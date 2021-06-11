@@ -1,0 +1,63 @@
+# base
+.env
+.env.*
+node_modules/
+
+# build folders
+lib
+build
+dist
+gen/
+target/
+_out
+
+# Typescript
+tsconfig.build.tsbuildinfo
+
+# logs 
+*.log
+
+# Yarn
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+# TODO - not now, but when production ready
+# !.yarn/cache
+
+# Other
+.DS_Store
+*.orig
+*.log
+*.flattened-pom.xml
+.eslintcache
+
+### IDEs ###
+# VSCode
+# nothing to do :-) 
+# .vscode
+
+# Intellij / Webstorm
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Emacs
+*~
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+

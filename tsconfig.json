@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.settings.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@os-pricing/react-core": ["modules/react-core/src"],
+      "@os-pricing/react-core/lib/*": ["modules/react-core/src/*"]
+    }
+  }
+}
