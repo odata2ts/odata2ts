@@ -7,17 +7,14 @@ export interface RunOptions extends Omit<Odata2tsOptions, "source" | "output"> {
 export class App {
   /**
    *
-   * @param odataMetadataJson metadata of a given OData service already parsed as JSON
+   * @param metadataJson metadata of a given OData service already parsed as JSON
    * @param outputPath path to the target folder
    * @param options further options
    */
-  public async run(odataMetadataJson: string, outputPath: string, options: RunOptions): Promise<void> {
-    const odata = odataMetadataJson;
-
+  public async run(metadataJson: string, outputPath: string, options: RunOptions): Promise<void> {
     const formatter = await this.createFormatter(outputPath, options.prettier);
 
-    const text = "const  test =  'Hi'";
-    const formatted = await formatter.format(text);
+    const formatted = await formatter.format(metadataJson);
     console.log(`Result [formatted: ${options.prettier}]`, formatted);
   }
 
