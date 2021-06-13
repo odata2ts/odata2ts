@@ -4,6 +4,7 @@ import * as path from "path";
 import { parseStringPromise } from "xml2js";
 
 import { App } from "./app";
+import { ODataEdmxModel } from "./odata/ODataEdmxModel";
 
 export interface Odata2tsOptions {
   source: string;
@@ -38,7 +39,7 @@ class Cli {
 
     // read metadata file and convert to JSON
     const metadataXml = await readFile(source);
-    const metadataJson = await parseStringPromise(metadataXml);
+    const metadataJson = (await parseStringPromise(metadataXml)) as ODataEdmxModel;
 
     // ensure that output directory exists
     await ensureDir(output).catch((error: Error) => {
