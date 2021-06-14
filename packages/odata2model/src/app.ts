@@ -5,7 +5,7 @@ import * as morph from "ts-morph";
 import { Odata2tsOptions } from "./cli";
 import { NoopFormatter } from "./formatter/NoopFormatter";
 import { PrettierFormatter } from "./formatter/PrettierFormatter";
-import { EntityType, ODataEdmxModel, OdataTypes } from "./odata/ODataEdmxModel";
+import { EntityType, ODataEdmxModel, OdataTypes, Schema } from "./odata/ODataEdmxModel";
 
 export interface RunOptions extends Omit<Odata2tsOptions, "source" | "output"> {}
 
@@ -36,13 +36,7 @@ export class App {
     await remove(fileName);
     const serviceDefinition = project.createSourceFile(fileName);
 
-    schema.EntityType.forEach((et) => {
-      serviceDefinition.addInterface({
-        name: et.$.Name,
-        isExported: true,
-        properties: this.generateProps(serviceName, et),
-      });
-    });
+    this.generateModelInterfaces(serviceName, schema, serviceDefinition);
 
     const raw = serviceDefinition.getFullText();
 
@@ -58,6 +52,16 @@ export class App {
       process.exit(3);
     });
     // console.log(`Result [formatted: ${options.prettier}]`, formatted);
+  }
+
+  private generateModelInterfaces(serviceName: string, schema: Schema, serviceDefinition: morph.SourceFile) {
+    schema.EntityType.forEach((et) => {
+      serviceDefinition.addInterface({
+        name: et.$.Name,
+        isExported: true,
+        properties: this.generateProps(serviceName, et),
+      });
+    });
   }
 
   private generateProps(serviceName: string, et: EntityType): Array<TsPropType> {
