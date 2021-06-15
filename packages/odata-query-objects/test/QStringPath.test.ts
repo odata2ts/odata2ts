@@ -104,7 +104,6 @@ describe("QStringPath test", () => {
     expect(result).toBe("matchesPattern(Country,'[A-Za-z]+')");
   });
 
-  /*
   test("indexOf", () => {
     const result = toTest.indexOf("nce").equals(3);
 
@@ -116,7 +115,6 @@ describe("QStringPath test", () => {
 
     expect(result).toBe("length(Country) eq 6");
   });
-  */
 
   test("toLower", () => {
     const result = toTest.toLower().equals("france");
@@ -170,10 +168,10 @@ describe("QStringPath test", () => {
     startWithState().matchesPattern("doesn't matter");
     testWithoutState();
 
-    /* startWithState().indexOf("doesn't matter").equals(3);
+    startWithState().indexOf("doesn't matter").equals(3);
     testWithoutState();
 
     startWithState().length().equals(3);
-    testWithoutState(); */
+    testWithoutState();
   });
 });

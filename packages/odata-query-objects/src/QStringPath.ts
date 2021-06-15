@@ -107,12 +107,14 @@ export class QStringPath {
 
   public indexOf(value: string) {
     const pathExpression = this.buildFunc(StringFilterFunctions.INDEX_OF, value);
-    return this;
+    this.pathExpression = undefined;
+    return new QNumberPath(pathExpression);
   }
 
   public length() {
     const pathExpression = this.buildNoValueFunc(StringFilterFunctions.LENGTH);
-    return this;
+    this.pathExpression = undefined;
+    return new QNumberPath(pathExpression);
   }
 
   public toLower() {
