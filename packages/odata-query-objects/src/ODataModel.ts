@@ -23,6 +23,21 @@ export const enum StringFilterFunctions {
   TRIM = "trim",
 }
 
+export const enum NumberFilterOperators {
+  ADDITION = "add",
+  SUBTRACTION = "sub",
+  MULTIPLICATION = "mul",
+  DIVISION = "div",
+  DIVISION_WITH_FRACTION = "divby",
+  MODULO = "mod",
+}
+
+export const enum NumberFilterFunctions {
+  CEILING = "ceiling",
+  FLOOR = "floor",
+  ROUND = "round",
+}
+
 export const enum CollectionFilterFunctions {
   STARTS_WITH = "startswith",
   ENDS_WITH = "endswith",
