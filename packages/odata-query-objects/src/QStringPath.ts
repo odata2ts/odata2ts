@@ -1,4 +1,5 @@
 import { StandardFilterOperators, StringFilterFunctions } from "./ODataModel";
+import { QNumberPath } from "./QNumberPath";
 
 export class QStringPath {
   private path: string;
@@ -29,32 +30,44 @@ export class QStringPath {
   }
 
   public equals(value: string) {
-    return this.buildBuiltInOp(StandardFilterOperators.EQUALS, value);
+    const result = this.buildBuiltInOp(StandardFilterOperators.EQUALS, value);
+    this.pathExpression = undefined;
+    return result;
   }
   public eq = this.equals;
 
   public notEquals(value: string) {
-    return this.buildBuiltInOp(StandardFilterOperators.NOT_EQUALS, value);
+    const result = this.buildBuiltInOp(StandardFilterOperators.NOT_EQUALS, value);
+    this.pathExpression = undefined;
+    return result;
   }
   public ne = this.notEquals;
 
   public lowerThan(value: string) {
-    return this.buildBuiltInOp(StandardFilterOperators.LOWER_THAN, value);
+    const result = this.buildBuiltInOp(StandardFilterOperators.LOWER_THAN, value);
+    this.pathExpression = undefined;
+    return result;
   }
   public lt = this.lowerThan;
 
   public lowerEquals(value: string) {
-    return this.buildBuiltInOp(StandardFilterOperators.LOWER_EQUALS, value);
+    const result = this.buildBuiltInOp(StandardFilterOperators.LOWER_EQUALS, value);
+    this.pathExpression = undefined;
+    return result;
   }
   public le = this.lowerEquals;
 
   public greaterThan(value: string) {
-    return this.buildBuiltInOp(StandardFilterOperators.GREATER_THAN, value);
+    const result = this.buildBuiltInOp(StandardFilterOperators.GREATER_THAN, value);
+    this.pathExpression = undefined;
+    return result;
   }
   public gt = this.greaterThan;
 
   public greaterEquals(value: string) {
-    return this.buildBuiltInOp(StandardFilterOperators.GREATER_EQUALS, value);
+    const result = this.buildBuiltInOp(StandardFilterOperators.GREATER_EQUALS, value);
+    this.pathExpression = undefined;
+    return result;
   }
   public ge = this.greaterEquals;
 
@@ -69,19 +82,27 @@ export class QStringPath {
   }
 
   public contains(value: string) {
-    return this.buildFunc(StringFilterFunctions.CONTAINS, value);
+    const result = this.buildFunc(StringFilterFunctions.CONTAINS, value);
+    this.pathExpression = undefined;
+    return result;
   }
 
   public startsWith(value: string) {
-    return this.buildFunc(StringFilterFunctions.STARTS_WITH, value);
+    const result = this.buildFunc(StringFilterFunctions.STARTS_WITH, value);
+    this.pathExpression = undefined;
+    return result;
   }
 
   public endsWith(value: string) {
-    return this.buildFunc(StringFilterFunctions.ENDS_WITH, value);
+    const result = this.buildFunc(StringFilterFunctions.ENDS_WITH, value);
+    this.pathExpression = undefined;
+    return result;
   }
 
   public matchesPattern(value: string) {
-    return this.buildFunc(StringFilterFunctions.MATCHES_PATTERN, value);
+    const result = this.buildFunc(StringFilterFunctions.MATCHES_PATTERN, value);
+    this.pathExpression = undefined;
+    return result;
   }
 
   public indexOf(value: string) {
@@ -90,7 +111,7 @@ export class QStringPath {
   }
 
   public length() {
-    this.pathExpression = this.buildNoValueFunc(StringFilterFunctions.LENGTH);
+    const pathExpression = this.buildNoValueFunc(StringFilterFunctions.LENGTH);
     return this;
   }
 

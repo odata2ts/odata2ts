@@ -135,4 +135,45 @@ describe("QStringPath test", () => {
 
     expect(result).toBe("trim(Country) eq 'France'");
   });
+
+  test("temporary results have been cleared", () => {
+    const startWithState = () => toTest.concatPrefix("test_");
+    const testWithoutState = () => expect(toTest.equals("France")).toBe("Country eq 'France'");
+
+    startWithState().equals("doesn't matter");
+    testWithoutState();
+
+    startWithState().notEquals("doesn't matter");
+    testWithoutState();
+
+    startWithState().greaterThan("doesn't matter");
+    testWithoutState();
+
+    startWithState().greaterEquals("doesn't matter");
+    testWithoutState();
+
+    startWithState().lt("doesn't matter");
+    testWithoutState();
+
+    startWithState().le("doesn't matter");
+    testWithoutState();
+
+    startWithState().contains("doesn't matter");
+    testWithoutState();
+
+    startWithState().startsWith("doesn't matter");
+    testWithoutState();
+
+    startWithState().endsWith("doesn't matter");
+    testWithoutState();
+
+    startWithState().matchesPattern("doesn't matter");
+    testWithoutState();
+
+    /* startWithState().indexOf("doesn't matter").equals(3);
+    testWithoutState();
+
+    startWithState().length().equals(3);
+    testWithoutState(); */
+  });
 });
