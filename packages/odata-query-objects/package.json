@@ -1,0 +1,21 @@
+{
+  "name": "@odata2ts/odata-query-objects",
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "texttechne",
+  "main": "./lib/index.js",
+  "scripts": {
+    "build": "yarn clean && yarn compile",
+    "clean": "rimraf ./lib",
+    "compile": "tsc --project tsconfig.json",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/jest": "26.0.23",
+    "jest": "27.0.4",
+    "rimraf": "^3.0.2",
+    "ts-jest": "27.0.3",
+    "ts-node": "10.0.0",
+    "typescript": "4.2.4"
+  }
+}
