@@ -1,4 +1,5 @@
 import { StandardFilterOperators, StringFilterFunctions } from "./ODataModel";
+import { QExpression } from "./QExpression";
 import { QNumberPath } from "./QNumberPath";
 
 export class QStringPath {
@@ -18,11 +19,11 @@ export class QStringPath {
   }
 
   private buildBuiltInOp(operator: StandardFilterOperators, value: string) {
-    return `${this.getPathExpression()} ${operator} '${value}'`;
+    return new QExpression(`${this.getPathExpression()} ${operator} '${value}'`);
   }
 
   private buildFunc(func: StringFilterFunctions, value: string) {
-    return `${func}(${this.getPathExpression()},'${value}')`;
+    return new QExpression(`${func}(${this.getPathExpression()},'${value}')`);
   }
 
   private buildNoValueFunc(func: StringFilterFunctions) {
@@ -108,13 +109,13 @@ export class QStringPath {
   public indexOf(value: string) {
     const pathExpression = this.buildFunc(StringFilterFunctions.INDEX_OF, value);
     this.pathExpression = undefined;
-    return new QNumberPath(pathExpression);
+    return new QNumberPath(pathExpression.toString());
   }
 
   public length() {
     const pathExpression = this.buildNoValueFunc(StringFilterFunctions.LENGTH);
     this.pathExpression = undefined;
-    return new QNumberPath(pathExpression);
+    return new QNumberPath(pathExpression.toString());
   }
 
   public toLower() {

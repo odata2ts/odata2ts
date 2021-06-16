@@ -1,4 +1,5 @@
 import { NumberFilterFunctions, NumberFilterOperators, StandardFilterOperators } from "./ODataModel";
+import { QExpression } from "./QExpression";
 
 export class QNumberPath {
   private path: string;
@@ -16,6 +17,10 @@ export class QNumberPath {
     return this.pathExpression ?? this.path;
   }
 
+  private buildBuiltInExpression(operator: StandardFilterOperators | NumberFilterOperators, value: number) {
+    return new QExpression(this.buildBuiltInOp(operator, value));
+  }
+
   private buildBuiltInOp(operator: StandardFilterOperators | NumberFilterOperators, value: number) {
     return `${this.getPathExpression()} ${operator} ${value}`;
   }
@@ -29,42 +34,42 @@ export class QNumberPath {
   }
 
   public equals(value: number) {
-    const result = this.buildBuiltInOp(StandardFilterOperators.EQUALS, value);
+    const result = this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
     this.pathExpression = undefined;
     return result;
   }
   public eq = this.equals;
 
   public notEquals(value: number) {
-    const result = this.buildBuiltInOp(StandardFilterOperators.NOT_EQUALS, value);
+    const result = this.buildBuiltInExpression(StandardFilterOperators.NOT_EQUALS, value);
     this.pathExpression = undefined;
     return result;
   }
   public ne = this.notEquals;
 
   public lowerThan(value: number) {
-    const result = this.buildBuiltInOp(StandardFilterOperators.LOWER_THAN, value);
+    const result = this.buildBuiltInExpression(StandardFilterOperators.LOWER_THAN, value);
     this.pathExpression = undefined;
     return result;
   }
   public lt = this.lowerThan;
 
   public lowerEquals(value: number) {
-    const result = this.buildBuiltInOp(StandardFilterOperators.LOWER_EQUALS, value);
+    const result = this.buildBuiltInExpression(StandardFilterOperators.LOWER_EQUALS, value);
     this.pathExpression = undefined;
     return result;
   }
   public le = this.lowerEquals;
 
   public greaterThan(value: number) {
-    const result = this.buildBuiltInOp(StandardFilterOperators.GREATER_THAN, value);
+    const result = this.buildBuiltInExpression(StandardFilterOperators.GREATER_THAN, value);
     this.pathExpression = undefined;
     return result;
   }
   public gt = this.greaterThan;
 
   public greaterEquals(value: number) {
-    const result = this.buildBuiltInOp(StandardFilterOperators.GREATER_EQUALS, value);
+    const result = this.buildBuiltInExpression(StandardFilterOperators.GREATER_EQUALS, value);
     this.pathExpression = undefined;
     return result;
   }

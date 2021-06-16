@@ -22,121 +22,126 @@ describe("QStringPath test", () => {
     const value = "France";
     const result = toTest.equals(value);
 
-    expect(result).toBe("Country eq 'France'");
-    expect(result).toBe(toTest.eq(value));
+    expect(result.toString()).toBe("Country eq 'France'");
+    expect(result.toString()).toBe(toTest.eq(value).toString());
   });
 
   test("not equals", () => {
     const value = "France";
     const result = toTest.notEquals(value);
 
-    expect(result).toBe("Country ne 'France'");
-    expect(result).toBe(toTest.ne(value));
+    expect(result.toString()).toBe("Country ne 'France'");
+    expect(result.toString()).toBe(toTest.ne(value).toString());
   });
 
   test("lower than", () => {
     const value = "X";
     const result = toTest.lowerThan(value);
 
-    expect(result).toBe("Country lt 'X'");
-    expect(result).toBe(toTest.lt(value));
+    expect(result.toString()).toBe("Country lt 'X'");
+    expect(result.toString()).toBe(toTest.lt(value).toString());
   });
 
   test("lower equals", () => {
     const value = "X";
     const result = toTest.lowerEquals(value);
 
-    expect(result).toBe("Country le 'X'");
-    expect(result).toBe(toTest.le(value));
+    expect(result.toString()).toBe("Country le 'X'");
+    expect(result.toString()).toBe(toTest.le(value).toString());
   });
 
   test("greater than", () => {
     const value = "X";
     const result = toTest.greaterThan(value);
 
-    expect(result).toBe("Country gt 'X'");
-    expect(result).toBe(toTest.gt(value));
+    expect(result.toString()).toBe("Country gt 'X'");
+    expect(result.toString()).toBe(toTest.gt(value).toString());
   });
 
   test("greater equals", () => {
     const value = "X";
     const result = toTest.greaterEquals(value);
 
-    expect(result).toBe("Country ge 'X'");
-    expect(result).toBe(toTest.ge(value));
+    expect(result.toString()).toBe("Country ge 'X'");
+    expect(result.toString()).toBe(toTest.ge(value).toString());
   });
 
   test("concat prefix", () => {
     const value = "X_";
     const result = toTest.concatPrefix(value).equals("X_France");
 
-    expect(result).toBe("concat('X_',Country) eq 'X_France'");
+    expect(result.toString()).toBe("concat('X_',Country) eq 'X_France'");
   });
 
   test("concat suffix", () => {
     const value = "_X";
     const result = toTest.concatSuffix(value).equals("France_X");
 
-    expect(result).toBe("concat(Country,'_X') eq 'France_X'");
+    expect(result.toString()).toBe("concat(Country,'_X') eq 'France_X'");
   });
 
   test("contains", () => {
     const result = toTest.contains("ran");
 
-    expect(result).toBe("contains(Country,'ran')");
+    expect(result.toString()).toBe("contains(Country,'ran')");
   });
 
   test("startsWith", () => {
     const result = toTest.startsWith("Fra");
 
-    expect(result).toBe("startswith(Country,'Fra')");
+    expect(result.toString()).toBe("startswith(Country,'Fra')");
   });
 
   test("endsWith", () => {
     const result = toTest.endsWith("nce");
 
-    expect(result).toBe("endswith(Country,'nce')");
+    expect(result.toString()).toBe("endswith(Country,'nce')");
   });
 
   test("matchesPattern", () => {
     const result = toTest.matchesPattern("[A-Za-z]+");
 
-    expect(result).toBe("matchesPattern(Country,'[A-Za-z]+')");
+    expect(result.toString()).toBe("matchesPattern(Country,'[A-Za-z]+')");
   });
 
   test("indexOf", () => {
     const result = toTest.indexOf("nce").equals(3);
 
-    expect(result).toBe("indexof(Country,'nce') eq 3");
+    expect(result.toString()).toBe("indexof(Country,'nce') eq 3");
   });
 
   test("length", () => {
     const result = toTest.length().equals(6);
 
-    expect(result).toBe("length(Country) eq 6");
+    expect(result.toString()).toBe("length(Country) eq 6");
   });
 
   test("toLower", () => {
     const result = toTest.toLower().equals("france");
 
-    expect(result).toBe("tolower(Country) eq 'france'");
+    expect(result.toString()).toBe("tolower(Country) eq 'france'");
   });
 
   test("toUpper", () => {
     const result = toTest.toUpper().equals("FRANCE");
 
-    expect(result).toBe("toupper(Country) eq 'FRANCE'");
+    expect(result.toString()).toBe("toupper(Country) eq 'FRANCE'");
   });
 
   test("trim", () => {
     const result = toTest.trim().equals("France");
 
-    expect(result).toBe("trim(Country) eq 'France'");
+    expect(result.toString()).toBe("trim(Country) eq 'France'");
   });
 
+  /**
+   * We test here, that internal state has been cleared after calling functions
+   * which return expressions.
+   * => we only test expression returning functions
+   */
   test("temporary results have been cleared", () => {
     const startWithState = () => toTest.concatPrefix("test_");
-    const testWithoutState = () => expect(toTest.equals("France")).toBe("Country eq 'France'");
+    const testWithoutState = () => expect(toTest.equals("France").toString()).toBe("Country eq 'France'");
 
     startWithState().equals("doesn't matter");
     testWithoutState();
@@ -166,12 +171,6 @@ describe("QStringPath test", () => {
     testWithoutState();
 
     startWithState().matchesPattern("doesn't matter");
-    testWithoutState();
-
-    startWithState().indexOf("doesn't matter").equals(3);
-    testWithoutState();
-
-    startWithState().length().equals(3);
     testWithoutState();
   });
 });
