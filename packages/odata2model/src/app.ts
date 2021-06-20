@@ -6,6 +6,7 @@ import { Odata2tsOptions } from "./cli";
 import { NoopFormatter } from "./formatter/NoopFormatter";
 import { PrettierFormatter } from "./formatter/PrettierFormatter";
 import { EntityType, ODataEdmxModel, OdataTypes, Schema } from "./odata/ODataEdmxModel";
+import { BaseFormatter } from "./formatter/BaseFormatter";
 
 export interface RunOptions extends Omit<Odata2tsOptions, "source" | "output"> {}
 
@@ -36,9 +37,16 @@ export class App {
     await remove(fileName);
     const serviceDefinition = project.createSourceFile(fileName);
 
+    this.createStandardInterfaces(project, outputPath, formatter);
     this.generateModelInterfaces(serviceName, schema, serviceDefinition);
 
-    const raw = serviceDefinition.getFullText();
+    this.formatAndWriteFile(fileName, serviceDefinition, formatter);
+
+    // console.log(`Result [formatted: ${options.prettier}]`, formatted);
+  }
+
+  private async formatAndWriteFile(fileName: string, file: morph.SourceFile, formatter: BaseFormatter) {
+    const raw = file.getFullText();
 
     const formatted = await formatter.format(raw).catch(async (error: Error) => {
       console.error("Formatting failed");
@@ -51,27 +59,44 @@ export class App {
       console.error(`Failed to write file [/${fileName}]`, error);
       process.exit(3);
     });
-    // console.log(`Result [formatted: ${options.prettier}]`, formatted);
+  }
+
+  private async createStandardInterfaces(project: morph.Project, outputPath: string, formatter: BaseFormatter) {
+    const typeFileName = path.join(outputPath, "ODataTypes.ts");
+    await remove(typeFileName);
+    const file = project.addSourceFileAtPath("src/types/ODataTypes.ts");
+
+    this.formatAndWriteFile(typeFileName, file, formatter);
   }
 
   private generateModelInterfaces(serviceName: string, schema: Schema, serviceDefinition: morph.SourceFile) {
+    const dataTypeImports = new Set<string>();
+
     schema.EntityType.forEach((et) => {
       serviceDefinition.addInterface({
         name: et.$.Name,
         isExported: true,
-        properties: this.generateProps(serviceName, et),
+        properties: this.generateProps(serviceName, et, dataTypeImports),
       });
     });
+
+    if (dataTypeImports.size) {
+      serviceDefinition.addImportDeclaration({
+        isTypeOnly: true,
+        namedImports: [...dataTypeImports],
+        moduleSpecifier: "./ODataTypes",
+      });
+    }
   }
 
-  private generateProps(serviceName: string, et: EntityType): Array<TsPropType> {
+  private generateProps(serviceName: string, et: EntityType, dtImports: Set<string>): Array<TsPropType> {
     const props = !et.Property
       ? []
       : et.Property.map(
           (prop) =>
             ({
               name: prop.$.Name,
-              type: this.getTsType(prop.$.Type),
+              type: this.getTsType(prop.$.Type, dtImports),
               hasQuestionToken: prop.$.Nullable !== "false",
             } as TsPropType)
         );
@@ -89,15 +114,31 @@ export class App {
     return [...props, ...navProps];
   }
 
-  private getTsType(odataType: OdataTypes): string {
+  private getTsType(odataType: OdataTypes, dtImports: Set<string>): string {
     switch (odataType) {
       case OdataTypes.Boolean:
         return "boolean";
+      case OdataTypes.Byte:
+      case OdataTypes.SByte:
+      case OdataTypes.Int16:
       case OdataTypes.Int32:
+      case OdataTypes.Int64:
+      case OdataTypes.Decimal:
+      case OdataTypes.Double:
         return "number";
       case OdataTypes.String:
-      default:
         return "string";
+      case OdataTypes.Date:
+        dtImports.add("DateString");
+        return "DateString";
+      case OdataTypes.Time:
+        dtImports.add("TimeOfDayString");
+        return "TimeOfDayString";
+      case OdataTypes.DateTimeOffset:
+        dtImports.add("DateTimeOffsetString");
+        return "DateTimeOffsetString";
+      default:
+        return "any";
     }
   }
 
