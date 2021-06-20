@@ -67,7 +67,7 @@ export interface NavigationProperty {
   $: {
     Name: string;
     Type: string;
-    Nullable: boolean;
+    Nullable?: "true" | "false";
     Partner: string;
   };
   // TODO: OnDelete, ReferentialConstraint, etc.

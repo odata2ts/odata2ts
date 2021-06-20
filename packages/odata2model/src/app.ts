@@ -82,6 +82,7 @@ export class App {
             ({
               name: prop.$.Name,
               type: this.getTsNavType(prop.$.Type, serviceName),
+              hasQuestionToken: prop.$.Nullable !== "false",
             } as TsPropType)
         );
 
