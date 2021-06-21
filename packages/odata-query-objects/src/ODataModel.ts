@@ -38,6 +38,25 @@ export const enum NumberFilterFunctions {
   ROUND = "round",
 }
 
+export const enum DateFilterFunctions {
+  YEAR = "year",
+  MONTH = "month",
+  DAY = "day",
+}
+
+export const enum DateTimeFilterFunctions {
+  YEAR = "year",
+  MONTH = "month",
+  DAY = "day",
+  HOUR = "hour",
+  MINUTE = "minute",
+  SECOND = "second",
+  DATE = "date",
+  TIME = "time",
+  // TOTAL_OFFSET_MINUTES = "totaloffsetminutes",
+  // TOTAL_SECONDS = "totalseconds",
+}
+
 export const enum CollectionFilterFunctions {
   STARTS_WITH = "startswith",
   ENDS_WITH = "endswith",
