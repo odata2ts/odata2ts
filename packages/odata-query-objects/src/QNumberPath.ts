@@ -1,16 +1,18 @@
 import { NumberFilterFunctions, NumberFilterOperators, StandardFilterOperators } from "./ODataModel";
+import { QPathModel } from "./QEntityModel";
 import { QExpression } from "./QExpression";
 
-export class QNumberPath {
-  private path: string;
+export class QNumberPath implements QPathModel {
   private pathExpression?: string;
 
-  constructor(path: string) {
+  constructor(private path: string) {
     if (!path || !path.trim()) {
       throw Error("Path must be supplied!");
     }
+  }
 
-    this.path = path;
+  public getPath(): string {
+    return this.path;
   }
 
   private getPathExpression(): string {
