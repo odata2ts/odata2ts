@@ -5,11 +5,12 @@
   "author": "texttechne",
   "main": "./lib/index.js",
   "scripts": {
-    "build": "yarn clean && yarn compile",
+    "build": "yarn test && yarn clean && yarn compile",
     "clean": "rimraf ./lib",
-    "compile": "tsc --project tsconfig.json",
+    "compile": "tsc",
     "test": "jest"
   },
+  "dependencies": {},
   "devDependencies": {
     "@types/jest": "26.0.23",
     "jest": "27.0.4",
@@ -17,5 +18,6 @@
     "ts-jest": "27.0.3",
     "ts-node": "10.0.0",
     "typescript": "4.2.4"
-  }
+  },
+  "types": "./lib/index.d.ts"
 }
