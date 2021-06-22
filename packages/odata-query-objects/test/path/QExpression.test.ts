@@ -1,6 +1,4 @@
-import { QExpression } from "../src/QExpression";
-import { QNumberPath } from "../src/QNumberPath";
-import { QStringPath } from "../src/QStringPath";
+import { QExpression, QNumberPath, QStringPath } from "../../src";
 
 describe("QNumberPath test", () => {
   const exampleExpression = new QStringPath("text").equals("hi there!");

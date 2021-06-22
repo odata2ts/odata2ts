@@ -1,4 +1,4 @@
-import { DateTimeFilterFunctions } from "../ODataModel";
+import { DateTimeFilterFunctions } from "../../odata/ODataModel";
 import { QNumberPath } from "../QNumberPath";
 
 function buildFunc(path: string, func: DateTimeFilterFunctions) {

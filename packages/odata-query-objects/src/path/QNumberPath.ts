@@ -1,6 +1,6 @@
-import { NumberFilterFunctions, NumberFilterOperators, StandardFilterOperators } from "./ODataModel";
-import { QPathModel } from "./QEntityModel";
+import { NumberFilterFunctions, NumberFilterOperators, StandardFilterOperators } from "../odata/ODataModel";
 import { QExpression } from "./QExpression";
+import { QPathModel } from "./QPathModel";
 
 export class QNumberPath implements QPathModel {
   private pathExpression?: string;

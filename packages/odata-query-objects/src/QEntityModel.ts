@@ -1,14 +1,50 @@
-import { QDatePath } from "./date-time-v4/QDatePath";
-import { QDateTimeOffsetPath } from "./date-time-v4/QDateTimeOffsetPath";
-import { QTimeOfDayPath } from "./date-time-v4/QTimeOfDayPath";
-import { QBooleanPath } from "./QBooleanPath";
-import { QNumberPath } from "./QNumberPath";
-import { QStringPath } from "./QStringPath";
+import { DateString, DateTimeOffsetString, TimeOfDayString } from "./odata/ODataTypes";
+import { QDatePath } from "./path/date-time-v4/QDatePath";
+import { QDateTimeOffsetPath } from "./path/date-time-v4/QDateTimeOffsetPath";
+import { QTimeOfDayPath } from "./path/date-time-v4/QTimeOfDayPath";
+import { QEntityCollectionPath } from "./path/QEntityCollectionPath";
+import { QEntityPath } from "./path/QEntityPath";
+import { QNumberPath } from "./path/QNumberPath";
+import { QStringPath } from "./path/QStringPath";
+import { QBooleanPath } from "./path/QBooleanPath";
 
-export type QEntity = { collectionName: string } & { [key: string]: QPath };
+/**
+ * Specify type & key (id) structure of entity via generics.
+ *
+ * For example: Creating an entity for type 'MyTestInterface' with composite key
+ * QEntityModel<MyTestInterface, "name" | "application">
+ */
+export type QEntityModel<TypeModel, KeyModel extends keyof TypeModel> = {
+  entityName: string;
+  createKey: (keys: { [Key in KeyModel]: TypeModel[Key] }) => string;
+} & QPropContainer<TypeModel>;
 
-export interface QPathModel {
-  getPath(): string;
-}
+/**
+ * Helper function to "unpack" an array type; leaves non-arrays untouched.
+ * => Unpack = Array<T> becomes T
+ */
+type Unpacked<T> = T extends (infer U)[] ? U : T;
 
-export type QPath = QBooleanPath | QNumberPath | QStringPath | QDatePath | QTimeOfDayPath | QDateTimeOffsetPath;
+/**
+ * Maps data types to QPath equivalents.
+ * Heavily relies on <em>Conditional Types</em>.
+ *
+ * Nominal types (date & time stuff) must come first, otherwise string would win in this case.
+ */
+export type QPropContainer<TypeModel> = {
+  [Property in keyof TypeModel]: TypeModel[Property] extends DateString
+    ? QDatePath
+    : TypeModel[Property] extends TimeOfDayString
+    ? QTimeOfDayPath
+    : TypeModel[Property] extends DateTimeOffsetString
+    ? QDateTimeOffsetPath
+    : TypeModel[Property] extends Boolean
+    ? QBooleanPath
+    : TypeModel[Property] extends Number
+    ? QNumberPath
+    : TypeModel[Property] extends string
+    ? QStringPath
+    : TypeModel[Property] extends Array<any>
+    ? QEntityCollectionPath<Unpacked<TypeModel[Property]>>
+    : QEntityPath<TypeModel[Property]>;
+};

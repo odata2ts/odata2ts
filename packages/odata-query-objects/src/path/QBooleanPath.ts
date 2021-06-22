@@ -1,5 +1,5 @@
-import { NumberFilterFunctions, NumberFilterOperators, StandardFilterOperators } from "./ODataModel";
-import { QPathModel } from "./QEntityModel";
+import { NumberFilterOperators, StandardFilterOperators } from "../odata/ODataModel";
+import { QPathModel } from "./QPathModel";
 import { QExpression } from "./QExpression";
 
 export class QBooleanPath implements QPathModel {

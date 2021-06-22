@@ -1,4 +1,4 @@
-import { QNumberPath } from "../src/QNumberPath";
+import { QNumberPath } from "../../src/";
 
 describe("QNumberPath test", () => {
   let toTest: QNumberPath;

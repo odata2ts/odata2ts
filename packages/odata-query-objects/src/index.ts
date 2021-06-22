@@ -1,8 +1,13 @@
-export { QEntity, QPath } from "./QEntityModel";
-export { QEntityFactory, QEntityModel, QPropContainer } from "./QEntityFactory";
-export { QExpression } from "./QExpression";
-export { QBooleanPath } from "./QBooleanPath";
-export { QNumberPath } from "./QNumberPath";
-export { QStringPath } from "./QStringPath";
-export { QEntityPath } from "./QEntityPath";
-export { QEntityCollectionPath } from "./QEntityCollectionPath";
+export { DateString, TimeOfDayString, DateTimeOffsetString } from "./odata/ODataTypes";
+
+export { QEntityFactory } from "./QEntityFactory";
+export { QEntityModel, QPropContainer } from "./QEntityModel";
+export { QExpression } from "./path/QExpression";
+export { QBooleanPath } from "./path/QBooleanPath";
+export { QNumberPath } from "./path/QNumberPath";
+export { QStringPath } from "./path/QStringPath";
+export { QDatePath } from "./path/date-time-v4/QDatePath";
+export { QTimeOfDayPath } from "./path/date-time-v4/QTimeOfDayPath";
+export { QDateTimeOffsetPath } from "./path/date-time-v4/QDateTimeOffsetPath";
+export { QEntityPath } from "./path/QEntityPath";
+export { QEntityCollectionPath } from "./path/QEntityCollectionPath";

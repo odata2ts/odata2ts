@@ -1,4 +1,4 @@
-import { QStringPath } from "../src/QStringPath";
+import { QStringPath } from "../../src";
 
 describe("QStringPath test", () => {
   let toTest: QStringPath;

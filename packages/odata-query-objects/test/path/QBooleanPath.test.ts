@@ -1,4 +1,4 @@
-import { QBooleanPath } from "../src/QBooleanPath";
+import { QBooleanPath } from "../../src";
 
 describe("QBooleanPath test", () => {
   let toTest: QBooleanPath;

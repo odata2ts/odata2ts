@@ -1,8 +1,15 @@
-import { QBooleanPath, QEntityFactory, QEntityPath, QNumberPath, QStringPath, QEntityCollectionPath } from "../src";
-import { QDatePath } from "../src/date-time-v4/QDatePath";
-import { QDateTimeOffsetPath } from "../src/date-time-v4/QDateTimeOffsetPath";
-import { QTimeOfDayPath } from "../src/date-time-v4/QTimeOfDayPath";
-import { DateString, DateTimeOffsetString, TimeOfDayString } from "../src/ODataTypes";
+import {
+  QBooleanPath,
+  QDatePath,
+  QTimeOfDayPath,
+  QDateTimeOffsetPath,
+  QEntityFactory,
+  QEntityPath,
+  QNumberPath,
+  QStringPath,
+  QEntityCollectionPath,
+} from "../src";
+import { DateString, DateTimeOffsetString, TimeOfDayString } from "../src/odata/ODataTypes";
 
 interface SimpleEntity {
   name: string;
