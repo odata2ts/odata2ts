@@ -38,6 +38,24 @@ export abstract class ODataUriBuilderBase<T> {
     return this;
   }
 
+  public skip(itemsToSkip: number) {
+    if (itemsToSkip === undefined || itemsToSkip === null || itemsToSkip < 0) {
+      throw Error("Parameter [skip] must be a positive integer including 0!");
+    }
+
+    this.itemsToSkip = itemsToSkip;
+    return this;
+  }
+
+  public top(itemsTop: number) {
+    if (itemsTop === undefined || itemsTop === null || itemsTop < 0) {
+      throw Error("Parameter [top] must be a positive integer including 0!");
+    }
+
+    this.itemsTop = itemsTop;
+    return this;
+  }
+
   public expanding<
     Prop extends ExtractPropertyNamesOfType<QEntityModel<T, any>, QEntityPath<any> | QEntityCollectionPath<any>>
   >(
