@@ -1,24 +1,5 @@
-import {
-  QNumberPath,
-  QStringPath,
-  QEntityPath,
-  QEntityFactory,
-  QBooleanPath,
-  QEntityCollectionPath,
-} from "@odata2ts/odata-query-objects";
 import { ODataUriBuilder } from "../src/ODataUriBuilder";
-
-interface Address {
-  street: string;
-}
-
-interface Person {
-  age: number;
-  name: string;
-  deceased: boolean;
-  address: Address;
-  altAdresses: Array<Address>;
-}
+import { Person, QPerson } from "./types/custom";
 
 /**
  * Helper function which adds the base path.
@@ -32,32 +13,6 @@ function addBase(urlPart: string) {
 
 describe("ODataUriBuilder Test", () => {
   let toTest: ODataUriBuilder<Person, "name" | "age">;
-
-  /* const qSalesTotals = QEntityFactory.create<Sales_Totals_by_Amount, "CompanyName" | "OrderID">(
-    "Sales_Totals_by_Amounts",
-    {
-      CompanyName: new QStringPath("CompanyName"),
-      OrderID: new QNumberPath("OrderID"),
-      SaleAmount: new QNumberPath("SaleAmount"),
-      ShippedDate: new QDateTimeOffsetPath("ShippedDate"),
-    }
-  ); */
-
-  const QAddress = QEntityFactory.create<Address, "street">("Addresses", {
-    street: new QStringPath("street"),
-  });
-
-  const QPerson = QEntityFactory.create<Person, "name" | "age">("Persons", {
-    age: new QNumberPath("age"),
-    name: new QStringPath("name"),
-    deceased: new QBooleanPath("deceased"),
-    get address() {
-      return new QEntityPath<Address>("address", QAddress);
-    },
-    get altAdresses() {
-      return new QEntityCollectionPath<Address>("altAdresses", QAddress);
-    },
-  });
 
   /**
    * Always use a new builder for each  test.
@@ -187,7 +142,7 @@ describe("ODataUriBuilder Test", () => {
     expect(candidate).toBe(expected);
   });
 
-  /* test("expand 1:n with skip & top", async () => {
+  /* /* test("expand 1:n with skip & top", async () => {
     const candidate = toTest
       .expanding<Order>("Orders", (builder) => {
         builder.select("OrderID", "ShipName").skip(1).top(0);
@@ -196,40 +151,31 @@ describe("ODataUriBuilder Test", () => {
     const expected = addBase("$expand=Orders($select=OrderID,ShipName;$skip=1;$top=0)");
 
     expect(candidate).toBe(expected);
-  });
+  }); */
 
   test("deeply nested expand", async () => {
     const candidate = toTest
-      .select("EmployeeID", "LastName")
-      .expanding<Order>("Orders", (builder) => {
-        builder.select("OrderID").expanding<Customer>("Customer", (custExpand) => {
-          custExpand.select("CustomerID");
+      .select("name", "age")
+      .expanding("address", (builder) => {
+        builder.select("street").expanding("responsible", (respExpand) => {
+          respExpand.select("name");
         });
       })
       .build();
-    const expected = addBase(
-      "$select=EmployeeID,LastName&$expand=Orders($select=OrderID;$expand=Customer($select=CustomerID))"
-    );
+    const expected = addBase("$select=name,age&$expand=address($select=street;$expand=responsible($select=name))");
 
     expect(candidate).toBe(expected);
   });
 
   test("combining simple & complex expand", async () => {
     const candidate = toTest
-      .expanding<Order>("Orders", (builder) => {
-        builder.select("OrderID");
+      .expanding("address", (builder) => {
+        builder.select("street");
       })
-      .expand("Employees1", "Employee1")
+      .expand("altAdresses")
       .build();
-    const expected = addBase("$expand=Orders($select=OrderID),Employees1,Employee1");
+    const expected = addBase("$expand=address($select=street),altAdresses");
 
     expect(candidate).toBe(expected);
-  }); */
-
-  ODataUriBuilder.create(QPerson)
-    .byKey({ name: "Heinz", age: 12 })
-    .count()
-    .select("name", "age")
-    .expanding("address", (builder) => builder.select("street"))
-    .build();
+  });
 });
