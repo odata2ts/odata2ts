@@ -1,31 +1,32 @@
-import { ODataOperators } from "./ODataModel";
+import { QEntityModel, QStringPath } from "@odata2ts/odata-query-objects";
+import { ODataUriBuilderBase, ODataUriBuilderConfig } from "./internal";
 
-export interface ODataUriBuilderConfig {
-  unencoded?: boolean;
-}
-
-export class ODataUriBuilder<T> {
-  private collection: string;
-  private unencoded: boolean;
-
-  private selects?: Array<keyof T>;
-  private itemsToSkip?: number;
-  private itemsTop?: number;
-  private itemsCount?: boolean;
-  private expands: Array<ODataUriBuilder<any>> = [];
-
-  constructor(collection: string, config?: ODataUriBuilderConfig) {
-    if (!collection || !collection.trim()) {
-      throw Error("A valid collection name must be supplied in [from] clause!");
+export class ODataUriBuilder<T, K extends keyof T> extends ODataUriBuilderBase<T> {
+  static create<T, K extends keyof T>(qEntity: QEntityModel<T, K>, config?: ODataUriBuilderConfig) {
+    if (!qEntity || !qEntity.entityName || !qEntity.entityName.trim()) {
+      throw Error("QEntity must be supplied with a valid entityName!");
     }
 
-    this.collection = collection;
-    this.unencoded = !!config && !!config.unencoded;
-    return this;
+    return new ODataUriBuilder<T, K>(qEntity, config);
   }
 
-  public select(...props: Array<keyof T>) {
-    this.selects = props;
+  protected readonly entity: QEntityModel<T, K>;
+  private key?: string;
+
+  private constructor(qEntity: QEntityModel<T, K>, config?: ODataUriBuilderConfig) {
+    super(qEntity, config);
+    this.entity = qEntity;
+  }
+
+  public byKey(keys: { [Key in K]: T[Key] }) {
+    this.key = Object.entries<T[K]>(keys)
+      .map(([key, value]) => {
+        const prop = this.entity[key as K];
+        const val = prop && prop instanceof QStringPath ? `'${value}'` : value;
+        return key + "=" + val;
+      })
+      .join(",");
+
     return this;
   }
 
@@ -52,67 +53,11 @@ export class ODataUriBuilder<T> {
     return this;
   }
 
-  public expanding<P>(prop: keyof T, builder: (builder: ODataUriBuilder<P>) => void): ODataUriBuilder<T> {
-    const expander = new ODataUriBuilder<P>(prop as string);
-    builder(expander);
-
-    this.expands.push(expander);
-
-    return this;
-  }
-
-  public expand(...props: Array<keyof T>) {
-    this.expands.push(
-      ...props.map((p) => {
-        return new ODataUriBuilder(p as string);
-      })
-    );
-    return this;
-  }
-
-  protected buildAsExpansion(): string {
-    const params = this.buildQuery(this.param);
-
-    return this.collection + (params.length ? `(${params.join(";")})` : "");
-  }
-
   public build(): string {
     const paramFn = this.unencoded ? this.param : this.paramEncoded;
     const params = this.buildQuery(paramFn);
+    const collection = this.entity.entityName + (this.key ? `(${this.key})` : "");
 
-    return "/" + this.collection + (params.length ? `?${params.join("&")}` : "");
-  }
-
-  private param(operator: string, value: string) {
-    return `${operator}=${value}`;
-  }
-
-  private paramEncoded(operator: string, value: string) {
-    return `${encodeURIComponent(operator)}=${encodeURIComponent(value)}`;
-  }
-
-  private buildQuery(param: (operator: string, value: string) => string): Array<string> {
-    const params: Array<string> = [];
-    const add = (operator: string, value: string) => params.push(param(operator, value));
-
-    if (this.selects) {
-      // url.addQuery(ODataOperators.SELECT, this.selects?.join(","));
-      add(ODataOperators.SELECT, this.selects?.join(","));
-    }
-    if (this.itemsToSkip !== undefined) {
-      add(ODataOperators.SKIP, String(this.itemsToSkip));
-    }
-    if (this.itemsTop !== undefined) {
-      add(ODataOperators.TOP, String(this.itemsTop));
-    }
-    if (this.itemsCount !== undefined) {
-      add(ODataOperators.COUNT, String(this.itemsCount));
-    }
-    if (this.expands.length) {
-      const expand = this.expands.map((exp) => exp.buildAsExpansion()).join(",");
-      add(ODataOperators.EXPAND, expand);
-    }
-
-    return params;
+    return "/" + collection + (params.length ? `?${params.join("&")}` : "");
   }
 }
