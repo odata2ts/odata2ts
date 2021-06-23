@@ -1,4 +1,10 @@
-import { QEntityCollectionPath, QEntityModel, QEntityPath, QPropContainer } from "../../odata-query-objects/lib";
+import {
+  QEntityCollectionPath,
+  QEntityModel,
+  QEntityPath,
+  QExpression,
+  QPropContainer,
+} from "../../odata-query-objects/lib";
 import { ExpandingODataUriBuilder } from "./internal";
 import { ODataOperators } from "./internal";
 
@@ -20,6 +26,7 @@ export abstract class ODataUriBuilderBase<T> {
   protected itemsTop?: number;
   protected itemsCount?: boolean;
   protected expands: Array<ExpandingODataUriBuilder<any>> = [];
+  protected filters: Array<QExpression> = [];
 
   protected constructor(qEntity: QEntityModel<T, any>, config?: ODataUriBuilderConfig) {
     if (!qEntity || !qEntity.entityName || !qEntity.entityName.trim()) {
@@ -74,19 +81,6 @@ export abstract class ODataUriBuilderBase<T> {
     return this;
   }
 
-  /* public expanding<E>(
-    prop: QEntityPath<E> | QEntityCollectionPath<E>,
-    builderFn: (builder: ExpandingODataUriBuilder<E>, qObject: QEntityModel<E, any>) => void
-  ) {
-    const entity = prop.getEntity();
-    const expander = ExpandingODataUriBuilder.create(entity);
-    builderFn(expander, entity);
-
-    this.expands.push(expander);
-
-    return this;
-  } */
-
   public expand<
     Prop extends ExtractPropertyNamesOfType<QEntityModel<T, any>, QEntityPath<any> | QEntityCollectionPath<any>>
   >(...props: Array<Prop>) {
@@ -112,7 +106,6 @@ export abstract class ODataUriBuilderBase<T> {
     const add = (operator: string, value: string) => params.push(param(operator, value));
 
     if (this.selects) {
-      // url.addQuery(ODataOperators.SELECT, this.selects?.join(","));
       add(ODataOperators.SELECT, this.selects?.join(","));
     }
     if (this.itemsToSkip !== undefined) {
@@ -124,11 +117,21 @@ export abstract class ODataUriBuilderBase<T> {
     if (this.itemsCount !== undefined) {
       add(ODataOperators.COUNT, String(this.itemsCount));
     }
+    if (this.filters.length) {
+      const filterConcat = this.filters.reduce((result, filter) => (result ? result.and(filter) : filter));
+      add(ODataOperators.FILTER, filterConcat.toString());
+    }
     if (this.expands.length) {
       const expand = this.expands.map((exp) => exp.build()).join(",");
       add(ODataOperators.EXPAND, expand);
     }
 
     return params;
+  }
+
+  public filter(...expressions: Array<QExpression>) {
+    this.filters.push(...expressions);
+
+    return this;
   }
 }
