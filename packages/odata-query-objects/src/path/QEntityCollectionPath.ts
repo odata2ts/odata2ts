@@ -2,7 +2,7 @@ import { QEntityModel } from "../QEntityModel";
 import { QPathModel } from "./QPathModel";
 
 export class QEntityCollectionPath<Type> implements QPathModel {
-  constructor(private path: string, private qEntity: Omit<QEntityModel<Type, any>, "createKey">) {
+  constructor(private path: string, private qEntity: QEntityModel<Type, any>) {
     if (!path || !path.trim()) {
       throw Error("Path must be supplied!");
     }

@@ -51,28 +51,6 @@ describe("QEntityFactory tests", () => {
     xx: new QEntityCollectionPath("xx", qSimple),
   });
 
-  test("create simple key", () => {
-    // @ts-expect-error
-    qSimple.createKey({ city: "Test" });
-    // @ts-expect-error
-    qSimple.createKey({ name: 123 });
-
-    const result = qSimple.createKey({ name: "Horst" });
-    expect(result).toBe("name='Horst'");
-  });
-
-  test("create complex key", () => {
-    // @ts-expect-error
-    qComplex.createKey({});
-    // @ts-expect-error
-    qComplex.createKey({ x: 2 });
-    // @ts-expect-error
-    qComplex.createKey({ x: "2", Z: false });
-
-    const result = qComplex.createKey({ x: 123, Z: false });
-    expect(result).toBe("x=123,Z=false");
-  });
-
   test("simple prop", () => {
     // @ts-expect-error
     qSimple.name.eq(3);
@@ -84,18 +62,12 @@ describe("QEntityFactory tests", () => {
   test("entity path", () => {
     const xyEntity = qComplex.xy.getEntity();
 
-    //@ts-expect-error
-    xyEntity.createKey({ name: 3 });
-
     const result = xyEntity.name.startsWith("Hi").toString();
     expect(result).toBe("startswith(name,'Hi')");
   });
 
   test("entity collection path", () => {
     const xxEntity = qComplex.xx.getEntity();
-
-    //@ts-expect-error
-    xxEntity.createKey({ name: 3 });
 
     const result = xxEntity.name.startsWith("Hi").toString();
     expect(result).toBe("startswith(name,'Hi')");

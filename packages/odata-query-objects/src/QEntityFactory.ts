@@ -17,15 +17,6 @@ export class QEntityFactory {
     return {
       ...props,
       entityName: entityName,
-      createKey: (keys: { [Key in KeyModel]: TypeModel[Key] }): string => {
-        return Object.entries(keys)
-          .map(([key, value]) => {
-            const prop = props[key as keyof TypeModel];
-            const val = prop && prop instanceof QStringPath ? `'${value}'` : value;
-            return key + "=" + val;
-          })
-          .join(",");
-      },
     };
   }
 }

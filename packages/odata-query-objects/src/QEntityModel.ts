@@ -16,7 +16,6 @@ import { QBooleanPath } from "./path/QBooleanPath";
  */
 export type QEntityModel<TypeModel, KeyModel extends keyof TypeModel> = {
   entityName: string;
-  createKey: (keys: { [Key in KeyModel]: TypeModel[Key] }) => string;
 } & QPropContainer<TypeModel>;
 
 /**
