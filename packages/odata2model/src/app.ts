@@ -30,7 +30,7 @@ export class App {
 
     // get file name based on service name
     const schema = metadataJson["edmx:Edmx"]["edmx:DataServices"][0].Schema[0];
-    const serviceName = schema.$.Namespace;
+    const serviceName = schema.$.Namespace.substring(0, 1).toUpperCase() + schema.$.Namespace.substring(1);
 
     // create ts file which holds all model interfaces
     const fileName = path.join(outputPath, serviceName + ".ts");
