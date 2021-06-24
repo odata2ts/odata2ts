@@ -3,10 +3,6 @@ import { ODataUriBuilderBase, ODataUriBuilderConfig } from "./internal";
 
 export class ODataUriBuilder<T, K extends keyof T> extends ODataUriBuilderBase<T> {
   static create<T, K extends keyof T>(qEntity: QEntityModel<T, K>, config?: ODataUriBuilderConfig) {
-    if (!qEntity || !qEntity.entityName || !qEntity.entityName.trim()) {
-      throw Error("QEntity must be supplied with a valid entityName!");
-    }
-
     return new ODataUriBuilder<T, K>(qEntity, config);
   }
 
@@ -38,7 +34,7 @@ export class ODataUriBuilder<T, K extends keyof T> extends ODataUriBuilderBase<T
   public build(): string {
     const paramFn = this.unencoded ? this.param : this.paramEncoded;
     const params = this.buildQuery(paramFn);
-    const collection = this.entity.entityName + (this.key ? `(${this.key})` : "");
+    const collection = this.entity.__collectionPath + (this.key ? `(${this.key})` : "");
 
     return "/" + collection + (params.length ? `?${params.join("&")}` : "");
   }

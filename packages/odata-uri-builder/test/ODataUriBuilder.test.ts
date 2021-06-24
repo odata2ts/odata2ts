@@ -33,7 +33,7 @@ describe("ODataUriBuilder Test", () => {
     expect(() => ODataUriBuilder.create()).toThrow();
     // @ts-expect-error
     expect(() => ODataUriBuilder.create({})).toThrow();
-    expect(() => ODataUriBuilder.create({ entityName: " " })).toThrow();
+    expect(() => ODataUriBuilder.create({ __collectionPath: " " })).toThrow();
   });
 
   test("config: encoded", () => {

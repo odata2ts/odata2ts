@@ -1,7 +1,6 @@
 import {
   QBooleanPath,
   QEntityCollectionPath,
-  QEntityFactory,
   QEntityModel,
   QEntityPath,
   QNumberPath,
@@ -18,7 +17,7 @@ export interface Person {
 }
 
 export const QPerson: QEntityModel<Person, "name" | "age"> = {
-  entityName: "Persons",
+  __collectionPath: "Persons",
   age: new QNumberPath("age"),
   name: new QStringPath("name"),
   deceased: new QBooleanPath("deceased"),

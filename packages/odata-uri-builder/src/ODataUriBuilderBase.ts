@@ -29,7 +29,7 @@ export abstract class ODataUriBuilderBase<T> {
   protected filters: Array<QExpression> = [];
 
   protected constructor(qEntity: QEntityModel<T, any>, config?: ODataUriBuilderConfig) {
-    if (!qEntity || !qEntity.entityName || !qEntity.entityName.trim()) {
+    if (!qEntity || !qEntity.__collectionPath || !qEntity.__collectionPath.trim()) {
       throw Error("A valid collection name must be provided!");
     }
 
