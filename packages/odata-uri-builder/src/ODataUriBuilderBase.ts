@@ -21,7 +21,7 @@ export abstract class ODataUriBuilderBase<T> {
   protected unencoded: boolean;
   protected config?: ODataUriBuilderConfig;
 
-  protected selects?: Array<string>;
+  protected selects: Array<string> = [];
   protected itemsToSkip?: number;
   protected itemsTop?: number;
   protected itemsCount?: boolean;
@@ -40,8 +40,10 @@ export abstract class ODataUriBuilderBase<T> {
 
   public abstract build(): string;
 
-  public select(...props: Array<keyof QPropContainer<T>>) {
-    this.selects = props.map((p) => this.entity[p].getPath());
+  public select(...props: Array<keyof QPropContainer<T> | null | undefined>) {
+    if (props && props.length) {
+      this.selects.push(...props.filter((p) => !!p).map((p) => this.entity[p].getPath()));
+    }
     return this;
   }
 
@@ -105,8 +107,8 @@ export abstract class ODataUriBuilderBase<T> {
     const params: Array<string> = [];
     const add = (operator: string, value: string) => params.push(param(operator, value));
 
-    if (this.selects) {
-      add(ODataOperators.SELECT, this.selects?.join(","));
+    if (this.selects.length) {
+      add(ODataOperators.SELECT, this.selects.join(","));
     }
     if (this.itemsToSkip !== undefined) {
       add(ODataOperators.SKIP, String(this.itemsToSkip));
