@@ -52,6 +52,41 @@ const qPerson: QEntityModel<Person, "firstName" | "lastName"> = {
 }
 ```
 
+## Entity Relationships
+
+Here's the example:
+
+```
+interface Person {
+  ...
+  address: Address;             // 1:1 relationship
+  altAddresses: Array<Address>; // 1:n relationship
+}
+
+const qPerson: QEntityModel<Person, "firstName" | "lastName"> = {
+  ...
+  address: new QEntityPath("address", qAddress),
+  altAddresses: new QEntityCollectionPath("altAddresses", qAddress)
+  ...
+}
+```
+
+## Factory Function
+
+Constructing entity models manually, as shown above, is a bit repetitive.
+Use `QEntityFactory` to reduce your efforts:
+
+```
+const qPerson = QEntityFactory.create<Person, "firstName" | "lastName">("Persons", {
+  firstName: QStringPath,
+  age: QNumberPath,
+  address: [QEntityPath, qAddress],
+  altAddresses: [QEntityCollectionPath, qAddress]
+})
+```
+
+As you can see from the example, we use tuples to specify QPath and QObject for entity relationships.
+
 ## Generating Query Objects
 
 Actually you shouldn't need to create Query Objects manually. Since each OData service exposes a meta description ($metadata parameter), we can fully automate the generation.
