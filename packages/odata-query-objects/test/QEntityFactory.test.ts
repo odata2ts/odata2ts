@@ -51,9 +51,9 @@ describe("QEntityFactory tests", () => {
     xx: new QEntityCollectionPath("xx", qSimple),
   });
 
-  test("__entityName", () => {
-    expect(qSimple.__entityName).toBe("test2");
-    expect(qComplex.__entityName).toBe("test");
+  test("__collectionPath", () => {
+    expect(qSimple.__collectionPath).toBe("test2");
+    expect(qComplex.__collectionPath).toBe("test");
   });
 
   test("simple prop", () => {

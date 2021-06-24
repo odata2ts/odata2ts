@@ -15,7 +15,10 @@ import { QBooleanPath } from "./path/QBooleanPath";
  * QEntityModel<MyTestInterface, "name" | "application">
  */
 export type QEntityModel<TypeModel, KeyModel extends keyof TypeModel> = {
-  __entityName: string;
+  /**
+   * OData path for the given entity collection.
+   */
+  __collectionPath: string;
 } & QPropContainer<TypeModel>;
 
 /**
