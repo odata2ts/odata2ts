@@ -31,18 +31,14 @@ export class App {
     // get file name based on service name
     const schema = metadataJson["edmx:Edmx"]["edmx:DataServices"][0].Schema[0];
     const serviceName = schema.$.Namespace;
-    const fileName = path.join(outputPath, serviceName + ".ts");
 
     // create ts file which holds all model interfaces
+    const fileName = path.join(outputPath, serviceName + ".ts");
     await remove(fileName);
     const serviceDefinition = project.createSourceFile(fileName);
 
-    this.createStandardInterfaces(project, outputPath, formatter);
     this.generateModelInterfaces(serviceName, schema, serviceDefinition);
-
     this.formatAndWriteFile(fileName, serviceDefinition, formatter);
-
-    // console.log(`Result [formatted: ${options.prettier}]`, formatted);
   }
 
   private async formatAndWriteFile(fileName: string, file: morph.SourceFile, formatter: BaseFormatter) {
@@ -61,14 +57,6 @@ export class App {
     });
   }
 
-  private async createStandardInterfaces(project: morph.Project, outputPath: string, formatter: BaseFormatter) {
-    const typeFileName = path.join(outputPath, "ODataTypes.ts");
-    await remove(typeFileName);
-    const file = project.addSourceFileAtPath("src/types/ODataTypes.ts");
-
-    this.formatAndWriteFile(typeFileName, file, formatter);
-  }
-
   private generateModelInterfaces(serviceName: string, schema: Schema, serviceDefinition: morph.SourceFile) {
     const dataTypeImports = new Set<string>();
 
@@ -84,7 +72,7 @@ export class App {
       serviceDefinition.addImportDeclaration({
         isTypeOnly: true,
         namedImports: [...dataTypeImports],
-        moduleSpecifier: "./ODataTypes",
+        moduleSpecifier: "@odata2ts/odata-query-objects",
       });
     }
   }
