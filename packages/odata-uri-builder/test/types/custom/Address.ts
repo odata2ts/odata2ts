@@ -7,7 +7,7 @@ export interface Address {
 }
 
 export const QAddress: QEntityModel<Address, "street"> = {
-  entityName: "Addresses",
+  __collectionPath: "Addresses",
   street: new QStringPath("street"),
   get responsible() {
     return new QEntityPath<Person>("responsible", QPerson);
