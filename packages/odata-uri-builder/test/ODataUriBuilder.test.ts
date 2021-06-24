@@ -22,11 +22,11 @@ describe("ODataUriBuilder Test", () => {
     toTest = ODataUriBuilder.create(QPerson, { unencoded: true });
   });
 
-  test("minimal default", () => {
+  test("create: minimal default", () => {
     expect(toTest.build()).toBe("/Persons");
   });
 
-  test("fail with empty collection", () => {
+  test("create: fail with missing QObject", () => {
     // @ts-ignore
     expect(() => ODataUriBuilder.create(null)).toThrow();
     // @ts-expect-error
@@ -36,131 +36,164 @@ describe("ODataUriBuilder Test", () => {
     expect(() => ODataUriBuilder.create({ entityName: " " })).toThrow();
   });
 
-  // TODO check config
+  test("config: encoded", () => {
+    const candidate = ODataUriBuilder.create(QPerson)
+      .select("name", "age")
+      .filter(QPerson.name.equals("AC/DC & Brothers"))
+      .build();
+    const expected = addBase("%24select=name%2Cage&%24filter=name%20eq%20'AC%2FDC%20%26%20Brothers'");
 
-  test("select 2 props", () => {
+    expect(candidate).toBe(expected);
+  });
+
+  test("config: encoded & no double encoding for expanded entities", () => {
+    const candidate = ODataUriBuilder.create(QPerson)
+      .select("name", "age")
+      .expanding("altAdresses", (expBuilder, qEntity) => {
+        expBuilder.filter(qEntity.street.equals("AC/DC & Brothers"));
+      })
+      .build();
+    const expected = addBase(
+      "%24select=name%2Cage&%24expand=altAdresses(%24filter%3Dstreet%20eq%20'AC%2FDC%20%26%20Brothers')"
+    );
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("select: 2 props", () => {
     const candidate = toTest.select("name", "age").build();
     const expected = addBase("$select=name,age");
 
     expect(candidate).toBe(expected);
   });
 
-  /*
-  TODO: ignore null / undefined to support evaluations & select nothing is also not problematic
-  test("fail with null or empty clause", () => {
-    expect(() => toTest.select(qEmployee.id, null)).toThrow();
-    expect(() => toTest.select(qEmployee.id, undefined)).toThrow();
-    expect(() => toTest.select()).toThrow();
-  });
- */
+  test("select: multiple times", () => {
+    const candidate = toTest.select("name").select("age").build();
+    const expected = addBase("$select=name,age");
 
-  test("test skip", () => {
+    expect(candidate).toBe(expected);
+  });
+
+  test("select: ignore null or undefined", () => {
+    const candidate = toTest.select(null, "name", undefined, "age").build();
+    const expected = addBase("$select=name,age");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("select: no param if only null is passed", () => {
+    const candidate = toTest.select(null).build();
+
+    expect(candidate).toBe("/Persons");
+  });
+
+  test("skip", () => {
     const candidate = toTest.skip(5).build();
     const expected = addBase("$skip=5");
 
     expect(candidate).toBe(expected);
   });
 
-  test("test skip with zero", () => {
+  test("skip: with zero", () => {
     const candidate = toTest.skip(0).build();
     const expected = addBase("$skip=0");
 
     expect(candidate).toBe(expected);
   });
 
-  test("fail skip with negative number", () => {
+  test("skip: fail with negative number", () => {
     expect(() => toTest.skip(-2)).toThrow();
   });
 
-  test("test top", () => {
+  test("top", () => {
     const candidate = toTest.top(15).build();
     const expected = addBase("$top=15");
 
     expect(candidate).toBe(expected);
   });
 
-  test("test top with zero", () => {
+  test("top: with zero", () => {
     const candidate = toTest.top(0).build();
     const expected = addBase("$top=0");
 
     expect(candidate).toBe(expected);
   });
 
-  test("fail top with negative number", () => {
+  test("top: fail with negative number", () => {
     expect(() => toTest.top(-1)).toThrow();
   });
 
-  test("test count", () => {
+  test("count", () => {
     const candidate = toTest.count().build();
     const expected = addBase("$count=true");
 
     expect(candidate).toBe(expected);
   });
 
-  test("test count=true", () => {
+  test("count: true", () => {
     const candidate = toTest.count(true).build();
     const expected = addBase("$count=true");
 
     expect(candidate).toBe(expected);
   });
 
-  test("test count=false", () => {
+  test("count: false", () => {
     const candidate = toTest.count(false).build();
     const expected = addBase("$count=false");
 
     expect(candidate).toBe(expected);
   });
 
-  test("simple filter", () => {
+  test("filter: simple", () => {
     const candidate = toTest.filter(QPerson.name.eq("Heinz")).build();
     const expected = addBase("$filter=name eq 'Heinz'");
 
     expect(candidate).toBe(expected);
   });
 
-  test("multiple filter", () => {
+  test("filter: 2 filters", () => {
     const candidate = toTest.filter(QPerson.name.eq("Heinz"), QPerson.age.eq(8)).build();
     const expected = addBase("$filter=name eq 'Heinz' and age eq 8");
 
     expect(candidate).toBe(expected);
   });
 
-  test("add filter multiple times", () => {
+  test("filter: multiple times", () => {
     const candidate = toTest.filter(QPerson.name.eq("Heinz")).filter(QPerson.age.eq(8)).build();
     const expected = addBase("$filter=name eq 'Heinz' and age eq 8");
 
     expect(candidate).toBe(expected);
   });
 
-  test("add filter expression manually", () => {
+  test("filter: add expression manually", () => {
     const candidate = toTest.filter(new QExpression("name eq 'Heinz'").and(new QExpression("age eq 8"))).build();
     const expected = addBase("$filter=name eq 'Heinz' and age eq 8");
 
     expect(candidate).toBe(expected);
   });
 
-  test("one simple expand", () => {
+  test("expand: simple", () => {
     const candidate = toTest.expand("address").build();
     const expected = addBase("$expand=address");
 
     expect(candidate).toBe(expected);
   });
 
-  test("two simple expands", () => {
+  test("expand: two simple ones", () => {
     const candidate = toTest.expand("address", "altAdresses").build();
     const expected = addBase("$expand=address,altAdresses");
 
     expect(candidate).toBe(expected);
   });
 
-  test("one fairly simple expand", () => {
+  test("expanding: simple", () => {
     const candidate = toTest.expanding("address", (builder) => {}).build();
     const expected = addBase("$expand=address");
 
     expect(candidate).toBe(expected);
   });
 
-  test("one expand with select", () => {
+  test("expandiong: with select", () => {
     const candidate = toTest
       .expanding("address", (builder) => {
         builder.select("street");
@@ -171,7 +204,7 @@ describe("ODataUriBuilder Test", () => {
     expect(candidate).toBe(expected);
   });
 
-  test("expand 1:n with filter & skip & top", async () => {
+  test("expanding: 1:n with filter & skip & top", async () => {
     const candidate = toTest
       .expanding("altAdresses", (builder, qEntity) => {
         builder.select("street").skip(1).top(0).filter(qEntity.street.equals("Teststr. 12"));
@@ -182,7 +215,7 @@ describe("ODataUriBuilder Test", () => {
     expect(candidate).toBe(expected);
   });
 
-  test("deeply nested expand", () => {
+  test("expanding: deeply nested", () => {
     const candidate = toTest
       .select("name", "age")
       .expanding("address", (builder, qAddress) => {
