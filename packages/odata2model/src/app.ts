@@ -33,12 +33,25 @@ export class App {
     const serviceName = schema.$.Namespace.substring(0, 1).toUpperCase() + schema.$.Namespace.substring(1);
 
     // create ts file which holds all model interfaces
-    const fileName = path.join(outputPath, serviceName + ".ts");
-    await remove(fileName);
-    const serviceDefinition = project.createSourceFile(fileName);
+    if (options.mode === "models" || options.mode === "all") {
+      const fileName = path.join(outputPath, serviceName + ".ts");
+      await remove(fileName);
+      const serviceDefinition = project.createSourceFile(fileName);
 
-    this.generateModelInterfaces(serviceName, schema, serviceDefinition);
-    this.formatAndWriteFile(fileName, serviceDefinition, formatter);
+      this.generateModelInterfaces(serviceName, schema, serviceDefinition);
+
+      this.formatAndWriteFile(fileName, serviceDefinition, formatter);
+    }
+    if (options.mode === "qobjects" || options.mode === "all") {
+      // create ts file which holds query objects
+      const fileNameQObjects = path.join(outputPath, `Q${serviceName}.ts`);
+      await remove(fileNameQObjects);
+      const qDefinition = project.createSourceFile(fileNameQObjects);
+
+      // generate
+      this.generateQueryObjects(serviceName, schema, qDefinition);
+      this.formatAndWriteFile(fileNameQObjects, qDefinition, formatter);
+    }
   }
 
   private async formatAndWriteFile(fileName: string, file: morph.SourceFile, formatter: BaseFormatter) {
@@ -137,6 +150,26 @@ export class App {
     }
 
     return pureType;
+  }
+
+  private generateQueryObjects(serviceName: string, schema: Schema, serviceDefinition: morph.SourceFile) {
+    const dataTypeImports = new Set<string>(["QEntityFactory"]);
+
+    /* schema.EntityType.forEach((et) => {
+      serviceDefinition.addVariableStatement({
+        name: et.$.Name,
+        isExported: true,
+        properties: this.generateProps(serviceName, et, dataTypeImports),
+      });
+    }); */
+
+    if (dataTypeImports.size) {
+      serviceDefinition.addImportDeclaration({
+        isTypeOnly: true,
+        namedImports: [...dataTypeImports],
+        moduleSpecifier: "@odata2ts/odata-query-objects",
+      });
+    }
   }
 
   private async createFormatter(outputPath: string, isEnabled: boolean) {

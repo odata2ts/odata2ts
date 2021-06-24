@@ -22,6 +22,7 @@
     "LICENSE"
   ],
   "dependencies": {
+    "@odata2ts/odata-query-objects": "*",
     "commander": "^7.2.0",
     "fs-extra": "^10.0.0",
     "prettier": "^2.3.1",

@@ -1,6 +1,5 @@
-import commander from "commander";
+import commander, { Option } from "commander";
 import { ensureDir, pathExists, readFile } from "fs-extra";
-import * as path from "path";
 import { parseStringPromise } from "xml2js";
 
 import { App } from "./app";
@@ -9,6 +8,7 @@ import { ODataEdmxModel } from "./odata/ODataEdmxModel";
 export interface Odata2tsOptions {
   source: string;
   output: string;
+  mode: "models" | "qobjects" | "all";
   prettier: boolean;
   debug: boolean;
 }
@@ -20,6 +20,11 @@ class Cli {
       .description("CLI to generate Typescript Interfaces for models of a given OData service.")
       .requiredOption("-s, --source <metadata.xml>", "Metadata file describing the OData service")
       .requiredOption("-o, --output <path>", "Output location for generated files")
+      .addOption(
+        new Option("-m, --mode <mode>", "What kind of stuff gets generated")
+          .choices(["models", "qobjects", "all"])
+          .default("all")
+      )
       .option("-p, --prettier", "Format result with prettier", false)
       .option("-d, --debug", "Verbose debug infos", false)
       .parse(process.argv);
