@@ -1,3 +1,8 @@
+/**
+ * Nominal typing for representing date & time formats while being strings.
+ * See: https://basarat.gitbook.io/typescript/main-1/nominaltyping
+ */
+
 enum DateStringBrand {
   __ = "DateString",
 }
