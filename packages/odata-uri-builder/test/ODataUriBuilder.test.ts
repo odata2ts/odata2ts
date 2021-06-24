@@ -1,3 +1,4 @@
+import { QExpression } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilder } from "../src/ODataUriBuilder";
 import { Person, QPerson } from "./types/custom";
 
@@ -110,6 +111,34 @@ describe("ODataUriBuilder Test", () => {
     expect(candidate).toBe(expected);
   });
 
+  test("simple filter", () => {
+    const candidate = toTest.filter(QPerson.name.eq("Heinz")).build();
+    const expected = addBase("$filter=name eq 'Heinz'");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("multiple filter", () => {
+    const candidate = toTest.filter(QPerson.name.eq("Heinz"), QPerson.age.eq(8)).build();
+    const expected = addBase("$filter=name eq 'Heinz' and age eq 8");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("add filter multiple times", () => {
+    const candidate = toTest.filter(QPerson.name.eq("Heinz")).filter(QPerson.age.eq(8)).build();
+    const expected = addBase("$filter=name eq 'Heinz' and age eq 8");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("add filter expression manually", () => {
+    const candidate = toTest.filter(new QExpression("name eq 'Heinz'").and(new QExpression("age eq 8"))).build();
+    const expected = addBase("$filter=name eq 'Heinz' and age eq 8");
+
+    expect(candidate).toBe(expected);
+  });
+
   test("one simple expand", () => {
     const candidate = toTest.expand("address").build();
     const expected = addBase("$expand=address");
@@ -142,16 +171,16 @@ describe("ODataUriBuilder Test", () => {
     expect(candidate).toBe(expected);
   });
 
-  /* /* test("expand 1:n with skip & top", async () => {
+  test("expand 1:n with filter & skip & top", async () => {
     const candidate = toTest
-      .expanding<Order>("Orders", (builder) => {
-        builder.select("OrderID", "ShipName").skip(1).top(0);
+      .expanding("altAdresses", (builder, qEntity) => {
+        builder.select("street").skip(1).top(0).filter(qEntity.street.equals("Teststr. 12"));
       })
       .build();
-    const expected = addBase("$expand=Orders($select=OrderID,ShipName;$skip=1;$top=0)");
+    const expected = addBase("$expand=altAdresses($select=street;$skip=1;$top=0;$filter=street eq 'Teststr. 12')");
 
     expect(candidate).toBe(expected);
-  }); */
+  });
 
   test("deeply nested expand", () => {
     const candidate = toTest
@@ -180,27 +209,6 @@ describe("ODataUriBuilder Test", () => {
       .expand("altAdresses")
       .build();
     const expected = addBase("$expand=address($select=street),altAdresses");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("simple filter", () => {
-    const candidate = toTest.filter(QPerson.name.eq("Heinz")).build();
-    const expected = addBase("$filter=name eq 'Heinz'");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("multiple filter", () => {
-    const candidate = toTest.filter(QPerson.name.eq("Heinz"), QPerson.age.eq(8)).build();
-    const expected = addBase("$filter=name eq 'Heinz' and age eq 8");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("add filter multiple times", () => {
-    const candidate = toTest.filter(QPerson.name.eq("Heinz")).filter(QPerson.age.eq(8)).build();
-    const expected = addBase("$filter=name eq 'Heinz' and age eq 8");
 
     expect(candidate).toBe(expected);
   });

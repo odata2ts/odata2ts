@@ -12,7 +12,7 @@ export interface ODataUriBuilderConfig {
   unencoded?: boolean;
 }
 
-type EntityExtractor<T> = T extends QEntityPath<infer E> ? E : never;
+type EntityExtractor<T> = T extends QEntityPath<infer E> ? E : T extends QEntityCollectionPath<infer E> ? E : never;
 type ExtractPropertyNamesOfType<T, S> = { [K in keyof T]: T[K] extends S ? K : never }[keyof T];
 
 export abstract class ODataUriBuilderBase<T> {
