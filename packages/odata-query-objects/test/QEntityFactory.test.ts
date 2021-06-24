@@ -51,6 +51,11 @@ describe("QEntityFactory tests", () => {
     xx: new QEntityCollectionPath("xx", qSimple),
   });
 
+  test("__entityName", () => {
+    expect(qSimple.__entityName).toBe("test2");
+    expect(qComplex.__entityName).toBe("test");
+  });
+
   test("simple prop", () => {
     // @ts-expect-error
     qSimple.name.eq(3);

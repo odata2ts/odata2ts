@@ -15,7 +15,7 @@ import { QBooleanPath } from "./path/QBooleanPath";
  * QEntityModel<MyTestInterface, "name" | "application">
  */
 export type QEntityModel<TypeModel, KeyModel extends keyof TypeModel> = {
-  entityName: string;
+  __entityName: string;
 } & QPropContainer<TypeModel>;
 
 /**

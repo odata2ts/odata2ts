@@ -1,4 +1,3 @@
-import { QStringPath } from "./path/QStringPath";
 import { QEntityModel, QPropContainer } from "./QEntityModel";
 
 export class QEntityFactory {
@@ -16,7 +15,7 @@ export class QEntityFactory {
   ): QEntityModel<Required<TypeModel>, KeyModel> {
     return {
       ...props,
-      entityName: entityName,
+      __entityName: entityName,
     };
   }
 }
