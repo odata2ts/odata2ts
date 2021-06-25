@@ -19,7 +19,7 @@ export type QEntityModel<TypeModel, KeyModel extends keyof TypeModel> = {
    * OData path for the given entity collection.
    */
   __collectionPath: string;
-} & QPropContainer<TypeModel>;
+} & QPropContainer<Required<TypeModel>>;
 
 /**
  * Helper function to "unpack" an array type; leaves non-arrays untouched.

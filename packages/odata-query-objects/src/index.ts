@@ -1,6 +1,6 @@
 export { DateString, TimeOfDayString, DateTimeOffsetString } from "./odata/ODataTypes";
 
-export { QEntityFactory } from "./QEntityFactory";
+export { QEntityFactory, QRawPropContainer } from "./QEntityFactory";
 export { QEntityModel, QPropContainer } from "./QEntityModel";
 export { QExpression } from "./path/QExpression";
 export { QBooleanPath } from "./path/QBooleanPath";

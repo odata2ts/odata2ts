@@ -65,11 +65,13 @@ interface Person {
 
 const qPerson: QEntityModel<Person, "firstName" | "lastName"> = {
   ...
-  address: new QEntityPath("address", qAddress),
-  altAddresses: new QEntityCollectionPath("altAddresses", qAddress)
+  address: new QEntityPath("address", () => qAddress),
+  altAddresses: new QEntityCollectionPath("altAddresses", () => qAddress)
   ...
 }
 ```
+
+Functions are used to wrap references to other Query Objects in order to allow for circular references.
 
 ## Factory Function
 
@@ -80,8 +82,8 @@ Use `QEntityFactory` to reduce your efforts:
 const qPerson = QEntityFactory.create<Person, "firstName" | "lastName">("Persons", {
   firstName: QStringPath,
   age: QNumberPath,
-  address: [QEntityPath, qAddress],
-  altAddresses: [QEntityCollectionPath, qAddress]
+  address: [QEntityPath, () => qAddress],
+  altAddresses: [QEntityCollectionPath, () => qAddress]
 })
 ```
 

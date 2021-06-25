@@ -13,6 +13,7 @@ import { DateString, DateTimeOffsetString, TimeOfDayString } from "../src/odata/
 
 interface SimpleEntity {
   name: string;
+  complexton?: ComplexEntity;
 }
 
 interface ComplexEntity {
@@ -33,13 +34,6 @@ describe("QEntityFactory tests", () => {
     name: QDatePath,
   });
 
-  const qSimple = QEntityFactory.create<SimpleEntity, "name">("test2", {
-    name: QStringPath,
-    // Typing Test: Expect error for unknown members
-    // @ts-expect-error => unknown member
-    whoAmI: QStringPath,
-  });
-
   const qComplex = QEntityFactory.create<ComplexEntity, "articleNo" | "Active">("test", {
     articleNo: QNumberPath,
     description: QStringPath,
@@ -47,8 +41,18 @@ describe("QEntityFactory tests", () => {
     deletedAt: QDatePath,
     bestSellingTime: QTimeOfDayPath,
     createdAt: QDateTimeOffsetPath,
-    simpleton: [QEntityPath, qSimple],
-    simpleList: [QEntityCollectionPath, qSimple],
+    simpleton: [QEntityPath, () => qSimple],
+    simpleList: [QEntityCollectionPath, () => qSimple],
+  });
+
+  const qSimple = QEntityFactory.create<SimpleEntity, "name">("test2", {
+    name: QStringPath,
+    // TODO this fails badly => type will be any for all entities
+    // complexton: [QEntityPath, () => qComplex],
+
+    // Typing Test: Expect error for unknown members
+    // @ts-expect-error => unknown member
+    whoAmI: QStringPath,
   });
 
   test("__collectionPath", () => {

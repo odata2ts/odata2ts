@@ -30,8 +30,8 @@ export type QRawPropContainer<TypeModel> = {
     : TypeModel[Property] extends string
     ? typeof QStringPath
     : TypeModel[Property] extends Array<any>
-    ? [typeof QEntityCollectionPath, QEntityModel<Unpacked<TypeModel[Property]>, any>]
-    : [typeof QEntityPath, QEntityModel<TypeModel[Property], any>];
+    ? [typeof QEntityCollectionPath, () => QEntityModel<Unpacked<TypeModel[Property]>, any>]
+    : [typeof QEntityPath, () => QEntityModel<TypeModel[Property], any>];
 };
 
 export class QEntityFactory {
@@ -46,15 +46,15 @@ export class QEntityFactory {
   static create<TypeModel, KeyModel extends keyof TypeModel>(
     collectionPath: string,
     props: QRawPropContainer<Required<TypeModel>>
-  ): QEntityModel<Required<TypeModel>, KeyModel> {
+  ): QEntityModel<TypeModel, KeyModel> {
     const result = Object.entries(props).reduce((collector, [name, constructorOrTuple]) => {
       if (typeof constructorOrTuple === "function") {
         // @ts-ignore
         collector[name] = new constructorOrTuple(name);
       } else if (typeof constructorOrTuple === "object") {
         // @ts-ignore
-        const [construct, entity] = constructorOrTuple;
-        collector[name] = new construct(name, entity);
+        const [construct, entityFn] = constructorOrTuple;
+        collector[name] = new construct(name, entityFn);
       } else {
         throw Error("Unknown type has been passed!");
       }
@@ -64,6 +64,6 @@ export class QEntityFactory {
     return {
       __collectionPath: collectionPath,
       ...result,
-    } as QEntityModel<Required<TypeModel>, KeyModel>;
+    } as QEntityModel<TypeModel, KeyModel>;
   }
 }
