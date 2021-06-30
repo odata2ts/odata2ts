@@ -6,6 +6,8 @@ import { QEntityCollectionPath } from "./QEntityCollectionPath";
 import { QEntityPath } from "./QEntityPath";
 import { QNumberPath } from "./QNumberPath";
 import { QStringPath } from "./QStringPath";
+import { QBinaryPath } from "./QBinaryPath";
+import { QGuidPath } from "./QGuidPath";
 
 export interface QPathModel {
   getPath(): string;
@@ -18,5 +20,7 @@ export type QPath =
   | QDatePath
   | QTimeOfDayPath
   | QDateTimeOffsetPath
+  | QBinaryPath
+  | QGuidPath
   | QEntityPath<any>
   | QEntityCollectionPath<any>;
