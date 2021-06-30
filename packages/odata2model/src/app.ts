@@ -1,16 +1,25 @@
 import * as path from "path";
 import { remove, writeFile } from "fs-extra";
-import * as morph from "ts-morph";
+// import * as morph from "ts-morph";
+import {
+  OptionalKind,
+  Project,
+  PropertySignatureStructure,
+  SourceFile,
+  VariableDeclarationKind,
+  Writers,
+} from "ts-morph";
+import { upperCaseFirst } from "upper-case-first";
 
 import { Odata2tsOptions } from "./cli";
 import { NoopFormatter } from "./formatter/NoopFormatter";
 import { PrettierFormatter } from "./formatter/PrettierFormatter";
-import { EntityType, ODataEdmxModel, OdataTypes, Schema } from "./odata/ODataEdmxModel";
+import { EntityType, NavigationProperty, ODataEdmxModel, OdataTypes, Property, Schema } from "./odata/ODataEdmxModel";
 import { BaseFormatter } from "./formatter/BaseFormatter";
 
 export interface RunOptions extends Omit<Odata2tsOptions, "source" | "output"> {}
 
-type TsPropType = morph.OptionalKind<morph.PropertySignatureStructure>;
+type TsPropType = OptionalKind<PropertySignatureStructure>;
 
 export class App {
   /**
@@ -23,24 +32,47 @@ export class App {
     const formatter = await this.createFormatter(outputPath, options.prettier);
 
     // Create ts-morph project
-    const project = new morph.Project({
+    const project = new Project({
       manipulationSettings: formatter.getSettings(),
       skipAddingFilesFromTsConfig: true,
     });
 
     // get file name based on service name
-    const schema = metadataJson["edmx:Edmx"]["edmx:DataServices"][0].Schema[0];
-    const serviceName = schema.$.Namespace.substring(0, 1).toUpperCase() + schema.$.Namespace.substring(1);
+    // TODO check edmx version attribute
+    const dataService = metadataJson["edmx:Edmx"]["edmx:DataServices"][0];
+    const serviceName = upperCaseFirst(dataService.Schema[0].$.Namespace);
+    const fileNameTypes = path.join(outputPath, serviceName + ".ts");
+
+    // merge all schemas & take name from first schema
+    // TODO only necessary for NorthwindModel => other use cases?
+    const schema = dataService.Schema.reduce((collector, schema, index) => {
+      if (index === 0) {
+        collector.$ = schema.$;
+      }
+      const ec = collector.EntityContainer ?? [];
+      const et = collector.EntityType ?? [];
+
+      if (schema.EntityContainer) {
+        ec.push(...schema.EntityContainer);
+      }
+      if (schema.EntityType) {
+        et.push(...schema.EntityType);
+      }
+
+      collector.EntityContainer = ec;
+      collector.EntityType = et;
+
+      return collector;
+    }, {} as Schema);
 
     // create ts file which holds all model interfaces
     if (options.mode === "models" || options.mode === "all") {
-      const fileName = path.join(outputPath, serviceName + ".ts");
-      await remove(fileName);
-      const serviceDefinition = project.createSourceFile(fileName);
+      await remove(fileNameTypes);
+      const serviceDefinition = project.createSourceFile(fileNameTypes);
 
       this.generateModelInterfaces(serviceName, schema, serviceDefinition);
 
-      this.formatAndWriteFile(fileName, serviceDefinition, formatter);
+      this.formatAndWriteFile(fileNameTypes, serviceDefinition, formatter);
     }
     if (options.mode === "qobjects" || options.mode === "all") {
       // create ts file which holds query objects
@@ -54,7 +86,7 @@ export class App {
     }
   }
 
-  private async formatAndWriteFile(fileName: string, file: morph.SourceFile, formatter: BaseFormatter) {
+  private async formatAndWriteFile(fileName: string, file: SourceFile, formatter: BaseFormatter) {
     const raw = file.getFullText();
 
     const formatted = await formatter.format(raw).catch(async (error: Error) => {
@@ -70,7 +102,7 @@ export class App {
     });
   }
 
-  private generateModelInterfaces(serviceName: string, schema: Schema, serviceDefinition: morph.SourceFile) {
+  private generateModelInterfaces(serviceName: string, schema: Schema, serviceDefinition: SourceFile) {
     const dataTypeImports = new Set<string>();
 
     schema.EntityType.forEach((et) => {
@@ -126,25 +158,41 @@ export class App {
       case OdataTypes.Int64:
       case OdataTypes.Decimal:
       case OdataTypes.Double:
+      case OdataTypes.Single:
         return "number";
       case OdataTypes.String:
         return "string";
       case OdataTypes.Date:
-        dtImports.add("DateString");
-        return "DateString";
+        const dateType = "DateString";
+        dtImports.add(dateType);
+        return dateType;
       case OdataTypes.Time:
-        dtImports.add("TimeOfDayString");
-        return "TimeOfDayString";
+        const timeType = "TimeOfDayString";
+        dtImports.add(timeType);
+        return timeType;
       case OdataTypes.DateTimeOffset:
-        dtImports.add("DateTimeOffsetString");
-        return "DateTimeOffsetString";
+        const dateTimeType = "DateTimeOffsetString";
+        dtImports.add(dateTimeType);
+        return dateTimeType;
+      case OdataTypes.Binary:
+        const binaryType = "BinaryString";
+        dtImports.add(binaryType);
+        return binaryType;
+      case OdataTypes.Guid:
+        const guidType = "GuidString";
+        dtImports.add(guidType);
+        return guidType;
       default:
-        return "any";
+        return "string";
     }
   }
 
+  private stripServiceName(name: string, serviceName: string) {
+    return name.replace(new RegExp(serviceName + "."), "");
+  }
+
   private getTsNavType(type: string, serviceName: string): string {
-    const pureType = type.replace(new RegExp(serviceName + "."), "");
+    const pureType = this.stripServiceName(type, serviceName);
     if (pureType.match(/^Collection\(/)) {
       return pureType.replace(/^Collection\(([^\)]+)\)/, "Array<$1>");
     }
@@ -152,24 +200,91 @@ export class App {
     return pureType;
   }
 
-  private generateQueryObjects(serviceName: string, schema: Schema, serviceDefinition: morph.SourceFile) {
-    const dataTypeImports = new Set<string>(["QEntityFactory"]);
+  private generateQueryObjects(serviceName: string, schema: Schema, serviceDefinition: SourceFile) {
+    const qTypeImports = new Set<string>(["QEntityModel", "QEntityPath", "QEntityCollectionPath"]);
+    const dtImports = new Set<string>();
 
-    /* schema.EntityType.forEach((et) => {
+    const collectionNames = schema.EntityContainer[0].EntitySet.reduce((collector, es) => {
+      collector[this.stripServiceName(es.$.EntityType, serviceName)] = es.$.Name;
+      return collector;
+    }, {} as { [key: string]: string });
+
+    schema.EntityType.forEach((et) => {
+      const name = upperCaseFirst(et.$.Name);
+      const keyRef = et.Key[0].PropertyRef.map((propRef) => `"${propRef.$.Name}"`).join(" | ");
+      const propContainer = this.generateQPathProps(serviceName, et, qTypeImports);
+      propContainer.__collectionPath = `"${collectionNames[name]}"`;
+
+      dtImports.add(name);
+
       serviceDefinition.addVariableStatement({
-        name: et.$.Name,
+        declarationKind: VariableDeclarationKind.Const,
         isExported: true,
-        properties: this.generateProps(serviceName, et, dataTypeImports),
+        declarations: [
+          {
+            name: `q${name}`,
+            type: `QEntityModel<${name}, ${keyRef}>`,
+            initializer: Writers.object(propContainer),
+          },
+        ],
+        //properties: this.generateProps(serviceName, et, dataTypeImports),
       });
-    }); */
+    });
 
-    if (dataTypeImports.size) {
+    serviceDefinition.addImportDeclaration({
+      isTypeOnly: false,
+      namedImports: [...qTypeImports],
+      moduleSpecifier: "@odata2ts/odata-query-objects",
+    });
+
+    if (dtImports.size) {
       serviceDefinition.addImportDeclaration({
         isTypeOnly: true,
-        namedImports: [...dataTypeImports],
-        moduleSpecifier: "@odata2ts/odata-query-objects",
+        namedImports: [...dtImports],
+        moduleSpecifier: `./${serviceName}`,
       });
     }
+  }
+
+  private generateQPathProps(serviceName: string, entityType: EntityType, qPathObjectImports: Set<string>) {
+    const dataTypeImports = new Set<any>();
+    const props = !entityType.Property
+      ? {}
+      : entityType.Property.reduce((container, prop) => {
+          const name = prop.$.Name;
+          // transform TS type to QPathObject type
+          const qType = this.getQPathByType(this.getTsType(prop.$.Type, dataTypeImports));
+
+          qPathObjectImports.add(qType);
+
+          container[name] = `new ${qType}("${name}")`;
+          return container;
+        }, {} as { [key: string]: string });
+
+    const navProps = !entityType.NavigationProperty
+      ? {}
+      : entityType.NavigationProperty.reduce((container, navProp) => {
+          const name = navProp.$.Name;
+          const [entType, qObj] = this.getQPathEntity(this.getTsNavType(navProp.$.Type, serviceName));
+          container[name] = `new ${entType}("${name}", () => ${qObj})`;
+          return container;
+        }, {} as { [key: string]: string });
+
+    return { ...props, ...navProps };
+  }
+
+  private getQPathByType(dataType: string) {
+    // Date, TimeOfDay, and DateTimeOffset end on suffix 'String' => remove that
+    const cleanedTypeName = dataType.replace(/String$/, "");
+    return `Q${upperCaseFirst(cleanedTypeName)}Path`;
+  }
+
+  private getQPathEntity(tsType: string) {
+    const collectionFound = tsType.match(/^Array<([^>]+)>/);
+    const entType = collectionFound ? "QEntityCollectionPath" : "QEntityPath";
+    const type = collectionFound ? collectionFound[1] : tsType;
+
+    return [entType, `q${upperCaseFirst(type)}`];
   }
 
   private async createFormatter(outputPath: string, isEnabled: boolean) {
