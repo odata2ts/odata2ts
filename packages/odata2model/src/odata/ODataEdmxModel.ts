@@ -48,9 +48,13 @@ export interface EntityType {
   $: {
     Name: string;
   };
-  Key: Array<{ PropertyRef: Array<{ $: { Name: string } }> }>;
+  Key: Array<PropertyRef>;
   Property: Array<Property>;
   NavigationProperty: Array<NavigationProperty>;
+}
+
+export interface PropertyRef {
+  PropertyRef: Array<{ $: { Name: string } }>;
 }
 
 export interface Property {
@@ -74,8 +78,7 @@ export interface NavigationProperty {
 }
 
 export const enum OdataTypes {
-  // TODO
-  // Binary = "Edm.Binary",
+  Binary = "Edm.Binary",
   Boolean = "Edm.Boolean",
   String = "Edm.String",
   Byte = "Edm.Byte",
@@ -85,12 +88,13 @@ export const enum OdataTypes {
   Int64 = "Edm.Int64",
   Decimal = "Edm.Decimal",
   Double = "Edm.Double",
-  // Single = "Edm.Single",
+  Single = "Edm.Single",
   Date = "Edm.Date",
   Time = "Edm.TimeOfDay",
   DateTimeOffset = "Edm.DateTimeOffset",
+  // TODO
   // Duration = "Edm.Duration",
-  // Guid = "Edm.Guid",
+  Guid = "Edm.Guid",
   // Stream = "Edm.Stream",
   // Geography = "Geography",
   // GeographyPoint = "GeographyPoint",
