@@ -1,7 +1,9 @@
 {
   "name": "@odata2ts/odata-uri-builder",
   "version": "0.1.0",
+  "description": "Allows for building type-safe OData queries",
   "license": "MIT",
+  "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
   "main": "./lib/index.js",
   "scripts": {
@@ -10,6 +12,11 @@
     "compile": "tsc",
     "test": "jest"
   },
+  "files": [
+    "*.md",
+    "lib",
+    "LICENSE"
+  ],
   "dependencies": {
     "@odata2ts/odata-query-objects": "*"
   },
@@ -22,5 +29,6 @@
     "ts-jest": "27.0.3",
     "ts-node": "10.0.0",
     "typescript": "^4.3.4"
-  }
+  },
+  "types": "./lib/index.d.ts"
 }
