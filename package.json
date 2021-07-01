@@ -4,19 +4,17 @@
   "private": true,
   "description": "Root project which allows for running single apps or deploy the whole stack.",
   "license": "MIT",
-  "repository": {
-    "type": "git"
-  },
+  "repository": "git@github.com:odata2ts/odata2ts.git",
   "scripts": {
-    "build": "echo \"TODO\" && exit 1",
-    "clean": "echo \"TODO\" && exit 1",
-    "release": "echo \"TODO\" && exit 1",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "lerna run build",
+    "clean": "lerna run clean",
+    "release": "lerna run build && lerna publish",
+    "test": "lerna run test"
   },
-  "dependencies": {},
   "devDependencies": {
     "@prettier/plugin-xml": "^0.13.1",
     "husky": "^6.0.0",
+    "lerna": "^4.0.0",
     "lint-staged": "^11.0.0",
     "prettier": "^2.3.1",
     "prettier-plugin-package": "^1.3.0",
