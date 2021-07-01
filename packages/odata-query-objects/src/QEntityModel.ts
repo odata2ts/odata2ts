@@ -42,16 +42,16 @@ export type QPropContainer<TypeModel> = {
     ? QTimeOfDayPath
     : TypeModel[Property] extends DateTimeOffsetString
     ? QDateTimeOffsetPath
+    : TypeModel[Property] extends BinaryString
+    ? QBinaryPath
+    : TypeModel[Property] extends GuidString
+    ? QGuidPath
     : TypeModel[Property] extends Boolean
     ? QBooleanPath
     : TypeModel[Property] extends Number
     ? QNumberPath
     : TypeModel[Property] extends string
     ? QStringPath
-    : TypeModel[Property] extends BinaryString
-    ? QBinaryPath
-    : TypeModel[Property] extends GuidString
-    ? QGuidPath
     : TypeModel[Property] extends Array<any>
     ? QEntityCollectionPath<Unpacked<TypeModel[Property]>>
     : QEntityPath<TypeModel[Property]>;
