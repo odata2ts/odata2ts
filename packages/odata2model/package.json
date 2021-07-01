@@ -1,11 +1,11 @@
 {
   "name": "@odata2ts/odata2model",
   "version": "0.0.1",
-  "description": "Root project which allows for running single apps or deploy the whole stack.",
+  "description": "Generates TypeScript interfaces & Query Objects from a given OData service",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
-  "main": "lib/cli.js",
+  "bin": "lib/cli.js",
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf lib build",

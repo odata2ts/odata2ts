@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import commander, { Option } from "commander";
 import { ensureDir, pathExists, readFile } from "fs-extra";
 import { parseStringPromise } from "xml2js";
