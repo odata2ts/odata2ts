@@ -1,6 +1,9 @@
 {
   "name": "@odata2ts/odata2model",
   "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Generates TypeScript interfaces & Query Objects from a given OData service",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
@@ -37,5 +40,6 @@
     "ts-node": "^10.0.0",
     "typescript": "^4.3.2"
   },
+  "gitHead": "b88f1a6e7ce84d26d1d7efa5a61dfc66a4626ec3",
   "readme": "README.md"
 }

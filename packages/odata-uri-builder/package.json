@@ -1,6 +1,9 @@
 {
   "name": "@odata2ts/odata-uri-builder",
   "version": "0.2.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Allows for building type-safe OData queries",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
@@ -30,5 +33,6 @@
     "ts-node": "10.0.0",
     "typescript": "^4.3.4"
   },
-  "types": "./lib/index.d.ts"
+  "types": "./lib/index.d.ts",
+  "gitHead": "b88f1a6e7ce84d26d1d7efa5a61dfc66a4626ec3"
 }

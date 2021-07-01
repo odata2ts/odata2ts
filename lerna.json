@@ -1,5 +1,15 @@
 {
   "packages": ["packages/*"],
   "version": "independent",
-  "npmClient": "yarn"
+  "npmClient": "yarn",
+  "command": {
+    "version": {
+      "conventionalCommits": true,
+      "message": "chore(release): publish %s"
+    },
+    "publish": {
+      "npmClient": "npm",
+      "graphType": "all"
+    }
+  }
 }
