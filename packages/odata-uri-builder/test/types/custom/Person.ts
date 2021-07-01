@@ -1,5 +1,7 @@
+import { DateTimeOffsetString } from "./../../../../odata-query-objects/src/odata/ODataTypes";
 import {
   QBooleanPath,
+  QDateTimeOffsetPath,
   QEntityCollectionPath,
   QEntityModel,
   QEntityPath,
@@ -12,6 +14,7 @@ export interface Person {
   age: number;
   name: string;
   deceased: boolean;
+  createdAt: DateTimeOffsetString;
   address: Address;
   altAdresses: Array<Address>;
 }
@@ -21,10 +24,7 @@ export const QPerson: QEntityModel<Person, "name" | "age"> = {
   age: new QNumberPath("age"),
   name: new QStringPath("name"),
   deceased: new QBooleanPath("deceased"),
-  get address() {
-    return new QEntityPath<Address>("address", QAddress);
-  },
-  get altAdresses() {
-    return new QEntityCollectionPath<Address>("altAdresses", QAddress);
-  },
+  createdAt: new QDateTimeOffsetPath("createdAt"),
+  address: new QEntityPath<Address>("address", () => QAddress),
+  altAdresses: new QEntityCollectionPath<Address>("altAdresses", () => QAddress),
 };
