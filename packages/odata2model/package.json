@@ -11,9 +11,7 @@
     "clean": "rimraf lib build",
     "compile": "tsc",
     "dev": "ts-node src/cli.ts -o build -p",
-    "dev-nw": "yarn dev -s test/fixture/metadata.xml ",
-    "release": "echo \"TODO\" && exit 1",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev-nw": "yarn dev -s test/fixture/metadata.xml "
   },
   "files": [
     "*.md",

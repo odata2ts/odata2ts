@@ -76,6 +76,7 @@ export abstract class ODataUriBuilderBase<T> {
   ) {
     const entity = (this.entity[prop] as QEntityPath<any>).getEntity();
     const expander = ExpandingODataUriBuilder.create(prop as string, entity);
+    // @ts-ignore
     builderFn(expander, entity);
 
     this.expands.push(expander);
