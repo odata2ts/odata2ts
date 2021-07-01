@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-query-objects",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
@@ -16,7 +16,6 @@
     "lib",
     "LICENSE"
   ],
-  "dependencies": {},
   "devDependencies": {
     "@types/jest": "26.0.23",
     "jest": "27.0.4",

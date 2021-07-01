@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata2model",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Generates TypeScript interfaces & Query Objects from a given OData service",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
@@ -20,7 +20,7 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@odata2ts/odata-query-objects": "*",
+    "@odata2ts/odata-query-objects": "^0.3.0",
     "commander": "^7.2.0",
     "fs-extra": "^10.0.0",
     "prettier": "^2.3.1",

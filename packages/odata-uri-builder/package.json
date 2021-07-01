@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-uri-builder",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Allows for building type-safe OData queries",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
@@ -18,7 +18,7 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@odata2ts/odata-query-objects": "*"
+    "@odata2ts/odata-query-objects": "^0.3.0"
   },
   "devDependencies": {
     "@types/jest": "26.0.23",
