@@ -1,9 +1,7 @@
 # ODATA 2 TS
 
-Set of tools for generating useful domain specific stuff out of a given OData service.
+Monorepo for a set of tools for generating & consuming useful domain specific stuff out of a given OData service.
 
-Planned Tools:
-
-- CLI for generating Typescript interfaces for data models found in OData descriptor file, i.e. $metadata.xml
-- CLI for generating domain specific models useful for filtering, querying, ... for using OData
-- ODataUriBuilder: Fluent API to construct OData queries => just strings
+- [OData URI Builder](https://github.com/odata2ts/odata2ts/tree/main/packages/odata-uri-builder): Offers a fluent and type-safe API to build OData queries
+- [OData Query Objects](https://github.com/odata2ts/odata2ts/tree/main/packages/odata-query-objects): Building blocks for OData Query Builder
+- [OData2Model](https://github.com/odata2ts/odata2ts/tree/main/packages/odata2model): Command line interface (CLI) for generating TypeScript interfaces & Query Objects
