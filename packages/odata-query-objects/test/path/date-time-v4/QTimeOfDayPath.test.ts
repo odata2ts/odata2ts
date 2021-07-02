@@ -1,0 +1,84 @@
+import { QTimeOfDayPath } from "./../../../src/path/date-time-v4/QTimeOfDayPath";
+
+describe("QTimeOfDayPath test", () => {
+  let toTest: QTimeOfDayPath;
+  const example = "20:15:59";
+
+  beforeEach(() => {
+    toTest = new QTimeOfDayPath("startTime");
+  });
+
+  test("get path", () => {
+    expect(toTest.getPath()).toBe("startTime");
+  });
+
+  test("fails with null, undefined, empty string", () => {
+    // @ts-ignore
+    expect(() => new QTimeOfDayPath(null)).toThrow();
+    // @ts-ignore
+    expect(() => new QTimeOfDayPath()).toThrow();
+    // @ts-ignore
+    expect(() => new QTimeOfDayPath(undefined)).toThrow();
+    expect(() => new QTimeOfDayPath("")).toThrow();
+    expect(() => new QTimeOfDayPath(" ")).toThrow();
+  });
+
+  test("equals", () => {
+    const result = toTest.equals(example).toString();
+
+    expect(result).toBe(`startTime eq ${example}`);
+    expect(result).toBe(toTest.eq(example).toString());
+  });
+
+  test("not equals", () => {
+    const result = toTest.notEquals(example).toString();
+
+    expect(result).toBe(`startTime ne ${example}`);
+    expect(result).toBe(toTest.ne(example).toString());
+  });
+
+  test("lower than", () => {
+    const result = toTest.lowerThan(example).toString();
+
+    expect(result).toBe(`startTime lt ${example}`);
+    expect(result).toBe(toTest.lt(example).toString());
+  });
+
+  test("lower equals", () => {
+    const result = toTest.lowerEquals(example).toString();
+
+    expect(result).toBe(`startTime le ${example}`);
+    expect(result).toBe(toTest.le(example).toString());
+  });
+
+  test("greater than", () => {
+    const result = toTest.greaterThan(example).toString();
+
+    expect(result).toBe(`startTime gt ${example}`);
+    expect(result).toBe(toTest.gt(example).toString());
+  });
+
+  test("greater equals", () => {
+    const result = toTest.greaterEquals(example).toString();
+
+    expect(result).toBe(`startTime ge ${example}`);
+    expect(result).toBe(toTest.ge(example).toString());
+  });
+
+  test("hour", () => {
+    const result = toTest.hour().equals(20).toString();
+
+    expect(result).toBe("hour(startTime) eq 20");
+  });
+
+  test("minute", () => {
+    const result = toTest.minute().equals(15).toString();
+    expect(result).toBe("minute(startTime) eq 15");
+  });
+
+  test("second", () => {
+    const result = toTest.second().eq(3).toString();
+
+    expect(result).toBe("second(startTime) eq 3");
+  });
+});
