@@ -22,6 +22,6 @@ export class QExpression {
   }
 
   public or(expression: QExpression): QExpression {
-    return new QExpression(`${this.expression} or ${expression}`);
+    return new QExpression(`(${this.expression} or ${expression})`);
   }
 }

@@ -44,18 +44,28 @@ describe("QNumberPath test", () => {
   test("or operator", () => {
     const toTest = exampleExpression.or(exampleNumberExpr).toString();
 
-    expect(toTest).toBe(`${exampleResult} or ${exampleNumberResult}`);
+    expect(toTest).toBe(`(${exampleResult} or ${exampleNumberResult})`);
   });
 
   test("or operator multiple times", () => {
     const toTest = exampleExpression.or(exampleNumberExpr).or(exampleNumberExpr).or(exampleExpression).toString();
 
-    expect(toTest).toBe(`${exampleResult} or ${exampleNumberResult} or ${exampleNumberResult} or ${exampleResult}`);
+    expect(toTest).toBe(
+      `(((${exampleResult} or ${exampleNumberResult}) or ${exampleNumberResult}) or ${exampleResult})`
+    );
   });
 
   test("combination", () => {
     const toTest = exampleExpression.not().or(exampleNumberExpr).and(exampleNumberExpr).toString();
 
-    expect(toTest).toBe(`not(${exampleResult}) or ${exampleNumberResult} and ${exampleNumberResult}`);
+    expect(toTest).toBe(`(not(${exampleResult}) or ${exampleNumberResult}) and ${exampleNumberResult}`);
+  });
+
+  test("or with parentheses", () => {
+    const toTest = exampleExpression.or(exampleNumberExpr).and(exampleExpression.or(exampleNumberExpr)).toString();
+
+    expect(toTest).toBe(
+      `(${exampleResult} or ${exampleNumberResult}) and (${exampleResult} or ${exampleNumberResult})`
+    );
   });
 });
