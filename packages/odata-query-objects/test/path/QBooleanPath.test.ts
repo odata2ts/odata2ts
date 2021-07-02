@@ -7,6 +7,10 @@ describe("QBooleanPath test", () => {
     toTest = new QBooleanPath("done");
   });
 
+  test("get path", () => {
+    expect(toTest.getPath()).toBe("done");
+  });
+
   test("fails with null, undefined, empty string", () => {
     // @ts-ignore
     expect(() => new QBooleanPath(null)).toThrow();

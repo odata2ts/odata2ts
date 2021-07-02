@@ -7,6 +7,10 @@ describe("QNumberPath test", () => {
     toTest = new QNumberPath("Price");
   });
 
+  test("get path", () => {
+    expect(toTest.getPath()).toBe("Price");
+  });
+
   test("fails with null, undefined, empty string", () => {
     // @ts-ignore
     expect(() => new QNumberPath(null)).toThrow();

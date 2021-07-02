@@ -1,4 +1,4 @@
-import { QGuidPath } from "./../../src/path/QGuidPath";
+import { QGuidPath } from "./../../src";
 
 describe("QGuidPath test", () => {
   let toTest: QGuidPath;

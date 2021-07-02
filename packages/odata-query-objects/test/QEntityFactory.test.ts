@@ -57,7 +57,7 @@ describe("QEntityFactory tests", () => {
 
   test("__collectionPath", () => {
     expect(qSimple.__collectionPath).toBe("test2");
-    // expect(qComplex.__collectionPath).toBe("test");
+    expect(qComplex.__collectionPath).toBe("test");
   });
 
   test("simple prop", () => {
@@ -80,5 +80,12 @@ describe("QEntityFactory tests", () => {
 
     const result = xxEntity.name.startsWith("Hi").toString();
     expect(result).toBe("startswith(name,'Hi')");
+  });
+
+  test("fail when not passing tuples or constructors", () => {
+    expect(() => {
+      // @ts-expect-error => wrong type, should be string
+      QEntityFactory.create<SimpleEntity, "name">("test2", { name: "huhu" });
+    }).toThrow();
   });
 });

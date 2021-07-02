@@ -1,10 +1,9 @@
-import { QBinaryPath } from "./../../src/path/QBinaryPath";
+import { QBinaryPath } from "./../../src";
 
 describe("QBinaryPath test", () => {
-  let toTest: QBinaryPath;
-
-  beforeEach(() => {
-    toTest = new QBinaryPath("picture");
+  test("smoke test", () => {
+    const result = new QBinaryPath("picture");
+    expect(result.getPath()).toBe("picture");
   });
 
   test("fails with null, undefined, empty string", () => {

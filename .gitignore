@@ -10,11 +10,12 @@ dist
 gen/
 target/
 _out
+coverage
 
 # Typescript
 tsconfig.build.tsbuildinfo
 
-# logs 
+# logs
 *.log
 
 # Yarn
@@ -33,7 +34,7 @@ tsconfig.build.tsbuildinfo
 
 ### IDEs ###
 # VSCode
-# nothing to do :-) 
+# nothing to do :-)
 # .vscode
 
 # Intellij / Webstorm

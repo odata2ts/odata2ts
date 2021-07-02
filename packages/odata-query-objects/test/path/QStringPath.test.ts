@@ -7,6 +7,10 @@ describe("QStringPath test", () => {
     toTest = new QStringPath("Country");
   });
 
+  test("get path", () => {
+    expect(toTest.getPath()).toBe("Country");
+  });
+
   test("fails with null, undefined, empty string", () => {
     // @ts-ignore
     expect(() => new QStringPath(null)).toThrow();
