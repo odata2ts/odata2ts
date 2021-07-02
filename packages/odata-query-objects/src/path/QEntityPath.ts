@@ -2,9 +2,12 @@ import { QEntityModel } from "../QEntityModel";
 import { QPathModel } from "./QPathModel";
 
 export class QEntityPath<Type> implements QPathModel {
-  constructor(private path: string, private qEntity: () => QEntityModel<Type, any>) {
+  constructor(private path: string, private qEntityFn: () => QEntityModel<Type, any>) {
     if (!path || !path.trim()) {
       throw Error("Path must be supplied!");
+    }
+    if (!qEntityFn || typeof qEntityFn !== "function") {
+      throw Error("Function which returns query object must be supplied!");
     }
   }
 
@@ -13,6 +16,6 @@ export class QEntityPath<Type> implements QPathModel {
   }
 
   public getEntity() {
-    return this.qEntity();
+    return this.qEntityFn();
   }
 }
