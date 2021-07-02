@@ -172,6 +172,32 @@ describe("ODataUriBuilder Test", () => {
     expect(candidate).toBe(expected);
   });
 
+  /*
+  test("filterOr: simple", () => {
+    const candidate = toTest.filterOr(QPerson.name.eq("Heinz")).build();
+    const expected = addBase("$filter=name eq 'Heinz'");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("filterOr: 2 filters", () => {
+    const candidate = toTest.filterOr(QPerson.name.eq("Heinz"), QPerson.age.ge(12)).build();
+    const expected = addBase("$filter=name eq 'Heinz' or age ge 12");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("filterOr: multiple times", () => {
+    const candidate = toTest
+      .filterOr(QPerson.name.eq("Heinz"), QPerson.age.ge(12))
+      .filterOr(QPerson.deceased.isTrue(), QPerson.age.gt(50))
+      .build();
+    const expected = addBase("$filter=(name eq 'Heinz' or age ge 8) and (deceased eq true or age gt 50)");
+
+    expect(candidate).toBe(expected);
+  });
+  */
+
   test("expand: simple", () => {
     const candidate = toTest.expand("address").build();
     const expected = addBase("$expand=address");

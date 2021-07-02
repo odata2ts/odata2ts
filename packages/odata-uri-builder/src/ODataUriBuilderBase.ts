@@ -14,6 +14,7 @@ export interface ODataUriBuilderConfig {
 
 type EntityExtractor<T> = T extends QEntityPath<infer E> ? E : T extends QEntityCollectionPath<infer E> ? E : never;
 type ExtractPropertyNamesOfType<T, S> = { [K in keyof T]: T[K] extends S ? K : never }[keyof T];
+type ExpandType<T> = ExtractPropertyNamesOfType<QEntityModel<T, any>, QEntityPath<any> | QEntityCollectionPath<any>>;
 
 export abstract class ODataUriBuilderBase<T> {
   protected entity: QEntityModel<T, any>;
@@ -65,9 +66,21 @@ export abstract class ODataUriBuilderBase<T> {
     return this;
   }
 
-  public expanding<
-    Prop extends ExtractPropertyNamesOfType<QEntityModel<T, any>, QEntityPath<any> | QEntityCollectionPath<any>>
-  >(
+  public filter(...expressions: Array<QExpression>) {
+    this.filters.push(...expressions);
+
+    return this;
+  }
+
+  /* public filterOr(...expressions: Array<QExpression>) {
+    this.filters.push(
+      expressions.reduce((collector, expr) => (collector ? collector.or(expr) : expr), null as unknown as QExpression)
+    );
+
+    return this;
+  } */
+
+  public expanding<Prop extends ExpandType<T>>(
     prop: Prop,
     builderFn: (
       builder: ExpandingODataUriBuilder<EntityExtractor<QEntityModel<T, any>[Prop]>>,
@@ -84,9 +97,7 @@ export abstract class ODataUriBuilderBase<T> {
     return this;
   }
 
-  public expand<
-    Prop extends ExtractPropertyNamesOfType<QEntityModel<T, any>, QEntityPath<any> | QEntityCollectionPath<any>>
-  >(...props: Array<Prop>) {
+  public expand<Prop extends ExpandType<T>>(...props: Array<Prop>) {
     this.expands.push(
       ...props.map((p) => {
         const prop = this.entity[p] as QEntityPath<any>;
@@ -130,11 +141,5 @@ export abstract class ODataUriBuilderBase<T> {
     }
 
     return params;
-  }
-
-  public filter(...expressions: Array<QExpression>) {
-    this.filters.push(...expressions);
-
-    return this;
   }
 }
