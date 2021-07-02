@@ -66,6 +66,18 @@ describe("QNumberPath test", () => {
     expect(result.toString()).toBe(toTest.ge(value).toString());
   });
 
+  test("in", () => {
+    const result = toTest.in(42).toString();
+
+    expect(result).toBe("Price eq 42");
+  });
+
+  test("in with multiple", () => {
+    const result = toTest.in(42, 44).toString();
+
+    expect(result).toBe(`(Price eq 42 or Price eq 44)`);
+  });
+
   test("plus", () => {
     const value = 42;
     const result = toTest.plus(value).equals(44);

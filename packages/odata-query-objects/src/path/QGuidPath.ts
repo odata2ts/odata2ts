@@ -50,4 +50,11 @@ export class QGuidPath implements QPathModel {
     return this.buildBuiltInExpression(StandardFilterOperators.GREATER_EQUALS, value);
   }
   public ge = this.greaterEquals;
+
+  public in(...values: Array<string>) {
+    return values.reduce((expression, value) => {
+      const expr = this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
+      return expression ? expression.or(expr) : expr;
+    }, null as unknown as QExpression);
+  }
 }

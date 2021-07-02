@@ -54,4 +54,11 @@ export class DateTimeBasePath implements QPathModel {
     return this.buildBuiltInOp(StandardFilterOperators.GREATER_EQUALS, value);
   }
   public ge = this.greaterEquals;
+
+  public in(...values: Array<string>) {
+    return values.reduce((expression, value) => {
+      const expr = this.buildBuiltInOp(StandardFilterOperators.EQUALS, value);
+      return expression ? expression.or(expr) : expr;
+    }, null as unknown as QExpression);
+  }
 }

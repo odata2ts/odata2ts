@@ -65,6 +65,18 @@ describe("QTimeOfDayPath test", () => {
     expect(result).toBe(toTest.ge(example).toString());
   });
 
+  test("in", () => {
+    const result = toTest.in(example).toString();
+
+    expect(result).toBe(`startTime eq ${example}`);
+  });
+
+  test("in with multiple", () => {
+    const result = toTest.in(example, example).toString();
+
+    expect(result).toBe(`(startTime eq ${example} or startTime eq ${example})`);
+  });
+
   test("hour", () => {
     const result = toTest.hour().equals(20).toString();
 

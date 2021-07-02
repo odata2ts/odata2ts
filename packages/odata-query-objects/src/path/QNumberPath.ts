@@ -77,6 +77,13 @@ export class QNumberPath implements QPathModel {
   }
   public ge = this.greaterEquals;
 
+  public in(...values: Array<number>) {
+    return values.reduce((expression, value) => {
+      const expr = this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
+      return expression ? expression.or(expr) : expr;
+    }, null as unknown as QExpression);
+  }
+
   public plus(value: number) {
     this.pathExpression = this.buildBuiltInOp(NumberFilterOperators.ADDITION, value);
     return this;

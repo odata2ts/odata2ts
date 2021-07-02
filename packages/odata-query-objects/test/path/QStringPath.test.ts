@@ -66,6 +66,18 @@ describe("QStringPath test", () => {
     expect(result.toString()).toBe(toTest.ge(value).toString());
   });
 
+  test("in", () => {
+    const result = toTest.in("X").toString();
+
+    expect(result).toBe("Country eq 'X'");
+  });
+
+  test("in with multiple", () => {
+    const result = toTest.in("X", "y").toString();
+
+    expect(result).toBe(`(Country eq 'X' or Country eq 'y')`);
+  });
+
   test("concat prefix", () => {
     const value = "X_";
     const result = toTest.concatPrefix(value).equals("X_France");

@@ -65,6 +65,18 @@ describe("QDatePath test", () => {
     expect(result).toBe(toTest.ge(example).toString());
   });
 
+  test("in", () => {
+    const result = toTest.in(example).toString();
+
+    expect(result).toBe(`startDate eq ${example}`);
+  });
+
+  test("in with multiple", () => {
+    const result = toTest.in(example, example).toString();
+
+    expect(result).toBe(`(startDate eq ${example} or startDate eq ${example})`);
+  });
+
   test("year", () => {
     const result = toTest.year().equals(2021).toString();
 

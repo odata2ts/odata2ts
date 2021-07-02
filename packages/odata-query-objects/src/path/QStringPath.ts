@@ -77,6 +77,13 @@ export class QStringPath implements QPathModel {
   }
   public ge = this.greaterEquals;
 
+  public in(...values: Array<string>) {
+    return values.reduce((expression, value) => {
+      const expr = this.buildBuiltInOp(StandardFilterOperators.EQUALS, value);
+      return expression ? expression.or(expr) : expr;
+    }, null as unknown as QExpression);
+  }
+
   public concatPrefix(value: string) {
     this.pathExpression = `${StringFilterFunctions.CONCAT}('${value}',${this.getPathExpression()})`;
     return this;
