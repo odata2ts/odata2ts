@@ -41,6 +41,12 @@ export abstract class ODataUriBuilderBase<T> {
 
   public abstract build(): string;
 
+  /**
+   * Select the properties of the entity you want to select.
+   *
+   * @param props the property names to select
+   * @returns this query builder
+   */
   public select(...props: Array<keyof QPropContainer<T> | null | undefined>) {
     if (props && props.length) {
       this.selects.push(...props.filter((p) => !!p).map((p) => this.entity[p].getPath()));
@@ -48,6 +54,13 @@ export abstract class ODataUriBuilderBase<T> {
     return this;
   }
 
+  /**
+   * Skip n items from the result set.
+   * To be used in combination with top.
+   *
+   * @param itemsToSkip amount of items to skip
+   * @returns this query builder
+   */
   public skip(itemsToSkip: number) {
     if (itemsToSkip === undefined || itemsToSkip === null || itemsToSkip < 0) {
       throw Error("Parameter [skip] must be a positive integer including 0!");
@@ -57,6 +70,13 @@ export abstract class ODataUriBuilderBase<T> {
     return this;
   }
 
+  /**
+   * Returns this many items.
+   * To be used in combination with skip.
+   *
+   * @param itemsTop amount of items to fetch
+   * @returns this query builder
+   */
   public top(itemsTop: number) {
     if (itemsTop === undefined || itemsTop === null || itemsTop < 0) {
       throw Error("Parameter [top] must be a positive integer including 0!");
@@ -66,6 +86,17 @@ export abstract class ODataUriBuilderBase<T> {
     return this;
   }
 
+  /**
+   * Specify as many filter expressions as you want by facilitating query objects.
+   * Alternatively you can use QueryExpressions directly.
+   *
+   * Each passed expression is concatenated to the other ones by an and expression.
+   *
+   * This method can be called multiple times in order to add filters successively.
+   *
+   * @param expressions possibly multiple expressions
+   * @returns this query builder
+   */
   public filter(...expressions: Array<QExpression>) {
     this.filters.push(...expressions);
 
@@ -80,6 +111,22 @@ export abstract class ODataUriBuilderBase<T> {
     return this;
   } */
 
+  /**
+   * Expand a given entity and receive an own builder for it to further select, filter, expand, etc.
+   *
+   * This method can be called multiple times.
+   *
+   * Example:
+   * .expanding("addresses", (addressBuilder, qAddress) => {
+   *   addressBuilder
+   *     .select(...)
+   *     .filter(qAddress.street.startsWith(...))
+   * })
+   *
+   * @param prop the name of the property which should be expanded
+   * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
+   * @returns this query builder
+   */
   public expanding<Prop extends ExpandType<T>>(
     prop: Prop,
     builderFn: (
@@ -97,6 +144,14 @@ export abstract class ODataUriBuilderBase<T> {
     return this;
   }
 
+  /**
+   * Simple & plain expand of the given entities or entity collections.
+   *
+   * This method can be called multiple times.
+   *
+   * @param props the attributes to expand
+   * @returns this query builder
+   */
   public expand<Prop extends ExpandType<T>>(...props: Array<Prop>) {
     this.expands.push(
       ...props.map((p) => {
