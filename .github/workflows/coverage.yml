@@ -1,6 +1,6 @@
 on: ["push", "pull_request"]
 
-name: Test Coveralls
+name: Tests with Coverage
 
 jobs:
   build:
