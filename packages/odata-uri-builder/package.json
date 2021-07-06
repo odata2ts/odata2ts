@@ -10,7 +10,7 @@
   "author": "texttechne",
   "main": "./lib/index.js",
   "scripts": {
-    "build": "yarn test && yarn clean && yarn compile",
+    "build": "yarn clean && yarn compile",
     "clean": "rimraf ./lib",
     "compile": "tsc",
     "test": "jest"

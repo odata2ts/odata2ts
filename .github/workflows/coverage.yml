@@ -15,6 +15,7 @@ jobs:
       - name: yarn install and coverage
         run: |
           yarn install
+          yarn build
           yarn coverage
       - name: Coveralls
         uses: coverallsapp/github-action@master
