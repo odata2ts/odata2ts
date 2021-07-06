@@ -1,3 +1,5 @@
+![npm (scoped)](https://img.shields.io/npm/v/@odata2ts/odata-query-objects?style=for-the-badge)
+
 # OData Query Objects
 
 Query objects are building blocks to allow for typesafe OData queries.

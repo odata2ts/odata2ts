@@ -1,3 +1,6 @@
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/odata2ts/odata2ts/Test%20Coveralls?style=for-the-badge)
+![Coveralls](https://img.shields.io/coveralls/github/odata2ts/odata2ts?style=for-the-badge)
+
 # ODATA 2 TS
 
 Monorepo for a set of tools for generating & consuming useful domain specific stuff out of a given OData service.

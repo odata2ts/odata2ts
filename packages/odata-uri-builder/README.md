@@ -1,3 +1,5 @@
+![npm (scoped)](https://img.shields.io/npm/v/@odata2ts/odata-uri-builder?style=for-the-badge)
+
 # OData URI Builder
 
 Allows for building type-safe OData queries.
