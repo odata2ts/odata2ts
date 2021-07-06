@@ -1,26 +1,7 @@
-import { NumberFilterOperators, StandardFilterOperators } from "../odata/ODataModel";
-import { QPathModel } from "./QPathModel";
-import { QExpression } from "./QExpression";
+import { StandardFilterOperators } from "../odata/ODataModel";
+import { QLiteralPath } from "./base/QLiteralPath";
 
-export class QBooleanPath implements QPathModel {
-  constructor(private path: string) {
-    if (!path || !path.trim()) {
-      throw Error("Path must be supplied!");
-    }
-  }
-
-  public getPath(): string {
-    return this.path;
-  }
-
-  private buildBuiltInExpression(operator: StandardFilterOperators | NumberFilterOperators, value: boolean) {
-    return new QExpression(this.buildBuiltInOp(operator, value));
-  }
-
-  private buildBuiltInOp(operator: StandardFilterOperators | NumberFilterOperators, value: boolean) {
-    return `${this.path} ${operator} ${value}`;
-  }
-
+export class QBooleanPath extends QLiteralPath<boolean, StandardFilterOperators> {
   public equals(value: boolean) {
     return this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
   }

@@ -9,6 +9,10 @@ export class QDateTimeOffsetPath extends DateTimeBasePath {
     super(path);
   }
 
+  protected buildNoValueFunc(func: DateTimeFilterFunctions) {
+    return `${func}(${this.path})`;
+  }
+
   public year = yearFn(this.path);
   public month = monthFn(this.path);
   public day = dayFn(this.path);

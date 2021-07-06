@@ -4,76 +4,55 @@ import { QNumberPath } from "./QNumberPath";
 import { QExpression } from "./QExpression";
 
 export class QStringPath implements QPathModel {
-  private path: string;
-  private pathExpression?: string;
-
-  constructor(path: string) {
+  constructor(private path: string) {
     if (!path || !path.trim()) {
       throw Error("Path must be supplied!");
     }
-
-    this.path = path;
   }
 
   public getPath(): string {
     return this.path;
   }
 
-  private getPathExpression(): string {
-    return this.pathExpression ?? this.path;
-  }
-
   private buildBuiltInOp(operator: StandardFilterOperators, value: string) {
-    return new QExpression(`${this.getPathExpression()} ${operator} '${value}'`);
+    return new QExpression(`${this.path} ${operator} '${value}'`);
   }
 
   private buildFunc(func: StringFilterFunctions, value: string) {
-    return new QExpression(`${func}(${this.getPathExpression()},'${value}')`);
+    return new QExpression(`${func}(${this.path},'${value}')`);
   }
 
   private buildNoValueFunc(func: StringFilterFunctions) {
-    return `${func}(${this.getPathExpression()})`;
+    return new QStringPath(`${func}(${this.path})`);
   }
 
   public equals(value: string) {
-    const result = this.buildBuiltInOp(StandardFilterOperators.EQUALS, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildBuiltInOp(StandardFilterOperators.EQUALS, value);
   }
   public eq = this.equals;
 
   public notEquals(value: string) {
-    const result = this.buildBuiltInOp(StandardFilterOperators.NOT_EQUALS, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildBuiltInOp(StandardFilterOperators.NOT_EQUALS, value);
   }
   public ne = this.notEquals;
 
   public lowerThan(value: string) {
-    const result = this.buildBuiltInOp(StandardFilterOperators.LOWER_THAN, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildBuiltInOp(StandardFilterOperators.LOWER_THAN, value);
   }
   public lt = this.lowerThan;
 
   public lowerEquals(value: string) {
-    const result = this.buildBuiltInOp(StandardFilterOperators.LOWER_EQUALS, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildBuiltInOp(StandardFilterOperators.LOWER_EQUALS, value);
   }
   public le = this.lowerEquals;
 
   public greaterThan(value: string) {
-    const result = this.buildBuiltInOp(StandardFilterOperators.GREATER_THAN, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildBuiltInOp(StandardFilterOperators.GREATER_THAN, value);
   }
   public gt = this.greaterThan;
 
   public greaterEquals(value: string) {
-    const result = this.buildBuiltInOp(StandardFilterOperators.GREATER_EQUALS, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildBuiltInOp(StandardFilterOperators.GREATER_EQUALS, value);
   }
   public ge = this.greaterEquals;
 
@@ -85,63 +64,48 @@ export class QStringPath implements QPathModel {
   }
 
   public concatPrefix(value: string) {
-    this.pathExpression = `${StringFilterFunctions.CONCAT}('${value}',${this.getPathExpression()})`;
-    return this;
+    return new QStringPath(`${StringFilterFunctions.CONCAT}('${value}',${this.path})`);
   }
 
   public concatSuffix(value: string) {
-    this.pathExpression = `${StringFilterFunctions.CONCAT}(${this.getPathExpression()},'${value}')`;
-    return this;
+    return new QStringPath(`${StringFilterFunctions.CONCAT}(${this.path},'${value}')`);
   }
 
   public contains(value: string) {
-    const result = this.buildFunc(StringFilterFunctions.CONTAINS, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildFunc(StringFilterFunctions.CONTAINS, value);
   }
 
   public startsWith(value: string) {
-    const result = this.buildFunc(StringFilterFunctions.STARTS_WITH, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildFunc(StringFilterFunctions.STARTS_WITH, value);
   }
 
   public endsWith(value: string) {
-    const result = this.buildFunc(StringFilterFunctions.ENDS_WITH, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildFunc(StringFilterFunctions.ENDS_WITH, value);
   }
 
   public matchesPattern(value: string) {
-    const result = this.buildFunc(StringFilterFunctions.MATCHES_PATTERN, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildFunc(StringFilterFunctions.MATCHES_PATTERN, value);
   }
 
   public indexOf(value: string) {
     const pathExpression = this.buildFunc(StringFilterFunctions.INDEX_OF, value);
-    this.pathExpression = undefined;
     return new QNumberPath(pathExpression.toString());
   }
 
   public length() {
     const pathExpression = this.buildNoValueFunc(StringFilterFunctions.LENGTH);
-    this.pathExpression = undefined;
-    return new QNumberPath(pathExpression.toString());
+    return new QNumberPath(pathExpression.getPath());
   }
 
   public toLower() {
-    this.pathExpression = this.buildNoValueFunc(StringFilterFunctions.TO_LOWER);
-    return this;
+    return this.buildNoValueFunc(StringFilterFunctions.TO_LOWER);
   }
 
   public toUpper() {
-    this.pathExpression = this.buildNoValueFunc(StringFilterFunctions.TO_UPPER);
-    return this;
+    return this.buildNoValueFunc(StringFilterFunctions.TO_UPPER);
   }
 
   public trim() {
-    this.pathExpression = this.buildNoValueFunc(StringFilterFunctions.TRIM);
-    return this;
+    return this.buildNoValueFunc(StringFilterFunctions.TRIM);
   }
 }

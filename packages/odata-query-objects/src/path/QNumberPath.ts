@@ -1,79 +1,39 @@
 import { NumberFilterFunctions, NumberFilterOperators, StandardFilterOperators } from "../odata/ODataModel";
+import { QLiteralPath } from "./base/QLiteralPath";
 import { QExpression } from "./QExpression";
-import { QPathModel } from "./QPathModel";
 
-export class QNumberPath implements QPathModel {
-  private pathExpression?: string;
-
-  constructor(private path: string) {
-    if (!path || !path.trim()) {
-      throw Error("Path must be supplied!");
-    }
-  }
-
-  public getPath(): string {
-    return this.path;
-  }
-
-  private getPathExpression(): string {
-    return this.pathExpression ?? this.path;
-  }
-
-  private buildBuiltInExpression(operator: StandardFilterOperators | NumberFilterOperators, value: number) {
-    return new QExpression(this.buildBuiltInOp(operator, value));
-  }
-
-  private buildBuiltInOp(operator: StandardFilterOperators | NumberFilterOperators, value: number) {
-    return `${this.getPathExpression()} ${operator} ${value}`;
-  }
-
-  /* private buildFunc(func: NumberFilterFunctions, value: number) {
-    return `${func}(${this.getPathExpression()},${value})`;
-  } */
-
+export class QNumberPath extends QLiteralPath<number, StandardFilterOperators | NumberFilterOperators> {
   private buildNoValueFunc(func: NumberFilterFunctions) {
-    return `${func}(${this.getPathExpression()})`;
+    return `${func}(${this.getPath()})`;
   }
 
   public equals(value: number) {
-    const result = this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
   }
   public eq = this.equals;
 
   public notEquals(value: number) {
-    const result = this.buildBuiltInExpression(StandardFilterOperators.NOT_EQUALS, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildBuiltInExpression(StandardFilterOperators.NOT_EQUALS, value);
   }
   public ne = this.notEquals;
 
   public lowerThan(value: number) {
-    const result = this.buildBuiltInExpression(StandardFilterOperators.LOWER_THAN, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildBuiltInExpression(StandardFilterOperators.LOWER_THAN, value);
   }
   public lt = this.lowerThan;
 
   public lowerEquals(value: number) {
-    const result = this.buildBuiltInExpression(StandardFilterOperators.LOWER_EQUALS, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildBuiltInExpression(StandardFilterOperators.LOWER_EQUALS, value);
   }
   public le = this.lowerEquals;
 
   public greaterThan(value: number) {
-    const result = this.buildBuiltInExpression(StandardFilterOperators.GREATER_THAN, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildBuiltInExpression(StandardFilterOperators.GREATER_THAN, value);
   }
   public gt = this.greaterThan;
 
   public greaterEquals(value: number) {
-    const result = this.buildBuiltInExpression(StandardFilterOperators.GREATER_EQUALS, value);
-    this.pathExpression = undefined;
-    return result;
+    return this.buildBuiltInExpression(StandardFilterOperators.GREATER_EQUALS, value);
   }
   public ge = this.greaterEquals;
 
@@ -85,51 +45,42 @@ export class QNumberPath implements QPathModel {
   }
 
   public plus(value: number) {
-    this.pathExpression = this.buildBuiltInOp(NumberFilterOperators.ADDITION, value);
-    return this;
+    return new QNumberPath(this.buildBuiltInOp(NumberFilterOperators.ADDITION, value));
   }
   public add = this.plus;
 
   public minus(value: number) {
-    this.pathExpression = this.buildBuiltInOp(NumberFilterOperators.SUBTRACTION, value);
-    return this;
+    return new QNumberPath(this.buildBuiltInOp(NumberFilterOperators.SUBTRACTION, value));
   }
   public sub = this.minus;
 
   public multiply(value: number) {
-    this.pathExpression = this.buildBuiltInOp(NumberFilterOperators.MULTIPLICATION, value);
-    return this;
+    return new QNumberPath(this.buildBuiltInOp(NumberFilterOperators.MULTIPLICATION, value));
   }
   public mul = this.multiply;
 
   public divide(value: number) {
-    this.pathExpression = this.buildBuiltInOp(NumberFilterOperators.DIVISION, value);
-    return this;
+    return new QNumberPath(this.buildBuiltInOp(NumberFilterOperators.DIVISION, value));
   }
   public div = this.divide;
 
   public divideWithFraction(value: number) {
-    this.pathExpression = this.buildBuiltInOp(NumberFilterOperators.DIVISION_WITH_FRACTION, value);
-    return this;
+    return new QNumberPath(this.buildBuiltInOp(NumberFilterOperators.DIVISION_WITH_FRACTION, value));
   }
   public divBy = this.divideWithFraction;
 
   public modulo(value: number) {
-    this.pathExpression = this.buildBuiltInOp(NumberFilterOperators.MODULO, value);
-    return this;
+    return new QNumberPath(this.buildBuiltInOp(NumberFilterOperators.MODULO, value));
   }
   public mod = this.modulo;
 
   public ceiling() {
-    this.pathExpression = this.buildNoValueFunc(NumberFilterFunctions.CEILING);
-    return this;
+    return new QNumberPath(this.buildNoValueFunc(NumberFilterFunctions.CEILING));
   }
   public floor() {
-    this.pathExpression = this.buildNoValueFunc(NumberFilterFunctions.FLOOR);
-    return this;
+    return new QNumberPath(this.buildNoValueFunc(NumberFilterFunctions.FLOOR));
   }
   public round() {
-    this.pathExpression = this.buildNoValueFunc(NumberFilterFunctions.ROUND);
-    return this;
+    return new QNumberPath(this.buildNoValueFunc(NumberFilterFunctions.ROUND));
   }
 }

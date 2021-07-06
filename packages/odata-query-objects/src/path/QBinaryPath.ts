@@ -1,4 +1,4 @@
-import { QNoopPath } from "./QNoopPath";
+import { QNoopPath } from "./base/QNoopPath";
 
 export class QBinaryPath extends QNoopPath {
   constructor(path: string) {

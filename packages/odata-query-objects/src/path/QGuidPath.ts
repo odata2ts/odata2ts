@@ -1,26 +1,8 @@
 import { QExpression } from "./QExpression";
-import { QPathModel } from "./QPathModel";
 import { StandardFilterOperators } from "../odata/ODataModel";
+import { QLiteralPath } from "./base/QLiteralPath";
 
-export class QGuidPath implements QPathModel {
-  constructor(private path: string) {
-    if (!path || !path.trim()) {
-      throw Error("Path must be supplied!");
-    }
-  }
-
-  public getPath(): string {
-    return this.path;
-  }
-
-  private buildBuiltInOp(operator: StandardFilterOperators, value: string) {
-    return `${this.getPath()} ${operator} ${value}`;
-  }
-
-  private buildBuiltInExpression(operator: StandardFilterOperators, value: string) {
-    return new QExpression(this.buildBuiltInOp(operator, value));
-  }
-
+export class QGuidPath extends QLiteralPath<string, StandardFilterOperators> {
   public equals(value: string) {
     return this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
   }

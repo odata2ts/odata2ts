@@ -1,6 +1,6 @@
-import { QPathModel } from "./QPathModel";
+import { QPathModel } from "../QPathModel";
 
-export class QNoopPath implements QPathModel {
+export abstract class QNoopPath implements QPathModel {
   constructor(private path: string) {
     if (!path || !path.trim()) {
       throw Error("Path must be supplied!");
