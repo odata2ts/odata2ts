@@ -1,3 +1,4 @@
+import { QOrderByExpression } from "./../QOrderByExpression";
 import { StandardFilterOperators, StringFilterFunctions } from "../odata/ODataModel";
 import { QPathModel } from "./QPathModel";
 import { QNumberPath } from "./QNumberPath";
@@ -10,9 +11,34 @@ export class QStringPath implements QPathModel {
     }
   }
 
+  /**
+   * Get the path to this property.
+   *
+   * @returns this property path
+   */
   public getPath(): string {
     return this.path;
   }
+
+  /**
+   * Order by this property in ascending order.
+   *
+   * @returns orderby expression
+   */
+  public ascending() {
+    return new QOrderByExpression(`${this.path} asc`);
+  }
+  public asc = this.ascending;
+
+  /**
+   * Order by this property in descending order.
+   *
+   * @returns orderby expression
+   */
+  public descending() {
+    return new QOrderByExpression(`${this.path} desc`);
+  }
+  public desc = this.descending;
 
   private buildBuiltInOp(operator: StandardFilterOperators, value: string) {
     return new QFilterExpression(`${this.path} ${operator} '${value}'`);

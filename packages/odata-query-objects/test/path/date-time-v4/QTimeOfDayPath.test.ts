@@ -23,6 +23,20 @@ describe("QTimeOfDayPath test", () => {
     expect(() => new QTimeOfDayPath(" ")).toThrow();
   });
 
+  test("orderBy asc", () => {
+    const result = toTest.asc().toString();
+
+    expect(result).toBe("startTime asc");
+    expect(result).toBe(toTest.ascending().toString());
+  });
+
+  test("orderBy desc", () => {
+    const result = toTest.desc().toString();
+
+    expect(result).toBe("startTime desc");
+    expect(result).toBe(toTest.descending().toString());
+  });
+
   test("equals", () => {
     const result = toTest.equals(example).toString();
 

@@ -23,6 +23,20 @@ describe("QDatePath test", () => {
     expect(() => new QDatePath(" ")).toThrow();
   });
 
+  test("orderBy asc", () => {
+    const result = toTest.asc().toString();
+
+    expect(result).toBe("startDate asc");
+    expect(result).toBe(toTest.ascending().toString());
+  });
+
+  test("orderBy desc", () => {
+    const result = toTest.desc().toString();
+
+    expect(result).toBe("startDate desc");
+    expect(result).toBe(toTest.descending().toString());
+  });
+
   test("equals", () => {
     const result = toTest.equals(example).toString();
 

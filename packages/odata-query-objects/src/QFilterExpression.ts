@@ -1,12 +1,8 @@
 export class QFilterExpression {
-  private expression: string;
-
-  constructor(expression: string) {
+  constructor(private expression: string) {
     if (!expression || !expression.trim()) {
       throw Error("Expression must be supplied!");
     }
-
-    this.expression = expression;
   }
 
   public toString(): string {

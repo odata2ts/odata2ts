@@ -22,23 +22,37 @@ describe("QBooleanPath test", () => {
     expect(() => new QBooleanPath(" ")).toThrow();
   });
 
+  test("orderBy asc", () => {
+    const result = toTest.asc().toString();
+
+    expect(result).toBe("done asc");
+    expect(result).toBe(toTest.ascending().toString());
+  });
+
+  test("orderBy desc", () => {
+    const result = toTest.desc().toString();
+
+    expect(result).toBe("done desc");
+    expect(result).toBe(toTest.descending().toString());
+  });
+
   test("equals", () => {
     const value = true;
-    const result = toTest.equals(value);
+    const result = toTest.equals(value).toString();
 
-    expect(result.toString()).toBe("done eq true");
-    expect(result.toString()).toBe(toTest.eq(value).toString());
+    expect(result).toBe("done eq true");
+    expect(result).toBe(toTest.eq(value).toString());
   });
 
   test("isTrue", () => {
-    const result = toTest.isTrue();
+    const result = toTest.isTrue().toString();
 
-    expect(result.toString()).toBe("done eq true");
+    expect(result).toBe("done eq true");
   });
 
   test("isFalse", () => {
-    const result = toTest.isFalse();
+    const result = toTest.isFalse().toString();
 
-    expect(result.toString()).toBe("done eq false");
+    expect(result).toBe("done eq false");
   });
 });

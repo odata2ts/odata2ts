@@ -1,8 +1,10 @@
+import { QOrderByExpression } from "./QOrderByExpression";
 export { DateString, TimeOfDayString, DateTimeOffsetString, BinaryString, GuidString } from "./odata/ODataTypes";
 
 export { QEntityFactory, QRawPropContainer } from "./QEntityFactory";
 export { QEntityModel, QPropContainer } from "./QEntityModel";
 export { QFilterExpression } from "./QFilterExpression";
+export { QOrderByExpression } from "./QOrderByExpression";
 export { QBooleanPath } from "./path/QBooleanPath";
 export { QNumberPath } from "./path/QNumberPath";
 export { QStringPath } from "./path/QStringPath";

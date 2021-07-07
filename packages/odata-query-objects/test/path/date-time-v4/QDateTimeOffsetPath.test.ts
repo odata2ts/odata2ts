@@ -23,6 +23,20 @@ describe("QDateTimeOffsetPath test", () => {
     expect(() => new QDateTimeOffsetPath(" ")).toThrow();
   });
 
+  test("orderBy asc", () => {
+    const result = toTest.asc().toString();
+
+    expect(result).toBe("createdAt asc");
+    expect(result).toBe(toTest.ascending().toString());
+  });
+
+  test("orderBy desc", () => {
+    const result = toTest.desc().toString();
+
+    expect(result).toBe("createdAt desc");
+    expect(result).toBe(toTest.descending().toString());
+  });
+
   test("equals", () => {
     const result = toTest.equals(example).toString();
 
