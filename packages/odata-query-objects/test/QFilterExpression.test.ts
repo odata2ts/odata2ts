@@ -1,6 +1,6 @@
-import { QExpression, QNumberPath, QStringPath } from "../../src";
+import { QFilterExpression, QNumberPath, QStringPath } from "../src";
 
-describe("QNumberPath test", () => {
+describe("QFilterExpression test", () => {
   const exampleExpression = new QStringPath("text").equals("hi there!");
   const exampleResult = "text eq 'hi there!'";
   const exampleNumberExpr = new QNumberPath("number").equals(3);
@@ -8,13 +8,13 @@ describe("QNumberPath test", () => {
 
   test("fails with null, undefined, empty string", () => {
     // @ts-ignore
-    expect(() => new QExpression(null)).toThrow();
+    expect(() => new QFilterExpression(null)).toThrow();
     // @ts-ignore
-    expect(() => new QExpression()).toThrow();
+    expect(() => new QFilterExpression()).toThrow();
     // @ts-ignore
-    expect(() => new QExpression(undefined)).toThrow();
-    expect(() => new QExpression("")).toThrow();
-    expect(() => new QExpression(" ")).toThrow();
+    expect(() => new QFilterExpression(undefined)).toThrow();
+    expect(() => new QFilterExpression("")).toThrow();
+    expect(() => new QFilterExpression(" ")).toThrow();
   });
 
   test("not operator", () => {

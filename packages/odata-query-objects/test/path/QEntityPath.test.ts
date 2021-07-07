@@ -1,5 +1,5 @@
-import { QEntityPath } from "./../../src/path/QEntityPath";
-import { QEntityFactory } from "./../../src/QEntityFactory";
+import { QEntityPath } from "./../../src";
+import { QEntityFactory } from "./../../src";
 
 describe("QEntityPath test", () => {
   const qEntity = QEntityFactory.create("test", {});

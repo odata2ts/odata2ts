@@ -2,7 +2,7 @@ export { DateString, TimeOfDayString, DateTimeOffsetString, BinaryString, GuidSt
 
 export { QEntityFactory, QRawPropContainer } from "./QEntityFactory";
 export { QEntityModel, QPropContainer } from "./QEntityModel";
-export { QExpression } from "./path/QExpression";
+export { QFilterExpression } from "./QFilterExpression";
 export { QBooleanPath } from "./path/QBooleanPath";
 export { QNumberPath } from "./path/QNumberPath";
 export { QStringPath } from "./path/QStringPath";

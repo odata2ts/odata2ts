@@ -1,4 +1,4 @@
-import { QExpression } from "../QExpression";
+import { QFilterExpression } from "../../QFilterExpression";
 import { QPathModel } from "../QPathModel";
 
 export abstract class QLiteralPath<ValueType, OperatorTypes> implements QPathModel {
@@ -13,7 +13,7 @@ export abstract class QLiteralPath<ValueType, OperatorTypes> implements QPathMod
   }
 
   protected buildBuiltInExpression(operator: OperatorTypes, value: ValueType) {
-    return new QExpression(this.buildBuiltInOp(operator, value));
+    return new QFilterExpression(this.buildBuiltInOp(operator, value));
   }
 
   protected buildBuiltInOp(operator: OperatorTypes, value: ValueType) {

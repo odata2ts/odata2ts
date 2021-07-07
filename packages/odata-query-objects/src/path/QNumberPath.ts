@@ -1,6 +1,6 @@
 import { NumberFilterFunctions, NumberFilterOperators, StandardFilterOperators } from "../odata/ODataModel";
 import { QLiteralPath } from "./base/QLiteralPath";
-import { QExpression } from "./QExpression";
+import { QFilterExpression } from "../QFilterExpression";
 
 export class QNumberPath extends QLiteralPath<number, StandardFilterOperators | NumberFilterOperators> {
   private buildNoValueFunc(func: NumberFilterFunctions) {
@@ -41,7 +41,7 @@ export class QNumberPath extends QLiteralPath<number, StandardFilterOperators | 
     return values.reduce((expression, value) => {
       const expr = this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
       return expression ? expression.or(expr) : expr;
-    }, null as unknown as QExpression);
+    }, null as unknown as QFilterExpression);
   }
 
   public plus(value: number) {

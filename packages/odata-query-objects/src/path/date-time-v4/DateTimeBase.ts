@@ -1,5 +1,5 @@
 import { DateTimeFilterFunctions, StandardFilterOperators } from "../../odata/ODataModel";
-import { QExpression } from "../QExpression";
+import { QFilterExpression } from "../../QFilterExpression";
 import { QLiteralPath } from "../base/QLiteralPath";
 
 export class DateTimeBasePath extends QLiteralPath<string, StandardFilterOperators> {
@@ -37,6 +37,6 @@ export class DateTimeBasePath extends QLiteralPath<string, StandardFilterOperato
     return values.reduce((expression, value) => {
       const expr = this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
       return expression ? expression.or(expr) : expr;
-    }, null as unknown as QExpression);
+    }, null as unknown as QFilterExpression);
   }
 }

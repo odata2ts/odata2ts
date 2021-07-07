@@ -1,7 +1,7 @@
 import { StandardFilterOperators, StringFilterFunctions } from "../odata/ODataModel";
 import { QPathModel } from "./QPathModel";
 import { QNumberPath } from "./QNumberPath";
-import { QExpression } from "./QExpression";
+import { QFilterExpression } from "../QFilterExpression";
 
 export class QStringPath implements QPathModel {
   constructor(private path: string) {
@@ -15,11 +15,11 @@ export class QStringPath implements QPathModel {
   }
 
   private buildBuiltInOp(operator: StandardFilterOperators, value: string) {
-    return new QExpression(`${this.path} ${operator} '${value}'`);
+    return new QFilterExpression(`${this.path} ${operator} '${value}'`);
   }
 
   private buildFunc(func: StringFilterFunctions, value: string) {
-    return new QExpression(`${func}(${this.path},'${value}')`);
+    return new QFilterExpression(`${func}(${this.path},'${value}')`);
   }
 
   private buildNoValueFunc(func: StringFilterFunctions) {
@@ -60,7 +60,7 @@ export class QStringPath implements QPathModel {
     return values.reduce((expression, value) => {
       const expr = this.buildBuiltInOp(StandardFilterOperators.EQUALS, value);
       return expression ? expression.or(expr) : expr;
-    }, null as unknown as QExpression);
+    }, null as unknown as QFilterExpression);
   }
 
   public concatPrefix(value: string) {
