@@ -1,5 +1,5 @@
-import { DateTimeOffsetString } from "./../../../../odata-query-objects/src/odata/ODataTypes";
 import {
+  DateTimeOffsetString,
   QBooleanPath,
   QDateTimeOffsetPath,
   QEntityCollectionPath,

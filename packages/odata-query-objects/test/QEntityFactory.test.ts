@@ -1,3 +1,4 @@
+import { SimpleEntity, ComplexEntity } from "./fixture/SimpleModel";
 import {
   QBooleanPath,
   QDatePath,
@@ -9,23 +10,6 @@ import {
   QStringPath,
   QEntityCollectionPath,
 } from "../src";
-import { DateString, DateTimeOffsetString, TimeOfDayString } from "../src/odata/ODataTypes";
-
-interface SimpleEntity {
-  name: string;
-  complexton?: ComplexEntity;
-}
-
-interface ComplexEntity {
-  articleNo: number;
-  description?: string;
-  Active: boolean;
-  deletedAt?: DateString;
-  bestSellingTime?: TimeOfDayString;
-  createdAt: DateTimeOffsetString;
-  simpleton?: SimpleEntity;
-  simpleList: Array<SimpleEntity>;
-}
 
 describe("QEntityFactory tests", () => {
   // Typing Test: Expect error for wrong typing

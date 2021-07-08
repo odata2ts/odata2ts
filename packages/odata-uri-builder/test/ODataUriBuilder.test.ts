@@ -1,6 +1,7 @@
 import { QExpression } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilder } from "../src/";
-import { Person, QPerson } from "./types/custom";
+import { Person } from "./fixture/types/SimplePersonModel";
+import { QPerson } from "./fixture/types/QSimplePersonModel";
 
 /**
  * Helper function which adds the base path.
