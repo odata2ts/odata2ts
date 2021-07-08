@@ -1,0 +1,21 @@
+# --- Basics ---
+### Metadata
+GET https://services.odata.org/TripPinRESTierService/$metadata
+
+
+# --- Types ---
+### Singleton
+GET https://services.odata.org/TripPinRESTierService/Me
+
+### FunctionImport
+GET https://services.odata.org/TripPinRESTierService/GetPersonWithMostFriends
+
+
+# --- Filter ---
+### Filter enum type
+GET https://services.odata.org/TripPinRESTierService/People
+?$select=FirstName,Gender&$filter=Gender eq 'Female'
+
+### Finally a working "in" statement
+GET https://services.odata.org/TripPinRESTierService/People
+?$select=FirstName&$filter=FirstName in ('Russell')
