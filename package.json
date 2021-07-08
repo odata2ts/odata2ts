@@ -9,7 +9,7 @@
     "build": "lerna run build",
     "clean": "lerna run clean",
     "coverage": "jest --coverage",
-    "release": "lerna run build && lerna publish",
+    "release": "yarn clean && yarn build && lerna publish",
     "test": "jest"
   },
   "devDependencies": {
