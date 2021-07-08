@@ -2,9 +2,9 @@ import {
   QEntityCollectionPath,
   QEntityModel,
   QEntityPath,
-  QExpression,
+  QFilterExpression,
   QPropContainer,
-} from "../../odata-query-objects/lib";
+} from "@odata2ts/odata-query-objects";
 import { ExpandingODataUriBuilder } from "./internal";
 import { ODataOperators } from "./internal";
 
@@ -27,7 +27,7 @@ export abstract class ODataUriBuilderBase<T> {
   protected itemsTop?: number;
   protected itemsCount?: boolean;
   protected expands: Array<ExpandingODataUriBuilder<any>> = [];
-  protected filters: Array<QExpression> = [];
+  protected filters: Array<QFilterExpression> = [];
 
   protected constructor(qEntity: QEntityModel<T, any>, config?: ODataUriBuilderConfig) {
     if (!qEntity || !qEntity.__collectionPath || !qEntity.__collectionPath.trim()) {
@@ -97,15 +97,15 @@ export abstract class ODataUriBuilderBase<T> {
    * @param expressions possibly multiple expressions
    * @returns this query builder
    */
-  public filter(...expressions: Array<QExpression>) {
+  public filter(...expressions: Array<QFilterExpression>) {
     this.filters.push(...expressions);
 
     return this;
   }
 
-  /* public filterOr(...expressions: Array<QExpression>) {
+  /* public filterOr(...expressions: Array<QFilterExpression>) {
     this.filters.push(
-      expressions.reduce((collector, expr) => (collector ? collector.or(expr) : expr), null as unknown as QExpression)
+      expressions.reduce((collector, expr) => (collector ? collector.or(expr) : expr), null as unknown as QFilterExpression)
     );
 
     return this;

@@ -1,5 +1,4 @@
-import { QExpression } from "@odata2ts/odata-query-objects";
-import { ODataUriBuilder } from "../src/";
+import { ODataUriBuilder, QFilterExpression } from "../src/";
 import { Person } from "./fixture/types/SimplePersonModel";
 import { QPerson } from "./fixture/types/QSimplePersonModel";
 
@@ -172,7 +171,9 @@ describe("ODataUriBuilder Test", () => {
   });
 
   test("filter: add expression manually", () => {
-    const candidate = toTest.filter(new QExpression("name eq 'Heinz'").and(new QExpression("age eq 8"))).build();
+    const candidate = toTest
+      .filter(new QFilterExpression("name eq 'Heinz'").and(new QFilterExpression("age eq 8")))
+      .build();
     const expected = addBase("$filter=name eq 'Heinz' and age eq 8");
 
     expect(candidate).toBe(expected);
