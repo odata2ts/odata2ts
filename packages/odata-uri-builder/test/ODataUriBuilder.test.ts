@@ -1,5 +1,5 @@
 import { QExpression } from "@odata2ts/odata-query-objects";
-import { ODataUriBuilder } from "../src/ODataUriBuilder";
+import { ODataUriBuilder } from "../src/";
 import { Person, QPerson } from "./types/custom";
 
 /**
@@ -143,6 +143,11 @@ describe("ODataUriBuilder Test", () => {
 
     expect(candidate).toBe(expected);
   });
+
+  /* test("orderBy", () => {
+    const candidate = toTest.orderBy(QPerson.name)
+
+  }); */
 
   test("filter: simple", () => {
     const candidate = toTest.filter(QPerson.name.eq("Heinz")).build();
