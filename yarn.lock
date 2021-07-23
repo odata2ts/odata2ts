@@ -1874,7 +1874,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/odata-query-objects@^0.3.3, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
+"@odata2ts/odata-query-objects@^0.4.0, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
@@ -1892,7 +1892,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-uri-builder@workspace:packages/odata-uri-builder"
   dependencies:
-    "@odata2ts/odata-query-objects": ^0.3.3
+    "@odata2ts/odata-query-objects": ^0.4.0
     "@types/jest": 26.0.23
     "@types/node": ^16.0.0
     axios: 0.21.1
@@ -1909,7 +1909,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2model@workspace:packages/odata2model"
   dependencies:
-    "@odata2ts/odata-query-objects": ^0.3.3
+    "@odata2ts/odata-query-objects": ^0.4.0
     "@types/fs-extra": ^9.0.11
     "@types/node": ^15.12.2
     "@types/prettier": ^2.3.0

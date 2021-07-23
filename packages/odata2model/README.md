@@ -38,10 +38,12 @@ The file names are determined by the service name which is to be found within th
 
 ## Options
 
-| Option     | Shorthand | Required | Default | Description                                          |
-| ---------- | --------- | -------- | ------- | ---------------------------------------------------- |
-| --source   | -s        | x        |         | Specifies the source file, i.e. metadata description |
-| --output   | -o        | x        |         | Specifies the output directory                       |
-| --mode     | -m        |          | all     | Allowed are: all, models, qobjects                   |
-| --prettier | -p        |          | false   | Use prettier to pretty print the result files        |
-| --debug    | -d        |          | false   | Add debug information                                |
+| Option         | Shorthand | Required | Default | Description                                                  |
+| -------------- | --------- | -------- | ------- | ------------------------------------------------------------ |
+| --source       | -s        | x        |         | Specifies the source file, i.e. metadata description         |
+| --output       | -o        | x        |         | Specifies the output directory                               |
+| --mode         | -m        |          | all     | Allowed are: all, models, qobjects                           |
+| --prettier     | -p        |          | false   | Use prettier to pretty print the result files                |
+| --debug        | -d        |          | false   | Add debug information                                        |
+| --model-prefix | -prefix   |          | ''      | Prefix for generated interfaces, e.g. 'I' => IPerson         |
+| --model-suffix | -suffix   |          | ''      | Suffix for generated interfaces, e.g. 'Model' => PersonModel |

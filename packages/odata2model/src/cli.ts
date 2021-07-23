@@ -11,6 +11,8 @@ export interface Odata2tsOptions {
   source: string;
   output: string;
   mode: "models" | "qobjects" | "all";
+  modelPrefix: string;
+  modelSuffix: string;
   prettier: boolean;
   debug: boolean;
 }
@@ -27,6 +29,8 @@ class Cli {
           .choices(["models", "qobjects", "all"])
           .default("all")
       )
+      .option("-prefix, --model-prefix <prefix>", "Prefix the generated interfaces with a static string", "")
+      .option("-suffix, --model-suffix <suffix>", "Sufffix the generated interfaces with a static string", "")
       .option("-p, --prettier", "Format result with prettier", false)
       .option("-d, --debug", "Verbose debug infos", false)
       .parse(process.argv);

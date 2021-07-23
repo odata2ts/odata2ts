@@ -16,6 +16,7 @@ import { NoopFormatter } from "./formatter/NoopFormatter";
 import { PrettierFormatter } from "./formatter/PrettierFormatter";
 import { EntityType, NavigationProperty, ODataEdmxModel, OdataTypes, Property, Schema } from "./odata/ODataEdmxModel";
 import { BaseFormatter } from "./formatter/BaseFormatter";
+import { option } from "commander";
 
 export interface RunOptions extends Omit<Odata2tsOptions, "source" | "output"> {}
 
@@ -70,7 +71,7 @@ export class App {
       await remove(fileNameTypes);
       const serviceDefinition = project.createSourceFile(fileNameTypes);
 
-      this.generateModelInterfaces(serviceName, schema, serviceDefinition);
+      this.generateModelInterfaces(serviceName, schema, serviceDefinition, options);
 
       this.formatAndWriteFile(fileNameTypes, serviceDefinition, formatter);
     }
@@ -102,12 +103,18 @@ export class App {
     });
   }
 
-  private generateModelInterfaces(serviceName: string, schema: Schema, serviceDefinition: SourceFile) {
+  private generateModelInterfaces(
+    serviceName: string,
+    schema: Schema,
+    serviceDefinition: SourceFile,
+    options: RunOptions
+  ) {
     const dataTypeImports = new Set<string>();
 
     schema.EntityType.forEach((et) => {
+      const name = `${options.modelPrefix}${et.$.Name}${options.modelSuffix}`;
       serviceDefinition.addInterface({
-        name: et.$.Name,
+        name: name,
         isExported: true,
         properties: this.generateProps(serviceName, et, dataTypeImports),
       });
