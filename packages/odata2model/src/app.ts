@@ -82,7 +82,7 @@ export class App {
       const qDefinition = project.createSourceFile(fileNameQObjects);
 
       // generate
-      this.generateQueryObjects(serviceName, schema, qDefinition);
+      this.generateQueryObjects(serviceName, schema, qDefinition, options);
       this.formatAndWriteFile(fileNameQObjects, qDefinition, formatter);
     }
   }
@@ -103,6 +103,10 @@ export class App {
     });
   }
 
+  private getModelName(name: string, options: RunOptions) {
+    return `${options.modelPrefix}${name}${options.modelSuffix}`;
+  }
+
   private generateModelInterfaces(
     serviceName: string,
     schema: Schema,
@@ -112,11 +116,10 @@ export class App {
     const dataTypeImports = new Set<string>();
 
     schema.EntityType.forEach((et) => {
-      const name = `${options.modelPrefix}${et.$.Name}${options.modelSuffix}`;
       serviceDefinition.addInterface({
-        name: name,
+        name: this.getModelName(et.$.Name, options),
         isExported: true,
-        properties: this.generateProps(serviceName, et, dataTypeImports),
+        properties: this.generateProps(serviceName, et, dataTypeImports, options),
       });
     });
 
@@ -129,7 +132,12 @@ export class App {
     }
   }
 
-  private generateProps(serviceName: string, et: EntityType, dtImports: Set<string>): Array<TsPropType> {
+  private generateProps(
+    serviceName: string,
+    et: EntityType,
+    dtImports: Set<string>,
+    options: RunOptions
+  ): Array<TsPropType> {
     const props = !et.Property
       ? []
       : et.Property.map(
@@ -146,7 +154,7 @@ export class App {
           (prop) =>
             ({
               name: prop.$.Name,
-              type: this.getTsNavType(prop.$.Type, serviceName),
+              type: this.getTsNavType(prop.$.Type, serviceName, options),
               hasQuestionToken: prop.$.Nullable !== "false",
             } as TsPropType)
         );
@@ -198,16 +206,22 @@ export class App {
     return name.replace(new RegExp(serviceName + "."), "");
   }
 
-  private getTsNavType(type: string, serviceName: string): string {
+  private getTsNavType(type: string, serviceName: string, options: RunOptions): string {
     const pureType = this.stripServiceName(type, serviceName);
     if (pureType.match(/^Collection\(/)) {
-      return pureType.replace(/^Collection\(([^\)]+)\)/, "Array<$1>");
+      const name = this.getModelName(pureType.replace(/^Collection\(([^\)]+)\)/, "$1"), options);
+      return `Array<${name}>`;
     }
 
-    return pureType;
+    return this.getModelName(pureType, options);
   }
 
-  private generateQueryObjects(serviceName: string, schema: Schema, serviceDefinition: SourceFile) {
+  private generateQueryObjects(
+    serviceName: string,
+    schema: Schema,
+    serviceDefinition: SourceFile,
+    options: RunOptions
+  ) {
     const qTypeImports = new Set<string>(["QEntityModel", "QEntityPath", "QEntityCollectionPath"]);
     const dtImports = new Set<string>();
 
@@ -219,7 +233,7 @@ export class App {
     schema.EntityType.forEach((et) => {
       const name = upperCaseFirst(et.$.Name);
       const keyRef = et.Key[0].PropertyRef.map((propRef) => `"${propRef.$.Name}"`).join(" | ");
-      const propContainer = this.generateQPathProps(serviceName, et, qTypeImports);
+      const propContainer = this.generateQPathProps(serviceName, et, qTypeImports, options);
       propContainer.__collectionPath = `"${collectionNames[name]}"`;
 
       dtImports.add(name);
@@ -253,7 +267,12 @@ export class App {
     }
   }
 
-  private generateQPathProps(serviceName: string, entityType: EntityType, qPathObjectImports: Set<string>) {
+  private generateQPathProps(
+    serviceName: string,
+    entityType: EntityType,
+    qPathObjectImports: Set<string>,
+    options: RunOptions
+  ) {
     const dataTypeImports = new Set<any>();
     const props = !entityType.Property
       ? {}
@@ -272,7 +291,7 @@ export class App {
       ? {}
       : entityType.NavigationProperty.reduce((container, navProp) => {
           const name = navProp.$.Name;
-          const [entType, qObj] = this.getQPathEntity(this.getTsNavType(navProp.$.Type, serviceName));
+          const [entType, qObj] = this.getQPathEntity(this.getTsNavType(navProp.$.Type, serviceName, options));
           container[name] = `new ${entType}("${name}", () => ${qObj})`;
           return container;
         }, {} as { [key: string]: string });
