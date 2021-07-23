@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.2.0...@odata2ts/odata2model@0.2.1) (2021-07-23)
+
+
+### Bug Fixes
+
+* **odata2model:** respect suffix & prefix in relationships ([cc59d9f](https://github.com/odata2ts/odata2ts/commit/cc59d9f6b8e12a7a729dd297921f2f2c7be9fe50))
+
+
+
+
+
 # [0.2.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.1.4...@odata2ts/odata2model@0.2.0) (2021-07-23)
 
 
