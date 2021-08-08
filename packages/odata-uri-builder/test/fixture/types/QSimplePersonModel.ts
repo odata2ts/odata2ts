@@ -9,8 +9,7 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { Person, Address } from "./SimplePersonModel";
 
-export const QPerson: QEntityModel<Person, "name" | "age"> = {
-  __collectionPath: "Persons",
+export const QPerson: QEntityModel<Person> = {
   age: new QNumberPath("age"),
   name: new QStringPath("name"),
   deceased: new QBooleanPath("deceased"),
@@ -19,8 +18,7 @@ export const QPerson: QEntityModel<Person, "name" | "age"> = {
   altAdresses: new QEntityCollectionPath<Address>("altAdresses", () => QAddress),
 };
 
-export const QAddress: QEntityModel<Address, "street"> = {
-  __collectionPath: "Addresses",
+export const QAddress: QEntityModel<Address> = {
   street: new QStringPath("street"),
   responsible: new QEntityPath<Person>("responsible", () => QPerson),
 };

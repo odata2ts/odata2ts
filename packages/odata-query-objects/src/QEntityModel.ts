@@ -11,17 +11,12 @@ import { QBinaryPath } from "./path/QBinaryPath";
 import { QGuidPath } from "./path/QGuidPath";
 
 /**
- * Specify type & key (id) structure of entity via generics.
+ * Specify structure of entity via generics.
  *
  * For example: Creating an entity for type 'MyTestInterface' with composite key
  * QEntityModel<MyTestInterface, "name" | "application">
  */
-export type QEntityModel<TypeModel, KeyModel extends keyof TypeModel> = {
-  /**
-   * OData path for the given entity collection.
-   */
-  __collectionPath: string;
-} & QPropContainer<Required<TypeModel>>;
+export type QEntityModel<TypeModel> = QPropContainer<Required<TypeModel>>;
 
 /**
  * Helper function to "unpack" an array type; leaves non-arrays untouched.

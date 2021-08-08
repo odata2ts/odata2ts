@@ -30,8 +30,7 @@ interface ComplexEntity {
   xx: Array<SimpleEntity>;
 }
 
-const qComplex: QEntityModel<ComplexEntity, "x" | "Z"> = {
-  __collectionPath: "test",
+const qComplex: QEntityModel<ComplexEntity> = {
   x: new QNumberPath("x"),
   y: new QStringPath("y"),
   Z: new QBooleanPath("Z"),
@@ -42,8 +41,7 @@ const qComplex: QEntityModel<ComplexEntity, "x" | "Z"> = {
   xx: new QEntityCollectionPath("xx", () => qSimple),
 };
 
-const qSimple: QEntityModel<SimpleEntity, "name"> = {
-  __collectionPath: "test2",
+const qSimple: QEntityModel<SimpleEntity> = {
   name: new QStringPath("name"),
   complexton: new QEntityPath("complexton", () => qComplex),
   // Typing Test: Expect error for unknown members
@@ -57,11 +55,6 @@ describe("QEntityFactory tests", () => {
     // @ts-expect-error => wrong type, should be string
     name: new QDatePath("name"),
   }); */
-
-  test("__collectionPath", () => {
-    expect(qSimple.__collectionPath).toBe("test2");
-    expect(qComplex.__collectionPath).toBe("test");
-  });
 
   test("simple prop", () => {
     // @ts-expect-error

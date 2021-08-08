@@ -10,25 +10,26 @@ export class ODataUriBuilder<T, K extends keyof T> extends ODataUriBuilderBase<T
    * to the OData service & the given entity.
    *
    * Example:
-   * ODataUriBuilder.create(qPerson)
+   * ODataUriBuilder.create("people", qPerson)
    *   .select(...)
-   *   .filter(qPerson.age.greateThan(...))
+   *   .filter(qPerson.age.greaterThan(...))
    *   ...
    *   .build()
    *
+   * @param path base path to
    * @param qEntity the query object
    * @param config optionally pass a configuration
    * @returns a UriBuilder
    */
-  static create<T, K extends keyof T>(qEntity: QEntityModel<T, K>, config?: ODataUriBuilderConfig) {
-    return new ODataUriBuilder<T, K>(qEntity, config);
+  static create<T, K extends keyof T>(path: string, qEntity: QEntityModel<T>, config?: ODataUriBuilderConfig) {
+    return new ODataUriBuilder<T, K>(path, qEntity, config);
   }
 
-  protected readonly entity: QEntityModel<T, K>;
+  protected readonly entity: QEntityModel<T>;
   private key?: string;
 
-  private constructor(qEntity: QEntityModel<T, K>, config?: ODataUriBuilderConfig) {
-    super(qEntity, config);
+  private constructor(path: string, qEntity: QEntityModel<T>, config?: ODataUriBuilderConfig) {
+    super(path, qEntity, config);
     this.entity = qEntity;
   }
 
@@ -69,7 +70,7 @@ export class ODataUriBuilder<T, K extends keyof T> extends ODataUriBuilderBase<T
   public build(): string {
     const paramFn = this.unencoded ? this.param : this.paramEncoded;
     const params = this.buildQuery(paramFn);
-    const collection = this.entity.__collectionPath + (this.key ? `(${this.key})` : "");
+    const collection = this.path + (this.key ? `(${this.key})` : "");
 
     return "/" + collection + (params.length ? `?${params.join("&")}` : "");
   }

@@ -4,7 +4,7 @@ import { QEntityCollectionPath } from "./../../src/path/QEntityCollectionPath";
 export interface SampleEntity {}
 
 describe("QEntityCollectionPath test", () => {
-  const qEntity = QEntityFactory.create("test", {});
+  const qEntity = QEntityFactory.create({});
 
   test("smoke test", () => {
     const result = new QEntityCollectionPath("test", () => qEntity);

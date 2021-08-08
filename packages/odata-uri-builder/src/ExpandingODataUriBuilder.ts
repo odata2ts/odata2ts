@@ -5,12 +5,12 @@ import { ODataUriBuilderBase, ODataUriBuilderConfig } from "./internal";
  * Builder for expanded entities or entity collections.
  */
 export class ExpandingODataUriBuilder<T> extends ODataUriBuilderBase<T> {
-  public static create<T>(property: string, qEntity: QEntityModel<T, any>, config?: ODataUriBuilderConfig) {
+  public static create<T>(property: string, qEntity: QEntityModel<T>, config?: ODataUriBuilderConfig) {
     return new ExpandingODataUriBuilder<T>(property, qEntity, config);
   }
 
-  private constructor(private property: string, qEntity: QEntityModel<T, any>, config?: ODataUriBuilderConfig) {
-    super(qEntity, config);
+  private constructor(path: string, qEntity: QEntityModel<T>, config?: ODataUriBuilderConfig) {
+    super(path, qEntity, config);
   }
 
   /**
@@ -22,6 +22,6 @@ export class ExpandingODataUriBuilder<T> extends ODataUriBuilderBase<T> {
   public build(): string {
     const params = this.buildQuery(this.param);
 
-    return this.property + (params.length ? `(${params.join(";")})` : "");
+    return this.path + (params.length ? `(${params.join(";")})` : "");
   }
 }

@@ -19,7 +19,7 @@ describe("ODataUriBuilder Test", () => {
    * Always use a new builder for each  test.
    */
   beforeEach(() => {
-    toTest = ODataUriBuilder.create(QPerson, { unencoded: true });
+    toTest = ODataUriBuilder.create("Persons", QPerson, { unencoded: true });
   });
 
   test("create: minimal default", () => {
@@ -33,11 +33,10 @@ describe("ODataUriBuilder Test", () => {
     expect(() => ODataUriBuilder.create()).toThrow();
     // @ts-expect-error
     expect(() => ODataUriBuilder.create({})).toThrow();
-    expect(() => ODataUriBuilder.create({ __collectionPath: " " })).toThrow();
   });
 
   test("config: encoded", () => {
-    const candidate = ODataUriBuilder.create(QPerson)
+    const candidate = ODataUriBuilder.create("Persons", QPerson)
       .select("name", "age")
       .filter(QPerson.name.equals("AC/DC & Brothers"))
       .build();
@@ -47,7 +46,7 @@ describe("ODataUriBuilder Test", () => {
   });
 
   test("config: encoded & no double encoding for expanded entities", () => {
-    const candidate = ODataUriBuilder.create(QPerson)
+    const candidate = ODataUriBuilder.create("Persons", QPerson)
       .select("name", "age")
       .expanding("altAdresses", (expBuilder, qEntity) => {
         expBuilder.filter(qEntity.street.equals("AC/DC & Brothers"));

@@ -19,8 +19,7 @@ export interface Person {
   altAdresses: Array<Address>;
 }
 
-export const QPerson: QEntityModel<Person, "name" | "age"> = {
-  __collectionPath: "Persons",
+export const QPerson: QEntityModel<Person> = {
   age: new QNumberPath("age"),
   name: new QStringPath("name"),
   deceased: new QBooleanPath("deceased"),

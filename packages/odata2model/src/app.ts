@@ -249,16 +249,15 @@ export class App {
     const qTypeImports = new Set<string>(["QEntityModel", "QEntityPath", "QEntityCollectionPath"]);
     const dtImports = new Set<string>();
 
-    const collectionNames = schema.EntityContainer[0].EntitySet.reduce((collector, es) => {
+    /* const collectionNames = schema.EntityContainer[0].EntitySet.reduce((collector, es) => {
       collector[this.stripServiceName(es.$.EntityType, serviceName)] = es.$.Name;
       return collector;
-    }, {} as { [key: string]: string });
+    }, {} as { [key: string]: string }); */
 
     schema.EntityType.forEach((et) => {
       const name = upperCaseFirst(et.$.Name);
       const keyRef = et.Key[0].PropertyRef.map((propRef) => `"${propRef.$.Name}"`).join(" | ");
       const propContainer = this.generateQPathProps(serviceName, et, qTypeImports, options);
-      propContainer.__collectionPath = `"${collectionNames[name]}"`;
 
       dtImports.add(name);
 
