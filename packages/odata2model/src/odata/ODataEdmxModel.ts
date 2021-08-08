@@ -20,6 +20,10 @@ export interface Schema {
   };
   EntityContainer: Array<EntityContainer>;
   EntityType: Array<EntityType>;
+  ComplexType: Array<ComplexType>;
+  EnumType: Array<EnumType>;
+  Function: Array<Function>;
+  Action: Array<Action>;
 }
 
 export interface EntityContainer {
@@ -27,6 +31,9 @@ export interface EntityContainer {
     Name: string;
   };
   EntitySet: Array<EntitySet>;
+  Singleton: Array<Singleton>;
+  FunctionImport: Array<FunctionImport>;
+  ActionImport: Array<ActionImport>;
 }
 
 export interface EntitySet {
@@ -35,6 +42,29 @@ export interface EntitySet {
     EntityType: string;
   };
   NavigationPropertyBinding: Array<NavigationPropertyBinding>;
+}
+
+export interface Singleton {
+  $: {
+    Name: string;
+    Type: string;
+  };
+  NavigationPropertyBinding: Array<NavigationPropertyBinding>;
+}
+
+export interface FunctionImport {
+  $: {
+    Name: string;
+    Function: string;
+    EntitySet: string;
+  };
+}
+
+export interface ActionImport {
+  $: {
+    Name: string;
+    Action: string;
+  };
 }
 
 export interface NavigationPropertyBinding {
@@ -53,6 +83,8 @@ export interface EntityType {
   NavigationProperty: Array<NavigationProperty>;
 }
 
+export interface ComplexType extends Omit<EntityType, "Key"> {}
+
 export interface PropertyRef {
   PropertyRef: Array<{ $: { Name: string } }>;
 }
@@ -64,6 +96,47 @@ export interface Property {
     MaxLength?: number;
     Nullable?: "true" | "false";
     Precision?: number;
+  };
+}
+
+export interface EnumType {
+  $: {
+    Name: string;
+  };
+  Member: Array<Member>;
+}
+
+export interface Member {
+  $: {
+    Name: string;
+    Value: number;
+  };
+}
+
+export interface Function {
+  $: {
+    Name: string;
+  };
+  Parameter: Array<Parameter>;
+  ReturnType: Array<ReturnType>;
+}
+
+export interface Action {
+  $: {
+    Name: string;
+    IsBound?: boolean;
+  };
+  Parameter: Array<Parameter>;
+  ReturnType: Array<ReturnType>;
+}
+
+export interface Parameter extends Property {
+  Unicode: boolean;
+}
+
+export interface ReturnType {
+  $: {
+    Type: string;
   };
 }
 
