@@ -14,9 +14,8 @@ import { upperCaseFirst } from "upper-case-first";
 import { Odata2tsOptions } from "./cli";
 import { NoopFormatter } from "./formatter/NoopFormatter";
 import { PrettierFormatter } from "./formatter/PrettierFormatter";
-import { EntityType, NavigationProperty, ODataEdmxModel, OdataTypes, Property, Schema } from "./odata/ODataEdmxModel";
+import { EntityType, ComplexType, ODataEdmxModel, OdataTypes, Schema } from "./odata/ODataEdmxModel";
 import { BaseFormatter } from "./formatter/BaseFormatter";
-import { option } from "commander";
 
 export interface RunOptions extends Omit<Odata2tsOptions, "source" | "output"> {}
 
@@ -47,23 +46,10 @@ export class App {
     // merge all schemas & take name from first schema
     // TODO only necessary for NorthwindModel => other use cases?
     const schema = dataService.Schema.reduce((collector, schema, index) => {
-      if (index === 0) {
-        collector.$ = schema.$;
-      }
-      const ec = collector.EntityContainer ?? [];
-      const et = collector.EntityType ?? [];
-
-      if (schema.EntityContainer) {
-        ec.push(...schema.EntityContainer);
-      }
-      if (schema.EntityType) {
-        et.push(...schema.EntityType);
-      }
-
-      collector.EntityContainer = ec;
-      collector.EntityType = et;
-
-      return collector;
+      return {
+        ...collector,
+        ...schema,
+      };
     }, {} as Schema);
 
     // create ts file which holds all model interfaces
@@ -123,6 +109,32 @@ export class App {
       });
     });
 
+    schema.ComplexType?.forEach((et) => {
+      serviceDefinition.addInterface({
+        name: this.getModelName(et.$.Name, options),
+        isExported: true,
+        properties: this.generateProps(serviceName, et, dataTypeImports, options),
+      });
+    });
+
+    schema.EnumType?.forEach((et) => {
+      serviceDefinition.addEnum({
+        name: this.getModelName(et.$.Name, options),
+        isExported: true,
+        members: et.Member.map((mem) => ({ name: mem.$.Name })),
+      });
+    });
+
+    /* schema.Function?.forEach((fn) => {
+      serviceDefinition.addTypeAlias({
+        name: fn.$.Name,
+        isExported: true,
+
+        members: fn..map((mem) => ({ name: mem.$.Name}))
+      })
+    })
+ */
+
     if (dataTypeImports.size) {
       serviceDefinition.addImportDeclaration({
         isTypeOnly: true,
@@ -134,7 +146,7 @@ export class App {
 
   private generateProps(
     serviceName: string,
-    et: EntityType,
+    et: EntityType | ComplexType,
     dtImports: Set<string>,
     options: RunOptions
   ): Array<TsPropType> {
@@ -144,7 +156,7 @@ export class App {
           (prop) =>
             ({
               name: prop.$.Name,
-              type: this.getTsType(prop.$.Type, dtImports),
+              type: this.getTsType(prop.$.Type, serviceName, dtImports, options),
               hasQuestionToken: prop.$.Nullable !== "false",
             } as TsPropType)
         );
@@ -154,7 +166,7 @@ export class App {
           (prop) =>
             ({
               name: prop.$.Name,
-              type: this.getTsNavType(prop.$.Type, serviceName, options),
+              type: this.getTsType(prop.$.Type, serviceName, dtImports, options),
               hasQuestionToken: prop.$.Nullable !== "false",
             } as TsPropType)
         );
@@ -162,8 +174,30 @@ export class App {
     return [...props, ...navProps];
   }
 
-  private getTsType(odataType: OdataTypes, dtImports: Set<string>): string {
-    switch (odataType) {
+  private getTsType(type: string, serviceName: string, dtImports: Set<string>, options: RunOptions): string {
+    const servicePrefix = serviceName + ".";
+
+    // collection => recursive call
+    if (type.match(/^Collection\(/)) {
+      const newType = type.replace(/^Collection\(([^\)]+)\)/, "$1");
+      return `Array<${this.getTsType(newType, serviceName, dtImports, options)}>`;
+    }
+
+    // domain object known from service, e.g. EntitySet, EnumType, ...
+    if (type.startsWith(servicePrefix)) {
+      const newType = type.replace(new RegExp(servicePrefix), "");
+      return this.getModelName(newType, options);
+    }
+    // OData built-in data types
+    if (type.startsWith("Edm.")) {
+      return this.mapODataType(type, dtImports);
+    }
+
+    throw Error(`Unknown type: Not 'Collection(...)', not '${servicePrefix}.*', not OData type 'Edm.*'`);
+  }
+
+  private mapODataType(type: OdataTypes | string, dtImports: Set<string>) {
+    switch (type) {
       case OdataTypes.Boolean:
         return "boolean";
       case OdataTypes.Byte:
@@ -204,16 +238,6 @@ export class App {
 
   private stripServiceName(name: string, serviceName: string) {
     return name.replace(new RegExp(serviceName + "."), "");
-  }
-
-  private getTsNavType(type: string, serviceName: string, options: RunOptions): string {
-    const pureType = this.stripServiceName(type, serviceName);
-    if (pureType.match(/^Collection\(/)) {
-      const name = this.getModelName(pureType.replace(/^Collection\(([^\)]+)\)/, "$1"), options);
-      return `Array<${name}>`;
-    }
-
-    return this.getModelName(pureType, options);
   }
 
   private generateQueryObjects(
@@ -279,7 +303,7 @@ export class App {
       : entityType.Property.reduce((container, prop) => {
           const name = prop.$.Name;
           // transform TS type to QPathObject type
-          const qType = this.getQPathByType(this.getTsType(prop.$.Type, dataTypeImports));
+          const qType = this.getQPathByType(this.getTsType(prop.$.Type, serviceName, dataTypeImports, options));
 
           qPathObjectImports.add(qType);
 
@@ -291,7 +315,9 @@ export class App {
       ? {}
       : entityType.NavigationProperty.reduce((container, navProp) => {
           const name = navProp.$.Name;
-          const [entType, qObj] = this.getQPathEntity(this.getTsNavType(navProp.$.Type, serviceName, options));
+          const [entType, qObj] = this.getQPathEntity(
+            this.getTsType(navProp.$.Type, serviceName, dataTypeImports, options)
+          );
           container[name] = `new ${entType}("${name}", () => ${qObj})`;
           return container;
         }, {} as { [key: string]: string });
