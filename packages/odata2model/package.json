@@ -14,7 +14,8 @@
     "clean": "rimraf lib build",
     "compile": "tsc",
     "dev": "ts-node src/cli.ts -o build -p",
-    "dev-nw": "yarn dev -s test/fixture/metadata.xml -d"
+    "dev-nw": "yarn dev -s test/fixture/metadata.xml -d",
+    "dev-trippin": "yarn dev -s test/fixture/trippin.xml -d"
   },
   "files": [
     "*.md",

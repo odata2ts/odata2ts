@@ -1,21 +1,151 @@
-# --- Basics ---
-### Metadata
-GET https://services.odata.org/TripPinRESTierService/$metadata
+###################################################
+# HTTP Tests against Trippin Service
+#
+#
+###################################################
+
+# --- CONFIUGARTION ---
+
+@rootUrl = https://services.odata.org/TripPinRESTierService
+@contentType = application/json
 
 
-# --- Types ---
-### Singleton
-GET https://services.odata.org/TripPinRESTierService/Me
+### @name GetKey
+GET {{rootUrl}}
 
-### FunctionImport
-GET https://services.odata.org/TripPinRESTierService/GetPersonWithMostFriends
+### TODO Here we would need redirect infos or parse the @odata.context variable
+### in order to automatically determine the new session id from Trippin
+### => static sessionId
+# @authToken = {{login.response.headers.X-AuthToken}}
+@sessionId = (S(sivik5crfo3qvprrreziudlp))
+@baseUrl = {{rootUrl}}/{{sessionId}}
 
 
-# --- Filter ---
+# --- METADATA ---
+### @name metadata
+GET {{baseUrl}}/$metadata
+
+
+# --- ENTITY SETS ---
+
+### List entities
+### @name people
+GET {{baseUrl}}/People?$count=true
+### @name airlines
+GET {{baseUrl}}/Airlines?$count=true
+### @name airports
+GET {{baseUrl}}/Airports?$count=true
+
+### Entity by id
+### canonical way
+GET {{baseUrl}}/Airports('KSFO')
+### explicit way => required for composite keys
+GET {{baseUrl}}/Airports(IcaoCode='KSFO')
+### alternative, restier way
+GET {{baseUrl}}/Airports/KSFO
+
+### Create Entity
+### new person
+POST {{baseUrl}}/People
+Content-Type: application/json
+
+{
+  "UserName": "heineritis",
+  "FirstName": "Heiner",
+  "LastName": "Itis",
+  "Emails": ["heineritis@odata.org"],
+  "AddressInfo": [{
+    "Address": "Teststr. 33, Biefe",
+    "City": {
+      "Name": "San Biefe",
+      "CountryRegion": "France",
+      "Region": "Arrandissement 13"
+    }
+  }]
+}
+### get person
+GET {{baseUrl}}/People('heineritis')
+### patch person
+PATCH {{baseUrl}}/People('heineritis')
+Content-Type: {{contentType}}
+
+{
+  "MiddleName": "H."
+}
+### update person
+PUT {{baseUrl}}/People('heineritis')
+Content-Type: application/json
+
+{
+  "Age": 33
+}
+### update person
+DELETE  {{baseUrl}}/People('heineritis')
+
+
+# --- SINGLETON ---
+### @name me
+GET {{baseUrl}}/Me
+
+
+# --- FUNCTIONS ---
+
+### unbound func
+GET {{baseUrl}}/GetPersonWithMostFriends
+
+### func with params
+GET {{baseUrl}}/GetNearestAirport(lat=51.918777,lon=8.620930)
+
+### func bound to trip => params are taken from the path
+GET {{baseUrl}}/People('russellwhyte')/Trips(0)/GetInvolvedPeople
+
+
+# --- ACTIONS ---
+
+### unbound action
+POST {{baseUrl}}/ResetDataSource
+
+
+# --- QUERIES ---
+
+### Airport by Id
+GET {{baseUrl}}/Airports('KSFO')
+### Person by Id
+GET {{baseUrl}}/People('russellwhyte')
+
+### Querying for Complex Prop Only
+GET {{baseUrl}}/Airports('KSFO')/Location
+### Querying for Single Prop Only
+GET {{baseUrl}}/Airports('KSFO')/Location/Address
+### Querying for Single Value Only
+GET {{baseUrl}}/Airports('KSFO')/Location/Address/$value
+
+### Navigatable Collection Prop
+GET {{baseUrl}}/People('russellwhyte')/Trips?$count=true
+###
+GET {{baseUrl}}/People('russellwhyte')/Friends?$count=true
+### Navigatable Collection Prop by Id
+GET {{baseUrl}}/People('russellwhyte')/Trips(0)
+###
+GET {{baseUrl}}/People('russellwhyte')/Friends('scottketchum')
+
+### Update Collection Prop by Id => 501 not implemented
+PATCH {{baseUrl}}/People('russellwhyte')/Trips(0)
+Content-Type: {{contentType}}
+
+{
+  "Budget": 3005
+}
+
+
+# --- FILTERING ---
+
 ### Filter enum type
 GET https://services.odata.org/TripPinRESTierService/People
-?$select=FirstName,Gender&$filter=Gender eq 'Female'
+?$select=FirstName,Gender
+&$filter=Gender eq 'Female'
 
 ### Finally a working "in" statement
 GET https://services.odata.org/TripPinRESTierService/People
-?$select=FirstName&$filter=FirstName in ('Russell')
+?$select=FirstName
+&$filter=FirstName in ('Russell')
