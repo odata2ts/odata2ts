@@ -1,3 +1,4 @@
+import { QPrimitiveCollectionPath } from "./path/QPrimitiveCollectionPath";
 import { BinaryString, DateString, DateTimeOffsetString, GuidString, TimeOfDayString } from "./odata/ODataTypes";
 import { QDatePath } from "./path/date-time-v4/QDatePath";
 import { QDateTimeOffsetPath } from "./path/date-time-v4/QDateTimeOffsetPath";
@@ -47,6 +48,8 @@ export type QPropContainer<TypeModel> = {
     ? QNumberPath
     : TypeModel[Property] extends string
     ? QStringPath
+    : TypeModel[Property] extends Array<string | number | boolean>
+    ? QPrimitiveCollectionPath<QNumberPath | QStringPath | QBooleanPath>
     : TypeModel[Property] extends Array<any>
     ? QEntityCollectionPath<Unpacked<TypeModel[Property]>>
     : QEntityPath<TypeModel[Property]>;

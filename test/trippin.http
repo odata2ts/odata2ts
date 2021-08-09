@@ -137,6 +137,13 @@ Content-Type: {{contentType}}
   "Budget": 3005
 }
 
+### Primitive Collections
+GET {{baseUrl}}/People('russellwhyte')/Emails?$count=true
+### $it does the trick for referencing the primitive value
+GET {{baseUrl}}/People('russellwhyte')/Emails?$orderby=$it desc
+### $it with filtering
+GET {{baseUrl}}/People('russellwhyte')/Emails?$filter=contains($it,'contoso')
+
 
 # --- FILTERING ---
 

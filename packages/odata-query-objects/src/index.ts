@@ -12,6 +12,7 @@ export { QBinaryPath } from "./path/QBinaryPath";
 export { QGuidPath } from "./path/QGuidPath";
 export { QEntityPath } from "./path/QEntityPath";
 export { QEntityCollectionPath } from "./path/QEntityCollectionPath";
+export { QPrimitiveCollectionPath } from "./path/QPrimitiveCollectionPath";
 export { QDatePath } from "./path/date-time-v4/QDatePath";
 export { QTimeOfDayPath } from "./path/date-time-v4/QTimeOfDayPath";
 export { QDateTimeOffsetPath } from "./path/date-time-v4/QDateTimeOffsetPath";
