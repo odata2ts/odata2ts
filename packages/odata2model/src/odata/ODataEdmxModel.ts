@@ -77,6 +77,7 @@ export interface NavigationPropertyBinding {
 export interface EntityType {
   $: {
     Name: string;
+    BaseType: string;
   };
   Key: Array<PropertyRef>;
   Property: Array<Property>;

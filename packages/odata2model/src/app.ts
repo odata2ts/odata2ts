@@ -99,21 +99,21 @@ export class App {
     serviceDefinition: SourceFile,
     options: RunOptions
   ) {
+    const servicePrefix = serviceName + ".";
     const dataTypeImports = new Set<string>();
 
-    schema.EntityType.forEach((et) => {
-      serviceDefinition.addInterface({
-        name: this.getModelName(et.$.Name, options),
-        isExported: true,
-        properties: this.generateProps(serviceName, et, dataTypeImports, options),
-      });
-    });
+    // Entity Types & Complex Types
+    const entities = [...(schema.EntityType ?? []), ...(schema.ComplexType ?? [])];
+    entities.forEach((et) => {
+      const baseType = et.$.BaseType
+        ? this.getModelName(et.$.BaseType.replace(new RegExp(servicePrefix), ""), options)
+        : undefined;
 
-    schema.ComplexType?.forEach((et) => {
       serviceDefinition.addInterface({
         name: this.getModelName(et.$.Name, options),
         isExported: true,
         properties: this.generateProps(serviceName, et, dataTypeImports, options),
+        extends: baseType ? [baseType] : undefined,
       });
     });
 
