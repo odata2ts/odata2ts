@@ -150,9 +150,10 @@ export class App {
     dtImports: Set<string>,
     options: RunOptions
   ): Array<TsPropType> {
-    const props = !et.Property
+    const props = [...(et.Property ?? []), ...(et.NavigationProperty ?? [])];
+    return !props.length
       ? []
-      : et.Property.map(
+      : props.map(
           (prop) =>
             ({
               name: prop.$.Name,
@@ -160,18 +161,6 @@ export class App {
               hasQuestionToken: prop.$.Nullable !== "false",
             } as TsPropType)
         );
-    const navProps = !et.NavigationProperty
-      ? []
-      : et.NavigationProperty.map(
-          (prop) =>
-            ({
-              name: prop.$.Name,
-              type: this.getTsType(prop.$.Type, serviceName, dtImports, options),
-              hasQuestionToken: prop.$.Nullable !== "false",
-            } as TsPropType)
-        );
-
-    return [...props, ...navProps];
   }
 
   private getTsType(type: string, serviceName: string, dtImports: Set<string>, options: RunOptions): string {
@@ -188,6 +177,7 @@ export class App {
       const newType = type.replace(new RegExp(servicePrefix), "");
       return this.getModelName(newType, options);
     }
+
     // OData built-in data types
     if (type.startsWith("Edm.")) {
       return this.mapODataType(type, dtImports);
@@ -236,17 +226,13 @@ export class App {
     }
   }
 
-  private stripServiceName(name: string, serviceName: string) {
-    return name.replace(new RegExp(serviceName + "."), "");
-  }
-
   private generateQueryObjects(
     serviceName: string,
     schema: Schema,
     serviceDefinition: SourceFile,
     options: RunOptions
   ) {
-    const qTypeImports = new Set<string>(["QEntityModel", "QEntityPath", "QEntityCollectionPath"]);
+    const qTypeImports = new Set<string>(["QEntityModel"]);
     const dtImports = new Set<string>();
 
     /* const collectionNames = schema.EntityContainer[0].EntitySet.reduce((collector, es) => {
@@ -254,12 +240,14 @@ export class App {
       return collector;
     }, {} as { [key: string]: string }); */
 
-    schema.EntityType.forEach((et) => {
-      const name = upperCaseFirst(et.$.Name);
-      const keyRef = et.Key[0].PropertyRef.map((propRef) => `"${propRef.$.Name}"`).join(" | ");
-      const propContainer = this.generateQPathProps(serviceName, et, qTypeImports, options);
+    const types = [...schema.EntityType, ...schema.ComplexType];
+    types.forEach((type) => {
+      const name = upperCaseFirst(type.$.Name);
+      const interfaceName = this.getModelName(name, options);
+      // const keyRef = et.Key[0].PropertyRef.map((propRef) => `"${propRef.$.Name}"`).join(" | ");
+      const propContainer = this.generateQPathProps(serviceName, type, qTypeImports, options);
 
-      dtImports.add(name);
+      dtImports.add(interfaceName);
 
       serviceDefinition.addVariableStatement({
         declarationKind: VariableDeclarationKind.Const,
@@ -267,7 +255,7 @@ export class App {
         declarations: [
           {
             name: `q${name}`,
-            type: `QEntityModel<${name}, ${keyRef}>`,
+            type: `QEntityModel<${interfaceName}>`,
             initializer: Writers.object(propContainer),
           },
         ],
@@ -292,42 +280,61 @@ export class App {
 
   private generateQPathProps(
     serviceName: string,
-    entityType: EntityType,
-    qPathObjectImports: Set<string>,
+    entityType: EntityType | ComplexType,
+    qImports: Set<string>,
     options: RunOptions
   ) {
-    const dataTypeImports = new Set<any>();
-    const props = !entityType.Property
+    const props = [...(entityType.Property ?? []), ...(entityType.NavigationProperty ?? [])];
+    return !props.length
       ? {}
-      : entityType.Property.reduce((container, prop) => {
+      : props.reduce((container, prop) => {
           const name = prop.$.Name;
           // transform TS type to QPathObject type
-          const qType = this.getQPathByType(this.getTsType(prop.$.Type, serviceName, dataTypeImports, options));
+          const [qType, entityPathType] = this.getQPathByType(prop.$.Type, serviceName, qImports, options);
 
-          qPathObjectImports.add(qType);
-
-          container[name] = `new ${qType}("${name}")`;
+          container[name] = entityPathType ? `new ${entityPathType}("${name}", ${qType})` : `new ${qType}("${name}")`;
           return container;
         }, {} as { [key: string]: string });
-
-    const navProps = !entityType.NavigationProperty
-      ? {}
-      : entityType.NavigationProperty.reduce((container, navProp) => {
-          const name = navProp.$.Name;
-          const [entType, qObj] = this.getQPathEntity(
-            this.getTsType(navProp.$.Type, serviceName, dataTypeImports, options)
-          );
-          container[name] = `new ${entType}("${name}", () => ${qObj})`;
-          return container;
-        }, {} as { [key: string]: string });
-
-    return { ...props, ...navProps };
   }
 
-  private getQPathByType(dataType: string) {
-    // Date, TimeOfDay, and DateTimeOffset end on suffix 'String' => remove that
-    const cleanedTypeName = dataType.replace(/String$/, "");
-    return `Q${upperCaseFirst(cleanedTypeName)}Path`;
+  private getQPathByType(
+    dataType: string,
+    serviceName: string,
+    qImports: Set<string>,
+    options: RunOptions
+  ): [string, string?] {
+    const servicePrefix = serviceName + ".";
+
+    // collection => recursive call
+    if (dataType.match(/^Collection\(/)) {
+      const newType = dataType.replace(/^Collection\(([^\)]+)\)/, "$1");
+      const [qType, qContainerType] = this.getQPathByType(newType, serviceName, qImports, options);
+
+      const containerType = qContainerType ? "QEntityCollectionPath" : "QPrimitiveCollectionPath";
+      const qParam = qContainerType ? `() => ${qType}` : qType;
+      qImports.add(containerType);
+      return [qParam, containerType];
+    }
+
+    // domain object known from service, e.g. EntitySet, EnumType, ...
+    if (dataType.startsWith(servicePrefix)) {
+      const newType = dataType.replace(new RegExp(servicePrefix), "");
+      qImports.add("QEntityPath");
+      const typeName = `() => q${upperCaseFirst(newType)}`;
+      return [typeName, "QEntityPath"];
+    }
+
+    // OData built-in data types
+    if (dataType.startsWith("Edm.")) {
+      // Date, TimeOfDay, and DateTimeOffset end on suffix 'String' => remove that
+      const baseType = this.mapODataType(dataType, new Set()).replace(/String$/, "");
+      const typeName = `Q${upperCaseFirst(baseType)}Path`;
+      qImports.add(typeName);
+
+      return [typeName];
+    }
+
+    throw Error(`Unknown datatype: ${dataType}`);
   }
 
   private getQPathEntity(tsType: string) {
