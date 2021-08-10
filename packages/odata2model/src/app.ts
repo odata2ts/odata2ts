@@ -39,8 +39,8 @@ export class App {
     // TODO only necessary for NorthwindModel => other use cases?
     const schema = dataService.Schema.reduce((collector, schema, index) => {
       return {
-        ...collector,
         ...schema,
+        ...collector,
       };
     }, {} as Schema);
 

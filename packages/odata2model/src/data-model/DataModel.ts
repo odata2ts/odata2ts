@@ -102,7 +102,9 @@ export class DataModel {
       result.type = this.mapODataType(dataType);
       result.dataType = DataTypes.PrimitiveType;
     } else {
-      throw Error(`Unknown type: Not 'Collection(...)', not '${this.servicePrefix}*', not OData type 'Edm.*'`);
+      throw Error(
+        `Unknown type [${dataType}]: Not 'Collection(...)', not '${this.servicePrefix}*', not OData type 'Edm.*'`
+      );
     }
 
     return result as PropertyModel;
