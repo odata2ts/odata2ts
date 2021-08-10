@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.4.0...@odata2ts/odata-query-objects@0.5.0) (2021-08-10)
+
+
+### Code Refactoring
+
+* QEntityModel without key spec ([913cd11](https://github.com/odata2ts/odata2ts/commit/913cd11df132969aca80054b2d1584bfe678a729))
+
+
+### Features
+
+* **qObjects:** add QPrimitiveCollectionPath ([0a93c74](https://github.com/odata2ts/odata2ts/commit/0a93c741ea049f3f5a075869ab58daba911e7dd0))
+* **qObjects:** integrate QEnumPath & refactor to QCollectionPath ([cb95d06](https://github.com/odata2ts/odata2ts/commit/cb95d067899d5cb28b72dea22ef7f2d458f64830))
+* **qObjects:** QCollectionPath & EntityPath with default enumTypes ([9743020](https://github.com/odata2ts/odata2ts/commit/9743020712df43f111d8961c41bf3c4acf6512ed))
+
+
+### BREAKING CHANGES
+
+* [query-objects]: QEntityModel without key spec & __collectionPath; [UrlBuilder]: path must be provided explicitly now for any entity set
+
+
+
+
+
 # [0.4.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.3.3...@odata2ts/odata-query-objects@0.4.0) (2021-07-08)
 
 

@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.3.0...@odata2ts/odata-uri-builder@0.4.0) (2021-08-10)
+
+
+### Bug Fixes
+
+* **uri-builder:** adapt to breaking changes ([c5b5223](https://github.com/odata2ts/odata2ts/commit/c5b52236eed841533081494df9fd557b7e8b74cc))
+
+
+### Code Refactoring
+
+* QEntityModel without key spec ([913cd11](https://github.com/odata2ts/odata2ts/commit/913cd11df132969aca80054b2d1584bfe678a729))
+
+
+### BREAKING CHANGES
+
+* [query-objects]: QEntityModel without key spec & __collectionPath; [UrlBuilder]: path must be provided explicitly now for any entity set
+
+
+
+
+
 # [0.3.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.2.3...@odata2ts/odata-uri-builder@0.3.0) (2021-07-08)
 
 
