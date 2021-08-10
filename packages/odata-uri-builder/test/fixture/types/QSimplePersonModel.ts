@@ -1,7 +1,7 @@
 import {
   QBooleanPath,
   QDateTimeOffsetPath,
-  QEntityCollectionPath,
+  QCollectionPath,
   QEntityModel,
   QEntityPath,
   QNumberPath,
@@ -15,7 +15,7 @@ export const QPerson: QEntityModel<Person> = {
   deceased: new QBooleanPath("deceased"),
   createdAt: new QDateTimeOffsetPath("createdAt"),
   address: new QEntityPath<Address>("address", () => QAddress),
-  altAdresses: new QEntityCollectionPath<Address>("altAdresses", () => QAddress),
+  altAdresses: new QCollectionPath<Address>("altAdresses", () => QAddress),
 };
 
 export const QAddress: QEntityModel<Address> = {

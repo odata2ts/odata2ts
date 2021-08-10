@@ -1,5 +1,5 @@
 import {
-  QEntityCollectionPath,
+  QCollectionPath,
   QEntityModel,
   QEntityPath,
   QFilterExpression,
@@ -12,9 +12,9 @@ export interface ODataUriBuilderConfig {
   unencoded?: boolean;
 }
 
-type EntityExtractor<T> = T extends QEntityPath<infer E> ? E : T extends QEntityCollectionPath<infer E> ? E : never;
+type EntityExtractor<T> = T extends QEntityPath<infer E> ? E : T extends QCollectionPath<infer E> ? E : never;
 type ExtractPropertyNamesOfType<T, S> = { [K in keyof T]: T[K] extends S ? K : never }[keyof T];
-type ExpandType<T> = ExtractPropertyNamesOfType<QEntityModel<T>, QEntityPath<any> | QEntityCollectionPath<any>>;
+type ExpandType<T> = ExtractPropertyNamesOfType<QEntityModel<T>, QEntityPath<any> | QCollectionPath<any>>;
 
 export abstract class ODataUriBuilderBase<T> {
   protected path: string;
@@ -49,7 +49,7 @@ export abstract class ODataUriBuilderBase<T> {
    * @param props the property names to select
    * @returns this query builder
    */
-  public select(...props: Array<keyof QPropContainer<T> | null | undefined>) {
+  public select(...props: Array<keyof QPropContainer<T, any> | null | undefined>) {
     if (props && props.length) {
       this.selects.push(...props.filter((p) => !!p).map((p) => this.entity[p].getPath()));
     }
