@@ -1,5 +1,5 @@
 import {
-  QEntityCollectionPath,
+  QCollectionPath,
   QEntityModel,
   QEntityPath,
   QFilterExpression,
@@ -12,12 +12,13 @@ export interface ODataUriBuilderConfig {
   unencoded?: boolean;
 }
 
-type EntityExtractor<T> = T extends QEntityPath<infer E> ? E : T extends QEntityCollectionPath<infer E> ? E : never;
+type EntityExtractor<T> = T extends QEntityPath<infer E> ? E : T extends QCollectionPath<infer E> ? E : never;
 type ExtractPropertyNamesOfType<T, S> = { [K in keyof T]: T[K] extends S ? K : never }[keyof T];
-type ExpandType<T> = ExtractPropertyNamesOfType<QEntityModel<T, any>, QEntityPath<any> | QEntityCollectionPath<any>>;
+type ExpandType<T> = ExtractPropertyNamesOfType<QEntityModel<T>, QEntityPath<any> | QCollectionPath<any>>;
 
 export abstract class ODataUriBuilderBase<T> {
-  protected entity: QEntityModel<T, any>;
+  protected path: string;
+  protected entity: QEntityModel<T>;
 
   protected unencoded: boolean;
   protected config?: ODataUriBuilderConfig;
@@ -29,11 +30,12 @@ export abstract class ODataUriBuilderBase<T> {
   protected expands: Array<ExpandingODataUriBuilder<any>> = [];
   protected filters: Array<QFilterExpression> = [];
 
-  protected constructor(qEntity: QEntityModel<T, any>, config?: ODataUriBuilderConfig) {
-    if (!qEntity || !qEntity.__collectionPath || !qEntity.__collectionPath.trim()) {
+  protected constructor(path: string, qEntity: QEntityModel<T>, config?: ODataUriBuilderConfig) {
+    if (!qEntity || !path || !path.trim()) {
       throw Error("A valid collection name must be provided!");
     }
 
+    this.path = path;
     this.entity = qEntity;
     this.config = config;
     this.unencoded = !!config && !!config.unencoded;
@@ -47,7 +49,7 @@ export abstract class ODataUriBuilderBase<T> {
    * @param props the property names to select
    * @returns this query builder
    */
-  public select(...props: Array<keyof QPropContainer<T> | null | undefined>) {
+  public select(...props: Array<keyof QPropContainer<T, any> | null | undefined>) {
     if (props && props.length) {
       this.selects.push(...props.filter((p) => !!p).map((p) => this.entity[p].getPath()));
     }
@@ -130,8 +132,8 @@ export abstract class ODataUriBuilderBase<T> {
   public expanding<Prop extends ExpandType<T>>(
     prop: Prop,
     builderFn: (
-      builder: ExpandingODataUriBuilder<EntityExtractor<QEntityModel<T, any>[Prop]>>,
-      qObject: QEntityModel<EntityExtractor<QEntityModel<T, any>[Prop]>, any>
+      builder: ExpandingODataUriBuilder<EntityExtractor<QEntityModel<T>[Prop]>>,
+      qObject: QEntityModel<EntityExtractor<QEntityModel<T>[Prop]>>
     ) => void
   ) {
     const entity = (this.entity[prop] as QEntityPath<any>).getEntity();

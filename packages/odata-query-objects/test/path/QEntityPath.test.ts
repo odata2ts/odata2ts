@@ -2,7 +2,7 @@ import { QEntityPath } from "./../../src";
 import { QEntityFactory } from "./../../src";
 
 describe("QEntityPath test", () => {
-  const qEntity = QEntityFactory.create("test", {});
+  const qEntity = QEntityFactory.create({});
 
   test("smoke test", () => {
     const result = new QEntityPath("test", () => qEntity);

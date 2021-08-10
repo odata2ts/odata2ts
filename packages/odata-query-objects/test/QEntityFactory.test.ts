@@ -8,17 +8,17 @@ import {
   QEntityPath,
   QNumberPath,
   QStringPath,
-  QEntityCollectionPath,
+  QCollectionPath,
 } from "../src";
 
 describe("QEntityFactory tests", () => {
   // Typing Test: Expect error for wrong typing
-  QEntityFactory.create<SimpleEntity, "name">("test2", {
+  QEntityFactory.create<SimpleEntity>({
     // @ts-expect-error => wrong type, should be string
     name: QDatePath,
   });
 
-  const qComplex = QEntityFactory.create<ComplexEntity, "articleNo" | "Active">("test", {
+  const qComplex = QEntityFactory.create<ComplexEntity>({
     articleNo: QNumberPath,
     description: QStringPath,
     Active: QBooleanPath,
@@ -26,10 +26,10 @@ describe("QEntityFactory tests", () => {
     bestSellingTime: QTimeOfDayPath,
     createdAt: QDateTimeOffsetPath,
     simpleton: [QEntityPath, () => qSimple],
-    simpleList: [QEntityCollectionPath, () => qSimple],
+    simpleList: [QCollectionPath, () => qSimple],
   });
 
-  const qSimple = QEntityFactory.create<SimpleEntity, "name">("test2", {
+  const qSimple = QEntityFactory.create<SimpleEntity>({
     name: QStringPath,
     // TODO this fails badly => type will be any for all entities
     // complexton: [QEntityPath, () => qComplex],
@@ -37,11 +37,6 @@ describe("QEntityFactory tests", () => {
     // Typing Test: Expect error for unknown members
     // @ts-expect-error => unknown member
     whoAmI: QStringPath,
-  });
-
-  test("__collectionPath", () => {
-    expect(qSimple.__collectionPath).toBe("test2");
-    expect(qComplex.__collectionPath).toBe("test");
   });
 
   test("simple prop", () => {

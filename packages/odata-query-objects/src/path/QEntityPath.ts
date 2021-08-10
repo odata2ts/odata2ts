@@ -1,8 +1,8 @@
 import { QEntityModel } from "../QEntityModel";
 import { QPathModel } from "./QPathModel";
 
-export class QEntityPath<Type> implements QPathModel {
-  constructor(private path: string, private qEntityFn: () => QEntityModel<Type, any>) {
+export class QEntityPath<Type, EnumTypes = undefined> implements QPathModel {
+  constructor(private path: string, private qEntityFn: () => QEntityModel<Type, EnumTypes>) {
     if (!path || !path.trim()) {
       throw Error("Path must be supplied!");
     }

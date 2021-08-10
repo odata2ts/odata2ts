@@ -1,8 +1,9 @@
+import { QEnumPath } from "./QEnumPath";
 import { QDatePath } from "./date-time-v4/QDatePath";
 import { QDateTimeOffsetPath } from "./date-time-v4/QDateTimeOffsetPath";
 import { QTimeOfDayPath } from "./date-time-v4/QTimeOfDayPath";
 import { QBooleanPath } from "./QBooleanPath";
-import { QEntityCollectionPath } from "./QEntityCollectionPath";
+import { QCollectionPath } from "./QCollectionPath";
 import { QEntityPath } from "./QEntityPath";
 import { QNumberPath } from "./QNumberPath";
 import { QStringPath } from "./QStringPath";
@@ -22,5 +23,6 @@ export type QPath =
   | QDateTimeOffsetPath
   | QBinaryPath
   | QGuidPath
-  | QEntityPath<any>
-  | QEntityCollectionPath<any>;
+  | QEnumPath
+  | QEntityPath<any, any>
+  | QCollectionPath<any, any>;

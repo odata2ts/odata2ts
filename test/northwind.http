@@ -1,39 +1,51 @@
+###################################################
+# HTTP Tests against Northwind Service
+# v4
+#
+###################################################
+
+# --- CONFIUGARTION ---
+
+@rootUrl = https://services.odata.org/V4/Northwind/Northwind.svc
+@contentType = application/json
+
+
 # --- Basics ---
 ### Metadata
-GET https://services.odata.org/V4/Northwind/Northwind.svc/$metadata
+GET {{rootUrl}}/$metadata
 
 
 # --- Order By ---
 ### Order by boolean
-GET https://services.odata.org/V4/Northwind/Northwind.svc/Products
+GET {{rootUrl}}/Products
 ?$orderby=Discontinued desc
 
 ### Order by 1:1 relationship
-GET https://services.odata.org/V4/Northwind/Northwind.svc/Orders
+GET {{rootUrl}}/Orders
 ?$orderby=Employee/LastName asc
 
 ### FAILS: Order by 1:n relationship
-GET https://services.odata.org/V4/Northwind/Northwind.svc/Categories
+GET {{rootUrl}}/Categories
 ?$select=CategoryName&$expand=Products&$orderby=Products/ProductName desc
 
 ### Order by manipulated number
-GET https://services.odata.org/V4/Northwind/Northwind.svc/Orders
+GET {{rootUrl}}/Orders
 ?$orderby=Employee/LastName asc
 
 ### Order by with multiple expressions
-GET https://services.odata.org/V4/Northwind/Northwind.svc/Products
+GET {{rootUrl}}/Products
 ?$orderby=Discontinued desc,ProductName asc
 
 
 # --- Filter ---
 ### FAILS: filter with "in" statement
-GET https://services.odata.org/V4/Northwind/Northwind.svc/Products
+GET {{rootUrl}}/Products
 ?$filter=ProductName in ('Chai', 'Chang')
 
 ### Filter by prop of 1:1 relationship
-GET https://services.odata.org/V4/Northwind/Northwind.svc/Orders
+GET {{rootUrl}}/Orders
 ?$count=true&$filter=Employee/LastName eq 'Buchanan'
 
 ### Filter by any on 1:n relationship
-GET https://services.odata.org/V4/Northwind/Northwind.svc/Categories
+GET {{rootUrl}}/Categories
 ?$select=CategoryName,Description&$filter=Products/any(p:p/ProductName eq 'Aniseed Syrup')

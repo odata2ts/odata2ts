@@ -3,7 +3,7 @@ import { QDatePath } from "./path/date-time-v4/QDatePath";
 import { QDateTimeOffsetPath } from "./path/date-time-v4/QDateTimeOffsetPath";
 import { QTimeOfDayPath } from "./path/date-time-v4/QTimeOfDayPath";
 import { QBooleanPath } from "./path/QBooleanPath";
-import { QEntityCollectionPath } from "./path/QEntityCollectionPath";
+import { QCollectionPath } from "./path/QCollectionPath";
 import { QEntityPath } from "./path/QEntityPath";
 import { QNumberPath } from "./path/QNumberPath";
 import { QPath } from "./path/QPathModel";
@@ -30,8 +30,8 @@ export type QRawPropContainer<TypeModel> = {
     : TypeModel[Property] extends string
     ? typeof QStringPath
     : TypeModel[Property] extends Array<any>
-    ? [typeof QEntityCollectionPath, () => QEntityModel<Unpacked<TypeModel[Property]>, any>]
-    : [typeof QEntityPath, () => QEntityModel<TypeModel[Property], any>];
+    ? [typeof QCollectionPath, () => QEntityModel<Unpacked<TypeModel[Property]>>]
+    : [typeof QEntityPath, () => QEntityModel<TypeModel[Property]>];
 };
 
 export class QEntityFactory {
@@ -39,14 +39,10 @@ export class QEntityFactory {
    * Factory function to create a QEntity based on a given type (TypeModel) in a type-safe manner.
    * Possible properties are checked via automatic type mapping.
    *
-   * @param collectionPath OData path to the entity collection
    * @param props mapped QPath constructors or for QEntityPath and QEntityCollectionPath tuples [QEntityPath, QObject]
    * @returns
    */
-  static create<TypeModel, KeyModel extends keyof TypeModel>(
-    collectionPath: string,
-    props: QRawPropContainer<Required<TypeModel>>
-  ): QEntityModel<TypeModel, KeyModel> {
+  static create<TypeModel>(props: QRawPropContainer<Required<TypeModel>>): QEntityModel<TypeModel> {
     const result = Object.entries(props).reduce((collector, [name, constructorOrTuple]) => {
       if (typeof constructorOrTuple === "function") {
         // @ts-ignore
@@ -62,8 +58,7 @@ export class QEntityFactory {
     }, {} as { [key: string]: QPath });
 
     return {
-      __collectionPath: collectionPath,
       ...result,
-    } as QEntityModel<TypeModel, KeyModel>;
+    } as QEntityModel<TypeModel>;
   }
 }
