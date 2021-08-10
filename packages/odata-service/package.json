@@ -19,6 +19,10 @@
     "lib",
     "LICENSE"
   ],
+  "dependencies": {
+    "@odata2ts/odata-query-objects": "*",
+    "@odata2ts/odata-uri-builder": "*"
+  },
   "devDependencies": {
     "@types/jest": "26.0.23",
     "@types/node": "^16.0.0",
