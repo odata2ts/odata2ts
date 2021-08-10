@@ -3,19 +3,33 @@ import {
   QDatePath,
   QTimeOfDayPath,
   QDateTimeOffsetPath,
-  QEntityFactory,
   QEntityPath,
   QNumberPath,
   QStringPath,
-  QEntityCollectionPath,
+  QCollectionPath,
   QEntityModel,
+  QEnumPath,
   DateString,
   DateTimeOffsetString,
   TimeOfDayString,
+  qEnumCollection,
 } from "../src";
+
+enum TypesEnum {
+  Primitive = "Primitive",
+  Complex = "Complex",
+}
+
+enum FeaturesEnum {
+  Feature1 = "Feature1",
+  Feature2 = "Feature2",
+}
+
+type EnumUnion = TypesEnum | FeaturesEnum;
 
 interface SimpleEntity {
   name: string;
+  myType: TypesEnum;
   complexton: ComplexEntity;
 }
 
@@ -28,9 +42,11 @@ interface ComplexEntity {
   cz: DateTimeOffsetString;
   xy?: SimpleEntity;
   xx: Array<SimpleEntity>;
+  features: Array<FeaturesEnum>;
+  favFeature: FeaturesEnum;
 }
 
-const qComplex: QEntityModel<ComplexEntity> = {
+const qComplex: QEntityModel<ComplexEntity, EnumUnion> = {
   x: new QNumberPath("x"),
   y: new QStringPath("y"),
   Z: new QBooleanPath("Z"),
@@ -38,11 +54,14 @@ const qComplex: QEntityModel<ComplexEntity> = {
   bz: new QTimeOfDayPath("bz"),
   cz: new QDateTimeOffsetPath("cz"),
   xy: new QEntityPath("xy", () => qSimple),
-  xx: new QEntityCollectionPath("xx", () => qSimple),
+  xx: new QCollectionPath("xx", () => qSimple),
+  features: new QCollectionPath("features", () => qEnumCollection),
+  favFeature: new QEnumPath("favFeature"),
 };
 
-const qSimple: QEntityModel<SimpleEntity> = {
+const qSimple: QEntityModel<SimpleEntity, EnumUnion> = {
   name: new QStringPath("name"),
+  myType: new QEnumPath("myType"),
   complexton: new QEntityPath("complexton", () => qComplex),
   // Typing Test: Expect error for unknown members
   // @ts-expect-error => unknown member

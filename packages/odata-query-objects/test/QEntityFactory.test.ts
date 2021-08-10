@@ -8,7 +8,7 @@ import {
   QEntityPath,
   QNumberPath,
   QStringPath,
-  QEntityCollectionPath,
+  QCollectionPath,
 } from "../src";
 
 describe("QEntityFactory tests", () => {
@@ -26,7 +26,7 @@ describe("QEntityFactory tests", () => {
     bestSellingTime: QTimeOfDayPath,
     createdAt: QDateTimeOffsetPath,
     simpleton: [QEntityPath, () => qSimple],
-    simpleList: [QEntityCollectionPath, () => qSimple],
+    simpleList: [QCollectionPath, () => qSimple],
   });
 
   const qSimple = QEntityFactory.create<SimpleEntity>({

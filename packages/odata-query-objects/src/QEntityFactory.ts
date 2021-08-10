@@ -3,7 +3,7 @@ import { QDatePath } from "./path/date-time-v4/QDatePath";
 import { QDateTimeOffsetPath } from "./path/date-time-v4/QDateTimeOffsetPath";
 import { QTimeOfDayPath } from "./path/date-time-v4/QTimeOfDayPath";
 import { QBooleanPath } from "./path/QBooleanPath";
-import { QEntityCollectionPath } from "./path/QEntityCollectionPath";
+import { QCollectionPath } from "./path/QCollectionPath";
 import { QEntityPath } from "./path/QEntityPath";
 import { QNumberPath } from "./path/QNumberPath";
 import { QPath } from "./path/QPathModel";
@@ -30,7 +30,7 @@ export type QRawPropContainer<TypeModel> = {
     : TypeModel[Property] extends string
     ? typeof QStringPath
     : TypeModel[Property] extends Array<any>
-    ? [typeof QEntityCollectionPath, () => QEntityModel<Unpacked<TypeModel[Property]>>]
+    ? [typeof QCollectionPath, () => QEntityModel<Unpacked<TypeModel[Property]>>]
     : [typeof QEntityPath, () => QEntityModel<TypeModel[Property]>];
 };
 

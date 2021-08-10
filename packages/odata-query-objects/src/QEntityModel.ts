@@ -1,9 +1,9 @@
-import { QPrimitiveCollectionPath } from "./path/QPrimitiveCollectionPath";
+import { QEnumPath } from "./path/QEnumPath";
 import { BinaryString, DateString, DateTimeOffsetString, GuidString, TimeOfDayString } from "./odata/ODataTypes";
 import { QDatePath } from "./path/date-time-v4/QDatePath";
 import { QDateTimeOffsetPath } from "./path/date-time-v4/QDateTimeOffsetPath";
 import { QTimeOfDayPath } from "./path/date-time-v4/QTimeOfDayPath";
-import { QEntityCollectionPath } from "./path/QEntityCollectionPath";
+import { QCollectionPath } from "./path/QCollectionPath";
 import { QEntityPath } from "./path/QEntityPath";
 import { QNumberPath } from "./path/QNumberPath";
 import { QStringPath } from "./path/QStringPath";
@@ -17,7 +17,7 @@ import { QGuidPath } from "./path/QGuidPath";
  * For example: Creating an entity for type 'MyTestInterface' with composite key
  * QEntityModel<MyTestInterface, "name" | "application">
  */
-export type QEntityModel<TypeModel> = QPropContainer<Required<TypeModel>>;
+export type QEntityModel<TypeModel, EnumTypes = null> = QPropContainer<Required<TypeModel>, EnumTypes>;
 
 /**
  * Helper function to "unpack" an array type; leaves non-arrays untouched.
@@ -31,7 +31,7 @@ type Unpacked<T> = T extends (infer U)[] ? U : T;
  *
  * Nominal types (date & time stuff) must come first, otherwise string would win in this case.
  */
-export type QPropContainer<TypeModel> = {
+export type QPropContainer<TypeModel, EnumTypes> = {
   [Property in keyof TypeModel]: TypeModel[Property] extends DateString
     ? QDatePath
     : TypeModel[Property] extends TimeOfDayString
@@ -46,11 +46,11 @@ export type QPropContainer<TypeModel> = {
     ? QBooleanPath
     : TypeModel[Property] extends Number
     ? QNumberPath
+    : TypeModel[Property] extends EnumTypes
+    ? QEnumPath
     : TypeModel[Property] extends string
     ? QStringPath
-    : TypeModel[Property] extends Array<string | number | boolean>
-    ? QPrimitiveCollectionPath<QNumberPath | QStringPath | QBooleanPath>
     : TypeModel[Property] extends Array<any>
-    ? QEntityCollectionPath<Unpacked<TypeModel[Property]>>
-    : QEntityPath<TypeModel[Property]>;
+    ? QCollectionPath<Unpacked<TypeModel[Property]>, EnumTypes>
+    : QEntityPath<TypeModel[Property], EnumTypes>;
 };
