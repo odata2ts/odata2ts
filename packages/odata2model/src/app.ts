@@ -1,25 +1,17 @@
 import * as path from "path";
 import { remove, writeFile } from "fs-extra";
-// import * as morph from "ts-morph";
-import {
-  OptionalKind,
-  Project,
-  PropertySignatureStructure,
-  SourceFile,
-  VariableDeclarationKind,
-  Writers,
-} from "ts-morph";
+import { Project, SourceFile, VariableDeclarationKind, Writers } from "ts-morph";
 import { upperCaseFirst } from "upper-case-first";
 
+import { DataModel } from "./data-model/DataModel";
 import { Odata2tsOptions } from "./cli";
 import { NoopFormatter } from "./formatter/NoopFormatter";
 import { PrettierFormatter } from "./formatter/PrettierFormatter";
-import { EntityType, ComplexType, ODataEdmxModel, OdataTypes, Schema } from "./odata/ODataEdmxModel";
+import { ODataEdmxModel, Schema } from "./odata/ODataEdmxModel";
 import { BaseFormatter } from "./formatter/BaseFormatter";
+import { DataTypes, PropertyModel, ModelType } from "./data-model/DataTypeModel";
 
 export interface RunOptions extends Omit<Odata2tsOptions, "source" | "output"> {}
-
-type TsPropType = OptionalKind<PropertySignatureStructure>;
 
 export class App {
   /**
@@ -52,13 +44,15 @@ export class App {
       };
     }, {} as Schema);
 
+    const dataModel = new DataModel(schema, options);
+
     // create ts file which holds all model interfaces
     if (options.mode === "models" || options.mode === "all") {
       await remove(fileNameTypes);
       const serviceDefinition = project.createSourceFile(fileNameTypes);
 
-      this.generateModelInterfaces(serviceName, schema, serviceDefinition, options);
-
+      // generate
+      this.generateModelInterfaces(dataModel, serviceDefinition);
       this.formatAndWriteFile(fileNameTypes, serviceDefinition, formatter);
     }
     if (options.mode === "qobjects" || options.mode === "all") {
@@ -68,7 +62,7 @@ export class App {
       const qDefinition = project.createSourceFile(fileNameQObjects);
 
       // generate
-      this.generateQueryObjects(serviceName, schema, qDefinition, options);
+      this.generateQueryObjects(dataModel, qDefinition);
       this.formatAndWriteFile(fileNameQObjects, qDefinition, formatter);
     }
   }
@@ -89,39 +83,27 @@ export class App {
     });
   }
 
-  private getModelName(name: string, options: RunOptions) {
-    return `${options.modelPrefix}${name}${options.modelSuffix}`;
-  }
-
-  private generateModelInterfaces(
-    serviceName: string,
-    schema: Schema,
-    serviceDefinition: SourceFile,
-    options: RunOptions
-  ) {
-    const servicePrefix = serviceName + ".";
-    const dataTypeImports = new Set<string>();
-
-    // Entity Types & Complex Types
-    const entities = [...(schema.EntityType ?? []), ...(schema.ComplexType ?? [])];
-    entities.forEach((et) => {
-      const baseType = et.$.BaseType
-        ? this.getModelName(et.$.BaseType.replace(new RegExp(servicePrefix), ""), options)
-        : undefined;
-
-      serviceDefinition.addInterface({
-        name: this.getModelName(et.$.Name, options),
+  private generateModelInterfaces(dataModel: DataModel, serviceDefinition: SourceFile) {
+    // Enum Types
+    dataModel.getEnums().forEach((et) => {
+      serviceDefinition.addEnum({
+        name: et.name,
         isExported: true,
-        properties: this.generateProps(serviceName, et, dataTypeImports, options),
-        extends: baseType ? [baseType] : undefined,
+        members: et.members.map((mem) => ({ name: mem, initializer: `"${mem}"` })),
       });
     });
 
-    schema.EnumType?.forEach((et) => {
-      serviceDefinition.addEnum({
-        name: this.getModelName(et.$.Name, options),
+    // Entity Types & Complex Types
+    dataModel.getModels().forEach((model) => {
+      serviceDefinition.addInterface({
+        name: model.name,
         isExported: true,
-        members: et.Member.map((mem) => ({ name: mem.$.Name })),
+        properties: model.props.map((p) => ({
+          name: p.odataName, // todo: map to lowercase
+          type: p.isCollection ? `Array<${p.type}>` : p.type,
+          hasQuestionToken: !p.required,
+        })),
+        extends: model.baseClasses,
       });
     });
 
@@ -135,127 +117,39 @@ export class App {
     })
  */
 
-    if (dataTypeImports.size) {
+    // add import statements for additional primitive types, e.g. DateString or GuidString
+    const imports = dataModel.getPrimitiveTypeImports();
+    if (imports.length) {
       serviceDefinition.addImportDeclaration({
         isTypeOnly: true,
-        namedImports: [...dataTypeImports],
+        namedImports: imports,
         moduleSpecifier: "@odata2ts/odata-query-objects",
       });
     }
   }
 
-  private generateProps(
-    serviceName: string,
-    et: EntityType | ComplexType,
-    dtImports: Set<string>,
-    options: RunOptions
-  ): Array<TsPropType> {
-    const props = [...(et.Property ?? []), ...(et.NavigationProperty ?? [])];
-    return !props.length
-      ? []
-      : props.map(
-          (prop) =>
-            ({
-              name: prop.$.Name,
-              type: this.getTsType(prop.$.Type, serviceName, dtImports, options),
-              hasQuestionToken: prop.$.Nullable !== "false",
-            } as TsPropType)
-        );
-  }
-
-  private getTsType(type: string, serviceName: string, dtImports: Set<string>, options: RunOptions): string {
-    const servicePrefix = serviceName + ".";
-
-    // collection => recursive call
-    if (type.match(/^Collection\(/)) {
-      const newType = type.replace(/^Collection\(([^\)]+)\)/, "$1");
-      return `Array<${this.getTsType(newType, serviceName, dtImports, options)}>`;
-    }
-
-    // domain object known from service, e.g. EntitySet, EnumType, ...
-    if (type.startsWith(servicePrefix)) {
-      const newType = type.replace(new RegExp(servicePrefix), "");
-      return this.getModelName(newType, options);
-    }
-
-    // OData built-in data types
-    if (type.startsWith("Edm.")) {
-      return this.mapODataType(type, dtImports);
-    }
-
-    throw Error(`Unknown type: Not 'Collection(...)', not '${servicePrefix}.*', not OData type 'Edm.*'`);
-  }
-
-  private mapODataType(type: OdataTypes | string, dtImports: Set<string>) {
-    switch (type) {
-      case OdataTypes.Boolean:
-        return "boolean";
-      case OdataTypes.Byte:
-      case OdataTypes.SByte:
-      case OdataTypes.Int16:
-      case OdataTypes.Int32:
-      case OdataTypes.Int64:
-      case OdataTypes.Decimal:
-      case OdataTypes.Double:
-      case OdataTypes.Single:
-        return "number";
-      case OdataTypes.String:
-        return "string";
-      case OdataTypes.Date:
-        const dateType = "DateString";
-        dtImports.add(dateType);
-        return dateType;
-      case OdataTypes.Time:
-        const timeType = "TimeOfDayString";
-        dtImports.add(timeType);
-        return timeType;
-      case OdataTypes.DateTimeOffset:
-        const dateTimeType = "DateTimeOffsetString";
-        dtImports.add(dateTimeType);
-        return dateTimeType;
-      case OdataTypes.Binary:
-        const binaryType = "BinaryString";
-        dtImports.add(binaryType);
-        return binaryType;
-      case OdataTypes.Guid:
-        const guidType = "GuidString";
-        dtImports.add(guidType);
-        return guidType;
-      default:
-        return "string";
-    }
-  }
-
-  private generateQueryObjects(
-    serviceName: string,
-    schema: Schema,
-    serviceDefinition: SourceFile,
-    options: RunOptions
-  ) {
+  private generateQueryObjects(dataModel: DataModel, serviceDefinition: SourceFile) {
+    const enumNames = dataModel.getEnums().map((enumType) => enumType.name);
+    const enumTypeUnion = enumNames.join(" | ");
     const qTypeImports = new Set<string>(["QEntityModel"]);
-    const dtImports = new Set<string>();
+    const modelImports = new Set<string>(enumNames);
 
-    /* const collectionNames = schema.EntityContainer[0].EntitySet.reduce((collector, es) => {
-      collector[this.stripServiceName(es.$.EntityType, serviceName)] = es.$.Name;
-      return collector;
-    }, {} as { [key: string]: string }); */
-
-    const types = [...schema.EntityType, ...schema.ComplexType];
-    types.forEach((type) => {
-      const name = upperCaseFirst(type.$.Name);
-      const interfaceName = this.getModelName(name, options);
+    dataModel.getModels().forEach((model) => {
       // const keyRef = et.Key[0].PropertyRef.map((propRef) => `"${propRef.$.Name}"`).join(" | ");
-      const propContainer = this.generateQPathProps(serviceName, type, qTypeImports, options);
+      const propContainer = this.generateQueryObjectProps(
+        [...this.collectBaseClassProps(dataModel, model), ...model.props],
+        qTypeImports
+      );
 
-      dtImports.add(interfaceName);
+      modelImports.add(model.name);
 
       serviceDefinition.addVariableStatement({
         declarationKind: VariableDeclarationKind.Const,
         isExported: true,
         declarations: [
           {
-            name: `q${name}`,
-            type: `QEntityModel<${interfaceName}>`,
+            name: `q${model.name}`,
+            type: `QEntityModel<${model.name}, ${enumTypeUnion}>`,
             initializer: Writers.object(propContainer),
           },
         ],
@@ -269,80 +163,73 @@ export class App {
       moduleSpecifier: "@odata2ts/odata-query-objects",
     });
 
-    if (dtImports.size) {
+    if (modelImports.size) {
       serviceDefinition.addImportDeclaration({
         isTypeOnly: true,
-        namedImports: [...dtImports],
-        moduleSpecifier: `./${serviceName}`,
+        namedImports: [...modelImports],
+        moduleSpecifier: `./${dataModel.getServiceName()}`,
       });
     }
   }
 
-  private generateQPathProps(
-    serviceName: string,
-    entityType: EntityType | ComplexType,
-    qImports: Set<string>,
-    options: RunOptions
-  ) {
-    const props = [...(entityType.Property ?? []), ...(entityType.NavigationProperty ?? [])];
-    return !props.length
-      ? {}
-      : props.reduce((container, prop) => {
-          const name = prop.$.Name;
-          // transform TS type to QPathObject type
-          const [qType, entityPathType] = this.getQPathByType(prop.$.Type, serviceName, qImports, options);
+  private collectBaseClassProps(dataModel: DataModel, model: ModelType): Array<PropertyModel> {
+    return model.baseClasses.reduce((collector, bc) => {
+      const baseModel = dataModel.getModel(bc);
+      if (baseModel.baseClasses.length) {
+        collector.push(...this.collectBaseClassProps(dataModel, baseModel));
+      }
 
-          container[name] = entityPathType ? `new ${entityPathType}("${name}", ${qType})` : `new ${qType}("${name}")`;
-          return container;
-        }, {} as { [key: string]: string });
+      collector.push(...baseModel.props);
+      return collector;
+    }, [] as Array<PropertyModel>);
   }
 
-  private getQPathByType(
-    dataType: string,
-    serviceName: string,
-    qImports: Set<string>,
-    options: RunOptions
-  ): [string, string?] {
-    const servicePrefix = serviceName + ".";
+  private generateQueryObjectProps(props: Array<PropertyModel>, qTypeImports: Set<string>) {
+    return props.reduce((collector, prop) => {
+      const name = prop.odataName;
+      // determine matching QPath type
+      let qPathType: string | null = null;
+      let qPathInit: string;
 
-    // collection => recursive call
-    if (dataType.match(/^Collection\(/)) {
-      const newType = dataType.replace(/^Collection\(([^\)]+)\)/, "$1");
-      const [qType, qContainerType] = this.getQPathByType(newType, serviceName, qImports, options);
+      if (prop.dataType === DataTypes.EnumType) {
+        qPathType = "QEnumPath";
+        qPathInit = `new ${qPathType}("${name}")`;
+      } else if (prop.dataType === DataTypes.PrimitiveType) {
+        // Custom primitive types like DateString or GuidString end on suffix 'String' => remove that
+        const baseType = prop.type.replace(/String$/, "");
+        qPathType = `Q${upperCaseFirst(baseType)}Path`;
+        qPathInit = `new ${qPathType}("${name}")`;
+      } else if (prop.dataType === DataTypes.ModelType) {
+        qPathType = "QEntityPath";
+        qPathInit = `new ${qPathType}("${name}", () => q${upperCaseFirst(prop.type)})`;
+      } else {
+        throw Error(`Unknonw DataType [${prop.dataType}] for prop with name [${name}]`);
+      }
 
-      const containerType = qContainerType ? "QEntityCollectionPath" : "QPrimitiveCollectionPath";
-      const qParam = qContainerType ? `() => ${qType}` : qType;
-      qImports.add(containerType);
-      return [qParam, containerType];
-    }
+      // factor in collections
+      if (prop.isCollection) {
+        const cType = `QCollectionPath`;
+        const qObject =
+          prop.dataType === DataTypes.ModelType
+            ? `q${upperCaseFirst(prop.type)}`
+            : prop.dataType === DataTypes.EnumType
+            ? `qEnumCollection`
+            : `q${upperCaseFirst(prop.type)}Collection`;
+        const typeAddition = prop.dataType === DataTypes.PrimitiveType ? `<{it: ${prop.type}}>` : "";
+        qPathInit = `new ${cType}${typeAddition}("${name}", () => ${qObject})`;
 
-    // domain object known from service, e.g. EntitySet, EnumType, ...
-    if (dataType.startsWith(servicePrefix)) {
-      const newType = dataType.replace(new RegExp(servicePrefix), "");
-      qImports.add("QEntityPath");
-      const typeName = `() => q${upperCaseFirst(newType)}`;
-      return [typeName, "QEntityPath"];
-    }
+        qTypeImports.add(cType);
+        if (prop.dataType !== DataTypes.ModelType) {
+          qTypeImports.add(qObject);
+        }
+      }
 
-    // OData built-in data types
-    if (dataType.startsWith("Edm.")) {
-      // Date, TimeOfDay, and DateTimeOffset end on suffix 'String' => remove that
-      const baseType = this.mapODataType(dataType, new Set()).replace(/String$/, "");
-      const typeName = `Q${upperCaseFirst(baseType)}Path`;
-      qImports.add(typeName);
+      // add import for data type
+      qTypeImports.add(qPathType);
 
-      return [typeName];
-    }
-
-    throw Error(`Unknown datatype: ${dataType}`);
-  }
-
-  private getQPathEntity(tsType: string) {
-    const collectionFound = tsType.match(/^Array<([^>]+)>/);
-    const entType = collectionFound ? "QEntityCollectionPath" : "QEntityPath";
-    const type = collectionFound ? collectionFound[1] : tsType;
-
-    return [entType, `q${upperCaseFirst(type)}`];
+      collector[name] = qPathInit;
+      return collector;
+    }, {} as { [key: string]: string });
   }
 
   private async createFormatter(outputPath: string, isEnabled: boolean) {
