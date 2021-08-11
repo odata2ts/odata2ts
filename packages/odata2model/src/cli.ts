@@ -10,7 +10,7 @@ import { ODataEdmxModel } from "./odata/ODataEdmxModel";
 export interface Odata2tsOptions {
   source: string;
   output: string;
-  mode: "models" | "qobjects" | "all";
+  mode: "models" | "qobjects" | "service" | "all";
   modelPrefix: string;
   modelSuffix: string;
   prettier: boolean;

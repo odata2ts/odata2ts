@@ -1,3 +1,4 @@
+import { ServiceGenerator } from "./generator/ServiceGenerator";
 import * as path from "path";
 import { remove, writeFile } from "fs-extra";
 import { Project, SourceFile } from "ts-morph";
@@ -70,6 +71,15 @@ export class App {
       // generate
       new QueryObjectGenerator().generate(dataModel, qDefinition);
       this.formatAndWriteFile(fileNameQObjects, qDefinition, formatter);
+    }
+
+    if (options.mode === "service" || options.mode === "all") {
+      const fileNameService = path.join(outputPath, `${serviceName}Service.ts`);
+      await remove(fileNameService);
+      const qDefinition = project.createSourceFile(fileNameService);
+
+      new ServiceGenerator().generate(dataModel, qDefinition);
+      this.formatAndWriteFile(fileNameService, qDefinition, formatter);
     }
   }
 
