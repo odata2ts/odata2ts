@@ -1,7 +1,6 @@
 import { ODataClient } from "./odata-client/ODataClientModel";
 import { QEntityModel } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilder } from "@odata2ts/odata-uri-builder";
-import { EntityIdentifier } from "./EntityModel";
 
 export class EntityTypeService<EModel, EId extends keyof EModel> {
   constructor(private client: ODataClient, private path: string, private qModel: QEntityModel<EModel>) {}
@@ -11,13 +10,11 @@ export class EntityTypeService<EModel, EId extends keyof EModel> {
   }
 
   patch(model: Partial<EModel>): Promise<void> {
-    // TODO
-    return Promise.reject("Not implemented yet!");
+    return this.client.patch(this.path, model);
   }
 
   delete(): Promise<void> {
-    // TODO
-    return Promise.reject("Not implemented yet!");
+    return this.client.delete(this.path);
   }
 
   query(

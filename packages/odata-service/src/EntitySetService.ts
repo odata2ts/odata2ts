@@ -12,13 +12,11 @@ export class EntitySetService<EModel, EId extends keyof EModel> {
   }
 
   public create(model: EModel): Promise<EModel> {
-    //TODO
-    return Promise.resolve(model);
+    return this.client.post(this.path, model);
   }
 
   public patch(id: EntityIdentifier<EModel, EId>, model: Partial<EModel>): Promise<void> {
-    //TODO
-    return Promise.reject("Not implemented yet!");
+    return this.get(id).patch(model);
   }
 
   public delete(id: EntityIdentifier<EModel, EId>): Promise<void> {
