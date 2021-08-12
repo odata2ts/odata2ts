@@ -93,7 +93,7 @@ export interface PropertyRef {
 export interface Property {
   $: {
     Name: string;
-    Type: OdataTypes;
+    Type: string;
     MaxLength?: number;
     Nullable?: "true" | "false";
     Precision?: number;
@@ -117,18 +117,19 @@ export interface Member {
 export interface Function {
   $: {
     Name: string;
+    IsBound?: "true" | "false";
   };
-  Parameter: Array<Parameter>;
+  Parameter?: Array<Parameter>;
   ReturnType: Array<ReturnType>;
 }
 
 export interface Action {
   $: {
     Name: string;
-    IsBound?: boolean;
+    IsBound?: "true" | "false";
   };
-  Parameter: Array<Parameter>;
-  ReturnType: Array<ReturnType>;
+  Parameter?: Array<Parameter>;
+  ReturnType?: Array<ReturnType>;
 }
 
 export interface Parameter extends Property {

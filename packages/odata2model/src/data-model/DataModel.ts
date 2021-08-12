@@ -1,11 +1,28 @@
 import { upperCaseFirst } from "upper-case-first";
 import { firstCharLowerCase } from "xml2js/lib/processors";
+
 import { RunOptions } from "../app";
-import { Property, NavigationProperty, Schema, OdataTypes } from "../odata/ODataEdmxModel";
-import { ModelType, EnumType, DataTypes, PropertyModel } from "./DataTypeModel";
+import {
+  Property,
+  NavigationProperty,
+  Schema,
+  OdataTypes,
+  Action,
+  Function,
+  EntityContainer,
+} from "../odata/ODataEdmxModel";
+import {
+  ModelType,
+  EnumType,
+  DataTypes,
+  PropertyModel,
+  EntityContainerModel,
+  OperationType,
+  OperationTypes,
+} from "./DataTypeModel";
 
 const EDM_PREFIX = "Edm.";
-
+const ROOT_OPERATION = "/";
 /**
  * EntityType, ComplexType, EnumType, PrimitiveType
  */
@@ -18,6 +35,12 @@ export class DataModel {
   // combines entity & complex types
   private modelTypes: { [name: string]: ModelType } = {};
   private enumTypes: { [name: string]: EnumType } = {};
+  // combines functions & actions
+  private operationTypes: { [binding: string]: Array<OperationType> } = {};
+  private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
+
+  // imports of custom dataTypes which are represented at strings,
+  // e.g. DateString, GuidString, etc.
   private primitiveTypeImports: Set<string> = new Set();
 
   constructor(schema: Schema, private options: RunOptions) {
@@ -28,11 +51,19 @@ export class DataModel {
   }
 
   private getModelName(name: string) {
-    return `${this.options.modelPrefix}${upperCaseFirst(name)}${this.options.modelSuffix}`;
+    return `${this.options.modelPrefix}${upperCaseFirst(this.stripServicePrefix(name))}${this.options.modelSuffix}`;
   }
 
   private getEnumName(name: string) {
     return `${upperCaseFirst(name)}`;
+  }
+
+  private getOperationName(name: string) {
+    return firstCharLowerCase(this.stripServicePrefix(name));
+  }
+
+  private getEntryPointName(name: string) {
+    return firstCharLowerCase(name);
   }
 
   private stripServicePrefix(token: string) {
@@ -60,7 +91,7 @@ export class DataModel {
       // support for base types, i.e. extends clause of interfaces
       const baseTypes = [];
       if (bType) {
-        baseTypes.push(this.getModelName(this.stripServicePrefix(bType)));
+        baseTypes.push(this.getModelName(bType));
       }
 
       this.modelTypes[name] = {
@@ -70,6 +101,11 @@ export class DataModel {
         props: props.map(this.mapProperty),
       };
     });
+
+    // functions, actions, EntitySet, Singleton
+    this.addOperations(schema.Function, OperationTypes.Function);
+    this.addOperations(schema.Action, OperationTypes.Action);
+    this.digestEntityContainer(schema.EntityContainer[0]);
   }
 
   private mapProperty = (p: Property | NavigationProperty): PropertyModel => {
@@ -150,31 +186,164 @@ export class DataModel {
     }
   }
 
+  private addOperations(operations: Array<Function | Action>, type: OperationTypes) {
+    if (!operations || !operations.length) {
+      return;
+    }
+
+    operations.forEach((op) => {
+      const params: Array<PropertyModel> = op.Parameter?.map(this.mapProperty) ?? [];
+      const returnType: PropertyModel | undefined = op.ReturnType?.map((rt) => {
+        return this.mapProperty({ ...rt, $: { Name: "workaround", ...rt.$ } });
+      })[0];
+      const isBound = op.$.IsBound === "true";
+
+      if (isBound && !params.length) {
+        throw Error(`IllegalState: Operation '${op.$.Name}' is bound, but has no parameters!`);
+      }
+
+      const binding = isBound ? params[0].type : ROOT_OPERATION;
+      if (!this.operationTypes[binding]) {
+        this.operationTypes[binding] = [];
+      }
+
+      this.operationTypes[binding].push({
+        odataName: op.$.Name,
+        name: this.getOperationName(op.$.Name),
+        type: type,
+        parameters: params,
+        returnType: returnType ? { odataType: returnType.odataType, type: returnType.type } : undefined,
+      });
+    });
+  }
+
+  private digestEntityContainer(container: EntityContainer) {
+    const { actions, functions, singletons, entitySets } = this.container;
+
+    container.ActionImport?.forEach((actionImport) => {
+      const name = this.getOperationName(actionImport.$.Name);
+      const operationName = this.getOperationName(actionImport.$.Action);
+
+      actions[name] = {
+        name: name,
+        odataName: actionImport.$.Name,
+        operation: this.getRootOperationType(operationName),
+      };
+    });
+
+    container.FunctionImport?.forEach((funcImport) => {
+      const name = this.getOperationName(funcImport.$.Name);
+      const operationName = this.getOperationName(funcImport.$.Function);
+
+      functions[name] = {
+        name,
+        odataName: funcImport.$.Name,
+        operation: this.getRootOperationType(operationName),
+        entitySet: funcImport.$.EntitySet,
+      };
+    });
+
+    container.Singleton?.forEach((singleton) => {
+      const name = this.getEntryPointName(singleton.$.Name);
+      singletons[name] = {
+        name,
+        odataName: singleton.$.Name,
+        type: this.getModel(this.getModelName(singleton.$.Type)),
+      };
+    });
+
+    container.EntitySet?.forEach((entitySet) => {
+      const name = this.getEntryPointName(entitySet.$.Name);
+
+      entitySets[name] = {
+        name,
+        odataName: entitySet.$.Name,
+        entityType: this.getModel(this.getModelName(entitySet.$.EntityType)),
+        navPropBinding: entitySet.NavigationPropertyBinding?.map((binding) => ({
+          path: this.stripServicePrefix(binding.$.Path),
+          target: binding.$.Target,
+        })),
+      };
+    });
+  }
+
+  /**
+   * The service name.
+   * @returns
+   */
   public getServiceName() {
     return this.serviceName;
   }
 
+  /**
+   * The prefix used to reference model or enum types in this schema.
+   * @returns service prefix
+   */
   public getServicePrefix() {
     return this.servicePrefix;
   }
 
+  /**
+   * Get a specific model by its name.
+   *
+   * @param modelName the final model name that is generated
+   * @returns the model type
+   */
   public getModel(modelName: string) {
     return this.modelTypes[modelName];
   }
 
+  /**
+   * Retrieve all knwon models, i.e. EntityType and ComplexType nodes from the EDMX model.
+   *
+   * @returns list of model types
+   */
   public getModels() {
     return Object.values(this.modelTypes);
   }
 
+  /**
+   * Get a specific enum by its enum
+   *
+   * @param name the final enum name that is generated
+   * @returns enum type
+   */
   public getEnum(name: string) {
     return this.enumTypes[name];
   }
 
+  /**
+   * Get list of all known enums, i.e. EnumType nodes from the EDMX model.
+   * @returns list of enum types
+   */
   public getEnums() {
     return Object.values(this.enumTypes);
   }
 
+  /**
+   * Get all special primitive data types, i.e. data types which are represented at strings,
+   * but convey a specific meaning: DateString, GuidString, etc.
+   *
+   * @returns list of additional data types to import when working with the data model
+   */
   public getPrimitiveTypeImports(): Array<string> {
     return [...this.primitiveTypeImports];
+  }
+
+  public getRootOperationType(name: string): OperationType {
+    const rootOps = this.operationTypes[ROOT_OPERATION] || [];
+    const rootOp = rootOps.find((op) => op.name === name);
+    if (!rootOp) {
+      throw Error(`Couldn't find root operation with name [${name}]`);
+    }
+    return rootOp;
+  }
+
+  public getOperationTypeByBinding(binding: string): Array<OperationType> | undefined {
+    return [...this.operationTypes[binding]];
+  }
+
+  public getEntityContainer() {
+    return this.container;
   }
 }
