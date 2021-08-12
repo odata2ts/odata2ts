@@ -73,6 +73,7 @@ export class App {
       this.formatAndWriteFile(fileNameQObjects, qDefinition, formatter);
     }
 
+    // Generate Individual OData-Service
     if (options.mode === "service" || options.mode === "all") {
       const fileNameService = path.join(outputPath, `${serviceName}Service.ts`);
       await remove(fileNameService);
