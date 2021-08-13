@@ -48,11 +48,12 @@ export class App {
     // parse model information from edmx into something we can really work with
     // => that stuff is called dataModel!
     const dataModel = new DataModel(schema, options);
+    const fileNames = dataModel.getFileNames();
 
     // Generate Model Interfaces
     // supported edmx types: EntityType, ComplexType, EnumType
     if (options.mode === "models" || options.mode === "all") {
-      const fileName = path.join(outputPath, serviceName + ".ts");
+      const fileName = this.getTsFilePath(outputPath, fileNames.model);
       await remove(fileName);
       const serviceDefinition = project.createSourceFile(fileName);
 
@@ -64,7 +65,8 @@ export class App {
     // supported edmx types: EntityType, ComplexType
     // supported edmx prop types: primitive types, enum types, primitive collection (incl enum types), entity collection, entity object, complex object
     if (options.mode === "qobjects" || options.mode === "all") {
-      const fileNameQObjects = path.join(outputPath, `Q${serviceName}.ts`);
+      const fileNameQObjects = this.getTsFilePath(outputPath, fileNames.qObject);
+
       await remove(fileNameQObjects);
       const qDefinition = project.createSourceFile(fileNameQObjects);
 
@@ -75,13 +77,17 @@ export class App {
 
     // Generate Individual OData-Service
     if (options.mode === "service" || options.mode === "all") {
-      const fileNameService = path.join(outputPath, `${serviceName}Service.ts`);
+      const fileNameService = this.getTsFilePath(outputPath, fileNames.service);
       await remove(fileNameService);
       const qDefinition = project.createSourceFile(fileNameService);
 
       new ServiceGenerator().generate(dataModel, qDefinition);
       this.formatAndWriteFile(fileNameService, qDefinition, formatter);
     }
+  }
+
+  private getTsFilePath(outputPath: string, name: string): string {
+    return path.join(outputPath, `${name}.ts`);
   }
 
   private async formatAndWriteFile(fileName: string, file: SourceFile, formatter: BaseFormatter) {
