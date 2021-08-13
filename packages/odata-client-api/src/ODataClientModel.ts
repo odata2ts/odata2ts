@@ -1,7 +1,7 @@
 import { ODataResponse } from "./ODataResponseModel";
 
-export interface ODataClient<RequestConfig> {
-  post<T>(url: string, data: T, requestConfig?: RequestConfig): ODataResponse<T>;
+export interface ODataClient<RequestConfig = any> {
+  post<T, ResponseModel>(url: string, data: T, requestConfig?: RequestConfig): ODataResponse<ResponseModel>;
   get<T>(url: string, requestConfig?: RequestConfig): ODataResponse<T>;
   put<T>(url: string, data: T, requestConfig?: RequestConfig): ODataResponse<void>;
   patch<T>(url: string, data: Partial<T>, requestConfig?: RequestConfig): ODataResponse<void>;
