@@ -13,7 +13,7 @@ function addBase(urlPart: string) {
 }
 
 describe("ODataUriBuilder Test", () => {
-  let toTest: ODataUriBuilder<Person, "name" | "age">;
+  let toTest: ODataUriBuilder<Person>;
 
   /**
    * Always use a new builder for each  test.
