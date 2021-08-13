@@ -12,4 +12,9 @@ describe("Integration Testing of Service Generation", () => {
     expect(result.data.FirstName).toBe("Russell");
     expect(result.data.LastName).toBe("Whyte");
   });
+
+  test("unbound function with params", async () => {
+    const result = await testService.getNearestAirport(123, 345);
+    expect(result.data.IcaoCode).toBe("ZBAA");
+  });
 });
