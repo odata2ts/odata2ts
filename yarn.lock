@@ -1874,6 +1874,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@odata2ts/odata-client-api@*, @odata2ts/odata-client-api@workspace:packages/odata-client-api":
+  version: 0.0.0-use.local
+  resolution: "@odata2ts/odata-client-api@workspace:packages/odata-client-api"
+  dependencies:
+    "@types/jest": 26.0.23
+    "@types/node": ^16.0.0
+    jest: 27.0.4
+    rimraf: ^3.0.2
+    ts-jest: 27.0.3
+    ts-node: 10.0.0
+    typescript: 4.2.4
+  languageName: unknown
+  linkType: soft
+
 "@odata2ts/odata-query-objects@*, @odata2ts/odata-query-objects@^0.5.0, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
@@ -1888,7 +1902,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-service@workspace:packages/odata-service":
+"@odata2ts/odata-service@*, @odata2ts/odata-service@workspace:packages/odata-service":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
@@ -1925,20 +1939,30 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2model@workspace:packages/odata2model"
   dependencies:
-    "@odata2ts/odata-query-objects": ^0.5.0
+    "@odata2ts/odata-client-api": "*"
+    "@odata2ts/odata-query-objects": "*"
+    "@odata2ts/odata-service": "*"
     "@types/fs-extra": ^9.0.11
+    "@types/jest": ^27.0.1
     "@types/node": ^15.12.2
     "@types/prettier": ^2.3.0
     "@types/xml2js": ^0.4.8
+    axios: ^0.21.1
     commander: ^7.2.0
     fs-extra: ^10.0.0
+    jest: ^27.0.6
     prettier: ^2.3.1
     rimraf: ^3.0.2
+    ts-jest: ^27.0.4
     ts-morph: ^11.0.0
     ts-node: ^10.0.0
     typescript: ^4.3.2
     upper-case-first: ^2.0.2
     xml2js: ^0.4.23
+  peerDependencies:
+    "@odata2ts/odata-client-api": "*"
+    "@odata2ts/odata-query-objects": "*"
+    "@odata2ts/odata-service": "*"
   bin:
     odata2model: lib/cli.js
   languageName: unknown
@@ -2126,6 +2150,16 @@ __metadata:
     jest-diff: ^26.0.0
     pretty-format: ^26.0.0
   checksum: a015676b78bdc51be6f6315acef10d9106ea8064e3e49143bca3c75b834b61285b45c5f5ccfd049a80107f1e2869a9183cdb5be85816c073ea8dd05852fafdc6
+  languageName: node
+  linkType: hard
+
+"@types/jest@npm:^27.0.1":
+  version: 27.0.1
+  resolution: "@types/jest@npm:27.0.1"
+  dependencies:
+    jest-diff: ^27.0.0
+    pretty-format: ^27.0.0
+  checksum: 5f2382b5800e736a1fb805b5ce35dc9276b978ab24225f3d3da0c5f74789a528cd8e2b085e3a157a12b1395038f137f7e1babd18c4b55c54c25f5db1d4ea3153
   languageName: node
   linkType: hard
 
@@ -2550,7 +2584,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:0.21.1":
+"axios@npm:0.21.1, axios@npm:^0.21.1":
   version: 0.21.1
   resolution: "axios@npm:0.21.1"
   dependencies:
@@ -5249,6 +5283,18 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
+"jest-diff@npm:^27.0.0, jest-diff@npm:^27.0.6":
+  version: 27.0.6
+  resolution: "jest-diff@npm:27.0.6"
+  dependencies:
+    chalk: ^4.0.0
+    diff-sequences: ^27.0.6
+    jest-get-type: ^27.0.6
+    pretty-format: ^27.0.6
+  checksum: 054aa17420ad516f06294a7b6cd014881fac202fee3833893a6414f84bc49a910d3d0dff5bf527462f724b1e5790eecf2c1f0bf2ea87e51b5fdd448334dd1608
+  languageName: node
+  linkType: hard
+
 "jest-diff@npm:^27.0.2":
   version: 27.0.2
   resolution: "jest-diff@npm:27.0.2"
@@ -5258,18 +5304,6 @@ fsevents@^2.3.2:
     jest-get-type: ^27.0.1
     pretty-format: ^27.0.2
   checksum: 2335c861c51c2d83e74ccbbb123ea6ae484cf217f447d7ec6ea5db69c32cae3c6f19d52b70fa8e13a7003287f13f63cf06575a569e16b4765248dd7f4e2d3b11
-  languageName: node
-  linkType: hard
-
-"jest-diff@npm:^27.0.6":
-  version: 27.0.6
-  resolution: "jest-diff@npm:27.0.6"
-  dependencies:
-    chalk: ^4.0.0
-    diff-sequences: ^27.0.6
-    jest-get-type: ^27.0.6
-    pretty-format: ^27.0.6
-  checksum: 054aa17420ad516f06294a7b6cd014881fac202fee3833893a6414f84bc49a910d3d0dff5bf527462f724b1e5790eecf2c1f0bf2ea87e51b5fdd448334dd1608
   languageName: node
   linkType: hard
 
@@ -7709,6 +7743,18 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
+"pretty-format@npm:^27.0.0, pretty-format@npm:^27.0.6":
+  version: 27.0.6
+  resolution: "pretty-format@npm:27.0.6"
+  dependencies:
+    "@jest/types": ^27.0.6
+    ansi-regex: ^5.0.0
+    ansi-styles: ^5.0.0
+    react-is: ^17.0.1
+  checksum: 29baf8d88a35c04ef81e310e3e239c6fe4f5b0827c9bd8f660df78e94632a9677bd113a64be78cc95c52945a4369b85828f32559cfd86c1b591aa3cc39d0798d
+  languageName: node
+  linkType: hard
+
 "pretty-format@npm:^27.0.2":
   version: 27.0.2
   resolution: "pretty-format@npm:27.0.2"
@@ -7718,18 +7764,6 @@ fsevents@^2.3.2:
     ansi-styles: ^5.0.0
     react-is: ^17.0.1
   checksum: d55daeb15770d46953e2e58b1f7568f91a0b8d4b4e4ccc788fcfa81a7638eb0f024181616da1f30073136d595137fcfef400413d7e0c2387baeb094dc72b0a0b
-  languageName: node
-  linkType: hard
-
-"pretty-format@npm:^27.0.6":
-  version: 27.0.6
-  resolution: "pretty-format@npm:27.0.6"
-  dependencies:
-    "@jest/types": ^27.0.6
-    ansi-regex: ^5.0.0
-    ansi-styles: ^5.0.0
-    react-is: ^17.0.1
-  checksum: 29baf8d88a35c04ef81e310e3e239c6fe4f5b0827c9bd8f660df78e94632a9677bd113a64be78cc95c52945a4369b85828f32559cfd86c1b591aa3cc39d0798d
   languageName: node
   linkType: hard
 
@@ -9043,6 +9077,39 @@ fsevents@^2.3.2:
   bin:
     ts-jest: cli.js
   checksum: a63f3a8620a16335d745f22377a9cc118129d28a5b122c609a7c6aabbb8048c85733c771a0dd39b136e8a75401473409452bdd3c5b9e3b85317c2e3f3ac03267
+  languageName: node
+  linkType: hard
+
+"ts-jest@npm:^27.0.4":
+  version: 27.0.4
+  resolution: "ts-jest@npm:27.0.4"
+  dependencies:
+    bs-logger: 0.x
+    buffer-from: 1.x
+    fast-json-stable-stringify: 2.x
+    jest-util: ^27.0.0
+    json5: 2.x
+    lodash: 4.x
+    make-error: 1.x
+    mkdirp: 1.x
+    semver: 7.x
+    yargs-parser: 20.x
+  peerDependencies:
+    "@babel/core": ">=7.0.0-beta.0 <8"
+    "@types/jest": ^26.0.0
+    babel-jest: ">=27.0.0 <28"
+    jest: ^27.0.0
+    typescript: ">=3.8 <5.0"
+  peerDependenciesMeta:
+    "@babel/core":
+      optional: true
+    "@types/jest":
+      optional: true
+    babel-jest:
+      optional: true
+  bin:
+    ts-jest: cli.js
+  checksum: 2891c2052f881e9350367ec0f978193d4268485496aa2613e45d6208f5809e7a04932105be38f3d1c016ff43d7699b7c7728728df6864ce22bc054aa0954af2f
   languageName: node
   linkType: hard
 
