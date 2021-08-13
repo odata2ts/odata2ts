@@ -49,7 +49,7 @@ interface ComplexEntity {
 const qComplex: QEntityModel<ComplexEntity, EnumUnion> = {
   x: new QNumberPath("x"),
   y: new QStringPath("y"),
-  Z: new QBooleanPath("Z"),
+  z: new QBooleanPath("Z"),
   az: new QDatePath("az"),
   bz: new QTimeOfDayPath("bz"),
   cz: new QDateTimeOffsetPath("cz"),

@@ -32,7 +32,9 @@ type Unpacked<T> = T extends (infer U)[] ? U : T;
  * Nominal types (date & time stuff) must come first, otherwise string would win in this case.
  */
 export type QPropContainer<TypeModel, EnumTypes> = {
-  [Property in keyof TypeModel]: TypeModel[Property] extends DateString
+  [Property in keyof TypeModel as Property extends string
+    ? Uncapitalize<Property>
+    : never]: TypeModel[Property] extends DateString
     ? QDatePath
     : TypeModel[Property] extends TimeOfDayString
     ? QTimeOfDayPath
