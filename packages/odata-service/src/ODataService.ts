@@ -1,10 +1,16 @@
+import { ODataClient } from "@odata2ts/odata-client-api";
+
 export class ODataService {
-  constructor(private basePath: string, private name: string) {
+  constructor(protected client: ODataClient<any>, protected basePath: string) {
+    if (!client) {
+      throw Error("[client] must be supplied to ODataService!");
+    }
     if (!basePath || !basePath.trim()) {
       throw Error("[basePath] must be supplied to ODataService!");
     }
-    if (!name || !name.trim()) {
-      throw Error("[name] must be supplied to ODataService!");
-    }
+  }
+
+  public getPath(): string {
+    return this.basePath;
   }
 }
