@@ -17,10 +17,7 @@ export class QueryObjectGenerator implements TsGenerator {
 
     dataModel.getModels().forEach((model) => {
       // const keyRef = et.Key[0].PropertyRef.map((propRef) => `"${propRef.$.Name}"`).join(" | ");
-      const propContainer = this.generateQueryObjectProps(
-        [...this.collectBaseClassProps(dataModel, model), ...model.props],
-        qTypeImports
-      );
+      const propContainer = this.generateQueryObjectProps([...model.baseProps, ...model.props], qTypeImports);
 
       modelImports.add(model.name);
 
@@ -29,7 +26,7 @@ export class QueryObjectGenerator implements TsGenerator {
         isExported: true,
         declarations: [
           {
-            name: `q${model.name}`,
+            name: model.qName,
             type: `QEntityModel<${model.name}, ${enumTypeUnion}>`,
             initializer: Writers.object(propContainer),
           },
@@ -48,40 +45,28 @@ export class QueryObjectGenerator implements TsGenerator {
       sourceFile.addImportDeclaration({
         isTypeOnly: true,
         namedImports: [...modelImports],
-        moduleSpecifier: `./${dataModel.getServiceName()}`,
+        moduleSpecifier: `./${dataModel.getFileNames().model}`,
       });
     }
   }
 
-  private collectBaseClassProps(dataModel: DataModel, model: ModelType): Array<PropertyModel> {
-    return model.baseClasses.reduce((collector, bc) => {
-      const baseModel = dataModel.getModel(bc);
-      if (baseModel.baseClasses.length) {
-        collector.push(...this.collectBaseClassProps(dataModel, baseModel));
-      }
-
-      collector.push(...baseModel.props);
-      return collector;
-    }, [] as Array<PropertyModel>);
-  }
-
   private generateQueryObjectProps(props: Array<PropertyModel>, qTypeImports: Set<string>) {
     return props.reduce((collector, prop) => {
-      const name = prop.odataName;
+      const { name, odataName } = prop;
       // determine matching QPath type
       let qPathType: string;
       let qPathInit: string;
 
       if (prop.dataType === DataTypes.EnumType) {
         qPathType = "QEnumPath";
-        qPathInit = `new ${qPathType}("${name}")`;
+        qPathInit = `new ${qPathType}("${odataName}")`;
       } else if (prop.dataType === DataTypes.PrimitiveType) {
         // Custom primitive types like DateString or GuidString end on suffix 'String' => remove that
         qPathType = `Q${upperCaseFirst(prop.type.replace(/String$/, ""))}Path`;
-        qPathInit = `new ${qPathType}("${name}")`;
+        qPathInit = `new ${qPathType}("${odataName}")`;
       } else if (prop.dataType === DataTypes.ModelType) {
         qPathType = "QEntityPath";
-        qPathInit = `new ${qPathType}("${name}", () => q${upperCaseFirst(prop.type)})`;
+        qPathInit = `new ${qPathType}("${odataName}", () => ${prop.qObject})`;
       } else {
         throw Error(`Unknonw DataType [${prop.dataType}] for prop with name [${name}]`);
       }
@@ -89,12 +74,12 @@ export class QueryObjectGenerator implements TsGenerator {
       // factor in collections
       if (prop.isCollection) {
         const cType = `QCollectionPath`;
-        const qObject =
-          prop.dataType === DataTypes.ModelType
-            ? `q${upperCaseFirst(prop.type)}`
-            : prop.dataType === DataTypes.EnumType
-            ? `qEnumCollection`
-            : `q${upperCaseFirst(prop.type)}Collection`;
+        const qObject = prop.qObject;
+
+        if (!qObject) {
+          throw Error("QObject for collection is missing!");
+        }
+
         // workaround: force the typing to work by adding additional type infos fro primitive qObjects
         const typeAddition = prop.dataType === DataTypes.PrimitiveType ? `<{it: ${prop.type}}>` : "";
         qPathInit = `new ${cType}${typeAddition}("${name}", () => ${qObject})`;
