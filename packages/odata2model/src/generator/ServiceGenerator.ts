@@ -2,9 +2,10 @@ import { MethodDeclarationStructure, OptionalKind, Scope, SourceFile } from "ts-
 
 import { DataModel } from "./../data-model/DataModel";
 import { TsGenerator } from "./GeneratorModel";
-import { ModelTypes } from "../data-model/DataTypeModel";
+import { DataTypes, ModelTypes } from "../data-model/DataTypeModel";
 
 const ROOT_SERVICE = "ODataService";
+const URL_COMPILER = "compileParameterPath";
 const RESPONSE_TYPES = {
   collection: "ODataCollectionResponse",
   model: "ODataModelResponse",
@@ -16,7 +17,7 @@ export class ServiceGenerator implements TsGenerator {
     const serviceName = dataModel.getFileNames().service;
     const container = dataModel.getEntityContainer();
 
-    const serviceImports: Set<string> = new Set([ROOT_SERVICE]);
+    const serviceImports: Set<string> = new Set([ROOT_SERVICE, URL_COMPILER]);
     const modelImports: Set<string> = new Set();
     const qImports: Set<string> = new Set();
     const clientApiImports: Set<string> = new Set(["ODataClient", "ODataResponse"]);
@@ -64,6 +65,11 @@ export class ServiceGenerator implements TsGenerator {
         ...Object.values(container.functions).map(
           ({ name, odataName, operation }): OptionalKind<MethodDeclarationStructure> => {
             const returnType = operation.returnType ? operation.returnType.type : "void";
+            const urlInlineParams = operation.parameters.map((p) => {
+              const isLiteral = p.type !== "string" && p.dataType !== DataTypes.EnumType;
+              return `${p.name}: { isLiteral: ${isLiteral}, value: ${p.name} }`;
+            });
+            const urlInlineParamsExpr = urlInlineParams.length ? `, { ${urlInlineParams.join(", ")} }` : "";
 
             clientApiImports.add(RESPONSE_TYPES.model);
 
@@ -75,7 +81,10 @@ export class ServiceGenerator implements TsGenerator {
                 type: param.type, // todo collection types
               })),
               returnType: `ODataResponse<${RESPONSE_TYPES.model}<${returnType}>>`,
-              statements: `return this.client.get(this.getPath() + "/${odataName}");`,
+              statements: [
+                `const url = ${URL_COMPILER}(this.getPath(), "${odataName}"${urlInlineParamsExpr})`,
+                `return this.client.get(url);`,
+              ],
             };
           }
         ),
