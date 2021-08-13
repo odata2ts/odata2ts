@@ -4,6 +4,11 @@ export const enum DataTypes {
   ModelType = "ModelType",
 }
 
+export const enum ModelTypes {
+  EntityType = "EntityType",
+  ComplexType = "ComplexType",
+}
+
 export const enum OperationTypes {
   Function = "Function",
   Action = "Action",
@@ -14,6 +19,7 @@ export interface PropertyModel {
   name: string;
   odataType: string;
   type: string;
+  qObject?: string;
   required: boolean;
   isCollection: boolean;
   dataType: DataTypes;
@@ -22,8 +28,13 @@ export interface PropertyModel {
 export interface ModelType {
   odataName: string;
   name: string;
+  qName: string;
+  modelType: ModelTypes;
+  keys: Array<string>;
   props: Array<PropertyModel>;
+  baseProps: Array<PropertyModel>;
   baseClasses: Array<string>;
+  getKeyUnion(): string;
 }
 
 export interface EnumType {

@@ -10,6 +10,8 @@ import {
   Action,
   Function,
   EntityContainer,
+  EntityType,
+  ComplexType,
 } from "../odata/ODataEdmxModel";
 import {
   ModelType,
@@ -19,6 +21,7 @@ import {
   EntityContainerModel,
   OperationType,
   OperationTypes,
+  ModelTypes,
 } from "./DataTypeModel";
 
 const EDM_PREFIX = "Edm.";
@@ -31,6 +34,12 @@ const ROOT_OPERATION = "/";
 export class DataModel {
   private serviceName: string;
   private servicePrefix: string;
+
+  private fileNames = {
+    model: "",
+    qObject: "",
+    service: "",
+  };
 
   // combines entity & complex types
   private modelTypes: { [name: string]: ModelType } = {};
@@ -47,11 +56,22 @@ export class DataModel {
     this.serviceName = schema.$.Namespace;
     this.servicePrefix = this.serviceName + ".";
 
+    const name = upperCaseFirst(this.serviceName);
+    this.fileNames = {
+      model: `${name}Model`,
+      qObject: `Q${name}`,
+      service: `${name}${name.endsWith("Service") ? "" : "Service"}`,
+    };
+
     this.digestSchema(schema);
   }
 
   private getModelName(name: string) {
     return `${this.options.modelPrefix}${upperCaseFirst(this.stripServicePrefix(name))}${this.options.modelSuffix}`;
+  }
+
+  private getQName(name: string) {
+    return `q${upperCaseFirst(this.stripServicePrefix(name))}`;
   }
 
   private getEnumName(name: string) {
@@ -83,6 +103,21 @@ export class DataModel {
 
     // entity types & complex types
     const models = [...(schema.EntityType ?? []), ...(schema.ComplexType ?? [])];
+    this.addModel(schema.EntityType, ModelTypes.EntityType);
+    this.addModel(schema.ComplexType, ModelTypes.ComplexType);
+    this.postProcessModel();
+
+    // functions, actions, EntitySet, Singleton
+    this.addOperations(schema.Function, OperationTypes.Function);
+    this.addOperations(schema.Action, OperationTypes.Action);
+    this.digestEntityContainer(schema.EntityContainer[0]);
+  }
+
+  private addModel(models: Array<EntityType | ComplexType>, modelType: ModelTypes) {
+    if (!models || !models.length) {
+      return;
+    }
+
     models.forEach((model) => {
       const name = this.getModelName(model.$.Name);
       const bType = model.$.BaseType;
@@ -94,56 +129,114 @@ export class DataModel {
         baseTypes.push(this.getModelName(bType));
       }
 
+      // key support
+      // we cannot add keys now stemming from base classes
+      // => postprocess required
+      const keys: Array<string> = [];
+      if (modelType === ModelTypes.EntityType) {
+        const entity = model as EntityType;
+        if (entity.Key && entity.Key.length && entity.Key[0].PropertyRef.length) {
+          keys.push(...(model as EntityType).Key[0].PropertyRef.map((key) => key.$.Name));
+        }
+      }
+
       this.modelTypes[name] = {
+        modelType,
+        name,
+        qName: this.getQName(model.$.Name),
         odataName: model.$.Name,
-        name: name,
         baseClasses: baseTypes,
+        keys: keys, // postprocess required to include keys from base classes
         props: props.map(this.mapProperty),
+        baseProps: [], // postprocess required
+        getKeyUnion: () => keys.join(" | "),
       };
     });
+  }
 
-    // functions, actions, EntitySet, Singleton
-    this.addOperations(schema.Function, OperationTypes.Function);
-    this.addOperations(schema.Action, OperationTypes.Action);
-    this.digestEntityContainer(schema.EntityContainer[0]);
+  private postProcessModel() {
+    Object.values(this.modelTypes).forEach((model) => {
+      const [baseProps, baseKeys] = this.collectBaseClassPropsAndKeys(model);
+      model.baseProps = baseProps;
+      model.keys.push(...baseKeys);
+
+      if (model.modelType === ModelTypes.EntityType && !model.keys.length) {
+        throw Error(`Key property is missing from Entity "${model.name}" (${model.odataName})!`);
+      }
+    });
+  }
+
+  private collectBaseClassPropsAndKeys(model: ModelType): [Array<PropertyModel>, Array<string>] {
+    return model.baseClasses.reduce(
+      ([props, keys], bc) => {
+        const baseModel = this.getModel(bc);
+
+        // recursiveness
+        if (baseModel.baseClasses.length) {
+          const [parentProps, parentKeys] = this.collectBaseClassPropsAndKeys(baseModel);
+          props.push(...parentProps);
+          keys.push(...parentKeys);
+        }
+
+        props.push(...baseModel.props);
+        keys.push(...baseModel.keys);
+        return [props, keys];
+      },
+      [[], []] as [Array<PropertyModel>, Array<string>]
+    );
   }
 
   private mapProperty = (p: Property | NavigationProperty): PropertyModel => {
     const isCollection = !!p.$.Type.match(/^Collection\(/);
     const dataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
 
-    const result: Partial<PropertyModel> = {
-      odataName: p.$.Name,
-      name: firstCharLowerCase(p.$.Name),
-      odataType: p.$.Type,
-      required: p.$.Nullable === "false",
-      isCollection: isCollection,
-    };
+    let resultType: string;
+    let resultDt: DataTypes;
+    let qEntityInstance: string | undefined;
 
     // domain object known from service, e.g. EntitySet, EnumType, ...
     if (dataType.startsWith(this.servicePrefix)) {
       const newType = this.stripServicePrefix(dataType);
       const enumType = this.enumTypes[newType];
+
       // special handling for enums
       if (enumType) {
-        result.type = enumType.name;
-        result.dataType = DataTypes.EnumType;
-      } else {
-        result.type = this.getModelName(newType);
-        result.dataType = DataTypes.ModelType;
+        resultType = enumType.name;
+        resultDt = DataTypes.EnumType;
+        if (isCollection) {
+          qEntityInstance = "qEnumCollection";
+        }
+      }
+      // handling of models
+      else {
+        resultType = this.getModelName(newType);
+        qEntityInstance = this.getQName(newType);
+        resultDt = DataTypes.ModelType;
       }
     }
     // OData built-in data types
     else if (dataType.startsWith(EDM_PREFIX)) {
-      result.type = this.mapODataType(dataType);
-      result.dataType = DataTypes.PrimitiveType;
+      resultType = this.mapODataType(dataType);
+      resultDt = DataTypes.PrimitiveType;
+      if (isCollection) {
+        qEntityInstance = `q${upperCaseFirst(resultType)}Collection`;
+      }
     } else {
       throw Error(
         `Unknown type [${dataType}]: Not 'Collection(...)', not '${this.servicePrefix}*', not OData type 'Edm.*'`
       );
     }
 
-    return result as PropertyModel;
+    return {
+      odataName: p.$.Name,
+      name: firstCharLowerCase(p.$.Name),
+      odataType: p.$.Type,
+      type: resultType,
+      qObject: qEntityInstance,
+      dataType: resultDt,
+      required: p.$.Nullable === "false",
+      isCollection: isCollection,
+    };
   };
 
   private mapODataType(type: string): string {
@@ -281,6 +374,10 @@ export class DataModel {
    */
   public getServicePrefix() {
     return this.servicePrefix;
+  }
+
+  public getFileNames() {
+    return { ...this.fileNames };
   }
 
   /**
