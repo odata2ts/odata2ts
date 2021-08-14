@@ -113,6 +113,8 @@ export class DataModel {
     this.digestEntityContainer(schema.EntityContainer[0]);
   }
 
+  private getProps(props: Array<Property | NavigationProperty>, propNames: Array<string>) {}
+
   private addModel(models: Array<EntityType | ComplexType>, modelType: ModelTypes) {
     if (!models || !models.length) {
       return;
@@ -136,7 +138,8 @@ export class DataModel {
       if (modelType === ModelTypes.EntityType) {
         const entity = model as EntityType;
         if (entity.Key && entity.Key.length && entity.Key[0].PropertyRef.length) {
-          keys.push(...(model as EntityType).Key[0].PropertyRef.map((key) => key.$.Name));
+          const propNames = entity.Key[0].PropertyRef.map((key) => key.$.Name);
+          keys.push(...propNames);
         }
       }
 
@@ -146,7 +149,8 @@ export class DataModel {
         qName: this.getQName(model.$.Name),
         odataName: model.$.Name,
         baseClasses: baseTypes,
-        keys: keys, // postprocess required to include keys from base classes
+        keyNames: keys, // postprocess required to include key specs from base classes
+        keys: [], // postprocess required to include props from base classes
         props: props.map(this.mapProperty),
         baseProps: [], // postprocess required
         getKeyUnion: () => keys.join(" | "),
@@ -158,10 +162,22 @@ export class DataModel {
     Object.values(this.modelTypes).forEach((model) => {
       const [baseProps, baseKeys] = this.collectBaseClassPropsAndKeys(model);
       model.baseProps = baseProps;
-      model.keys.push(...baseKeys);
+      model.keyNames.push(...baseKeys);
 
-      if (model.modelType === ModelTypes.EntityType && !model.keys.length) {
-        throw Error(`Key property is missing from Entity "${model.name}" (${model.odataName})!`);
+      if (model.modelType === ModelTypes.EntityType) {
+        // sanity check: entity types require key specification
+        if (!model.keyNames.length) {
+          throw Error(`Key property is missing from Entity "${model.name}" (${model.odataName})!`);
+        }
+
+        const props = [...model.props, ...model.baseProps];
+        model.keys = model.keyNames.map((keyName) => {
+          const prop = props.find((p) => p.odataName === keyName);
+          if (!prop) {
+            throw Error(`Key with name [${keyName}] not found in props!`);
+          }
+          return prop;
+        });
       }
     });
   }
@@ -179,7 +195,7 @@ export class DataModel {
         }
 
         props.push(...baseModel.props);
-        keys.push(...baseModel.keys);
+        keys.push(...baseModel.keyNames);
         return [props, keys];
       },
       [[], []] as [Array<PropertyModel>, Array<string>]

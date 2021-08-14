@@ -30,7 +30,8 @@ export interface ModelType {
   name: string;
   qName: string;
   modelType: ModelTypes;
-  keys: Array<string>;
+  keyNames: Array<string>;
+  keys: Array<PropertyModel>;
   props: Array<PropertyModel>;
   baseProps: Array<PropertyModel>;
   baseClasses: Array<string>;
