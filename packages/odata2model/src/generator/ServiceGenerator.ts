@@ -1,11 +1,14 @@
+import { compileParameterPath } from "@odata2ts/odata-service";
+import { ImportContainer } from "./ImportContainer";
+import { upperCaseFirst } from "upper-case-first";
+import { PropertyModel } from "./../data-model/DataTypeModel";
 import { ProjectManager } from "./../project/ProjectManager";
 import {
-  ClassDeclarationStructure,
+  ImportDeclarationStructure,
   MethodDeclarationStructure,
   OptionalKind,
-  Project,
+  PropertyDeclarationStructure,
   Scope,
-  SourceFile,
 } from "ts-morph";
 
 import { DataModel } from "./../data-model/DataModel";
@@ -13,7 +16,6 @@ import {
   ActionImportType,
   DataTypes,
   FunctionImportType,
-  ModelType,
   ModelTypes,
   OperationTypes,
 } from "../data-model/DataTypeModel";
@@ -27,35 +29,19 @@ const RESPONSE_TYPES = {
   value: "ODataValueResponse",
 };
 
-type ImportContainer = {
-  service: Set<string>;
-  model: Set<string>;
-  qobjects: Set<string>;
-  clientApi: Set<string>;
-};
-
 export class ServiceGenerator {
   constructor(private project: ProjectManager, private dataModel: DataModel) {}
 
-  private createImportContainer(): ImportContainer {
-    return {
-      service: new Set(),
-      model: new Set(),
-      qobjects: new Set(),
-      clientApi: new Set(["ODataClient", "ODataResponse"]),
-    };
-  }
-
-  public generate(): void {
-    const sourceFile = this.project.getMainServiceFile();
+  public async generate(): Promise<void> {
+    const sourceFile = await this.project.createMainServiceFile();
     const serviceName = this.dataModel.getFileNames().service;
     const container = this.dataModel.getEntityContainer();
-    const fileNames = this.dataModel.getFileNames();
 
-    const importContainer = this.createImportContainer();
-    importContainer.service.add(ROOT_SERVICE);
-    importContainer.service.add(URL_COMPILER);
-    importContainer.service.add(BODY_PARAM_COMPILER);
+    await this.generateModelServices();
+
+    const importContainer = new ImportContainer(this.dataModel);
+    importContainer.addFromClientApi("ODataClient", "ODataResponse");
+    importContainer.addFromService(ROOT_SERVICE, URL_COMPILER, BODY_PARAM_COMPILER);
 
     sourceFile.addClass({
       isExported: true,
@@ -85,9 +71,9 @@ export class ServiceGenerator {
             isEntity ? `, ${entityType.keys.map((k) => `"${k}"`).join("|")}` : ""
           }>`;
 
-          importContainer.service.add(serviceType);
-          importContainer.model.add(entityType.name);
-          importContainer.qobjects.add(entityType.qName);
+          importContainer.addFromService(serviceType);
+          importContainer.addGeneratedModel(entityType.name);
+          importContainer.addGeneratedQObject(entityType.qName);
 
           return {
             scope: Scope.Public,
@@ -97,52 +83,46 @@ export class ServiceGenerator {
         }),
       ],
       methods: [
-        ...this.generateMethods(Object.values(container.functions), OperationTypes.Function, importContainer.clientApi),
-        ...this.generateMethods(Object.values(container.actions), OperationTypes.Action, importContainer.clientApi),
+        ...this.generateMethods(Object.values(container.functions), OperationTypes.Function, importContainer),
+        ...this.generateMethods(Object.values(container.actions), OperationTypes.Action, importContainer),
       ],
     });
 
-    sourceFile.addImportDeclarations([
-      {
-        namedImports: [...importContainer.service],
-        moduleSpecifier: "@odata2ts/odata-service",
-      },
-      {
-        namedImports: [...importContainer.clientApi],
-        moduleSpecifier: "@odata2ts/odata-client-api",
-      },
-      {
-        namedImports: [...importContainer.model],
-        moduleSpecifier: "./" + fileNames.model,
-      },
-      {
-        namedImports: [...importContainer.qobjects],
-        moduleSpecifier: "./" + fileNames.qObject,
-      },
-    ]);
+    sourceFile.addImportDeclarations(importContainer.getImportDeclarations());
   }
 
-  private generateModelServices(importContainer: ImportContainer) {
-    this.dataModel.getModels().forEach((model) => {
-      const serviceType = "EntityTypeService";
+  private async generateModelServices() {
+    const entityServiceType = "EntityTypeService";
+    const entitySetServiceType = "EntitySetService";
+    const collectionServiceType = "CollectionService";
 
-      importContainer.service.add(serviceType);
-      importContainer.qobjects.add(model.qName);
+    // build service file for each entity & complex type
+    // also include a corresponding CollectionService for each type
+    for (const model of this.dataModel.getModels()) {
+      const serviceName = this.getServiceName(model.name);
+      const serviceFile = await this.project.createServiceFile(serviceName);
+      const props = [...model.baseProps, ...model.props];
+      const modelProps = props.filter((prop) => prop.dataType === DataTypes.ModelType);
+      const importContainer = new ImportContainer(this.dataModel);
 
-      // [model.name]
-      const result = {
+      importContainer.addFromService(entityServiceType);
+      importContainer.addFromClientApi("ODataClient");
+      importContainer.addGeneratedModel(model.name);
+      importContainer.addGeneratedQObject(model.qName);
+
+      // generate EntityTypeService
+      serviceFile.addClass({
         isExported: true,
-        name: this.getServiceName(model),
-        extends: serviceType + `<${model.name}>`,
+        name: serviceName,
+        extends: entityServiceType + `<${model.name}>`,
         ctors: [
           {
             parameters: [
               { name: "client", type: "ODataClient" },
               { name: "path", type: "string" },
-              { name: "qModel", type: `QEntityModel<${model.name}>` },
             ],
             statements: [
-              "super(client, path, qModel);",
+              `super(client, path, ${model.qName});`,
               /* ...Object.values(container.entitySets).map(({ name, entityType }) => {
               return `this.${name} = new EntitySetService(this.client, this.getPath(), ${entityType.qName})`;
             }), */
@@ -150,24 +130,90 @@ export class ServiceGenerator {
           },
         ],
         properties: [
-          {
-            scope: Scope.Private,
-            name: "qObject",
-            initializer: model.qName,
-          },
+          ...modelProps.map((prop) => {
+            const [key, propModelType] = this.getServiceNamesForProp(prop);
+            // don't include imports for this type
+            if (serviceName !== key) {
+              importContainer.addGeneratedService(key, propModelType);
+            }
+
+            return {
+              scope: Scope.Private,
+              name: prop.name,
+              type: `${propModelType} | undefined `,
+            } as PropertyDeclarationStructure;
+          }),
         ],
-      };
-    });
+        methods: [
+          ...modelProps.map(
+            (prop) =>
+              ({
+                scope: Scope.Public,
+                name: `get${upperCaseFirst(prop.name)}`,
+                returnType: this.getServiceNameForProp(prop),
+                statements: [
+                  `if(!this.${prop.name}) {`,
+                  // prettier-ignore
+                  `  this.${prop.name} = new ${this.getServiceNameForProp(prop)}(this.client, this.path + "/${prop.odataName}")`,
+                  "}",
+                  `return this.${prop.name}`,
+                ],
+              } as MethodDeclarationStructure)
+          ),
+        ],
+      });
+
+      if (model.modelType === ModelTypes.EntityType) {
+        importContainer.addFromService(entitySetServiceType);
+
+        // now the entity collection service
+        serviceFile.addClass({
+          isExported: true,
+          name: this.getCollectionServiceName(model.name),
+          extends: entitySetServiceType + `<${model.name}, >`,
+          ctors: [
+            {
+              parameters: [
+                { name: "client", type: "ODataClient" },
+                { name: "path", type: "string" },
+              ],
+              statements: [
+                `super(client, path, ${model.qName});`,
+                /* ...Object.values(container.entitySets).map(({ name, entityType }) => {
+              return `this.${name} = new EntitySetService(this.client, this.getPath(), ${entityType.qName})`;
+            }), */
+              ],
+            },
+          ],
+          methods: [],
+        });
+      }
+
+      serviceFile.addImportDeclarations(importContainer.getImportDeclarations(true));
+    }
   }
 
-  private getServiceName(model: ModelType) {
-    return model.name + "Service";
+  private getServiceName(name: string) {
+    return name + "Service";
+  }
+
+  private getCollectionServiceName(name: string) {
+    return name + "CollectionService";
+  }
+
+  private getServiceNamesForProp(prop: PropertyModel): [string, string] {
+    const serviceName = this.getServiceName(prop.type);
+    return [serviceName, prop.isCollection ? this.getCollectionServiceName(prop.type) : serviceName];
+  }
+
+  private getServiceNameForProp(prop: PropertyModel): string {
+    return this.getServiceNamesForProp(prop)[1];
   }
 
   private generateMethods(
     operations: Array<FunctionImportType | ActionImportType>,
     operationType: OperationTypes,
-    clientApiImports: Set<string>
+    importContainer: ImportContainer
   ) {
     return Object.values(operations).map(({ name, odataName, operation }): OptionalKind<MethodDeclarationStructure> => {
       const isFunc = operationType === OperationTypes.Function;
@@ -179,7 +225,7 @@ export class ServiceGenerator {
       const paramSpec = paramsSpec.length ? `{ ${paramsSpec.join(", ")} }` : undefined;
       const bodyParamsParam = !isFunc && paramSpec ? `compileBodyParam(${paramSpec})` : "{}";
 
-      clientApiImports.add(RESPONSE_TYPES.model);
+      importContainer.addFromClientApi(RESPONSE_TYPES.model);
 
       return {
         scope: Scope.Public,
