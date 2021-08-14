@@ -72,7 +72,7 @@ export class ProjectManager {
   }
 
   public async createServiceFile(name: string) {
-    const file = await this.createFile(`${this.getServiceDir()}/${name}`);
+    const file = await this.createFile(`service/${name}`);
     this.serviceFiles.push(file);
 
     return file;
