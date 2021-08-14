@@ -3,21 +3,21 @@ import { QEntityModel } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilder } from "@odata2ts/odata-uri-builder";
 
 export class EntityTypeService<EModel> {
-  constructor(private client: ODataClient, private path: string, private qModel: QEntityModel<EModel>) {}
+  constructor(protected client: ODataClient, protected path: string, protected qModel: QEntityModel<EModel, any>) {}
 
-  private createBuilder(): ODataUriBuilder<EModel> {
+  protected createBuilder(): ODataUriBuilder<EModel> {
     return ODataUriBuilder.create(this.path, this.qModel);
   }
 
-  patch(model: Partial<EModel>): ODataResponse<void> {
+  public patch(model: Partial<EModel>): ODataResponse<void> {
     return this.client.patch(this.path, model);
   }
 
-  delete(): ODataResponse<void> {
+  public delete(): ODataResponse<void> {
     return this.client.delete(this.path);
   }
 
-  query(
+  public query(
     queryFn: (builder: ODataUriBuilder<EModel>, qObject: QEntityModel<EModel>) => void
   ): ODataResponse<ODataModelResponse<EModel> | undefined> {
     const builder = this.createBuilder();
