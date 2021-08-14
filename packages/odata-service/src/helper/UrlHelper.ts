@@ -4,6 +4,13 @@ export const compileParameterPath = (basePath: string, path: string, params?: In
   return `${basePath}/${path}` + (params ? `(${compileParams(params)})` : "");
 };
 
+export const compileBodyParam = (params: InlineUrlProps): string => {
+  const ps = Object.entries(params).map(
+    ([name, prop]) => `${name}: ${prop.isLiteral ? prop.value : compileQuotedValue(prop.value)}`
+  );
+  return `{${ps.join(",")}}`;
+};
+
 export const compileParams = (id: InlineUrlProps) => {
   if (typeof id !== "object") {
     throw Error("Only object types are valid for compileParams!");
