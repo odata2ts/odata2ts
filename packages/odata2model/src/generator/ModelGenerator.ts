@@ -1,19 +1,20 @@
 import { SourceFile } from "ts-morph";
 import { DataModel } from "./../data-model/DataModel";
-import { TsGenerator } from "./GeneratorModel";
 
-export class ModelGenerator implements TsGenerator {
-  public generate(dataModel: DataModel, sourceFile: SourceFile): void {
-    this.generateEnums(dataModel, sourceFile);
-    this.generateModels(dataModel, sourceFile);
+export class ModelGenerator {
+  constructor(private dataModel: DataModel, private sourceFile: SourceFile) {}
+
+  public generate(): void {
+    this.generateEnums();
+    this.generateModels();
 
     // add import statements for additional primitive types, e.g. DateString or GuidString
-    this.addDataTypeImports(dataModel.getPrimitiveTypeImports(), sourceFile);
+    this.addDataTypeImports(this.dataModel.getPrimitiveTypeImports());
   }
 
-  private generateEnums(dataModel: DataModel, sourceFile: SourceFile) {
-    dataModel.getEnums().forEach((et) => {
-      sourceFile.addEnum({
+  private generateEnums() {
+    this.dataModel.getEnums().forEach((et) => {
+      this.sourceFile.addEnum({
         name: et.name,
         isExported: true,
         members: et.members.map((mem) => ({ name: mem, initializer: `"${mem}"` })),
@@ -21,9 +22,9 @@ export class ModelGenerator implements TsGenerator {
     });
   }
 
-  private generateModels(dataModel: DataModel, sourceFile: SourceFile) {
-    dataModel.getModels().forEach((model) => {
-      sourceFile.addInterface({
+  private generateModels() {
+    this.dataModel.getModels().forEach((model) => {
+      this.sourceFile.addInterface({
         name: model.name,
         isExported: true,
         properties: model.props.map((p) => ({
@@ -36,11 +37,11 @@ export class ModelGenerator implements TsGenerator {
     });
   }
 
-  private addDataTypeImports(imports: Array<string>, sourceFile: SourceFile) {
+  private addDataTypeImports(imports: Array<string>) {
     if (!imports || !imports.length) {
       return;
     }
-    sourceFile.addImportDeclaration({
+    this.sourceFile.addImportDeclaration({
       isTypeOnly: true,
       namedImports: imports,
       moduleSpecifier: "@odata2ts/odata-query-objects",
