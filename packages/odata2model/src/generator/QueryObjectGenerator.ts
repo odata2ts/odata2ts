@@ -3,25 +3,26 @@ import { SourceFile, VariableDeclarationKind, Writers } from "ts-morph";
 
 import { DataTypes, ModelType, PropertyModel } from "./../data-model/DataTypeModel";
 import { DataModel } from "./../data-model/DataModel";
-import { TsGenerator } from "./GeneratorModel";
 
 const CORE_QCLASSES = ["QEntityModel"];
 const Q_OBJECT_PACKAGE = "@odata2ts/odata-query-objects";
 
-export class QueryObjectGenerator implements TsGenerator {
-  public generate(dataModel: DataModel, sourceFile: SourceFile): void {
-    const enumNames = dataModel.getEnums().map((enumType) => enumType.name);
+export class QueryObjectGenerator {
+  constructor(private dataModel: DataModel, private sourceFile: SourceFile) {}
+
+  public generate(): void {
+    const enumNames = this.dataModel.getEnums().map((enumType) => enumType.name);
     const enumTypeUnion = enumNames.join(" | ");
     const qTypeImports = new Set<string>(CORE_QCLASSES);
     const modelImports = new Set<string>(enumNames);
 
-    dataModel.getModels().forEach((model) => {
+    this.dataModel.getModels().forEach((model) => {
       // const keyRef = et.Key[0].PropertyRef.map((propRef) => `"${propRef.$.Name}"`).join(" | ");
       const propContainer = this.generateQueryObjectProps([...model.baseProps, ...model.props], qTypeImports);
 
       modelImports.add(model.name);
 
-      sourceFile.addVariableStatement({
+      this.sourceFile.addVariableStatement({
         declarationKind: VariableDeclarationKind.Const,
         isExported: true,
         declarations: [
@@ -35,17 +36,17 @@ export class QueryObjectGenerator implements TsGenerator {
       });
     });
 
-    sourceFile.addImportDeclaration({
+    this.sourceFile.addImportDeclaration({
       isTypeOnly: false,
       namedImports: [...qTypeImports],
       moduleSpecifier: Q_OBJECT_PACKAGE,
     });
 
     if (modelImports.size) {
-      sourceFile.addImportDeclaration({
+      this.sourceFile.addImportDeclaration({
         isTypeOnly: true,
         namedImports: [...modelImports],
-        moduleSpecifier: `./${dataModel.getFileNames().model}`,
+        moduleSpecifier: `./${this.dataModel.getFileNames().model}`,
       });
     }
   }
