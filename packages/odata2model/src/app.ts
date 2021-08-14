@@ -39,7 +39,6 @@ export class App {
     // parse model information from edmx into something we can really work with
     // => that stuff is called dataModel!
     const dataModel = new DataModel(schema, options);
-    const fileNames = dataModel.getFileNames();
     const project = new ProjectManager(dataModel, outputPath, options.prettier);
     await project.init();
 
@@ -65,10 +64,7 @@ export class App {
 
     // Generate Individual OData-Service
     if (options.mode === "service" || options.mode === "all") {
-      await project.createMainServiceFile();
-
-      new ServiceGenerator(project, dataModel).generate();
-
+      await new ServiceGenerator(project, dataModel).generate();
       await project.writeServiceFiles();
     }
   }
