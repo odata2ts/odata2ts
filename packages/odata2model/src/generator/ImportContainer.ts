@@ -67,7 +67,6 @@ export class ImportContainer {
 
   public getImportDeclarations(fromSubPath: boolean = false): Array<ImportDeclarationStructure> {
     const { genServices, ...standardImports } = this.container;
-    const relativePath = `${fromSubPath ? ".." : "."}/`;
 
     return [
       ...Object.entries(standardImports)
@@ -76,13 +75,13 @@ export class ImportContainer {
           const mapping = this.mapping[key];
           return {
             namedImports: [...values],
-            moduleSpecifier: `${mapping.isRelative ? relativePath : ""}${mapping.moduleName}`,
+            moduleSpecifier: `${mapping.isRelative ? `${fromSubPath ? ".." : "."}/` : ""}${mapping.moduleName}`,
           } as ImportDeclarationStructure;
         }),
       ...Object.entries(genServices).map(([key, values]) => {
         return {
           namedImports: [...values],
-          moduleSpecifier: (fromSubPath ? "./" : "../") + key,
+          moduleSpecifier: (fromSubPath ? "./" : "./service/") + key,
         } as ImportDeclarationStructure;
       }),
     ];
