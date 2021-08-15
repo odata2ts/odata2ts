@@ -58,6 +58,10 @@ export class ServiceGenerator {
               const serviceType = this.getCollectionServiceName(entityType.name);
               return `this.${name} = new ${serviceType}(this.client, this.getPath() + "/${odataName}")`;
             }),
+            ...Object.values(container.singletons).map(({ name, odataName, type }) => {
+              const serviceType = this.getServiceName(type.name);
+              return `this.${name} = new ${serviceType}(this.client, this.getPath() + "/${odataName}")`;
+            }),
           ],
         },
       ],
@@ -66,6 +70,17 @@ export class ServiceGenerator {
         { scope: Scope.Private, name: "name", type: "string", initializer: `"${this.dataModel.getServiceName()}"` },
         ...Object.values(container.entitySets).map(({ name, entityType }) => {
           const type = this.getCollectionServiceName(entityType.name);
+
+          importContainer.addGeneratedService(this.getServiceName(entityType.name), type);
+
+          return {
+            scope: Scope.Public,
+            name,
+            type,
+          };
+        }),
+        ...Object.values(container.singletons).map(({ name, type: entityType }) => {
+          const type = this.getServiceName(entityType.name);
 
           importContainer.addGeneratedService(this.getServiceName(entityType.name), type);
 
