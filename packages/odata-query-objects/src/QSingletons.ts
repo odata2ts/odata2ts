@@ -13,6 +13,8 @@ import { QEntityModel } from "./QEntityModel";
 const ATTRIBUTE_NAME = "it";
 const PRIMITIVE_VALUE_REFERENCE = "$it";
 
+export type GenericEnum = {};
+
 export const qStringCollection: QEntityModel<{ [ATTRIBUTE_NAME]: string }> = {
   [ATTRIBUTE_NAME]: new QStringPath(PRIMITIVE_VALUE_REFERENCE),
 };
@@ -44,8 +46,6 @@ export const qTimeOfDayCollection: QEntityModel<{ [ATTRIBUTE_NAME]: TimeOfDayStr
 export const qDateCollection: QEntityModel<{ [ATTRIBUTE_NAME]: DateString }> = {
   [ATTRIBUTE_NAME]: new QDatePath(PRIMITIVE_VALUE_REFERENCE),
 };
-
-export type GenericEnum = {};
 
 export const qEnumCollection: QEntityModel<{ [ATTRIBUTE_NAME]: GenericEnum }, GenericEnum> = {
   [ATTRIBUTE_NAME]: new QEnumPath(PRIMITIVE_VALUE_REFERENCE),

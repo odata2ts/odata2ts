@@ -17,3 +17,4 @@ export { QTimeOfDayPath } from "./path/date-time-v4/QTimeOfDayPath";
 export { QDateTimeOffsetPath } from "./path/date-time-v4/QDateTimeOffsetPath";
 
 export * from "./QSingletons";
+export * from "./path/QPathModel";

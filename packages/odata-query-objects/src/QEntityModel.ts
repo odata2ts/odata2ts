@@ -14,8 +14,8 @@ import { QGuidPath } from "./path/QGuidPath";
 /**
  * Specify structure of entity via generics.
  *
- * For example: Creating an entity for type 'MyTestInterface' with composite key
- * QEntityModel<MyTestInterface, "name" | "application">
+ * For example: Creating an entity for type 'MyTestInterface' with enum props "features" & "favFeature"
+ * QEntityModel<MyTestInterface, "features" | "favFeature">
  */
 export type QEntityModel<TypeModel, EnumTypes = null> = QPropContainer<Required<TypeModel>, EnumTypes>;
 

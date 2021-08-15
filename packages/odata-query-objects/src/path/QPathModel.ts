@@ -14,7 +14,7 @@ export interface QPathModel {
   getPath(): string;
 }
 
-export type QPath =
+export type QPrimitivePath =
   | QBooleanPath
   | QNumberPath
   | QStringPath
@@ -23,6 +23,6 @@ export type QPath =
   | QDateTimeOffsetPath
   | QBinaryPath
   | QGuidPath
-  | QEnumPath
-  | QEntityPath<any, any>
-  | QCollectionPath<any, any>;
+  | QEnumPath;
+
+export type QPath = QEntityPath<any, any> | QCollectionPath<any> | QPrimitivePath;
