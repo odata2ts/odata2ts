@@ -1,10 +1,8 @@
-import { compileParameterPath } from "@odata2ts/odata-service";
 import { ImportContainer } from "./ImportContainer";
-import { upperCaseFirst } from "upper-case-first";
 import { PropertyModel } from "./../data-model/DataTypeModel";
 import { ProjectManager } from "./../project/ProjectManager";
 import {
-  ImportDeclarationStructure,
+  GetAccessorDeclarationStructure,
   MethodDeclarationStructure,
   OptionalKind,
   PropertyDeclarationStructure,
@@ -144,13 +142,13 @@ export class ServiceGenerator {
 
             return {
               scope: Scope.Private,
-              name: prop.name,
+              name: "_" + prop.name,
               type: `${propModelType}`,
               hasQuestionToken: true,
             } as PropertyDeclarationStructure;
           }),
         ],
-        methods: [
+        getAccessors: [
           ...modelProps.map((prop) => {
             const modelType = this.dataModel.getModel(prop.type);
             const isCollection = prop.isCollection && modelType.modelType === ModelTypes.ComplexType;
@@ -160,16 +158,16 @@ export class ServiceGenerator {
 
             return {
               scope: Scope.Public,
-              name: `get${upperCaseFirst(prop.name)}`,
+              name: prop.name,
               returnType: type,
               statements: [
-                `if(!this.${prop.name}) {`,
+                `if(!this._${prop.name}) {`,
                 // prettier-ignore
-                `  this.${prop.name} = new ${type}(this.client, this.path + "/${prop.odataName}"${isCollection ? `, ${modelType.qName}`: ""})`,
+                `  this._${prop.name} = new ${type}(this.client, this.path + "/${prop.odataName}"${isCollection ? `, ${modelType.qName}`: ""})`,
                 "}",
-                `return this.${prop.name}`,
+                `return this._${prop.name}`,
               ],
-            } as MethodDeclarationStructure;
+            } as GetAccessorDeclarationStructure;
           }),
         ],
       });
