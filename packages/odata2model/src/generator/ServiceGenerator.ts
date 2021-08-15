@@ -174,20 +174,19 @@ export class ServiceGenerator {
         ],
       });
 
+      // now the entity collection service
       if (model.modelType === ModelTypes.EntityType) {
         importContainer.addFromService(entitySetServiceType, COMPILE_ID);
 
         const isSingleKey = model.keys.length === 1;
-        const keyType = isSingleKey
-          ? model.keys[0].type
-          : `{ ${model.keys.map((k) => `${k.name}: ${k.type}`).join(", ")} }`;
+        const exactKeyType = `{ ${model.keys.map((k) => `${k.name}: ${k.type}`).join(", ")} }`;
+        const keyType = `${isSingleKey ? model.keys[0].type + " | " : ""}${exactKeyType}`;
         const keySpec = this.createKeySpec(model.keys);
 
-        // now the entity collection service
         serviceFile.addClass({
           isExported: true,
           name: this.getCollectionServiceName(model.name),
-          extends: entitySetServiceType + `<${model.name}, >`,
+          extends: entitySetServiceType + `<${model.name}, ${keyType}>`,
           ctors: [
             {
               parameters: [
@@ -249,7 +248,9 @@ export class ServiceGenerator {
   }
 
   private createKeySpec(params: Array<PropertyModel>): string | undefined {
-    const props = params.map((p) => `{ isLiteral: ${!this.isQuotedValue(p)}, name: "${p.name}" }`);
+    const props = params.map(
+      (p) => `{ isLiteral: ${!this.isQuotedValue(p)}, name: "${p.name}", odataName: "${p.odataName}" }`
+    );
     return props.length ? `[${props.join(", ")}]` : undefined;
   }
 

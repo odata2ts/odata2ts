@@ -8,6 +8,7 @@ export type InlineUrlProps = { [prop: string]: InlineUrlProp };
 export interface KeyProp {
   isLiteral: boolean;
   name: string;
+  odataName: string;
 }
 
 export type KeySpec = Array<KeyProp>;
