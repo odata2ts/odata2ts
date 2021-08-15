@@ -1,32 +1,24 @@
-import { ODataClient, ODataCollectionResponse, ODataModelResponse, ODataResponse } from "@odata2ts/odata-client-api";
-import { ODataUriBuilder } from "@odata2ts/odata-uri-builder";
+import { EntityTypeService } from "./EntityTypeService";
+import { EntityBaseService } from "./EntityBaseService";
+import { ODataClient, ODataModelResponse, ODataResponse } from "@odata2ts/odata-client-api";
 import { QEntityModel } from "@odata2ts/odata-query-objects";
 
-export class EntitySetService<EModel> {
-  constructor(protected client: ODataClient, protected path: string, protected qModel: QEntityModel<EModel, any>) {}
-
-  private createBuilder(): ODataUriBuilder<EModel> {
-    return ODataUriBuilder.create(this.path, this.qModel);
+export abstract class EntitySetService<EModel, EIdType> extends EntityBaseService<EModel> {
+  constructor(client: ODataClient, path: string, qModel: QEntityModel<EModel, any>) {
+    super(client, path, qModel);
   }
 
   public create(model: EModel): ODataResponse<ODataModelResponse<EModel>> {
     return this.client.post(this.path, model);
   }
 
-  /* public patch(id: EntityIdentifier<EModel, EId>, model: Partial<EModel>): ODataResponse<void> {
+  public abstract get(id: EIdType): EntityTypeService<EModel>;
+
+  public patch(id: EIdType, model: Partial<EModel>): ODataResponse<void> {
     return this.get(id).patch(model);
   }
 
-  public delete(id: EntityIdentifier<EModel, EId>): ODataResponse<void> {
+  public delete(id: EIdType): ODataResponse<void> {
     return this.get(id).delete();
-  } */
-
-  public query(
-    queryFn: (builder: ODataUriBuilder<EModel>, qObject: QEntityModel<EModel>) => void
-  ): ODataResponse<ODataCollectionResponse<EModel>> {
-    const builder = this.createBuilder();
-    queryFn(builder, this.qModel);
-
-    return this.client.get(builder.build());
   }
 }

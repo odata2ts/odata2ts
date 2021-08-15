@@ -14,8 +14,8 @@ export const QPerson: QEntityModel<Person> = {
   name: new QStringPath("name"),
   deceased: new QBooleanPath("deceased"),
   createdAt: new QDateTimeOffsetPath("createdAt"),
-  address: new QEntityPath<Address>("address", () => QAddress),
-  altAdresses: new QCollectionPath<Address>("altAdresses", () => QAddress),
+  address: new QEntityPath<Address>("Address", () => QAddress),
+  altAdresses: new QCollectionPath<Address>("AltAdresses", () => QAddress),
 };
 
 export const QAddress: QEntityModel<Address> = {

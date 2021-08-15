@@ -82,8 +82,8 @@ export class QueryObjectGenerator {
         }
 
         // workaround: force the typing to work by adding additional type infos fro primitive qObjects
-        const typeAddition = prop.dataType === DataTypes.PrimitiveType ? `<{it: ${prop.type}}>` : "";
-        qPathInit = `new ${cType}${typeAddition}("${name}", () => ${qObject})`;
+        const typeAddition = prop.dataType === DataTypes.PrimitiveType ? `<{it: ${prop.type}}, any>` : "";
+        qPathInit = `new ${cType}${typeAddition}("${odataName}", () => ${qObject})`;
 
         qTypeImports.add(cType);
         if (prop.dataType !== DataTypes.ModelType) {

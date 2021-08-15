@@ -5,8 +5,8 @@ export interface Person {
   name: string;
   deceased: boolean;
   createdAt: DateTimeOffsetString;
-  address: Address;
-  altAdresses: Array<Address>;
+  Address: Address;
+  AltAdresses: Array<Address>;
 }
 
 export interface Address {

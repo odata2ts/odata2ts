@@ -136,10 +136,10 @@ export abstract class ODataUriBuilderBase<T> {
       qObject: QEntityModel<EntityExtractor<QEntityModel<T>[Prop]>>
     ) => void
   ) {
-    const entity = (this.entity[prop] as QEntityPath<any>).getEntity();
-    const expander = ExpandingODataUriBuilder.create(prop as string, entity);
+    const entityProp = this.entity[prop] as QEntityPath<any>;
+    const expander = ExpandingODataUriBuilder.create(entityProp.getPath(), entityProp.getEntity());
     // @ts-ignore
-    builderFn(expander, entity);
+    builderFn(expander, entityProp.getEntity());
 
     this.expands.push(expander);
 
@@ -158,7 +158,7 @@ export abstract class ODataUriBuilderBase<T> {
     this.expands.push(
       ...props.map((p) => {
         const prop = this.entity[p] as QEntityPath<any>;
-        return ExpandingODataUriBuilder.create(p as string, prop.getEntity());
+        return ExpandingODataUriBuilder.create(prop.getPath(), prop.getEntity());
       })
     );
     return this;

@@ -13,7 +13,7 @@ export const compileId = (path: string, keySpec: KeySpec, values: string | numbe
       throw Error(`Key [ks.name] not mapped in provided values!`);
     }
 
-    collector[ks.name] = { isLiteral: ks.isLiteral, value };
+    collector[ks.odataName] = { isLiteral: ks.isLiteral, value };
     return collector;
   }, {} as InlineUrlProps);
 
