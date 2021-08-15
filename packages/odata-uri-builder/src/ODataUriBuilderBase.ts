@@ -1,5 +1,6 @@
 import {
   QCollectionPath,
+  QEntityCollectionPath,
   QEntityModel,
   QEntityPath,
   QFilterExpression,
@@ -14,7 +15,10 @@ export interface ODataUriBuilderConfig {
 
 type EntityExtractor<T> = T extends QEntityPath<infer E> ? E : T extends QCollectionPath<infer E> ? E : never;
 type ExtractPropertyNamesOfType<T, S> = { [K in keyof T]: T[K] extends S ? K : never }[keyof T];
-type ExpandType<T> = ExtractPropertyNamesOfType<QEntityModel<T>, QEntityPath<any> | QCollectionPath<any>>;
+type ExpandType<T> = ExtractPropertyNamesOfType<
+  QEntityModel<T>,
+  QEntityPath<any> | QEntityCollectionPath<any, any> | QCollectionPath<any>
+>;
 
 export abstract class ODataUriBuilderBase<T> {
   protected path: string;
