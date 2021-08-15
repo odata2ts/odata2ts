@@ -1,14 +1,40 @@
-import { InlineUrlProps } from "./../EntityModel";
+import { InlineUrlProps, KeySpec } from "./../EntityModel";
 
-export const compileParameterPath = (basePath: string, path: string, params?: InlineUrlProps): string => {
-  return `${basePath}/${path}` + (params ? `(${compileParams(params)})` : "");
+export const compileId = (path: string, keySpec: KeySpec, values: string | number | { [key: string]: any }): string => {
+  if (typeof values === "string" || typeof values === "number") {
+    if (Object.keys(keySpec).length !== 1) {
+      throw Error("Only primitive value for id provided, but complex key spec is required!");
+    }
+    return compileSingleParamPath(path, Object.values(keySpec)[0].isLiteral, values);
+  }
+  const params = keySpec.reduce((collector, ks) => {
+    const value = values[ks.name];
+    if (value === undefined) {
+      throw Error(`Key [ks.name] not mapped in provided values!`);
+    }
+
+    collector[ks.name] = { isLiteral: ks.isLiteral, value };
+    return collector;
+  }, {} as InlineUrlProps);
+
+  return compileParameterPath(path, undefined, params);
+};
+
+function getValue(isLiteral: boolean, value: any): string {
+  return isLiteral ? value : compileQuotedValue(value);
+}
+
+export const compileSingleParamPath = (path: string, isLiteral: boolean, value: string | number) => {
+  return `${path || ""}(${getValue(isLiteral, value)})`;
+};
+
+export const compileParameterPath = (basePath: string, path?: string, params?: InlineUrlProps): string => {
+  return `${basePath}${path ? "/" + path : ""}` + (params ? `(${compileParams(params)})` : "");
 };
 
 export const compileBodyParam = (params: InlineUrlProps): string => {
-  const ps = Object.entries(params).map(
-    ([name, prop]) => `${name}: ${prop.isLiteral ? prop.value : compileQuotedValue(prop.value)}`
-  );
-  return `{${ps.join(",")}}`;
+  const ps = Object.entries(params).map(([name, prop]) => `${name}: ${getValue(prop.isLiteral, prop.value)}}`);
+  return `{ ${ps.join(",")} }`;
 };
 
 export const compileParams = (id: InlineUrlProps) => {
