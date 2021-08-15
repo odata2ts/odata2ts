@@ -1,9 +1,9 @@
-import { QEntityFactory, QCollectionPath } from "../../src";
+import { QCollectionPath, qStringCollection } from "../../src";
 
 export interface SampleEntity {}
 
 describe("QCollectionPath test", () => {
-  const qEntity = QEntityFactory.create({});
+  const qEntity = qStringCollection;
 
   test("smoke test", () => {
     const result = new QCollectionPath("test", () => qEntity);
