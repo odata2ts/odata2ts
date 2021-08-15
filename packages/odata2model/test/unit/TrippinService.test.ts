@@ -16,4 +16,21 @@ describe("Testing Generation of TrippinService", () => {
     const result = await testService.getNearestAirport(123, 345);
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/GetNearestAirport(lat=123,lon=345)`);
   });
+
+  test("unbound action", async () => {
+    await testService.resetDataSource();
+    expect(odataClient.lastUrl).toBe(`${BASE_URL}/ResetDataSource`);
+    expect(odataClient.lastData).toEqual({});
+  });
+
+  test("entitSet - get", async () => {
+    await testService.people.query((queryBuilder) => {
+      queryBuilder.select("firstName", "lastName").build();
+    });
+
+    expect(odataClient.lastUrl).toBe(
+      `${BASE_URL}/People?${encodeURIComponent("$select")}=${encodeURIComponent("FirstName,LastName")}`
+    );
+    expect(odataClient.lastData).toEqual({});
+  });
 });
