@@ -14,6 +14,7 @@ import {
   TimeOfDayString,
   qEnumCollection,
   qStringCollection,
+  QEntityCollectionPath,
 } from "../src";
 
 enum TypesEnum {
@@ -56,7 +57,7 @@ const qComplex: QEntityModel<ComplexEntity, EnumUnion> = {
   bz: new QTimeOfDayPath("bz"),
   cz: new QDateTimeOffsetPath("cz"),
   xy: new QEntityPath("xy", () => qSimple),
-  xx: new QCollectionPath("xx", () => qSimple),
+  xx: new QEntityCollectionPath("xx", () => qSimple),
   primitiveCollection: new QCollectionPath("PrimitiveCollection", () => qStringCollection),
   features: new QCollectionPath("features", () => qEnumCollection),
   favFeature: new QEnumPath("favFeature"),
@@ -101,9 +102,9 @@ describe("QEntityFactory tests", () => {
   });
 
   test("collection path", () => {
-    const xxEntity = qComplex.xx.getEntity();
+    const pc = qComplex.primitiveCollection;
 
-    const result = xxEntity.name.startsWith("Hi").toString();
-    expect(result).toBe("startswith(name,'Hi')");
+    expect(pc.getEntity()).toBe(qStringCollection);
+    expect(pc.getPath()).toBe("PrimitiveCollection");
   });
 });

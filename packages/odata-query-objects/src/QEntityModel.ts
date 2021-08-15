@@ -10,6 +10,7 @@ import { QStringPath } from "./path/QStringPath";
 import { QBooleanPath } from "./path/QBooleanPath";
 import { QBinaryPath } from "./path/QBinaryPath";
 import { QGuidPath } from "./path/QGuidPath";
+import { QEntityCollectionPath } from "./path/QEntityCollectionPath";
 
 /**
  * Specify structure of entity via generics.
@@ -44,15 +45,17 @@ export type QPropContainer<TypeModel, EnumTypes> = {
     ? QBinaryPath
     : TypeModel[Property] extends GuidString
     ? QGuidPath
-    : TypeModel[Property] extends Boolean
+    : TypeModel[Property] extends boolean
     ? QBooleanPath
-    : TypeModel[Property] extends Number
+    : TypeModel[Property] extends number
     ? QNumberPath
     : TypeModel[Property] extends EnumTypes
     ? QEnumPath
     : TypeModel[Property] extends string
     ? QStringPath
-    : TypeModel[Property] extends Array<any>
-    ? QCollectionPath<Unpacked<TypeModel[Property]>, EnumTypes>
+    : TypeModel[Property] extends Array<string | number | boolean | EnumTypes>
+    ? QCollectionPath<Unpacked<TypeModel[Property]>>
+    : TypeModel[Property] extends Array<object>
+    ? QEntityCollectionPath<Unpacked<TypeModel[Property]>, EnumTypes>
     : QEntityPath<TypeModel[Property], EnumTypes>;
 };
