@@ -15,7 +15,7 @@ export class QCollectionPath<Type, EnumTypes = undefined> implements QPathModel 
     return this.path;
   }
 
-  public getEntity() {
+  public getEntity(): QEntityModel<Type, EnumTypes> {
     return this.qEntityFn();
   }
 }
