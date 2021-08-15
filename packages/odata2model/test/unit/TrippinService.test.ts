@@ -216,4 +216,11 @@ describe("Testing Generation of TrippinService", () => {
 
     expect(result.getPath()).toBe(`${BASE_URL}/People('tester')/BestFriend/BestFriend/BestFriend/HomeAddress/City`);
   });
+
+  test("singleton", async () => {
+    const result = testService.me;
+
+    expect(result.getPath()).toBe(`${BASE_URL}/Me`);
+    expect(result.getQOjbect()).toBe(qPerson);
+  });
 });
