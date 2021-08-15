@@ -26,7 +26,6 @@ export class ODataUriBuilder<T> extends ODataUriBuilderBase<T> {
   }
 
   protected readonly entity: QEntityModel<T>;
-  private key?: string;
 
   private constructor(path: string, qEntity: QEntityModel<T>, config?: ODataUriBuilderConfig) {
     super(path, qEntity, config);
@@ -52,8 +51,7 @@ export class ODataUriBuilder<T> extends ODataUriBuilderBase<T> {
   public build(): string {
     const paramFn = this.unencoded ? this.param : this.paramEncoded;
     const params = this.buildQuery(paramFn);
-    const collection = this.path + (this.key ? `(${this.key})` : "");
 
-    return "/" + collection + (params.length ? `?${params.join("&")}` : "");
+    return this.path + (params.length ? `?${params.join("&")}` : "");
   }
 }
