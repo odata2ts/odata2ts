@@ -102,7 +102,6 @@ export class DataModel {
     });
 
     // entity types & complex types
-    const models = [...(schema.EntityType ?? []), ...(schema.ComplexType ?? [])];
     this.addModel(schema.EntityType, ModelTypes.EntityType);
     this.addModel(schema.ComplexType, ModelTypes.ComplexType);
     this.postProcessModel();

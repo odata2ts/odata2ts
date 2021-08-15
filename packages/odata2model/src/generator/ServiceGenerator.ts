@@ -56,9 +56,9 @@ export class ServiceGenerator {
           ],
           statements: [
             "super(client, basePath);",
-            ...Object.values(container.entitySets).map(({ name, entityType }) => {
+            ...Object.values(container.entitySets).map(({ name, odataName, entityType }) => {
               const serviceType = this.getCollectionServiceName(entityType.name);
-              return `this.${name} = new ${serviceType}(this.client, this.getPath())`;
+              return `this.${name} = new ${serviceType}(this.client, this.getPath() + "/${odataName}")`;
             }),
           ],
         },
