@@ -54,6 +54,7 @@ export class QueryObjectGenerator {
   private generateQueryObjectProps(props: Array<PropertyModel>, qTypeImports: Set<string>) {
     return props.reduce((collector, prop) => {
       const { name, odataName } = prop;
+      const isModelType = prop.dataType === DataTypes.ModelType;
       // determine matching QPath type
       let qPathType: string;
       let qPathInit: string;
@@ -65,7 +66,7 @@ export class QueryObjectGenerator {
         // Custom primitive types like DateString or GuidString end on suffix 'String' => remove that
         qPathType = `Q${upperCaseFirst(prop.type.replace(/String$/, ""))}Path`;
         qPathInit = `new ${qPathType}("${odataName}")`;
-      } else if (prop.dataType === DataTypes.ModelType) {
+      } else if (isModelType) {
         qPathType = "QEntityPath";
         qPathInit = `new ${qPathType}("${odataName}", () => ${prop.qObject})`;
       } else {
@@ -74,7 +75,7 @@ export class QueryObjectGenerator {
 
       // factor in collections
       if (prop.isCollection) {
-        const cType = `QCollectionPath`;
+        const cType = `Q${isModelType ? "Entity" : ""}CollectionPath`;
         const qObject = prop.qObject;
 
         if (!qObject) {
@@ -82,11 +83,10 @@ export class QueryObjectGenerator {
         }
 
         // workaround: force the typing to work by adding additional type infos fro primitive qObjects
-        const typeAddition = prop.dataType === DataTypes.PrimitiveType ? `<{it: ${prop.type}}, any>` : "";
-        qPathInit = `new ${cType}${typeAddition}("${odataName}", () => ${qObject})`;
+        qPathInit = `new ${cType}("${odataName}", () => ${qObject})`;
 
         qTypeImports.add(cType);
-        if (prop.dataType !== DataTypes.ModelType) {
+        if (!isModelType) {
           qTypeImports.add(qObject);
         }
       }
