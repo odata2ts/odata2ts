@@ -41,8 +41,8 @@ export class ServiceGenerator {
     await this.generateModelServices();
 
     const importContainer = new ImportContainer(this.dataModel);
-    importContainer.addFromClientApi("ODataClient", "ODataResponse");
-    importContainer.addFromService(ROOT_SERVICE, COMPILE_PARAMS, COMPILE_BODY);
+    importContainer.addFromClientApi("ODataClient");
+    importContainer.addFromService(ROOT_SERVICE);
 
     sourceFile.addClass({
       isExported: true,
@@ -57,7 +57,8 @@ export class ServiceGenerator {
           statements: [
             "super(client, basePath);",
             ...Object.values(container.entitySets).map(({ name, entityType }) => {
-              return `this.${name} = new EntitySetService(this.client, this.getPath(), ${entityType.qName})`;
+              const serviceType = this.getCollectionServiceName(entityType.name);
+              return `this.${name} = new ${serviceType}(this.client, this.getPath())`;
             }),
           ],
         },
@@ -66,15 +67,9 @@ export class ServiceGenerator {
         // the name of the service is part of any URL: basePath/name/*
         { scope: Scope.Private, name: "name", type: "string", initializer: `"${this.dataModel.getServiceName()}"` },
         ...Object.values(container.entitySets).map(({ name, entityType }) => {
-          const isEntity = entityType.modelType === ModelTypes.EntityType;
-          const serviceType = isEntity ? "EntitySetService" : "CollectionService";
-          const type = `${serviceType}<${entityType.name}${
-            isEntity ? `, ${entityType.keys.map((k) => `"${k}"`).join("|")}` : ""
-          }>`;
+          const type = this.getCollectionServiceName(entityType.name);
 
-          importContainer.addFromService(serviceType);
-          importContainer.addGeneratedModel(entityType.name);
-          importContainer.addGeneratedQObject(entityType.qName);
+          importContainer.addGeneratedService(this.getServiceName(entityType.name), type);
 
           return {
             scope: Scope.Public,
@@ -84,12 +79,12 @@ export class ServiceGenerator {
         }),
       ],
       methods: [
-        // ...this.generateMethods(Object.values(container.functions), OperationTypes.Function, importContainer),
-        // ...this.generateMethods(Object.values(container.actions), OperationTypes.Action, importContainer),
+        ...this.generateMethods(Object.values(container.functions), OperationTypes.Function, importContainer),
+        ...this.generateMethods(Object.values(container.actions), OperationTypes.Action, importContainer),
       ],
     });
 
-    sourceFile.addImportDeclarations(importContainer.getImportDeclarations());
+    sourceFile.addImportDeclarations(importContainer.getImportDeclarations(false));
   }
 
   private async generateModelServices() {
@@ -132,35 +127,50 @@ export class ServiceGenerator {
         ],
         properties: [
           ...modelProps.map((prop) => {
-            const [key, propModelType] = this.getServiceNamesForProp(prop);
+            const modelType = this.dataModel.getModel(prop.type);
+            const isCollection = prop.isCollection && modelType.modelType === ModelTypes.ComplexType;
+            let [key, propModelType] = this.getServiceNamesForProp(prop);
+
+            if (isCollection) {
+              importContainer.addFromService(collectionServiceType);
+              importContainer.addGeneratedModel(modelType.name);
+              importContainer.addGeneratedQObject(modelType.qName);
+              propModelType = `${collectionServiceType}<${modelType.name}>`;
+            }
             // don't include imports for this type
-            if (serviceName !== key) {
+            else if (serviceName !== key) {
               importContainer.addGeneratedService(key, propModelType);
             }
 
             return {
               scope: Scope.Private,
               name: prop.name,
-              type: `${propModelType} | undefined `,
+              type: `${propModelType}`,
+              hasQuestionToken: true,
             } as PropertyDeclarationStructure;
           }),
         ],
         methods: [
-          ...modelProps.map(
-            (prop) =>
-              ({
-                scope: Scope.Public,
-                name: `get${upperCaseFirst(prop.name)}`,
-                returnType: this.getServiceNameForProp(prop),
-                statements: [
-                  `if(!this.${prop.name}) {`,
-                  // prettier-ignore
-                  `  this.${prop.name} = new ${this.getServiceNameForProp(prop)}(this.client, this.path + "/${prop.odataName}")`,
-                  "}",
-                  `return this.${prop.name}`,
-                ],
-              } as MethodDeclarationStructure)
-          ),
+          ...modelProps.map((prop) => {
+            const modelType = this.dataModel.getModel(prop.type);
+            const isCollection = prop.isCollection && modelType.modelType === ModelTypes.ComplexType;
+            const type = isCollection
+              ? `${collectionServiceType}<${modelType.name}>`
+              : this.getServiceNameForProp(prop);
+
+            return {
+              scope: Scope.Public,
+              name: `get${upperCaseFirst(prop.name)}`,
+              returnType: type,
+              statements: [
+                `if(!this.${prop.name}) {`,
+                // prettier-ignore
+                `  this.${prop.name} = new ${type}(this.client, this.path + "/${prop.odataName}"${isCollection ? `, ${modelType.qName}`: ""})`,
+                "}",
+                `return this.${prop.name}`,
+              ],
+            } as MethodDeclarationStructure;
+          }),
         ],
       });
 
@@ -244,7 +254,7 @@ export class ServiceGenerator {
   }
 
   private createParamsSpec(params: Array<PropertyModel>): string | undefined {
-    const props = params.map((p) => `${p.name}: { isLiteral: ${!this.isQuotedValue(p)}, value: ${p.name} } }`);
+    const props = params.map((p) => `${p.name}: { isLiteral: ${!this.isQuotedValue(p)}, value: ${p.name} }`);
     return props.length ? `{ ${props.join(", ")} }` : undefined;
   }
 
@@ -257,9 +267,16 @@ export class ServiceGenerator {
       const isFunc = operationType === OperationTypes.Function;
       const returnType = operation.returnType ? operation.returnType.type : "void";
       const paramsSpec = this.createParamsSpec(operation.parameters);
-      const bodyParamsParam = !isFunc && paramsSpec ? `compileBodyParam(${paramsSpec})` : "{}";
+      const bodyParamsParam = !isFunc && paramsSpec ? `${COMPILE_BODY}(${paramsSpec})` : "{}";
 
-      importContainer.addFromClientApi(RESPONSE_TYPES.model);
+      importContainer.addFromClientApi("ODataResponse", RESPONSE_TYPES.model);
+      importContainer.addFromService(COMPILE_PARAMS);
+      if (!isFunc && paramsSpec) {
+        importContainer.addFromService(COMPILE_BODY);
+      }
+      if (operation.returnType?.type) {
+        importContainer.addGeneratedModel(returnType);
+      }
 
       return {
         scope: Scope.Public,
