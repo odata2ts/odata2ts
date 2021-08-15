@@ -1,6 +1,7 @@
-import { Feature, PersonGender, PersonModel } from "./../../build/TrippinModel";
+import { Address } from "./../../../odata-uri-builder/test/fixture/types/custom/Address";
+import { Feature, LocationModel, PersonGender, PersonModel } from "./../../build/TrippinModel";
 import { MockODataClient } from "./../MockODataClient";
-import { qPerson } from "./../../build/QTrippin";
+import { qPerson, qLocation } from "./../../build/QTrippin";
 import { TrippinService } from "../../build/TrippinService";
 
 describe("Testing Generation of TrippinService", () => {
@@ -152,5 +153,67 @@ describe("Testing Generation of TrippinService", () => {
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')`);
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastData).toBeUndefined();
+  });
+
+  test("complex type", async () => {
+    const complex = testService.people.get("tester").homeAddress;
+
+    expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
+    expect(complex.getQOjbect()).toBe(qLocation);
+  });
+
+  test("complex type: query", async () => {
+    await testService.people.get("tester").homeAddress.query();
+
+    expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
+    expect(odataClient.lastOperation).toBe("GET");
+    expect(odataClient.lastData).toBeUndefined();
+  });
+
+  test("complex collection", async () => {
+    const complex = testService.people.get("tester").addressInfo;
+
+    expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
+    expect(complex.getQOjbect()).toBe(qLocation);
+  });
+
+  test("complex collection: query", async () => {
+    await testService.people.get("tester").addressInfo.query();
+
+    expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
+    expect(odataClient.lastOperation).toBe("GET");
+    expect(odataClient.lastData).toBeUndefined();
+  });
+
+  test("complex collection: create", async () => {
+    const model: LocationModel = { Address: "TestAdress" };
+    await testService.people.get("tester").addressInfo.create(model);
+
+    expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
+    expect(odataClient.lastOperation).toBe("POST");
+    expect(odataClient.lastData).toEqual(model);
+  });
+
+  test("complex collection: update", async () => {
+    const models = [{ Address: "TestAddress 1" }, { Address: "test 2" }];
+    await testService.people.get("tester").addressInfo.update(models);
+
+    expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
+    expect(odataClient.lastOperation).toBe("PUT");
+    expect(odataClient.lastData).toEqual(models);
+  });
+
+  test("complex collection: delete", async () => {
+    await testService.people.get("tester").addressInfo.delete();
+
+    expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
+    expect(odataClient.lastOperation).toBe("DELETE");
+    expect(odataClient.lastData).toBeUndefined();
+  });
+
+  test("navigation", async () => {
+    const result = testService.people.get("tester").bestFriend.bestFriend.bestFriend.homeAddress.city;
+
+    expect(result.getPath()).toBe(`${BASE_URL}/People('tester')/BestFriend/BestFriend/BestFriend/HomeAddress/City`);
   });
 });

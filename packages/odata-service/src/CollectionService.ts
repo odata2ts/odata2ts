@@ -1,12 +1,10 @@
-import { ODataUriBuilder } from "@odata2ts/odata-uri-builder";
 import { QEntityModel } from "@odata2ts/odata-query-objects";
 import { ODataClient, ODataModelResponse, ODataResponse } from "@odata2ts/odata-client-api";
+import { EntityBaseService } from "./EntityBaseService";
 
-export class CollectionService<T> {
-  constructor(private client: ODataClient, private path: string, private qModel: QEntityModel<T>) {}
-
-  private createBuilder(): ODataUriBuilder<T> {
-    return ODataUriBuilder.create(this.path, this.qModel);
+export class CollectionService<T> extends EntityBaseService<T> {
+  constructor(client: ODataClient, path: string, qModel: QEntityModel<T, any>) {
+    super(client, path, qModel);
   }
 
   public create(model: T): ODataResponse<ODataModelResponse<T>> {
