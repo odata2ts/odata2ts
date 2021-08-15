@@ -5,4 +5,11 @@ export interface InlineUrlProp {
 
 export type InlineUrlProps = { [prop: string]: InlineUrlProp };
 
-export type EntityIdentifier<Model, Id extends keyof Model> = string | { [Key in Id]: Model[Key] };
+export interface KeyProp {
+  isLiteral: boolean;
+  name: string;
+}
+
+export type KeySpec = Array<KeyProp>;
+
+export type EntityIdentifier<Model, Id extends keyof Model> = string | number | { [Key in Id]: Model[Key] };

@@ -21,8 +21,9 @@ import {
 } from "../data-model/DataTypeModel";
 
 const ROOT_SERVICE = "ODataService";
-const URL_COMPILER = "compileParameterPath";
-const BODY_PARAM_COMPILER = "compileBodyParam";
+const COMPILE_PARAMS = "compileParameterPath";
+const COMPILE_BODY = "compileBodyParam";
+const COMPILE_ID = "compileId";
 const RESPONSE_TYPES = {
   collection: "ODataCollectionResponse",
   model: "ODataModelResponse",
@@ -41,7 +42,7 @@ export class ServiceGenerator {
 
     const importContainer = new ImportContainer(this.dataModel);
     importContainer.addFromClientApi("ODataClient", "ODataResponse");
-    importContainer.addFromService(ROOT_SERVICE, URL_COMPILER, BODY_PARAM_COMPILER);
+    importContainer.addFromService(ROOT_SERVICE, COMPILE_PARAMS, COMPILE_BODY);
 
     sourceFile.addClass({
       isExported: true,
@@ -83,8 +84,8 @@ export class ServiceGenerator {
         }),
       ],
       methods: [
-        ...this.generateMethods(Object.values(container.functions), OperationTypes.Function, importContainer),
-        ...this.generateMethods(Object.values(container.actions), OperationTypes.Action, importContainer),
+        // ...this.generateMethods(Object.values(container.functions), OperationTypes.Function, importContainer),
+        // ...this.generateMethods(Object.values(container.actions), OperationTypes.Action, importContainer),
       ],
     });
 
@@ -164,7 +165,13 @@ export class ServiceGenerator {
       });
 
       if (model.modelType === ModelTypes.EntityType) {
-        importContainer.addFromService(entitySetServiceType);
+        importContainer.addFromService(entitySetServiceType, COMPILE_ID);
+
+        const isSingleKey = model.keys.length === 1;
+        const keyType = isSingleKey
+          ? model.keys[0].type
+          : `{ ${model.keys.map((k) => `${k.name}: ${k.type}`).join(", ")} }`;
+        const keySpec = this.createKeySpec(model.keys);
 
         // now the entity collection service
         serviceFile.addClass({
@@ -185,7 +192,24 @@ export class ServiceGenerator {
               ],
             },
           ],
-          methods: [],
+          properties: [{ name: "keySpec", scope: Scope.Private, initializer: keySpec }],
+          methods: [
+            {
+              name: "getKeySpec",
+              scope: Scope.Public,
+              statements: ["return this.keySpec"],
+            },
+            {
+              name: "get",
+              scope: Scope.Public,
+              returnType: serviceName,
+              parameters: [{ name: "id", type: keyType }],
+              statements: [
+                `const url = ${COMPILE_ID}(this.path, this.keySpec, id)`,
+                `return new ${serviceName}(this.client, url)`,
+              ],
+            },
+          ],
         });
       }
 
@@ -210,6 +234,20 @@ export class ServiceGenerator {
     return this.getServiceNamesForProp(prop)[1];
   }
 
+  private isQuotedValue(prop: PropertyModel): boolean {
+    return prop.type === "string" || prop.dataType === DataTypes.EnumType;
+  }
+
+  private createKeySpec(params: Array<PropertyModel>): string | undefined {
+    const props = params.map((p) => `{ isLiteral: ${!this.isQuotedValue(p)}, name: "${p.name}" }`);
+    return props.length ? `[${props.join(", ")}]` : undefined;
+  }
+
+  private createParamsSpec(params: Array<PropertyModel>): string | undefined {
+    const props = params.map((p) => `${p.name}: { isLiteral: ${!this.isQuotedValue(p)}, value: ${p.name} } }`);
+    return props.length ? `{ ${props.join(", ")} }` : undefined;
+  }
+
   private generateMethods(
     operations: Array<FunctionImportType | ActionImportType>,
     operationType: OperationTypes,
@@ -218,12 +256,8 @@ export class ServiceGenerator {
     return Object.values(operations).map(({ name, odataName, operation }): OptionalKind<MethodDeclarationStructure> => {
       const isFunc = operationType === OperationTypes.Function;
       const returnType = operation.returnType ? operation.returnType.type : "void";
-      const paramsSpec = operation.parameters.map((p) => {
-        const isLiteral = p.type !== "string" && p.dataType !== DataTypes.EnumType;
-        return `${p.name}: { isLiteral: ${isLiteral}, value: ${p.name} }`;
-      });
-      const paramSpec = paramsSpec.length ? `{ ${paramsSpec.join(", ")} }` : undefined;
-      const bodyParamsParam = !isFunc && paramSpec ? `compileBodyParam(${paramSpec})` : "{}";
+      const paramsSpec = this.createParamsSpec(operation.parameters);
+      const bodyParamsParam = !isFunc && paramsSpec ? `compileBodyParam(${paramsSpec})` : "{}";
 
       importContainer.addFromClientApi(RESPONSE_TYPES.model);
 
@@ -236,7 +270,8 @@ export class ServiceGenerator {
         })),
         returnType: `ODataResponse<${RESPONSE_TYPES.model}<${returnType}>>`,
         statements: [
-          `const url = ${URL_COMPILER}(this.getPath(), "${odataName}"${isFunc && paramSpec ? `, ${paramSpec}` : ""})`,
+          // prettier-ignore
+          `const url = ${COMPILE_PARAMS}(this.getPath(), "${odataName}"${isFunc && paramsSpec ? `, ${paramsSpec}` : ""})`,
           `return this.client.${isFunc ? "get(url)" : `post(url, ${bodyParamsParam})`};`,
         ],
       };
