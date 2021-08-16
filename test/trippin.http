@@ -129,6 +129,29 @@ GET {{baseUrl}}/People('russellwhyte')/Trips(0)
 ###
 GET {{baseUrl}}/People('russellwhyte')/Friends('scottketchum')
 
+### Primitive Collections
+GET {{baseUrl}}/People('russellwhyte')/Emails?$count=true
+### $it does the trick for referencing the primitive value
+GET {{baseUrl}}/People('russellwhyte')/Emails?$orderby=$it desc
+### $it with filtering
+GET {{baseUrl}}/People('russellwhyte')/Emails?$filter=contains($it,'contoso')
+
+### Non-exposed Collections: Trips
+GET {{baseUrl}}/People('russellwhyte')?$expand=Trips
+### works anyway
+GET {{baseUrl}}/People('russellwhyte')/Trips/0
+
+### Derived Entity Type
+GET {{baseUrl}}/People/Trippin.Employee
+###
+GET {{baseUrl}}/People('kristakemp')/Trippin.Employee
+### Manager example
+GET {{baseUrl}}/People/Trippin.Manager
+###
+GET {{baseUrl}}/People('genevievereeves')/Trippin.Manager
+
+
+# --- PATCHING ---
 ### Update Collection Prop by Id => 501 not implemented
 PATCH {{baseUrl}}/People('russellwhyte')/Trips(0)
 Content-Type: {{contentType}}
@@ -137,15 +160,42 @@ Content-Type: {{contentType}}
   "Budget": 3005
 }
 
-### Primitive Collections
-GET {{baseUrl}}/People('russellwhyte')/Emails?$count=true
-### $it does the trick for referencing the primitive value
-GET {{baseUrl}}/People('russellwhyte')/Emails?$orderby=$it desc
-### $it with filtering
-GET {{baseUrl}}/People('russellwhyte')/Emails?$filter=contains($it,'contoso')
+### Update NavProp Collection
+GET {{baseUrl}}/People('russellwhyte')/Trips
+### Create - note: need to manually specify ID
+POST {{baseUrl}}/People('russellwhyte')/Trips
+Content-Type: {{contentType}}
+
+{
+  "TripId": 5,
+  "ShareId": "109b2fa0-efbf-490e-a5e3-bac8f7d47100",
+  "Name": "Test Trip",
+  "Budget": 1000,
+  "Description": "Testing Field Trip",
+  "Tags": [
+    "business",
+    "New York meeting"
+  ],
+  "StartsAt": "2021-01-01T00:00:00Z",
+  "EndsAt": "2021-01-04T00:00:00Z"
+}
+### Update: 501 not implemented
+PATCH {{baseUrl}}/People('russellwhyte')/Trips(0)
+Content-Type: {{contentType}}
+
+{
+  "Budget": 3005
+}
+### Delete
+DELETE  {{baseUrl}}/People('russellwhyte')/Trips(5)
+
+
 
 
 # --- FILTERING ---
+### Filtering by complex type substructure
+GET {{baseUrl}}/People('russellwhyte')/AddressInfo?$filter=City/Name eq 'Boise'
+
 
 ### Filter enum type
 GET https://services.odata.org/TripPinRESTierService/People
