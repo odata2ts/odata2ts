@@ -304,7 +304,7 @@ export class DataModel {
     operations.forEach((op) => {
       const params: Array<PropertyModel> = op.Parameter?.map(this.mapProperty) ?? [];
       const returnType: PropertyModel | undefined = op.ReturnType?.map((rt) => {
-        return this.mapProperty({ ...rt, $: { Name: "workaround", ...rt.$ } });
+        return this.mapProperty({ ...rt, $: { Name: "NO_NAME_BECAUSE_RETURN_TYPE", ...rt.$ } });
       })[0];
       const isBound = op.$.IsBound === "true";
 
@@ -312,7 +312,8 @@ export class DataModel {
         throw Error(`IllegalState: Operation '${op.$.Name}' is bound, but has no parameters!`);
       }
 
-      const binding = isBound ? params[0].type : ROOT_OPERATION;
+      const bindingProp = isBound ? params.shift() : undefined;
+      const binding = bindingProp ? bindingProp.type : ROOT_OPERATION;
       if (!this.operationTypes[binding]) {
         this.operationTypes[binding] = [];
       }
@@ -322,7 +323,7 @@ export class DataModel {
         name: this.getOperationName(op.$.Name),
         type: type,
         parameters: params,
-        returnType: returnType ? { odataType: returnType.odataType, type: returnType.type } : undefined,
+        returnType: returnType,
       });
     });
   }
@@ -453,8 +454,9 @@ export class DataModel {
     return rootOp;
   }
 
-  public getOperationTypeByBinding(binding: string): Array<OperationType> | undefined {
-    return [...this.operationTypes[binding]];
+  public getOperationTypeByBinding(binding: string): Array<OperationType> {
+    const operations = this.operationTypes[binding];
+    return !operations ? [] : [...operations];
   }
 
   public getEntityContainer() {

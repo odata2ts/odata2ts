@@ -1,6 +1,4 @@
-import { ImportContainer } from "./ImportContainer";
-import { PropertyModel } from "./../data-model/DataTypeModel";
-import { ProjectManager } from "./../project/ProjectManager";
+import { upperCaseFirst } from "upper-case-first";
 import {
   GetAccessorDeclarationStructure,
   MethodDeclarationStructure,
@@ -9,6 +7,8 @@ import {
   Scope,
 } from "ts-morph";
 
+import { ImportContainer } from "./ImportContainer";
+import { ProjectManager } from "./../project/ProjectManager";
 import { DataModel } from "./../data-model/DataModel";
 import {
   ActionImportType,
@@ -16,6 +16,8 @@ import {
   FunctionImportType,
   ModelTypes,
   OperationTypes,
+  OperationType,
+  PropertyModel,
 } from "../data-model/DataTypeModel";
 
 const ROOT_SERVICE = "ODataService";
@@ -92,8 +94,10 @@ export class ServiceGenerator {
         }),
       ],
       methods: [
-        ...this.generateMethods(Object.values(container.functions), OperationTypes.Function, importContainer),
-        ...this.generateMethods(Object.values(container.actions), OperationTypes.Action, importContainer),
+        ...this.generateUnboundOperations(
+          [...Object.values(container.functions), ...Object.values(container.actions)],
+          importContainer
+        ),
       ],
     });
 
@@ -109,9 +113,11 @@ export class ServiceGenerator {
     // also include a corresponding CollectionService for each type
     for (const model of this.dataModel.getModels()) {
       const serviceName = this.getServiceName(model.name);
+      const operations = this.dataModel.getOperationTypeByBinding(model.name);
       const serviceFile = await this.project.createServiceFile(serviceName);
       const props = [...model.baseProps, ...model.props];
       const modelProps = props.filter((prop) => prop.dataType === DataTypes.ModelType);
+      const primColProps = props.filter((prop) => prop.isCollection && prop.dataType !== DataTypes.ModelType);
       const importContainer = new ImportContainer(this.dataModel);
 
       importContainer.addFromService(entityServiceType);
@@ -162,6 +168,33 @@ export class ServiceGenerator {
               hasQuestionToken: true,
             } as PropertyDeclarationStructure;
           }),
+          ...primColProps.map((prop) => {
+            const isEnum = prop.dataType === DataTypes.EnumType;
+            const type = isEnum
+              ? `EnumCollection<${prop.type}>`
+              : `${upperCaseFirst(prop.type.replace(/String$/, ""))}Collection`;
+            const collectionType = `${collectionServiceType}<${type}>`;
+
+            if (!prop.qObject) {
+              throw Error("Illegal State: [qObject] must be provided for Collection types!");
+            }
+
+            importContainer.addFromService(collectionServiceType);
+            importContainer.addFromQObject(prop.qObject);
+            if (isEnum) {
+              importContainer.addGeneratedModel(prop.type);
+              importContainer.addFromQObject("EnumCollection");
+            } else {
+              importContainer.addFromQObject(type);
+            }
+
+            return {
+              scope: Scope.Private,
+              name: "_" + prop.name,
+              type: `${collectionType}`,
+              hasQuestionToken: true,
+            };
+          }),
         ],
         getAccessors: [
           ...modelProps.map((prop) => {
@@ -184,7 +217,21 @@ export class ServiceGenerator {
               ],
             } as GetAccessorDeclarationStructure;
           }),
+          ...primColProps.map((prop) => {
+            return {
+              scope: Scope.Public,
+              name: prop.name,
+              statements: [
+                `if(!this._${prop.name}) {`,
+                // prettier-ignore
+                `  this._${prop.name} = new ${collectionServiceType}(this.client, this.path + "/${prop.odataName}", ${prop.qObject})`,
+                "}",
+                `return this._${prop.name}`,
+              ],
+            } as GetAccessorDeclarationStructure;
+          }),
         ],
+        methods: [...this.generateBoundOperations(operations, importContainer)],
       });
 
       // now the entity collection service
@@ -274,44 +321,56 @@ export class ServiceGenerator {
     return props.length ? `{ ${props.join(", ")} }` : undefined;
   }
 
-  private generateMethods(
+  private generateBoundOperations(operations: Array<OperationType>, importContainer: ImportContainer) {
+    return operations.map((op) => this.generateMethod(op.name, op.odataName, op, importContainer));
+  }
+
+  private generateUnboundOperations(
     operations: Array<FunctionImportType | ActionImportType>,
-    operationType: OperationTypes,
     importContainer: ImportContainer
   ) {
-    return Object.values(operations).map(({ name, odataName, operation }): OptionalKind<MethodDeclarationStructure> => {
-      const isFunc = operationType === OperationTypes.Function;
-      const returnType = operation.returnType ? operation.returnType.type : "void";
-      const paramsSpec = this.createParamsSpec(operation.parameters);
-      const bodyParamsParam = !isFunc && paramsSpec ? `${COMPILE_BODY}(${paramsSpec})` : "{}";
+    return Object.values(operations).map(({ name, odataName, operation }) =>
+      this.generateMethod(name, odataName, operation, importContainer)
+    );
+  }
 
-      importContainer.addFromClientApi("ODataResponse", RESPONSE_TYPES.model);
-      importContainer.addFromService(COMPILE_PARAMS);
-      if (!isFunc && paramsSpec) {
-        importContainer.addFromService(COMPILE_BODY);
-      }
-      if (operation.returnType?.type) {
-        importContainer.addGeneratedModel(returnType);
-      }
+  private generateMethod(
+    name: string,
+    odataName: string,
+    operation: OperationType,
+    importContainer: ImportContainer
+  ): OptionalKind<MethodDeclarationStructure> {
+    const isFunc = operation.type === OperationTypes.Function;
+    const returnType = operation.returnType ? operation.returnType.type : "void";
+    const paramsSpec = this.createParamsSpec(operation.parameters);
+    const bodyParamsParam = !isFunc && paramsSpec ? `${COMPILE_BODY}(${paramsSpec})` : "{}";
 
-      return {
-        scope: Scope.Public,
-        name,
-        parameters: operation.parameters.map((param) => {
-          this.addTypeForProp(importContainer, param);
-          return {
-            name: param.name,
-            type: param.type, // todo collection types
-          };
-        }),
-        returnType: `ODataResponse<${RESPONSE_TYPES.model}<${returnType}>>`,
-        statements: [
-          // prettier-ignore
-          `const url = ${COMPILE_PARAMS}(this.getPath(), "${odataName}"${isFunc && paramsSpec ? `, ${paramsSpec}` : ""})`,
-          `return this.client.${isFunc ? "get(url)" : `post(url, ${bodyParamsParam})`};`,
-        ],
-      };
-    });
+    importContainer.addFromClientApi("ODataResponse", RESPONSE_TYPES.model);
+    importContainer.addFromService(COMPILE_PARAMS);
+    if (!isFunc && paramsSpec) {
+      importContainer.addFromService(COMPILE_BODY);
+    }
+    if (operation.returnType?.type && returnType) {
+      this.addTypeForProp(importContainer, operation.returnType);
+    }
+
+    return {
+      scope: Scope.Public,
+      name,
+      parameters: operation.parameters.map((param) => {
+        this.addTypeForProp(importContainer, param);
+        return {
+          name: param.name,
+          type: param.type, // todo collection types
+        };
+      }),
+      returnType: `ODataResponse<${RESPONSE_TYPES.model}<${returnType}>>`,
+      statements: [
+        // prettier-ignore
+        `const url = ${COMPILE_PARAMS}(this.getPath(), "${odataName}"${isFunc && paramsSpec ? `, ${paramsSpec}` : ""})`,
+        `return this.client.${isFunc ? "get(url)" : `post(url, ${bodyParamsParam})`};`,
+      ],
+    };
   }
 
   private addTypeForProp(importContainer: ImportContainer, p: PropertyModel) {

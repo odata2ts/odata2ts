@@ -95,6 +95,7 @@ export class ProjectManager {
     const fileName = file.getFilePath();
     const raw = file.getFullText();
 
+    // const formatted = raw;
     const formatted = await this.formatter.format(raw).catch(async (error: Error) => {
       console.error("Formatting failed");
       await writeFile("error.log", error);

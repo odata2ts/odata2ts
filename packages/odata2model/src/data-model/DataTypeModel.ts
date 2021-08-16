@@ -52,10 +52,7 @@ export interface OperationType {
   returnType?: ReturnTypeModel;
 }
 
-export interface ReturnTypeModel {
-  odataType: string;
-  type: string;
-}
+export interface ReturnTypeModel extends PropertyModel {}
 
 export type EntityContainerModel = {
   entitySets: { [name: string]: EntitySetType };

@@ -99,11 +99,29 @@ GET {{baseUrl}}/GetNearestAirport(lat=51.918777,lon=8.620930)
 ### func bound to trip => params are taken from the path
 GET {{baseUrl}}/People('russellwhyte')/Trips(0)/GetInvolvedPeople
 
+### also works with namespace prefix
+GET {{baseUrl}}/People('russellwhyte')/Trips(0)/Trippin.GetInvolvedPeople
+
+### func bound with params
+GET {{baseUrl}}/People('russellwhyte')/Trippin.GetFriendsTrips(userName='scottketchum')
+
 
 # --- ACTIONS ---
 
 ### unbound action
 POST {{baseUrl}}/ResetDataSource
+
+### bound action
+POST {{baseUrl}}/People('russellwhyte')/Trippin.UpdateLastName
+Content-Type: {{contentType}}
+
+{
+  "lastName": "Tester"
+}
+
+###
+GET {{baseUrl}}/People('russellwhyte')
+
 
 
 # --- QUERIES ---
