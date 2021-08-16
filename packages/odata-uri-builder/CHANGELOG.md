@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.4.0...@odata2ts/odata-uri-builder@0.5.0) (2021-08-16)
+
+
+### Bug Fixes
+
+* **uri-builder:** adapt to QEntityCollectionPath ([e1b02c1](https://github.com/odata2ts/odata2ts/commit/e1b02c18fa320b40a89142c5471006d7bbd5b488))
+* more service tests, fix prop names vs odata names ([489b690](https://github.com/odata2ts/odata2ts/commit/489b69078144d3ed6a478373f7a22d8d923567ec))
+* **uri-builder:** fix tests ([e1919d7](https://github.com/odata2ts/odata2ts/commit/e1919d753a80de163848b235bd2e619fc8483855))
+* **url-builder:** don't add anything before the given path ([1c20145](https://github.com/odata2ts/odata2ts/commit/1c201451d9ed34e55e8c964730057584e7d01a72))
+
+
+### Code Refactoring
+
+* **uri-builder:** remove byId function ([e22cdae](https://github.com/odata2ts/odata2ts/commit/e22cdae47975bbf2689e4a1edcd471590590a8f6))
+
+
+### Features
+
+* **uri-builder:** adapt to new QEntityCollectionPath ([3eb3983](https://github.com/odata2ts/odata2ts/commit/3eb3983997b665633a502755788e8c964cbc0b53))
+
+
+### BREAKING CHANGES
+
+* **uri-builder:** public API has changed by removing byId()
+
+
+
+
+
 # [0.4.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.3.0...@odata2ts/odata-uri-builder@0.4.0) (2021-08-10)
 
 
