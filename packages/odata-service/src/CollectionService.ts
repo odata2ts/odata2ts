@@ -1,5 +1,7 @@
 import { QEntityModel, PrimitiveCollectionType } from "@odata2ts/odata-query-objects";
-import { ODataClient, ODataModelResponse, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataUriBuilder } from "@odata2ts/odata-uri-builder";
+import { ODataClient, ODataModelResponse, ODataResponse, ODataCollectionResponse } from "@odata2ts/odata-client-api";
+
 import { EntityBaseService } from "./EntityBaseService";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
@@ -19,5 +21,11 @@ export class CollectionService<T, K = PrimitiveExtractor<T>> extends EntityBaseS
 
   public delete(): ODataResponse<void> {
     return this.client.delete(this.path);
+  }
+
+  public query(
+    queryFn?: (builder: ODataUriBuilder<T>, qObject: QEntityModel<T>) => void
+  ): ODataResponse<ODataCollectionResponse<T>> {
+    return this.client.get(this.getQueryUrl(queryFn));
   }
 }

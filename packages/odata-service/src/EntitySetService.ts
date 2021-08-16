@@ -1,7 +1,9 @@
+import { QEntityModel } from "@odata2ts/odata-query-objects";
+import { ODataUriBuilder } from "@odata2ts/odata-uri-builder";
+
 import { EntityTypeService } from "./EntityTypeService";
 import { EntityBaseService } from "./EntityBaseService";
-import { ODataClient, ODataModelResponse, ODataResponse } from "@odata2ts/odata-client-api";
-import { QEntityModel } from "@odata2ts/odata-query-objects";
+import { ODataClient, ODataModelResponse, ODataResponse, ODataCollectionResponse } from "@odata2ts/odata-client-api";
 
 export abstract class EntitySetService<EModel, EIdType> extends EntityBaseService<EModel> {
   constructor(client: ODataClient, path: string, qModel: QEntityModel<EModel, any>) {
@@ -20,5 +22,11 @@ export abstract class EntitySetService<EModel, EIdType> extends EntityBaseServic
 
   public delete(id: EIdType): ODataResponse<void> {
     return this.get(id).delete();
+  }
+
+  public query(
+    queryFn?: (builder: ODataUriBuilder<EModel>, qObject: QEntityModel<EModel>) => void
+  ): ODataResponse<ODataCollectionResponse<EModel>> {
+    return this.client.get(this.getQueryUrl(queryFn));
   }
 }

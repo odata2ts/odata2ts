@@ -17,9 +17,7 @@ export abstract class EntityBaseService<EModel> {
     return this.qModel;
   }
 
-  public query(
-    queryFn?: (builder: ODataUriBuilder<EModel>, qObject: QEntityModel<EModel>) => void
-  ): ODataResponse<ODataModelResponse<EModel> | undefined> {
+  protected getQueryUrl(queryFn?: (builder: ODataUriBuilder<EModel>, qObject: QEntityModel<EModel>) => void): string {
     let url = this.path;
 
     if (queryFn) {
@@ -28,6 +26,6 @@ export abstract class EntityBaseService<EModel> {
       url = builder.build();
     }
 
-    return this.client.get(url);
+    return url;
   }
 }
