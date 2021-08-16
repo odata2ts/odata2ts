@@ -8,7 +8,7 @@
   "scripts": {
     "build": "lerna run build",
     "clean": "lerna run clean",
-    "coverage": "jest --coverage",
+    "coverage": "yarn workspace @odata2ts/odata2model dev-trippin && jest --coverage",
     "release": "yarn clean && yarn build && lerna publish",
     "test": "lerna run test -- --passWithNoTests"
   },
