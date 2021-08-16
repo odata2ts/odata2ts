@@ -196,6 +196,8 @@ export class ServiceGenerator {
         const keyType = `${isSingleKey ? model.keys[0].type + " | " : ""}${exactKeyType}`;
         const keySpec = this.createKeySpec(model.keys);
 
+        model.keys.forEach((keyProp) => this.addTypeForProp(importContainer, keyProp));
+
         serviceFile.addClass({
           isExported: true,
           name: this.getCollectionServiceName(model.name),
@@ -295,10 +297,13 @@ export class ServiceGenerator {
       return {
         scope: Scope.Public,
         name,
-        parameters: operation.parameters.map((param) => ({
-          name: param.name,
-          type: param.type, // todo collection types
-        })),
+        parameters: operation.parameters.map((param) => {
+          this.addTypeForProp(importContainer, param);
+          return {
+            name: param.name,
+            type: param.type, // todo collection types
+          };
+        }),
         returnType: `ODataResponse<${RESPONSE_TYPES.model}<${returnType}>>`,
         statements: [
           // prettier-ignore
@@ -307,5 +312,13 @@ export class ServiceGenerator {
         ],
       };
     });
+  }
+
+  private addTypeForProp(importContainer: ImportContainer, p: PropertyModel) {
+    if (p.dataType === DataTypes.PrimitiveType && p.type.endsWith("String")) {
+      importContainer.addFromQObject(p.type);
+    } else if (p.dataType === DataTypes.EnumType || p.dataType === DataTypes.ModelType) {
+      importContainer.addGeneratedModel(p.type);
+    }
   }
 }

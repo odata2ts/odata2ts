@@ -37,7 +37,7 @@ export class ImportContainer {
   }
 
   public addFromQObject(...names: Array<string>) {
-    names.forEach(this.container.qobjects.add);
+    names.forEach((n) => this.container.qobjects.add(n));
   }
 
   public addFromClientApi(...names: Array<string>) {
