@@ -112,8 +112,6 @@ export class DataModel {
     this.digestEntityContainer(schema.EntityContainer[0]);
   }
 
-  private getProps(props: Array<Property | NavigationProperty>, propNames: Array<string>) {}
-
   private addModel(models: Array<EntityType | ComplexType>, modelType: ModelTypes) {
     if (!models || !models.length) {
       return;
@@ -202,6 +200,10 @@ export class DataModel {
   }
 
   private mapProperty = (p: Property | NavigationProperty): PropertyModel => {
+    if (!p.$.Type) {
+      throw Error(`No type information given for property [${p.$.Name}]!`);
+    }
+
     const isCollection = !!p.$.Type.match(/^Collection\(/);
     const dataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
 
