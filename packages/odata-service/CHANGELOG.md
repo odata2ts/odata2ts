@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.2.0...@odata2ts/odata-service@0.2.1) (2021-08-16)
+
+
+### Bug Fixes
+
+* **service:** add dependency to odata-client-api ([e90605b](https://github.com/odata2ts/odata2ts/commit/e90605b97664eb7d4ff215a909aa0a486be4c4ea))
+* **service:** also allow for boolean as InlineUrlProp ([428a095](https://github.com/odata2ts/odata2ts/commit/428a095be138c0e7c696aaf1baf7e0a656b352fa))
+* **service:** fix response types of collection queries ([2f5a5d9](https://github.com/odata2ts/odata2ts/commit/2f5a5d9c71ed6f05543571dba897a60834662448))
+
+
+
+
+
 # 0.2.0 (2021-08-16)
 
 

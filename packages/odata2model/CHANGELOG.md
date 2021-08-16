@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.4.0...@odata2ts/odata2model@0.5.0) (2021-08-16)
+
+
+### Bug Fixes
+
+* **odata2model:** add import for parameter types ([03f25f4](https://github.com/odata2ts/odata2ts/commit/03f25f406aa5f304eeef5f7a89cfda478eb05d2a))
+
+
+### Features
+
+* **odata2model:** add bound func/actions & add primitive collections ([c18daac](https://github.com/odata2ts/odata2ts/commit/c18daac8135f17e1554e65ff4c5f4a7a76b4886b))
+* **odata2model:** check for missing type & throw error ([39cdd55](https://github.com/odata2ts/odata2ts/commit/39cdd55802afdcbc5846e4119a1696d236550009))
+
+
+
+
+
 # [0.4.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.3.0...@odata2ts/odata2model@0.4.0) (2021-08-16)
 
 
