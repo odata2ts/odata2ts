@@ -1,8 +1,8 @@
-import { QPrimitiveCollection } from "../QSingletons";
+import { QEntityModel } from "./../QEntityModel";
 import { QPathModel } from "./QPathModel";
 
-export class QCollectionPath<Type> implements QPathModel {
-  constructor(private path: string, private qEntityFn: () => QPrimitiveCollection<Type>) {
+export class QCollectionPath<CollectionType> implements QPathModel {
+  constructor(private path: string, private qEntityFn: () => QEntityModel<CollectionType>) {
     if (!path || !path.trim()) {
       throw Error("Path must be supplied!");
     }
@@ -15,7 +15,7 @@ export class QCollectionPath<Type> implements QPathModel {
     return this.path;
   }
 
-  public getEntity(): QPrimitiveCollection<Type> {
+  public getEntity(): QEntityModel<CollectionType> {
     return this.qEntityFn();
   }
 }

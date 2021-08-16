@@ -1,3 +1,14 @@
+import {
+  DateCollection,
+  TimeOfDayCollection,
+  DateTimeOffsetCollection,
+  BinaryCollection,
+  GuidCollection,
+  BooleanCollection,
+  NumberCollection,
+  StringCollection,
+  EnumCollection,
+} from "./QSingletons";
 import { QEnumPath } from "./path/QEnumPath";
 import { BinaryString, DateString, DateTimeOffsetString, GuidString, TimeOfDayString } from "./odata/ODataTypes";
 import { QDatePath } from "./path/date-time-v4/QDatePath";
@@ -54,8 +65,26 @@ export type QPropContainer<TypeModel, EnumTypes> = {
     : TypeModel[Property] extends string
     ? QStringPath
     : TypeModel[Property] extends Array<string | number | boolean | EnumTypes>
-    ? QCollectionPath<Unpacked<TypeModel[Property]>>
+    ? QCollectionPath<CollectionMapper<Unpacked<TypeModel[Property]>>>
     : TypeModel[Property] extends Array<object>
     ? QEntityCollectionPath<Unpacked<TypeModel[Property]>, EnumTypes>
     : QEntityPath<TypeModel[Property], EnumTypes>;
 };
+
+export type CollectionMapper<Type> = Type extends DateString
+  ? DateCollection
+  : Type extends TimeOfDayString
+  ? TimeOfDayCollection
+  : Type extends DateTimeOffsetString
+  ? DateTimeOffsetCollection
+  : Type extends BinaryString
+  ? BinaryCollection
+  : Type extends GuidString
+  ? GuidCollection
+  : Type extends boolean
+  ? BooleanCollection
+  : Type extends number
+  ? NumberCollection
+  : Type extends string
+  ? StringCollection
+  : EnumCollection<Type>;

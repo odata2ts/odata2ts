@@ -13,43 +13,63 @@ import { QEntityModel } from "./QEntityModel";
 const ATTRIBUTE_NAME = "it";
 const PRIMITIVE_VALUE_REFERENCE = "$it";
 
-export interface PrimitiveCollection<T> {
-  it: T;
+export interface PrimitiveCollectionType<T> {
+  [ATTRIBUTE_NAME]: T;
 }
-export type QPrimitiveCollection<T> = QEntityModel<PrimitiveCollection<T>, null>;
 
-export const qStringCollection: QPrimitiveCollection<string> = {
+export type StringCollection = PrimitiveCollectionType<string>;
+export type NumberCollection = PrimitiveCollectionType<number>;
+export type BooleanCollection = PrimitiveCollectionType<boolean>;
+export type GuidCollection = PrimitiveCollectionType<GuidString>;
+export type BinaryCollection = PrimitiveCollectionType<BinaryString>;
+export type DateTimeOffsetCollection = PrimitiveCollectionType<DateTimeOffsetString>;
+export type TimeOfDayCollection = PrimitiveCollectionType<TimeOfDayString>;
+export type DateCollection = PrimitiveCollectionType<DateString>;
+export type EnumCollection<T> = PrimitiveCollectionType<T>;
+
+export type PrimitiveCollection =
+  | StringCollection
+  | NumberCollection
+  | BooleanCollection
+  | GuidCollection
+  | BinaryCollection
+  | DateTimeOffsetCollection
+  | TimeOfDayCollection
+  | DateCollection
+  | EnumCollection<any>;
+
+export const qStringCollection: QEntityModel<StringCollection> = {
   [ATTRIBUTE_NAME]: new QStringPath(PRIMITIVE_VALUE_REFERENCE),
 };
 
-export const qNumberCollection: QPrimitiveCollection<number> = {
+export const qNumberCollection: QEntityModel<NumberCollection> = {
   [ATTRIBUTE_NAME]: new QNumberPath(PRIMITIVE_VALUE_REFERENCE),
 };
 
-export const qBooleanCollection: QPrimitiveCollection<boolean> = {
+export const qBooleanCollection: QEntityModel<BooleanCollection> = {
   [ATTRIBUTE_NAME]: new QBooleanPath(PRIMITIVE_VALUE_REFERENCE),
 };
 
-export const qGuidCollection: QPrimitiveCollection<GuidString> = {
+export const qGuidCollection: QEntityModel<GuidCollection> = {
   [ATTRIBUTE_NAME]: new QGuidPath(PRIMITIVE_VALUE_REFERENCE),
 };
 
-export const qBinaryCollection: QPrimitiveCollection<BinaryString> = {
+export const qBinaryCollection: QEntityModel<BinaryCollection> = {
   [ATTRIBUTE_NAME]: new QBinaryPath(PRIMITIVE_VALUE_REFERENCE),
 };
 
-export const qDateTimeOffsetCollection: QPrimitiveCollection<DateTimeOffsetString> = {
+export const qDateTimeOffsetCollection: QEntityModel<DateTimeOffsetCollection> = {
   [ATTRIBUTE_NAME]: new QDateTimeOffsetPath(PRIMITIVE_VALUE_REFERENCE),
 };
 
-export const qTimeOfDayCollection: QPrimitiveCollection<TimeOfDayString> = {
+export const qTimeOfDayCollection: QEntityModel<TimeOfDayCollection> = {
   [ATTRIBUTE_NAME]: new QTimeOfDayPath(PRIMITIVE_VALUE_REFERENCE),
 };
 
-export const qDateCollection: QPrimitiveCollection<DateString> = {
+export const qDateCollection: QEntityModel<DateCollection> = {
   [ATTRIBUTE_NAME]: new QDatePath(PRIMITIVE_VALUE_REFERENCE),
 };
 
-export const qEnumCollection: QPrimitiveCollection<any> = {
+export const qEnumCollection: QEntityModel<EnumCollection<any>> = {
   [ATTRIBUTE_NAME]: new QEnumPath(PRIMITIVE_VALUE_REFERENCE),
 };

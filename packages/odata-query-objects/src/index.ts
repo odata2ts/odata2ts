@@ -1,7 +1,7 @@
 export { DateString, TimeOfDayString, DateTimeOffsetString, BinaryString, GuidString } from "./odata/ODataTypes";
 
 export { QEntityFactory, QRawPropContainer } from "./QEntityFactory";
-export { QEntityModel, QPropContainer } from "./QEntityModel";
+export { QEntityModel, QPropContainer, CollectionMapper } from "./QEntityModel";
 export { QFilterExpression } from "./QFilterExpression";
 export { QOrderByExpression } from "./QOrderByExpression";
 export { QBooleanPath } from "./path/QBooleanPath";
