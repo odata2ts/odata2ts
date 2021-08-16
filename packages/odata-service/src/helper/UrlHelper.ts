@@ -49,16 +49,16 @@ export const compileParams = (id: InlineUrlProps) => {
     .join(",");
 };
 
-export const compileLiteralValue = (id: string | number): string => {
-  if (typeof id !== "string" && typeof id !== "number") {
-    throw Error("Only string & number types are valid for compileLiteralId!");
+export const compileLiteralValue = (id: string | number | boolean): string => {
+  if (typeof id !== "string" && typeof id !== "number" && typeof id !== "boolean") {
+    throw Error("Only string, number & boolean types are valid for compileLiteralId!");
   }
   return String(id);
 };
 
-export const compileQuotedValue = (id: string | number) => {
-  if (typeof id !== "string" && typeof id !== "number") {
-    throw Error("Only string & number types are valid for compileQuotedId!");
+export const compileQuotedValue = (id: string | number | boolean) => {
+  if (typeof id !== "string" && typeof id !== "number" && typeof id !== "boolean") {
+    throw Error("Only string, number & boolean types are valid for compileQuotedId!");
   }
   return `'${id}'`;
 };
