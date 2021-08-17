@@ -156,7 +156,7 @@ GET {{baseUrl}}/People('russellwhyte')/Emails?$filter=contains($it,'contoso')
 
 ### Non-exposed Collections: Trips
 GET {{baseUrl}}/People('russellwhyte')?$expand=Trips
-### works anyway
+### by id
 GET {{baseUrl}}/People('russellwhyte')/Trips/0
 
 ### Derived Entity Type
@@ -168,6 +168,27 @@ GET {{baseUrl}}/People/Trippin.Manager
 ###
 GET {{baseUrl}}/People('genevievereeves')/Trippin.Manager
 
+### $Count
+GET {{baseUrl}}/People('russellwhyte')/Friends/$count
+### $Count
+GET {{baseUrl}}/People$filter=Friends/$count gt 2
+
+
+### Lambda Operators
+GET {{baseUrl}}/People?$filter=Trips/any(a:a/Budget gt 2999)
+&$select=FirstName,LastName
+&$count=true
+&$expand=Trips($select=Description,Budget)
+###
+GET {{baseUrl}}/People?$filter=Trips/all(a:a/Budget ge 5000)
+&$select=FirstName,LastName
+&$count=true
+&$expand=Trips($select=Description,Budget)
+###
+GET {{baseUrl}}/People?$expand=Friends($select=UserName;$filter=$it/BestFriend/UserName ne $this/UserName),BestFriend($select=UserName)
+#
+&$select=UserName
+# &$expand=Trips($select=Description,Budget)
 
 # --- PATCHING ---
 ### Update Collection Prop by Id => 501 not implemented
