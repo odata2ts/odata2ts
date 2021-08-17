@@ -1,7 +1,7 @@
 import { upperCaseFirst } from "upper-case-first";
 import { firstCharLowerCase } from "xml2js/lib/processors";
 
-import { RunOptions } from "../app";
+import { RunOptions } from "../OptionModel";
 import {
   Property,
   NavigationProperty,

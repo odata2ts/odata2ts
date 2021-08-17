@@ -5,17 +5,8 @@ import { ensureDir, pathExists, readFile } from "fs-extra";
 import { parseStringPromise } from "xml2js";
 
 import { App } from "./app";
+import { EmitModes, Modes, ProjectOptions, RunOptions } from "./OptionModel";
 import { ODataEdmxModel } from "./odata/ODataEdmxModel";
-
-export interface Odata2tsOptions {
-  source: string;
-  output: string;
-  mode: "models" | "qobjects" | "service" | "all";
-  modelPrefix: string;
-  modelSuffix: string;
-  prettier: boolean;
-  debug: boolean;
-}
 
 class Cli {
   public async main(): Promise<void> {
@@ -26,8 +17,16 @@ class Cli {
       .requiredOption("-o, --output <path>", "Output location for generated files")
       .addOption(
         new Option("-m, --mode <mode>", "What kind of stuff gets generated")
-          .choices(["models", "qobjects", "all"])
+          .choices(["models", "qobjects", "service", "all"])
           .default("all")
+      )
+      .addOption(
+        new Option(
+          "-e, --emit-mode <mode>",
+          "Output TS source files, compiled JS files with/wihthout generated d.ts files"
+        )
+          .choices(Object.values(EmitModes))
+          .default("js-dts")
       )
       .option("-prefix, --model-prefix <prefix>", "Prefix the generated interfaces with a static string", "")
       .option("-suffix, --model-suffix <suffix>", "Sufffix the generated interfaces with a static string", "")
@@ -35,10 +34,20 @@ class Cli {
       .option("-d, --debug", "Verbose debug infos", false)
       .parse(process.argv);
 
-    const { source, output, ...options } = cli.opts() as Odata2tsOptions;
+    const { source, emitMode, mode, ...opts } = cli.opts() as ProjectOptions;
+    const options: RunOptions = {
+      mode: Modes[mode],
+      emitMode: emitMode as EmitModes,
+      ...opts,
+    };
 
     if (options.debug) {
-      console.log("Provided Options:", cli.opts());
+      console.log("Provided Options:", {
+        ...options,
+        source,
+        mode,
+        emitMode,
+      });
     }
 
     console.log("Reading file:", source);
@@ -53,12 +62,12 @@ class Cli {
     const metadataJson = (await parseStringPromise(metadataXml)) as ODataEdmxModel;
 
     // ensure that output directory exists
-    await ensureDir(output).catch((error: Error) => {
-      console.error(`Output path [${output}] couldn't be created!`, error);
+    await ensureDir(options.output).catch((error: Error) => {
+      console.error(`Output path [${options.output}] couldn't be created!`, error);
     });
 
     // run the app
-    new App().run(metadataJson, output, options).catch((err: Error) => {
+    new App().run(metadataJson, options).catch((err: Error) => {
       console.error("Error while running the program", err);
       process.exit(1);
     });
