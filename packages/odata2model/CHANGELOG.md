@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.5.0...@odata2ts/odata2model@0.6.0) (2021-08-17)
+
+
+### Features
+
+* **odata2model:** add emitMode to allow js and/or d.ts generation ([88e69ca](https://github.com/odata2ts/odata2ts/commit/88e69caff9d9b48f3f607f7f26d3d7d8d4449514))
+
+
+
+
+
 # [0.5.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.4.0...@odata2ts/odata2model@0.5.0) (2021-08-16)
 
 
