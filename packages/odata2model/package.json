@@ -14,10 +14,10 @@
     "clean": "rimraf lib build",
     "compile": "tsc",
     "dev": "ts-node src/cli.ts -o build -p",
-    "dev-nw": "yarn dev -s test/fixture/metadata.xml -d -p --model-suffix Model",
-    "dev-trippin": "yarn dev -s test/fixture/trippin.xml -d -p --model-suffix Model",
-    "test": "yarn dev-trippin && jest test/unit",
-    "test-int": "yarn dev-trippin && jest test/integration"
+    "dev-nw": "yarn dev -s test/fixture/metadata.xml -d -p --model-suffix Model -e ts",
+    "dev-trippin": "yarn dev -s test/fixture/trippin.xml -d -p --model-suffix Model -e ts",
+    "test": "yarn clean && yarn dev-trippin && jest test/unit",
+    "test-int": "yarn clean && yarn dev-trippin && jest test/integration"
   },
   "files": [
     "*.md",
