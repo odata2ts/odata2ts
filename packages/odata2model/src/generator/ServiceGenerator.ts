@@ -341,11 +341,12 @@ export class ServiceGenerator {
     importContainer: ImportContainer
   ): OptionalKind<MethodDeclarationStructure> {
     const isFunc = operation.type === OperationTypes.Function;
-    const returnType = operation.returnType ? operation.returnType.type : "void";
+    const odataType = operation.returnType?.isCollection ? RESPONSE_TYPES.collection : RESPONSE_TYPES.model;
+    const returnType = !operation.returnType ? "void" : operation.returnType.type;
     const paramsSpec = this.createParamsSpec(operation.parameters);
     const bodyParamsParam = !isFunc && paramsSpec ? `${COMPILE_BODY}(${paramsSpec})` : "{}";
 
-    importContainer.addFromClientApi("ODataResponse", RESPONSE_TYPES.model);
+    importContainer.addFromClientApi("ODataResponse", odataType);
     importContainer.addFromService(COMPILE_PARAMS);
     if (!isFunc && paramsSpec) {
       importContainer.addFromService(COMPILE_BODY);
@@ -364,7 +365,7 @@ export class ServiceGenerator {
           type: param.type, // todo collection types
         };
       }),
-      returnType: `ODataResponse<${RESPONSE_TYPES.model}<${returnType}>>`,
+      returnType: `ODataResponse<${odataType}<${returnType}>>`,
       statements: [
         // prettier-ignore
         `const url = ${COMPILE_PARAMS}(this.getPath(), "${odataName}"${isFunc && paramsSpec ? `, ${paramsSpec}` : ""})`,
