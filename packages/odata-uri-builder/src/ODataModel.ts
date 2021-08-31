@@ -5,6 +5,7 @@ export const enum ODataOperators {
   TOP = "$top",
   EXPAND = "$expand",
   COUNT = "$count",
+  ORDER_BY = "$orderby",
 }
 
 export const enum ODataFilterOperators {

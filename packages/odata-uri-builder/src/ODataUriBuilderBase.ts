@@ -4,6 +4,7 @@ import {
   QEntityModel,
   QEntityPath,
   QFilterExpression,
+  QOrderByExpression,
   QPropContainer,
 } from "@odata2ts/odata-query-objects";
 import { ExpandingODataUriBuilder } from "./internal";
@@ -33,6 +34,7 @@ export abstract class ODataUriBuilderBase<T> {
   protected itemsCount?: boolean;
   protected expands: Array<ExpandingODataUriBuilder<any>> = [];
   protected filters: Array<QFilterExpression> = [];
+  protected orderBys: Array<QOrderByExpression> = [];
 
   protected constructor(path: string, qEntity: QEntityModel<T>, config?: ODataUriBuilderConfig) {
     if (!qEntity || !path || !path.trim()) {
@@ -89,6 +91,21 @@ export abstract class ODataUriBuilderBase<T> {
     }
 
     this.itemsTop = itemsTop;
+    return this;
+  }
+
+  /**
+   * Specify order by expressions by facilitating qObjects and their
+   * ascending and descending methods.
+   *
+   * This method can be called multiple times in order to add orderBy expressions successively.
+   *
+   * @param expressions possibly multiple order by expressions at once
+   * @returns this query builder
+   */
+  public orderBy(...expressions: Array<QOrderByExpression>) {
+    this.orderBys.push(...expressions);
+
     return this;
   }
 
@@ -199,6 +216,10 @@ export abstract class ODataUriBuilderBase<T> {
     if (this.expands.length) {
       const expand = this.expands.map((exp) => exp.build()).join(",");
       add(ODataOperators.EXPAND, expand);
+    }
+    if (this.orderBys.length) {
+      const order = this.orderBys.map((exp) => exp.toString()).join(",");
+      add(ODataOperators.ORDER_BY, order);
     }
 
     return params;

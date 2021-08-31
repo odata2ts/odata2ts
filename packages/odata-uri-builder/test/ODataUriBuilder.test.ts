@@ -143,10 +143,33 @@ describe("ODataUriBuilder Test", () => {
     expect(candidate).toBe(expected);
   });
 
-  /* test("orderBy", () => {
-    const candidate = toTest.orderBy(QPerson.name)
+  test("orderBy", () => {
+    const candidate = toTest.orderBy(QPerson.name.asc()).build();
+    const expected = addBase("$orderby=name asc");
 
-  }); */
+    expect(candidate).toBe(expected);
+  });
+
+  test("orderBy: desc", () => {
+    const candidate = toTest.orderBy(QPerson.name.desc()).build();
+    const expected = addBase("$orderby=name desc");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("orderBy: multiple", () => {
+    const candidate = toTest.orderBy(QPerson.name.descending(), QPerson.age.ascending()).build();
+    const expected = addBase("$orderby=name desc,age asc");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("orderBy: consecutive", () => {
+    const candidate = toTest.orderBy(QPerson.name.descending()).orderBy(QPerson.age.ascending()).build();
+    const expected = addBase("$orderby=name desc,age asc");
+
+    expect(candidate).toBe(expected);
+  });
 
   test("filter: simple", () => {
     const candidate = toTest.filter(QPerson.name.eq("Heinz")).build();

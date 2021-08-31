@@ -173,7 +173,6 @@ GET {{baseUrl}}/People('russellwhyte')/Friends/$count
 ### $Count
 GET {{baseUrl}}/People$filter=Friends/$count gt 2
 
-
 ### Lambda Operators
 GET {{baseUrl}}/People?$filter=Trips/any(a:a/Budget gt 2999)
 &$select=FirstName,LastName
@@ -189,6 +188,18 @@ GET {{baseUrl}}/People?$expand=Friends($select=UserName;$filter=$it/BestFriend/U
 #
 &$select=UserName
 # &$expand=Trips($select=Description,Budget)
+
+### $OrderBy
+GET {{baseUrl}}/People('russellwhyte')/Friends?$select=LastName&$orderby=LastName
+### desc
+GET {{baseUrl}}/People('russellwhyte')/Friends?$select=LastName&$orderby=LastName desc
+### multi
+GET {{baseUrl}}/People?$select=Gender,UserName&$orderby=Gender desc,Username desc
+### in expand
+GET {{baseUrl}}/People('russellwhyte')?$select=LastName&$expand=Friends($select=LastName;$orderby=LastName desc)
+### with $count
+GET {{baseUrl}}/People?$select=UserName&$orderby=Friends/$count desc&$expand=Friends($select=UserName)
+
 
 # --- PATCHING ---
 ### Update Collection Prop by Id => 501 not implemented
