@@ -1,4 +1,4 @@
-import { QEntityModel } from "@odata2ts/odata-query-objects";
+import { QEntityModel, Unnominalized } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilder } from "@odata2ts/odata-uri-builder";
 import { ODataClient, ODataModelResponse, ODataResponse } from "@odata2ts/odata-client-api";
 
@@ -9,7 +9,7 @@ export class EntityTypeService<EModel> extends EntityBaseService<EModel> {
     super(client, path, qModel);
   }
 
-  public patch(model: Partial<EModel>): ODataResponse<void> {
+  public patch(model: Partial<Unnominalized<EModel>>): ODataResponse<void> {
     return this.client.patch(this.path, model);
   }
 

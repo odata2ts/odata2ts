@@ -240,8 +240,8 @@ export class ServiceGenerator {
         importContainer.addFromService(entitySetServiceType, COMPILE_ID);
 
         const isSingleKey = model.keys.length === 1;
-        const exactKeyType = `{ ${model.keys.map((k) => `${k.name}: ${k.type}`).join(", ")} }`;
-        const keyType = `${isSingleKey ? model.keys[0].type + " | " : ""}${exactKeyType}`;
+        const exactKeyType = `{ ${model.keys.map((k) => `${k.name}: ${this.sanitizeType(k.type)}`).join(", ")} }`;
+        const keyType = `${isSingleKey ? this.sanitizeType(model.keys[0].type) + " | " : ""}${exactKeyType}`;
         const keySpec = this.createKeySpec(model.keys);
 
         model.keys.forEach((keyProp) => this.addTypeForProp(importContainer, keyProp));
@@ -287,6 +287,10 @@ export class ServiceGenerator {
 
       serviceFile.addImportDeclarations(importContainer.getImportDeclarations(true));
     }
+  }
+
+  private sanitizeType(typeName: string) {
+    return typeName.endsWith("String") ? "string" : typeName;
   }
 
   private getServiceName(name: string) {
@@ -357,7 +361,8 @@ export class ServiceGenerator {
     // typing info for all parameters => as object
     const paramsStrings = operation.parameters.map((param) => {
       this.addTypeForProp(importContainer, param);
-      return `${param.name}${!param.required ? "?" : ""}: ${param.isCollection ? `Array<${param.type}>` : param.type}`;
+      const saniType = this.sanitizeType(param.type);
+      return `${param.name}${!param.required ? "?" : ""}: ${param.isCollection ? `Array<${saniType}>` : saniType}`;
     });
     const optParamType = paramsStrings.length ? `{ ${paramsStrings.join(", ")} }` : undefined;
     const optParamOptional = operation.parameters.reduce((result, p) => result && !p.required, true);
