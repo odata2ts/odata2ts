@@ -1,20 +1,26 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
-import axios, { AxiosPromise, AxiosRequestConfig } from "axios";
+import axios, { AxiosInstance, AxiosPromise, AxiosRequestConfig } from "axios";
 
 export class TestODataClient implements ODataClient<AxiosRequestConfig> {
+  axisoInstance: AxiosInstance;
+
+  constructor(private config?: AxiosRequestConfig) {
+    this.axisoInstance = axios.create(config);
+  }
+
   post<T, ResponseModel>(url: string, data: T, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
-    return axios.post(url, data);
+    return this.axisoInstance.post(url, data);
   }
   get<T>(url: string, requestConfig?: AxiosRequestConfig): AxiosPromise<T> {
-    return axios.get(url);
+    return this.axisoInstance.get(url);
   }
   put<T>(url: string, data: T, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
-    return axios.put(url, data);
+    return this.axisoInstance.put(url, data);
   }
   patch<T>(url: string, data: Partial<T>, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
-    return axios.patch(url);
+    return this.axisoInstance.patch(url);
   }
   delete(url: string, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
-    return axios.delete(url);
+    return this.axisoInstance.delete(url);
   }
 }

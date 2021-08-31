@@ -1,6 +1,6 @@
 export interface InlineUrlProp {
   isLiteral: boolean;
-  value: string | number | boolean;
+  value?: any;
 }
 
 export type InlineUrlProps = { [prop: string]: InlineUrlProp };

@@ -3,6 +3,7 @@ import {
   GetAccessorDeclarationStructure,
   MethodDeclarationStructure,
   OptionalKind,
+  ParameterDeclarationStructure,
   PropertyDeclarationStructure,
   Scope,
 } from "ts-morph";
@@ -21,8 +22,8 @@ import {
 } from "../data-model/DataTypeModel";
 
 const ROOT_SERVICE = "ODataService";
-const COMPILE_PARAMS = "compileParameterPath";
-const COMPILE_BODY = "compileBodyParam";
+const COMPILE_FUNCTION_PATH = "compileFunctionPath";
+const COMPILE_ACTION_PATH = "compileActionPath";
 const COMPILE_ID = "compileId";
 const RESPONSE_TYPES = {
   collection: "ODataCollectionResponse",
@@ -317,12 +318,14 @@ export class ServiceGenerator {
   }
 
   private createParamsSpec(params: Array<PropertyModel>): string | undefined {
-    const props = params.map((p) => `${p.name}: { isLiteral: ${!this.isQuotedValue(p)}, value: ${p.name} }`);
+    const props = params.map((p) => `${p.name}: { isLiteral: ${!this.isQuotedValue(p)}, value: params.${p.name} }`);
     return props.length ? `{ ${props.join(", ")} }` : undefined;
   }
 
   private generateBoundOperations(operations: Array<OperationType>, importContainer: ImportContainer) {
-    return operations.map((op) => this.generateMethod(op.name, op.odataName, op, importContainer));
+    return operations.map((op) =>
+      this.generateMethod(op.name, this.dataModel.getServicePrefix() + op.odataName, op, importContainer)
+    );
   }
 
   private generateUnboundOperations(
@@ -344,32 +347,36 @@ export class ServiceGenerator {
     const odataType = operation.returnType?.isCollection ? RESPONSE_TYPES.collection : RESPONSE_TYPES.model;
     const returnType = !operation.returnType ? "void" : operation.returnType.type;
     const paramsSpec = this.createParamsSpec(operation.parameters);
-    const bodyParamsParam = !isFunc && paramsSpec ? `${COMPILE_BODY}(${paramsSpec})` : "{}";
 
     importContainer.addFromClientApi("ODataResponse", odataType);
-    importContainer.addFromService(COMPILE_PARAMS);
-    if (!isFunc && paramsSpec) {
-      importContainer.addFromService(COMPILE_BODY);
-    }
+    importContainer.addFromService(isFunc ? COMPILE_FUNCTION_PATH : COMPILE_ACTION_PATH);
     if (operation.returnType?.type && returnType) {
       this.addTypeForProp(importContainer, operation.returnType);
     }
 
+    // typing info for all parameters => as object
+    const paramsStrings = operation.parameters.map((param) => {
+      this.addTypeForProp(importContainer, param);
+      return `${param.name}${!param.required ? "?" : ""}: ${param.isCollection ? `Array<${param.type}>` : param.type}`;
+    });
+    const optParamType = paramsStrings.length ? `{ ${paramsStrings.join(", ")} }` : undefined;
+    const optParamOptional = operation.parameters.reduce((result, p) => result && !p.required, true);
+
+    // url construction is different between function and action
+    const url = isFunc
+      ? `${COMPILE_FUNCTION_PATH}(this.getPath(), "${odataName}"${paramsSpec ? `, ${paramsSpec}` : ""})`
+      : `${COMPILE_ACTION_PATH}(this.getPath(), "${odataName}")`;
+
     return {
       scope: Scope.Public,
       name,
-      parameters: operation.parameters.map((param) => {
-        this.addTypeForProp(importContainer, param);
-        return {
-          name: param.name,
-          type: param.type, // todo collection types
-        };
-      }),
+      parameters: optParamType
+        ? [{ name: "params", type: optParamType, initializer: optParamOptional ? "{}" : undefined }]
+        : undefined,
       returnType: `ODataResponse<${odataType}<${returnType}>>`,
       statements: [
-        // prettier-ignore
-        `const url = ${COMPILE_PARAMS}(this.getPath(), "${odataName}"${isFunc && paramsSpec ? `, ${paramsSpec}` : ""})`,
-        `return this.client.${isFunc ? "get(url)" : `post(url, ${bodyParamsParam})`};`,
+        `const url = ${url}`,
+        `return this.client.${isFunc ? "get(url)" : `post(url, ${optParamType ? "params" : "{}"})`};`,
       ],
     };
   }

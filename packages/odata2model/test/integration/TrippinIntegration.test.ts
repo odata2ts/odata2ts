@@ -14,7 +14,7 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("unbound function with params", async () => {
-    const result = await testService.getNearestAirport(123, 345);
+    const result = await testService.getNearestAirport({ lat: 123, lon: 345 });
     expect(result.data.IcaoCode).toBe("ZBAA");
   });
 

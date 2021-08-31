@@ -11,11 +11,11 @@ describe("Testing Generation of TrippinService", () => {
 
   test("unbound function", async () => {
     await testService.getPersonWithMostFriends();
-    expect(odataClient.lastUrl).toBe(`${BASE_URL}/GetPersonWithMostFriends`);
+    expect(odataClient.lastUrl).toBe(`${BASE_URL}/GetPersonWithMostFriends()`);
   });
 
   test("unbound function with params", async () => {
-    const result = await testService.getNearestAirport(123, 345);
+    const result = await testService.getNearestAirport({ lat: 123, lon: 345 });
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/GetNearestAirport(lat=123,lon=345)`);
   });
 

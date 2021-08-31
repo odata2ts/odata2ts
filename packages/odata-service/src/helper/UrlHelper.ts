@@ -17,48 +17,85 @@ export const compileId = (path: string, keySpec: KeySpec, values: string | numbe
     return collector;
   }, {} as InlineUrlProps);
 
-  return compileParameterPath(path, undefined, params);
+  return compileFunctionPath(path, undefined, params);
 };
 
-function getValue(isLiteral: boolean, value: any): string {
-  return isLiteral ? value : compileQuotedValue(value);
-}
-
-export const compileSingleParamPath = (path: string, isLiteral: boolean, value: string | number) => {
+const compileSingleParamPath = (path: string, isLiteral: boolean, value: string | number): string => {
   return `${path || ""}(${getValue(isLiteral, value)})`;
 };
 
-export const compileParameterPath = (basePath: string, path?: string, params?: InlineUrlProps): string => {
-  return `${basePath}${path ? "/" + path : ""}` + (params ? `(${compileParams(params)})` : "");
+const getValue = (isLiteral: boolean, value: any): string => {
+  return isLiteral ? compileLiteralValue(value) : compileQuotedValue(value);
 };
 
-export const compileBodyParam = (params: InlineUrlProps): string => {
-  const ps = Object.entries(params).map(([name, prop]) => `${name}: ${getValue(prop.isLiteral, prop.value)}}`);
-  return `{ ${ps.join(",")} }`;
+/**
+ * Constructs an url path suitable for OData functions.
+ * Parentheses are always added.
+ * Parameters are supported.
+ *
+ * @param path required path element; minimum: name of the function
+ * @param name function name; if left out the path must contain the function name
+ * @param params parameter map which specifies whether each value is literal or quoted
+ * @returns url path
+ */
+export const compileFunctionPath = (path: string, name?: string, params?: InlineUrlProps): string => {
+  const actionPath = compileActionPath(path, name);
+  return `${actionPath}(${params ? compileParams(params) : ""})`;
 };
 
-export const compileParams = (id: InlineUrlProps) => {
+const compileParams = (id: InlineUrlProps) => {
   if (typeof id !== "object") {
     throw Error("Only object types are valid for compileParams!");
   }
   return Object.entries(id)
-    .map(([key, value]) => {
-      const val = value.isLiteral ? compileLiteralValue(value.value) : compileQuotedValue(value.value);
+    .map(([key, { value, isLiteral }]) => {
+      const val = value === undefined || value === null ? null : getValue(isLiteral, value);
       return key + "=" + val;
     })
     .join(",");
 };
 
-export const compileLiteralValue = (id: string | number | boolean): string => {
-  if (typeof id !== "string" && typeof id !== "number" && typeof id !== "boolean") {
-    throw Error("Only string, number & boolean types are valid for compileLiteralId!");
+export const compileActionPath = (path: string, actionName?: string) => {
+  if (!path || !path.trim()) {
+    throw Error("Path must be provided; at least the function name!");
   }
-  return String(id);
+  return `${path}${actionName ? "/" + actionName : ""}`;
 };
 
-export const compileQuotedValue = (id: string | number | boolean) => {
-  if (typeof id !== "string" && typeof id !== "number" && typeof id !== "boolean") {
-    throw Error("Only string, number & boolean types are valid for compileQuotedId!");
+// export const compileBodyParam = (params: InlineUrlProps): string => {
+//   const ps = Object.entries(params).map(([name, prop]) => `${name}: ${getValue(prop.isLiteral, prop.value)}}`);
+//   return `{ ${ps.join(",")} }`;
+// };
+
+/**
+ * Returns an appropriate string value for the given value.
+ * Performs validity checks on type and valid value.
+ *
+ * @param value value to print out as string
+ * @returns string value
+ */
+export const compileLiteralValue = (value: string | number | boolean): string => {
+  if (typeof value !== "string" && typeof value !== "number" && typeof value !== "boolean") {
+    throw Error("Only string, number & boolean types are valid for compileLiteralValue!");
   }
-  return `'${id}'`;
+  if (typeof value === "string" && !value.trim().length) {
+    throw Error("Empty string given as value: Not allowed!");
+  }
+  return String(value);
+};
+
+/**
+ * Returns the value as quoted string, e.g. "test" => "'test'".
+ *
+ * @param value value to print out as string with single quotes
+ * @returns string value
+ */
+export const compileQuotedValue = (value: string | number | boolean): string => {
+  if (typeof value !== "string" && typeof value !== "number" && typeof value !== "boolean") {
+    throw Error("Only string, number & boolean types are valid for compileQuotedValue!");
+  }
+  if (typeof value === "string" && !value.trim().length) {
+    throw Error("Empty string given as value: Not allowed!");
+  }
+  return `'${value}'`;
 };
