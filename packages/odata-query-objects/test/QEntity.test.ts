@@ -15,6 +15,8 @@ import {
   qEnumCollection,
   qStringCollection,
   QEntityCollectionPath,
+  GuidString,
+  QGuidPath,
 } from "../src";
 
 enum TypesEnum {
@@ -36,6 +38,7 @@ interface SimpleEntity {
 }
 
 interface ComplexEntity {
+  ID: GuidString;
   x: number;
   y?: string;
   Z: boolean;
@@ -50,6 +53,7 @@ interface ComplexEntity {
 }
 
 const qComplex: QEntityModel<ComplexEntity, EnumUnion> = {
+  id: new QGuidPath("ID"),
   x: new QNumberPath("x"),
   y: new QStringPath("y"),
   z: new QBooleanPath("Z"),
@@ -85,6 +89,11 @@ describe("QEntityFactory tests", () => {
 
     const result = qSimple.name.eq("hi").toString();
     expect(result).toBe("name eq 'hi'");
+  });
+
+  test("ID prop", () => {
+    const result = qComplex.id.eq("123").toString();
+    expect(result).toBe("ID eq 123");
   });
 
   test("entity path", () => {

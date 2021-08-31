@@ -246,7 +246,7 @@ export class DataModel {
 
     return {
       odataName: p.$.Name,
-      name: firstCharLowerCase(p.$.Name),
+      name: p.$.Name === "ID" ? "id" : firstCharLowerCase(p.$.Name),
       odataType: p.$.Type,
       type: resultType,
       qObject: qEntityInstance,
