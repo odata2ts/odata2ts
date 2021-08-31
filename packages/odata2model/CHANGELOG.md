@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.6.0...@odata2ts/odata2model@0.7.0) (2021-08-31)
+
+
+### Bug Fixes
+
+* **odata2model:** correct typing for returned collection types ([3943f08](https://github.com/odata2ts/odata2ts/commit/3943f089a57e3f37e703f577096bf58d18dda0fa))
+* **odata2model:** fix tests ([96556cd](https://github.com/odata2ts/odata2ts/commit/96556cd68aae86f2ac231925a49d7350a3670816))
+* **service:** don't use nominal types for input; use string instead ([788dc5c](https://github.com/odata2ts/odata2ts/commit/788dc5c091e5d1e29e2cf9f44cf1485f65691a6b))
+
+
+### Features
+
+* map ID to id ([a0652fa](https://github.com/odata2ts/odata2ts/commit/a0652fa70617de2ce9de70d9b294532bce8c8b91))
+
+
+
+
+
 # [0.6.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.5.0...@odata2ts/odata2model@0.6.0) (2021-08-17)
 
 

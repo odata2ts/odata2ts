@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.2.1...@odata2ts/odata-service@0.2.2) (2021-08-31)
+
+
+### Bug Fixes
+
+* **service:** don't use nominal types for input; use string instead ([788dc5c](https://github.com/odata2ts/odata2ts/commit/788dc5c091e5d1e29e2cf9f44cf1485f65691a6b))
+
+
+
+
+
 ## [0.2.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.2.0...@odata2ts/odata-service@0.2.1) (2021-08-16)
 
 

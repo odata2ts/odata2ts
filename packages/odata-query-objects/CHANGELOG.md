@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.6.0...@odata2ts/odata-query-objects@0.7.0) (2021-08-31)
+
+
+### Features
+
+* **qObjects:** add ts converter to translate nominal types into strings ([c57487b](https://github.com/odata2ts/odata2ts/commit/c57487b6d774c787cc2ae26f88a9ed14327a9cef))
+* **uri-builder:** order by implementation for uri-builder ([3502b75](https://github.com/odata2ts/odata2ts/commit/3502b755f744ba2b58ee43331d85dc5ef6235304))
+* map ID to id ([a0652fa](https://github.com/odata2ts/odata2ts/commit/a0652fa70617de2ce9de70d9b294532bce8c8b91))
+
+
+
+
+
 # [0.6.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.5.0...@odata2ts/odata-query-objects@0.6.0) (2021-08-16)
 
 
