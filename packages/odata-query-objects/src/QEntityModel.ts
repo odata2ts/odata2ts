@@ -38,6 +38,13 @@ export type QEntityModel<TypeModel, EnumTypes = null> = QPropContainer<Required<
 type Unpacked<T> = T extends (infer U)[] ? U : T;
 
 /**
+ * Converts all nominal types, e.g. DateString, GuidString, etc, to plain old strings.
+ */
+export type Unnominalized<T> = {
+  [P in keyof T]: T[P] extends string ? string : T[P];
+};
+
+/**
  * Maps data types to QPath equivalents.
  * Heavily relies on <em>Conditional Types</em>.
  *
