@@ -1,5 +1,18 @@
 import { InlineUrlProps, KeySpec } from "./../EntityModel";
 
+/**
+ * Constructs an url path for an entity with the given values as key props.
+ * The passed value can either be simple, in the case of an id,
+ * or complex in the case of a composite id.
+ *
+ * Passed values are checked against the keySpec to only allow valid values.
+ * The function also checks that all required keys are specified.
+ *
+ * @param path required path element
+ * @param keySpec specification of keys
+ * @param values either a primitive number or string or an dedicated object with name-value-pairs.
+ * @returns url path
+ */
 export const compileId = (path: string, keySpec: KeySpec, values: string | number | { [key: string]: any }): string => {
   if (typeof values === "string" || typeof values === "number") {
     if (Object.keys(keySpec).length !== 1) {
@@ -49,23 +62,26 @@ const compileParams = (id: InlineUrlProps) => {
   }
   return Object.entries(id)
     .map(([key, { value, isLiteral }]) => {
-      const val = value === undefined || value === null ? null : getValue(isLiteral, value);
+      // TODO: "null" for optional params via config or does this work for every OData provider?
+      const val = value === undefined || value === null ? "null" : getValue(isLiteral, value);
       return key + "=" + val;
     })
     .join(",");
 };
 
+/**
+ * Constructs an url path suitable for OData actions.
+ *
+ * @param path required path element; minimum: name of the action
+ * @param name action name; if left out the path must contain the action name
+ * @returns url path
+ */
 export const compileActionPath = (path: string, actionName?: string) => {
   if (!path || !path.trim()) {
     throw Error("Path must be provided; at least the function name!");
   }
   return `${path}${actionName ? "/" + actionName : ""}`;
 };
-
-// export const compileBodyParam = (params: InlineUrlProps): string => {
-//   const ps = Object.entries(params).map(([name, prop]) => `${name}: ${getValue(prop.isLiteral, prop.value)}}`);
-//   return `{ ${ps.join(",")} }`;
-// };
 
 /**
  * Returns an appropriate string value for the given value.
