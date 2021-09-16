@@ -12,6 +12,7 @@ import { QGuidPath } from "./QGuidPath";
 
 export interface QPathModel {
   getPath(): string;
+  withPath(newPath: string): any;
 }
 
 export type QPrimitivePath =

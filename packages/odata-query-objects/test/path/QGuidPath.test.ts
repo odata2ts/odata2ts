@@ -8,6 +8,11 @@ describe("QGuidPath test", () => {
     toTest = new QGuidPath("ID");
   });
 
+  test("get path", () => {
+    expect(toTest.getPath()).toBe("ID");
+    expect(toTest.withPath("new").getPath()).toBe("new");
+  });
+
   test("fails with null, undefined, empty string", () => {
     // @ts-ignore
     expect(() => new QGuidPath(null)).toThrow();

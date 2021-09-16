@@ -65,3 +65,8 @@ export const enum CollectionFilterFunctions {
   LENGTH = "length",
   CONCAT = "concat",
 }
+
+export const enum LambdaFunctions {
+  ANY = "any",
+  ALL = "all",
+}

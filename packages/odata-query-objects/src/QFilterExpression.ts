@@ -14,7 +14,7 @@ export class QFilterExpression {
 
   public and(expression: QFilterExpression): QFilterExpression {
     const thisIsEmpty = !this.expression?.toString();
-    const newIsEmpty = !expression?.toString();
+    const newIsEmpty = !expression.toString();
 
     if (!thisIsEmpty && !newIsEmpty) {
       this.expression = `${this.expression} and ${expression.toString()}`;
@@ -27,7 +27,7 @@ export class QFilterExpression {
 
   public or(expression: QFilterExpression): QFilterExpression {
     const thisIsEmpty = !this.expression?.toString();
-    const newIsEmpty = !expression?.toString();
+    const newIsEmpty = !expression.toString();
 
     if (!thisIsEmpty && !newIsEmpty) {
       return new QFilterExpression(`(${this.expression} or ${expression.toString()})`);

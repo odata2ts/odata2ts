@@ -9,6 +9,7 @@ describe("QStringPath test", () => {
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("Country");
+    expect(toTest.withPath("new").getPath()).toBe("new");
   });
 
   test("fails with null, undefined, empty string", () => {

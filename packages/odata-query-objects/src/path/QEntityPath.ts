@@ -15,6 +15,10 @@ export class QEntityPath<Type, EnumTypes = undefined> implements QPathModel {
     return this.path;
   }
 
+  public withPath(newPath: string): QEntityPath<Type, EnumTypes> {
+    return new QEntityPath(newPath, this.qEntityFn);
+  }
+
   public getEntity() {
     return this.qEntityFn();
   }

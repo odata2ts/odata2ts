@@ -178,13 +178,27 @@ GET {{baseUrl}}/People?$filter=Trips/any(a:a/Budget gt 2999)
 &$select=FirstName,LastName
 &$count=true
 &$expand=Trips($select=Description,Budget)
-###
-GET {{baseUrl}}/People?$filter=Trips/all(a:a/Budget ge 5000)
+### complex search
+GET {{baseUrl}}/People?$filter=Trips/any(a:a/Budget gt 2999 and a/Budget lt 5000)
 &$select=FirstName,LastName
 &$count=true
 &$expand=Trips($select=Description,Budget)
-###
-GET {{baseUrl}}/People?$expand=Friends($select=UserName;$filter=$it/BestFriend/UserName ne $this/UserName),BestFriend($select=UserName)
+### all
+GET {{baseUrl}}/People?
+&$filter=Trips/all(a:a/Budget ge 5000)
+&$select=FirstName,LastName
+&$count=true
+&$expand=Trips($select=Description,Budget)
+### any with primitive collection
+GET {{baseUrl}}/People('russellwhyte')/Trips?$filter=Tags/any(a:a eq 'New York meeting')
+&$count=true
+
+
+&$expand=Trips($select=Description,Budget,Tags)
+
+### $this doesn't work
+GET {{baseUrl}}/People?
+&$expand=Friends($select=UserName;$filter=$it/BestFriend/UserName ne $this/UserName),BestFriend($select=UserName)
 #
 &$select=UserName
 # &$expand=Trips($select=Description,Budget)

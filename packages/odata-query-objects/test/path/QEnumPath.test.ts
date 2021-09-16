@@ -14,6 +14,7 @@ describe("QEnumPath test", () => {
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("feature");
+    expect(toTest.withPath("new").getPath()).toBe("new");
   });
 
   test("fails with null, undefined, empty string", () => {

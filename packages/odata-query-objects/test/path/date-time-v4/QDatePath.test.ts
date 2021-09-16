@@ -10,6 +10,7 @@ describe("QDatePath test", () => {
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("startDate");
+    expect(toTest.withPath("new").getPath()).toBe("new");
   });
 
   test("fails with null, undefined, empty string", () => {

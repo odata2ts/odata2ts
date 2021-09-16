@@ -3,6 +3,10 @@ import { StandardFilterOperators } from "../odata/ODataModel";
 import { QLiteralPath } from "./base/QLiteralPath";
 
 export class QGuidPath extends QLiteralPath<string, StandardFilterOperators> {
+  public withPath(newPath: string): QGuidPath {
+    return new QGuidPath(newPath);
+  }
+
   public equals(value: string) {
     return this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
   }

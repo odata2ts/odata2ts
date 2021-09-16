@@ -4,6 +4,7 @@ describe("QBinaryPath test", () => {
   test("smoke test", () => {
     const result = new QBinaryPath("picture");
     expect(result.getPath()).toBe("picture");
+    expect(result.withPath("new").getPath()).toBe("new");
   });
 
   test("fails with null, undefined, empty string", () => {

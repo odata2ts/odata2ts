@@ -9,6 +9,7 @@ describe("QBooleanPath test", () => {
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("done");
+    expect(toTest.withPath("test").getPath()).toBe("test");
   });
 
   test("fails with null, undefined, empty string", () => {

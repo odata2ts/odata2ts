@@ -7,6 +7,7 @@ describe("QEntityPath test", () => {
   test("smoke test", () => {
     const result = new QEntityPath("test", () => qEntity);
     expect(result.getPath()).toBe("test");
+    expect(result.withPath("new").getPath()).toBe("new");
     expect(result.getEntity()).toBe(qEntity);
   });
 

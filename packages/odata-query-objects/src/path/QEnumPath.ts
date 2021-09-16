@@ -23,6 +23,10 @@ export class QEnumPath implements QPathModel {
     return this.path;
   }
 
+  public withPath(newPath: string): QEnumPath {
+    return new QEnumPath(newPath);
+  }
+
   /**
    * Order by this property in ascending order.
    *

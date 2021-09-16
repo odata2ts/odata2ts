@@ -10,4 +10,6 @@ export abstract class QNoopPath implements QPathModel {
   public getPath(): string {
     return this.path;
   }
+
+  abstract withPath(newPath: string): any;
 }
