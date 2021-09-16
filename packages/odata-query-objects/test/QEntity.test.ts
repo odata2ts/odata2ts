@@ -1,3 +1,4 @@
+import { PartialDeep } from "type-fest";
 import {
   QBooleanPath,
   QDatePath,
@@ -18,6 +19,7 @@ import {
   QEntityCollectionPath,
   GuidString,
   QGuidPath,
+  Unnominalized,
 } from "../src";
 
 enum TypesEnum {
@@ -41,19 +43,37 @@ interface SimpleEntity {
 
 interface ComplexEntity {
   ID: GuidString;
-  x: number;
+  x?: number;
   y?: string;
   Z: boolean;
-  az: DateString;
+  az?: DateString;
   bz?: TimeOfDayString;
   cz: DateTimeOffsetString;
   xy?: SimpleEntity;
   xx: Array<SimpleEntity>;
   primitiveCollection: Array<string>;
-  nominalizedCollection: Array<GuidString>;
+  nominalizedCollection?: Array<GuidString>;
   features: Array<FeaturesEnum>;
   favFeature: FeaturesEnum;
 }
+
+/**
+ * Unnominalized: Testing for TypeScript failures
+ * If no typescript errors occur the type is fine.
+ */
+type SanitizedComplexEntity = PartialDeep<Unnominalized<ComplexEntity>>;
+const unnominalizedTest: SanitizedComplexEntity = {
+  ID: "test",
+  az: "2021-12-31",
+  x: 12,
+  nominalizedCollection: ["12345"],
+  xy: {
+    id: "ffff",
+    complexton: {
+      ID: "testing",
+    },
+  },
+};
 
 const qComplex: QEntityModel<ComplexEntity, EnumUnion> = {
   id: new QGuidPath("ID"),
