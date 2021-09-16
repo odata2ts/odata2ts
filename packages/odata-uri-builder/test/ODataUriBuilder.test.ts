@@ -201,6 +201,20 @@ describe("ODataUriBuilder Test", () => {
     expect(candidate).toBe(expected);
   });
 
+  test("filter: don't filter if all filters are empty", () => {
+    const candidate = toTest.filter(new QFilterExpression()).build();
+    const expected = addBase("");
+
+    expect(candidate).toBe("/Persons");
+  });
+
+  test("filter: don't apply empty filters", () => {
+    const candidate = toTest.filter(new QFilterExpression("name eq 'Heinz'").and(new QFilterExpression())).build();
+    const expected = addBase("$filter=name eq 'Heinz'");
+
+    expect(candidate).toBe(expected);
+  });
+
   /*
   test("filterOr: simple", () => {
     const candidate = toTest.filterOr(QPerson.name.eq("Heinz")).build();

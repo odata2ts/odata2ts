@@ -1,26 +1,36 @@
 import { QFilterExpression, QNumberPath, QStringPath } from "../src";
 
 describe("QFilterExpression test", () => {
-  const exampleExpression = new QStringPath("text").equals("hi there!");
-  const exampleResult = "text eq 'hi there!'";
-  const exampleNumberExpr = new QNumberPath("number").equals(3);
-  const exampleNumberResult = "number eq 3";
+  let exampleExpression: QFilterExpression;
+  let exampleResult: string;
+  let exampleNumberExpr: QFilterExpression;
+  let exampleNumberResult: string;
 
-  test("fails with null, undefined, empty string", () => {
+  beforeEach(() => {
+    exampleExpression = new QStringPath("text").equals("hi there!");
+    exampleResult = "text eq 'hi there!'";
+    exampleNumberExpr = new QNumberPath("number").equals(3);
+    exampleNumberResult = "number eq 3";
+  });
+
+  test("might be empty", () => {
     // @ts-ignore
-    expect(() => new QFilterExpression(null)).toThrow();
-    // @ts-ignore
-    expect(() => new QFilterExpression()).toThrow();
-    // @ts-ignore
-    expect(() => new QFilterExpression(undefined)).toThrow();
-    expect(() => new QFilterExpression("")).toThrow();
-    expect(() => new QFilterExpression(" ")).toThrow();
+    expect(new QFilterExpression(null).toString()).toBe("");
+    expect(new QFilterExpression(undefined).toString()).toBe("");
+    expect(new QFilterExpression("    ").toString()).toBe("");
+    expect(new QFilterExpression("").toString()).toBe("");
   });
 
   test("not operator", () => {
     const toTest = exampleExpression.not().toString();
 
     expect(toTest).toBe(`not(${exampleResult})`);
+  });
+
+  test("not operator with empty filter", () => {
+    const toTest = new QFilterExpression().not().toString();
+
+    expect(toTest).toBe("");
   });
 
   test("not operator multiple times", () => {
@@ -35,16 +45,32 @@ describe("QFilterExpression test", () => {
     expect(toTest).toBe(`${exampleResult} and ${exampleNumberResult}`);
   });
 
-  test("and operator multiple times", () => {
-    const toTest = exampleExpression.and(exampleNumberExpr).and(exampleNumberExpr).and(exampleExpression).toString();
+  test("and operator with empty filter", () => {
+    const toTest = exampleExpression.and(new QFilterExpression()).toString();
+    const toTest2 = new QFilterExpression().and(exampleExpression).toString();
 
-    expect(toTest).toBe(`${exampleResult} and ${exampleNumberResult} and ${exampleNumberResult} and ${exampleResult}`);
+    expect(toTest).toBe(exampleResult);
+    expect(toTest2).toBe(exampleResult);
+  });
+
+  test("and operator multiple times", () => {
+    const toTest = exampleExpression.and(exampleNumberExpr).and(exampleNumberExpr).toString();
+
+    expect(toTest).toBe(`${exampleResult} and ${exampleNumberResult} and ${exampleNumberResult}`);
   });
 
   test("or operator", () => {
     const toTest = exampleExpression.or(exampleNumberExpr).toString();
 
     expect(toTest).toBe(`(${exampleResult} or ${exampleNumberResult})`);
+  });
+
+  test("or operator with empty filter", () => {
+    const toTest = exampleExpression.or(new QFilterExpression()).toString();
+    const toTest2 = new QFilterExpression().or(exampleExpression).toString();
+
+    expect(toTest).toBe(exampleResult);
+    expect(toTest2).toBe(exampleResult);
   });
 
   test("or operator multiple times", () => {

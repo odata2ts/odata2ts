@@ -196,6 +196,7 @@ export abstract class ODataUriBuilderBase<T> {
   protected buildQuery(param: (operator: string, value: string) => string): Array<string> {
     const params: Array<string> = [];
     const add = (operator: string, value: string) => params.push(param(operator, value));
+    const cleanedFilters = this.filters.filter((f) => f.toString());
 
     if (this.selects.length) {
       add(ODataOperators.SELECT, this.selects.join(","));
@@ -209,8 +210,8 @@ export abstract class ODataUriBuilderBase<T> {
     if (this.itemsCount !== undefined) {
       add(ODataOperators.COUNT, String(this.itemsCount));
     }
-    if (this.filters.length) {
-      const filterConcat = this.filters.reduce((result, filter) => (result ? result.and(filter) : filter));
+    if (cleanedFilters.length) {
+      const filterConcat = cleanedFilters.reduce((result, filter) => (result ? result.and(filter) : filter));
       add(ODataOperators.FILTER, filterConcat.toString());
     }
     if (this.expands.length) {
