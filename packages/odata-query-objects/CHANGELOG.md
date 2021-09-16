@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.7.0...@odata2ts/odata-query-objects@0.8.0) (2021-09-16)
+
+
+### Features
+
+* **qObjects:** make Unnominalized recursive ([9afa139](https://github.com/odata2ts/odata2ts/commit/9afa13977e05a836a5dc5a9ddf53b3fdeb69ef63))
+* **qObjects:** support lambda functions (any & all) ([3d45804](https://github.com/odata2ts/odata2ts/commit/3d458049b228f444a47491a1f002d5849c6d9577))
+* **type-fest:** add type-fest as dependency ([dfb4cd6](https://github.com/odata2ts/odata2ts/commit/dfb4cd69a94cd824eb107d12cc08fb0052d4ca06))
+
+
+
+
+
 # [0.7.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.6.0...@odata2ts/odata-query-objects@0.7.0) (2021-08-31)
 
 
