@@ -14,6 +14,7 @@ import {
   TimeOfDayString,
   qEnumCollection,
   qStringCollection,
+  qGuidCollection,
   QEntityCollectionPath,
   GuidString,
   QGuidPath,
@@ -32,6 +33,7 @@ enum FeaturesEnum {
 type EnumUnion = TypesEnum | FeaturesEnum;
 
 interface SimpleEntity {
+  id: GuidString;
   name: string;
   myType: TypesEnum;
   complexton: ComplexEntity;
@@ -48,6 +50,7 @@ interface ComplexEntity {
   xy?: SimpleEntity;
   xx: Array<SimpleEntity>;
   primitiveCollection: Array<string>;
+  nominalizedCollection: Array<GuidString>;
   features: Array<FeaturesEnum>;
   favFeature: FeaturesEnum;
 }
@@ -63,6 +66,7 @@ const qComplex: QEntityModel<ComplexEntity, EnumUnion> = {
   xy: new QEntityPath("xy", () => qSimple),
   xx: new QEntityCollectionPath("xx", () => qSimple),
   primitiveCollection: new QCollectionPath("PrimitiveCollection", () => qStringCollection),
+  nominalizedCollection: new QCollectionPath("NominalizedCollection", () => qGuidCollection),
   features: new QCollectionPath("features", () => qEnumCollection),
   favFeature: new QEnumPath("favFeature"),
 };

@@ -39,9 +39,10 @@ type Unpacked<T> = T extends (infer U)[] ? U : T;
 
 /**
  * Converts all nominal types, e.g. DateString, GuidString, etc, to plain old strings.
+ * Works recursively.
  */
 export type Unnominalized<T> = {
-  [P in keyof T]: T[P] extends string ? string : T[P];
+  [P in keyof T]: T[P] extends string ? string : T[P] extends object ? Unnominalized<T[P]> : T[P];
 };
 
 /**
