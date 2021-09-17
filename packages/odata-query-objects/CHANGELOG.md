@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.8.0...@odata2ts/odata-query-objects@0.8.1) (2021-09-17)
+
+
+### Bug Fixes
+
+* **qObjects:** Unnominalized must respect optional attributes ([c882690](https://github.com/odata2ts/odata2ts/commit/c8826902a778612470363433e52c120e214303fa))
+
+
+
+
+
 # [0.8.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.7.0...@odata2ts/odata-query-objects@0.8.0) (2021-09-16)
 
 

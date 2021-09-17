@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.7.1...@odata2ts/odata2model@0.8.0) (2021-09-17)
+
+
+### Bug Fixes
+
+* fix test ([2144cca](https://github.com/odata2ts/odata2ts/commit/2144cca49cda81ecc929425ca4171d99446c1ee1))
+
+
+### Code Refactoring
+
+* **odata-service:** use odata names as param names ([73b130a](https://github.com/odata2ts/odata2ts/commit/73b130a06411e9e7bf030a3dd605d2bcaebf1d70))
+
+
+### Features
+
+* **odata2model:** unnominalize response values of actions / functions ([4f284fa](https://github.com/odata2ts/odata2ts/commit/4f284fab3782ca5deb47d0e1b8ab25f5a2fc2bb2))
+
+
+### BREAKING CHANGES
+
+* **odata-service:** param names of complex keys have changed
+
+
+
+
+
 ## [0.7.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.7.0...@odata2ts/odata2model@0.7.1) (2021-09-16)
 
 **Note:** Version bump only for package @odata2ts/odata2model

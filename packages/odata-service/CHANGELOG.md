@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.2.3...@odata2ts/odata-service@0.3.0) (2021-09-17)
+
+
+### Code Refactoring
+
+* **odata-service:** use odata names as param names ([73b130a](https://github.com/odata2ts/odata2ts/commit/73b130a06411e9e7bf030a3dd605d2bcaebf1d70))
+
+
+### Features
+
+* **odata-service:** remove id field from create param when it's a Guid & introduce typing tests ([9943a0d](https://github.com/odata2ts/odata2ts/commit/9943a0da80bc9f31dd96f247514865c8ea2408c6))
+* **odata-service:** unnominalize response & input values of EntitySet & EntityType methods ([03f8318](https://github.com/odata2ts/odata2ts/commit/03f8318bdd75c4666413a8d9a196056a0a52ebd1))
+
+
+### BREAKING CHANGES
+
+* **odata-service:** param names of complex keys have changed
+
+
+
+
+
 ## [0.2.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.2.2...@odata2ts/odata-service@0.2.3) (2021-09-16)
 
 **Note:** Version bump only for package @odata2ts/odata-service
