@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.8.0...@odata2ts/odata2model@0.8.1) (2021-09-17)
+
+
+### Bug Fixes
+
+* **odata-service:** revert exposure of Unnominalized ([6ce4ea7](https://github.com/odata2ts/odata2ts/commit/6ce4ea779f3a83e67aa02d6d9213dcec2711df8a))
+
+
+
+
+
 # [0.8.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.7.1...@odata2ts/odata2model@0.8.0) (2021-09-17)
 
 
