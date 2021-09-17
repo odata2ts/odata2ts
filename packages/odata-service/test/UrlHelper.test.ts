@@ -101,7 +101,7 @@ describe("UrlHelper Test", () => {
   });
 
   test("compileId: compositeId", () => {
-    const result = compileId(BASE_PATH, KEY_SPEC_COMPOSITE_ID, { age: 5, name: "Tester", deceased: false });
+    const result = compileId(BASE_PATH, KEY_SPEC_COMPOSITE_ID, { Age: 5, NAME: "Tester", dead: false });
     expect(result).toBe(BASE_PATH + "(NAME='Tester',Age=5,dead=false)");
   });
 

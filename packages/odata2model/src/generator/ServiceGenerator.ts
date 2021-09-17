@@ -240,7 +240,7 @@ export class ServiceGenerator {
         importContainer.addFromService(entitySetServiceType, COMPILE_ID);
 
         const isSingleKey = model.keys.length === 1;
-        const exactKeyType = `{ ${model.keys.map((k) => `${k.name}: ${this.sanitizeType(k.type)}`).join(", ")} }`;
+        const exactKeyType = `{ ${model.keys.map((k) => `${k.odataName}: ${this.sanitizeType(k.type)}`).join(", ")} }`;
         const keyType = `${isSingleKey ? this.sanitizeType(model.keys[0].type) + " | " : ""}${exactKeyType}`;
         const keySpec = this.createKeySpec(model.keys);
 

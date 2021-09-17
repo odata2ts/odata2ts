@@ -21,9 +21,9 @@ export const compileId = (path: string, keySpec: KeySpec, values: string | numbe
     return compileSingleParamPath(path, Object.values(keySpec)[0].isLiteral, values);
   }
   const params = keySpec.reduce((collector, ks) => {
-    const value = values[ks.name];
+    const value = values[ks.odataName];
     if (value === undefined) {
-      throw Error(`Key [ks.name] not mapped in provided values!`);
+      throw Error(`Key [${ks.odataName}] not mapped in provided values!`);
     }
 
     collector[ks.odataName] = { isLiteral: ks.isLiteral, value };
