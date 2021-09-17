@@ -1,4 +1,4 @@
-import { QEntityModel, Unnominalized } from "@odata2ts/odata-query-objects";
+import { QEntityModel, Unnominalized, GuidString } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilder } from "@odata2ts/odata-uri-builder";
 
 import { EntityTypeService } from "./EntityTypeService";
@@ -10,7 +10,7 @@ export abstract class EntitySetService<EModel, EIdType> extends EntityBaseServic
     super(client, path, qModel);
   }
 
-  public create(model: Unnominalized<EModel>): ODataResponse<ODataModelResponse<EModel>> {
+  public create(model: Unnominalized<EModel>): ODataResponse<ODataModelResponse<Unnominalized<EModel>>> {
     return this.client.post(this.path, model);
   }
 
@@ -26,7 +26,7 @@ export abstract class EntitySetService<EModel, EIdType> extends EntityBaseServic
 
   public query(
     queryFn?: (builder: ODataUriBuilder<EModel>, qObject: QEntityModel<EModel>) => void
-  ): ODataResponse<ODataCollectionResponse<EModel>> {
+  ): ODataResponse<ODataCollectionResponse<Unnominalized<EModel>>> {
     return this.client.get(this.getQueryUrl(queryFn));
   }
 }

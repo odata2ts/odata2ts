@@ -1,4 +1,4 @@
-import { QEntityModel, PrimitiveCollectionType } from "@odata2ts/odata-query-objects";
+import { QEntityModel, PrimitiveCollectionType, Unnominalized } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilder } from "@odata2ts/odata-uri-builder";
 import { ODataClient, ODataModelResponse, ODataResponse, ODataCollectionResponse } from "@odata2ts/odata-client-api";
 
@@ -11,7 +11,7 @@ export class CollectionService<T, K = PrimitiveExtractor<T>> extends EntityBaseS
     super(client, path, qModel);
   }
 
-  public add(model: K): ODataResponse<ODataModelResponse<T>> {
+  public add(model: K): ODataResponse<ODataModelResponse<Unnominalized<T>>> {
     return this.client.post(this.path, model);
   }
 
@@ -25,7 +25,7 @@ export class CollectionService<T, K = PrimitiveExtractor<T>> extends EntityBaseS
 
   public query(
     queryFn?: (builder: ODataUriBuilder<T>, qObject: QEntityModel<T>) => void
-  ): ODataResponse<ODataCollectionResponse<T>> {
+  ): ODataResponse<ODataCollectionResponse<Unnominalized<T>>> {
     return this.client.get(this.getQueryUrl(queryFn));
   }
 }
