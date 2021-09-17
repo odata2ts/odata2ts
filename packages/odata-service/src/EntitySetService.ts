@@ -32,7 +32,7 @@ export abstract class EntitySetService<EModel, EIdType> extends EntityBaseServic
 
   public query(
     queryFn?: (builder: ODataUriBuilder<EModel>, qObject: QEntityModel<EModel>) => void
-  ): ODataResponse<ODataCollectionResponse<Unnominalized<EModel>>> {
+  ): ODataResponse<ODataCollectionResponse<EModel>> {
     return this.client.get(this.getQueryUrl(queryFn));
   }
 }

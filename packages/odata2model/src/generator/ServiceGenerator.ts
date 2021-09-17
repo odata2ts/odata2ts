@@ -349,15 +349,10 @@ export class ServiceGenerator {
   ): OptionalKind<MethodDeclarationStructure> {
     const isFunc = operation.type === OperationTypes.Function;
     const odataType = operation.returnType?.isCollection ? RESPONSE_TYPES.collection : RESPONSE_TYPES.model;
-    const returnType = !operation.returnType
-      ? "void"
-      : operation.returnType.dataType === DataTypes.ModelType
-      ? `Unnominalized<${operation.returnType.type}>`
-      : operation.returnType.type;
+    const returnType = !operation.returnType ? "void" : operation.returnType.type;
     const paramsSpec = this.createParamsSpec(operation.parameters);
 
     importContainer.addFromClientApi("ODataResponse", odataType);
-    importContainer.addFromQObject("Unnominalized");
     importContainer.addFromService(isFunc ? COMPILE_FUNCTION_PATH : COMPILE_ACTION_PATH);
     if (operation.returnType?.type && returnType) {
       this.addTypeForProp(importContainer, operation.returnType);

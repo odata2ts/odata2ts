@@ -19,7 +19,7 @@ export class EntityTypeService<EModel> extends EntityBaseService<EModel> {
 
   public query(
     queryFn?: (builder: ODataUriBuilder<EModel>, qObject: QEntityModel<EModel>) => void
-  ): ODataResponse<ODataModelResponse<Unnominalized<EModel>>> {
+  ): ODataResponse<ODataModelResponse<EModel>> {
     return this.client.get(this.getQueryUrl(queryFn));
   }
 }
