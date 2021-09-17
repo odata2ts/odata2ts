@@ -42,7 +42,7 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("entitySet: get with complex id", async () => {
-    const testId = { userName: "tester" };
+    const testId = { UserName: "tester" };
     const expected = `${BASE_URL}/People(UserName='tester')`;
 
     expect(testService.people.get(testId).getPath()).toBe(expected);
