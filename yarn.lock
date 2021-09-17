@@ -2078,7 +2078,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-query-objects@^0.7.0, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
+"@odata2ts/odata-query-objects@^0.8.0, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
@@ -2093,28 +2093,30 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-service@^0.2.2, @odata2ts/odata-service@workspace:packages/odata-service":
+"@odata2ts/odata-service@^0.2.3, @odata2ts/odata-service@workspace:packages/odata-service":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
     "@odata2ts/odata-client-api": "*"
-    "@odata2ts/odata-query-objects": ^0.7.0
-    "@odata2ts/odata-uri-builder": ^0.6.0
+    "@odata2ts/odata-query-objects": ^0.8.0
+    "@odata2ts/odata-uri-builder": ^0.6.1
     "@types/jest": 26.0.23
     "@types/node": ^16.0.0
     jest: 27.0.4
     rimraf: ^3.0.2
+    ts-expect: ^1.3.0
     ts-jest: 27.0.3
     ts-node: 10.0.0
+    type-fest: ^2.3.2
     typescript: 4.2.4
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-uri-builder@^0.6.0, @odata2ts/odata-uri-builder@workspace:packages/odata-uri-builder":
+"@odata2ts/odata-uri-builder@^0.6.1, @odata2ts/odata-uri-builder@workspace:packages/odata-uri-builder":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-uri-builder@workspace:packages/odata-uri-builder"
   dependencies:
-    "@odata2ts/odata-query-objects": ^0.7.0
+    "@odata2ts/odata-query-objects": ^0.8.0
     "@types/jest": 26.0.23
     "@types/node": ^16.0.0
     axios: 0.21.1
@@ -2132,8 +2134,8 @@ __metadata:
   resolution: "@odata2ts/odata2model@workspace:packages/odata2model"
   dependencies:
     "@odata2ts/odata-client-api": ^0.2.0
-    "@odata2ts/odata-query-objects": ^0.7.0
-    "@odata2ts/odata-service": ^0.2.2
+    "@odata2ts/odata-query-objects": ^0.8.0
+    "@odata2ts/odata-service": ^0.2.3
     "@types/fs-extra": ^9.0.11
     "@types/jest": ^27.0.1
     "@types/node": ^15.12.2
@@ -9764,6 +9766,13 @@ fsevents@^2.3.2:
   version: 1.0.1
   resolution: "trim-off-newlines@npm:1.0.1"
   checksum: c590b9e8c1d91ac1b57b65f8ed7cc7837e702d86f47c725462cc7e03f3850dfa92a32f956d350632208aa78e9be03917a21d9ef5d139c30be13bb51bf576209f
+  languageName: node
+  linkType: hard
+
+"ts-expect@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "ts-expect@npm:1.3.0"
+  checksum: af5d71d841f0e0d9114f141ee83b3b54b4808d43ec8cf462495ca227dd40c98d4f5ad934953078a5ac167ec534b6ffd11ffb3fa050485e55e7a27e4e5bf74ad0
   languageName: node
   linkType: hard
 

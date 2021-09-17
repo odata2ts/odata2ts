@@ -51,7 +51,7 @@ export class PersonModelService extends EntityTypeService<PersonModel> {
   }
 }
 
-export class PersonModelCollectionService extends EntitySetService<PersonModel, string | { userName: string }> {
+export class PersonModelCollectionService extends EntitySetService<PersonModel, string | { UserName: string }> {
   private keySpec = [{ isLiteral: false, name: "userName", odataName: "UserName" }];
 
   constructor(client: ODataClient, path: string) {
@@ -62,7 +62,7 @@ export class PersonModelCollectionService extends EntitySetService<PersonModel, 
     return this.keySpec;
   }
 
-  public get(id: string | { userName: string }): PersonModelService {
+  public get(id: string | { UserName: string }): PersonModelService {
     const url = compileId(this.path, this.keySpec, id);
     return new PersonModelService(this.client, url);
   }
