@@ -1,8 +1,12 @@
-import { QEntityPath } from "./../../src";
-import { QEntityFactory } from "./../../src";
+import { QEntityFactory, QEntityPath, QNumberPath, QStringPath } from "./../../src";
+
+interface SimpleEntity {
+  id: number;
+  name: string;
+}
 
 describe("QEntityPath test", () => {
-  const qEntity = QEntityFactory.create({});
+  const qEntity = QEntityFactory.create<SimpleEntity>({ id: QNumberPath, name: QStringPath });
 
   test("smoke test", () => {
     const result = new QEntityPath("test", () => qEntity);
@@ -29,5 +33,17 @@ describe("QEntityPath test", () => {
     expect(() => new QEntityPath("test")).toThrow();
     // @ts-ignore
     expect(() => new QEntityPath("test", "")).toThrow();
+  });
+
+  test("use entityProps", () => {
+    const test = new QEntityPath("test", () => qEntity);
+
+    expect(test.props.id.gt(1).toString()).toBe("test/id gt 1");
+    expect(test.props.name.contains("hi").toString()).toBe("contains(test/name,'hi')");
+    expect(test.props.name.asc().toString()).toBe("test/name asc");
+
+    // check that entity hasn't been modified
+    expect(test.getEntity().id.eq(1).toString()).toBe("id eq 1");
+    expect(test.getEntity().name.eq("test").toString()).toBe("name eq 'test'");
   });
 });
