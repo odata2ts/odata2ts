@@ -26,6 +26,8 @@ describe("EntitySetService Typing Test", () => {
   const testService: TestCollectionService = new TestCollectionService(odataClient, BASE_URL);
   const personService: PersonModelCollectionService = new PersonModelCollectionService(odataClient, BASE_URL);
 
+  test("noop", () => {});
+
   // TODO: return querieswithout nominal types
   //
   // test("entitySet: query return type", () => {
