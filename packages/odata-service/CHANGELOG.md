@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.3.1...@odata2ts/odata-service@0.4.0) (2021-10-12)
+
+
+### Features
+
+* **qObjects:** entityPath with props attribute ([#11](https://github.com/odata2ts/odata2ts/issues/11)) ([5d2f5d1](https://github.com/odata2ts/odata2ts/commit/5d2f5d12b968cafd53fa07ec5e9fe4d5bd086ad0))
+
+
+
+
+
 ## [0.3.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.3.0...@odata2ts/odata-service@0.3.1) (2021-09-17)
 
 
