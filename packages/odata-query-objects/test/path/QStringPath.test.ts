@@ -2,9 +2,11 @@ import { QStringPath } from "../../src";
 
 describe("QStringPath test", () => {
   let toTest: QStringPath;
+  let otherProp: QStringPath;
 
   beforeEach(() => {
     toTest = new QStringPath("Country");
+    otherProp = new QStringPath("Language");
   });
 
   test("get path", () => {
@@ -37,11 +39,31 @@ describe("QStringPath test", () => {
     expect(result).toBe(toTest.descending().toString());
   });
 
+  test("isNull", () => {
+    const result = toTest.isNull();
+    expect(result.toString()).toBe("Country eq null");
+    expect(result.toString()).toBe(toTest.eq(null).toString());
+  });
+
+  test("isNotNull", () => {
+    const result = toTest.isNotNull();
+    expect(result.toString()).toBe("Country ne null");
+    expect(result.toString()).toBe(toTest.ne(null).toString());
+  });
+
   test("equals", () => {
     const value = "France";
     const result = toTest.equals(value);
 
     expect(result.toString()).toBe("Country eq 'France'");
+    expect(result.toString()).toBe(toTest.eq(value).toString());
+  });
+
+  test("equals prop", () => {
+    const value = otherProp;
+    const result = toTest.equals(value);
+
+    expect(result.toString()).toBe("Country eq Language");
     expect(result.toString()).toBe(toTest.eq(value).toString());
   });
 
@@ -53,11 +75,27 @@ describe("QStringPath test", () => {
     expect(result.toString()).toBe(toTest.ne(value).toString());
   });
 
+  test("not equals prop", () => {
+    const value = otherProp;
+    const result = toTest.notEquals(value);
+
+    expect(result.toString()).toBe("Country ne Language");
+    expect(result.toString()).toBe(toTest.ne(value).toString());
+  });
+
   test("lower than", () => {
     const value = "X";
     const result = toTest.lowerThan(value);
 
     expect(result.toString()).toBe("Country lt 'X'");
+    expect(result.toString()).toBe(toTest.lt(value).toString());
+  });
+
+  test("lower than prop", () => {
+    const value = otherProp;
+    const result = toTest.lowerThan(value);
+
+    expect(result.toString()).toBe("Country lt Language");
     expect(result.toString()).toBe(toTest.lt(value).toString());
   });
 
@@ -69,11 +107,27 @@ describe("QStringPath test", () => {
     expect(result.toString()).toBe(toTest.le(value).toString());
   });
 
+  test("lower equals prop", () => {
+    const value = otherProp;
+    const result = toTest.lowerEquals(value);
+
+    expect(result.toString()).toBe("Country le Language");
+    expect(result.toString()).toBe(toTest.le(value).toString());
+  });
+
   test("greater than", () => {
     const value = "X";
     const result = toTest.greaterThan(value);
 
     expect(result.toString()).toBe("Country gt 'X'");
+    expect(result.toString()).toBe(toTest.gt(value).toString());
+  });
+
+  test("greater than prop", () => {
+    const value = otherProp;
+    const result = toTest.greaterThan(value);
+
+    expect(result.toString()).toBe("Country gt Language");
     expect(result.toString()).toBe(toTest.gt(value).toString());
   });
 
@@ -85,10 +139,24 @@ describe("QStringPath test", () => {
     expect(result.toString()).toBe(toTest.ge(value).toString());
   });
 
+  test("greater equals prop", () => {
+    const value = otherProp;
+    const result = toTest.greaterEquals(value);
+
+    expect(result.toString()).toBe("Country ge Language");
+    expect(result.toString()).toBe(toTest.ge(value).toString());
+  });
+
   test("in", () => {
     const result = toTest.in("X").toString();
 
     expect(result).toBe("Country eq 'X'");
+  });
+
+  test("in props", () => {
+    const result = toTest.in(otherProp).toString();
+
+    expect(result).toBe("Country eq Language");
   });
 
   test("in with multiple", () => {
@@ -104,11 +172,25 @@ describe("QStringPath test", () => {
     expect(result.toString()).toBe("concat('X_',Country) eq 'X_France'");
   });
 
+  test("concat prefix prop", () => {
+    const value = otherProp;
+    const result = toTest.concatPrefix(value).equals("X_France");
+
+    expect(result.toString()).toBe("concat(Language,Country) eq 'X_France'");
+  });
+
   test("concat suffix", () => {
     const value = "_X";
     const result = toTest.concatSuffix(value).equals("France_X");
 
     expect(result.toString()).toBe("concat(Country,'_X') eq 'France_X'");
+  });
+
+  test("concat suffix prop", () => {
+    const value = otherProp;
+    const result = toTest.concatSuffix(value).equals("France_X");
+
+    expect(result.toString()).toBe("concat(Country,Language) eq 'France_X'");
   });
 
   test("contains", () => {
@@ -117,10 +199,22 @@ describe("QStringPath test", () => {
     expect(result.toString()).toBe("contains(Country,'ran')");
   });
 
+  test("contains prop", () => {
+    const result = toTest.contains(otherProp);
+
+    expect(result.toString()).toBe("contains(Country,Language)");
+  });
+
   test("startsWith", () => {
     const result = toTest.startsWith("Fra");
 
     expect(result.toString()).toBe("startswith(Country,'Fra')");
+  });
+
+  test("startsWithProp", () => {
+    const result = toTest.startsWith(otherProp);
+
+    expect(result.toString()).toBe("startswith(Country,Language)");
   });
 
   test("endsWith", () => {
@@ -129,16 +223,34 @@ describe("QStringPath test", () => {
     expect(result.toString()).toBe("endswith(Country,'nce')");
   });
 
+  test("endsWith prop", () => {
+    const result = toTest.endsWith(otherProp);
+
+    expect(result.toString()).toBe("endswith(Country,Language)");
+  });
+
   test("matchesPattern", () => {
     const result = toTest.matchesPattern("[A-Za-z]+");
 
     expect(result.toString()).toBe("matchesPattern(Country,'[A-Za-z]+')");
   });
 
+  test("matchesPattern prop", () => {
+    const result = toTest.matchesPattern(otherProp);
+
+    expect(result.toString()).toBe("matchesPattern(Country,Language)");
+  });
+
   test("indexOf", () => {
     const result = toTest.indexOf("nce").equals(3);
 
     expect(result.toString()).toBe("indexof(Country,'nce') eq 3");
+  });
+
+  test("indexOf prop", () => {
+    const result = toTest.indexOf(otherProp).equals(3);
+
+    expect(result.toString()).toBe("indexof(Country,Language) eq 3");
   });
 
   test("length", () => {

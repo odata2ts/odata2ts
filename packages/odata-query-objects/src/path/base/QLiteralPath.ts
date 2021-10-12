@@ -40,11 +40,24 @@ export abstract class QLiteralPath<ValueType, OperatorTypes> implements QPathMod
   }
   public desc = this.descending;
 
+  private getFinalValue(value: ValueType) {
+    // @ts-ignore
+    return value && typeof value.getPath === "function" ? value.getPath() : value;
+  }
+
   protected buildBuiltInExpression(operator: OperatorTypes, value: ValueType) {
     return new QFilterExpression(this.buildBuiltInOp(operator, value));
   }
 
   protected buildBuiltInOp(operator: OperatorTypes, value: ValueType) {
-    return `${this.path} ${operator} ${value}`;
+    return `${this.path} ${operator} ${this.getFinalValue(value)}`;
+  }
+
+  public isNull() {
+    return `${this.path} eq null`;
+  }
+
+  public isNotNull() {
+    return `${this.path} ne null`;
   }
 }
