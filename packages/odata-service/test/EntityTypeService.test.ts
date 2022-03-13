@@ -1,4 +1,4 @@
-import { MockODataClient } from "./MockODataClient";
+import { MockODataClient } from "./mock/MockODataClient";
 import { Feature, PersonModel, PersonModelService } from "./fixture/PersonModelService";
 
 describe("EntityTypeService Test", () => {
@@ -9,6 +9,10 @@ describe("EntityTypeService Test", () => {
 
   beforeEach(() => {
     testService = new PersonModelService(odataClient, BASE_URL);
+  });
+
+  test("entitySet: setup", async () => {
+    expect(testService.getPath()).toBe(BASE_URL);
   });
 
   test("entityType: query", async () => {

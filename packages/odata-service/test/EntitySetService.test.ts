@@ -1,5 +1,5 @@
-import { MockODataClient } from "./MockODataClient";
-import { Feature, PersonModel, PersonModelCollectionService } from "./fixture/PersonModelService";
+import { MockODataClient } from "./mock/MockODataClient";
+import { Feature, PersonModel, PersonModelCollectionService, qPerson } from "./fixture/PersonModelService";
 
 describe("EntitySetService Test", () => {
   const odataClient = new MockODataClient();
@@ -9,6 +9,13 @@ describe("EntitySetService Test", () => {
 
   beforeEach(() => {
     testService = new PersonModelCollectionService(odataClient, BASE_URL);
+    expect(testService.getPath());
+  });
+
+  test("entitySet: setup", async () => {
+    expect(testService.getPath()).toBe(BASE_URL);
+    expect(testService.getQOjbect()).not.toBeNull();
+    expect(testService.getQOjbect()).toBe(qPerson);
   });
 
   test("entitySet: query", async () => {
