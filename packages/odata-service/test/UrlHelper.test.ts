@@ -69,6 +69,8 @@ describe("UrlHelper Test", () => {
     expect(() => compileFunctionPath()).toThrowError();
     expect(() => compileFunctionPath("")).toThrowError();
     expect(() => compileFunctionPath(" ")).toThrowError();
+    // @ts-expect-error
+    expect(() => compileFunctionPath(BASE_PATH, undefined, "test")).toThrowError();
   });
 
   test("compileActionPath", () => {
@@ -100,20 +102,24 @@ describe("UrlHelper Test", () => {
     expect(result).toBe(BASE_PATH + "(5)");
   });
 
+  test("compileId: without base path", () => {
+    const result = compileId("", KEY_SPEC_NUMBER, 5);
+
+    expect(result).toBe("(5)");
+  });
+
   test("compileId: compositeId", () => {
     const result = compileId(BASE_PATH, KEY_SPEC_COMPOSITE_ID, { Age: 5, NAME: "Tester", dead: false });
     expect(result).toBe(BASE_PATH + "(NAME='Tester',Age=5,dead=false)");
   });
 
-  test("fail compileId: wrong params", () => {
-    // @ts-expect-error
-    expect(() => compileId(undefined, KEY_SPEC_COMPOSITE_ID, "test")).toThrow();
-    expect(() => compileId(BASE_PATH, KEY_SPEC_COMPOSITE_ID, 3)).toThrow();
-  });
-
   test("fail compileId: compositeId and primitive", () => {
     expect(() => compileId(BASE_PATH, KEY_SPEC_COMPOSITE_ID, "test")).toThrow();
     expect(() => compileId(BASE_PATH, KEY_SPEC_COMPOSITE_ID, 3)).toThrow();
+  });
+
+  test("fail compileId: non-matching keys and values", () => {
+    expect(() => compileId(BASE_PATH, KEY_SPEC_COMPOSITE_ID, { name: "Heinz", age: 12, notThere: "sss" })).toThrow();
   });
 
   test("compileLiteralValue", () => {

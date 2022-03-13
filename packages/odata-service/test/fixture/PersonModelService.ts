@@ -24,7 +24,7 @@ export interface PersonModel {
   BestFriend?: PersonModel;
 }
 
-const qPerson: QEntityModel<PersonModel, Feature> = {
+export const qPerson: QEntityModel<PersonModel, Feature> = {
   userName: new QStringPath("UserName"),
   age: new QNumberPath("Age"),
   favFeature: new QEnumPath("FavFeature"),

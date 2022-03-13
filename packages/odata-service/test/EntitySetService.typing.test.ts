@@ -2,7 +2,7 @@ import { expectType, TypeEqual } from "ts-expect";
 import { ODataResponse, ODataCollectionResponse } from "@odata2ts/odata-client-api";
 import { Unnominalized } from "@odata2ts/odata-query-objects";
 
-import { MockODataClient } from "./MockODataClient";
+import { MockODataClient } from "./mock/MockODataClient";
 import { TestCollectionService, TestService, TestModel } from "./fixture/TypingModelService";
 import { Feature, PersonModel, PersonModelCollectionService } from "./fixture/PersonModelService";
 
