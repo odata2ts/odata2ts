@@ -1,5 +1,5 @@
 import { ODataService } from "./../src/";
-import { MockODataClient } from "../../odata2model/test/MockODataClient";
+import { MockODataClient } from "./mock/MockODataClient";
 
 describe("ODataService Test", () => {
   const odataClient = new MockODataClient();

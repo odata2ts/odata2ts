@@ -1,6 +1,6 @@
 import { qStringCollection, StringCollection, qEnumCollection, EnumCollection } from "@odata2ts/odata-query-objects";
 import { CollectionService } from "../src";
-import { MockODataClient } from "../../odata2model/test/MockODataClient";
+import { MockODataClient } from "./mock/MockODataClient";
 import { Feature, PersonModel } from "./fixture/PersonModelService";
 
 describe("CollectionService Test", () => {
