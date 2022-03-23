@@ -1,15 +1,13 @@
-#!/usr/bin/env node
-
 import commander, { Option } from "commander";
 import { ensureDir, pathExists, readFile } from "fs-extra";
 import { parseStringPromise } from "xml2js";
 
-import { App } from "./app";
+import { runApp } from "./app";
 import { EmitModes, Modes, ProjectOptions, RunOptions } from "./OptionModel";
 import { ODataEdmxModel } from "./odata/ODataEdmxModel";
 
-class Cli {
-  public async main(): Promise<void> {
+export class Cli {
+  async run(): Promise<void> {
     const cli = new commander.Command()
       .version("0.1.0")
       .description("CLI to generate Typescript Interfaces for models of a given OData service.")
@@ -54,7 +52,7 @@ class Cli {
     const exists = await pathExists(source);
     if (!exists) {
       console.error(`Input source [${source}] doesn't exist!`);
-      process.exit(1);
+      process.exit(2);
     }
 
     // read metadata file and convert to JSON
@@ -62,16 +60,19 @@ class Cli {
     const metadataJson = (await parseStringPromise(metadataXml)) as ODataEdmxModel;
 
     // ensure that output directory exists
-    await ensureDir(options.output).catch((error: Error) => {
+    try {
+      await ensureDir(options.output);
+    } catch (error) {
       console.error(`Output path [${options.output}] couldn't be created!`, error);
-    });
+      process.exit(3);
+    }
 
     // run the app
-    new App().run(metadataJson, options).catch((err: Error) => {
+    try {
+      await runApp(metadataJson, options);
+    } catch (err: any) {
       console.error("Error while running the program", err);
-      process.exit(1);
-    });
+      process.exit(99);
+    }
   }
 }
-
-new Cli().main();
