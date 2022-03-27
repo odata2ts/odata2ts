@@ -1,4 +1,4 @@
-import { NavigationProperty, Property } from "../../../src/odata/ODataEdmxModel";
+import { NavigationProperty, Property } from "../../../src/data-model/edmx/ODataEdmxModel";
 
 export class ODataBaseTypeBuilder {
   protected createProperty(name: string, type: string, nullable?: boolean, maxLength?: number, precision?: number) {

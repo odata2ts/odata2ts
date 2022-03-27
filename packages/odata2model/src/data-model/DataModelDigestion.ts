@@ -9,7 +9,7 @@ import {
   OdataTypes,
   Property,
   Schema,
-} from "../odata/ODataEdmxModel";
+} from "./edmx/ODataEdmxModel";
 import { RunOptions } from "../OptionModel";
 import { upperCaseFirst } from "upper-case-first";
 import { firstCharLowerCase } from "xml2js/lib/processors";

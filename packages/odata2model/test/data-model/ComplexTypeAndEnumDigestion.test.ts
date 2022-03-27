@@ -1,7 +1,7 @@
 import { ODataModelBuilder, ODataVersion } from "./builder/ODataModelBuilder";
 import { digest } from "../../src/data-model/DataModelDigestion";
 import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
-import { OdataTypes } from "../../src/odata/ODataEdmxModel";
+import { OdataTypes } from "../../src/data-model/edmx/ODataEdmxModel";
 import { DataTypes, ModelTypes } from "../../src/data-model/DataTypeModel";
 
 const NOOP_FN = () => {};
