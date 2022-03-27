@@ -1,7 +1,7 @@
-import { ProjectManager } from "./project/ProjectManager";
+import { createProjectManager } from "./project/ProjectManager";
 import { ServiceGenerator } from "./generator/ServiceGenerator";
 
-import { DataModel } from "./data-model/DataModel";
+import { digest } from "./data-model/DataModelDigestion";
 import { ODataEdmxModel, Schema } from "./odata/ODataEdmxModel";
 import { QueryObjectGenerator } from "./generator/QueryObjectGenerator";
 import { ModelGenerator } from "./generator/ModelGenerator";
@@ -29,9 +29,8 @@ export async function runApp(metadataJson: ODataEdmxModel, options: RunOptions):
 
   // parse model information from edmx into something we can really work with
   // => that stuff is called dataModel!
-  const dataModel = new DataModel(schema, options);
-  const project = new ProjectManager(dataModel, options);
-  await project.init();
+  const dataModel = await digest(schema, options);
+  const project = await createProjectManager(dataModel, options);
 
   // Generate Model Interfaces
   // supported edmx types: EntityType, ComplexType, EnumType

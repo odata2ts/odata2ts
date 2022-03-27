@@ -65,13 +65,14 @@ export interface SingletonType {
   odataName: string;
   name: string;
   type: ModelType;
+  navPropBinding?: Array<NavPropBindingType>;
 }
 
 export interface EntitySetType {
   odataName: string;
   name: string;
   entityType: ModelType;
-  navPropBinding: Array<NavPropBindingType>;
+  navPropBinding?: Array<NavPropBindingType>;
 }
 
 export interface NavPropBindingType {

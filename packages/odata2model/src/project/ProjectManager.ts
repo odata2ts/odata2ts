@@ -8,20 +8,23 @@ import { BaseFormatter } from "../formatter/BaseFormatter";
 import { DataModel } from "../data-model/DataModel";
 import { EmitModes, RunOptions } from "../OptionModel";
 
+export async function createProjectManager(dataModel: DataModel, options: RunOptions): Promise<ProjectManager> {
+  const { output, prettier } = options;
+  const formatter = prettier ? new PrettierFormatter(output) : new NoopFormatter(output);
+  await formatter.init();
+
+  return new ProjectManager(dataModel, options, formatter);
+}
+
 export class ProjectManager {
-  private formatter!: BaseFormatter;
   private project!: Project;
 
   private files: { [name: string]: SourceFile } = {};
   private serviceFiles: Array<SourceFile> = [];
 
-  constructor(private dataModel: DataModel, private options: RunOptions) {}
-
-  public async init() {
-    const { output, prettier, emitMode } = this.options;
+  constructor(private dataModel: DataModel, private options: RunOptions, private formatter: BaseFormatter) {
+    const { output, emitMode } = this.options;
     const generateDeclarations = [EmitModes.js_dts, EmitModes.dts].includes(emitMode);
-
-    this.formatter = await this.createFormatter(output, prettier);
 
     // Create ts-morph project
     this.project = new Project({
@@ -156,10 +159,5 @@ export class ProjectManager {
       console.error(`Failed to write file [/${fileName}]`, error);
       process.exit(3);
     });
-  }
-
-  private async createFormatter(outputPath: string, isPrettierEnabled: boolean) {
-    const formatter = isPrettierEnabled ? new PrettierFormatter(outputPath) : new NoopFormatter(outputPath);
-    return await formatter.init();
   }
 }
