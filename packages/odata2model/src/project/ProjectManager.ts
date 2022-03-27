@@ -2,9 +2,9 @@ import * as path from "path";
 import { emptyDir, remove, writeFile } from "fs-extra";
 import { Project, SourceFile, ts } from "ts-morph";
 
-import { NoopFormatter } from "./../formatter/NoopFormatter";
-import { PrettierFormatter } from "./../formatter/PrettierFormatter";
-import { BaseFormatter } from "../formatter/BaseFormatter";
+import { NoopFormatter } from "./formatter/NoopFormatter";
+import { PrettierFormatter } from "./formatter/PrettierFormatter";
+import { BaseFormatter } from "./formatter/BaseFormatter";
 import { DataModel } from "../data-model/DataModel";
 import { EmitModes, RunOptions } from "../OptionModel";
 

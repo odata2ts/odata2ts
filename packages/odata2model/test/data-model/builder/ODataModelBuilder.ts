@@ -5,7 +5,7 @@ import {
   Schema,
   Singleton,
   Function,
-} from "../../../src/odata/ODataEdmxModel";
+} from "../../../src/data-model/edmx/ODataEdmxModel";
 import { ODataComplexTypeBuilder } from "./ODataComplexTypeBuilder";
 import { ODataEntityTypeBuilder } from "./ODataEntityTypeBuilder";
 import { ODataFunctionBuilder } from "./ODataFunctionBuilder";

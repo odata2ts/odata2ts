@@ -1,5 +1,5 @@
 import { ODataBaseTypeBuilder } from "./ODataBaseTypeBuilder";
-import { Action } from "../../../src/odata/ODataEdmxModel";
+import { Action } from "../../../src/data-model/edmx/ODataEdmxModel";
 
 export class ODataFunctionBuilder extends ODataBaseTypeBuilder {
   private functionType: Action;

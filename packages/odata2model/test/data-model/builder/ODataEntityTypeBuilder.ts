@@ -1,4 +1,4 @@
-import { EntityType } from "../../../src/odata/ODataEdmxModel";
+import { EntityType } from "../../../src/data-model/edmx/ODataEdmxModel";
 import { ODataBaseTypeBuilder } from "./ODataBaseTypeBuilder";
 
 export class ODataEntityTypeBuilder extends ODataBaseTypeBuilder {

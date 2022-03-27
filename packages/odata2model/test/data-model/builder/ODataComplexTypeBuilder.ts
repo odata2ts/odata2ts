@@ -1,4 +1,4 @@
-import { ComplexType } from "../../../src/odata/ODataEdmxModel";
+import { ComplexType } from "../../../src/data-model/edmx/ODataEdmxModel";
 import { ODataBaseTypeBuilder } from "./ODataBaseTypeBuilder";
 
 export class ODataComplexTypeBuilder extends ODataBaseTypeBuilder {
