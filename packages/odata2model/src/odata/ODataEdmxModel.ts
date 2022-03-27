@@ -2,9 +2,9 @@ export interface ODataEdmxModel {
   "edmx:Edmx": {
     $: {
       Version: string;
-      "xmnlns:edmx": string;
+      "xmlns:edmx": string;
     };
-    "edmx:Reference": Array<any>;
+    // "edmx:Reference": Array<any>;
     "edmx:DataServices": Array<DataService>;
   };
 }
@@ -18,22 +18,22 @@ export interface Schema {
     Namespace: string;
     xmlns: string;
   };
-  EntityContainer: Array<EntityContainer>;
-  EntityType: Array<EntityType>;
-  ComplexType: Array<ComplexType>;
-  EnumType: Array<EnumType>;
-  Function: Array<Function>;
-  Action: Array<Action>;
+  EntityContainer?: Array<EntityContainer>;
+  EntityType?: Array<EntityType>;
+  ComplexType?: Array<ComplexType>;
+  EnumType?: Array<EnumType>;
+  Function?: Array<Function>;
+  Action?: Array<Action>;
 }
 
 export interface EntityContainer {
   $: {
     Name: string;
   };
-  EntitySet: Array<EntitySet>;
-  Singleton: Array<Singleton>;
-  FunctionImport: Array<FunctionImport>;
-  ActionImport: Array<ActionImport>;
+  EntitySet?: Array<EntitySet>;
+  Singleton?: Array<Singleton>;
+  FunctionImport?: Array<FunctionImport>;
+  ActionImport?: Array<ActionImport>;
 }
 
 export interface EntitySet {
@@ -41,7 +41,7 @@ export interface EntitySet {
     Name: string;
     EntityType: string;
   };
-  NavigationPropertyBinding: Array<NavigationPropertyBinding>;
+  NavigationPropertyBinding?: Array<NavigationPropertyBinding>;
 }
 
 export interface Singleton {
@@ -49,7 +49,7 @@ export interface Singleton {
     Name: string;
     Type: string;
   };
-  NavigationPropertyBinding: Array<NavigationPropertyBinding>;
+  NavigationPropertyBinding?: Array<NavigationPropertyBinding>;
 }
 
 export interface FunctionImport {
@@ -77,11 +77,11 @@ export interface NavigationPropertyBinding {
 export interface EntityType {
   $: {
     Name: string;
-    BaseType: string;
+    BaseType?: string;
   };
   Key: Array<PropertyRef>;
   Property: Array<Property>;
-  NavigationProperty: Array<NavigationProperty>;
+  NavigationProperty?: Array<NavigationProperty>;
 }
 
 export interface ComplexType extends Omit<EntityType, "Key"> {}
@@ -133,7 +133,7 @@ export interface Action {
 }
 
 export interface Parameter extends Property {
-  Unicode: boolean;
+  Unicode?: boolean;
 }
 
 export interface ReturnType {
@@ -147,7 +147,7 @@ export interface NavigationProperty {
     Name: string;
     Type: string;
     Nullable?: "true" | "false";
-    Partner: string;
+    Partner?: string;
   };
   // TODO: OnDelete, ReferentialConstraint, etc.
 }
