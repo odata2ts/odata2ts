@@ -10,13 +10,15 @@ import {
   EntitySetType,
 } from "./DataTypeModel";
 
+export interface ProjectFiles {
+  model: string;
+  qObject: string;
+  service: string;
+}
+
 export class DataModel {
   private servicePrefix: string;
-  private fileNames = {
-    model: "",
-    qObject: "",
-    service: "",
-  };
+  private fileNames: ProjectFiles;
 
   // combines entity & complex types
   private modelTypes: { [name: string]: ModelType } = {};
