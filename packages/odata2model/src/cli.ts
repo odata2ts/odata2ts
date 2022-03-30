@@ -4,7 +4,7 @@ import { parseStringPromise } from "xml2js";
 
 import { runApp } from "./app";
 import { EmitModes, Modes, ProjectOptions, RunOptions } from "./OptionModel";
-import { ODataEdmxModel } from "./odata/ODataEdmxModel";
+import { ODataEdmxModel } from "./data-model/edmx/ODataEdmxModel";
 
 export class Cli {
   async run(): Promise<void> {

@@ -1,19 +1,23 @@
 import * as path from "path";
 import { emptyDir, remove, writeFile } from "fs-extra";
-import { Project, SourceFile, ts } from "ts-morph";
+import { Project, SourceFile } from "ts-morph";
 
 import { NoopFormatter } from "./formatter/NoopFormatter";
 import { PrettierFormatter } from "./formatter/PrettierFormatter";
 import { BaseFormatter } from "./formatter/BaseFormatter";
-import { DataModel } from "../data-model/DataModel";
-import { EmitModes, RunOptions } from "../OptionModel";
+import { ProjectFiles } from "../data-model/DataModel";
+import { EmitModes } from "../OptionModel";
 
-export async function createProjectManager(dataModel: DataModel, options: RunOptions): Promise<ProjectManager> {
-  const { output, prettier } = options;
-  const formatter = prettier ? new PrettierFormatter(output) : new NoopFormatter(output);
+export async function createProjectManager(
+  projectFiles: ProjectFiles,
+  outputDir: string,
+  emitMode: EmitModes,
+  usePrettier: boolean
+): Promise<ProjectManager> {
+  const formatter = usePrettier ? new PrettierFormatter(outputDir) : new NoopFormatter(outputDir);
   await formatter.init();
 
-  return new ProjectManager(dataModel, options, formatter);
+  return new ProjectManager(projectFiles, outputDir, emitMode, formatter);
 }
 
 export class ProjectManager {
@@ -22,8 +26,12 @@ export class ProjectManager {
   private files: { [name: string]: SourceFile } = {};
   private serviceFiles: Array<SourceFile> = [];
 
-  constructor(private dataModel: DataModel, private options: RunOptions, private formatter: BaseFormatter) {
-    const { output, emitMode } = this.options;
+  constructor(
+    private projectFiles: ProjectFiles,
+    private outputDir: string,
+    private emitMode: EmitModes,
+    private formatter: BaseFormatter
+  ) {
     const generateDeclarations = [EmitModes.js_dts, EmitModes.dts].includes(emitMode);
 
     // Create ts-morph project
@@ -31,20 +39,20 @@ export class ProjectManager {
       manipulationSettings: this.formatter.getSettings(),
       skipAddingFilesFromTsConfig: true,
       compilerOptions: {
-        outDir: output,
+        outDir: outputDir,
         declaration: generateDeclarations,
       },
     });
   }
 
   private async createFile(name: string) {
-    const fileName = path.join(this.options.output, `${name}.ts`);
+    const fileName = path.join(this.outputDir, `${name}.ts`);
     await remove(fileName);
     return this.project.createSourceFile(fileName);
   }
 
   public async createModelFile() {
-    this.files.model = await this.createFile(this.dataModel.getFileNames().model);
+    this.files.model = await this.createFile(this.projectFiles.model);
     return this.getModelFile();
   }
 
@@ -57,7 +65,7 @@ export class ProjectManager {
   }
 
   public async createQObjectFile() {
-    this.files.qobject = await this.createFile(this.dataModel.getFileNames().qObject);
+    this.files.qobject = await this.createFile(this.projectFiles.qObject);
     return this.getQObjectFile();
   }
 
@@ -70,7 +78,7 @@ export class ProjectManager {
   }
 
   public async createMainServiceFile() {
-    this.files.mainService = await this.createFile(this.dataModel.getFileNames().service);
+    this.files.mainService = await this.createFile(this.projectFiles.service);
     return this.getMainServiceFile();
   }
 
@@ -79,7 +87,7 @@ export class ProjectManager {
   }
 
   public getServiceDir() {
-    return path.join(this.options.output, "service");
+    return path.join(this.outputDir, "service");
   }
 
   public async createServiceFile(name: string) {
@@ -90,7 +98,7 @@ export class ProjectManager {
   }
 
   public async writeServiceFiles() {
-    await emptyDir(this.options.output + "/service");
+    await emptyDir(this.outputDir + "/service");
 
     return Promise.all([
       this.formatAndWriteFile(this.getMainServiceFile()),
@@ -99,7 +107,7 @@ export class ProjectManager {
   }
 
   public async writeFiles() {
-    switch (this.options.emitMode) {
+    switch (this.emitMode) {
       case EmitModes.ts:
         await this.writeModelFile();
         await this.writeQObjectFile();
@@ -118,7 +126,7 @@ export class ProjectManager {
   private async emitJsFiles(declarationOnly?: boolean) {
     console.log(
       `Emitting ${declarationOnly ? "declaration" : "JS"} files (${
-        this.options.emitMode === EmitModes.js_dts ? "including" : "without"
+        this.emitMode === EmitModes.js_dts ? "including" : "without"
       } declaration files)`
     );
 
@@ -132,7 +140,7 @@ export class ProjectManager {
   private async formatAndWriteFile(file: SourceFile) {
     const fileName = file.getFilePath();
 
-    switch (this.options.emitMode) {
+    switch (this.emitMode) {
       case EmitModes.ts:
         console.log(`Writing file: ${fileName}`);
         return this.emitSourceFiles(fileName, file.getFullText());
