@@ -17,7 +17,6 @@ jobs:
           yarn install
           yarn build
           yarn coverage
-          yarn int-test
       - name: Coveralls
         uses: coverallsapp/github-action@v1.1.2
         with:
