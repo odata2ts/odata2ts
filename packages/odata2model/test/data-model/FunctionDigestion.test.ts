@@ -155,6 +155,6 @@ describe("Function Digestion Test", () => {
   test("Function Import: fail without function", async () => {
     odataBuilder.addFunctionImport("GetBestFriend", "GetBestFriend", "Friends");
 
-    await expect(doDigest()).rejects.toThrow("Couldn't find root operation with name [GetBestFriend]");
+    await expect(doDigest()).rejects.toThrow("Couldn't find root operation with name [getBestFriend]");
   });
 });

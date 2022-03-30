@@ -196,11 +196,17 @@ describe("EntityTypeDigestion Test", () => {
     const result = await digest(odataBuilder.getSchema(), runOpts);
 
     // check needed imports for special primitive types
-    expect(result.getPrimitiveTypeImports()).toEqual(["GuidString", "DateString", "DateTimeOffsetString"]);
+    expect(result.getPrimitiveTypeImports()).toEqual([
+      "GuidString",
+      "TimeOfDayString",
+      "DateString",
+      "DateTimeOffsetString",
+      "BinaryString",
+    ]);
 
     // now check all props regarding their type
     const model = result.getModel("Max");
-    expect(model.props).toEqual([
+    expect(model.props).toMatchObject([
       { name: "id" },
       {
         name: "isTrue",
