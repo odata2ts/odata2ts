@@ -8,9 +8,10 @@
   "scripts": {
     "build": "lerna run build",
     "clean": "lerna run clean",
-    "coverage": "yarn workspace @odata2ts/odata2model dev-trippin && jest --coverage",
+    "coverage": "lerna run test -- --coverage --passWithNoTests",
     "release": "yarn clean && yarn build && lerna publish",
-    "test": "lerna run test -- --passWithNoTests"
+    "test": "lerna run test -- --passWithNoTests",
+    "int-test": "lerna run int-test"
   },
   "devDependencies": {
     "@prettier/plugin-xml": "^0.13.1",
