@@ -17,7 +17,7 @@
     "dev-nw": "yarn dev -s int-test/fixture/metadata.xml -d -p --model-suffix Model -e ts",
     "dev-trippin": "yarn dev -s int-test/fixture/trippin.xml -d -p --model-suffix Model -e ts",
     "int-test": "yarn clean && yarn dev-trippin && jest ./int-test",
-    "test": "yarn clean && jest ./test"
+    "test": "jest ./test"
   },
   "files": [
     "*.md",
