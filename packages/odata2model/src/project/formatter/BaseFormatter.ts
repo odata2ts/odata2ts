@@ -1,4 +1,5 @@
 import { ManipulationSettings } from "ts-morph";
+import { FileFormatter } from "./FileFormatter";
 
 /**
  * Abstract formatter.
@@ -7,7 +8,7 @@ import { ManipulationSettings } from "ts-morph";
  * @abstract
  * @class Formatter
  */
-export abstract class BaseFormatter {
+export abstract class BaseFormatter implements FileFormatter {
   /**
    * Path of the output file.
    *
@@ -47,7 +48,6 @@ export abstract class BaseFormatter {
   /**
    * Returns initialized ts-morph manipuation settings.
    *
-   * @abstract
    * @returns {Promise<Partial<ManipulationSettings>>} ts-morph manipulation settings
    * @memberof Formatter
    */
@@ -55,13 +55,5 @@ export abstract class BaseFormatter {
     return this.settings;
   }
 
-  /**
-   * Formats a given source code.
-   *
-   * @abstract
-   * @param {string} source Source code to format
-   * @returns {string} Formatted source code
-   * @memberof Formatter
-   */
   public abstract format(source: string): Promise<string>;
 }

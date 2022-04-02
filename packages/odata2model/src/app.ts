@@ -42,22 +42,18 @@ export async function runApp(metadataJson: ODataEdmxModel, options: RunOptions):
   const modelsFile = await project.createModelFile();
   new ModelGenerator(dataModel, modelsFile).generate();
 
-  // await project.writeModelFile();
-
   // Generate Query Objects
   // supported edmx types: EntityType, ComplexType
   // supported edmx prop types: primitive types, enum types, primitive collection (incl enum types), entity collection, entity object, complex object
   if ([Modes.qobjects, Modes.service, Modes.all].includes(options.mode)) {
     const qFile = await project.createQObjectFile();
     new QueryObjectGenerator(dataModel, qFile).generate();
-
-    // await project.writeQObjectFile();
   }
 
   // Generate Individual OData-Service
   if ([Modes.service, Modes.all].includes(options.mode)) {
+    await project.cleanServiceDir();
     await new ServiceGenerator(project, dataModel).generate();
-    // await project.writeServiceFiles();
   }
 
   await project.writeFiles();

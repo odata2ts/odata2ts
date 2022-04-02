@@ -1,21 +1,28 @@
+import path from "path";
+import { Project, SourceFile } from "ts-morph";
+import * as TsMorph from "ts-morph";
+import { emptyDir, remove, writeFile } from "fs-extra";
+
 import { createProjectManager } from "../../src/project/ProjectManager";
 import { EmitModes } from "../../src/OptionModel";
 import { ProjectFiles } from "../../src/data-model/DataModel";
-import * as TsMorph from "ts-morph";
-import { remove } from "fs-extra";
-import { Project } from "ts-morph";
-import path from "path";
+import * as Formatter from "../../src/project/formatter";
 
+// global mock for file operations
 jest.mock("fs-extra");
-// globally mock ts-morph to keep this a unit test
+// global mock for ts-morph to keep this a unit test
 jest.mock("ts-morph");
 
 describe("ProjectManager Test", () => {
   const SERVICE_NAME = "Tester";
-  const MOCK_SOURCE_FILE = { test: "balloon" };
+  const SERVICE_PATH = "service";
+
   const MOCK_PROJECT: Project = {
     // @ts-ignore
-    createSourceFile: jest.fn(() => MOCK_SOURCE_FILE),
+    createSourceFile: jest.fn((filePath: string) => ({
+      getFilePath: () => filePath,
+      getFullText: () => "",
+    })),
     // @ts-ignore
     emit: jest.fn(),
   };
@@ -26,9 +33,18 @@ describe("ProjectManager Test", () => {
   let usePrettier: boolean;
 
   let projectConstructorSpy: jest.SpyInstance;
+  let formatterSpy: jest.SpyInstance;
+  let consoleSpy: jest.SpyInstance;
+  let processExitSpy: jest.SpyInstance;
 
   beforeAll(() => {
     projectConstructorSpy = jest.spyOn(TsMorph, "Project").mockImplementation(() => MOCK_PROJECT);
+    formatterSpy = jest.spyOn(Formatter, "createFormatter").mockResolvedValue({
+      format: () => Promise.resolve(""),
+      getSettings: () => ({}),
+    });
+    consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    processExitSpy = jest.spyOn(process, "exit");
   });
 
   beforeEach(() => {
@@ -40,7 +56,7 @@ describe("ProjectManager Test", () => {
       service: `${SERVICE_NAME}Service`,
     };
     outputDir = "build";
-    emitMode = EmitModes.js_dts;
+    emitMode = EmitModes.ts;
     usePrettier = true;
   });
 
@@ -58,23 +74,27 @@ describe("ProjectManager Test", () => {
     expect(projectConstructorSpy.mock.calls[0][0]).toMatchObject({
       skipAddingFilesFromTsConfig: true,
       compilerOptions: {
-        declaration: true,
+        declaration: false,
         outDir: outputDir,
       },
     });
   });
 
   async function testEmitModeDeclarations(counter: number, mode: EmitModes, declarationsShouldBeSet: boolean) {
+    // given emit mode and initialized project manager
     emitMode = mode;
+
+    // when project manager has been created
     await doCreateProjectManager();
 
+    // then compiler options have been set correctly
     expect(projectConstructorSpy.mock.calls[counter][0].compilerOptions).toEqual({
       declaration: declarationsShouldBeSet,
       outDir: outputDir,
     });
   }
 
-  test("ProjectManager: set compiler option for DTS generation", async () => {
+  test("ProjectManager: compiler options for DTS generation", async () => {
     let callCounter = -1;
     await testEmitModeDeclarations(++callCounter, EmitModes.js_dts, true);
     await testEmitModeDeclarations(++callCounter, EmitModes.dts, true);
@@ -82,76 +102,152 @@ describe("ProjectManager Test", () => {
     await testEmitModeDeclarations(++callCounter, EmitModes.ts, false);
   });
 
-  test("ProjectManager: create & get model file", async () => {
+  test("ProjectManager: no TS file emitting when empty", async () => {
+    // given emit mode and initialized project manager
+    emitMode = EmitModes.ts;
     const pm = await doCreateProjectManager();
 
-    // initially no model file
-    expect(pm.getModelFile()).toBeUndefined();
+    // when writing files
+    await pm.writeFiles();
 
-    // create model file
-    const expectedModelFilePath = path.join(outputDir, "TesterModel.ts");
-    const result = await pm.createModelFile();
+    expect(MOCK_PROJECT.emit).not.toHaveBeenCalled();
+    expect(writeFile).not.toHaveBeenCalled();
+  });
+
+  async function testTsMorphEmitMode(counter: number, mode: EmitModes) {
+    // given emit mode and initialized project manager
+    emitMode = mode;
+    const pm = await doCreateProjectManager();
+
+    // when writing files
+    await pm.writeFiles();
+
+    const expectedParams = { emitOnlyDtsFiles: emitMode === EmitModes.dts };
+    expect(MOCK_PROJECT.emit).toHaveBeenCalledWith(expectedParams);
+    expect(writeFile).not.toHaveBeenCalled();
+  }
+
+  test("ProjectManager: JS emit modes", async () => {
+    let callCounter = -1;
+    await testTsMorphEmitMode(++callCounter, EmitModes.js_dts);
+    await testTsMorphEmitMode(++callCounter, EmitModes.js);
+    await testTsMorphEmitMode(++callCounter, EmitModes.dts);
+  });
+
+  async function testFileCreation(createdFile: SourceFile, expectedFilePath: string) {
+    const completeFilePath = path.join(outputDir, expectedFilePath + ".ts");
 
     // we expect to get the stuff that was produced by project.createSourceFile
-    expect(result).toBe(MOCK_SOURCE_FILE);
+    expect(createdFile.getFilePath()).toBe(completeFilePath);
     // existing file should have been removed first
-    await expect(remove).toHaveBeenCalledWith(expectedModelFilePath);
+    await expect(remove).toHaveBeenCalledWith(completeFilePath);
     // ts-morph was used to create source file
-    await expect(MOCK_PROJECT.createSourceFile).toHaveBeenCalledWith(expectedModelFilePath);
+    await expect(MOCK_PROJECT.createSourceFile).toHaveBeenCalledWith(completeFilePath);
 
-    // same model file as before via create
+    return completeFilePath;
+  }
+
+  test("ProjectManager: create, get and write model file", async () => {
+    // given an initialized project manager
+    const pm = await doCreateProjectManager();
+    expect(pm.getModelFile()).toBeUndefined();
+
+    // when creating model file
+    const result = await pm.createModelFile();
+
+    // then file was created properly
+    const filePath = await testFileCreation(result, projectFiles.model);
     expect(pm.getModelFile()).toBe(result);
+
+    // when writing all files
+    await pm.writeFiles();
+
+    // then only this file is written
+    expect(writeFile).toHaveBeenCalledTimes(1);
+    expect(writeFile).toHaveBeenCalledWith(filePath, "");
   });
 
   test("ProjectManager: create & get qObject file", async () => {
+    // given an initialized project manager
     const pm = await doCreateProjectManager();
-
-    // initially no model file
     expect(pm.getQObjectFile()).toBeUndefined();
 
-    // create model file
-    const expectedModelFilePath = path.join(outputDir, "qTester.ts");
+    // when creating file
     const result = await pm.createQObjectFile();
 
-    // we expect to get the stuff that was produced by project.createSourceFile
-    expect(result).toBe(MOCK_SOURCE_FILE);
-    // existing file should have been removed first
-    await expect(remove).toHaveBeenCalledWith(expectedModelFilePath);
-    // ts-morph was used to create source file
-    await expect(MOCK_PROJECT.createSourceFile).toHaveBeenCalledWith(expectedModelFilePath);
-
-    // same model file as before via create
+    // then file was created properly
+    const filePath = await testFileCreation(result, projectFiles.qObject);
     expect(pm.getQObjectFile()).toBe(result);
+
+    // when writing all files
+    await pm.writeFiles();
+
+    // then only this file is written
+    expect(writeFile).toHaveBeenCalledTimes(1);
+    expect(writeFile).toHaveBeenCalledWith(filePath, "");
   });
 
   test("ProjectManager: create & get main service file", async () => {
+    // given an initialized project manager
     const pm = await doCreateProjectManager();
-
-    // initially no model file
     expect(pm.getMainServiceFile()).toBeUndefined();
 
-    // create model file
-    const expectedModelFilePath = path.join(outputDir, "TesterService.ts");
+    // when creating file
     const result = await pm.createMainServiceFile();
 
-    // we expect to get the stuff that was produced by project.createSourceFile
-    expect(result).toBe(MOCK_SOURCE_FILE);
-    // existing file should have been removed first
-    await expect(remove).toHaveBeenCalledWith(expectedModelFilePath);
-    // ts-morph was used to create source file
-    await expect(MOCK_PROJECT.createSourceFile).toHaveBeenCalledWith(expectedModelFilePath);
-
-    // same model file as before via create
+    // then file was created properly
+    const filePath = await testFileCreation(result, "TesterService");
     expect(pm.getMainServiceFile()).toBe(result);
+
+    // when writing all files
+    await pm.writeFiles();
+
+    // then only this file is written
+    expect(writeFile).toHaveBeenCalledTimes(1);
+    expect(writeFile).toHaveBeenCalledWith(filePath, "");
   });
 
-  test("ProjectManager: getServiceDir", async () => {
+  test("ProjectManager: create & get service files", async () => {
+    // given an initialized project manager
+    const servicePath = path.join(outputDir, SERVICE_PATH);
     const pm = await doCreateProjectManager();
-    expect(pm.getServiceDir()).toBe(path.join(outputDir, "service"));
+    expect(pm.getServiceFiles()).toEqual([]);
+    expect(pm.getServiceDir()).toBe(servicePath);
+
+    // when creating file
+    const result = await pm.createServiceFile("TestXyService");
+
+    // then file was created properly
+    const filePath = await testFileCreation(result, `${SERVICE_PATH}/TestXyService`);
+    expect(pm.getServiceFiles().length).toBe(1);
+    expect(pm.getServiceFiles()[0].getFilePath()).toBe(filePath);
+
+    // when adding one more file
+    const result2 = await pm.createServiceFile("Test2Service");
+
+    // then it has been added ot the end of the service files
+    const filePath2 = await testFileCreation(result2, `${SERVICE_PATH}/Test2Service`);
+    expect(pm.getServiceFiles().length).toBe(2);
+    expect(pm.getServiceFiles()[1].getFilePath()).toBe(filePath2);
+
+    // when writing all files
+    await pm.writeFiles();
+
+    // then only the service files are written
+    expect(writeFile).toHaveBeenCalledTimes(2);
+    expect(writeFile).toHaveBeenNthCalledWith(1, filePath, "");
+    expect(writeFile).toHaveBeenNthCalledWith(2, filePath2, "");
   });
 
-  test("ProjectManager: create service file", async () => {
+  test("ProjectManager: clean service dir", async () => {
+    // given an initialized project manager
     const pm = await doCreateProjectManager();
-    expect(pm.getServiceDir()).toBe(path.join(outputDir, "service"));
+
+    // when cleaning service dir
+    await pm.cleanServiceDir();
+
+    // then IO operation was called
+    expect(emptyDir).toHaveBeenCalledTimes(1);
+    expect(emptyDir).toHaveBeenCalledWith(path.join(outputDir, SERVICE_PATH));
   });
 });
