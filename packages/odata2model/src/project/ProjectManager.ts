@@ -2,11 +2,10 @@ import * as path from "path";
 import { emptyDir, remove, writeFile } from "fs-extra";
 import { Project, SourceFile } from "ts-morph";
 
-import { NoopFormatter } from "./formatter/NoopFormatter";
-import { PrettierFormatter } from "./formatter/PrettierFormatter";
-import { BaseFormatter } from "./formatter/BaseFormatter";
 import { ProjectFiles } from "../data-model/DataModel";
 import { EmitModes } from "../OptionModel";
+import { createFormatter } from "./formatter";
+import { FileFormatter } from "./formatter/FileFormatter";
 
 export async function createProjectManager(
   projectFiles: ProjectFiles,
@@ -14,11 +13,11 @@ export async function createProjectManager(
   emitMode: EmitModes,
   usePrettier: boolean
 ): Promise<ProjectManager> {
-  const formatter = usePrettier ? new PrettierFormatter(outputDir) : new NoopFormatter(outputDir);
-  await formatter.init();
-
+  const formatter = await createFormatter(outputDir, usePrettier);
   return new ProjectManager(projectFiles, outputDir, emitMode, formatter);
 }
+
+const STATIC_SERVICE_DIR = "service";
 
 export class ProjectManager {
   private project!: Project;
@@ -30,7 +29,7 @@ export class ProjectManager {
     private projectFiles: ProjectFiles,
     private outputDir: string,
     private emitMode: EmitModes,
-    private formatter: BaseFormatter
+    private formatter: FileFormatter
   ) {
     const generateDeclarations = [EmitModes.js_dts, EmitModes.dts].includes(emitMode);
 
@@ -60,10 +59,6 @@ export class ProjectManager {
     return this.files.model;
   }
 
-  public async writeModelFile() {
-    return this.formatAndWriteFile(this.getModelFile());
-  }
-
   public async createQObjectFile() {
     this.files.qobject = await this.createFile(this.projectFiles.qObject);
     return this.getQObjectFile();
@@ -71,10 +66,6 @@ export class ProjectManager {
 
   public getQObjectFile() {
     return this.files.qobject;
-  }
-
-  public async writeQObjectFile() {
-    return this.formatAndWriteFile(this.getQObjectFile());
   }
 
   public async createMainServiceFile() {
@@ -87,32 +78,26 @@ export class ProjectManager {
   }
 
   public getServiceDir() {
-    return path.join(this.outputDir, "service");
+    return path.join(this.outputDir, STATIC_SERVICE_DIR);
+  }
+
+  public async cleanServiceDir() {
+    return emptyDir(this.getServiceDir());
   }
 
   public async createServiceFile(name: string) {
-    const file = await this.createFile(`service/${name}`);
+    const file = await this.createFile(path.join(STATIC_SERVICE_DIR, name));
     this.serviceFiles.push(file);
 
     return file;
   }
 
-  public async writeServiceFiles() {
-    await emptyDir(this.outputDir + "/service");
-
-    return Promise.all([
-      this.formatAndWriteFile(this.getMainServiceFile()),
-      ...this.serviceFiles.map((sf) => this.formatAndWriteFile(sf)),
-    ]);
+  public getServiceFiles() {
+    return this.serviceFiles;
   }
 
   public async writeFiles() {
     switch (this.emitMode) {
-      case EmitModes.ts:
-        await this.writeModelFile();
-        await this.writeQObjectFile();
-        await this.writeServiceFiles();
-        break;
       case EmitModes.js:
       case EmitModes.js_dts:
         await this.emitJsFiles();
@@ -120,14 +105,17 @@ export class ProjectManager {
       case EmitModes.dts:
         await this.emitJsFiles(true);
         break;
+      case EmitModes.ts:
+        await this.emitTsFiles();
+        break;
     }
   }
 
   private async emitJsFiles(declarationOnly?: boolean) {
     console.log(
-      `Emitting ${declarationOnly ? "declaration" : "JS"} files (${
-        this.emitMode === EmitModes.js_dts ? "including" : "without"
-      } declaration files)`
+      declarationOnly
+        ? "Emitting declaration files"
+        : `Emitting JS files (${this.emitMode === EmitModes.js_dts ? "including" : "without"} declaration files)`
     );
 
     await this.project.emit({ emitOnlyDtsFiles: !!declarationOnly });
@@ -137,35 +125,28 @@ export class ProjectManager {
     } */
   }
 
-  private async formatAndWriteFile(file: SourceFile) {
+  private async emitTsFiles() {
+    const files = [this.getModelFile(), this.getQObjectFile(), this.getMainServiceFile(), ...this.getServiceFiles()];
+    return Promise.all([...files.filter((file) => !!file).map(this.formatAndWriteFile)]);
+  }
+
+  private formatAndWriteFile = async (file: SourceFile) => {
     const fileName = file.getFilePath();
+    const content = file.getFullText();
 
-    switch (this.emitMode) {
-      case EmitModes.ts:
-        console.log(`Writing file: ${fileName}`);
-        return this.emitSourceFiles(fileName, file.getFullText());
-      case EmitModes.js:
-      case EmitModes.js_dts:
-        console.log(`Emitting JS files for: ${fileName}`);
-        await file.emit();
-        break;
-      case EmitModes.dts:
-        console.log(`Emitting declarations for: ${fileName}`);
-        return file.emit({ emitOnlyDtsFiles: true });
-    }
-  }
+    try {
+      const formatted = await this.formatter.format(content);
 
-  private async emitSourceFiles(fileName: string, content: string) {
-    // const formatted = raw;
-    const formatted = await this.formatter.format(content).catch(async (error: Error) => {
+      try {
+        return writeFile(fileName, formatted);
+      } catch (writeError) {
+        console.error(`Failed to write file [/${fileName}]`, writeError);
+        process.exit(3);
+      }
+    } catch (formattingError) {
       console.error("Formatting failed");
-      await writeFile("error.log", error);
+      await writeFile("error.log", formattingError);
       process.exit(99);
-    });
-
-    return writeFile(fileName, formatted).catch((error: Error) => {
-      console.error(`Failed to write file [/${fileName}]`, error);
-      process.exit(3);
-    });
-  }
+    }
+  };
 }
