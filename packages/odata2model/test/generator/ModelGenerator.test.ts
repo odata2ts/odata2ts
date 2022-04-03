@@ -1,9 +1,12 @@
-import { ModelGenerator } from "../../src/generator/ModelGenerator";
-import { ODataModelBuilder, ODataVersion } from "../data-model/builder/ODataModelBuilder";
-import { digest } from "../../src/data-model/DataModelDigestion";
-import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
-import { EnumDeclaration, Project } from "ts-morph";
+import { Project } from "ts-morph";
+
 import { OdataTypes } from "../../src/data-model/edmx/ODataEdmxModel";
+import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
+import { generateModels } from "../../src/generator";
+import { digest } from "../../src/data-model/DataModelDigestion";
+
+import { ODataModelBuilder, ODataVersion } from "../data-model/builder/ODataModelBuilder";
+import { createFixtureComparator, FixtureComparator } from "./comparator/FixtureComparator";
 
 describe("Model Generator Tests", () => {
   const SERVICE_NAME = "Tester";
@@ -13,11 +16,13 @@ describe("Model Generator Tests", () => {
 
   let runOptions: RunOptions;
   let odataBuilder: ODataModelBuilder;
+  let fixtureComparator: FixtureComparator;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     project = new Project({
       skipAddingFilesFromTsConfig: true,
     });
+    fixtureComparator = await createFixtureComparator("generator/model");
   });
 
   beforeEach(() => {
@@ -37,22 +42,24 @@ describe("Model Generator Tests", () => {
     const sourceFile = project.createSourceFile(id);
     const dataModel = await digest(odataBuilder.getSchema(), runOptions);
 
-    const mg = new ModelGenerator(dataModel, sourceFile);
-    mg.generate();
+    generateModels(dataModel, sourceFile);
 
-    return sourceFile;
+    return sourceFile.getFullText().trim();
+  }
+
+  async function generateAndCompare(id: string, fixturePath: string) {
+    const result = await doGenerate(id);
+    await fixtureComparator.compareWithFixture(result, fixturePath);
   }
 
   test("smoke test", async () => {
     // given an empty data model
 
     // when generating model
-    const sourceFile = await doGenerate("smokeTest");
+    const result = await doGenerate("smokeTest");
 
     // then nothing really happened
-    expect(sourceFile.getEnums()).toEqual([]);
-    expect(sourceFile.getImportDeclarations()).toEqual([]);
-    expect(sourceFile.getFullText()).toEqual("");
+    expect(result).toEqual("");
   });
 
   test("Model Generator: one enum type", async () => {
@@ -61,50 +68,28 @@ describe("Model Generator Tests", () => {
       { name: "A", value: 1 },
       { name: "B", value: 2 },
     ]);
-    const expected = `
-export enum Choice {
-    A = "A",
-    B = "B"
-}`;
 
     // when generating model
-    const sourceFile = await doGenerate("oneEnumType");
-
-    // then we get a string enum
-    expect(sourceFile.getEnums().length).toBe(1);
-    expect(sourceFile.getFullText()).toContain(expected.trim());
+    // then match fixture text
+    await generateAndCompare("oneEnumType", "enum-min.ts");
   });
 
   test("Model Generator: complex type", async () => {
     // given one minimal model
     odataBuilder.addComplexType("Brand", undefined, (builder) => builder.addProp("naming", OdataTypes.String));
 
-    const expected = `
-export interface Brand {
-    naming?: string;
-}
-`;
-
     // when generating model
-    const sourceFile = await doGenerate("complexType");
-
-    // then we get a string enum
-    expect(sourceFile.getFullText().trim()).toBe(expected.trim());
+    // then match fixture text
+    await generateAndCompare("complexType", "complex-min.ts");
   });
 
   test("Model Generator: one minimal model", async () => {
     // given one minimal model
     odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", OdataTypes.String));
-    const expected = `
-export interface Book {
-    id: string;
-}`;
 
     // when generating model
-    const sourceFile = await doGenerate("oneModel");
-
-    // then we get a string enum
-    expect(sourceFile.getFullText().trim()).toBe(expected.trim());
+    // then match fixture text
+    await generateAndCompare("oneModel", "entity-min.ts");
   });
 
   test("Model Generator: one max model", async () => {
@@ -126,57 +111,29 @@ export interface Book {
         .addProp("testSingle", OdataTypes.Single)
         .addProp("testBinary", OdataTypes.Binary)
         .addProp("testAny", "Edm.AnythingYouWant")
-        .addProp("branding", `${SERVICE_NAME}.Brand`)
     );
-    const expected = `
-import type { GuidString, TimeOfDayString, DateString, DateTimeOffsetString, BinaryString } from "@odata2ts/odata-query-objects";
-
-export interface Book {
-    id: GuidString;
-    isTrue: boolean;
-    time?: TimeOfDayString;
-    optionalDate?: DateString;
-    dateTimeOffset?: DateTimeOffsetString;
-    TestInt16?: number;
-    TestInt32?: number;
-    TestInt64?: number;
-    TestDecimal?: number;
-    TestDouble?: number;
-    testByte?: number;
-    testSByte?: number;
-    testSingle?: number;
-    testBinary?: BinaryString;
-    testAny?: string;
-    branding?: Brand;
-}`;
 
     // when generating model
-    const sourceFile = await doGenerate("oneMaxModel");
-
-    // then we get a string enum
-    expect(sourceFile.getFullText().trim()).toBe(expected.trim());
+    // then match fixture text
+    await generateAndCompare("oneMaxModel", "entity-max.ts");
   });
 
-  test("Model Generator: complex & collection", async () => {
+  test("Model Generator: entity relationships", async () => {
     // given one minimal model
-    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
-      builder
-        .addKeyProp("id", OdataTypes.String)
-        .addProp("branding", `${SERVICE_NAME}.Brand`)
-        .addProp("multipleStrings", `Collection(Edm.String)`)
-    );
-    const expected = `
-export interface Book {
-    id: string;
-    branding?: Brand;
-    multipleStrings?: Array<string>;
-}`;
+    odataBuilder
+      .addComplexType("Brand", undefined, (builder) => builder.addProp("color", OdataTypes.String))
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", OdataTypes.String)
+          .addProp("branding", `${SERVICE_NAME}.Brand`)
+          .addProp("multipleBrands", `Collection(${SERVICE_NAME}.Brand)`)
+          .addProp("multipleStrings", `Collection(Edm.String)`)
+          .addProp("multipleNumbers", `Collection(Edm.Decimal)`)
+      );
 
     // when generating model
-    const sourceFile = await doGenerate("complexAndCollection");
-
-    // then we get a string enum
-    expect(sourceFile.getFullText().trim()).toBe(expected.trim());
+    // then match fixture text
+    await generateAndCompare("entity-relationships", "entity-relationships.ts");
   });
 
   test("Model Generator: base class", async () => {
@@ -187,24 +144,8 @@ export interface Book {
     );
     odataBuilder.addEntityType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", OdataTypes.String));
 
-    const expected = `
-export interface GrandParent {
-    id: string;
-}
-
-export interface Parent extends GrandParent {
-    parentalAdvice?: boolean;
-}
-
-export interface Child extends Parent {
-    Ch1ld1shF4n?: string;
-}
-`;
-
     // when generating model
-    const sourceFile = await doGenerate("baseClass");
-
-    // then we get a string enum
-    expect(sourceFile.getFullText().trim()).toBe(expected.trim());
+    // then match fixture text
+    await generateAndCompare("baseClass", "entity-hierarchy.ts");
   });
 });
