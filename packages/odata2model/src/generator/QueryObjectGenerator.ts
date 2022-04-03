@@ -41,13 +41,13 @@ class QueryObjectGenerator {
       });
     });
 
-    this.sourceFile.addImportDeclaration({
-      isTypeOnly: false,
-      namedImports: [...qTypeImports],
-      moduleSpecifier: Q_OBJECT_PACKAGE,
-    });
-
     if (modelImports.size) {
+      this.sourceFile.addImportDeclaration({
+        isTypeOnly: false,
+        namedImports: [...qTypeImports],
+        moduleSpecifier: Q_OBJECT_PACKAGE,
+      });
+
       this.sourceFile.addImportDeclaration({
         isTypeOnly: true,
         namedImports: [...modelImports],
