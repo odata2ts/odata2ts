@@ -1,5 +1,5 @@
 import { SourceFile } from "ts-morph";
-import { DataModel } from "./../data-model/DataModel";
+import { DataModel } from "../data-model/DataModel";
 
 export class ModelGenerator {
   constructor(private dataModel: DataModel, private sourceFile: SourceFile) {}
