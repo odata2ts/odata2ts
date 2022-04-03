@@ -9,18 +9,14 @@ import type {
 
 export interface Book {
   id: GuidString;
-  isTrue: boolean;
+  requiredOption: boolean;
   time?: TimeOfDayString;
   optionalDate?: DateString;
   dateTimeOffset?: DateTimeOffsetString;
-  TestInt16?: number;
-  TestInt32?: number;
-  TestInt64?: number;
   TestDecimal?: number;
-  TestDouble?: number;
-  testByte?: number;
-  testSByte?: number;
-  testSingle?: number;
   testBinary?: BinaryString;
   testAny?: string;
+  multipleStrings?: Array<string>;
+  multipleNumbers?: Array<number>;
+  multipleBooleans?: Array<boolean>;
 }

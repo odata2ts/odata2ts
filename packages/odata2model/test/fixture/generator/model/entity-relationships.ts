@@ -1,11 +1,10 @@
-export interface Book {
+export interface Author {
   id: string;
-  branding?: Brand;
-  multipleBrands?: Array<Brand>;
-  multipleStrings?: Array<string>;
-  multipleNumbers?: Array<number>;
+  name: string;
 }
 
-export interface Brand {
-  color?: string;
+export interface Book {
+  id: string;
+  author: Author;
+  relatedAuthors?: Array<Author>;
 }
