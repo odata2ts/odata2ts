@@ -1,13 +1,18 @@
 import { upperCaseFirst } from "upper-case-first";
 import { SourceFile, VariableDeclarationKind, Writers } from "ts-morph";
 
-import { DataTypes, ModelType, PropertyModel } from "./../data-model/DataTypeModel";
-import { DataModel } from "./../data-model/DataModel";
+import { DataTypes, PropertyModel } from "../data-model/DataTypeModel";
+import { DataModel } from "../data-model/DataModel";
 
 const CORE_QCLASSES = ["QEntityModel"];
 const Q_OBJECT_PACKAGE = "@odata2ts/odata-query-objects";
 
-export class QueryObjectGenerator {
+export function generateQueryObjects(dataModel: DataModel, sourceFile: SourceFile) {
+  const generator = new QueryObjectGenerator(dataModel, sourceFile);
+  return generator.generate();
+}
+
+class QueryObjectGenerator {
   constructor(private dataModel: DataModel, private sourceFile: SourceFile) {}
 
   public generate(): void {

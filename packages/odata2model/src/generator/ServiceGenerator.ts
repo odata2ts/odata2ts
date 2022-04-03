@@ -6,6 +6,7 @@ import {
   ParameterDeclarationStructure,
   PropertyDeclarationStructure,
   Scope,
+  SourceFile,
 } from "ts-morph";
 
 import { ImportContainer } from "./ImportContainer";
@@ -31,8 +32,13 @@ const RESPONSE_TYPES = {
   value: "ODataValueResponse",
 };
 
-export class ServiceGenerator {
-  constructor(private project: ProjectManager, private dataModel: DataModel) {}
+export async function generateServices(dataModel: DataModel, project: ProjectManager) {
+  const generator = new ServiceGenerator(dataModel, project);
+  return generator.generate();
+}
+
+class ServiceGenerator {
+  constructor(private dataModel: DataModel, private project: ProjectManager) {}
 
   public async generate(): Promise<void> {
     const sourceFile = await this.project.createMainServiceFile();
