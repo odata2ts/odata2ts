@@ -1,7 +1,12 @@
 import { SourceFile } from "ts-morph";
 import { DataModel } from "../data-model/DataModel";
 
-export class ModelGenerator {
+export function generateModels(dataModel: DataModel, sourceFile: SourceFile) {
+  const generator = new ModelGenerator(dataModel, sourceFile);
+  return generator.generate();
+}
+
+class ModelGenerator {
   constructor(private dataModel: DataModel, private sourceFile: SourceFile) {}
 
   public generate(): void {

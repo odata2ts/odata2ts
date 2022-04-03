@@ -1,10 +1,8 @@
 import { createProjectManager } from "./project/ProjectManager";
-import { ServiceGenerator } from "./generator/ServiceGenerator";
+import { generateModels, generateQueryObjects, generateServices } from "./generator";
 
 import { digest } from "./data-model/DataModelDigestion";
 import { ODataEdmxModel, Schema } from "./data-model/edmx/ODataEdmxModel";
-import { QueryObjectGenerator } from "./generator/QueryObjectGenerator";
-import { ModelGenerator } from "./generator/ModelGenerator";
 import { Modes, RunOptions } from "./OptionModel";
 
 /**
@@ -40,20 +38,20 @@ export async function runApp(metadataJson: ODataEdmxModel, options: RunOptions):
   // Generate Model Interfaces
   // supported edmx types: EntityType, ComplexType, EnumType
   const modelsFile = await project.createModelFile();
-  new ModelGenerator(dataModel, modelsFile).generate();
+  generateModels(dataModel, modelsFile);
 
   // Generate Query Objects
   // supported edmx types: EntityType, ComplexType
   // supported edmx prop types: primitive types, enum types, primitive collection (incl enum types), entity collection, entity object, complex object
   if ([Modes.qobjects, Modes.service, Modes.all].includes(options.mode)) {
     const qFile = await project.createQObjectFile();
-    new QueryObjectGenerator(dataModel, qFile).generate();
+    generateQueryObjects(dataModel, qFile);
   }
 
   // Generate Individual OData-Service
   if ([Modes.service, Modes.all].includes(options.mode)) {
     await project.cleanServiceDir();
-    await new ServiceGenerator(project, dataModel).generate();
+    await generateServices(dataModel, project);
   }
 
   await project.writeFiles();
