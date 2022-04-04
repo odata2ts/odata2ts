@@ -1,4 +1,4 @@
-import { readFileSync } from "fs-extra";
+import { pathExistsSync, readFileSync } from "fs-extra";
 import prettier, { Options } from "prettier";
 
 /**
@@ -27,13 +27,17 @@ export class FixtureComparator {
   public async compareWithFixture(text: string, fixturePath: string) {
     const config = this.prettierConfig || undefined;
     const result = prettier.format(text, config);
-    const fixture = await this.loadFixture(this.path + fixturePath);
-    const cleanedFixture = fixture.replace(new RegExp("^//( )*@ts-nocheck"), "").trim();
 
+    if (!pathExistsSync(this.path + fixturePath)) {
+      throw new Error("Unable to load fixture: " + this.path + fixturePath);
+    }
+
+    const fixture = this.loadFixture(this.path + fixturePath);
+    const cleanedFixture = fixture.replace(new RegExp("^//( )*@ts-nocheck"), "").trim();
     expect(result.trim()).toBe(cleanedFixture);
   }
 
-  public async loadFixture(path: string) {
+  public loadFixture(path: string) {
     return readFileSync(path, "utf-8");
   }
 }

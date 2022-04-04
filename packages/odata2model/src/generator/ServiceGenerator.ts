@@ -3,15 +3,13 @@ import {
   GetAccessorDeclarationStructure,
   MethodDeclarationStructure,
   OptionalKind,
-  ParameterDeclarationStructure,
   PropertyDeclarationStructure,
   Scope,
-  SourceFile,
 } from "ts-morph";
 
 import { ImportContainer } from "./ImportContainer";
-import { ProjectManager } from "./../project/ProjectManager";
-import { DataModel } from "./../data-model/DataModel";
+import { ProjectManager } from "../project/ProjectManager";
+import { DataModel } from "../data-model/DataModel";
 import {
   ActionImportType,
   DataTypes,
@@ -191,8 +189,6 @@ class ServiceGenerator {
             if (isEnum) {
               importContainer.addGeneratedModel(prop.type);
               importContainer.addFromQObject("EnumCollection");
-            } else {
-              importContainer.addFromQObject(type);
             }
 
             return {
@@ -355,7 +351,7 @@ class ServiceGenerator {
   ): OptionalKind<MethodDeclarationStructure> {
     const isFunc = operation.type === OperationTypes.Function;
     const odataType = operation.returnType?.isCollection ? RESPONSE_TYPES.collection : RESPONSE_TYPES.model;
-    const returnType = !operation.returnType ? "void" : operation.returnType.type;
+    const returnType = !operation.returnType ? "void" : this.sanitizeType(operation.returnType.type);
     const paramsSpec = this.createParamsSpec(operation.parameters);
 
     importContainer.addFromClientApi("ODataResponse", odataType);
@@ -393,9 +389,7 @@ class ServiceGenerator {
   }
 
   private addTypeForProp(importContainer: ImportContainer, p: PropertyModel) {
-    if (p.dataType === DataTypes.PrimitiveType && p.type.endsWith("String")) {
-      importContainer.addFromQObject(p.type);
-    } else if (p.dataType === DataTypes.EnumType || p.dataType === DataTypes.ModelType) {
+    if (p.dataType === DataTypes.EnumType || p.dataType === DataTypes.ModelType) {
       importContainer.addGeneratedModel(p.type);
     }
   }
