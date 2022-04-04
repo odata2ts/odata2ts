@@ -6,11 +6,11 @@
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "scripts": {
-    "build": "lerna run build",
-    "clean": "lerna run clean",
-    "coverage": "lerna run test -- --coverage --passWithNoTests",
+    "build": "yarn clean && lerna run build",
+    "clean": "rimraf coverage && lerna run clean",
+    "coverage": "jest --coverage",
     "release": "yarn clean && yarn build && lerna publish",
-    "test": "lerna run test -- --passWithNoTests",
+    "test": "lerna run test",
     "int-test": "lerna run int-test"
   },
   "devDependencies": {
@@ -22,6 +22,7 @@
     "prettier": "^2.3.1",
     "prettier-plugin-package": "^1.3.0",
     "prettier-plugin-properties": "^0.1.0",
+    "rimraf": "^3.0.2",
     "typescript": "^4.3.2"
   },
   "husky": {

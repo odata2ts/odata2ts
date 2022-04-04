@@ -10,9 +10,9 @@
   "main": "./lib/index.js",
   "scripts": {
     "build": "yarn clean && yarn compile",
-    "clean": "rimraf ./lib",
+    "clean": "rimraf lib coverage",
     "compile": "tsc",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "files": [
     "*.md",
