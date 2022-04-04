@@ -197,6 +197,8 @@ export class ODataModelBuilder {
         },
       })),
     });
+
+    return this;
   }
 
   public addFunction(
