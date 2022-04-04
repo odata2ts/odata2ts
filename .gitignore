@@ -20,9 +20,12 @@ tsconfig.build.tsbuildinfo
 
 # Yarn
 .yarn/*
-!.yarn/releases
+!.yarn/patches
 !.yarn/plugins
-# TODO - not now, but when production ready
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+# TODO - not now, reconsider when production ready
 # !.yarn/cache
 
 # Other
