@@ -29,7 +29,7 @@ const EDM_PREFIX = "Edm.";
 const ROOT_OPERATION = "/";
 
 class Digester {
-  private dataModel: DataModel;
+  private readonly dataModel: DataModel;
 
   constructor(private schema: Schema, private options: RunOptions) {
     const serviceName = schema.$.Namespace;
@@ -162,7 +162,7 @@ class Digester {
       ([props, keys], bc) => {
         const baseModel = this.dataModel.getModel(bc);
 
-        // recursiveness
+        // recursive
         if (baseModel.baseClasses.length) {
           const [parentProps, parentKeys] = this.collectBaseClassPropsAndKeys(baseModel);
           props.push(...parentProps);
@@ -170,7 +170,7 @@ class Digester {
         }
 
         props.push(...baseModel.props);
-        keys.push(...baseModel.keyNames);
+        keys.push(...baseModel.keyNames.filter((kn) => !keys.includes(kn)));
         return [props, keys];
       },
       [[], []] as [Array<PropertyModel>, Array<string>]
