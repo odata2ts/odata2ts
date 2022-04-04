@@ -2119,7 +2119,7 @@ __metadata:
     "@odata2ts/odata-query-objects": ^0.9.0
     "@types/jest": 26.0.23
     "@types/node": ^16.0.0
-    axios: 0.21.1
+    axios: ^0.26.1
     jest: 27.0.4
     query-string: 7.0.0
     rimraf: ^3.0.2
@@ -2141,7 +2141,7 @@ __metadata:
     "@types/node": ^15.12.2
     "@types/prettier": ^2.3.0
     "@types/xml2js": ^0.4.8
-    axios: ^0.21.1
+    axios: ^0.26.1
     commander: ^7.2.0
     fs-extra: ^10.0.0
     jest: ^27.0.6
@@ -2779,12 +2779,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:0.21.1, axios@npm:^0.21.1":
-  version: 0.21.1
-  resolution: "axios@npm:0.21.1"
+"axios@npm:^0.26.1":
+  version: 0.26.1
+  resolution: "axios@npm:0.26.1"
   dependencies:
-    follow-redirects: ^1.10.0
-  checksum: 864fb7b5d077d236737f10adca53bf451a93f35a15271f56fba8da07265a02d26b7d881b935a6697dc6adb0549ea3e56d2eecb403edaa3bb78f6479901c10f69
+    follow-redirects: ^1.14.8
+  checksum: 139698e390e6e875d75efcebc3b4a0bb94b680fab69e4e8632d640bb64d746f4dd3efcedbab69f3e55ae01e4b83e4f530f78800b936ff282c6c24365023d2e89
   languageName: node
   linkType: hard
 
@@ -4295,13 +4295,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.10.0":
-  version: 1.14.1
-  resolution: "follow-redirects@npm:1.14.1"
+"follow-redirects@npm:^1.14.8":
+  version: 1.14.9
+  resolution: "follow-redirects@npm:1.14.9"
   peerDependenciesMeta:
     debug:
       optional: true
-  checksum: 761a18699688b19d66b3e9199ecaf9cd39ede953f3529299c7fca4190b27b855c17c491170977844d5db5e169ffc35ebae999bb0833e9c9c61988d19c20ae7ab
+  checksum: 1b602c548b4194c66d8d530d2c8f76b4116b6c498434acfa561f583f45b571fd9fc042fba778748cd863044051656cf4788ba11c8ff35407223ed0d38ffff0d4
   languageName: node
   linkType: hard
 
