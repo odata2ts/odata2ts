@@ -167,7 +167,7 @@ describe("EntityTypeDigestion Test", () => {
     });
     expect(result.getModel("Child")).toMatchObject({
       name: "Child",
-      // keyNames: ["id"],
+      keyNames: ["id"],
       props: [expectedChildProp],
       baseClasses: ["Parent"],
       baseProps: [expectedGrandParentProp, expectedParentProp],
