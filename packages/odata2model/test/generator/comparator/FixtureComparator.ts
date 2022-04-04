@@ -21,7 +21,6 @@ export class FixtureComparator {
   private readonly path: string;
 
   constructor(basePath: string, private prettierConfig: Options | null) {
-    const base = basePath ? basePath.replace(/\/$/, "") : "";
     this.path = path.join(__dirname, "../../fixture", basePath);
   }
 
@@ -35,8 +34,8 @@ export class FixtureComparator {
     }
 
     const fixture = this.loadFixture(fullPath);
-    const cleanedFixture = fixture.replace(new RegExp("^//( )*@ts-nocheck"), "").trim();
-    expect(result.trim()).toBe(cleanedFixture);
+    const cleanedFixture = fixture.replace(new RegExp("^//( )*@ts-nocheck"), "").replace(/\r\n/g, "\n").trim();
+    expect(result.trim()).toEqual(cleanedFixture);
   }
 
   public loadFixture(path: string) {

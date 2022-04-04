@@ -20,14 +20,14 @@
     "LICENSE"
   ],
   "devDependencies": {
-    "@types/jest": "27.0.1",
-    "@types/node": "^16.0.0",
-    "jest": "27.2.0",
+    "@types/jest": "^27.4.1",
+    "@types/node": "^17.0.23",
+    "jest": "27.5.1",
     "rimraf": "^3.0.2",
-    "ts-jest": "27.0.5",
-    "ts-node": "10.0.0",
-    "type-fest": "^2.3.2",
-    "typescript": "4.3.5"
+    "ts-jest": "^27.1.4",
+    "ts-node": "10.7.0",
+    "type-fest": "^2.12.2",
+    "typescript": "4.6.3"
   },
   "types": "./lib/index.d.ts",
   "gitHead": "b88f1a6e7ce84d26d1d7efa5a61dfc66a4626ec3"

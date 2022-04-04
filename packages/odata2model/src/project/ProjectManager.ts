@@ -127,6 +127,10 @@ export class ProjectManager {
 
   private async emitTsFiles() {
     const files = [this.getModelFile(), this.getQObjectFile(), this.getMainServiceFile(), ...this.getServiceFiles()];
+    console.log(
+      "Emitting TS files: ",
+      files.filter((f) => !!f).map((f) => f.getFilePath())
+    );
     return Promise.all([...files.filter((file) => !!file).map(this.formatAndWriteFile)]);
   }
 

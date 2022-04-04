@@ -14,10 +14,10 @@
     "int-test": "lerna run int-test"
   },
   "devDependencies": {
-    "@prettier/plugin-xml": "^0.13.1",
-    "conventional-changelog-core": "4.2.2",
+    "@prettier/plugin-xml": "^2.0.1",
+    "conventional-changelog-core": "4.2.4",
     "husky": "^6.0.0",
-    "jest": "^27.0.6",
+    "jest": "^27.5.1",
     "lerna": "^4.0.0",
     "lint-staged": "^11.0.0",
     "prettier": "^2.3.1",
@@ -25,7 +25,7 @@
     "prettier-plugin-properties": "^0.1.0",
     "rimraf": "^3.0.2",
     "shelljs": "^0.8.5",
-    "typescript": "^4.3.2"
+    "typescript": "^4.6.3"
   },
   "husky": {
     "hooks": {
