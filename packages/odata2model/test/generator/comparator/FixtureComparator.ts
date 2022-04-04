@@ -1,3 +1,4 @@
+import path from "path";
 import { pathExistsSync, readFileSync } from "fs-extra";
 import prettier, { Options } from "prettier";
 
@@ -21,18 +22,19 @@ export class FixtureComparator {
 
   constructor(basePath: string, private prettierConfig: Options | null) {
     const base = basePath ? basePath.replace(/\/$/, "") : "";
-    this.path = `test/fixture${base ? "/" + base : ""}/`;
+    this.path = path.join(__dirname, "../../fixture", basePath);
   }
 
   public async compareWithFixture(text: string, fixturePath: string) {
     const config = this.prettierConfig || undefined;
     const result = prettier.format(text, config);
 
-    if (!pathExistsSync(this.path + fixturePath)) {
-      throw new Error("Unable to load fixture: " + this.path + fixturePath);
+    const fullPath = this.path + path.sep + fixturePath;
+    if (!pathExistsSync(fullPath)) {
+      throw new Error("Unable to load fixture: " + fullPath);
     }
 
-    const fixture = this.loadFixture(this.path + fixturePath);
+    const fixture = this.loadFixture(fullPath);
     const cleanedFixture = fixture.replace(new RegExp("^//( )*@ts-nocheck"), "").trim();
     expect(result.trim()).toBe(cleanedFixture);
   }

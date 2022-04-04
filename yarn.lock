@@ -2158,7 +2158,7 @@ __metadata:
     "@odata2ts/odata-query-objects": "*"
     "@odata2ts/odata-service": "*"
   bin:
-    odata2model: lib/cli.js
+    odata2model: lib/run-cli.js
   languageName: unknown
   linkType: soft
 
@@ -2174,6 +2174,7 @@ __metadata:
     prettier: ^2.3.1
     prettier-plugin-package: ^1.3.0
     prettier-plugin-properties: ^0.1.0
+    rimraf: ^3.0.2
     typescript: ^4.3.2
   languageName: unknown
   linkType: soft
