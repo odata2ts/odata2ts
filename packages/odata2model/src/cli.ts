@@ -1,38 +1,65 @@
-import commander, { Option } from "commander";
 import { ensureDir, pathExists, readFile } from "fs-extra";
+import commander, { Option } from "commander";
+import { cosmiconfig } from "cosmiconfig";
 import { parseStringPromise } from "xml2js";
 
 import { runApp } from "./app";
 import { EmitModes, Modes, ProjectOptions, RunOptions } from "./OptionModel";
 import { ODataEdmxModel } from "./data-model/edmx/ODataEdmxModel";
+import { logFilePath } from "./project/logger/logFilePath";
 
 export class Cli {
   async run(): Promise<void> {
     const cli = new commander.Command()
-      .version("0.1.0")
+      .version("0.2.0")
       .description("CLI to generate Typescript Interfaces for models of a given OData service.")
       .requiredOption("-s, --source <metadata.xml>", "Metadata file describing the OData service")
       .requiredOption("-o, --output <path>", "Output location for generated files")
       .addOption(
-        new Option("-m, --mode <mode>", "What kind of stuff gets generated")
-          .choices(["models", "qobjects", "service", "all"])
-          .default("all")
+        new Option("-m, --mode <mode>", "What kind of stuff gets generated").choices([
+          "models",
+          "qobjects",
+          "service",
+          "all",
+        ])
       )
       .addOption(
         new Option(
           "-e, --emit-mode <mode>",
           "Output TS source files, compiled JS files with/wihthout generated d.ts files"
-        )
-          .choices(Object.values(EmitModes))
-          .default("js-dts")
+        ).choices(Object.values(EmitModes))
       )
-      .option("-prefix, --model-prefix <prefix>", "Prefix the generated interfaces with a static string", "")
-      .option("-suffix, --model-suffix <suffix>", "Sufffix the generated interfaces with a static string", "")
-      .option("-p, --prettier", "Format result with prettier", false)
-      .option("-d, --debug", "Verbose debug infos", false)
+      .option("-prefix, --model-prefix <prefix>", "Prefix the generated interfaces with a static string")
+      .option("-suffix, --model-suffix <suffix>", "Suffix the generated interfaces with a static string")
+      .option("-p, --prettier", "Format result with prettier")
+      .option("-d, --debug", "Verbose debug infos")
       .parse(process.argv);
 
-    const { source, emitMode, mode, ...opts } = cli.opts() as ProjectOptions;
+    const defaultConfig = {
+      mode: "all",
+      emitMode: "js-dts",
+      modelPrefix: "",
+      modelSuffix: "",
+      prettier: false,
+      debug: false,
+    };
+    const cliOpts = cli.opts() as Partial<ProjectOptions>;
+    const explorer = cosmiconfig("odata2ts");
+    const discoveredConfig = await explorer.search();
+
+    if (discoveredConfig?.config) {
+      console.log("Loaded config file: ", discoveredConfig.filepath);
+    } else {
+      console.log("No config file found");
+    }
+
+    const mergedConfig = {
+      ...defaultConfig,
+      ...(discoveredConfig?.config || {}),
+      ...cliOpts,
+    };
+
+    const { source, emitMode, mode, ...opts } = mergedConfig;
     const options: RunOptions = {
       mode: Modes[mode],
       emitMode: emitMode as EmitModes,
@@ -40,11 +67,10 @@ export class Cli {
     };
 
     if (options.debug) {
-      console.log("Provided Options:", {
-        ...options,
-        source,
+      console.log("Resolved config:", {
         mode,
         emitMode,
+        ...opts,
       });
     }
 

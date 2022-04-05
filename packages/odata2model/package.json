@@ -13,9 +13,10 @@
     "build": "yarn clean && yarn compile",
     "clean": "rimraf lib build",
     "compile": "tsc",
-    "dev": "ts-node --cwd-mode src/run-cli.ts -o build -p",
-    "dev-nw": "yarn dev -s int-test/fixture/metadata.xml -d -p --model-suffix Model -e ts",
-    "dev-trippin": "yarn dev -s int-test/fixture/trippin.xml -d -p --model-suffix Model -e ts",
+    "generate": "ts-node --cwd-mode src/run-cli.ts ",
+    "dev": "yarn clean && yarn dev-nw && yarn dev-trippin",
+    "dev-nw": "yarn generate -o build/northwind -s int-test/fixture/northwind-v4.xml",
+    "dev-trippin": "yarn generate -o build/trippin -s int-test/fixture/trippin.xml",
     "int-test": "yarn clean && yarn dev-trippin && jest ./int-test",
     "test": "jest ./test"
   },
@@ -32,6 +33,7 @@
   },
   "dependencies": {
     "commander": "^9.1.0",
+    "cosmiconfig": "^7.0.1",
     "fs-extra": "^10.0.1",
     "prettier": "^2.6.2",
     "ts-morph": "^14.0.0",
