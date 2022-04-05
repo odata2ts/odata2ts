@@ -1,10 +1,14 @@
-import { Cli } from "../src/cli";
-import * as app from "../src/app";
-import { EmitModes, Modes, RunOptions } from "../src/OptionModel";
 import fsExtra from "fs-extra";
+import * as cosmiConfig from "cosmiconfig";
+import type { CosmiconfigResult } from "cosmiconfig/dist/types";
+
+import { Cli } from "../src/cli";
+import { EmitModes, Modes, RunOptions } from "../src/OptionModel";
+import * as app from "../src/app";
 
 jest.mock("fs-extra");
 jest.mock("../src/app");
+jest.mock("cosmiconfig");
 
 describe("Cli Test", () => {
   const EXIT_MSG = "process.exit was called.";
@@ -15,7 +19,26 @@ describe("Cli Test", () => {
   let logInfoSpy: jest.SpyInstance;
   let logErrorSpy: jest.SpyInstance;
   let defaultArgs = ["-s", "./test/fixture/dummy.xml", "-o", "./test/fixture"];
-  let runOptions: RunOptions;
+  let runOptions: Partial<RunOptions>;
+  let mockCosmi = {
+    search: jest.fn().mockResolvedValue({}),
+  };
+  let mockConfig: CosmiconfigResult;
+
+  beforeAll(() => {
+    // mock the real app, we're only testing the CLI here
+    // => provide Promise implementation to make things work
+    // @ts-ignore
+    app.runApp.mockResolvedValue();
+
+    // mock loading of config file via IO
+    // @ts-ignore
+    jest.spyOn(cosmiConfig, "cosmiconfig").mockImplementation(() => mockCosmi);
+
+    // mock console to keep a clean test output
+    logInfoSpy = jest.spyOn(console, "log").mockImplementation(jest.fn);
+    logErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn);
+  });
 
   beforeEach(() => {
     // clear mock state before each test
@@ -29,15 +52,6 @@ describe("Cli Test", () => {
       throw new Error(EXIT_MSG);
     });
 
-    // mock the real app, we're only testing the CLI here
-    // => provide Promise implementation to make things work
-    // @ts-ignore
-    app.runApp.mockResolvedValue();
-
-    // mock console to keep a clean test output
-    logInfoSpy = jest.spyOn(console, "log").mockImplementation(jest.fn);
-    logErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn);
-
     // default run options
     runOptions = {
       mode: Modes.all,
@@ -49,15 +63,47 @@ describe("Cli Test", () => {
       debug: false,
     };
 
-    //@ts-ignore
+    mockConfig = {
+      config: {},
+      isEmpty: false,
+      filepath: `${process.cwd}/.testrc`,
+    };
+
+    // @ts-ignore
     fsExtra.pathExists.mockResolvedValue(true);
-    //@ts-ignore
+    // @ts-ignore
     fsExtra.readFile.mockResolvedValue("");
   });
 
   afterAll(() => {
     process.argv = ORIGINAL_ARGS;
+
+    jest.resetAllMocks();
   });
+
+  /**
+   * Executes a CLI run.
+   *
+   * @param args mocked to be process args
+   */
+  async function runCli(args: Array<string> = []): Promise<void> {
+    process.argv = [...STANDARD_ARGS, ...args];
+    return new Cli().run();
+  }
+
+  /**
+   * Test successful CLI run:
+   * - no errors occur
+   * - run options which are passed to app are matching with ours
+   *
+   * @param args
+   */
+  async function testCli(args: Array<string> = defaultArgs) {
+    await expect(runCli(args)).resolves.toBeUndefined();
+
+    expect(process.exit).not.toHaveBeenCalled();
+    expect(app.runApp).toHaveBeenCalledWith(null, runOptions);
+  }
 
   test("Smoke Test", async () => {
     await expect(runCli()).rejects.toThrow(EXIT_MSG);
@@ -65,13 +111,6 @@ describe("Cli Test", () => {
     expect(process.exit).not.toHaveBeenCalledWith(0);
     expect(app.runApp).not.toHaveBeenCalled();
   });
-
-  async function testCli(args: Array<string> = defaultArgs) {
-    await expect(runCli(args)).resolves.toBeUndefined();
-
-    expect(process.exit).not.toHaveBeenCalled();
-    expect(app.runApp).toHaveBeenCalledWith(null, runOptions);
-  }
 
   test("Most simple successful run", async () => {
     await testCli();
@@ -175,7 +214,7 @@ describe("Cli Test", () => {
 
   test("Fail runApp", async () => {
     // @ts-ignore
-    app.runApp.mockRejectedValue(new Error("Oh No!"));
+    app.runApp.mockRejectedValueOnce(new Error("Oh No!"));
 
     await expect(runCli(defaultArgs)).rejects.toThrow(EXIT_MSG);
 
@@ -183,8 +222,36 @@ describe("Cli Test", () => {
     expect(logErrorSpy).toHaveBeenCalledTimes(1);
   });
 
-  async function runCli(args: Array<string> = []): Promise<void> {
-    process.argv = [...STANDARD_ARGS, ...args];
-    return new Cli().run();
-  }
+  test("Config loaded but empty", async () => {
+    // given are the defaults
+    // when returning empty config
+    mockCosmi.search = jest.fn().mockResolvedValue(mockConfig);
+
+    // then defaults should work
+    await testCli();
+  });
+
+  test("Config loaded", async () => {
+    // given a custom config
+    mockConfig!.config = {
+      mode: Modes[Modes.models],
+      emitMode: EmitModes.dts,
+      modelPrefix: "I",
+      modelSuffix: "Model",
+      prettier: true,
+      debug: true,
+    };
+
+    // when returning empty config
+    mockCosmi.search = jest.fn().mockResolvedValue(mockConfig);
+    await runCli(defaultArgs);
+
+    // then config should have been used to determine runOptions
+    const { mode, ...mockOpts } = mockConfig!.config;
+    expect(app.runApp).toHaveBeenCalledWith(null, {
+      output: "./test/fixture",
+      mode: Modes.models,
+      ...mockOpts,
+    });
+  });
 });
