@@ -6,6 +6,7 @@ import { ProjectFiles } from "../data-model/DataModel";
 import { EmitModes } from "../OptionModel";
 import { createFormatter } from "./formatter";
 import { FileFormatter } from "./formatter/FileFormatter";
+import { logFilePath } from "./logger/logFilePath";
 
 export async function createProjectManager(
   projectFiles: ProjectFiles,
@@ -129,7 +130,7 @@ export class ProjectManager {
     const files = [this.getModelFile(), this.getQObjectFile(), this.getMainServiceFile(), ...this.getServiceFiles()];
     console.log(
       "Emitting TS files: ",
-      files.filter((f) => !!f).map((f) => f.getFilePath())
+      files.filter((f) => !!f).map((f) => logFilePath(f.getFilePath()))
     );
     return Promise.all([...files.filter((file) => !!file).map(this.formatAndWriteFile)]);
   }
