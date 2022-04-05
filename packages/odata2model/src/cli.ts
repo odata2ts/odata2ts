@@ -48,7 +48,7 @@ export class Cli {
     const discoveredConfig = await explorer.search();
 
     if (discoveredConfig?.config) {
-      console.log("Loaded config file: ", discoveredConfig.filepath);
+      console.log("Loaded config file: ", logFilePath(discoveredConfig.filepath));
     } else {
       console.log("No config file found");
     }
