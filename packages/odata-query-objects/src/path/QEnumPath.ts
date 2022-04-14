@@ -1,5 +1,5 @@
-import { QOrderByExpression } from "./../QOrderByExpression";
-import { StandardFilterOperators, StringFilterFunctions } from "../odata/ODataModel";
+import { QOrderByExpression } from "../QOrderByExpression";
+import { StandardFilterOperators } from "../odata/ODataModel";
 import { QPathModel } from "./QPathModel";
 import { QFilterExpression } from "../QFilterExpression";
 
@@ -21,10 +21,6 @@ export class QEnumPath implements QPathModel {
    */
   public getPath(): string {
     return this.path;
-  }
-
-  public withPath(newPath: string): QEnumPath {
-    return new QEnumPath(newPath);
   }
 
   /**

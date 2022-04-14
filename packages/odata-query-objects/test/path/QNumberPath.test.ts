@@ -11,15 +11,14 @@ describe("QNumberPath test", () => {
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("Price");
-    expect(toTest.withPath("new").getPath()).toBe("new");
   });
 
   test("fails with null, undefined, empty string", () => {
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QNumberPath(null)).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QNumberPath()).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QNumberPath(undefined)).toThrow();
     expect(() => new QNumberPath("")).toThrow();
     expect(() => new QNumberPath(" ")).toThrow();

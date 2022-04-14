@@ -8,7 +8,7 @@ import { QGuidPath } from "./path/QGuidPath";
 import { QBooleanPath } from "./path/QBooleanPath";
 import { QNumberPath } from "./path/QNumberPath";
 import { QStringPath } from "./path/QStringPath";
-import { QEntityModel } from "./QEntityModel";
+import { QueryObject } from "./QueryObject";
 
 const ATTRIBUTE_NAME = "it";
 const PRIMITIVE_VALUE_REFERENCE = "$it";
@@ -38,38 +38,68 @@ export type PrimitiveCollection =
   | DateCollection
   | EnumCollection<any>;
 
-export const qStringCollection: QEntityModel<StringCollection> = {
-  [ATTRIBUTE_NAME]: new QStringPath(PRIMITIVE_VALUE_REFERENCE),
-};
+export abstract class QPrimitiveCollection<QType> extends QueryObject {
+  public readonly it;
 
-export const qNumberCollection: QEntityModel<NumberCollection> = {
-  [ATTRIBUTE_NAME]: new QNumberPath(PRIMITIVE_VALUE_REFERENCE),
-};
+  constructor(prefix?: string) {
+    super(prefix);
 
-export const qBooleanCollection: QEntityModel<BooleanCollection> = {
-  [ATTRIBUTE_NAME]: new QBooleanPath(PRIMITIVE_VALUE_REFERENCE),
-};
+    this.it = this.createQPathType(this.withPrefix(PRIMITIVE_VALUE_REFERENCE));
+  }
 
-export const qGuidCollection: QEntityModel<GuidCollection> = {
-  [ATTRIBUTE_NAME]: new QGuidPath(PRIMITIVE_VALUE_REFERENCE),
-};
+  abstract createQPathType(path: string): QType;
+}
 
-export const qBinaryCollection: QEntityModel<BinaryCollection> = {
-  [ATTRIBUTE_NAME]: new QBinaryPath(PRIMITIVE_VALUE_REFERENCE),
-};
+export class QStringCollection extends QPrimitiveCollection<QStringPath> {
+  createQPathType(path: string) {
+    return new QStringPath(path);
+  }
+}
 
-export const qDateTimeOffsetCollection: QEntityModel<DateTimeOffsetCollection> = {
-  [ATTRIBUTE_NAME]: new QDateTimeOffsetPath(PRIMITIVE_VALUE_REFERENCE),
-};
+export class QNumberCollection extends QPrimitiveCollection<QNumberPath> {
+  createQPathType(path: string) {
+    return new QNumberPath(path);
+  }
+}
 
-export const qTimeOfDayCollection: QEntityModel<TimeOfDayCollection> = {
-  [ATTRIBUTE_NAME]: new QTimeOfDayPath(PRIMITIVE_VALUE_REFERENCE),
-};
+export class QBooleanCollection extends QPrimitiveCollection<QBooleanPath> {
+  createQPathType(path: string) {
+    return new QBooleanPath(path);
+  }
+}
 
-export const qDateCollection: QEntityModel<DateCollection> = {
-  [ATTRIBUTE_NAME]: new QDatePath(PRIMITIVE_VALUE_REFERENCE),
-};
+export class QGuidCollection extends QPrimitiveCollection<QGuidPath> {
+  createQPathType(path: string) {
+    return new QGuidPath(path);
+  }
+}
 
-export const qEnumCollection: QEntityModel<EnumCollection<any>> = {
-  [ATTRIBUTE_NAME]: new QEnumPath(PRIMITIVE_VALUE_REFERENCE),
-};
+export class QBinaryCollection extends QPrimitiveCollection<QBinaryPath> {
+  createQPathType(path: string) {
+    return new QBinaryPath(path);
+  }
+}
+
+export class QDateTimeOffsetCollection extends QPrimitiveCollection<QDateTimeOffsetPath> {
+  createQPathType(path: string) {
+    return new QDateTimeOffsetPath(path);
+  }
+}
+
+export class QTimeOfDayCollection extends QPrimitiveCollection<QTimeOfDayPath> {
+  createQPathType(path: string) {
+    return new QTimeOfDayPath(path);
+  }
+}
+
+export class QDateCollection extends QPrimitiveCollection<QDatePath> {
+  createQPathType(path: string) {
+    return new QDatePath(path);
+  }
+}
+
+export class QEnumCollection extends QPrimitiveCollection<QEnumPath> {
+  createQPathType(path: string) {
+    return new QEnumPath(path);
+  }
+}

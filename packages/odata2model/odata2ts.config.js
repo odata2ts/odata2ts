@@ -1,5 +1,5 @@
 module.exports = {
-  mode: "model",
+  mode: "qobjects",
   debug: false,
   prettier: true,
   emitMode: "ts",

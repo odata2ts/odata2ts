@@ -1,49 +1,41 @@
-import { QEntityFactory, QEntityPath, QNumberPath, QStringPath } from "./../../src";
-
-interface SimpleEntity {
-  id: number;
-  name: string;
-}
+import { QEntityPath } from "../../src";
+import { QSimpleEntity } from "../fixture/SimpleComplexModel";
 
 describe("QEntityPath test", () => {
-  const qEntity = QEntityFactory.create<SimpleEntity>({ id: QNumberPath, name: QStringPath });
-
   test("smoke test", () => {
-    const result = new QEntityPath("test", () => qEntity);
+    const result = new QEntityPath("test", () => QSimpleEntity);
     expect(result.getPath()).toBe("test");
-    expect(result.withPath("new").getPath()).toBe("new");
-    expect(result.getEntity()).toBe(qEntity);
+    expect(JSON.stringify(result.getEntity())).toEqual(JSON.stringify(new QSimpleEntity("test")));
   });
 
   test("fails with null, undefined, empty string", () => {
-    // @ts-ignore
-    expect(() => new QEntityPath(null, () => qEntity)).toThrow();
-    // @ts-ignore
-    expect(() => new QEntityPath(undefined, () => qEntity)).toThrow();
-    // @ts-ignore
-    expect(() => new QEntityPath(undefined, () => qEntity)).toThrow();
-    expect(() => new QEntityPath("", () => qEntity)).toThrow();
-    expect(() => new QEntityPath(" ", () => qEntity)).toThrow();
+    // @ts-expect-error
+    expect(() => new QEntityPath(null, () => QSimpleEntity)).toThrow();
+    // @ts-expect-error
+    expect(() => new QEntityPath(undefined, () => QSimpleEntity)).toThrow();
+    // @ts-expect-error
+    expect(() => new QEntityPath(undefined, () => QSimpleEntity)).toThrow();
+    expect(() => new QEntityPath("", () => QSimpleEntity)).toThrow();
+    expect(() => new QEntityPath(" ", () => QSimpleEntity)).toThrow();
   });
 
   test("fails without qObject", () => {
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QEntityPath("test", null)).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QEntityPath("test")).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QEntityPath("test", "")).toThrow();
   });
 
   test("use entityProps", () => {
-    const test = new QEntityPath("test", () => qEntity);
+    const test = new QEntityPath("test", () => QSimpleEntity);
 
     expect(test.props.id.gt(1).toString()).toBe("test/id gt 1");
     expect(test.props.name.contains("hi").toString()).toBe("contains(test/name,'hi')");
     expect(test.props.name.asc().toString()).toBe("test/name asc");
 
-    // check that entity hasn't been modified
-    expect(test.getEntity().id.eq(1).toString()).toBe("id eq 1");
-    expect(test.getEntity().name.eq("test").toString()).toBe("name eq 'test'");
+    expect(test.getEntity().id.eq(1).toString()).toBe("test/id eq 1");
+    expect(test.getEntity().name.eq("test").toString()).toBe("test/name eq 'test'");
   });
 });

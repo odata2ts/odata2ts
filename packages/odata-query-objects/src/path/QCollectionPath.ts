@@ -1,8 +1,8 @@
 import { LambdaFunctions } from "../odata/ODataModel";
-import { QEntityModel, QFilterExpression, QPathModel } from "./../";
+import { QFilterExpression, QPathModel } from "./../";
 
 export class QCollectionPath<CollectionType> implements QPathModel {
-  constructor(private path: string, private qEntityFn: () => QEntityModel<CollectionType>) {
+  constructor(private path: string, private qEntityFn: () => new (prefix?: string) => CollectionType) {
     if (!path || !path.trim()) {
       throw Error("Path must be supplied!");
     }
@@ -11,24 +11,17 @@ export class QCollectionPath<CollectionType> implements QPathModel {
     }
   }
 
-  public withPath(newPath: string): QCollectionPath<CollectionType> {
-    return new QCollectionPath(newPath, this.qEntityFn);
-  }
-
   public getPath(): string {
     return this.path;
   }
 
-  public getEntity(): QEntityModel<CollectionType> {
-    return this.qEntityFn();
+  public getEntity(): CollectionType {
+    return new (this.qEntityFn())(this.path);
   }
 
-  private lambdaFunction(
-    operationName: string,
-    fn: (qObject: QEntityModel<CollectionType>) => QFilterExpression,
-    prefix: string
-  ) {
-    const expression = fn(this.qEntityFn());
+  private lambdaFunction(operationName: string, fn: (qObject: CollectionType) => QFilterExpression, prefix: string) {
+    // no prefix here => because $it needs to be replaced
+    const expression = fn(new (this.qEntityFn())());
     if (!expression.toString()) {
       return expression;
     }
@@ -38,17 +31,11 @@ export class QCollectionPath<CollectionType> implements QPathModel {
     return new QFilterExpression(`${this.path}/${operationName}(${prefix}:${replacedExpression})`);
   }
 
-  public any(
-    fn: (qObject: QEntityModel<CollectionType>) => QFilterExpression,
-    prefix: string = "a"
-  ): QFilterExpression {
+  public any(fn: (qObject: CollectionType) => QFilterExpression, prefix: string = "a"): QFilterExpression {
     return this.lambdaFunction(LambdaFunctions.ANY, fn, prefix);
   }
 
-  public all(
-    fn: (qObject: QEntityModel<CollectionType>) => QFilterExpression,
-    prefix: string = "a"
-  ): QFilterExpression {
+  public all(fn: (qObject: CollectionType) => QFilterExpression, prefix: string = "a"): QFilterExpression {
     return this.lambdaFunction(LambdaFunctions.ALL, fn, prefix);
   }
 }

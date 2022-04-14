@@ -20,10 +20,6 @@ export class QStringPath implements QPathModel {
     return this.path;
   }
 
-  public withPath(newPath: string): QStringPath {
-    return new QStringPath(newPath);
-  }
-
   /**
    * Order by this property in ascending order.
    *

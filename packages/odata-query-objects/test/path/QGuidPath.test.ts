@@ -1,4 +1,4 @@
-import { QGuidPath } from "./../../src";
+import { QGuidPath } from "../../src";
 
 describe("QGuidPath test", () => {
   let toTest: QGuidPath;
@@ -10,15 +10,14 @@ describe("QGuidPath test", () => {
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("ID");
-    expect(toTest.withPath("new").getPath()).toBe("new");
   });
 
   test("fails with null, undefined, empty string", () => {
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QGuidPath(null)).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QGuidPath()).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QGuidPath(undefined)).toThrow();
     expect(() => new QGuidPath("")).toThrow();
     expect(() => new QGuidPath(" ")).toThrow();

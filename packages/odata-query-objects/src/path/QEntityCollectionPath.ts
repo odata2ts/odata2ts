@@ -1,8 +1,8 @@
-import { QEntityModel, QPathModel, QFilterExpression } from "..";
+import { QPathModel, QFilterExpression } from "..";
 import { LambdaFunctions } from "../odata/ODataModel";
 
-export class QEntityCollectionPath<Type, EnumTypes = null> implements QPathModel {
-  constructor(private path: string, private qEntityFn: () => QEntityModel<Type, EnumTypes>) {
+export class QEntityCollectionPath<Type> implements QPathModel {
+  constructor(private path: string, private qEntityFn: () => new (prefix?: string) => Type) {
     if (!path || !path.trim()) {
       throw Error("Path must be supplied!");
     }
@@ -15,44 +15,26 @@ export class QEntityCollectionPath<Type, EnumTypes = null> implements QPathModel
     return this.path;
   }
 
-  public withPath(newPath: string): QEntityCollectionPath<Type, EnumTypes> {
-    return new QEntityCollectionPath(newPath, this.qEntityFn);
+  public getEntity(): Type {
+    return new (this.qEntityFn())(this.path);
   }
 
-  public getEntity(): QEntityModel<Type, EnumTypes> {
-    return this.qEntityFn();
+  private lambdaFunction(operationName: string, fn: (qObject: Type) => QFilterExpression, prefix: string) {
+    // create new qObject with given prefix
+    const qEntity = new (this.qEntityFn())(prefix);
+    const expression = fn(qEntity);
+    if (!expression.toString()) {
+      return expression;
+    }
+
+    return new QFilterExpression(`${this.path}/${operationName}(${prefix}:${expression})`);
   }
 
-  private lambdaFunction(
-    operationName: string,
-    fn: (qObject: QEntityModel<Type, EnumTypes>) => QFilterExpression,
-    prefix: string
-  ) {
-    // create new qObject out of old one, but prefix every path object
-    const qEntity = this.qEntityFn();
-    const prefixedQ = Object.entries(qEntity).reduce((collector, [key, value]) => {
-      // @ts-ignore: dynamic stuff
-      collector[key] = value.withPath(`${prefix}/${value.getPath()}`);
-      return collector;
-    }, {} as QEntityModel<Type, EnumTypes>);
-
-    const expression = fn(prefixedQ);
-    return expression.toString()
-      ? new QFilterExpression(`${this.path}/${operationName}(${prefix}:${expression})`)
-      : expression;
-  }
-
-  public any(
-    fn: (qObject: QEntityModel<Type, EnumTypes>) => QFilterExpression,
-    prefix: string = "a"
-  ): QFilterExpression {
+  public any(fn: (qObject: Type) => QFilterExpression, prefix: string = "a"): QFilterExpression {
     return this.lambdaFunction(LambdaFunctions.ANY, fn, prefix);
   }
 
-  public all(
-    fn: (qObject: QEntityModel<Type, EnumTypes>) => QFilterExpression,
-    prefix: string = "a"
-  ): QFilterExpression {
+  public all(fn: (qObject: Type) => QFilterExpression, prefix: string = "a"): QFilterExpression {
     return this.lambdaFunction(LambdaFunctions.ALL, fn, prefix);
   }
 }

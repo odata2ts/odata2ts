@@ -10,15 +10,15 @@ describe("QTimeOfDayPath test", () => {
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("startTime");
-    expect(toTest.withPath("new").getPath()).toBe("new");
+    expect(new QTimeOfDayPath("new").getPath()).toBe("new");
   });
 
   test("fails with null, undefined, empty string", () => {
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QTimeOfDayPath(null)).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QTimeOfDayPath()).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QTimeOfDayPath(undefined)).toThrow();
     expect(() => new QTimeOfDayPath("")).toThrow();
     expect(() => new QTimeOfDayPath(" ")).toThrow();

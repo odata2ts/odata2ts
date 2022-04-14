@@ -9,10 +9,6 @@ export class QDateTimeOffsetPath extends DateTimeBasePath {
     super(path);
   }
 
-  public withPath(newPath: string): QDateTimeOffsetPath {
-    return new QDateTimeOffsetPath(newPath);
-  }
-
   protected buildNoValueFunc(func: DateTimeFilterFunctions) {
     return `${func}(${this.path})`;
   }

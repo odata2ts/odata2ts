@@ -9,8 +9,6 @@ export abstract class QLiteralPath<ValueType, OperatorTypes> implements QPathMod
     }
   }
 
-  abstract withPath(newPath: string): any;
-
   /**
    * Get the path to this property.
    *

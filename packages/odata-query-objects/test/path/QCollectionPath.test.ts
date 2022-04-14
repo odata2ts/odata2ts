@@ -1,38 +1,35 @@
-import { QCollectionPath, qStringCollection, QFilterExpression } from "../../src";
+import { QCollectionPath, QFilterExpression, QStringCollection } from "../../src";
 
 export interface SampleEntity {}
 
 describe("QCollectionPath test", () => {
-  const qEntity = qStringCollection;
-
   const createToTest = () => {
-    return new QCollectionPath("test", () => qEntity);
+    return new QCollectionPath("test", () => QStringCollection);
   };
 
   test("smoke test", () => {
     const result = createToTest();
     expect(result.getPath()).toBe("test");
-    expect(result.withPath("new").getPath()).toBe("new");
-    expect(result.getEntity()).toBe(qEntity);
+    expect(result.getEntity()).toStrictEqual(new QStringCollection("test"));
   });
 
   test("fails with null, undefined, empty string", () => {
-    // @ts-ignore
-    expect(() => new QCollectionPath(null, () => qEntity)).toThrow();
-    // @ts-ignore
-    expect(() => new QCollectionPath(undefined, () => qEntity)).toThrow();
-    // @ts-ignore
-    expect(() => new QCollectionPath(undefined, () => qEntity)).toThrow();
-    expect(() => new QCollectionPath("", () => qEntity)).toThrow();
-    expect(() => new QCollectionPath(" ", () => qEntity)).toThrow();
+    // @ts-expect-error
+    expect(() => new QCollectionPath(null, () => QStringCollection)).toThrow();
+    // @ts-expect-error
+    expect(() => new QCollectionPath(undefined, () => QStringCollection)).toThrow();
+    // @ts-expect-error
+    expect(() => new QCollectionPath(undefined, () => QStringCollection)).toThrow();
+    expect(() => new QCollectionPath("", () => QStringCollection)).toThrow();
+    expect(() => new QCollectionPath(" ", () => QStringCollection)).toThrow();
   });
 
   test("fails without qObject", () => {
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QCollectionPath("test", null)).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QCollectionPath("test")).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QCollectionPath("test", "")).toThrow();
   });
 
@@ -45,7 +42,7 @@ describe("QCollectionPath test", () => {
 
   test("empty any filter", () => {
     const result = createToTest()
-      .any((qTest) => new QFilterExpression())
+      .any(() => new QFilterExpression())
       .toString();
     expect(result).toBe("");
   });
@@ -71,7 +68,7 @@ describe("QCollectionPath test", () => {
 
   test("empty all filter", () => {
     const result = createToTest()
-      .all((qTest) => new QFilterExpression())
+      .all(() => new QFilterExpression())
       .toString();
     expect(result).toBe("");
   });

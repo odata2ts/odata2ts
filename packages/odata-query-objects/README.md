@@ -3,100 +3,67 @@
 # OData Query Objects
 
 Query objects are building blocks to allow for typesafe OData queries.
-First of all query objects encapsulate the typing of given entities as well as the specification of their ids / keys.
-This information is then exploited in the ODataUriBuilder.
-
-Here's an example of a type model with a composite key, where `firstName` and `lastName` are properties of the `Person` interface:
+They are the counterpart to the typescript model interfaces and allow for complex and powerful query semantics.
 
 ```
-QEntityModel<Person, "firstName" | "lastName">
-```
-
-Furthermore, each query object specifies its attributes as QPath objects. They allow for type safe filtering.
-For example:
-
-```
-const qPerson: QEntityModel<Person, "firstName" | "lastName"> = {
-  __collectionPath: "Persons",
-  firstName: new QStringPath("firstName"),
-  lastName: new QStringPath("lastName"),
-  age: new QNumberPath("name"),
-  ...
+// model interface
+export interface SimpleEntity {
+  id: number;
+  name: string;
+  feat: FeaturesEnum;
+  complexton: ComplexEntity;
 }
 
-qPerson.name.eq("Horst").toString() // results in: person eq 'Horst'
-qPerson.name.startsWith("Ho").toString() // results in: startswith(person,'Ho')
-qPerson.age.plus(10).greaterThan(30) // results in: add(age,10) gt 30
-```
+// query object
+export class QSimpleEntity extends QueryObject {
+  public readonly id = new QNumberPath(this.withPrefix("id"));
+  public readonly name = new QStringPath(this.withPrefix("name"));
+  public readonly feat = new QEnumPath(this.withPrefix("feat"));
+  public readonly complexton = new QEntityPath(this.withPrefix("complexton"), () => QComplexEntity);
 
-## Date, TimeOfDay & DateTimeOffset
-
-Date & time types are just plain strings in OData, even though they comply to the ISO-8601 standard.
-In order to differentiate between each of these types as well as strings we use "nominal typing" ([here's a good explanation](https://basarat.gitbook.io/typescript/main-1/nominaltyping)].
-
-We provide the following types within this package:
-
-- DateString
-- TimeOfDayString
-- DateTimeOffsetString
-
-These types are mandatory within the provided interface in order to model date & time types.
-
-```
-interface Person {
-  ...
-  createdAt: DateTimeOffsetString
+  constructor(prefix?: string) {
+    super(prefix);
+  }
 }
 
-const qPerson: QEntityModel<Person, "firstName" | "lastName"> = {
-  ...
-  createdAt: new QDateTimeOffsetPath("createdAt")
-}
+// instantiate
+const qSimple = new QSimpleEntity();
+
+// let's use the query object
+qSimple.id.gt(100).toString()             // results in: id gt 100
+qSimple.name.startsWith("Hor").toString() // results in: startswith(name,'Hor')
+qSimple.id.plus(10).greaterThan(30)       // results in: add(id,10) gt 30
 ```
-
-## Entity Relationships
-
-Here's the example:
-
-```
-interface Person {
-  ...
-  address: Address;             // 1:1 relationship
-  altAddresses: Array<Address>; // 1:n relationship
-}
-
-const qPerson: QEntityModel<Person, "firstName" | "lastName"> = {
-  ...
-  address: new QEntityPath("address", () => qAddress),
-  altAddresses: new QEntityCollectionPath("altAddresses", () => qAddress)
-  ...
-}
-```
-
-Functions are used to wrap references to other Query Objects in order to allow for circular references.
-
-## Factory Function
-
-Constructing entity models manually, as shown above, is a bit repetitive.
-Use `QEntityFactory` to reduce your efforts:
-
-```
-const qPerson = QEntityFactory.create<Person, "firstName" | "lastName">("Persons", {
-  firstName: QStringPath,
-  age: QNumberPath,
-  address: [QEntityPath, () => qAddress],
-  altAddresses: [QEntityCollectionPath, () => qAddress]
-})
-```
-
-As you can see from the example, we use tuples to specify QPath and QObject for entity relationships.
 
 ## Generating Query Objects
 
-Actually you shouldn't need to create Query Objects manually. Since each OData service exposes a meta description ($metadata parameter), we can fully automate the generation.
+Actually you shouldn't need to create Query Objects manually. 
+Since each OData service exposes a meta description ($metadata parameter), we can fully automate the generation.
 
-Take a look at the `odata2model` package to generate TypeScript interfaces & Query Objects by a given metadata.xml.
+Take a look at the `odata2model` package to generate TypeScript interfaces & query Objects by a given metadata.xml.
+
+
+## Technical Notes
+
+### String Based Data Types like Date, TimeOfDay, DateTimeOffset or Guid
+
+Some data types are transferred as string, but adhere to a special format.
+Date & time types, for example, comply to the ISO-8601 standard, so you will receive something like this for 
+a date time: `2021-12-31T23:59:59`.
+
+In the final model interfaces they will simply be typed as `string`. 
+However, when using those types in OData queries it is essential to handle them correctly.
+While proper strings are surrounded by single quotes, those special strings are usually not.
+Furthermore, filtering for those properties has different semantics depending on the type.
+
+All of this logic is encapsulated in the generated query objects. 
+They provide the needed functionality to express typesafe OData queries with ease.
+
+### Entity Relationships
+
+Functions are used to wrap references to other Query Objects in order to allow for circular references.
 
 ## Inspiration
 
-The base idea for "Query Objects" is taken from [QueryDsl](http://www.querydsl.com/). [Jooq](https://www.jooq.org/) seems also to work this way.
+The base idea for "Query Objects" is taken from [QueryDsl](http://www.querydsl.com/). 
+[Jooq](https://www.jooq.org/) also works this way.

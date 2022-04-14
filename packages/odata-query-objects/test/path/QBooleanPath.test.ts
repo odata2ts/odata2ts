@@ -9,15 +9,14 @@ describe("QBooleanPath test", () => {
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("done");
-    expect(toTest.withPath("test").getPath()).toBe("test");
   });
 
   test("fails with null, undefined, empty string", () => {
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QBooleanPath(null)).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QBooleanPath()).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QBooleanPath(undefined)).toThrow();
     expect(() => new QBooleanPath("")).toThrow();
     expect(() => new QBooleanPath(" ")).toThrow();

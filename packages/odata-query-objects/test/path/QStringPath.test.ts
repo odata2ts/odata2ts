@@ -11,15 +11,14 @@ describe("QStringPath test", () => {
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("Country");
-    expect(toTest.withPath("new").getPath()).toBe("new");
   });
 
   test("fails with null, undefined, empty string", () => {
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QStringPath(null)).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QStringPath()).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QStringPath(undefined)).toThrow();
     expect(() => new QStringPath("")).toThrow();
     expect(() => new QStringPath(" ")).toThrow();
@@ -173,8 +172,7 @@ describe("QStringPath test", () => {
   });
 
   test("concat prefix prop", () => {
-    const value = otherProp;
-    const result = toTest.concatPrefix(value).equals("X_France");
+    const result = toTest.concatPrefix(otherProp).equals("X_France");
 
     expect(result.toString()).toBe("concat(Language,Country) eq 'X_France'");
   });
@@ -187,8 +185,7 @@ describe("QStringPath test", () => {
   });
 
   test("concat suffix prop", () => {
-    const value = otherProp;
-    const result = toTest.concatSuffix(value).equals("France_X");
+    const result = toTest.concatSuffix(otherProp).equals("France_X");
 
     expect(result.toString()).toBe("concat(Country,Language) eq 'France_X'");
   });
