@@ -1,6 +1,5 @@
 import { ODataUriBuilder, QFilterExpression } from "../src/";
-import { Person } from "./fixture/types/SimplePersonModel";
-import { QPerson } from "./fixture/types/QSimplePersonModel";
+import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 
 /**
  * Helper function which adds the base path.
@@ -13,13 +12,13 @@ function addBase(urlPart: string) {
 }
 
 describe("ODataUriBuilder Test", () => {
-  let toTest: ODataUriBuilder<Person>;
+  let toTest: ODataUriBuilder<QPerson>;
 
   /**
    * Always use a new builder for each  test.
    */
   beforeEach(() => {
-    toTest = ODataUriBuilder.create("/Persons", QPerson, { unencoded: true });
+    toTest = ODataUriBuilder.create("/Persons", qPerson, { unencoded: true });
   });
 
   test("create: minimal default", () => {
@@ -36,9 +35,9 @@ describe("ODataUriBuilder Test", () => {
   });
 
   test("config: encoded", () => {
-    const candidate = ODataUriBuilder.create("/Persons", QPerson)
+    const candidate = ODataUriBuilder.create("/Persons", qPerson)
       .select("name", "age")
-      .filter(QPerson.name.equals("AC/DC & Brothers"))
+      .filter(qPerson.name.equals("AC/DC & Brothers"))
       .build();
     const expected = addBase("%24select=name%2Cage&%24filter=name%20eq%20'AC%2FDC%20%26%20Brothers'");
 
@@ -46,7 +45,7 @@ describe("ODataUriBuilder Test", () => {
   });
 
   test("config: encoded & no double encoding for expanded entities", () => {
-    const candidate = ODataUriBuilder.create("/Persons", QPerson)
+    const candidate = ODataUriBuilder.create("/Persons", qPerson)
       .select("name", "age")
       .expanding("altAdresses", (expBuilder, qEntity) => {
         expBuilder.filter(qEntity.street.equals("AC/DC & Brothers"));
@@ -144,49 +143,49 @@ describe("ODataUriBuilder Test", () => {
   });
 
   test("orderBy", () => {
-    const candidate = toTest.orderBy(QPerson.name.asc()).build();
+    const candidate = toTest.orderBy(qPerson.name.asc()).build();
     const expected = addBase("$orderby=name asc");
 
     expect(candidate).toBe(expected);
   });
 
   test("orderBy: desc", () => {
-    const candidate = toTest.orderBy(QPerson.name.desc()).build();
+    const candidate = toTest.orderBy(qPerson.name.desc()).build();
     const expected = addBase("$orderby=name desc");
 
     expect(candidate).toBe(expected);
   });
 
   test("orderBy: multiple", () => {
-    const candidate = toTest.orderBy(QPerson.name.descending(), QPerson.age.ascending()).build();
+    const candidate = toTest.orderBy(qPerson.name.descending(), qPerson.age.ascending()).build();
     const expected = addBase("$orderby=name desc,age asc");
 
     expect(candidate).toBe(expected);
   });
 
   test("orderBy: consecutive", () => {
-    const candidate = toTest.orderBy(QPerson.name.descending()).orderBy(QPerson.age.ascending()).build();
+    const candidate = toTest.orderBy(qPerson.name.descending()).orderBy(qPerson.age.ascending()).build();
     const expected = addBase("$orderby=name desc,age asc");
 
     expect(candidate).toBe(expected);
   });
 
   test("filter: simple", () => {
-    const candidate = toTest.filter(QPerson.name.eq("Heinz")).build();
+    const candidate = toTest.filter(qPerson.name.eq("Heinz")).build();
     const expected = addBase("$filter=name eq 'Heinz'");
 
     expect(candidate).toBe(expected);
   });
 
   test("filter: 2 filters", () => {
-    const candidate = toTest.filter(QPerson.name.eq("Heinz"), QPerson.age.eq(8)).build();
+    const candidate = toTest.filter(qPerson.name.eq("Heinz"), qPerson.age.eq(8)).build();
     const expected = addBase("$filter=name eq 'Heinz' and age eq 8");
 
     expect(candidate).toBe(expected);
   });
 
   test("filter: multiple times", () => {
-    const candidate = toTest.filter(QPerson.name.eq("Heinz")).filter(QPerson.age.eq(8)).build();
+    const candidate = toTest.filter(qPerson.name.eq("Heinz")).filter(qPerson.age.eq(8)).build();
     const expected = addBase("$filter=name eq 'Heinz' and age eq 8");
 
     expect(candidate).toBe(expected);
@@ -203,7 +202,6 @@ describe("ODataUriBuilder Test", () => {
 
   test("filter: don't filter if all filters are empty", () => {
     const candidate = toTest.filter(new QFilterExpression()).build();
-    const expected = addBase("");
 
     expect(candidate).toBe("/Persons");
   });
@@ -217,14 +215,14 @@ describe("ODataUriBuilder Test", () => {
 
   /*
   test("filterOr: simple", () => {
-    const candidate = toTest.filterOr(QPerson.name.eq("Heinz")).build();
+    const candidate = toTest.filterOr(qPerson.name.eq("Heinz")).build();
     const expected = addBase("$filter=name eq 'Heinz'");
 
     expect(candidate).toBe(expected);
   });
 
   test("filterOr: 2 filters", () => {
-    const candidate = toTest.filterOr(QPerson.name.eq("Heinz"), QPerson.age.ge(12)).build();
+    const candidate = toTest.filterOr(qPerson.name.eq("Heinz"), qPerson.age.ge(12)).build();
     const expected = addBase("$filter=name eq 'Heinz' or age ge 12");
 
     expect(candidate).toBe(expected);
@@ -232,7 +230,7 @@ describe("ODataUriBuilder Test", () => {
 
   test("filterOr: multiple times", () => {
     const candidate = toTest
-      .filterOr(QPerson.name.eq("Heinz"), QPerson.age.ge(12))
+      .filterOr(qPerson.name.eq("Heinz"), qPerson.age.ge(12))
       .filterOr(QPerson.deceased.isTrue(), QPerson.age.gt(50))
       .build();
     const expected = addBase("$filter=(name eq 'Heinz' or age ge 8) and (deceased eq true or age gt 50)");
@@ -256,7 +254,7 @@ describe("ODataUriBuilder Test", () => {
   });
 
   test("expanding: simple", () => {
-    const candidate = toTest.expanding("address", (builder) => {}).build();
+    const candidate = toTest.expanding("address", () => {}).build();
     const expected = addBase("$expand=Address");
 
     expect(candidate).toBe(expected);
