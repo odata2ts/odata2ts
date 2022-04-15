@@ -1,4 +1,4 @@
-import { InlineUrlProps, KeySpec } from "./../EntityModel";
+import { InlineUrlProps, KeySpec } from "../EntityModel";
 
 /**
  * Constructs an url path for an entity with the given values as key props.
@@ -73,7 +73,7 @@ const compileParams = (id: InlineUrlProps) => {
  * Constructs an url path suitable for OData actions.
  *
  * @param path required path element; minimum: name of the action
- * @param name action name; if left out the path must contain the action name
+ * @param actionName if left out the path must contain the action name
  * @returns url path
  */
 export const compileActionPath = (path: string, actionName?: string) => {

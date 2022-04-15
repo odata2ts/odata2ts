@@ -3,12 +3,12 @@ import { EntityTypeService, CollectionService, EntitySetService, compileId } fro
 import {
   QCollectionPath,
   QEntityCollectionPath,
-  QEntityModel,
-  qEnumCollection,
   QEnumPath,
   QNumberPath,
   QStringPath,
   QEntityPath,
+  QueryObject,
+  QEnumCollection,
 } from "@odata2ts/odata-query-objects";
 
 export const enum Feature {
@@ -24,18 +24,24 @@ export interface PersonModel {
   BestFriend?: PersonModel;
 }
 
-export const qPerson: QEntityModel<PersonModel, Feature> = {
-  userName: new QStringPath("UserName"),
-  age: new QNumberPath("Age"),
-  favFeature: new QEnumPath("FavFeature"),
-  features: new QCollectionPath("Features", () => qEnumCollection),
-  friends: new QEntityCollectionPath("Friends", () => qPerson),
-  bestFriend: new QEntityPath("BestFriend", () => qPerson),
-};
+export class QPerson extends QueryObject {
+  public readonly userName = new QStringPath(this.withPrefix("UserName"));
+  public readonly age = new QNumberPath(this.withPrefix("Age"));
+  public readonly favFeature = new QEnumPath(this.withPrefix("FavFeature"));
+  public readonly features = new QCollectionPath(this.withPrefix("Features"), () => QEnumCollection);
+  public readonly friends = new QEntityCollectionPath(this.withPrefix("Friends"), () => QPerson);
+  public readonly bestFriend = new QEntityPath(this.withPrefix("BestFriend"), () => QPerson);
 
-export class PersonModelService extends EntityTypeService<PersonModel> {
+  constructor(path?: string) {
+    super(path);
+  }
+}
+
+export const qPerson = new QPerson();
+
+export class PersonModelService extends EntityTypeService<PersonModel, QPerson> {
   public get features() {
-    return new CollectionService(this.client, this.path + "/Features", qEnumCollection);
+    return new CollectionService(this.client, this.path + "/Features", new QEnumCollection());
   }
 
   public get bestFriend() {
@@ -47,11 +53,15 @@ export class PersonModelService extends EntityTypeService<PersonModel> {
   }
 
   constructor(client: ODataClient, path: string) {
-    super(client, path, qPerson);
+    super(client, path, new QPerson());
   }
 }
 
-export class PersonModelCollectionService extends EntitySetService<PersonModel, string | { UserName: string }> {
+export class PersonModelCollectionService extends EntitySetService<
+  PersonModel,
+  QPerson,
+  string | { UserName: string }
+> {
   private keySpec = [{ isLiteral: false, name: "userName", odataName: "UserName" }];
 
   constructor(client: ODataClient, path: string) {

@@ -1,7 +1,7 @@
-import { qStringCollection, StringCollection, qEnumCollection, EnumCollection } from "@odata2ts/odata-query-objects";
+import { QStringCollection, StringCollection, QEnumCollection, EnumCollection } from "@odata2ts/odata-query-objects";
 import { CollectionService } from "../src";
 import { MockODataClient } from "./mock/MockODataClient";
-import { Feature, PersonModel } from "./fixture/PersonModelService";
+import { Feature } from "./fixture/PersonModelService";
 
 describe("CollectionService Test", () => {
   const odataClient = new MockODataClient();
@@ -9,8 +9,8 @@ describe("CollectionService Test", () => {
   const STRING_URL = `${BASE_URL}/Name`;
   const ENUM_URL = `${BASE_URL}/Feature`;
 
-  let stringService: CollectionService<StringCollection>;
-  let enumService: CollectionService<EnumCollection<Feature>>;
+  let stringService: CollectionService<StringCollection, QStringCollection>;
+  let enumService: CollectionService<EnumCollection<Feature>, QEnumCollection>;
 
   const getParams = (params: { [key: string]: string }) => {
     const ps = Object.entries(params).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
@@ -18,8 +18,8 @@ describe("CollectionService Test", () => {
   };
 
   beforeEach(() => {
-    stringService = new CollectionService(odataClient, STRING_URL, qStringCollection);
-    enumService = new CollectionService(odataClient, ENUM_URL, qEnumCollection);
+    stringService = new CollectionService(odataClient, STRING_URL, new QStringCollection());
+    enumService = new CollectionService(odataClient, ENUM_URL, new QEnumCollection());
   });
 
   test("collection: query", async () => {
@@ -34,16 +34,12 @@ describe("CollectionService Test", () => {
     expect(odataClient.lastOperation).toBe("GET");
   });
 
-  test("collection: skip, top, count & but no select, expand", async () => {
+  test("collection: skip, top & count, but no select, expand", async () => {
     const params = getParams({ $skip: "1", $top: "2", $count: "true" });
     const expectedString = STRING_URL + params;
     const expectedEnum = ENUM_URL + params;
 
     await stringService.query((queryBuilder) => {
-      expect(queryBuilder.select).toBeUndefined;
-      expect(queryBuilder.expand).toBeUndefined;
-      expect(queryBuilder.expanding).toBeUndefined;
-
       queryBuilder.skip(1).top(2).count(true);
     });
 
@@ -52,10 +48,6 @@ describe("CollectionService Test", () => {
     expect(odataClient.lastOperation).toBe("GET");
 
     await enumService.query((queryBuilder) => {
-      expect(queryBuilder.select).toBeUndefined;
-      expect(queryBuilder.expand).toBeUndefined;
-      expect(queryBuilder.expanding).toBeUndefined;
-
       queryBuilder.skip(1).top(2).count(true);
     });
 
@@ -77,13 +69,6 @@ describe("CollectionService Test", () => {
   });
 
   test("collection: add", async () => {
-    const model: PersonModel = {
-      UserName: "tester",
-      Age: 14,
-      FavFeature: Feature.Feature1,
-      Features: [Feature.Feature1],
-      Friends: [],
-    };
     await stringService.add("test");
 
     expect(odataClient.lastUrl).toBe(STRING_URL);
@@ -99,7 +84,7 @@ describe("CollectionService Test", () => {
 
   test("collection: no patch", async () => {
     // @ts-expect-error
-    expect(stringService.patch).toBeUndefined;
+    expect(stringService.patch).toBeUndefined();
   });
 
   test("collection: update", async () => {

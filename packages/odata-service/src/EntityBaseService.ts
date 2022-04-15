@@ -1,11 +1,11 @@
-import { ODataClient, ODataModelResponse, ODataResponse } from "@odata2ts/odata-client-api";
-import { QEntityModel } from "@odata2ts/odata-query-objects";
+import { QueryObject } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilder } from "@odata2ts/odata-uri-builder";
+import { ODataClient } from "@odata2ts/odata-client-api";
 
-export abstract class EntityBaseService<EModel> {
-  constructor(protected client: ODataClient, protected path: string, protected qModel: QEntityModel<EModel, any>) {}
+export abstract class EntityBaseService<Q extends QueryObject> {
+  protected constructor(protected client: ODataClient, protected path: string, protected qModel: Q) {}
 
-  protected createBuilder(): ODataUriBuilder<EModel> {
+  protected createBuilder(): ODataUriBuilder<Q> {
     return ODataUriBuilder.create(this.path, this.qModel);
   }
 
@@ -13,11 +13,11 @@ export abstract class EntityBaseService<EModel> {
     return this.path;
   }
 
-  public getQOjbect() {
+  public getQObject() {
     return this.qModel;
   }
 
-  protected getQueryUrl(queryFn?: (builder: ODataUriBuilder<EModel>, qObject: QEntityModel<EModel>) => void): string {
+  protected getQueryUrl(queryFn?: (builder: ODataUriBuilder<Q>, qObject: Q) => void): string {
     let url = this.path;
 
     if (queryFn) {
