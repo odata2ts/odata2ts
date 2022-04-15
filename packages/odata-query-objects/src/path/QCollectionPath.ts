@@ -15,8 +15,8 @@ export class QCollectionPath<CollectionType> implements QPathModel {
     return this.path;
   }
 
-  public getEntity(): CollectionType {
-    return new (this.qEntityFn())(this.path);
+  public getEntity(withPrefix: boolean = false): CollectionType {
+    return new (this.qEntityFn())(withPrefix ? this.path : undefined);
   }
 
   private lambdaFunction(operationName: string, fn: (qObject: CollectionType) => QFilterExpression, prefix: string) {

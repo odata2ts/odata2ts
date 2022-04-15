@@ -9,7 +9,8 @@ describe("QEntityCollectionPath test", () => {
   test("smoke test", () => {
     const result = new QEntityCollectionPath("test", () => QSimpleEntity);
     expect(result.getPath()).toBe("test");
-    expect(JSON.stringify(result.getEntity())).toEqual(JSON.stringify(new QSimpleEntity("test")));
+    expect(JSON.stringify(result.getEntity())).toEqual(JSON.stringify(new QSimpleEntity()));
+    expect(JSON.stringify(result.getEntity(true))).toEqual(JSON.stringify(new QSimpleEntity("test")));
   });
 
   test("fails with null, undefined, empty string", () => {

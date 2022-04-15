@@ -10,7 +10,8 @@ describe("QCollectionPath test", () => {
   test("smoke test", () => {
     const result = createToTest();
     expect(result.getPath()).toBe("test");
-    expect(result.getEntity()).toStrictEqual(new QStringCollection("test"));
+    expect(result.getEntity()).toStrictEqual(new QStringCollection());
+    expect(result.getEntity(true)).toStrictEqual(new QStringCollection("test"));
   });
 
   test("fails with null, undefined, empty string", () => {

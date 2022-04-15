@@ -14,11 +14,11 @@ export class QEntityPath<Type> implements QPathModel {
     return this.path;
   }
 
-  public getEntity(): Type {
-    return new (this.qEntityFn())(this.path);
+  public getEntity(withPrefix: boolean = false): Type {
+    return new (this.qEntityFn())(withPrefix ? this.path : undefined);
   }
 
   public get props(): Type {
-    return this.getEntity();
+    return new (this.qEntityFn())(this.path);
   }
 }

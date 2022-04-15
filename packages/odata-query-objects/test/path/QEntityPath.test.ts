@@ -5,7 +5,8 @@ describe("QEntityPath test", () => {
   test("smoke test", () => {
     const result = new QEntityPath("test", () => QSimpleEntity);
     expect(result.getPath()).toBe("test");
-    expect(JSON.stringify(result.getEntity())).toEqual(JSON.stringify(new QSimpleEntity("test")));
+    expect(JSON.stringify(result.getEntity())).toEqual(JSON.stringify(new QSimpleEntity()));
+    expect(JSON.stringify(result.getEntity(true))).toEqual(JSON.stringify(new QSimpleEntity("test")));
   });
 
   test("fails with null, undefined, empty string", () => {
@@ -35,7 +36,7 @@ describe("QEntityPath test", () => {
     expect(test.props.name.contains("hi").toString()).toBe("contains(test/name,'hi')");
     expect(test.props.name.asc().toString()).toBe("test/name asc");
 
-    expect(test.getEntity().id.eq(1).toString()).toBe("test/id eq 1");
-    expect(test.getEntity().name.eq("test").toString()).toBe("test/name eq 'test'");
+    expect(test.getEntity().id.eq(1).toString()).toBe("id eq 1");
+    expect(test.getEntity(true).id.eq(1).toString()).toBe("test/id eq 1");
   });
 });

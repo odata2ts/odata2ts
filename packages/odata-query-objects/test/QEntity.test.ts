@@ -17,22 +17,29 @@ describe("QEntity tests", () => {
 
   test("entity path", () => {
     const xyEntity = qComplex.xy.getEntity();
+    const xyEntity2 = qComplex.xy.getEntity(true);
 
     const result = xyEntity.name.startsWith("Hi").toString();
-    expect(result).toBe("startswith(xy/name,'Hi')");
+    const result2 = xyEntity2.name.startsWith("Hi").toString();
+    expect(result).toBe("startswith(name,'Hi')");
+    expect(result2).toBe("startswith(xy/name,'Hi')");
   });
 
   test("entity collection path", () => {
     const xxEntity = qComplex.xx.getEntity();
+    const xxEntity2 = qComplex.xx.getEntity(true);
 
     const result = xxEntity.name.startsWith("Hi").toString();
-    expect(result).toBe("startswith(xx/name,'Hi')");
+    const result2 = xxEntity2.name.startsWith("Hi").toString();
+    expect(result).toBe("startswith(name,'Hi')");
+    expect(result2).toBe("startswith(xx/name,'Hi')");
   });
 
   test("collection path", () => {
     const pc = qComplex.primitiveCollection;
 
-    expect(pc.getEntity()).toStrictEqual(new QStringCollection("PrimitiveCollection"));
+    expect(pc.getEntity()).toStrictEqual(new QStringCollection());
+    expect(pc.getEntity(true)).toStrictEqual(new QStringCollection("PrimitiveCollection"));
     expect(pc.getPath()).toBe("PrimitiveCollection");
   });
 });
