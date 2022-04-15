@@ -9,6 +9,7 @@ import { QNumberPath } from "./QNumberPath";
 import { QStringPath } from "./QStringPath";
 import { QBinaryPath } from "./QBinaryPath";
 import { QGuidPath } from "./QGuidPath";
+import { QEntityCollectionPath } from "./QEntityCollectionPath";
 
 export interface QPathModel {
   getPath(): string;
@@ -25,4 +26,6 @@ export type QPrimitivePath =
   | QGuidPath
   | QEnumPath;
 
-export type QPath = QEntityPath<any> | QCollectionPath<any> | QPrimitivePath;
+export type QComplexPath = QEntityPath<any> | QEntityCollectionPath<any> | QCollectionPath<any>;
+
+export type QPath = QPrimitivePath | QComplexPath;
