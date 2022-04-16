@@ -55,51 +55,60 @@ export class QStringCollection extends QPrimitiveCollection<QStringPath> {
     return new QStringPath(path);
   }
 }
+export const qStringCollection = new QStringCollection();
 
 export class QNumberCollection extends QPrimitiveCollection<QNumberPath> {
   createQPathType(path: string) {
     return new QNumberPath(path);
   }
 }
+export const qNumberCollection = new QNumberCollection();
 
 export class QBooleanCollection extends QPrimitiveCollection<QBooleanPath> {
   createQPathType(path: string) {
     return new QBooleanPath(path);
   }
 }
+export const qBooleanCollection = new QBooleanCollection();
 
 export class QGuidCollection extends QPrimitiveCollection<QGuidPath> {
   createQPathType(path: string) {
     return new QGuidPath(path);
   }
 }
+export const qGuidCollection = new QGuidCollection();
 
 export class QBinaryCollection extends QPrimitiveCollection<QBinaryPath> {
   createQPathType(path: string) {
     return new QBinaryPath(path);
   }
 }
+export const qBinaryCollection = new QBinaryCollection();
 
 export class QDateTimeOffsetCollection extends QPrimitiveCollection<QDateTimeOffsetPath> {
   createQPathType(path: string) {
     return new QDateTimeOffsetPath(path);
   }
 }
+export const qDateTimeOffsetCollection = new QDateTimeOffsetCollection();
 
 export class QTimeOfDayCollection extends QPrimitiveCollection<QTimeOfDayPath> {
   createQPathType(path: string) {
     return new QTimeOfDayPath(path);
   }
 }
+export const qTimeOfDayCollection = new QTimeOfDayCollection();
 
 export class QDateCollection extends QPrimitiveCollection<QDatePath> {
   createQPathType(path: string) {
     return new QDatePath(path);
   }
 }
+export const qDateCollection = new QDateCollection();
 
 export class QEnumCollection extends QPrimitiveCollection<QEnumPath> {
   createQPathType(path: string) {
     return new QEnumPath(path);
   }
 }
+export const qEnumCollection = new QEnumCollection();

@@ -2,10 +2,10 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
 import { EntityTypeService, EntitySetService, compileId } from "@odata2ts/odata-service";
 import { Book } from "../TesterModel";
-import { qBook } from "../QTester";
+import { QBook, qBook } from "../QTester";
 import { AuthorService, AuthorCollectionService } from "./AuthorService";
 
-export class BookService extends EntityTypeService<Book> {
+export class BookService extends EntityTypeService<Book, QBook> {
   private _author?: AuthorService;
   private _relatedAuthors?: AuthorCollectionService;
 
@@ -30,7 +30,7 @@ export class BookService extends EntityTypeService<Book> {
   }
 }
 
-export class BookCollectionService extends EntitySetService<Book, string | { ID: string }> {
+export class BookCollectionService extends EntitySetService<Book, QBook, string | { ID: string }> {
   private keySpec = [{ isLiteral: true, name: "id", odataName: "ID" }];
 
   constructor(client: ODataClient, path: string) {

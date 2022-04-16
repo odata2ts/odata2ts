@@ -2,9 +2,9 @@
 import { ODataClient, ODataResponse, ODataModelResponse, ODataCollectionResponse } from "@odata2ts/odata-client-api";
 import { EntityTypeService, compileFunctionPath, EntitySetService, compileId } from "@odata2ts/odata-service";
 import { Book } from "../TesterModel";
-import { qBook } from "../QTester";
+import { QBook, qBook } from "../QTester";
 
-export class BookService extends EntityTypeService<Book> {
+export class BookService extends EntityTypeService<Book, QBook> {
   constructor(client: ODataClient, path: string) {
     super(client, path, qBook);
   }
@@ -26,7 +26,7 @@ export class BookService extends EntityTypeService<Book> {
   }
 }
 
-export class BookCollectionService extends EntitySetService<Book, string | { id: string }> {
+export class BookCollectionService extends EntitySetService<Book, QBook, string | { id: string }> {
   private keySpec = [{ isLiteral: false, name: "id", odataName: "id" }];
 
   constructor(client: ODataClient, path: string) {
