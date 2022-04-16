@@ -5,7 +5,7 @@ import { pathExistsSync, removeSync } from "fs-extra";
 // This test suite needs a longer timeout, since node process is started
 jest.setTimeout(10 * 1000); // 10 secs
 
-describe("Run-Cli Test", () => {
+describe.skip("Run-Cli Test", () => {
   test("Smoke Test", async () => {
     const result = await runCli();
 
