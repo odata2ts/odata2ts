@@ -1,4 +1,4 @@
-import { QDateTimeOffsetPath } from "./../../../src/path/date-time-v4/QDateTimeOffsetPath";
+import { QDateTimeOffsetPath } from "../../../src";
 
 describe("QDateTimeOffsetPath test", () => {
   let toTest: QDateTimeOffsetPath;
@@ -10,15 +10,14 @@ describe("QDateTimeOffsetPath test", () => {
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("createdAt");
-    expect(toTest.withPath("new").getPath()).toBe("new");
   });
 
   test("fails with null, undefined, empty string", () => {
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QDateTimeOffsetPath(null)).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QDateTimeOffsetPath()).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QDateTimeOffsetPath(undefined)).toThrow();
     expect(() => new QDateTimeOffsetPath("")).toThrow();
     expect(() => new QDateTimeOffsetPath(" ")).toThrow();

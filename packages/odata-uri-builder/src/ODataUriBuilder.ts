@@ -1,10 +1,9 @@
-import { QEntityModel } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderBase, ODataUriBuilderConfig } from "./internal";
 
 /**
  * Create an OData URI string in a typesafe way by facilitating generated query objects.
  */
-export class ODataUriBuilder<T> extends ODataUriBuilderBase<T> {
+export class ODataUriBuilder<Q> extends ODataUriBuilderBase<Q> {
   /**
    * Create an UriBuilder by passing in a query object, which already contains the base path
    * to the OData service & the given entity.
@@ -21,13 +20,13 @@ export class ODataUriBuilder<T> extends ODataUriBuilderBase<T> {
    * @param config optionally pass a configuration
    * @returns a UriBuilder
    */
-  static create<T>(path: string, qEntity: QEntityModel<T>, config?: ODataUriBuilderConfig) {
-    return new ODataUriBuilder<T>(path, qEntity, config);
+  static create<Q>(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
+    return new ODataUriBuilder<Q>(path, qEntity, config);
   }
 
-  protected readonly entity: QEntityModel<T>;
+  protected readonly entity: Q;
 
-  private constructor(path: string, qEntity: QEntityModel<T>, config?: ODataUriBuilderConfig) {
+  private constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
     super(path, qEntity, config);
     this.entity = qEntity;
   }

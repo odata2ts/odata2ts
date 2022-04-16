@@ -1,5 +1,5 @@
 import { TestODataClient } from "../TestODataClient";
-import { TrippinService } from "../../build/TrippinService";
+import { TrippinService } from "../../build/trippin/TrippinService";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
@@ -21,7 +21,7 @@ describe("Integration Testing of Service Generation", () => {
   test("entityType query", async () => {
     const result = await testService.people.get("russellwhyte").query();
     expect(result.status).toBe(200);
-    expect(result.data).toBeDefined;
+    expect(result.data).toBeDefined();
     expect(result.data.FirstName).toBe("Russell");
     expect(result.data.LastName).toBe("Whyte");
   });
@@ -29,7 +29,7 @@ describe("Integration Testing of Service Generation", () => {
   test("entitySet query", async () => {
     const result = await testService.people.query();
     expect(result.status).toBe(200);
-    expect(result.data).toBeDefined;
+    expect(result.data).toBeDefined();
     expect(result.data.value.length).toBe(20);
   });
 
@@ -37,7 +37,7 @@ describe("Integration Testing of Service Generation", () => {
     const result = await testService.people.get("russellwhyte").addressInfo.query();
 
     expect(result.status).toBe(200);
-    expect(result.data).toBeDefined;
+    expect(result.data).toBeDefined();
     expect(result.data.value.length).toBe(1);
     expect(result.data.value[0].Address).toBe("187 Suffolk Ln.");
   });

@@ -2,15 +2,15 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
 import { EntityTypeService, EntitySetService, compileId } from "@odata2ts/odata-service";
 import { TestEntity } from "../TesterModel";
-import { qTestEntity } from "../QTester";
+import { QTestEntity, qTestEntity } from "../QTester";
 
-export class TestEntityService extends EntityTypeService<TestEntity> {
+export class TestEntityService extends EntityTypeService<TestEntity, QTestEntity> {
   constructor(client: ODataClient, path: string) {
     super(client, path, qTestEntity);
   }
 }
 
-export class TestEntityCollectionService extends EntitySetService<TestEntity, string | { id: string }> {
+export class TestEntityCollectionService extends EntitySetService<TestEntity, QTestEntity, string | { id: string }> {
   private keySpec = [{ isLiteral: false, name: "id", odataName: "id" }];
 
   constructor(client: ODataClient, path: string) {

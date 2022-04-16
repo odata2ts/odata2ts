@@ -1,13 +1,24 @@
-// @ts-nocheck
-import { QEntityModel, QStringPath, QEntityPath, QEntityCollectionPath } from "@odata2ts/odata-query-objects";
-import type { Author, Book } from "./TesterModel";
+import { QueryObject, QStringPath, QEntityPath, QEntityCollectionPath } from "@odata2ts/odata-query-objects";
 
-export const qAuthor: QEntityModel<Author> = {
-  id: new QStringPath("id"),
-  name: new QStringPath("name"),
-};
-export const qBook: QEntityModel<Book> = {
-  id: new QStringPath("id"),
-  author: new QEntityPath("author", () => qAuthor),
-  relatedAuthors: new QEntityCollectionPath("relatedAuthors", () => qAuthor),
-};
+export class QAuthor extends QueryObject {
+  public readonly id = new QStringPath(this.withPrefix("id"));
+  public readonly name = new QStringPath(this.withPrefix("name"));
+
+  constructor(path?: string) {
+    super(path);
+  }
+}
+
+export const qAuthor = new QAuthor();
+
+export class QBook extends QueryObject {
+  public readonly id = new QStringPath(this.withPrefix("id"));
+  public readonly author = new QEntityPath(this.withPrefix("author"), () => QAuthor);
+  public readonly relatedAuthors = new QEntityCollectionPath(this.withPrefix("relatedAuthors"), () => QAuthor);
+
+  constructor(path?: string) {
+    super(path);
+  }
+}
+
+export const qBook = new QBook();

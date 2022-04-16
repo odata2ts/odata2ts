@@ -1,9 +1,13 @@
-// @ts-nocheck
-import { QEntityModel, QStringPath, QEnumPath, QCollectionPath, qEnumCollection } from "@odata2ts/odata-query-objects";
-import type { Choice, Book } from "./TesterModel";
+import { QueryObject, QStringPath, QEnumPath, QCollectionPath, QEnumCollection } from "@odata2ts/odata-query-objects";
 
-export const qBook: QEntityModel<Book, Choice> = {
-  id: new QStringPath("id"),
-  myChoice: new QEnumPath("myChoice"),
-  otherChoices: new QCollectionPath("otherChoices", () => qEnumCollection),
-};
+export class QBook extends QueryObject {
+  public readonly id = new QStringPath(this.withPrefix("id"));
+  public readonly myChoice = new QEnumPath(this.withPrefix("myChoice"));
+  public readonly otherChoices = new QCollectionPath(this.withPrefix("otherChoices"), () => QEnumCollection);
+
+  constructor(path?: string) {
+    super(path);
+  }
+}
+
+export const qBook = new QBook();

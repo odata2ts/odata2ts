@@ -1,7 +1,11 @@
-// @ts-nocheck
-import { QEntityModel, QStringPath } from "@odata2ts/odata-query-objects";
-import type { Book } from "./TesterModel";
+import { QueryObject, QStringPath } from "@odata2ts/odata-query-objects";
 
-export const qBook: QEntityModel<Book> = {
-  id: new QStringPath("id"),
-};
+export class QBook extends QueryObject {
+  public readonly id = new QStringPath(this.withPrefix("id"));
+
+  constructor(path?: string) {
+    super(path);
+  }
+}
+
+export const qBook = new QBook();

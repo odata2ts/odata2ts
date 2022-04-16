@@ -1,16 +1,34 @@
-// @ts-nocheck
-import { QEntityModel, QStringPath, QBooleanPath } from "@odata2ts/odata-query-objects";
-import type { GrandParent, Parent, Child } from "./TesterModel";
+import { QueryObject, QStringPath, QBooleanPath } from "@odata2ts/odata-query-objects";
 
-export const qGrandParent: QEntityModel<GrandParent> = {
-  id: new QStringPath("id"),
-};
-export const qParent: QEntityModel<Parent> = {
-  id: new QStringPath("id"),
-  parentalAdvice: new QBooleanPath("parentalAdvice"),
-};
-export const qChild: QEntityModel<Child> = {
-  id: new QStringPath("id"),
-  parentalAdvice: new QBooleanPath("parentalAdvice"),
-  ch1ld1shF4n: new QStringPath("Ch1ld1shF4n"),
-};
+export class QGrandParent extends QueryObject {
+  public readonly id = new QStringPath(this.withPrefix("id"));
+
+  constructor(path?: string) {
+    super(path);
+  }
+}
+
+export const qGrandParent = new QGrandParent();
+
+export class QParent extends QueryObject {
+  public readonly id = new QStringPath(this.withPrefix("id"));
+  public readonly parentalAdvice = new QBooleanPath(this.withPrefix("parentalAdvice"));
+
+  constructor(path?: string) {
+    super(path);
+  }
+}
+
+export const qParent = new QParent();
+
+export class QChild extends QueryObject {
+  public readonly id = new QStringPath(this.withPrefix("id"));
+  public readonly parentalAdvice = new QBooleanPath(this.withPrefix("parentalAdvice"));
+  public readonly ch1ld1shF4n = new QStringPath(this.withPrefix("Ch1ld1shF4n"));
+
+  constructor(path?: string) {
+    super(path);
+  }
+}
+
+export const qChild = new QChild();

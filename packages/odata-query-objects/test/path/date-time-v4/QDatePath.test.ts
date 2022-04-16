@@ -1,4 +1,4 @@
-import { QDatePath } from "./../../../src/path/date-time-v4/QDatePath";
+import { QDatePath } from "../../../src";
 
 describe("QDatePath test", () => {
   let toTest: QDatePath;
@@ -10,15 +10,14 @@ describe("QDatePath test", () => {
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("startDate");
-    expect(toTest.withPath("new").getPath()).toBe("new");
   });
 
   test("fails with null, undefined, empty string", () => {
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QDatePath(null)).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QDatePath()).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QDatePath(undefined)).toThrow();
     expect(() => new QDatePath("")).toThrow();
     expect(() => new QDatePath(" ")).toThrow();

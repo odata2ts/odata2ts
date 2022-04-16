@@ -1,10 +1,4 @@
-import {
-  compileId,
-  compileFunctionPath,
-  compileLiteralValue,
-  compileQuotedValue,
-  compileActionPath,
-} from "../src/helper/UrlHelper";
+import { compileId, compileFunctionPath, compileLiteralValue, compileQuotedValue, compileActionPath } from "../src";
 
 describe("UrlHelper Test", () => {
   const BASE_PATH = "/base";

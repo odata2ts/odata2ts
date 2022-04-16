@@ -1,12 +1,23 @@
-// @ts-nocheck
-import { QEntityModel, QStringPath, QEntityPath, QEntityCollectionPath } from "@odata2ts/odata-query-objects";
-import type { Book, PublishingMethod } from "./TesterModel";
+import { QueryObject, QStringPath, QEntityPath, QEntityCollectionPath } from "@odata2ts/odata-query-objects";
 
-export const qBook: QEntityModel<Book> = {
-  id: new QStringPath("id"),
-  method: new QEntityPath("method", () => qPublishingMethod),
-  altMethods: new QEntityCollectionPath("altMethods", () => qPublishingMethod),
-};
-export const qPublishingMethod: QEntityModel<PublishingMethod> = {
-  name: new QStringPath("name"),
-};
+export class QBook extends QueryObject {
+  public readonly id = new QStringPath(this.withPrefix("id"));
+  public readonly method = new QEntityPath(this.withPrefix("method"), () => QPublishingMethod);
+  public readonly altMethods = new QEntityCollectionPath(this.withPrefix("altMethods"), () => QPublishingMethod);
+
+  constructor(path?: string) {
+    super(path);
+  }
+}
+
+export const qBook = new QBook();
+
+export class QPublishingMethod extends QueryObject {
+  public readonly name = new QStringPath(this.withPrefix("name"));
+
+  constructor(path?: string) {
+    super(path);
+  }
+}
+
+export const qPublishingMethod = new QPublishingMethod();

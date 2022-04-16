@@ -1,5 +1,5 @@
 import { MockODataClient } from "./mock/MockODataClient";
-import { Feature, PersonModel, PersonModelService } from "./fixture/PersonModelService";
+import { PersonModel, PersonModelService } from "./fixture/PersonModelService";
 
 describe("EntityTypeService Test", () => {
   const odataClient = new MockODataClient();

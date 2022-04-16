@@ -1,7 +1,7 @@
-import { LocationModel } from "../../build/TrippinModel";
+import { LocationModel } from "../../build/trippin/TrippinModel";
 import { MockODataClient } from "../MockODataClient";
-import { qPerson, qLocation } from "../../build/QTrippin";
-import { TrippinService } from "../../build/TrippinService";
+import { qPerson, qLocation } from "../../build/trippin/QTrippin";
+import { TrippinService } from "../../build/trippin/TrippinService";
 
 describe("Testing Generation of TrippinService", () => {
   const BASE_URL = "/test";
@@ -15,7 +15,7 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("unbound function with params", async () => {
-    const result = await testService.getNearestAirport({ lat: 123, lon: 345 });
+    await testService.getNearestAirport({ lat: 123, lon: 345 });
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/GetNearestAirport(lat=123,lon=345)`);
   });
 
@@ -29,7 +29,7 @@ describe("Testing Generation of TrippinService", () => {
     const expected = `${BASE_URL}/People`;
 
     expect(testService.people.getPath()).toBe(expected);
-    expect(testService.people.getQOjbect()).toBe(qPerson);
+    expect(JSON.stringify(testService.people.getQObject())).toEqual(JSON.stringify(qPerson));
     expect(testService.people.getKeySpec()).toEqual([{ isLiteral: false, name: "userName", odataName: "UserName" }]);
   });
 
@@ -38,7 +38,7 @@ describe("Testing Generation of TrippinService", () => {
     const expected = `${BASE_URL}/People('${testId}')`;
 
     expect(testService.people.get(testId).getPath()).toBe(expected);
-    expect(testService.people.get(testId).getQOjbect()).toBe(qPerson);
+    expect(JSON.stringify(testService.people.get(testId).getQObject())).toEqual(JSON.stringify(qPerson));
   });
 
   test("entitySet: get with complex id", async () => {
@@ -46,14 +46,13 @@ describe("Testing Generation of TrippinService", () => {
     const expected = `${BASE_URL}/People(UserName='tester')`;
 
     expect(testService.people.get(testId).getPath()).toBe(expected);
-    expect(testService.people.get(testId).getQOjbect()).toBe(qPerson);
   });
 
   test("complex type", async () => {
     const complex = testService.people.get("tester").homeAddress;
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
-    expect(complex.getQOjbect()).toBe(qLocation);
+    expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
   });
 
   test("complex type: query", async () => {
@@ -68,7 +67,7 @@ describe("Testing Generation of TrippinService", () => {
     const complex = testService.people.get("tester").addressInfo;
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
-    expect(complex.getQOjbect()).toBe(qLocation);
+    expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
   });
 
   test("complex collection: query", async () => {
@@ -115,6 +114,6 @@ describe("Testing Generation of TrippinService", () => {
     const result = testService.me;
 
     expect(result.getPath()).toBe(`${BASE_URL}/Me`);
-    expect(result.getQOjbect()).toBe(qPerson);
+    expect(JSON.stringify(result.getQObject())).toEqual(JSON.stringify(qPerson));
   });
 });

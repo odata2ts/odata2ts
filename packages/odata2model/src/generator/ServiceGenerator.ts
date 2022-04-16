@@ -128,13 +128,13 @@ class ServiceGenerator {
       importContainer.addFromService(entityServiceType);
       importContainer.addFromClientApi("ODataClient");
       importContainer.addGeneratedModel(model.name);
-      importContainer.addGeneratedQObject(model.qName);
+      importContainer.addGeneratedQObject(upperCaseFirst(model.qName), model.qName);
 
       // generate EntityTypeService
       serviceFile.addClass({
         isExported: true,
         name: serviceName,
-        extends: entityServiceType + `<${model.name}>`,
+        extends: entityServiceType + `<${model.name}, ${upperCaseFirst(model.qName)}>`,
         ctors: [
           {
             parameters: [
@@ -158,8 +158,8 @@ class ServiceGenerator {
             if (isCollection) {
               importContainer.addFromService(collectionServiceType);
               importContainer.addGeneratedModel(modelType.name);
-              importContainer.addGeneratedQObject(modelType.qName);
-              propModelType = `${collectionServiceType}<${modelType.name}>`;
+              importContainer.addGeneratedQObject(upperCaseFirst(modelType.qName), modelType.qName);
+              propModelType = `${collectionServiceType}<${modelType.name}, ${upperCaseFirst(modelType.qName)}>`;
             }
             // don't include imports for this type
             else if (serviceName !== key) {
@@ -178,17 +178,20 @@ class ServiceGenerator {
             const type = isEnum
               ? `EnumCollection<${prop.type}>`
               : `${upperCaseFirst(prop.type.replace(/String$/, ""))}Collection`;
-            const collectionType = `${collectionServiceType}<${type}>`;
+            const qType = isEnum ? "QEnumCollection" : `Q${type}`;
+            const collectionType = `${collectionServiceType}<${type}, ${qType}>`;
 
             if (!prop.qObject) {
               throw Error("Illegal State: [qObject] must be provided for Collection types!");
             }
 
             importContainer.addFromService(collectionServiceType);
-            importContainer.addFromQObject(prop.qObject);
+            importContainer.addFromQObject(upperCaseFirst(prop.qObject), prop.qObject);
             if (isEnum) {
               importContainer.addGeneratedModel(prop.type);
               importContainer.addFromQObject("EnumCollection");
+            } else {
+              importContainer.addFromQObject(type);
             }
 
             return {
@@ -204,7 +207,7 @@ class ServiceGenerator {
             const modelType = this.dataModel.getModel(prop.type);
             const isCollection = prop.isCollection && modelType.modelType === ModelTypes.ComplexType;
             const type = isCollection
-              ? `${collectionServiceType}<${modelType.name}>`
+              ? `${collectionServiceType}<${modelType.name}, ${upperCaseFirst(modelType.qName)}>`
               : this.getServiceNameForProp(prop);
 
             return {
@@ -251,7 +254,7 @@ class ServiceGenerator {
         serviceFile.addClass({
           isExported: true,
           name: this.getCollectionServiceName(model.name),
-          extends: entitySetServiceType + `<${model.name}, ${keyType}>`,
+          extends: entitySetServiceType + `<${model.name}, ${upperCaseFirst(model.qName)}, ${keyType}>`,
           ctors: [
             {
               parameters: [

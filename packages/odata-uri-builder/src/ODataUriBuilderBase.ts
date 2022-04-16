@@ -1,11 +1,11 @@
 import {
   QCollectionPath,
+  QComplexPath,
   QEntityCollectionPath,
-  QEntityModel,
   QEntityPath,
   QFilterExpression,
   QOrderByExpression,
-  QPropContainer,
+  QPath,
 } from "@odata2ts/odata-query-objects";
 import { ExpandingODataUriBuilder } from "./internal";
 import { ODataOperators } from "./internal";
@@ -14,16 +14,28 @@ export interface ODataUriBuilderConfig {
   unencoded?: boolean;
 }
 
-type EntityExtractor<T> = T extends QEntityPath<infer E> ? E : T extends QEntityCollectionPath<infer E> ? E : never;
-type ExtractPropertyNamesOfType<T, S> = { [K in keyof T]: T[K] extends S ? K : never }[keyof T];
-type ExpandType<T> = ExtractPropertyNamesOfType<
-  QEntityModel<T>,
-  QEntityPath<any> | QEntityCollectionPath<any, any> | QCollectionPath<any>
+/**
+ * Extracts the wrapped entity from QEntityPath or QEntityCollectionPath
+ */
+type EntityExtractor<Q> = Q extends QEntityPath<infer E> ? E : Q extends QEntityCollectionPath<infer E> ? E : never;
+/**
+ * Extracts all keys from a property (Q*Path), but only for the given types
+ */
+type ExtractPropertyNamesOfType<QPath, QPathTypes> = {
+  [Key in keyof QPath]: QPath[Key] extends QPathTypes ? Key : never;
+}[keyof QPath];
+/**
+ * Retrieves all property names which are expandable,
+ * i.e. props of type QEntityPath, QEntityCollectionPath and QCollectionPath
+ */
+type ExpandType<QPath> = ExtractPropertyNamesOfType<
+  QPath,
+  QEntityPath<any> | QEntityCollectionPath<any> | QCollectionPath<any>
 >;
 
-export abstract class ODataUriBuilderBase<T> {
+export abstract class ODataUriBuilderBase<Q> {
   protected path: string;
-  protected entity: QEntityModel<T>;
+  protected entity: Q;
 
   protected unencoded: boolean;
   protected config?: ODataUriBuilderConfig;
@@ -36,7 +48,7 @@ export abstract class ODataUriBuilderBase<T> {
   protected filters: Array<QFilterExpression> = [];
   protected orderBys: Array<QOrderByExpression> = [];
 
-  protected constructor(path: string, qEntity: QEntityModel<T>, config?: ODataUriBuilderConfig) {
+  protected constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
     if (!qEntity || !path || !path.trim()) {
       throw Error("A valid collection name must be provided!");
     }
@@ -55,9 +67,15 @@ export abstract class ODataUriBuilderBase<T> {
    * @param props the property names to select
    * @returns this query builder
    */
-  public select(...props: Array<keyof QPropContainer<T, any> | null | undefined>) {
+  public select(...props: Array<keyof Q | null | undefined>) {
     if (props && props.length) {
-      this.selects.push(...props.filter((p) => !!p).map((p) => this.entity[p].getPath()));
+      this.selects.push(
+        ...props
+          .filter((p): p is keyof Q => !!p)
+          .map((p) => {
+            return (this.entity[p] as unknown as QPath).getPath();
+          })
+      );
     }
     return this;
   }
@@ -150,16 +168,12 @@ export abstract class ODataUriBuilderBase<T> {
    * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
    * @returns this query builder
    */
-  public expanding<Prop extends ExpandType<T>>(
+  public expanding<Prop extends ExpandType<Q>>(
     prop: Prop,
-    builderFn: (
-      builder: ExpandingODataUriBuilder<EntityExtractor<QEntityModel<T>[Prop]>>,
-      qObject: QEntityModel<EntityExtractor<QEntityModel<T>[Prop]>>
-    ) => void
+    builderFn: (builder: ExpandingODataUriBuilder<EntityExtractor<Q[Prop]>>, qObject: EntityExtractor<Q[Prop]>) => void
   ) {
-    const entityProp = this.entity[prop] as QEntityPath<any>;
+    const entityProp = this.entity[prop] as unknown as QComplexPath;
     const expander = ExpandingODataUriBuilder.create(entityProp.getPath(), entityProp.getEntity());
-    // @ts-ignore
     builderFn(expander, entityProp.getEntity());
 
     this.expands.push(expander);
@@ -175,10 +189,10 @@ export abstract class ODataUriBuilderBase<T> {
    * @param props the attributes to expand
    * @returns this query builder
    */
-  public expand<Prop extends ExpandType<T>>(...props: Array<Prop>) {
+  public expand<Prop extends ExpandType<Q>>(...props: Array<Prop>) {
     this.expands.push(
       ...props.map((p) => {
-        const prop = this.entity[p] as QEntityPath<any>;
+        const prop = this.entity[p] as unknown as QComplexPath;
         return ExpandingODataUriBuilder.create(prop.getPath(), prop.getEntity());
       })
     );

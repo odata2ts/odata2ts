@@ -1,6 +1,5 @@
-// @ts-nocheck
 import {
-  QEntityModel,
+  QueryObject,
   QGuidPath,
   QBooleanPath,
   QTimeOfDayPath,
@@ -10,22 +9,27 @@ import {
   QBinaryPath,
   QStringPath,
   QCollectionPath,
-  qStringCollection,
-  qNumberCollection,
-  qBooleanCollection,
+  QStringCollection,
+  QNumberCollection,
+  QBooleanCollection,
 } from "@odata2ts/odata-query-objects";
-import type { Book } from "./TesterModel";
 
-export const qBook: QEntityModel<Book> = {
-  id: new QGuidPath("id"),
-  requiredOption: new QBooleanPath("requiredOption"),
-  time: new QTimeOfDayPath("time"),
-  optionalDate: new QDatePath("optionalDate"),
-  dateTimeOffset: new QDateTimeOffsetPath("dateTimeOffset"),
-  testDecimal: new QNumberPath("TestDecimal"),
-  testBinary: new QBinaryPath("testBinary"),
-  testAny: new QStringPath("testAny"),
-  multipleStrings: new QCollectionPath("multipleStrings", () => qStringCollection),
-  multipleNumbers: new QCollectionPath("multipleNumbers", () => qNumberCollection),
-  multipleBooleans: new QCollectionPath("multipleBooleans", () => qBooleanCollection),
-};
+export class QBook extends QueryObject {
+  public readonly id = new QGuidPath(this.withPrefix("id"));
+  public readonly requiredOption = new QBooleanPath(this.withPrefix("requiredOption"));
+  public readonly time = new QTimeOfDayPath(this.withPrefix("time"));
+  public readonly optionalDate = new QDatePath(this.withPrefix("optionalDate"));
+  public readonly dateTimeOffset = new QDateTimeOffsetPath(this.withPrefix("dateTimeOffset"));
+  public readonly testDecimal = new QNumberPath(this.withPrefix("TestDecimal"));
+  public readonly testBinary = new QBinaryPath(this.withPrefix("testBinary"));
+  public readonly testAny = new QStringPath(this.withPrefix("testAny"));
+  public readonly multipleStrings = new QCollectionPath(this.withPrefix("multipleStrings"), () => QStringCollection);
+  public readonly multipleNumbers = new QCollectionPath(this.withPrefix("multipleNumbers"), () => QNumberCollection);
+  public readonly multipleBooleans = new QCollectionPath(this.withPrefix("multipleBooleans"), () => QBooleanCollection);
+
+  constructor(path?: string) {
+    super(path);
+  }
+}
+
+export const qBook = new QBook();

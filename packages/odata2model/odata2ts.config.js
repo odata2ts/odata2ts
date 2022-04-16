@@ -1,5 +1,5 @@
 module.exports = {
-  mode: "model",
+  mode: "all",
   debug: false,
   prettier: true,
   emitMode: "ts",

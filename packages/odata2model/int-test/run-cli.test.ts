@@ -5,7 +5,7 @@ import { pathExistsSync, removeSync } from "fs-extra";
 // This test suite needs a longer timeout, since node process is started
 jest.setTimeout(10 * 1000); // 10 secs
 
-describe("Run-Cli Test", () => {
+describe.skip("Run-Cli Test", () => {
   test("Smoke Test", async () => {
     const result = await runCli();
 
@@ -19,12 +19,12 @@ describe("Run-Cli Test", () => {
   test.skip("Simple", async () => {
     const result = await runCli(["-s", "./test/fixture/dummy.xml", "-o", "./test/fixture"]);
 
-    expect(result.stderr).toBeUndefined();
     expect(result.code).toBe(0);
+    expect(result.stderr).toBe("");
   });
 
   test("Fail without source", async () => {
-    const result = await runCli(["-o", "./test/fixture"]);
+    const result = await runCli(["-o", "./int-test/fixture"]);
 
     expect(result.stderr).toContain("-s");
     expect(result.stderr).toContain("--source");
@@ -34,7 +34,7 @@ describe("Run-Cli Test", () => {
   });
 
   test("Fail without output directory", async () => {
-    const result = await runCli(["-s", "./test/fixture/dummy.xml"]);
+    const result = await runCli(["-s", "./int-test/fixture/dummy.xml"]);
 
     expect(result.stderr).toContain("-o");
     expect(result.stderr).toContain("--output");
@@ -45,7 +45,7 @@ describe("Run-Cli Test", () => {
 
   test("Fail with missing source", async () => {
     const misleadingFilePath = "doesntExistFile.nef";
-    const result = await runCli(["-s", misleadingFilePath, "-o", "./test/fixture"]);
+    const result = await runCli(["-s", misleadingFilePath, "-o", "./int-test/fixture"]);
 
     expect(result.stderr).toContain(misleadingFilePath);
     expect(result.stderr).toContain("doesn't exist");
@@ -56,7 +56,7 @@ describe("Run-Cli Test", () => {
   test("Create output folder if it doesn't exist", async () => {
     const genDirBase = "./test/generated";
     const genDir = `${genDirBase}/xyz`;
-    const args = ["-s", "./test/fixture/dummy.xml", "-o", genDir];
+    const args = ["-s", "./int-test/fixture/dummy.xml", "-o", genDir];
     removeSync(genDirBase);
 
     await runCli(args);
@@ -77,7 +77,7 @@ interface CliResult {
 function runCli(args?: Array<string>): Promise<CliResult> {
   return new Promise((resolve) => {
     exec(
-      `npx ts-node --cwd-mode -T ${path.resolve("./src/run-cli.ts")} ${args?.join(" ")}`,
+      `yarn ts-node --cwd-mode -T ${path.resolve("./src/run-cli.ts")} ${args?.join(" ")}`,
       (error, stdout, stderr) => {
         resolve({
           code: error && error.code ? error.code : 0,

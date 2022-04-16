@@ -14,8 +14,8 @@ describe("EntitySetService Test", () => {
 
   test("entitySet: setup", async () => {
     expect(testService.getPath()).toBe(BASE_URL);
-    expect(testService.getQOjbect()).not.toBeNull();
-    expect(testService.getQOjbect()).toBe(qPerson);
+    expect(testService.getQObject()).not.toBeNull();
+    expect(testService.getQObject()).toBe(qPerson);
   });
 
   test("entitySet: query", async () => {

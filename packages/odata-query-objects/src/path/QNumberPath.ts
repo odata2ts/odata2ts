@@ -3,10 +3,6 @@ import { QLiteralPath } from "./base/QLiteralPath";
 import { QFilterExpression } from "../QFilterExpression";
 
 export class QNumberPath extends QLiteralPath<number | QNumberPath, StandardFilterOperators | NumberFilterOperators> {
-  public withPath(newPath: string): QNumberPath {
-    return new QNumberPath(newPath);
-  }
-
   private buildNoValueFunc(func: NumberFilterFunctions) {
     return `${func}(${this.getPath()})`;
   }

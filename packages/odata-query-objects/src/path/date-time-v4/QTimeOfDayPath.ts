@@ -6,10 +6,6 @@ export class QTimeOfDayPath extends DateTimeBasePath {
     super(path);
   }
 
-  public withPath(newPath: string): QTimeOfDayPath {
-    return new QTimeOfDayPath(newPath);
-  }
-
   hour = hourFn(this.path);
   minute = minuteFn(this.path);
   second = secondFn(this.path);

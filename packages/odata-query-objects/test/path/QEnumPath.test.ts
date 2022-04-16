@@ -14,15 +14,14 @@ describe("QEnumPath test", () => {
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("feature");
-    expect(toTest.withPath("new").getPath()).toBe("new");
   });
 
   test("fails with null, undefined, empty string", () => {
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QEnumPath(null)).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QEnumPath()).toThrow();
-    // @ts-ignore
+    // @ts-expect-error
     expect(() => new QEnumPath(undefined)).toThrow();
     expect(() => new QEnumPath("")).toThrow();
     expect(() => new QEnumPath(" ")).toThrow();

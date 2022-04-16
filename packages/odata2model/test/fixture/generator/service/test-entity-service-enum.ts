@@ -1,12 +1,12 @@
 // @ts-nocheck
-import { qEnumCollection, EnumCollection } from "@odata2ts/odata-query-objects";
+import { QEnumCollection, qEnumCollection, EnumCollection } from "@odata2ts/odata-query-objects";
 import { ODataClient } from "@odata2ts/odata-client-api";
 import { EntityTypeService, CollectionService, EntitySetService, compileId } from "@odata2ts/odata-service";
 import { Book, Choice } from "../TesterModel";
-import { qBook } from "../QTester";
+import { QBook, qBook } from "../QTester";
 
-export class BookService extends EntityTypeService<Book> {
-  private _altChoices?: CollectionService<EnumCollection<Choice>>;
+export class BookService extends EntityTypeService<Book, QBook> {
+  private _altChoices?: CollectionService<EnumCollection<Choice>, QEnumCollection>;
 
   constructor(client: ODataClient, path: string) {
     super(client, path, qBook);
@@ -21,7 +21,7 @@ export class BookService extends EntityTypeService<Book> {
   }
 }
 
-export class BookCollectionService extends EntitySetService<Book, string | { id: string }> {
+export class BookCollectionService extends EntitySetService<Book, QBook, string | { id: string }> {
   private keySpec = [{ isLiteral: false, name: "id", odataName: "id" }];
 
   constructor(client: ODataClient, path: string) {
