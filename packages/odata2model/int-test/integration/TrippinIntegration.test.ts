@@ -1,5 +1,5 @@
 import { TestODataClient } from "../TestODataClient";
-import { TrippinService } from "../../build/trippin/TrippinService";
+import { TrippinService } from "../../build/v4/trippin/TrippinService";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";

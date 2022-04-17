@@ -5,6 +5,9 @@ import { pathExistsSync, removeSync } from "fs-extra";
 // This test suite needs a longer timeout, since node process is started
 jest.setTimeout(10 * 1000); // 10 secs
 
+const OUTPUT_PATH = "./int-test/generated";
+const DUMMY_SOURCE = "./int-test/fixture/v4/dummy.xml";
+
 describe.skip("Run-Cli Test", () => {
   test("Smoke Test", async () => {
     const result = await runCli();
@@ -17,14 +20,14 @@ describe.skip("Run-Cli Test", () => {
   //  a) we need a real, but minimal OData spec here
   //  b) specific response code if file isn't valid
   test.skip("Simple", async () => {
-    const result = await runCli(["-s", "./test/fixture/dummy.xml", "-o", "./test/fixture"]);
+    const result = await runCli(["-s", DUMMY_SOURCE, "-o", OUTPUT_PATH]);
 
     expect(result.code).toBe(0);
     expect(result.stderr).toBe("");
   });
 
   test("Fail without source", async () => {
-    const result = await runCli(["-o", "./int-test/fixture"]);
+    const result = await runCli(["-o", OUTPUT_PATH]);
 
     expect(result.stderr).toContain("-s");
     expect(result.stderr).toContain("--source");
@@ -34,7 +37,7 @@ describe.skip("Run-Cli Test", () => {
   });
 
   test("Fail without output directory", async () => {
-    const result = await runCli(["-s", "./int-test/fixture/dummy.xml"]);
+    const result = await runCli(["-s", DUMMY_SOURCE]);
 
     expect(result.stderr).toContain("-o");
     expect(result.stderr).toContain("--output");
@@ -45,7 +48,7 @@ describe.skip("Run-Cli Test", () => {
 
   test("Fail with missing source", async () => {
     const misleadingFilePath = "doesntExistFile.nef";
-    const result = await runCli(["-s", misleadingFilePath, "-o", "./int-test/fixture"]);
+    const result = await runCli(["-s", misleadingFilePath, "-o", OUTPUT_PATH]);
 
     expect(result.stderr).toContain(misleadingFilePath);
     expect(result.stderr).toContain("doesn't exist");
@@ -54,9 +57,9 @@ describe.skip("Run-Cli Test", () => {
   });
 
   test("Create output folder if it doesn't exist", async () => {
-    const genDirBase = "./test/generated";
+    const genDirBase = OUTPUT_PATH;
     const genDir = `${genDirBase}/xyz`;
-    const args = ["-s", "./int-test/fixture/dummy.xml", "-o", genDir];
+    const args = ["-s", DUMMY_SOURCE, "-o", genDir];
     removeSync(genDirBase);
 
     await runCli(args);
