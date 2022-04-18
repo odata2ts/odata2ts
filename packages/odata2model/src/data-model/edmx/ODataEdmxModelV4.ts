@@ -1,46 +1,42 @@
-export interface ODataEdmxModel {
-  "edmx:Edmx": {
-    $: {
-      Version: string;
-      "xmlns:edmx": string;
-    };
-    // "edmx:Reference": Array<any>;
-    "edmx:DataServices": Array<DataService>;
-  };
+import {
+  ODataEdmxModelBase,
+  Schema,
+  EntityContainer,
+  EntitySet,
+  Property,
+  ReturnType,
+  EntityType,
+} from "./ODataEdmxModelBase";
+
+export interface ODataEdmxModelV4 extends ODataEdmxModelBase<SchemaV4> {}
+
+export interface SchemaV4 extends Schema<EntityTypeV4> {
+  EntityContainer?: Array<EntityContainerV4>;
+  Function?: Array<Operation>;
+  Action?: Array<Operation>;
 }
 
-export interface DataService {
-  Schema: Array<Schema>;
+export interface EntityTypeV4 extends EntityType {
+  NavigationProperty?: Array<NavigationProperty>;
 }
 
-export interface Schema {
-  $: {
-    Namespace: string;
-    xmlns: string;
-  };
-  EntityContainer?: Array<EntityContainer>;
-  EntityType?: Array<EntityType>;
-  ComplexType?: Array<ComplexType>;
-  EnumType?: Array<EnumType>;
-  Function?: Array<Function>;
-  Action?: Array<Action>;
-}
-
-export interface EntityContainer {
+export interface NavigationProperty {
   $: {
     Name: string;
+    Type: string;
+    Nullable?: "true" | "false";
+    Partner?: string;
   };
-  EntitySet?: Array<EntitySet>;
+  // TODO: OnDelete, ReferentialConstraint, etc.
+}
+
+export interface EntityContainerV4 extends EntityContainer<EntitySetV4> {
   Singleton?: Array<Singleton>;
   FunctionImport?: Array<FunctionImport>;
   ActionImport?: Array<ActionImport>;
 }
 
-export interface EntitySet {
-  $: {
-    Name: string;
-    EntityType: string;
-  };
+export interface EntitySetV4 extends EntitySet {
   NavigationPropertyBinding?: Array<NavigationPropertyBinding>;
 }
 
@@ -74,47 +70,7 @@ export interface NavigationPropertyBinding {
   };
 }
 
-export interface EntityType {
-  $: {
-    Name: string;
-    BaseType?: string;
-  };
-  Key: Array<PropertyRef>;
-  Property: Array<Property>;
-  NavigationProperty?: Array<NavigationProperty>;
-}
-
-export interface ComplexType extends Omit<EntityType, "Key"> {}
-
-export interface PropertyRef {
-  PropertyRef: Array<{ $: { Name: string } }>;
-}
-
-export interface Property {
-  $: {
-    Name: string;
-    Type: string;
-    MaxLength?: number;
-    Nullable?: "true" | "false";
-    Precision?: number;
-  };
-}
-
-export interface EnumType {
-  $: {
-    Name: string;
-  };
-  Member: Array<Member>;
-}
-
-export interface Member {
-  $: {
-    Name: string;
-    Value: number;
-  };
-}
-
-export interface Function {
+export interface Operation {
   $: {
     Name: string;
     IsBound?: "true" | "false";
@@ -123,36 +79,11 @@ export interface Function {
   ReturnType: Array<ReturnType>;
 }
 
-export interface Action {
-  $: {
-    Name: string;
-    IsBound?: "true" | "false";
-  };
-  Parameter?: Array<Parameter>;
-  ReturnType?: Array<ReturnType>;
-}
-
 export interface Parameter extends Property {
   Unicode?: boolean;
 }
 
-export interface ReturnType {
-  $: {
-    Type: string;
-  };
-}
-
-export interface NavigationProperty {
-  $: {
-    Name: string;
-    Type: string;
-    Nullable?: "true" | "false";
-    Partner?: string;
-  };
-  // TODO: OnDelete, ReferentialConstraint, etc.
-}
-
-export const enum OdataTypes {
+export const enum ODataTypesV4 {
   Binary = "Edm.Binary",
   Boolean = "Edm.Boolean",
   String = "Edm.String",
@@ -164,12 +95,12 @@ export const enum OdataTypes {
   Decimal = "Edm.Decimal",
   Double = "Edm.Double",
   Single = "Edm.Single",
+  Guid = "Edm.Guid",
   Date = "Edm.Date",
   Time = "Edm.TimeOfDay",
   DateTimeOffset = "Edm.DateTimeOffset",
   // TODO
   // Duration = "Edm.Duration",
-  Guid = "Edm.Guid",
   // Stream = "Edm.Stream",
   // Geography = "Geography",
   // GeographyPoint = "GeographyPoint",
