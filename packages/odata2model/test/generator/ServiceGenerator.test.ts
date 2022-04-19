@@ -1,18 +1,18 @@
 import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
-import { ODataModelBuilder, ODataVersion } from "../data-model/builder/ODataModelBuilder";
 import { createFixtureComparator, FixtureComparator } from "./comparator/FixtureComparator";
 import { SERVICE_NAME } from "./EntityBasedGenerationTests";
-import { digest } from "../../src/data-model/DataModelDigestion";
+import { digest } from "../../src/data-model/DataModelDigestionV4";
 import { generateServices } from "../../src/generator";
 import { createProjectManager, ProjectManager } from "../../src/project/ProjectManager";
 import { ProjectFiles } from "../../src/data-model/DataModel";
-import { OdataTypes } from "../../src/data-model/edmx/ODataEdmxModel";
+import { ODataTypesV4 } from "../../src/data-model/edmx/ODataEdmxModelV4";
+import { ODataModelBuilderV4 } from "../data-model/builder/v4/ODataModelBuilderV4";
 
 describe("Service Generator Tests", () => {
   const FIXTURE_PATH = "generator/service";
 
   let runOptions: RunOptions;
-  let odataBuilder: ODataModelBuilder;
+  let odataBuilder: ODataModelBuilderV4;
 
   let projectFiles: ProjectFiles = {
     model: `${SERVICE_NAME}Model`,
@@ -27,7 +27,7 @@ describe("Service Generator Tests", () => {
   });
 
   beforeEach(async () => {
-    odataBuilder = new ODataModelBuilder(ODataVersion.V4, SERVICE_NAME);
+    odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
     runOptions = {
       mode: Modes.all,
       emitMode: EmitModes.js_dts,
@@ -71,10 +71,10 @@ describe("Service Generator Tests", () => {
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) =>
         builder
-          .addKeyProp("id", OdataTypes.String)
+          .addKeyProp("id", ODataTypesV4.String)
           // simple props don't make a difference
-          .addProp("test", OdataTypes.String)
-          .addProp("test2", OdataTypes.Guid)
+          .addProp("test", ODataTypesV4.String)
+          .addProp("test2", ODataTypesV4.Guid)
       )
       .addEntitySet("list", `${SERVICE_NAME}.TestEntity`);
 
@@ -95,7 +95,7 @@ describe("Service Generator Tests", () => {
   test("Service Generator: one singleton", async () => {
     // given one singleton
     odataBuilder
-      .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", OdataTypes.String))
+      .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       .addSingleton("current", `${SERVICE_NAME}.TestEntity`);
 
     // when generating
@@ -115,11 +115,11 @@ describe("Service Generator Tests", () => {
   test("Service Generator: one unbound function", async () => {
     // given two functions: one without and one with params
     odataBuilder
-      .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", OdataTypes.String))
+      .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       .addFunction("getBestsellers", `Collection(${SERVICE_NAME}.TestEntity)`, false)
       .addFunctionImport("mostPop", `${SERVICE_NAME}.getBestsellers`, "none")
       .addFunction("firstBook", `${SERVICE_NAME}.TestEntity`, false, (builder) =>
-        builder.addParam("testString", OdataTypes.String, false).addParam("testNumber", OdataTypes.Double)
+        builder.addParam("testString", ODataTypesV4.String, false).addParam("testNumber", ODataTypesV4.Double)
       )
       .addFunctionImport("bestBook", `${SERVICE_NAME}.firstBook`, "none");
 
@@ -133,11 +133,11 @@ describe("Service Generator Tests", () => {
   test("Service Generator: one unbound action", async () => {
     // given one EntitySet
     odataBuilder
-      .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", OdataTypes.String))
+      .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       .addAction("ping", undefined, false)
       .addActionImport("keepAlive", `${SERVICE_NAME}.ping`)
       .addAction("vote", `${SERVICE_NAME}.TestEntity`, false, (builder) =>
-        builder.addParam("rating", OdataTypes.Int16, false).addParam("comment", OdataTypes.String)
+        builder.addParam("rating", ODataTypesV4.Int16, false).addParam("comment", ODataTypesV4.String)
       )
       .addActionImport("DoLike", `${SERVICE_NAME}.vote`);
 
@@ -151,15 +151,15 @@ describe("Service Generator Tests", () => {
   test("Service Generator: one bound function", async () => {
     // given one EntitySet
     odataBuilder
-      .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", OdataTypes.String))
+      .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       // given function without params, but with special return type which should simply become string
-      .addFunction("bestReview", OdataTypes.Guid, true, (builder) => builder.addParam("book", `${SERVICE_NAME}.Book`))
+      .addFunction("bestReview", ODataTypesV4.Guid, true, (builder) => builder.addParam("book", `${SERVICE_NAME}.Book`))
       // given function with params which returns collection
-      .addFunction("filterReviews", `Collection(${OdataTypes.String})`, true, (builder) =>
+      .addFunction("filterReviews", `Collection(${ODataTypesV4.String})`, true, (builder) =>
         builder
           .addParam("book", `${SERVICE_NAME}.Book`)
-          .addParam("minRating", OdataTypes.Int16, false)
-          .addParam("minCreated", OdataTypes.Date)
+          .addParam("minRating", ODataTypesV4.Int16, false)
+          .addParam("minCreated", ODataTypesV4.Date)
       );
 
     // when generating
@@ -174,13 +174,13 @@ describe("Service Generator Tests", () => {
   test("Service Generator: one bound action", async () => {
     // given one EntitySet
     odataBuilder
-      .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", OdataTypes.String))
+      .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       .addAction("like", undefined, true, (builder) => builder.addParam("book", `${SERVICE_NAME}.Book`))
-      .addAction("postReview", OdataTypes.String, true, (builder) =>
+      .addAction("postReview", ODataTypesV4.String, true, (builder) =>
         builder
           .addParam("book", `${SERVICE_NAME}.Book`)
-          .addParam("rating", OdataTypes.Int16, false)
-          .addParam("publicationDate", OdataTypes.Date)
+          .addParam("rating", ODataTypesV4.Int16, false)
+          .addParam("publicationDate", ODataTypesV4.Date)
       );
 
     // when generating
@@ -196,11 +196,11 @@ describe("Service Generator Tests", () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("Author", undefined, (builder) =>
-        builder.addKeyProp("ID", OdataTypes.Guid).addProp("name", OdataTypes.String, false)
+        builder.addKeyProp("ID", ODataTypesV4.Guid).addProp("name", ODataTypesV4.String, false)
       )
       .addEntityType("Book", undefined, (builder) =>
         builder
-          .addKeyProp("ID", OdataTypes.Guid)
+          .addKeyProp("ID", ODataTypesV4.Guid)
           .addProp("author", `${SERVICE_NAME}.Author`)
           .addProp("relatedAuthors", `Collection(${SERVICE_NAME}.Author)`)
       );
@@ -219,10 +219,10 @@ describe("Service Generator Tests", () => {
   test("Service Generator: EntityService with Complex Type", async () => {
     // given one EntitySet
     odataBuilder
-      .addComplexType("Reviewer", undefined, (builder) => builder.addProp("name", OdataTypes.String, false))
+      .addComplexType("Reviewer", undefined, (builder) => builder.addProp("name", ODataTypesV4.String, false))
       .addEntityType("Book", undefined, (builder) =>
         builder
-          .addKeyProp("id", OdataTypes.String)
+          .addKeyProp("id", ODataTypesV4.String)
           .addProp("lector", `${SERVICE_NAME}.Reviewer`)
           .addProp("reviewers", `Collection(${SERVICE_NAME}.Reviewer)`)
       );
@@ -251,7 +251,7 @@ describe("Service Generator Tests", () => {
       ])
       .addEntityType("Book", undefined, (builder) =>
         builder
-          .addKeyProp("id", OdataTypes.String)
+          .addKeyProp("id", ODataTypesV4.String)
           .addProp("myChoice", `${SERVICE_NAME}.Choice`)
           .addProp("altChoices", `Collection(${SERVICE_NAME}.Choice)`)
       );

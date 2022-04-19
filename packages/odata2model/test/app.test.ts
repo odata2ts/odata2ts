@@ -1,10 +1,9 @@
-import { ODataModelBuilder, ODataVersion } from "./data-model/builder/ODataModelBuilder";
-
 import { SERVICE_NAME } from "./generator/EntityBasedGenerationTests";
 import { EmitModes, Modes, RunOptions } from "../src/OptionModel";
 import { runApp } from "../src/app";
 import * as ProjectManager from "../src/project/ProjectManager";
 import * as Generator from "../src/generator";
+import { ODataModelBuilderV4 } from "./data-model/builder/v4/ODataModelBuilderV4";
 
 jest.mock("fs-extra");
 jest.mock("ts-morph");
@@ -12,7 +11,7 @@ jest.mock("../src/generator");
 
 describe("App Test", () => {
   let runOptions: RunOptions;
-  let odataBuilder: ODataModelBuilder;
+  let odataBuilder: ODataModelBuilderV4;
   let createPmSpy: jest.SpyInstance;
   let pmSpy: ProjectManager.ProjectManager;
 
@@ -33,7 +32,7 @@ describe("App Test", () => {
   beforeEach(async () => {
     jest.clearAllMocks();
 
-    odataBuilder = new ODataModelBuilder(ODataVersion.V4, SERVICE_NAME);
+    odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
     runOptions = {
       mode: Modes.models,
       emitMode: EmitModes.ts,

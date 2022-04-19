@@ -1,12 +1,12 @@
-import { ODataModelBuilder, ODataVersion } from "./builder/ODataModelBuilder";
-import { digest } from "../../src/data-model/DataModelDigestion";
+import { digest } from "../../src/data-model/DataModelDigestionV4";
 import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
-import { OdataTypes } from "../../src/data-model/edmx/ODataEdmxModel";
+import { ODataTypesV4 } from "../../src/data-model/edmx/ODataEdmxModelV4";
+import { ODataModelBuilderV4 } from "./builder/v4/ODataModelBuilderV4";
 
 describe("Singleton Digestion Test", () => {
   const SERVICE_NAME = "SingletonTest";
 
-  let odataBuilder: ODataModelBuilder;
+  let odataBuilder: ODataModelBuilderV4;
   let runOpts: RunOptions;
 
   function doDigest() {
@@ -14,7 +14,7 @@ describe("Singleton Digestion Test", () => {
   }
 
   beforeEach(() => {
-    odataBuilder = new ODataModelBuilder(ODataVersion.V4, SERVICE_NAME);
+    odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
     runOpts = {
       mode: Modes.all,
       emitMode: EmitModes.js_dts,
@@ -28,7 +28,7 @@ describe("Singleton Digestion Test", () => {
 
   test("Singleton: min case", async () => {
     odataBuilder.addSingleton("Me", "User").addEntityType("User", undefined, (builder) => {
-      builder.addKeyProp("id", OdataTypes.String);
+      builder.addKeyProp("id", ODataTypesV4.String);
     });
 
     const result = await doDigest();
@@ -53,7 +53,7 @@ describe("Singleton Digestion Test", () => {
       { path: "attitudes", target: "Me" },
     ];
     odataBuilder.addSingleton("Me", "User", navProps).addEntityType("User", undefined, (builder) => {
-      builder.addKeyProp("id", OdataTypes.String);
+      builder.addKeyProp("id", ODataTypesV4.String);
     });
 
     const result = await doDigest();

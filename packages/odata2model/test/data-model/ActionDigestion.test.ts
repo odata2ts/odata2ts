@@ -1,13 +1,13 @@
-import { ODataModelBuilder, ODataVersion } from "./builder/ODataModelBuilder";
-import { digest } from "../../src/data-model/DataModelDigestion";
+import { digest } from "../../src/data-model/DataModelDigestionV4";
 import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
-import { OdataTypes } from "../../src/data-model/edmx/ODataEdmxModel";
+import { ODataTypesV4 } from "../../src/data-model/edmx/ODataEdmxModelV4";
 import { DataTypes, OperationTypes } from "../../src/data-model/DataTypeModel";
+import { ODataModelBuilderV4 } from "./builder/v4/ODataModelBuilderV4";
 
 describe("Action Digestion Test", () => {
   const SERVICE_NAME = "ActionTest";
 
-  let odataBuilder: ODataModelBuilder;
+  let odataBuilder: ODataModelBuilderV4;
   let runOpts: RunOptions;
 
   function doDigest() {
@@ -15,7 +15,7 @@ describe("Action Digestion Test", () => {
   }
 
   beforeEach(() => {
-    odataBuilder = new ODataModelBuilder(ODataVersion.V4, SERVICE_NAME);
+    odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
     runOpts = {
       mode: Modes.all,
       emitMode: EmitModes.js_dts,
@@ -45,12 +45,12 @@ describe("Action Digestion Test", () => {
   });
 
   test("Action: with params", async () => {
-    odataBuilder.addAction("addFriend", OdataTypes.String, false, (builder) => {
+    odataBuilder.addAction("addFriend", ODataTypesV4.String, false, (builder) => {
       builder
-        .addParam("test", OdataTypes.String, false)
-        .addParam("testTruth", OdataTypes.Boolean)
-        .addParam("testNumber", OdataTypes.Decimal)
-        .addParam("testDate", OdataTypes.Date);
+        .addParam("test", ODataTypesV4.String, false)
+        .addParam("testTruth", ODataTypesV4.Boolean)
+        .addParam("testNumber", ODataTypesV4.Decimal)
+        .addParam("testDate", ODataTypesV4.Date);
     });
 
     const result = await doDigest();
@@ -130,7 +130,7 @@ describe("Action Digestion Test", () => {
   });
 
   test("Action: fail bound function without params", async () => {
-    odataBuilder.addAction("NotifyBestFriend", OdataTypes.Boolean, true);
+    odataBuilder.addAction("NotifyBestFriend", ODataTypesV4.Boolean, true);
 
     await expect(doDigest()).rejects.toThrowError("no parameters");
   });
@@ -140,7 +140,7 @@ describe("Action Digestion Test", () => {
       .addActionImport("NotifyBestFriend", "messageBestFriend")
       .addAction("messageBestFriend", undefined, false);
     // .addEntityType("User", undefined, (builder) => {
-    //   builder.addKeyProp("id", OdataTypes.String);
+    //   builder.addKeyProp("id", ODataTypesV4.String);
     // });
 
     const result = await doDigest();

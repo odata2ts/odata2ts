@@ -1,21 +1,15 @@
-import { ODataModelBuilder, ODataVersion } from "./builder/ODataModelBuilder";
-import { digest } from "../../src/data-model/DataModelDigestion";
+import { digest } from "../../src/data-model/DataModelDigestionV4";
 import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
-
-const NOOP_FN = () => {};
+import { ODataModelBuilderV4 } from "./builder/v4/ODataModelBuilderV4";
 
 describe("DataModelDigestion Test", () => {
   const SERVICE_NAME = "Tester";
 
-  let odataBuilder: ODataModelBuilder;
+  let odataBuilder: ODataModelBuilderV4;
   let runOpts: RunOptions;
 
-  function doDigest() {
-    return digest(odataBuilder.getSchema(), runOpts);
-  }
-
   beforeEach(() => {
-    odataBuilder = new ODataModelBuilder(ODataVersion.V4, SERVICE_NAME);
+    odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
     runOpts = {
       mode: Modes.all,
       emitMode: EmitModes.js_dts,
@@ -47,7 +41,7 @@ describe("DataModelDigestion Test", () => {
 
   test("Deduplicate Service Suffix", async () => {
     const newServiceName = "TestService";
-    odataBuilder = new ODataModelBuilder(ODataVersion.V4, newServiceName);
+    odataBuilder = new ODataModelBuilderV4(newServiceName);
 
     const result = await digest(odataBuilder.getSchema(), runOpts);
 
