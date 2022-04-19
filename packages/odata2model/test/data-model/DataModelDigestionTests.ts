@@ -1,15 +1,20 @@
-import { digest } from "../../src/data-model/DataModelDigestionV4";
 import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
 import { ODataModelBuilderV4 } from "./builder/v4/ODataModelBuilderV4";
+import { DataModel } from "../../src/data-model/DataModel";
+import { Schema } from "../../src/data-model/edmx/ODataEdmxModelBase";
+import { ODataModelBuilder } from "./builder/ODataModelBuilder";
 
-describe("DataModelDigestion Test", () => {
+export type DigestionFunction = <S extends Schema<any, any>>(schema: S, runOpts: RunOptions) => Promise<DataModel>;
+export type ModelBuilderConstructor<MB extends ODataModelBuilder<any, any, any, any>> = new (serviceName: string) => MB;
+
+export function createDataModelTests(ODataBuilderConstructor: ModelBuilderConstructor<any>, digest: DigestionFunction) {
   const SERVICE_NAME = "Tester";
 
-  let odataBuilder: ODataModelBuilderV4;
+  let odataBuilder: ODataModelBuilder<any, any, any, any>;
   let runOpts: RunOptions;
 
   beforeEach(() => {
-    odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
+    odataBuilder = new ODataBuilderConstructor(SERVICE_NAME);
     runOpts = {
       mode: Modes.all,
       emitMode: EmitModes.js_dts,
@@ -52,4 +57,4 @@ describe("DataModelDigestion Test", () => {
       service: `TestService`,
     });
   });
-});
+}

@@ -27,7 +27,7 @@ export class ODataEntityTypeBuilderV2 extends ODataEntityTypeBuilderBase<EntityT
       End: [
         {
           $: {
-            Role: fromRole,
+            Role: toRole,
             Type: type,
             Multiplicity: multiplicity,
           },

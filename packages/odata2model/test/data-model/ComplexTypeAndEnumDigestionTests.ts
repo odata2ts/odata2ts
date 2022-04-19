@@ -4,7 +4,7 @@ import { ODataTypesV4 } from "../../src/data-model/edmx/ODataEdmxModelV4";
 import { DataTypes } from "../../src/data-model/DataTypeModel";
 import { ODataModelBuilderV4 } from "./builder/v4/ODataModelBuilderV4";
 
-describe("ComplexType And Enum Digestion Test", () => {
+export function createComplexAndEnumTests() {
   const SERVICE_NAME = "ComplexAndEnum";
   const ENTITY_NAME = "Product";
 
@@ -177,4 +177,4 @@ describe("ComplexType And Enum Digestion Test", () => {
       baseProps: [...expectedGrandParentProps, expectedParentProp],
     });
   });
-});
+}

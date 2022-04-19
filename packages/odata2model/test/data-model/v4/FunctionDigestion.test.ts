@@ -1,8 +1,8 @@
-import { digest } from "../../src/data-model/DataModelDigestionV4";
-import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
-import { ODataTypesV4 } from "../../src/data-model/edmx/ODataEdmxModelV4";
-import { DataTypes, OperationTypes } from "../../src/data-model/DataTypeModel";
-import { ODataModelBuilderV4 } from "./builder/v4/ODataModelBuilderV4";
+import { digest } from "../../../src/data-model/DataModelDigestionV4";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
+import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
+import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
+import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 describe("Function Digestion Test", () => {
   const SERVICE_NAME = "FunctionTest";

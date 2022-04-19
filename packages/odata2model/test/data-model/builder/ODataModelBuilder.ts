@@ -1,4 +1,6 @@
 import { ComplexType, EntityType, ODataEdmxModelBase, Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
+import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase";
+import { ODataComplexTypeBuilderBase } from "./ODataComplexTypeBuilderBase";
 
 export enum ODataVersion {
   V2 = "2.0",
@@ -18,6 +20,17 @@ export abstract class ODataModelBuilder<
 
   protected abstract createVersionedSchema(): S;
   protected abstract createVersionedModel(): M;
+
+  public abstract addEntityType(
+    name: string,
+    baseType: string | undefined,
+    builderFn: <ETB extends ODataEntityTypeBuilderBase<ET>>(builder: ETB) => void
+  ): this;
+  public abstract addComplexType(
+    name: string,
+    baseType: string | undefined,
+    builderFn: <CTB extends ODataComplexTypeBuilderBase<CT>>(builder: CTB) => void
+  ): this;
 
   protected createSchema(): Schema<ET, CT> {
     return {

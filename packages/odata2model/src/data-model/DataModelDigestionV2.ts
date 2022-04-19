@@ -1,6 +1,6 @@
 import { RunOptions } from "../OptionModel";
 import { ComplexTypeV3, EntityTypeV3, ODataTypesV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
-import { OperationTypes, PropertyModel } from "./DataTypeModel";
+import { OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { DataModel } from "./DataModel";
 import { Digester } from "./DataModelDigestion";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
@@ -32,14 +32,13 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
           throw new Error(`Association end couldn't be determined for NavigationProperty [${np.$.Name}]`);
         }
 
-        const type = this.stripServicePrefix(end.$.Type);
         const isRequired = end.$.Multiplicity !== "*" && !end.$.Multiplicity.startsWith("0..");
         const isCollection = end.$.Multiplicity !== "1" && !end.$.Multiplicity.endsWith("..1");
 
         return {
           $: {
             Name: np.$.Name,
-            Type: isCollection ? `Collection(${type})` : type,
+            Type: isCollection ? `Collection(${end.$.Type})` : end.$.Type,
             Nullable: isRequired ? "false" : "true",
           },
         };
@@ -66,18 +65,21 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
           ? this.mapProperty({ $: { Name: "NO_NAME_BECAUSE_RETURN_TYPE", Type: returnTypeDef } })
           : undefined;
 
+        const operation: OperationType = {
+          name,
+          odataName: funcImport.$.Name,
+          type: OperationTypes.Function,
+          parameters,
+          returnType,
+        };
+        this.dataModel.addOperationType("/", operation);
+
         this.dataModel.addFunction(name, {
           name,
           odataName: funcImport.$.Name,
           // TODO: does this really match V4 model?!
           entitySet: funcImport.$.EntitySet!,
-          operation: {
-            name,
-            odataName: funcImport.$.Name,
-            type: OperationTypes.Function,
-            parameters,
-            returnType,
-          },
+          operation: operation,
         });
       });
 
