@@ -1,0 +1,141 @@
+import { digest } from "../../../src/data-model/DataModelDigestionV2";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
+import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
+import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
+import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
+
+describe("Function Digestion Test", () => {
+  const SERVICE_NAME = "FunctionTest";
+
+  let odataBuilder: ODataModelBuilderV2;
+  let runOpts: RunOptions;
+
+  function doDigest() {
+    return digest(odataBuilder.getSchema(), runOpts);
+  }
+
+  beforeEach(() => {
+    odataBuilder = new ODataModelBuilderV2(SERVICE_NAME);
+    runOpts = {
+      mode: Modes.all,
+      emitMode: EmitModes.js_dts,
+      output: "ignore",
+      prettier: false,
+      debug: false,
+      modelPrefix: "",
+      modelSuffix: "",
+    };
+  });
+
+  test("Function: min case", async () => {
+    odataBuilder.addFunctionImport("GetBestFriend");
+
+    const result = await doDigest();
+
+    expect(result.getOperationTypeByBinding("xyz")).toEqual([]);
+    expect(result.getOperationTypeByBinding("/")).toMatchObject([
+      {
+        odataName: "GetBestFriend",
+        name: "getBestFriend",
+        type: OperationTypes.Function,
+        parameters: [],
+      },
+    ]);
+  });
+
+  test("Function: with returnType", async () => {
+    odataBuilder.addFunctionImport("getBestFriend", ODataTypesV3.Boolean);
+
+    const result = await doDigest();
+
+    expect(result.getOperationTypeByBinding("/")).toMatchObject([
+      {
+        odataName: "getBestFriend",
+        name: "getBestFriend",
+        returnType: {
+          dataType: DataTypes.PrimitiveType,
+          name: "nO_NAME_BECAUSE_RETURN_TYPE",
+          odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
+          odataType: "Edm.Boolean",
+          type: "boolean",
+          qObject: undefined,
+          required: false,
+          isCollection: false,
+        },
+      },
+    ]);
+  });
+
+  test("Function: with params", async () => {
+    odataBuilder.addFunctionImport("GetBestFriend", ODataTypesV3.String, (builder) => {
+      builder
+        .addParam("test", ODataTypesV3.String, false)
+        .addParam("testTruth", ODataTypesV3.Boolean)
+        .addParam("testNumber", ODataTypesV3.Int16)
+        .addParam("testDateTime", ODataTypesV3.DateTime);
+    });
+
+    const result = await doDigest();
+
+    expect(result.getOperationTypeByBinding("/")).toMatchObject([
+      {
+        odataName: "GetBestFriend",
+        parameters: [
+          {
+            name: "test",
+            type: "string",
+          },
+          {
+            name: "testTruth",
+            type: "boolean",
+          },
+          {
+            name: "testNumber",
+            type: "number",
+          },
+          {
+            name: "testDateTime",
+            type: "DateTimeString",
+          },
+        ],
+        returnType: {
+          dataType: DataTypes.PrimitiveType,
+          name: "nO_NAME_BECAUSE_RETURN_TYPE",
+          odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
+          odataType: "Edm.String",
+          type: "string",
+          qObject: undefined,
+          required: false,
+          isCollection: false,
+        },
+      },
+    ]);
+  });
+
+  test("Function: returning EntitySet", async () => {
+    odataBuilder
+      .addFunctionImport("listProducts", `Collection(${SERVICE_NAME}.Product)`)
+      .addEntityType("Product", undefined, (builder) => {
+        builder.addKeyProp("id", "Edm.Guid");
+      });
+
+    const result = await doDigest();
+
+    expect(result.getOperationTypeByBinding("/")).toMatchObject([
+      {
+        name: "listProducts",
+        type: OperationTypes.Function,
+        parameters: [],
+        returnType: {
+          isCollection: true,
+          dataType: DataTypes.ModelType,
+          name: "nO_NAME_BECAUSE_RETURN_TYPE",
+          odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
+          odataType: `Collection(${SERVICE_NAME}.Product)`,
+          type: "Product",
+          qObject: "qProduct",
+        },
+      },
+    ]);
+  });
+});

@@ -1,15 +1,12 @@
-import { ODataModelBuilder, ODataVersion } from "./builder/ODataModelBuilder";
-import { digest } from "../../src/data-model/DataModelDigestion";
-import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
-import { ModelTypes } from "../../src/data-model/DataTypeModel";
-import { OdataTypes } from "../../src/data-model/edmx/ODataEdmxModel";
-
-const NOOP_FN = () => {};
+import { digest } from "../../../src/data-model/DataModelDigestionV4";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
+import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
+import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 describe("EntitySet Digestion Test", () => {
   const SERVICE_NAME = "EntitySetTest";
 
-  let odataBuilder: ODataModelBuilder;
+  let odataBuilder: ODataModelBuilderV4;
   let runOpts: RunOptions;
 
   function doDigest() {
@@ -17,7 +14,7 @@ describe("EntitySet Digestion Test", () => {
   }
 
   beforeEach(() => {
-    odataBuilder = new ODataModelBuilder(ODataVersion.V4, SERVICE_NAME);
+    odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
     runOpts = {
       mode: Modes.all,
       emitMode: EmitModes.js_dts,
@@ -31,7 +28,7 @@ describe("EntitySet Digestion Test", () => {
 
   test("EntitySet: min case", async () => {
     odataBuilder.addEntitySet("Products", "Product").addEntityType("Product", undefined, (builder) => {
-      builder.addKeyProp("id", OdataTypes.String);
+      builder.addKeyProp("id", ODataTypesV4.String);
     });
 
     const result = await doDigest();
@@ -57,7 +54,7 @@ describe("EntitySet Digestion Test", () => {
     ];
     odataBuilder
       .addEntityType("Product", undefined, (builder) => {
-        builder.addKeyProp("id", OdataTypes.String);
+        builder.addKeyProp("id", ODataTypesV4.String);
       })
       .addEntitySet("Products", "Product", navProps);
 

@@ -1,15 +1,15 @@
-import { ODataModelBuilder, ODataVersion } from "./builder/ODataModelBuilder";
-import { digest } from "../../src/data-model/DataModelDigestion";
-import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
-import { OdataTypes } from "../../src/data-model/edmx/ODataEdmxModel";
-import { DataTypes, ModelTypes } from "../../src/data-model/DataTypeModel";
+import { digest } from "../../../src/data-model/DataModelDigestionV4";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
+import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
+import { DataTypes, ModelTypes } from "../../../src/data-model/DataTypeModel";
+import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 const NOOP_FN = () => {};
 
 describe("EntityTypeDigestion Test", () => {
   const SERVICE_NAME = "Tester";
 
-  let odataBuilder: ODataModelBuilder;
+  let odataBuilder: ODataModelBuilderV4;
   let runOpts: RunOptions;
 
   function doDigest() {
@@ -17,7 +17,7 @@ describe("EntityTypeDigestion Test", () => {
   }
 
   beforeEach(() => {
-    odataBuilder = new ODataModelBuilder(ODataVersion.V4, SERVICE_NAME);
+    odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
     runOpts = {
       mode: Modes.all,
       emitMode: EmitModes.js_dts,
@@ -31,7 +31,7 @@ describe("EntityTypeDigestion Test", () => {
 
   test("EntityTypes: simple entity", async () => {
     odataBuilder.addEntityType("min", undefined, (builder) => {
-      builder.addKeyProp("id", OdataTypes.String);
+      builder.addKeyProp("id", ODataTypesV4.String);
     });
 
     const result = await doDigest();
@@ -57,7 +57,7 @@ describe("EntityTypeDigestion Test", () => {
       isCollection: false,
       name: "id",
       odataName: "id",
-      odataType: OdataTypes.String,
+      odataType: ODataTypesV4.String,
       qObject: undefined,
       required: true,
       type: "string",
@@ -96,9 +96,9 @@ describe("EntityTypeDigestion Test", () => {
   test("EntityTypes: composite keys", async () => {
     odataBuilder.addEntityType("CompoKey", undefined, (builder) => {
       builder
-        .addKeyProp("cat", OdataTypes.String)
-        .addKeyProp("subCat", OdataTypes.String)
-        .addKeyProp("counter", OdataTypes.Int16);
+        .addKeyProp("cat", ODataTypesV4.String)
+        .addKeyProp("subCat", ODataTypesV4.String)
+        .addKeyProp("counter", ODataTypesV4.Int16);
     });
 
     const dataModel = await doDigest();
@@ -121,29 +121,29 @@ describe("EntityTypeDigestion Test", () => {
   });
 
   test("EntityTypes: base class hierarchy", async () => {
-    odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", OdataTypes.Guid));
+    odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Guid));
     odataBuilder.addEntityType("Parent", "GrandParent", (builder) =>
-      builder.addProp("parentalAdvice", OdataTypes.Boolean)
+      builder.addProp("parentalAdvice", ODataTypesV4.Boolean)
     );
-    odataBuilder.addEntityType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", OdataTypes.String));
+    odataBuilder.addEntityType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", ODataTypesV4.String));
 
     const expectedGrandParentProp = {
       dataType: DataTypes.PrimitiveType,
       name: "id",
-      odataType: OdataTypes.Guid,
+      odataType: ODataTypesV4.Guid,
       required: true,
       type: "GuidString",
     };
     const expectedParentProp = {
       dataType: DataTypes.PrimitiveType,
       name: "parentalAdvice",
-      odataType: OdataTypes.Boolean,
+      odataType: ODataTypesV4.Boolean,
       type: "boolean",
     };
     const expectedChildProp = {
       dataType: DataTypes.PrimitiveType,
       name: "ch1ld1shF4n",
-      odataType: OdataTypes.String,
+      odataType: ODataTypesV4.String,
       type: "string",
     };
 
@@ -177,20 +177,20 @@ describe("EntityTypeDigestion Test", () => {
   test("EntityTypes: max prop types", async () => {
     odataBuilder.addEntityType("max", undefined, (builder) =>
       builder
-        .addKeyProp("ID", OdataTypes.Guid)
-        .addProp("isTrue", OdataTypes.Boolean, false)
-        .addProp("time", OdataTypes.Time)
-        .addProp("optionalDate", OdataTypes.Date)
-        .addProp("dateTimeOffset", OdataTypes.DateTimeOffset)
-        .addProp("TestInt16", OdataTypes.Int16)
-        .addProp("TestInt32", OdataTypes.Int32)
-        .addProp("TestInt64", OdataTypes.Int64)
-        .addProp("TestDecimal", OdataTypes.Decimal)
-        .addProp("TestDouble", OdataTypes.Double)
-        .addProp("testByte", OdataTypes.Byte)
-        .addProp("testSByte", OdataTypes.SByte)
-        .addProp("testSingle", OdataTypes.Single)
-        .addProp("testBinary", OdataTypes.Binary)
+        .addKeyProp("ID", ODataTypesV4.Guid)
+        .addProp("isTrue", ODataTypesV4.Boolean, false)
+        .addProp("time", ODataTypesV4.Time)
+        .addProp("optionalDate", ODataTypesV4.Date)
+        .addProp("dateTimeOffset", ODataTypesV4.DateTimeOffset)
+        .addProp("TestInt16", ODataTypesV4.Int16)
+        .addProp("TestInt32", ODataTypesV4.Int32)
+        .addProp("TestInt64", ODataTypesV4.Int64)
+        .addProp("TestDecimal", ODataTypesV4.Decimal)
+        .addProp("TestDouble", ODataTypesV4.Double)
+        .addProp("testByte", ODataTypesV4.Byte)
+        .addProp("testSByte", ODataTypesV4.SByte)
+        .addProp("testSingle", ODataTypesV4.Single)
+        .addProp("testBinary", ODataTypesV4.Binary)
         .addProp("testAny", "Edm.AnythingYouWant")
     );
     const result = await digest(odataBuilder.getSchema(), runOpts);
@@ -211,82 +211,82 @@ describe("EntityTypeDigestion Test", () => {
       {
         name: "isTrue",
         dataType: DataTypes.PrimitiveType,
-        odataType: OdataTypes.Boolean,
+        odataType: ODataTypesV4.Boolean,
         type: "boolean",
         required: true,
       },
       {
         name: "time",
         dataType: DataTypes.PrimitiveType,
-        odataType: OdataTypes.Time,
+        odataType: ODataTypesV4.Time,
         type: "TimeOfDayString",
         required: false,
       },
       {
         name: "optionalDate",
         dataType: DataTypes.PrimitiveType,
-        odataType: OdataTypes.Date,
+        odataType: ODataTypesV4.Date,
         type: "DateString",
         required: false,
       },
       {
         name: "dateTimeOffset",
         dataType: DataTypes.PrimitiveType,
-        odataType: OdataTypes.DateTimeOffset,
+        odataType: ODataTypesV4.DateTimeOffset,
         type: "DateTimeOffsetString",
       },
       {
         name: "testInt16",
         dataType: DataTypes.PrimitiveType,
-        odataType: OdataTypes.Int16,
+        odataType: ODataTypesV4.Int16,
         type: "number",
       },
       {
         name: "testInt32",
         dataType: DataTypes.PrimitiveType,
-        odataType: OdataTypes.Int32,
+        odataType: ODataTypesV4.Int32,
         type: "number",
       },
       {
         name: "testInt64",
         dataType: DataTypes.PrimitiveType,
-        odataType: OdataTypes.Int64,
+        odataType: ODataTypesV4.Int64,
         type: "number",
       },
       {
         name: "testDecimal",
         dataType: DataTypes.PrimitiveType,
-        odataType: OdataTypes.Decimal,
+        odataType: ODataTypesV4.Decimal,
         type: "number",
       },
       {
         name: "testDouble",
         dataType: DataTypes.PrimitiveType,
-        odataType: OdataTypes.Double,
+        odataType: ODataTypesV4.Double,
         type: "number",
       },
       {
         name: "testByte",
         dataType: DataTypes.PrimitiveType,
-        odataType: OdataTypes.Byte,
+        odataType: ODataTypesV4.Byte,
         type: "number",
       },
       {
         name: "testSByte",
         dataType: DataTypes.PrimitiveType,
-        odataType: OdataTypes.SByte,
+        odataType: ODataTypesV4.SByte,
         type: "number",
       },
       {
         name: "testSingle",
         dataType: DataTypes.PrimitiveType,
-        odataType: OdataTypes.Single,
+        odataType: ODataTypesV4.Single,
         type: "number",
       },
       {
         name: "testBinary",
         dataType: DataTypes.PrimitiveType,
-        odataType: OdataTypes.Binary,
+        odataType: ODataTypesV4.Binary,
         type: "BinaryString",
       },
       {
@@ -301,7 +301,7 @@ describe("EntityTypeDigestion Test", () => {
   test("EntityTypes: navProps with entity & entity collection", async () => {
     odataBuilder.addEntityType("Category", undefined, (builder) => {
       builder
-        .addKeyProp("ID", OdataTypes.Guid)
+        .addKeyProp("ID", ODataTypesV4.Guid)
         .addNavProp("bestProduct", `${SERVICE_NAME}.Product`)
         .addNavProp("featuredProducts", `Collection(${SERVICE_NAME}.Product)`);
     });
@@ -332,7 +332,7 @@ describe("EntityTypeDigestion Test", () => {
   test("EntityTypes: navProps", async () => {
     odataBuilder.addEntityType("max", undefined, (builder) =>
       builder
-        .addKeyProp("ID", OdataTypes.Guid)
+        .addKeyProp("ID", ODataTypesV4.Guid)
         .addNavProp("products", `${SERVICE_NAME}.product`)
         .addNavProp("similarProducts", `${SERVICE_NAME}.Prod.uct`, "test", false)
     );

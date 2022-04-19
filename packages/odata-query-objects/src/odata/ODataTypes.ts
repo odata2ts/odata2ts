@@ -54,3 +54,13 @@ export type GuidString = string & GuidStringBrand;
 enum GuidStringBrand {
   _ = "",
 }
+
+export type DateTimeString = string & DateTimeStringBrand;
+enum DateTimeStringBrand {
+  _ = "",
+}
+
+export type TimeString = string & TimeStringBrand;
+enum TimeStringBrand {
+  _ = "",
+}

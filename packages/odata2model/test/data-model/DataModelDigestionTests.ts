@@ -1,21 +1,20 @@
-import { ODataModelBuilder, ODataVersion } from "./builder/ODataModelBuilder";
-import { digest } from "../../src/data-model/DataModelDigestion";
 import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
+import { ODataModelBuilderV4 } from "./builder/v4/ODataModelBuilderV4";
+import { DataModel } from "../../src/data-model/DataModel";
+import { Schema } from "../../src/data-model/edmx/ODataEdmxModelBase";
+import { ODataModelBuilder } from "./builder/ODataModelBuilder";
 
-const NOOP_FN = () => {};
+export type DigestionFunction = <S extends Schema<any, any>>(schema: S, runOpts: RunOptions) => Promise<DataModel>;
+export type ModelBuilderConstructor<MB extends ODataModelBuilder<any, any, any, any>> = new (serviceName: string) => MB;
 
-describe("DataModelDigestion Test", () => {
+export function createDataModelTests(ODataBuilderConstructor: ModelBuilderConstructor<any>, digest: DigestionFunction) {
   const SERVICE_NAME = "Tester";
 
-  let odataBuilder: ODataModelBuilder;
+  let odataBuilder: ODataModelBuilder<any, any, any, any>;
   let runOpts: RunOptions;
 
-  function doDigest() {
-    return digest(odataBuilder.getSchema(), runOpts);
-  }
-
   beforeEach(() => {
-    odataBuilder = new ODataModelBuilder(ODataVersion.V4, SERVICE_NAME);
+    odataBuilder = new ODataBuilderConstructor(SERVICE_NAME);
     runOpts = {
       mode: Modes.all,
       emitMode: EmitModes.js_dts,
@@ -47,7 +46,7 @@ describe("DataModelDigestion Test", () => {
 
   test("Deduplicate Service Suffix", async () => {
     const newServiceName = "TestService";
-    odataBuilder = new ODataModelBuilder(ODataVersion.V4, newServiceName);
+    odataBuilder = new ODataModelBuilderV4(newServiceName);
 
     const result = await digest(odataBuilder.getSchema(), runOpts);
 
@@ -58,4 +57,4 @@ describe("DataModelDigestion Test", () => {
       service: `TestService`,
     });
   });
-});
+}

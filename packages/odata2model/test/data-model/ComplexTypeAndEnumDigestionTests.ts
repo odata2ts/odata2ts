@@ -1,16 +1,14 @@
-import { ODataModelBuilder, ODataVersion } from "./builder/ODataModelBuilder";
-import { digest } from "../../src/data-model/DataModelDigestion";
+import { digest } from "../../src/data-model/DataModelDigestionV4";
 import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
-import { OdataTypes } from "../../src/data-model/edmx/ODataEdmxModel";
-import { DataTypes, ModelTypes } from "../../src/data-model/DataTypeModel";
+import { ODataTypesV4 } from "../../src/data-model/edmx/ODataEdmxModelV4";
+import { DataTypes } from "../../src/data-model/DataTypeModel";
+import { ODataModelBuilderV4 } from "./builder/v4/ODataModelBuilderV4";
 
-const NOOP_FN = () => {};
-
-describe("ComplexType And Enum Digestion Test", () => {
+export function createComplexAndEnumTests() {
   const SERVICE_NAME = "ComplexAndEnum";
   const ENTITY_NAME = "Product";
 
-  let odataBuilder: ODataModelBuilder;
+  let odataBuilder: ODataModelBuilderV4;
   let runOpts: RunOptions;
 
   function doDigest() {
@@ -18,7 +16,7 @@ describe("ComplexType And Enum Digestion Test", () => {
   }
 
   beforeEach(() => {
-    odataBuilder = new ODataModelBuilder(ODataVersion.V4, SERVICE_NAME);
+    odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
     runOpts = {
       mode: Modes.all,
       emitMode: EmitModes.js_dts,
@@ -33,7 +31,7 @@ describe("ComplexType And Enum Digestion Test", () => {
   test("EnumType: enum type", async () => {
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", OdataTypes.String).addProp("myChoice", `${SERVICE_NAME}.Choice`)
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoice", `${SERVICE_NAME}.Choice`)
       )
       .addEnumType("Choice", [
         { name: "A", value: 1 },
@@ -58,7 +56,7 @@ describe("ComplexType And Enum Digestion Test", () => {
   test("EnumType: enum collection", async () => {
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", OdataTypes.String).addProp("myChoices", `Collection(${SERVICE_NAME}.Choice)`)
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoices", `Collection(${SERVICE_NAME}.Choice)`)
       )
       .addEnumType("Choice", [
         { name: "A", value: 1 },
@@ -84,9 +82,9 @@ describe("ComplexType And Enum Digestion Test", () => {
   test("ComplexType: complex type", async () => {
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", OdataTypes.String).addProp("branding", `${SERVICE_NAME}.Brand`)
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("branding", `${SERVICE_NAME}.Brand`)
       )
-      .addComplexType("Brand", undefined, (builder) => builder.addProp("naming", OdataTypes.String));
+      .addComplexType("Brand", undefined, (builder) => builder.addProp("naming", ODataTypesV4.String));
 
     const result = await doDigest();
     const model = result.getModel(ENTITY_NAME);
@@ -107,12 +105,12 @@ describe("ComplexType And Enum Digestion Test", () => {
   test("ComplexType: base class hierarchy", async () => {
     odataBuilder
       .addComplexType("GrandParent", undefined, (builder) =>
-        builder.addProp("name", OdataTypes.String).addProp("myChoice", `${SERVICE_NAME}.Choice`)
+        builder.addProp("name", ODataTypesV4.String).addProp("myChoice", `${SERVICE_NAME}.Choice`)
       )
-      .addComplexType("Parent", "GrandParent", (builder) => builder.addProp("parentalAdvice", OdataTypes.Boolean))
-      .addComplexType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", OdataTypes.String))
+      .addComplexType("Parent", "GrandParent", (builder) => builder.addProp("parentalAdvice", ODataTypesV4.Boolean))
+      .addComplexType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", ODataTypesV4.String))
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", OdataTypes.String).addProp("kids", `${SERVICE_NAME}.Child`)
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("kids", `${SERVICE_NAME}.Child`)
       )
       .addEnumType("Choice", [
         { name: "A", value: 1 },
@@ -124,7 +122,7 @@ describe("ComplexType And Enum Digestion Test", () => {
       {
         dataType: DataTypes.PrimitiveType,
         name: "name",
-        odataType: OdataTypes.String,
+        odataType: ODataTypesV4.String,
         required: false,
         type: "string",
       },
@@ -142,13 +140,13 @@ describe("ComplexType And Enum Digestion Test", () => {
     const expectedParentProp = {
       dataType: DataTypes.PrimitiveType,
       name: "parentalAdvice",
-      odataType: OdataTypes.Boolean,
+      odataType: ODataTypesV4.Boolean,
       type: "boolean",
     };
     const expectedChildProp = {
       dataType: DataTypes.PrimitiveType,
       name: "ch1ld1shF4n",
-      odataType: OdataTypes.String,
+      odataType: ODataTypesV4.String,
       type: "string",
     };
 
@@ -179,4 +177,4 @@ describe("ComplexType And Enum Digestion Test", () => {
       baseProps: [...expectedGrandParentProps, expectedParentProp],
     });
   });
-});
+}

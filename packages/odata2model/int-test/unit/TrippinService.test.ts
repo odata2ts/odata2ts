@@ -1,7 +1,7 @@
-import { LocationModel } from "../../build/trippin/TrippinModel";
+import { LocationModel } from "../../build/v4/trippin/TrippinModel";
+import { qPerson, qLocation } from "../../build/v4/trippin/QTrippin";
+import { TrippinService } from "../../build/v4/trippin/TrippinService";
 import { MockODataClient } from "../MockODataClient";
-import { qPerson, qLocation } from "../../build/trippin/QTrippin";
-import { TrippinService } from "../../build/trippin/TrippinService";
 
 describe("Testing Generation of TrippinService", () => {
   const BASE_URL = "/test";
