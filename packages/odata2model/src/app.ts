@@ -1,8 +1,10 @@
 import { createProjectManager } from "./project/ProjectManager";
 import { generateModels, generateQueryObjects, generateServices } from "./generator";
-
-import { digest } from "./data-model/DataModelDigestion";
-import { ODataEdmxModel, Schema } from "./data-model/edmx/ODataEdmxModel";
+import { SchemaV3 } from "./data-model/edmx/ODataEdmxModelV3";
+import { SchemaV4 } from "./data-model/edmx/ODataEdmxModelV4";
+import { digest as digestV2 } from "./data-model/DataModelDigestionV2";
+import { digest as digestV4 } from "./data-model/DataModelDigestionV4";
+import { ODataEdmxModelBase, Schema } from "./data-model/edmx/ODataEdmxModelBase";
 import { Modes, RunOptions } from "./OptionModel";
 
 /**
@@ -10,24 +12,29 @@ import { Modes, RunOptions } from "./OptionModel";
  * @param metadataJson metadata of a given OData service already parsed as JSON
  * @param options further options
  */
-export async function runApp(metadataJson: ODataEdmxModel, options: RunOptions): Promise<void> {
+export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: RunOptions): Promise<void> {
+  // determine edmx version attribute
+  const version = metadataJson["edmx:Edmx"].$.Version;
+
   // get file name based on service name
-  // TODO check edmx version attribute
   const dataService = metadataJson["edmx:Edmx"]["edmx:DataServices"][0];
 
   // merge all schemas & take name from first schema
   // TODO only necessary for NorthwindModel => other use cases?
-  const schema = dataService.Schema.reduce(
+  const schemaRaw = dataService.Schema.reduce(
     (collector, schema) => ({
       ...schema,
       ...collector,
     }),
-    {} as Schema
+    {} as Schema<any, any>
   );
 
   // parse model information from edmx into something we can really work with
   // => that stuff is called dataModel!
-  const dataModel = await digest(schema, options);
+  // prettier-ignore
+  const dataModel = version === "1.0"
+    ? await digestV2(schemaRaw as SchemaV3, options)
+    : await digestV4(schemaRaw as SchemaV4, options);
   const project = await createProjectManager(
     dataModel.getFileNames(),
     options.output,

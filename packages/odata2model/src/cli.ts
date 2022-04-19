@@ -5,8 +5,8 @@ import { parseStringPromise } from "xml2js";
 
 import { runApp } from "./app";
 import { EmitModes, Modes, ProjectOptions, RunOptions } from "./OptionModel";
-import { ODataEdmxModel } from "./data-model/edmx/ODataEdmxModel";
 import { logFilePath } from "./project/logger/logFilePath";
+import { ODataEdmxModelBase } from "./data-model/edmx/ODataEdmxModelBase";
 
 export class Cli {
   async run(): Promise<void> {
@@ -83,7 +83,10 @@ export class Cli {
 
     // read metadata file and convert to JSON
     const metadataXml = await readFile(source);
-    const metadataJson = (await parseStringPromise(metadataXml)) as ODataEdmxModel;
+    const metadataJson = (await parseStringPromise(metadataXml)) as ODataEdmxModelBase<any>;
+    // TODO find out if "1.0" and "4.0" are really correct
+    // TODO exit here if no version not suitable version was detected
+    // console.log(`OData version detected: ${metadataJson["edmx:Edmx"].$.Version}`);
 
     // ensure that output directory exists
     try {

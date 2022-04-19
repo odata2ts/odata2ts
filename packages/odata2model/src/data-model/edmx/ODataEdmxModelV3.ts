@@ -1,8 +1,16 @@
-import { ODataEdmxModelBase, EntityContainer, Schema, Property, ReturnType, EntityType } from "./ODataEdmxModelBase";
+import {
+  ODataEdmxModelBase,
+  EntityContainer,
+  Schema,
+  Property,
+  ReturnType,
+  EntityType,
+  ComplexType,
+} from "./ODataEdmxModelBase";
 
 export interface ODataEdmxModelV3 extends ODataEdmxModelBase<SchemaV3> {}
 
-export interface SchemaV3 extends Schema<EntityTypeV3> {
+export interface SchemaV3 extends Schema<EntityTypeV3, ComplexTypeV3> {
   EntityContainer?: Array<EntityContainerV3>;
   Association?: Array<Association>;
 }
@@ -10,6 +18,8 @@ export interface SchemaV3 extends Schema<EntityTypeV3> {
 export interface EntityTypeV3 extends EntityType {
   NavigationProperty?: Array<NavigationProperty>;
 }
+
+export interface ComplexTypeV3 extends ComplexType {}
 
 export interface NavigationProperty {
   $: {
@@ -43,7 +53,7 @@ export interface AssociationSetEnd {
 export interface FunctionImport {
   $: {
     Name: string;
-    EntitySet: string;
+    EntitySet?: string;
     ReturnType?: string;
   };
   ReturnType?: Array<ReturnType>;
@@ -51,7 +61,7 @@ export interface FunctionImport {
 }
 
 export interface Parameter extends Property {
-  Mode: "In" | "Out";
+  Mode?: "In" | "Out" | "InOut";
 }
 
 export interface Association {

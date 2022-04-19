@@ -6,17 +6,22 @@ import {
   Property,
   ReturnType,
   EntityType,
+  ComplexType,
 } from "./ODataEdmxModelBase";
 
 export interface ODataEdmxModelV4 extends ODataEdmxModelBase<SchemaV4> {}
 
-export interface SchemaV4 extends Schema<EntityTypeV4> {
+export interface SchemaV4 extends Schema<EntityTypeV4, ComplexTypeV4> {
   EntityContainer?: Array<EntityContainerV4>;
   Function?: Array<Operation>;
   Action?: Array<Operation>;
 }
 
 export interface EntityTypeV4 extends EntityType {
+  NavigationProperty?: Array<NavigationProperty>;
+}
+
+export interface ComplexTypeV4 extends ComplexType {
   NavigationProperty?: Array<NavigationProperty>;
 }
 
@@ -76,7 +81,7 @@ export interface Operation {
     IsBound?: "true" | "false";
   };
   Parameter?: Array<Parameter>;
-  ReturnType: Array<ReturnType>;
+  ReturnType?: Array<ReturnType>;
 }
 
 export interface Parameter extends Property {

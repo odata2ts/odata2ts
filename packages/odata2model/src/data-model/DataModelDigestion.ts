@@ -1,37 +1,18 @@
-import { DataModel } from "./DataModel";
-import {
-  Action,
-  ComplexType,
-  EntityContainer,
-  EntityType,
-  Function,
-  NavigationProperty,
-  OdataTypes,
-  Property,
-  Schema,
-} from "./edmx/ODataEdmxModel";
-import { RunOptions } from "../OptionModel";
-import { upperCaseFirst } from "upper-case-first";
 import { firstCharLowerCase } from "xml2js/lib/processors";
-import { DataTypes, ModelType, ModelTypes, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
+import { upperCaseFirst } from "upper-case-first";
 
-/**
- * Takes an EDMX schema
- * @param schema
- * @param options
- */
-export async function digest(schema: Schema, options: RunOptions): Promise<DataModel> {
-  const digester = new Digester(schema, options);
-  return digester.digest();
-}
+import { DataModel } from "./DataModel";
+import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModelBase";
+import { RunOptions } from "../OptionModel";
+import { DataTypes, ModelType, ModelTypes, PropertyModel } from "./DataTypeModel";
 
-const EDM_PREFIX = "Edm.";
-const ROOT_OPERATION = "/";
+export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, CT extends ComplexType> {
+  protected static EDM_PREFIX = "Edm.";
+  protected static ROOT_OPERATION = "/";
 
-class Digester {
-  private readonly dataModel: DataModel;
+  protected readonly dataModel: DataModel;
 
-  constructor(private schema: Schema, private options: RunOptions) {
+  protected constructor(protected schema: S, protected options: RunOptions) {
     const serviceName = schema.$.Namespace;
     this.dataModel = new DataModel(serviceName);
   }
@@ -41,31 +22,37 @@ class Digester {
     return this.dataModel;
   }
 
-  private getModelName(name: string) {
+  protected abstract getNavigationProps(entityType: ET | ComplexType): Array<Property>;
+
+  protected abstract digestEntityContainer(): void;
+
+  protected abstract mapODataType(type: string): string;
+
+  protected getModelName(name: string) {
     return `${this.options.modelPrefix}${upperCaseFirst(this.stripServicePrefix(name))}${this.options.modelSuffix}`;
   }
 
-  private getQName(name: string) {
+  protected getQName(name: string) {
     return `q${upperCaseFirst(this.stripServicePrefix(name))}`;
   }
 
-  private getEnumName(name: string) {
+  protected getEnumName(name: string) {
     return `${upperCaseFirst(name)}`;
   }
 
-  private getOperationName(name: string) {
-    return firstCharLowerCase(this.stripServicePrefix(name));
-  }
-
-  private getEntryPointName(name: string) {
+  protected getEntryPointName(name: string) {
     return firstCharLowerCase(name);
   }
 
-  private stripServicePrefix(token: string) {
+  protected stripServicePrefix(token: string) {
     return token.replace(new RegExp(this.dataModel.getServicePrefix()), "");
   }
 
-  private digestSchema(schema: Schema) {
+  protected getOperationName(name: string) {
+    return firstCharLowerCase(this.stripServicePrefix(name));
+  }
+
+  private digestSchema(schema: Schema<ET, CT>) {
     // enums
     schema.EnumType?.forEach((et) => {
       const name = et.$.Name;
@@ -81,16 +68,11 @@ class Digester {
     this.addModel(schema.ComplexType, ModelTypes.ComplexType);
     this.postProcessModel();
 
-    // functions, actions, EntitySet, Singleton
-    this.addOperations(schema.Function, OperationTypes.Function);
-    this.addOperations(schema.Action, OperationTypes.Action);
-
-    if (schema.EntityContainer && schema.EntityContainer.length) {
-      this.digestEntityContainer(schema.EntityContainer[0]);
-    }
+    // delegate to concrete entity container digestion
+    this.digestEntityContainer();
   }
 
-  private addModel(models: Array<EntityType | ComplexType> | undefined, modelType: ModelTypes) {
+  private addModel(models: Array<ET | ComplexType> | undefined, modelType: ModelTypes) {
     if (!models || !models.length) {
       return;
     }
@@ -98,7 +80,7 @@ class Digester {
     models.forEach((model) => {
       const name = this.getModelName(model.$.Name);
       const bType = model.$.BaseType;
-      const props = [...(model.Property ?? []), ...(model.NavigationProperty ?? [])];
+      const props = [...(model.Property ?? []), ...this.getNavigationProps(model)];
 
       // support for base types, i.e. extends clause of interfaces
       const baseTypes = [];
@@ -177,7 +159,7 @@ class Digester {
     );
   }
 
-  private mapProperty = (p: Property | NavigationProperty): PropertyModel => {
+  protected mapProperty = (p: Property): PropertyModel => {
     if (!p.$.Type) {
       throw Error(`No type information given for property [${p.$.Name}]!`);
     }
@@ -210,7 +192,7 @@ class Digester {
       }
     }
     // OData built-in data types
-    else if (dataType.startsWith(EDM_PREFIX)) {
+    else if (dataType.startsWith(Digester.EDM_PREFIX)) {
       resultType = this.mapODataType(dataType);
       resultDt = DataTypes.PrimitiveType;
       if (isCollection) {
@@ -233,136 +215,4 @@ class Digester {
       isCollection: isCollection,
     };
   };
-
-  private mapODataType(type: string): string {
-    switch (type) {
-      case OdataTypes.Boolean:
-        return "boolean";
-      case OdataTypes.Byte:
-      case OdataTypes.SByte:
-      case OdataTypes.Int16:
-      case OdataTypes.Int32:
-      case OdataTypes.Int64:
-      case OdataTypes.Decimal:
-      case OdataTypes.Double:
-      case OdataTypes.Single:
-        return "number";
-      case OdataTypes.String:
-        return "string";
-      case OdataTypes.Date:
-        const dateType = "DateString";
-        this.dataModel.addPrimitiveTypeImport(dateType);
-        return dateType;
-      case OdataTypes.Time:
-        const timeType = "TimeOfDayString";
-        this.dataModel.addPrimitiveTypeImport(timeType);
-        return timeType;
-      case OdataTypes.DateTimeOffset:
-        const dateTimeType = "DateTimeOffsetString";
-        this.dataModel.addPrimitiveTypeImport(dateTimeType);
-        return dateTimeType;
-      case OdataTypes.Binary:
-        const binaryType = "BinaryString";
-        this.dataModel.addPrimitiveTypeImport(binaryType);
-        return binaryType;
-      case OdataTypes.Guid:
-        const guidType = "GuidString";
-        this.dataModel.addPrimitiveTypeImport(guidType);
-        return guidType;
-      default:
-        return "string";
-    }
-  }
-
-  private addOperations(operations: Array<Function | Action> | undefined, type: OperationTypes) {
-    if (!operations || !operations.length) {
-      return;
-    }
-
-    operations.forEach((op) => {
-      const params: Array<PropertyModel> = op.Parameter?.map(this.mapProperty) ?? [];
-      const returnType: PropertyModel | undefined = op.ReturnType?.map((rt) => {
-        return this.mapProperty({ ...rt, $: { Name: "NO_NAME_BECAUSE_RETURN_TYPE", ...rt.$ } });
-      })[0];
-      const isBound = op.$.IsBound === "true";
-
-      if (isBound && !params.length) {
-        throw Error(`IllegalState: Operation '${op.$.Name}' is bound, but has no parameters!`);
-      }
-
-      const bindingProp = isBound ? params.shift() : undefined;
-      const binding = bindingProp ? bindingProp.type : ROOT_OPERATION;
-      this.dataModel.addOperationType(binding, {
-        odataName: op.$.Name,
-        name: this.getOperationName(op.$.Name),
-        type: type,
-        parameters: params,
-        returnType: returnType,
-      });
-    });
-  }
-
-  private digestEntityContainer(container: EntityContainer) {
-    container.ActionImport?.forEach((actionImport) => {
-      const name = this.getOperationName(actionImport.$.Name);
-      const operationName = this.getOperationName(actionImport.$.Action);
-
-      this.dataModel.addAction(name, {
-        name: name,
-        odataName: actionImport.$.Name,
-        operation: this.getRootOperationType(operationName),
-      });
-    });
-
-    container.FunctionImport?.forEach((funcImport) => {
-      const name = this.getOperationName(funcImport.$.Name);
-      const operationName = this.getOperationName(funcImport.$.Function);
-
-      this.dataModel.addFunction(name, {
-        name,
-        odataName: funcImport.$.Name,
-        operation: this.getRootOperationType(operationName),
-        entitySet: funcImport.$.EntitySet,
-      });
-    });
-
-    container.Singleton?.forEach((singleton) => {
-      const name = this.getEntryPointName(singleton.$.Name);
-      const navPropBindings = singleton.NavigationPropertyBinding || [];
-
-      this.dataModel.addSingleton(name, {
-        name,
-        odataName: singleton.$.Name,
-        type: this.dataModel.getModel(this.getModelName(singleton.$.Type)),
-        navPropBinding: navPropBindings.map((binding) => ({
-          path: this.stripServicePrefix(binding.$.Path),
-          target: binding.$.Target,
-        })),
-      });
-    });
-
-    container.EntitySet?.forEach((entitySet) => {
-      const name = this.getEntryPointName(entitySet.$.Name);
-      const navPropBindings = entitySet.NavigationPropertyBinding || [];
-
-      this.dataModel.addEntitySet(name, {
-        name,
-        odataName: entitySet.$.Name,
-        entityType: this.dataModel.getModel(this.getModelName(entitySet.$.EntityType)),
-        navPropBinding: navPropBindings.map((binding) => ({
-          path: this.stripServicePrefix(binding.$.Path),
-          target: binding.$.Target,
-        })),
-      });
-    });
-  }
-
-  private getRootOperationType(name: string): OperationType {
-    const rootOps = this.dataModel.getOperationTypeByBinding(ROOT_OPERATION);
-    const rootOp = rootOps.find((op) => op.name === name);
-    if (!rootOp) {
-      throw Error(`Couldn't find root operation with name [${name}]`);
-    }
-    return rootOp;
-  }
 }

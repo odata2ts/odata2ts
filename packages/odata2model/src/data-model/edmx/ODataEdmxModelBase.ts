@@ -13,13 +13,13 @@ export interface DataService<VersionedSchema> {
   Schema: Array<VersionedSchema>;
 }
 
-export interface Schema<ET extends EntityType> {
+export interface Schema<ET extends EntityType, CT extends ComplexType> {
   $: {
     Namespace: string;
     xmlns: string;
   };
   EntityType?: Array<ET>;
-  ComplexType?: Array<ComplexType>;
+  ComplexType?: Array<CT>;
   EnumType?: Array<EnumType>;
 }
 
