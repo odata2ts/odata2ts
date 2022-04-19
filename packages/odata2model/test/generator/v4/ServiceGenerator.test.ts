@@ -1,12 +1,12 @@
-import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
-import { createFixtureComparator, FixtureComparator } from "./comparator/FixtureComparator";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
+import { createFixtureComparator, FixtureComparator } from "../comparator/FixtureComparator";
 import { SERVICE_NAME } from "./EntityBasedGenerationTests";
-import { digest } from "../../src/data-model/DataModelDigestionV4";
-import { generateServices } from "../../src/generator";
-import { createProjectManager, ProjectManager } from "../../src/project/ProjectManager";
-import { ProjectFiles } from "../../src/data-model/DataModel";
-import { ODataTypesV4 } from "../../src/data-model/edmx/ODataEdmxModelV4";
-import { ODataModelBuilderV4 } from "../data-model/builder/v4/ODataModelBuilderV4";
+import { digest } from "../../../src/data-model/DataModelDigestionV4";
+import { generateServices } from "../../../src/generator";
+import { createProjectManager, ProjectManager } from "../../../src/project/ProjectManager";
+import { ProjectFiles } from "../../../src/data-model/DataModel";
+import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
+import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 
 describe("Service Generator Tests", () => {
   const FIXTURE_PATH = "generator/service";

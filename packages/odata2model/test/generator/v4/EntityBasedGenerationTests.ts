@@ -1,10 +1,10 @@
 import { Project, SourceFile } from "ts-morph";
-import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
-import { createFixtureComparator, FixtureComparator } from "./comparator/FixtureComparator";
-import { ODataTypesV4 } from "../../src/data-model/edmx/ODataEdmxModelV4";
-import { digest } from "../../src/data-model/DataModelDigestionV4";
-import { DataModel } from "../../src/data-model/DataModel";
-import { ODataModelBuilderV4 } from "../data-model/builder/v4/ODataModelBuilderV4";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
+import { createFixtureComparator, FixtureComparator } from "../comparator/FixtureComparator";
+import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
+import { digest } from "../../../src/data-model/DataModelDigestionV4";
+import { DataModel } from "../../../src/data-model/DataModel";
+import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 
 export const SERVICE_NAME = "Tester";
 export const ENTITY_NAME = "Book";

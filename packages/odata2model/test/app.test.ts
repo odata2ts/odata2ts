@@ -1,4 +1,3 @@
-import { SERVICE_NAME } from "./generator/EntityBasedGenerationTests";
 import { EmitModes, Modes, RunOptions } from "../src/OptionModel";
 import { runApp } from "../src/app";
 import * as ProjectManager from "../src/project/ProjectManager";
@@ -8,6 +7,8 @@ import { ODataModelBuilderV4 } from "./data-model/builder/v4/ODataModelBuilderV4
 jest.mock("fs-extra");
 jest.mock("ts-morph");
 jest.mock("../src/generator");
+
+const SERVICE_NAME = "Tester";
 
 describe("App Test", () => {
   let runOptions: RunOptions;
