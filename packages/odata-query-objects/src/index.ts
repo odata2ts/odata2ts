@@ -1,4 +1,12 @@
-export { DateString, TimeOfDayString, DateTimeOffsetString, BinaryString, GuidString } from "./odata/ODataTypes";
+export {
+  DateString,
+  TimeOfDayString,
+  DateTimeOffsetString,
+  BinaryString,
+  GuidString,
+  DateTimeString,
+  TimeString,
+} from "./odata/ODataTypes";
 
 export { QFilterExpression } from "./QFilterExpression";
 export { QOrderByExpression } from "./QOrderByExpression";
