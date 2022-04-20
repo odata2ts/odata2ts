@@ -9,6 +9,7 @@ import { QBooleanPath } from "./path/QBooleanPath";
 import { QNumberPath } from "./path/QNumberPath";
 import { QStringPath } from "./path/QStringPath";
 import { QueryObject } from "./QueryObject";
+import * as V2 from "./path/date-time-v2";
 
 const ATTRIBUTE_NAME = "it";
 const PRIMITIVE_VALUE_REFERENCE = "$it";
@@ -105,6 +106,27 @@ export class QDateCollection extends QPrimitiveCollection<QDatePath> {
   }
 }
 export const qDateCollection = new QDateCollection();
+
+export class QTimeV2Collection extends QPrimitiveCollection<V2.QTimeV2Path> {
+  createQPathType(path: string) {
+    return new V2.QTimeV2Path(path);
+  }
+}
+export const qTimeV2Collection = new QTimeV2Collection();
+
+export class QDateTimeV2Collection extends QPrimitiveCollection<V2.QDateTimeV2Path> {
+  createQPathType(path: string) {
+    return new V2.QDateTimeV2Path(path);
+  }
+}
+export const qDateTimeV2Collection = new QDateTimeV2Collection();
+
+export class QDateTimeOffsetV2Collection extends QPrimitiveCollection<V2.QDateTimeOffsetV2Path> {
+  createQPathType(path: string) {
+    return new V2.QDateTimeOffsetV2Path(path);
+  }
+}
+export const qDateTimeOffsetV2Collection = new QDateTimeOffsetV2Collection();
 
 export class QEnumCollection extends QPrimitiveCollection<QEnumPath> {
   createQPathType(path: string) {

@@ -55,12 +55,17 @@ enum GuidStringBrand {
   _ = "",
 }
 
-export type DateTimeString = string & DateTimeStringBrand;
-enum DateTimeStringBrand {
+export type TimeV2String = string & TimeV2StringBrand;
+enum TimeV2StringBrand {
   _ = "",
 }
 
-export type TimeString = string & TimeStringBrand;
-enum TimeStringBrand {
+export type DateTimeV2String = string & DateTimeV2StringBrand;
+enum DateTimeV2StringBrand {
+  _ = "",
+}
+
+export type DateTimeOffsetV2String = string & DateTimeOffsetV2StringBrand;
+enum DateTimeOffsetV2StringBrand {
   _ = "",
 }

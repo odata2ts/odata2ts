@@ -1,3 +1,8 @@
+export enum ODataVersion {
+  V2 = "2.0",
+  V4 = "4.0",
+}
+
 export const enum DataTypes {
   PrimitiveType = "PrimitiveType",
   EnumType = "EnumType",

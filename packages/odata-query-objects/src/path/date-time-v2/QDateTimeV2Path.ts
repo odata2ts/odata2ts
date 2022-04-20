@@ -1,8 +1,8 @@
 import { DateTimeBasePath } from "./DateTimeBase";
 import { dayFn, hourFn, minuteFn, monthFn, secondFn, yearFn } from "../base/DateTimeFunctions";
 
-export class QDateTimePath extends DateTimeBasePath {
-  protected getFinalValue(value: string | QDateTimePath) {
+export class QDateTimeV2Path extends DateTimeBasePath {
+  protected getFinalValue(value: string | QDateTimeV2Path) {
     return typeof value === "string"
       ? `datetime'${value}'`
       : typeof value.getPath === "function"

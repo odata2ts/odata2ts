@@ -4,8 +4,9 @@ export {
   DateTimeOffsetString,
   BinaryString,
   GuidString,
-  DateTimeString,
-  TimeString,
+  TimeV2String,
+  DateTimeV2String,
+  DateTimeOffsetV2String,
 } from "./odata/ODataTypes";
 
 export { QFilterExpression } from "./QFilterExpression";
@@ -24,5 +25,6 @@ export { QTimeOfDayPath } from "./path/date-time-v4/QTimeOfDayPath";
 export { QDateTimeOffsetPath } from "./path/date-time-v4/QDateTimeOffsetPath";
 export { QueryObject } from "./QueryObject";
 
+export * from "./path/date-time-v2";
 export * from "./QSingletons";
 export * from "./path/QPathModel";

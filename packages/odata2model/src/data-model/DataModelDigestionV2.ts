@@ -1,6 +1,6 @@
 import { RunOptions } from "../OptionModel";
 import { ComplexTypeV3, EntityTypeV3, ODataTypesV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
-import { OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
+import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { DataModel } from "./DataModel";
 import { Digester } from "./DataModelDigestion";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
@@ -17,7 +17,7 @@ export async function digest(schema: SchemaV3, options: RunOptions): Promise<Dat
 
 class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
   constructor(schema: SchemaV3, options: RunOptions) {
-    super(schema, options);
+    super(ODataVersion.V2, schema, options);
   }
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV3): Array<Property> {
@@ -111,15 +111,15 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
       case ODataTypesV3.String:
         return "string";
       case ODataTypesV3.DateTime:
-        const dateType = "DateTimeString";
+        const dateType = "DateTimeV2String";
         this.dataModel.addPrimitiveTypeImport(dateType);
         return dateType;
       case ODataTypesV3.Time:
-        const timeType = "TimeString";
+        const timeType = "TimeV2String";
         this.dataModel.addPrimitiveTypeImport(timeType);
         return timeType;
       case ODataTypesV3.DateTimeOffset:
-        const dateTimeType = "DateTimeOffsetString";
+        const dateTimeType = "DateTimeOffsetV2String";
         this.dataModel.addPrimitiveTypeImport(dateTimeType);
         return dateTimeType;
       case ODataTypesV3.Binary:

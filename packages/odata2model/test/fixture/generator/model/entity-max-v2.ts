@@ -1,18 +1,17 @@
-// @ts-nocheck
 import type {
   GuidString,
-  TimeString,
-  DateTimeString,
-  DateTimeOffsetString,
+  TimeV2String,
+  DateTimeV2String,
+  DateTimeOffsetV2String,
   BinaryString,
 } from "@odata2ts/odata-query-objects";
 
 export interface Book {
   id: GuidString;
   requiredOption: boolean;
-  time?: TimeString;
-  optionalDate?: DateTimeString;
-  dateTimeOffset?: DateTimeOffsetString;
+  time?: TimeV2String;
+  optionalDate?: DateTimeV2String;
+  dateTimeOffset?: DateTimeOffsetV2String;
   TestDecimal?: string;
   testNumber?: number;
   testBinary?: BinaryString;

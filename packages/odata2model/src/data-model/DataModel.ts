@@ -8,6 +8,7 @@ import {
   FunctionImportType,
   SingletonType,
   EntitySetType,
+  ODataVersion,
 } from "./DataTypeModel";
 
 export interface ProjectFiles {
@@ -17,8 +18,8 @@ export interface ProjectFiles {
 }
 
 export class DataModel {
-  private servicePrefix: string;
-  private fileNames: ProjectFiles;
+  private readonly servicePrefix: string;
+  private readonly fileNames: ProjectFiles;
 
   // combines entity & complex types
   private modelTypes: { [name: string]: ModelType } = {};
@@ -31,7 +32,7 @@ export class DataModel {
   // e.g. DateString, GuidString, etc.
   private primitiveTypeImports: Set<string> = new Set();
 
-  constructor(private serviceName: string) {
+  constructor(private version: ODataVersion, private serviceName: string) {
     this.servicePrefix = serviceName + ".";
 
     const name = upperCaseFirst(serviceName);
@@ -40,6 +41,14 @@ export class DataModel {
       qObject: `Q${name}`,
       service: `${name}${name.endsWith("Service") ? "" : "Service"}`,
     };
+  }
+
+  /**
+   * OData version: 2.0 or 4.0.
+   * @returns
+   */
+  public getODataVersion() {
+    return this.version;
   }
 
   /**

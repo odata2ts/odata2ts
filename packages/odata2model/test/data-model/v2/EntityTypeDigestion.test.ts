@@ -198,9 +198,9 @@ describe("EntityTypeDigestion Test", () => {
     // check needed imports for special primitive types
     expect(result.getPrimitiveTypeImports()).toEqual([
       "GuidString",
-      "TimeString",
-      "DateTimeString",
-      "DateTimeOffsetString",
+      "TimeV2String",
+      "DateTimeV2String",
+      "DateTimeOffsetV2String",
       "BinaryString",
     ]);
 
@@ -219,21 +219,21 @@ describe("EntityTypeDigestion Test", () => {
         name: "time",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Time,
-        type: "TimeString",
+        type: "TimeV2String",
         required: false,
       },
       {
         name: "optionalDate",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.DateTime,
-        type: "DateTimeString",
+        type: "DateTimeV2String",
         required: false,
       },
       {
         name: "dateTimeOffset",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.DateTimeOffset,
-        type: "DateTimeOffsetString",
+        type: "DateTimeOffsetV2String",
       },
       {
         name: "testInt16",

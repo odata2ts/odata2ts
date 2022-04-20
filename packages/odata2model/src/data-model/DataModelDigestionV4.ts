@@ -1,7 +1,7 @@
 import { RunOptions } from "../OptionModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
-import { SchemaV4, Operation, ODataTypesV4, EntityTypeV4, ComplexTypeV4 } from "./edmx/ODataEdmxModelV4";
-import { OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
+import { ComplexTypeV4, EntityTypeV4, ODataTypesV4, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4";
+import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { Digester } from "./DataModelDigestion";
 import { DataModel } from "./DataModel";
 
@@ -17,7 +17,7 @@ export async function digest(schema: SchemaV4, options: RunOptions): Promise<Dat
 
 class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
   constructor(schema: SchemaV4, options: RunOptions) {
-    super(schema, options);
+    super(ODataVersion.V4, schema, options);
   }
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV4): Array<Property> {

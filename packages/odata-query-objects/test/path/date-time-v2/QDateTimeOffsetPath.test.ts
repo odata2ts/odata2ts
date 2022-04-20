@@ -1,4 +1,4 @@
-import { QDateTimeOffsetPath } from "../../../src/v2";
+import { QDateTimeOffsetV2Path } from "../../../src";
 import {
   EXAMPLE_DATE_TIME_OFFSET,
   createBaseDateTimeTests,
@@ -6,10 +6,10 @@ import {
   createTimeFunctionTests,
 } from "./DateTimeBaseTests";
 
-describe("QDateTimeOffsetPath test", () => {
+describe("QDateTimeOffsetV2Path test", () => {
   const exampleResult = `datetimeoffset'${EXAMPLE_DATE_TIME_OFFSET}'`;
 
-  createBaseDateTimeTests(QDateTimeOffsetPath, EXAMPLE_DATE_TIME_OFFSET, exampleResult);
-  createDateFunctionTests(QDateTimeOffsetPath);
-  createTimeFunctionTests(QDateTimeOffsetPath);
+  createBaseDateTimeTests(QDateTimeOffsetV2Path, EXAMPLE_DATE_TIME_OFFSET, exampleResult);
+  createDateFunctionTests(QDateTimeOffsetV2Path);
+  createTimeFunctionTests(QDateTimeOffsetV2Path);
 });

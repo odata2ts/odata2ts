@@ -4,7 +4,7 @@ import { upperCaseFirst } from "upper-case-first";
 import { DataModel } from "./DataModel";
 import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModelBase";
 import { RunOptions } from "../OptionModel";
-import { DataTypes, ModelType, ModelTypes, PropertyModel } from "./DataTypeModel";
+import { DataTypes, ModelType, ModelTypes, ODataVersion, PropertyModel } from "./DataTypeModel";
 
 export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, CT extends ComplexType> {
   protected static EDM_PREFIX = "Edm.";
@@ -12,14 +12,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   protected readonly dataModel: DataModel;
 
-  protected constructor(protected schema: S, protected options: RunOptions) {
+  protected constructor(protected version: ODataVersion, protected schema: S, protected options: RunOptions) {
     const serviceName = schema.$.Namespace;
-    this.dataModel = new DataModel(serviceName);
-  }
-
-  public async digest(): Promise<DataModel> {
-    this.digestSchema(this.schema);
-    return this.dataModel;
+    this.dataModel = new DataModel(version, serviceName);
   }
 
   protected abstract getNavigationProps(entityType: ET | ComplexType): Array<Property>;
@@ -27,6 +22,11 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   protected abstract digestEntityContainer(): void;
 
   protected abstract mapODataType(type: string): string;
+
+  public async digest(): Promise<DataModel> {
+    this.digestSchema(this.schema);
+    return this.dataModel;
+  }
 
   protected getModelName(name: string) {
     return `${this.options.modelPrefix}${upperCaseFirst(this.stripServicePrefix(name))}${this.options.modelSuffix}`;

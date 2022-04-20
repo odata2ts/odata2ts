@@ -1,4 +1,4 @@
-import { QDateTimePath } from "../../../src/v2";
+import { QDateTimeV2Path } from "../../../src";
 import {
   EXAMPLE_DATE_TIME,
   createBaseDateTimeTests,
@@ -6,10 +6,10 @@ import {
   createTimeFunctionTests,
 } from "./DateTimeBaseTests";
 
-describe("QDateTimePath test", () => {
+describe("QDateTimeV2Path test", () => {
   const exampleResult = `datetime'${EXAMPLE_DATE_TIME}'`;
 
-  createBaseDateTimeTests(QDateTimePath, EXAMPLE_DATE_TIME, exampleResult);
-  createDateFunctionTests(QDateTimePath);
-  createTimeFunctionTests(QDateTimePath);
+  createBaseDateTimeTests(QDateTimeV2Path, EXAMPLE_DATE_TIME, exampleResult);
+  createDateFunctionTests(QDateTimeV2Path);
+  createTimeFunctionTests(QDateTimeV2Path);
 });

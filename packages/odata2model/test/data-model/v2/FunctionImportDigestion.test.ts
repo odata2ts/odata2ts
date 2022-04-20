@@ -95,7 +95,7 @@ describe("Function Digestion Test", () => {
           },
           {
             name: "testDateTime",
-            type: "DateTimeString",
+            type: "DateTimeV2String",
           },
         ],
         returnType: {
