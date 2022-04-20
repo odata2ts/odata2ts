@@ -1,4 +1,4 @@
-import { DateTimeBasePath } from "../../../src/path/date-time-v2/DateTimeBase";
+import { DateTimeBasePath } from "../../../src/path/v2/DateTimeBase";
 import { QNumberPath } from "../../../src";
 
 export type DateTimeConstructor<T extends DateTimeBasePath> = new (path: string) => T;

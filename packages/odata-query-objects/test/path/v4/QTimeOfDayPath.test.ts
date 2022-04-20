@@ -1,4 +1,4 @@
-import { QTimeOfDayPath } from "./../../../src/path/date-time-v4/QTimeOfDayPath";
+import { QTimeOfDayPath } from "../../../src/path/v4/QTimeOfDayPath";
 
 describe("QTimeOfDayPath test", () => {
   let toTest: QTimeOfDayPath;

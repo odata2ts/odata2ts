@@ -1,15 +1,15 @@
 import { GuidString, BinaryString, DateTimeOffsetString, TimeOfDayString, DateString } from "./odata/ODataTypes";
 import { QEnumPath } from "./path/QEnumPath";
 import { QBinaryPath } from "./path/QBinaryPath";
-import { QDatePath } from "./path/date-time-v4/QDatePath";
-import { QTimeOfDayPath } from "./path/date-time-v4/QTimeOfDayPath";
-import { QDateTimeOffsetPath } from "./path/date-time-v4/QDateTimeOffsetPath";
+import { QDatePath } from "./path/v4/QDatePath";
+import { QTimeOfDayPath } from "./path/v4/QTimeOfDayPath";
+import { QDateTimeOffsetPath } from "./path/v4/QDateTimeOffsetPath";
 import { QGuidPath } from "./path/QGuidPath";
 import { QBooleanPath } from "./path/QBooleanPath";
 import { QNumberPath } from "./path/QNumberPath";
-import { QStringPath } from "./path/QStringPath";
+import { QStringPath } from "./path/v4/QStringPath";
 import { QueryObject } from "./QueryObject";
-import * as V2 from "./path/date-time-v2";
+import * as V2 from "./path/v2";
 
 const ATTRIBUTE_NAME = "it";
 const PRIMITIVE_VALUE_REFERENCE = "$it";
