@@ -2,12 +2,17 @@ import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
 import { ODataModelBuilderV4 } from "./builder/v4/ODataModelBuilderV4";
 import { DataModel } from "../../src/data-model/DataModel";
 import { Schema } from "../../src/data-model/edmx/ODataEdmxModelBase";
+import { ODataVersion } from "../../src/data-model/DataTypeModel";
 import { ODataModelBuilder } from "./builder/ODataModelBuilder";
 
 export type DigestionFunction = <S extends Schema<any, any>>(schema: S, runOpts: RunOptions) => Promise<DataModel>;
 export type ModelBuilderConstructor<MB extends ODataModelBuilder<any, any, any, any>> = new (serviceName: string) => MB;
 
-export function createDataModelTests(ODataBuilderConstructor: ModelBuilderConstructor<any>, digest: DigestionFunction) {
+export function createDataModelTests(
+  version: ODataVersion,
+  ODataBuilderConstructor: ModelBuilderConstructor<any>,
+  digest: DigestionFunction
+) {
   const SERVICE_NAME = "Tester";
 
   let odataBuilder: ODataModelBuilder<any, any, any, any>;
@@ -37,6 +42,7 @@ export function createDataModelTests(ODataBuilderConstructor: ModelBuilderConstr
       qObject: `Q${SERVICE_NAME}`,
       service: `${SERVICE_NAME}Service`,
     });
+    expect(result.getODataVersion()).toBe(version);
 
     expect(result.getModels()).toEqual([]);
     expect(result.getEnums()).toEqual([]);
