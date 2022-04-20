@@ -1,5 +1,5 @@
 import { DateTimeBasePath } from "./DateTimeBase";
-import { hourFn, minuteFn, secondFn } from "./DateTimeFunctions";
+import { hourFn, minuteFn, secondFn } from "../base/DateTimeFunctions";
 
 export class QTimeOfDayPath extends DateTimeBasePath {
   constructor(path: string) {
