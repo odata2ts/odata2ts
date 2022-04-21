@@ -47,7 +47,6 @@ export function createDataModelTests(
     expect(result.getModels()).toEqual([]);
     expect(result.getEnums()).toEqual([]);
     expect(result.getEntityContainer()).toEqual({ entitySets: {}, singletons: {}, functions: {}, actions: {} });
-    expect(result.getPrimitiveTypeImports()).toEqual([]);
   });
 
   test("Deduplicate Service Suffix", async () => {

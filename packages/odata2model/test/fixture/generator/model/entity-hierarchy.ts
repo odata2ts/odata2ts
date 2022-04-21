@@ -1,7 +1,5 @@
-import type { GuidString } from "@odata2ts/odata-query-objects";
-
 export interface GrandParent {
-  id: GuidString;
+  id: string;
 }
 
 export interface Parent extends GrandParent {

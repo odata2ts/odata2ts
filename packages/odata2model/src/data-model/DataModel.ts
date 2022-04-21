@@ -116,20 +116,6 @@ export class DataModel {
     return Object.values(this.enumTypes);
   }
 
-  public addPrimitiveTypeImport(typeName: string) {
-    this.primitiveTypeImports.add(typeName);
-  }
-
-  /**
-   * Get all special primitive data types, i.e. data types which are represented at strings,
-   * but convey a specific meaning: DateString, GuidString, etc.
-   *
-   * @returns list of additional data types to import when working with the data model
-   */
-  public getPrimitiveTypeImports(): Array<string> {
-    return [...this.primitiveTypeImports];
-  }
-
   public addOperationType(binding: string, operationType: OperationType) {
     if (!this.operationTypes[binding]) {
       this.operationTypes[binding] = [];

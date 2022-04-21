@@ -1,14 +1,3 @@
-export {
-  DateString,
-  TimeOfDayString,
-  DateTimeOffsetString,
-  BinaryString,
-  GuidString,
-  TimeV2String,
-  DateTimeV2String,
-  DateTimeOffsetV2String,
-} from "./odata/ODataTypes";
-
 export { QFilterExpression } from "./QFilterExpression";
 export { QOrderByExpression } from "./QOrderByExpression";
 export { QBooleanPath } from "./path/QBooleanPath";

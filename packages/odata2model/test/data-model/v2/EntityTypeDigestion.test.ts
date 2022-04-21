@@ -6,7 +6,7 @@ import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
 
 const NOOP_FN = () => {};
 
-describe("EntityTypeDigestion Test", () => {
+describe("V2: EntityTypeDigestion Test", () => {
   const SERVICE_NAME = "Tester";
 
   let odataBuilder: ODataModelBuilderV2;
@@ -133,7 +133,7 @@ describe("EntityTypeDigestion Test", () => {
       name: "id",
       odataType: ODataTypesV3.Guid,
       required: true,
-      type: "GuidString",
+      type: "string",
     };
     const expectedParentProp = {
       dataType: DataTypes.PrimitiveType,
@@ -204,15 +204,6 @@ describe("EntityTypeDigestion Test", () => {
     );
     const result = await digest(odataBuilder.getSchema(), runOpts);
 
-    // check needed imports for special primitive types
-    expect(result.getPrimitiveTypeImports()).toEqual([
-      "GuidString",
-      "TimeV2String",
-      "DateTimeV2String",
-      "DateTimeOffsetV2String",
-      "BinaryString",
-    ]);
-
     // now check all props regarding their type
     const model = result.getModel("Max");
     expect(model.props).toMatchObject([
@@ -220,7 +211,7 @@ describe("EntityTypeDigestion Test", () => {
         name: "id",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Guid,
-        type: "GuidString",
+        type: "string",
         required: true,
         qObject: undefined,
         qPath: "QGuidPath",
@@ -238,7 +229,7 @@ describe("EntityTypeDigestion Test", () => {
         name: "time",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Time,
-        type: "TimeV2String",
+        type: "string",
         required: false,
         qObject: undefined,
         qPath: "QTimeV2Path",
@@ -247,7 +238,7 @@ describe("EntityTypeDigestion Test", () => {
         name: "optionalDate",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.DateTime,
-        type: "DateTimeV2String",
+        type: "string",
         required: false,
         qObject: undefined,
         qPath: "QDateTimeV2Path",
@@ -256,7 +247,7 @@ describe("EntityTypeDigestion Test", () => {
         name: "dateTimeOffset",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.DateTimeOffset,
-        type: "DateTimeOffsetV2String",
+        type: "string",
         qObject: undefined,
         qPath: "QDateTimeOffsetV2Path",
       },
@@ -328,7 +319,7 @@ describe("EntityTypeDigestion Test", () => {
         name: "testBinary",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Binary,
-        type: "BinaryString",
+        type: "string",
         qObject: undefined,
         qPath: "QBinaryPath",
       },
@@ -344,7 +335,7 @@ describe("EntityTypeDigestion Test", () => {
         name: "multipleIds",
         dataType: DataTypes.PrimitiveType,
         odataType: `Collection(${ODataTypesV3.Guid})`,
-        type: "GuidString",
+        type: "string",
         isCollection: true,
         qObject: "QGuidCollection",
         qPath: "QGuidPath",
@@ -376,7 +367,7 @@ describe("EntityTypeDigestion Test", () => {
       {
         name: "multipleTimes",
         odataType: `Collection(${ODataTypesV3.Time})`,
-        type: "TimeV2String",
+        type: "string",
         isCollection: true,
         qObject: "QTimeV2Collection",
         qPath: "QTimeV2Path",
@@ -384,7 +375,7 @@ describe("EntityTypeDigestion Test", () => {
       {
         name: "multipleDateTimes",
         odataType: `Collection(${ODataTypesV3.DateTime})`,
-        type: "DateTimeV2String",
+        type: "string",
         isCollection: true,
         qObject: "QDateTimeV2Collection",
         qPath: "QDateTimeV2Path",
@@ -392,7 +383,7 @@ describe("EntityTypeDigestion Test", () => {
       {
         name: "multipleDateTimeOffsets",
         odataType: `Collection(${ODataTypesV3.DateTimeOffset})`,
-        type: "DateTimeOffsetV2String",
+        type: "string",
         isCollection: true,
         qObject: "QDateTimeOffsetV2Collection",
         qPath: "QDateTimeOffsetV2Path",
@@ -400,7 +391,7 @@ describe("EntityTypeDigestion Test", () => {
       {
         name: "multipleBinaries",
         odataType: `Collection(${ODataTypesV3.Binary})`,
-        type: "BinaryString",
+        type: "string",
         isCollection: true,
         qObject: "QBinaryCollection",
         qPath: "QBinaryPath",

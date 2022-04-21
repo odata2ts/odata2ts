@@ -1,4 +1,3 @@
-import { GuidString, BinaryString, DateTimeOffsetString, TimeOfDayString, DateString } from "./odata/ODataTypes";
 import { QEnumPath } from "./path/QEnumPath";
 import { QBinaryPath } from "./path/QBinaryPath";
 import { QDatePath } from "./path/v4/QDatePath";
@@ -21,23 +20,9 @@ export interface PrimitiveCollectionType<T> {
 export type StringCollection = PrimitiveCollectionType<string>;
 export type NumberCollection = PrimitiveCollectionType<number>;
 export type BooleanCollection = PrimitiveCollectionType<boolean>;
-export type GuidCollection = PrimitiveCollectionType<GuidString>;
-export type BinaryCollection = PrimitiveCollectionType<BinaryString>;
-export type DateTimeOffsetCollection = PrimitiveCollectionType<DateTimeOffsetString>;
-export type TimeOfDayCollection = PrimitiveCollectionType<TimeOfDayString>;
-export type DateCollection = PrimitiveCollectionType<DateString>;
 export type EnumCollection<T> = PrimitiveCollectionType<T>;
 
-export type PrimitiveCollection =
-  | StringCollection
-  | NumberCollection
-  | BooleanCollection
-  | GuidCollection
-  | BinaryCollection
-  | DateTimeOffsetCollection
-  | TimeOfDayCollection
-  | DateCollection
-  | EnumCollection<any>;
+export type PrimitiveCollection = StringCollection | NumberCollection | BooleanCollection | EnumCollection<any>;
 
 export abstract class QPrimitiveCollection<QType> extends QueryObject {
   public readonly it;
