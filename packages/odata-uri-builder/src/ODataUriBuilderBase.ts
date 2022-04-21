@@ -1,50 +1,20 @@
-import {
-  QCollectionPath,
-  QComplexPath,
-  QEntityCollectionPath,
-  QEntityPath,
-  QFilterExpression,
-  QOrderByExpression,
-  QPath,
-} from "@odata2ts/odata-query-objects";
-import { ExpandingODataUriBuilder } from "./internal";
+import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
 import { ODataOperators } from "./internal";
 
 export interface ODataUriBuilderConfig {
   unencoded?: boolean;
 }
 
-/**
- * Extracts the wrapped entity from QEntityPath or QEntityCollectionPath
- */
-type EntityExtractor<Q> = Q extends QEntityPath<infer E> ? E : Q extends QEntityCollectionPath<infer E> ? E : never;
-/**
- * Extracts all keys from a property (Q*Path), but only for the given types
- */
-type ExtractPropertyNamesOfType<QPath, QPathTypes> = {
-  [Key in keyof QPath]: QPath[Key] extends QPathTypes ? Key : never;
-}[keyof QPath];
-/**
- * Retrieves all property names which are expandable,
- * i.e. props of type QEntityPath, QEntityCollectionPath and QCollectionPath
- */
-type ExpandType<QPath> = ExtractPropertyNamesOfType<
-  QPath,
-  QEntityPath<any> | QEntityCollectionPath<any> | QCollectionPath<any>
->;
-
-export abstract class ODataUriBuilderBase<Q> {
+export abstract class ODataUriBuilderBase<Q extends QueryObject> {
   protected path: string;
   protected entity: Q;
 
   protected unencoded: boolean;
   protected config?: ODataUriBuilderConfig;
 
-  protected selects: Array<string> = [];
   protected itemsToSkip?: number;
   protected itemsTop?: number;
   protected itemsCount?: boolean;
-  protected expands: Array<ExpandingODataUriBuilder<any>> = [];
   protected filters: Array<QFilterExpression> = [];
   protected orderBys: Array<QOrderByExpression> = [];
 
@@ -59,26 +29,11 @@ export abstract class ODataUriBuilderBase<Q> {
     this.unencoded = !!config && !!config.unencoded;
   }
 
-  public abstract build(): string;
+  protected abstract getSelectResult(): string | undefined;
 
-  /**
-   * Select the properties of the entity you want to select.
-   *
-   * @param props the property names to select
-   * @returns this query builder
-   */
-  public select(...props: Array<keyof Q | null | undefined>) {
-    if (props && props.length) {
-      this.selects.push(
-        ...props
-          .filter((p): p is keyof Q => !!p)
-          .map((p) => {
-            return (this.entity[p] as unknown as QPath).getPath();
-          })
-      );
-    }
-    return this;
-  }
+  protected abstract getExpandResult(): string | undefined;
+
+  protected abstract getCountResult(): [string, string] | undefined;
 
   /**
    * Skip n items from the result set.
@@ -152,53 +107,6 @@ export abstract class ODataUriBuilderBase<Q> {
     return this;
   } */
 
-  /**
-   * Expand a given entity and receive an own builder for it to further select, filter, expand, etc.
-   *
-   * This method can be called multiple times.
-   *
-   * Example:
-   * .expanding("addresses", (addressBuilder, qAddress) => {
-   *   addressBuilder
-   *     .select(...)
-   *     .filter(qAddress.street.startsWith(...))
-   * })
-   *
-   * @param prop the name of the property which should be expanded
-   * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
-   * @returns this query builder
-   */
-  public expanding<Prop extends ExpandType<Q>>(
-    prop: Prop,
-    builderFn: (builder: ExpandingODataUriBuilder<EntityExtractor<Q[Prop]>>, qObject: EntityExtractor<Q[Prop]>) => void
-  ) {
-    const entityProp = this.entity[prop] as unknown as QComplexPath;
-    const expander = ExpandingODataUriBuilder.create(entityProp.getPath(), entityProp.getEntity());
-    builderFn(expander, entityProp.getEntity());
-
-    this.expands.push(expander);
-
-    return this;
-  }
-
-  /**
-   * Simple & plain expand of the given entities or entity collections.
-   *
-   * This method can be called multiple times.
-   *
-   * @param props the attributes to expand
-   * @returns this query builder
-   */
-  public expand<Prop extends ExpandType<Q>>(...props: Array<Prop>) {
-    this.expands.push(
-      ...props.map((p) => {
-        const prop = this.entity[p] as unknown as QComplexPath;
-        return ExpandingODataUriBuilder.create(prop.getPath(), prop.getEntity());
-      })
-    );
-    return this;
-  }
-
   protected param(operator: string, value: string) {
     return `${operator}=${value}`;
   }
@@ -212,8 +120,12 @@ export abstract class ODataUriBuilderBase<Q> {
     const add = (operator: string, value: string) => params.push(param(operator, value));
     const cleanedFilters = this.filters.filter((f) => f.toString());
 
-    if (this.selects.length) {
-      add(ODataOperators.SELECT, this.selects.join(","));
+    const selectResult = this.getSelectResult();
+    const expandResult = this.getExpandResult();
+    const countResult = this.getCountResult();
+
+    if (selectResult) {
+      add(ODataOperators.SELECT, selectResult);
     }
     if (this.itemsToSkip !== undefined) {
       add(ODataOperators.SKIP, String(this.itemsToSkip));
@@ -221,16 +133,15 @@ export abstract class ODataUriBuilderBase<Q> {
     if (this.itemsTop !== undefined) {
       add(ODataOperators.TOP, String(this.itemsTop));
     }
-    if (this.itemsCount !== undefined) {
-      add(ODataOperators.COUNT, String(this.itemsCount));
+    if (countResult) {
+      add(countResult[0], countResult[1]);
     }
     if (cleanedFilters.length) {
       const filterConcat = cleanedFilters.reduce((result, filter) => (result ? result.and(filter) : filter));
       add(ODataOperators.FILTER, filterConcat.toString());
     }
-    if (this.expands.length) {
-      const expand = this.expands.map((exp) => exp.build()).join(",");
-      add(ODataOperators.EXPAND, expand);
+    if (expandResult) {
+      add(ODataOperators.EXPAND, expandResult);
     }
     if (this.orderBys.length) {
       const order = this.orderBys.map((exp) => exp.toString()).join(",");
@@ -238,5 +149,17 @@ export abstract class ODataUriBuilderBase<Q> {
     }
 
     return params;
+  }
+
+  /**
+   * Build the final URI string.
+   *
+   * @returns the query string including the base service & collection path
+   */
+  public build(): string {
+    const paramFn = this.unencoded ? this.param : this.paramEncoded;
+    const params = this.buildQuery(paramFn);
+
+    return this.path + (params.length ? `?${params.join("&")}` : "");
   }
 }

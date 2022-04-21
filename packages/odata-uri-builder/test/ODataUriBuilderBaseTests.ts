@@ -1,4 +1,6 @@
-import { ODataUriBuilder, QFilterExpression } from "../src/";
+import { QueryObject } from "@odata2ts/odata-query-objects";
+import { QFilterExpression } from "../src/";
+import { ODataUriBuilder, ODataUriBuilderConfig } from "../src/internal";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 
 /**
@@ -11,14 +13,20 @@ function addBase(urlPart: string) {
   return `/Persons?${urlPart}`;
 }
 
-describe("ODataUriBuilder Test", () => {
+export type BuilderFactoryFunction<Q extends QueryObject> = (
+  path: string,
+  qEntity: Q,
+  config?: ODataUriBuilderConfig
+) => ODataUriBuilder<Q>;
+
+export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) {
   let toTest: ODataUriBuilder<QPerson>;
 
   /**
-   * Always use a new builder for each  test.
+   * Always use a new builder for each test.
    */
   beforeEach(() => {
-    toTest = ODataUriBuilder.create("/Persons", qPerson, { unencoded: true });
+    toTest = createBuilder("/Persons", qPerson, { unencoded: true });
   });
 
   test("create: minimal default", () => {
@@ -26,34 +34,20 @@ describe("ODataUriBuilder Test", () => {
   });
 
   test("create: fail with missing QObject", () => {
-    // @ts-ignore
-    expect(() => ODataUriBuilder.create(null)).toThrow();
     // @ts-expect-error
-    expect(() => ODataUriBuilder.create()).toThrow();
+    expect(() => createBuilder(null)).toThrow();
     // @ts-expect-error
-    expect(() => ODataUriBuilder.create({})).toThrow();
+    expect(() => createBuilder()).toThrow();
+    // @ts-expect-error
+    expect(() => createBuilder({})).toThrow();
   });
 
   test("config: encoded", () => {
-    const candidate = ODataUriBuilder.create("/Persons", qPerson)
+    const candidate = createBuilder("/Persons", qPerson)
       .select("name", "age")
       .filter(qPerson.name.equals("AC/DC & Brothers"))
       .build();
     const expected = addBase("%24select=name%2Cage&%24filter=name%20eq%20'AC%2FDC%20%26%20Brothers'");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("config: encoded & no double encoding for expanded entities", () => {
-    const candidate = ODataUriBuilder.create("/Persons", qPerson)
-      .select("name", "age")
-      .expanding("altAdresses", (expBuilder, qEntity) => {
-        expBuilder.filter(qEntity.street.equals("AC/DC & Brothers"));
-      })
-      .build();
-    const expected = addBase(
-      "%24select=name%2Cage&%24expand=AltAdresses(%24filter%3Dstreet%20eq%20'AC%2FDC%20%26%20Brothers')"
-    );
 
     expect(candidate).toBe(expected);
   });
@@ -119,27 +113,6 @@ describe("ODataUriBuilder Test", () => {
 
   test("top: fail with negative number", () => {
     expect(() => toTest.top(-1)).toThrow();
-  });
-
-  test("count", () => {
-    const candidate = toTest.count().build();
-    const expected = addBase("$count=true");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("count: true", () => {
-    const candidate = toTest.count(true).build();
-    const expected = addBase("$count=true");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("count: false", () => {
-    const candidate = toTest.count(false).build();
-    const expected = addBase("$count=false");
-
-    expect(candidate).toBe(expected);
   });
 
   test("orderBy", () => {
@@ -252,64 +225,4 @@ describe("ODataUriBuilder Test", () => {
 
     expect(candidate).toBe(expected);
   });
-
-  test("expanding: simple", () => {
-    const candidate = toTest.expanding("address", () => {}).build();
-    const expected = addBase("$expand=Address");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("expanding: with select", () => {
-    const candidate = toTest
-      .expanding("address", (builder) => {
-        builder.select("street");
-      })
-      .build();
-    const expected = addBase("$expand=Address($select=street)");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("expanding: 1:n with filter & skip & top", async () => {
-    const candidate = toTest
-      .expanding("altAdresses", (builder, qEntity) => {
-        builder.select("street").skip(1).top(0).filter(qEntity.street.equals("Teststr. 12"));
-      })
-      .build();
-    const expected = addBase("$expand=AltAdresses($select=street;$skip=1;$top=0;$filter=street eq 'Teststr. 12')");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("expanding: deeply nested", () => {
-    const candidate = toTest
-      .select("name", "age")
-      .expanding("address", (builder, qAddress) => {
-        builder
-          .select("street")
-          .filter(qAddress.street.startsWith("Kam"))
-          .expanding("responsible", (respExpand) => {
-            respExpand.select("name");
-          });
-      })
-      .build();
-    const expected = addBase(
-      "$select=name,age&$expand=Address($select=street;$filter=startswith(street,'Kam');$expand=responsible($select=name))"
-    );
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("combining simple & complex expand", () => {
-    const candidate = toTest
-      .expanding("address", (builder) => {
-        builder.select("street");
-      })
-      .expand("altAdresses")
-      .build();
-    const expected = addBase("$expand=Address($select=street),AltAdresses");
-
-    expect(candidate).toBe(expected);
-  });
-});
+}

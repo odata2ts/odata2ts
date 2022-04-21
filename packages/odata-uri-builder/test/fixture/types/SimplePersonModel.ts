@@ -1,10 +1,8 @@
-import { DateTimeOffsetString } from "@odata2ts/odata-query-objects";
-
 export interface Person {
   age: number;
   name: string;
   deceased: boolean;
-  createdAt: DateTimeOffsetString;
+  createdAt: string;
   Address: Address;
   AltAdresses: Array<Address>;
 }
