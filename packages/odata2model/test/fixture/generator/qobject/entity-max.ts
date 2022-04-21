@@ -12,6 +12,11 @@ import {
   QStringCollection,
   QNumberCollection,
   QBooleanCollection,
+  QGuidCollection,
+  QTimeOfDayCollection,
+  QDateCollection,
+  QDateTimeOffsetCollection,
+  QBinaryCollection,
 } from "@odata2ts/odata-query-objects";
 
 export class QBook extends QueryObject {
@@ -26,6 +31,14 @@ export class QBook extends QueryObject {
   public readonly multipleStrings = new QCollectionPath(this.withPrefix("multipleStrings"), () => QStringCollection);
   public readonly multipleNumbers = new QCollectionPath(this.withPrefix("multipleNumbers"), () => QNumberCollection);
   public readonly multipleBooleans = new QCollectionPath(this.withPrefix("multipleBooleans"), () => QBooleanCollection);
+  public readonly multipleIds = new QCollectionPath(this.withPrefix("multipleIds"), () => QGuidCollection);
+  public readonly multipleTimes = new QCollectionPath(this.withPrefix("multipleTimes"), () => QTimeOfDayCollection);
+  public readonly multipleDates = new QCollectionPath(this.withPrefix("multipleDates"), () => QDateCollection);
+  public readonly multipleDateTimeOffsets = new QCollectionPath(
+    this.withPrefix("multipleDateTimeOffsets"),
+    () => QDateTimeOffsetCollection
+  );
+  public readonly multipleBinaries = new QCollectionPath(this.withPrefix("multipleBinaries"), () => QBinaryCollection);
 
   constructor(path?: string) {
     super(path);

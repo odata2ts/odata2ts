@@ -11,16 +11,18 @@ export const enum StandardFilterOperators {
 
 export const enum StringFilterFunctions {
   CONCAT = "concat",
-  CONTAINS = "contains",
+  CONTAINS = "contains", // v4 only
+  SUBSTRING_OF = "substringof", // v2 only
   ENDS_WITH = "endswith",
   INDEX_OF = "indexof",
   LENGTH = "length",
   STARTS_WITH = "startswith",
   // SUBSTRING = "substring"
-  MATCHES_PATTERN = "matchesPattern",
+  MATCHES_PATTERN = "matchesPattern", // v4 only
   TO_LOWER = "tolower",
   TO_UPPER = "toupper",
   TRIM = "trim",
+  // REPLACE = "replace", // v2 only
 }
 
 export const enum NumberFilterOperators {
@@ -28,7 +30,7 @@ export const enum NumberFilterOperators {
   SUBTRACTION = "sub",
   MULTIPLICATION = "mul",
   DIVISION = "div",
-  DIVISION_WITH_FRACTION = "divby",
+  DIVISION_WITH_FRACTION = "divby", //v4 only
   MODULO = "mod",
 }
 

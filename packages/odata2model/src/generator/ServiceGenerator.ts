@@ -1,4 +1,3 @@
-import { upperCaseFirst } from "upper-case-first";
 import {
   GetAccessorDeclarationStructure,
   MethodDeclarationStructure,
@@ -6,6 +5,8 @@ import {
   PropertyDeclarationStructure,
   Scope,
 } from "ts-morph";
+import { firstCharLowerCase } from "xml2js/lib/processors";
+import { upperCaseFirst } from "upper-case-first";
 
 import { ImportContainer } from "./ImportContainer";
 import { ProjectManager } from "../project/ProjectManager";
@@ -128,13 +129,13 @@ class ServiceGenerator {
       importContainer.addFromService(entityServiceType);
       importContainer.addFromClientApi("ODataClient");
       importContainer.addGeneratedModel(model.name);
-      importContainer.addGeneratedQObject(upperCaseFirst(model.qName), model.qName);
+      importContainer.addGeneratedQObject(model.qName, firstCharLowerCase(model.qName));
 
       // generate EntityTypeService
       serviceFile.addClass({
         isExported: true,
         name: serviceName,
-        extends: entityServiceType + `<${model.name}, ${upperCaseFirst(model.qName)}>`,
+        extends: entityServiceType + `<${model.name}, ${model.qName}>`,
         ctors: [
           {
             parameters: [
@@ -142,7 +143,7 @@ class ServiceGenerator {
               { name: "path", type: "string" },
             ],
             statements: [
-              `super(client, path, ${model.qName});`,
+              `super(client, path, ${firstCharLowerCase(model.qName)});`,
               /* ...Object.values(container.entitySets).map(({ name, entityType }) => {
               return `this.${name} = new EntitySetService(this.client, this.getPath(), ${entityType.qName})`;
             }), */
@@ -158,8 +159,8 @@ class ServiceGenerator {
             if (isCollection) {
               importContainer.addFromService(collectionServiceType);
               importContainer.addGeneratedModel(modelType.name);
-              importContainer.addGeneratedQObject(upperCaseFirst(modelType.qName), modelType.qName);
-              propModelType = `${collectionServiceType}<${modelType.name}, ${upperCaseFirst(modelType.qName)}>`;
+              importContainer.addGeneratedQObject(modelType.qName, firstCharLowerCase(modelType.qName));
+              propModelType = `${collectionServiceType}<${modelType.name}, ${modelType.qName}>`;
             }
             // don't include imports for this type
             else if (serviceName !== key) {
@@ -186,7 +187,7 @@ class ServiceGenerator {
             }
 
             importContainer.addFromService(collectionServiceType);
-            importContainer.addFromQObject(upperCaseFirst(prop.qObject), prop.qObject);
+            importContainer.addFromQObject(prop.qObject, firstCharLowerCase(prop.qObject));
             if (isEnum) {
               importContainer.addGeneratedModel(prop.type);
               importContainer.addFromQObject("EnumCollection");
@@ -207,7 +208,7 @@ class ServiceGenerator {
             const modelType = this.dataModel.getModel(prop.type);
             const isCollection = prop.isCollection && modelType.modelType === ModelTypes.ComplexType;
             const type = isCollection
-              ? `${collectionServiceType}<${modelType.name}, ${upperCaseFirst(modelType.qName)}>`
+              ? `${collectionServiceType}<${modelType.name}, ${modelType.qName}>`
               : this.getServiceNameForProp(prop);
 
             return {
@@ -217,7 +218,7 @@ class ServiceGenerator {
               statements: [
                 `if(!this._${prop.name}) {`,
                 // prettier-ignore
-                `  this._${prop.name} = new ${type}(this.client, this.path + "/${prop.odataName}"${isCollection ? `, ${modelType.qName}`: ""})`,
+                `  this._${prop.name} = new ${type}(this.client, this.path + "/${prop.odataName}"${isCollection ? `, ${firstCharLowerCase(modelType.qName)}`: ""})`,
                 "}",
                 `return this._${prop.name}`,
               ],
@@ -230,7 +231,7 @@ class ServiceGenerator {
               statements: [
                 `if(!this._${prop.name}) {`,
                 // prettier-ignore
-                `  this._${prop.name} = new ${collectionServiceType}(this.client, this.path + "/${prop.odataName}", ${prop.qObject})`,
+                `  this._${prop.name} = new ${collectionServiceType}(this.client, this.path + "/${prop.odataName}", ${firstCharLowerCase(prop.qObject!)})`,
                 "}",
                 `return this._${prop.name}`,
               ],
@@ -254,7 +255,7 @@ class ServiceGenerator {
         serviceFile.addClass({
           isExported: true,
           name: this.getCollectionServiceName(model.name),
-          extends: entitySetServiceType + `<${model.name}, ${upperCaseFirst(model.qName)}, ${keyType}>`,
+          extends: entitySetServiceType + `<${model.name}, ${model.qName}, ${keyType}>`,
           ctors: [
             {
               parameters: [
@@ -262,7 +263,7 @@ class ServiceGenerator {
                 { name: "path", type: "string" },
               ],
               statements: [
-                `super(client, path, ${model.qName});`,
+                `super(client, path, ${firstCharLowerCase(model.qName)});`,
                 /* ...Object.values(container.entitySets).map(({ name, entityType }) => {
               return `this.${name} = new EntitySetService(this.client, this.getPath(), ${entityType.qName})`;
             }), */

@@ -7,10 +7,11 @@ import {
   EntityTypeV4,
   ComplexTypeV4,
 } from "../../../../src/data-model/edmx/ODataEdmxModelV4";
+import { ODataVersion } from "../../../../src/data-model/DataTypeModel";
 import { ODataEntityTypeBuilderV4 } from "./ODataEntityTypeBuilderV4";
 import { ODataComplexTypeBuilderV4 } from "./ODataComplexTypeBuilderV4";
 import { ODataOperationBuilderV4 } from "./ODataOperationBuilderV4";
-import { ODataModelBuilder, ODataVersion } from "../ODataModelBuilder";
+import { ODataModelBuilder } from "../ODataModelBuilder";
 
 export interface NavProp {
   path: string;

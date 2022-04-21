@@ -1,6 +1,6 @@
 import { RunOptions } from "../OptionModel";
 import { ComplexTypeV3, EntityTypeV3, ODataTypesV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
-import { OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
+import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { DataModel } from "./DataModel";
 import { Digester } from "./DataModelDigestion";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
@@ -17,7 +17,7 @@ export async function digest(schema: SchemaV3, options: RunOptions): Promise<Dat
 
 class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
   constructor(schema: SchemaV3, options: RunOptions) {
-    super(schema, options);
+    super(ODataVersion.V2, schema, options);
   }
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV3): Array<Property> {
@@ -95,43 +95,44 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
     }
   }
 
-  protected mapODataType(type: string): string {
+  protected mapODataType(type: string): [string, string, string] {
     switch (type) {
       case ODataTypesV3.Boolean:
-        return "boolean";
+        return ["boolean", "QBooleanPath", "QBooleanCollection"];
       case ODataTypesV3.Int16:
       case ODataTypesV3.Int32:
-        return "number";
+        return ["number", "QNumberPath", "QNumberCollection"];
       case ODataTypesV3.Byte:
       case ODataTypesV3.SByte:
       case ODataTypesV3.Int64:
       case ODataTypesV3.Decimal:
       case ODataTypesV3.Double:
       case ODataTypesV3.Single:
+        return ["string", "QNumberPath", "QNumberCollection"];
       case ODataTypesV3.String:
-        return "string";
+        return ["string", "QStringV2Path", "QStringV2Collection"];
       case ODataTypesV3.DateTime:
-        const dateType = "DateTimeString";
+        const dateType = "DateTimeV2String";
         this.dataModel.addPrimitiveTypeImport(dateType);
-        return dateType;
+        return [dateType, "QDateTimeV2Path", "QDateTimeV2Collection"];
       case ODataTypesV3.Time:
-        const timeType = "TimeString";
+        const timeType = "TimeV2String";
         this.dataModel.addPrimitiveTypeImport(timeType);
-        return timeType;
+        return [timeType, "QTimeV2Path", "QTimeV2Collection"];
       case ODataTypesV3.DateTimeOffset:
-        const dateTimeType = "DateTimeOffsetString";
+        const dateTimeType = "DateTimeOffsetV2String";
         this.dataModel.addPrimitiveTypeImport(dateTimeType);
-        return dateTimeType;
+        return [dateTimeType, "QDateTimeOffsetV2Path", "QDateTimeOffsetV2Collection"];
       case ODataTypesV3.Binary:
         const binaryType = "BinaryString";
         this.dataModel.addPrimitiveTypeImport(binaryType);
-        return binaryType;
+        return [binaryType, "QBinaryPath", "QBinaryCollection"];
       case ODataTypesV3.Guid:
         const guidType = "GuidString";
         this.dataModel.addPrimitiveTypeImport(guidType);
-        return guidType;
+        return [guidType, "QGuidPath", "QGuidCollection"];
       default:
-        return "string";
+        return ["string", "QStringV2Path", "QStringV2Collection"];
     }
   }
 }

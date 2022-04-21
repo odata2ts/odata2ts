@@ -1,14 +1,15 @@
 import { GuidString, BinaryString, DateTimeOffsetString, TimeOfDayString, DateString } from "./odata/ODataTypes";
 import { QEnumPath } from "./path/QEnumPath";
 import { QBinaryPath } from "./path/QBinaryPath";
-import { QDatePath } from "./path/date-time-v4/QDatePath";
-import { QTimeOfDayPath } from "./path/date-time-v4/QTimeOfDayPath";
-import { QDateTimeOffsetPath } from "./path/date-time-v4/QDateTimeOffsetPath";
+import { QDatePath } from "./path/v4/QDatePath";
+import { QTimeOfDayPath } from "./path/v4/QTimeOfDayPath";
+import { QDateTimeOffsetPath } from "./path/v4/QDateTimeOffsetPath";
 import { QGuidPath } from "./path/QGuidPath";
 import { QBooleanPath } from "./path/QBooleanPath";
 import { QNumberPath } from "./path/QNumberPath";
-import { QStringPath } from "./path/QStringPath";
+import { QStringPath } from "./path/v4/QStringPath";
 import { QueryObject } from "./QueryObject";
+import { QDateTimeOffsetV2Path, QDateTimeV2Path, QStringV2Path, QTimeV2Path } from "./path/v2";
 
 const ATTRIBUTE_NAME = "it";
 const PRIMITIVE_VALUE_REFERENCE = "$it";
@@ -56,6 +57,13 @@ export class QStringCollection extends QPrimitiveCollection<QStringPath> {
   }
 }
 export const qStringCollection = new QStringCollection();
+
+export class QStringV2Collection extends QPrimitiveCollection<QStringV2Path> {
+  createQPathType(path: string) {
+    return new QStringV2Path(path);
+  }
+}
+export const qStringV2Collection = new QStringV2Collection();
 
 export class QNumberCollection extends QPrimitiveCollection<QNumberPath> {
   createQPathType(path: string) {
@@ -105,6 +113,27 @@ export class QDateCollection extends QPrimitiveCollection<QDatePath> {
   }
 }
 export const qDateCollection = new QDateCollection();
+
+export class QTimeV2Collection extends QPrimitiveCollection<QTimeV2Path> {
+  createQPathType(path: string) {
+    return new QTimeV2Path(path);
+  }
+}
+export const qTimeV2Collection = new QTimeV2Collection();
+
+export class QDateTimeV2Collection extends QPrimitiveCollection<QDateTimeV2Path> {
+  createQPathType(path: string) {
+    return new QDateTimeV2Path(path);
+  }
+}
+export const qDateTimeV2Collection = new QDateTimeV2Collection();
+
+export class QDateTimeOffsetV2Collection extends QPrimitiveCollection<QDateTimeOffsetV2Path> {
+  createQPathType(path: string) {
+    return new QDateTimeOffsetV2Path(path);
+  }
+}
+export const qDateTimeOffsetV2Collection = new QDateTimeOffsetV2Collection();
 
 export class QEnumCollection extends QPrimitiveCollection<QEnumPath> {
   createQPathType(path: string) {

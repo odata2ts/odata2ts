@@ -1,7 +1,7 @@
-import { QueryObject, QStringPath } from "@odata2ts/odata-query-objects";
+import { QueryObject, QBooleanPath } from "@odata2ts/odata-query-objects";
 
 export class QBrand extends QueryObject {
-  public readonly naming = new QStringPath(this.withPrefix("naming"));
+  public readonly naming = new QBooleanPath(this.withPrefix("naming"));
 
   constructor(path?: string) {
     super(path);

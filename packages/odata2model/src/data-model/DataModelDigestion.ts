@@ -4,7 +4,7 @@ import { upperCaseFirst } from "upper-case-first";
 import { DataModel } from "./DataModel";
 import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModelBase";
 import { RunOptions } from "../OptionModel";
-import { DataTypes, ModelType, ModelTypes, PropertyModel } from "./DataTypeModel";
+import { DataTypes, ModelType, ModelTypes, ODataVersion, PropertyModel } from "./DataTypeModel";
 
 export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, CT extends ComplexType> {
   protected static EDM_PREFIX = "Edm.";
@@ -12,28 +12,28 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   protected readonly dataModel: DataModel;
 
-  protected constructor(protected schema: S, protected options: RunOptions) {
+  protected constructor(protected version: ODataVersion, protected schema: S, protected options: RunOptions) {
     const serviceName = schema.$.Namespace;
-    this.dataModel = new DataModel(serviceName);
-  }
-
-  public async digest(): Promise<DataModel> {
-    this.digestSchema(this.schema);
-    return this.dataModel;
+    this.dataModel = new DataModel(version, serviceName);
   }
 
   protected abstract getNavigationProps(entityType: ET | ComplexType): Array<Property>;
 
   protected abstract digestEntityContainer(): void;
 
-  protected abstract mapODataType(type: string): string;
+  protected abstract mapODataType(type: string): [string, string, string];
+
+  public async digest(): Promise<DataModel> {
+    this.digestSchema(this.schema);
+    return this.dataModel;
+  }
 
   protected getModelName(name: string) {
     return `${this.options.modelPrefix}${upperCaseFirst(this.stripServicePrefix(name))}${this.options.modelSuffix}`;
   }
 
   protected getQName(name: string) {
-    return `q${upperCaseFirst(this.stripServicePrefix(name))}`;
+    return `Q${upperCaseFirst(this.stripServicePrefix(name))}`;
   }
 
   protected getEnumName(name: string) {
@@ -169,9 +169,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     let resultType: string;
     let resultDt: DataTypes;
-    let qEntityInstance: string | undefined;
+    let resultQPath: string;
+    let qClass: string | undefined;
 
-    // domain object known from service, e.g. EntitySet, EnumType, ...
+    // domain object known from service: EntityType, ComplexType or EnumType
     if (dataType.startsWith(this.dataModel.getServicePrefix())) {
       const newType = this.stripServicePrefix(dataType);
       const enumType = this.dataModel.getEnum(newType);
@@ -180,23 +181,27 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       if (enumType) {
         resultType = enumType.name;
         resultDt = DataTypes.EnumType;
+        resultQPath = "QEnumPath";
         if (isCollection) {
-          qEntityInstance = "qEnumCollection";
+          qClass = "QEnumCollection";
         }
       }
       // handling of models
       else {
         resultType = this.getModelName(newType);
-        qEntityInstance = this.getQName(newType);
         resultDt = DataTypes.ModelType;
+        resultQPath = "QEntityPath";
+        qClass = this.getQName(newType);
       }
     }
     // OData built-in data types
     else if (dataType.startsWith(Digester.EDM_PREFIX)) {
-      resultType = this.mapODataType(dataType);
+      const [type, qPath, qCollectionClass] = this.mapODataType(dataType);
+      resultType = type;
+      resultQPath = qPath;
       resultDt = DataTypes.PrimitiveType;
       if (isCollection) {
-        qEntityInstance = `q${upperCaseFirst(resultType)}Collection`;
+        qClass = qCollectionClass;
       }
     } else {
       throw new Error(
@@ -209,7 +214,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       name: p.$.Name === "ID" ? "id" : firstCharLowerCase(p.$.Name),
       odataType: p.$.Type,
       type: resultType,
-      qObject: qEntityInstance,
+      qObject: qClass,
+      qPath: resultQPath,
       dataType: resultDt,
       required: p.$.Nullable === "false",
       isCollection: isCollection,

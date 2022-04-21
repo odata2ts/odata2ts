@@ -2,11 +2,6 @@ import { ComplexType, EntityType, ODataEdmxModelBase, Schema } from "../../../sr
 import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase";
 import { ODataComplexTypeBuilderBase } from "./ODataComplexTypeBuilderBase";
 
-export enum ODataVersion {
-  V2 = "2.0",
-  V4 = "4.0",
-}
-
 export abstract class ODataModelBuilder<
   M extends ODataEdmxModelBase<S>,
   S extends Schema<ET, CT>,

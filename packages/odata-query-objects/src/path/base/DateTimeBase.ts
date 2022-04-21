@@ -1,6 +1,6 @@
 import { StandardFilterOperators } from "../../odata/ODataModel";
 import { QFilterExpression } from "../../QFilterExpression";
-import { QLiteralPath } from "../base/QLiteralPath";
+import { QLiteralPath } from "./QLiteralPath";
 
 export abstract class DateTimeBasePath extends QLiteralPath<string, StandardFilterOperators> {
   public equals(value: string) {

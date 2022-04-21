@@ -1,3 +1,8 @@
+export enum ODataVersion {
+  V2 = "2.0",
+  V4 = "4.0",
+}
+
 export const enum DataTypes {
   PrimitiveType = "PrimitiveType",
   EnumType = "EnumType",
@@ -20,6 +25,7 @@ export interface PropertyModel {
   odataType: string;
   type: string;
   qObject?: string;
+  qPath: string;
   required: boolean;
   isCollection: boolean;
   dataType: DataTypes;

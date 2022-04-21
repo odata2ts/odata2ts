@@ -79,7 +79,7 @@ export function createEntityBasedGenerationTests(
 
   test(`${testSuiteName}: complex type`, async () => {
     // given one minimal model
-    odataBuilder.addComplexType("Brand", undefined, (builder) => builder.addProp("naming", ODataTypesV3.String));
+    odataBuilder.addComplexType("Brand", undefined, (builder) => builder.addProp("naming", ODataTypesV3.Boolean));
 
     // when generating model
     // then match fixture text
@@ -88,7 +88,7 @@ export function createEntityBasedGenerationTests(
 
   test(`${testSuiteName}: one minimal model`, async () => {
     // given one minimal model
-    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV3.String));
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV3.Guid));
 
     // when generating model
     // then match fixture text
@@ -105,12 +105,24 @@ export function createEntityBasedGenerationTests(
         .addProp("optionalDate", ODataTypesV3.DateTime)
         .addProp("dateTimeOffset", ODataTypesV3.DateTimeOffset)
         .addProp("TestDecimal", ODataTypesV3.Decimal)
-        .addProp("testNumber", ODataTypesV3.Int16)
+        .addProp("testInt16", ODataTypesV3.Int16)
+        .addProp("testInt32", ODataTypesV3.Int32)
+        .addProp("testInt64", ODataTypesV3.Int64)
+        .addProp("testSingle", ODataTypesV3.Single)
+        .addProp("testByte", ODataTypesV3.Byte)
+        .addProp("testSByte", ODataTypesV3.SByte)
+        .addProp("testDouble", ODataTypesV3.Double)
         .addProp("testBinary", ODataTypesV3.Binary)
         .addProp("testAny", "Edm.AnythingYouWant")
+        .addProp("multipleIds", `Collection(${ODataTypesV3.Guid})`)
         .addProp("multipleStrings", `Collection(${ODataTypesV3.String})`)
-        .addProp("multipleNumbers", `Collection(${ODataTypesV3.Int32})`)
         .addProp("multipleBooleans", `Collection(${ODataTypesV3.Boolean})`)
+        .addProp("multipleTimes", `Collection(${ODataTypesV3.Time})`)
+        .addProp("multipleDateTimes", `Collection(${ODataTypesV3.DateTime})`)
+        .addProp("multipleDateTimeOffsets", `Collection(${ODataTypesV3.DateTimeOffset})`)
+        .addProp("multipleInt16", `Collection(${ODataTypesV3.Int16})`)
+        .addProp("multipleDecimals", `Collection(${ODataTypesV3.Decimal})`)
+        .addProp("multipleBinaries", `Collection(${ODataTypesV3.Binary})`)
     );
 
     // when generating model
@@ -122,11 +134,11 @@ export function createEntityBasedGenerationTests(
     // given one minimal model
     odataBuilder
       .addEntityType("author", undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV3.String).addProp("name", ODataTypesV3.String, false)
+        builder.addKeyProp("id", ODataTypesV3.Guid).addProp("name", ODataTypesV3.Boolean, false)
       )
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
         builder
-          .addKeyProp("id", ODataTypesV3.String)
+          .addKeyProp("id", ODataTypesV3.Guid)
           .addProp("author", `${SERVICE_NAME}.Author`, false)
           .addProp("relatedAuthors", `Collection(${SERVICE_NAME}.Author)`)
       );
@@ -138,11 +150,11 @@ export function createEntityBasedGenerationTests(
 
   test(`${testSuiteName}: base class`, async () => {
     // given an entity hierarchy
-    odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV3.String));
+    odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV3.Guid));
     odataBuilder.addEntityType("Parent", "GrandParent", (builder) =>
       builder.addProp("parentalAdvice", ODataTypesV3.Boolean)
     );
-    odataBuilder.addEntityType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", ODataTypesV3.String));
+    odataBuilder.addEntityType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", ODataTypesV3.Boolean));
 
     // when generating model
     // then match fixture text
@@ -154,7 +166,7 @@ export function createEntityBasedGenerationTests(
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
         builder
-          .addKeyProp("id", ODataTypesV3.String)
+          .addKeyProp("id", ODataTypesV3.Guid)
           .addProp("myChoice", `${SERVICE_NAME}.Choice`, false)
           .addProp("otherChoices", `Collection(${SERVICE_NAME}.Choice)`)
       )
@@ -171,10 +183,10 @@ export function createEntityBasedGenerationTests(
   test(`${testSuiteName}: entity & complex entity`, async () => {
     // given an entity with enum props
     odataBuilder
-      .addComplexType("publishingMethod", undefined, (builder) => builder.addProp("name", ODataTypesV3.String))
+      .addComplexType("publishingMethod", undefined, (builder) => builder.addProp("name", ODataTypesV3.Boolean))
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
         builder
-          .addKeyProp("id", ODataTypesV3.String)
+          .addKeyProp("id", ODataTypesV3.Guid)
           .addProp("method", `${SERVICE_NAME}.PublishingMethod`, false)
           .addProp("altMethods", `Collection(${SERVICE_NAME}.PublishingMethod)`)
       );

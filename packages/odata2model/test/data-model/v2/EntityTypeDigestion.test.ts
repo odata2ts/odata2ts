@@ -43,7 +43,7 @@ describe("EntityTypeDigestion Test", () => {
       modelType: ModelTypes.EntityType,
       name: "Min",
       odataName: "min",
-      qName: "qMin",
+      qName: "QMin",
       baseClasses: [],
       baseProps: [],
       keyNames: ["id"],
@@ -59,6 +59,7 @@ describe("EntityTypeDigestion Test", () => {
       odataName: "id",
       odataType: ODataTypesV3.String,
       qObject: undefined,
+      qPath: "QStringV2Path",
       required: true,
       type: "string",
     };
@@ -192,108 +193,217 @@ describe("EntityTypeDigestion Test", () => {
         .addProp("testSingle", ODataTypesV3.Single)
         .addProp("testBinary", ODataTypesV3.Binary)
         .addProp("testAny", "Edm.AnythingYouWant")
+        .addProp("multipleIds", `Collection(${ODataTypesV3.Guid})`)
+        .addProp("multipleStrings", `Collection(${ODataTypesV3.String})`)
+        .addProp("multipleNumbers", `Collection(${ODataTypesV3.Decimal})`)
+        .addProp("multipleBooleans", `Collection(${ODataTypesV3.Boolean})`)
+        .addProp("multipleTimes", `Collection(${ODataTypesV3.Time})`)
+        .addProp("multipleDateTimes", `Collection(${ODataTypesV3.DateTime})`)
+        .addProp("multipleDateTimeOffsets", `Collection(${ODataTypesV3.DateTimeOffset})`)
+        .addProp("multipleBinaries", `Collection(${ODataTypesV3.Binary})`)
     );
     const result = await digest(odataBuilder.getSchema(), runOpts);
 
     // check needed imports for special primitive types
     expect(result.getPrimitiveTypeImports()).toEqual([
       "GuidString",
-      "TimeString",
-      "DateTimeString",
-      "DateTimeOffsetString",
+      "TimeV2String",
+      "DateTimeV2String",
+      "DateTimeOffsetV2String",
       "BinaryString",
     ]);
 
     // now check all props regarding their type
     const model = result.getModel("Max");
     expect(model.props).toMatchObject([
-      { name: "id" },
+      {
+        name: "id",
+        dataType: DataTypes.PrimitiveType,
+        odataType: ODataTypesV3.Guid,
+        type: "GuidString",
+        required: true,
+        qObject: undefined,
+        qPath: "QGuidPath",
+      },
       {
         name: "isTrue",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Boolean,
         type: "boolean",
         required: true,
+        qObject: undefined,
+        qPath: "QBooleanPath",
       },
       {
         name: "time",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Time,
-        type: "TimeString",
+        type: "TimeV2String",
         required: false,
+        qObject: undefined,
+        qPath: "QTimeV2Path",
       },
       {
         name: "optionalDate",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.DateTime,
-        type: "DateTimeString",
+        type: "DateTimeV2String",
         required: false,
+        qObject: undefined,
+        qPath: "QDateTimeV2Path",
       },
       {
         name: "dateTimeOffset",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.DateTimeOffset,
-        type: "DateTimeOffsetString",
+        type: "DateTimeOffsetV2String",
+        qObject: undefined,
+        qPath: "QDateTimeOffsetV2Path",
       },
       {
         name: "testInt16",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Int16,
         type: "number",
+        qObject: undefined,
+        qPath: "QNumberPath",
       },
       {
         name: "testInt32",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Int32,
         type: "number",
+        qObject: undefined,
+        qPath: "QNumberPath",
       },
       {
         name: "testInt64",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Int64,
         type: "string",
+        qObject: undefined,
+        qPath: "QNumberPath",
       },
       {
         name: "testDecimal",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Decimal,
         type: "string",
+        qObject: undefined,
+        qPath: "QNumberPath",
       },
       {
         name: "testDouble",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Double,
         type: "string",
+        qObject: undefined,
+        qPath: "QNumberPath",
       },
       {
         name: "testByte",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Byte,
         type: "string",
+        qObject: undefined,
+        qPath: "QNumberPath",
       },
       {
         name: "testSByte",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.SByte,
         type: "string",
+        qObject: undefined,
+        qPath: "QNumberPath",
       },
       {
         name: "testSingle",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Single,
         type: "string",
+        qObject: undefined,
+        qPath: "QNumberPath",
       },
       {
         name: "testBinary",
         dataType: DataTypes.PrimitiveType,
         odataType: ODataTypesV3.Binary,
         type: "BinaryString",
+        qObject: undefined,
+        qPath: "QBinaryPath",
       },
       {
         name: "testAny",
         dataType: DataTypes.PrimitiveType,
         odataType: "Edm.AnythingYouWant",
         type: "string",
+        qObject: undefined,
+        qPath: "QStringV2Path",
+      },
+      {
+        name: "multipleIds",
+        dataType: DataTypes.PrimitiveType,
+        odataType: `Collection(${ODataTypesV3.Guid})`,
+        type: "GuidString",
+        isCollection: true,
+        qObject: "QGuidCollection",
+        qPath: "QGuidPath",
+      },
+      {
+        name: "multipleStrings",
+        odataType: `Collection(${ODataTypesV3.String})`,
+        type: "string",
+        isCollection: true,
+        qObject: "QStringV2Collection",
+        qPath: "QStringV2Path",
+      },
+      {
+        name: "multipleNumbers",
+        odataType: `Collection(${ODataTypesV3.Decimal})`,
+        type: "string",
+        isCollection: true,
+        qObject: "QNumberCollection",
+        qPath: "QNumberPath",
+      },
+      {
+        name: "multipleBooleans",
+        odataType: `Collection(${ODataTypesV3.Boolean})`,
+        type: "boolean",
+        isCollection: true,
+        qObject: "QBooleanCollection",
+        qPath: "QBooleanPath",
+      },
+      {
+        name: "multipleTimes",
+        odataType: `Collection(${ODataTypesV3.Time})`,
+        type: "TimeV2String",
+        isCollection: true,
+        qObject: "QTimeV2Collection",
+        qPath: "QTimeV2Path",
+      },
+      {
+        name: "multipleDateTimes",
+        odataType: `Collection(${ODataTypesV3.DateTime})`,
+        type: "DateTimeV2String",
+        isCollection: true,
+        qObject: "QDateTimeV2Collection",
+        qPath: "QDateTimeV2Path",
+      },
+      {
+        name: "multipleDateTimeOffsets",
+        odataType: `Collection(${ODataTypesV3.DateTimeOffset})`,
+        type: "DateTimeOffsetV2String",
+        isCollection: true,
+        qObject: "QDateTimeOffsetV2Collection",
+        qPath: "QDateTimeOffsetV2Path",
+      },
+      {
+        name: "multipleBinaries",
+        odataType: `Collection(${ODataTypesV3.Binary})`,
+        type: "BinaryString",
+        isCollection: true,
+        qObject: "QBinaryCollection",
+        qPath: "QBinaryPath",
       },
     ]);
   });
@@ -328,7 +438,8 @@ describe("EntityTypeDigestion Test", () => {
     expect(product.props[1]).toEqual({
       name: "category",
       odataName: "Category",
-      qObject: "qCategory",
+      qObject: "QCategory",
+      qPath: "QEntityPath",
       type: "Category",
       odataType: `${SERVICE_NAME}.Category`,
       isCollection: false,
@@ -338,7 +449,8 @@ describe("EntityTypeDigestion Test", () => {
     expect(product.props[2]).toEqual({
       name: "supplier",
       odataName: "supplier",
-      qObject: "qSupplier",
+      qObject: "QSupplier",
+      qPath: "QEntityPath",
       type: "Supplier",
       odataType: `${SERVICE_NAME}.Supplier`,
       isCollection: false,
@@ -351,7 +463,8 @@ describe("EntityTypeDigestion Test", () => {
     expect(category.props[1]).toEqual({
       name: "products",
       odataName: "products",
-      qObject: "qProduct",
+      qObject: "QProduct",
+      qPath: "QEntityPath",
       type: "Product",
       odataType: `Collection(${SERVICE_NAME}.Product)`,
       isCollection: true,

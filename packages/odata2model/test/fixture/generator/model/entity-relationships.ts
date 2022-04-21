@@ -1,10 +1,12 @@
+import type { GuidString } from "@odata2ts/odata-query-objects";
+
 export interface Author {
-  id: string;
-  name: string;
+  id: GuidString;
+  name: boolean;
 }
 
 export interface Book {
-  id: string;
+  id: GuidString;
   author: Author;
   relatedAuthors?: Array<Author>;
 }

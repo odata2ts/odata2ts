@@ -1,12 +1,12 @@
-import { QStringPath } from "../../src";
+import { QStringBasePath } from "../../src/path/base/QStringBasePath";
 
-describe("QStringPath test", () => {
-  let toTest: QStringPath;
-  let otherProp: QStringPath;
+export function createStringTests<T extends QStringBasePath<any>>(QSConstructor: new (path: string) => T) {
+  let toTest: T;
+  let otherProp: T;
 
   beforeEach(() => {
-    toTest = new QStringPath("Country");
-    otherProp = new QStringPath("Language");
+    toTest = new QSConstructor("Country");
+    otherProp = new QSConstructor("Language");
   });
 
   test("get path", () => {
@@ -15,13 +15,13 @@ describe("QStringPath test", () => {
 
   test("fails with null, undefined, empty string", () => {
     // @ts-expect-error
-    expect(() => new QStringPath(null)).toThrow();
+    expect(() => new QSConstructor(null)).toThrow();
     // @ts-expect-error
-    expect(() => new QStringPath()).toThrow();
+    expect(() => new QSConstructor()).toThrow();
     // @ts-expect-error
-    expect(() => new QStringPath(undefined)).toThrow();
-    expect(() => new QStringPath("")).toThrow();
-    expect(() => new QStringPath(" ")).toThrow();
+    expect(() => new QSConstructor(undefined)).toThrow();
+    expect(() => new QSConstructor("")).toThrow();
+    expect(() => new QSConstructor(" ")).toThrow();
   });
 
   test("orderBy asc", () => {
@@ -190,18 +190,6 @@ describe("QStringPath test", () => {
     expect(result.toString()).toBe("concat(Country,Language) eq 'France_X'");
   });
 
-  test("contains", () => {
-    const result = toTest.contains("ran");
-
-    expect(result.toString()).toBe("contains(Country,'ran')");
-  });
-
-  test("contains prop", () => {
-    const result = toTest.contains(otherProp);
-
-    expect(result.toString()).toBe("contains(Country,Language)");
-  });
-
   test("startsWith", () => {
     const result = toTest.startsWith("Fra");
 
@@ -224,18 +212,6 @@ describe("QStringPath test", () => {
     const result = toTest.endsWith(otherProp);
 
     expect(result.toString()).toBe("endswith(Country,Language)");
-  });
-
-  test("matchesPattern", () => {
-    const result = toTest.matchesPattern("[A-Za-z]+");
-
-    expect(result.toString()).toBe("matchesPattern(Country,'[A-Za-z]+')");
-  });
-
-  test("matchesPattern prop", () => {
-    const result = toTest.matchesPattern(otherProp);
-
-    expect(result.toString()).toBe("matchesPattern(Country,Language)");
   });
 
   test("indexOf", () => {
@@ -273,44 +249,4 @@ describe("QStringPath test", () => {
 
     expect(result.toString()).toBe("trim(Country) eq 'France'");
   });
-
-  /**
-   * We test here, that internal state has been cleared after calling functions
-   * which return expressions.
-   * => we only test expression returning functions
-   */
-  test("temporary results have been cleared", () => {
-    const startWithState = () => toTest.concatPrefix("test_");
-    const testWithoutState = () => expect(toTest.equals("France").toString()).toBe("Country eq 'France'");
-
-    startWithState().equals("doesn't matter");
-    testWithoutState();
-
-    startWithState().notEquals("doesn't matter");
-    testWithoutState();
-
-    startWithState().greaterThan("doesn't matter");
-    testWithoutState();
-
-    startWithState().greaterEquals("doesn't matter");
-    testWithoutState();
-
-    startWithState().lt("doesn't matter");
-    testWithoutState();
-
-    startWithState().le("doesn't matter");
-    testWithoutState();
-
-    startWithState().contains("doesn't matter");
-    testWithoutState();
-
-    startWithState().startsWith("doesn't matter");
-    testWithoutState();
-
-    startWithState().endsWith("doesn't matter");
-    testWithoutState();
-
-    startWithState().matchesPattern("doesn't matter");
-    testWithoutState();
-  });
-});
+}
