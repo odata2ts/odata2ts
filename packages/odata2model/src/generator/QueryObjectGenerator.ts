@@ -1,4 +1,3 @@
-import { upperCaseFirst } from "upper-case-first";
 import {
   ConstructorDeclarationStructure,
   OptionalKind,
@@ -10,6 +9,7 @@ import {
 
 import { DataTypes, PropertyModel } from "../data-model/DataTypeModel";
 import { DataModel } from "../data-model/DataModel";
+import { firstCharLowerCase } from "xml2js/lib/processors";
 
 const CORE_QCLASSES = ["QueryObject"];
 const Q_OBJECT_PACKAGE = "@odata2ts/odata-query-objects";
@@ -22,14 +22,12 @@ const Q_OBJECT_CONSTRUCTOR: OptionalKind<ConstructorDeclarationStructure> = {
     },
   ],
   statements: "super(path);",
-}
+};
 
 export function generateQueryObjects(dataModel: DataModel, sourceFile: SourceFile) {
   const generator = new QueryObjectGenerator(dataModel, sourceFile);
   return generator.generate();
 }
-
-
 
 class QueryObjectGenerator {
   constructor(private dataModel: DataModel, private sourceFile: SourceFile) {}
@@ -39,7 +37,7 @@ class QueryObjectGenerator {
 
     this.dataModel.getModels().forEach((model) => {
       this.sourceFile.addClass({
-        name: upperCaseFirst(model.qName),
+        name: model.qName,
         isExported: true,
         extends: "QueryObject",
         ctors: [Q_OBJECT_CONSTRUCTOR],
@@ -51,8 +49,8 @@ class QueryObjectGenerator {
         isExported: true,
         declarations: [
           {
-            name: model.qName,
-            initializer: `new ${upperCaseFirst(model.qName)}()`,
+            name: firstCharLowerCase(model.qName),
+            initializer: `new ${model.qName}()`,
           },
         ],
       });
@@ -74,20 +72,12 @@ class QueryObjectGenerator {
     return props.map((prop) => {
       const { name, odataName } = prop;
       const isModelType = prop.dataType === DataTypes.ModelType;
-      // determine matching QPath type
-      let qPathType: string;
       let qPathInit: string;
 
-      if (prop.dataType === DataTypes.EnumType) {
-        qPathType = "QEnumPath";
-        qPathInit = `new ${qPathType}(this.withPrefix("${odataName}"))`;
-      } else if (prop.dataType === DataTypes.PrimitiveType) {
-        // Custom primitive types like DateString or GuidString end on suffix 'String' => remove that
-        qPathType = `Q${upperCaseFirst(prop.type.replace(/String$/, ""))}Path`;
-        qPathInit = `new ${qPathType}(this.withPrefix("${odataName}"))`;
+      if (prop.dataType === DataTypes.EnumType || prop.dataType === DataTypes.PrimitiveType) {
+        qPathInit = `new ${prop.qPath}(this.withPrefix("${odataName}"))`;
       } else if (isModelType) {
-        qPathType = "QEntityPath";
-        qPathInit = `new ${qPathType}(this.withPrefix("${odataName}"), () => ${upperCaseFirst(prop.qObject!)})`;
+        qPathInit = `new ${prop.qPath}(this.withPrefix("${odataName}"), () => ${prop.qObject!})`;
       } else {
         throw Error(`Unknown DataType [${prop.dataType}] for prop with name [${name}]`);
       }
@@ -101,16 +91,16 @@ class QueryObjectGenerator {
           throw Error("QObject for collection is missing!");
         }
 
-        qPathInit = `new ${cType}(this.withPrefix("${odataName}"), () => ${upperCaseFirst(qObject)})`;
+        qPathInit = `new ${cType}(this.withPrefix("${odataName}"), () => ${qObject})`;
 
         qTypeImports.add(cType);
         if (!isModelType) {
-          qTypeImports.add(upperCaseFirst(qObject));
+          qTypeImports.add(qObject);
         }
       }
 
       // add import for data type
-      qTypeImports.add(qPathType);
+      qTypeImports.add(prop.qPath);
 
       return {
         name,

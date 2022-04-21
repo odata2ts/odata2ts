@@ -9,7 +9,7 @@ import { QBooleanPath } from "./path/QBooleanPath";
 import { QNumberPath } from "./path/QNumberPath";
 import { QStringPath } from "./path/v4/QStringPath";
 import { QueryObject } from "./QueryObject";
-import * as V2 from "./path/v2";
+import { QDateTimeOffsetV2Path, QDateTimeV2Path, QStringV2Path, QTimeV2Path } from "./path/v2";
 
 const ATTRIBUTE_NAME = "it";
 const PRIMITIVE_VALUE_REFERENCE = "$it";
@@ -57,6 +57,13 @@ export class QStringCollection extends QPrimitiveCollection<QStringPath> {
   }
 }
 export const qStringCollection = new QStringCollection();
+
+export class QStringV2Collection extends QPrimitiveCollection<QStringV2Path> {
+  createQPathType(path: string) {
+    return new QStringV2Path(path);
+  }
+}
+export const qStringV2Collection = new QStringV2Collection();
 
 export class QNumberCollection extends QPrimitiveCollection<QNumberPath> {
   createQPathType(path: string) {
@@ -107,23 +114,23 @@ export class QDateCollection extends QPrimitiveCollection<QDatePath> {
 }
 export const qDateCollection = new QDateCollection();
 
-export class QTimeV2Collection extends QPrimitiveCollection<V2.QTimeV2Path> {
+export class QTimeV2Collection extends QPrimitiveCollection<QTimeV2Path> {
   createQPathType(path: string) {
-    return new V2.QTimeV2Path(path);
+    return new QTimeV2Path(path);
   }
 }
 export const qTimeV2Collection = new QTimeV2Collection();
 
-export class QDateTimeV2Collection extends QPrimitiveCollection<V2.QDateTimeV2Path> {
+export class QDateTimeV2Collection extends QPrimitiveCollection<QDateTimeV2Path> {
   createQPathType(path: string) {
-    return new V2.QDateTimeV2Path(path);
+    return new QDateTimeV2Path(path);
   }
 }
 export const qDateTimeV2Collection = new QDateTimeV2Collection();
 
-export class QDateTimeOffsetV2Collection extends QPrimitiveCollection<V2.QDateTimeOffsetV2Path> {
+export class QDateTimeOffsetV2Collection extends QPrimitiveCollection<QDateTimeOffsetV2Path> {
   createQPathType(path: string) {
-    return new V2.QDateTimeOffsetV2Path(path);
+    return new QDateTimeOffsetV2Path(path);
   }
 }
 export const qDateTimeOffsetV2Collection = new QDateTimeOffsetV2Collection();

@@ -1,3 +1,3 @@
 export interface Brand {
-  naming?: string;
+  naming?: boolean;
 }

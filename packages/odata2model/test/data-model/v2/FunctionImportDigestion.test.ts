@@ -133,7 +133,7 @@ describe("Function Digestion Test", () => {
           odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
           odataType: `Collection(${SERVICE_NAME}.Product)`,
           type: "Product",
-          qObject: "qProduct",
+          qObject: "QProduct",
         },
       },
     ]);

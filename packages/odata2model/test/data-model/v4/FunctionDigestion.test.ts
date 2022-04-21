@@ -122,7 +122,7 @@ describe("Function Digestion Test", () => {
           odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
           odataType: "Collection(Edm.String)",
           type: "string",
-          qObject: "qStringCollection",
+          qObject: "QStringCollection",
         },
       },
       {

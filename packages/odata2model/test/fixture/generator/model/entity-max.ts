@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type {
   GuidString,
   TimeOfDayString,
@@ -19,4 +18,9 @@ export interface Book {
   multipleStrings?: Array<string>;
   multipleNumbers?: Array<number>;
   multipleBooleans?: Array<boolean>;
+  multipleIds?: Array<GuidString>;
+  multipleTimes?: Array<TimeOfDayString>;
+  multipleDates?: Array<DateString>;
+  multipleDateTimeOffsets?: Array<DateTimeOffsetString>;
+  multipleBinaries?: Array<BinaryString>;
 }

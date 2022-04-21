@@ -49,6 +49,7 @@ export function createComplexAndEnumTests() {
       odataName: "myChoice",
       odataType: `${SERVICE_NAME}.Choice`,
       qObject: undefined,
+      qPath: "QEnumPath",
       required: false,
       type: "Choice",
     });
@@ -73,7 +74,8 @@ export function createComplexAndEnumTests() {
       name: "myChoices",
       odataName: "myChoices",
       odataType: `Collection(${SERVICE_NAME}.Choice)`,
-      qObject: "qEnumCollection",
+      qObject: "QEnumCollection",
+      qPath: "QEnumPath",
       required: false,
       type: "Choice",
     });
@@ -96,7 +98,8 @@ export function createComplexAndEnumTests() {
       name: "branding",
       odataName: "branding",
       odataType: `${SERVICE_NAME}.Brand`,
-      qObject: "qBrand",
+      qObject: "QBrand",
+      qPath: "QEntityPath",
       required: false,
       type: "Brand",
     });

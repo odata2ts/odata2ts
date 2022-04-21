@@ -87,10 +87,10 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     }
   }
 
-  protected mapODataType(type: string): string {
+  protected mapODataType(type: string): [string, string, string] {
     switch (type) {
       case ODataTypesV4.Boolean:
-        return "boolean";
+        return ["boolean", "QBooleanPath", "QBooleanCollection"];
       case ODataTypesV4.Byte:
       case ODataTypesV4.SByte:
       case ODataTypesV4.Int16:
@@ -99,31 +99,31 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       case ODataTypesV4.Decimal:
       case ODataTypesV4.Double:
       case ODataTypesV4.Single:
-        return "number";
+        return ["number", "QNumberPath", "QNumberCollection"];
       case ODataTypesV4.String:
-        return "string";
+        return ["string", "QStringPath", "QStringCollection"];
       case ODataTypesV4.Date:
         const dateType = "DateString";
         this.dataModel.addPrimitiveTypeImport(dateType);
-        return dateType;
+        return [dateType, "QDatePath", "QDateCollection"];
       case ODataTypesV4.Time:
         const timeType = "TimeOfDayString";
         this.dataModel.addPrimitiveTypeImport(timeType);
-        return timeType;
+        return [timeType, "QTimeOfDayPath", "QTimeOfDayCollection"];
       case ODataTypesV4.DateTimeOffset:
         const dateTimeType = "DateTimeOffsetString";
         this.dataModel.addPrimitiveTypeImport(dateTimeType);
-        return dateTimeType;
+        return [dateTimeType, "QDateTimeOffsetPath", "QDateTimeOffsetCollection"];
       case ODataTypesV4.Binary:
         const binaryType = "BinaryString";
         this.dataModel.addPrimitiveTypeImport(binaryType);
-        return binaryType;
+        return [binaryType, "QBinaryPath", "QBinaryCollection"];
       case ODataTypesV4.Guid:
         const guidType = "GuidString";
         this.dataModel.addPrimitiveTypeImport(guidType);
-        return guidType;
+        return [guidType, "QGuidPath", "QGuidCollection"];
       default:
-        return "string";
+        return ["string", "QStringPath", "QStringCollection"];
     }
   }
 

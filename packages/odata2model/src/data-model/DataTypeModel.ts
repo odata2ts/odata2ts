@@ -25,6 +25,7 @@ export interface PropertyModel {
   odataType: string;
   type: string;
   qObject?: string;
+  qPath: string;
   required: boolean;
   isCollection: boolean;
   dataType: DataTypes;

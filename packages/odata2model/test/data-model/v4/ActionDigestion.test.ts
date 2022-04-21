@@ -123,7 +123,7 @@ describe("Action Digestion Test", () => {
           odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
           odataType: `Collection(${SERVICE_NAME}.User)`,
           type: "User",
-          qObject: "qUser",
+          qObject: "QUser",
         },
       },
     ]);
@@ -135,7 +135,7 @@ describe("Action Digestion Test", () => {
     await expect(doDigest()).rejects.toThrowError("no parameters");
   });
 
-  test("Actino Import: min case", async () => {
+  test("Action Import: min case", async () => {
     odataBuilder
       .addActionImport("NotifyBestFriend", "messageBestFriend")
       .addAction("messageBestFriend", undefined, false);
