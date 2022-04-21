@@ -1,56 +1,43 @@
-import { ODataUriBuilderBase, ODataUriBuilderConfig } from "./internal";
+import {
+  QCollectionPath,
+  QEntityCollectionPath,
+  QEntityPath,
+  QFilterExpression,
+  QOrderByExpression,
+  QueryObject,
+} from "@odata2ts/odata-query-objects";
 
 /**
- * Create an OData URI string in a typesafe way by facilitating generated query objects.
+ * Extracts the wrapped entity from QEntityPath or QEntityCollectionPath
  */
-export class ODataUriBuilder<Q> extends ODataUriBuilderBase<Q> {
-  /**
-   * Create an UriBuilder by passing in a query object, which already contains the base path
-   * to the OData service & the given entity.
-   *
-   * Example:
-   * ODataUriBuilder.create("people", qPerson)
-   *   .select(...)
-   *   .filter(qPerson.age.greaterThan(...))
-   *   ...
-   *   .build()
-   *
-   * @param path base path to
-   * @param qEntity the query object
-   * @param config optionally pass a configuration
-   * @returns a UriBuilder
-   */
-  static create<Q>(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
-    return new ODataUriBuilder<Q>(path, qEntity, config);
-  }
+export type EntityExtractor<QProp> = QProp extends QEntityPath<infer ET>
+  ? ET
+  : QProp extends QEntityCollectionPath<infer ET>
+  ? ET
+  : never;
 
-  protected readonly entity: Q;
+/**
+ * Extracts all keys from a property (Q*Path), but only for the given types
+ */
+export type ExtractPropertyNamesOfType<QPath, QPathTypes> = {
+  [Key in keyof QPath]: QPath[Key] extends QPathTypes ? Key : never;
+}[keyof QPath];
 
-  private constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
-    super(path, qEntity, config);
-    this.entity = qEntity;
-  }
+/**
+ * Retrieves all property names which are expandable,
+ * i.e. props of type QEntityPath, QEntityCollectionPath and QCollectionPath
+ */
+export type ExpandType<Q extends QueryObject> = ExtractPropertyNamesOfType<
+  Q,
+  QEntityPath<any> | QEntityCollectionPath<any> | QCollectionPath<any>
+>;
 
-  /**
-   * Add the count to the response.
-   *
-   * @param doCount explicitly specify if counting should be done
-   * @returns this query builder
-   */
-  public count(doCount?: boolean) {
-    this.itemsCount = doCount === undefined || doCount;
-    return this;
-  }
-
-  /**
-   * Build the final URI string.
-   *
-   * @returns the query string including the base service & collection path
-   */
-  public build(): string {
-    const paramFn = this.unencoded ? this.param : this.paramEncoded;
-    const params = this.buildQuery(paramFn);
-
-    return this.path + (params.length ? `?${params.join("&")}` : "");
-  }
+export interface ODataUriBuilder<Q extends QueryObject> {
+  select: (...props: Array<keyof Q | null | undefined>) => this;
+  expand: <Prop extends ExpandType<Q>>(...props: Array<Prop>) => this;
+  skip: (itemsToSkip: number) => this;
+  top: (itemsTop: number) => this;
+  orderBy: (...expressions: Array<QOrderByExpression>) => this;
+  filter: (...expressions: Array<QFilterExpression>) => this;
+  build: () => string;
 }
