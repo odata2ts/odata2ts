@@ -1,8 +1,8 @@
-import { QPathModel, QFilterExpression } from "..";
+import { QPathModel, QFilterExpression, QueryObject } from "..";
 import { LambdaFunctions } from "../odata/ODataModel";
 
-export class QEntityCollectionPath<Type> implements QPathModel {
-  constructor(private path: string, private qEntityFn: () => new (prefix?: string) => Type) {
+export class QEntityCollectionPath<Q extends QueryObject> implements QPathModel {
+  constructor(private path: string, private qEntityFn: () => new (prefix?: string) => Q) {
     if (!path || !path.trim()) {
       throw Error("Path must be supplied!");
     }
@@ -15,11 +15,11 @@ export class QEntityCollectionPath<Type> implements QPathModel {
     return this.path;
   }
 
-  public getEntity(withPrefix: boolean = false): Type {
+  public getEntity(withPrefix: boolean = false): Q {
     return new (this.qEntityFn())(withPrefix ? this.path : undefined);
   }
 
-  private lambdaFunction(operationName: string, fn: (qObject: Type) => QFilterExpression, prefix: string) {
+  private lambdaFunction(operationName: string, fn: (qObject: Q) => QFilterExpression, prefix: string) {
     // create new qObject with given prefix
     const qEntity = new (this.qEntityFn())(prefix);
     const expression = fn(qEntity);
@@ -30,11 +30,11 @@ export class QEntityCollectionPath<Type> implements QPathModel {
     return new QFilterExpression(`${this.path}/${operationName}(${prefix}:${expression})`);
   }
 
-  public any(fn: (qObject: Type) => QFilterExpression, prefix: string = "a"): QFilterExpression {
+  public any(fn: (qObject: Q) => QFilterExpression, prefix: string = "a"): QFilterExpression {
     return this.lambdaFunction(LambdaFunctions.ANY, fn, prefix);
   }
 
-  public all(fn: (qObject: Type) => QFilterExpression, prefix: string = "a"): QFilterExpression {
+  public all(fn: (qObject: Q) => QFilterExpression, prefix: string = "a"): QFilterExpression {
     return this.lambdaFunction(LambdaFunctions.ALL, fn, prefix);
   }
 }

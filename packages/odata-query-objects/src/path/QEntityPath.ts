@@ -1,7 +1,8 @@
 import { QPathModel } from "./QPathModel";
+import { QueryObject } from "../QueryObject";
 
-export class QEntityPath<Type> implements QPathModel {
-  constructor(private path: string, private qEntityFn: () => new (prefix?: string) => Type) {
+export class QEntityPath<Q extends QueryObject> implements QPathModel {
+  constructor(private path: string, private qEntityFn: () => new (prefix?: string) => Q) {
     if (!path || !path.trim()) {
       throw Error("Path must be supplied!");
     }
@@ -14,11 +15,11 @@ export class QEntityPath<Type> implements QPathModel {
     return this.path;
   }
 
-  public getEntity(withPrefix: boolean = false): Type {
+  public getEntity(withPrefix: boolean = false): Q {
     return new (this.qEntityFn())(withPrefix ? this.path : undefined);
   }
 
-  public get props(): Type {
+  public get props(): Q {
     return new (this.qEntityFn())(this.path);
   }
 }
