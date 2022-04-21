@@ -1,17 +1,9 @@
-import type {
-  GuidString,
-  TimeV2String,
-  DateTimeV2String,
-  DateTimeOffsetV2String,
-  BinaryString,
-} from "@odata2ts/odata-query-objects";
-
 export interface Book {
-  id: GuidString;
+  id: string;
   requiredOption: boolean;
-  time?: TimeV2String;
-  optionalDate?: DateTimeV2String;
-  dateTimeOffset?: DateTimeOffsetV2String;
+  time?: string;
+  optionalDate?: string;
+  dateTimeOffset?: string;
   TestDecimal?: string;
   testInt16?: number;
   testInt32?: number;
@@ -20,15 +12,15 @@ export interface Book {
   testByte?: string;
   testSByte?: string;
   testDouble?: string;
-  testBinary?: BinaryString;
+  testBinary?: string;
   testAny?: string;
-  multipleIds?: Array<GuidString>;
+  multipleIds?: Array<string>;
   multipleStrings?: Array<string>;
   multipleBooleans?: Array<boolean>;
-  multipleTimes?: Array<TimeV2String>;
-  multipleDateTimes?: Array<DateTimeV2String>;
-  multipleDateTimeOffsets?: Array<DateTimeOffsetV2String>;
+  multipleTimes?: Array<string>;
+  multipleDateTimes?: Array<string>;
+  multipleDateTimeOffsets?: Array<string>;
   multipleInt16?: Array<number>;
   multipleDecimals?: Array<string>;
-  multipleBinaries?: Array<BinaryString>;
+  multipleBinaries?: Array<string>;
 }

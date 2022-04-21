@@ -317,7 +317,7 @@ class ServiceGenerator {
   }
 
   private isQuotedValue(prop: PropertyModel): boolean {
-    return prop.type === "string" || prop.dataType === DataTypes.EnumType;
+    return ["QStringPath", "QStringV2Path"].includes(prop.qPath) || prop.dataType === DataTypes.EnumType;
   }
 
   private createKeySpec(params: Array<PropertyModel>): string | undefined {

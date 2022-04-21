@@ -103,25 +103,15 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       case ODataTypesV4.String:
         return ["string", "QStringPath", "QStringCollection"];
       case ODataTypesV4.Date:
-        const dateType = "DateString";
-        this.dataModel.addPrimitiveTypeImport(dateType);
-        return [dateType, "QDatePath", "QDateCollection"];
+        return ["string", "QDatePath", "QDateCollection"];
       case ODataTypesV4.Time:
-        const timeType = "TimeOfDayString";
-        this.dataModel.addPrimitiveTypeImport(timeType);
-        return [timeType, "QTimeOfDayPath", "QTimeOfDayCollection"];
+        return ["string", "QTimeOfDayPath", "QTimeOfDayCollection"];
       case ODataTypesV4.DateTimeOffset:
-        const dateTimeType = "DateTimeOffsetString";
-        this.dataModel.addPrimitiveTypeImport(dateTimeType);
-        return [dateTimeType, "QDateTimeOffsetPath", "QDateTimeOffsetCollection"];
+        return ["string", "QDateTimeOffsetPath", "QDateTimeOffsetCollection"];
       case ODataTypesV4.Binary:
-        const binaryType = "BinaryString";
-        this.dataModel.addPrimitiveTypeImport(binaryType);
-        return [binaryType, "QBinaryPath", "QBinaryCollection"];
+        return ["string", "QBinaryPath", "QBinaryCollection"];
       case ODataTypesV4.Guid:
-        const guidType = "GuidString";
-        this.dataModel.addPrimitiveTypeImport(guidType);
-        return [guidType, "QGuidPath", "QGuidCollection"];
+        return ["string", "QGuidPath", "QGuidCollection"];
       default:
         return ["string", "QStringPath", "QStringCollection"];
     }

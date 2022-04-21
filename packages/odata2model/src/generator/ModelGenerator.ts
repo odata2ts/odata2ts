@@ -12,9 +12,6 @@ class ModelGenerator {
   public generate(): void {
     this.generateEnums();
     this.generateModels();
-
-    // add import statements for additional primitive types, e.g. DateString or GuidString
-    this.addDataTypeImports(this.dataModel.getPrimitiveTypeImports());
   }
 
   private generateEnums() {
@@ -39,17 +36,6 @@ class ModelGenerator {
         })),
         extends: model.baseClasses,
       });
-    });
-  }
-
-  private addDataTypeImports(imports: Array<string>) {
-    if (!imports || !imports.length) {
-      return;
-    }
-    this.sourceFile.addImportDeclaration({
-      isTypeOnly: true,
-      namedImports: imports,
-      moduleSpecifier: "@odata2ts/odata-query-objects",
     });
   }
 }

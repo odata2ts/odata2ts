@@ -1,7 +1,5 @@
-import type { GuidString } from "@odata2ts/odata-query-objects";
-
 export interface Book {
-  id: GuidString;
+  id: string;
   method: PublishingMethod;
   altMethods?: Array<PublishingMethod>;
 }

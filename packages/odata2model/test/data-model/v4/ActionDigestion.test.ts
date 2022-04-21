@@ -73,7 +73,7 @@ describe("Action Digestion Test", () => {
           },
           {
             name: "testDate",
-            type: "DateString",
+            type: "string",
           },
         ],
         returnType: {
