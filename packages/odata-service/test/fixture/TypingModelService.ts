@@ -1,6 +1,4 @@
 import {
-  GuidString,
-  DateString,
   QGuidPath,
   QNumberPath,
   QDatePath,
@@ -15,10 +13,10 @@ import { ODataClient } from "@odata2ts/odata-client-api";
 import { EntityTypeServiceV4, EntitySetServiceV4 } from "../../src";
 
 export interface TestModel {
-  ID: GuidString;
+  ID: string;
   counter: number;
-  date?: DateString;
-  tags: Array<GuidString>;
+  date?: string;
+  tags: Array<string>;
   other?: TestModel;
   others?: Array<TestModel>;
 }
@@ -44,12 +42,12 @@ export class TestService extends EntityTypeServiceV4<TestModel, QTest> {
   }
 }
 
-export class TestCollectionService extends EntitySetServiceV4<TestModel, QTest, GuidString | { ID: GuidString }> {
+export class TestCollectionService extends EntitySetServiceV4<TestModel, QTest, string | { ID: string }> {
   constructor(client: ODataClient, path: string) {
     super(client, path, qTest);
   }
 
-  public get(id: GuidString | { ID: GuidString }): TestService {
+  public get(id: string | { ID: string }): TestService {
     const url = "test";
     return new TestService(this.client, url);
   }
