@@ -1,5 +1,5 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
-import { EntityTypeService, CollectionService, EntitySetService, compileId } from "../../src";
+import { EntityTypeServiceV4, CollectionServiceV4, EntitySetServiceV4, compileId } from "../../src";
 import {
   QCollectionPath,
   QEntityCollectionPath,
@@ -39,9 +39,9 @@ export class QPerson extends QueryObject {
 
 export const qPerson = new QPerson();
 
-export class PersonModelService extends EntityTypeService<PersonModel, QPerson> {
+export class PersonModelService extends EntityTypeServiceV4<PersonModel, QPerson> {
   public get features() {
-    return new CollectionService(this.client, this.path + "/Features", new QEnumCollection());
+    return new CollectionServiceV4(this.client, this.path + "/Features", new QEnumCollection());
   }
 
   public get bestFriend() {
@@ -57,7 +57,7 @@ export class PersonModelService extends EntityTypeService<PersonModel, QPerson> 
   }
 }
 
-export class PersonModelCollectionService extends EntitySetService<
+export class PersonModelCollectionService extends EntitySetServiceV4<
   PersonModel,
   QPerson,
   string | { UserName: string }

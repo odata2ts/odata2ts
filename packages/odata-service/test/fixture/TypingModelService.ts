@@ -12,7 +12,7 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { ODataClient } from "@odata2ts/odata-client-api";
 
-import { EntityTypeService, EntitySetService } from "../../src";
+import { EntityTypeServiceV4, EntitySetServiceV4 } from "../../src";
 
 export interface TestModel {
   ID: GuidString;
@@ -38,13 +38,13 @@ export class QTest extends QueryObject {
 
 export const qTest = new QTest();
 
-export class TestService extends EntityTypeService<TestModel, QTest> {
+export class TestService extends EntityTypeServiceV4<TestModel, QTest> {
   constructor(client: ODataClient, path: string) {
     super(client, path, qTest);
   }
 }
 
-export class TestCollectionService extends EntitySetService<TestModel, QTest, GuidString | { ID: GuidString }> {
+export class TestCollectionService extends EntitySetServiceV4<TestModel, QTest, GuidString | { ID: GuidString }> {
   constructor(client: ODataClient, path: string) {
     super(client, path, qTest);
   }
