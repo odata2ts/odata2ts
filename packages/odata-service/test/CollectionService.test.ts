@@ -1,5 +1,5 @@
 import { QStringCollection, StringCollection, QEnumCollection, EnumCollection } from "@odata2ts/odata-query-objects";
-import { CollectionService } from "../src";
+import { CollectionServiceV4 } from "../src";
 import { MockODataClient } from "./mock/MockODataClient";
 import { Feature } from "./fixture/PersonModelService";
 
@@ -9,8 +9,8 @@ describe("CollectionService Test", () => {
   const STRING_URL = `${BASE_URL}/Name`;
   const ENUM_URL = `${BASE_URL}/Feature`;
 
-  let stringService: CollectionService<StringCollection, QStringCollection>;
-  let enumService: CollectionService<EnumCollection<Feature>, QEnumCollection>;
+  let stringService: CollectionServiceV4<StringCollection, QStringCollection>;
+  let enumService: CollectionServiceV4<EnumCollection<Feature>, QEnumCollection>;
 
   const getParams = (params: { [key: string]: string }) => {
     const ps = Object.entries(params).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
@@ -18,8 +18,8 @@ describe("CollectionService Test", () => {
   };
 
   beforeEach(() => {
-    stringService = new CollectionService(odataClient, STRING_URL, new QStringCollection());
-    enumService = new CollectionService(odataClient, ENUM_URL, new QEnumCollection());
+    stringService = new CollectionServiceV4(odataClient, STRING_URL, new QStringCollection());
+    enumService = new CollectionServiceV4(odataClient, ENUM_URL, new QEnumCollection());
   });
 
   test("collection: query", async () => {
