@@ -1,5 +1,19 @@
-import { QComplexPath, QPath, QueryObject } from "@odata2ts/odata-query-objects";
-import { ExpandType, ODataOperators, ODataUriBuilder, ODataUriBuilderBase, ODataUriBuilderConfig } from "../internal";
+import {
+  QComplexPath,
+  QEntityCollectionPath,
+  QEntityPath,
+  QPath,
+  QPathModel,
+  QueryObject,
+} from "@odata2ts/odata-query-objects";
+import {
+  EntityExtractor,
+  ExpandType,
+  ODataOperators,
+  ODataUriBuilder,
+  ODataUriBuilderBase,
+  ODataUriBuilderConfig,
+} from "../internal";
 
 /**
  * Create an OData URI string in a typesafe way by facilitating generated query objects.
@@ -50,52 +64,45 @@ export class ODataUriBuilderV2<Q extends QueryObject> extends ODataUriBuilderBas
   }
 
   /**
-   * Select the properties of the entity you want to select.
+   * Name the properties of the entity you want to select.
+   * Null or undefined are allowed and will be ignored.
    *
-   * @param props the property names to select
+   * This function can be called multiple times.
+   *
+   * If you want to select nested properties, e.g. "address/street", then you need to use a function.
+   * The first parameter of the function will be the current QueryObject of the UriBuilder.
+   *
+   * Examples for a PersonModel:
+   * - {@code select("lastName", null, "firstName")} => $select=lastName,firstName
+   * - {@code select((qPerson) => qPerson.address.props.street) } => $select=address/street
+   * - {@code select((qPerson) => [qPerson.address.props.street, qPerson.lastName]) } => $select=address/street,lastName
+   *
+   * @param props the property names to select or a function to select one or more QPathModels from QueryObject
    * @returns this query builder
    */
-  public select(...props: Array<keyof Q | null | undefined>) {
+  public select(...props: Array<keyof Q | null | undefined | ((q: Q) => QPathModel | [QPathModel])>) {
     if (props && props.length) {
-      this.selects.push(
-        ...props
-          .filter((p): p is keyof Q => !!p)
-          .map((p) => {
-            return (this.entity[p] as unknown as QPath).getPath();
-          })
-      );
+      for (let p of props) {
+        if (!p) {
+          continue;
+        }
+
+        if (typeof p === "function") {
+          const ePath = p(this.entity);
+          if (ePath) {
+            const ePathList = Array.isArray(ePath) ? ePath : [ePath];
+            for (let ep of ePathList) {
+              this.selects.push(ep.getPath());
+            }
+          }
+        } else {
+          const prop = this.entity[p] as unknown as QPathModel;
+          this.selects.push(prop.getPath());
+        }
+      }
     }
     return this;
   }
-
-  /**
-   * Expand a given entity and receive an own builder for it to further select, filter, expand, etc.
-   *
-   * This method can be called multiple times.
-   *
-   * Example:
-   * .expanding("addresses", (addressBuilder, qAddress) => {
-   *   addressBuilder
-   *     .select(...)
-   *     .filter(qAddress.street.startsWith(...))
-   * })
-   *
-   * @param prop the name of the property which should be expanded
-   * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
-   * @returns this query builder
-   */
-  /*public expanding<Prop extends ExpandType<Q>>(
-    prop: Prop,
-    builderFn: (builder: ExpandingODataUriBuilder<EntityExtractor<Q[Prop]>>, qObject: EntityExtractor<Q[Prop]>) => void
-  ) {
-    const entityProp = this.entity[prop] as unknown as QComplexPath;
-    const expander = ExpandingODataUriBuilder.create(entityProp.getPath(), entityProp.getEntity());
-    builderFn(expander, entityProp.getEntity());
-
-    this.expands.push(expander);
-
-    return this;
-  }*/
 
   /**
    * Simple & plain expand of the given entities or entity collections.
@@ -113,6 +120,30 @@ export class ODataUriBuilderV2<Q extends QueryObject> extends ODataUriBuilderBas
         return prop.getPath();
       })
     );
+    return this;
+  }
+
+  /**
+   * Expand nested props of the current entity.
+   *
+   * This method can be called multiple times.
+   *
+   * Examples for a PersonModel:
+   * - {@code expanding("address", (qAddress) => qAddress.responsible) // result: $expand=address/responsible}
+   * - {@code expanding("address", (qAddress) => qAddress.responsible.props.address) // result: $expand=address/responsible/address}
+   *
+   * @param prop name of the property to expand
+   * @param expandFn function which receives the query object as argument
+   * @returns this query builder
+   */
+  public expanding<Prop extends ExpandType<Q>>(
+    prop: Prop,
+    expandFn: (q: EntityExtractor<Q[Prop]>) => QEntityPath<any> | QEntityCollectionPath<any>
+  ) {
+    const entityProp = this.entity[prop] as unknown as QComplexPath;
+    const ePath = expandFn(entityProp.getEntity(true));
+    this.expands.push(ePath.getPath());
+
     return this;
   }
 }
