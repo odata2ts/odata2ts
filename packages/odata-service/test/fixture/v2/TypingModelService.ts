@@ -10,7 +10,7 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { ODataClient } from "@odata2ts/odata-client-api";
 
-import { EntityTypeServiceV4, EntitySetServiceV4 } from "../../src";
+import { EntityTypeServiceV4, EntitySetServiceV4 } from "../../../src";
 
 export interface TestModel {
   ID: string;

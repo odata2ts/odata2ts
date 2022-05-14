@@ -1,19 +1,19 @@
 import { ODataClient, ODataResponse } from "@odata2ts/odata-client-api";
 import { QueryObject } from "@odata2ts/odata-query-objects";
-import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
+import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
-import { EntityTypeServiceV4 } from "./EntityTypeServiceV4";
-import { ODataCollectionResponseV4, ODataModelResponseV4 } from "./ResponseModelV4";
-import { ServiceBaseV4 } from "./ServiceBaseV4";
-import { compileId } from "../helper/UrlHelper";
+import { ODataCollectionResponseV2, ODataModelResponseV2 } from "./ResponseModelV2";
+import { EntityTypeServiceV2 } from "./EntityTypeServiceV2";
+import { ServiceBaseV2 } from "./ServiceBaseV2";
 import { EntityKeySpec } from "../ServiceModel";
+import { compileId } from "../helper/UrlHelper";
 
-export abstract class EntitySetServiceV4<
+export abstract class EntitySetServiceV2<
   T,
   Q extends QueryObject,
   EIdType,
-  ETS extends EntityTypeServiceV4<T, Q>
-> extends ServiceBaseV4<T, Q> {
+  ETS extends EntityTypeServiceV2<T, Q>
+> extends ServiceBaseV2<T, Q> {
   /**
    * Overriding the constructor to support creation of EntityTypeService from within this service.
    * Also support key spec.
@@ -49,7 +49,7 @@ export abstract class EntitySetServiceV4<
    * @param model
    * @return
    */
-  public create: (model: T) => ODataResponse<ODataModelResponseV4<T>> = this.doPost;
+  public create: (model: T) => ODataResponse<ODataModelResponseV2<T>> = this.doPost;
 
   public get(id: EIdType) {
     const url = compileId(this.path, this.keySpec, id);
@@ -65,6 +65,6 @@ export abstract class EntitySetServiceV4<
   }
 
   public query: (
-    queryFn?: (builder: ODataUriBuilderV4<Q>, qObject: Q) => void
-  ) => ODataResponse<ODataCollectionResponseV4<T>> = this.doQuery;
+    queryFn?: (builder: ODataUriBuilderV2<Q>, qObject: Q) => void
+  ) => ODataResponse<ODataCollectionResponseV2<T>> = this.doQuery;
 }

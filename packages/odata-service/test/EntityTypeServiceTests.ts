@@ -1,14 +1,18 @@
-import { MockODataClient } from "./mock/MockODataClient";
-import { PersonModel, PersonModelService } from "./fixture/PersonModelService";
+import { ODataClient } from "@odata2ts/odata-client-api";
 
-describe("EntityTypeService Test", () => {
-  const odataClient = new MockODataClient();
+import { MockODataClient } from "./mock/MockODataClient";
+import { PersonModel, PersonModelServiceVersion } from "./fixture/PersonModel";
+
+export function commonEntityTypeServiceTests(
+  odataClient: MockODataClient,
+  serviceConstructor: new (odataClient: ODataClient, url: string) => PersonModelServiceVersion
+) {
   const BASE_URL = "/test('tester')";
 
-  let testService: PersonModelService;
+  let testService: PersonModelServiceVersion;
 
   beforeEach(() => {
-    testService = new PersonModelService(odataClient, BASE_URL);
+    testService = new serviceConstructor(odataClient, BASE_URL);
   });
 
   test("entitySet: setup", async () => {
@@ -19,6 +23,7 @@ describe("EntityTypeService Test", () => {
     const expected = `${BASE_URL}`;
 
     await testService.query();
+
     expect(odataClient.lastUrl).toBe(expected);
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");
@@ -67,4 +72,4 @@ describe("EntityTypeService Test", () => {
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastData).toBeUndefined();
   });
-});
+}
