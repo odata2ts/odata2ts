@@ -1,18 +1,18 @@
+import { ODataResponse } from "@odata2ts/odata-client-api";
 import { QueryObject } from "@odata2ts/odata-query-objects";
-import { ODataClient, ODataModelResponse, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
-import { EntityBaseServiceV4 } from "./EntityBaseServiceV4";
+import { ServiceBaseV4 } from "./ServiceBaseV4";
+import { ODataModelResponseV4 } from "./ResponseModelV4";
 
-export class EntityTypeServiceV4<T, Q extends QueryObject> extends EntityBaseServiceV4<T, Q, ODataModelResponse<T>> {
-  constructor(client: ODataClient, path: string, qModel: Q) {
-    super(client, path, qModel);
-  }
+export class EntityTypeServiceV4<T, Q extends QueryObject> extends ServiceBaseV4<T, Q> {
+  public patch: (model: Partial<T>) => ODataResponse<void> = this.doPatch;
 
-  public patch = this.doPatch;
+  public update: (model: T) => ODataResponse<void> = this.doPut;
 
-  public update = this.doPut;
+  public delete: () => ODataResponse<void> = this.doDelete;
 
-  public delete = this.doDelete;
-
-  public query = this.doQuery;
+  public query: (
+    queryFn?: (builder: ODataUriBuilderV4<Q>, qObject: Q) => void
+  ) => ODataResponse<ODataModelResponseV4<T>> = this.doQuery;
 }

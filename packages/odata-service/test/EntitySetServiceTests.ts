@@ -1,21 +1,29 @@
 import { MockODataClient } from "./mock/MockODataClient";
-import { Feature, PersonModel, PersonModelCollectionService, qPerson } from "./fixture/PersonModelService";
+import { Feature, PersonModel } from "./fixture/PersonModel";
+import { QPersonV4 } from "./fixture/v4/PersonModelService";
+import { QPersonV2 } from "./fixture/v2/PersonModelService";
+import { ODataClient } from "@odata2ts/odata-client-api";
+import { EntitySetServiceV2, EntitySetServiceV4 } from "../src";
 
-describe("EntitySetService Test", () => {
-  const odataClient = new MockODataClient();
+export function commonEntitySetTests(
+  odataClient: MockODataClient,
+  serviceConstructor: new (odataClient: ODataClient, baseUrl: string) =>
+    | EntitySetServiceV4<PersonModel, QPersonV4, any, any>
+    | EntitySetServiceV2<PersonModel, QPersonV2, any, any>
+) {
   const BASE_URL = "/test";
 
-  let testService: PersonModelCollectionService;
+  let testService:
+    | EntitySetServiceV4<PersonModel, QPersonV4, any, any>
+    | EntitySetServiceV2<PersonModel, QPersonV2, any, any>;
 
   beforeEach(() => {
-    testService = new PersonModelCollectionService(odataClient, BASE_URL);
-    expect(testService.getPath());
+    testService = new serviceConstructor(odataClient, BASE_URL);
   });
 
   test("entitySet: setup", async () => {
     expect(testService.getPath()).toBe(BASE_URL);
     expect(testService.getQObject()).not.toBeNull();
-    expect(testService.getQObject()).toBe(qPerson);
   });
 
   test("entitySet: query", async () => {
@@ -80,4 +88,4 @@ describe("EntitySetService Test", () => {
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastData).toBeUndefined();
   });
-});
+}
