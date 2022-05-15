@@ -34,7 +34,11 @@ export class FixtureComparator {
     }
 
     const fixture = this.loadFixture(fullPath);
-    const cleanedFixture = fixture.replace(new RegExp("^//( )*@ts-nocheck"), "").replace(/\r\n/g, "\n").trim();
+    const cleanedFixture = fixture
+      .replace(/\r\n/g, "\n")
+      .replace(new RegExp("^//( )*@ts-nocheck( )*\n"), "")
+      .replace(/[ ]*\/\/[ ]*@ts-ignore[ ]*\n/g, "")
+      .trim();
     expect(result.trim()).toEqual(cleanedFixture);
   }
 
