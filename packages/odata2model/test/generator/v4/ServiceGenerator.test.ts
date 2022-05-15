@@ -7,6 +7,8 @@ import { createProjectManager, ProjectManager } from "../../../src/project/Proje
 import { ProjectFiles } from "../../../src/data-model/DataModel";
 import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
+import path from "path";
+import { ODataVesions } from "../../../src/app";
 
 describe("Service Generator Tests", () => {
   const FIXTURE_PATH = "generator/service";
@@ -43,7 +45,7 @@ describe("Service Generator Tests", () => {
   async function doGenerate() {
     const dataModel = await digest(odataBuilder.getSchema(), runOptions);
 
-    await generateServices(dataModel, projectManager);
+    await generateServices(dataModel, projectManager, ODataVesions.V4);
   }
 
   async function compareMainService(fixture: string) {
@@ -88,7 +90,7 @@ describe("Service Generator Tests", () => {
     expect(projectManager.getServiceFiles().length).toEqual(1);
     await fixtureComparator.compareWithFixture(
       projectManager.getServiceFiles()[0].getFullText(),
-      "test-entity-service.ts"
+      "v4" + path.sep + "test-entity-service.ts"
     );
   });
 
@@ -108,7 +110,7 @@ describe("Service Generator Tests", () => {
     expect(projectManager.getServiceFiles().length).toEqual(1);
     await fixtureComparator.compareWithFixture(
       projectManager.getServiceFiles()[0].getFullText(),
-      "test-entity-service.ts"
+      "v4" + path.sep + "test-entity-service.ts"
     );
   });
 
@@ -168,7 +170,10 @@ describe("Service Generator Tests", () => {
     // then service has those functions
     const services = projectManager.getServiceFiles();
     expect(services.length).toEqual(1);
-    await fixtureComparator.compareWithFixture(services[0].getFullText(), "test-entity-service-bound-func.ts");
+    await fixtureComparator.compareWithFixture(
+      services[0].getFullText(),
+      "v4" + path.sep + "test-entity-service-bound-func.ts"
+    );
   });
 
   test("Service Generator: one bound action", async () => {
@@ -189,7 +194,10 @@ describe("Service Generator Tests", () => {
     // then service has actions
     const services = projectManager.getServiceFiles();
     expect(services.length).toEqual(1);
-    await fixtureComparator.compareWithFixture(services[0].getFullText(), "test-entity-service-bound-action.ts");
+    await fixtureComparator.compareWithFixture(
+      services[0].getFullText(),
+      "v4" + path.sep + "test-entity-service-bound-action.ts"
+    );
   });
 
   test("Service Generator: EntityService with Relationships", async () => {
@@ -212,7 +220,7 @@ describe("Service Generator Tests", () => {
     expect(projectManager.getServiceFiles().length).toEqual(2);
     await fixtureComparator.compareWithFixture(
       projectManager.getServiceFiles()[1].getFullText(),
-      "test-entity-service-relationships.ts"
+      "v4" + path.sep + "test-entity-service-relationships.ts"
     );
   });
 
@@ -234,11 +242,11 @@ describe("Service Generator Tests", () => {
     expect(projectManager.getServiceFiles().length).toEqual(2);
     await fixtureComparator.compareWithFixture(
       projectManager.getServiceFiles()[0].getFullText(),
-      "test-entity-service-complex.ts"
+      "v4" + path.sep + "test-entity-service-complex.ts"
     );
     await fixtureComparator.compareWithFixture(
       projectManager.getServiceFiles()[1].getFullText(),
-      "test-complex-service.ts"
+      "v4" + path.sep + "test-complex-service.ts"
     );
   });
 
@@ -263,7 +271,7 @@ describe("Service Generator Tests", () => {
     expect(projectManager.getServiceFiles().length).toEqual(1);
     await fixtureComparator.compareWithFixture(
       projectManager.getServiceFiles()[0].getFullText(),
-      "test-entity-service-enum.ts"
+      "v4" + path.sep + "test-entity-service-enum.ts"
     );
   });
 });
