@@ -80,23 +80,18 @@ export class ODataUriBuilderV2<Q extends QueryObject> extends ODataUriBuilderBas
    * @param props the property names to select or a function to select one or more QPathModels from QueryObject
    * @returns this query builder
    */
-  public select(...props: Array<keyof Q | null | undefined | ((q: Q) => QPathModel | [QPathModel])>) {
+  public select(...props: Array<keyof Q | null | undefined | QPathModel>) {
     if (props && props.length) {
       for (let p of props) {
         if (!p) {
           continue;
         }
 
-        if (typeof p === "function") {
-          const ePath = p(this.entity);
-          if (ePath) {
-            const ePathList = Array.isArray(ePath) ? ePath : [ePath];
-            for (let ep of ePathList) {
-              this.selects.push(ep.getPath());
-            }
-          }
+        if (typeof p === "object" && typeof p.getPath === "function") {
+          this.selects.push(p.getPath());
         } else {
-          const prop = this.entity[p] as unknown as QPathModel;
+          // @ts-ignore
+          const prop = this.entity[p] as QPathModel;
           this.selects.push(prop.getPath());
         }
       }
