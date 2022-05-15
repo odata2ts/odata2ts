@@ -91,7 +91,7 @@ describe("Service Generator Tests V2", () => {
     expect(projectManager.getServiceFiles().length).toEqual(1);
     await fixtureComparator.compareWithFixture(
       projectManager.getServiceFiles()[0].getFullText(),
-      "V2" + path.sep + "test-entity-service.ts"
+      "v2" + path.sep + "test-entity-service.ts"
     );
   });
 
@@ -148,7 +148,7 @@ describe("Service Generator Tests V2", () => {
     expect(projectManager.getServiceFiles().length).toEqual(2);
     await fixtureComparator.compareWithFixture(
       projectManager.getServiceFiles()[1].getFullText(),
-      "V2" + path.sep + "test-entity-service-relationships.ts"
+      "v2" + path.sep + "test-entity-service-relationships.ts"
     );
   });
 
@@ -170,11 +170,11 @@ describe("Service Generator Tests V2", () => {
     expect(projectManager.getServiceFiles().length).toEqual(2);
     await fixtureComparator.compareWithFixture(
       projectManager.getServiceFiles()[0].getFullText(),
-      "V2" + path.sep + "test-entity-service-complex.ts"
+      "v2" + path.sep + "test-entity-service-complex.ts"
     );
     await fixtureComparator.compareWithFixture(
       projectManager.getServiceFiles()[1].getFullText(),
-      "V2" + path.sep + "test-complex-service.ts"
+      "v2" + path.sep + "test-complex-service.ts"
     );
   });
 
@@ -199,7 +199,7 @@ describe("Service Generator Tests V2", () => {
     expect(projectManager.getServiceFiles().length).toEqual(1);
     await fixtureComparator.compareWithFixture(
       projectManager.getServiceFiles()[0].getFullText(),
-      "V2" + path.sep + "test-entity-service-enum.ts"
+      "v2" + path.sep + "test-entity-service-enum.ts"
     );
   });
 });

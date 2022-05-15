@@ -129,7 +129,7 @@ describe("Service Generator Tests V4", () => {
     await doGenerate();
 
     // then main service file encompasses unbound functions
-    await compareMainService("main-service-func-import.ts", true);
+    await compareMainService("main-service-func-unbound.ts", true);
   });
 
   test("Service Generator: one unbound action", async () => {
