@@ -41,22 +41,31 @@ describe("ODataUriBuilderV2 Test", () => {
   });
 
   test("select: simple prop", () => {
-    const candidate = toTest.select((q) => q.age).build();
+    const candidate = toTest.select(qPerson.age).build();
     const expected = addBase("$select=age");
 
     expect(candidate).toBe(expected);
   });
 
   test("select: nested prop", () => {
-    const candidate = toTest.select((q) => q.address.props.street).build();
+    const candidate = toTest.select(qPerson.address.props.street).build();
     const expected = addBase("$select=Address/street");
 
     expect(candidate).toBe(expected);
   });
 
   test("select: deeply nested prop", () => {
-    const candidate = toTest.select((q) => q.address.props.responsible.props.age).build();
+    const candidate = toTest.select(qPerson.address.props.responsible.props.age).build();
     const expected = addBase("$select=Address/responsible/age");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("select: mixed", () => {
+    const candidate = toTest
+      .select("age", qPerson.address.props.street, qPerson.address.props.responsible.props.age)
+      .build();
+    const expected = addBase("$select=age,Address/street,Address/responsible/age");
 
     expect(candidate).toBe(expected);
   });
