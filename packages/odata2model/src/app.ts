@@ -7,14 +7,20 @@ import { digest as digestV4 } from "./data-model/DataModelDigestionV4";
 import { ODataEdmxModelBase, Schema } from "./data-model/edmx/ODataEdmxModelBase";
 import { Modes, RunOptions } from "./OptionModel";
 
+export enum ODataVesions {
+  V2,
+  V4,
+}
+
 /**
  *
  * @param metadataJson metadata of a given OData service already parsed as JSON
  * @param options further options
  */
 export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: RunOptions): Promise<void> {
-  // determine edmx version attribute
-  const version = metadataJson["edmx:Edmx"].$.Version;
+  // determine edmx edmxVersion attribute
+  const edmxVersion = metadataJson["edmx:Edmx"].$.Version;
+  const version = edmxVersion === "1.0" ? ODataVesions.V2 : ODataVesions.V4;
 
   // get file name based on service name
   const dataService = metadataJson["edmx:Edmx"]["edmx:DataServices"][0];
@@ -32,7 +38,7 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   // parse model information from edmx into something we can really work with
   // => that stuff is called dataModel!
   // prettier-ignore
-  const dataModel = version === "1.0"
+  const dataModel = version === ODataVesions.V2
     ? await digestV2(schemaRaw as SchemaV3, options)
     : await digestV4(schemaRaw as SchemaV4, options);
   const project = await createProjectManager(
@@ -58,7 +64,7 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   // Generate Individual OData-Service
   if ([Modes.service, Modes.all].includes(options.mode)) {
     await project.cleanServiceDir();
-    await generateServices(dataModel, project);
+    await generateServices(dataModel, project, version);
   }
 
   await project.writeFiles();

@@ -10,7 +10,7 @@ import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuild
 import path from "path";
 import { ODataVesions } from "../../../src/app";
 
-describe("Service Generator Tests", () => {
+describe("Service Generator Tests V4", () => {
   const FIXTURE_PATH = "generator/service";
 
   let runOptions: RunOptions;
@@ -48,13 +48,13 @@ describe("Service Generator Tests", () => {
     await generateServices(dataModel, projectManager, ODataVesions.V4);
   }
 
-  async function compareMainService(fixture: string) {
+  async function compareMainService(fixture: string, v4Specific: boolean) {
     const main = projectManager.getMainServiceFile();
 
     expect(main).toBeTruthy();
     expect(main.getFullText()).toBeTruthy();
 
-    await fixtureComparator.compareWithFixture(main.getFullText(), fixture);
+    await fixtureComparator.compareWithFixture(main.getFullText(), (v4Specific ? "v4" + path.sep : "") + fixture);
   }
 
   test("Service Generator: empty", async () => {
@@ -64,7 +64,7 @@ describe("Service Generator Tests", () => {
     await doGenerate();
 
     // then main service file has been generated but no individual ones
-    await compareMainService("main-service-min.ts");
+    await compareMainService("main-service-min.ts", false);
     expect(projectManager.getServiceFiles().length).toEqual(0);
   });
 
@@ -84,7 +84,7 @@ describe("Service Generator Tests", () => {
     await doGenerate();
 
     // then main service file lists an entity set
-    await compareMainService("main-service-entityset.ts");
+    await compareMainService("main-service-entityset.ts", false);
 
     // then we get one additional service file
     expect(projectManager.getServiceFiles().length).toEqual(1);
@@ -104,7 +104,7 @@ describe("Service Generator Tests", () => {
     await doGenerate();
 
     // then main service file encompasses a singleton
-    await compareMainService("main-service-singleton.ts");
+    await compareMainService("main-service-singleton.ts", true);
 
     // then we get the same service file as before
     expect(projectManager.getServiceFiles().length).toEqual(1);
@@ -129,7 +129,7 @@ describe("Service Generator Tests", () => {
     await doGenerate();
 
     // then main service file encompasses unbound functions
-    await compareMainService("main-service-func-unbound.ts");
+    await compareMainService("main-service-func-import.ts", true);
   });
 
   test("Service Generator: one unbound action", async () => {
@@ -147,7 +147,7 @@ describe("Service Generator Tests", () => {
     await doGenerate();
 
     // then main service file encompasses an unbound function
-    await compareMainService("main-service-action-unbound.ts");
+    await compareMainService("main-service-action-unbound.ts", true);
   });
 
   test("Service Generator: one bound function", async () => {

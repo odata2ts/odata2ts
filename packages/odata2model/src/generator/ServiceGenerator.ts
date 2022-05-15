@@ -16,28 +16,28 @@ import {
   DataTypes,
   FunctionImportType,
   ModelTypes,
-  OperationTypes,
   OperationType,
+  OperationTypes,
   PropertyModel,
 } from "../data-model/DataTypeModel";
+import { ODataVesions } from "../app";
 
 const ROOT_SERVICE = "ODataService";
 const COMPILE_FUNCTION_PATH = "compileFunctionPath";
 const COMPILE_ACTION_PATH = "compileActionPath";
-const COMPILE_ID = "compileId";
 const RESPONSE_TYPES = {
   collection: "ODataCollectionResponse",
   model: "ODataModelResponse",
   value: "ODataValueResponse",
 };
 
-export async function generateServices(dataModel: DataModel, project: ProjectManager) {
-  const generator = new ServiceGenerator(dataModel, project);
+export async function generateServices(dataModel: DataModel, project: ProjectManager, version: ODataVesions) {
+  const generator = new ServiceGenerator(dataModel, project, version);
   return generator.generate();
 }
 
 class ServiceGenerator {
-  constructor(private dataModel: DataModel, private project: ProjectManager) {}
+  constructor(private dataModel: DataModel, private project: ProjectManager, private version: ODataVesions) {}
 
   public async generate(): Promise<void> {
     const sourceFile = await this.project.createMainServiceFile();
@@ -110,10 +110,14 @@ class ServiceGenerator {
     sourceFile.addImportDeclarations(importContainer.getImportDeclarations(false));
   }
 
+  private getVersionSuffix() {
+    return this.version === ODataVesions.V2 ? "V2" : "V4";
+  }
+
   private async generateModelServices() {
-    const entityServiceType = "EntityTypeService";
-    const entitySetServiceType = "EntitySetService";
-    const collectionServiceType = "CollectionService";
+    const entityServiceType = "EntityTypeService" + this.getVersionSuffix();
+    const entitySetServiceType = "EntitySetService" + this.getVersionSuffix();
+    const collectionServiceType = "CollectionService" + this.getVersionSuffix();
 
     // build service file for each entity & complex type
     // also include a corresponding CollectionService for each type
@@ -243,7 +247,7 @@ class ServiceGenerator {
 
       // now the entity collection service
       if (model.modelType === ModelTypes.EntityType) {
-        importContainer.addFromService(entitySetServiceType, COMPILE_ID);
+        importContainer.addFromService(entitySetServiceType);
 
         const isSingleKey = model.keys.length === 1;
         const exactKeyType = `{ ${model.keys.map((k) => `${k.odataName}: ${this.sanitizeType(k.type)}`).join(", ")} }`;
@@ -255,37 +259,14 @@ class ServiceGenerator {
         serviceFile.addClass({
           isExported: true,
           name: this.getCollectionServiceName(model.name),
-          extends: entitySetServiceType + `<${model.name}, ${model.qName}, ${keyType}>`,
+          extends: entitySetServiceType + `<${model.name}, ${model.qName}, ${keyType}, ${serviceName}>`,
           ctors: [
             {
               parameters: [
                 { name: "client", type: "ODataClient" },
                 { name: "path", type: "string" },
               ],
-              statements: [
-                `super(client, path, ${firstCharLowerCase(model.qName)});`,
-                /* ...Object.values(container.entitySets).map(({ name, entityType }) => {
-              return `this.${name} = new EntitySetService(this.client, this.getPath(), ${entityType.qName})`;
-            }), */
-              ],
-            },
-          ],
-          properties: [{ name: "keySpec", scope: Scope.Private, initializer: keySpec }],
-          methods: [
-            {
-              name: "getKeySpec",
-              scope: Scope.Public,
-              statements: ["return this.keySpec"],
-            },
-            {
-              name: "get",
-              scope: Scope.Public,
-              returnType: serviceName,
-              parameters: [{ name: "id", type: keyType }],
-              statements: [
-                `const url = ${COMPILE_ID}(this.path, this.keySpec, id)`,
-                `return new ${serviceName}(this.client, url)`,
-              ],
+              statements: [`super(client, path, ${firstCharLowerCase(model.qName)}, ${serviceName}, ${keySpec});`],
             },
           ],
         });
@@ -354,12 +335,14 @@ class ServiceGenerator {
     importContainer: ImportContainer
   ): OptionalKind<MethodDeclarationStructure> {
     const isFunc = operation.type === OperationTypes.Function;
-    const odataType = operation.returnType?.isCollection ? RESPONSE_TYPES.collection : RESPONSE_TYPES.model;
+    const odataType = operation.returnType?.isCollection
+      ? RESPONSE_TYPES.collection + this.getVersionSuffix()
+      : RESPONSE_TYPES.model + this.getVersionSuffix();
     const returnType = !operation.returnType ? "void" : this.sanitizeType(operation.returnType.type);
     const paramsSpec = this.createParamsSpec(operation.parameters);
 
-    importContainer.addFromClientApi("ODataResponse", odataType);
-    importContainer.addFromService(isFunc ? COMPILE_FUNCTION_PATH : COMPILE_ACTION_PATH);
+    importContainer.addFromClientApi("ODataResponse");
+    importContainer.addFromService(odataType, isFunc ? COMPILE_FUNCTION_PATH : COMPILE_ACTION_PATH);
     if (operation.returnType?.type && returnType) {
       this.addTypeForProp(importContainer, operation.returnType);
     }
