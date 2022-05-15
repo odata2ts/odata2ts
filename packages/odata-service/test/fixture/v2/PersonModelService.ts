@@ -1,5 +1,5 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
-import { EntityTypeServiceV2, EntitySetServiceV2, compileId, CollectionServiceV2 } from "../../../src";
+import { EntityTypeServiceV2, EntitySetServiceV2, CollectionServiceV2 } from "../../../src";
 import {
   QCollectionPath,
   QEntityCollectionPath,
