@@ -2,7 +2,7 @@
 
 # OData 2 Model
 
-Create TypeScript interfaces & query objects from a given metadata description of an OData service.
+Create TypeScript interfaces, query objects and / or complete client services from a given metadata description of an OData service.
 
 ## Installation
 
@@ -39,10 +39,10 @@ The file names are determined by the service name which is to be found within th
 ## Options
 
 | Option         | Shorthand | Required | Default | Description                                                  |
-| -------------- | --------- | -------- | ------- | ------------------------------------------------------------ |
+| -------------- | --------- | -------- | ------- |--------------------------------------------------------------|
 | --source       | -s        | x        |         | Specifies the source file, i.e. metadata description         |
 | --output       | -o        | x        |         | Specifies the output directory                               |
-| --mode         | -m        |          | all     | Allowed are: all, models, qobjects                           |
+| --mode         | -m        |          | all     | Allowed are: all, models, qobjects, service                  |
 | --prettier     | -p        |          | false   | Use prettier to pretty print the result files                |
 | --debug        | -d        |          | false   | Add debug information                                        |
 | --model-prefix | -prefix   |          | ''      | Prefix for generated interfaces, e.g. 'I' => IPerson         |
