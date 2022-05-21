@@ -9,7 +9,7 @@
     "build": "yarn clean && lerna run build",
     "clean": "rimraf coverage && lerna run clean",
     "coverage": "yarn workspace @odata2ts/odata2model dev && jest --coverage",
-    "release": "yarn clean && yarn build && lerna publish",
+    "release": "yarn build && lerna publish",
     "test": "lerna run test",
     "int-test": "lerna run int-test"
   },
