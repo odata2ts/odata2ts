@@ -2,7 +2,7 @@ import { ODataClient, ODataResponse } from "@odata2ts/odata-client-api";
 import {
   EntityTypeServiceV4,
   ODataModelResponseV4,
-  compileFunctionPath,
+  compileFunctionPathV4,
   ODataCollectionResponseV4,
   EntitySetServiceV4,
 } from "@odata2ts/odata-service";
@@ -17,7 +17,7 @@ export class BookService extends EntityTypeServiceV4<Book, QBook> {
   }
 
   public bestReview(): ODataResponse<ODataModelResponseV4<string>> {
-    const url = compileFunctionPath(this.getPath(), "Tester.bestReview");
+    const url = compileFunctionPathV4(this.getPath(), "Tester.bestReview");
     return this.client.get(url);
   }
 
@@ -25,7 +25,7 @@ export class BookService extends EntityTypeServiceV4<Book, QBook> {
     minRating: number;
     minCreated?: string;
   }): ODataResponse<ODataCollectionResponseV4<string>> {
-    const url = compileFunctionPath(this.getPath(), "Tester.filterReviews", {
+    const url = compileFunctionPathV4(this.getPath(), "Tester.filterReviews", {
       minRating: { isLiteral: true, value: params.minRating },
       minCreated: { isLiteral: true, value: params.minCreated },
     });

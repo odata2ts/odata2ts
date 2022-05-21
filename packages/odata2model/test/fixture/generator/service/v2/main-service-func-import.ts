@@ -2,7 +2,7 @@ import { ODataClient, ODataResponse } from "@odata2ts/odata-client-api";
 import {
   ODataService,
   ODataCollectionResponseV2,
-  compileFunctionPath,
+  compileFunctionPathV2,
   ODataModelResponseV2,
 } from "@odata2ts/odata-service";
 // @ts-ignore
@@ -16,7 +16,7 @@ export class TesterService extends ODataService {
   }
 
   public mostPop(): ODataResponse<ODataCollectionResponseV2<TestEntity>> {
-    const url = compileFunctionPath(this.getPath(), "mostPop");
+    const url = compileFunctionPathV2(this.getPath(), "mostPop");
     return this.client.get(url);
   }
 
@@ -24,7 +24,7 @@ export class TesterService extends ODataService {
     testString: string;
     testNumber?: number;
   }): ODataResponse<ODataModelResponseV2<TestEntity>> {
-    const url = compileFunctionPath(this.getPath(), "bestBook", {
+    const url = compileFunctionPathV2(this.getPath(), "bestBook", {
       testString: { isLiteral: false, value: params.testString },
       testNumber: { isLiteral: true, value: params.testNumber },
     });

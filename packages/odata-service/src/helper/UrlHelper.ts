@@ -30,7 +30,7 @@ export const compileId = (path: string, keySpec: KeySpec, values: string | numbe
     return collector;
   }, {} as InlineUrlProps);
 
-  return compileFunctionPath(path, undefined, params);
+  return compileFunctionPathV4(path, undefined, params);
 };
 
 const compileSingleParamPath = (path: string, isLiteral: boolean, value: string | number): string => {
@@ -51,9 +51,28 @@ const getValue = (isLiteral: boolean, value: any): string => {
  * @param params parameter map which specifies whether each value is literal or quoted
  * @returns url path
  */
-export const compileFunctionPath = (path: string, name?: string, params?: InlineUrlProps): string => {
+export const compileFunctionPathV4 = (path: string, name?: string, params?: InlineUrlProps): string => {
   const actionPath = compileActionPath(path, name);
   return `${actionPath}(${params ? compileParams(params) : ""})`;
+};
+
+export const compileFunctionPathV2 = (path: string, name?: string, params?: InlineUrlProps): string => {
+  if (params && typeof params !== "object") {
+    throw Error("Only object types are valid for compileParams!");
+  }
+
+  const actionPath = compileActionPath(path, name);
+  const queryString = !params
+    ? ""
+    : "?" +
+      Object.entries(params)
+        .map(([key, { value, isLiteral }]) => {
+          // TODO: "null" for optional params via config or does this work for every OData provider?
+          const val = value === undefined || value === null ? "null" : getValue(isLiteral, value);
+          return encodeURIComponent(key) + "=" + encodeURIComponent(val);
+        })
+        .join("&");
+  return actionPath + queryString;
 };
 
 const compileParams = (id: InlineUrlProps) => {
