@@ -1,0 +1,50 @@
+# --- METADATA ---
+### @name metadata
+GET {{baseUrl}}/$metadata
+
+### Get Version
+GET {{rootUrl}}
+
+
+# --- Queries ---
+### @name list products
+GET {{baseUrl}}/Products?$inlinecount=allpages
+Accept: {{contentType}}
+
+### @name get product zero
+GET {{baseUrl}}/Products(0)
+Accept: {{contentType}}
+
+### @name get unknown product
+GET {{baseUrl}}/Products(666)
+Accept: {{contentType}}
+
+# --- Create Entity ---
+### @name create new product
+POST {{baseUrl}}/Products
+Accept: {{contentType}}
+Content-Type: {{contentType}}
+
+{
+  "ID": 999,
+  "Description": "Test Description",
+  "Name": "TestName",
+  "Price": "12.88",
+  "Rating": 1,
+  "ReleaseDate": "2022-01-01T00:00:00"
+}
+
+# PATCH doesn't work and merge is not supported by HTTPClient
+### @name update new product
+PATCH {{baseUrl}}/Products(999)
+Accept: {{contentType}}
+Content-Type: {{contentType}}
+
+{
+  "Description": "Test Descriptioning!!!",
+  "Rating": 3
+}
+
+### @name delete new product
+DELETE {{baseUrl}}/Products(999)
+Accept: {{contentType}}
