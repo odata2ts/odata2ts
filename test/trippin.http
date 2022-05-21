@@ -1,8 +1,8 @@
-###################################################
+# ##################################################
 # HTTP Tests against Trippin Service
 #
 #
-###################################################
+# ##################################################
 
 # --- CONFIUGARTION ---
 
@@ -19,7 +19,6 @@ GET {{rootUrl}}
 # @authToken = {{login.response.headers.X-AuthToken}}
 @sessionId = (S(sivik5crfo3qvprrreziudlp))
 @baseUrl = {{rootUrl}}/{{sessionId}}
-
 
 # --- METADATA ---
 ### @name metadata
@@ -47,7 +46,7 @@ GET {{baseUrl}}/Airports/KSFO
 ### Create Entity
 ### new person
 POST {{baseUrl}}/People
-Content-Type: application/json
+Content-Type: {{contentType}}
 
 {
   "UserName": "heineritis",
