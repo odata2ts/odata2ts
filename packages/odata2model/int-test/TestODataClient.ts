@@ -9,18 +9,27 @@ export class TestODataClient implements ODataClient<AxiosRequestConfig> {
   }
 
   post<T, ResponseModel>(url: string, data: T, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
-    return this.axisoInstance.post(url, data);
+    return this.axisoInstance.post(url, data, requestConfig);
   }
   get<T>(url: string, requestConfig?: AxiosRequestConfig): AxiosPromise<T> {
-    return this.axisoInstance.get(url);
+    return this.axisoInstance.get(url, requestConfig);
   }
   put<T>(url: string, data: T, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
-    return this.axisoInstance.put(url, data);
+    return this.axisoInstance.put(url, data, requestConfig);
   }
   patch<T>(url: string, data: Partial<T>, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
-    return this.axisoInstance.patch(url);
+    return this.axisoInstance.patch(url, data, requestConfig);
+  }
+  merge<T>(url: string, data: Partial<T>, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
+    return this.axisoInstance.request({
+      // @ts-ignore: custom old-fashioned V2 merge method
+      method: "MERGE",
+      url,
+      data,
+      ...requestConfig,
+    });
   }
   delete(url: string, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
-    return this.axisoInstance.delete(url);
+    return this.axisoInstance.delete(url, requestConfig);
   }
 }
