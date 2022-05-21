@@ -1,4 +1,11 @@
-import { compileId, compileFunctionPath, compileLiteralValue, compileQuotedValue, compileActionPath } from "../src";
+import {
+  compileId,
+  compileFunctionPathV2,
+  compileFunctionPathV4,
+  compileLiteralValue,
+  compileQuotedValue,
+  compileActionPath,
+} from "../src";
 
 describe("UrlHelper Test", () => {
   const BASE_PATH = "/base";
@@ -10,16 +17,16 @@ describe("UrlHelper Test", () => {
   const KEY_SPEC_STRING = [{ isLiteral: false, name: "toDo", odataName: "ToDo" }];
   const KEY_SPEC_NUMBER = [{ isLiteral: true, name: "toDo", odataName: "ToDo" }];
 
-  test("compileFunctionPath", () => {
-    let result = compileFunctionPath(BASE_PATH);
+  test("compileFunctionPathV4", () => {
+    let result = compileFunctionPathV4(BASE_PATH);
     expect(result).toBe(BASE_PATH + "()");
 
-    result = compileFunctionPath(BASE_PATH, "myFunc");
+    result = compileFunctionPathV4(BASE_PATH, "myFunc");
     expect(result).toBe(BASE_PATH + "/myFunc()");
   });
 
-  test("compileFunctionPath: with params", () => {
-    const result = compileFunctionPath(BASE_PATH, undefined, {
+  test("compileFunctionPathV4: with params", () => {
+    const result = compileFunctionPathV4(BASE_PATH, undefined, {
       id: { isLiteral: true, value: "123" },
       test: { isLiteral: false, value: "test" },
       age: { isLiteral: true, value: 3 },
@@ -31,8 +38,8 @@ describe("UrlHelper Test", () => {
     expect(result).toBe(BASE_PATH + "(id=123,test='test',age=3,age2='3',oldEnough=true,oldEnough2='true')");
   });
 
-  test("compileFunctionPath: with path and params", () => {
-    const result = compileFunctionPath(BASE_PATH, undefined, {
+  test("compileFunctionPathV4: with path and params", () => {
+    const result = compileFunctionPathV4(BASE_PATH, undefined, {
       id: { isLiteral: true, value: "123" },
       test: { isLiteral: false, value: "test" },
       age: { isLiteral: true, value: 3 },
@@ -44,8 +51,8 @@ describe("UrlHelper Test", () => {
     expect(result).toBe(BASE_PATH + "(id=123,test='test',age=3,age2='3',oldEnough=true,oldEnough2='true')");
   });
 
-  test("compileFunctionPath: null for optional params", () => {
-    const result = compileFunctionPath(BASE_PATH, undefined, {
+  test("compileFunctionPathV4: null for optional params", () => {
+    const result = compileFunctionPathV4(BASE_PATH, undefined, {
       id: { isLiteral: true, value: "123" },
       test: { isLiteral: false, value: undefined },
       age: { isLiteral: true, value: undefined },
@@ -56,15 +63,59 @@ describe("UrlHelper Test", () => {
     expect(result).toBe(BASE_PATH + "(id=123,test=null,age=null,age2=0,oldEnough=false)");
   });
 
-  test("compileFunctionPath: fail with wrong params", () => {
+  test("compileFunctionPathV4: fail with wrong params", () => {
     // @ts-expect-error
-    expect(() => compileFunctionPath(null)).toThrowError();
+    expect(() => compileFunctionPathV4(null)).toThrowError();
     // @ts-expect-error
-    expect(() => compileFunctionPath()).toThrowError();
-    expect(() => compileFunctionPath("")).toThrowError();
-    expect(() => compileFunctionPath(" ")).toThrowError();
+    expect(() => compileFunctionPathV4()).toThrowError();
+    expect(() => compileFunctionPathV4("")).toThrowError();
+    expect(() => compileFunctionPathV4(" ")).toThrowError();
     // @ts-expect-error
     expect(() => compileFunctionPath(BASE_PATH, undefined, "test")).toThrowError();
+  });
+
+  test("compileFunctionPathV2", () => {
+    let result = compileFunctionPathV2(BASE_PATH);
+    expect(result).toBe(BASE_PATH);
+
+    result = compileFunctionPathV2(BASE_PATH, "myFunc");
+    expect(result).toBe(BASE_PATH + "/myFunc");
+  });
+
+  test("compileFunctionPathV2: with params", () => {
+    const result = compileFunctionPathV2(BASE_PATH, undefined, {
+      id: { isLiteral: true, value: "123" },
+      test: { isLiteral: false, value: "test" },
+      age: { isLiteral: true, value: 3 },
+      age2: { isLiteral: false, value: 3 },
+      oldEnough: { isLiteral: true, value: true },
+      oldEnough2: { isLiteral: false, value: true },
+    });
+
+    expect(result).toBe(BASE_PATH + "?id=123&test='test'&age=3&age2='3'&oldEnough=true&oldEnough2='true'");
+  });
+
+  test("compileFunctionPathV2: null for optional params", () => {
+    const result = compileFunctionPathV2(BASE_PATH, undefined, {
+      id: { isLiteral: true, value: "123" },
+      test: { isLiteral: false, value: undefined },
+      age: { isLiteral: true, value: undefined },
+      age2: { isLiteral: true, value: 0 },
+      oldEnough: { isLiteral: true, value: false },
+    });
+
+    expect(result).toBe(BASE_PATH + "?id=123&test=null&age=null&age2=0&oldEnough=false");
+  });
+
+  test("compileFunctionPathV2: fail with wrong params", () => {
+    // @ts-expect-error
+    expect(() => compileFunctionPathV2(null)).toThrowError();
+    // @ts-expect-error
+    expect(() => compileFunctionPathV2()).toThrowError();
+    expect(() => compileFunctionPathV2("")).toThrowError();
+    expect(() => compileFunctionPathV2(" ")).toThrowError();
+    // @ts-expect-error
+    expect(() => compileFunctionPathV2(BASE_PATH, undefined, "test")).toThrowError();
   });
 
   test("compileActionPath", () => {

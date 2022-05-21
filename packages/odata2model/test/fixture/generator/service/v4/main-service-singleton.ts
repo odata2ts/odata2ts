@@ -1,6 +1,6 @@
-// @ts-nocheck
 import { ODataClient } from "@odata2ts/odata-client-api";
 import { ODataService } from "@odata2ts/odata-service";
+// @ts-ignore
 import { TestEntityService } from "./service/TestEntityService";
 
 export class TesterService extends ODataService {

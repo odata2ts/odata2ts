@@ -342,7 +342,10 @@ class ServiceGenerator {
     const paramsSpec = this.createParamsSpec(operation.parameters);
 
     importContainer.addFromClientApi("ODataResponse");
-    importContainer.addFromService(odataType, isFunc ? COMPILE_FUNCTION_PATH : COMPILE_ACTION_PATH);
+    importContainer.addFromService(
+      odataType,
+      isFunc ? COMPILE_FUNCTION_PATH + this.getVersionSuffix() : COMPILE_ACTION_PATH
+    );
     if (operation.returnType?.type && returnType) {
       this.addTypeForProp(importContainer, operation.returnType);
     }
@@ -358,7 +361,9 @@ class ServiceGenerator {
 
     // url construction is different between function and action
     const url = isFunc
-      ? `${COMPILE_FUNCTION_PATH}(this.getPath(), "${odataName}"${paramsSpec ? `, ${paramsSpec}` : ""})`
+      ? `${COMPILE_FUNCTION_PATH + this.getVersionSuffix()}(this.getPath(), "${odataName}"${
+          paramsSpec ? `, ${paramsSpec}` : ""
+        })`
       : `${COMPILE_ACTION_PATH}(this.getPath(), "${odataName}")`;
 
     return {
