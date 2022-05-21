@@ -3,6 +3,52 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.6.3...@odata2ts/odata-uri-builder@0.7.0) (2022-05-21)
+
+
+### Features
+
+* **uriBuilder:** simply use EntityPaths as select args ([fd21405](https://github.com/odata2ts/odata2ts/commit/fd2140586db9ab531e768d21646b07ab9a0b937a))
+* **uriBuilder:** support for nested selects and nested expands (V2 only) ([a7ed0f5](https://github.com/odata2ts/odata2ts/commit/a7ed0f5df6df08e795a5e555def958b03ac9d273))
+* **uriBuilder:** v2 support for UriBuilder ([7a5a504](https://github.com/odata2ts/odata2ts/commit/7a5a5048d436e752757089a270f80e5a2f1c0dea))
+
+
+* Feat/refactor query objects (#20) ([67b662a](https://github.com/odata2ts/odata2ts/commit/67b662a6da3344eb215b4f1276bf26464d2126f5)), closes [#20](https://github.com/odata2ts/odata2ts/issues/20)
+
+
+### Bug Fixes
+
+* **test:** collect code coverage from src folders, thus exhibiting untested code ([3acef8b](https://github.com/odata2ts/odata2ts/commit/3acef8b83b2625579bbce4a967724e884c39c358))
+* **test:** make coverage test run again ([f2d360b](https://github.com/odata2ts/odata2ts/commit/f2d360bac59901bd056dab5755dcf66d66988af5))
+
+
+### BREAKING CHANGES
+
+* **uriBuilder:** ODataUriBuilder has become an interface, while the real implementation is ODataUriBuilderV4
+* no EntityFactory anymore, no nominalized types in interfaces anymore, etc.
+
+* refactor(qObjects): getEntity with prefix option; by default without prefix
+
+* fix(qObjects): better QPath modelling
+
+* refactor(uri-builder): only use QueryObjects for typing & remove QEntityModel stuff
+
+* refactor(odata2model): generate new QObject classes
+
+* refactor(service): services now require Model as well as QClass
+
+* refactor(odata2model): generate services with new QObject classes
+
+* fix(odata2model): fix integration tests
+
+* fix: make int-tests for coverage task work again
+
+* fix: skip run-cli tests (don't work on github)
+
+
+
+
+
 ## [0.6.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.6.2...@odata2ts/odata-uri-builder@0.6.3) (2021-10-12)
 
 **Note:** Version bump only for package @odata2ts/odata-uri-builder

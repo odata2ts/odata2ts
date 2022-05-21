@@ -3,6 +3,52 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.4.0...@odata2ts/odata-service@0.5.0) (2022-05-21)
+
+
+### Bug Fixes
+
+* V2 function params as query params ([07a1f29](https://github.com/odata2ts/odata2ts/commit/07a1f294005b9af7f1ebadecd8978ffca7caa80f))
+* **test:** correct fixture for model ([1142538](https://github.com/odata2ts/odata2ts/commit/1142538214f2855833bd0e585169bc7a30cc7760))
+* **test:** make coverage test run again ([f2d360b](https://github.com/odata2ts/odata2ts/commit/f2d360bac59901bd056dab5755dcf66d66988af5))
+* wrong import of MockODataClient ([5c26c75](https://github.com/odata2ts/odata2ts/commit/5c26c75190d069e61ec4b3f9a7b2c0810012a407))
+
+
+### Features
+
+* **odata2model:** V2 service generation support ([2b17a01](https://github.com/odata2ts/odata2ts/commit/2b17a013d65fc12aac8315bc34bce441eb505870))
+* **service:** V2 support for services + refactored EntitySetService to include get method & keySpec ([cdc818c](https://github.com/odata2ts/odata2ts/commit/cdc818c3aa810d2d4b7072c883de4e184643d8aa))
+
+
+* Feat/refactor query objects (#20) ([67b662a](https://github.com/odata2ts/odata2ts/commit/67b662a6da3344eb215b4f1276bf26464d2126f5)), closes [#20](https://github.com/odata2ts/odata2ts/issues/20)
+
+
+### BREAKING CHANGES
+
+* no EntityFactory anymore, no nominalized types in interfaces anymore, etc.
+
+* refactor(qObjects): getEntity with prefix option; by default without prefix
+
+* fix(qObjects): better QPath modelling
+
+* refactor(uri-builder): only use QueryObjects for typing & remove QEntityModel stuff
+
+* refactor(odata2model): generate new QObject classes
+
+* refactor(service): services now require Model as well as QClass
+
+* refactor(odata2model): generate services with new QObject classes
+
+* fix(odata2model): fix integration tests
+
+* fix: make int-tests for coverage task work again
+
+* fix: skip run-cli tests (don't work on github)
+
+
+
+
+
 # [0.4.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.3.1...@odata2ts/odata-service@0.4.0) (2021-10-12)
 
 

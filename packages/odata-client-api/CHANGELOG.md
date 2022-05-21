@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-client-api@0.2.0...@odata2ts/odata-client-api@0.3.0) (2022-05-21)
+
+
+### Bug Fixes
+
+* **test:** collect code coverage from src folders, thus exhibiting untested code ([3acef8b](https://github.com/odata2ts/odata2ts/commit/3acef8b83b2625579bbce4a967724e884c39c358))
+* **test:** make coverage test run again ([f2d360b](https://github.com/odata2ts/odata2ts/commit/f2d360bac59901bd056dab5755dcf66d66988af5))
+
+
+### Code Refactoring
+
+* **clientApi:** Refactor response model & remove individual response types, e.g. collection or raw data ([36c644b](https://github.com/odata2ts/odata2ts/commit/36c644b865533ff4e0788726ac55b27947b1f943))
+
+
+### BREAKING CHANGES
+
+* **clientApi:** refactored interfaces
+
+
+
+
+
 # 0.2.0 (2021-08-16)
 
 

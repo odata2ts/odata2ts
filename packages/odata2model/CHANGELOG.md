@@ -3,6 +3,70 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.8.2...@odata2ts/odata2model@0.9.0) (2022-05-21)
+
+
+### Bug Fixes
+
+* V2 function params as query params ([07a1f29](https://github.com/odata2ts/odata2ts/commit/07a1f294005b9af7f1ebadecd8978ffca7caa80f))
+* **odata2model:** fix tests ([efd12bc](https://github.com/odata2ts/odata2ts/commit/efd12bcfb44b7522f3d5ff6c157acd8ca12f74cf))
+* **odata2model:DataModel:** Duplicate keys when extending multiple times ([157aa13](https://github.com/odata2ts/odata2ts/commit/157aa13a1ffc765b90abdfd2824a4da5fd0729ec))
+* **odata2model:test:** name northwind-v4 fixture correctly ([39e77f4](https://github.com/odata2ts/odata2ts/commit/39e77f46ea2de2fa381480d89e7c5551cd57d411))
+* **test:** collect code coverage from src folders, thus exhibiting untested code ([3acef8b](https://github.com/odata2ts/odata2ts/commit/3acef8b83b2625579bbce4a967724e884c39c358))
+* **test:** fix data-model tests ([b8abb8a](https://github.com/odata2ts/odata2ts/commit/b8abb8afe7dfdf4d940bb4cbc8d92575e0416087))
+* **test:** make coverage test run again ([f2d360b](https://github.com/odata2ts/odata2ts/commit/f2d360bac59901bd056dab5755dcf66d66988af5))
+* on windows ts-node needs cwd-mode flag ([4f3c0f5](https://github.com/odata2ts/odata2ts/commit/4f3c0f5da9257504f842ca7a51af31e0ef578018))
+
+
+### Features
+
+* integration tests for V2 (ODataV2 sample service) ([98bf0b8](https://github.com/odata2ts/odata2ts/commit/98bf0b8fc950337c970b408036d103c2c5934402))
+* **odata2model:** FixtureComparator ignores [@ts-ignore](https://github.com/ts-ignore) ([b483ed5](https://github.com/odata2ts/odata2ts/commit/b483ed569394b3fb69c9b8d3904e377d2dc7a341))
+* **odata2model:** move v4 tests & adapt expectations of fixtures ([2f84127](https://github.com/odata2ts/odata2ts/commit/2f841278397564ed1e815a8087068921628ec15e))
+* **odata2model:** V2 service generation support ([2b17a01](https://github.com/odata2ts/odata2ts/commit/2b17a013d65fc12aac8315bc34bce441eb505870))
+* **odata2model:Cli:** load config from file via cosmiconfig ([a490778](https://github.com/odata2ts/odata2ts/commit/a4907785b90a513f6a4c910e861d63e14139908b))
+* **odata2model:Cli:** log file paths relative to working dir of process ([fc1ce86](https://github.com/odata2ts/odata2ts/commit/fc1ce86420858f72d87901435adccaba93280d8c))
+* **test:** add run-cli integration test ([45a2da1](https://github.com/odata2ts/odata2ts/commit/45a2da1ede37c2734003b40eadafffbc8a82c14a))
+* **test:** app test ([ad9d3f2](https://github.com/odata2ts/odata2ts/commit/ad9d3f2536828363ef153f54e31f3882089ee3a1))
+* **test:** Builder for generating Edmx schemas in JSON ([227279a](https://github.com/odata2ts/odata2ts/commit/227279a5faed92a8befa86e5c893e8c6d48df5d6))
+* **test:** FixtureComparator ([38b03bf](https://github.com/odata2ts/odata2ts/commit/38b03bf67019d45807c90f281bd935aa914f95e5))
+* **test:** ProjectManager test without testing formatting including some refactorings ([8f666f3](https://github.com/odata2ts/odata2ts/commit/8f666f35b10fb2b2a29c62ec01778fb73e1ab789))
+* **test:** same tests for model & qobject generation ([a4d882d](https://github.com/odata2ts/odata2ts/commit/a4d882da0bc6dd3c785d13d376b34245c82b0f4a))
+* **test:** ServiceGenerator tests & fixes ([6a2c242](https://github.com/odata2ts/odata2ts/commit/6a2c24225d9f8b9197c8223e507cf75ba5b74307))
+* **test:** test for ProjectManager (first draft) ([f705b0b](https://github.com/odata2ts/odata2ts/commit/f705b0bc29f4c848588a5c252ca22a5aebdefe0e))
+* **test:** testing Model generation ([6d7c530](https://github.com/odata2ts/odata2ts/commit/6d7c53084758b23a3a4525bd9ee8bc5efb25e71e))
+* **test:** Tests for DataModel and EDMX digestion ([5740292](https://github.com/odata2ts/odata2ts/commit/574029264fdf5af9dcd410108cd8aeb692fa623b))
+
+
+* Feat/refactor query objects (#20) ([67b662a](https://github.com/odata2ts/odata2ts/commit/67b662a6da3344eb215b4f1276bf26464d2126f5)), closes [#20](https://github.com/odata2ts/odata2ts/issues/20)
+
+
+### BREAKING CHANGES
+
+* no EntityFactory anymore, no nominalized types in interfaces anymore, etc.
+
+* refactor(qObjects): getEntity with prefix option; by default without prefix
+
+* fix(qObjects): better QPath modelling
+
+* refactor(uri-builder): only use QueryObjects for typing & remove QEntityModel stuff
+
+* refactor(odata2model): generate new QObject classes
+
+* refactor(service): services now require Model as well as QClass
+
+* refactor(odata2model): generate services with new QObject classes
+
+* fix(odata2model): fix integration tests
+
+* fix: make int-tests for coverage task work again
+
+* fix: skip run-cli tests (don't work on github)
+
+
+
+
+
 ## [0.8.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.8.1...@odata2ts/odata2model@0.8.2) (2021-10-12)
 
 **Note:** Version bump only for package @odata2ts/odata2model
