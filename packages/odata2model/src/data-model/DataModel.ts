@@ -9,6 +9,7 @@ import {
   SingletonType,
   EntitySetType,
   ODataVersion,
+  ComplexType,
 } from "./DataTypeModel";
 
 export interface ProjectFiles {
@@ -21,16 +22,12 @@ export class DataModel {
   private readonly servicePrefix: string;
   private readonly fileNames: ProjectFiles;
 
-  // combines entity & complex types
   private modelTypes: { [name: string]: ModelType } = {};
+  private complexTypes: { [name: string]: ComplexType } = {};
   private enumTypes: { [name: string]: EnumType } = {};
   // combines functions & actions
   private operationTypes: { [binding: string]: Array<OperationType> } = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
-
-  // imports of custom dataTypes which are represented at strings,
-  // e.g. DateString, GuidString, etc.
-  private primitiveTypeImports: Set<string> = new Set();
 
   constructor(private version: ODataVersion, private serviceName: string) {
     this.servicePrefix = serviceName + ".";
@@ -92,6 +89,29 @@ export class DataModel {
    */
   public getModels() {
     return Object.values(this.modelTypes);
+  }
+
+  public addComplexType(name: string, model: ComplexType) {
+    this.complexTypes[name] = model;
+  }
+
+  /**
+   * Get a specific model by its name.
+   *
+   * @param name the final model name that is generated
+   * @returns the model type
+   */
+  public getComplexType(name: string) {
+    return this.complexTypes[name];
+  }
+
+  /**
+   * Retrieve all known models, i.e. EntityType and ComplexType nodes from the EDMX model.
+   *
+   * @returns list of model types
+   */
+  public getComplexTypes() {
+    return Object.values(this.complexTypes);
   }
 
   public addEnum(name: string, type: EnumType) {

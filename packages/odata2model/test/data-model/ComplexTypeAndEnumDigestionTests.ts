@@ -157,24 +157,21 @@ export function createComplexAndEnumTests() {
     const model = result.getModel(ENTITY_NAME);
 
     expect(model.props[1]).toMatchObject({});
-    expect(result.getModel("GrandParent")).toMatchObject({
+    expect(result.getComplexType("GrandParent")).toMatchObject({
       name: "GrandParent",
       odataName: "GrandParent",
-      keyNames: [],
       props: expectedGrandParentProps,
       baseClasses: [],
       baseProps: [],
     });
-    expect(result.getModel("Parent")).toMatchObject({
+    expect(result.getComplexType("Parent")).toMatchObject({
       name: "Parent",
-      keyNames: [],
       props: [expectedParentProp],
       baseClasses: ["GrandParent"],
       baseProps: expectedGrandParentProps,
     });
-    expect(result.getModel("Child")).toMatchObject({
+    expect(result.getComplexType("Child")).toMatchObject({
       name: "Child",
-      keyNames: [],
       props: [expectedChildProp],
       baseClasses: ["Parent"],
       baseProps: [...expectedGrandParentProps, expectedParentProp],

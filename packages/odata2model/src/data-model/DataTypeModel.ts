@@ -6,12 +6,8 @@ export enum ODataVersion {
 export const enum DataTypes {
   PrimitiveType = "PrimitiveType",
   EnumType = "EnumType",
-  ModelType = "ModelType",
-}
-
-export const enum ModelTypes {
-  EntityType = "EntityType",
   ComplexType = "ComplexType",
+  ModelType = "ModelType",
 }
 
 export const enum OperationTypes {
@@ -31,17 +27,19 @@ export interface PropertyModel {
   dataType: DataTypes;
 }
 
-export interface ModelType {
+export interface ModelType extends ComplexType {
+  keyNames: Array<string>;
+  keys: Array<PropertyModel>;
+  getKeyUnion(): string;
+}
+
+export interface ComplexType {
   odataName: string;
   name: string;
   qName: string;
-  modelType: ModelTypes;
-  keyNames: Array<string>;
-  keys: Array<PropertyModel>;
   props: Array<PropertyModel>;
   baseProps: Array<PropertyModel>;
   baseClasses: Array<string>;
-  getKeyUnion(): string;
 }
 
 export interface EnumType {

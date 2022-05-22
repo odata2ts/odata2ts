@@ -25,7 +25,8 @@ class ModelGenerator {
   }
 
   private generateModels() {
-    this.dataModel.getModels().forEach((model) => {
+    const models = [...this.dataModel.getModels(), ...this.dataModel.getComplexTypes()];
+    models.forEach((model) => {
       this.sourceFile.addInterface({
         name: model.name,
         isExported: true,

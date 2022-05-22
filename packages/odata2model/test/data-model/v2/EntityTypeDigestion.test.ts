@@ -1,7 +1,7 @@
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
 import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
-import { DataTypes, ModelTypes, PropertyModel } from "../../../src/data-model/DataTypeModel";
+import { DataTypes, PropertyModel } from "../../../src/data-model/DataTypeModel";
 import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
 
 const NOOP_FN = () => {};
@@ -40,7 +40,6 @@ describe("V2: EntityTypeDigestion Test", () => {
     const model = result.getModels()[0];
     // expect(model).toEqual({});
     expect(model).toMatchObject({
-      modelType: ModelTypes.EntityType,
       name: "Min",
       odataName: "min",
       qName: "QMin",

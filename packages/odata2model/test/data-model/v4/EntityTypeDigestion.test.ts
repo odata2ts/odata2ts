@@ -1,7 +1,7 @@
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
 import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
-import { DataTypes, ModelTypes } from "../../../src/data-model/DataTypeModel";
+import { DataTypes } from "../../../src/data-model/DataTypeModel";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
 
@@ -41,7 +41,6 @@ describe("V2: EntityTypeDigestion Test", () => {
     const model = result.getModels()[0];
     // expect(model).toEqual({});
     expect(model).toMatchObject({
-      modelType: ModelTypes.EntityType,
       name: "Min",
       odataName: "min",
       qName: "QMin",

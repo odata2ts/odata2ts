@@ -4,7 +4,12 @@ import { upperCaseFirst } from "upper-case-first";
 import { DataModel } from "./DataModel";
 import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModelBase";
 import { RunOptions } from "../OptionModel";
-import { DataTypes, ModelType, ModelTypes, ODataVersion, PropertyModel } from "./DataTypeModel";
+import { ComplexType as ComplexModelType, DataTypes, ODataVersion, PropertyModel } from "./DataTypeModel";
+
+export enum ModelTypes {
+  EntityType,
+  ComplexType,
+}
 
 export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, CT extends ComplexType> {
   protected static EDM_PREFIX = "Edm.";
@@ -79,70 +84,84 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     models.forEach((model) => {
       const name = this.getModelName(model.$.Name);
+      const qName = this.getQName(model.$.Name);
+      const odataName = model.$.Name;
       const bType = model.$.BaseType;
       const props = [...(model.Property ?? []), ...this.getNavigationProps(model)];
 
       // support for base types, i.e. extends clause of interfaces
-      const baseTypes = [];
+      const baseClasses = [];
       if (bType) {
-        baseTypes.push(this.getModelName(bType));
+        baseClasses.push(this.getModelName(bType));
       }
 
-      // key support
-      // we cannot add keys now stemming from base classes
-      // => postprocess required
-      const keys: Array<string> = [];
       if (modelType === ModelTypes.EntityType) {
+        // key support
+        // we cannot add keys now stemming from base classes
+        // => postprocess required
+        const keys: Array<string> = [];
         const entity = model as EntityType;
         if (entity.Key && entity.Key.length && entity.Key[0].PropertyRef.length) {
           const propNames = entity.Key[0].PropertyRef.map((key) => key.$.Name);
           keys.push(...propNames);
         }
-      }
 
-      this.dataModel.addModel(name, {
-        modelType,
-        name,
-        qName: this.getQName(model.$.Name),
-        odataName: model.$.Name,
-        baseClasses: baseTypes,
-        keyNames: keys, // postprocess required to include key specs from base classes
-        keys: [], // postprocess required to include props from base classes
-        props: props.map(this.mapProperty),
-        baseProps: [], // postprocess required
-        getKeyUnion: () => keys.join(" | "),
-      });
-    });
-  }
-
-  private postProcessModel() {
-    this.dataModel.getModels().forEach((model) => {
-      const [baseProps, baseKeys] = this.collectBaseClassPropsAndKeys(model);
-      model.baseProps = baseProps;
-      model.keyNames.push(...baseKeys);
-
-      if (model.modelType === ModelTypes.EntityType) {
-        // sanity check: entity types require key specification
-        if (!model.keyNames.length) {
-          throw Error(`Key property is missing from Entity "${model.name}" (${model.odataName})!`);
-        }
-
-        const props = [...model.props, ...model.baseProps];
-        model.keys = model.keyNames.map((keyName) => {
-          const prop = props.find((p) => p.odataName === keyName);
-          if (!prop) {
-            throw Error(`Key with name [${keyName}] not found in props!`);
-          }
-          return prop;
+        this.dataModel.addModel(name, {
+          name,
+          qName,
+          odataName,
+          baseClasses,
+          keyNames: keys, // postprocess required to include key specs from base classes
+          keys: [], // postprocess required to include props from base classes
+          props: props.map(this.mapProperty),
+          baseProps: [], // postprocess required
+          getKeyUnion: () => keys.join(" | "),
+        });
+      } else {
+        this.dataModel.addComplexType(name, {
+          name,
+          qName,
+          odataName,
+          baseClasses,
+          props: props.map(this.mapProperty),
+          baseProps: [], // postprocess required
         });
       }
     });
   }
 
-  private collectBaseClassPropsAndKeys(model: ModelType): [Array<PropertyModel>, Array<string>] {
+  private postProcessModel() {
+    // complex types
+    this.dataModel.getComplexTypes().forEach((model) => {
+      const [baseProps] = this.collectBaseClassPropsAndKeys(model);
+      model.baseProps = baseProps;
+    });
+    // entity types
+    this.dataModel.getModels().forEach((model) => {
+      const [baseProps, baseKeys] = this.collectBaseClassPropsAndKeys(model);
+      model.baseProps = baseProps;
+      model.keyNames.push(...baseKeys);
+
+      // sanity check: entity types require key specification
+      if (!model.keyNames.length) {
+        throw Error(`Key property is missing from Entity "${model.name}" (${model.odataName})!`);
+      }
+
+      const props = [...model.props, ...model.baseProps];
+      model.keys = model.keyNames.map((keyName) => {
+        const prop = props.find((p) => p.odataName === keyName);
+        if (!prop) {
+          throw Error(`Key with name [${keyName}] not found in props!`);
+        }
+        return prop;
+      });
+    });
+  }
+
+  private collectBaseClassPropsAndKeys(model: ComplexModelType): [Array<PropertyModel>, Array<string>] {
     return model.baseClasses.reduce(
       ([props, keys], bc) => {
-        const baseModel = this.dataModel.getModel(bc);
+        const baseModel = this.dataModel.getModel(bc) || this.dataModel.getComplexType(bc);
 
         // recursive
         if (baseModel.baseClasses.length) {
@@ -152,7 +171,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         }
 
         props.push(...baseModel.props);
-        keys.push(...baseModel.keyNames.filter((kn) => !keys.includes(kn)));
+        if (baseModel.keyNames) {
+          keys.push(...baseModel.keyNames.filter((kn) => !keys.includes(kn)));
+        }
         return [props, keys];
       },
       [[], []] as [Array<PropertyModel>, Array<string>]
@@ -209,9 +230,12 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       );
     }
 
+    const name = p.$.Name === "ID" ? "id" : firstCharLowerCase(p.$.Name);
+    const odataName = p.$.Name;
+
     return {
-      odataName: p.$.Name,
-      name: p.$.Name === "ID" ? "id" : firstCharLowerCase(p.$.Name),
+      odataName,
+      name,
       odataType: p.$.Type,
       type: resultType,
       qObject: qClass,

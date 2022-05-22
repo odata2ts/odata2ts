@@ -35,7 +35,8 @@ class QueryObjectGenerator {
   public generate(): void {
     const qTypeImports = new Set<string>(CORE_QCLASSES);
 
-    this.dataModel.getModels().forEach((model) => {
+    const models = [...this.dataModel.getModels(), ...this.dataModel.getComplexTypes()];
+    models.forEach((model) => {
       this.sourceFile.addClass({
         name: model.qName,
         isExported: true,
@@ -56,7 +57,7 @@ class QueryObjectGenerator {
       });
     });
 
-    if (this.dataModel.getModels().length) {
+    if (models.length) {
       this.sourceFile.addImportDeclaration({
         isTypeOnly: false,
         namedImports: [...qTypeImports],
@@ -71,7 +72,7 @@ class QueryObjectGenerator {
   ): Array<OptionalKind<PropertyDeclarationStructure>> {
     return props.map((prop) => {
       const { name, odataName } = prop;
-      const isModelType = prop.dataType === DataTypes.ModelType;
+      const isModelType = prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
       let qPathInit: string;
 
       if (prop.dataType === DataTypes.EnumType || prop.dataType === DataTypes.PrimitiveType) {

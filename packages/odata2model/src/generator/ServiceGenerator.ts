@@ -4,6 +4,7 @@ import {
   OptionalKind,
   PropertyDeclarationStructure,
   Scope,
+  SourceFile,
 } from "ts-morph";
 import { firstCharLowerCase } from "xml2js/lib/processors";
 import { upperCaseFirst } from "upper-case-first";
@@ -13,9 +14,10 @@ import { ProjectManager } from "../project/ProjectManager";
 import { DataModel } from "../data-model/DataModel";
 import {
   ActionImportType,
+  ComplexType,
   DataTypes,
   FunctionImportType,
-  ModelTypes,
+  ModelType,
   OperationType,
   OperationTypes,
   PropertyModel,
@@ -114,164 +116,196 @@ class ServiceGenerator {
     return this.version === ODataVesions.V2 ? "V2" : "V4";
   }
 
-  private async generateModelServices() {
+  private async generateModelService(
+    model: ComplexType,
+    serviceName: string,
+    serviceFile: SourceFile,
+    importContainer: ImportContainer
+  ) {
     const entityServiceType = "EntityTypeService" + this.getVersionSuffix();
-    const entitySetServiceType = "EntitySetService" + this.getVersionSuffix();
     const collectionServiceType = "CollectionService" + this.getVersionSuffix();
 
-    // build service file for each entity & complex type
-    // also include a corresponding CollectionService for each type
+    const operations = this.dataModel.getOperationTypeByBinding(model.name);
+    const props = [...model.baseProps, ...model.props];
+    const modelProps = props.filter(
+      (prop) => prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType
+    );
+    const primColProps = props.filter(
+      (prop) => prop.isCollection && prop.dataType !== DataTypes.ModelType && prop.dataType !== DataTypes.ComplexType
+    );
+
+    importContainer.addFromService(entityServiceType);
+    importContainer.addFromClientApi("ODataClient");
+    importContainer.addGeneratedModel(model.name);
+    importContainer.addGeneratedQObject(model.qName, firstCharLowerCase(model.qName));
+
+    // generate EntityTypeService
+    serviceFile.addClass({
+      isExported: true,
+      name: serviceName,
+      extends: entityServiceType + `<${model.name}, ${model.qName}>`,
+      ctors: [
+        {
+          parameters: [
+            { name: "client", type: "ODataClient" },
+            { name: "path", type: "string" },
+          ],
+          statements: [
+            `super(client, path, ${firstCharLowerCase(model.qName)});`,
+            /* ...Object.values(container.entitySets).map(({ name, entityType }) => {
+            return `this.${name} = new EntitySetService(this.client, this.getPath(), ${entityType.qName})`;
+          }), */
+          ],
+        },
+      ],
+      properties: [
+        ...modelProps.map((prop) => {
+          const complexType = this.dataModel.getComplexType(prop.type);
+          let [key, propModelType] = this.getServiceNamesForProp(prop);
+
+          if (prop.isCollection && complexType) {
+            importContainer.addFromService(collectionServiceType);
+            importContainer.addGeneratedModel(complexType.name);
+            importContainer.addGeneratedQObject(complexType.qName, firstCharLowerCase(complexType.qName));
+            propModelType = `${collectionServiceType}<${complexType.name}, ${complexType.qName}>`;
+          }
+          // don't include imports for this type
+          else if (serviceName !== key) {
+            importContainer.addGeneratedService(key, propModelType);
+          }
+
+          return {
+            scope: Scope.Private,
+            name: "_" + prop.name,
+            type: `${propModelType}`,
+            hasQuestionToken: true,
+          } as PropertyDeclarationStructure;
+        }),
+        ...primColProps.map((prop) => {
+          const isEnum = prop.dataType === DataTypes.EnumType;
+          const type = isEnum
+            ? `EnumCollection<${prop.type}>`
+            : `${upperCaseFirst(prop.type.replace(/String$/, ""))}Collection`;
+          const qType = isEnum ? "QEnumCollection" : `Q${type}`;
+          const collectionType = `${collectionServiceType}<${type}, ${qType}>`;
+
+          if (!prop.qObject) {
+            throw Error("Illegal State: [qObject] must be provided for Collection types!");
+          }
+
+          importContainer.addFromService(collectionServiceType);
+          importContainer.addFromQObject(prop.qObject, firstCharLowerCase(prop.qObject));
+          if (isEnum) {
+            importContainer.addGeneratedModel(prop.type);
+            importContainer.addFromQObject("EnumCollection");
+          } else {
+            importContainer.addFromQObject(type);
+          }
+
+          return {
+            scope: Scope.Private,
+            name: "_" + prop.name,
+            type: `${collectionType}`,
+            hasQuestionToken: true,
+          };
+        }),
+      ],
+      getAccessors: [
+        ...modelProps.map((prop) => {
+          const complexType = this.dataModel.getComplexType(prop.type);
+          const isComplexCollection = prop.isCollection && complexType;
+          const type = isComplexCollection
+            ? `${collectionServiceType}<${complexType.name}, ${complexType.qName}>`
+            : this.getServiceNameForProp(prop);
+
+          return {
+            scope: Scope.Public,
+            name: prop.name,
+            returnType: type,
+            statements: [
+              `if(!this._${prop.name}) {`,
+              // prettier-ignore
+              `  this._${prop.name} = new ${type}(this.client, this.path + "/${prop.odataName}"${isComplexCollection ? `, ${firstCharLowerCase(complexType.qName)}`: ""})`,
+              "}",
+              `return this._${prop.name}`,
+            ],
+          } as GetAccessorDeclarationStructure;
+        }),
+        ...primColProps.map((prop) => {
+          return {
+            scope: Scope.Public,
+            name: prop.name,
+            statements: [
+              `if(!this._${prop.name}) {`,
+              // prettier-ignore
+              `  this._${prop.name} = new ${collectionServiceType}(this.client, this.path + "/${prop.odataName}", ${firstCharLowerCase(prop.qObject!)})`,
+              "}",
+              `return this._${prop.name}`,
+            ],
+          } as GetAccessorDeclarationStructure;
+        }),
+      ],
+      methods: [...this.generateBoundOperations(operations, importContainer)],
+    });
+  }
+
+  private async generateEntityCollectionService(
+    model: ModelType,
+    serviceName: string,
+    serviceFile: SourceFile,
+    importContainer: ImportContainer
+  ) {
+    const entitySetServiceType = "EntitySetService" + this.getVersionSuffix();
+
+    importContainer.addFromService(entitySetServiceType);
+
+    const isSingleKey = model.keys.length === 1;
+    const exactKeyType = `{ ${model.keys.map((k) => `${k.odataName}: ${this.sanitizeType(k.type)}`).join(", ")} }`;
+    const keyType = `${isSingleKey ? this.sanitizeType(model.keys[0].type) + " | " : ""}${exactKeyType}`;
+    const keySpec = this.createKeySpec(model.keys);
+
+    model.keys.forEach((keyProp) => this.addTypeForProp(importContainer, keyProp));
+
+    serviceFile.addClass({
+      isExported: true,
+      name: this.getCollectionServiceName(model.name),
+      extends: entitySetServiceType + `<${model.name}, ${model.qName}, ${keyType}, ${serviceName}>`,
+      ctors: [
+        {
+          parameters: [
+            { name: "client", type: "ODataClient" },
+            { name: "path", type: "string" },
+          ],
+          statements: [`super(client, path, ${firstCharLowerCase(model.qName)}, ${serviceName}, ${keySpec});`],
+        },
+      ],
+    });
+  }
+
+  private async generateModelServices() {
+    // build service file for each entity, consisting of EntityTypeService & EntityCollectionService
     for (const model of this.dataModel.getModels()) {
       const serviceName = this.getServiceName(model.name);
-      const operations = this.dataModel.getOperationTypeByBinding(model.name);
       const serviceFile = await this.project.createServiceFile(serviceName);
-      const props = [...model.baseProps, ...model.props];
-      const modelProps = props.filter((prop) => prop.dataType === DataTypes.ModelType);
-      const primColProps = props.filter((prop) => prop.isCollection && prop.dataType !== DataTypes.ModelType);
       const importContainer = new ImportContainer(this.dataModel);
 
-      importContainer.addFromService(entityServiceType);
-      importContainer.addFromClientApi("ODataClient");
-      importContainer.addGeneratedModel(model.name);
-      importContainer.addGeneratedQObject(model.qName, firstCharLowerCase(model.qName));
+      // entity type service
+      await this.generateModelService(model, serviceName, serviceFile, importContainer);
 
-      // generate EntityTypeService
-      serviceFile.addClass({
-        isExported: true,
-        name: serviceName,
-        extends: entityServiceType + `<${model.name}, ${model.qName}>`,
-        ctors: [
-          {
-            parameters: [
-              { name: "client", type: "ODataClient" },
-              { name: "path", type: "string" },
-            ],
-            statements: [
-              `super(client, path, ${firstCharLowerCase(model.qName)});`,
-              /* ...Object.values(container.entitySets).map(({ name, entityType }) => {
-              return `this.${name} = new EntitySetService(this.client, this.getPath(), ${entityType.qName})`;
-            }), */
-            ],
-          },
-        ],
-        properties: [
-          ...modelProps.map((prop) => {
-            const modelType = this.dataModel.getModel(prop.type);
-            const isCollection = prop.isCollection && modelType.modelType === ModelTypes.ComplexType;
-            let [key, propModelType] = this.getServiceNamesForProp(prop);
+      // entity collection service
+      await this.generateEntityCollectionService(model, serviceName, serviceFile, importContainer);
 
-            if (isCollection) {
-              importContainer.addFromService(collectionServiceType);
-              importContainer.addGeneratedModel(modelType.name);
-              importContainer.addGeneratedQObject(modelType.qName, firstCharLowerCase(modelType.qName));
-              propModelType = `${collectionServiceType}<${modelType.name}, ${modelType.qName}>`;
-            }
-            // don't include imports for this type
-            else if (serviceName !== key) {
-              importContainer.addGeneratedService(key, propModelType);
-            }
+      serviceFile.addImportDeclarations(importContainer.getImportDeclarations(true));
+    }
 
-            return {
-              scope: Scope.Private,
-              name: "_" + prop.name,
-              type: `${propModelType}`,
-              hasQuestionToken: true,
-            } as PropertyDeclarationStructure;
-          }),
-          ...primColProps.map((prop) => {
-            const isEnum = prop.dataType === DataTypes.EnumType;
-            const type = isEnum
-              ? `EnumCollection<${prop.type}>`
-              : `${upperCaseFirst(prop.type.replace(/String$/, ""))}Collection`;
-            const qType = isEnum ? "QEnumCollection" : `Q${type}`;
-            const collectionType = `${collectionServiceType}<${type}, ${qType}>`;
+    // build service file for complex types
+    for (const model of this.dataModel.getComplexTypes()) {
+      const serviceName = this.getServiceName(model.name);
+      const serviceFile = await this.project.createServiceFile(serviceName);
+      const importContainer = new ImportContainer(this.dataModel);
 
-            if (!prop.qObject) {
-              throw Error("Illegal State: [qObject] must be provided for Collection types!");
-            }
-
-            importContainer.addFromService(collectionServiceType);
-            importContainer.addFromQObject(prop.qObject, firstCharLowerCase(prop.qObject));
-            if (isEnum) {
-              importContainer.addGeneratedModel(prop.type);
-              importContainer.addFromQObject("EnumCollection");
-            } else {
-              importContainer.addFromQObject(type);
-            }
-
-            return {
-              scope: Scope.Private,
-              name: "_" + prop.name,
-              type: `${collectionType}`,
-              hasQuestionToken: true,
-            };
-          }),
-        ],
-        getAccessors: [
-          ...modelProps.map((prop) => {
-            const modelType = this.dataModel.getModel(prop.type);
-            const isCollection = prop.isCollection && modelType.modelType === ModelTypes.ComplexType;
-            const type = isCollection
-              ? `${collectionServiceType}<${modelType.name}, ${modelType.qName}>`
-              : this.getServiceNameForProp(prop);
-
-            return {
-              scope: Scope.Public,
-              name: prop.name,
-              returnType: type,
-              statements: [
-                `if(!this._${prop.name}) {`,
-                // prettier-ignore
-                `  this._${prop.name} = new ${type}(this.client, this.path + "/${prop.odataName}"${isCollection ? `, ${firstCharLowerCase(modelType.qName)}`: ""})`,
-                "}",
-                `return this._${prop.name}`,
-              ],
-            } as GetAccessorDeclarationStructure;
-          }),
-          ...primColProps.map((prop) => {
-            return {
-              scope: Scope.Public,
-              name: prop.name,
-              statements: [
-                `if(!this._${prop.name}) {`,
-                // prettier-ignore
-                `  this._${prop.name} = new ${collectionServiceType}(this.client, this.path + "/${prop.odataName}", ${firstCharLowerCase(prop.qObject!)})`,
-                "}",
-                `return this._${prop.name}`,
-              ],
-            } as GetAccessorDeclarationStructure;
-          }),
-        ],
-        methods: [...this.generateBoundOperations(operations, importContainer)],
-      });
-
-      // now the entity collection service
-      if (model.modelType === ModelTypes.EntityType) {
-        importContainer.addFromService(entitySetServiceType);
-
-        const isSingleKey = model.keys.length === 1;
-        const exactKeyType = `{ ${model.keys.map((k) => `${k.odataName}: ${this.sanitizeType(k.type)}`).join(", ")} }`;
-        const keyType = `${isSingleKey ? this.sanitizeType(model.keys[0].type) + " | " : ""}${exactKeyType}`;
-        const keySpec = this.createKeySpec(model.keys);
-
-        model.keys.forEach((keyProp) => this.addTypeForProp(importContainer, keyProp));
-
-        serviceFile.addClass({
-          isExported: true,
-          name: this.getCollectionServiceName(model.name),
-          extends: entitySetServiceType + `<${model.name}, ${model.qName}, ${keyType}, ${serviceName}>`,
-          ctors: [
-            {
-              parameters: [
-                { name: "client", type: "ODataClient" },
-                { name: "path", type: "string" },
-              ],
-              statements: [`super(client, path, ${firstCharLowerCase(model.qName)}, ${serviceName}, ${keySpec});`],
-            },
-          ],
-        });
-      }
-
+      // entity type service
+      await this.generateModelService(model, serviceName, serviceFile, importContainer);
       serviceFile.addImportDeclarations(importContainer.getImportDeclarations(true));
     }
   }
