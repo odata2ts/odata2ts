@@ -1,9 +1,10 @@
 export interface Book {
   id: string;
   method: PublishingMethod;
-  altMethods?: Array<PublishingMethod>;
+  altMethod: PublishingMethod | null;
+  altMethods: Array<PublishingMethod>;
 }
 
 export interface PublishingMethod {
-  name?: boolean;
+  name: boolean | null;
 }

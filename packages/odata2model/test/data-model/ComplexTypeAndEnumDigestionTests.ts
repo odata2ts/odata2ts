@@ -93,7 +93,7 @@ export function createComplexAndEnumTests() {
 
     expect(model).toBeTruthy();
     expect(model.props[1]).toEqual({
-      dataType: DataTypes.ModelType,
+      dataType: DataTypes.ComplexType,
       isCollection: false,
       name: "branding",
       odataName: "branding",

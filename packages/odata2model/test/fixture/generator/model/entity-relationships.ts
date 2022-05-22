@@ -1,10 +1,11 @@
 export interface Author {
   id: string;
-  name: boolean;
+  name: boolean | null;
 }
 
 export interface Book {
   id: string;
-  author: Author;
+  author?: Author;
+  altAuthor?: Author | null;
   relatedAuthors?: Array<Author>;
 }

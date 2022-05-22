@@ -9,6 +9,7 @@ import {
 export class QBook extends QueryObject {
   public readonly id = new QGuidPath(this.withPrefix("id"));
   public readonly method = new QEntityPath(this.withPrefix("method"), () => QPublishingMethod);
+  public readonly altMethod = new QEntityPath(this.withPrefix("altMethod"), () => QPublishingMethod);
   public readonly altMethods = new QEntityCollectionPath(this.withPrefix("altMethods"), () => QPublishingMethod);
 
   constructor(path?: string) {

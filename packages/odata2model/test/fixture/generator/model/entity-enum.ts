@@ -6,5 +6,5 @@ export enum Choice {
 export interface Book {
   id: string;
   myChoice: Choice;
-  otherChoices?: Array<Choice>;
+  otherChoices: Array<Choice>;
 }

@@ -95,6 +95,9 @@ describe("Action Digestion Test", () => {
       .addAction("searchWithFilter", `Collection(${SERVICE_NAME}.User)`, true, (builder) => {
         builder.addParam("user", `${SERVICE_NAME}.User`).addParam("choice", `${SERVICE_NAME}.Choice`);
       })
+      .addEntityType("User", undefined, (builder) => {
+        builder.addKeyProp("id", ODataTypesV4.String);
+      })
       .addEnumType("Choice", [
         { name: "A", value: 1 },
         { name: "B", value: 9 },
@@ -137,11 +140,11 @@ describe("Action Digestion Test", () => {
 
   test("Action Import: min case", async () => {
     odataBuilder
+      .addEntityType("User", undefined, (builder) => {
+        builder.addKeyProp("id", ODataTypesV4.String);
+      })
       .addActionImport("NotifyBestFriend", "messageBestFriend")
       .addAction("messageBestFriend", undefined, false);
-    // .addEntityType("User", undefined, (builder) => {
-    //   builder.addKeyProp("id", ODataTypesV4.String);
-    // });
 
     const result = await doDigest();
     expect(result.getEntityContainer().actions).toMatchObject({

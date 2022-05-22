@@ -1,15 +1,15 @@
 import { upperCaseFirst } from "upper-case-first";
 import {
-  ModelType,
-  EnumType,
-  EntityContainerModel,
-  OperationType,
   ActionImportType,
-  FunctionImportType,
-  SingletonType,
-  EntitySetType,
-  ODataVersion,
   ComplexType,
+  EntityContainerModel,
+  EntitySetType,
+  EnumType,
+  FunctionImportType,
+  ModelType,
+  ODataVersion,
+  OperationType,
+  SingletonType,
 } from "./DataTypeModel";
 
 export interface ProjectFiles {
@@ -46,6 +46,14 @@ export class DataModel {
    */
   public getODataVersion() {
     return this.version;
+  }
+
+  public isV2() {
+    return this.version === ODataVersion.V2;
+  }
+
+  public isV4() {
+    return this.version === ODataVersion.V4;
   }
 
   /**

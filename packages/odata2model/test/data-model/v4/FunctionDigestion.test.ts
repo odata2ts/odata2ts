@@ -101,6 +101,9 @@ describe("Function Digestion Test", () => {
 
   test("Function: bound function returning string list", async () => {
     odataBuilder
+      .addEntityType("User", undefined, (builder) => {
+        builder.addKeyProp("id", ODataTypesV4.String);
+      })
       .addFunction("listAttitudes", "Collection(Edm.String)", true, (builder) => {
         builder.addParam("user", `${SERVICE_NAME}.User`);
       })

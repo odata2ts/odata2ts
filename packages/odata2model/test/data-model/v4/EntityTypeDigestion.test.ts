@@ -399,12 +399,16 @@ describe("V2: EntityTypeDigestion Test", () => {
   });
 
   test("EntityTypes: navProps with entity & entity collection", async () => {
-    odataBuilder.addEntityType("Category", undefined, (builder) => {
-      builder
-        .addKeyProp("ID", ODataTypesV4.Guid)
-        .addNavProp("bestProduct", `${SERVICE_NAME}.Product`)
-        .addNavProp("featuredProducts", `Collection(${SERVICE_NAME}.Product)`);
-    });
+    odataBuilder
+      .addEntityType("Category", undefined, (builder) => {
+        builder
+          .addKeyProp("ID", ODataTypesV4.Guid)
+          .addNavProp("bestProduct", `${SERVICE_NAME}.Product`)
+          .addNavProp("featuredProducts", `Collection(${SERVICE_NAME}.Product)`);
+      })
+      .addEntityType("Product", undefined, (builder) => {
+        builder.addKeyProp("ID", ODataTypesV4.Guid);
+      });
 
     const result = await digest(odataBuilder.getSchema(), runOpts);
     const model = result.getModel("Category");
@@ -430,15 +434,22 @@ describe("V2: EntityTypeDigestion Test", () => {
   });
 
   test("EntityTypes: navProps", async () => {
-    odataBuilder.addEntityType("max", undefined, (builder) =>
-      builder
-        .addKeyProp("ID", ODataTypesV4.Guid)
-        .addNavProp("products", `${SERVICE_NAME}.product`)
-        .addNavProp("similarProducts", `${SERVICE_NAME}.Prod.uct`, "test", false)
-    );
+    odataBuilder
+      .addEntityType("max", undefined, (builder) =>
+        builder
+          .addKeyProp("ID", ODataTypesV4.Guid)
+          .addNavProp("products", `${SERVICE_NAME}.Product`)
+          .addNavProp("similarProducts", `${SERVICE_NAME}.Prod.uct`, "test", false)
+      )
+      .addEntityType("Product", undefined, (builder) => {
+        builder.addKeyProp("ID", ODataTypesV4.Guid);
+      })
+      .addEntityType("Prod.uct", undefined, (builder) => {
+        builder.addKeyProp("ID", ODataTypesV4.Guid);
+      });
 
     const result = await digest(odataBuilder.getSchema(), runOpts);
 
-    expect(result.getModels().length).toBe(1);
+    expect(result.getModels().length).toBe(3);
   });
 });

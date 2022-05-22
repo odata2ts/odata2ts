@@ -3,9 +3,9 @@ export interface GrandParent {
 }
 
 export interface Parent extends GrandParent {
-  parentalAdvice?: boolean;
+  parentalAdvice: boolean | null;
 }
 
 export interface Child extends Parent {
-  Ch1ld1shF4n?: boolean;
+  Ch1ld1shF4n: boolean | null;
 }
