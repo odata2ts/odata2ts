@@ -28,5 +28,9 @@
     "ts-node": "10.7.0",
     "typescript": "4.6.3"
   },
-  "types": "./lib/index.d.ts"
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@odata2ts/odata-client-api": "*",
+    "axios": "^0.27.2"
+  }
 }
