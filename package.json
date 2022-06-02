@@ -9,12 +9,14 @@
     "build": "yarn clean && lerna run build",
     "clean": "rimraf coverage && lerna run clean",
     "coverage": "yarn workspace @odata2ts/odata2model dev && jest --coverage",
-    "release": "yarn build && lerna publish",
+    "postversion": "lerna publish from-git",
+    "release": "env-cmd -f .env.local --no-override lerna version",
     "test": "lerna run test",
     "int-test": "lerna run int-test"
   },
   "devDependencies": {
     "@prettier/plugin-xml": "^2.0.1",
+    "env-cmd": "^10.1.0",
     "husky": "^7.0.4",
     "jest": "^27.5.1",
     "lerna": "^4.0.0",
