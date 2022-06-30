@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.10.0...@odata2ts/odata-query-objects@0.10.1) (2022-06-30)
+
+
+### Bug Fixes
+
+* private prop prefix might conflict with generated prop of extending class ([#31](https://github.com/odata2ts/odata2ts/issues/31)) ([73b3d1f](https://github.com/odata2ts/odata2ts/commit/73b3d1fc1d7e00681a0bae0427d0d62ce19b0a4c))
+
+
+
+
+
+
 # [0.10.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.9.0...@odata2ts/odata-query-objects@0.10.0) (2022-05-21)
 
 

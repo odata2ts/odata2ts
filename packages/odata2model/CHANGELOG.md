@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.9.0...@odata2ts/odata2model@0.10.0) (2022-06-30)
+
+
+### Features
+
+* use pascalCase for file names and allow to override serviceName ([#30](https://github.com/odata2ts/odata2ts/issues/30)) ([5aa1e44](https://github.com/odata2ts/odata2ts/commit/5aa1e44a32099d781649ffbed87daa85d0647f5f))
+
+
+### BREAKING CHANGES
+
+* new file names
+
+* fix: missed package.json
+
+* fix: make serviceName option optional
+
+
+
+
+
+
 # [0.9.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.8.2...@odata2ts/odata2model@0.9.0) (2022-05-21)
 
 
