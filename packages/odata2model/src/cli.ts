@@ -33,6 +33,7 @@ export class Cli {
       .option("-suffix, --model-suffix <suffix>", "Suffix the generated interfaces with a static string")
       .option("-p, --prettier", "Format result with prettier")
       .option("-d, --debug", "Verbose debug infos")
+      .option("-name, --service-name <serviceName>", "Give the service your own name")
       .parse(process.argv);
 
     const defaultConfig = {
