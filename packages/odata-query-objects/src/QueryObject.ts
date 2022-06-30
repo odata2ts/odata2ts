@@ -1,7 +1,7 @@
 export class QueryObject {
-  constructor(private prefix?: string) {}
+  constructor(private _prefix?: string) {}
 
   protected withPrefix(path: string) {
-    return this.prefix ? `${this.prefix}/${path}` : path;
+    return this._prefix ? `${this._prefix}/${path}` : path;
   }
 }
