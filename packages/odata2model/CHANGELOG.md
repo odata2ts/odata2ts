@@ -15,9 +15,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * new file names
 
-* fix: missed package.json
-
-* fix: make serviceName option optional
 
 
 

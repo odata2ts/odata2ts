@@ -12,6 +12,7 @@
     "build": "yarn clean && yarn compile",
     "clean": "rimraf lib coverage",
     "compile": "tsc",
+    "prepublish": "yarn build",
     "test": "jest"
   },
   "files": [

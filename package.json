@@ -10,7 +10,7 @@
     "clean": "rimraf coverage && lerna run clean",
     "coverage": "yarn workspace @odata2ts/odata2model dev && jest --coverage",
     "postversion": "lerna publish from-git",
-    "release": "yarn build && env-cmd -f .env.local --no-override lerna version",
+    "release": "env-cmd -f .env.local --no-override lerna version",
     "test": "lerna run test",
     "int-test": "lerna run int-test"
   },
