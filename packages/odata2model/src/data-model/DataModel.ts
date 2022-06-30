@@ -10,6 +10,7 @@ import {
   EntitySetType,
   ODataVersion,
 } from "./DataTypeModel";
+import { pascalCase } from "pascal-case";
 
 export interface ProjectFiles {
   model: string;
@@ -32,10 +33,10 @@ export class DataModel {
   // e.g. DateString, GuidString, etc.
   private primitiveTypeImports: Set<string> = new Set();
 
-  constructor(private version: ODataVersion, private serviceName: string) {
+  constructor(private version: ODataVersion, private serviceName: string, overridingServiceName?: string) {
     this.servicePrefix = serviceName + ".";
 
-    const name = upperCaseFirst(serviceName);
+    const name = pascalCase(overridingServiceName || serviceName);
     this.fileNames = {
       model: `${name}Model`,
       qObject: `Q${name}`,
