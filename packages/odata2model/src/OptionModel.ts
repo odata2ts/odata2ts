@@ -21,7 +21,7 @@ export interface ProjectOptions {
   prettier: boolean;
   debug: boolean;
   emitMode: keyof typeof EmitModes;
-  serviceName: string | undefined;
+  serviceName?: string;
 }
 
 export interface RunOptions extends Omit<ProjectOptions, "source" | "mode" | "emitMode"> {
