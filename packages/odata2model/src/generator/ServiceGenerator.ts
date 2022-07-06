@@ -249,6 +249,7 @@ class ServiceGenerator {
       if (model.modelType === ModelTypes.EntityType) {
         importContainer.addFromService(entitySetServiceType);
 
+        const collectionOperations = this.dataModel.getOperationTypeByBinding(`Collection(${model.name})`);
         const isSingleKey = model.keys.length === 1;
         const exactKeyType = `{ ${model.keys.map((k) => `${k.odataName}: ${this.sanitizeType(k.type)}`).join(", ")} }`;
         const keyType = `${isSingleKey ? this.sanitizeType(model.keys[0].type) + " | " : ""}${exactKeyType}`;
@@ -269,6 +270,7 @@ class ServiceGenerator {
               statements: [`super(client, path, ${firstCharLowerCase(model.qName)}, ${serviceName}, ${keySpec});`],
             },
           ],
+          methods: [...this.generateBoundOperations(collectionOperations, importContainer)],
         });
       }
 
