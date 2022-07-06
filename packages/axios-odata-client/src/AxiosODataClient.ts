@@ -108,6 +108,10 @@ export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
     return error;
   }
 
+  public async refreshCsrfToken() {
+    return this.fetchSecurityToken();
+  }
+
   public getInstance() {
     return this.client;
   }
