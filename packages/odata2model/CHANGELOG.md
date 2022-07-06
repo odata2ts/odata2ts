@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.11.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.10.1...@odata2ts/odata2model@0.11.0) (2022-07-06)
+
+
+### Features
+
+* **odata2model:** actions & function on collection level ([#33](https://github.com/odata2ts/odata2ts/issues/33)) ([985b2dc](https://github.com/odata2ts/odata2ts/commit/985b2dc6ca443a73b3a4c877712199c23c5a75cb))
+
+
+
+
+
 ## [0.10.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.10.0...@odata2ts/odata2model@0.10.1) (2022-06-30)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/axios-odata-client@0.1.1...@odata2ts/axios-odata-client@0.2.0) (2022-07-06)
+
+
+### Features
+
+* add option to enable automatic csrf token handling ([#32](https://github.com/odata2ts/odata2ts/issues/32)) ([cf4b8c6](https://github.com/odata2ts/odata2ts/commit/cf4b8c60f02ef1fdf7af267e61791e4b7d94fb3e))
+
+
+
+
+
 ## [0.1.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/axios-odata-client@0.1.0...@odata2ts/axios-odata-client@0.1.1) (2022-06-30)
 
 
