@@ -196,10 +196,7 @@ GET {{baseUrl}}/People('russellwhyte')/Trips?$filter=Tags/any(a:a eq 'New York m
 &$expand=Trips($select=Description,Budget,Tags)
 
 ### $this doesn't work
-GET {{baseUrl}}/People?
-&$expand=Friends($select=UserName;$filter=$it/BestFriend/UserName ne $this/UserName),BestFriend($select=UserName)
-#
-&$select=UserName
+GET {{baseUrl}}/People?$expand=Friends($select=UserName;$filter=$it/BestFriend/UserName ne $this/UserName),BestFriend($select=UserName)&$select=UserName
 # &$expand=Trips($select=Description,Budget)
 
 ### $OrderBy
@@ -269,3 +266,9 @@ GET https://services.odata.org/TripPinRESTierService/People
 GET https://services.odata.org/TripPinRESTierService/People
 ?$select=FirstName
 &$filter=FirstName in ('Russell')
+
+### Groupby
+GET {{baseUrl}}/People?$select=Gender&$apply=aggregate(Gender with countdistinct as counter)
+
+### Groupby
+GET {{baseUrl}}/People
