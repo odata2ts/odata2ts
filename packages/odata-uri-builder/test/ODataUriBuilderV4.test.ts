@@ -113,4 +113,16 @@ describe("ODataUriBuilderV4 Test", () => {
 
     expect(candidate).toBe(expected);
   });
+
+  test("simple groupBy", () => {
+    const candidate = toTest.select("name").groupBy("name").build();
+
+    expect(candidate).toBe(addBase("$select=name&$apply=groupby((name))"));
+  });
+
+  test("multiple groupBys", () => {
+    const candidate = toTest.select("name", "age").groupBy("name", "age").build();
+
+    expect(candidate).toBe(addBase("$select=name,age&$apply=groupby((name,age))"));
+  });
 });

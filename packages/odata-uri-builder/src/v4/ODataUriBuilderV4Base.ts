@@ -14,6 +14,7 @@ export abstract class ODataUriBuilderV4Base<Q extends QueryObject>
 {
   protected selects: Array<string> = [];
   protected expands: Array<ExpandingODataUriBuilder<any>> = [];
+  protected groupBys: Array<string> = [];
 
   protected getSelectResult() {
     return this.selects.length ? this.selects.join(",") : undefined;
@@ -25,6 +26,10 @@ export abstract class ODataUriBuilderV4Base<Q extends QueryObject>
 
   protected getCountResult(): [string, string] | undefined {
     return this.itemsCount !== undefined ? [ODataOperators.COUNT, String(this.itemsCount)] : undefined;
+  }
+
+  protected getGroupByResult(): string | undefined {
+    return this.groupBys.length ? `groupby((${this.groupBys.join(",")}))` : undefined;
   }
 
   /**

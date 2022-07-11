@@ -1,6 +1,6 @@
 import { ODataUriBuilderConfig } from "../internal";
 import { ODataUriBuilderV4Base } from "./ODataUriBuilderV4Base";
-import { QueryObject } from "@odata2ts/odata-query-objects";
+import { QPath, QueryObject } from "@odata2ts/odata-query-objects";
 
 /**
  * Create an OData URI string in a typesafe way by facilitating generated query objects.
@@ -34,6 +34,19 @@ export class ODataUriBuilderV4<Q extends QueryObject> extends ODataUriBuilderV4B
    */
   public count(doCount?: boolean) {
     this.itemsCount = doCount === undefined || doCount;
+    return this;
+  }
+
+  public groupBy(...props: Array<keyof Q | null | undefined>) {
+    if (props && props.length) {
+      this.groupBys.push(
+        ...props
+          .filter((p): p is keyof Q => !!p)
+          .map((p) => {
+            return (this.entity[p] as unknown as QPath).getPath();
+          })
+      );
+    }
     return this;
   }
 }

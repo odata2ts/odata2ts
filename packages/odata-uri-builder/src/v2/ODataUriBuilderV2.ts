@@ -2,7 +2,6 @@ import {
   QComplexPath,
   QEntityCollectionPath,
   QEntityPath,
-  QPath,
   QPathModel,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
@@ -50,6 +49,10 @@ export class ODataUriBuilderV2<Q extends QueryObject> extends ODataUriBuilderBas
   }
   protected getCountResult(): [string, string] | undefined {
     return this.itemsCount ? [ODataOperators.COUNTV2, "allpages"] : undefined;
+  }
+
+  protected getGroupByResult(): string | undefined {
+    return undefined;
   }
 
   /**

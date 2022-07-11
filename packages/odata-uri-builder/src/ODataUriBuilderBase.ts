@@ -35,6 +35,8 @@ export abstract class ODataUriBuilderBase<Q extends QueryObject> {
 
   protected abstract getCountResult(): [string, string] | undefined;
 
+  protected abstract getGroupByResult(): string | undefined;
+
   /**
    * Skip n items from the result set.
    * To be used in combination with top.
@@ -123,9 +125,13 @@ export abstract class ODataUriBuilderBase<Q extends QueryObject> {
     const selectResult = this.getSelectResult();
     const expandResult = this.getExpandResult();
     const countResult = this.getCountResult();
+    const groupByResult = this.getGroupByResult();
 
     if (selectResult) {
       add(ODataOperators.SELECT, selectResult);
+    }
+    if (groupByResult) {
+      add(ODataOperators.APPLY, groupByResult);
     }
     if (this.itemsToSkip !== undefined) {
       add(ODataOperators.SKIP, String(this.itemsToSkip));
