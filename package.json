@@ -12,7 +12,8 @@
     "postversion": "lerna publish from-git",
     "release": "env-cmd -f .env.local --no-override lerna version",
     "test": "lerna run test",
-    "int-test": "lerna run int-test"
+    "int-test": "lerna run int-test",
+    "version": "yarn install && git add yarn.lock"
   },
   "devDependencies": {
     "@prettier/plugin-xml": "^2.0.1",
