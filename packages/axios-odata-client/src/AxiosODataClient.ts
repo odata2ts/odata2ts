@@ -53,7 +53,7 @@ export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
         error.response?.status === 403 &&
         error.response?.headers?.["x-csrf-token"] === "Required"
       ) {
-        // sap csrf token expires, let's reset it and refetch
+        // csrf token expired, let's reset it and refetch
         this.csrfToken = undefined;
 
         return this.client.request(error.config);
