@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.11.1...@odata2ts/odata2model@0.11.2) (2022-07-20)
+
+
+### Bug Fixes
+
+* guids in v2 have special syntax (guid'xxxx-...') ([#35](https://github.com/odata2ts/odata2ts/issues/35)) ([a551bcc](https://github.com/odata2ts/odata2ts/commit/a551bccf27dc7e8348020840402372582f9448e5))
+
+
+
+
+
 ## [0.11.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.11.0...@odata2ts/odata2model@0.11.1) (2022-07-11)
 
 **Note:** Version bump only for package @odata2ts/odata2model
