@@ -8,7 +8,7 @@ import { QEntityPath } from "./QEntityPath";
 import { QNumberPath } from "./QNumberPath";
 import { QStringPath } from "./v4/QStringPath";
 import { QBinaryPath } from "./QBinaryPath";
-import { QGuidPath } from "./QGuidPath";
+import { QGuidPath } from "./v4/QGuidPath";
 import { QEntityCollectionPath } from "./QEntityCollectionPath";
 
 export interface QPathModel {

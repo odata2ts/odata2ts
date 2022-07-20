@@ -1,10 +1,10 @@
 export interface Author {
-  id: string;
+  id: number;
   name: boolean;
 }
 
 export interface Book {
-  id: string;
+  id: number;
   author: Author;
   relatedAuthors?: Array<Author>;
 }
