@@ -11,7 +11,7 @@
     "coverage": "yarn workspace @odata2ts/odata2model dev && jest --coverage",
     "postversion": "lerna publish from-git",
     "release": "env-cmd -f .env.local --no-override lerna version",
-    "test": "lerna run test",
+    "test": "lerna run test -- --no-cache",
     "int-test": "lerna run int-test",
     "version": "yarn install && git add yarn.lock"
   },

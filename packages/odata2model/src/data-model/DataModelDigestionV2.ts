@@ -120,7 +120,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
       case ODataTypesV3.Binary:
         return ["string", "QBinaryPath", "QBinaryCollection"];
       case ODataTypesV3.Guid:
-        return ["string", "QGuidPath", "QGuidCollection"];
+        return ["string", "QGuidV2Path", "QGuidV2Collection"];
       default:
         return ["string", "QStringV2Path", "QStringV2Collection"];
     }

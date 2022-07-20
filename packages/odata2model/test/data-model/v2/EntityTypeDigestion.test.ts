@@ -214,7 +214,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         type: "string",
         required: true,
         qObject: undefined,
-        qPath: "QGuidPath",
+        qPath: "QGuidV2Path",
       },
       {
         name: "isTrue",
@@ -337,8 +337,8 @@ describe("V2: EntityTypeDigestion Test", () => {
         odataType: `Collection(${ODataTypesV3.Guid})`,
         type: "string",
         isCollection: true,
-        qObject: "QGuidCollection",
-        qPath: "QGuidPath",
+        qObject: "QGuidV2Collection",
+        qPath: "QGuidV2Path",
       },
       {
         name: "multipleStrings",

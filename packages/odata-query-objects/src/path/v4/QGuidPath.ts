@@ -1,6 +1,6 @@
-import { QFilterExpression } from "../QFilterExpression";
-import { StandardFilterOperators } from "../odata/ODataModel";
-import { QLiteralPath } from "./base/QLiteralPath";
+import { QFilterExpression } from "../../QFilterExpression";
+import { StandardFilterOperators } from "../../odata/ODataModel";
+import { QLiteralPath } from "../base/QLiteralPath";
 
 export class QGuidPath extends QLiteralPath<string, StandardFilterOperators> {
   public equals(value: string) {

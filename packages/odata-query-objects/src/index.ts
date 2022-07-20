@@ -4,7 +4,7 @@ export { QBooleanPath } from "./path/QBooleanPath";
 export { QNumberPath } from "./path/QNumberPath";
 export { QStringPath } from "./path/v4/QStringPath";
 export { QBinaryPath } from "./path/QBinaryPath";
-export { QGuidPath } from "./path/QGuidPath";
+export { QGuidPath } from "./path/v4/QGuidPath";
 export { QEnumPath } from "./path/QEnumPath";
 export { QEntityPath } from "./path/QEntityPath";
 export { QEntityCollectionPath } from "./path/QEntityCollectionPath";

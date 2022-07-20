@@ -1,3 +1,3 @@
 export interface Book {
-  id: string;
+  id: number;
 }
