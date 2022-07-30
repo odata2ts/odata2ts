@@ -1,10 +1,9 @@
 {
-  "name": "@odata2ts/odata-uri-builder",
-  "version": "0.8.1",
+  "name": "@odata2ts/axios-odata-client",
+  "version": "0.2.1",
   "publishConfig": {
     "access": "public"
   },
-  "description": "Allows for building type-safe OData queries",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
@@ -14,27 +13,25 @@
     "clean": "rimraf lib coverage",
     "compile": "tsc",
     "prepublish": "yarn build",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "files": [
     "*.md",
     "lib",
     "LICENSE"
   ],
-  "dependencies": {
-    "@odata2ts/odata-query-objects": "^0.10.3"
-  },
   "devDependencies": {
     "@types/jest": "^27.4.1",
     "@types/node": "^17.0.23",
-    "axios": "^0.26.1",
     "jest": "27.5.1",
-    "query-string": "7.1.1",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.1.4",
     "ts-node": "10.7.0",
-    "typescript": "^4.6.3"
+    "typescript": "4.6.3"
   },
-  "types": "./lib/index.d.ts",
-  "gitHead": "b88f1a6e7ce84d26d1d7efa5a61dfc66a4626ec3"
+  "dependencies": {
+    "@odata2ts/odata-client-api": "^0.3.1",
+    "axios": "^0.27.2"
+  },
+  "types": "./lib/index.d.ts"
 }

@@ -325,3 +325,9 @@ GET {{baseUrl}}/People?$select=FirstName,Gender&$filter=Gender eq 'Female'
 
 ### Finally a working "in" statement
 GET {{baseUrl}}/People?$select=FirstName&$filter=FirstName in ('Russell')
+
+### Groupby
+GET {{baseUrl}}/People?$select=Gender&$apply=aggregate(Gender with countdistinct as counter)
+
+### Groupby
+GET {{baseUrl}}/People

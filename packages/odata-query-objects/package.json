@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-query-objects",
-  "version": "0.10.0",
+  "version": "0.10.3",
   "publishConfig": {
     "access": "public"
   },
@@ -12,6 +12,7 @@
     "build": "yarn clean && yarn compile",
     "clean": "rimraf lib coverage",
     "compile": "tsc",
+    "prepublish": "yarn build",
     "test": "jest"
   },
   "files": [

@@ -1,6 +1,6 @@
 import {
   QueryObject,
-  QGuidPath,
+  QGuidV2Path,
   QBooleanPath,
   QTimeV2Path,
   QDateTimeV2Path,
@@ -9,7 +9,7 @@ import {
   QBinaryPath,
   QStringV2Path,
   QCollectionPath,
-  QGuidCollection,
+  QGuidV2Collection,
   QStringV2Collection,
   QBooleanCollection,
   QTimeV2Collection,
@@ -20,7 +20,7 @@ import {
 } from "@odata2ts/odata-query-objects";
 
 export class QBook extends QueryObject {
-  public readonly id = new QGuidPath(this.withPrefix("id"));
+  public readonly id = new QGuidV2Path(this.withPrefix("id"));
   public readonly requiredOption = new QBooleanPath(this.withPrefix("requiredOption"));
   public readonly time = new QTimeV2Path(this.withPrefix("time"));
   public readonly optionalDate = new QDateTimeV2Path(this.withPrefix("optionalDate"));
@@ -35,7 +35,7 @@ export class QBook extends QueryObject {
   public readonly testDouble = new QNumberPath(this.withPrefix("testDouble"));
   public readonly testBinary = new QBinaryPath(this.withPrefix("testBinary"));
   public readonly testAny = new QStringV2Path(this.withPrefix("testAny"));
-  public readonly multipleIds = new QCollectionPath(this.withPrefix("multipleIds"), () => QGuidCollection);
+  public readonly multipleIds = new QCollectionPath(this.withPrefix("multipleIds"), () => QGuidV2Collection);
   public readonly multipleStrings = new QCollectionPath(this.withPrefix("multipleStrings"), () => QStringV2Collection);
   public readonly multipleBooleans = new QCollectionPath(this.withPrefix("multipleBooleans"), () => QBooleanCollection);
   public readonly multipleTimes = new QCollectionPath(this.withPrefix("multipleTimes"), () => QTimeV2Collection);

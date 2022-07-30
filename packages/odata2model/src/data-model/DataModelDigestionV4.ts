@@ -134,7 +134,11 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       }
 
       const bindingProp = isBound ? params.shift() : undefined;
-      const binding = bindingProp ? bindingProp.type : DigesterV4.ROOT_OPERATION;
+      const binding = bindingProp
+        ? bindingProp.isCollection
+          ? `Collection(${bindingProp.type})`
+          : bindingProp.type
+        : DigesterV4.ROOT_OPERATION;
       this.dataModel.addOperationType(binding, {
         odataName: op.$.Name,
         name: this.getOperationName(op.$.Name),

@@ -1,5 +1,5 @@
 export interface Book {
-  id: string;
+  id: number;
 }
 
 export interface EditableBook extends Pick<Book, "id"> {}

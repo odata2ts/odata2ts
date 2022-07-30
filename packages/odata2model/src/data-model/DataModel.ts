@@ -11,6 +11,7 @@ import {
   OperationType,
   SingletonType,
 } from "./DataTypeModel";
+import { pascalCase } from "pascal-case";
 
 export interface ProjectFiles {
   model: string;
@@ -29,10 +30,10 @@ export class DataModel {
   private operationTypes: { [binding: string]: Array<OperationType> } = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
 
-  constructor(private version: ODataVersion, private serviceName: string) {
+  constructor(private version: ODataVersion, private serviceName: string, overridingServiceName?: string) {
     this.servicePrefix = serviceName + ".";
 
-    const name = upperCaseFirst(serviceName);
+    const name = pascalCase(overridingServiceName || serviceName);
     this.fileNames = {
       model: `${name}Model`,
       qObject: `Q${name}`,

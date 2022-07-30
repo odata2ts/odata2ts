@@ -3,6 +3,45 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.8.0...@odata2ts/odata-uri-builder@0.8.1) (2022-07-20)
+
+**Note:** Version bump only for package @odata2ts/odata-uri-builder
+
+
+
+
+
+# [0.8.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.7.2...@odata2ts/odata-uri-builder@0.8.0) (2022-07-11)
+
+
+### Features
+
+* **uriBuilder:** groupBy ([#34](https://github.com/odata2ts/odata2ts/issues/34)) ([fb21e7c](https://github.com/odata2ts/odata2ts/commit/fb21e7c353fbfa9f914e6fb5a8d0dee1c6fa5926))
+
+
+
+
+
+## [0.7.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.7.1...@odata2ts/odata-uri-builder@0.7.2) (2022-06-30)
+
+
+### Bug Fixes
+
+* add prebulish script to guarantee building before publishing ([b6986db](https://github.com/odata2ts/odata2ts/commit/b6986dbdb258b7b3cb8f36ab52ae1ff7b093f7dc))
+
+
+
+
+
+## [0.7.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.7.0...@odata2ts/odata-uri-builder@0.7.1) (2022-06-30)
+
+**Note:** Version bump only for package @odata2ts/odata-uri-builder
+
+
+
+
+
+
 # [0.7.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.6.3...@odata2ts/odata-uri-builder@0.7.0) (2022-05-21)
 
 

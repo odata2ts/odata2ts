@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.10.2...@odata2ts/odata-query-objects@0.10.3) (2022-07-20)
+
+
+### Bug Fixes
+
+* guids in v2 have special syntax (guid'xxxx-...') ([#35](https://github.com/odata2ts/odata2ts/issues/35)) ([a551bcc](https://github.com/odata2ts/odata2ts/commit/a551bccf27dc7e8348020840402372582f9448e5))
+
+
+
+
+
+## [0.10.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.10.1...@odata2ts/odata-query-objects@0.10.2) (2022-06-30)
+
+
+### Bug Fixes
+
+* add prebulish script to guarantee building before publishing ([b6986db](https://github.com/odata2ts/odata2ts/commit/b6986dbdb258b7b3cb8f36ab52ae1ff7b093f7dc))
+
+
+
+
+
+## [0.10.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.10.0...@odata2ts/odata-query-objects@0.10.1) (2022-06-30)
+
+
+### Bug Fixes
+
+* private prop prefix might conflict with generated prop of extending class ([#31](https://github.com/odata2ts/odata2ts/issues/31)) ([73b3d1f](https://github.com/odata2ts/odata2ts/commit/73b3d1fc1d7e00681a0bae0427d0d62ce19b0a4c))
+
+
+
+
+
+
 # [0.10.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.9.0...@odata2ts/odata-query-objects@0.10.0) (2022-05-21)
 
 

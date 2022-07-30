@@ -3,6 +3,65 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.11.1...@odata2ts/odata2model@0.11.2) (2022-07-20)
+
+
+### Bug Fixes
+
+* guids in v2 have special syntax (guid'xxxx-...') ([#35](https://github.com/odata2ts/odata2ts/issues/35)) ([a551bcc](https://github.com/odata2ts/odata2ts/commit/a551bccf27dc7e8348020840402372582f9448e5))
+
+
+
+
+
+## [0.11.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.11.0...@odata2ts/odata2model@0.11.1) (2022-07-11)
+
+**Note:** Version bump only for package @odata2ts/odata2model
+
+
+
+
+
+# [0.11.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.10.1...@odata2ts/odata2model@0.11.0) (2022-07-06)
+
+
+### Features
+
+* **odata2model:** actions & function on collection level ([#33](https://github.com/odata2ts/odata2ts/issues/33)) ([985b2dc](https://github.com/odata2ts/odata2ts/commit/985b2dc6ca443a73b3a4c877712199c23c5a75cb))
+
+
+
+
+
+## [0.10.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.10.0...@odata2ts/odata2model@0.10.1) (2022-06-30)
+
+
+### Bug Fixes
+
+* add prebulish script to guarantee building before publishing ([b6986db](https://github.com/odata2ts/odata2ts/commit/b6986dbdb258b7b3cb8f36ab52ae1ff7b093f7dc))
+
+
+
+
+
+# [0.10.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.9.0...@odata2ts/odata2model@0.10.0) (2022-06-30)
+
+
+### Features
+
+* use pascalCase for file names and allow to override serviceName ([#30](https://github.com/odata2ts/odata2ts/issues/30)) ([5aa1e44](https://github.com/odata2ts/odata2ts/commit/5aa1e44a32099d781649ffbed87daa85d0647f5f))
+
+
+### BREAKING CHANGES
+
+* new file names
+
+
+
+
+
+
+
 # [0.9.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.8.2...@odata2ts/odata2model@0.9.0) (2022-05-21)
 
 

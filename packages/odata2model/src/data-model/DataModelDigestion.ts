@@ -20,7 +20,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   protected constructor(protected version: ODataVersion, protected schema: S, protected options: RunOptions) {
     const serviceName = schema.$.Namespace;
-    this.dataModel = new DataModel(version, serviceName);
+    this.dataModel = new DataModel(version, serviceName, options.serviceName);
     this.collectModelTypes(this.schema);
   }
 

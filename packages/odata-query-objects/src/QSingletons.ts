@@ -3,12 +3,12 @@ import { QBinaryPath } from "./path/QBinaryPath";
 import { QDatePath } from "./path/v4/QDatePath";
 import { QTimeOfDayPath } from "./path/v4/QTimeOfDayPath";
 import { QDateTimeOffsetPath } from "./path/v4/QDateTimeOffsetPath";
-import { QGuidPath } from "./path/QGuidPath";
+import { QGuidPath } from "./path/v4/QGuidPath";
 import { QBooleanPath } from "./path/QBooleanPath";
 import { QNumberPath } from "./path/QNumberPath";
 import { QStringPath } from "./path/v4/QStringPath";
 import { QueryObject } from "./QueryObject";
-import { QDateTimeOffsetV2Path, QDateTimeV2Path, QStringV2Path, QTimeV2Path } from "./path/v2";
+import { QDateTimeOffsetV2Path, QDateTimeV2Path, QGuidV2Path, QStringV2Path, QTimeV2Path } from "./path/v2";
 
 const ATTRIBUTE_NAME = "it";
 const PRIMITIVE_VALUE_REFERENCE = "$it";
@@ -70,6 +70,13 @@ export class QGuidCollection extends QPrimitiveCollection<QGuidPath> {
   }
 }
 export const qGuidCollection = new QGuidCollection();
+
+export class QGuidV2Collection extends QPrimitiveCollection<QGuidV2Path> {
+  createQPathType(path: string) {
+    return new QGuidV2Path(path);
+  }
+}
+export const qGuidV2Collection = new QGuidV2Collection();
 
 export class QBinaryCollection extends QPrimitiveCollection<QBinaryPath> {
   createQPathType(path: string) {

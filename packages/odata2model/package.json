@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata2model",
-  "version": "0.9.0",
+  "version": "0.11.2",
   "publishConfig": {
     "access": "public"
   },
@@ -24,6 +24,7 @@
     "dev-odata": "yarn generate -o build/v2/odata -s int-test/fixture/v2/odata.xml",
     "dev-trippin": "yarn generate -o build/v4/trippin -s int-test/fixture/v4/trippin.xml",
     "int-test": "yarn clean && yarn dev-trippin && jest ./int-test",
+    "prepublish": "yarn build",
     "test": "jest ./test"
   },
   "files": [
@@ -41,15 +42,16 @@
     "commander": "^9.1.0",
     "cosmiconfig": "^7.0.1",
     "fs-extra": "^10.0.1",
+    "pascal-case": "^3.1.2",
     "prettier": "^2.6.2",
     "ts-morph": "^14.0.0",
     "upper-case-first": "^2.0.2",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
-    "@odata2ts/odata-client-api": "^0.3.0",
-    "@odata2ts/odata-query-objects": "^0.10.0",
-    "@odata2ts/odata-service": "^0.5.0",
+    "@odata2ts/odata-client-api": "^0.3.1",
+    "@odata2ts/odata-query-objects": "^0.10.3",
+    "@odata2ts/odata-service": "^0.5.4",
     "@types/fs-extra": "^9.0.13",
     "@types/jest": "^27.4.1",
     "@types/node": "^17.0.23",

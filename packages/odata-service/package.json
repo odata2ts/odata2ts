@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-service",
-  "version": "0.5.0",
+  "version": "0.5.4",
   "publishConfig": {
     "access": "public"
   },
@@ -12,6 +12,7 @@
     "build": "yarn clean && yarn compile",
     "clean": "rimraf lib coverage",
     "compile": "tsc",
+    "prepublish": "yarn build",
     "test": "jest"
   },
   "files": [
@@ -20,9 +21,9 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@odata2ts/odata-client-api": "^0.3.0",
-    "@odata2ts/odata-query-objects": "^0.10.0",
-    "@odata2ts/odata-uri-builder": "^0.7.0"
+    "@odata2ts/odata-client-api": "^0.3.1",
+    "@odata2ts/odata-query-objects": "^0.10.3",
+    "@odata2ts/odata-uri-builder": "^0.8.1"
   },
   "devDependencies": {
     "@types/jest": "^27.4.1",

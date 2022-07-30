@@ -7,4 +7,5 @@ export const enum ODataOperators {
   COUNT = "$count",
   COUNTV2 = "$inlinecount",
   ORDER_BY = "$orderby",
+  APPLY = "$apply",
 }
