@@ -133,19 +133,20 @@ export function createEntityBasedGenerationTests(
   test(`${testSuiteName}: entity relationships`, async () => {
     // given one minimal model
     odataBuilder
-      .addEntityType("author", undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV3.Int32).addProp("name", ODataTypesV3.Boolean, false)
+      .addEntityType("Author", undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV3.Int32).addProp("name", ODataTypesV3.Boolean, true)
       )
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
         builder
           .addKeyProp("id", ODataTypesV3.Int32)
           .addProp("author", `${SERVICE_NAME}.Author`, false)
+          .addProp("altAuthor", `${SERVICE_NAME}.Author`, true)
           .addProp("relatedAuthors", `Collection(${SERVICE_NAME}.Author)`)
       );
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("entity-relationships", "entity-relationships.ts");
+    await generateAndCompare("entity-relationships", "entity-relationships-v2.ts");
   });
 
   test(`${testSuiteName}: base class`, async () => {
@@ -180,16 +181,22 @@ export function createEntityBasedGenerationTests(
     await generateAndCompare("entityEnum", "entity-enum.ts");
   });
 
-  test(`${testSuiteName}: entity & complex entity`, async () => {
+  test(`${testSuiteName}: entity & complex type`, async () => {
     // given an entity with enum props
     odataBuilder
-      .addComplexType("publishingMethod", undefined, (builder) => builder.addProp("name", ODataTypesV3.Boolean))
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
         builder
           .addKeyProp("id", ODataTypesV3.Int32)
           .addProp("method", `${SERVICE_NAME}.PublishingMethod`, false)
+          .addProp("altMethod", `${SERVICE_NAME}.PublishingMethod`, true)
           .addProp("altMethods", `Collection(${SERVICE_NAME}.PublishingMethod)`)
-      );
+      )
+      .addComplexType("PublishingMethod", undefined, (builder) =>
+        builder.addProp("name", ODataTypesV3.Boolean).addProp("city", `${SERVICE_NAME}.City`)
+      )
+      .addComplexType("City", undefined, (builder) => {
+        builder.addProp("choice", ODataTypesV3.Boolean, false).addProp("optChoice", ODataTypesV3.Boolean);
+      });
 
     // when generating model
     // then match fixture text

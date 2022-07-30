@@ -2,7 +2,7 @@ import { ODataClient, ODataResponse } from "@odata2ts/odata-client-api";
 import { QueryObject } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilder } from "@odata2ts/odata-uri-builder";
 
-export abstract class OperationBaseService<T, Q extends QueryObject, ModelResponse, UB extends ODataUriBuilder<Q>> {
+export abstract class OperationBaseService<Q extends QueryObject, ModelResponse, UB extends ODataUriBuilder<Q>> {
   public constructor(protected client: ODataClient, protected path: string, protected qModel: Q) {}
 
   protected abstract createBuilder(): UB;

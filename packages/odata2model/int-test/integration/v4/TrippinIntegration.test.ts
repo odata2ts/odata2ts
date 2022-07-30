@@ -7,6 +7,11 @@ describe("Integration Testing of Service Generation", () => {
 
   const testService = new TrippinService(odataClient, BASE_URL);
 
+  test("unbound action", async () => {
+    const result = await testService.resetDataSource();
+    expect(result.data).toBe("");
+  });
+
   test("unbound function", async () => {
     const result = await testService.getPersonWithMostFriends();
     expect(result.data.FirstName).toBe("Russell");
@@ -16,11 +21,6 @@ describe("Integration Testing of Service Generation", () => {
   test("unbound function with params", async () => {
     const result = await testService.getNearestAirport({ lat: 123, lon: 345 });
     expect(result.data.IcaoCode).toBe("ZBAA");
-  });
-
-  test("unbound action", async () => {
-    const result = await testService.resetDataSource();
-    expect(result.data).toBe("");
   });
 
   test("entityType query", async () => {

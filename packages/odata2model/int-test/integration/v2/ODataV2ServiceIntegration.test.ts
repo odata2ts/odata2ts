@@ -1,6 +1,6 @@
 import { TestODataClient } from "../../TestODataClient";
 import { ODataDemoService } from "../../../build/v2/odata/ODataDemoService";
-import { ProductModel } from "../../../build/v2/odata/ODataDemoModel";
+import { ProductModel, EditableProductModel } from "../../../build/v2/odata/ODataDemoModel";
 import { AxiosError } from "axios";
 
 /**
@@ -17,13 +17,12 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
 
   const testService = new ODataDemoService(odataClient, BASE_URL);
 
-  const PRODUCT_ZERO: ProductModel = {
+  const PRODUCT_ZERO: Omit<ProductModel, "Category" | "Supplier"> = {
     ID: 0,
     Name: "Bread",
     Description: "Whole grain bread",
     ReleaseDate: "/Date(694224000000)/",
-    // TODO: Proper null values
-    // "DiscontinuedDate": null,
+    DiscontinuedDate: null,
     Rating: 4,
     Price: "2.5",
   };
@@ -63,11 +62,13 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   });
 
   test("create, update and delete product", async () => {
+    jest.setTimeout(15000);
+
     // we need a session id to modify stuff on the server
     const editableService = new ODataDemoService(odataClient, BASE_URL_WITH_SESSION);
 
     // given
-    const product: ProductModel = {
+    const product: EditableProductModel = {
       ID: 999,
       Description: "Test Description",
       Name: "TestName",

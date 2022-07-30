@@ -1,5 +1,5 @@
-import { LocationModel } from "../../build/v4/trippin/TrippinModel";
-import { qPerson, qLocation } from "../../build/v4/trippin/QTrippin";
+import { EditableLocationModel, EditablePersonModel, Feature, PersonGender } from "../../build/v4/trippin/TrippinModel";
+import { qLocation, qPerson } from "../../build/v4/trippin/QTrippin";
 import { TrippinService } from "../../build/v4/trippin/TrippinService";
 import { MockODataClient } from "../MockODataClient";
 
@@ -8,6 +8,18 @@ describe("Testing Generation of TrippinService", () => {
   const odataClient = new MockODataClient();
 
   const testService = new TrippinService(odataClient, BASE_URL);
+
+  let editModel: EditablePersonModel;
+
+  beforeEach(() => {
+    editModel = {
+      UserName: "williams",
+      FavoriteFeature: Feature.Feature1,
+      Features: [],
+      FirstName: "Heinz",
+      Gender: PersonGender.Unknown,
+    };
+  });
 
   test("unbound function", async () => {
     await testService.getPersonWithMostFriends();
@@ -33,19 +45,76 @@ describe("Testing Generation of TrippinService", () => {
     expect(testService.people.getKeySpec()).toEqual([{ isLiteral: false, name: "userName", odataName: "UserName" }]);
   });
 
+  test("entitySet: create", async () => {
+    const expectedUrl = `${BASE_URL}/People`;
+
+    await testService.people.create(editModel);
+
+    expect(odataClient.lastOperation).toBe("POST");
+    expect(odataClient.lastUrl).toBe(expectedUrl);
+    expect(odataClient.lastData).toBe(editModel);
+  });
+
   test("entitySet: get", async () => {
     const testId = "test";
     const expected = `${BASE_URL}/People('${testId}')`;
 
-    expect(testService.people.get(testId).getPath()).toBe(expected);
-    expect(JSON.stringify(testService.people.get(testId).getQObject())).toEqual(JSON.stringify(qPerson));
+    const etService = testService.people.get(testId);
+
+    expect(etService.getPath()).toBe(expected);
+    expect(JSON.stringify(etService.getQObject())).toEqual(JSON.stringify(qPerson));
   });
 
   test("entitySet: get with complex id", async () => {
-    const testId = { UserName: "tester" };
-    const expected = `${BASE_URL}/People(UserName='tester')`;
+    const testId = { UserName: "williams" };
+    const expected = `${BASE_URL}/People(UserName='williams')`;
 
     expect(testService.people.get(testId).getPath()).toBe(expected);
+    expect(testService.people.get(editModel).getPath()).toBe(expected);
+  });
+
+  test("entityType: update", async () => {
+    const id = "williams";
+    const expectedUrl = `${BASE_URL}/People('${id}')`;
+    const model: EditablePersonModel = {
+      UserName: "williams",
+      FavoriteFeature: Feature.Feature1,
+      Features: [],
+      FirstName: "Heinz",
+      Gender: PersonGender.Unknown,
+      Age: 33,
+    };
+
+    await testService.people.get(id).update(model);
+
+    expect(odataClient.lastOperation).toBe("PUT");
+    expect(odataClient.lastUrl).toBe(expectedUrl);
+    expect(odataClient.lastData).toBe(model);
+  });
+
+  test("entityType: patch", async () => {
+    const id = "williams";
+    const expectedUrl = `${BASE_URL}/People('${id}')`;
+    const model = {
+      Age: 44,
+    };
+
+    await testService.people.get(id).patch(model);
+
+    expect(odataClient.lastOperation).toBe("PATCH");
+    expect(odataClient.lastUrl).toBe(expectedUrl);
+    expect(odataClient.lastData).toBe(model);
+  });
+
+  test("entityType: delete", async () => {
+    const id = "williams";
+    const expectedUrl = `${BASE_URL}/People('${id}')`;
+
+    await testService.people.get(id).delete();
+
+    expect(odataClient.lastOperation).toBe("DELETE");
+    expect(odataClient.lastUrl).toBe(expectedUrl);
+    expect(odataClient.lastData).toBe(undefined);
   });
 
   test("complex type", async () => {
@@ -61,6 +130,20 @@ describe("Testing Generation of TrippinService", () => {
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
     expect(odataClient.lastOperation).toBe("GET");
     expect(odataClient.lastData).toBeUndefined();
+  });
+
+  test("complex type: update", async () => {
+    const complex = testService.people.get("tester").homeAddress;
+
+    const model: EditableLocationModel = {
+      Address: "Test Address",
+      City: { Name: "Test City" },
+    };
+    await complex.update(model);
+
+    expect(odataClient.lastOperation).toBe("PUT");
+    expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
+    expect(odataClient.lastData).toStrictEqual(model);
   });
 
   test("complex collection", async () => {
@@ -79,7 +162,7 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("complex collection: create", async () => {
-    const model: LocationModel = { Address: "TestAdress" };
+    const model: EditableLocationModel = { Address: "TestAdress" };
     await testService.people.get("tester").addressInfo.add(model);
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);

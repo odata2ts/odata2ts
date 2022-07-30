@@ -1,14 +1,14 @@
-import { upperCaseFirst } from "upper-case-first";
 import {
-  ModelType,
-  EnumType,
-  EntityContainerModel,
-  OperationType,
   ActionImportType,
-  FunctionImportType,
-  SingletonType,
+  ComplexType,
+  EntityContainerModel,
   EntitySetType,
+  EnumType,
+  FunctionImportType,
+  ModelType,
   ODataVersion,
+  OperationType,
+  SingletonType,
 } from "./DataTypeModel";
 import { pascalCase } from "pascal-case";
 
@@ -22,16 +22,12 @@ export class DataModel {
   private readonly servicePrefix: string;
   private readonly fileNames: ProjectFiles;
 
-  // combines entity & complex types
   private modelTypes: { [name: string]: ModelType } = {};
+  private complexTypes: { [name: string]: ComplexType } = {};
   private enumTypes: { [name: string]: EnumType } = {};
   // combines functions & actions
   private operationTypes: { [binding: string]: Array<OperationType> } = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
-
-  // imports of custom dataTypes which are represented at strings,
-  // e.g. DateString, GuidString, etc.
-  private primitiveTypeImports: Set<string> = new Set();
 
   constructor(private version: ODataVersion, private serviceName: string, overridingServiceName?: string) {
     this.servicePrefix = serviceName + ".";
@@ -52,6 +48,14 @@ export class DataModel {
     return this.version;
   }
 
+  public isV2() {
+    return this.version === ODataVersion.V2;
+  }
+
+  public isV4() {
+    return this.version === ODataVersion.V4;
+  }
+
   /**
    * The service name.
    * @returns
@@ -70,6 +74,10 @@ export class DataModel {
 
   public getFileNames() {
     return { ...this.fileNames };
+  }
+
+  public getEditableModelName(modelName: string) {
+    return `Editable${modelName}`;
   }
 
   public addModel(name: string, model: ModelType) {
@@ -95,18 +103,31 @@ export class DataModel {
     return Object.values(this.modelTypes);
   }
 
-  public addEnum(name: string, type: EnumType) {
-    this.enumTypes[name] = type;
+  public addComplexType(name: string, model: ComplexType) {
+    this.complexTypes[name] = model;
   }
 
   /**
-   * Get a specific enum by its name.
+   * Get a specific model by its name.
    *
-   * @param name the final enum name that is generated
-   * @returns enum type
+   * @param name the final model name that is generated
+   * @returns the model type
    */
-  public getEnum(name: string) {
-    return this.enumTypes[name];
+  public getComplexType(name: string) {
+    return this.complexTypes[name];
+  }
+
+  /**
+   * Retrieve all known models, i.e. EntityType and ComplexType nodes from the EDMX model.
+   *
+   * @returns list of model types
+   */
+  public getComplexTypes() {
+    return Object.values(this.complexTypes);
+  }
+
+  public addEnum(name: string, type: EnumType) {
+    this.enumTypes[name] = type;
   }
 
   /**

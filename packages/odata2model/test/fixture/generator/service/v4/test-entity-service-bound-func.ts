@@ -7,11 +7,11 @@ import {
   EntitySetServiceV4,
 } from "@odata2ts/odata-service";
 // @ts-ignore
-import { Book } from "../TesterModel";
+import { Book, EditableBook } from "../TesterModel";
 // @ts-ignore
 import { QBook, qBook } from "../QTester";
 
-export class BookService extends EntityTypeServiceV4<Book, QBook> {
+export class BookService extends EntityTypeServiceV4<Book, EditableBook, QBook> {
   constructor(client: ODataClient, path: string) {
     super(client, path, qBook);
   }
@@ -33,7 +33,13 @@ export class BookService extends EntityTypeServiceV4<Book, QBook> {
   }
 }
 
-export class BookCollectionService extends EntitySetServiceV4<Book, QBook, string | { id: string }, BookService> {
+export class BookCollectionService extends EntitySetServiceV4<
+  Book,
+  EditableBook,
+  QBook,
+  string | { id: string },
+  BookService
+> {
   constructor(client: ODataClient, path: string) {
     super(client, path, qBook, BookService, [{ isLiteral: false, name: "id", odataName: "id" }]);
   }

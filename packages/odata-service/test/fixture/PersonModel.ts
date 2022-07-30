@@ -14,7 +14,6 @@ import {
   QStringV2Collection,
   StringCollection,
 } from "@odata2ts/odata-query-objects";
-import { ODataClient } from "@odata2ts/odata-client-api";
 
 export const enum Feature {
   Feature1 = "Feature1",
@@ -28,6 +27,9 @@ export interface PersonModel {
   Friends: Array<PersonModel>;
   BestFriend?: PersonModel;
 }
+
+export type EditablePersonModel = Pick<PersonModel, "UserName" | "Age" | "FavFeature"> &
+  Partial<Omit<PersonModel, "UserName" | "Age" | "FavFeature">>;
 
 export type PersonModelServiceVersion = PMServiceV2 | PMServiceV4;
 export type PersonCollectionServiceVersion = PMCServiceV2 | PMCServiceV4;

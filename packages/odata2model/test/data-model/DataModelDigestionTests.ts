@@ -48,18 +48,4 @@ export function createDataModelTests(
     expect(result.getEnums()).toEqual([]);
     expect(result.getEntityContainer()).toEqual({ entitySets: {}, singletons: {}, functions: {}, actions: {} });
   });
-
-  test("Deduplicate Service Suffix", async () => {
-    const newServiceName = "TestService";
-    odataBuilder = new ODataModelBuilderV4(newServiceName);
-
-    const result = await digest(odataBuilder.getSchema(), runOpts);
-
-    expect(result.getServiceName()).toBe(newServiceName);
-    expect(result.getFileNames()).toEqual({
-      model: `${newServiceName}Model`,
-      qObject: `Q${newServiceName}`,
-      service: `TestService`,
-    });
-  });
 }
