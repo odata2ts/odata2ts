@@ -21,6 +21,7 @@ export const qBook = new QBook();
 
 export class QPublishingMethod extends QueryObject {
   public readonly name = new QBooleanPath(this.withPrefix("name"));
+  public readonly city = new QEntityPath(this.withPrefix("city"), () => QCity);
 
   constructor(path?: string) {
     super(path);
@@ -28,3 +29,14 @@ export class QPublishingMethod extends QueryObject {
 }
 
 export const qPublishingMethod = new QPublishingMethod();
+
+export class QCity extends QueryObject {
+  public readonly choice = new QBooleanPath(this.withPrefix("choice"));
+  public readonly optChoice = new QBooleanPath(this.withPrefix("optChoice"));
+
+  constructor(path?: string) {
+    super(path);
+  }
+}
+
+export const qCity = new QCity();

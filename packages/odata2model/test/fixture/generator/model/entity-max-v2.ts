@@ -24,3 +24,33 @@ export interface Book {
   multipleDecimals: Array<string>;
   multipleBinaries: Array<string>;
 }
+
+export interface EditableBook
+  extends Pick<Book, "id" | "requiredOption">,
+    Partial<
+      Pick<
+        Book,
+        | "time"
+        | "optionalDate"
+        | "dateTimeOffset"
+        | "TestDecimal"
+        | "testInt16"
+        | "testInt32"
+        | "testInt64"
+        | "testSingle"
+        | "testByte"
+        | "testSByte"
+        | "testDouble"
+        | "testBinary"
+        | "testAny"
+        | "multipleIds"
+        | "multipleStrings"
+        | "multipleBooleans"
+        | "multipleTimes"
+        | "multipleDateTimes"
+        | "multipleDateTimeOffsets"
+        | "multipleInt16"
+        | "multipleDecimals"
+        | "multipleBinaries"
+      >
+    > {}

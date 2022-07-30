@@ -45,6 +45,33 @@ Content-Type: {{contentType}}
   "Rating": 3
 }
 
+### @name update category association
+PATCH {{baseUrl}}/Products(999)
+Accept: {{contentType}}
+Content-Type: {{contentType}}
+
+{
+  "Category": { uri: "{{baseUrl}}/Categories(1)" }
+}
+
+
 ### @name delete new product
 DELETE {{baseUrl}}/Products(999)
 Accept: {{contentType}}
+
+# --- Create Entity With Association ---
+### @name create new product with association
+POST {{baseUrl}}/Products
+Accept: {{contentType}}
+Content-Type: {{contentType}}
+
+{
+  "ID": 999,
+  "Description": "Test Description",
+  "Name": "TestName",
+  "Price": "12.88",
+  "Rating": 1,
+  "ReleaseDate": "2022-01-01T00:00:00",
+  "Category": { ID: 1 }
+}
+}

@@ -10,7 +10,7 @@ import {
   QueryObject,
   QEnumCollection,
 } from "@odata2ts/odata-query-objects";
-import { PersonModel } from "../PersonModel";
+import { EditablePersonModel, PersonModel } from "../PersonModel";
 
 export class QPersonV4 extends QueryObject {
   public readonly userName = new QStringPath(this.withPrefix("UserName"));
@@ -27,7 +27,7 @@ export class QPersonV4 extends QueryObject {
 
 export const qPersonV4 = new QPersonV4();
 
-export class PersonModelService extends EntityTypeServiceV4<PersonModel, QPersonV4> {
+export class PersonModelService extends EntityTypeServiceV4<PersonModel, EditablePersonModel, QPersonV4> {
   constructor(client: ODataClient, path: string) {
     super(client, path, new QPersonV4());
   }
@@ -47,6 +47,7 @@ export class PersonModelService extends EntityTypeServiceV4<PersonModel, QPerson
 
 export class PersonModelCollectionService extends EntitySetServiceV4<
   PersonModel,
+  EditablePersonModel,
   QPersonV4,
   string | { UserName: string },
   PersonModelService

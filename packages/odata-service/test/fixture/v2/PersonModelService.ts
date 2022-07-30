@@ -10,7 +10,7 @@ import {
   QEnumCollection,
   QStringV2Path,
 } from "@odata2ts/odata-query-objects";
-import { PersonModel } from "../PersonModel";
+import { EditablePersonModel, PersonModel } from "../PersonModel";
 
 export class QPersonV2 extends QueryObject {
   public readonly userName = new QStringV2Path(this.withPrefix("UserName"));
@@ -27,7 +27,7 @@ export class QPersonV2 extends QueryObject {
 
 export const qPersonV2 = new QPersonV2();
 
-export class PersonModelService extends EntityTypeServiceV2<PersonModel, QPersonV2> {
+export class PersonModelService extends EntityTypeServiceV2<PersonModel, EditablePersonModel, QPersonV2> {
   public get features() {
     return new CollectionServiceV2(this.client, this.path + "/Features", new QEnumCollection());
   }
@@ -47,6 +47,7 @@ export class PersonModelService extends EntityTypeServiceV2<PersonModel, QPerson
 
 export class PersonModelCollectionService extends EntitySetServiceV2<
   PersonModel,
+  EditablePersonModel,
   QPersonV2,
   string | { UserName: string },
   PersonModelService

@@ -5,7 +5,6 @@ import { ODataCollectionResponseV4, ODataModelResponseV4 } from "./ResponseModel
 import { OperationBaseService } from "../OperationBaseService";
 
 export class ServiceBaseV4<T, Q extends QueryObject> extends OperationBaseService<
-  T,
   Q,
   ODataModelResponseV4<T>,
   ODataUriBuilderV4<Q>

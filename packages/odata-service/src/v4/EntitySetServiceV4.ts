@@ -10,9 +10,10 @@ import { EntityKeySpec } from "../ServiceModel";
 
 export abstract class EntitySetServiceV4<
   T,
+  EditableT,
   Q extends QueryObject,
   EIdType,
-  ETS extends EntityTypeServiceV4<T, Q>
+  ETS extends EntityTypeServiceV4<T, EditableT, Q>
 > extends ServiceBaseV4<T, Q> {
   /**
    * Overriding the constructor to support creation of EntityTypeService from within this service.
@@ -49,14 +50,14 @@ export abstract class EntitySetServiceV4<
    * @param model
    * @return
    */
-  public create: (model: T) => ODataResponse<ODataModelResponseV4<T>> = this.doPost;
+  public create: (model: EditableT) => ODataResponse<ODataModelResponseV4<T>> = this.doPost;
 
   public get(id: EIdType) {
     const url = compileId(this.path, this.keySpec, id);
     return new this.entityTypeServiceConstructor(this.client, url);
   }
 
-  public patch(id: EIdType, model: Partial<T>): ODataResponse<void> {
+  public patch(id: EIdType, model: Partial<EditableT>): ODataResponse<void> {
     return this.get(id).patch(model);
   }
 

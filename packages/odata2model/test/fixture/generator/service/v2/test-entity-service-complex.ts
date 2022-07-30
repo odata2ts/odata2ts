@@ -1,15 +1,15 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
 import { EntityTypeServiceV2, CollectionServiceV2, EntitySetServiceV2 } from "@odata2ts/odata-service";
 // @ts-ignore
-import { Book, Reviewer } from "../TesterModel";
+import { Book, EditableBook, Reviewer, EditableReviewer } from "../TesterModel";
 // @ts-ignore
 import { QBook, qBook, QReviewer, qReviewer } from "../QTester";
 // @ts-ignore
 import { ReviewerService } from "./ReviewerService";
 
-export class BookService extends EntityTypeServiceV2<Book, QBook> {
+export class BookService extends EntityTypeServiceV2<Book, EditableBook, QBook> {
   private _lector?: ReviewerService;
-  private _reviewers?: CollectionServiceV2<Reviewer, QReviewer>;
+  private _reviewers?: CollectionServiceV2<Reviewer, QReviewer, EditableReviewer>;
 
   constructor(client: ODataClient, path: string) {
     super(client, path, qBook);
@@ -23,16 +23,26 @@ export class BookService extends EntityTypeServiceV2<Book, QBook> {
     return this._lector;
   }
 
-  public get reviewers(): CollectionServiceV2<Reviewer, QReviewer> {
+  public get reviewers(): CollectionServiceV2<Reviewer, QReviewer, EditableReviewer> {
     if (!this._reviewers) {
-      this._reviewers = new CollectionServiceV2<Reviewer, QReviewer>(this.client, this.path + "/reviewers", qReviewer);
+      this._reviewers = new CollectionServiceV2<Reviewer, QReviewer, EditableReviewer>(
+        this.client,
+        this.path + "/reviewers",
+        qReviewer
+      );
     }
 
     return this._reviewers;
   }
 }
 
-export class BookCollectionService extends EntitySetServiceV2<Book, QBook, string | { id: string }, BookService> {
+export class BookCollectionService extends EntitySetServiceV2<
+  Book,
+  EditableBook,
+  QBook,
+  string | { id: string },
+  BookService
+> {
   constructor(client: ODataClient, path: string) {
     super(client, path, qBook, BookService, [{ isLiteral: false, name: "id", odataName: "id" }]);
   }

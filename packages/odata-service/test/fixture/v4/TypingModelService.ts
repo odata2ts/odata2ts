@@ -21,6 +21,8 @@ export interface TestModel {
   others?: Array<TestModel>;
 }
 
+export type EditableTestModel = Pick<TestModel, "ID" | "counter"> & Partial<Omit<TestModel, "ID" | "counter">>;
+
 export class QTest extends QueryObject {
   public readonly id = new QGuidPath(this.withPrefix("ID"));
   public readonly counter = new QNumberPath(this.withPrefix("counter"));
@@ -36,19 +38,20 @@ export class QTest extends QueryObject {
 
 export const qTest = new QTest();
 
-export class TestService extends EntityTypeServiceV4<TestModel, QTest> {
+export class TestService extends EntityTypeServiceV4<TestModel, EditableTestModel, QTest> {
   constructor(client: ODataClient, path: string) {
     super(client, path, qTest);
   }
 }
 
-export class TestCollectionService extends EntitySetServiceV4<TestModel, QTest, string | { ID: string }> {
+export class TestCollectionService extends EntitySetServiceV4<
+  TestModel,
+  EditableTestModel,
+  QTest,
+  string | { ID: string },
+  TestService
+> {
   constructor(client: ODataClient, path: string) {
-    super(client, path, qTest);
-  }
-
-  public get(id: string | { ID: string }): TestService {
-    const url = "test";
-    return new TestService(this.client, url);
+    super(client, path, qTest, TestService, [{ isLiteral: false, name: "id", odataName: "ID" }]);
   }
 }

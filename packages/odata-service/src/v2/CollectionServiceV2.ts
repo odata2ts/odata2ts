@@ -7,20 +7,23 @@ import { ServiceBaseV2 } from "./ServiceBaseV2";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
 
-export class CollectionServiceV2<T, Q extends QueryObject, K = PrimitiveExtractor<T>> extends ServiceBaseV2<T, Q> {
+export class CollectionServiceV2<T, Q extends QueryObject, EditableT = PrimitiveExtractor<T>> extends ServiceBaseV2<
+  T,
+  Q
+> {
   /**
    * Add a new item to the collection.
    *
    * @param model primitive value
    */
-  public add: (model: K) => ODataResponse<ODataModelResponseV2<T>> = this.doPost;
+  public add: (model: EditableT) => ODataResponse<ODataModelResponseV2<T>> = this.doPost;
 
   /**
    * Update the whole collection.
    *
    * @param models set of primitive values
    */
-  public update: (models: Array<K>) => ODataResponse<void> = this.doPut;
+  public update: (models: Array<EditableT>) => ODataResponse<void> = this.doPut;
 
   /**
    * Delete the whole collection.

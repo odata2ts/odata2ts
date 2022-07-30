@@ -4,47 +4,51 @@
 #
 # ##################################################
 
-# --- CONFIUGARTION ---
-
+# --- CONFIUGARTION FOR VSCode ---
 @rootUrl = https://services.odata.org/TripPinRESTierService
 @contentType = application/json
-
-
-### @name GetKey
-GET {{rootUrl}}
-
-### TODO Here we would need redirect infos or parse the @odata.context variable
-### in order to automatically determine the new session id from Trippin
-### => static sessionId
-# @authToken = {{login.response.headers.X-AuthToken}}
 @sessionId = (S(sivik5crfo3qvprrreziudlp))
 @baseUrl = {{rootUrl}}/{{sessionId}}
 
+###
+# @name GetKey
+GET {{rootUrl}}
+
 # --- METADATA ---
-### @name metadata
+
+###
+# @name metadata
 GET {{baseUrl}}/$metadata
 
 
 # --- ENTITY SETS ---
 
 ### List entities
-### @name people
+# @name list people
 GET {{baseUrl}}/People?$count=true
-### @name airlines
+###
+# @name list airlines
 GET {{baseUrl}}/Airlines?$count=true
-### @name airports
-GET {{baseUrl}}/Airports?$count=true
+###
+# @name list airports
+GET {{baseUrl}}/Airports?$count=true&$expand=*
+
 
 ### Entity by id
-### canonical way
+# @name get in canonical form
 GET {{baseUrl}}/Airports('KSFO')
-### explicit way => required for composite keys
+###
+# @name get in explicit form => required for composite keys
 GET {{baseUrl}}/Airports(IcaoCode='KSFO')
-### alternative, restier way
+###
+# @name alternative, restier way
 GET {{baseUrl}}/Airports/KSFO
 
-### Create Entity
-### new person
+
+# --- CRUD OPERATIONS ---
+
+###
+# @name create new person
 POST {{baseUrl}}/People
 Content-Type: {{contentType}}
 
@@ -62,16 +66,19 @@ Content-Type: {{contentType}}
     }
   }]
 }
-### get person
+###
+# @name get new person
 GET {{baseUrl}}/People('heineritis')
-### patch person
+###
+# @name patch new person
 PATCH {{baseUrl}}/People('heineritis')
 Content-Type: {{contentType}}
 
 {
   "MiddleName": "H."
 }
-### update person
+###
+# @name update new person
 PUT {{baseUrl}}/People('heineritis')
 Content-Type: application/json
 
@@ -82,35 +89,122 @@ Content-Type: application/json
 DELETE  {{baseUrl}}/People('heineritis')
 
 
+# --- ASSOCIATIONS ---
+
+###
+# @name get associated collection
+GET {{baseUrl}}/People('russellwhyte')/Trips
+
+###
+# @name create associate collection entry
+POST {{baseUrl}}/People('russellwhyte')/Trips
+Content-Type: {{contentType}}
+
+{
+  "TripId": 5,
+  "ShareId": "109b2fa0-efbf-490e-a5e3-bac8f7d47100",
+  "Name": "Test Trip",
+  "Budget": 1000,
+  "Description": "Testing Field Trip",
+  "Tags": [
+    "business",
+    "New York meeting"
+  ],
+  "StartsAt": "2021-01-01T00:00:00Z",
+  "EndsAt": "2021-01-04T00:00:00Z"
+}
+###
+# @name update associated collection item by Id
+# => 501 not implemented
+PATCH {{baseUrl}}/People('russellwhyte')/Trips(0)
+Content-Type: {{contentType}}
+
+{
+  "Budget": 3005
+}
+###
+# @name delete associated entity
+DELETE  {{baseUrl}}/People('russellwhyte')/Trips(5)
+
+###
+#
+GET {{baseUrl}}/People/Trippin.Manager
+###
+#
+GET {{baseUrl}}/People/Trippin.Employee
+###
+#
+GET {{baseUrl}}/People('genevievereeves')
+###
+# @name create entity with associated collection
+POST {{baseUrl}}/People
+Content-Type: {{contentType}}
+
+{
+  "@odata.type": "#Trippin.Manager",
+  "UserName": "patgriswold",
+  "FirstName": "Pat",
+  "LastName": "Griswold",
+  "Emails": [],
+  "AddressInfo": [{
+    "Address": "Teststr. 33, Biefe",
+    "City": {
+      "Name": "San Biefe",
+      "CountryRegion": "France",
+      "Region": "Arrandissement 13"
+    }
+  }],
+  "DirectReports@odata.bind": [
+    "{{baseUrl}}/People('russelwhyte')"
+  ]
+
+}
+###
+GET {{baseUrl}}/People('patgriswold')/Trippin.Manager
+
+###
+DELETE {{baseUrl}}/People('patgriswold')
+
+
+###
 # --- SINGLETON ---
-### @name me
+
+###
+# @name me singleton
 GET {{baseUrl}}/Me
 
 
 # --- FUNCTIONS ---
 
-### unbound func
+### Unbound Functions
+# @name unbound func
 GET {{baseUrl}}/GetPersonWithMostFriends
 
-### func with params
+###
+# @name func with params
 GET {{baseUrl}}/GetNearestAirport(lat=51.918777,lon=8.620930)
 
-### func bound to trip => params are taken from the path
+###
+# @name func bound to trip => params are taken from the path
 GET {{baseUrl}}/People('russellwhyte')/Trips(0)/GetInvolvedPeople
 
-### also works with namespace prefix
+###
+# @name also works with namespace prefix
 GET {{baseUrl}}/People('russellwhyte')/Trips(0)/Trippin.GetInvolvedPeople
 
-### func bound with params
+###
+# @name func bound with params
 GET {{baseUrl}}/People('russellwhyte')/Trippin.GetFriendsTrips(userName='scottketchum')
 
 
 # --- ACTIONS ---
 
-### unbound action
+###
+# @name unbound action
 POST {{baseUrl}}/ResetDataSource
 
-### bound action
+###
+# @name bound action
 POST {{baseUrl}}/People('russellwhyte')/Trippin.UpdateLastName
 Content-Type: {{contentType}}
 
@@ -119,29 +213,32 @@ Content-Type: {{contentType}}
 }
 
 ###
-GET {{baseUrl}}/People('russellwhyte')
-
-
-
 # --- QUERIES ---
 
-### Airport by Id
+###
+# @name Airport by Id
 GET {{baseUrl}}/Airports('KSFO')
-### Person by Id
+###
+# @name Person by Id
 GET {{baseUrl}}/People('russellwhyte')
 
-### Querying for Complex Prop Only
+###
+# @name Querying for Complex Prop Only
 GET {{baseUrl}}/Airports('KSFO')/Location
-### Querying for Single Prop Only
+###
+# @name Querying for Single Prop Only
 GET {{baseUrl}}/Airports('KSFO')/Location/Address
-### Querying for Single Value Only
+###
+# @name Querying for Single Value Only
 GET {{baseUrl}}/Airports('KSFO')/Location/Address/$value
 
-### Navigatable Collection Prop
+###
+# @name Navigatable Collection Prop
 GET {{baseUrl}}/People('russellwhyte')/Trips?$count=true
 ###
 GET {{baseUrl}}/People('russellwhyte')/Friends?$count=true
-### Navigatable Collection Prop by Id
+###
+# @name Navigatable Collection Prop by Id
 GET {{baseUrl}}/People('russellwhyte')/Trips(0)
 ###
 GET {{baseUrl}}/People('russellwhyte')/Friends('scottketchum')
@@ -165,7 +262,10 @@ GET {{baseUrl}}/People('kristakemp')/Trippin.Employee
 ### Manager example
 GET {{baseUrl}}/People/Trippin.Manager
 ###
-GET {{baseUrl}}/People('genevievereeves')/Trippin.Manager
+GET {{baseUrl}}/People('genevievereeves')/Trippin.Manager?$select=FirstName,LastName
+### No expand possible
+# => 500 Parameter "source" cannot be null
+GET {{baseUrl}}/People('genevievereeves')/Trippin.Manager?$expand=*
 
 ### $Count
 GET {{baseUrl}}/People('russellwhyte')/Friends/$count
@@ -177,28 +277,28 @@ GET {{baseUrl}}/People?$filter=Trips/any(a:a/Budget gt 2999)
 &$select=FirstName,LastName
 &$count=true
 &$expand=Trips($select=Description,Budget)
+
 ### complex search
 GET {{baseUrl}}/People?$filter=Trips/any(a:a/Budget gt 2999 and a/Budget lt 5000)
 &$select=FirstName,LastName
 &$count=true
 &$expand=Trips($select=Description,Budget)
+
 ### all
 GET {{baseUrl}}/People?
 &$filter=Trips/all(a:a/Budget ge 5000)
 &$select=FirstName,LastName
 &$count=true
 &$expand=Trips($select=Description,Budget)
+
 ### any with primitive collection
 GET {{baseUrl}}/People('russellwhyte')/Trips?$filter=Tags/any(a:a eq 'New York meeting')
 &$count=true
-
-
 &$expand=Trips($select=Description,Budget,Tags)
 
 ### $this doesn't work
 GET {{baseUrl}}/People?
 &$expand=Friends($select=UserName;$filter=$it/BestFriend/UserName ne $this/UserName),BestFriend($select=UserName)
-#
 &$select=UserName
 # &$expand=Trips($select=Description,Budget)
 
@@ -214,58 +314,14 @@ GET {{baseUrl}}/People('russellwhyte')?$select=LastName&$expand=Friends($select=
 GET {{baseUrl}}/People?$select=UserName&$orderby=Friends/$count desc&$expand=Friends($select=UserName)
 
 
-# --- PATCHING ---
-### Update Collection Prop by Id => 501 not implemented
-PATCH {{baseUrl}}/People('russellwhyte')/Trips(0)
-Content-Type: {{contentType}}
-
-{
-  "Budget": 3005
-}
-
-### Update NavProp Collection
-GET {{baseUrl}}/People('russellwhyte')/Trips
-### Create - note: need to manually specify ID
-POST {{baseUrl}}/People('russellwhyte')/Trips
-Content-Type: {{contentType}}
-
-{
-  "TripId": 5,
-  "ShareId": "109b2fa0-efbf-490e-a5e3-bac8f7d47100",
-  "Name": "Test Trip",
-  "Budget": 1000,
-  "Description": "Testing Field Trip",
-  "Tags": [
-    "business",
-    "New York meeting"
-  ],
-  "StartsAt": "2021-01-01T00:00:00Z",
-  "EndsAt": "2021-01-04T00:00:00Z"
-}
-### Update: 501 not implemented
-PATCH {{baseUrl}}/People('russellwhyte')/Trips(0)
-Content-Type: {{contentType}}
-
-{
-  "Budget": 3005
-}
-### Delete
-DELETE  {{baseUrl}}/People('russellwhyte')/Trips(5)
-
-
-
-
 # --- FILTERING ---
+
 ### Filtering by complex type substructure
 GET {{baseUrl}}/People('russellwhyte')/AddressInfo?$filter=City/Name eq 'Boise'
 
 
 ### Filter enum type
-GET https://services.odata.org/TripPinRESTierService/People
-?$select=FirstName,Gender
-&$filter=Gender eq 'Female'
+GET {{baseUrl}}/People?$select=FirstName,Gender&$filter=Gender eq 'Female'
 
 ### Finally a working "in" statement
-GET https://services.odata.org/TripPinRESTierService/People
-?$select=FirstName
-&$filter=FirstName in ('Russell')
+GET {{baseUrl}}/People?$select=FirstName&$filter=FirstName in ('Russell')

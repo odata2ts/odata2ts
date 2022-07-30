@@ -125,6 +125,7 @@ class ServiceGenerator {
     const entityServiceType = "EntityTypeService" + this.getVersionSuffix();
     const collectionServiceType = "CollectionService" + this.getVersionSuffix();
 
+    const editableModelName = this.dataModel.getEditableModelName(model.name);
     const operations = this.dataModel.getOperationTypeByBinding(model.name);
     const props = [...model.baseProps, ...model.props];
     const modelProps = props.filter(
@@ -136,14 +137,14 @@ class ServiceGenerator {
 
     importContainer.addFromService(entityServiceType);
     importContainer.addFromClientApi("ODataClient");
-    importContainer.addGeneratedModel(model.name);
+    importContainer.addGeneratedModel(model.name, editableModelName);
     importContainer.addGeneratedQObject(model.qName, firstCharLowerCase(model.qName));
 
     // generate EntityTypeService
     serviceFile.addClass({
       isExported: true,
       name: serviceName,
-      extends: entityServiceType + `<${model.name}, ${model.qName}>`,
+      extends: entityServiceType + `<${model.name}, ${editableModelName}, ${model.qName}>`,
       ctors: [
         {
           parameters: [
@@ -164,10 +165,11 @@ class ServiceGenerator {
           let [key, propModelType] = this.getServiceNamesForProp(prop);
 
           if (prop.isCollection && complexType) {
+            const editableName = this.dataModel.getEditableModelName(complexType.name);
             importContainer.addFromService(collectionServiceType);
-            importContainer.addGeneratedModel(complexType.name);
+            importContainer.addGeneratedModel(complexType.name, editableName);
             importContainer.addGeneratedQObject(complexType.qName, firstCharLowerCase(complexType.qName));
-            propModelType = `${collectionServiceType}<${complexType.name}, ${complexType.qName}>`;
+            propModelType = `${collectionServiceType}<${complexType.name}, ${complexType.qName}, ${editableName}>`;
           }
           // don't include imports for this type
           else if (serviceName !== key) {
@@ -215,7 +217,9 @@ class ServiceGenerator {
           const complexType = this.dataModel.getComplexType(prop.type);
           const isComplexCollection = prop.isCollection && complexType;
           const type = isComplexCollection
-            ? `${collectionServiceType}<${complexType.name}, ${complexType.qName}>`
+            ? `${collectionServiceType}<${complexType.name}, ${
+                complexType.qName
+              }, ${this.dataModel.getEditableModelName(complexType.name)}>`
             : this.getServiceNameForProp(prop);
 
           return {
@@ -269,7 +273,11 @@ class ServiceGenerator {
     serviceFile.addClass({
       isExported: true,
       name: this.getCollectionServiceName(model.name),
-      extends: entitySetServiceType + `<${model.name}, ${model.qName}, ${keyType}, ${serviceName}>`,
+      extends:
+        entitySetServiceType +
+        `<${model.name}, ${this.dataModel.getEditableModelName(model.name)}, ${
+          model.qName
+        }, ${keyType}, ${serviceName}>`,
       ctors: [
         {
           parameters: [

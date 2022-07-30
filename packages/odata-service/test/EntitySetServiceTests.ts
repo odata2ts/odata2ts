@@ -1,5 +1,5 @@
 import { MockODataClient } from "./mock/MockODataClient";
-import { Feature, PersonModel } from "./fixture/PersonModel";
+import { EditablePersonModel, Feature, PersonModel } from "./fixture/PersonModel";
 import { QPersonV4 } from "./fixture/v4/PersonModelService";
 import { QPersonV2 } from "./fixture/v2/PersonModelService";
 import { ODataClient } from "@odata2ts/odata-client-api";
@@ -8,14 +8,14 @@ import { EntitySetServiceV2, EntitySetServiceV4 } from "../src";
 export function commonEntitySetTests(
   odataClient: MockODataClient,
   serviceConstructor: new (odataClient: ODataClient, baseUrl: string) =>
-    | EntitySetServiceV4<PersonModel, QPersonV4, any, any>
-    | EntitySetServiceV2<PersonModel, QPersonV2, any, any>
+    | EntitySetServiceV4<PersonModel, EditablePersonModel, QPersonV4, any, any>
+    | EntitySetServiceV2<PersonModel, EditablePersonModel, QPersonV2, any, any>
 ) {
   const BASE_URL = "/test";
 
   let testService:
-    | EntitySetServiceV4<PersonModel, QPersonV4, any, any>
-    | EntitySetServiceV2<PersonModel, QPersonV2, any, any>;
+    | EntitySetServiceV4<PersonModel, EditablePersonModel, QPersonV4, any, any>
+    | EntitySetServiceV2<PersonModel, EditablePersonModel, QPersonV2, any, any>;
 
   beforeEach(() => {
     testService = new serviceConstructor(odataClient, BASE_URL);

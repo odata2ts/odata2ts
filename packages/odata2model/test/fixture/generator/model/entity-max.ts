@@ -16,3 +16,25 @@ export interface Book {
   multipleDateTimeOffsets: Array<string>;
   multipleBinaries: Array<string>;
 }
+
+export interface EditableBook
+  extends Pick<Book, "id" | "requiredOption">,
+    Partial<
+      Pick<
+        Book,
+        | "time"
+        | "optionalDate"
+        | "dateTimeOffset"
+        | "TestDecimal"
+        | "testBinary"
+        | "testAny"
+        | "multipleStrings"
+        | "multipleNumbers"
+        | "multipleBooleans"
+        | "multipleIds"
+        | "multipleTimes"
+        | "multipleDates"
+        | "multipleDateTimeOffsets"
+        | "multipleBinaries"
+      >
+    > {}

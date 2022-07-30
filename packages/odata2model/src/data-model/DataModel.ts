@@ -76,6 +76,10 @@ export class DataModel {
     return { ...this.fileNames };
   }
 
+  public getEditableModelName(modelName: string) {
+    return `Editable${modelName}`;
+  }
+
   public addModel(name: string, model: ModelType) {
     this.modelTypes[name] = model;
   }

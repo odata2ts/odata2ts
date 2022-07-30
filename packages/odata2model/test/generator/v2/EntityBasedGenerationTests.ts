@@ -181,17 +181,22 @@ export function createEntityBasedGenerationTests(
     await generateAndCompare("entityEnum", "entity-enum.ts");
   });
 
-  test(`${testSuiteName}: entity & complex entity`, async () => {
+  test(`${testSuiteName}: entity & complex type`, async () => {
     // given an entity with enum props
     odataBuilder
-      .addComplexType("PublishingMethod", undefined, (builder) => builder.addProp("name", ODataTypesV3.Boolean))
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
         builder
           .addKeyProp("id", ODataTypesV3.Guid)
           .addProp("method", `${SERVICE_NAME}.PublishingMethod`, false)
           .addProp("altMethod", `${SERVICE_NAME}.PublishingMethod`, true)
           .addProp("altMethods", `Collection(${SERVICE_NAME}.PublishingMethod)`)
-      );
+      )
+      .addComplexType("PublishingMethod", undefined, (builder) =>
+        builder.addProp("name", ODataTypesV3.Boolean).addProp("city", `${SERVICE_NAME}.City`)
+      )
+      .addComplexType("City", undefined, (builder) => {
+        builder.addProp("choice", ODataTypesV3.Boolean, false).addProp("optChoice", ODataTypesV3.Boolean);
+      });
 
     // when generating model
     // then match fixture text
