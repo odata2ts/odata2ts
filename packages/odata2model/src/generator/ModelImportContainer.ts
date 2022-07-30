@@ -26,7 +26,7 @@ export class ModelImportContainer {
     names.forEach((n) => this.container.service.add(n));
   }
 
-  public getImportDeclarations(fromSubPath: boolean = false): Array<ImportDeclarationStructure> {
+  public getImportDeclarations(): Array<ImportDeclarationStructure> {
     const { ...standardImports } = this.container;
 
     return [
@@ -36,7 +36,7 @@ export class ModelImportContainer {
           const mapping = this.mapping[key];
           return {
             namedImports: [...values],
-            moduleSpecifier: `${mapping.isRelative ? `${fromSubPath ? ".." : "."}/` : ""}${mapping.moduleName}`,
+            moduleSpecifier: `${mapping.isRelative ? `./` : ""}${mapping.moduleName}`,
           } as ImportDeclarationStructure;
         }),
     ];

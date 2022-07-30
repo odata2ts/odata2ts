@@ -43,6 +43,7 @@ export function createDataModelTests(
       service: `${SERVICE_NAME}Service`,
     });
     expect(result.getODataVersion()).toBe(version);
+    expect(result.getEditableModelName("TestModel")).toBe("EditableTestModel");
 
     expect(result.getModels()).toEqual([]);
     expect(result.getEnums()).toEqual([]);
