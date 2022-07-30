@@ -1,14 +1,14 @@
 import { DeferredContent } from "@odata2ts/odata-service";
 
 export interface Author {
-  id: string;
+  id: number;
   name: boolean | null;
 }
 
 export interface EditableAuthor extends Pick<Author, "id">, Partial<Pick<Author, "name">> {}
 
 export interface Book {
-  id: string;
+  id: number;
   author: Author | DeferredContent;
   altAuthor: Author | null | DeferredContent;
   relatedAuthors: Array<Author> | DeferredContent;

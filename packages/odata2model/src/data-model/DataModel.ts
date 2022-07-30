@@ -1,4 +1,3 @@
-import { upperCaseFirst } from "upper-case-first";
 import {
   ActionImportType,
   ComplexType,
