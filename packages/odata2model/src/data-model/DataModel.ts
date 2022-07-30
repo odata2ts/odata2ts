@@ -131,16 +131,6 @@ export class DataModel {
   }
 
   /**
-   * Get a specific enum by its name.
-   *
-   * @param name the final enum name that is generated
-   * @returns enum type
-   */
-  public getEnum(name: string) {
-    return this.enumTypes[name];
-  }
-
-  /**
    * Get list of all known enums, i.e. EnumType nodes from the EDMX model.
    * @returns list of enum types
    */
