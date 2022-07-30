@@ -88,9 +88,7 @@ class ModelGenerator {
       .filter((p) => !p.required && !entityTypes.includes(p.dataType))
       .map((p) => `"${p.odataName}"`)
       .join(" | ");
-    const complexProps = allProps.filter((p) =>
-      this.dataModel.isV2() ? p.dataType === DataTypes.ComplexType : entityTypes.includes(p.dataType)
-    );
+    const complexProps = allProps.filter((p) => p.dataType === DataTypes.ComplexType);
 
     const extendsClause = [
       requiredProps ? `Pick<${model.name}, ${requiredProps}>` : null,
@@ -103,21 +101,15 @@ class ModelGenerator {
       extends: extendsClause,
       properties: !complexProps
         ? undefined
-        : complexProps
-            // TODO entity types => assumes deep insert capabilities
-            // V2 => link reference to entity ({ uri: "..." }) should work for create, update and patch
-            // V4 =>
-            //   - 4.0 @odata.bind and 4.01 @id should work: https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_LinktoRelatedEntitiesWhenCreatinganE
-            //   - deep insert: https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_CreateRelatedEntitiesWhenCreatinganE
-            .map((p) => {
-              return {
-                name: p.odataName,
-                type: this.getEditablePropType(p, importContainer),
-                // optional props don't need to be specified in editable model
-                // also, entities would require deep insert func => we make it optional for now
-                hasQuestionToken: !p.required || p.dataType === DataTypes.ModelType,
-              };
-            }),
+        : complexProps.map((p) => {
+            return {
+              name: p.odataName,
+              type: this.getEditablePropType(p, importContainer),
+              // optional props don't need to be specified in editable model
+              // also, entities would require deep insert func => we make it optional for now
+              hasQuestionToken: !p.required || p.dataType === DataTypes.ModelType,
+            };
+          }),
     });
   }
 

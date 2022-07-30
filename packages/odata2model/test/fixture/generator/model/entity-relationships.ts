@@ -12,8 +12,4 @@ export interface Book {
   relatedAuthors?: Array<Author>;
 }
 
-export interface EditableBook extends Pick<Book, "id"> {
-  author?: EditableAuthor;
-  altAuthor?: EditableAuthor | null;
-  relatedAuthors?: Array<EditableAuthor>;
-}
+export interface EditableBook extends Pick<Book, "id"> {}
