@@ -39,10 +39,6 @@ export class QBook extends QueryObject {
     () => QDateTimeOffsetCollection
   );
   public readonly multipleBinaries = new QCollectionPath(this.withPrefix("multipleBinaries"), () => QBinaryCollection);
-
-  constructor(path?: string) {
-    super(path);
-  }
 }
 
 export const qBook = new QBook();

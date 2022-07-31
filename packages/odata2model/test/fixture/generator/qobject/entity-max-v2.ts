@@ -50,10 +50,6 @@ export class QBook extends QueryObject {
   public readonly multipleInt16 = new QCollectionPath(this.withPrefix("multipleInt16"), () => QNumberCollection);
   public readonly multipleDecimals = new QCollectionPath(this.withPrefix("multipleDecimals"), () => QNumberCollection);
   public readonly multipleBinaries = new QCollectionPath(this.withPrefix("multipleBinaries"), () => QBinaryCollection);
-
-  constructor(path?: string) {
-    super(path);
-  }
 }
 
 export const qBook = new QBook();
