@@ -55,6 +55,10 @@ export class ODataUriBuilderV2<Q extends QueryObject> extends ODataUriBuilderBas
     return undefined;
   }
 
+  protected getSearchResult(): string | undefined {
+    return undefined;
+  }
+
   /**
    * Add the count to the response.
    *
