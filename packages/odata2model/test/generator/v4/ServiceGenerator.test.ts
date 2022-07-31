@@ -73,7 +73,10 @@ describe("Service Generator Tests V4", () => {
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) =>
         builder
-          .addKeyProp("id", ODataTypesV4.String)
+          .addKeyProp("id", ODataTypesV4.Guid)
+          .addKeyProp("age", ODataTypesV4.Int32)
+          .addKeyProp("deceased", ODataTypesV4.Boolean)
+          .addKeyProp("desc", ODataTypesV4.String)
           // simple props don't make a difference
           .addProp("test", ODataTypesV4.String)
           .addProp("test2", ODataTypesV4.Guid)
@@ -105,13 +108,6 @@ describe("Service Generator Tests V4", () => {
 
     // then main service file encompasses a singleton
     await compareMainService("main-service-singleton.ts", true);
-
-    // then we get the same service file as before
-    expect(projectManager.getServiceFiles().length).toEqual(1);
-    await fixtureComparator.compareWithFixture(
-      projectManager.getServiceFiles()[0].getFullText(),
-      "v4" + path.sep + "test-entity-service.ts"
-    );
   });
 
   test("Service Generator: one unbound function", async () => {

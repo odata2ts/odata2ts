@@ -74,7 +74,13 @@ describe("Service Generator Tests V2", () => {
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) =>
         builder
-          .addKeyProp("id", ODataTypesV3.String)
+          .addKeyProp("id", ODataTypesV3.Guid)
+          .addKeyProp("age", ODataTypesV3.Int32)
+          .addKeyProp("deceased", ODataTypesV3.Boolean)
+          .addKeyProp("desc", ODataTypesV3.String)
+          .addKeyProp("dateAndTime", ODataTypesV3.DateTime)
+          .addKeyProp("dateAndTimeAndOffset", ODataTypesV3.DateTimeOffset)
+          .addKeyProp("time", ODataTypesV3.Time)
           // simple props don't make a difference
           .addProp("test", ODataTypesV3.String)
           .addProp("test2", ODataTypesV3.Guid)
@@ -109,6 +115,25 @@ describe("Service Generator Tests V2", () => {
 
     // then main service file encompasses unbound functions
     await compareMainService("main-service-func-import.ts", true);
+  });
+
+  test("Service Generator: Special function params", async () => {
+    // given two functions: one without and one with params
+    odataBuilder
+      .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV3.String))
+      .addFunctionImport("bestBook", `${SERVICE_NAME}.TestEntity`, (builder) =>
+        builder
+          .addParam("testGuid", ODataTypesV3.Guid, false)
+          .addParam("testDateTime", ODataTypesV3.DateTime)
+          .addParam("testDateTimeOffset", ODataTypesV3.DateTimeOffset)
+          .addParam("testTime", ODataTypesV3.Time)
+      );
+
+    // when generating
+    await doGenerate();
+
+    // then main service file encompasses unbound functions
+    await compareMainService("main-service-func-import-special-params.ts", true);
   });
 
   test.skip("Service Generator: one unbound action", async () => {

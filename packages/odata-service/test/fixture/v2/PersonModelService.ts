@@ -1,5 +1,5 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
-import { EntityTypeServiceV2, EntitySetServiceV2, CollectionServiceV2 } from "../../../src";
+import { EntityTypeServiceV2, EntitySetServiceV2, CollectionServiceV2, compileFunctionPathV2 } from "../../../src";
 import {
   QCollectionPath,
   QEntityCollectionPath,
@@ -43,6 +43,16 @@ export class PersonModelService extends EntityTypeServiceV2<PersonModel, Editabl
   constructor(client: ODataClient, path: string) {
     super(client, path, new QPersonV2());
   }
+
+  public getSomething(params: { testGuid: string; testDateTime: string; testDateTimeO: string; testTime: string }) {
+    const url = compileFunctionPathV2(this.getPath(), "GetAnything", {
+      testGuid: { isLiteral: false, typePrefix: "guid", value: params.testGuid },
+      testDateTime: { isLiteral: false, typePrefix: "datetime", value: params.testDateTime },
+      testDateTimeO: { isLiteral: false, typePrefix: "datetimeoffset", value: params.testDateTimeO },
+      testTime: { isLiteral: false, typePrefix: "time", value: params.testTime },
+    });
+    return this.client.get(url);
+  }
 }
 
 export class PersonModelCollectionService extends EntitySetServiceV2<
@@ -53,6 +63,8 @@ export class PersonModelCollectionService extends EntitySetServiceV2<
   PersonModelService
 > {
   constructor(client: ODataClient, path: string) {
-    super(client, path, qPersonV2, PersonModelService, [{ isLiteral: false, name: "userName", odataName: "UserName" }]);
+    super(client, path, qPersonV2, PersonModelService, [
+      { isLiteral: false, type: "string", name: "userName", odataName: "UserName" },
+    ]);
   }
 }

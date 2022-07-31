@@ -1,4 +1,5 @@
-import { InlineUrlProps, KeySpec } from "../EntityModel";
+import { InlineUrlProps, EntityKeySpec } from "../EntityModel";
+import { ParsedKey } from "../ServiceModel";
 
 /**
  * Constructs an url path for an entity with the given values as key props.
@@ -13,12 +14,17 @@ import { InlineUrlProps, KeySpec } from "../EntityModel";
  * @param values either a primitive number or string or an dedicated object with name-value-pairs.
  * @returns url path
  */
-export const compileId = (path: string, keySpec: KeySpec, values: string | number | { [key: string]: any }): string => {
+export const compileId = (
+  path: string,
+  keySpec: EntityKeySpec,
+  values: string | number | { [key: string]: any }
+): string => {
   if (typeof values === "string" || typeof values === "number") {
     if (Object.keys(keySpec).length !== 1) {
       throw Error("Only primitive value for id provided, but complex key spec is required!");
     }
-    return compileSingleParamPath(path, Object.values(keySpec)[0].isLiteral, values);
+    const { isLiteral, typePrefix } = keySpec[0];
+    return compileSingleParamPath(path, isLiteral, typePrefix, values);
   }
   const params = keySpec.reduce((collector, ks) => {
     const value = values[ks.odataName];
@@ -26,20 +32,112 @@ export const compileId = (path: string, keySpec: KeySpec, values: string | numbe
       throw Error(`Key [${ks.odataName}] not mapped in provided values!`);
     }
 
-    collector[ks.odataName] = { isLiteral: ks.isLiteral, value };
+    collector[ks.odataName] = { isLiteral: ks.isLiteral, value, typePrefix: ks.typePrefix };
     return collector;
   }, {} as InlineUrlProps);
 
   return compileFunctionPathV4(path, undefined, params);
 };
 
-const compileSingleParamPath = (path: string, isLiteral: boolean, value: string | number): string => {
-  return `${path || ""}(${getValue(isLiteral, value)})`;
+const compileSingleParamPath = (
+  path: string,
+  isLiteral: boolean,
+  typePrefix: string | undefined,
+  value: string | number
+): string => {
+  return `${path || ""}(${getValue(isLiteral, value, typePrefix)})`;
 };
 
-const getValue = (isLiteral: boolean, value: any): string => {
+const getValue = (isLiteral: boolean, value: any, typePrefix?: string): string => {
+  if (typePrefix?.trim().length) {
+    return typePrefix + compileQuotedValue(value);
+  }
   return isLiteral ? compileLiteralValue(value) : compileQuotedValue(value);
 };
+
+export const parseId = <T>(id: string, keySpec: EntityKeySpec): ParsedKey<T> => {
+  if (!id?.trim()) {
+    throw new Error("parseId failed: Irregular id passed!");
+  }
+
+  let path = id.replace(/(^[^(]+)\(.*/, "$1");
+  if (path === id) {
+    path = "";
+  }
+  let keys = id.replace(/.*\(([^)]+)\)/, "$1").split(",");
+  if (keys.length === 1 && keys[0] === id) {
+    keys = [];
+  }
+
+  let result: Record<string, unknown> = {};
+
+  // handle short form => myEntity(123)
+  if (keySpec.length === 1 && keys.length === 1 && keys[0].indexOf("=") === -1) {
+    const key = keySpec[0].odataName;
+    result[key] = parseValue(key, keys[0], keySpec);
+  }
+  // complex / explicit form => myEntity(id=123[,...])
+  else if (keys.length) {
+    result = keys.reduce((coll, cur) => {
+      const [key, value] = cur.split("=");
+
+      coll[key] = parseValue(key, value, keySpec);
+      return coll;
+    }, result);
+  }
+
+  if (keys.length !== keySpec.length) {
+    throw new Error("ParseId failed: given keys do not comply with key specification!");
+  }
+
+  return {
+    path,
+    // @ts-ignore => too much magic especially regarding poor man's conversion logic
+    keys: result,
+  };
+};
+
+function parseValue(key: string, value: string, keySpec: EntityKeySpec) {
+  if (!key || !value) {
+    throw new Error(`ParseId failed: Key and value must be specified!`);
+  }
+
+  const keyFromSpec = keySpec.find((ks) => ks.odataName === key);
+  if (!keyFromSpec) {
+    throw new Error(`ParseId failed: Key "${key}" is not part of the key spec!`);
+  }
+
+  const { typePrefix, type, isLiteral } = keyFromSpec;
+
+  // clean from typePrefix (v2 only) and from quoted values
+  const cleanedValue = typePrefix
+    ? value.replace(new RegExp(`^${typePrefix}'([^']*)'`), "$1")
+    : !isLiteral
+    ? value.replace(/'([^']*)'/, "$1")
+    : value;
+
+  // poor man's conversion
+  let convertedValue: string | number | boolean;
+  if (type === "boolean") {
+    if (cleanedValue === "true") {
+      convertedValue = true;
+    } else if (cleanedValue === "false") {
+      convertedValue = false;
+    } else {
+      throw new Error(
+        `ParseId failed: Invalid value for boolean attribute "${key}"! Only the literals "true" or "false" are valid.`
+      );
+    }
+  } else if (type === "number") {
+    convertedValue = Number(cleanedValue);
+  } else if (!cleanedValue) {
+    throw new Error(`ParseId failed: Key and value must be specified!`);
+  } else {
+    convertedValue = cleanedValue;
+  }
+
+  return convertedValue;
+}
 
 /**
  * Constructs an url path suitable for OData functions.
@@ -66,9 +164,9 @@ export const compileFunctionPathV2 = (path: string, name?: string, params?: Inli
     ? ""
     : "?" +
       Object.entries(params)
-        .map(([key, { value, isLiteral }]) => {
+        .map(([key, { value, isLiteral, typePrefix }]) => {
           // TODO: "null" for optional params via config or does this work for every OData provider?
-          const val = value === undefined || value === null ? "null" : getValue(isLiteral, value);
+          const val = value === undefined || value === null ? "null" : getValue(isLiteral, value, typePrefix);
           return encodeURIComponent(key) + "=" + encodeURIComponent(val);
         })
         .join("&");
@@ -80,9 +178,9 @@ const compileParams = (id: InlineUrlProps) => {
     throw Error("Only object types are valid for compileParams!");
   }
   return Object.entries(id)
-    .map(([key, { value, isLiteral }]) => {
+    .map(([key, { value, isLiteral, typePrefix }]) => {
       // TODO: "null" for optional params via config or does this work for every OData provider?
-      const val = value === undefined || value === null ? "null" : getValue(isLiteral, value);
+      const val = value === undefined || value === null ? "null" : getValue(isLiteral, value, typePrefix);
       return key + "=" + val;
     })
     .join(",");

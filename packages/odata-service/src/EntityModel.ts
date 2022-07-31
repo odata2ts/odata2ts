@@ -8,6 +8,12 @@ export interface InlineUrlProp {
    */
   isLiteral: boolean;
   /**
+   * Only required for V2 types like datetime or guid, e.g. guid'12345678-BBBb-cCCCC-0000-123456789012'.
+   *
+   * If specified, property isLiteral is ignored (it's automatically true).
+   */
+  typePrefix?: string;
+  /**
    *
    */
   value?: any;
@@ -22,12 +28,24 @@ export type InlineUrlProps = { [prop: string]: InlineUrlProp };
 /**
  * All information about a property which is part of the entity key.
  */
-export interface KeyProp {
+export interface EntityKeyProp {
   /**
    * Whether the value of the property should be used as-is.
    * If false, values need to be quoted with single quotes.
    */
   isLiteral: boolean;
+  /**
+   * Only required for V2 types like datetime or guid, e.g. guid'12345678-BBBb-cCCCC-0000-123456789012'.
+   *
+   * If specified, property isLiteral is ignored (it's automatically true).
+   */
+  typePrefix?: string;
+  /**
+   * JS type of the property, e.g. "string" or "number"
+   *
+   * Required for parsing a key and converting it
+   */
+  type: string;
   /**
    * The name of the property.
    */
@@ -43,4 +61,4 @@ export interface KeyProp {
  * In the most simple case, the array contains one KeyProp, e.g. the id.
  * However, it also allows for complex keys.
  */
-export type KeySpec = Array<KeyProp>;
+export type EntityKeySpec = Array<EntityKeyProp>;

@@ -8,14 +8,14 @@ import { EntitySetServiceV2, EntitySetServiceV4 } from "../src";
 export function commonEntitySetTests(
   odataClient: MockODataClient,
   serviceConstructor: new (odataClient: ODataClient, baseUrl: string) =>
-    | EntitySetServiceV4<PersonModel, EditablePersonModel, QPersonV4, any, any>
-    | EntitySetServiceV2<PersonModel, EditablePersonModel, QPersonV2, any, any>
+    | EntitySetServiceV4<PersonModel, EditablePersonModel, QPersonV4, string | { UserName: string }, any>
+    | EntitySetServiceV2<PersonModel, EditablePersonModel, QPersonV2, string | { UserName: string }, any>
 ) {
   const BASE_URL = "/test";
 
   let testService:
-    | EntitySetServiceV4<PersonModel, EditablePersonModel, QPersonV4, any, any>
-    | EntitySetServiceV2<PersonModel, EditablePersonModel, QPersonV2, any, any>;
+    | EntitySetServiceV4<PersonModel, EditablePersonModel, QPersonV4, string | { UserName: string }, any>
+    | EntitySetServiceV2<PersonModel, EditablePersonModel, QPersonV2, string | { UserName: string }, any>;
 
   beforeEach(() => {
     testService = new serviceConstructor(odataClient, BASE_URL);
@@ -24,6 +24,21 @@ export function commonEntitySetTests(
   test("entitySet: setup", async () => {
     expect(testService.getPath()).toBe(BASE_URL);
     expect(testService.getQObject()).not.toBeNull();
+  });
+
+  test("entitySet: createKey", async () => {
+    expect(testService.createKey("xxx")).toBe("test('xxx')");
+    expect(testService.createKey({ UserName: "xxx" })).toBe("test(UserName='xxx')");
+  });
+
+  test("entitySet: parseKey", async () => {
+    const expected = {
+      path: "test",
+      keys: { UserName: "xxx" },
+    };
+
+    expect(testService.parseKey("test('xxx')")).toStrictEqual(expected);
+    expect(testService.parseKey("test(UserName='xxx')")).toStrictEqual(expected);
   });
 
   test("entitySet: query", async () => {
