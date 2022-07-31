@@ -9,7 +9,7 @@ import { createBaseTests } from "./ODataUriBuilderBaseTests";
  * @returns
  */
 function addBase(urlPart: string) {
-  return `/Persons?${urlPart}`;
+  return `/Persons${urlPart ? `?${urlPart}` : ""}`;
 }
 
 describe("ODataUriBuilderV4 Test", () => {
@@ -126,9 +126,24 @@ describe("ODataUriBuilderV4 Test", () => {
     expect(candidate).toBe(addBase("$select=name,age&$apply=groupby((name,age))"));
   });
 
-  test("search", () => {
+  test("search with single term", () => {
     const candidate = toTest.search("testing").build();
 
-    expect(candidate).toBe(addBase("$search='testing'"));
+    expect(candidate).toBe(addBase("$search=testing"));
+  });
+
+  test("search with phrase", () => {
+    const candidate = toTest.search("testing more").build();
+
+    expect(candidate).toBe(addBase('$search="testing more"'));
+  });
+
+  test("search with no term", () => {
+    const noopPath = addBase("");
+
+    expect(toTest.search(undefined).build()).toBe(noopPath);
+    expect(toTest.search(null).build()).toBe(noopPath);
+    expect(toTest.search("").build()).toBe(noopPath);
+    expect(toTest.search(" ").build()).toBe(noopPath);
   });
 });
