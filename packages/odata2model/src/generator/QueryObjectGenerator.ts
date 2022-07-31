@@ -13,16 +13,6 @@ import { firstCharLowerCase } from "xml2js/lib/processors";
 
 const CORE_QCLASSES = ["QueryObject"];
 const Q_OBJECT_PACKAGE = "@odata2ts/odata-query-objects";
-const Q_OBJECT_CONSTRUCTOR: OptionalKind<ConstructorDeclarationStructure> = {
-  parameters: [
-    {
-      name: "path",
-      hasQuestionToken: true,
-      type: "string",
-    },
-  ],
-  statements: "super(path);",
-};
 
 export function generateQueryObjects(dataModel: DataModel, sourceFile: SourceFile) {
   const generator = new QueryObjectGenerator(dataModel, sourceFile);
@@ -41,7 +31,6 @@ class QueryObjectGenerator {
         name: model.qName,
         isExported: true,
         extends: "QueryObject",
-        ctors: [Q_OBJECT_CONSTRUCTOR],
         properties: this.generateQueryObjectProps([...model.baseProps, ...model.props], qTypeImports),
       });
 
