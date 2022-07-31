@@ -125,4 +125,10 @@ describe("ODataUriBuilderV4 Test", () => {
 
     expect(candidate).toBe(addBase("$select=name,age&$apply=groupby((name,age))"));
   });
+
+  test("search", () => {
+    const candidate = toTest.search("testing").build();
+
+    expect(candidate).toBe(addBase("$search='testing'"));
+  });
 });

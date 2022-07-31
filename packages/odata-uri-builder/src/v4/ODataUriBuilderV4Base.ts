@@ -15,6 +15,7 @@ export abstract class ODataUriBuilderV4Base<Q extends QueryObject>
   protected selects: Array<string> = [];
   protected expands: Array<ExpandingODataUriBuilder<any>> = [];
   protected groupBys: Array<string> = [];
+  protected searchTerm: string | undefined;
 
   protected getSelectResult() {
     return this.selects.length ? this.selects.join(",") : undefined;

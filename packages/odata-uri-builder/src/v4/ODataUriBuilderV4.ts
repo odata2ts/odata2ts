@@ -49,4 +49,14 @@ export class ODataUriBuilderV4<Q extends QueryObject> extends ODataUriBuilderV4B
     }
     return this;
   }
+
+  public search(term: string) {
+    this.searchTerm = term;
+
+    return this;
+  }
+
+  protected getSearchResult(): string | undefined {
+    return this.searchTerm?.trim() ? `'${this.searchTerm}'` : undefined;
+  }
 }

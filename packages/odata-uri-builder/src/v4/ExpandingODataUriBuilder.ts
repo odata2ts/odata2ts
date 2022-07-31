@@ -21,4 +21,8 @@ export class ExpandingODataUriBuilder<Q extends QueryObject> extends ODataUriBui
 
     return this.path + (params.length ? `(${params.join(";")})` : "");
   }
+
+  protected getSearchResult(): string | undefined {
+    return undefined;
+  }
 }
