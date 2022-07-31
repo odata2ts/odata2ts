@@ -1,7 +1,7 @@
 import { QueryObject } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
-import { ODataCollectionResponseV4, ODataModelResponseV4 } from "./ResponseModelV4";
+import { ODataModelResponseV4 } from "./ResponseModelV4";
 import { OperationBaseService } from "../OperationBaseService";
 
 export class ServiceBaseV4<T, Q extends QueryObject> extends OperationBaseService<

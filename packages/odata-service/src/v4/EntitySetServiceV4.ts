@@ -5,8 +5,9 @@ import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 import { EntityTypeServiceV4 } from "./EntityTypeServiceV4";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "./ResponseModelV4";
 import { ServiceBaseV4 } from "./ServiceBaseV4";
-import { compileId } from "../helper/UrlHelper";
-import { EntityKeySpec } from "../ServiceModel";
+import { compileId, parseId } from "../helper/UrlHelper";
+import { EntityKeySpec } from "../EntityModel";
+import { ParsedKey } from "../ServiceModel";
 
 export abstract class EntitySetServiceV4<
   T,
@@ -31,7 +32,7 @@ export abstract class EntitySetServiceV4<
     path: string,
     qModel: Q,
     protected entityTypeServiceConstructor: new (client: ODataClient, path: string) => ETS,
-    protected keySpec: Array<EntityKeySpec>
+    protected keySpec: EntityKeySpec
   ) {
     super(client, path, qModel);
   }
@@ -42,6 +43,28 @@ export abstract class EntitySetServiceV4<
    */
   public getKeySpec() {
     return this.keySpec;
+  }
+
+  /**
+   * Create an OData path for an entity with a given id.
+   * Might be useful for routing.
+   *
+   * @example myEntity(1234)
+   * @example myEntity(id=1234,name='Test')
+   * @param id either a primitive value or an object for a composite key
+   */
+  public createKey(id: EIdType): string {
+    return compileId(this.path.startsWith("/") ? this.path.substring(1) : this.path, this.keySpec, id);
+  }
+
+  /**
+   * Parse an OData path representing the id of an entity.
+   * Might be useful for routing in combination with createKey.
+   *
+   * @param keyPath e.g. myEntity(id=1234,name='Test')
+   */
+  public parseKey(keyPath: string): ParsedKey<EIdType> {
+    return parseId<EIdType>(keyPath, this.keySpec);
   }
 
   /**

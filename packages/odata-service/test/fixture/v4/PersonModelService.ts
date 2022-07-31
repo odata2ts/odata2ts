@@ -53,6 +53,8 @@ export class PersonModelCollectionService extends EntitySetServiceV4<
   PersonModelService
 > {
   constructor(client: ODataClient, path: string) {
-    super(client, path, qPersonV4, PersonModelService, [{ isLiteral: false, name: "userName", odataName: "UserName" }]);
+    super(client, path, qPersonV4, PersonModelService, [
+      { isLiteral: false, type: "string", name: "userName", odataName: "UserName" },
+    ]);
   }
 }

@@ -28,8 +28,7 @@ export interface PersonModel {
   BestFriend?: PersonModel;
 }
 
-export type EditablePersonModel = Pick<PersonModel, "UserName" | "Age" | "FavFeature"> &
-  Partial<Omit<PersonModel, "UserName" | "Age" | "FavFeature">>;
+export interface EditablePersonModel extends Pick<PersonModel, "UserName" | "Age" | "FavFeature" | "Features"> {}
 
 export type PersonModelServiceVersion = PMServiceV2 | PMServiceV4;
 export type PersonCollectionServiceVersion = PMCServiceV2 | PMCServiceV4;

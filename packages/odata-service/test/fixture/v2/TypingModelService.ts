@@ -52,6 +52,6 @@ export class TestCollectionService extends EntitySetServiceV4<
   TestService
 > {
   constructor(client: ODataClient, path: string) {
-    super(client, path, qTest, TestService, [{ isLiteral: false, name: "id", odataName: "ID" }]);
+    super(client, path, qTest, TestService, [{ isLiteral: false, type: "guid", name: "id", odataName: "ID" }]);
   }
 }
