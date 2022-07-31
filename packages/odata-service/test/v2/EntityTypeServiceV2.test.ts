@@ -24,11 +24,19 @@ describe("EntityTypeService V2 Test", () => {
     expect(testService.getQObject()).toMatchObject(new QPersonV2());
   });
 
-  test("entityType V4: typing of query stuff", async () => {
+  test("entityType V2: typing of query stuff", async () => {
     // typing test of result
     const result: HttpResponseModel<ODataModelResponseV2<PersonModel>> = await testService.query((builder) => {
       // typing test of builder
       const resultB: ODataUriBuilderV2<QPersonV2> = builder;
     });
+  });
+
+  test("entityType V2: function params", async () => {
+    await testService.getSomething({ testGuid: "123", testDateTime: "1", testDateTimeO: "2", testTime: "3" });
+    expect(odataClient.lastUrl).toBe(
+      BASE_URL +
+        "/GetAnything?testGuid=guid'123'&testDateTime=datetime'1'&testDateTimeO=datetimeoffset'2'&testTime=time'3'"
+    );
   });
 });

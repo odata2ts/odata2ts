@@ -23,7 +23,8 @@ export const compileId = (
     if (Object.keys(keySpec).length !== 1) {
       throw Error("Only primitive value for id provided, but complex key spec is required!");
     }
-    return compileSingleParamPath(path, Object.values(keySpec)[0].isLiteral, values);
+    const { isLiteral, typePrefix } = keySpec[0];
+    return compileSingleParamPath(path, isLiteral, typePrefix, values);
   }
   const params = keySpec.reduce((collector, ks) => {
     const value = values[ks.odataName];
@@ -38,13 +39,18 @@ export const compileId = (
   return compileFunctionPathV4(path, undefined, params);
 };
 
-const compileSingleParamPath = (path: string, isLiteral: boolean, value: string | number): string => {
-  return `${path || ""}(${getValue(isLiteral, value)})`;
+const compileSingleParamPath = (
+  path: string,
+  isLiteral: boolean,
+  typePrefix: string | undefined,
+  value: string | number
+): string => {
+  return `${path || ""}(${getValue(isLiteral, value, typePrefix)})`;
 };
 
 const getValue = (isLiteral: boolean, value: any, typePrefix?: string): string => {
   if (typePrefix?.trim().length) {
-    return typePrefix + compileLiteralValue(value);
+    return typePrefix + compileQuotedValue(value);
   }
   return isLiteral ? compileLiteralValue(value) : compileQuotedValue(value);
 };
@@ -158,9 +164,9 @@ export const compileFunctionPathV2 = (path: string, name?: string, params?: Inli
     ? ""
     : "?" +
       Object.entries(params)
-        .map(([key, { value, isLiteral }]) => {
+        .map(([key, { value, isLiteral, typePrefix }]) => {
           // TODO: "null" for optional params via config or does this work for every OData provider?
-          const val = value === undefined || value === null ? "null" : getValue(isLiteral, value);
+          const val = value === undefined || value === null ? "null" : getValue(isLiteral, value, typePrefix);
           return encodeURIComponent(key) + "=" + encodeURIComponent(val);
         })
         .join("&");
