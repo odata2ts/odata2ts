@@ -15,10 +15,15 @@ export class TestEntityCollectionService extends EntitySetServiceV4<
   TestEntity,
   EditableTestEntity,
   QTestEntity,
-  string | { id: string },
+  { id: string; age: number; deceased: boolean; desc: string },
   TestEntityService
 > {
   constructor(client: ODataClient, path: string) {
-    super(client, path, qTestEntity, TestEntityService, [{ isLiteral: false, name: "id", odataName: "id" }]);
+    super(client, path, qTestEntity, TestEntityService, [
+      { isLiteral: true, type: "string", name: "id", odataName: "id" },
+      { isLiteral: true, type: "number", name: "age", odataName: "age" },
+      { isLiteral: true, type: "boolean", name: "deceased", odataName: "deceased" },
+      { isLiteral: false, type: "string", name: "desc", odataName: "desc" },
+    ]);
   }
 }

@@ -23,6 +23,7 @@ import {
   PropertyModel,
 } from "../data-model/DataTypeModel";
 import { ODataVesions } from "../app";
+import { ODataTypesV3 } from "../data-model/edmx/ODataEdmxModelV3";
 
 const ROOT_SERVICE = "ODataService";
 const COMPILE_FUNCTION_PATH = "compileFunctionPath";
@@ -345,15 +346,39 @@ class ServiceGenerator {
     return ["QStringPath", "QStringV2Path"].includes(prop.qPath) || prop.dataType === DataTypes.EnumType;
   }
 
+  private getTypePrefix(prop: PropertyModel): string | "" {
+    if (this.dataModel.isV2()) {
+      switch (prop.odataType) {
+        case ODataTypesV3.Guid:
+          return "guid";
+        case ODataTypesV3.DateTime:
+          return "datetime";
+        case ODataTypesV3.DateTimeOffset:
+          return "datetimeoffset";
+        case ODataTypesV3.Time:
+          return "time";
+      }
+    }
+    return "";
+  }
+
   private createKeySpec(params: Array<PropertyModel>): string | undefined {
-    const props = params.map(
-      (p) => `{ isLiteral: ${!this.isQuotedValue(p)}, name: "${p.name}", odataName: "${p.odataName}" }`
-    );
+    const props = params.map((p) => {
+      const typePrefix = this.getTypePrefix(p);
+      return `{ isLiteral: ${!typePrefix && !this.isQuotedValue(p)}, type: "${p.type}", ${
+        typePrefix ? `typePrefix: "${typePrefix}", ` : ""
+      }name: "${p.name}", odataName: "${p.odataName}" }`;
+    });
     return props.length ? `[${props.join(", ")}]` : undefined;
   }
 
   private createParamsSpec(params: Array<PropertyModel>): string | undefined {
-    const props = params.map((p) => `${p.name}: { isLiteral: ${!this.isQuotedValue(p)}, value: params.${p.name} }`);
+    const props = params.map((p) => {
+      const typePrefix = this.getTypePrefix(p);
+      return `${p.name}: { isLiteral: ${!typePrefix && !this.isQuotedValue(p)}, ${
+        typePrefix ? `typePrefix: "${typePrefix}", ` : ""
+      }value: params.${p.name} }`;
+    });
     return props.length ? `{ ${props.join(", ")} }` : undefined;
   }
 

@@ -42,7 +42,9 @@ describe("Testing Generation of TrippinService", () => {
 
     expect(testService.people.getPath()).toBe(expected);
     expect(JSON.stringify(testService.people.getQObject())).toEqual(JSON.stringify(qPerson));
-    expect(testService.people.getKeySpec()).toEqual([{ isLiteral: false, name: "userName", odataName: "UserName" }]);
+    expect(testService.people.getKeySpec()).toEqual([
+      { isLiteral: false, type: "string", name: "userName", odataName: "UserName" },
+    ]);
   });
 
   test("entitySet: create", async () => {

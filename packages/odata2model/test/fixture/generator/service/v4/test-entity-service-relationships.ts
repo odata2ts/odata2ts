@@ -40,6 +40,6 @@ export class BookCollectionService extends EntitySetServiceV4<
   BookService
 > {
   constructor(client: ODataClient, path: string) {
-    super(client, path, qBook, BookService, [{ isLiteral: true, name: "id", odataName: "ID" }]);
+    super(client, path, qBook, BookService, [{ isLiteral: true, type: "string", name: "id", odataName: "ID" }]);
   }
 }
