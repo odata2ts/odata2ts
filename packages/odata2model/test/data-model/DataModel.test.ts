@@ -62,4 +62,22 @@ describe("Data Model Tests", function () {
       service: `${newServiceName}Service`,
     });
   });
+
+  test("fileNames are always in PascalCase", () => {
+    const expected = "AbcDefGhi";
+    const expRes = {
+      model: `${expected}Model`,
+      qObject: `Q${expected}`,
+      service: `${expected}Service`,
+    };
+
+    const firstVersion = "abcDef-ghi";
+    dataModel = new DataModel(ODataVersion.V4, firstVersion);
+
+    expect(dataModel.getServiceName()).toBe(firstVersion);
+    expect(dataModel.getFileNames()).toEqual(expRes);
+
+    dataModel = new DataModel(ODataVersion.V4, SERVICE_NAME, "abc_DEFGhi");
+    expect(dataModel.getFileNames()).toEqual(expRes);
+  });
 });

@@ -1,10 +1,9 @@
-import { firstCharLowerCase } from "xml2js/lib/processors";
-import { upperCaseFirst } from "upper-case-first";
-
 import { DataModel } from "./DataModel";
 import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModelBase";
 import { RunOptions } from "../OptionModel";
 import { ComplexType as ComplexModelType, DataTypes, ODataVersion, PropertyModel } from "./DataTypeModel";
+import { pascalCase } from "pascal-case";
+import { camelCase } from "camel-case";
 
 export enum ModelTypes {
   EntityType,
@@ -36,19 +35,19 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   }
 
   protected getModelName(name: string) {
-    return `${this.options.modelPrefix}${upperCaseFirst(this.stripServicePrefix(name))}${this.options.modelSuffix}`;
+    return `${this.options.modelPrefix}${pascalCase(this.stripServicePrefix(name))}${this.options.modelSuffix}`;
   }
 
   protected getQName(name: string) {
-    return `Q${upperCaseFirst(this.stripServicePrefix(name))}`;
+    return `Q${pascalCase(this.stripServicePrefix(name))}`;
   }
 
   protected getEnumName(name: string) {
-    return `${upperCaseFirst(this.stripServicePrefix(name))}`;
+    return `${pascalCase(this.stripServicePrefix(name))}`;
   }
 
   protected getEntryPointName(name: string) {
-    return firstCharLowerCase(name);
+    return camelCase(name);
   }
 
   protected stripServicePrefix(token: string) {
@@ -56,7 +55,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   }
 
   protected getOperationName(name: string) {
-    return firstCharLowerCase(this.stripServicePrefix(name));
+    return camelCase(this.stripServicePrefix(name));
   }
 
   private collectModelTypes(schema: Schema<ET, CT>) {
@@ -256,7 +255,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       );
     }
 
-    const name = p.$.Name === "ID" ? "id" : firstCharLowerCase(p.$.Name);
+    const name = camelCase(p.$.Name);
     const odataName = p.$.Name;
 
     return {

@@ -1,5 +1,4 @@
 import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
-import { ODataModelBuilderV4 } from "./builder/v4/ODataModelBuilderV4";
 import { DataModel } from "../../src/data-model/DataModel";
 import { Schema } from "../../src/data-model/edmx/ODataEdmxModelBase";
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
@@ -47,5 +46,25 @@ export function createDataModelTests(
     expect(result.getModels()).toEqual([]);
     expect(result.getEnums()).toEqual([]);
     expect(result.getEntityContainer()).toEqual({ entitySets: {}, singletons: {}, functions: {}, actions: {} });
+  });
+
+  test("consisting casing", async () => {
+    odataBuilder
+      .addEntityType("MY_TYPE", undefined, (builder) => {
+        builder.addKeyProp("ID", "Edm.String");
+      })
+      .addComplexType("HOME_ADDRESS", undefined, (builder) => {
+        builder.addProp("abc_def", "Edm.String");
+      })
+      .addEnumType("fav_FEAT", [{ name: "HEY", value: 0 }]);
+
+    const result = await digest(odataBuilder.getSchema(), runOpts);
+
+    expect(result.getModels()[0].name).toBe("MyType");
+    expect(result.getModels()[0].props[0].name).toBe("id");
+    expect(result.getComplexTypes()[0].name).toBe("HomeAddress");
+    expect(result.getComplexTypes()[0].props[0].name).toBe("abcDef");
+    expect(result.getEnums()[0].name).toBe("FavFeat");
+    expect(result.getEnums()[0].members[0]).toBe("HEY");
   });
 }
