@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.5.4...@odata2ts/odata-service@0.6.0) (2022-08-01)
+
+
+### Features
+
+* createKey and parseKey for EntitySetService & correct V2 type prefixing ([#39](https://github.com/odata2ts/odata2ts/issues/39)) ([edd05bb](https://github.com/odata2ts/odata2ts/commit/edd05bbf7747ba280786c9ba274160ef274c030a))
+* typing improvements & editable model versions ([#27](https://github.com/odata2ts/odata2ts/issues/27)) ([df290df](https://github.com/odata2ts/odata2ts/commit/df290dff953a9e37c64c39c18ffdec74ce1874d4))
+
+
+### BREAKING CHANGES
+
+* model has become a true query response model.
+Properties which are nullable now allow null values instead of undefined;
+complex types are never undefined, but can be nullable;
+collections are never nullable.
+V2 only: added deferred content typings for entity and entity collection properties.
+
+* feat: generate EditableModels and use in service for create, update, and patch
+* different signatures for all actions
+
+* test: proper test for ModelImportContainer & dataModel.getEditableModelName
+
+* test: proper test for DataModel
+
+* refactor(odata2model): don't always combine handling of complex and entity types
+
+
+
+
+
 ## [0.5.4](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.5.3...@odata2ts/odata-service@0.5.4) (2022-07-20)
 
 **Note:** Version bump only for package @odata2ts/odata-service

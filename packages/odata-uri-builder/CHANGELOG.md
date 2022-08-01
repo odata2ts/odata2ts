@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.8.1...@odata2ts/odata-uri-builder@0.9.0) (2022-08-01)
+
+
+### Features
+
+* allow v4 system query $search option ([#40](https://github.com/odata2ts/odata2ts/issues/40)) ([1904884](https://github.com/odata2ts/odata2ts/commit/190488434b85d051617758ff59678c20ee56b27c))
+
+
+
+
+
 ## [0.8.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.8.0...@odata2ts/odata-uri-builder@0.8.1) (2022-07-20)
 
 **Note:** Version bump only for package @odata2ts/odata-uri-builder

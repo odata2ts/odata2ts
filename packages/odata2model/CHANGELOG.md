@@ -3,6 +3,51 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.12.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.11.2...@odata2ts/odata2model@0.12.0) (2022-08-01)
+
+
+### Bug Fixes
+
+* remove superfluous constructor from qObjects ([#41](https://github.com/odata2ts/odata2ts/issues/41)) ([f5f5623](https://github.com/odata2ts/odata2ts/commit/f5f56233eeadff584dc91c4a05c4d3d8196a7af3))
+
+
+### Code Refactoring
+
+* consistent casing for services, models and props ([#42](https://github.com/odata2ts/odata2ts/issues/42)) ([70e6e92](https://github.com/odata2ts/odata2ts/commit/70e6e92a888c67f65dadb643ed12ace692d2cc8a))
+* use proper getMethods for services ([#43](https://github.com/odata2ts/odata2ts/issues/43)) ([e05c818](https://github.com/odata2ts/odata2ts/commit/e05c818f193711a161a34be8e7a4c3ba71572a75))
+
+
+### Features
+
+* createKey and parseKey for EntitySetService & correct V2 type prefixing ([#39](https://github.com/odata2ts/odata2ts/issues/39)) ([edd05bb](https://github.com/odata2ts/odata2ts/commit/edd05bbf7747ba280786c9ba274160ef274c030a))
+* typing improvements & editable model versions ([#27](https://github.com/odata2ts/odata2ts/issues/27)) ([df290df](https://github.com/odata2ts/odata2ts/commit/df290dff953a9e37c64c39c18ffdec74ce1874d4))
+
+
+### BREAKING CHANGES
+
+* use proper getMethods for services "getXxxSrv()" instead of get accessors "xxx"
+* consistent camel or pascal casing for services, models and props
+
+* fix: always empty output dir before generating
+* model has become a true query response model.
+Properties which are nullable now allow null values instead of undefined;
+complex types are never undefined, but can be nullable;
+collections are never nullable.
+V2 only: added deferred content typings for entity and entity collection properties.
+
+* feat: generate EditableModels and use in service for create, update, and patch
+* different signatures for all actions
+
+* test: proper test for ModelImportContainer & dataModel.getEditableModelName
+
+* test: proper test for DataModel
+
+* refactor(odata2model): don't always combine handling of complex and entity types
+
+
+
+
+
 ## [0.11.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.11.1...@odata2ts/odata2model@0.11.2) (2022-07-20)
 
 
