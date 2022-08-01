@@ -28,7 +28,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   };
 
   test("list products with count", async () => {
-    const result = await testService.products.query((b) => b.count());
+    const result = await testService.getProductsSrv().query((b) => b.count());
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data.d).toBeDefined();
@@ -40,7 +40,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   });
 
   test("get product zero", async () => {
-    const result = await testService.products.get(0).query();
+    const result = await testService.getProductsSrv().get(0).query();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data.d).toBeDefined();
@@ -51,7 +51,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
 
   test("get unknown product", async () => {
     try {
-      await testService.products.get(666).query();
+      await testService.getProductsSrv().get(666).query();
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
@@ -78,12 +78,12 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
     };
 
     // when creating the product
-    let result = await editableService.products.create(product);
+    let result = await editableService.getProductsSrv().create(product);
     // then return object matches our product
     expect(result.data.d).toMatchObject({ ...product, ReleaseDate: "/Date(1672488959000)/" });
 
     // given a service for the new product
-    const productService = editableService.products.get(product.ID);
+    const productService = editableService.getProductsSrv().get(product.ID);
     // when updating the description, we expect no error
     await productService.patch({ Description: "Updated Desc" });
 
@@ -102,7 +102,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   });
 
   test("deep select query", async () => {
-    const result = await testService.products.query((b, qProduct) => {
+    const result = await testService.getProductsSrv().query((b, qProduct) => {
       b.count()
         .select("id", "name", qProduct.category.props.name)
         .select(qProduct.category.props.id) // just for the fun of it
