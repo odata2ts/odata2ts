@@ -8,27 +8,27 @@ import { QBook, qBook } from "../QTester";
 import { AuthorService, AuthorCollectionService } from "./AuthorService";
 
 export class BookService extends EntityTypeServiceV4<Book, EditableBook, QBook> {
-  private _author?: AuthorService;
-  private _relatedAuthors?: AuthorCollectionService;
+  private _authorSrv?: AuthorService;
+  private _relatedAuthorsSrv?: AuthorCollectionService;
 
   constructor(client: ODataClient, path: string) {
     super(client, path, qBook);
   }
 
-  public get author(): AuthorService {
-    if (!this._author) {
-      this._author = new AuthorService(this.client, this.path + "/author");
+  public getAuthorSrv(): AuthorService {
+    if (!this._authorSrv) {
+      this._authorSrv = new AuthorService(this.client, this.path + "/author");
     }
 
-    return this._author;
+    return this._authorSrv;
   }
 
-  public get relatedAuthors(): AuthorCollectionService {
-    if (!this._relatedAuthors) {
-      this._relatedAuthors = new AuthorCollectionService(this.client, this.path + "/relatedAuthors");
+  public getRelatedAuthorsSrv(): AuthorCollectionService {
+    if (!this._relatedAuthorsSrv) {
+      this._relatedAuthorsSrv = new AuthorCollectionService(this.client, this.path + "/relatedAuthors");
     }
 
-    return this._relatedAuthors;
+    return this._relatedAuthorsSrv;
   }
 }
 

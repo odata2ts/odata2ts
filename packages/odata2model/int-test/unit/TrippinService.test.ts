@@ -40,9 +40,9 @@ describe("Testing Generation of TrippinService", () => {
   test("entitySet", async () => {
     const expected = `${BASE_URL}/People`;
 
-    expect(testService.people.getPath()).toBe(expected);
-    expect(JSON.stringify(testService.people.getQObject())).toEqual(JSON.stringify(qPerson));
-    expect(testService.people.getKeySpec()).toEqual([
+    expect(testService.getPeopleSrv().getPath()).toBe(expected);
+    expect(JSON.stringify(testService.getPeopleSrv().getQObject())).toEqual(JSON.stringify(qPerson));
+    expect(testService.getPeopleSrv().getKeySpec()).toEqual([
       { isLiteral: false, type: "string", name: "userName", odataName: "UserName" },
     ]);
   });
@@ -50,7 +50,7 @@ describe("Testing Generation of TrippinService", () => {
   test("entitySet: create", async () => {
     const expectedUrl = `${BASE_URL}/People`;
 
-    await testService.people.create(editModel);
+    await testService.getPeopleSrv().create(editModel);
 
     expect(odataClient.lastOperation).toBe("POST");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -61,7 +61,7 @@ describe("Testing Generation of TrippinService", () => {
     const testId = "test";
     const expected = `${BASE_URL}/People('${testId}')`;
 
-    const etService = testService.people.get(testId);
+    const etService = testService.getPeopleSrv().get(testId);
 
     expect(etService.getPath()).toBe(expected);
     expect(JSON.stringify(etService.getQObject())).toEqual(JSON.stringify(qPerson));
@@ -71,8 +71,8 @@ describe("Testing Generation of TrippinService", () => {
     const testId = { UserName: "williams" };
     const expected = `${BASE_URL}/People(UserName='williams')`;
 
-    expect(testService.people.get(testId).getPath()).toBe(expected);
-    expect(testService.people.get(editModel).getPath()).toBe(expected);
+    expect(testService.getPeopleSrv().get(testId).getPath()).toBe(expected);
+    expect(testService.getPeopleSrv().get(editModel).getPath()).toBe(expected);
   });
 
   test("entityType: update", async () => {
@@ -87,7 +87,7 @@ describe("Testing Generation of TrippinService", () => {
       Age: 33,
     };
 
-    await testService.people.get(id).update(model);
+    await testService.getPeopleSrv().get(id).update(model);
 
     expect(odataClient.lastOperation).toBe("PUT");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -101,7 +101,7 @@ describe("Testing Generation of TrippinService", () => {
       Age: 44,
     };
 
-    await testService.people.get(id).patch(model);
+    await testService.getPeopleSrv().get(id).patch(model);
 
     expect(odataClient.lastOperation).toBe("PATCH");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -112,7 +112,7 @@ describe("Testing Generation of TrippinService", () => {
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
 
-    await testService.people.get(id).delete();
+    await testService.getPeopleSrv().get(id).delete();
 
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -120,14 +120,14 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("complex type", async () => {
-    const complex = testService.people.get("tester").homeAddress;
+    const complex = testService.getPeopleSrv().get("tester").getHomeAddressSrv();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
     expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
   });
 
   test("complex type: query", async () => {
-    await testService.people.get("tester").homeAddress.query();
+    await testService.getPeopleSrv().get("tester").getHomeAddressSrv().query();
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
     expect(odataClient.lastOperation).toBe("GET");
@@ -135,7 +135,7 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("complex type: update", async () => {
-    const complex = testService.people.get("tester").homeAddress;
+    const complex = testService.getPeopleSrv().get("tester").getHomeAddressSrv();
 
     const model: EditableLocationModel = {
       Address: "Test Address",
@@ -149,14 +149,14 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("complex collection", async () => {
-    const complex = testService.people.get("tester").addressInfo;
+    const complex = testService.getPeopleSrv().get("tester").getAddressInfoSrv();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
   });
 
   test("complex collection: query", async () => {
-    await testService.people.get("tester").addressInfo.query();
+    await testService.getPeopleSrv().get("tester").getAddressInfoSrv().query();
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("GET");
@@ -165,7 +165,7 @@ describe("Testing Generation of TrippinService", () => {
 
   test("complex collection: create", async () => {
     const model: EditableLocationModel = { Address: "TestAdress" };
-    await testService.people.get("tester").addressInfo.add(model);
+    await testService.getPeopleSrv().get("tester").getAddressInfoSrv().add(model);
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("POST");
@@ -174,7 +174,7 @@ describe("Testing Generation of TrippinService", () => {
 
   test("complex collection: update", async () => {
     const models = [{ Address: "TestAddress 1" }, { Address: "test 2" }];
-    await testService.people.get("tester").addressInfo.update(models);
+    await testService.getPeopleSrv().get("tester").getAddressInfoSrv().update(models);
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("PUT");
@@ -182,7 +182,7 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("complex collection: delete", async () => {
-    await testService.people.get("tester").addressInfo.delete();
+    await testService.getPeopleSrv().get("tester").getAddressInfoSrv().delete();
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("DELETE");
@@ -190,13 +190,20 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("navigation", async () => {
-    const result = testService.people.get("tester").bestFriend.bestFriend.bestFriend.homeAddress.city;
+    const result = testService
+      .getPeopleSrv()
+      .get("tester")
+      .getBestFriendSrv()
+      .getBestFriendSrv()
+      .getBestFriendSrv()
+      .getHomeAddressSrv()
+      .getCitySrv();
 
     expect(result.getPath()).toBe(`${BASE_URL}/People('tester')/BestFriend/BestFriend/BestFriend/HomeAddress/City`);
   });
 
   test("singleton", async () => {
-    const result = testService.me;
+    const result = testService.getMeSrv();
 
     expect(result.getPath()).toBe(`${BASE_URL}/Me`);
     expect(JSON.stringify(result.getQObject())).toEqual(JSON.stringify(qPerson));

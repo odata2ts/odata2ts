@@ -24,7 +24,7 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("entityType query", async () => {
-    const result = await testService.people.get("russellwhyte").query();
+    const result = await testService.getPeopleSrv().get("russellwhyte").query();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data.FirstName).toBe("Russell");
@@ -32,14 +32,14 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("entitySet query", async () => {
-    const result = await testService.people.query();
+    const result = await testService.getPeopleSrv().query();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data.value.length).toBe(20);
   });
 
   test("entitySet query people with any Feature 1", async () => {
-    const result = await testService.people.query((builder, qPerson) => {
+    const result = await testService.getPeopleSrv().query((builder, qPerson) => {
       return builder
         .count()
         .top(10)
@@ -112,7 +112,7 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("collection of strings", async () => {
-    const result = await testService.people.get("russellwhyte").addressInfo.query();
+    const result = await testService.getPeopleSrv().get("russellwhyte").getAddressInfoSrv().query();
 
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();

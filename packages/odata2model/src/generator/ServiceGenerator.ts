@@ -1,11 +1,4 @@
-import {
-  GetAccessorDeclarationStructure,
-  MethodDeclarationStructure,
-  OptionalKind,
-  PropertyDeclarationStructure,
-  Scope,
-  SourceFile,
-} from "ts-morph";
+import { MethodDeclarationStructure, OptionalKind, PropertyDeclarationStructure, Scope, SourceFile } from "ts-morph";
 import { firstCharLowerCase } from "xml2js/lib/processors";
 import { upperCaseFirst } from "upper-case-first";
 
@@ -63,32 +56,22 @@ class ServiceGenerator {
             { name: "client", type: "ODataClient<any>" },
             { name: "basePath", type: "string" },
           ],
-          statements: [
-            "super(client, basePath);",
-            ...Object.values(container.entitySets).map(({ name, odataName, entityType }) => {
-              const serviceType = this.getCollectionServiceName(entityType.name);
-              return `this.${name} = new ${serviceType}(this.client, this.getPath() + "/${odataName}")`;
-            }),
-            ...Object.values(container.singletons).map(({ name, odataName, type }) => {
-              const serviceType = this.getServiceName(type.name);
-              return `this.${name} = new ${serviceType}(this.client, this.getPath() + "/${odataName}")`;
-            }),
-          ],
+          statements: ["super(client, basePath);"],
         },
       ],
       properties: [
-        // the name of the service is part of any URL: basePath/name/*
-        { scope: Scope.Private, name: "name", type: "string", initializer: `"${this.dataModel.getServiceName()}"` },
+        { scope: Scope.Private, name: "_name", type: "string", initializer: `"${this.dataModel.getServiceName()}"` },
         ...Object.values(container.entitySets).map(({ name, entityType }) => {
           const type = this.getCollectionServiceName(entityType.name);
 
           importContainer.addGeneratedService(this.getServiceName(entityType.name), type);
 
           return {
-            scope: Scope.Public,
-            name,
+            scope: Scope.Private,
+            name: this.getPropNameForService(name),
             type,
-          };
+            hasQuestionToken: true,
+          } as PropertyDeclarationStructure;
         }),
         ...Object.values(container.singletons).map(({ name, type: entityType }) => {
           const type = this.getServiceName(entityType.name);
@@ -96,13 +79,44 @@ class ServiceGenerator {
           importContainer.addGeneratedService(this.getServiceName(entityType.name), type);
 
           return {
-            scope: Scope.Public,
-            name,
+            scope: Scope.Private,
+            name: this.getPropNameForService(name),
             type,
+            hasQuestionToken: true,
           };
         }),
       ],
       methods: [
+        ...Object.values(container.entitySets).map(({ name, odataName, entityType }) => {
+          const propName = this.getPropNameForService(name);
+          const serviceType = this.getCollectionServiceName(entityType.name);
+          return {
+            scope: Scope.Public,
+            name: this.getGetterNameForService(name),
+            statements: [
+              `if(!this.${propName}) {`,
+              // prettier-ignore
+              `  this.${propName} = new ${serviceType}(this.client, this.getPath() + "/${odataName}")`,
+              "}",
+              `return this.${propName}`,
+            ],
+          };
+        }),
+        ...Object.values(container.singletons).map(({ name, odataName, type }) => {
+          const propName = this.getPropNameForService(name);
+          const serviceType = this.getServiceName(type.name);
+          return {
+            scope: Scope.Public,
+            name: this.getGetterNameForService(name),
+            statements: [
+              `if(!this.${propName}) {`,
+              // prettier-ignore
+              `  this.${propName} = new ${serviceType}(this.client, this.getPath() + "/${odataName}")`,
+              "}",
+              `return this.${propName}`,
+            ],
+          };
+        }),
         ...this.generateUnboundOperations(
           [...Object.values(container.functions), ...Object.values(container.actions)],
           importContainer
@@ -152,12 +166,7 @@ class ServiceGenerator {
             { name: "client", type: "ODataClient" },
             { name: "path", type: "string" },
           ],
-          statements: [
-            `super(client, path, ${firstCharLowerCase(model.qName)});`,
-            /* ...Object.values(container.entitySets).map(({ name, entityType }) => {
-            return `this.${name} = new EntitySetService(this.client, this.getPath(), ${entityType.qName})`;
-          }), */
-          ],
+          statements: [`super(client, path, ${firstCharLowerCase(model.qName)});`],
         },
       ],
       properties: [
@@ -179,7 +188,7 @@ class ServiceGenerator {
 
           return {
             scope: Scope.Private,
-            name: "_" + prop.name,
+            name: this.getPropNameForService(prop.name),
             type: `${propModelType}`,
             hasQuestionToken: true,
           } as PropertyDeclarationStructure;
@@ -207,14 +216,15 @@ class ServiceGenerator {
 
           return {
             scope: Scope.Private,
-            name: "_" + prop.name,
+            name: this.getPropNameForService(prop.name),
             type: `${collectionType}`,
             hasQuestionToken: true,
           };
         }),
       ],
-      getAccessors: [
+      methods: [
         ...modelProps.map((prop) => {
+          const propName = this.getPropNameForService(prop.name);
           const complexType = this.dataModel.getComplexType(prop.type);
           const isComplexCollection = prop.isCollection && complexType;
           const type = isComplexCollection
@@ -225,32 +235,33 @@ class ServiceGenerator {
 
           return {
             scope: Scope.Public,
-            name: prop.name,
+            name: this.getGetterNameForService(prop.name),
             returnType: type,
             statements: [
-              `if(!this._${prop.name}) {`,
+              `if(!this.${propName}) {`,
               // prettier-ignore
-              `  this._${prop.name} = new ${type}(this.client, this.path + "/${prop.odataName}"${isComplexCollection ? `, ${firstCharLowerCase(complexType.qName)}`: ""})`,
+              `  this.${propName} = new ${type}(this.client, this.path + "/${prop.odataName}"${isComplexCollection ? `, ${firstCharLowerCase(complexType.qName)}`: ""})`,
               "}",
-              `return this._${prop.name}`,
+              `return this.${propName}`,
             ],
-          } as GetAccessorDeclarationStructure;
+          };
         }),
         ...primColProps.map((prop) => {
+          const propName = this.getPropNameForService(prop.name);
           return {
             scope: Scope.Public,
-            name: prop.name,
+            name: this.getGetterNameForService(prop.name),
             statements: [
-              `if(!this._${prop.name}) {`,
+              `if(!this.${propName}) {`,
               // prettier-ignore
-              `  this._${prop.name} = new ${collectionServiceType}(this.client, this.path + "/${prop.odataName}", ${firstCharLowerCase(prop.qObject!)})`,
+              `  this.${propName} = new ${collectionServiceType}(this.client, this.path + "/${prop.odataName}", ${firstCharLowerCase(prop.qObject!)})`,
               "}",
-              `return this._${prop.name}`,
+              `return this.${propName}`,
             ],
-          } as GetAccessorDeclarationStructure;
+          };
         }),
+        ...this.generateBoundOperations(operations, importContainer),
       ],
-      methods: [...this.generateBoundOperations(operations, importContainer)],
     });
   }
 
@@ -327,6 +338,14 @@ class ServiceGenerator {
 
   private getServiceName(name: string) {
     return name + "Service";
+  }
+
+  private getPropNameForService(name: string) {
+    return `_${firstCharLowerCase(name)}Srv`;
+  }
+
+  private getGetterNameForService(name: string) {
+    return `get${upperCaseFirst(name)}Srv`;
   }
 
   private getCollectionServiceName(name: string) {
