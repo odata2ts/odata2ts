@@ -201,9 +201,9 @@ describe("Cli Test", () => {
     expect(logErrorSpy).toHaveBeenCalledTimes(1);
   });
 
-  test("Fail ensureDir", async () => {
+  test("Fail emptyDir", async () => {
     // @ts-ignore
-    fsExtra.ensureDir.mockRejectedValueOnce(new Error("Oh No!"));
+    fsExtra.emptyDir.mockRejectedValueOnce(new Error("Oh No!"));
 
     await expect(runCli(defaultArgs)).rejects.toThrow(EXIT_MSG);
 
