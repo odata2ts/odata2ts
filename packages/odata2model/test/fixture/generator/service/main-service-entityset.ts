@@ -5,7 +5,7 @@ import { TestEntityCollectionService } from "./service/TestEntityService";
 
 export class TesterService extends ODataService {
   private _name: string = "Tester";
-  private _listSrv: TestEntityCollectionService;
+  private _listSrv?: TestEntityCollectionService;
 
   constructor(client: ODataClient<any>, basePath: string) {
     super(client, basePath);

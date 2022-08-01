@@ -70,7 +70,8 @@ class ServiceGenerator {
             scope: Scope.Private,
             name: this.getPropNameForService(name),
             type,
-          };
+            hasQuestionToken: true,
+          } as PropertyDeclarationStructure;
         }),
         ...Object.values(container.singletons).map(({ name, type: entityType }) => {
           const type = this.getServiceName(entityType.name);
@@ -81,6 +82,7 @@ class ServiceGenerator {
             scope: Scope.Private,
             name: this.getPropNameForService(name),
             type,
+            hasQuestionToken: true,
           };
         }),
       ],

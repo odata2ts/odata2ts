@@ -5,7 +5,7 @@ import { TestEntityService } from "./service/TestEntityService";
 
 export class TesterService extends ODataService {
   private _name: string = "Tester";
-  private _currentUserSrv: TestEntityService;
+  private _currentUserSrv?: TestEntityService;
 
   constructor(client: ODataClient<any>, basePath: string) {
     super(client, basePath);
@@ -13,8 +13,9 @@ export class TesterService extends ODataService {
 
   public getCurrentUserSrv() {
     if (!this._currentUserSrv) {
-      this._currentUserSrv = new TestEntityService(this.client, this.getPath() + "/current");
+      this._currentUserSrv = new TestEntityService(this.client, this.getPath() + "/CURRENT_USER");
     }
+
     return this._currentUserSrv;
   }
 }
