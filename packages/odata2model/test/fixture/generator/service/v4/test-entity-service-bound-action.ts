@@ -6,7 +6,7 @@ import {
   EntitySetServiceV4,
 } from "@odata2ts/odata-service";
 // @ts-ignore
-import { Book, EditableBook } from "../TesterModel";
+import { Book, EditableBook, Review } from "../TesterModel";
 // @ts-ignore
 import { QBook, qBook } from "../QTester";
 
@@ -20,7 +20,10 @@ export class BookService extends EntityTypeServiceV4<Book, EditableBook, QBook> 
     return this.client.post(url, {});
   }
 
-  public postReview(params: { rating: number; publicationDate?: string }): ODataResponse<ODataModelResponseV4<string>> {
+  public postReview(params: {
+    Rating: number;
+    PUBLICATION_DATE?: string;
+  }): ODataResponse<ODataModelResponseV4<Review>> {
     const url = compileActionPath(this.getPath(), "Tester.postReview");
     return this.client.post(url, params);
   }

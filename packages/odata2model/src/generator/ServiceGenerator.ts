@@ -394,9 +394,9 @@ class ServiceGenerator {
   private createParamsSpec(params: Array<PropertyModel>): string | undefined {
     const props = params.map((p) => {
       const typePrefix = this.getTypePrefix(p);
-      return `${p.name}: { isLiteral: ${!typePrefix && !this.isQuotedValue(p)}, ${
+      return `${p.odataName}: { isLiteral: ${!typePrefix && !this.isQuotedValue(p)}, ${
         typePrefix ? `typePrefix: "${typePrefix}", ` : ""
-      }value: params.${p.name} }`;
+      }value: params.${p.odataName} }`;
     });
     return props.length ? `{ ${props.join(", ")} }` : undefined;
   }
@@ -442,7 +442,7 @@ class ServiceGenerator {
     const paramsStrings = operation.parameters.map((param) => {
       this.addTypeForProp(importContainer, param);
       const saniType = this.sanitizeType(param.type);
-      return `${param.name}${!param.required ? "?" : ""}: ${param.isCollection ? `Array<${saniType}>` : saniType}`;
+      return `${param.odataName}${!param.required ? "?" : ""}: ${param.isCollection ? `Array<${saniType}>` : saniType}`;
     });
     const optParamType = paramsStrings.length ? `{ ${paramsStrings.join(", ")} }` : undefined;
     const optParamOptional = operation.parameters.reduce((result, p) => result && !p.required, true);

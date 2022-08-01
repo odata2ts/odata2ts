@@ -150,14 +150,15 @@ describe("Service Generator Tests V4", () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addEntityType("Review", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       // given function without params, but with special return type which should simply become string
-      .addFunction("bestReview", ODataTypesV4.Guid, true, (builder) => builder.addParam("book", `${SERVICE_NAME}.Book`))
+      .addFunction("BestReview", ODataTypesV4.Guid, true, (builder) => builder.addParam("book", `${SERVICE_NAME}.Book`))
       // given function with params which returns collection
-      .addFunction("filterReviews", `Collection(${ODataTypesV4.String})`, true, (builder) =>
+      .addFunction("filterReviews", `Collection(${SERVICE_NAME}.Review)`, true, (builder) =>
         builder
-          .addParam("book", `${SERVICE_NAME}.Book`)
-          .addParam("minRating", ODataTypesV4.Int16, false)
-          .addParam("minCreated", ODataTypesV4.Date)
+          .addParam("Book", `${SERVICE_NAME}.Book`)
+          .addParam("MIN_RATING", ODataTypesV4.Int16, false)
+          .addParam("MinCreated", ODataTypesV4.Date)
       );
 
     // when generating
@@ -165,7 +166,7 @@ describe("Service Generator Tests V4", () => {
 
     // then service has those functions
     const services = projectManager.getServiceFiles();
-    expect(services.length).toEqual(1);
+    expect(services.length).toEqual(2);
     await fixtureComparator.compareWithFixture(
       services[0].getFullText(),
       "v4" + path.sep + "test-entity-service-bound-func.ts"
@@ -176,12 +177,13 @@ describe("Service Generator Tests V4", () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addEntityType("Review", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       .addAction("like", undefined, true, (builder) => builder.addParam("book", `${SERVICE_NAME}.Book`))
-      .addAction("postReview", ODataTypesV4.String, true, (builder) =>
+      .addAction("postReview", `${SERVICE_NAME}.Review`, true, (builder) =>
         builder
-          .addParam("book", `${SERVICE_NAME}.Book`)
-          .addParam("rating", ODataTypesV4.Int16, false)
-          .addParam("publicationDate", ODataTypesV4.Date)
+          .addParam("Book", `${SERVICE_NAME}.Book`)
+          .addParam("Rating", ODataTypesV4.Int16, false)
+          .addParam("PUBLICATION_DATE", ODataTypesV4.Date)
       );
 
     // when generating
@@ -189,7 +191,7 @@ describe("Service Generator Tests V4", () => {
 
     // then service has actions
     const services = projectManager.getServiceFiles();
-    expect(services.length).toEqual(1);
+    expect(services.length).toEqual(2);
     await fixtureComparator.compareWithFixture(
       services[0].getFullText(),
       "v4" + path.sep + "test-entity-service-bound-action.ts"

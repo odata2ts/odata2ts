@@ -105,9 +105,9 @@ describe("Service Generator Tests V2", () => {
     // given two functions: one without and one with params
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV3.String))
-      .addFunctionImport("mostPop", `Collection(${SERVICE_NAME}.TestEntity)`)
-      .addFunctionImport("bestBook", `${SERVICE_NAME}.TestEntity`, (builder) =>
-        builder.addParam("testString", ODataTypesV3.String, false).addParam("testNumber", ODataTypesV3.Int32)
+      .addFunctionImport("MostPop", `Collection(${SERVICE_NAME}.TestEntity)`)
+      .addFunctionImport("BEST_BOOK", `${SERVICE_NAME}.TestEntity`, (builder) =>
+        builder.addParam("TestString", ODataTypesV3.String, false).addParam("TEST_NUMBER", ODataTypesV3.Int32)
       );
 
     // when generating

@@ -16,17 +16,17 @@ export class TesterService extends ODataService {
   }
 
   public mostPop(): ODataResponse<ODataCollectionResponseV2<TestEntity>> {
-    const url = compileFunctionPathV2(this.getPath(), "mostPop");
+    const url = compileFunctionPathV2(this.getPath(), "MostPop");
     return this.client.get(url);
   }
 
   public bestBook(params: {
-    testString: string;
-    testNumber?: number;
+    TestString: string;
+    TEST_NUMBER?: number;
   }): ODataResponse<ODataModelResponseV2<TestEntity>> {
-    const url = compileFunctionPathV2(this.getPath(), "bestBook", {
-      testString: { isLiteral: false, value: params.testString },
-      testNumber: { isLiteral: true, value: params.testNumber },
+    const url = compileFunctionPathV2(this.getPath(), "BEST_BOOK", {
+      TestString: { isLiteral: false, value: params.TestString },
+      TEST_NUMBER: { isLiteral: true, value: params.TEST_NUMBER },
     });
     return this.client.get(url);
   }
