@@ -78,7 +78,7 @@ describe("Action Digestion Test", () => {
         ],
         returnType: {
           dataType: DataTypes.PrimitiveType,
-          name: "nO_NAME_BECAUSE_RETURN_TYPE",
+          name: "noNameBecauseReturnType",
           odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
           odataType: "Edm.String",
           type: "string",
@@ -122,7 +122,7 @@ describe("Action Digestion Test", () => {
         returnType: {
           isCollection: true,
           dataType: DataTypes.ModelType,
-          name: "nO_NAME_BECAUSE_RETURN_TYPE",
+          name: "noNameBecauseReturnType",
           odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
           odataType: `Collection(${SERVICE_NAME}.User)`,
           type: "User",

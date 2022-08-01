@@ -41,7 +41,7 @@ describe("Function Digestion Test", () => {
         parameters: [],
         returnType: {
           dataType: DataTypes.PrimitiveType,
-          name: "nO_NAME_BECAUSE_RETURN_TYPE",
+          name: "noNameBecauseReturnType",
           odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
           odataType: "Edm.Boolean",
           type: "boolean",
@@ -87,7 +87,7 @@ describe("Function Digestion Test", () => {
         ],
         returnType: {
           dataType: DataTypes.PrimitiveType,
-          name: "nO_NAME_BECAUSE_RETURN_TYPE",
+          name: "noNameBecauseReturnType",
           odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
           odataType: "Edm.String",
           type: "string",
@@ -121,7 +121,7 @@ describe("Function Digestion Test", () => {
         returnType: {
           isCollection: true,
           dataType: DataTypes.PrimitiveType,
-          name: "nO_NAME_BECAUSE_RETURN_TYPE",
+          name: "noNameBecauseReturnType",
           odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
           odataType: "Collection(Edm.String)",
           type: "string",
