@@ -101,7 +101,7 @@ describe("Service Generator Tests V4", () => {
     // given one singleton
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
-      .addSingleton("current", `${SERVICE_NAME}.TestEntity`);
+      .addSingleton("CURRENT_USER", `${SERVICE_NAME}.TestEntity`);
 
     // when generating
     await doGenerate();

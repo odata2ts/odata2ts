@@ -4,7 +4,7 @@ import { ODataService, ODataModelResponseV4, compileActionPath } from "@odata2ts
 import { TestEntity } from "./TesterModel";
 
 export class TesterService extends ODataService {
-  private name: string = "Tester";
+  private _name: string = "Tester";
 
   constructor(client: ODataClient<any>, basePath: string) {
     super(client, basePath);

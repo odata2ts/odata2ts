@@ -8,31 +8,31 @@ import { QBook, qBook, QReviewer, qReviewer } from "../QTester";
 import { ReviewerService } from "./ReviewerService";
 
 export class BookService extends EntityTypeServiceV2<Book, EditableBook, QBook> {
-  private _lector?: ReviewerService;
-  private _reviewers?: CollectionServiceV2<Reviewer, QReviewer, EditableReviewer>;
+  private _lectorSrv?: ReviewerService;
+  private _reviewersSrv?: CollectionServiceV2<Reviewer, QReviewer, EditableReviewer>;
 
   constructor(client: ODataClient, path: string) {
     super(client, path, qBook);
   }
 
-  public get lector(): ReviewerService {
-    if (!this._lector) {
-      this._lector = new ReviewerService(this.client, this.path + "/lector");
+  public getLectorSrv(): ReviewerService {
+    if (!this._lectorSrv) {
+      this._lectorSrv = new ReviewerService(this.client, this.path + "/lector");
     }
 
-    return this._lector;
+    return this._lectorSrv;
   }
 
-  public get reviewers(): CollectionServiceV2<Reviewer, QReviewer, EditableReviewer> {
-    if (!this._reviewers) {
-      this._reviewers = new CollectionServiceV2<Reviewer, QReviewer, EditableReviewer>(
+  public getReviewersSrv(): CollectionServiceV2<Reviewer, QReviewer, EditableReviewer> {
+    if (!this._reviewersSrv) {
+      this._reviewersSrv = new CollectionServiceV2<Reviewer, QReviewer, EditableReviewer>(
         this.client,
         this.path + "/reviewers",
         qReviewer
       );
     }
 
-    return this._reviewers;
+    return this._reviewersSrv;
   }
 }
 
