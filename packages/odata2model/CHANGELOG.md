@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.12.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.12.0...@odata2ts/odata2model@0.12.1) (2022-08-01)
+
+
+### Bug Fixes
+
+* add imports for returnType & don't camel case function / action params ([#44](https://github.com/odata2ts/odata2ts/issues/44)) ([b46e4fd](https://github.com/odata2ts/odata2ts/commit/b46e4fdf5bd1566c03c8833daf1a7afcbb471d53))
+
+
+
+
+
 # [0.12.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.11.2...@odata2ts/odata2model@0.12.0) (2022-08-01)
 
 
