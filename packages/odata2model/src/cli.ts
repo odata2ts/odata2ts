@@ -1,4 +1,4 @@
-import { ensureDir, pathExists, readFile } from "fs-extra";
+import { emptyDir, pathExists, readFile } from "fs-extra";
 import commander, { Option } from "commander";
 import { cosmiconfig } from "cosmiconfig";
 import { parseStringPromise } from "xml2js";
@@ -91,7 +91,7 @@ export class Cli {
 
     // ensure that output directory exists
     try {
-      await ensureDir(options.output);
+      await emptyDir(options.output);
     } catch (error) {
       console.error(`Output path [${options.output}] couldn't be created!`, error);
       process.exit(3);
