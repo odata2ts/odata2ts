@@ -7,7 +7,7 @@ import {
   EntitySetServiceV4,
 } from "@odata2ts/odata-service";
 // @ts-ignore
-import { Book, EditableBook } from "../TesterModel";
+import { Book, EditableBook, Review } from "../TesterModel";
 // @ts-ignore
 import { QBook, qBook } from "../QTester";
 
@@ -17,17 +17,17 @@ export class BookService extends EntityTypeServiceV4<Book, EditableBook, QBook> 
   }
 
   public bestReview(): ODataResponse<ODataModelResponseV4<string>> {
-    const url = compileFunctionPathV4(this.getPath(), "Tester.bestReview");
+    const url = compileFunctionPathV4(this.getPath(), "Tester.BestReview");
     return this.client.get(url);
   }
 
   public filterReviews(params: {
-    minRating: number;
-    minCreated?: string;
-  }): ODataResponse<ODataCollectionResponseV4<string>> {
+    MIN_RATING: number;
+    MinCreated?: string;
+  }): ODataResponse<ODataCollectionResponseV4<Review>> {
     const url = compileFunctionPathV4(this.getPath(), "Tester.filterReviews", {
-      minRating: { isLiteral: true, value: params.minRating },
-      minCreated: { isLiteral: true, value: params.minCreated },
+      MIN_RATING: { isLiteral: true, value: params.MIN_RATING },
+      MinCreated: { isLiteral: true, value: params.MinCreated },
     });
     return this.client.get(url);
   }
