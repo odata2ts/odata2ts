@@ -177,7 +177,7 @@ describe("Service Generator Tests V4", () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
-      .addEntityType("Review", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addComplexType("Review", undefined, (builder) => builder.addProp("test", ODataTypesV4.String))
       .addAction("like", undefined, true, (builder) => builder.addParam("book", `${SERVICE_NAME}.Book`))
       .addAction("postReview", `${SERVICE_NAME}.Review`, true, (builder) =>
         builder

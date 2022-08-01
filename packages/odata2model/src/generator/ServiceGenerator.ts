@@ -469,7 +469,11 @@ class ServiceGenerator {
   }
 
   private addTypeForProp(importContainer: ImportContainer, p: PropertyModel) {
-    if (p.dataType === DataTypes.EnumType || p.dataType === DataTypes.ModelType) {
+    if (
+      p.dataType === DataTypes.EnumType ||
+      p.dataType === DataTypes.ModelType ||
+      p.dataType === DataTypes.ComplexType
+    ) {
       importContainer.addGeneratedModel(p.type);
     }
   }
