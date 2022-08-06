@@ -1,11 +1,28 @@
-import { ODataUriBuilderConfig } from "../internal";
-import { ODataUriBuilderV4Base } from "./ODataUriBuilderV4Base";
-import { QPath, QueryObject } from "@odata2ts/odata-query-objects";
+import {
+  EntityExtractor,
+  ExpandingODataUriBuilderV4,
+  ExpandType,
+  ODataOperators,
+  ODataUriBuilder,
+  ODataUriBuilderBase,
+  ODataUriBuilderConfig,
+  ODataUriBuilderV4Model,
+} from "../internal";
+import {
+  QComplexPath,
+  QFilterExpression,
+  QOrderByExpression,
+  QPath,
+  QPathModel,
+  QueryObject,
+} from "@odata2ts/odata-query-objects";
 
 /**
  * Create an OData URI string in a typesafe way by facilitating generated query objects.
  */
-export class ODataUriBuilderV4<Q extends QueryObject> extends ODataUriBuilderV4Base<Q> {
+export class ODataUriBuilderV4<Q extends QueryObject> implements ODataUriBuilderV4Model<Q> {
+  private builder: ODataUriBuilderBase<Q>;
+
   /**
    * Create an UriBuilder by passing in a query object, which already contains the base path
    * to the OData service & the given entity.
@@ -26,14 +43,54 @@ export class ODataUriBuilderV4<Q extends QueryObject> extends ODataUriBuilderV4B
     return new ODataUriBuilderV4<Q>(path, qEntity, config);
   }
 
+  private constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
+    this.builder = new ODataUriBuilderBase(path, qEntity, config);
+  }
+
+  public count(doCount?: boolean) {
+    this.builder.count(ODataOperators.COUNT, String(doCount === undefined || doCount));
+    return this;
+  }
+
+  public select(...props: Array<keyof Q | null | undefined>) {
+    this.builder.select(props);
+    return this;
+  }
+
+  public filter(...expressions: Array<QFilterExpression>) {
+    this.builder.filter(expressions);
+    return this;
+  }
+
+  public expand<Prop extends ExpandType<Q>>(...props: Array<Prop>) {
+    this.builder.expand(ExpandingODataUriBuilderV4, props);
+    return this;
+  }
+
   /**
-   * Add the count to the response.
+   * Expand a given entity and receive an own builder for it to further select, filter, expand, etc.
    *
-   * @param doCount explicitly specify if counting should be done
+   * This method can be called multiple times.
+   *
+   * Example:
+   * .expanding("addresses", (addressBuilder, qAddress) => {
+   *   addressBuilder
+   *     .select(...)
+   *     .filter(qAddress.street.startsWith(...))
+   * })
+   *
+   * @param prop the name of the property which should be expanded
+   * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
    * @returns this query builder
    */
-  public count(doCount?: boolean) {
-    this.itemsCount = doCount === undefined || doCount;
+  public expanding<Prop extends ExpandType<Q>>(
+    prop: Prop,
+    builderFn: (
+      builder: ExpandingODataUriBuilderV4<EntityExtractor<Q[Prop]>>,
+      qObject: EntityExtractor<Q[Prop]>
+    ) => void
+  ) {
+    this.builder.expanding(ExpandingODataUriBuilderV4, prop, builderFn);
     return this;
   }
 
@@ -46,15 +103,22 @@ export class ODataUriBuilderV4<Q extends QueryObject> extends ODataUriBuilderV4B
    * @param props
    */
   public groupBy(...props: Array<keyof Q | null | undefined>) {
-    if (props && props.length) {
-      this.groupBys.push(
-        ...props
-          .filter((p): p is keyof Q => !!p)
-          .map((p) => {
-            return (this.entity[p] as unknown as QPath).getPath();
-          })
-      );
-    }
+    this.builder.groupBy(props);
+    return this;
+  }
+
+  public orderBy(...expressions: Array<QOrderByExpression>) {
+    this.builder.orderBy(expressions);
+    return this;
+  }
+
+  public top(itemsTop: number) {
+    this.builder.top(itemsTop);
+    return this;
+  }
+
+  public skip(itemsToSkip: number) {
+    this.builder.skip(itemsToSkip);
     return this;
   }
 
@@ -65,14 +129,11 @@ export class ODataUriBuilderV4<Q extends QueryObject> extends ODataUriBuilderV4B
    * @param term
    */
   public search(term: string | undefined | null) {
-    this.searchTerm = term || undefined;
-
+    this.builder.search(term);
     return this;
   }
 
-  protected getSearchResult(): string | undefined {
-    const term = this.searchTerm?.trim();
-    // single word is a term (literal value), multiple terms are a phrase (quoted value with double quotes)
-    return !term ? undefined : term.indexOf(" ") > -1 ? `"${this.searchTerm}"` : this.searchTerm;
+  public build() {
+    return this.builder.build();
   }
 }

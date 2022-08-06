@@ -1,4 +1,4 @@
-import { ODataUriBuilderV2 } from "../src/v2/ODataUriBuilderV2";
+import { ODataUriBuilderV2 } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 import { createBaseTests } from "./ODataUriBuilderBaseTests";
 
@@ -40,14 +40,7 @@ describe("ODataUriBuilderV2 Test", () => {
     expect(candidate).toBe(expected);
   });
 
-  test("select: simple prop", () => {
-    const candidate = toTest.select(qPerson.age).build();
-    const expected = addBase("$select=age");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("select: nested prop", () => {
+  /*test("select: nested prop", () => {
     const candidate = toTest.select(qPerson.address.props.street).build();
     const expected = addBase("$select=Address/street");
 
@@ -60,20 +53,12 @@ describe("ODataUriBuilderV2 Test", () => {
 
     expect(candidate).toBe(expected);
   });
+*/
 
-  test("select: mixed", () => {
-    const candidate = toTest
-      .select("age", qPerson.address.props.street, qPerson.address.props.responsible.props.age)
-      .build();
-    const expected = addBase("$select=age,Address/street,Address/responsible/age");
+  /*test("expanding: nested expand", () => {
+      const candidate = toTest.expanding("address", (q) => q.responsible).build();
+      const expected = addBase("$expand=Address/responsible");
 
-    expect(candidate).toBe(expected);
-  });
-
-  test("expanding: nested expand", () => {
-    const candidate = toTest.expanding("address", (q) => q.responsible).build();
-    const expected = addBase("$expand=Address/responsible");
-
-    expect(candidate).toBe(expected);
-  });
+      expect(candidate).toBe(expected);
+    });*/
 });
