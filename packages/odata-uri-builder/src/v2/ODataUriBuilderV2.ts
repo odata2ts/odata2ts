@@ -1,18 +1,8 @@
+import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
 import {
-  QComplexPath,
-  QEntityCollectionPath,
-  QEntityPath,
-  QFilterExpression,
-  QOrderByExpression,
-  QPathModel,
-  QueryObject,
-} from "@odata2ts/odata-query-objects";
-import {
-  EntityExtractor,
-  ExpandingODataUriBuilderV4,
   ExpandType,
   ODataOperators,
-  ODataUriBuilderBase,
+  ODataUriBuilder,
   ODataUriBuilderConfig,
   ODataUriBuilderV2Model,
 } from "../internal";
@@ -42,10 +32,10 @@ export class ODataUriBuilderV2<Q extends QueryObject> implements ODataUriBuilder
     return new ODataUriBuilderV2<Q>(path, qEntity, config);
   }
 
-  private builder: ODataUriBuilderBase<Q>;
+  private builder: ODataUriBuilder<Q>;
 
   private constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
-    this.builder = new ODataUriBuilderBase(path, qEntity, config);
+    this.builder = new ODataUriBuilder(path, qEntity, config);
   }
 
   /**

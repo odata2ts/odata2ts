@@ -4,24 +4,16 @@ import {
   ExpandType,
   ODataOperators,
   ODataUriBuilder,
-  ODataUriBuilderBase,
   ODataUriBuilderConfig,
   ODataUriBuilderV4Model,
 } from "../internal";
-import {
-  QComplexPath,
-  QFilterExpression,
-  QOrderByExpression,
-  QPath,
-  QPathModel,
-  QueryObject,
-} from "@odata2ts/odata-query-objects";
+import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
 
 /**
  * Create an OData URI string in a typesafe way by facilitating generated query objects.
  */
 export class ODataUriBuilderV4<Q extends QueryObject> implements ODataUriBuilderV4Model<Q> {
-  private builder: ODataUriBuilderBase<Q>;
+  private builder: ODataUriBuilder<Q>;
 
   /**
    * Create an UriBuilder by passing in a query object, which already contains the base path
@@ -44,7 +36,7 @@ export class ODataUriBuilderV4<Q extends QueryObject> implements ODataUriBuilder
   }
 
   private constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
-    this.builder = new ODataUriBuilderBase(path, qEntity, config);
+    this.builder = new ODataUriBuilder(path, qEntity, config);
   }
 
   public count(doCount?: boolean) {

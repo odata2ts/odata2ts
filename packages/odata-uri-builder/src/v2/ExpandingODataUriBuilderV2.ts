@@ -1,6 +1,6 @@
 import { QueryObject } from "@odata2ts/odata-query-objects";
-import { ExpandingODataUriBuilderV2Model, ExpandType } from "../ODataUriBuilder";
-import { ODataUriBuilderBase } from "../ODataUriBuilderBase";
+import { ExpandingODataUriBuilderV2Model, ExpandType } from "../ODataUriBuilderModel";
+import { ODataUriBuilder } from "../ODataUriBuilder";
 import { ExpandingODataUriBuilderV4 } from "../v4/ExpandingODataUriBuilderV4";
 
 /**
@@ -12,10 +12,10 @@ export class ExpandingODataUriBuilderV2<Q extends QueryObject> implements Expand
     return new ExpandingODataUriBuilderV2<Q>(property, qEntity);
   }
 
-  private builder: ODataUriBuilderBase<Q>;
+  private builder: ODataUriBuilder<Q>;
 
   public constructor(property: string, qEntity: Q) {
-    this.builder = new ODataUriBuilderBase(property, qEntity, { expandingBuilder: true });
+    this.builder = new ODataUriBuilder(property, qEntity, { expandingBuilder: true });
   }
 
   public select(...props: Array<keyof Q | null | undefined>) {

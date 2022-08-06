@@ -1,126 +1,248 @@
+import { QComplexPath, QFilterExpression, QOrderByExpression, QPath, QueryObject } from "@odata2ts/odata-query-objects";
 import {
-  QCollectionPath,
-  QEntityCollectionPath,
-  QEntityPath,
-  QFilterExpression,
-  QOrderByExpression,
-  QueryObject,
-} from "@odata2ts/odata-query-objects";
-import { ODataUriBuilderConfig } from "./ODataUriBuilderBase";
+  ExpandingBuilderFactoryFunction,
+  ExpandingODataUriBuilderV4,
+  ExpandType,
+  ODataOperators,
+  ODataUriBuilderConfig,
+} from "./internal";
 
-/**
- * Extracts the wrapped entity from QEntityPath or QEntityCollectionPath
- */
-export type EntityExtractor<QProp> = QProp extends QEntityPath<infer ET>
-  ? ET
-  : QProp extends QEntityCollectionPath<infer ET>
-  ? ET
-  : never;
+export class ODataUriBuilder<Q extends QueryObject> {
+  private readonly path: string;
+  private readonly entity: Q;
 
-/**
- * Extracts all keys from a property (Q*Path), but only for the given types
- */
-export type ExtractPropertyNamesOfType<QPath, QPathTypes> = {
-  [Key in keyof QPath]: QPath[Key] extends QPathTypes ? Key : never;
-}[keyof QPath];
+  private readonly unencoded: boolean;
+  private readonly config?: ODataUriBuilderConfig;
 
-/**
- * Retrieves all property names which are expandable,
- * i.e. props of type QEntityPath, QEntityCollectionPath and QCollectionPath
- */
-export type ExpandType<Q extends QueryObject> = ExtractPropertyNamesOfType<
-  Q,
-  QEntityPath<any> | QEntityCollectionPath<any> | QCollectionPath<any>
->;
+  private itemsCount: [ODataOperators, string] | undefined;
+  private itemsToSkip: number | undefined;
+  private itemsTop: number | undefined;
 
-export type EntityPropNames<Q extends QueryObject> = Array<keyof Q | null | undefined>;
+  private selects: Array<string> | undefined;
+  private filters: Array<QFilterExpression> | undefined;
+  private orderBys: Array<QOrderByExpression> | undefined;
+  private expands: Array<string> | undefined;
+  protected groupBys: Array<string> | undefined;
+  protected searchTerm: string | undefined;
 
-export interface ODataUriBuilder<Q extends QueryObject, ReturnType, ExpandingReturnType> {
-  count: (doCount?: boolean) => ReturnType;
+  constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
+    if (!qEntity || !path || !path.trim()) {
+      throw Error("A valid collection name must be provided!");
+    }
 
-  search: (term: string | undefined | null) => ReturnType;
+    this.path = path;
+    this.entity = qEntity;
+    this.config = config;
+    this.unencoded = !!config && !!config.unencoded;
+  }
 
   /**
-   * Name the properties of the entity you want to select.
-   * Null or undefined are allowed and will be ignored.
+   * Add the count system query param.
    *
-   * This function can be called multiple times.
-   *
-   * If you want to select nested properties, e.g. "address/street", then you need to use a function.
-   * The first parameter of the function will be the current QueryObject of the UriBuilder.
-   *
-   * Examples:
-   * - {@code select("lastName", "firstName", undefined) } => $select=lastName,firstName
-   * - {@code select("lastName", false ? "firstName" : undefined) } => $select=lastName
-   *
-   * @param props the property names to select or a function to select one or more QPathModels from QueryObject
+   * @param countOperator V2 or V4 count operator
+   * @param countInstruction value of the parameter
    * @returns this query builder
    */
-  select: (...props: EntityPropNames<Q>) => ReturnType;
+  public count(countOperator: ODataOperators.COUNT | ODataOperators.COUNTV2, countInstruction: string) {
+    this.itemsCount = [countOperator, countInstruction];
+  }
+
+  public select(props: Array<keyof Q | null | undefined>) {
+    if (props && props.length) {
+      if (!this.selects) {
+        this.selects = [];
+      }
+      this.selects.push(
+        ...props
+          .filter((p): p is keyof Q => !!p)
+          .map((p) => {
+            return (this.entity[p] as unknown as QPath).getPath();
+          })
+      );
+    }
+  }
+
+  public filter(expressions: Array<QFilterExpression>) {
+    if (expressions?.length) {
+      if (!this.filters) {
+        this.filters = [];
+      }
+      this.filters.push(...expressions);
+    }
+  }
+
+  public expand<Prop extends ExpandType<Q>>(expBuilder: ExpandingBuilderFactoryFunction<Q>, props: Array<Prop>) {
+    if (props?.length) {
+      if (!this.expands) {
+        this.expands = [];
+      }
+      this.expands.push(
+        ...props.map((p) => {
+          const prop = this.entity[p] as unknown as QComplexPath;
+          return new expBuilder(prop.getPath(), prop.getEntity()).build();
+        })
+      );
+    }
+  }
+
+  public expanding<Prop extends ExpandType<Q>>(
+    expBuilder: ExpandingBuilderFactoryFunction<Q>,
+    prop: Prop,
+    builderFn: (builder: any, qObject: any) => void
+  ) {
+    if (!prop) {
+      throw new Error("Expanding prop must be defined!");
+    }
+    if (builderFn) {
+      if (!this.expands) {
+        this.expands = [];
+      }
+
+      const entityProp = this.entity[prop] as unknown as QComplexPath;
+      const expander = ExpandingODataUriBuilderV4.create(entityProp.getPath(), entityProp.getEntity());
+      builderFn(expander, entityProp.getEntity());
+
+      this.expands.push(expander.build());
+    }
+  }
 
   /**
-   * Specify as many filter expressions as you want by facilitating query objects.
-   * Alternatively you can use QueryExpressions directly.
+   * Skip n items from the result set.
+   * To be used in combination with top.
    *
-   * Each passed expression is concatenated to the other ones by an and expression.
-   *
-   * This method can be called multiple times in order to add filters successively.
-   *
-   * @param expressions possibly multiple expressions
+   * @param itemsToSkip amount of items to skip
    * @returns this query builder
    */
-  filter: (...expressions: Array<QFilterExpression>) => ReturnType;
+  public skip(itemsToSkip: number) {
+    if (itemsToSkip === undefined || itemsToSkip === null || itemsToSkip < 0) {
+      throw Error("Parameter [skip] must be a positive integer including 0!");
+    }
+
+    this.itemsToSkip = itemsToSkip;
+  }
 
   /**
-   * Simple & plain expand of the given entities or entity collections.
+   * Returns this many items.
+   * To be used in combination with skip.
    *
-   * This method can be called multiple times.
-   *
-   * @param props the attributes to expand
+   * @param itemsTop amount of items to fetch
    * @returns this query builder
    */
-  expand: <Prop extends ExpandType<Q>>(...props: Array<Prop>) => ReturnType;
-  groupBy: (...props: EntityPropNames<Q>) => ReturnType;
-  skip: (itemsToSkip: number) => ReturnType;
-  top: (itemsTop: number) => ReturnType;
-  orderBy: (...expressions: Array<QOrderByExpression>) => ReturnType;
-  build: () => string;
+  public top(itemsTop: number) {
+    if (itemsTop === undefined || itemsTop === null || itemsTop < 0) {
+      throw Error("Parameter [top] must be a positive integer including 0!");
+    }
+
+    this.itemsTop = itemsTop;
+  }
+
+  /**
+   * Specify order by expressions by facilitating qObjects and their
+   * ascending and descending methods.
+   *
+   * This method can be called multiple times in order to add orderBy expressions successively.
+   *
+   * @param expressions possibly multiple order by expressions at once
+   * @returns this query builder
+   */
+  public orderBy(expressions: Array<QOrderByExpression>) {
+    if (expressions?.length) {
+      if (!this.orderBys) {
+        this.orderBys = [];
+      }
+      this.orderBys.push(...expressions);
+    }
+  }
+
+  /* public filterOr(...expressions: Array<QFilterExpression>) {
+    this.filters.push(
+      expressions.reduce((collector, expr) => (collector ? collector.or(expr) : expr), null as unknown as QFilterExpression)
+    );
+  } */
+
+  public groupBy(props: Array<keyof Q | null | undefined>) {
+    if (props && props.length) {
+      if (!this.groupBys) {
+        this.groupBys = [];
+      }
+      this.groupBys.push(
+        ...props
+          .filter((p): p is keyof Q => !!p)
+          .map((p) => {
+            return (this.entity[p] as unknown as QPath).getPath();
+          })
+      );
+    }
+  }
+
+  public search(term: string | undefined | null) {
+    this.searchTerm = term || undefined;
+  }
+
+  private param(operator: string, value: string) {
+    return `${operator}=${value}`;
+  }
+
+  private paramEncoded(operator: string, value: string) {
+    return `${encodeURIComponent(operator)}=${encodeURIComponent(value)}`;
+  }
+
+  private buildQuery(param: (operator: string, value: string) => string): Array<string> {
+    const params: Array<string> = [];
+    const add = (operator: string, value: string) => params.push(param(operator, value));
+
+    const cleanedFilters = this.filters?.filter((f) => f.toString());
+
+    if (this.selects?.length) {
+      add(ODataOperators.SELECT, this.selects.join(","));
+    }
+    if (this.expands?.length) {
+      add(ODataOperators.EXPAND, this.expands.join(","));
+    }
+    if (cleanedFilters?.length) {
+      const filterConcat = cleanedFilters.reduce((result, filter) => (result ? result.and(filter) : filter));
+
+      if (filterConcat) {
+        add(ODataOperators.FILTER, filterConcat.toString());
+      }
+    }
+    if (this.groupBys?.length) {
+      add(ODataOperators.APPLY, `groupby((${this.groupBys.join(",")}))`);
+    }
+    if (this.orderBys?.length) {
+      const order = this.orderBys.map((exp) => exp.toString()).join(",");
+      add(ODataOperators.ORDER_BY, order);
+    }
+    if (this.itemsCount?.length === 2) {
+      add(this.itemsCount[0], this.itemsCount[1]);
+    }
+    if (this.itemsTop !== undefined) {
+      add(ODataOperators.TOP, String(this.itemsTop));
+    }
+    if (this.itemsToSkip !== undefined) {
+      add(ODataOperators.SKIP, String(this.itemsToSkip));
+    }
+    if (this.searchTerm) {
+      // single word is a term (literal value), multiple terms are a phrase (quoted value with double quotes)
+      const encodedSearchTerm = this.searchTerm.indexOf(" ") > -1 ? `"${this.searchTerm}"` : this.searchTerm;
+      add(ODataOperators.SEARCH, encodedSearchTerm);
+    }
+
+    return params;
+  }
+
+  /**
+   * Build the final URI string.
+   *
+   * @returns the query string including the base service & collection path
+   */
+  public build(): string {
+    const paramFn = this.unencoded || this.config?.expandingBuilder ? this.param : this.paramEncoded;
+    const params = this.buildQuery(paramFn);
+
+    return (
+      this.path +
+      (!params.length ? "" : !this.config?.expandingBuilder ? `?${params.join("&")}` : `(${params.join(";")})`)
+    );
+  }
 }
-
-type BuilderOp = "build";
-type PaginationOps = "skip" | "top";
-type BaseOps = "select" | "filter" | "expand" | "orderBy";
-type V2Ops = BaseOps | "count" | PaginationOps;
-type V4Ops = V2Ops | "groupBy" | "search";
-type V2ExpandingOps = "select";
-type V4ExpandingOps = BaseOps | PaginationOps;
-
-// BuilderOperation | V2Operations | V2Operations
-
-export interface ODataUriBuilderV2Model<Q extends QueryObject>
-  // extends Selectable<Q, ODataUriBuilderV2Model<Q>> {}
-  extends Pick<
-    ODataUriBuilder<Q, ODataUriBuilderV2Model<Q>, ExpandingODataUriBuilderV2Model<Q>>,
-    BuilderOp | V2Ops | PaginationOps
-
-    // "build" | "select" | "filter" | "orderBy" //| "count" | "skip" | "top"
-  > {}
-
-export interface ExpandingODataUriBuilderV2Model<Q extends QueryObject>
-  extends Pick<
-    ODataUriBuilder<Q, ExpandingODataUriBuilderV2Model<Q>, ExpandingODataUriBuilderV2Model<Q>>,
-    BuilderOp | V2ExpandingOps
-  > {}
-
-export interface ODataUriBuilderV4Model<Q extends QueryObject>
-  extends Pick<ODataUriBuilder<Q, ODataUriBuilderV4Model<Q>, ExpandingODataUriBuilderV4Model<Q>>, BuilderOp | V4Ops> {}
-
-export interface ExpandingODataUriBuilderV4Model<Q extends QueryObject>
-  extends Pick<
-    ODataUriBuilder<Q, ExpandingODataUriBuilderV4Model<Q>, ExpandingODataUriBuilderV4Model<Q>>,
-    BuilderOp | V4ExpandingOps
-  > {}
-
-export type ExpandingBuilderFactoryFunction<Q extends QueryObject> = new (path: string, qEntity: Q) =>
-  | ExpandingODataUriBuilderV2Model<Q>
-  | ExpandingODataUriBuilderV4Model<Q>;

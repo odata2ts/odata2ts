@@ -1,7 +1,7 @@
 import { QueryObject } from "@odata2ts/odata-query-objects";
 import { QFilterExpression } from "../src/";
 import {
-  ODataUriBuilder,
+  ODataUriBuilderModel,
   ODataUriBuilderConfig,
   ODataUriBuilderV2Model,
   ODataUriBuilderV4Model,
