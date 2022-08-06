@@ -1,6 +1,11 @@
 import { QueryObject } from "@odata2ts/odata-query-objects";
 import { QFilterExpression } from "../src/";
-import { ODataUriBuilder, ODataUriBuilderConfig } from "../src/internal";
+import {
+  ODataUriBuilderModel,
+  ODataUriBuilderConfig,
+  ODataUriBuilderV2Model,
+  ODataUriBuilderV4Model,
+} from "../src/internal";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 
 /**
@@ -17,10 +22,10 @@ export type BuilderFactoryFunction<Q extends QueryObject> = (
   path: string,
   qEntity: Q,
   config?: ODataUriBuilderConfig
-) => ODataUriBuilder<Q>;
+) => ODataUriBuilderV2Model<Q> | ODataUriBuilderV4Model<Q>;
 
 export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) {
-  let toTest: ODataUriBuilder<QPerson>;
+  let toTest: ODataUriBuilderV2Model<QPerson>;
 
   /**
    * Always use a new builder for each test.

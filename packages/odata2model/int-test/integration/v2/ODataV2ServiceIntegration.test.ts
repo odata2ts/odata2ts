@@ -101,6 +101,8 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
     expect(result.data.d[0]).toMatchObject(PRODUCT_ZERO);
   });
 
+  /*
+  TODO
   test("deep select query", async () => {
     const result = await testService.getProductsSrv().query((b, qProduct) => {
       b.count()
@@ -121,5 +123,5 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
         Name: "Food",
       },
     });
-  });
+  });*/
 });

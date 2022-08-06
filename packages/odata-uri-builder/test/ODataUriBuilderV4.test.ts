@@ -78,7 +78,7 @@ describe("ODataUriBuilderV4 Test", () => {
         builder.select("street").skip(1).top(0).filter(qEntity.street.equals("Teststr. 12"));
       })
       .build();
-    const expected = addBase("$expand=AltAdresses($select=street;$skip=1;$top=0;$filter=street eq 'Teststr. 12')");
+    const expected = addBase("$expand=AltAdresses($select=street;$filter=street eq 'Teststr. 12';$top=0;$skip=1)");
 
     expect(candidate).toBe(expected);
   });
@@ -96,7 +96,7 @@ describe("ODataUriBuilderV4 Test", () => {
       })
       .build();
     const expected = addBase(
-      "$select=name,age&$expand=Address($select=street;$filter=startswith(street,'Kam');$expand=responsible($select=name))"
+      "$select=name,age&$expand=Address($select=street;$expand=responsible($select=name);$filter=startswith(street,'Kam'))"
     );
 
     expect(candidate).toBe(expected);
@@ -144,6 +144,6 @@ describe("ODataUriBuilderV4 Test", () => {
     expect(toTest.search(undefined).build()).toBe(noopPath);
     expect(toTest.search(null).build()).toBe(noopPath);
     expect(toTest.search("").build()).toBe(noopPath);
-    expect(toTest.search(" ").build()).toBe(noopPath);
+    expect(toTest.search(" ").build()).toBe(addBase('$search=" "'));
   });
 });

@@ -1,14 +1,8 @@
 import { HttpResponseModel } from "@odata2ts/odata-client-api";
-import {
-  QStringCollection,
-  StringCollection,
-  QEnumCollection,
-  EnumCollection,
-  QStringV2Collection,
-} from "@odata2ts/odata-query-objects";
+import { StringCollection, QEnumCollection, EnumCollection, QStringV2Collection } from "@odata2ts/odata-query-objects";
 
 import { MockODataClient } from "../mock/MockODataClient";
-import { CollectionServiceV2, CollectionServiceV4, ODataCollectionResponseV2 } from "../../src";
+import { CollectionServiceV2, ODataCollectionResponseV2 } from "../../src";
 import { Feature } from "../fixture/PersonModel";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
 
