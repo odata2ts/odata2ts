@@ -42,7 +42,7 @@ export function commonCollectionTests(
   });
 
   test("collection: skip & top, but no select, expand", async () => {
-    const params = getParams({ $skip: "1", $top: "2" });
+    const params = getParams({ $top: "2", $skip: "1" });
     const expectedString = STRING_URL + params;
     const expectedEnum = ENUM_URL + params;
 
