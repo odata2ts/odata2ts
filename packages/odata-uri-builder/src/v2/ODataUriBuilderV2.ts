@@ -1,5 +1,6 @@
-import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
+import { QComplexPath, QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
 import {
+  EntityExtractor,
   ExpandType,
   ODataOperators,
   ODataUriBuilder,
@@ -65,30 +66,46 @@ export class ODataUriBuilderV2<Q extends QueryObject> implements ODataUriBuilder
   }
 
   public expand<Prop extends ExpandType<Q>>(...props: Array<Prop>) {
-    this.builder.expand(ExpandingODataUriBuilderV2, props);
+    this.builder.expand(props);
     return this;
   }
-  /*
-    /!**
-     * Expand nested props of the current entity.
-     *
-     * This method can be called multiple times.
-     *
-     * Examples for a PersonModel:
-     * - {@code expanding("address", (qAddress) => qAddress.responsible) // result: $expand=address/responsible}
-     * - {@code expanding("address", (qAddress) => qAddress.responsible.props.address) // result: $expand=address/responsible/address}
-     *
-     * @param prop name of the property to expand
-     * @param expandFn function which receives the query object as argument
-     * @returns this query builder
-     *!/
-    public expanding<Prop extends ExpandType<Q>>(
-      prop: Prop,
-      builderFn: (builder: ExpandingODataUriBuilder<EntityExtractor<Q[Prop]>>, qObject: EntityExtractor<Q[Prop]>) => void
-    ) {
-      this.builder.expanding(prop, builderFn);
-      return this;
-    }*/
+  /**
+   * Expand nested props of the current entity.
+   *
+   * This method can be called multiple times.
+   *
+   * Examples for a PersonModel:
+   * - {@code expanding("address", (qAddress) => qAddress.responsible) // result: $expand=address/responsible}
+   * - {@code expanding("address", (qAddress) => qAddress.responsible.props.address) // result: $expand=address/responsible/address}
+   *
+   * @param prop name of the property to expand
+   * @param builderFn function which receives the query object as argument
+   * @returns this query builder
+   */
+  public expanding<Prop extends ExpandType<Q>>(
+    prop: Prop,
+    builderFn: (
+      builder: ExpandingODataUriBuilderV2<EntityExtractor<Q[Prop]>>,
+      qObject: EntityExtractor<Q[Prop]>
+    ) => void
+  ) {
+    const entityProp = this.builder.getEntityProp<QComplexPath>(prop);
+    const entity = entityProp.getEntity();
+
+    const expander = new ExpandingODataUriBuilderV2(entityProp.getPath(), entity);
+
+    builderFn(expander, entity);
+
+    const { selects, expands } = expander.build();
+    if (selects?.length) {
+      this.builder.addSelects(...selects);
+    }
+    if (expands?.length) {
+      this.builder.addExpands(...expands);
+    }
+
+    return this;
+  }
 
   public orderBy(...expressions: Array<QOrderByExpression>) {
     this.builder.orderBy(expressions);

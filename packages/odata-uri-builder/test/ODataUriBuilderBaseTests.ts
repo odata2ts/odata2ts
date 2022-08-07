@@ -22,10 +22,10 @@ export type BuilderFactoryFunction<Q extends QueryObject> = (
   path: string,
   qEntity: Q,
   config?: ODataUriBuilderConfig
-) => ODataUriBuilderV2Model<Q> | ODataUriBuilderV4Model<Q>;
+) => ODataUriBuilderV2Model<QPerson>;
 
 export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) {
-  let toTest: ODataUriBuilderV2Model<QPerson>;
+  let toTest: Omit<ODataUriBuilderV2Model<QPerson>, "expanding">;
 
   /**
    * Always use a new builder for each test.

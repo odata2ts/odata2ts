@@ -6,6 +6,7 @@ import {
   QOrderByExpression,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
+import { ExpandingODataUriBuilderV2, ExpandingODataUriBuilderV4 } from "./internal";
 
 /**
  * Extracts the wrapped entity from QEntityPath or QEntityCollectionPath
@@ -39,7 +40,7 @@ export interface ODataUriBuilderConfig {
   unencoded?: boolean;
 }
 
-export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType, ExpandingReturnType> {
+export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
   count: (doCount?: boolean) => ReturnType;
 
   search: (term: string | undefined | null) => ReturnType;
@@ -84,6 +85,13 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType, Expandi
    * @returns this query builder
    */
   expand: <Prop extends ExpandType<Q>>(...props: Array<Prop>) => ReturnType;
+  expanding: <Prop extends ExpandType<Q>>(
+    prop: Prop,
+    expBuilderFn: (
+      expBuilder: ExpandingODataUriBuilderV4<EntityExtractor<Q[Prop]>>,
+      qObject: EntityExtractor<Q[Prop]>
+    ) => void
+  ) => ReturnType;
   groupBy: (...props: EntityPropNames<Q>) => ReturnType;
   skip: (itemsToSkip: number) => ReturnType;
   top: (itemsTop: number) => ReturnType;
@@ -93,41 +101,32 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType, Expandi
 
 type BuilderOp = "build";
 type PaginationOps = "skip" | "top";
-type BaseOps = "select" | "filter" | "expand" | "orderBy";
+type BaseOps = "select" | "expand" | "filter" | "orderBy";
 type V2Ops = BaseOps | "count" | PaginationOps;
-type V4Ops = V2Ops | "groupBy" | "search";
+type V4Ops = V2Ops | "expanding" | "groupBy" | "search";
 type V2ExpandingOps = "select";
-type V4ExpandingOps = BaseOps | PaginationOps;
+type V4ExpandingOps = BaseOps | "expanding" | PaginationOps;
 
-// BuilderOperation | V2Operations | V2Operations
+type V2ExpandResult = { selects?: Array<string>; expands?: Array<string> };
 
 export interface ODataUriBuilderV2Model<Q extends QueryObject>
-  // extends Selectable<Q, ODataUriBuilderV2Model<Q>> {}
-  extends Pick<
-    ODataUriBuilderModel<Q, ODataUriBuilderV2Model<Q>, ExpandingODataUriBuilderV2Model<Q>>,
-    BuilderOp | V2Ops | PaginationOps
-
-    // "build" | "select" | "filter" | "orderBy" //| "count" | "skip" | "top"
-  > {}
+  extends Pick<ODataUriBuilderModel<Q, ODataUriBuilderV2Model<Q>>, BuilderOp | V2Ops | PaginationOps> {
+  expanding: <Prop extends ExpandType<Q>>(
+    prop: Prop,
+    expBuilderFn: (
+      expBuilder: ExpandingODataUriBuilderV2<EntityExtractor<Q[Prop]>>,
+      qObject: EntityExtractor<Q[Prop]>
+    ) => void
+  ) => this;
+}
 
 export interface ExpandingODataUriBuilderV2Model<Q extends QueryObject>
-  extends Pick<
-    ODataUriBuilderModel<Q, ExpandingODataUriBuilderV2Model<Q>, ExpandingODataUriBuilderV2Model<Q>>,
-    BuilderOp | V2ExpandingOps
-  > {}
+  extends Pick<ODataUriBuilderModel<Q, ExpandingODataUriBuilderV2Model<Q>>, V2ExpandingOps> {
+  build: () => V2ExpandResult;
+}
 
 export interface ODataUriBuilderV4Model<Q extends QueryObject>
-  extends Pick<
-    ODataUriBuilderModel<Q, ODataUriBuilderV4Model<Q>, ExpandingODataUriBuilderV4Model<Q>>,
-    BuilderOp | V4Ops
-  > {}
+  extends Pick<ODataUriBuilderModel<Q, ODataUriBuilderV4Model<Q>>, BuilderOp | V4Ops> {}
 
 export interface ExpandingODataUriBuilderV4Model<Q extends QueryObject>
-  extends Pick<
-    ODataUriBuilderModel<Q, ExpandingODataUriBuilderV4Model<Q>, ExpandingODataUriBuilderV4Model<Q>>,
-    BuilderOp | V4ExpandingOps
-  > {}
-
-export type ExpandingBuilderFactoryFunction<Q extends QueryObject> = new (path: string, qEntity: Q) =>
-  | ExpandingODataUriBuilderV2Model<Q>
-  | ExpandingODataUriBuilderV4Model<Q>;
+  extends Pick<ODataUriBuilderModel<Q, ExpandingODataUriBuilderV4Model<Q>>, BuilderOp | V4ExpandingOps> {}

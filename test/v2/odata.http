@@ -19,6 +19,31 @@ Accept: {{contentType}}
 GET {{baseUrl}}/Products(666)
 Accept: {{contentType}}
 
+### @name expanding
+GET {{baseUrl}}/Products?$expand=Category
+Accept: {{contentType}}
+
+### @name deep expanding
+GET {{baseUrl}}/Products(0)?$expand=Category/Products
+Accept: {{contentType}}
+
+### @name selecting nested
+GET {{baseUrl}}/Products?$select=ID,Name,Category/ID&$expand=Category
+Accept: {{contentType}}
+
+### @name selecting nested without expand => fails 400
+GET {{baseUrl}}/Products?$select=ID,Name,Category/ID
+Accept: {{contentType}}
+
+### @name selecting deeply nested
+GET {{baseUrl}}/Products(0)?$select=ID,Name,Category/Name,Category/Products/Name&$expand=Category/Products
+Accept: {{contentType}}
+
+### @name selecting deeply nested with individual expands
+GET {{baseUrl}}/Products(0)?$select=ID,Name,Category/Name,Category/Products/Name&$expand=Category,Category/Products
+Accept: {{contentType}}
+
+
 # --- Create Entity ---
 ### @name create new product
 POST {{baseUrl}}/Products
