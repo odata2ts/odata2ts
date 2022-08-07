@@ -1,3 +1,4 @@
+import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
 import {
   EntityExtractor,
   ExpandingODataUriBuilderV4,
@@ -7,7 +8,6 @@ import {
   ODataUriBuilderConfig,
   ODataUriBuilderV4Model,
 } from "../internal";
-import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
 
 /**
  * Create an OData URI string in a typesafe way by facilitating generated query objects.
@@ -55,7 +55,7 @@ export class ODataUriBuilderV4<Q extends QueryObject> implements ODataUriBuilder
   }
 
   public expand<Prop extends ExpandType<Q>>(...props: Array<Prop>) {
-    this.builder.expand(ExpandingODataUriBuilderV4, props);
+    this.builder.expand(props);
     return this;
   }
 
@@ -82,7 +82,7 @@ export class ODataUriBuilderV4<Q extends QueryObject> implements ODataUriBuilder
       qObject: EntityExtractor<Q[Prop]>
     ) => void
   ) {
-    this.builder.expanding(ExpandingODataUriBuilderV4, prop, builderFn);
+    this.builder.expanding(prop, builderFn);
     return this;
   }
 

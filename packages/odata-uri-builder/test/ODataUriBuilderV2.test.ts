@@ -40,20 +40,39 @@ describe("ODataUriBuilderV2 Test", () => {
     expect(candidate).toBe(expected);
   });
 
-  /*test("select: nested prop", () => {
-    const candidate = toTest.select(qPerson.address.props.street).build();
-    const expected = addBase("$select=Address/street");
+  test("expanding: selecting nested prop", () => {
+    const candidate = toTest.expanding("address", (builder) => builder.select("street")).build();
+    const expected = addBase("$select=Address/street&$expand=Address");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expanding: selecting nested prop mixed with selects and expands", () => {
+    const candidate = toTest
+      .select("name")
+      .expand("altAdresses")
+      .expanding("address", (builder) => builder.select("street"))
+      .build();
+    const expected = addBase("$select=name,Address/street&$expand=AltAdresses,Address");
 
     expect(candidate).toBe(expected);
   });
 
   test("select: deeply nested prop", () => {
-    const candidate = toTest.select(qPerson.address.props.responsible.props.age).build();
-    const expected = addBase("$select=Address/responsible/age");
+    const candidate = toTest
+      .expanding("address", (builder) => {
+        builder.expanding("responsible", (respBuilder) => {
+          respBuilder.select("name").expand("address");
+        });
+      })
+      .build();
+
+    const expected = addBase(
+      "$select=Address/responsible/name&$expand=Address,Address/responsible,Address/responsible/Address"
+    );
 
     expect(candidate).toBe(expected);
   });
-*/
 
   /*test("expanding: nested expand", () => {
       const candidate = toTest.expanding("address", (q) => q.responsible).build();

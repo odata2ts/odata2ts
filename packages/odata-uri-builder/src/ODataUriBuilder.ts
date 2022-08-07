@@ -1,11 +1,5 @@
 import { QComplexPath, QFilterExpression, QOrderByExpression, QPath, QueryObject } from "@odata2ts/odata-query-objects";
-import {
-  ExpandingBuilderFactoryFunction,
-  ExpandingODataUriBuilderV4,
-  ExpandType,
-  ODataOperators,
-  ODataUriBuilderConfig,
-} from "./internal";
+import { ExpandingODataUriBuilderV4, ExpandType, ODataOperators, ODataUriBuilderConfig } from "./internal";
 
 export class ODataUriBuilder<Q extends QueryObject> {
   private readonly path: string;
@@ -22,8 +16,8 @@ export class ODataUriBuilder<Q extends QueryObject> {
   private filters: Array<QFilterExpression> | undefined;
   private orderBys: Array<QOrderByExpression> | undefined;
   private expands: Array<string> | undefined;
-  protected groupBys: Array<string> | undefined;
-  protected searchTerm: string | undefined;
+  private groupBys: Array<string> | undefined;
+  private searchTerm: string | undefined;
 
   constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
     if (!qEntity || !path || !path.trim()) {
@@ -34,6 +28,45 @@ export class ODataUriBuilder<Q extends QueryObject> {
     this.entity = qEntity;
     this.config = config;
     this.unencoded = !!config && !!config.unencoded;
+  }
+
+  public getPath() {
+    return this.path;
+  }
+
+  private getSelects() {
+    if (!this.selects) {
+      this.selects = [];
+    }
+    return this.selects;
+  }
+
+  private getExpands() {
+    if (!this.expands) {
+      this.expands = [];
+    }
+    return this.expands;
+  }
+
+  public addSelects = (...paths: Array<string>) => {
+    if (paths?.length) {
+      this.getSelects().push(...paths);
+    }
+  };
+
+  public addExpands = (...paths: Array<string>) => {
+    if (paths?.length) {
+      this.getExpands().push(...paths);
+    }
+  };
+
+  /**
+   * Helper method to retrieve a typed property from the entity.
+   *
+   * @param prop
+   */
+  public getEntityProp<PropType = QPath>(prop: keyof Q) {
+    return this.entity[prop] as unknown as PropType;
   }
 
   /**
@@ -49,14 +82,11 @@ export class ODataUriBuilder<Q extends QueryObject> {
 
   public select(props: Array<keyof Q | null | undefined>) {
     if (props && props.length) {
-      if (!this.selects) {
-        this.selects = [];
-      }
-      this.selects.push(
+      this.getSelects().push(
         ...props
           .filter((p): p is keyof Q => !!p)
           .map((p) => {
-            return (this.entity[p] as unknown as QPath).getPath();
+            return this.getEntityProp(p).getPath();
           })
       );
     }
@@ -71,39 +101,31 @@ export class ODataUriBuilder<Q extends QueryObject> {
     }
   }
 
-  public expand<Prop extends ExpandType<Q>>(expBuilder: ExpandingBuilderFactoryFunction<Q>, props: Array<Prop>) {
+  public expand<Prop extends ExpandType<Q>>(props: Array<Prop>) {
     if (props?.length) {
-      if (!this.expands) {
-        this.expands = [];
-      }
-      this.expands.push(
+      this.getExpands().push(
         ...props.map((p) => {
-          const prop = this.entity[p] as unknown as QComplexPath;
-          return new expBuilder(prop.getPath(), prop.getEntity()).build();
+          const prop = this.getEntityProp<QComplexPath>(p);
+          return prop.getPath();
         })
       );
     }
   }
 
-  public expanding<Prop extends ExpandType<Q>>(
-    expBuilder: ExpandingBuilderFactoryFunction<Q>,
-    prop: Prop,
-    builderFn: (builder: any, qObject: any) => void
-  ) {
+  public expanding<Prop extends ExpandType<Q>>(prop: Prop, builderFn: (builder: any, qObject: any) => void) {
     if (!prop) {
       throw new Error("Expanding prop must be defined!");
     }
-    if (builderFn) {
-      if (!this.expands) {
-        this.expands = [];
-      }
 
-      const entityProp = this.entity[prop] as unknown as QComplexPath;
-      const expander = ExpandingODataUriBuilderV4.create(entityProp.getPath(), entityProp.getEntity());
-      builderFn(expander, entityProp.getEntity());
+    const entityProp = this.getEntityProp<QComplexPath>(prop);
+    const path = entityProp.getPath();
+    const entity = entityProp.getEntity();
 
-      this.expands.push(expander.build());
-    }
+    const expander = new ExpandingODataUriBuilderV4(path, entity);
+
+    builderFn(expander, entity);
+
+    this.getExpands().push(expander.build());
   }
 
   /**
@@ -169,7 +191,7 @@ export class ODataUriBuilder<Q extends QueryObject> {
         ...props
           .filter((p): p is keyof Q => !!p)
           .map((p) => {
-            return (this.entity[p] as unknown as QPath).getPath();
+            return this.getEntityProp(p).getPath();
           })
       );
     }

@@ -1,19 +1,18 @@
 import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
-import { EntityExtractor, ExpandingODataUriBuilderV4Model, ExpandType } from "../ODataUriBuilderModel";
-import { ODataUriBuilder } from "../ODataUriBuilder";
+import { ODataUriBuilder, EntityExtractor, ExpandingODataUriBuilderV4Model, ExpandType } from "../internal";
 
 /**
  * Builder for expanded entities or entity collections.
  */
 export class ExpandingODataUriBuilderV4<Q extends QueryObject> implements ExpandingODataUriBuilderV4Model<Q> {
   public static create<Q extends QueryObject>(property: string, qEntity: Q /*, config?: ODataUriBuilderConfig*/) {
-    // must never be encoded, since it is part of $expand
     return new ExpandingODataUriBuilderV4<Q>(property, qEntity);
   }
 
   private builder: ODataUriBuilder<Q>;
 
   public constructor(property: string, qEntity: Q) {
+    // must never be encoded, since it is part of $expand
     this.builder = new ODataUriBuilder(property, qEntity, { expandingBuilder: true });
   }
 
@@ -23,7 +22,7 @@ export class ExpandingODataUriBuilderV4<Q extends QueryObject> implements Expand
   }
 
   public expand<Prop extends ExpandType<Q>>(...props: Array<Prop>) {
-    this.builder.expand(ExpandingODataUriBuilderV4, props);
+    this.builder.expand(props);
     return this;
   }
 
@@ -50,7 +49,7 @@ export class ExpandingODataUriBuilderV4<Q extends QueryObject> implements Expand
       qObject: EntityExtractor<Q[Prop]>
     ) => void
   ) {
-    this.builder.expanding(ExpandingODataUriBuilderV4, prop, builderFn);
+    this.builder.expanding(prop, builderFn);
     return this;
   }
 
@@ -82,8 +81,5 @@ export class ExpandingODataUriBuilderV4<Q extends QueryObject> implements Expand
    */
   public build(): string {
     return this.builder.build();
-    // const params = this.buildQuery(this.param);
-    //
-    // return this.path + (params.length ? `(${params.join(";")})` : "");
   }
 }
