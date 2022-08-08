@@ -1,14 +1,22 @@
 import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
-import { ODataUriBuilder, EntityExtractor, ExpandingODataUriBuilderV4Model, ExpandType } from "../internal";
+import {
+  ODataUriBuilder,
+  EntityExtractor,
+  ExpandingODataUriBuilderV4 as ExpandingODataUriBuilderV4Model,
+  ExpandType,
+} from "../internal";
+
+export function createExpandingUriBuilderV4<Q extends QueryObject>(
+  property: string,
+  qEntity: Q
+): ExpandingODataUriBuilderV4Model<Q> {
+  return new ExpandingODataUriBuilderV4<Q>(property, qEntity);
+}
 
 /**
  * Builder for expanded entities or entity collections.
  */
-export class ExpandingODataUriBuilderV4<Q extends QueryObject> implements ExpandingODataUriBuilderV4Model<Q> {
-  public static create<Q extends QueryObject>(property: string, qEntity: Q /*, config?: ODataUriBuilderConfig*/) {
-    return new ExpandingODataUriBuilderV4<Q>(property, qEntity);
-  }
-
+class ExpandingODataUriBuilderV4<Q extends QueryObject> implements ExpandingODataUriBuilderV4Model<Q> {
   private builder: ODataUriBuilder<Q>;
 
   public constructor(property: string, qEntity: Q) {
@@ -26,22 +34,6 @@ export class ExpandingODataUriBuilderV4<Q extends QueryObject> implements Expand
     return this;
   }
 
-  /**
-   * Expand a given entity and receive an own builder for it to further select, filter, expand, etc.
-   *
-   * This method can be called multiple times.
-   *
-   * Example:
-   * .expanding("addresses", (addressBuilder, qAddress) => {
-   *   addressBuilder
-   *     .select(...)
-   *     .filter(qAddress.street.startsWith(...))
-   * })
-   *
-   * @param prop the name of the property which should be expanded
-   * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
-   * @returns this query builder
-   */
   public expanding<Prop extends ExpandType<Q>>(
     prop: Prop,
     builderFn: (

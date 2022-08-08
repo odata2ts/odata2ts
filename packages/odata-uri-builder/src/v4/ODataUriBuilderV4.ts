@@ -3,44 +3,46 @@ import {
   EntityExtractor,
   ExpandingODataUriBuilderV4,
   ExpandType,
-  ODataOperators,
   ODataUriBuilder,
   ODataUriBuilderConfig,
-  ODataUriBuilderV4Model,
+  ODataUriBuilderV4 as ODataUriBuilderV4Model,
 } from "../internal";
+
+/**
+ * Create an UriBuilder by passing in a path and a query object.
+ *
+ * Example for a query on a entity collection:
+ * ODataUriBuilder.create("people", qPerson)
+ *   .select(...)
+ *   .filter(qPerson.age.greaterThan(...))
+ *   ...
+ *   .build()
+ *
+ * @param path base path to
+ * @param qEntity the query object
+ * @param config optionally pass a configuration
+ * @returns a UriBuilder
+ */
+export function createUriBuilderV4<Q extends QueryObject>(
+  path: string,
+  qEntity: Q,
+  config?: ODataUriBuilderConfig
+): ODataUriBuilderV4Model<Q> {
+  return new ODataUriBuilderV4<Q>(path, qEntity, config);
+}
 
 /**
  * Create an OData URI string in a typesafe way by facilitating generated query objects.
  */
-export class ODataUriBuilderV4<Q extends QueryObject> implements ODataUriBuilderV4Model<Q> {
+class ODataUriBuilderV4<Q extends QueryObject> implements ODataUriBuilderV4Model<Q> {
   private builder: ODataUriBuilder<Q>;
 
-  /**
-   * Create an UriBuilder by passing in a query object, which already contains the base path
-   * to the OData service & the given entity.
-   *
-   * Example:
-   * ODataUriBuilder.create("people", qPerson)
-   *   .select(...)
-   *   .filter(qPerson.age.greaterThan(...))
-   *   ...
-   *   .build()
-   *
-   * @param path base path to
-   * @param qEntity the query object
-   * @param config optionally pass a configuration
-   * @returns a UriBuilder
-   */
-  static create<Q extends QueryObject>(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
-    return new ODataUriBuilderV4<Q>(path, qEntity, config);
-  }
-
-  private constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
+  constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
     this.builder = new ODataUriBuilder(path, qEntity, config);
   }
 
   public count(doCount?: boolean) {
-    this.builder.count(ODataOperators.COUNT, String(doCount === undefined || doCount));
+    this.builder.count(doCount);
     return this;
   }
 
@@ -59,22 +61,6 @@ export class ODataUriBuilderV4<Q extends QueryObject> implements ODataUriBuilder
     return this;
   }
 
-  /**
-   * Expand a given entity and receive an own builder for it to further select, filter, expand, etc.
-   *
-   * This method can be called multiple times.
-   *
-   * Example:
-   * .expanding("addresses", (addressBuilder, qAddress) => {
-   *   addressBuilder
-   *     .select(...)
-   *     .filter(qAddress.street.startsWith(...))
-   * })
-   *
-   * @param prop the name of the property which should be expanded
-   * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
-   * @returns this query builder
-   */
   public expanding<Prop extends ExpandType<Q>>(
     prop: Prop,
     builderFn: (
@@ -86,14 +72,6 @@ export class ODataUriBuilderV4<Q extends QueryObject> implements ODataUriBuilder
     return this;
   }
 
-  /**
-   * Group by clause for properties.
-   * Uses system query option $apply.
-   *
-   * It's okay to pass null or undefined, these values are automatically filtered.
-   *
-   * @param props
-   */
   public groupBy(...props: Array<keyof Q | null | undefined>) {
     this.builder.groupBy(props);
     return this;
@@ -114,12 +92,6 @@ export class ODataUriBuilderV4<Q extends QueryObject> implements ODataUriBuilder
     return this;
   }
 
-  /**
-   * V4 free text search option, where the server decides how to apply the search value.
-   * Uses system query option $search.
-   *
-   * @param term
-   */
   public search(term: string | undefined | null) {
     this.builder.search(term);
     return this;

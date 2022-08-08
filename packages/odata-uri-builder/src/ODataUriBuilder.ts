@@ -1,6 +1,9 @@
 import { QComplexPath, QFilterExpression, QOrderByExpression, QPath, QueryObject } from "@odata2ts/odata-query-objects";
-import { ExpandingODataUriBuilderV4, ExpandType, ODataOperators, ODataUriBuilderConfig } from "./internal";
+import { createExpandingUriBuilderV4, ExpandType, ODataOperators, ODataUriBuilderConfig } from "./internal";
 
+/**
+ * Bundles all the logic about handling system query params for OData (V2 and V4).
+ */
 export class ODataUriBuilder<Q extends QueryObject> {
   private readonly path: string;
   private readonly entity: Q;
@@ -69,15 +72,13 @@ export class ODataUriBuilder<Q extends QueryObject> {
     return this.entity[prop] as unknown as PropType;
   }
 
-  /**
-   * Add the count system query param.
-   *
-   * @param countOperator V2 or V4 count operator
-   * @param countInstruction value of the parameter
-   * @returns this query builder
-   */
-  public count(countOperator: ODataOperators.COUNT | ODataOperators.COUNTV2, countInstruction: string) {
-    this.itemsCount = [countOperator, countInstruction];
+  public count(doCount?: boolean) {
+    this.itemsCount = [ODataOperators.COUNT, String(doCount === undefined || doCount)];
+  }
+  public countV2(doCount?: boolean) {
+    if (doCount === undefined || doCount) {
+      this.itemsCount = [ODataOperators.COUNTV2, "allpages"];
+    }
   }
 
   public select(props: Array<keyof Q | null | undefined>) {
@@ -121,7 +122,7 @@ export class ODataUriBuilder<Q extends QueryObject> {
     const path = entityProp.getPath();
     const entity = entityProp.getEntity();
 
-    const expander = new ExpandingODataUriBuilderV4(path, entity);
+    const expander = createExpandingUriBuilderV4(path, entity);
 
     builderFn(expander, entity);
 
@@ -253,11 +254,6 @@ export class ODataUriBuilder<Q extends QueryObject> {
     return params;
   }
 
-  /**
-   * Build the final URI string.
-   *
-   * @returns the query string including the base service & collection path
-   */
   public build(): string {
     const paramFn = this.unencoded || this.config?.expandingBuilder ? this.param : this.paramEncoded;
     const params = this.buildQuery(paramFn);

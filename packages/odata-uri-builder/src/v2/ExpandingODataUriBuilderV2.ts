@@ -1,22 +1,29 @@
-import { QComplexPath, QPath, QueryObject } from "@odata2ts/odata-query-objects";
-import { EntityExtractor, ExpandingODataUriBuilderV2Model, ExpandType } from "../ODataUriBuilderModel";
+import { QComplexPath, QueryObject } from "@odata2ts/odata-query-objects";
+import {
+  EntityExtractor,
+  ExpandingODataUriBuilderV2 as ExpandingODataUriBuilderV2Model,
+  ExpandType,
+} from "../ODataUriBuilderModel";
 import { ODataUriBuilder } from "../ODataUriBuilder";
+
+export function createExpandingUriBuilderV2<Q extends QueryObject>(
+  property: string,
+  qEntity: Q
+): ExpandingODataUriBuilderV2Model<Q> {
+  // must never be encoded, since it is part of $expand
+  return new ExpandingODataUriBuilderV2<Q>(property, qEntity);
+}
 
 /**
  * Builder for expanded entities or entity collections.
  */
-export class ExpandingODataUriBuilderV2<Q extends QueryObject> implements ExpandingODataUriBuilderV2Model<Q> {
-  public static create<Q extends QueryObject>(property: string, qEntity: Q /*, config?: ODataUriBuilderConfig*/) {
-    // must never be encoded, since it is part of $expand
-    return new ExpandingODataUriBuilderV2<Q>(property, qEntity);
-  }
-
+class ExpandingODataUriBuilderV2<Q extends QueryObject> implements ExpandingODataUriBuilderV2Model<Q> {
   private selects = new Set<string>();
   private expands = new Set<string>();
 
   private builder: ODataUriBuilder<Q>;
 
-  public constructor(property: string, qEntity: Q) {
+  constructor(property: string, qEntity: Q) {
     this.builder = new ODataUriBuilder(property, qEntity, { expandingBuilder: true });
     this.expands.add(property);
   }
@@ -75,12 +82,6 @@ export class ExpandingODataUriBuilderV2<Q extends QueryObject> implements Expand
     return this;
   }
 
-  /**
-   * Build the final URI string for this expanded entity or entity collection.
-   * This method is called internally.
-   *
-   * @returns the query string for this expanded entity or entity collection
-   */
   public build() {
     const { selects, expands } = this;
     return {

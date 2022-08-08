@@ -1,4 +1,4 @@
-import { ODataUriBuilderV4 } from "../src/";
+import { createUriBuilderV4, ODataUriBuilderV4 } from "../src/";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 import { createBaseTests } from "./ODataUriBuilderBaseTests";
 
@@ -17,17 +17,17 @@ describe("ODataUriBuilderV4 Test", () => {
 
   // @ts-ignore: hard to get the right typing right, so we always use the V2 model as common ground
   // all we care about here, ist that V4 covers all the functionally V2 has
-  createBaseTests(ODataUriBuilderV4.create);
+  createBaseTests(createUriBuilderV4);
 
   /**
    * Always use a new builder for each  test.
    */
   beforeEach(() => {
-    toTest = ODataUriBuilderV4.create("/Persons", qPerson, { unencoded: true });
+    toTest = createUriBuilderV4("/Persons", qPerson, { unencoded: true });
   });
 
   test("config: encoded & no double encoding for expanded entities", () => {
-    const candidate = ODataUriBuilderV4.create("/Persons", qPerson)
+    const candidate = createUriBuilderV4("/Persons", qPerson)
       .select("name", "age")
       .expanding("altAdresses", (expBuilder, qEntity) => {
         expBuilder.filter(qEntity.street.equals("AC/DC & Brothers"));
