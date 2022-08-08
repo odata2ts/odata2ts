@@ -1,6 +1,6 @@
-import { ODataUriBuilderV2 } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 import { createBaseTests } from "./ODataUriBuilderBaseTests";
+import { createUriBuilderV2, ODataUriBuilderV2Model } from "../src/";
 
 /**
  * Helper function which adds the base path.
@@ -13,15 +13,15 @@ function addBase(urlPart: string) {
 }
 
 describe("ODataUriBuilderV2 Test", () => {
-  let toTest: ODataUriBuilderV2<QPerson>;
+  let toTest: ODataUriBuilderV2Model<QPerson>;
 
-  createBaseTests(ODataUriBuilderV2.create);
+  createBaseTests(createUriBuilderV2);
 
   /**
    * Always use a new builder for each  test.
    */
   beforeEach(() => {
-    toTest = ODataUriBuilderV2.create("/Persons", qPerson, { unencoded: true });
+    toTest = createUriBuilderV2("/Persons", qPerson, { unencoded: true });
   });
 
   test("count: true", () => {

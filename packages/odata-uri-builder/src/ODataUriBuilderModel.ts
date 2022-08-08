@@ -6,7 +6,6 @@ import {
   QOrderByExpression,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
-import { ExpandingODataUriBuilderV2, ExpandingODataUriBuilderV4 } from "./internal";
 
 /**
  * Extracts the wrapped entity from QEntityPath or QEntityCollectionPath
@@ -40,25 +39,22 @@ export interface ODataUriBuilderConfig {
   unencoded?: boolean;
 }
 
+/**
+ * Represents all possible builder operations.
+ * However, any builder will only be composed of a subset of these operations.
+ */
 export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
-  count: (doCount?: boolean) => ReturnType;
-
-  search: (term: string | undefined | null) => ReturnType;
-
   /**
-   * Name the properties of the entity you want to select.
+   * Name the properties of the entity you want to select (as they are specified on the query object).
    * Null or undefined are allowed and will be ignored.
    *
    * This function can be called multiple times.
    *
-   * If you want to select nested properties, e.g. "address/street", then you need to use a function.
-   * The first parameter of the function will be the current QueryObject of the UriBuilder.
-   *
-   * Examples:
-   * - {@code select("lastName", "firstName", undefined) } => $select=lastName,firstName
-   * - {@code select("lastName", false ? "firstName" : undefined) } => $select=lastName
-   *
-   * @param props the property names to select or a function to select one or more QPathModels from QueryObject
+   * @example
+   * builder.select("lastName", "firstName", undefined) // $select=lastName,firstName
+   * @example
+   * builder.select("lastName", false ? "firstName" : undefined) // $select=lastName
+   * @param props the property names to select as they are specified on the query object
    * @returns this query builder
    */
   select: (...props: EntityPropNames<Q>) => ReturnType;
@@ -71,62 +67,185 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
    *
    * This method can be called multiple times in order to add filters successively.
    *
+   * @example
+   * builder.filter(qPerson.lastName.eq("Smith"), qPerson.age.gt(18)) // $filter=LastName eq 'Smith' and Age gt 18
+   * @example
+   * builder.filter(qPerson.lastName.eq("Smith").or(qPerson.firstName.eq("Horst")) // $filter=LastName eq 'Smith' or FirstName eq 'Horst'
    * @param expressions possibly multiple expressions
    * @returns this query builder
    */
   filter: (...expressions: Array<QFilterExpression>) => ReturnType;
 
   /**
-   * Simple & plain expand of the given entities or entity collections.
+   * V4 search option, where the server decides how to apply the search value.
+   * Null or undefined are allowed and will be ignored.
+   *
+   * Uses system query option $search.
+   *
+   * @example
+   * builder.search("
+   * @param term
+   * @returns this query builder
+   */
+  search: (term: string | undefined | null) => ReturnType;
+
+  /**
+   * Simple & plain expand of attributes which are entities or entity collections.
    *
    * This method can be called multiple times.
    *
+   * @example
+   * builder.expand("address", "altAddress") // $expand=Address,AltAddress
    * @param props the attributes to expand
    * @returns this query builder
    */
   expand: <Prop extends ExpandType<Q>>(...props: Array<Prop>) => ReturnType;
+
+  /**
+   * Expand one property, which is an entity or entity collection.
+   * The second parameter is a callback function which receives a specialized URI builder and the proper query object
+   * for the expanded entity.
+   * With the help of the builder you can further select, filter, expand, etc.
+   *
+   * @example
+   * builder.expanding("address", (addressBuilder, qAddress) => {
+   *   addressBuilder
+   *     .select("city")
+   *     .filter(qAddress.country.eq("IT"))
+   * })} // $expand=address($select=City;$filter=Country eq 'IT')
+   * @param prop the name of the property which should be expanded (must be an entity or entity collection)
+   * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
+   * @returns this query builder
+   */
   expanding: <Prop extends ExpandType<Q>>(
     prop: Prop,
     expBuilderFn: (
-      expBuilder: ExpandingODataUriBuilderV4<EntityExtractor<Q[Prop]>>,
+      expBuilder: ExpandingODataUriBuilderV4Model<EntityExtractor<Q[Prop]>>,
       qObject: EntityExtractor<Q[Prop]>
     ) => void
   ) => ReturnType;
+
+  /**
+   * Simple group by clause for properties (no aggregate functionality yet).
+   * Uses system query option $apply.
+   *
+   * Null or undefined are allowed and will be ignored.
+   *
+   * @example
+   * builder.select("country").groupBy("country") // $select=Country&apply=groupby((Country))
+   * @param props
+   * @returns this query builder
+   */
   groupBy: (...props: EntityPropNames<Q>) => ReturnType;
-  skip: (itemsToSkip: number) => ReturnType;
+
+  /**
+   * Count the list of result items. The query response will have an appropriate count field.
+   *
+   * @example
+   * builder.count() // $count
+   * @example
+   * builder.count(false) // $count=false
+   * @param doCount defaults to true
+   * @returns this query builder
+   */
+  count: (doCount?: boolean) => ReturnType;
+
+  /**
+   * Limit the amount of records to retrieve.
+   *
+   * @example
+   * builder.top(20) // $top=20
+   * @param itemsTop max amount of items to fetch
+   */
   top: (itemsTop: number) => ReturnType;
+
+  /**
+   * Skips a specified number of records, e.g. skip the first 20 items.
+   *
+   * @example
+   * builder.skip(20) // $skip=20
+   * @param itemsToSkip number of records to skip
+   * @returns this query builder
+   */
+  skip: (itemsToSkip: number) => ReturnType;
+
+  /**
+   * Specify the sort order of the results by utilizing query objects.
+   *
+   * @example
+   * builder.orderBy(qPerson.age.desc(), qPerson.name.asc()) // $orderby=Age desc,Name asc
+   * @param expressions
+   * @returns this query builder
+   */
   orderBy: (...expressions: Array<QOrderByExpression>) => ReturnType;
+
+  /**
+   * Build the final URI string.
+   *
+   * @example
+   * builder.build() // Person?$select=...&$expand=...
+   * @returns the query string including the base service & collection path
+   */
   build: () => string;
+}
+
+export interface V2ExpandingFunction<Q extends QueryObject, ReturnType> {
+  /**
+   * Expand one property, which is an entity or entity collection.
+   * The second parameter is a callback function which receives a specialized URI builder and the proper query object
+   * for the expanded entity.
+   * With the help of the builder you can further select, filter, expand, etc.
+   *
+   * Expand nested props of the current entity.
+   * You can then select, expand or do further expanding.
+   *
+   * @example
+   * builder.expanding("address", (expBuilder) => expBuilder.select("street", "city")) // $select=address/street,address/city&$expand=address}
+   * @example
+   * builder.expanding("address", (expBuilder) => expBuilder.expand("country")) // $expand=address,address/country}
+   * @param prop the name of the property which should be expanded (must be an entity or entity collection)
+   * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
+   * @returns this query builder
+   */
+  expanding: <Prop extends ExpandType<Q>>(
+    prop: Prop,
+    expBuilderFn: (
+      expBuilder: ExpandingODataUriBuilderV2Model<EntityExtractor<Q[Prop]>>,
+      qObject: EntityExtractor<Q[Prop]>
+    ) => void
+  ) => ReturnType;
 }
 
 type BuilderOp = "build";
 type PaginationOps = "skip" | "top";
 type BaseOps = "select" | "expand" | "filter" | "orderBy";
-type V2Ops = BaseOps | "count" | PaginationOps;
+
+type V2ExpandingOps = "select" | "expand"; // custom expanding & build method
+type V2Ops = BuilderOp | BaseOps | "count" | PaginationOps; // custom expanding method
 type V4Ops = V2Ops | "expanding" | "groupBy" | "search";
-type V2ExpandingOps = "select";
-type V4ExpandingOps = BaseOps | "expanding" | PaginationOps;
+type V4ExpandingOps = BuilderOp | BaseOps | "expanding" | PaginationOps;
 
-type V2ExpandResult = { selects?: Array<string>; expands?: Array<string> };
+export type V2ExpandResult = { selects?: Array<string>; expands?: Array<string> };
 
+/**
+ * Contract for ODataUriBuilder for V2.
+ */
 export interface ODataUriBuilderV2Model<Q extends QueryObject>
-  extends Pick<ODataUriBuilderModel<Q, ODataUriBuilderV2Model<Q>>, BuilderOp | V2Ops | PaginationOps> {
-  expanding: <Prop extends ExpandType<Q>>(
-    prop: Prop,
-    expBuilderFn: (
-      expBuilder: ExpandingODataUriBuilderV2<EntityExtractor<Q[Prop]>>,
-      qObject: EntityExtractor<Q[Prop]>
-    ) => void
-  ) => this;
-}
+  extends Pick<ODataUriBuilderModel<Q, ODataUriBuilderV2Model<Q>>, V2Ops>,
+    V2ExpandingFunction<Q, ODataUriBuilderV2Model<Q>> {}
 
 export interface ExpandingODataUriBuilderV2Model<Q extends QueryObject>
-  extends Pick<ODataUriBuilderModel<Q, ExpandingODataUriBuilderV2Model<Q>>, V2ExpandingOps> {
+  extends Pick<ODataUriBuilderModel<Q, ExpandingODataUriBuilderV2Model<Q>>, V2ExpandingOps>,
+    V2ExpandingFunction<Q, ExpandingODataUriBuilderV2Model<Q>> {
+  /**
+   * Build result is actually a list of select and expand strings, which must be consumed manually by the
+   * caller of the build function.
+   */
   build: () => V2ExpandResult;
 }
 
 export interface ODataUriBuilderV4Model<Q extends QueryObject>
-  extends Pick<ODataUriBuilderModel<Q, ODataUriBuilderV4Model<Q>>, BuilderOp | V4Ops> {}
+  extends Pick<ODataUriBuilderModel<Q, ODataUriBuilderV4Model<Q>>, V4Ops> {}
 
 export interface ExpandingODataUriBuilderV4Model<Q extends QueryObject>
-  extends Pick<ODataUriBuilderModel<Q, ExpandingODataUriBuilderV4Model<Q>>, BuilderOp | V4ExpandingOps> {}
+  extends Pick<ODataUriBuilderModel<Q, ExpandingODataUriBuilderV4Model<Q>>, V4ExpandingOps> {}
