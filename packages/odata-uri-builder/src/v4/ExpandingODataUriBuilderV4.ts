@@ -1,5 +1,10 @@
 import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
-import { ODataUriBuilder, EntityExtractor, ExpandingODataUriBuilderV4Model, ExpandType } from "../internal";
+import {
+  ODataUriBuilder,
+  EntityExtractor,
+  ExpandingODataUriBuilderV4 as ExpandingODataUriBuilderV4Model,
+  ExpandType,
+} from "../internal";
 
 export function createExpandingUriBuilderV4<Q extends QueryObject>(
   property: string,

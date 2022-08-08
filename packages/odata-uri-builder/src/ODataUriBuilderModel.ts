@@ -120,7 +120,7 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
   expanding: <Prop extends ExpandType<Q>>(
     prop: Prop,
     expBuilderFn: (
-      expBuilder: ExpandingODataUriBuilderV4Model<EntityExtractor<Q[Prop]>>,
+      expBuilder: ExpandingODataUriBuilderV4<EntityExtractor<Q[Prop]>>,
       qObject: EntityExtractor<Q[Prop]>
     ) => void
   ) => ReturnType;
@@ -210,7 +210,7 @@ export interface V2ExpandingFunction<Q extends QueryObject, ReturnType> {
   expanding: <Prop extends ExpandType<Q>>(
     prop: Prop,
     expBuilderFn: (
-      expBuilder: ExpandingODataUriBuilderV2Model<EntityExtractor<Q[Prop]>>,
+      expBuilder: ExpandingODataUriBuilderV2<EntityExtractor<Q[Prop]>>,
       qObject: EntityExtractor<Q[Prop]>
     ) => void
   ) => ReturnType;
@@ -230,13 +230,13 @@ export type V2ExpandResult = { selects?: Array<string>; expands?: Array<string> 
 /**
  * Contract for ODataUriBuilder for V2.
  */
-export interface ODataUriBuilderV2Model<Q extends QueryObject>
-  extends Pick<ODataUriBuilderModel<Q, ODataUriBuilderV2Model<Q>>, V2Ops>,
-    V2ExpandingFunction<Q, ODataUriBuilderV2Model<Q>> {}
+export interface ODataUriBuilderV2<Q extends QueryObject>
+  extends Pick<ODataUriBuilderModel<Q, ODataUriBuilderV2<Q>>, V2Ops>,
+    V2ExpandingFunction<Q, ODataUriBuilderV2<Q>> {}
 
-export interface ExpandingODataUriBuilderV2Model<Q extends QueryObject>
-  extends Pick<ODataUriBuilderModel<Q, ExpandingODataUriBuilderV2Model<Q>>, V2ExpandingOps>,
-    V2ExpandingFunction<Q, ExpandingODataUriBuilderV2Model<Q>> {
+export interface ExpandingODataUriBuilderV2<Q extends QueryObject>
+  extends Pick<ODataUriBuilderModel<Q, ExpandingODataUriBuilderV2<Q>>, V2ExpandingOps>,
+    V2ExpandingFunction<Q, ExpandingODataUriBuilderV2<Q>> {
   /**
    * Build result is actually a list of select and expand strings, which must be consumed manually by the
    * caller of the build function.
@@ -244,8 +244,8 @@ export interface ExpandingODataUriBuilderV2Model<Q extends QueryObject>
   build: () => V2ExpandResult;
 }
 
-export interface ODataUriBuilderV4Model<Q extends QueryObject>
-  extends Pick<ODataUriBuilderModel<Q, ODataUriBuilderV4Model<Q>>, V4Ops> {}
+export interface ODataUriBuilderV4<Q extends QueryObject>
+  extends Pick<ODataUriBuilderModel<Q, ODataUriBuilderV4<Q>>, V4Ops> {}
 
-export interface ExpandingODataUriBuilderV4Model<Q extends QueryObject>
-  extends Pick<ODataUriBuilderModel<Q, ExpandingODataUriBuilderV4Model<Q>>, V4ExpandingOps> {}
+export interface ExpandingODataUriBuilderV4<Q extends QueryObject>
+  extends Pick<ODataUriBuilderModel<Q, ExpandingODataUriBuilderV4<Q>>, V4ExpandingOps> {}

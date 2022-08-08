@@ -1,4 +1,4 @@
-import { createUriBuilderV4, ODataUriBuilderV4Model } from "../src/";
+import { createUriBuilderV4, ODataUriBuilderV4 } from "../src/";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 import { createBaseTests } from "./ODataUriBuilderBaseTests";
 
@@ -13,7 +13,7 @@ function addBase(urlPart: string) {
 }
 
 describe("ODataUriBuilderV4 Test", () => {
-  let toTest: ODataUriBuilderV4Model<QPerson>;
+  let toTest: ODataUriBuilderV4<QPerson>;
 
   // @ts-ignore: hard to get the right typing right, so we always use the V2 model as common ground
   // all we care about here, ist that V4 covers all the functionally V2 has

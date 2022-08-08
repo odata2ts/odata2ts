@@ -1,11 +1,11 @@
 import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
 import {
   EntityExtractor,
-  ExpandingODataUriBuilderV4Model,
+  ExpandingODataUriBuilderV4,
   ExpandType,
   ODataUriBuilder,
   ODataUriBuilderConfig,
-  ODataUriBuilderV4Model,
+  ODataUriBuilderV4 as ODataUriBuilderV4Model,
 } from "../internal";
 
 /**
@@ -64,7 +64,7 @@ class ODataUriBuilderV4<Q extends QueryObject> implements ODataUriBuilderV4Model
   public expanding<Prop extends ExpandType<Q>>(
     prop: Prop,
     builderFn: (
-      builder: ExpandingODataUriBuilderV4Model<EntityExtractor<Q[Prop]>>,
+      builder: ExpandingODataUriBuilderV4<EntityExtractor<Q[Prop]>>,
       qObject: EntityExtractor<Q[Prop]>
     ) => void
   ) {

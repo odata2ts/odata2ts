@@ -1,11 +1,11 @@
 import { QComplexPath, QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
 import {
   EntityExtractor,
-  ExpandingODataUriBuilderV2Model,
+  ExpandingODataUriBuilderV2,
   ExpandType,
   ODataUriBuilder,
   ODataUriBuilderConfig,
-  ODataUriBuilderV2Model,
+  ODataUriBuilderV2 as ODataUriBuilderV2Model,
   createExpandingUriBuilderV2,
 } from "../internal";
 
@@ -29,7 +29,7 @@ export function createUriBuilderV2<Q extends QueryObject>(
   path: string,
   qEntity: Q,
   config?: ODataUriBuilderConfig
-): ODataUriBuilderV2Model<Q> {
+): ODataUriBuilderV2<Q> {
   return new ODataUriBuilderV2<Q>(path, qEntity, config);
 }
 
@@ -61,7 +61,7 @@ class ODataUriBuilderV2<Q extends QueryObject> implements ODataUriBuilderV2Model
   public expanding<Prop extends ExpandType<Q>>(
     prop: Prop,
     builderFn: (
-      builder: ExpandingODataUriBuilderV2Model<EntityExtractor<Q[Prop]>>,
+      builder: ExpandingODataUriBuilderV2<EntityExtractor<Q[Prop]>>,
       qObject: EntityExtractor<Q[Prop]>
     ) => void
   ) {

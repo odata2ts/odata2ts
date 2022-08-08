@@ -1,5 +1,9 @@
 import { QComplexPath, QueryObject } from "@odata2ts/odata-query-objects";
-import { EntityExtractor, ExpandingODataUriBuilderV2Model, ExpandType } from "../ODataUriBuilderModel";
+import {
+  EntityExtractor,
+  ExpandingODataUriBuilderV2 as ExpandingODataUriBuilderV2Model,
+  ExpandType,
+} from "../ODataUriBuilderModel";
 import { ODataUriBuilder } from "../ODataUriBuilder";
 
 export function createExpandingUriBuilderV2<Q extends QueryObject>(
