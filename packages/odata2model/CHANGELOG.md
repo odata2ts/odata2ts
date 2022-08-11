@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.13.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.12.1...@odata2ts/odata2model@0.13.0) (2022-08-11)
+
+
+### Code Refactoring
+
+* **uri-builder:** composition over inheritance, proper interfaces ([#48](https://github.com/odata2ts/odata2ts/issues/48)) ([36c8a0a](https://github.com/odata2ts/odata2ts/commit/36c8a0a27dabfbcfbd2359d040dcda518615a4e0))
+
+
+### Features
+
+* **uri-builder:** V2 implementation of "expanding" method ([#49](https://github.com/odata2ts/odata2ts/issues/49)) ([e237c61](https://github.com/odata2ts/odata2ts/commit/e237c61710125daa6e7e6617ebf377304f1b5d89))
+
+
+### BREAKING CHANGES
+
+* **uri-builder:** It was possible to select nested props by using q-props (V2 only); this syntax has been removed and will be replaced by making use of the current V4 syntax: you first expand the property (method "expanding") and then select (or expand) on the expanded entity.
+* **uri-builder:** ODataUriBuilder was removed from export, it might have served as base class but was of no other use.
+
+
+
+
+
 ## [0.12.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.12.0...@odata2ts/odata2model@0.12.1) (2022-08-01)
 
 

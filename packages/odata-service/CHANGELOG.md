@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.6.0...@odata2ts/odata-service@0.7.0) (2022-08-11)
+
+
+### Bug Fixes
+
+* **service:** UrlHelper should allow empty strings => typing is correct ([efc7ac6](https://github.com/odata2ts/odata2ts/commit/efc7ac6fe94a0a98a26e8b6d07aa757b1204d61d))
+
+
+### Code Refactoring
+
+* **uri-builder:** composition over inheritance, proper interfaces ([#48](https://github.com/odata2ts/odata2ts/issues/48)) ([36c8a0a](https://github.com/odata2ts/odata2ts/commit/36c8a0a27dabfbcfbd2359d040dcda518615a4e0))
+* **uri-builder:** expose interfaces instead of implementations through factory function ([#50](https://github.com/odata2ts/odata2ts/issues/50)) ([ae1d960](https://github.com/odata2ts/odata2ts/commit/ae1d960d5ead1aabbf1e6b22bf720f7a48cc0e98))
+
+
+### BREAKING CHANGES
+
+* **uri-builder:** ODataUriBuilders must be created in a new way. Previously `ODataUriBuilderV4.create(...)`, now `createUriBuilderV4(...)`. The params stayed the same.
+
+* refactor(uri-builder): rename interfaces by removing "Model" suffix
+
+* fix(service): import and use factory function
+* **uri-builder:** It was possible to select nested props by using q-props (V2 only); this syntax has been removed and will be replaced by making use of the current V4 syntax: you first expand the property (method "expanding") and then select (or expand) on the expanded entity.
+* **uri-builder:** ODataUriBuilder was removed from export, it might have served as base class but was of no other use.
+
+
+
+
+
 # [0.6.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.5.4...@odata2ts/odata-service@0.6.0) (2022-08-01)
 
 
