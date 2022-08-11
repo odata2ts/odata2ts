@@ -211,9 +211,6 @@ export const compileLiteralValue = (value: string | number | boolean): string =>
   if (typeof value !== "string" && typeof value !== "number" && typeof value !== "boolean") {
     throw Error("Only string, number & boolean types are valid for compileLiteralValue!");
   }
-  if (typeof value === "string" && !value.trim().length) {
-    throw Error("Empty string given as value: Not allowed!");
-  }
   return String(value);
 };
 
@@ -226,9 +223,6 @@ export const compileLiteralValue = (value: string | number | boolean): string =>
 export const compileQuotedValue = (value: string | number | boolean): string => {
   if (typeof value !== "string" && typeof value !== "number" && typeof value !== "boolean") {
     throw Error("Only string, number & boolean types are valid for compileQuotedValue!");
-  }
-  if (typeof value === "string" && !value.trim().length) {
-    throw Error("Empty string given as value: Not allowed!");
   }
   return `'${value}'`;
 };

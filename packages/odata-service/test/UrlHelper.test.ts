@@ -309,8 +309,6 @@ describe("UrlHelper Test", () => {
     expect(() => compileLiteralValue(undefined)).toThrow();
     // @ts-expect-error
     expect(() => compileLiteralValue(null)).toThrow();
-    expect(() => compileLiteralValue("")).toThrow();
-    expect(() => compileLiteralValue(" ")).toThrow();
   });
 
   test("compileQuotedValue", () => {
@@ -335,7 +333,5 @@ describe("UrlHelper Test", () => {
     expect(() => compileQuotedValue(undefined)).toThrow();
     // @ts-expect-error
     expect(() => compileQuotedValue(null)).toThrow();
-    expect(() => compileQuotedValue("")).toThrow();
-    expect(() => compileQuotedValue(" ")).toThrow();
   });
 });
