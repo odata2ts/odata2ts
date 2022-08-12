@@ -88,7 +88,7 @@ export function createEntityBasedGenerationTests(
 
   test(`${testSuiteName}: one minimal model`, async () => {
     // given one minimal model
-    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Int32));
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean));
 
     // when generating model
     // then match fixture text
@@ -143,7 +143,7 @@ export function createEntityBasedGenerationTests(
 
   test(`${testSuiteName}: base class`, async () => {
     // given an entity hierarchy
-    odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Int32));
+    odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean));
     odataBuilder.addEntityType("Parent", "GrandParent", (builder) =>
       builder.addProp("parentalAdvice", ODataTypesV4.Boolean)
     );
@@ -159,7 +159,7 @@ export function createEntityBasedGenerationTests(
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
         builder
-          .addKeyProp("id", ODataTypesV4.Int32)
+          .addKeyProp("id", ODataTypesV4.Boolean)
           .addProp("myChoice", `${SERVICE_NAME}.Choice`, false)
           // .addProp("optionalChoice", `${SERVICE_NAME}.Choice`, true)
           .addProp("otherChoices", `Collection(${SERVICE_NAME}.Choice)`)
@@ -179,7 +179,7 @@ export function createEntityBasedGenerationTests(
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
         builder
-          .addKeyProp("id", ODataTypesV4.Int32)
+          .addKeyProp("id", ODataTypesV4.Boolean)
           .addProp("method", `${SERVICE_NAME}.PublishingMethod`, false)
           .addProp("altMethod", `${SERVICE_NAME}.PublishingMethod`, true)
           .addProp("altMethods", `Collection(${SERVICE_NAME}.PublishingMethod)`)

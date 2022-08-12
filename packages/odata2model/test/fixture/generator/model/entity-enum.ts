@@ -4,7 +4,7 @@ export enum Choice {
 }
 
 export interface Book {
-  id: number;
+  id: boolean;
   myChoice: Choice;
   otherChoices: Array<Choice>;
 }

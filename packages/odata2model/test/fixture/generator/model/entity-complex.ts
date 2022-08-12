@@ -1,5 +1,5 @@
 export interface Book {
-  id: number;
+  id: boolean;
   method: PublishingMethod;
   altMethod: PublishingMethod | null;
   altMethods: Array<PublishingMethod>;
