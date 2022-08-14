@@ -96,9 +96,9 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       case ODataTypesV4.Int16:
       case ODataTypesV4.Int32:
       case ODataTypesV4.Int64:
-      case ODataTypesV4.Decimal:
-      case ODataTypesV4.Double:
       case ODataTypesV4.Single:
+      case ODataTypesV4.Double:
+      case ODataTypesV4.Decimal:
         return ["number", "QNumberPath", "QNumberCollection"];
       case ODataTypesV4.String:
         return ["string", "QStringPath", "QStringCollection"];

@@ -1,6 +1,6 @@
 # --- METADATA ---
 ### @name metadata
-GET {{baseUrl}}/$metadata
+GET {{rootUrl}}/$metadata
 
 ### Get Version
 GET {{rootUrl}}
@@ -8,50 +8,50 @@ GET {{rootUrl}}
 
 # --- Queries ---
 ### @name list products
-GET {{baseUrl}}/Products?$inlinecount=allpages
-Accept: {{contentType}}
-
-### @name get product zero
-GET {{baseUrl}}/Products(0)
-Accept: {{contentType}}
-
-### @name get unknown product
-GET {{baseUrl}}/Products(666)
+GET {{rootUrl}}/Products?$inlinecount=allpages
 Accept: {{contentType}}
 
 ### @name filter by price (decimal)
-GET {{rootUrl}}/Products?$inlinecount=allpages&$filter=Price eq 22.8m
+GET {{rootUrl}}/Products?$inlinecount=allpages&$filter=UnitPrice ge 21.2m
 Accept: {{contentType}}
 
 
+### @name get product zero
+GET {{rootUrl}}/Products(4)
+Accept: {{contentType}}
+
+### @name get unknown product
+GET {{rootUrl}}/Products(666)
+Accept: {{contentType}}
+
 ### @name expanding
-GET {{baseUrl}}/Products?$expand=Category
+GET {{rootUrl}}/Products(4)?$expand=Category
 Accept: {{contentType}}
 
 ### @name deep expanding
-GET {{baseUrl}}/Products(0)?$expand=Category/Products
+GET {{rootUrl}}/Products(0)?$expand=Category/Products
 Accept: {{contentType}}
 
 ### @name selecting nested
-GET {{baseUrl}}/Products?$select=ID,Name,Category/ID&$expand=Category
+GET {{rootUrl}}/Products?$select=ID,Name,Category/ID&$expand=Category
 Accept: {{contentType}}
 
 ### @name selecting nested without expand => fails 400
-GET {{baseUrl}}/Products?$select=ID,Name,Category/ID
+GET {{rootUrl}}/Products?$select=ProductID,ProductName,Category/CategoryID
 Accept: {{contentType}}
 
 ### @name selecting deeply nested
-GET {{baseUrl}}/Products(0)?$select=ID,Name,Category/Name,Category/Products/Name&$expand=Category/Products
+GET {{rootUrl}}/Products(4)?$select=ProductID,ProductName,Category/CategoryID,Category/Products/ProductName&$expand=Category/Products
 Accept: {{contentType}}
 
 ### @name selecting deeply nested with individual expands
-GET {{baseUrl}}/Products(0)?$select=ID,Name,Category/Name,Category/Products/Name&$expand=Category,Category/Products
+GET {{rootUrl}}/Products(4)?$select=ProductID,ProductName,Category/CategoryID,Category/Products/ProductName&$expand=Category,Category/Products
 Accept: {{contentType}}
 
 
 # --- Create Entity ---
 ### @name create new product
-POST {{baseUrl}}/Products
+POST {{rootUrl}}/Products
 Accept: {{contentType}}
 Content-Type: {{contentType}}
 
@@ -66,7 +66,7 @@ Content-Type: {{contentType}}
 
 # PATCH doesn't work and merge is not supported by HTTPClient
 ### @name update new product
-PATCH {{baseUrl}}/Products(999)
+PATCH {{rootUrl}}/Products(999)
 Accept: {{contentType}}
 Content-Type: {{contentType}}
 
@@ -76,22 +76,22 @@ Content-Type: {{contentType}}
 }
 
 ### @name update category association
-PATCH {{baseUrl}}/Products(999)
+PATCH {{rootUrl}}/Products(999)
 Accept: {{contentType}}
 Content-Type: {{contentType}}
 
 {
-  "Category": { uri: "{{baseUrl}}/Categories(1)" }
+  "Category": { uri: "{{rootUrl}}/Categories(1)" }
 }
 
 
 ### @name delete new product
-DELETE {{baseUrl}}/Products(999)
+DELETE {{rootUrl}}/Products(999)
 Accept: {{contentType}}
 
 # --- Create Entity With Association ---
 ### @name create new product with association
-POST {{baseUrl}}/Products
+POST {{rootUrl}}/Products
 Accept: {{contentType}}
 Content-Type: {{contentType}}
 

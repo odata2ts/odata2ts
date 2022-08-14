@@ -9,6 +9,19 @@ export abstract class QLiteralPath<ValueType, OperatorTypes> implements QPathMod
     }
   }
 
+  private getFinalValue(value: ValueType) {
+    // @ts-ignore: duck typing getPath
+    return value && typeof value.getPath === "function" ? value.getPath() : value;
+  }
+
+  protected buildBuiltInExpression(operator: OperatorTypes, value: ValueType) {
+    return new QFilterExpression(this.buildBuiltInOp(operator, value));
+  }
+
+  protected buildBuiltInOp(operator: OperatorTypes, value: ValueType) {
+    return `${this.path} ${operator} ${this.getFinalValue(value)}`;
+  }
+
   /**
    * Get the path to this property.
    *
@@ -37,19 +50,6 @@ export abstract class QLiteralPath<ValueType, OperatorTypes> implements QPathMod
     return new QOrderByExpression(`${this.path} desc`);
   }
   public desc = this.descending;
-
-  private getFinalValue(value: ValueType) {
-    // @ts-ignore
-    return value && typeof value.getPath === "function" ? value.getPath() : value;
-  }
-
-  protected buildBuiltInExpression(operator: OperatorTypes, value: ValueType) {
-    return new QFilterExpression(this.buildBuiltInOp(operator, value));
-  }
-
-  protected buildBuiltInOp(operator: OperatorTypes, value: ValueType) {
-    return `${this.path} ${operator} ${this.getFinalValue(value)}`;
-  }
 
   public isNull() {
     return `${this.path} eq null`;

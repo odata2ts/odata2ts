@@ -25,14 +25,14 @@ export class QBook extends QueryObject {
   public readonly time = new QTimeV2Path(this.withPrefix("time"));
   public readonly optionalDate = new QDateTimeV2Path(this.withPrefix("optionalDate"));
   public readonly dateTimeOffset = new QDateTimeOffsetV2Path(this.withPrefix("dateTimeOffset"));
-  public readonly testDecimal = new QNumberPath(this.withPrefix("TestDecimal"));
+  public readonly testByte = new QNumberPath(this.withPrefix("testByte"));
+  public readonly testSByte = new QNumberPath(this.withPrefix("testSByte"));
   public readonly testInt16 = new QNumberPath(this.withPrefix("testInt16"));
   public readonly testInt32 = new QNumberPath(this.withPrefix("testInt32"));
   public readonly testInt64 = new QNumberPath(this.withPrefix("testInt64"));
   public readonly testSingle = new QNumberPath(this.withPrefix("testSingle"));
-  public readonly testByte = new QNumberPath(this.withPrefix("testByte"));
-  public readonly testSByte = new QNumberPath(this.withPrefix("testSByte"));
   public readonly testDouble = new QNumberPath(this.withPrefix("testDouble"));
+  public readonly testDecimal = new QNumberPath(this.withPrefix("TestDecimal"));
   public readonly testBinary = new QBinaryPath(this.withPrefix("testBinary"));
   public readonly testAny = new QStringV2Path(this.withPrefix("testAny"));
   public readonly multipleIds = new QCollectionPath(this.withPrefix("multipleIds"), () => QGuidV2Collection);

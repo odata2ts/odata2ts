@@ -1,11 +1,4 @@
-import {
-  ConstructorDeclarationStructure,
-  OptionalKind,
-  PropertyDeclarationStructure,
-  Scope,
-  SourceFile,
-  VariableDeclarationKind,
-} from "ts-morph";
+import { OptionalKind, PropertyDeclarationStructure, Scope, SourceFile, VariableDeclarationKind } from "ts-morph";
 
 import { DataTypes, PropertyModel } from "../data-model/DataTypeModel";
 import { DataModel } from "../data-model/DataModel";
@@ -64,12 +57,10 @@ class QueryObjectGenerator {
       const isModelType = prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
       let qPathInit: string;
 
-      if (prop.dataType === DataTypes.EnumType || prop.dataType === DataTypes.PrimitiveType) {
-        qPathInit = `new ${prop.qPath}(this.withPrefix("${odataName}"))`;
-      } else if (isModelType) {
+      if (isModelType) {
         qPathInit = `new ${prop.qPath}(this.withPrefix("${odataName}"), () => ${prop.qObject!})`;
       } else {
-        throw Error(`Unknown DataType [${prop.dataType}] for prop with name [${name}]`);
+        qPathInit = `new ${prop.qPath}(this.withPrefix("${odataName}"))`;
       }
 
       // factor in collections
