@@ -5,11 +5,6 @@ import { ComplexType as ComplexModelType, DataTypes, ODataVersion, PropertyModel
 import { pascalCase } from "pascal-case";
 import { camelCase } from "camel-case";
 
-export enum ModelTypes {
-  EntityType,
-  ComplexType,
-}
-
 export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, CT extends ComplexType> {
   protected static EDM_PREFIX = "Edm.";
   protected static ROOT_OPERATION = "/";
@@ -27,6 +22,12 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   protected abstract digestEntityContainer(): void;
 
+  /**
+   * Get essential infos about a given odata type from the version specific service variants.
+   *
+   * @param type
+   * @return tuple of return type, query object, query collection object
+   */
   protected abstract mapODataType(type: string): [string, string, string];
 
   public async digest(): Promise<DataModel> {

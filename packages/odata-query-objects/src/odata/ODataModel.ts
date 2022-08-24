@@ -25,6 +25,11 @@ export const enum StringFilterFunctions {
   // REPLACE = "replace", // v2 only
 }
 
+export type StringFilterFunctionModelV2 = StandardFilterOperators &
+  Omit<StringFilterFunctions, "CONTAINS" | "MATCHES_PATTERN">;
+
+export type StringFilterFunctionModelV4 = StandardFilterOperators & Omit<StringFilterFunctions, "SUBSTRING_OF">;
+
 export const enum NumberFilterOperators {
   ADDITION = "add",
   SUBTRACTION = "sub",

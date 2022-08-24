@@ -29,6 +29,7 @@ GET {{baseUrl}}/People?$count=true
 ###
 # @name list airlines
 GET {{baseUrl}}/Airlines?$count=true
+Content-Type: {{contentType}}
 ###
 # @name list airports
 GET {{baseUrl}}/Airports?$count=true&$expand=*
@@ -257,6 +258,7 @@ GET {{baseUrl}}/People('russellwhyte')/Trips/0
 
 ### Derived Entity Type
 GET {{baseUrl}}/People/Trippin.Employee
+Content-Type: {{contentType}};IEEE754Compatible=true
 ###
 GET {{baseUrl}}/People('kristakemp')/Trippin.Employee
 ### Manager example
@@ -316,18 +318,49 @@ GET {{baseUrl}}/People?$select=UserName&$orderby=Friends/$count desc&$expand=Fri
 
 # --- FILTERING ---
 
-### Filtering by complex type substructure
+###
+# @name Filtering by complex type substructure
 GET {{baseUrl}}/People('russellwhyte')/AddressInfo?$filter=City/Name eq 'Boise'
-
-
-### Filter enum type
+###
+# @name Filter enum type
 GET {{baseUrl}}/People?$select=FirstName,Gender&$filter=Gender eq 'Female'
-
-### Finally a working "in" statement
+###
+# @name "in" statement
 GET {{baseUrl}}/People?$select=FirstName&$filter=FirstName in ('Russell')
+###
+# @name filter by type ?!
+GET {{baseUrl}}/People('russellwhyte')/Trips?$filter=isof(Budget, Edm.Single)
+###
+# @name filtering number (Edm.Single) with subtraction
+GET {{baseUrl}}/People('russellwhyte')/Trips?$filter=Budget sub 1 eq 1999
+###
+# @name filtering number casted as Edm.Double with subtraction
+GET {{baseUrl}}/People('russellwhyte')/Trips?$filter=cast(Budget, Edm.Double) sub 0.5 eq 1999.5
+###
+# @name filtering number casted as Edm.String
+GET {{baseUrl}}/People('russellwhyte')/Trips?$filter=startswith(cast(Budget, Emd.String), '2')
+
+
+# --- Group by ---
 
 ### Groupby
+@name
 GET {{baseUrl}}/People?$select=Gender&$apply=aggregate(Gender with countdistinct as counter)
 
 ### Groupby
-GET {{baseUrl}}/People
+GET {{baseUrl}}/People?$select=Age
+
+
+# --- Metadata Control ---
+
+### IEEE754Compatible => should type Edm.Int64 and Edm.Decimal as string => NOT SUPPORTED
+# @name get employee cost (EdmInt64) as string => NO EFFECT
+GET {{baseUrl}}/People/Trippin.Employee?$select=cost
+Content-Type: {{contentType}};IEEE754Compatible=true
+Accept: {{contentType}};IEEE754Compatible=true
+
+###
+# @name get no metadata => NO EFFECT
+GET {{baseUrl}}/People('russellwhyte')/Trips
+Content-Type: {{contentType}};medata=none
+Accept: {{contentType}};medata=none

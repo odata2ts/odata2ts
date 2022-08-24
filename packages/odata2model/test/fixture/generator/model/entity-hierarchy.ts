@@ -1,5 +1,5 @@
 export interface GrandParent {
-  id: number;
+  id: boolean;
 }
 
 export interface EditableGrandParent extends Pick<GrandParent, "id"> {}

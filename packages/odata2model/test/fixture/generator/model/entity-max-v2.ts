@@ -4,14 +4,14 @@ export interface Book {
   time: string | null;
   optionalDate: string | null;
   dateTimeOffset: string | null;
-  TestDecimal: string | null;
+  testByte: string | null;
+  testSByte: string | null;
   testInt16: number | null;
   testInt32: number | null;
   testInt64: string | null;
   testSingle: string | null;
-  testByte: string | null;
-  testSByte: string | null;
   testDouble: string | null;
+  TestDecimal: string | null;
   testBinary: string | null;
   testAny: string | null;
   multipleIds: Array<string>;
@@ -33,14 +33,14 @@ export interface EditableBook
         | "time"
         | "optionalDate"
         | "dateTimeOffset"
-        | "TestDecimal"
+        | "testByte"
+        | "testSByte"
         | "testInt16"
         | "testInt32"
         | "testInt64"
         | "testSingle"
-        | "testByte"
-        | "testSByte"
         | "testDouble"
+        | "TestDecimal"
         | "testBinary"
         | "testAny"
         | "multipleIds"

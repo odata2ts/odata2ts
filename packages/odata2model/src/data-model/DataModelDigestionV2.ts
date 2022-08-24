@@ -105,9 +105,9 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
       case ODataTypesV3.Byte:
       case ODataTypesV3.SByte:
       case ODataTypesV3.Int64:
-      case ODataTypesV3.Decimal:
-      case ODataTypesV3.Double:
       case ODataTypesV3.Single:
+      case ODataTypesV3.Double:
+      case ODataTypesV3.Decimal:
         return ["string", "QNumberPath", "QNumberCollection"];
       case ODataTypesV3.String:
         return ["string", "QStringV2Path", "QStringV2Collection"];

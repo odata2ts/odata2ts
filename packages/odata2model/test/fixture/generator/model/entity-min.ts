@@ -1,5 +1,5 @@
 export interface Book {
-  id: number;
+  id: boolean;
 }
 
 export interface EditableBook extends Pick<Book, "id"> {}
