@@ -202,7 +202,7 @@ class ServiceGenerator {
           const collectionType = `${collectionServiceType}<${type}, ${qType}>`;
 
           if (!prop.qObject) {
-            throw Error("Illegal State: [qObject] must be provided for Collection types!");
+            throw new Error("Illegal State: [qObject] must be provided for Collection types!");
           }
 
           importContainer.addFromService(collectionServiceType);

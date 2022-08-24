@@ -4,10 +4,10 @@ import { LambdaFunctions } from "../odata/ODataModel";
 export class QEntityCollectionPath<Q extends QueryObject> implements QPathModel {
   constructor(private path: string, private qEntityFn: () => new (prefix?: string) => Q) {
     if (!path || !path.trim()) {
-      throw Error("Path must be supplied!");
+      throw new Error("Path must be supplied!");
     }
     if (!qEntityFn || typeof qEntityFn !== "function") {
-      throw Error("Function which returns query object must be supplied!");
+      throw new Error("Function which returns query object must be supplied!");
     }
   }
 

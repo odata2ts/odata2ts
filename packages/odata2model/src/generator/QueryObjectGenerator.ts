@@ -69,7 +69,7 @@ class QueryObjectGenerator {
         const qObject = prop.qObject;
 
         if (!qObject) {
-          throw Error("QObject for collection is missing!");
+          throw new Error("QObject for collection is missing!");
         }
 
         qPathInit = `new ${cType}(this.withPrefix("${odataName}"), () => ${qObject})`;

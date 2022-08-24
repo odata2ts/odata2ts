@@ -130,7 +130,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       const isBound = op.$.IsBound === "true";
 
       if (isBound && !params.length) {
-        throw Error(`IllegalState: Operation '${op.$.Name}' is bound, but has no parameters!`);
+        throw new Error(`IllegalState: Operation '${op.$.Name}' is bound, but has no parameters!`);
       }
 
       const bindingProp = isBound ? params.shift() : undefined;
@@ -153,7 +153,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     const rootOps = this.dataModel.getOperationTypeByBinding(DigesterV4.ROOT_OPERATION);
     const rootOp = rootOps.find((op) => op.name === name);
     if (!rootOp) {
-      throw Error(`Couldn't find root operation with name [${name}]`);
+      throw new Error(`Couldn't find root operation with name [${name}]`);
     }
     return rootOp;
   }

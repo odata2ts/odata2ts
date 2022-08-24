@@ -31,7 +31,7 @@ export class ODataUriBuilder<Q extends QueryObject> {
 
   constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
     if (!qEntity || !path || !path.trim()) {
-      throw Error("A valid collection name must be provided!");
+      throw new Error("A valid collection name must be provided!");
     }
 
     this.path = path;
