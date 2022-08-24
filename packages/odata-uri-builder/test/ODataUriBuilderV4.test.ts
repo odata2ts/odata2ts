@@ -19,11 +19,15 @@ describe("ODataUriBuilderV4 Test", () => {
   // all we care about here, ist that V4 covers all the functionally V2 has
   createBaseTests(createUriBuilderV4);
 
+  function refresh() {
+    toTest = createUriBuilderV4("/Persons", qPerson, { unencoded: true });
+  }
+
   /**
    * Always use a new builder for each  test.
    */
   beforeEach(() => {
-    toTest = createUriBuilderV4("/Persons", qPerson, { unencoded: true });
+    refresh();
   });
 
   test("config: encoded & no double encoding for expanded entities", () => {
@@ -41,12 +45,11 @@ describe("ODataUriBuilderV4 Test", () => {
   });
 
   test("count", () => {
-    const candidate = toTest.count().build();
-    const candidate2 = toTest.count(true).build();
     const expected = addBase("$count=true");
 
-    expect(candidate).toBe(expected);
-    expect(candidate).toBe(candidate2);
+    expect(toTest.count().build()).toBe(expected);
+    refresh();
+    expect(toTest.count(true).build()).toBe(expected);
   });
 
   test("count: false", () => {
@@ -61,6 +64,13 @@ describe("ODataUriBuilderV4 Test", () => {
     const expected = addBase("$expand=Address");
 
     expect(candidate).toBe(expected);
+  });
+
+  test("expanding: ignore null function", () => {
+    const expected = addBase("");
+
+    expect(toTest.expanding("address", null).build()).toBe(expected);
+    expect(toTest.expanding("address", undefined).build()).toBe(expected);
   });
 
   test("expanding: with select", () => {
@@ -104,7 +114,7 @@ describe("ODataUriBuilderV4 Test", () => {
     expect(candidate).toBe(expected);
   });
 
-  test("combining simple & complex expand", () => {
+  test("expanding: combining simple & complex expand", () => {
     const candidate = toTest
       .expanding("address", (builder) => {
         builder.select("street");
@@ -116,16 +126,24 @@ describe("ODataUriBuilderV4 Test", () => {
     expect(candidate).toBe(expected);
   });
 
-  test("simple groupBy", () => {
-    const candidate = toTest.select("name").groupBy("name").build();
-
-    expect(candidate).toBe(addBase("$select=name&$apply=groupby((name))"));
+  test("groupBy", () => {
+    expect(toTest.groupBy("name").build()).toBe(addBase("$apply=groupby((name))"));
+    refresh();
+    expect(toTest.groupBy("name", "age").build()).toBe(addBase("$apply=groupby((name,age))"));
   });
 
-  test("multiple groupBys", () => {
-    const candidate = toTest.select("name", "age").groupBy("name", "age").build();
+  test("groupBy: ignore nullable", () => {
+    const expected = addBase("");
 
-    expect(candidate).toBe(addBase("$select=name,age&$apply=groupby((name,age))"));
+    expect(toTest.groupBy(null).build()).toBe(expected);
+    expect(toTest.groupBy(undefined).build()).toBe(expected);
+    expect(toTest.groupBy("name", null, undefined, "age").build()).toBe(addBase("$apply=groupby((name,age))"));
+  });
+
+  test("groupBy: consecutive", () => {
+    const candidate = toTest.groupBy("name").groupBy("age").build();
+
+    expect(candidate).toBe(addBase("$apply=groupby((name,age))"));
   });
 
   test("search with single term", () => {

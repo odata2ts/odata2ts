@@ -32,7 +32,24 @@ export type ExpandType<Q extends QueryObject> = ExtractPropertyNamesOfType<
   QEntityPath<any> | QEntityCollectionPath<any> | QCollectionPath<any>
 >;
 
-export type EntityPropNames<Q extends QueryObject> = Array<keyof Q | null | undefined>;
+export type Nullable = null | undefined;
+
+export type NullableParam<OptionType> = OptionType | Nullable;
+
+export type NullableParamList<OptionType> = Array<OptionType | Nullable>;
+
+/**
+ * @deprecated use NullableParamList<keyof Q> directly
+ */
+export type EntityPropNames<Q extends QueryObject> = NullableParamList<keyof Q>;
+
+export type ExpandingFunction<Prop> =
+  | ((expBuilder: ExpandingODataUriBuilderV4<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void)
+  | Nullable;
+
+export type ExpandingFunctionV2<Prop> =
+  | ((expBuilder: ExpandingODataUriBuilderV2<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void)
+  | Nullable;
 
 export interface ODataUriBuilderConfig {
   expandingBuilder?: boolean;
@@ -57,7 +74,7 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
    * @param props the property names to select as they are specified on the query object
    * @returns this query builder
    */
-  select: (...props: EntityPropNames<Q>) => ReturnType;
+  select: (...props: NullableParamList<keyof Q>) => ReturnType;
 
   /**
    * Specify as many filter expressions as you want by facilitating query objects.
@@ -74,7 +91,7 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
    * @param expressions possibly multiple expressions
    * @returns this query builder
    */
-  filter: (...expressions: Array<QFilterExpression>) => ReturnType;
+  filter: (...expressions: NullableParamList<QFilterExpression>) => ReturnType;
 
   /**
    * V4 search option, where the server decides how to apply the search value.
@@ -87,7 +104,7 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
    * @param term
    * @returns this query builder
    */
-  search: (term: string | undefined | null) => ReturnType;
+  search: (term: NullableParam<string>) => ReturnType;
 
   /**
    * Simple & plain expand of attributes which are entities or entity collections.
@@ -99,7 +116,7 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
    * @param props the attributes to expand
    * @returns this query builder
    */
-  expand: <Prop extends ExpandType<Q>>(...props: Array<Prop>) => ReturnType;
+  expand: <Prop extends ExpandType<Q>>(...props: NullableParamList<Prop>) => ReturnType;
 
   /**
    * Expand one property, which is an entity or entity collection.
@@ -117,13 +134,7 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
    * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
    * @returns this query builder
    */
-  expanding: <Prop extends ExpandType<Q>>(
-    prop: Prop,
-    expBuilderFn: (
-      expBuilder: ExpandingODataUriBuilderV4<EntityExtractor<Q[Prop]>>,
-      qObject: EntityExtractor<Q[Prop]>
-    ) => void
-  ) => ReturnType;
+  expanding: <Prop extends ExpandType<Q>>(prop: Prop, expBuilderFn: ExpandingFunction<Q[Prop]>) => ReturnType;
 
   /**
    * Simple group by clause for properties (no aggregate functionality yet).
@@ -136,7 +147,7 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
    * @param props
    * @returns this query builder
    */
-  groupBy: (...props: EntityPropNames<Q>) => ReturnType;
+  groupBy: (...props: NullableParamList<keyof Q>) => ReturnType;
 
   /**
    * Count the list of result items. The query response will have an appropriate count field.
@@ -157,7 +168,7 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
    * builder.top(20) // $top=20
    * @param itemsTop max amount of items to fetch
    */
-  top: (itemsTop: number) => ReturnType;
+  top: (itemsTop: NullableParam<number>) => ReturnType;
 
   /**
    * Skips a specified number of records, e.g. skip the first 20 items.
@@ -167,7 +178,7 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
    * @param itemsToSkip number of records to skip
    * @returns this query builder
    */
-  skip: (itemsToSkip: number) => ReturnType;
+  skip: (itemsToSkip: NullableParam<number>) => ReturnType;
 
   /**
    * Specify the sort order of the results by utilizing query objects.
@@ -177,7 +188,7 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
    * @param expressions
    * @returns this query builder
    */
-  orderBy: (...expressions: Array<QOrderByExpression>) => ReturnType;
+  orderBy: (...expressions: NullableParamList<QOrderByExpression>) => ReturnType;
 
   /**
    * Build the final URI string.
@@ -207,13 +218,7 @@ export interface V2ExpandingFunction<Q extends QueryObject, ReturnType> {
    * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
    * @returns this query builder
    */
-  expanding: <Prop extends ExpandType<Q>>(
-    prop: Prop,
-    expBuilderFn: (
-      expBuilder: ExpandingODataUriBuilderV2<EntityExtractor<Q[Prop]>>,
-      qObject: EntityExtractor<Q[Prop]>
-    ) => void
-  ) => ReturnType;
+  expanding: <Prop extends ExpandType<Q>>(prop: Prop, expBuilderFn: ExpandingFunctionV2<Q[Prop]>) => ReturnType;
 }
 
 type BuilderOp = "build";

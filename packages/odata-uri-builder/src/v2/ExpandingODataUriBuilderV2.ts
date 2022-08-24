@@ -1,8 +1,10 @@
 import { QComplexPath, QueryObject } from "@odata2ts/odata-query-objects";
 import {
   EntityExtractor,
+  ExpandingFunctionV2,
   ExpandingODataUriBuilderV2 as ExpandingODataUriBuilderV2Model,
   ExpandType,
+  NullableParamList,
 } from "../ODataUriBuilderModel";
 import { ODataUriBuilder } from "../ODataUriBuilder";
 
@@ -35,7 +37,7 @@ class ExpandingODataUriBuilderV2<Q extends QueryObject> implements ExpandingODat
     return this.getPrefixedPath(path);
   };
 
-  public select(...props: Array<keyof Q | null | undefined>) {
+  public select(...props: NullableParamList<keyof Q>) {
     const filtered = props?.filter((p): p is keyof Q => !!p);
     if (filtered?.length) {
       filtered.map(this.getPrefixedPathForProp).forEach((path) => {
@@ -46,7 +48,7 @@ class ExpandingODataUriBuilderV2<Q extends QueryObject> implements ExpandingODat
     return this;
   }
 
-  public expand<Prop extends ExpandType<Q>>(...props: Array<Prop>) {
+  public expand<Prop extends ExpandType<Q>>(...props: NullableParamList<Prop>) {
     const filtered = props?.filter((p): p is NonNullable<Prop> => !!p);
     if (filtered?.length) {
       filtered.map(this.getPrefixedPathForProp).forEach((path) => {
@@ -57,17 +59,14 @@ class ExpandingODataUriBuilderV2<Q extends QueryObject> implements ExpandingODat
     return this;
   }
 
-  public expanding<Prop extends ExpandType<Q>>(
-    prop: Prop,
-    builderFn: (
-      builder: ExpandingODataUriBuilderV2<EntityExtractor<Q[Prop]>>,
-      qObject: EntityExtractor<Q[Prop]>
-    ) => void
-  ) {
+  public expanding<Prop extends ExpandType<Q>>(prop: Prop, builderFn: ExpandingFunctionV2<Q[Prop]>) {
+    if (!builderFn) {
+      return this;
+    }
+
     const entityProp = this.builder.getEntityProp<QComplexPath>(prop);
     const entity = entityProp.getEntity();
-
-    const expander = new ExpandingODataUriBuilderV2(entityProp.getPath(), entity);
+    const expander = new ExpandingODataUriBuilderV2<EntityExtractor<Q[Prop]>>(entityProp.getPath(), entity);
 
     builderFn(expander, entity);
 

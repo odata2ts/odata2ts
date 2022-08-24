@@ -9,7 +9,7 @@ import { createUriBuilderV2, ODataUriBuilderV2 } from "../src/";
  * @returns
  */
 function addBase(urlPart: string) {
-  return `/Persons?${urlPart}`;
+  return `/Persons${urlPart ? `?${urlPart}` : ""}`;
 }
 
 describe("ODataUriBuilderV2 Test", () => {
@@ -25,12 +25,10 @@ describe("ODataUriBuilderV2 Test", () => {
   });
 
   test("count: true", () => {
-    const candidate = toTest.count(true).build();
-    const candidate2 = toTest.count().build();
     const expected = addBase("$inlinecount=allpages");
 
-    expect(candidate).toBe(expected);
-    expect(candidate).toBe(candidate2);
+    expect(toTest.count().build()).toBe(expected);
+    expect(toTest.count(true).build()).toBe(expected);
   });
 
   test("count: false", () => {
@@ -38,6 +36,20 @@ describe("ODataUriBuilderV2 Test", () => {
     const expected = "/Persons";
 
     expect(candidate).toBe(expected);
+  });
+
+  test("expanding: simple", () => {
+    const candidate = toTest.expanding("address", () => {}).build();
+    const expected = addBase("$expand=Address");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expanding: ignore null function", () => {
+    const expected = addBase("");
+
+    expect(toTest.expanding("address", null).build()).toBe(expected);
+    expect(toTest.expanding("address", undefined).build()).toBe(expected);
   });
 
   test("expanding: selecting nested prop", () => {
@@ -73,11 +85,4 @@ describe("ODataUriBuilderV2 Test", () => {
 
     expect(candidate).toBe(expected);
   });
-
-  /*test("expanding: nested expand", () => {
-      const candidate = toTest.expanding("address", (q) => q.responsible).build();
-      const expected = addBase("$expand=Address/responsible");
-
-      expect(candidate).toBe(expected);
-    });*/
 });

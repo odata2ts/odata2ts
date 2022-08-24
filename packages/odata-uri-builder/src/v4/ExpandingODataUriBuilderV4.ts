@@ -4,6 +4,9 @@ import {
   EntityExtractor,
   ExpandingODataUriBuilderV4 as ExpandingODataUriBuilderV4Model,
   ExpandType,
+  NullableParamList,
+  ExpandingFunction,
+  NullableParam,
 } from "../internal";
 
 export function createExpandingUriBuilderV4<Q extends QueryObject>(
@@ -24,43 +27,39 @@ class ExpandingODataUriBuilderV4<Q extends QueryObject> implements ExpandingODat
     this.builder = new ODataUriBuilder(property, qEntity, { expandingBuilder: true });
   }
 
-  public select(...props: Array<keyof Q | null | undefined>) {
+  public select(...props: NullableParamList<keyof Q>) {
     this.builder.select(props);
     return this;
   }
 
-  public expand<Prop extends ExpandType<Q>>(...props: Array<Prop>) {
+  public expand<Prop extends ExpandType<Q>>(...props: NullableParamList<Prop>) {
     this.builder.expand(props);
     return this;
   }
 
-  public expanding<Prop extends ExpandType<Q>>(
-    prop: Prop,
-    builderFn: (
-      builder: ExpandingODataUriBuilderV4<EntityExtractor<Q[Prop]>>,
-      qObject: EntityExtractor<Q[Prop]>
-    ) => void
-  ) {
-    this.builder.expanding(prop, builderFn);
+  public expanding<Prop extends ExpandType<Q>>(prop: Prop, builderFn: ExpandingFunction<Q[Prop]>) {
+    if (builderFn) {
+      this.builder.expanding(prop, builderFn);
+    }
     return this;
   }
 
-  public filter(...expressions: Array<QFilterExpression>) {
+  public filter(...expressions: NullableParamList<QFilterExpression>) {
     this.builder.filter(expressions);
     return this;
   }
 
-  public orderBy(...expressions: Array<QOrderByExpression>) {
+  public orderBy(...expressions: NullableParamList<QOrderByExpression>) {
     this.builder.orderBy(expressions);
     return this;
   }
 
-  public top(itemsTop: number) {
+  public top(itemsTop: NullableParam<number>) {
     this.builder.top(itemsTop);
     return this;
   }
 
-  public skip(itemsToSkip: number) {
+  public skip(itemsToSkip: NullableParam<number>) {
     this.builder.skip(itemsToSkip);
     return this;
   }
