@@ -1,5 +1,12 @@
 import { QComplexPath, QFilterExpression, QOrderByExpression, QPath, QueryObject } from "@odata2ts/odata-query-objects";
-import { createExpandingUriBuilderV4, ExpandType, ODataOperators, ODataUriBuilderConfig } from "./internal";
+import {
+  createExpandingUriBuilderV4,
+  ExpandType,
+  NullableParam,
+  NullableParamList,
+  ODataOperators,
+  ODataUriBuilderConfig,
+} from "./internal";
 
 /**
  * Bundles all the logic about handling system query params for OData (V2 and V4).
@@ -51,15 +58,17 @@ export class ODataUriBuilder<Q extends QueryObject> {
     return this.expands;
   }
 
-  public addSelects = (...paths: Array<string>) => {
-    if (paths?.length) {
-      this.getSelects().push(...paths);
+  public addSelects = (...paths: NullableParamList<string>) => {
+    const filteredPaths = paths?.filter((p): p is string => !!p);
+    if (filteredPaths?.length) {
+      this.getSelects().push(...filteredPaths);
     }
   };
 
-  public addExpands = (...paths: Array<string>) => {
-    if (paths?.length) {
-      this.getExpands().push(...paths);
+  public addExpands = (...paths: NullableParamList<string>) => {
+    const filteredPaths = paths?.filter((p): p is string => !!p);
+    if (filteredPaths?.length) {
+      this.getExpands().push(...filteredPaths);
     }
   };
 
@@ -75,41 +84,40 @@ export class ODataUriBuilder<Q extends QueryObject> {
   public count(doCount?: boolean) {
     this.itemsCount = [ODataOperators.COUNT, String(doCount === undefined || doCount)];
   }
+
   public countV2(doCount?: boolean) {
     if (doCount === undefined || doCount) {
       this.itemsCount = [ODataOperators.COUNTV2, "allpages"];
     }
   }
 
-  public select(props: Array<keyof Q | null | undefined>) {
-    if (props && props.length) {
-      this.getSelects().push(
-        ...props
-          .filter((p): p is keyof Q => !!p)
-          .map((p) => {
-            return this.getEntityProp(p).getPath();
-          })
-      );
+  public select(props: NullableParamList<keyof Q>) {
+    const filteredPaths = props?.filter((p): p is keyof Q => !!p).map((p) => this.getEntityProp(p).getPath());
+    if (filteredPaths?.length) {
+      this.getSelects().push(...filteredPaths);
     }
   }
 
-  public filter(expressions: Array<QFilterExpression>) {
-    if (expressions?.length) {
+  public filter(expressions: NullableParamList<QFilterExpression>) {
+    const filteredExps = expressions?.filter((exp): exp is QFilterExpression => !!exp);
+    if (filteredExps?.length) {
       if (!this.filters) {
         this.filters = [];
       }
-      this.filters.push(...expressions);
+      this.filters.push(...filteredExps);
     }
   }
 
-  public expand<Prop extends ExpandType<Q>>(props: Array<Prop>) {
-    if (props?.length) {
-      this.getExpands().push(
-        ...props.map((p) => {
-          const prop = this.getEntityProp<QComplexPath>(p);
-          return prop.getPath();
-        })
-      );
+  /* public filterOr(...expressions: Array<QFilterExpression>) {
+    this.filters.push(
+      expressions.reduce((collector, expr) => (collector ? collector.or(expr) : expr), null as unknown as QFilterExpression)
+    );
+  } */
+
+  public expand<Prop extends ExpandType<Q>>(props: NullableParamList<Prop>) {
+    const filteredPaths = props?.filter((p): p is Prop => !!p).map((p) => this.getEntityProp(p).getPath());
+    if (filteredPaths?.length) {
+      this.getExpands().push(...filteredPaths);
     }
   }
 
@@ -136,12 +144,8 @@ export class ODataUriBuilder<Q extends QueryObject> {
    * @param itemsToSkip amount of items to skip
    * @returns this query builder
    */
-  public skip(itemsToSkip: number) {
-    if (itemsToSkip === undefined || itemsToSkip === null || itemsToSkip < 0) {
-      throw Error("Parameter [skip] must be a positive integer including 0!");
-    }
-
-    this.itemsToSkip = itemsToSkip;
+  public skip(itemsToSkip: NullableParam<number>) {
+    this.itemsToSkip = typeof itemsToSkip === "number" ? itemsToSkip : undefined;
   }
 
   /**
@@ -151,12 +155,8 @@ export class ODataUriBuilder<Q extends QueryObject> {
    * @param itemsTop amount of items to fetch
    * @returns this query builder
    */
-  public top(itemsTop: number) {
-    if (itemsTop === undefined || itemsTop === null || itemsTop < 0) {
-      throw Error("Parameter [top] must be a positive integer including 0!");
-    }
-
-    this.itemsTop = itemsTop;
+  public top(itemsTop: NullableParam<number>) {
+    this.itemsTop = typeof itemsTop === "number" ? itemsTop : undefined;
   }
 
   /**
@@ -168,37 +168,27 @@ export class ODataUriBuilder<Q extends QueryObject> {
    * @param expressions possibly multiple order by expressions at once
    * @returns this query builder
    */
-  public orderBy(expressions: Array<QOrderByExpression>) {
-    if (expressions?.length) {
+  public orderBy(expressions: NullableParamList<QOrderByExpression>) {
+    const filteredExps = expressions?.filter((exp): exp is QOrderByExpression => !!exp);
+    if (filteredExps?.length) {
       if (!this.orderBys) {
         this.orderBys = [];
       }
-      this.orderBys.push(...expressions);
+      this.orderBys.push(...filteredExps);
     }
   }
 
-  /* public filterOr(...expressions: Array<QFilterExpression>) {
-    this.filters.push(
-      expressions.reduce((collector, expr) => (collector ? collector.or(expr) : expr), null as unknown as QFilterExpression)
-    );
-  } */
-
-  public groupBy(props: Array<keyof Q | null | undefined>) {
-    if (props && props.length) {
+  public groupBy(props: NullableParamList<keyof Q>) {
+    const filteredPaths = props?.filter((p): p is keyof Q => !!p).map((p) => this.getEntityProp(p).getPath());
+    if (filteredPaths?.length) {
       if (!this.groupBys) {
         this.groupBys = [];
       }
-      this.groupBys.push(
-        ...props
-          .filter((p): p is keyof Q => !!p)
-          .map((p) => {
-            return this.getEntityProp(p).getPath();
-          })
-      );
+      this.groupBys.push(...filteredPaths);
     }
   }
 
-  public search(term: string | undefined | null) {
+  public search(term: NullableParam<string>) {
     this.searchTerm = term || undefined;
   }
 

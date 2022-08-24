@@ -9,7 +9,7 @@ import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
  * @returns
  */
 function addBase(urlPart: string) {
-  return `/Persons?${urlPart}`;
+  return `/Persons${urlPart ? `?${urlPart}` : ""}`;
 }
 
 export type BuilderFactoryFunction<Q extends QueryObject> = (
@@ -21,11 +21,15 @@ export type BuilderFactoryFunction<Q extends QueryObject> = (
 export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) {
   let toTest: Omit<ODataUriBuilderV2<QPerson>, "expanding" | "count">;
 
+  function refresh() {
+    toTest = createBuilder("/Persons", qPerson, { unencoded: true });
+  }
+
   /**
    * Always use a new builder for each test.
    */
   beforeEach(() => {
-    toTest = createBuilder("/Persons", qPerson, { unencoded: true });
+    refresh();
   });
 
   test("create: minimal default", () => {
@@ -65,67 +69,56 @@ export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) 
     expect(candidate).toBe(expected);
   });
 
-  test("select: ignore null or undefined", () => {
+  test("select: ignore nullables", () => {
     const candidate = toTest.select(null, "name", undefined, "age").build();
     const expected = addBase("$select=name,age");
 
     expect(candidate).toBe(expected);
   });
 
-  test("select: no param if only null is passed", () => {
+  test("select: no param if only nullable is passed", () => {
     const candidate = toTest.select(null).build();
 
     expect(candidate).toBe("/Persons");
   });
 
   test("skip", () => {
-    const candidate = toTest.skip(5).build();
-    const expected = addBase("$skip=5");
-
-    expect(candidate).toBe(expected);
+    expect(toTest.skip(99).build()).toBe(addBase("$skip=99"));
+    refresh();
+    expect(toTest.skip(0).build()).toBe(addBase("$skip=0"));
+    refresh();
+    expect(toTest.skip(-5).build()).toBe(addBase("$skip=-5"));
   });
 
-  test("skip: with zero", () => {
-    const candidate = toTest.skip(0).build();
-    const expected = addBase("$skip=0");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("skip: fail with negative number", () => {
-    expect(() => toTest.skip(-2)).toThrow();
+  test("skip: ignore nullable", () => {
+    expect(toTest.skip(null).build()).toBe(addBase(""));
+    expect(toTest.skip(undefined).build()).toBe(addBase(""));
   });
 
   test("top", () => {
-    const candidate = toTest.top(15).build();
-    const expected = addBase("$top=15");
-
-    expect(candidate).toBe(expected);
+    expect(toTest.top(15).build()).toBe(addBase("$top=15"));
+    refresh();
+    expect(toTest.top(0).build()).toBe(addBase("$top=0"));
+    refresh();
+    expect(toTest.top(-3).build()).toBe(addBase("$top=-3"));
   });
 
-  test("top: with zero", () => {
-    const candidate = toTest.top(0).build();
-    const expected = addBase("$top=0");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("top: fail with negative number", () => {
-    expect(() => toTest.top(-1)).toThrow();
+  test("top: ignore nullable", () => {
+    expect(toTest.top(null).build()).toBe(addBase(""));
+    expect(toTest.top(undefined).build()).toBe(addBase(""));
   });
 
   test("orderBy", () => {
-    const candidate = toTest.orderBy(qPerson.name.asc()).build();
-    const expected = addBase("$orderby=name asc");
+    const expectedAsc = addBase("$orderby=name asc");
+    const expectedDesc = addBase("$orderby=name desc");
 
-    expect(candidate).toBe(expected);
-  });
-
-  test("orderBy: desc", () => {
-    const candidate = toTest.orderBy(qPerson.name.desc()).build();
-    const expected = addBase("$orderby=name desc");
-
-    expect(candidate).toBe(expected);
+    expect(toTest.orderBy(qPerson.name.asc()).build()).toBe(expectedAsc);
+    refresh();
+    expect(toTest.orderBy(qPerson.name.ascending()).build()).toBe(expectedAsc);
+    refresh();
+    expect(toTest.orderBy(qPerson.name.desc()).build()).toBe(expectedDesc);
+    refresh();
+    expect(toTest.orderBy(qPerson.name.descending()).build()).toBe(expectedDesc);
   });
 
   test("orderBy: multiple", () => {
@@ -140,6 +133,14 @@ export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) 
     const expected = addBase("$orderby=name desc,age asc");
 
     expect(candidate).toBe(expected);
+  });
+
+  test("orderBy: ignore nullable", () => {
+    expect(toTest.orderBy(null).build()).toBe(addBase(""));
+    refresh();
+    expect(toTest.orderBy(undefined).build()).toBe(addBase(""));
+    refresh();
+    expect(toTest.orderBy(undefined, qPerson.name.descending()).build()).toBe(addBase("$orderby=name desc"));
   });
 
   test("filter: simple", () => {
@@ -185,6 +186,16 @@ export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) 
     expect(candidate).toBe(expected);
   });
 
+  test("filter: ignore nullables", () => {
+    const expectedNull = addBase("");
+
+    expect(toTest.filter(null).build()).toBe(expectedNull);
+    refresh();
+    expect(toTest.filter(undefined).build()).toBe(expectedNull);
+    refresh();
+    expect(toTest.filter(undefined, qPerson.name.eq("Heinz"), null).build()).toBe(addBase("$filter=name eq 'Heinz'"));
+  });
+
   /*
   test("filterOr: simple", () => {
     const candidate = toTest.filterOr(qPerson.name.eq("Heinz")).build();
@@ -223,5 +234,14 @@ export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) 
     const expected = addBase("$expand=Address,AltAdresses");
 
     expect(candidate).toBe(expected);
+  });
+
+  test("expand: ignore nullables", () => {
+    const expectedNull = addBase("");
+    const expected = addBase("$expand=Address");
+
+    expect(toTest.expand(null).build()).toBe(expectedNull);
+    expect(toTest.expand(undefined).build()).toBe(expectedNull);
+    expect(toTest.expand("address", undefined, null).build()).toBe(expected);
   });
 }

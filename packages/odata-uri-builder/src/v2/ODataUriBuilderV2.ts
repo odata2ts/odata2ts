@@ -7,6 +7,9 @@ import {
   ODataUriBuilderConfig,
   ODataUriBuilderV2 as ODataUriBuilderV2Model,
   createExpandingUriBuilderV2,
+  NullableParamList,
+  ExpandingFunctionV2,
+  NullableParam,
 } from "../internal";
 
 /**
@@ -43,28 +46,26 @@ class ODataUriBuilderV2<Q extends QueryObject> implements ODataUriBuilderV2Model
     this.builder = new ODataUriBuilder(path, qEntity, config);
   }
 
-  public select(...props: Array<keyof Q | null | undefined>) {
+  public select(...props: NullableParamList<keyof Q>) {
     this.builder.select(props);
     return this;
   }
 
-  public filter(...expressions: Array<QFilterExpression>) {
+  public filter(...expressions: NullableParamList<QFilterExpression>) {
     this.builder.filter(expressions);
     return this;
   }
 
-  public expand<Prop extends ExpandType<Q>>(...props: Array<Prop>) {
+  public expand<Prop extends ExpandType<Q>>(...props: NullableParamList<Prop>) {
     this.builder.expand(props);
     return this;
   }
 
-  public expanding<Prop extends ExpandType<Q>>(
-    prop: Prop,
-    builderFn: (
-      builder: ExpandingODataUriBuilderV2<EntityExtractor<Q[Prop]>>,
-      qObject: EntityExtractor<Q[Prop]>
-    ) => void
-  ) {
+  public expanding<Prop extends ExpandType<Q>>(prop: Prop, builderFn: ExpandingFunctionV2<Q[Prop]>) {
+    if (!builderFn) {
+      return this;
+    }
+
     const entityProp = this.builder.getEntityProp<QComplexPath>(prop);
     const entity = entityProp.getEntity();
 
@@ -83,7 +84,7 @@ class ODataUriBuilderV2<Q extends QueryObject> implements ODataUriBuilderV2Model
     return this;
   }
 
-  public orderBy(...expressions: Array<QOrderByExpression>) {
+  public orderBy(...expressions: NullableParamList<QOrderByExpression>) {
     this.builder.orderBy(expressions);
     return this;
   }
@@ -93,12 +94,12 @@ class ODataUriBuilderV2<Q extends QueryObject> implements ODataUriBuilderV2Model
     return this;
   }
 
-  public top(itemsTop: number) {
+  public top(itemsTop: NullableParam<number>) {
     this.builder.top(itemsTop);
     return this;
   }
 
-  public skip(itemsToSkip: number) {
+  public skip(itemsToSkip: NullableParam<number>) {
     this.builder.skip(itemsToSkip);
     return this;
   }

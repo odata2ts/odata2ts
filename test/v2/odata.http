@@ -6,6 +6,12 @@ GET {{baseUrl}}/$metadata
 GET {{rootUrl}}
 
 
+# --- Data Types
+### @name DateTime
+GET {{baseUrl}}/Products?$inlinecount=allpages&$select=ReleaseDate
+Accept: {{contentType}}
+
+
 # --- Queries ---
 ### @name list products
 GET {{baseUrl}}/Products?$inlinecount=allpages
@@ -48,7 +54,6 @@ Accept: {{contentType}}
 GET {{baseUrl}}/Products(0)?$select=ID,Name,Category/Name,Category/Products/Name&$expand=Category,Category/Products
 Accept: {{contentType}}
 
-
 # --- Create Entity ---
 ### @name create new product
 POST {{baseUrl}}/Products
@@ -64,16 +69,24 @@ Content-Type: {{contentType}}
   "ReleaseDate": "2022-01-01T00:00:00"
 }
 
-# PATCH doesn't work and merge is not supported by HTTPClient
-### @name update new product
-PATCH {{baseUrl}}/Products(999)
+### @name merge new product
+POST {{baseUrl}}/Products(999)
 Accept: {{contentType}}
 Content-Type: {{contentType}}
+X-Http-Method: MERGE
 
 {
   "Description": "Test Descriptioning!!!",
   "Rating": 3
 }
+
+### PATCH doesn't work and merge is not supported by HTTPClient
+### @name update new product
+PATCH {{baseUrl}}/Products(999)
+Accept: {{contentType}}
+Content-Type: {{contentType}}
+
+
 
 ### @name update category association
 PATCH {{baseUrl}}/Products(999)
