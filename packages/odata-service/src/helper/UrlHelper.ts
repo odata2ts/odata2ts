@@ -21,7 +21,7 @@ export const compileId = (
 ): string => {
   if (typeof values === "string" || typeof values === "number") {
     if (Object.keys(keySpec).length !== 1) {
-      throw Error("Only primitive value for id provided, but complex key spec is required!");
+      throw new Error("Only primitive value for id provided, but complex key spec is required!");
     }
     const { isLiteral, typePrefix } = keySpec[0];
     return compileSingleParamPath(path, isLiteral, typePrefix, values);
@@ -29,7 +29,7 @@ export const compileId = (
   const params = keySpec.reduce((collector, ks) => {
     const value = values[ks.odataName];
     if (value === undefined) {
-      throw Error(`Key [${ks.odataName}] not mapped in provided values!`);
+      throw new Error(`Key [${ks.odataName}] not mapped in provided values!`);
     }
 
     collector[ks.odataName] = { isLiteral: ks.isLiteral, value, typePrefix: ks.typePrefix };
@@ -156,7 +156,7 @@ export const compileFunctionPathV4 = (path: string, name?: string, params?: Inli
 
 export const compileFunctionPathV2 = (path: string, name?: string, params?: InlineUrlProps): string => {
   if (params && typeof params !== "object") {
-    throw Error("Only object types are valid for compileParams!");
+    throw new Error("Only object types are valid for compileParams!");
   }
 
   const actionPath = compileActionPath(path, name);
@@ -175,7 +175,7 @@ export const compileFunctionPathV2 = (path: string, name?: string, params?: Inli
 
 const compileParams = (id: InlineUrlProps) => {
   if (typeof id !== "object") {
-    throw Error("Only object types are valid for compileParams!");
+    throw new Error("Only object types are valid for compileParams!");
   }
   return Object.entries(id)
     .map(([key, { value, isLiteral, typePrefix }]) => {
@@ -195,7 +195,7 @@ const compileParams = (id: InlineUrlProps) => {
  */
 export const compileActionPath = (path: string, actionName?: string) => {
   if (!path || !path.trim()) {
-    throw Error("Path must be provided; at least the function name!");
+    throw new Error("Path must be provided; at least the function name!");
   }
   return `${path}${actionName ? "/" + actionName : ""}`;
 };
@@ -209,7 +209,7 @@ export const compileActionPath = (path: string, actionName?: string) => {
  */
 export const compileLiteralValue = (value: string | number | boolean): string => {
   if (typeof value !== "string" && typeof value !== "number" && typeof value !== "boolean") {
-    throw Error("Only string, number & boolean types are valid for compileLiteralValue!");
+    throw new Error("Only string, number & boolean types are valid for compileLiteralValue!");
   }
   return String(value);
 };
@@ -222,7 +222,7 @@ export const compileLiteralValue = (value: string | number | boolean): string =>
  */
 export const compileQuotedValue = (value: string | number | boolean): string => {
   if (typeof value !== "string" && typeof value !== "number" && typeof value !== "boolean") {
-    throw Error("Only string, number & boolean types are valid for compileQuotedValue!");
+    throw new Error("Only string, number & boolean types are valid for compileQuotedValue!");
   }
   return `'${value}'`;
 };

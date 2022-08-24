@@ -5,7 +5,7 @@ import { QPathModel } from "../QPathModel";
 export abstract class QLiteralPath<ValueType, OperatorTypes> implements QPathModel {
   constructor(protected path: string) {
     if (!path || !path.trim()) {
-      throw Error("Path must be supplied!");
+      throw new Error("Path must be supplied!");
     }
   }
 

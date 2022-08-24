@@ -170,14 +170,14 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
       // sanity check: entity types require key specification
       if (!model.keyNames.length) {
-        throw Error(`Key property is missing from Entity "${model.name}" (${model.odataName})!`);
+        throw new Error(`Key property is missing from Entity "${model.name}" (${model.odataName})!`);
       }
 
       const props = [...model.props, ...model.baseProps];
       model.keys = model.keyNames.map((keyName) => {
         const prop = props.find((p) => p.odataName === keyName);
         if (!prop) {
-          throw Error(`Key with name [${keyName}] not found in props!`);
+          throw new Error(`Key with name [${keyName}] not found in props!`);
         }
         return prop;
       });
@@ -208,7 +208,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   protected mapProperty = (p: Property): PropertyModel => {
     if (!p.$.Type) {
-      throw Error(`No type information given for property [${p.$.Name}]!`);
+      throw new Error(`No type information given for property [${p.$.Name}]!`);
     }
 
     const isCollection = !!p.$.Type.match(/^Collection\(/);

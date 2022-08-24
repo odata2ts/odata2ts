@@ -7,7 +7,7 @@ import { QFilterExpression } from "../../QFilterExpression";
 export abstract class QStringBasePath<SubClass extends QStringBasePath<any>> implements QPathModel {
   constructor(private path: string) {
     if (!path || !path.trim()) {
-      throw Error("Path must be supplied!");
+      throw new Error("Path must be supplied!");
     }
   }
 

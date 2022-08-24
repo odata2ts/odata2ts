@@ -5,7 +5,7 @@ import { QOrderByExpression } from "../../QOrderByExpression";
 export class QGuidV2Path {
   constructor(private path: string) {
     if (!path || !path.trim()) {
-      throw Error("Path must be supplied!");
+      throw new Error("Path must be supplied!");
     }
   }
 

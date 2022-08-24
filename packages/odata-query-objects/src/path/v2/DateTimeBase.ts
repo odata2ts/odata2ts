@@ -6,7 +6,7 @@ import { QPathModel } from "../QPathModel";
 export abstract class DateTimeBasePath implements QPathModel {
   constructor(private path: string) {
     if (!path || !path.trim()) {
-      throw Error("Path must be supplied!");
+      throw new Error("Path must be supplied!");
     }
   }
 
