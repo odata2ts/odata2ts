@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.11.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.10.0...@odata2ts/odata-uri-builder@0.11.0) (2022-08-25)
+
+
+### Bug Fixes
+
+* always create errors with new operator ([#54](https://github.com/odata2ts/odata2ts/issues/54)) ([562dede](https://github.com/odata2ts/odata2ts/commit/562dede85d7ce276957a4b1683856d4adfee3ad1))
+
+
+### Features
+
+* **uri-builder:** allow for null | undefined in nearly all builder methods ([#53](https://github.com/odata2ts/odata2ts/issues/53)) ([1dd6629](https://github.com/odata2ts/odata2ts/commit/1dd6629ac9d12f42c61ab240eba3f21e288156ba))
+
+
+
+
+
 # [0.10.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-uri-builder@0.9.0...@odata2ts/odata-uri-builder@0.10.0) (2022-08-11)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.7.0...@odata2ts/odata-service@0.7.1) (2022-08-25)
+
+
+### Bug Fixes
+
+* always create errors with new operator ([#54](https://github.com/odata2ts/odata2ts/issues/54)) ([562dede](https://github.com/odata2ts/odata2ts/commit/562dede85d7ce276957a4b1683856d4adfee3ad1))
+
+
+
+
+
 # [0.7.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.6.0...@odata2ts/odata-service@0.7.0) (2022-08-11)
 
 
