@@ -36,7 +36,8 @@
   "peerDependencies": {
     "@odata2ts/odata-client-api": "*",
     "@odata2ts/odata-query-objects": "*",
-    "@odata2ts/odata-service": "*"
+    "@odata2ts/odata-service": "*",
+    "prettier": "*"
   },
   "dependencies": {
     "camel-case": "^4.1.2",
@@ -44,7 +45,6 @@
     "cosmiconfig": "^7.0.1",
     "fs-extra": "^10.0.1",
     "pascal-case": "^3.1.2",
-    "prettier": "^2.6.2",
     "ts-morph": "^14.0.0",
     "upper-case-first": "^2.0.2",
     "xml2js": "^0.4.23"
