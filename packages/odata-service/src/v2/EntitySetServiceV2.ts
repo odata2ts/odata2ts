@@ -1,11 +1,11 @@
-import { ODataClient, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import { QueryObject } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
 import { ODataCollectionResponseV2, ODataModelResponseV2 } from "./ResponseModelV2";
 import { EntityTypeServiceV2 } from "./EntityTypeServiceV2";
 import { ServiceBaseV2 } from "./ServiceBaseV2";
-import { EntityKeySpec, ODataClientConfig } from "../EntityModel";
+import { EntityKeySpec } from "../EntityModel";
 import { compileId, parseId } from "../helper/UrlHelper";
 import { ParsedKey } from "../ServiceModel";
 

@@ -1,4 +1,4 @@
-import { ODataClient } from "@odata2ts/odata-client-api";
+import { ODataClient, ODataClientConfig } from "@odata2ts/odata-client-api";
 import { EntityTypeServiceV2, EntitySetServiceV2, CollectionServiceV2, compileFunctionPathV2 } from "../../../src";
 import {
   QCollectionPath,
@@ -11,7 +11,6 @@ import {
   QStringV2Path,
 } from "@odata2ts/odata-query-objects";
 import { EditablePersonModel, PersonModel } from "../PersonModel";
-import { ODataClientConfig } from "../../../src/EntityModel";
 
 export class QPersonV2 extends QueryObject {
   public readonly userName = new QStringV2Path(this.withPrefix("UserName"));

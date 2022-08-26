@@ -1,4 +1,4 @@
-import { ODataClient, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import { QueryObject } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
@@ -6,8 +6,8 @@ import { EntityTypeServiceV4 } from "./EntityTypeServiceV4";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "./ResponseModelV4";
 import { ServiceBaseV4 } from "./ServiceBaseV4";
 import { compileId, parseId } from "../helper/UrlHelper";
-import { EntityKeySpec, ODataClientConfig } from "../EntityModel";
 import { ParsedKey } from "../ServiceModel";
+import { EntityKeySpec } from "../EntityModel";
 
 export abstract class EntitySetServiceV4<
   ClientType extends ODataClient,

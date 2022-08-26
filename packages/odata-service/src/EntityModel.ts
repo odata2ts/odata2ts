@@ -1,9 +1,3 @@
-import { ODataClient } from "@odata2ts/odata-client-api";
-
-export type ODataClientConfig<ClientType extends ODataClient> = ClientType extends ODataClient<infer Config>
-  ? Config
-  : never;
-
 /**
  * Typing for a property which can be used as inline parameter.
  */

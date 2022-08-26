@@ -1,10 +1,9 @@
-import { ODataClient, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import { QueryObject } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
 import { ServiceBaseV4 } from "./ServiceBaseV4";
 import { ODataModelResponseV4 } from "./ResponseModelV4";
-import { ODataClientConfig } from "../EntityModel";
 
 export class EntityTypeServiceV4<
   ClientType extends ODataClient,
