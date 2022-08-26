@@ -6,13 +6,14 @@ import { ServiceBaseV4 } from "./ServiceBaseV4";
 import { ODataModelResponseV4 } from "./ResponseModelV4";
 
 export class EntityTypeServiceV4<T, EditableT, Q extends QueryObject> extends ServiceBaseV4<T, Q> {
-  public patch: (model: Partial<EditableT>) => ODataResponse<void> = this.doPatch;
+  public patch: (model: Partial<EditableT>, requestConfig?: unknown) => ODataResponse<void> = this.doPatch;
 
-  public update: (model: EditableT) => ODataResponse<void> = this.doPut;
+  public update: (model: EditableT, requestConfig?: unknown) => ODataResponse<void> = this.doPut;
 
-  public delete: () => ODataResponse<void> = this.doDelete;
+  public delete: (requestConfig?: unknown) => ODataResponse<void> = this.doDelete;
 
   public query: (
-    queryFn?: (builder: ODataUriBuilderV4<Q>, qObject: Q) => void
+    queryFn?: (builder: ODataUriBuilderV4<Q>, qObject: Q) => void,
+    requestConfig?: unknown
   ) => ODataResponse<ODataModelResponseV4<T>> = this.doQuery;
 }

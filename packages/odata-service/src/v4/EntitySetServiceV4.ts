@@ -73,22 +73,23 @@ export abstract class EntitySetServiceV4<
    * @param model
    * @return
    */
-  public create: (model: EditableT) => ODataResponse<ODataModelResponseV4<T>> = this.doPost;
+  public create: (model: EditableT, requestConfig?: unknown) => ODataResponse<ODataModelResponseV4<T>> = this.doPost;
 
   public get(id: EIdType) {
     const url = compileId(this.path, this.keySpec, id);
     return new this.entityTypeServiceConstructor(this.client, url);
   }
 
-  public patch(id: EIdType, model: Partial<EditableT>): ODataResponse<void> {
-    return this.get(id).patch(model);
+  public patch(id: EIdType, model: Partial<EditableT>, requestConfig?: unknown): ODataResponse<void> {
+    return this.get(id).patch(model, requestConfig);
   }
 
-  public delete(id: EIdType): ODataResponse<void> {
-    return this.get(id).delete();
+  public delete(id: EIdType, requestConfig?: unknown): ODataResponse<void> {
+    return this.get(id).delete(requestConfig);
   }
 
   public query: (
-    queryFn?: (builder: ODataUriBuilderV4<Q>, qObject: Q) => void
+    queryFn?: (builder: ODataUriBuilderV4<Q>, qObject: Q) => void,
+    requestConfig?: unknown
   ) => ODataResponse<ODataCollectionResponseV4<T>> = this.doQuery;
 }

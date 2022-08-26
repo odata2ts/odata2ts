@@ -27,7 +27,7 @@ export abstract class EntitySetServiceV2<
    * @param keySpec the specification of the key (supports composite keys) of the given entity
    * @protected
    */
-  protected constructor(
+  public constructor(
     client: ODataClient,
     path: string,
     qModel: Q,
@@ -73,22 +73,27 @@ export abstract class EntitySetServiceV2<
    * @param model
    * @return
    */
-  public create: (model: EditableT) => ODataResponse<ODataModelResponseV2<T>> = this.doPost;
+  public create: (model: EditableT, requestConfig?: unknown) => ODataResponse<ODataModelResponseV2<T>> = this.doPost;
 
   public get(id: EIdType) {
     const url = compileId(this.path, this.keySpec, id);
     return new this.entityTypeServiceConstructor(this.client, url);
   }
 
-  public patch(id: EIdType, model: Partial<EditableT>): ODataResponse<void> {
-    return this.get(id).patch(model);
+  public patch(
+    id: EIdType,
+    model: Partial<EditableT>,
+    requestConfig?: ConstructorParameters<typeof EntitySetServiceV2>[0] extends ODataClient<infer Config> ? Config : never
+  ): ODataResponse<void> {
+    return this.get(id).patch(model, requestConfig);
   }
 
-  public delete(id: EIdType): ODataResponse<void> {
-    return this.get(id).delete();
+  public delete(id: EIdType, requestConfig?: unknown): ODataResponse<void> {
+    return this.get(id).delete(requestConfig);
   }
 
   public query: (
-    queryFn?: (builder: ODataUriBuilderV2<Q>, qObject: Q) => void
+    queryFn?: (builder: ODataUriBuilderV2<Q>, qObject: Q) => void,
+    requestConfig?: unknown
   ) => ODataResponse<ODataCollectionResponseV2<T>> = this.doQuery;
 }

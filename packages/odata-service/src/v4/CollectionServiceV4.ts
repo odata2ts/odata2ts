@@ -16,14 +16,14 @@ export class CollectionServiceV4<T, Q extends QueryObject, EditableT = Primitive
    *
    * @param model primitive value
    */
-  public add: (model: EditableT) => ODataResponse<ODataModelResponseV4<T>> = this.doPost;
+  public add: (model: EditableT, requestConfig?: unknown) => ODataResponse<ODataModelResponseV4<T>> = this.doPost;
 
   /**
    * Update the whole collection.
    *
    * @param models set of primitive values
    */
-  public update: (models: Array<EditableT>) => ODataResponse<void> = this.doPut;
+  public update: (models: Array<EditableT>, requestConfig?: unknown) => ODataResponse<void> = this.doPut;
 
   /**
    * Delete the whole collection.
@@ -34,6 +34,7 @@ export class CollectionServiceV4<T, Q extends QueryObject, EditableT = Primitive
    * Query collection of primitive values.
    */
   public query: (
-    queryFn?: (builder: ODataUriBuilderV4<Q>, qObject: Q) => void
+    queryFn?: (builder: ODataUriBuilderV4<Q>, qObject: Q) => void,
+    requestConfig?: unknown
   ) => ODataResponse<ODataCollectionResponseV4<T>> = this.doQuery;
 }
