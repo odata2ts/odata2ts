@@ -30,4 +30,15 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
     });
     return this.client.get(url, requestConfig);
   }
+
+  public postBestBook(
+    params: { TestString: string; TEST_NUMBER?: number },
+    requestConfig?: ODataClientConfig<ClientType>
+  ): ODataResponse<ODataModelResponseV2<TestEntity>> {
+    const url = compileFunctionPathV2(this.getPath(), "postBestBook", {
+      TestString: { isLiteral: false, value: params.TestString },
+      TEST_NUMBER: { isLiteral: true, value: params.TEST_NUMBER },
+    });
+    return this.client.post(url, undefined, requestConfig);
+  }
 }

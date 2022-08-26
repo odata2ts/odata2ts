@@ -42,14 +42,15 @@ export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, Sch
   public addFunctionImport(
     name: string,
     returnType?: string,
-    paramBuilder?: (builder: ODataFunctionBuilderV2) => void
+    paramBuilder?: (builder: ODataFunctionBuilderV2) => void,
+    usePostMethod?: boolean
   ) {
     const container = this.getEntityContainer();
     if (!container.FunctionImport) {
       container.FunctionImport = [];
     }
 
-    const builder = new ODataFunctionBuilderV2(name, returnType);
+    const builder = new ODataFunctionBuilderV2(name, returnType, usePostMethod);
     if (paramBuilder) {
       paramBuilder(builder);
     }

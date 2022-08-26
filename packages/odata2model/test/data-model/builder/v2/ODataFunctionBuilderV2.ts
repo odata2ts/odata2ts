@@ -4,7 +4,7 @@ import { createProperty } from "../ODataBuilderHelper";
 export class ODataFunctionBuilderV2 {
   private function: FunctionImport;
 
-  constructor(name: string, returnType?: string) {
+  constructor(name: string, returnType?: string, usePostMethod?: boolean) {
     this.function = {
       $: {
         Name: name,
@@ -18,6 +18,9 @@ export class ODataFunctionBuilderV2 {
           },
         },
       ];
+    }
+    if (usePostMethod) {
+      this.function.$["m:HttpMethod"] = "POST";
     }
   }
 

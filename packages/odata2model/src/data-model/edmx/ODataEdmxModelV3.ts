@@ -55,6 +55,7 @@ export interface FunctionImport {
     Name: string;
     EntitySet?: string;
     ReturnType?: string;
+    "m:HttpMethod"?: "POST" | "GET";
   };
   ReturnType?: Array<ReturnType>;
   Parameter?: Array<Parameter>;

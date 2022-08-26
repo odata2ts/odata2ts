@@ -54,6 +54,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
 
       container.FunctionImport?.forEach((funcImport) => {
         const name = this.getOperationName(funcImport.$.Name);
+        const usePost = funcImport.$["m:HttpMethod"]?.toUpperCase() === "POST";
         const parameters = funcImport.Parameter?.map(this.mapProperty) ?? [];
 
         // TODO: the spec allows for multiple ReturnType elements
@@ -71,6 +72,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
           type: OperationTypes.Function,
           parameters,
           returnType,
+          usePost,
         };
         this.dataModel.addOperationType("/", operation);
 

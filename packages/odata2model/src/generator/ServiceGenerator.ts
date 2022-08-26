@@ -474,9 +474,14 @@ class ServiceGenerator {
       statements: [
         `const url = ${url}`,
         `return this.client.${
-          isFunc
-            ? `get(url, ${requestConfigParam.name})`
-            : `post(url, ${optParamType ? "params" : "{}"}, ${requestConfigParam.name})`
+          !isFunc
+            ? // actions: since V4
+              `post(url, ${optParamType ? "params" : "{}"}, ${requestConfigParam.name})`
+            : operation.usePost
+            ? // V2 POST => BUT values are still query params, they are not part of the request body
+              `post(url, undefined, ${requestConfigParam.name})`
+            : // functions: since V2
+              `get(url, ${requestConfigParam.name})`
         };`,
       ],
     };
