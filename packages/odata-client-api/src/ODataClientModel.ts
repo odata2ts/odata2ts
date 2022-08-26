@@ -1,5 +1,12 @@
 import { ODataResponse } from "./ODataResponseModel";
 
+/**
+ * Retrieves the configuration type for the given ODataClient type.
+ */
+export type ODataClientConfig<ClientType extends ODataClient> = ClientType extends ODataClient<infer Config>
+  ? Config
+  : never;
+
 export interface ODataClient<RequestConfig = any> {
   /**
    * Create a model or collection entry.
@@ -53,18 +60,4 @@ export interface ODataClient<RequestConfig = any> {
    * @param requestConfig
    */
   delete(url: string, requestConfig?: RequestConfig): ODataResponse<void>;
-
-  // TODO --- OData Feature Matrix --- TODO
-  // Security: Basic Auth
-  // Optimistic Locking: ETag (Header)
-  // Header Infos:
-  //   - Location: specifies edit or read url; Create (Media) Entity or Async Request with 202
-  //   - OData-EntityId: id of created / upserted entity; Create or Update with 204
-  //   - OData-Error
-  //   - Preference-Applied
-  //   - Vary
-  // Special Ops: Batch, Async Requests
-
-  // TODO --- Standard Features --- TODO
-  // additional headers: eg. CSRF token
 }
