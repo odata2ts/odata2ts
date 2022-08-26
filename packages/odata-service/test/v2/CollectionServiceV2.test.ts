@@ -9,10 +9,14 @@ import { commonCollectionTests, getParams } from "../CollectionServiceTests";
 describe("CollectionService V2 Tests", () => {
   const odataClient = new MockODataClient();
 
-  const stringConstructor = (url: string): CollectionServiceV2<StringCollection, QStringV2Collection> => {
+  const stringConstructor = (
+    url: string
+  ): CollectionServiceV2<MockODataClient, StringCollection, QStringV2Collection> => {
     return new CollectionServiceV2(odataClient, url, new QStringV2Collection());
   };
-  const enumConstructor = (url: string): CollectionServiceV2<EnumCollection<Feature>, QEnumCollection> => {
+  const enumConstructor = (
+    url: string
+  ): CollectionServiceV2<MockODataClient, EnumCollection<Feature>, QEnumCollection> => {
     return new CollectionServiceV2(odataClient, url, new QEnumCollection());
   };
 

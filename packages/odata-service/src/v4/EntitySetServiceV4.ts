@@ -6,15 +6,16 @@ import { EntityTypeServiceV4 } from "./EntityTypeServiceV4";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "./ResponseModelV4";
 import { ServiceBaseV4 } from "./ServiceBaseV4";
 import { compileId, parseId } from "../helper/UrlHelper";
-import { EntityKeySpec } from "../EntityModel";
+import { EntityKeySpec, ODataClientConfig } from "../EntityModel";
 import { ParsedKey } from "../ServiceModel";
 
 export abstract class EntitySetServiceV4<
+  ClientType extends ODataClient,
   T,
   EditableT,
   Q extends QueryObject,
   EIdType,
-  ETS extends EntityTypeServiceV4<T, EditableT, Q>
+  ETS extends EntityTypeServiceV4<ClientType, T, EditableT, Q>
 > extends ServiceBaseV4<T, Q> {
   /**
    * Overriding the constructor to support creation of EntityTypeService from within this service.
@@ -73,23 +74,30 @@ export abstract class EntitySetServiceV4<
    * @param model
    * @return
    */
-  public create: (model: EditableT, requestConfig?: unknown) => ODataResponse<ODataModelResponseV4<T>> = this.doPost;
+  public create: (
+    model: EditableT,
+    requestConfig?: ODataClientConfig<ClientType>
+  ) => ODataResponse<ODataModelResponseV4<T>> = this.doPost;
 
   public get(id: EIdType) {
     const url = compileId(this.path, this.keySpec, id);
     return new this.entityTypeServiceConstructor(this.client, url);
   }
 
-  public patch(id: EIdType, model: Partial<EditableT>, requestConfig?: unknown): ODataResponse<void> {
+  public patch(
+    id: EIdType,
+    model: Partial<EditableT>,
+    requestConfig?: ODataClientConfig<ClientType>
+  ): ODataResponse<void> {
     return this.get(id).patch(model, requestConfig);
   }
 
-  public delete(id: EIdType, requestConfig?: unknown): ODataResponse<void> {
+  public delete(id: EIdType, requestConfig?: ODataClientConfig<ClientType>): ODataResponse<void> {
     return this.get(id).delete(requestConfig);
   }
 
   public query: (
     queryFn?: (builder: ODataUriBuilderV4<Q>, qObject: Q) => void,
-    requestConfig?: unknown
+    requestConfig?: ODataClientConfig<ClientType>
   ) => ODataResponse<ODataCollectionResponseV4<T>> = this.doQuery;
 }

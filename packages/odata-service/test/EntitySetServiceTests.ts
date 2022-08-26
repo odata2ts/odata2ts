@@ -8,14 +8,42 @@ import { EntitySetServiceV2, EntitySetServiceV4 } from "../src";
 export function commonEntitySetTests(
   odataClient: MockODataClient,
   serviceConstructor: new (odataClient: ODataClient, baseUrl: string) =>
-    | EntitySetServiceV4<PersonModel, EditablePersonModel, QPersonV4, string | { UserName: string }, any>
-    | EntitySetServiceV2<PersonModel, EditablePersonModel, QPersonV2, string | { UserName: string }, any>
+    | EntitySetServiceV4<
+        MockODataClient,
+        PersonModel,
+        EditablePersonModel,
+        QPersonV4,
+        string | { UserName: string },
+        any
+      >
+    | EntitySetServiceV2<
+        MockODataClient,
+        PersonModel,
+        EditablePersonModel,
+        QPersonV2,
+        string | { UserName: string },
+        any
+      >
 ) {
   const BASE_URL = "/test";
 
   let testService:
-    | EntitySetServiceV4<PersonModel, EditablePersonModel, QPersonV4, string | { UserName: string }, any>
-    | EntitySetServiceV2<PersonModel, EditablePersonModel, QPersonV2, string | { UserName: string }, any>;
+    | EntitySetServiceV4<
+        MockODataClient,
+        PersonModel,
+        EditablePersonModel,
+        QPersonV4,
+        string | { UserName: string },
+        any
+      >
+    | EntitySetServiceV2<
+        MockODataClient,
+        PersonModel,
+        EditablePersonModel,
+        QPersonV2,
+        string | { UserName: string },
+        any
+      >;
 
   beforeEach(() => {
     testService = new serviceConstructor(odataClient, BASE_URL);

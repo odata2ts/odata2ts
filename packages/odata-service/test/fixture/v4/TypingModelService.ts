@@ -38,18 +38,24 @@ export class QTest extends QueryObject {
 
 export const qTest = new QTest();
 
-export class TestService extends EntityTypeServiceV4<TestModel, EditableTestModel, QTest> {
+export class TestService<ClientType extends ODataClient> extends EntityTypeServiceV4<
+  ClientType,
+  TestModel,
+  EditableTestModel,
+  QTest
+> {
   constructor(client: ODataClient, path: string) {
     super(client, path, qTest);
   }
 }
 
-export class TestCollectionService extends EntitySetServiceV4<
+export class TestCollectionService<ClientType extends ODataClient> extends EntitySetServiceV4<
+  ClientType,
   TestModel,
   EditableTestModel,
   QTest,
   string | { ID: string },
-  TestService
+  TestService<ClientType>
 > {
   constructor(client: ODataClient, path: string) {
     super(client, path, qTest, TestService, [{ isLiteral: false, type: "guid", name: "id", odataName: "ID" }]);

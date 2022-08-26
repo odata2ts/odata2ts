@@ -27,7 +27,12 @@ export class QPersonV2 extends QueryObject {
 
 export const qPersonV2 = new QPersonV2();
 
-export class PersonModelService extends EntityTypeServiceV2<PersonModel, EditablePersonModel, QPersonV2> {
+export class PersonModelService<ClientType extends ODataClient> extends EntityTypeServiceV2<
+  ClientType,
+  PersonModel,
+  EditablePersonModel,
+  QPersonV2
+> {
   public get features() {
     return new CollectionServiceV2(this.client, this.path + "/Features", new QEnumCollection());
   }
@@ -55,12 +60,13 @@ export class PersonModelService extends EntityTypeServiceV2<PersonModel, Editabl
   }
 }
 
-export class PersonModelCollectionService extends EntitySetServiceV2<
+export class PersonModelCollectionService<ClientType extends ODataClient> extends EntitySetServiceV2<
+  ClientType,
   PersonModel,
   EditablePersonModel,
   QPersonV2,
   string | { UserName: string },
-  PersonModelService
+  PersonModelService<ClientType>
 > {
   constructor(client: ODataClient, path: string) {
     super(client, path, qPersonV2, PersonModelService, [

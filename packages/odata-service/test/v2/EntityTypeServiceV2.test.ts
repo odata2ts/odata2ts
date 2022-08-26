@@ -4,14 +4,14 @@ import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 import { ODataModelResponseV2 } from "../../src";
 import { MockODataClient } from "../mock/MockODataClient";
 import { PersonModel } from "../fixture/PersonModel";
-import { PersonModelService, qPersonV2, QPersonV2 } from "../fixture/v2/PersonModelService";
+import { PersonModelService, QPersonV2 } from "../fixture/v2/PersonModelService";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 
 describe("EntityTypeService V2 Test", () => {
   const odataClient = new MockODataClient();
   const BASE_URL = "/test('tester')";
 
-  let testService: PersonModelService;
+  let testService: PersonModelService<MockODataClient>;
 
   commonEntityTypeServiceTests(odataClient, PersonModelService);
 
