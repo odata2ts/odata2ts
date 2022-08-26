@@ -10,8 +10,13 @@ import { Book, EditableBook, Review } from "../TesterModel";
 // @ts-ignore
 import { QBook, qBook } from "../QTester";
 
-export class BookService extends EntityTypeServiceV4<Book, EditableBook, QBook> {
-  constructor(client: ODataClient, path: string) {
+export class BookService<ClientType extends ODataClient> extends EntityTypeServiceV4<
+  ClientType,
+  Book,
+  EditableBook,
+  QBook
+> {
+  constructor(client: ClientType, path: string) {
     super(client, path, qBook);
   }
 
@@ -29,14 +34,15 @@ export class BookService extends EntityTypeServiceV4<Book, EditableBook, QBook> 
   }
 }
 
-export class BookCollectionService extends EntitySetServiceV4<
+export class BookCollectionService<ClientType extends ODataClient> extends EntitySetServiceV4<
+  ClientType,
   Book,
   EditableBook,
   QBook,
   string | { id: string },
-  BookService
+  BookService<ClientType>
 > {
-  constructor(client: ODataClient, path: string) {
+  constructor(client: ClientType, path: string) {
     super(client, path, qBook, BookService, [{ isLiteral: false, type: "string", name: "id", odataName: "id" }]);
   }
 }

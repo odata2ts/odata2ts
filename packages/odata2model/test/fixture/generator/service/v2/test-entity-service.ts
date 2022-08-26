@@ -5,13 +5,19 @@ import { TestEntity, EditableTestEntity } from "../TesterModel";
 // @ts-ignore
 import { QTestEntity, qTestEntity } from "../QTester";
 
-export class TestEntityService extends EntityTypeServiceV2<TestEntity, EditableTestEntity, QTestEntity> {
-  constructor(client: ODataClient, path: string) {
+export class TestEntityService<ClientType extends ODataClient> extends EntityTypeServiceV2<
+  ClientType,
+  TestEntity,
+  EditableTestEntity,
+  QTestEntity
+> {
+  constructor(client: ClientType, path: string) {
     super(client, path, qTestEntity);
   }
 }
 
-export class TestEntityCollectionService extends EntitySetServiceV2<
+export class TestEntityCollectionService<ClientType extends ODataClient> extends EntitySetServiceV2<
+  ClientType,
   TestEntity,
   EditableTestEntity,
   QTestEntity,
@@ -24,9 +30,9 @@ export class TestEntityCollectionService extends EntitySetServiceV2<
     dateAndTimeAndOffset: string;
     time: string;
   },
-  TestEntityService
+  TestEntityService<ClientType>
 > {
-  constructor(client: ODataClient, path: string) {
+  constructor(client: ClientType, path: string) {
     super(client, path, qTestEntity, TestEntityService, [
       { isLiteral: false, type: "string", typePrefix: "guid", name: "id", odataName: "id" },
       { isLiteral: true, type: "number", name: "age", odataName: "age" },

@@ -6,10 +6,15 @@ import { Book, EditableBook, Choice } from "../TesterModel";
 // @ts-ignore
 import { QBook, qBook } from "../QTester";
 
-export class BookService extends EntityTypeServiceV2<Book, EditableBook, QBook> {
-  private _altChoicesSrv?: CollectionServiceV2<EnumCollection<Choice>, QEnumCollection>;
+export class BookService<ClientType extends ODataClient> extends EntityTypeServiceV2<
+  ClientType,
+  Book,
+  EditableBook,
+  QBook
+> {
+  private _altChoicesSrv?: CollectionServiceV2<ClientType, EnumCollection<Choice>, QEnumCollection>;
 
-  constructor(client: ODataClient, path: string) {
+  constructor(client: ClientType, path: string) {
     super(client, path, qBook);
   }
 
@@ -22,14 +27,15 @@ export class BookService extends EntityTypeServiceV2<Book, EditableBook, QBook> 
   }
 }
 
-export class BookCollectionService extends EntitySetServiceV2<
+export class BookCollectionService<ClientType extends ODataClient> extends EntitySetServiceV2<
+  ClientType,
   Book,
   EditableBook,
   QBook,
   string | { id: string },
-  BookService
+  BookService<ClientType>
 > {
-  constructor(client: ODataClient, path: string) {
+  constructor(client: ClientType, path: string) {
     super(client, path, qBook, BookService, [{ isLiteral: false, type: "string", name: "id", odataName: "id" }]);
   }
 }

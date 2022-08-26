@@ -3,10 +3,10 @@ import { ODataService, ODataModelResponseV2, compileFunctionPathV2 } from "@odat
 // @ts-ignore
 import { TestEntity } from "./TesterModel";
 
-export class TesterService extends ODataService {
+export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
   private _name: string = "Tester";
 
-  constructor(client: ODataClient<any>, basePath: string) {
+  constructor(client: ClientType, basePath: string) {
     super(client, basePath);
   }
 

@@ -7,15 +7,20 @@ import { QBook, qBook, QReviewer, qReviewer } from "../QTester";
 // @ts-ignore
 import { ReviewerService } from "./ReviewerService";
 
-export class BookService extends EntityTypeServiceV4<Book, EditableBook, QBook> {
-  private _lectorSrv?: ReviewerService;
-  private _reviewersSrv?: CollectionServiceV4<Reviewer, QReviewer, EditableReviewer>;
+export class BookService<ClientType extends ODataClient> extends EntityTypeServiceV4<
+  ClientType,
+  Book,
+  EditableBook,
+  QBook
+> {
+  private _lectorSrv?: ReviewerService<ClientType>;
+  private _reviewersSrv?: CollectionServiceV4<ClientType, Reviewer, QReviewer, EditableReviewer>;
 
-  constructor(client: ODataClient, path: string) {
+  constructor(client: ClientType, path: string) {
     super(client, path, qBook);
   }
 
-  public getLectorSrv(): ReviewerService {
+  public getLectorSrv(): ReviewerService<ClientType> {
     if (!this._lectorSrv) {
       this._lectorSrv = new ReviewerService(this.client, this.path + "/lector");
     }
@@ -23,27 +28,24 @@ export class BookService extends EntityTypeServiceV4<Book, EditableBook, QBook> 
     return this._lectorSrv;
   }
 
-  public getReviewersSrv(): CollectionServiceV4<Reviewer, QReviewer, EditableReviewer> {
+  public getReviewersSrv(): CollectionServiceV4<ClientType, Reviewer, QReviewer, EditableReviewer> {
     if (!this._reviewersSrv) {
-      this._reviewersSrv = new CollectionServiceV4<Reviewer, QReviewer, EditableReviewer>(
-        this.client,
-        this.path + "/reviewers",
-        qReviewer
-      );
+      this._reviewersSrv = new CollectionServiceV4(this.client, this.path + "/reviewers", qReviewer);
     }
 
     return this._reviewersSrv;
   }
 }
 
-export class BookCollectionService extends EntitySetServiceV4<
+export class BookCollectionService<ClientType extends ODataClient> extends EntitySetServiceV4<
+  ClientType,
   Book,
   EditableBook,
   QBook,
   string | { id: string },
-  BookService
+  BookService<ClientType>
 > {
-  constructor(client: ODataClient, path: string) {
+  constructor(client: ClientType, path: string) {
     super(client, path, qBook, BookService, [{ isLiteral: false, type: "string", name: "id", odataName: "id" }]);
   }
 }
