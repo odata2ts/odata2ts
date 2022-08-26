@@ -3,15 +3,15 @@ import { ODataService } from "@odata2ts/odata-service";
 // @ts-ignore
 import { TestEntityService } from "./service/TestEntityService";
 
-export class TesterService extends ODataService {
+export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
   private _name: string = "Tester";
-  private _currentUserSrv?: TestEntityService;
+  private _currentUserSrv?: TestEntityService<ClientType>;
 
-  constructor(client: ODataClient<any>, basePath: string) {
+  constructor(client: ClientType, basePath: string) {
     super(client, basePath);
   }
 
-  public getCurrentUserSrv() {
+  public getCurrentUserSrv(): TestEntityService<ClientType> {
     if (!this._currentUserSrv) {
       this._currentUserSrv = new TestEntityService(this.client, this.getPath() + "/CURRENT_USER");
     }

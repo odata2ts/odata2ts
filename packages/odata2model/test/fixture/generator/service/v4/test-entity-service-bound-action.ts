@@ -1,4 +1,4 @@
-import { ODataClient, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import {
   EntityTypeServiceV4,
   ODataModelResponseV4,
@@ -10,33 +10,39 @@ import { Book, EditableBook, Review } from "../TesterModel";
 // @ts-ignore
 import { QBook, qBook } from "../QTester";
 
-export class BookService extends EntityTypeServiceV4<Book, EditableBook, QBook> {
-  constructor(client: ODataClient, path: string) {
+export class BookService<ClientType extends ODataClient> extends EntityTypeServiceV4<
+  ClientType,
+  Book,
+  EditableBook,
+  QBook
+> {
+  constructor(client: ClientType, path: string) {
     super(client, path, qBook);
   }
 
-  public like(): ODataResponse<ODataModelResponseV4<void>> {
+  public like(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
     const url = compileActionPath(this.getPath(), "Tester.like");
-    return this.client.post(url, {});
+    return this.client.post(url, {}, requestConfig);
   }
 
-  public postReview(params: {
-    Rating: number;
-    PUBLICATION_DATE?: string;
-  }): ODataResponse<ODataModelResponseV4<Review>> {
+  public postReview(
+    params: { Rating: number; PUBLICATION_DATE?: string },
+    requestConfig?: ODataClientConfig<ClientType>
+  ): ODataResponse<ODataModelResponseV4<Review>> {
     const url = compileActionPath(this.getPath(), "Tester.postReview");
-    return this.client.post(url, params);
+    return this.client.post(url, params, requestConfig);
   }
 }
 
-export class BookCollectionService extends EntitySetServiceV4<
+export class BookCollectionService<ClientType extends ODataClient> extends EntitySetServiceV4<
+  ClientType,
   Book,
   EditableBook,
   QBook,
   string | { id: string },
-  BookService
+  BookService<ClientType>
 > {
-  constructor(client: ODataClient, path: string) {
+  constructor(client: ClientType, path: string) {
     super(client, path, qBook, BookService, [{ isLiteral: false, type: "string", name: "id", odataName: "id" }]);
   }
 }

@@ -1,4 +1,4 @@
-import { ODataClient } from "@odata2ts/odata-client-api";
+import { ODataClient, ODataClientConfig } from "@odata2ts/odata-client-api";
 import { EntityTypeServiceV2, EntitySetServiceV2, CollectionServiceV2, compileFunctionPathV2 } from "../../../src";
 import {
   QCollectionPath,
@@ -27,7 +27,12 @@ export class QPersonV2 extends QueryObject {
 
 export const qPersonV2 = new QPersonV2();
 
-export class PersonModelService extends EntityTypeServiceV2<PersonModel, EditablePersonModel, QPersonV2> {
+export class PersonModelService<ClientType extends ODataClient> extends EntityTypeServiceV2<
+  ClientType,
+  PersonModel,
+  EditablePersonModel,
+  QPersonV2
+> {
   public get features() {
     return new CollectionServiceV2(this.client, this.path + "/Features", new QEnumCollection());
   }
@@ -44,23 +49,27 @@ export class PersonModelService extends EntityTypeServiceV2<PersonModel, Editabl
     super(client, path, new QPersonV2());
   }
 
-  public getSomething(params: { testGuid: string; testDateTime: string; testDateTimeO: string; testTime: string }) {
+  public getSomething(
+    params: { testGuid: string; testDateTime: string; testDateTimeO: string; testTime: string },
+    requestConfig?: ODataClientConfig<ClientType>
+  ) {
     const url = compileFunctionPathV2(this.getPath(), "GetAnything", {
       testGuid: { isLiteral: false, typePrefix: "guid", value: params.testGuid },
       testDateTime: { isLiteral: false, typePrefix: "datetime", value: params.testDateTime },
       testDateTimeO: { isLiteral: false, typePrefix: "datetimeoffset", value: params.testDateTimeO },
       testTime: { isLiteral: false, typePrefix: "time", value: params.testTime },
     });
-    return this.client.get(url);
+    return this.client.get(url, requestConfig);
   }
 }
 
-export class PersonModelCollectionService extends EntitySetServiceV2<
+export class PersonModelCollectionService<ClientType extends ODataClient> extends EntitySetServiceV2<
+  ClientType,
   PersonModel,
   EditablePersonModel,
   QPersonV2,
   string | { UserName: string },
-  PersonModelService
+  PersonModelService<ClientType>
 > {
   constructor(client: ODataClient, path: string) {
     super(client, path, qPersonV2, PersonModelService, [

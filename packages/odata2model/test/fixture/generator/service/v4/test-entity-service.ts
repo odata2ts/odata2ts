@@ -5,20 +5,26 @@ import { TestEntity, EditableTestEntity } from "../TesterModel";
 // @ts-ignore
 import { QTestEntity, qTestEntity } from "../QTester";
 
-export class TestEntityService extends EntityTypeServiceV4<TestEntity, EditableTestEntity, QTestEntity> {
-  constructor(client: ODataClient, path: string) {
+export class TestEntityService<ClientType extends ODataClient> extends EntityTypeServiceV4<
+  ClientType,
+  TestEntity,
+  EditableTestEntity,
+  QTestEntity
+> {
+  constructor(client: ClientType, path: string) {
     super(client, path, qTestEntity);
   }
 }
 
-export class TestEntityCollectionService extends EntitySetServiceV4<
+export class TestEntityCollectionService<ClientType extends ODataClient> extends EntitySetServiceV4<
+  ClientType,
   TestEntity,
   EditableTestEntity,
   QTestEntity,
   { id: string; age: number; deceased: boolean; desc: string },
-  TestEntityService
+  TestEntityService<ClientType>
 > {
-  constructor(client: ODataClient, path: string) {
+  constructor(client: ClientType, path: string) {
     super(client, path, qTestEntity, TestEntityService, [
       { isLiteral: true, type: "string", name: "id", odataName: "id" },
       { isLiteral: true, type: "number", name: "age", odataName: "age" },

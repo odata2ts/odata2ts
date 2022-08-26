@@ -11,7 +11,7 @@ describe("EntityTypeService V4 Tests", () => {
   const odataClient = new MockODataClient();
   const BASE_URL = "/test('tester')";
 
-  let testService: PersonModelService;
+  let testService: PersonModelService<MockODataClient>;
 
   commonEntityTypeServiceTests(odataClient, PersonModelService);
 

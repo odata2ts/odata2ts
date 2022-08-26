@@ -1,4 +1,4 @@
-import { ODataClient, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import { QueryObject } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
@@ -10,11 +10,12 @@ import { compileId, parseId } from "../helper/UrlHelper";
 import { ParsedKey } from "../ServiceModel";
 
 export abstract class EntitySetServiceV2<
+  ClientType extends ODataClient,
   T,
   EditableT,
   Q extends QueryObject,
   EIdType,
-  ETS extends EntityTypeServiceV2<T, EditableT, Q>
+  ETS extends EntityTypeServiceV2<ClientType, T, EditableT, Q>
 > extends ServiceBaseV2<T, Q> {
   /**
    * Overriding the constructor to support creation of EntityTypeService from within this service.
@@ -73,22 +74,30 @@ export abstract class EntitySetServiceV2<
    * @param model
    * @return
    */
-  public create: (model: EditableT) => ODataResponse<ODataModelResponseV2<T>> = this.doPost;
+  public create: (
+    model: EditableT,
+    requestConfig?: ODataClientConfig<ClientType>
+  ) => ODataResponse<ODataModelResponseV2<T>> = this.doPost;
 
   public get(id: EIdType) {
     const url = compileId(this.path, this.keySpec, id);
     return new this.entityTypeServiceConstructor(this.client, url);
   }
 
-  public patch(id: EIdType, model: Partial<EditableT>): ODataResponse<void> {
-    return this.get(id).patch(model);
+  public patch(
+    id: EIdType,
+    model: Partial<EditableT>,
+    requestConfig?: ODataClientConfig<ClientType>
+  ): ODataResponse<void> {
+    return this.get(id).patch(model, requestConfig);
   }
 
-  public delete(id: EIdType): ODataResponse<void> {
-    return this.get(id).delete();
+  public delete(id: EIdType, requestConfig?: ODataClientConfig<ClientType>): ODataResponse<void> {
+    return this.get(id).delete(requestConfig);
   }
 
   public query: (
-    queryFn?: (builder: ODataUriBuilderV2<Q>, qObject: Q) => void
+    queryFn?: (builder: ODataUriBuilderV2<Q>, qObject: Q) => void,
+    requestConfig?: ODataClientConfig<ClientType>
   ) => ODataResponse<ODataCollectionResponseV2<T>> = this.doQuery;
 }

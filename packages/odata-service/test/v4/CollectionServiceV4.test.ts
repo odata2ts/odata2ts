@@ -9,10 +9,14 @@ import { Feature } from "../fixture/PersonModel";
 describe("CollectionService V4 Tests", () => {
   const odataClient = new MockODataClient();
 
-  const stringConstructor = (url: string): CollectionServiceV4<StringCollection, QStringCollection> => {
+  const stringConstructor = (
+    url: string
+  ): CollectionServiceV4<MockODataClient, StringCollection, QStringCollection> => {
     return new CollectionServiceV4(odataClient, url, new QStringCollection());
   };
-  const enumConstructor = (url: string): CollectionServiceV4<EnumCollection<Feature>, QEnumCollection> => {
+  const enumConstructor = (
+    url: string
+  ): CollectionServiceV4<MockODataClient, EnumCollection<Feature>, QEnumCollection> => {
     return new CollectionServiceV4(odataClient, url, new QEnumCollection());
   };
 

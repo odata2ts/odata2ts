@@ -16,7 +16,7 @@ describe("V4 EntitySetService Test", () => {
   const odataClient = new MockODataClient();
   const BASE_URL = "/test";
 
-  let testService: PersonModelCollectionService;
+  let testService: PersonModelCollectionService<MockODataClient>;
 
   commonEntitySetTests(odataClient, PersonModelCollectionService);
 
@@ -37,6 +37,6 @@ describe("V4 EntitySetService Test", () => {
 
   test("entitySet: ensure typing of EntityTypeService", async () => {
     // just a typing test: this only needs to compile
-    const result: PersonModelService = testService.get({ UserName: "heinz" });
+    const result: PersonModelService<MockODataClient> = testService.get({ UserName: "heinz" });
   });
 });

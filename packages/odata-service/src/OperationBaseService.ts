@@ -14,31 +14,31 @@ export abstract class OperationBaseService<Q extends QueryObject, ModelResponse,
     return this.qModel;
   }
 
-  protected doPost<S>(model: S): ODataResponse<ModelResponse> {
-    return this.client.post(this.path, model);
+  protected doPost<S>(model: S, requestConfig?: unknown): ODataResponse<ModelResponse> {
+    return this.client.post(this.path, model, requestConfig);
   }
 
-  protected doPatch<S>(model: S): ODataResponse<void> {
-    return this.client.patch(this.path, model);
+  protected doPatch<S>(model: S, requestConfig?: unknown): ODataResponse<void> {
+    return this.client.patch(this.path, model, requestConfig);
   }
 
-  protected doMerge<S>(model: S): ODataResponse<void> {
+  protected doMerge<S>(model: S, requestConfig?: unknown): ODataResponse<void> {
     if (this.client.merge) {
-      return this.client.merge(this.path, model);
+      return this.client.merge(this.path, model, requestConfig);
     } else {
-      return this.doPatch(model);
+      return this.doPatch(model, requestConfig);
     }
   }
 
-  protected doPut<S>(model: S): ODataResponse<void> {
-    return this.client.put(this.path, model);
+  protected doPut<S>(model: S, requestConfig?: unknown): ODataResponse<void> {
+    return this.client.put(this.path, model, requestConfig);
   }
 
-  protected doDelete(): ODataResponse<void> {
-    return this.client.delete(this.path);
+  protected doDelete(requestConfig?: unknown): ODataResponse<void> {
+    return this.client.delete(this.path, requestConfig);
   }
 
-  protected doQuery<QR>(queryFn?: (builder: UB, qObject: Q) => void): ODataResponse<QR> {
+  protected doQuery<QR>(queryFn?: (builder: UB, qObject: Q) => void, requestConfig?: unknown): ODataResponse<QR> {
     let url = this.path;
 
     if (queryFn) {
@@ -47,6 +47,6 @@ export abstract class OperationBaseService<Q extends QueryObject, ModelResponse,
       url = builder.build();
     }
 
-    return this.client.get(url);
+    return this.client.get(url, requestConfig);
   }
 }

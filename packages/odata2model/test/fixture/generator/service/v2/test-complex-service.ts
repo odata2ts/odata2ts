@@ -5,8 +5,13 @@ import { Reviewer, EditableReviewer } from "../TesterModel";
 // @ts-ignore
 import { QReviewer, qReviewer } from "../QTester";
 
-export class ReviewerService extends EntityTypeServiceV2<Reviewer, EditableReviewer, QReviewer> {
-  constructor(client: ODataClient, path: string) {
+export class ReviewerService<ClientType extends ODataClient> extends EntityTypeServiceV2<
+  ClientType,
+  Reviewer,
+  EditableReviewer,
+  QReviewer
+> {
+  constructor(client: ClientType, path: string) {
     super(client, path, qReviewer);
   }
 }

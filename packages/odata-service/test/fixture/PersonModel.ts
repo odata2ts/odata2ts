@@ -14,6 +14,7 @@ import {
   QStringV2Collection,
   StringCollection,
 } from "@odata2ts/odata-query-objects";
+import { MockODataClient } from "../mock/MockODataClient";
 
 export const enum Feature {
   Feature1 = "Feature1",
@@ -30,15 +31,15 @@ export interface PersonModel {
 
 export interface EditablePersonModel extends Pick<PersonModel, "UserName" | "Age" | "FavFeature" | "Features"> {}
 
-export type PersonModelServiceVersion = PMServiceV2 | PMServiceV4;
-export type PersonCollectionServiceVersion = PMCServiceV2 | PMCServiceV4;
+export type PersonModelServiceVersion = PMServiceV2<MockODataClient> | PMServiceV4<MockODataClient>;
+export type PersonCollectionServiceVersion = PMCServiceV2<MockODataClient> | PMCServiceV4<MockODataClient>;
 
 export type StringCollectionServiceConstructor = (url: string) => StringCollectionService;
 export type StringCollectionService =
-  | CollectionServiceV4<StringCollection, QStringCollection>
-  | CollectionServiceV2<StringCollection, QStringV2Collection>;
+  | CollectionServiceV4<MockODataClient, StringCollection, QStringCollection>
+  | CollectionServiceV2<MockODataClient, StringCollection, QStringV2Collection>;
 
 export type EnumCollectionServiceConstructor = (url: string) => EnumCollectionService;
 export type EnumCollectionService =
-  | CollectionServiceV4<EnumCollection<Feature>, QEnumCollection>
-  | CollectionServiceV2<EnumCollection<Feature>, QEnumCollection>;
+  | CollectionServiceV4<MockODataClient, EnumCollection<Feature>, QEnumCollection>
+  | CollectionServiceV2<MockODataClient, EnumCollection<Feature>, QEnumCollection>;

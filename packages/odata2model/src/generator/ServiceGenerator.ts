@@ -19,6 +19,7 @@ import { ODataVesions } from "../app";
 import { ODataTypesV3 } from "../data-model/edmx/ODataEdmxModelV3";
 
 const ROOT_SERVICE = "ODataService";
+
 const COMPILE_FUNCTION_PATH = "compileFunctionPath";
 const COMPILE_ACTION_PATH = "compileActionPath";
 const RESPONSE_TYPES = {
@@ -49,11 +50,12 @@ class ServiceGenerator {
     sourceFile.addClass({
       isExported: true,
       name: serviceName,
-      extends: ROOT_SERVICE,
+      typeParameters: ["ClientType extends ODataClient"],
+      extends: `${ROOT_SERVICE}<ClientType>`,
       ctors: [
         {
           parameters: [
-            { name: "client", type: "ODataClient<any>" },
+            { name: "client", type: "ClientType" },
             { name: "basePath", type: "string" },
           ],
           statements: ["super(client, basePath);"],
@@ -69,7 +71,7 @@ class ServiceGenerator {
           return {
             scope: Scope.Private,
             name: this.getPropNameForService(name),
-            type,
+            type: `${type}<ClientType>`,
             hasQuestionToken: true,
           } as PropertyDeclarationStructure;
         }),
@@ -81,7 +83,7 @@ class ServiceGenerator {
           return {
             scope: Scope.Private,
             name: this.getPropNameForService(name),
-            type,
+            type: `${type}<ClientType>`,
             hasQuestionToken: true,
           };
         }),
@@ -108,6 +110,7 @@ class ServiceGenerator {
           return {
             scope: Scope.Public,
             name: this.getGetterNameForService(name),
+            returnType: `${serviceType}<ClientType>`,
             statements: [
               `if(!this.${propName}) {`,
               // prettier-ignore
@@ -159,11 +162,12 @@ class ServiceGenerator {
     serviceFile.addClass({
       isExported: true,
       name: serviceName,
-      extends: entityServiceType + `<${model.name}, ${editableModelName}, ${model.qName}>`,
+      typeParameters: ["ClientType extends ODataClient"],
+      extends: entityServiceType + `<ClientType, ${model.name}, ${editableModelName}, ${model.qName}>`,
       ctors: [
         {
           parameters: [
-            { name: "client", type: "ODataClient" },
+            { name: "client", type: "ClientType" },
             { name: "path", type: "string" },
           ],
           statements: [`super(client, path, ${firstCharLowerCase(model.qName)});`],
@@ -179,17 +183,20 @@ class ServiceGenerator {
             importContainer.addFromService(collectionServiceType);
             importContainer.addGeneratedModel(complexType.name, editableName);
             importContainer.addGeneratedQObject(complexType.qName, firstCharLowerCase(complexType.qName));
-            propModelType = `${collectionServiceType}<${complexType.name}, ${complexType.qName}, ${editableName}>`;
-          }
-          // don't include imports for this type
-          else if (serviceName !== key) {
-            importContainer.addGeneratedService(key, propModelType);
+            propModelType = `${collectionServiceType}<ClientType, ${complexType.name}, ${complexType.qName}, ${editableName}>`;
+          } else {
+            // don't include imports for this type
+            if (serviceName !== key) {
+              importContainer.addGeneratedService(key, propModelType);
+            }
+
+            propModelType = `${propModelType}<ClientType>`;
           }
 
           return {
             scope: Scope.Private,
             name: this.getPropNameForService(prop.name),
-            type: `${propModelType}`,
+            type: propModelType,
             hasQuestionToken: true,
           } as PropertyDeclarationStructure;
         }),
@@ -199,7 +206,7 @@ class ServiceGenerator {
             ? `EnumCollection<${prop.type}>`
             : `${upperCaseFirst(prop.type.replace(/String$/, ""))}Collection`;
           const qType = isEnum ? "QEnumCollection" : `Q${type}`;
-          const collectionType = `${collectionServiceType}<${type}, ${qType}>`;
+          const collectionType = `${collectionServiceType}<ClientType, ${type}, ${qType}>`;
 
           if (!prop.qObject) {
             throw new Error("Illegal State: [qObject] must be provided for Collection types!");
@@ -227,16 +234,17 @@ class ServiceGenerator {
           const propName = this.getPropNameForService(prop.name);
           const complexType = this.dataModel.getComplexType(prop.type);
           const isComplexCollection = prop.isCollection && complexType;
-          const type = isComplexCollection
-            ? `${collectionServiceType}<${complexType.name}, ${
+          const type = isComplexCollection ? collectionServiceType : this.getServiceNameForProp(prop);
+          const typeWithGenerics = isComplexCollection
+            ? `${collectionServiceType}<ClientType, ${complexType.name}, ${
                 complexType.qName
               }, ${this.dataModel.getEditableModelName(complexType.name)}>`
-            : this.getServiceNameForProp(prop);
+            : `${type}<ClientType>`;
 
           return {
             scope: Scope.Public,
             name: this.getGetterNameForService(prop.name),
-            returnType: type,
+            returnType: typeWithGenerics,
             statements: [
               `if(!this.${propName}) {`,
               // prettier-ignore
@@ -286,15 +294,16 @@ class ServiceGenerator {
     serviceFile.addClass({
       isExported: true,
       name: this.getCollectionServiceName(model.name),
+      typeParameters: ["ClientType extends ODataClient"],
       extends:
         entitySetServiceType +
-        `<${model.name}, ${this.dataModel.getEditableModelName(model.name)}, ${
+        `<ClientType, ${model.name}, ${this.dataModel.getEditableModelName(model.name)}, ${
           model.qName
-        }, ${keyType}, ${serviceName}>`,
+        }, ${keyType}, ${serviceName}<ClientType>>`,
       ctors: [
         {
           parameters: [
-            { name: "client", type: "ODataClient" },
+            { name: "client", type: "ClientType" },
             { name: "path", type: "string" },
           ],
           statements: [`super(client, path, ${firstCharLowerCase(model.qName)}, ${serviceName}, ${keySpec});`],
@@ -429,7 +438,7 @@ class ServiceGenerator {
     const returnType = !operation.returnType ? "void" : this.sanitizeType(operation.returnType.type);
     const paramsSpec = this.createParamsSpec(operation.parameters);
 
-    importContainer.addFromClientApi("ODataResponse");
+    importContainer.addFromClientApi("ODataClientConfig", "ODataResponse");
     importContainer.addFromService(
       odataType,
       isFunc ? COMPILE_FUNCTION_PATH + this.getVersionSuffix() : COMPILE_ACTION_PATH
@@ -446,6 +455,7 @@ class ServiceGenerator {
     });
     const optParamType = paramsStrings.length ? `{ ${paramsStrings.join(", ")} }` : undefined;
     const optParamOptional = operation.parameters.reduce((result, p) => result && !p.required, true);
+    const requestConfigParam = { name: "requestConfig", hasQuestionToken: true, type: "ODataClientConfig<ClientType>" };
 
     // url construction is different between function and action
     const url = isFunc
@@ -458,12 +468,16 @@ class ServiceGenerator {
       scope: Scope.Public,
       name,
       parameters: optParamType
-        ? [{ name: "params", type: optParamType, initializer: optParamOptional ? "{}" : undefined }]
-        : undefined,
+        ? [{ name: "params", type: optParamType, initializer: optParamOptional ? "{}" : undefined }, requestConfigParam]
+        : [requestConfigParam],
       returnType: `ODataResponse<${odataType}<${returnType}>>`,
       statements: [
         `const url = ${url}`,
-        `return this.client.${isFunc ? "get(url)" : `post(url, ${optParamType ? "params" : "{}"})`};`,
+        `return this.client.${
+          isFunc
+            ? `get(url, ${requestConfigParam.name})`
+            : `post(url, ${optParamType ? "params" : "{}"}, ${requestConfigParam.name})`
+        };`,
       ],
     };
   }

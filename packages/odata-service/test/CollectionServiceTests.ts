@@ -20,6 +20,7 @@ export function commonCollectionTests(
   const BASE_URL = "/test";
   const STRING_URL = `${BASE_URL}/Name`;
   const ENUM_URL = `${BASE_URL}/Feature`;
+  const REQUEST_CONFIG = { test: "Test" };
 
   let stringService: StringCollectionService;
   let enumService: EnumCollectionService;
@@ -34,11 +35,13 @@ export function commonCollectionTests(
     expect(odataClient.lastUrl).toBe(STRING_URL);
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");
+    expect(odataClient.lastRequestConfig).toBeUndefined();
 
-    await enumService.query();
+    await enumService.query(undefined, REQUEST_CONFIG);
     expect(odataClient.lastUrl).toBe(ENUM_URL);
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
 
   test("collection: skip & top, but no select, expand", async () => {
@@ -81,12 +84,14 @@ export function commonCollectionTests(
     expect(odataClient.lastUrl).toBe(STRING_URL);
     expect(odataClient.lastOperation).toBe("POST");
     expect(odataClient.lastData).toEqual("test");
+    expect(odataClient.lastRequestConfig).toBeUndefined();
 
-    await enumService.add(Feature.Feature1);
+    await enumService.add(Feature.Feature1, REQUEST_CONFIG);
 
     expect(odataClient.lastUrl).toBe(ENUM_URL);
     expect(odataClient.lastOperation).toBe("POST");
     expect(odataClient.lastData).toEqual(Feature.Feature1);
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
 
   test("collection: no patch", async () => {
@@ -101,6 +106,10 @@ export function commonCollectionTests(
     expect(odataClient.lastUrl).toBe(STRING_URL);
     expect(odataClient.lastOperation).toBe("PUT");
     expect(odataClient.lastData).toEqual(model);
+    expect(odataClient.lastRequestConfig).toBeUndefined();
+
+    await stringService.update(model, REQUEST_CONFIG);
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
 
   test("collection: delete", async () => {
@@ -109,5 +118,9 @@ export function commonCollectionTests(
     expect(odataClient.lastUrl).toBe(STRING_URL);
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastData).toBeUndefined();
+    expect(odataClient.lastRequestConfig).toBeUndefined();
+
+    await stringService.delete(REQUEST_CONFIG);
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
 }
