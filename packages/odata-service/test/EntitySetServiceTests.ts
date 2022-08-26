@@ -26,6 +26,7 @@ export function commonEntitySetTests(
       >
 ) {
   const BASE_URL = "/test";
+  const REQUEST_CONFIG = { test: "Test" };
 
   let testService:
     | EntitySetServiceV4<
@@ -76,6 +77,10 @@ export function commonEntitySetTests(
     expect(odataClient.lastUrl).toBe(expected);
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
+
+    await testService.query(undefined, REQUEST_CONFIG);
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
 
   test("entitySet: query with select", async () => {
@@ -111,6 +116,10 @@ export function commonEntitySetTests(
     expect(odataClient.lastUrl).toBe(BASE_URL);
     expect(odataClient.lastOperation).toBe("POST");
     expect(odataClient.lastData).toEqual(model);
+    expect(odataClient.lastRequestConfig).toBeUndefined();
+
+    await testService.create(model, REQUEST_CONFIG);
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
 
   test("entitySet: patch", async () => {
@@ -122,6 +131,10 @@ export function commonEntitySetTests(
     expect(odataClient.lastUrl).toBe(`${BASE_URL}('tester')`);
     expect(odataClient.lastOperation).toBe("PATCH");
     expect(odataClient.lastData).toEqual(model);
+    expect(odataClient.lastRequestConfig).toBeUndefined();
+
+    await testService.patch("tester", model, REQUEST_CONFIG);
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
 
   test("entitySet: delete", async () => {
@@ -130,5 +143,9 @@ export function commonEntitySetTests(
     expect(odataClient.lastUrl).toBe(`${BASE_URL}('tester')`);
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastData).toBeUndefined();
+    expect(odataClient.lastRequestConfig).toBeUndefined();
+
+    await testService.delete("tester", REQUEST_CONFIG);
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
 }

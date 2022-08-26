@@ -22,10 +22,11 @@ describe("CollectionService V2 Tests", () => {
 
   commonCollectionTests(odataClient, stringConstructor, enumConstructor);
 
-  test("collection: query", async () => {
+  test("collection: query response typing test", async () => {
     const stringService = stringConstructor("testString");
     const enumService = enumConstructor("testEnum");
 
+    // typing tests
     const result: HttpResponseModel<ODataCollectionResponseV2<StringCollection>> = await stringService.query();
     const resultEnum: HttpResponseModel<ODataCollectionResponseV2<StringCollection>> = await enumService.query();
   });

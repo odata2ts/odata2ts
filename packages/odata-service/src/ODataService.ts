@@ -1,7 +1,7 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
 
-export class ODataService {
-  constructor(protected client: ODataClient, protected basePath: string) {
+export class ODataService<ClientType extends ODataClient> {
+  constructor(protected client: ClientType, protected basePath: string) {
     if (!client) {
       throw new Error("[client] must be supplied to ODataService!");
     }

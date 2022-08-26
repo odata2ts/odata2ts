@@ -12,11 +12,13 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
   public lastUrl?: string;
   public lastData?: any;
   public lastOperation?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  public lastRequestConfig?: MockRequestConfig;
 
   post<T, ResponseModel>(url: string, data: T, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = data;
     this.lastOperation = "POST";
+    this.lastRequestConfig = requestConfig || undefined;
     // @ts-ignore
     return this.respond();
   }
@@ -24,6 +26,7 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     this.lastUrl = url;
     this.lastData = undefined;
     this.lastOperation = "GET";
+    this.lastRequestConfig = requestConfig || undefined;
 
     // @ts-ignore
     return this.respond();
@@ -32,6 +35,7 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     this.lastUrl = url;
     this.lastData = data;
     this.lastOperation = "PUT";
+    this.lastRequestConfig = requestConfig || undefined;
 
     // @ts-ignore
     return this.respond();
@@ -40,6 +44,7 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     this.lastUrl = url;
     this.lastData = data;
     this.lastOperation = "PATCH";
+    this.lastRequestConfig = requestConfig || undefined;
 
     // @ts-ignore
     return this.respond();
@@ -48,6 +53,7 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     this.lastUrl = url;
     this.lastData = undefined;
     this.lastOperation = "DELETE";
+    this.lastRequestConfig = requestConfig || undefined;
 
     // @ts-ignore
     return this.respond();

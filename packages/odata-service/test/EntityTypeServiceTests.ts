@@ -8,6 +8,7 @@ export function commonEntityTypeServiceTests(
   serviceConstructor: new (odataClient: ODataClient, url: string) => PersonModelServiceVersion
 ) {
   const BASE_URL = "/test('tester')";
+  const REQUEST_CONFIG = { test: "Test" };
 
   let testService: PersonModelServiceVersion;
 
@@ -27,6 +28,10 @@ export function commonEntityTypeServiceTests(
     expect(odataClient.lastUrl).toBe(expected);
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");
+    expect(odataClient.lastRequestConfig).toBeUndefined();
+
+    await testService.query(undefined, REQUEST_CONFIG);
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
 
   test("entityType: query with select", async () => {
@@ -63,6 +68,10 @@ export function commonEntityTypeServiceTests(
     expect(odataClient.lastUrl).toBe(BASE_URL);
     expect(odataClient.lastOperation).toBe("PATCH");
     expect(odataClient.lastData).toEqual(model);
+    expect(odataClient.lastRequestConfig).toBeUndefined();
+
+    await testService.patch(model, REQUEST_CONFIG);
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
 
   test("entityType: delete", async () => {
@@ -71,5 +80,9 @@ export function commonEntityTypeServiceTests(
     expect(odataClient.lastUrl).toBe(BASE_URL);
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastData).toBeUndefined();
+    expect(odataClient.lastRequestConfig).toBeUndefined();
+
+    await testService.delete(REQUEST_CONFIG);
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
 }
