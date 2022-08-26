@@ -83,7 +83,7 @@ class ServiceGenerator {
           return {
             scope: Scope.Private,
             name: this.getPropNameForService(name),
-            type,
+            type: `${type}<ClientType>`,
             hasQuestionToken: true,
           };
         }),
@@ -110,6 +110,7 @@ class ServiceGenerator {
           return {
             scope: Scope.Public,
             name: this.getGetterNameForService(name),
+            returnType: `${serviceType}<ClientType>`,
             statements: [
               `if(!this.${propName}) {`,
               // prettier-ignore
@@ -437,7 +438,7 @@ class ServiceGenerator {
     const returnType = !operation.returnType ? "void" : this.sanitizeType(operation.returnType.type);
     const paramsSpec = this.createParamsSpec(operation.parameters);
 
-    importContainer.addFromClientApi("ODataResponse");
+    importContainer.addFromClientApi("ODataClientConfig", "ODataResponse");
     importContainer.addFromService(
       odataType,
       isFunc ? COMPILE_FUNCTION_PATH + this.getVersionSuffix() : COMPILE_ACTION_PATH
@@ -454,6 +455,7 @@ class ServiceGenerator {
     });
     const optParamType = paramsStrings.length ? `{ ${paramsStrings.join(", ")} }` : undefined;
     const optParamOptional = operation.parameters.reduce((result, p) => result && !p.required, true);
+    const requestConfigParam = { name: "requestConfig", hasQuestionToken: true, type: "ODataClientConfig<ClientType>" };
 
     // url construction is different between function and action
     const url = isFunc
@@ -466,12 +468,16 @@ class ServiceGenerator {
       scope: Scope.Public,
       name,
       parameters: optParamType
-        ? [{ name: "params", type: optParamType, initializer: optParamOptional ? "{}" : undefined }]
-        : undefined,
+        ? [{ name: "params", type: optParamType, initializer: optParamOptional ? "{}" : undefined }, requestConfigParam]
+        : [requestConfigParam],
       returnType: `ODataResponse<${odataType}<${returnType}>>`,
       statements: [
         `const url = ${url}`,
-        `return this.client.${isFunc ? "get(url)" : `post(url, ${optParamType ? "params" : "{}"})`};`,
+        `return this.client.${
+          isFunc
+            ? `get(url, ${requestConfigParam.name})`
+            : `post(url, ${optParamType ? "params" : "{}"}, ${requestConfigParam.name})`
+        };`,
       ],
     };
   }

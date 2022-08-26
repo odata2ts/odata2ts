@@ -1,4 +1,4 @@
-import { ODataClient, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import {
   EntityTypeServiceV4,
   ODataModelResponseV4,
@@ -20,17 +20,17 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     super(client, path, qBook);
   }
 
-  public like(): ODataResponse<ODataModelResponseV4<void>> {
+  public like(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
     const url = compileActionPath(this.getPath(), "Tester.like");
-    return this.client.post(url, {});
+    return this.client.post(url, {}, requestConfig);
   }
 
-  public postReview(params: {
-    Rating: number;
-    PUBLICATION_DATE?: string;
-  }): ODataResponse<ODataModelResponseV4<Review>> {
+  public postReview(
+    params: { Rating: number; PUBLICATION_DATE?: string },
+    requestConfig?: ODataClientConfig<ClientType>
+  ): ODataResponse<ODataModelResponseV4<Review>> {
     const url = compileActionPath(this.getPath(), "Tester.postReview");
-    return this.client.post(url, params);
+    return this.client.post(url, params, requestConfig);
   }
 }
 
