@@ -2075,6 +2075,7 @@ __metadata:
     "@odata2ts/odata-client-api": "*"
     "@odata2ts/odata-query-objects": "*"
     "@odata2ts/odata-service": "*"
+    prettier: "*"
   bin:
     odata2model: lib/run-cli.js
   languageName: unknown
