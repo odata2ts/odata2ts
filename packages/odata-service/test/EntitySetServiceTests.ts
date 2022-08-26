@@ -77,7 +77,7 @@ export function commonEntitySetTests(
     expect(odataClient.lastUrl).toBe(expected);
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");
-    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
+    expect(odataClient.lastRequestConfig).toBeUndefined();
 
     await testService.query(undefined, REQUEST_CONFIG);
     expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);

@@ -11,6 +11,7 @@ import {
   QStringV2Path,
 } from "@odata2ts/odata-query-objects";
 import { EditablePersonModel, PersonModel } from "../PersonModel";
+import { ODataClientConfig } from "../../../src/EntityModel";
 
 export class QPersonV2 extends QueryObject {
   public readonly userName = new QStringV2Path(this.withPrefix("UserName"));
@@ -49,14 +50,17 @@ export class PersonModelService<ClientType extends ODataClient> extends EntityTy
     super(client, path, new QPersonV2());
   }
 
-  public getSomething(params: { testGuid: string; testDateTime: string; testDateTimeO: string; testTime: string }) {
+  public getSomething(
+    params: { testGuid: string; testDateTime: string; testDateTimeO: string; testTime: string },
+    requestConfig?: ODataClientConfig<ClientType>
+  ) {
     const url = compileFunctionPathV2(this.getPath(), "GetAnything", {
       testGuid: { isLiteral: false, typePrefix: "guid", value: params.testGuid },
       testDateTime: { isLiteral: false, typePrefix: "datetime", value: params.testDateTime },
       testDateTimeO: { isLiteral: false, typePrefix: "datetimeoffset", value: params.testDateTimeO },
       testTime: { isLiteral: false, typePrefix: "time", value: params.testTime },
     });
-    return this.client.get(url);
+    return this.client.get(url, requestConfig);
   }
 }
 

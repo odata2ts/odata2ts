@@ -10,6 +10,7 @@ import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 describe("EntityTypeService V2 Test", () => {
   const odataClient = new MockODataClient();
   const BASE_URL = "/test('tester')";
+  const REQUEST_CONFIG = { test: "Test" };
 
   let testService: PersonModelService<MockODataClient>;
 
@@ -38,5 +39,14 @@ describe("EntityTypeService V2 Test", () => {
       BASE_URL +
         "/GetAnything?testGuid=guid'123'&testDateTime=datetime'1'&testDateTimeO=datetimeoffset'2'&testTime=time'3'"
     );
+    expect(odataClient.lastData).toBeUndefined();
+    expect(odataClient.lastOperation).toBe("GET");
+    expect(odataClient.lastRequestConfig).toBeUndefined();
+
+    await testService.getSomething(
+      { testGuid: "123", testDateTime: "1", testDateTimeO: "2", testTime: "3" },
+      REQUEST_CONFIG
+    );
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
 });
