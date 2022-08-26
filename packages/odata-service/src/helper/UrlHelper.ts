@@ -164,10 +164,9 @@ export const compileFunctionPathV2 = (path: string, name?: string, params?: Inli
     ? ""
     : "?" +
       Object.entries(params)
+        .filter((p) => p[1].value !== undefined && p[1].value !== null)
         .map(([key, { value, isLiteral, typePrefix }]) => {
-          // TODO: "null" for optional params via config or does this work for every OData provider?
-          const val = value === undefined || value === null ? "null" : getValue(isLiteral, value, typePrefix);
-          return encodeURIComponent(key) + "=" + encodeURIComponent(val);
+          return encodeURIComponent(key) + "=" + encodeURIComponent(getValue(isLiteral, value, typePrefix));
         })
         .join("&");
   return actionPath + queryString;

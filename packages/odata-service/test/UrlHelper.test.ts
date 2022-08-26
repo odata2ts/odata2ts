@@ -111,12 +111,12 @@ describe("UrlHelper Test", () => {
     const result = compileFunctionPathV2(BASE_PATH, undefined, {
       id: { isLiteral: true, value: "123" },
       test: { isLiteral: false, value: undefined },
-      age: { isLiteral: true, value: undefined },
+      age: { isLiteral: true, value: null },
       age2: { isLiteral: true, value: 0 },
       oldEnough: { isLiteral: true, value: false },
     });
 
-    expect(result).toBe(BASE_PATH + "?id=123&test=null&age=null&age2=0&oldEnough=false");
+    expect(result).toBe(BASE_PATH + "?id=123&age2=0&oldEnough=false");
   });
 
   test("compileFunctionPathV2: fail with wrong params", () => {
