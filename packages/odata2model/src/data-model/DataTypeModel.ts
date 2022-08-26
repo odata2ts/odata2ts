@@ -54,6 +54,7 @@ export interface OperationType {
   type: OperationTypes;
   parameters: Array<PropertyModel>;
   returnType?: ReturnTypeModel;
+  usePost?: boolean;
 }
 
 export interface ReturnTypeModel extends PropertyModel {}

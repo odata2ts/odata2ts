@@ -102,14 +102,20 @@ describe("Service Generator Tests V2", () => {
   });
 
   test("Service Generator: one function", async () => {
-    // given two functions: one without and one with params
+    // given three functions: one without and one with params and a third which POSTs
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV3.String))
       .addFunctionImport("MostPop", `Collection(${SERVICE_NAME}.TestEntity)`)
       .addFunctionImport("BEST_BOOK", `${SERVICE_NAME}.TestEntity`, (builder) =>
         builder.addParam("TestString", ODataTypesV3.String, false).addParam("TEST_NUMBER", ODataTypesV3.Int32)
+      )
+      .addFunctionImport(
+        "postBestBook",
+        `${SERVICE_NAME}.TestEntity`,
+        (builder) =>
+          builder.addParam("TestString", ODataTypesV3.String, false).addParam("TEST_NUMBER", ODataTypesV3.Int32),
+        true
       );
-
     // when generating
     await doGenerate();
 
@@ -134,23 +140,6 @@ describe("Service Generator Tests V2", () => {
 
     // then main service file encompasses unbound functions
     await compareMainService("main-service-func-import-special-params.ts", true);
-  });
-
-  test.skip("Service Generator: one unbound action", async () => {
-    // given one EntitySet
-    odataBuilder.addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV3.String));
-    // .addActionImport("ping", undefined, false)
-    // .addActionImport("keepAlive", `${SERVICE_NAME}.ping`)
-    // .addAction("vote", `${SERVICE_NAME}.TestEntity`, false, (builder) =>
-    //   builder.addParam("rating", ODataTypesV3.Int16, false).addParam("comment", ODataTypesV3.String)
-    // )
-    // .addActionImport("DoLike", `${SERVICE_NAME}.vote`);
-
-    // when generating
-    await doGenerate();
-
-    // then main service file encompasses an unbound function
-    await compareMainService("main-service-action-import.ts", true);
   });
 
   test("Service Generator: EntityService with Relationships", async () => {

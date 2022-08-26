@@ -3,6 +3,7 @@ import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
 import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
 import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
 import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
+import { OperationType } from "../../../src/data-model/DataTypeModel";
 
 describe("Function Digestion Test", () => {
   const SERVICE_NAME = "FunctionTest";
@@ -33,13 +34,15 @@ describe("Function Digestion Test", () => {
     const result = await doDigest();
 
     expect(result.getOperationTypeByBinding("xyz")).toEqual([]);
-    expect(result.getOperationTypeByBinding("/")).toMatchObject([
+    expect(result.getOperationTypeByBinding("/")).toStrictEqual([
       {
         odataName: "GetBestFriend",
         name: "getBestFriend",
         type: OperationTypes.Function,
         parameters: [],
-      },
+        returnType: undefined,
+        usePost: false,
+      } as OperationType,
     ]);
   });
 
@@ -136,6 +139,23 @@ describe("Function Digestion Test", () => {
           qObject: "QProduct",
         },
       },
+    ]);
+  });
+
+  test("Function: POST method", async () => {
+    odataBuilder.addFunctionImport("GetBestFriend", undefined, undefined, true);
+
+    const result = await doDigest();
+
+    expect(result.getOperationTypeByBinding("/")).toStrictEqual([
+      {
+        odataName: "GetBestFriend",
+        name: "getBestFriend",
+        type: OperationTypes.Function,
+        usePost: true,
+        returnType: undefined,
+        parameters: [],
+      } as OperationType,
     ]);
   });
 });
