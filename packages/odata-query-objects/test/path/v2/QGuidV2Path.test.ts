@@ -9,6 +9,10 @@ describe("QGuidV2Path test", () => {
     toTest = new QGuidV2Path("ID");
   });
 
+  test("get value", () => {
+    expect(QGuidV2Path.getUrlConformValue(exampleGuid)).toBe(exampleGuidValue);
+  });
+
   test("get path", () => {
     expect(toTest.getPath()).toBe("ID");
   });

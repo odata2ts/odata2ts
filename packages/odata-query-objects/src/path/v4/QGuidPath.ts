@@ -3,6 +3,10 @@ import { StandardFilterOperators } from "../../odata/ODataModel";
 import { QLiteralPath } from "../base/QLiteralPath";
 
 export class QGuidPath extends QLiteralPath<string, StandardFilterOperators> {
+  public static getUrlConformValue(value: string): string {
+    return value;
+  }
+
   public equals(value: string) {
     return this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
   }

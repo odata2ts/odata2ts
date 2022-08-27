@@ -4,6 +4,10 @@ import { QPathModel } from "./QPathModel";
 import { QFilterExpression } from "../QFilterExpression";
 
 export class QEnumPath implements QPathModel {
+  public static getUrlConformValue(value: string) {
+    return `'${value}'`;
+  }
+
   constructor(private path: string) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
@@ -11,7 +15,7 @@ export class QEnumPath implements QPathModel {
   }
 
   private buildBuiltInOp(operator: StandardFilterOperators, value: string) {
-    return new QFilterExpression(`${this.path} ${operator} '${value}'`);
+    return new QFilterExpression(`${this.path} ${operator} ${QEnumPath.getUrlConformValue(value)}`);
   }
 
   /**

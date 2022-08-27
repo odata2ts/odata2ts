@@ -12,6 +12,10 @@ describe("QStringPath test", () => {
     otherProp = new QStringV2Path("Language");
   });
 
+  test("get URL conform value", () => {
+    expect(QStringV2Path.getUrlConformValue("Tester")).toBe("'Tester'");
+  });
+
   test("substringOf", () => {
     const result = toTest.substringOf("ran");
 

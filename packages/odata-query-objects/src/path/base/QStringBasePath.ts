@@ -5,6 +5,10 @@ import { QNumberPath } from "../QNumberPath";
 import { QFilterExpression } from "../../QFilterExpression";
 
 export abstract class QStringBasePath<SubClass extends QStringBasePath<any>> implements QPathModel {
+  public static getUrlConformValue(value: string) {
+    return `'${value}'`;
+  }
+
   constructor(private path: string) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
@@ -43,7 +47,11 @@ export abstract class QStringBasePath<SubClass extends QStringBasePath<any>> imp
   public desc = this.descending;
 
   protected getFinalValue(value: string | SubClass) {
-    return typeof value === "string" ? `'${value}'` : typeof value.getPath === "function" ? value.getPath() : "null";
+    return typeof value === "string"
+      ? QStringBasePath.getUrlConformValue(value)
+      : typeof value.getPath === "function"
+      ? value.getPath()
+      : "null";
   }
 
   protected buildBuiltInOp(operator: StandardFilterOperators, value: string | SubClass) {

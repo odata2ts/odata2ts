@@ -3,6 +3,10 @@ import { StandardFilterOperators } from "../../odata/ODataModel";
 import { QOrderByExpression } from "../../QOrderByExpression";
 
 export class QGuidV2Path {
+  public static getUrlConformValue(value: string) {
+    return `guid'${value}'`;
+  }
+
   constructor(private path: string) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
@@ -15,7 +19,7 @@ export class QGuidV2Path {
 
   protected getFinalValue(value: string | QGuidV2Path) {
     return typeof value === "string"
-      ? `guid'${value}'`
+      ? QGuidV2Path.getUrlConformValue(value)
       : typeof value.getPath === "function"
       ? value.getPath()
       : "null";

@@ -9,6 +9,10 @@ describe("QNumberPath test", () => {
     otherProp = new QNumberPath("Budget");
   });
 
+  test("get URL conform value", () => {
+    expect(QNumberPath.getUrlConformValue(333.22)).toBe("333.22");
+  });
+
   test("get path", () => {
     expect(toTest.getPath()).toBe("Price");
   });

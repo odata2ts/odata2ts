@@ -12,6 +12,10 @@ describe("QStringPath test", () => {
     otherProp = new QStringPath("Language");
   });
 
+  test("get URL conform value", () => {
+    expect(QStringPath.getUrlConformValue("Tester")).toBe("'Tester'");
+  });
+
   test("contains", () => {
     const result = toTest.contains("ran");
 

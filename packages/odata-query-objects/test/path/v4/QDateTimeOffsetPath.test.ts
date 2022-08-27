@@ -8,6 +8,10 @@ describe("QDateTimeOffsetPath test", () => {
     toTest = new QDateTimeOffsetPath("createdAt");
   });
 
+  test("get URL conform value", () => {
+    expect(QDateTimeOffsetPath.getUrlConformValue(example)).toBe(example);
+  });
+
   test("get path", () => {
     expect(toTest.getPath()).toBe("createdAt");
   });

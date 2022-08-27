@@ -6,4 +6,8 @@ describe("QTimeV2Path test", () => {
 
   createBaseDateTimeTests(QTimeV2Path, EXAMPLE_TIME, exampleResult);
   createTimeFunctionTests(QTimeV2Path);
+
+  test("get URL conform value", () => {
+    expect(QTimeV2Path.getUrlConformValue(EXAMPLE_TIME)).toBe(exampleResult);
+  });
 });

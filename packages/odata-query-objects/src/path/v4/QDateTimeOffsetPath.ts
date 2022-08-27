@@ -1,4 +1,4 @@
-import { DateTimeBasePath } from "../base/DateTimeBase";
+import { DateTimeBasePath } from "./DateTimeBase";
 import { dayFn, hourFn, minuteFn, monthFn, secondFn, yearFn } from "../base/DateTimeFunctions";
 import { DateTimeFilterFunctions } from "../../odata/ODataModel";
 import { QDatePath } from "./QDatePath";

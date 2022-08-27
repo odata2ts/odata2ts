@@ -7,6 +7,11 @@ describe("QBooleanPath test", () => {
     toTest = new QBooleanPath("done");
   });
 
+  test("get URL conform value", () => {
+    expect(QBooleanPath.getUrlConformValue(true)).toBe("true");
+    expect(QBooleanPath.getUrlConformValue(false)).toBe("false");
+  });
+
   test("get path", () => {
     expect(toTest.getPath()).toBe("done");
   });

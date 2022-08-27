@@ -12,4 +12,8 @@ describe("QDateTimeOffsetV2Path test", () => {
   createBaseDateTimeTests(QDateTimeOffsetV2Path, EXAMPLE_DATE_TIME_OFFSET, exampleResult);
   createDateFunctionTests(QDateTimeOffsetV2Path);
   createTimeFunctionTests(QDateTimeOffsetV2Path);
+
+  test("get URL conform value", () => {
+    expect(QDateTimeOffsetV2Path.getUrlConformValue(EXAMPLE_DATE_TIME_OFFSET)).toBe(exampleResult);
+  });
 });

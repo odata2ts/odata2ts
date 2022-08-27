@@ -8,6 +8,10 @@ describe("QDatePath test", () => {
     toTest = new QDatePath("startDate");
   });
 
+  test("get URL conform value", () => {
+    expect(QDatePath.getUrlConformValue(example)).toBe(example);
+  });
+
   test("get path", () => {
     expect(toTest.getPath()).toBe("startDate");
   });

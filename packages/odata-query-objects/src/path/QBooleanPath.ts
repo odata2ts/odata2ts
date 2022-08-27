@@ -2,6 +2,10 @@ import { StandardFilterOperators } from "../odata/ODataModel";
 import { QLiteralPath } from "./base/QLiteralPath";
 
 export class QBooleanPath extends QLiteralPath<boolean | QBooleanPath, StandardFilterOperators> {
+  public static getUrlConformValue(value: boolean): string {
+    return String(value);
+  }
+
   public equals(value: boolean) {
     return this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
   }

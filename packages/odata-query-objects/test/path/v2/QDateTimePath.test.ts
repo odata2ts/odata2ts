@@ -12,4 +12,8 @@ describe("QDateTimeV2Path test", () => {
   createBaseDateTimeTests(QDateTimeV2Path, EXAMPLE_DATE_TIME, exampleResult);
   createDateFunctionTests(QDateTimeV2Path);
   createTimeFunctionTests(QDateTimeV2Path);
+
+  test("get URL conform value", () => {
+    expect(QDateTimeV2Path.getUrlConformValue(EXAMPLE_DATE_TIME)).toBe(exampleResult);
+  });
 });

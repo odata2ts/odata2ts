@@ -3,13 +3,17 @@ import { QEnumPath } from "../../src";
 describe("QEnumPath test", () => {
   let toTest: QEnumPath;
   const enum FeatureEnum {
-    Feature1,
-    Feature2,
-    Feature3,
+    Feature1 = "Feature1",
+    Feature2 = "Feature2",
+    Feature3 = "Feature3",
   }
 
   beforeEach(() => {
     toTest = new QEnumPath("feature");
+  });
+
+  test("get URL conform value", () => {
+    expect(QEnumPath.getUrlConformValue(FeatureEnum.Feature1)).toBe("'Feature1'");
   });
 
   test("get path", () => {

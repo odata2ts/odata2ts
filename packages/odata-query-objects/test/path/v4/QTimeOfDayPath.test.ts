@@ -8,6 +8,10 @@ describe("QTimeOfDayPath test", () => {
     toTest = new QTimeOfDayPath("startTime");
   });
 
+  test("get URL conform value", () => {
+    expect(QTimeOfDayPath.getUrlConformValue(example)).toBe(example);
+  });
+
   test("get path", () => {
     expect(toTest.getPath()).toBe("startTime");
     expect(new QTimeOfDayPath("new").getPath()).toBe("new");
