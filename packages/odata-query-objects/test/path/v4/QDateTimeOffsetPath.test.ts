@@ -10,6 +10,14 @@ describe("QDateTimeOffsetPath test", () => {
 
   test("get URL conform value", () => {
     expect(QDateTimeOffsetPath.getUrlConformValue(example)).toBe(example);
+    expect(QDateTimeOffsetPath.getUrlConformValue(null)).toBe("null");
+    expect(QDateTimeOffsetPath.getUrlConformValue(undefined)).toBeUndefined();
+  });
+
+  test("parse URL conform value", () => {
+    expect(QDateTimeOffsetPath.parseValueFromUrl(example)).toBe(example);
+    expect(QDateTimeOffsetPath.parseValueFromUrl("null")).toBeNull();
+    expect(QDateTimeOffsetPath.parseValueFromUrl(undefined)).toBeUndefined();
   });
 
   test("get path", () => {

@@ -2,11 +2,20 @@ import { QOrderByExpression } from "../QOrderByExpression";
 import { StandardFilterOperators } from "../odata/ODataModel";
 import { QPathModel } from "./QPathModel";
 import { QFilterExpression } from "../QFilterExpression";
+import { createParsingRegexp, getParamValue, parseParamValue } from "../param/UrlParamHelper";
+import { UrlParamModel, UrlParamValueFormatter, UrlParamValueParser } from "../param/UrlParamModel";
+
+const URL_PARAM_CONFIG: UrlParamModel = { isQuoted: true };
+const URL_PARAM_REGEXP = createParsingRegexp(URL_PARAM_CONFIG);
 
 export class QEnumPath implements QPathModel {
-  public static getUrlConformValue(value: string) {
-    return `'${value}'`;
-  }
+  public static getUrlConformValue: UrlParamValueFormatter<string> = (value) => {
+    return getParamValue(value, URL_PARAM_CONFIG);
+  };
+
+  public static parseValueFromUrl: UrlParamValueParser<string> = (urlConformValue) => {
+    return parseParamValue(urlConformValue, URL_PARAM_REGEXP);
+  };
 
   constructor(private path: string) {
     if (!path || !path.trim()) {

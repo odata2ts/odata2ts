@@ -1,7 +1,7 @@
 import { QStringV2Path } from "../../../src";
 import { createStringTests } from "../StringBaseTests";
 
-describe("QStringPath test", () => {
+describe("QStringV2Path test", () => {
   createStringTests(QStringV2Path);
 
   let toTest: QStringV2Path;
@@ -14,6 +14,14 @@ describe("QStringPath test", () => {
 
   test("get URL conform value", () => {
     expect(QStringV2Path.getUrlConformValue("Tester")).toBe("'Tester'");
+    expect(QStringV2Path.getUrlConformValue(null)).toBe("null");
+    expect(QStringV2Path.getUrlConformValue(undefined)).toBeUndefined();
+  });
+
+  test("parse URL value", () => {
+    expect(QStringV2Path.parseValueFromUrl("'Tester'")).toBe("Tester");
+    expect(QStringV2Path.parseValueFromUrl("null")).toBeNull();
+    expect(QStringV2Path.parseValueFromUrl(undefined)).toBeUndefined();
   });
 
   test("substringOf", () => {

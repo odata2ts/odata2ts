@@ -9,8 +9,16 @@ describe("QGuidV2Path test", () => {
     toTest = new QGuidV2Path("ID");
   });
 
-  test("get value", () => {
+  test("get URL conform value", () => {
     expect(QGuidV2Path.getUrlConformValue(exampleGuid)).toBe(exampleGuidValue);
+    expect(QGuidV2Path.getUrlConformValue(null)).toBe("null");
+    expect(QGuidV2Path.getUrlConformValue(undefined)).toBeUndefined();
+  });
+
+  test("parse URL value", () => {
+    expect(QGuidV2Path.parseValueFromUrl(exampleGuidValue)).toBe(exampleGuid);
+    expect(QGuidV2Path.parseValueFromUrl("null")).toBeNull();
+    expect(QGuidV2Path.parseValueFromUrl(undefined)).toBeUndefined();
   });
 
   test("get path", () => {

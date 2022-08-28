@@ -14,6 +14,14 @@ describe("QStringPath test", () => {
 
   test("get URL conform value", () => {
     expect(QStringPath.getUrlConformValue("Tester")).toBe("'Tester'");
+    expect(QStringPath.getUrlConformValue(null)).toBe("null");
+    expect(QStringPath.getUrlConformValue(undefined)).toBeUndefined();
+  });
+
+  test("parse URL value", () => {
+    expect(QStringPath.parseValueFromUrl("'Tester'")).toBe("Tester");
+    expect(QStringPath.parseValueFromUrl("null")).toBeNull();
+    expect(QStringPath.parseValueFromUrl(undefined)).toBeUndefined();
   });
 
   test("contains", () => {

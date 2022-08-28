@@ -1,17 +1,15 @@
 import { QOrderByExpression } from "../../QOrderByExpression";
 import { QFilterExpression } from "../../QFilterExpression";
 import { QPathModel } from "../QPathModel";
+import { getExpressionValue } from "../../param/UrlParamHelper";
 
-export abstract class QLiteralPath<ValueType, OperatorTypes> implements QPathModel {
+export abstract class QLiteralPath<ValueType extends boolean | number | string | QPathModel, OperatorTypes>
+  implements QPathModel
+{
   constructor(protected path: string) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
     }
-  }
-
-  private getFinalValue(value: ValueType) {
-    // @ts-ignore: duck typing getPath
-    return value && typeof value.getPath === "function" ? value.getPath() : value;
   }
 
   protected buildBuiltInExpression(operator: OperatorTypes, value: ValueType) {
@@ -19,7 +17,7 @@ export abstract class QLiteralPath<ValueType, OperatorTypes> implements QPathMod
   }
 
   protected buildBuiltInOp(operator: OperatorTypes, value: ValueType) {
-    return `${this.path} ${operator} ${this.getFinalValue(value)}`;
+    return `${this.path} ${operator} ${getExpressionValue(value)}`;
   }
 
   /**

@@ -1,11 +1,21 @@
 import { QFilterExpression } from "../../QFilterExpression";
 import { StandardFilterOperators } from "../../odata/ODataModel";
 import { QOrderByExpression } from "../../QOrderByExpression";
+import { createParsingRegexp, getExpressionValue, getParamValue, parseParamValue } from "../../param/UrlParamHelper";
+import { UrlParamModel, UrlParamValueFormatter, UrlParamValueParser } from "../../param/UrlParamModel";
+import { QPathModel } from "../QPathModel";
 
-export class QGuidV2Path {
-  public static getUrlConformValue(value: string) {
-    return `guid'${value}'`;
-  }
+const URL_PARAM_CONFIG: UrlParamModel = { typePrefix: "guid" };
+const URL_PARAM_REGEXP = createParsingRegexp(URL_PARAM_CONFIG);
+
+export class QGuidV2Path implements QPathModel {
+  public static getUrlConformValue: UrlParamValueFormatter<string> = (value) => {
+    return getParamValue(value, URL_PARAM_CONFIG);
+  };
+
+  public static parseValueFromUrl: UrlParamValueParser<string> = (urlConformValue) => {
+    return parseParamValue(urlConformValue, URL_PARAM_REGEXP);
+  };
 
   constructor(private path: string) {
     if (!path || !path.trim()) {
@@ -14,15 +24,7 @@ export class QGuidV2Path {
   }
 
   private buildBuiltInOp(operator: StandardFilterOperators, value: string | this) {
-    return new QFilterExpression(`${this.path} ${operator} ${this.getFinalValue(value)}`);
-  }
-
-  protected getFinalValue(value: string | QGuidV2Path) {
-    return typeof value === "string"
-      ? QGuidV2Path.getUrlConformValue(value)
-      : typeof value.getPath === "function"
-      ? value.getPath()
-      : "null";
+    return new QFilterExpression(`${this.path} ${operator} ${getExpressionValue(value, URL_PARAM_CONFIG)}`);
   }
 
   /**

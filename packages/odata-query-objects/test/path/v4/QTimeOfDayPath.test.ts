@@ -10,6 +10,14 @@ describe("QTimeOfDayPath test", () => {
 
   test("get URL conform value", () => {
     expect(QTimeOfDayPath.getUrlConformValue(example)).toBe(example);
+    expect(QTimeOfDayPath.getUrlConformValue(null)).toBe("null");
+    expect(QTimeOfDayPath.getUrlConformValue(undefined)).toBeUndefined();
+  });
+
+  test("parse URL conform value", () => {
+    expect(QTimeOfDayPath.parseValueFromUrl(example)).toBe(example);
+    expect(QTimeOfDayPath.parseValueFromUrl("null")).toBeNull();
+    expect(QTimeOfDayPath.parseValueFromUrl(undefined)).toBeUndefined();
   });
 
   test("get path", () => {
