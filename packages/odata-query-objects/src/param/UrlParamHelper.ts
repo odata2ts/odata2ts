@@ -1,3 +1,6 @@
+import { UrlParamModel } from "./UrlParamModel";
+import { QPathModel } from "../path/QPathModel";
+
 /**
  * Convert a given value to a URL conform parameter value, which can be used in
  * - keys
@@ -10,9 +13,6 @@
  * @param value
  * @param options by default values are interpreted as literals, i.e. without surrounding single quotes
  */
-import { UrlParamModel } from "./UrlParamModel";
-import { QPathModel } from "../path/QPathModel";
-
 function getValue(value: number | string | boolean, options: UrlParamModel = {}): string {
   const { isQuoted = false, typePrefix, typeSuffix } = options;
 

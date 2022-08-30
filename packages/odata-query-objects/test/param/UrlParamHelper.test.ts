@@ -5,7 +5,7 @@ import {
   getParamValue,
   parseParamValue,
 } from "../../src/param/UrlParamHelper";
-import { QPathModel } from "../../lib";
+import { QPathModel } from "../../src";
 
 describe("UrlParamHelper Tests", () => {
   const quotedTest: UrlParamModel = { isQuoted: true };
