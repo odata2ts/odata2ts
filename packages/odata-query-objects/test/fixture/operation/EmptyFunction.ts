@@ -19,8 +19,8 @@ export class QGetSomethingFunctionV2 extends QFunction {
     super(path, "getSomething", true);
   }
 
-  public getParams(): Record<string, QParam<any>> {
-    return {};
+  public getParams() {
+    return undefined;
   }
 
   public buildUrl(): string {

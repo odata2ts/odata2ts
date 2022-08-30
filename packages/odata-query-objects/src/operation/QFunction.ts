@@ -1,4 +1,4 @@
-import { QParam } from "../param";
+import { QParam } from "./";
 import { compileOperationPath } from "./OperationHelper";
 
 type FunctionParams = Record<string, string>;
@@ -10,6 +10,30 @@ const REGEXP_V2_PARAMS = /.*\?(.+)/;
 
 const SINGLE_VALUE_TYPES = ["string", "number", "boolean"];
 
+function compileUrlParams(params: FunctionParams | undefined) {
+  const result =
+    !params || !Object.keys(params).length
+      ? ""
+      : Object.entries(params)
+          .map(([key, value]) => {
+            return key + "=" + value;
+          })
+          .join(",");
+
+  return `(${result})`;
+}
+
+function compileQueryParams(params: FunctionParams | undefined) {
+  return !params || !Object.keys(params).length
+    ? ""
+    : "?" +
+        Object.entries(params)
+          .map(([key, value]) => {
+            return encodeURIComponent(key) + "=" + encodeURIComponent(value);
+          })
+          .join("&");
+}
+
 /**
  * Base class for handling an OData function (v2 and V4).
  * This includes handling of entity id paths which have exactly the same form.
@@ -17,7 +41,7 @@ const SINGLE_VALUE_TYPES = ["string", "number", "boolean"];
 export abstract class QFunction<ParamModel = undefined> {
   public constructor(protected path: string, protected name: string, protected v2Mode: boolean = false) {}
 
-  public abstract getParams(): Record<string, QParam<any>>;
+  public abstract getParams(): Record<string, QParam<any>> | undefined;
 
   public getPath(): string {
     return this.path;
@@ -32,29 +56,32 @@ export abstract class QFunction<ParamModel = undefined> {
   }
 
   protected formatUrl(params: ParamModel): string {
-    let paramsString: string;
+    const qParams = this.getParams();
+    let paramsString: string = "";
+
     // short form of id: just primitive value for single key entities
-    if (SINGLE_VALUE_TYPES.includes(typeof params) || params === null) {
-      const qParamKeys = Object.keys(this.getParams());
-      if (qParamKeys.length !== 1) {
+    if (SINGLE_VALUE_TYPES.includes(typeof params)) {
+      const qParamKeys = qParams ? Object.keys(qParams) : [];
+      if (!qParams || qParamKeys.length !== 1) {
         throw new Error("Only primitive value for id provided, but complex key spec is required!");
       }
-      paramsString = `(${this.getParams()[qParamKeys[0]].formatUrlValue(params) || ""})`;
+      paramsString = `(${qParams[qParamKeys[0]].formatUrlValue(params) || ""})`;
     }
     // complex form
     else {
       const formatted = this.formatParams(params);
-      paramsString = this.isV2() ? this.compileQueryParams(formatted) : this.compileUrlParams(formatted);
+      paramsString = this.isV2() ? compileQueryParams(formatted) : compileUrlParams(formatted);
     }
 
     return compileOperationPath(this.path, this.name) + paramsString;
   }
 
-  private formatParams(params: ParamModel): FunctionParams {
-    if (params === undefined) {
-      return {};
-    }
+  private formatParams(params: ParamModel): FunctionParams | undefined {
     const qParams = this.getParams();
+
+    if (!params || !qParams) {
+      return undefined;
+    }
 
     return Object.entries<any>(params)
       .map(([key, value]) => {
@@ -71,33 +98,9 @@ export abstract class QFunction<ParamModel = undefined> {
       }, {} as FunctionParams);
   }
 
-  private compileUrlParams(params: FunctionParams) {
-    if (typeof params !== "object") {
-      throw new Error("Only object types are valid for compileParams!");
-    }
-    const result = Object.entries(params)
-      .map(([key, value]) => {
-        return key + "=" + value;
-      })
-      .join(",");
-
-    return `(${result})`;
-  }
-
-  private compileQueryParams(params: FunctionParams) {
-    return !params || !Object.keys(params).length
-      ? ""
-      : "?" +
-          Object.entries(params)
-            .map(([key, value]) => {
-              return encodeURIComponent(key) + "=" + encodeURIComponent(value);
-            })
-            .join("&");
-  }
-
   public parseUrl(url: string): ParamModel {
     const qParams = this.getParams();
-    if (!Object.keys(qParams).length) {
+    if (!qParams || !Object.keys(qParams).length) {
       return undefined!;
     }
 

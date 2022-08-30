@@ -1,27 +1,4 @@
-import { UrlParamValueFormatter, UrlParamValueParser } from "../param/UrlParamModel";
-
-export enum QParamTypesV2 {
-  Guid,
-  Boolean,
-  String,
-  Number,
-  Time,
-  DateTime,
-  DateTimeOffset,
-  // Binary,
-}
-
-export enum QParamTypes {
-  Guid,
-  Boolean,
-  String,
-  Number,
-  TimeOfDay,
-  Date,
-  DateTimeOffset,
-  // Duration,
-  // Binary,
-}
+import { UrlParamValueFormatter, UrlParamValueParser } from "../internal";
 
 export abstract class QParam<Type extends string | number | boolean> {
   constructor(protected name: string) {

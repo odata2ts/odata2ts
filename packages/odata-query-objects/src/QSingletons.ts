@@ -1,14 +1,20 @@
-import { QEnumPath } from "./path/QEnumPath";
-import { QBinaryPath } from "./path/QBinaryPath";
-import { QDatePath } from "./path/v4/QDatePath";
-import { QTimeOfDayPath } from "./path/v4/QTimeOfDayPath";
-import { QDateTimeOffsetPath } from "./path/v4/QDateTimeOffsetPath";
-import { QGuidPath } from "./path/v4/QGuidPath";
-import { QBooleanPath } from "./path/QBooleanPath";
-import { QNumberPath } from "./path/QNumberPath";
-import { QStringPath } from "./path/v4/QStringPath";
-import { QueryObject } from "./QueryObject";
-import { QDateTimeOffsetV2Path, QDateTimeV2Path, QGuidV2Path, QStringV2Path, QTimeV2Path } from "./path/v2";
+import {
+  QueryObject,
+  QBinaryPath,
+  QBooleanPath,
+  QEnumPath,
+  QGuidPath,
+  QGuidV2Path,
+  QNumberPath,
+  QStringPath,
+  QStringV2Path,
+  QDatePath,
+  QTimeOfDayPath,
+  QDateTimeOffsetPath,
+  QDateTimeOffsetV2Path,
+  QDateTimeV2Path,
+  QTimeV2Path,
+} from "./internal";
 
 const ATTRIBUTE_NAME = "it";
 const PRIMITIVE_VALUE_REFERENCE = "$it";
