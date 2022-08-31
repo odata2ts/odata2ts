@@ -41,7 +41,7 @@ function compileQueryParams(params: FunctionParams | undefined) {
 export abstract class QFunction<ParamModel = undefined> {
   public constructor(protected path: string, protected name: string, protected v2Mode: boolean = false) {}
 
-  public abstract getParams(): Record<string, QParam<any>> | undefined;
+  public abstract getParams(): Array<QParam<any>> | undefined;
 
   public getPath(): string {
     return this.path;
@@ -61,11 +61,10 @@ export abstract class QFunction<ParamModel = undefined> {
 
     // short form of id: just primitive value for single key entities
     if (SINGLE_VALUE_TYPES.includes(typeof params)) {
-      const qParamKeys = qParams ? Object.keys(qParams) : [];
-      if (!qParams || qParamKeys.length !== 1) {
-        throw new Error("Only primitive value for id provided, but complex key spec is required!");
+      if (qParams?.length !== 1) {
+        throw new Error("Only one primitive value was provided, but the function has multiple parameters!");
       }
-      paramsString = `(${qParams[qParamKeys[0]].formatUrlValue(params) || ""})`;
+      paramsString = `(${qParams[0].formatUrlValue(params) || ""})`;
     }
     // complex form
     else {
@@ -85,7 +84,7 @@ export abstract class QFunction<ParamModel = undefined> {
 
     return Object.entries<any>(params)
       .map(([key, value]) => {
-        const qParam = qParams[key];
+        const qParam = qParams.find(q => q.getMappedName() === key);
         if (!qParam) {
           throw new Error(`Unknown parameter "${key}"!`);
         }
@@ -100,7 +99,7 @@ export abstract class QFunction<ParamModel = undefined> {
 
   public parseUrl(url: string): ParamModel {
     const qParams = this.getParams();
-    if (!qParams || !Object.keys(qParams).length) {
+    if (!qParams?.length) {
       return undefined!;
     }
 
@@ -110,11 +109,15 @@ export abstract class QFunction<ParamModel = undefined> {
     const params = paramMatcher?.length === 2 ? paramMatcher[1].split(this.isV2() ? "&" : ",") : [];
 
     // handle short form => myEntity(123)
-    if (Object.keys(qParams).length === 1 && params.length === 1 && params[0].indexOf("=") === -1) {
-      const [key, qParam] = Object.entries<QParam<any>>(qParams)[0];
-      return {
+    if (params.length === 1 && params[0].indexOf("=") === -1) {
+      if (qParams.length !== 1) {
+        throw new Error("")
+      }
+      const qParam = qParams[0];
+      return qParam.parseUrlValue(params[0]);
+      /*return {
         [key]: qParam.parseUrlValue(params[0]),
-      } as ParamModel;
+      } as ParamModel;*/
     }
 
     // regular form
@@ -125,16 +128,15 @@ export abstract class QFunction<ParamModel = undefined> {
       }
 
       const [key, value] = keyAndValue;
-      const qParamEntry = Object.entries<QParam<any>>(qParams).find((entry) => entry[1].getName() === key);
+      const qParam = qParams.find((q) => q.getName() === key);
 
-      if (!qParamEntry) {
+      if (!qParam) {
         throw new Error(
           `Failed to parse function params: Param "${key}" is not part of this function's method signature!`
         );
       }
 
-      // @ts-ignore
-      model[qParamEntry[0]] = qParamEntry[1].parseUrlValue(value);
+      model[qParam.getMappedName() as keyof ParamModel] = qParam.parseUrlValue(value);
       return model;
     }, {} as ParamModel);
   }

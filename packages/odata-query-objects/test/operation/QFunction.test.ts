@@ -45,7 +45,7 @@ describe("QFunction Tests", () => {
     expect(exampleFunction.buildUrl({ isbn: "123" })).toBe("test/EntityXy(isbn='123')");
     expect(exampleFunction.buildUrl("123")).toBe("test/EntityXy('123')");
     expect(exampleFunction.parseUrl("test/EntityXy(isbn='123')")).toMatchObject({ isbn: "123" });
-    expect(exampleFunction.parseUrl("test/EntityXy('123')")).toMatchObject({ isbn: "123" });
+    expect(exampleFunction.parseUrl("test/EntityXy('123')")).toBe("123");
   });
 
   test("QFunction: multiple params", () => {
@@ -64,10 +64,10 @@ describe("QFunction Tests", () => {
     };
 
     expect(exampleFunction.buildUrl(requiredParams)).toBe(
-      "/BestBook(testNumber=3,testBoolean=false,testString='testing',testGuid=aaa-bbb)"
+      "/BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb)"
     );
     expect(exampleFunction.buildUrl(allParams)).toBe(
-      "/BestBook(testNumber=3,testBoolean=false,testString='testing',testGuid=aaa-bbb,testDate=null,testDateTimeOffset=dateTime)"
+      "/BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb,testDate=null,testDateTimeOffset=dateTime)"
     );
   });
 
@@ -85,7 +85,7 @@ describe("QFunction Tests", () => {
       testString: null,
     };
     const expected =
-      "/BestBook?testGuid=guid'aa-bb'&testDateTime=datetime'testDt'&testTime=time'testTime'&testDateTimeOffset=datetimeoffset'testDtOffset'";
+      "/BestBook?Testguid=guid'aa-bb'&testDateTime=datetime'testDt'&testTime=time'testTime'&testDateTimeOffset=datetimeoffset'testDtOffset'";
 
     expect(exampleFunction.buildUrl(requiredParams)).toBe(expected);
     expect(exampleFunction.buildUrl(allParams)).toBe(expected + "&testString=null");

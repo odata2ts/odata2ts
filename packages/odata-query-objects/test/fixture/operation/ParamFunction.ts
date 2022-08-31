@@ -8,7 +8,6 @@ import {
   QGuidParam,
   QGuidV2Param,
   QNumberParam,
-  QParam,
   QStringParam,
   QTimeOfDayParam,
   QTimeV2Param,
@@ -25,15 +24,15 @@ export interface BestBookParamModel {
 }
 
 export class QBestBookFunction extends QFunction<BestBookParamModel> {
-  private readonly params: Record<keyof BestBookParamModel, QParam<any>> = {
-    testNumber: new QNumberParam("testNumber"),
-    testBoolean: new QBooleanParam("testBoolean"),
-    testString: new QStringParam("testString"),
-    testGuid: new QGuidParam("testGuid"),
-    testDate: new QDateParam("testDate"),
-    testTime: new QTimeOfDayParam("testTime"),
-    testDateTimeOffset: new QDateTimeOffsetParam("testDateTimeOffset"),
-  };
+  private readonly params = [
+    new QNumberParam("TestNumber", "testNumber"),
+    new QBooleanParam("test_Boolean", "testBoolean"),
+    new QStringParam("testString"),
+    new QGuidParam("testGuid"),
+    new QDateParam("testDate"),
+    new QTimeOfDayParam("testTime"),
+    new QDateTimeOffsetParam("testDateTimeOffset"),
+  ];
 
   constructor(path: string) {
     super(path, "BestBook");
@@ -49,23 +48,23 @@ export class QBestBookFunction extends QFunction<BestBookParamModel> {
 }
 
 export interface BestBookParamModelV2 {
+  testGuid: string;
+  testDateTime: string;
+  testDateTimeOffset?: string | null;
+  testTime?: string | null;
   testBoolean?: string | null;
   testString?: string | null;
-  testGuid: string | null;
-  testDateTime: string | null;
-  testDateTimeOffset: string | null;
-  testTime: string | null;
 }
 
 export class QBestBookFunctionV2 extends QFunction<BestBookParamModelV2> {
-  private readonly params: Record<keyof BestBookParamModelV2, QParam<any>> = {
-    testBoolean: new QBooleanParam("testBoolean"),
-    testString: new QStringParam("testString"),
-    testGuid: new QGuidV2Param("testGuid"),
-    testDateTime: new QDateTimeV2Param("testDateTime"),
-    testDateTimeOffset: new QDateTimeOffsetV2Param("testDateTimeOffset"),
-    testTime: new QTimeV2Param("testTime"),
-  };
+  private readonly params = [
+    new QGuidV2Param("Testguid", "testGuid"),
+    new QDateTimeV2Param("testDateTime"),
+    new QDateTimeOffsetV2Param("testDateTimeOffset"),
+    new QTimeV2Param("testTime"),
+    new QBooleanParam("testBoolean"),
+    new QStringParam("testString"),
+  ];
 
   constructor(path: string) {
     super(path, "BestBook", true);

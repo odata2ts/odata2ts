@@ -1,4 +1,4 @@
-import { QFunction, QParam, QStringParam } from "../../../src";
+import { QFunction, QStringParam } from "../../../src";
 
 export type BookIdModel =
   | string
@@ -12,15 +12,15 @@ export class BookIdFunction extends QFunction<BookIdModel> {
     super(path, "EntityXy");
   }
 
-  private readonly params: Record<keyof BookIdModel, QParam<any>> = {
-    isbn: new QStringParam("isbn"),
-  };
+  private readonly params = [
+    new QStringParam("isbn"),
+  ]
 
   public getParams() {
     return this.params;
   }
 
-  public buildUrl(params: string | BookIdModel): string {
+  public buildUrl(params: BookIdModel) {
     return this.formatUrl(params);
   }
 }

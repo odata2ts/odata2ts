@@ -1,12 +1,12 @@
-import { QFunction, QParam } from "../../../src";
+import { QFunction } from "../../../src";
 
 export class QGetSomethingFunction extends QFunction {
   constructor(path: string) {
     super(path, "getSomething");
   }
 
-  public getParams(): Record<string, QParam<any>> {
-    return {};
+  public getParams() {
+    return undefined;
   }
 
   public buildUrl(): string {
