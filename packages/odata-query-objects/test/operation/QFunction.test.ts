@@ -22,6 +22,7 @@ describe("QFunction Tests", () => {
     expect(exampleFunction.getPath()).toBe("test-path");
     expect(exampleFunction.buildUrl()).toBe("test-path/getSomething()");
     expect(exampleFunction.parseUrl("xyz")).toBeUndefined();
+    expect(exampleFunction.parseUrl("xyz(123)")).toBeUndefined();
   });
 
   test("QFunction: V2 mode", () => {
@@ -30,14 +31,7 @@ describe("QFunction Tests", () => {
     expect(exampleFunction.getPath()).toBe("test-path");
     expect(exampleFunction.buildUrl()).toBe("test-path/getSomething");
     expect(exampleFunction.parseUrl("xyz")).toBeUndefined();
-  });
-
-  test("QFunction: V2 with params", () => {
-    const exampleFunction = new QGetSomethingFunctionV2("test-path");
-    expect(exampleFunction.getName()).toBe("getSomething");
-    expect(exampleFunction.getPath()).toBe("test-path");
-    expect(exampleFunction.buildUrl()).toBe("test-path/getSomething");
-    expect(exampleFunction.parseUrl("xyz")).toBeUndefined();
+    expect(exampleFunction.parseUrl("xyz(123)")).toBeUndefined();
   });
 
   test("QFunction: for IDs", () => {
