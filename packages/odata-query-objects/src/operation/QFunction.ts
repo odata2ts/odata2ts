@@ -55,7 +55,7 @@ export abstract class QFunction<ParamModel = undefined> {
     return this.v2Mode;
   }
 
-  protected formatUrl(params: ParamModel): string {
+  public buildUrl(params: ParamModel): string {
     const qParams = this.getParams();
     let paramsString: string = "";
 
@@ -66,7 +66,7 @@ export abstract class QFunction<ParamModel = undefined> {
       }
       paramsString = `(${qParams[0].formatUrlValue(params) || ""})`;
     }
-    // complex form
+    // complex form or undefined
     else {
       const formatted = this.formatParams(params);
       paramsString = this.isV2() ? compileQueryParams(formatted) : compileUrlParams(formatted);

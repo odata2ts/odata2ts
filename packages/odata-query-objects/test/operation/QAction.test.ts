@@ -1,4 +1,3 @@
-import {QGetSomethingFunction} from "../fixture/operation/EmptyFunction";
 import {EMPTY_ACTION_NAME, QEmptyAction} from "../fixture/operation/EmptyAction";
 import {ParamActionParamModel, QParamAction} from "../fixture/operation/ParamAction";
 
@@ -9,8 +8,8 @@ describe("QAction Tests", () => {
     expect(exampleOperation.getPath()).toBe("");
     expect(exampleOperation.buildUrl()).toBe("/" + EMPTY_ACTION_NAME);
     expect(exampleOperation.getParams()).toBeUndefined();
-    expect(exampleOperation.convertUserParams()).toBeUndefined();
-    expect(exampleOperation.convertODataParams()).toBeUndefined();
+    expect(exampleOperation.convertUserParams(undefined)).toBeUndefined();
+    expect(exampleOperation.convertODataParams(undefined)).toBeUndefined();
   });
 
   test("QAction: set path", () => {

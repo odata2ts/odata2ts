@@ -41,10 +41,6 @@ export class QBestBookFunction extends QFunction<BestBookParamModel> {
   public getParams() {
     return this.params;
   }
-
-  public buildUrl(params: BestBookParamModel): string {
-    return this.formatUrl(params);
-  }
 }
 
 export interface BestBookParamModelV2 {
@@ -72,9 +68,5 @@ export class QBestBookFunctionV2 extends QFunction<BestBookParamModelV2> {
 
   public getParams() {
     return this.params;
-  }
-
-  public buildUrl(params: BestBookParamModelV2): string {
-    return this.formatUrl(params);
   }
 }

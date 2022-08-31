@@ -21,7 +21,7 @@ export abstract class QAction<ParamModel = undefined> {
     return `${compileOperationPath(this.path, this.name)}`;
   }
 
-  public convertUserParams(params?: ParamModel): ActionParams | undefined {
+  public convertUserParams(params: ParamModel): ActionParams | undefined {
     const qParams = this.getParams();
 
     if (!params || !qParams) {
@@ -46,7 +46,7 @@ export abstract class QAction<ParamModel = undefined> {
       }, {} as ActionParams);
   }
 
-  public convertODataParams(params?: ActionParams): ParamModel | undefined {
+  public convertODataParams(params: ParamModel extends undefined ? undefined : ActionParams): ParamModel | undefined {
     const qParams = this.getParams();
 
     if (!params || !qParams) {

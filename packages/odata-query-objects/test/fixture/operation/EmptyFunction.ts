@@ -9,8 +9,8 @@ export class QGetSomethingFunction extends QFunction {
     return undefined;
   }
 
-  public buildUrl(): string {
-    return this.formatUrl(undefined);
+  public buildUrl() {
+    return super.buildUrl(undefined);
   }
 }
 
@@ -23,7 +23,7 @@ export class QGetSomethingFunctionV2 extends QFunction {
     return undefined;
   }
 
-  public buildUrl(): string {
-    return this.formatUrl(undefined);
+  public buildUrl() {
+    return super.buildUrl(undefined);
   }
 }
