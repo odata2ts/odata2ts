@@ -1,13 +1,10 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import { QueryObject } from "@odata2ts/odata-query-objects";
+import { QFunction, QueryObject } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
-import { ODataCollectionResponseV2, ODataModelResponseV2 } from "./ResponseModelV2";
 import { EntityTypeServiceV2 } from "./EntityTypeServiceV2";
+import { ODataCollectionResponseV2, ODataModelResponseV2 } from "./ResponseModelV2";
 import { ServiceBaseV2 } from "./ServiceBaseV2";
-import { EntityKeySpec } from "../EntityModel";
-import { compileId, parseId } from "../helper/UrlHelper";
-import { ParsedKey } from "../ServiceModel";
 
 export abstract class EntitySetServiceV2<
   ClientType extends ODataClient,
@@ -25,7 +22,7 @@ export abstract class EntitySetServiceV2<
    * @param path the base URL path
    * @param qModel query object
    * @param entityTypeServiceConstructor the corresponding service for a single entity
-   * @param keySpec the specification of the key (supports composite keys) of the given entity
+   * @param idFunction the id function
    * @protected
    */
   protected constructor(
@@ -33,7 +30,7 @@ export abstract class EntitySetServiceV2<
     path: string,
     qModel: Q,
     protected entityTypeServiceConstructor: new (client: ODataClient, path: string) => ETS,
-    protected keySpec: EntityKeySpec
+    protected idFunction: QFunction<EIdType>
   ) {
     super(client, path, qModel);
   }
@@ -43,7 +40,7 @@ export abstract class EntitySetServiceV2<
    * Supports composite keys.
    */
   public getKeySpec() {
-    return this.keySpec;
+    return this.idFunction.getParams();
   }
 
   /**
@@ -55,7 +52,8 @@ export abstract class EntitySetServiceV2<
    * @param id either a primitive value or an object for a composite key
    */
   public createKey(id: EIdType): string {
-    return compileId(this.path.startsWith("/") ? this.path.substring(1) : this.path, this.keySpec, id);
+    const url = this.idFunction.buildUrl(id);
+    return url.startsWith("/") ? url.substring(1) : url;
   }
 
   /**
@@ -64,8 +62,8 @@ export abstract class EntitySetServiceV2<
    *
    * @param keyPath e.g. myEntity(id=1234,name='Test')
    */
-  public parseKey(keyPath: string): ParsedKey<EIdType> {
-    return parseId<EIdType>(keyPath, this.keySpec);
+  public parseKey(keyPath: string): EIdType {
+    return this.idFunction.parseUrl(keyPath);
   }
 
   /**
@@ -80,7 +78,7 @@ export abstract class EntitySetServiceV2<
   ) => ODataResponse<ODataModelResponseV2<T>> = this.doPost;
 
   public get(id: EIdType) {
-    const url = compileId(this.path, this.keySpec, id);
+    const url = this.idFunction.buildUrl(id);
     return new this.entityTypeServiceConstructor(this.client, url);
   }
 

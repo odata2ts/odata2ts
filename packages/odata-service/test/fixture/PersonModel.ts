@@ -31,6 +31,15 @@ export interface PersonModel {
 
 export interface EditablePersonModel extends Pick<PersonModel, "UserName" | "Age" | "FavFeature" | "Features"> {}
 
+export type PersonId = string | { userName: string };
+
+export interface GetSomethingFunctionParams {
+  testGuid: string,
+  testDateTime: string,
+  testDateTimeO: string,
+  testTime: string,
+}
+
 export type PersonModelServiceVersion = PMServiceV2<MockODataClient> | PMServiceV4<MockODataClient>;
 export type PersonCollectionServiceVersion = PMCServiceV2<MockODataClient> | PMCServiceV4<MockODataClient>;
 

@@ -3,9 +3,10 @@ import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
 import { ODataModelResponseV4 } from "../../src";
 import { MockODataClient } from "../mock/MockODataClient";
-import { PersonModelService, QPersonV4, qPersonV4 } from "../fixture/v4/PersonModelService";
+import { PersonModelService } from "../fixture/v4/PersonModelService";
 import { PersonModel } from "../fixture/PersonModel";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
+import {QPersonV4, qPersonV4} from "../fixture/v4/QPersonV4";
 
 describe("EntityTypeService V4 Tests", () => {
   const odataClient = new MockODataClient();

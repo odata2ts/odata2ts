@@ -1,31 +1,12 @@
 import { ODataClient, ODataClientConfig } from "@odata2ts/odata-client-api";
-import { EntityTypeServiceV2, EntitySetServiceV2, CollectionServiceV2, compileFunctionPathV2 } from "../../../src";
+import { EntityTypeServiceV2, EntitySetServiceV2, CollectionServiceV2 } from "../../../src";
 import {
-  QCollectionPath,
-  QEntityCollectionPath,
-  QEnumPath,
-  QNumberPath,
-  QEntityPath,
-  QueryObject,
   QEnumCollection,
-  QStringV2Path,
 } from "@odata2ts/odata-query-objects";
-import { EditablePersonModel, PersonModel } from "../PersonModel";
+import {EditablePersonModel, GetSomethingFunctionParams, PersonId, PersonModel} from "../PersonModel";
+import {QGetSomethingFunction, qPersonV2, QPersonV2} from "./QPersonV2";
+import {QPersonIdFunction} from "../QPerson";
 
-export class QPersonV2 extends QueryObject {
-  public readonly userName = new QStringV2Path(this.withPrefix("UserName"));
-  public readonly age = new QNumberPath(this.withPrefix("Age"));
-  public readonly favFeature = new QEnumPath(this.withPrefix("FavFeature"));
-  public readonly features = new QCollectionPath(this.withPrefix("Features"), () => QEnumCollection);
-  public readonly friends = new QEntityCollectionPath(this.withPrefix("Friends"), () => QPersonV2);
-  public readonly bestFriend = new QEntityPath(this.withPrefix("BestFriend"), () => QPersonV2);
-
-  constructor(path?: string) {
-    super(path);
-  }
-}
-
-export const qPersonV2 = new QPersonV2();
 
 export class PersonModelService<ClientType extends ODataClient> extends EntityTypeServiceV2<
   ClientType,
@@ -33,6 +14,8 @@ export class PersonModelService<ClientType extends ODataClient> extends EntityTy
   EditablePersonModel,
   QPersonV2
 > {
+  private qGetSomething = new QGetSomethingFunction(this.path);
+
   public get features() {
     return new CollectionServiceV2(this.client, this.path + "/Features", new QEnumCollection());
   }
@@ -50,15 +33,10 @@ export class PersonModelService<ClientType extends ODataClient> extends EntityTy
   }
 
   public getSomething(
-    params: { testGuid: string; testDateTime: string; testDateTimeO: string; testTime: string },
+    params: GetSomethingFunctionParams,
     requestConfig?: ODataClientConfig<ClientType>
   ) {
-    const url = compileFunctionPathV2(this.getPath(), "GetAnything", {
-      testGuid: { isLiteral: false, typePrefix: "guid", value: params.testGuid },
-      testDateTime: { isLiteral: false, typePrefix: "datetime", value: params.testDateTime },
-      testDateTimeO: { isLiteral: false, typePrefix: "datetimeoffset", value: params.testDateTimeO },
-      testTime: { isLiteral: false, typePrefix: "time", value: params.testTime },
-    });
+    const url = this.qGetSomething.buildUrl(params);
     return this.client.get(url, requestConfig);
   }
 }
@@ -68,12 +46,10 @@ export class PersonModelCollectionService<ClientType extends ODataClient> extend
   PersonModel,
   EditablePersonModel,
   QPersonV2,
-  string | { UserName: string },
+  PersonId,
   PersonModelService<ClientType>
 > {
   constructor(client: ODataClient, path: string) {
-    super(client, path, qPersonV2, PersonModelService, [
-      { isLiteral: false, type: "string", name: "userName", odataName: "UserName" },
-    ]);
+    super(client, path, qPersonV2, PersonModelService, new QPersonIdFunction(path));
   }
 }
