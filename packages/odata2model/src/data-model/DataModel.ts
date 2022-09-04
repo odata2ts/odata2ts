@@ -1,3 +1,5 @@
+import { pascalCase } from "pascal-case";
+
 import {
   ActionImportType,
   ComplexType,
@@ -10,13 +12,14 @@ import {
   OperationType,
   SingletonType,
 } from "./DataTypeModel";
-import { pascalCase } from "pascal-case";
 
 export interface ProjectFiles {
   model: string;
   qObject: string;
   service: string;
 }
+
+const ROOT_OPERATION_BINDING = "/";
 
 export class DataModel {
   private readonly servicePrefix: string;
@@ -144,6 +147,11 @@ export class DataModel {
     }
 
     this.operationTypes[binding].push(operationType);
+  }
+
+  public getUnboundOperationTypes(): Array<OperationType> {
+    const operations = this.operationTypes[ROOT_OPERATION_BINDING];
+    return !operations ? [] : [...operations];
   }
 
   public getOperationTypeByBinding(binding: string): Array<OperationType> {

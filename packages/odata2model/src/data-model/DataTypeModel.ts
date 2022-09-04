@@ -28,6 +28,7 @@ export interface PropertyModel {
 }
 
 export interface ModelType extends ComplexType {
+  idFunctionName: string;
   keyNames: Array<string>;
   keys: Array<PropertyModel>;
   getKeyUnion(): string;
@@ -51,6 +52,7 @@ export interface EnumType {
 export interface OperationType {
   odataName: string;
   name: string;
+  paramsModelName: string;
   type: OperationTypes;
   parameters: Array<PropertyModel>;
   returnType?: ReturnTypeModel;

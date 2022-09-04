@@ -1,7 +1,7 @@
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
-import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
 import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
+import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 describe("Function Digestion Test", () => {
@@ -37,6 +37,7 @@ describe("Function Digestion Test", () => {
       {
         odataName: "GetBestFriend",
         name: "getBestFriend",
+        paramsModelName: "GetBestFriendParams",
         type: OperationTypes.Function,
         parameters: [],
         returnType: {
@@ -116,6 +117,7 @@ describe("Function Digestion Test", () => {
     expect(result.getOperationTypeByBinding("User")).toMatchObject([
       {
         name: "listAttitudes",
+        paramsModelName: "ListAttitudesParams",
         type: OperationTypes.Function,
         parameters: [],
         returnType: {

@@ -1,7 +1,7 @@
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
-import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
 import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
+import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 describe("Action Digestion Test", () => {
@@ -37,6 +37,7 @@ describe("Action Digestion Test", () => {
       {
         odataName: "AddFriend",
         name: "addFriend",
+        paramsModelName: "AddFriendParams",
         type: OperationTypes.Action,
         parameters: [],
         returnType: undefined,

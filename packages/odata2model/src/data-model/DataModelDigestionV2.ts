@@ -1,19 +1,21 @@
+import { pascalCase } from "pascal-case";
+
+import { DigesterFunction } from "../FactoryFunctionModel";
 import { RunOptions } from "../OptionModel";
-import { ComplexTypeV3, EntityTypeV3, ODataTypesV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
-import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
-import { DataModel } from "./DataModel";
 import { Digester } from "./DataModelDigestion";
+import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
+import { ComplexTypeV3, EntityTypeV3, ODataTypesV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
 
 /**
  * Takes an EDMX schema
  * @param schema
  * @param options
  */
-export async function digest(schema: SchemaV3, options: RunOptions): Promise<DataModel> {
+export const digest: DigesterFunction<SchemaV3> = async (schema, options) => {
   const digester = new DigesterV3(schema, options);
   return digester.digest();
-}
+};
 
 class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
   constructor(schema: SchemaV3, options: RunOptions) {
@@ -69,6 +71,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
         const operation: OperationType = {
           name,
           odataName: funcImport.$.Name,
+          paramsModelName: pascalCase(funcImport.$.Name) + Digester.PARAMS_MODEL_SUFFIX,
           type: OperationTypes.Function,
           parameters,
           returnType,

@@ -1,19 +1,19 @@
+import { DigesterFunction } from "../FactoryFunctionModel";
 import { RunOptions } from "../OptionModel";
+import { Digester } from "./DataModelDigestion";
+import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
 import { ComplexTypeV4, EntityTypeV4, ODataTypesV4, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4";
-import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
-import { Digester } from "./DataModelDigestion";
-import { DataModel } from "./DataModel";
 
 /**
  * Takes an EDMX schema
  * @param schema
  * @param options
  */
-export async function digest(schema: SchemaV4, options: RunOptions): Promise<DataModel> {
+export const digest: DigesterFunction<SchemaV4> = (schema, options) => {
   const digester = new DigesterV4(schema, options);
   return digester.digest();
-}
+};
 
 class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
   constructor(schema: SchemaV4, options: RunOptions) {
@@ -142,6 +142,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       this.dataModel.addOperationType(binding, {
         odataName: op.$.Name,
         name: this.getOperationName(op.$.Name),
+        paramsModelName: this.getOperationParamsModelName(op.$.Name),
         type: type,
         parameters: params,
         returnType: returnType,

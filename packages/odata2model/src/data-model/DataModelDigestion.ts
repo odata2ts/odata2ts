@@ -1,13 +1,17 @@
-import { DataModel } from "./DataModel";
-import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModelBase";
-import { RunOptions } from "../OptionModel";
-import { ComplexType as ComplexModelType, DataTypes, ODataVersion, PropertyModel } from "./DataTypeModel";
-import { pascalCase } from "pascal-case";
 import { camelCase } from "camel-case";
+import { pascalCase } from "pascal-case";
+
+import { RunOptions } from "../OptionModel";
+import { DataModel } from "./DataModel";
+import { ComplexType as ComplexModelType, DataTypes, ODataVersion, PropertyModel } from "./DataTypeModel";
+import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModelBase";
+
+const ID_SUFFIX = "Id";
 
 export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, CT extends ComplexType> {
   protected static EDM_PREFIX = "Edm.";
   protected static ROOT_OPERATION = "/";
+  protected static PARAMS_MODEL_SUFFIX = "Params";
 
   protected readonly dataModel: DataModel;
   private model2Type: Map<string, DataTypes> = new Map<string, DataTypes>();
@@ -35,8 +39,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     return this.dataModel;
   }
 
-  protected getModelName(name: string) {
-    return `${this.options.modelPrefix}${pascalCase(this.stripServicePrefix(name))}${this.options.modelSuffix}`;
+  protected getModelName(name: string, typeSuffix?: string): string {
+    return (
+      this.options.modelPrefix +
+      pascalCase(this.stripServicePrefix(name)) +
+      (typeSuffix || "") +
+      this.options.modelSuffix
+    );
   }
 
   protected getQName(name: string) {
@@ -57,6 +66,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   protected getOperationName(name: string) {
     return camelCase(this.stripServicePrefix(name));
+  }
+
+  protected getOperationParamsModelName(name: string) {
+    return pascalCase(this.stripServicePrefix(name)) + Digester.PARAMS_MODEL_SUFFIX;
   }
 
   private collectModelTypes(schema: Schema<ET, CT>) {
@@ -149,6 +162,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
       this.dataModel.addModel(baseModel.name, {
         ...baseModel,
+        idFunctionName: this.getModelName(baseModel.name, ID_SUFFIX),
         keyNames: keys, // postprocess required to include key specs from base classes
         keys: [], // postprocess required to include props from base classes
         getKeyUnion: () => keys.join(" | "),
