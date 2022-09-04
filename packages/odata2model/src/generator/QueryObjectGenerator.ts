@@ -1,16 +1,17 @@
 import { OptionalKind, PropertyDeclarationStructure, Scope, SourceFile, VariableDeclarationKind } from "ts-morph";
-
-import { DataTypes, PropertyModel } from "../data-model/DataTypeModel";
-import { DataModel } from "../data-model/DataModel";
 import { firstCharLowerCase } from "xml2js/lib/processors";
+
+import { DataModel } from "../data-model/DataModel";
+import { DataTypes, PropertyModel } from "../data-model/DataTypeModel";
+import { EntityBasedGeneratorFunction } from "../FactoryFunctionModel";
 
 const CORE_QCLASSES = ["QueryObject"];
 const Q_OBJECT_PACKAGE = "@odata2ts/odata-query-objects";
 
-export function generateQueryObjects(dataModel: DataModel, sourceFile: SourceFile) {
+export const generateQueryObjects: EntityBasedGeneratorFunction = (dataModel, sourceFile) => {
   const generator = new QueryObjectGenerator(dataModel, sourceFile);
   return generator.generate();
-}
+};
 
 class QueryObjectGenerator {
   constructor(private dataModel: DataModel, private sourceFile: SourceFile) {}

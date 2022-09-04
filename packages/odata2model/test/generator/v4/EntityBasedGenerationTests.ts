@@ -1,69 +1,33 @@
-import { Project, SourceFile } from "ts-morph";
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
-import { createFixtureComparator, FixtureComparator } from "../comparator/FixtureComparator";
-import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { DataModel } from "../../../src/data-model/DataModel";
+import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
+import { EntityBasedGeneratorFunction } from "../../../src/FactoryFunctionModel";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
+import { FixtureComparator, createFixtureComparator } from "../comparator/FixtureComparator";
+import { FixtureComparatorHelper, createHelper } from "../comparator/FixtureComparatorHelper";
 
 export const SERVICE_NAME = "Tester";
 export const ENTITY_NAME = "Book";
 
-export type GeneratorFunction = (dataModel: DataModel, sourceFile: SourceFile) => void;
-
 export function createEntityBasedGenerationTests(
   testSuiteName: string,
   fixtureBasePath: string,
-  generate: GeneratorFunction
+  generate: EntityBasedGeneratorFunction
 ) {
-  let runOptions: RunOptions;
   let odataBuilder: ODataModelBuilderV4;
-
-  const project: Project = new Project({
-    skipAddingFilesFromTsConfig: true,
-  });
-  let fixtureComparator: FixtureComparator;
+  let fixtureComparatorHelper: FixtureComparatorHelper;
 
   beforeAll(async () => {
-    fixtureComparator = await createFixtureComparator(fixtureBasePath);
+    fixtureComparatorHelper = await createHelper(fixtureBasePath, digest, generate);
   });
 
   beforeEach(() => {
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
-    runOptions = {
-      mode: Modes.all,
-      emitMode: EmitModes.js_dts,
-      output: "ignore",
-      prettier: false,
-      debug: false,
-      modelPrefix: "",
-      modelSuffix: "",
-    };
   });
 
-  async function doGenerate(id: string) {
-    const sourceFile = project.createSourceFile(id);
-    const dataModel = await digest(odataBuilder.getSchema(), runOptions);
-
-    generate(dataModel, sourceFile);
-
-    return sourceFile.getFullText().trim();
+  async function generateAndCompare(id: string, fixturePath: string, runOptions?: RunOptions) {
+    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), runOptions);
   }
-
-  async function generateAndCompare(id: string, fixturePath: string) {
-    const result = await doGenerate(id);
-    await fixtureComparator.compareWithFixture(result, fixturePath);
-  }
-
-  test(`${testSuiteName}: smoke test`, async () => {
-    // given an empty data model
-
-    // when generating model
-    const result = await doGenerate("smokeTest");
-
-    // then nothing really happened
-    expect(result).toEqual("");
-  });
 
   test(`${testSuiteName}: one enum type`, async () => {
     // given only a single enum type

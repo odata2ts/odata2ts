@@ -1,12 +1,14 @@
 import { SourceFile } from "ts-morph";
+
 import { DataModel } from "../data-model/DataModel";
-import { ComplexType, DataTypes, PropertyModel } from "../data-model/DataTypeModel";
+import { ComplexType, DataTypes, ModelType, OperationType, PropertyModel } from "../data-model/DataTypeModel";
+import { EntityBasedGeneratorFunction } from "../FactoryFunctionModel";
 import { ModelImportContainer } from "./ModelImportContainer";
 
-export function generateModels(dataModel: DataModel, sourceFile: SourceFile) {
+export const generateModels: EntityBasedGeneratorFunction = (dataModel, sourceFile) => {
   const generator = new ModelGenerator(dataModel, sourceFile);
   return generator.generate();
-}
+};
 
 const DEFERRED_CONTENT = "DeferredContent";
 

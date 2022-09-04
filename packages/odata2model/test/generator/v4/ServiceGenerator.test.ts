@@ -1,60 +1,55 @@
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
-import { createFixtureComparator, FixtureComparator } from "../comparator/FixtureComparator";
-import { SERVICE_NAME } from "./EntityBasedGenerationTests";
-import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { generateServices } from "../../../src/generator";
-import { createProjectManager, ProjectManager } from "../../../src/project/ProjectManager";
-import { ProjectFiles } from "../../../src/data-model/DataModel";
-import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
-import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import path from "path";
+
+import { SourceFile } from "ts-morph";
+
 import { ODataVesions } from "../../../src/app";
+import { ProjectFiles } from "../../../src/data-model/DataModel";
+import { digest } from "../../../src/data-model/DataModelDigestionV4";
+import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
+import { EmitModes } from "../../../src/OptionModel";
+import { ProjectManager, createProjectManager } from "../../../src/project/ProjectManager";
+import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
+import { ServiceFixtureComparatorHelper, createServiceHelper } from "../comparator/FixtureComparatorHelper";
+import { SERVICE_NAME } from "./EntityBasedGenerationTests";
 
 describe("Service Generator Tests V4", () => {
   const FIXTURE_PATH = "generator/service";
-
-  let runOptions: RunOptions;
-  let odataBuilder: ODataModelBuilderV4;
-
-  let projectFiles: ProjectFiles = {
+  const PROJECT_FILES: ProjectFiles = {
     model: `${SERVICE_NAME}Model`,
     qObject: `q${SERVICE_NAME}`,
     service: `${SERVICE_NAME}Service`,
   };
+
+  let odataBuilder: ODataModelBuilderV4;
   let projectManager: ProjectManager;
-  let fixtureComparator: FixtureComparator;
+  let fixtureComparatorHelper: ServiceFixtureComparatorHelper;
 
   beforeAll(async () => {
-    fixtureComparator = await createFixtureComparator(FIXTURE_PATH);
+    fixtureComparatorHelper = await createServiceHelper(FIXTURE_PATH, digest, ODataVesions.V4);
   });
 
   beforeEach(async () => {
+    projectManager = await createProjectManager(PROJECT_FILES, "build", EmitModes.ts, true);
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
-    runOptions = {
-      mode: Modes.all,
-      emitMode: EmitModes.js_dts,
-      output: "ignore",
-      prettier: false,
-      debug: false,
-      modelPrefix: "",
-      modelSuffix: "",
-    };
-    projectManager = await createProjectManager(projectFiles, "build", EmitModes.ts, true);
   });
 
   async function doGenerate() {
-    const dataModel = await digest(odataBuilder.getSchema(), runOptions);
-
-    await generateServices(dataModel, projectManager, ODataVesions.V4);
+    await fixtureComparatorHelper.generateService(odataBuilder.getSchema(), projectManager);
   }
 
-  async function compareMainService(fixture: string, v4Specific: boolean) {
-    const main = projectManager.getMainServiceFile();
+  function getV4SpecificPath(fixture: string, v4Specific: boolean) {
+    return (v4Specific ? "v4" + path.sep : "") + fixture;
+  }
 
-    expect(main).toBeTruthy();
-    expect(main.getFullText()).toBeTruthy();
+  async function compareMainService(fixture: string, v4Specific: boolean = false) {
+    await fixtureComparatorHelper.compareService(
+      getV4SpecificPath(fixture, v4Specific),
+      projectManager.getMainServiceFile()
+    );
+  }
 
-    await fixtureComparator.compareWithFixture(main.getFullText(), (v4Specific ? "v4" + path.sep : "") + fixture);
+  async function compareService(service: SourceFile, fixture: string, v4Specific: boolean = false) {
+    await fixtureComparatorHelper.compareService(getV4SpecificPath(fixture, v4Specific), service);
   }
 
   test("Service Generator: empty", async () => {
@@ -91,10 +86,7 @@ describe("Service Generator Tests V4", () => {
 
     // then we get one additional service file
     expect(projectManager.getServiceFiles().length).toEqual(1);
-    await fixtureComparator.compareWithFixture(
-      projectManager.getServiceFiles()[0].getFullText(),
-      "v4" + path.sep + "test-entity-service.ts"
-    );
+    await compareService(projectManager.getServiceFiles()[0], "test-entity-service.ts", true);
   });
 
   test("Service Generator: one singleton", async () => {
@@ -167,10 +159,7 @@ describe("Service Generator Tests V4", () => {
     // then service has those functions
     const services = projectManager.getServiceFiles();
     expect(services.length).toEqual(2);
-    await fixtureComparator.compareWithFixture(
-      services[0].getFullText(),
-      "v4" + path.sep + "test-entity-service-bound-func.ts"
-    );
+    await compareService(services[0], "test-entity-service-bound-func.ts", true);
   });
 
   test("Service Generator: one bound action", async () => {
@@ -192,10 +181,7 @@ describe("Service Generator Tests V4", () => {
     // then service has actions
     const services = projectManager.getServiceFiles();
     expect(services.length).toEqual(2);
-    await fixtureComparator.compareWithFixture(
-      services[0].getFullText(),
-      "v4" + path.sep + "test-entity-service-bound-action.ts"
-    );
+    await compareService(services[0], "test-entity-service-bound-action.ts", true);
   });
 
   test("Service Generator: EntityService with Relationships", async () => {
@@ -216,10 +202,7 @@ describe("Service Generator Tests V4", () => {
 
     // then we get two additional service file
     expect(projectManager.getServiceFiles().length).toEqual(2);
-    await fixtureComparator.compareWithFixture(
-      projectManager.getServiceFiles()[1].getFullText(),
-      "v4" + path.sep + "test-entity-service-relationships.ts"
-    );
+    await compareService(projectManager.getServiceFiles()[1], "test-entity-service-relationships.ts", true);
   });
 
   test("Service Generator: EntityService with Complex Type", async () => {
@@ -238,14 +221,8 @@ describe("Service Generator Tests V4", () => {
 
     // then we get two additional service file
     expect(projectManager.getServiceFiles().length).toEqual(2);
-    await fixtureComparator.compareWithFixture(
-      projectManager.getServiceFiles()[0].getFullText(),
-      "v4" + path.sep + "test-entity-service-complex.ts"
-    );
-    await fixtureComparator.compareWithFixture(
-      projectManager.getServiceFiles()[1].getFullText(),
-      "v4" + path.sep + "test-complex-service.ts"
-    );
+    await compareService(projectManager.getServiceFiles()[0], "test-entity-service-complex.ts", true);
+    await compareService(projectManager.getServiceFiles()[1], "test-complex-service.ts", true);
   });
 
   test("Service Generator: EntityService with Enum Type", async () => {
@@ -267,9 +244,6 @@ describe("Service Generator Tests V4", () => {
 
     // then we get two additional service file
     expect(projectManager.getServiceFiles().length).toEqual(1);
-    await fixtureComparator.compareWithFixture(
-      projectManager.getServiceFiles()[0].getFullText(),
-      "v4" + path.sep + "test-entity-service-enum.ts"
-    );
+    await compareService(projectManager.getServiceFiles()[0], "test-entity-service-enum.ts", true);
   });
 });
