@@ -17,6 +17,8 @@ export interface Book {
   multipleBinaries: Array<string>;
 }
 
+export type BookId = string | { id: string };
+
 export interface EditableBook
   extends Pick<Book, "id" | "requiredOption">,
     Partial<

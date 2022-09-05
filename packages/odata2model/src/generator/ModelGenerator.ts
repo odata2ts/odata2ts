@@ -16,8 +16,11 @@ class ModelGenerator {
   constructor(private dataModel: DataModel, private sourceFile: SourceFile) {}
 
   public generate(): void {
+    const importContainer = new ModelImportContainer();
+
     this.generateEnums();
-    this.generateModels();
+    this.generateModels(importContainer);
+    this.generateUnboundOperationParams(importContainer);
   }
 
   private generateEnums() {
@@ -30,11 +33,14 @@ class ModelGenerator {
     });
   }
 
-  private generateModels() {
-    const importContainer = new ModelImportContainer();
-    const models = [...this.dataModel.getModels(), ...this.dataModel.getComplexTypes()];
-
-    models.forEach((model) => {
+  private generateModels(importContainer: ModelImportContainer) {
+    this.dataModel.getModels().forEach((model) => {
+      this.generateModel(model, importContainer);
+      this.generateIdModel(model, importContainer);
+      this.generateEditableModel(model, importContainer);
+      this.generateBoundOperations(model.odataName, importContainer);
+    });
+    this.dataModel.getComplexTypes().forEach((model) => {
       this.generateModel(model, importContainer);
       this.generateEditableModel(model, importContainer);
     });
@@ -76,6 +82,20 @@ class ModelGenerator {
 
     // primitive, enum & complex types
     return prop.type + (prop.required ? "" : " | null") + suffix;
+  }
+
+  private generateIdModel(model: ModelType, importContainer: ModelImportContainer) {
+    const singleType = model.keys.length === 1 ? `${model.keys[0].type} | ` : "";
+    const keyTypes = model.keys
+      .map((keyProp) => `${keyProp.odataName}: ${this.getPropType(keyProp, importContainer)}`)
+      .join(",");
+    const type = `${singleType}{${keyTypes}}`;
+
+    this.sourceFile.addTypeAlias({
+      name: model.idFunctionName,
+      isExported: true,
+      type,
+    });
   }
 
   private generateEditableModel(model: ComplexType, importContainer: ModelImportContainer) {
@@ -126,5 +146,31 @@ class ModelGenerator {
 
     // primitive, enum & complex types
     return type + (prop.required ? "" : " | null");
+  }
+
+  private generateUnboundOperationParams(importContainer: ModelImportContainer) {
+    this.dataModel.getUnboundOperationTypes().forEach((operation) => {
+      this.generateOperation(operation, importContainer);
+    });
+  }
+
+  private generateBoundOperations(entityName: string, importContainer: ModelImportContainer) {
+    this.dataModel.getOperationTypeByBinding(entityName).forEach((operation) => {
+      this.generateOperation(operation, importContainer);
+    });
+  }
+
+  private generateOperation(operation: OperationType, importContainer: ModelImportContainer) {
+    this.sourceFile.addInterface({
+      name: operation.paramsModelName,
+      isExported: true,
+      properties: operation.parameters.map((p) => {
+        return {
+          name: p.odataName,
+          type: this.getPropType(p, importContainer),
+          hasQuestionToken: !p.required,
+        };
+      }),
+    });
   }
 }

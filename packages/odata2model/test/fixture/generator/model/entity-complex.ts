@@ -5,6 +5,8 @@ export interface Book {
   altMethods: Array<PublishingMethod>;
 }
 
+export type BookId = boolean | { id: boolean };
+
 export interface EditableBook extends Pick<Book, "id"> {
   method: EditablePublishingMethod;
   altMethod?: EditablePublishingMethod | null;
