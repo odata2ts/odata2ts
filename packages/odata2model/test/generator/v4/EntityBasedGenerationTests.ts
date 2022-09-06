@@ -1,10 +1,13 @@
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
+import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
 import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
-import { EntityBasedGeneratorFunction } from "../../../src/FactoryFunctionModel";
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
+import { GenerationOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
-import { FixtureComparator, createFixtureComparator } from "../comparator/FixtureComparator";
-import { FixtureComparatorHelper, createHelper } from "../comparator/FixtureComparatorHelper";
+import {
+  EntityBasedGeneratorFunctionWithoutVersion,
+  FixtureComparatorHelper,
+  createHelper,
+} from "../comparator/FixtureComparatorHelper";
 
 export const SERVICE_NAME = "Tester";
 export const ENTITY_NAME = "Book";
@@ -12,7 +15,7 @@ export const ENTITY_NAME = "Book";
 export function createEntityBasedGenerationTests(
   testSuiteName: string,
   fixtureBasePath: string,
-  generate: EntityBasedGeneratorFunction
+  generate: EntityBasedGeneratorFunctionWithoutVersion
 ) {
   let odataBuilder: ODataModelBuilderV4;
   let fixtureComparatorHelper: FixtureComparatorHelper;
@@ -25,8 +28,8 @@ export function createEntityBasedGenerationTests(
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
   });
 
-  async function generateAndCompare(id: string, fixturePath: string, runOptions?: RunOptions) {
-    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), runOptions);
+  async function generateAndCompare(id: string, fixturePath: string, genOptions?: GenerationOptions) {
+    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), genOptions);
   }
 
   test(`${testSuiteName}: one enum type`, async () => {
@@ -48,6 +51,18 @@ export function createEntityBasedGenerationTests(
     // when generating model
     // then match fixture text
     await generateAndCompare("complexType", "complex-min.ts");
+  });
+
+  test(`${testSuiteName}: complex type with editable`, async () => {
+    // given one minimal model
+    odataBuilder.addComplexType("Brand", undefined, (builder) => builder.addProp("naming", ODataTypesV4.Boolean));
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("complexTypeEdit", "complex-editable.ts", {
+      skipIdModel: false,
+      skipEditableModel: false,
+    });
   });
 
   test(`${testSuiteName}: one minimal model`, async () => {
@@ -83,7 +98,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("oneMaxModel", "entity-max.ts");
+    await generateAndCompare("oneMaxModel", "entity-max.ts", { skipIdModel: false, skipEditableModel: false });
   });
 
   test(`${testSuiteName}: entity relationships`, async () => {
@@ -115,7 +130,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("baseClass", "entity-hierarchy.ts");
+    await generateAndCompare("baseClass", "entity-hierarchy.ts", { skipIdModel: false, skipEditableModel: false });
   });
 
   test(`${testSuiteName}: entity & enum`, async () => {

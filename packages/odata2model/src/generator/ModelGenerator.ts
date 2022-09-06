@@ -1,26 +1,35 @@
 import { SourceFile } from "ts-morph";
 
+import { ODataVesions } from "../app";
 import { DataModel } from "../data-model/DataModel";
 import { ComplexType, DataTypes, ModelType, OperationType, PropertyModel } from "../data-model/DataTypeModel";
 import { EntityBasedGeneratorFunction } from "../FactoryFunctionModel";
+import { GenerationOptions } from "../OptionModel";
 import { ModelImportContainer } from "./ModelImportContainer";
 
-export const generateModels: EntityBasedGeneratorFunction = (dataModel, sourceFile) => {
-  const generator = new ModelGenerator(dataModel, sourceFile);
+export const generateModels: EntityBasedGeneratorFunction = (dataModel, sourceFile, version, options) => {
+  const generator = new ModelGenerator(dataModel, sourceFile, version, options);
   return generator.generate();
 };
 
 const DEFERRED_CONTENT = "DeferredContent";
 
 class ModelGenerator {
-  constructor(private dataModel: DataModel, private sourceFile: SourceFile) {}
+  constructor(
+    private dataModel: DataModel,
+    private sourceFile: SourceFile,
+    private version: ODataVesions,
+    private options: GenerationOptions | undefined
+  ) {}
 
   public generate(): void {
     const importContainer = new ModelImportContainer();
 
     this.generateEnums();
     this.generateModels(importContainer);
-    this.generateUnboundOperationParams(importContainer);
+    if (!this.options?.skipOperationModel) {
+      this.generateUnboundOperationParams(importContainer);
+    }
   }
 
   private generateEnums() {
@@ -36,13 +45,21 @@ class ModelGenerator {
   private generateModels(importContainer: ModelImportContainer) {
     this.dataModel.getModels().forEach((model) => {
       this.generateModel(model, importContainer);
-      this.generateIdModel(model, importContainer);
-      this.generateEditableModel(model, importContainer);
-      this.generateBoundOperations(model.odataName, importContainer);
+      if (!this.options?.skipIdModel) {
+        this.generateIdModel(model, importContainer);
+      }
+      if (!this.options?.skipEditableModel) {
+        this.generateEditableModel(model, importContainer);
+      }
+      if (!this.options?.skipOperationModel) {
+        this.generateBoundOperations(model.odataName, importContainer);
+      }
     });
     this.dataModel.getComplexTypes().forEach((model) => {
       this.generateModel(model, importContainer);
-      this.generateEditableModel(model, importContainer);
+      if (!this.options?.skipEditableModel) {
+        this.generateEditableModel(model, importContainer);
+      }
     });
 
     this.sourceFile.addImportDeclarations(importContainer.getImportDeclarations());
@@ -92,7 +109,7 @@ class ModelGenerator {
     const type = `${singleType}{${keyTypes}}`;
 
     this.sourceFile.addTypeAlias({
-      name: model.idFunctionName,
+      name: model.idModelName,
       isExported: true,
       type,
     });

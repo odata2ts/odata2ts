@@ -37,6 +37,7 @@ describe("Action Digestion Test", () => {
       {
         odataName: "AddFriend",
         name: "addFriend",
+        qName: "QAddFriend",
         paramsModelName: "AddFriendParams",
         type: OperationTypes.Action,
         parameters: [],

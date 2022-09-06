@@ -1,9 +1,9 @@
 import {
-  QueryObject,
-  QNumberPath,
   QBooleanPath,
-  QEntityPath,
   QEntityCollectionPath,
+  QEntityPath,
+  QNumberPath,
+  QueryObject,
 } from "@odata2ts/odata-query-objects";
 
 export class QAuthor extends QueryObject {

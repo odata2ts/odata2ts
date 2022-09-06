@@ -38,6 +38,7 @@ describe("Function Digestion Test", () => {
       {
         odataName: "GetBestFriend",
         name: "getBestFriend",
+        qName: "QGetBestFriend",
         paramsModelName: "GetBestFriendParams",
         type: OperationTypes.Function,
         parameters: [],
@@ -152,6 +153,7 @@ describe("Function Digestion Test", () => {
       {
         odataName: "GetBestFriend",
         name: "getBestFriend",
+        qName: "QGetBestFriend",
         paramsModelName: "GetBestFriendParams",
         type: OperationTypes.Function,
         usePost: true,

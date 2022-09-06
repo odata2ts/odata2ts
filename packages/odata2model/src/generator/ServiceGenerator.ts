@@ -1,9 +1,8 @@
 import { MethodDeclarationStructure, OptionalKind, PropertyDeclarationStructure, Scope, SourceFile } from "ts-morph";
-import { firstCharLowerCase } from "xml2js/lib/processors";
 import { upperCaseFirst } from "upper-case-first";
+import { firstCharLowerCase } from "xml2js/lib/processors";
 
-import { ImportContainer } from "./ImportContainer";
-import { ProjectManager } from "../project/ProjectManager";
+import { ODataVesions } from "../app";
 import { DataModel } from "../data-model/DataModel";
 import {
   ActionImportType,
@@ -15,8 +14,9 @@ import {
   OperationTypes,
   PropertyModel,
 } from "../data-model/DataTypeModel";
-import { ODataVesions } from "../app";
 import { ODataTypesV3 } from "../data-model/edmx/ODataEdmxModelV3";
+import { ProjectManager } from "../project/ProjectManager";
+import { ImportContainer } from "./ImportContainer";
 
 const ROOT_SERVICE = "ODataService";
 

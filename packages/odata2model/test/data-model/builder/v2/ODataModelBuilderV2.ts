@@ -62,8 +62,7 @@ export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, Sch
   public addEntityType(
     name: string,
     baseType: string | undefined,
-    builderFn: (builder: ODataEntityTypeBuilderV2) => void,
-    config?: { ignoreId: boolean }
+    builderFn: (builder: ODataEntityTypeBuilderV2) => void
   ) {
     if (!this.schema.EntityType) {
       this.schema.EntityType = [];

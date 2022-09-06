@@ -1,28 +1,34 @@
 import { ODataTypesV3 } from "../../../lib/data-model/edmx/ODataEdmxModelV3";
+import { ODataVesions } from "../../../src/app";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { generateModels } from "../../../src/generator";
-import { RunOptions } from "../../../src/OptionModel";
+import { GenerationOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
-import { FixtureComparatorHelper, createHelper } from "../comparator/FixtureComparatorHelper";
+import {
+  EntityBasedGeneratorFunctionWithoutVersion,
+  FixtureComparatorHelper,
+  createHelper,
+} from "../comparator/FixtureComparatorHelper";
 import { SERVICE_NAME, createEntityBasedGenerationTests } from "./EntityBasedGenerationTests";
 
 describe("Model Generator Tests V2", () => {
   const TEST_SUITE_NAME = "Model Generator";
   const FIXTURE_BASE_PATH = "generator/model";
+  const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = (dataModel, sourceFile, genOptions) => {
+    return generateModels(dataModel, sourceFile, ODataVesions.V2, genOptions);
+  };
 
   let odataBuilder: ODataModelBuilderV2;
   let fixtureComparatorHelper: FixtureComparatorHelper;
 
-  createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, (dataModel, sourceFile) => {
-    return generateModels(dataModel, sourceFile);
-  });
+  createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, GENERATE);
 
-  async function generateAndCompare(id: string, fixturePath: string, runOptions?: RunOptions) {
-    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), runOptions);
+  async function generateAndCompare(id: string, fixturePath: string, genOptions?: GenerationOptions) {
+    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), genOptions);
   }
 
   beforeAll(async () => {
-    fixtureComparatorHelper = await createHelper(FIXTURE_BASE_PATH, digest, generateModels);
+    fixtureComparatorHelper = await createHelper(FIXTURE_BASE_PATH, digest, GENERATE);
   });
 
   beforeEach(() => {

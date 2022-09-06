@@ -32,7 +32,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    * @param type
    * @return tuple of return type, query object, query collection object
    */
-  protected abstract mapODataType(type: string): [string, string, string];
+  protected abstract mapODataType(type: string): [string, string, string, string | undefined];
 
   public async digest(): Promise<DataModel> {
     this.digestSchema(this.schema);
@@ -66,6 +66,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   protected getOperationName(name: string) {
     return camelCase(this.stripServicePrefix(name));
+  }
+
+  protected getQOperationName(name: string) {
+    return `Q${pascalCase(this.getOperationName(name))}`;
   }
 
   protected getOperationParamsModelName(name: string) {
@@ -160,9 +164,11 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         keys.push(...propNames);
       }
 
+      const idModelName = this.getModelName(baseModel.name, ID_SUFFIX);
       this.dataModel.addModel(baseModel.name, {
         ...baseModel,
-        idFunctionName: this.getModelName(baseModel.name, ID_SUFFIX),
+        idModelName,
+        qIdFunctionName: `Q${idModelName}`,
         keyNames: keys, // postprocess required to include key specs from base classes
         keys: [], // postprocess required to include props from base classes
         getKeyUnion: () => keys.join(" | "),
@@ -231,6 +237,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     let resultDt: DataTypes | undefined;
     let resultType: string;
     let resultQPath: string;
+    let resultQParam: string | undefined;
     let qClass: string | undefined;
 
     // domain object known from service: EntityType, ComplexType or EnumType
@@ -258,9 +265,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // OData built-in data types
     else if (dataType.startsWith(Digester.EDM_PREFIX)) {
       resultDt = DataTypes.PrimitiveType;
-      const [type, qPath, qCollectionClass] = this.mapODataType(dataType);
+      const [type, qPath, qCollectionClass, qParam] = this.mapODataType(dataType);
       resultType = type;
       resultQPath = qPath;
+      resultQParam = qParam;
       if (isCollection) {
         qClass = qCollectionClass;
       }
@@ -280,6 +288,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       type: resultType,
       qObject: qClass,
       qPath: resultQPath,
+      qParam: resultQParam,
       dataType: resultDt!,
       required: p.$.Nullable === "false",
       isCollection: isCollection,

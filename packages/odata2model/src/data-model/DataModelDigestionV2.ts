@@ -72,6 +72,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
           name,
           odataName: funcImport.$.Name,
           paramsModelName: pascalCase(funcImport.$.Name) + Digester.PARAMS_MODEL_SUFFIX,
+          qName: this.getQOperationName(funcImport.$.Name),
           type: OperationTypes.Function,
           parameters,
           returnType,
@@ -100,34 +101,34 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
     }
   }
 
-  protected mapODataType(type: string): [string, string, string] {
+  protected mapODataType(type: string): [string, string, string, string | undefined] {
     switch (type) {
       case ODataTypesV3.Boolean:
-        return ["boolean", "QBooleanPath", "QBooleanCollection"];
+        return ["boolean", "QBooleanPath", "QBooleanCollection", "QBooleanParam"];
       case ODataTypesV3.Int16:
       case ODataTypesV3.Int32:
-        return ["number", "QNumberPath", "QNumberCollection"];
+        return ["number", "QNumberPath", "QNumberCollection", "QNumberParam"];
       case ODataTypesV3.Byte:
       case ODataTypesV3.SByte:
       case ODataTypesV3.Int64:
       case ODataTypesV3.Single:
       case ODataTypesV3.Double:
       case ODataTypesV3.Decimal:
-        return ["string", "QNumberPath", "QNumberCollection"];
+        return ["string", "QNumberPath", "QNumberCollection", "QNumberParam"];
       case ODataTypesV3.String:
-        return ["string", "QStringV2Path", "QStringV2Collection"];
+        return ["string", "QStringV2Path", "QStringV2Collection", "QStringParam"];
       case ODataTypesV3.DateTime:
-        return ["string", "QDateTimeV2Path", "QDateTimeV2Collection"];
+        return ["string", "QDateTimeV2Path", "QDateTimeV2Collection", "QDateTimeV2Param"];
       case ODataTypesV3.Time:
-        return ["string", "QTimeV2Path", "QTimeV2Collection"];
+        return ["string", "QTimeV2Path", "QTimeV2Collection", "QTimeV2Param"];
       case ODataTypesV3.DateTimeOffset:
-        return ["string", "QDateTimeOffsetV2Path", "QDateTimeOffsetV2Collection"];
+        return ["string", "QDateTimeOffsetV2Path", "QDateTimeOffsetV2Collection", "QDateTimeOffsetV2Param"];
       case ODataTypesV3.Binary:
-        return ["string", "QBinaryPath", "QBinaryCollection"];
+        return ["string", "QBinaryPath", "QBinaryCollection", undefined];
       case ODataTypesV3.Guid:
-        return ["string", "QGuidV2Path", "QGuidV2Collection"];
+        return ["string", "QGuidV2Path", "QGuidV2Collection", "QGuidV2Param"];
       default:
-        return ["string", "QStringV2Path", "QStringV2Collection"];
+        return ["string", "QStringV2Path", "QStringV2Collection", "QStringParam"];
     }
   }
 }

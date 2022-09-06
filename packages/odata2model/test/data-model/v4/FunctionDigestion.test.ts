@@ -37,6 +37,7 @@ describe("Function Digestion Test", () => {
       {
         odataName: "GetBestFriend",
         name: "getBestFriend",
+        qName: "QGetBestFriend",
         paramsModelName: "GetBestFriendParams",
         type: OperationTypes.Function,
         parameters: [],
@@ -117,6 +118,7 @@ describe("Function Digestion Test", () => {
     expect(result.getOperationTypeByBinding("User")).toMatchObject([
       {
         name: "listAttitudes",
+        qName: "QListAttitudes",
         paramsModelName: "ListAttitudesParams",
         type: OperationTypes.Function,
         parameters: [],

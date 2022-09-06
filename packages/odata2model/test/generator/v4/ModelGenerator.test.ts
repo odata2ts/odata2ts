@@ -1,29 +1,34 @@
-import { ODataTypesV4 } from "../../../lib/data-model/edmx/ODataEdmxModelV4";
+import { ODataVesions } from "../../../src/app";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
+import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
 import { generateModels } from "../../../src/generator";
-import { RunOptions } from "../../../src/OptionModel";
+import { GenerationOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
-import { FixtureComparatorHelper, createHelper } from "../comparator/FixtureComparatorHelper";
+import {
+  EntityBasedGeneratorFunctionWithoutVersion,
+  FixtureComparatorHelper,
+  createHelper,
+} from "../comparator/FixtureComparatorHelper";
 import { ENTITY_NAME, SERVICE_NAME, createEntityBasedGenerationTests } from "./EntityBasedGenerationTests";
 
 describe("Model Generator Tests V4", () => {
   const TEST_SUITE_NAME = "Model Generator";
   const FIXTURE_BASE_PATH = "generator/model";
+  const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = (dataModel, sourceFile, genOptions) => {
+    return generateModels(dataModel, sourceFile, ODataVesions.V4, genOptions);
+  };
 
   let odataBuilder: ODataModelBuilderV4;
   let fixtureComparatorHelper: FixtureComparatorHelper;
 
-  createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, (dataModel, sourceFile) => {
-    return generateModels(dataModel, sourceFile);
-  });
+  createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, GENERATE);
 
-  async function generateAndCompare(id: string, fixturePath: string, runOptions?: RunOptions) {
-    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), runOptions);
+  async function generateAndCompare(id: string, fixturePath: string, genOptions?: GenerationOptions) {
+    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), genOptions);
   }
 
   beforeAll(async () => {
-    fixtureComparatorHelper = await createHelper(FIXTURE_BASE_PATH, digest, generateModels);
+    fixtureComparatorHelper = await createHelper(FIXTURE_BASE_PATH, digest, GENERATE);
   });
 
   beforeEach(() => {
@@ -92,7 +97,7 @@ describe("Model Generator Tests V4", () => {
   test(`${TEST_SUITE_NAME}: bound function`, async () => {
     // given one minimal model with bound function
     odataBuilder
-      .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV3.Boolean))
+      .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
       .addFunction("MinOperation", ODataTypesV4.String, true, (builder) =>
         builder
           .addParam("book", `${SERVICE_NAME}.Book`)
@@ -102,6 +107,6 @@ describe("Model Generator Tests V4", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("minFunction", "operation-bound.ts");
+    await generateAndCompare("boundFunction", "operation-bound.ts");
   });
 });

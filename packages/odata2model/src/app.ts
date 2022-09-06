@@ -1,15 +1,37 @@
-import { createProjectManager } from "./project/ProjectManager";
-import { generateModels, generateQueryObjects, generateServices } from "./generator";
-import { SchemaV3 } from "./data-model/edmx/ODataEdmxModelV3";
-import { SchemaV4 } from "./data-model/edmx/ODataEdmxModelV4";
 import { digest as digestV2 } from "./data-model/DataModelDigestionV2";
 import { digest as digestV4 } from "./data-model/DataModelDigestionV4";
 import { ODataEdmxModelBase, Schema } from "./data-model/edmx/ODataEdmxModelBase";
-import { Modes, RunOptions } from "./OptionModel";
+import { SchemaV3 } from "./data-model/edmx/ODataEdmxModelV3";
+import { SchemaV4 } from "./data-model/edmx/ODataEdmxModelV4";
+import { generateModels, generateQueryObjects, generateServices } from "./generator";
+import { GenerationOptions, Modes, RunOptions } from "./OptionModel";
+import { createProjectManager } from "./project/ProjectManager";
 
 export enum ODataVesions {
   V2,
   V4,
+}
+
+function isQObjectGen(mode: Modes) {
+  return [Modes.qobjects, Modes.service, Modes.all].includes(mode);
+}
+
+function isServiceGen(mode: Modes) {
+  return [Modes.service, Modes.all].includes(mode);
+}
+
+function useGenerationOptions({ mode, generation }: RunOptions): GenerationOptions {
+  if (!generation) {
+    return {};
+  }
+  return isServiceGen(mode)
+    ? {
+        ...generation,
+        skipEditableModel: false,
+        skipIdModel: false,
+        skipOperationModel: false,
+      }
+    : generation;
 }
 
 /**
@@ -37,32 +59,35 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
 
   // parse model information from edmx into something we can really work with
   // => that stuff is called dataModel!
-  // prettier-ignore
-  const dataModel = version === ODataVesions.V2
-    ? await digestV2(schemaRaw as SchemaV3, options)
-    : await digestV4(schemaRaw as SchemaV4, options);
+  const dataModel =
+    version === ODataVesions.V2
+      ? await digestV2(schemaRaw as SchemaV3, options)
+      : await digestV4(schemaRaw as SchemaV4, options);
+  // handling the overall generation project
   const project = await createProjectManager(
     dataModel.getFileNames(),
     options.output,
     options.emitMode,
     options.prettier
   );
+  // safe guard generation options, depending on generation mode
+  const generationOptions = useGenerationOptions(options);
 
   // Generate Model Interfaces
   // supported edmx types: EntityType, ComplexType, EnumType
   const modelsFile = await project.createModelFile();
-  generateModels(dataModel, modelsFile);
+  generateModels(dataModel, modelsFile, version, generationOptions);
 
   // Generate Query Objects
   // supported edmx types: EntityType, ComplexType
   // supported edmx prop types: primitive types, enum types, primitive collection (incl enum types), entity collection, entity object, complex object
-  if ([Modes.qobjects, Modes.service, Modes.all].includes(options.mode)) {
+  if (isQObjectGen(options.mode)) {
     const qFile = await project.createQObjectFile();
-    generateQueryObjects(dataModel, qFile);
+    generateQueryObjects(dataModel, qFile, version, generationOptions);
   }
 
   // Generate Individual OData-Service
-  if ([Modes.service, Modes.all].includes(options.mode)) {
+  if (isServiceGen(options.mode)) {
     await project.cleanServiceDir();
     await generateServices(dataModel, project, version);
   }
