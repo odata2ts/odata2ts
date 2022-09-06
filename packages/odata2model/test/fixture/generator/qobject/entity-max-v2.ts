@@ -2,6 +2,7 @@ import {
   QBinaryCollection,
   QBinaryPath,
   QBooleanCollection,
+  QBooleanParam,
   QBooleanPath,
   QCollectionPath,
   QDateTimeOffsetV2Collection,
@@ -13,6 +14,7 @@ import {
   QGuidV2Param,
   QGuidV2Path,
   QNumberCollection,
+  QNumberParam,
   QNumberPath,
   QStringV2Collection,
   QStringV2Path,
@@ -26,6 +28,8 @@ import { BookId } from "./TesterModel";
 
 export class QBook extends QueryObject {
   public readonly id = new QGuidV2Path(this.withPrefix("id"));
+  public readonly id2 = new QNumberPath(this.withPrefix("id2"));
+  public readonly id3 = new QBooleanPath(this.withPrefix("id3"));
   public readonly requiredOption = new QBooleanPath(this.withPrefix("requiredOption"));
   public readonly time = new QTimeV2Path(this.withPrefix("time"));
   public readonly optionalDate = new QDateTimeV2Path(this.withPrefix("optionalDate"));
@@ -60,7 +64,7 @@ export class QBook extends QueryObject {
 export const qBook = new QBook();
 
 export class QBookId extends QFunction<BookId> {
-  private readonly params = [new QGuidV2Param("id")];
+  private readonly params = [new QGuidV2Param("id"), new QNumberParam("id2"), new QBooleanParam("id3")];
 
   constructor(path: string) {
     super(path, "Book", true);

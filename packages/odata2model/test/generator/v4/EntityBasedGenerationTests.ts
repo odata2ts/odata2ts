@@ -79,6 +79,8 @@ export function createEntityBasedGenerationTests(
     odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
       builder
         .addKeyProp("id", ODataTypesV4.Guid)
+        .addKeyProp("id2", ODataTypesV4.Int32)
+        .addKeyProp("id3", ODataTypesV4.Boolean)
         .addProp("requiredOption", ODataTypesV4.Boolean, false)
         .addProp("time", ODataTypesV4.Time)
         .addProp("optionalDate", ODataTypesV4.Date)

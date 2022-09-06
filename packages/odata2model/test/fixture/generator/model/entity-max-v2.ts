@@ -1,5 +1,7 @@
 export interface Book {
   id: string;
+  id2: number;
+  id3: boolean;
   requiredOption: boolean;
   time: string | null;
   optionalDate: string | null;
@@ -25,10 +27,10 @@ export interface Book {
   multipleBinaries: Array<string>;
 }
 
-export type BookId = string | { id: string };
+export type BookId = { id: string; id2: number; id3: boolean };
 
 export interface EditableBook
-  extends Pick<Book, "id" | "requiredOption">,
+  extends Pick<Book, "id" | "id2" | "id3" | "requiredOption">,
     Partial<
       Pick<
         Book,
