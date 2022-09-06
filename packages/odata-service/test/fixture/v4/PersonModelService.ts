@@ -1,10 +1,10 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
-import { EntityTypeServiceV4, CollectionServiceV4, EntitySetServiceV4 } from "../../../src";
 import { QEnumCollection } from "@odata2ts/odata-query-objects";
-import {EditablePersonModel, PersonId, PersonModel} from "../PersonModel";
-import { qPersonV4, QPersonV4} from "./QPersonV4";
-import {QPersonIdFunction} from "../QPerson";
 
+import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4 } from "../../../src";
+import { EditablePersonModel, PersonId, PersonModel } from "../PersonModel";
+import { QPersonIdFunction } from "../QPerson";
+import { QPersonV4, qPersonV4 } from "./QPersonV4";
 
 export class PersonModelService<ClientType extends ODataClient> extends EntityTypeServiceV4<
   ClientType,
