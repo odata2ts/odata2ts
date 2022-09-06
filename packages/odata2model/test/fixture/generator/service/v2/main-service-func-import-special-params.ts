@@ -1,25 +1,32 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import { ODataService, ODataModelResponseV2, compileFunctionPathV2 } from "@odata2ts/odata-service";
+import { ODataModelResponseV2, ODataService } from "@odata2ts/odata-service";
+
 // @ts-ignore
-import { TestEntity } from "./TesterModel";
+import { QBestBook } from "./QTester";
+// @ts-ignore
+import { BestBookParams, TestEntity } from "./TesterModel";
 
 export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
   private _name: string = "Tester";
+  private _qBestBook?: QBestBook;
 
   constructor(client: ClientType, basePath: string) {
     super(client, basePath);
   }
 
+  private _getQBestBook() {
+    if (!this._qBestBook) {
+      this._qBestBook = new QBestBook(this.getPath());
+    }
+
+    return this._qBestBook;
+  }
+
   public bestBook(
-    params: { testGuid: string; testDateTime?: string; testDateTimeOffset?: string; testTime?: string },
+    params: BestBookParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<TestEntity>> {
-    const url = compileFunctionPathV2(this.getPath(), "bestBook", {
-      testGuid: { isLiteral: false, typePrefix: "guid", value: params.testGuid },
-      testDateTime: { isLiteral: false, typePrefix: "datetime", value: params.testDateTime },
-      testDateTimeOffset: { isLiteral: false, typePrefix: "datetimeoffset", value: params.testDateTimeOffset },
-      testTime: { isLiteral: false, typePrefix: "time", value: params.testTime },
-    });
+    const url = this._getQBestBook().buildUrl(params);
     return this.client.get(url, requestConfig);
   }
 }

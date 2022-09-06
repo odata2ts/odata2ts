@@ -74,7 +74,7 @@ export type EntityContainerModel = {
 export interface SingletonType {
   odataName: string;
   name: string;
-  type: ModelType;
+  entityType: ModelType;
   navPropBinding?: Array<NavPropBindingType>;
 }
 

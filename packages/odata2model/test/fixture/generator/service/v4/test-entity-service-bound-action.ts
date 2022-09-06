@@ -1,14 +1,10 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import {
-  EntityTypeServiceV4,
-  ODataModelResponseV4,
-  compileActionPath,
-  EntitySetServiceV4,
-} from "@odata2ts/odata-service";
+import { EntitySetServiceV4, EntityTypeServiceV4, ODataModelResponseV4 } from "@odata2ts/odata-service";
+
 // @ts-ignore
-import { Book, EditableBook, Review } from "../TesterModel";
+import { QBook, QBookId, QLike, QPostReview, qBook } from "../QTester";
 // @ts-ignore
-import { QBook, qBook } from "../QTester";
+import { Book, BookId, EditableBook, PostReviewParams, Review } from "../TesterModel";
 
 export class BookService<ClientType extends ODataClient> extends EntityTypeServiceV4<
   ClientType,
@@ -16,20 +12,39 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
   EditableBook,
   QBook
 > {
+  private _qLike?: QLike;
+  private _qPostReview?: QPostReview;
+
   constructor(client: ClientType, path: string) {
     super(client, path, qBook);
   }
 
+  private _getQLike() {
+    if (!this._qLike) {
+      this._qLike = new QLike(this.getPath());
+    }
+
+    return this._qLike;
+  }
+
   public like(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
-    const url = compileActionPath(this.getPath(), "Tester.like");
+    const url = this._getQLike().buildUrl();
     return this.client.post(url, {}, requestConfig);
   }
 
+  private _getQPostReview() {
+    if (!this._qPostReview) {
+      this._qPostReview = new QPostReview(this.getPath());
+    }
+
+    return this._qPostReview;
+  }
+
   public postReview(
-    params: { Rating: number; PUBLICATION_DATE?: string },
+    params: PostReviewParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV4<Review>> {
-    const url = compileActionPath(this.getPath(), "Tester.postReview");
+    const url = this._getQPostReview().buildUrl();
     return this.client.post(url, params, requestConfig);
   }
 }
@@ -39,10 +54,10 @@ export class BookCollectionService<ClientType extends ODataClient> extends Entit
   Book,
   EditableBook,
   QBook,
-  string | { id: string },
+  BookId,
   BookService<ClientType>
 > {
   constructor(client: ClientType, path: string) {
-    super(client, path, qBook, BookService, [{ isLiteral: false, type: "string", name: "id", odataName: "id" }]);
+    super(client, path, qBook, BookService, new QBookId(path));
   }
 }

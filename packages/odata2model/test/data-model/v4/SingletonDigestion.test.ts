@@ -1,6 +1,6 @@
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
 import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 describe("Singleton Digestion Test", () => {
@@ -33,7 +33,7 @@ describe("Singleton Digestion Test", () => {
 
     const result = await doDigest();
     expect(result.getEntityContainer().singletons).toMatchObject({
-      me: { odataName: "Me", name: "me", type: { name: "User" } },
+      me: { odataName: "Me", name: "me", entityType: { name: "User" } },
     });
   });
 
@@ -43,7 +43,7 @@ describe("Singleton Digestion Test", () => {
     // TODO: this should throw
     const result = await doDigest();
     expect(result.getEntityContainer().singletons).toMatchObject({
-      me: { odataName: "Me", name: "me", type: undefined },
+      me: { odataName: "Me", name: "me", entityType: undefined },
     });
   });
 
@@ -59,7 +59,7 @@ describe("Singleton Digestion Test", () => {
     const result = await doDigest();
 
     expect(result.getEntityContainer().singletons).toMatchObject({
-      me: { odataName: "Me", name: "me", type: { name: "User" }, navPropBinding: navProps },
+      me: { odataName: "Me", name: "me", entityType: { name: "User" }, navPropBinding: navProps },
     });
   });
 });

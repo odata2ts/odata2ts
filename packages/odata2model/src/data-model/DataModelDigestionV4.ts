@@ -64,7 +64,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
         this.dataModel.addSingleton(name, {
           name,
           odataName: singleton.$.Name,
-          type: this.dataModel.getModel(this.getModelName(singleton.$.Type)),
+          entityType: this.dataModel.getModel(this.getModelName(singleton.$.Type)),
           navPropBinding: navPropBindings.map((binding) => ({
             path: this.stripServicePrefix(binding.$.Path),
             target: binding.$.Target,

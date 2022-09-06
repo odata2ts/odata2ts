@@ -246,4 +246,23 @@ describe("Service Generator Tests V4", () => {
     expect(projectManager.getServiceFiles().length).toEqual(1);
     await compareService(projectManager.getServiceFiles()[0], "test-entity-service-enum.ts", true);
   });
+
+  test("Service Generator: function bound to collection", async () => {
+    // given one EntitySet
+    odataBuilder
+      .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      // given function without params, but with special return type which should simply become string
+      .addFunction("BestReview", ODataTypesV4.Guid, true, (builder) =>
+        // here's the trick => binding first param to Collection of Entity Type
+        builder.addParam("book", `Collection(${SERVICE_NAME}.Book)`)
+      );
+
+    // when generating
+    await doGenerate();
+
+    // then service has those functions
+    const services = projectManager.getServiceFiles();
+    expect(services.length).toEqual(1);
+    await compareService(services[0], "test-entity-service-bound-collection-func.ts", true);
+  });
 });
