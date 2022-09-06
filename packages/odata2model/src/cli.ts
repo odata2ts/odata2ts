@@ -1,12 +1,13 @@
-import { emptyDir, pathExists, readFile } from "fs-extra";
 import commander, { Option } from "commander";
 import { cosmiconfig } from "cosmiconfig";
+import { TypeScriptLoader } from "cosmiconfig-typescript-loader";
+import { emptyDir, pathExists, readFile } from "fs-extra";
 import { parseStringPromise } from "xml2js";
 
 import { runApp } from "./app";
+import { ODataEdmxModelBase } from "./data-model/edmx/ODataEdmxModelBase";
 import { EmitModes, Modes, ProjectOptions, RunOptions } from "./OptionModel";
 import { logFilePath } from "./project/logger/logFilePath";
-import { ODataEdmxModelBase } from "./data-model/edmx/ODataEdmxModelBase";
 
 export class Cli {
   async run(): Promise<void> {
@@ -45,7 +46,25 @@ export class Cli {
       debug: false,
     };
     const cliOpts = cli.opts() as Partial<ProjectOptions>;
-    const explorer = cosmiconfig("odata2ts");
+    const moduleName = "odata2ts";
+    const explorer = cosmiconfig(moduleName, {
+      searchPlaces: [
+        "package.json",
+        `.${moduleName}rc`,
+        `.${moduleName}rc.json`,
+        `.${moduleName}rc.yaml`,
+        `.${moduleName}rc.yml`,
+        `.${moduleName}rc.js`,
+        `.${moduleName}rc.ts`,
+        `.${moduleName}rc.cjs`,
+        `${moduleName}.config.js`,
+        `${moduleName}.config.ts`,
+        `${moduleName}.config.cjs`,
+      ],
+      loaders: {
+        ".ts": TypeScriptLoader(),
+      },
+    });
     const discoveredConfig = await explorer.search();
 
     if (discoveredConfig?.config) {
