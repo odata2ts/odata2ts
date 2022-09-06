@@ -52,7 +52,7 @@ class ModelGenerator {
         this.generateEditableModel(model, importContainer);
       }
       if (!this.options?.skipOperationModel) {
-        this.generateBoundOperations(model.odataName, importContainer);
+        this.generateBoundOperationParams(model.odataName, importContainer);
       }
     });
     this.dataModel.getComplexTypes().forEach((model) => {
@@ -167,17 +167,20 @@ class ModelGenerator {
 
   private generateUnboundOperationParams(importContainer: ModelImportContainer) {
     this.dataModel.getUnboundOperationTypes().forEach((operation) => {
-      this.generateOperation(operation, importContainer);
+      this.generateOperationParams(operation, importContainer);
     });
   }
 
-  private generateBoundOperations(entityName: string, importContainer: ModelImportContainer) {
+  private generateBoundOperationParams(entityName: string, importContainer: ModelImportContainer) {
     this.dataModel.getOperationTypeByBinding(entityName).forEach((operation) => {
-      this.generateOperation(operation, importContainer);
+      this.generateOperationParams(operation, importContainer);
     });
   }
 
-  private generateOperation(operation: OperationType, importContainer: ModelImportContainer) {
+  private generateOperationParams(operation: OperationType, importContainer: ModelImportContainer) {
+    if (!operation.parameters.length) {
+      return;
+    }
     this.sourceFile.addInterface({
       name: operation.paramsModelName,
       isExported: true,

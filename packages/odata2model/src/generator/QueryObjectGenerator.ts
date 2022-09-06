@@ -180,13 +180,16 @@ class QueryObjectGenerator {
 
   private generateOperation(operation: OperationType, importContainer: ImportContainer) {
     const qOperation = operation.type === OperationTypes.Action ? "QAction" : "QFunction";
+    const hasParams = operation.parameters.length > 0;
     importContainer.addFromQObject(qOperation);
-    importContainer.addGeneratedModel(operation.paramsModelName);
+    if (hasParams) {
+      importContainer.addGeneratedModel(operation.paramsModelName);
+    }
 
     this.sourceFile.addClass({
       name: operation.qName,
       isExported: true,
-      extends: `${qOperation}<${operation.paramsModelName}>`,
+      extends: qOperation + (hasParams ? `<${operation.paramsModelName}>` : ""),
       properties: [
         {
           name: "params",
@@ -206,6 +209,14 @@ class QueryObjectGenerator {
           name: "getParams",
           statements: ["return this.params"],
         },
+        ...(hasParams
+          ? []
+          : [
+              {
+                name: "buildUrl",
+                statements: ["return super.buildUrl(undefined)"],
+              },
+            ]),
       ],
     });
   }

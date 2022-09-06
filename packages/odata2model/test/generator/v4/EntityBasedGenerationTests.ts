@@ -176,4 +176,13 @@ export function createEntityBasedGenerationTests(
     // then match fixture text
     await generateAndCompare("entityComplex", "entity-complex.ts");
   });
+
+  test(`${testSuiteName}: empty function`, async () => {
+    // given a simple function
+    odataBuilder.addFunction("EmptyFunction", ODataTypesV4.String, false);
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("emptyFunction", "function-empty.ts");
+  });
 }
