@@ -33,6 +33,6 @@ describe("V4 EntitySetService Test", () => {
 
   test("entitySet: ensure typing of EntityTypeService", async () => {
     // just a typing test: this only needs to compile
-    const result: PersonModelService<MockODataClient> = testService.get({ userName: "heinz" });
+    const result: PersonModelService<MockODataClient> = testService.get({ UserName: "heinz" });
   });
 });

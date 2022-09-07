@@ -45,8 +45,10 @@ describe("QFunction Tests", () => {
   test("QFunction: multiple params", () => {
     const exampleFunction = new QBestBookFunction("");
     const requiredParams: BestBookParamModel = {
-      testNumber: 3,
-      testBoolean: false,
+      // TODO: mappedName
+      TestNumber: 3,
+      // TODO: mappedName
+      test_Boolean: false,
       testString: "testing",
       testGuid: "aaa-bbb",
     };
@@ -79,7 +81,7 @@ describe("QFunction Tests", () => {
       testString: null,
     };
     const expected =
-      "/BestBook?Testguid=guid'aa-bb'&testDateTime=datetime'testDt'&testTime=time'testTime'&testDateTimeOffset=datetimeoffset'testDtOffset'";
+      "/BestBook?testGuid=guid'aa-bb'&testDateTime=datetime'testDt'&testTime=time'testTime'&testDateTimeOffset=datetimeoffset'testDtOffset'";
 
     expect(exampleFunction.buildUrl(requiredParams)).toBe(expected);
     expect(exampleFunction.buildUrl(allParams)).toBe(expected + "&testString=null");

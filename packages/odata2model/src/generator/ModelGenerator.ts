@@ -186,7 +186,7 @@ class ModelGenerator {
       isExported: true,
       properties: operation.parameters.map((p) => {
         return {
-          name: p.odataName,
+          name: p.odataName, //TODO: mappedName
           type: this.getPropType(p, importContainer),
           hasQuestionToken: !p.required,
         };

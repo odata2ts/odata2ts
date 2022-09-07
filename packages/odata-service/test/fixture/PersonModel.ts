@@ -1,4 +1,14 @@
 import {
+  EnumCollection,
+  QEnumCollection,
+  QStringCollection,
+  QStringV2Collection,
+  StringCollection,
+} from "@odata2ts/odata-query-objects";
+
+import { CollectionServiceV2, CollectionServiceV4 } from "../../src";
+import { MockODataClient } from "../mock/MockODataClient";
+import {
   PersonModelCollectionService as PMCServiceV2,
   PersonModelService as PMServiceV2,
 } from "./v2/PersonModelService";
@@ -6,15 +16,6 @@ import {
   PersonModelCollectionService as PMCServiceV4,
   PersonModelService as PMServiceV4,
 } from "./v4/PersonModelService";
-import { CollectionServiceV2, CollectionServiceV4 } from "../../src";
-import {
-  EnumCollection,
-  QEnumCollection,
-  QStringCollection,
-  QStringV2Collection,
-  StringCollection,
-} from "@odata2ts/odata-query-objects";
-import { MockODataClient } from "../mock/MockODataClient";
 
 export const enum Feature {
   Feature1 = "Feature1",
@@ -31,13 +32,13 @@ export interface PersonModel {
 
 export interface EditablePersonModel extends Pick<PersonModel, "UserName" | "Age" | "FavFeature" | "Features"> {}
 
-export type PersonId = string | { userName: string };
+export type PersonId = string | { UserName: string };
 
 export interface GetSomethingFunctionParams {
-  testGuid: string,
-  testDateTime: string,
-  testDateTimeO: string,
-  testTime: string,
+  testGuid: string;
+  testDateTime: string;
+  testDateTimeO: string;
+  testTime: string;
 }
 
 export type PersonModelServiceVersion = PMServiceV2<MockODataClient> | PMServiceV4<MockODataClient>;

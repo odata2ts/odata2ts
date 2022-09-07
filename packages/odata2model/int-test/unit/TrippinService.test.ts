@@ -78,7 +78,6 @@ describe("Testing Generation of TrippinService", () => {
     const expected = `${BASE_URL}/People(UserName='williams')`;
 
     expect(testService.getPeopleSrv().get(testId).getPath()).toBe(expected);
-    expect(testService.getPeopleSrv().get(editModel).getPath()).toBe(expected);
   });
 
   test("entityType: update", async () => {

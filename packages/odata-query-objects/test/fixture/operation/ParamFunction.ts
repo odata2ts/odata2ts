@@ -14,8 +14,12 @@ import {
 } from "../../../src";
 
 export interface BestBookParamModel {
-  testNumber: number;
-  testBoolean: boolean;
+  // TODO: mappedName
+  // testNumber: number;
+  TestNumber: number;
+  // TODO: mappedName
+  // testBoolean: boolean;
+  test_Boolean: boolean;
   testString: string;
   testGuid: string;
   testDate?: string | null;
@@ -54,7 +58,7 @@ export interface BestBookParamModelV2 {
 
 export class QBestBookFunctionV2 extends QFunction<BestBookParamModelV2> {
   private readonly params = [
-    new QGuidV2Param("Testguid", "testGuid"),
+    new QGuidV2Param("testGuid"),
     new QDateTimeV2Param("testDateTime"),
     new QDateTimeOffsetV2Param("testDateTimeOffset"),
     new QTimeV2Param("testTime"),

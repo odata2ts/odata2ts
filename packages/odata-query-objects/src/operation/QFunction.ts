@@ -84,7 +84,8 @@ export abstract class QFunction<ParamModel = undefined> {
 
     return Object.entries<any>(params)
       .map(([key, value]) => {
-        const qParam = qParams.find((q) => q.getMappedName() === key);
+        // TODO: mappedName
+        const qParam = qParams.find((q) => q.getName() === key);
         if (!qParam) {
           throw new Error(`Unknown parameter "${key}"!`);
         }
@@ -136,7 +137,8 @@ export abstract class QFunction<ParamModel = undefined> {
         );
       }
 
-      model[qParam.getMappedName() as keyof ParamModel] = qParam.parseUrlValue(value);
+      // TODO: mappedName
+      model[qParam.getName() as keyof ParamModel] = qParam.parseUrlValue(value);
       return model;
     }, {} as ParamModel);
   }

@@ -1,12 +1,21 @@
 import {
-  QCollectionPath, QDateTimeOffsetV2Param, QDateTimeV2Param, QEntityCollectionPath, QEntityPath,
+  QCollectionPath,
+  QDateTimeOffsetV2Param,
+  QDateTimeV2Param,
+  QEntityCollectionPath,
+  QEntityPath,
   QEnumCollection,
-  QEnumPath, QFunction, QGuidV2Param,
-  QNumberPath, QParam,
-  QStringV2Path, QTimeV2Param,
-  QueryObject
+  QEnumPath,
+  QFunction,
+  QGuidV2Param,
+  QNumberPath,
+  QParam,
+  QStringV2Path,
+  QTimeV2Param,
+  QueryObject,
 } from "@odata2ts/odata-query-objects";
-import {GetSomethingFunctionParams} from "../PersonModel";
+
+import { GetSomethingFunctionParams } from "../PersonModel";
 
 export class QPersonV2 extends QueryObject {
   public readonly userName = new QStringV2Path(this.withPrefix("UserName"));
@@ -27,7 +36,7 @@ export class QGetSomethingFunction extends QFunction<GetSomethingFunctionParams>
     super(path, "GET_SOMETHING", true);
   }
 
-  getParams(): Array<QParam<any>> | undefined {
+  getParams() {
     return [
       new QGuidV2Param("testGuid"),
       new QDateTimeV2Param("testDateTime"),
@@ -35,5 +44,4 @@ export class QGetSomethingFunction extends QFunction<GetSomethingFunctionParams>
       new QTimeV2Param("testTime"),
     ];
   }
-
 }
