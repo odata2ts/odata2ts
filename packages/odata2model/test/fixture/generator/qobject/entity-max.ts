@@ -56,7 +56,7 @@ export class QBookId extends QFunction<BookId> {
   private readonly params = [new QGuidParam("id"), new QNumberParam("id2"), new QBooleanParam("id3")];
 
   constructor(path: string) {
-    super(path, "Book");
+    super(path, "");
   }
 
   getParams() {

@@ -185,4 +185,13 @@ export function createEntityBasedGenerationTests(
     // then match fixture text
     await generateAndCompare("emptyFunction", "function-empty.ts");
   });
+
+  test(`${testSuiteName}: empty action`, async () => {
+    // given a simple function
+    odataBuilder.addAction("EmptyAction", ODataTypesV4.String, false);
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("emptyAction", "action-empty.ts");
+  });
 }

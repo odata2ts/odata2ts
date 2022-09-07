@@ -41,7 +41,7 @@ function compileQueryParams(params: FunctionParams | undefined) {
 export abstract class QFunction<ParamModel = undefined> {
   public constructor(protected path: string, protected name: string, protected v2Mode: boolean = false) {}
 
-  public abstract getParams(): Array<QParam<any>> | undefined;
+  public abstract getParams(): Array<QParam<any>>;
 
   public getPath(): string {
     return this.path;
@@ -84,7 +84,7 @@ export abstract class QFunction<ParamModel = undefined> {
 
     return Object.entries<any>(params)
       .map(([key, value]) => {
-        const qParam = qParams.find(q => q.getMappedName() === key);
+        const qParam = qParams.find((q) => q.getMappedName() === key);
         if (!qParam) {
           throw new Error(`Unknown parameter "${key}"!`);
         }
@@ -111,7 +111,7 @@ export abstract class QFunction<ParamModel = undefined> {
     // handle short form => myEntity(123)
     if (params.length === 1 && params[0].indexOf("=") === -1) {
       if (qParams.length !== 1) {
-        throw new Error("")
+        throw new Error("");
       }
       const qParam = qParams[0];
       return qParam.parseUrlValue(params[0]);

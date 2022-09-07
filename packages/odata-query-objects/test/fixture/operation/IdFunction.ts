@@ -8,8 +8,9 @@ export type BookIdModel =
 
 export class BookIdFunction extends QFunction<BookIdModel> {
   constructor(path: string) {
+    // Note: the name of the entity must be supplied as part of the path, because it depends on EntitySet and NavigationProps
     // Note: ids are handled the same for v2 & v4 => setting isV2 to true would be wrong
-    super(path, "EntityXy");
+    super(path, "");
   }
 
   private readonly params = [new QStringParam("isbn")];

@@ -6,7 +6,7 @@ export class QGetSomethingFunction extends QFunction {
   }
 
   public getParams() {
-    return undefined;
+    return [];
   }
 
   public buildUrl() {
@@ -20,7 +20,7 @@ export class QGetSomethingFunctionV2 extends QFunction {
   }
 
   public getParams() {
-    return undefined;
+    return [];
   }
 
   public buildUrl() {

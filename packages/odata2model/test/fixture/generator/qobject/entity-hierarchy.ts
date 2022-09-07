@@ -13,7 +13,7 @@ export class QGrandParentId extends QFunction<GrandParentId> {
   private readonly params = [new QBooleanParam("id")];
 
   constructor(path: string) {
-    super(path, "GrandParent");
+    super(path, "");
   }
 
   getParams() {
@@ -32,7 +32,7 @@ export class QParentId extends QFunction<ParentId> {
   private readonly params = [new QBooleanParam("id")];
 
   constructor(path: string) {
-    super(path, "Parent");
+    super(path, "");
   }
 
   getParams() {
@@ -52,7 +52,7 @@ export class QChildId extends QFunction<ChildId> {
   private readonly params = [new QBooleanParam("id")];
 
   constructor(path: string) {
-    super(path, "Child");
+    super(path, "");
   }
 
   getParams() {

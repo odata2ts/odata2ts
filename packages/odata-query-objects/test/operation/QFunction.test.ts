@@ -35,7 +35,7 @@ describe("QFunction Tests", () => {
   });
 
   test("QFunction: for IDs", () => {
-    const exampleFunction = new BookIdFunction("test");
+    const exampleFunction = new BookIdFunction("test/EntityXy");
     expect(exampleFunction.buildUrl({ isbn: "123" })).toBe("test/EntityXy(isbn='123')");
     expect(exampleFunction.buildUrl("123")).toBe("test/EntityXy('123')");
     expect(exampleFunction.parseUrl("test/EntityXy(isbn='123')")).toMatchObject({ isbn: "123" });
