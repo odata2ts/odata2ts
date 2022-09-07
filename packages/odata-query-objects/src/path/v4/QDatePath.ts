@@ -1,4 +1,4 @@
-import { DateTimeBasePath } from "../base/DateTimeBase";
+import { DateTimeBasePath } from "./DateTimeBase";
 import { dayFn, monthFn, yearFn } from "../base/DateTimeFunctions";
 
 export class QDatePath extends DateTimeBasePath {

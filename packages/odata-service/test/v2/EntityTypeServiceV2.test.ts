@@ -4,8 +4,9 @@ import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 import { ODataModelResponseV2 } from "../../src";
 import { MockODataClient } from "../mock/MockODataClient";
 import { PersonModel } from "../fixture/PersonModel";
-import { PersonModelService, QPersonV2 } from "../fixture/v2/PersonModelService";
+import { PersonModelService } from "../fixture/v2/PersonModelService";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
+import {QPersonV2} from "../fixture/v2/QPersonV2";
 
 describe("EntityTypeService V2 Test", () => {
   const odataClient = new MockODataClient();
@@ -37,7 +38,7 @@ describe("EntityTypeService V2 Test", () => {
     await testService.getSomething({ testGuid: "123", testDateTime: "1", testDateTimeO: "2", testTime: "3" });
     expect(odataClient.lastUrl).toBe(
       BASE_URL +
-        "/GetAnything?testGuid=guid'123'&testDateTime=datetime'1'&testDateTimeO=datetimeoffset'2'&testTime=time'3'"
+        "/GET_SOMETHING?testGuid=guid'123'&testDateTime=datetime'1'&testDateTimeO=datetimeoffset'2'&testTime=time'3'"
     );
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");

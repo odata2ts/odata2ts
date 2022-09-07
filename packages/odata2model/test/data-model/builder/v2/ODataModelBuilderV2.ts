@@ -1,14 +1,14 @@
+import { ODataVersion } from "../../../../src/data-model/DataTypeModel";
 import {
   ComplexTypeV3,
   EntityTypeV3,
   ODataEdmxModelV3,
   SchemaV3,
 } from "../../../../src/data-model/edmx/ODataEdmxModelV3";
-import { ODataVersion } from "../../../../src/data-model/DataTypeModel";
-import { ODataEntityTypeBuilderV2 } from "./ODataEntityTypeBuilderV2";
-import { ODataComplexTypeBuilderV2 } from "./ODataComplexTypeBuilderV2";
-import { ODataFunctionBuilderV2 } from "./ODataFunctionBuilderV2";
 import { ODataModelBuilder } from "../ODataModelBuilder";
+import { ODataComplexTypeBuilderV2 } from "./ODataComplexTypeBuilderV2";
+import { ODataEntityTypeBuilderV2 } from "./ODataEntityTypeBuilderV2";
+import { ODataFunctionBuilderV2 } from "./ODataFunctionBuilderV2";
 
 export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, SchemaV3, EntityTypeV3, ComplexTypeV3> {
   constructor(serviceName: string) {

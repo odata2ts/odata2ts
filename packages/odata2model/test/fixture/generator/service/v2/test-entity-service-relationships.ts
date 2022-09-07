@@ -1,11 +1,12 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
-import { EntityTypeServiceV2, EntitySetServiceV2 } from "@odata2ts/odata-service";
+import { EntitySetServiceV2, EntityTypeServiceV2 } from "@odata2ts/odata-service";
+
 // @ts-ignore
-import { Book, EditableBook } from "../TesterModel";
+import { QBook, QBookId, qBook } from "../QTester";
 // @ts-ignore
-import { QBook, qBook } from "../QTester";
+import { Book, BookId, EditableBook } from "../TesterModel";
 // @ts-ignore
-import { AuthorService, AuthorCollectionService } from "./AuthorService";
+import { AuthorCollectionService, AuthorService } from "./AuthorService";
 
 export class BookService<ClientType extends ODataClient> extends EntityTypeServiceV2<
   ClientType,
@@ -42,12 +43,10 @@ export class BookCollectionService<ClientType extends ODataClient> extends Entit
   Book,
   EditableBook,
   QBook,
-  string | { ID: string },
+  BookId,
   BookService<ClientType>
 > {
   constructor(client: ClientType, path: string) {
-    super(client, path, qBook, BookService, [
-      { isLiteral: false, type: "string", typePrefix: "guid", name: "id", odataName: "ID" },
-    ]);
+    super(client, path, qBook, BookService, new QBookId(path));
   }
 }

@@ -1,8 +1,19 @@
 import { NumberFilterFunctions, NumberFilterOperators, StandardFilterOperators } from "../odata/ODataModel";
 import { QLiteralPath } from "./base/QLiteralPath";
 import { QFilterExpression } from "../QFilterExpression";
+import { getParamValue, parseParamValue } from "../param/UrlParamHelper";
+import { UrlParamValueFormatter, UrlParamValueParser } from "../param/UrlParamModel";
 
 export class QNumberPath extends QLiteralPath<number | QNumberPath, StandardFilterOperators | NumberFilterOperators> {
+  public static getUrlConformValue: UrlParamValueFormatter<number> = (value) => {
+    return getParamValue(value);
+  };
+
+  public static parseValueFromUrl: UrlParamValueParser<number> = (urlConformValue) => {
+    const value = parseParamValue(urlConformValue);
+    return typeof value === "string" ? Number(urlConformValue) : value;
+  };
+
   private buildNoValueFunc(func: NumberFilterFunctions) {
     return `${func}(${this.getPath()})`;
   }

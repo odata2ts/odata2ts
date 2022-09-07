@@ -1,4 +1,4 @@
-import { QueryObject, QBooleanPath, QEnumPath, QCollectionPath, QEnumCollection } from "@odata2ts/odata-query-objects";
+import { QBooleanPath, QCollectionPath, QEnumCollection, QEnumPath, QueryObject } from "@odata2ts/odata-query-objects";
 
 export class QBook extends QueryObject {
   public readonly id = new QBooleanPath(this.withPrefix("id"));

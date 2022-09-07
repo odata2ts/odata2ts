@@ -9,6 +9,18 @@ describe("QNumberPath test", () => {
     otherProp = new QNumberPath("Budget");
   });
 
+  test("get URL conform value", () => {
+    expect(QNumberPath.getUrlConformValue(333.22)).toBe("333.22");
+    expect(QNumberPath.getUrlConformValue(null)).toBe("null");
+    expect(QNumberPath.getUrlConformValue(undefined)).toBeUndefined();
+  });
+
+  test("parse URL conform value", () => {
+    expect(QNumberPath.parseValueFromUrl("333.22")).toBe(333.22);
+    expect(QNumberPath.parseValueFromUrl("null")).toBeNull();
+    expect(QNumberPath.parseValueFromUrl(undefined)).toBeUndefined();
+  });
+
   test("get path", () => {
     expect(toTest.getPath()).toBe("Price");
   });

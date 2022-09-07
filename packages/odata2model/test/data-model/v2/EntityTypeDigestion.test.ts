@@ -1,7 +1,7 @@
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
-import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
 import { DataTypes, PropertyModel } from "../../../src/data-model/DataTypeModel";
+import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
 
 const NOOP_FN = () => {};
@@ -43,6 +43,8 @@ describe("V2: EntityTypeDigestion Test", () => {
       name: "Min",
       odataName: "min",
       qName: "QMin",
+      idModelName: "MinId",
+      qIdFunctionName: "QMinId",
       baseClasses: [],
       baseProps: [],
       keyNames: ["id"],
@@ -153,6 +155,8 @@ describe("V2: EntityTypeDigestion Test", () => {
     expect(result.getModel("GrandParent")).toMatchObject({
       name: "GrandParent",
       odataName: "GrandParent",
+      idModelName: "GrandParentId",
+      qIdFunctionName: "QGrandParentId",
       keyNames: ["id"],
       props: [expectedGrandParentProp],
       baseClasses: [],
@@ -160,6 +164,8 @@ describe("V2: EntityTypeDigestion Test", () => {
     });
     expect(result.getModel("Parent")).toMatchObject({
       name: "Parent",
+      idModelName: "ParentId",
+      qIdFunctionName: "QParentId",
       keyNames: ["id"],
       props: [expectedParentProp],
       baseClasses: ["GrandParent"],
@@ -167,6 +173,8 @@ describe("V2: EntityTypeDigestion Test", () => {
     });
     expect(result.getModel("Child")).toMatchObject({
       name: "Child",
+      idModelName: "ChildId",
+      qIdFunctionName: "QChildId",
       keyNames: ["id"],
       props: [expectedChildProp],
       baseClasses: ["Parent"],

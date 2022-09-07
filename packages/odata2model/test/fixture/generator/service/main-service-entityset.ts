@@ -1,5 +1,6 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
 import { ODataService } from "@odata2ts/odata-service";
+
 // @ts-ignore
 import { TestEntityCollectionService } from "./service/TestEntityService";
 

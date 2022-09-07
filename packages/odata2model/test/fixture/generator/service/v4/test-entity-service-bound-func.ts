@@ -1,15 +1,15 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import {
-  EntityTypeServiceV4,
-  ODataModelResponseV4,
-  compileFunctionPathV4,
-  ODataCollectionResponseV4,
   EntitySetServiceV4,
+  EntityTypeServiceV4,
+  ODataCollectionResponseV4,
+  ODataModelResponseV4,
 } from "@odata2ts/odata-service";
+
 // @ts-ignore
-import { Book, EditableBook, Review } from "../TesterModel";
+import { QBestReview, QBook, QBookId, QFilterReviews, qBook } from "../QTester";
 // @ts-ignore
-import { QBook, qBook } from "../QTester";
+import { Book, BookId, EditableBook, FilterReviewsParams, Review } from "../TesterModel";
 
 export class BookService<ClientType extends ODataClient> extends EntityTypeServiceV4<
   ClientType,
@@ -17,23 +17,39 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
   EditableBook,
   QBook
 > {
+  private _qBestReview?: QBestReview;
+  private _qFilterReviews?: QFilterReviews;
+
   constructor(client: ClientType, path: string) {
     super(client, path, qBook);
   }
 
+  private _getQBestReview() {
+    if (!this._qBestReview) {
+      this._qBestReview = new QBestReview(this.getPath());
+    }
+
+    return this._qBestReview;
+  }
+
   public bestReview(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<string>> {
-    const url = compileFunctionPathV4(this.getPath(), "Tester.BestReview");
+    const url = this._getQBestReview().buildUrl();
     return this.client.get(url, requestConfig);
   }
 
+  private _getQFilterReviews() {
+    if (!this._qFilterReviews) {
+      this._qFilterReviews = new QFilterReviews(this.getPath());
+    }
+
+    return this._qFilterReviews;
+  }
+
   public filterReviews(
-    params: { MIN_RATING: number; MinCreated?: string },
+    params: FilterReviewsParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<Review>> {
-    const url = compileFunctionPathV4(this.getPath(), "Tester.filterReviews", {
-      MIN_RATING: { isLiteral: true, value: params.MIN_RATING },
-      MinCreated: { isLiteral: true, value: params.MinCreated },
-    });
+    const url = this._getQFilterReviews().buildUrl(params);
     return this.client.get(url, requestConfig);
   }
 }
@@ -43,10 +59,10 @@ export class BookCollectionService<ClientType extends ODataClient> extends Entit
   Book,
   EditableBook,
   QBook,
-  string | { id: string },
+  BookId,
   BookService<ClientType>
 > {
   constructor(client: ClientType, path: string) {
-    super(client, path, qBook, BookService, [{ isLiteral: false, type: "string", name: "id", odataName: "id" }]);
+    super(client, path, qBook, BookService, new QBookId(path));
   }
 }

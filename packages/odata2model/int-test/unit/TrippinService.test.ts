@@ -1,5 +1,11 @@
-import { EditableLocationModel, EditablePersonModel, Feature, PersonGender } from "../../build/v4/trippin/TrippinModel";
 import { qLocation, qPerson } from "../../build/v4/trippin/QTrippin";
+import {
+  EditableLocationModel,
+  EditablePersonModel,
+  Feature,
+  PersonGender,
+  PersonModelIdModel,
+} from "../../build/v4/trippin/TrippinModel";
 import { TrippinService } from "../../build/v4/trippin/TrippinService";
 import { MockODataClient } from "../MockODataClient";
 
@@ -42,9 +48,9 @@ describe("Testing Generation of TrippinService", () => {
 
     expect(testService.getPeopleSrv().getPath()).toBe(expected);
     expect(JSON.stringify(testService.getPeopleSrv().getQObject())).toEqual(JSON.stringify(qPerson));
-    expect(testService.getPeopleSrv().getKeySpec()).toEqual([
-      { isLiteral: false, type: "string", name: "userName", odataName: "UserName" },
-    ]);
+    expect(testService.getPeopleSrv().getKeySpec().length).toBe(1);
+    expect(testService.getPeopleSrv().getKeySpec()[0].getName()).toEqual("UserName");
+    expect(testService.getPeopleSrv().getKeySpec()[0].getMappedName()).toEqual("userName");
   });
 
   test("entitySet: create", async () => {
@@ -68,11 +74,10 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("entitySet: get with complex id", async () => {
-    const testId = { UserName: "williams" };
+    const testId: PersonModelIdModel = { UserName: "williams" };
     const expected = `${BASE_URL}/People(UserName='williams')`;
 
     expect(testService.getPeopleSrv().get(testId).getPath()).toBe(expected);
-    expect(testService.getPeopleSrv().get(editModel).getPath()).toBe(expected);
   });
 
   test("entityType: update", async () => {

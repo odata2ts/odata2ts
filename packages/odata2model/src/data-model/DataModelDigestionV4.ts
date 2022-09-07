@@ -1,19 +1,21 @@
+import { pascalCase } from "pascal-case";
+
+import { DigesterFunction } from "../FactoryFunctionModel";
 import { RunOptions } from "../OptionModel";
+import { Digester } from "./DataModelDigestion";
+import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
 import { ComplexTypeV4, EntityTypeV4, ODataTypesV4, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4";
-import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
-import { Digester } from "./DataModelDigestion";
-import { DataModel } from "./DataModel";
 
 /**
  * Takes an EDMX schema
  * @param schema
  * @param options
  */
-export async function digest(schema: SchemaV4, options: RunOptions): Promise<DataModel> {
+export const digest: DigesterFunction<SchemaV4> = (schema, options) => {
   const digester = new DigesterV4(schema, options);
   return digester.digest();
-}
+};
 
 class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
   constructor(schema: SchemaV4, options: RunOptions) {
@@ -62,7 +64,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
         this.dataModel.addSingleton(name, {
           name,
           odataName: singleton.$.Name,
-          type: this.dataModel.getModel(this.getModelName(singleton.$.Type)),
+          entityType: this.dataModel.getModel(this.getModelName(singleton.$.Type)),
           navPropBinding: navPropBindings.map((binding) => ({
             path: this.stripServicePrefix(binding.$.Path),
             target: binding.$.Target,
@@ -87,10 +89,10 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     }
   }
 
-  protected mapODataType(type: string): [string, string, string] {
+  protected mapODataType(type: string): [string, string, string, string | undefined] {
     switch (type) {
       case ODataTypesV4.Boolean:
-        return ["boolean", "QBooleanPath", "QBooleanCollection"];
+        return ["boolean", "QBooleanPath", "QBooleanCollection", "QBooleanParam"];
       case ODataTypesV4.Byte:
       case ODataTypesV4.SByte:
       case ODataTypesV4.Int16:
@@ -99,21 +101,21 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       case ODataTypesV4.Single:
       case ODataTypesV4.Double:
       case ODataTypesV4.Decimal:
-        return ["number", "QNumberPath", "QNumberCollection"];
+        return ["number", "QNumberPath", "QNumberCollection", "QNumberParam"];
       case ODataTypesV4.String:
-        return ["string", "QStringPath", "QStringCollection"];
+        return ["string", "QStringPath", "QStringCollection", "QStringParam"];
       case ODataTypesV4.Date:
-        return ["string", "QDatePath", "QDateCollection"];
+        return ["string", "QDatePath", "QDateCollection", "QDateParam"];
       case ODataTypesV4.Time:
-        return ["string", "QTimeOfDayPath", "QTimeOfDayCollection"];
+        return ["string", "QTimeOfDayPath", "QTimeOfDayCollection", "QTimeOfDayParam"];
       case ODataTypesV4.DateTimeOffset:
-        return ["string", "QDateTimeOffsetPath", "QDateTimeOffsetCollection"];
+        return ["string", "QDateTimeOffsetPath", "QDateTimeOffsetCollection", "QDateTimeOffsetParam"];
       case ODataTypesV4.Binary:
-        return ["string", "QBinaryPath", "QBinaryCollection"];
+        return ["string", "QBinaryPath", "QBinaryCollection", undefined];
       case ODataTypesV4.Guid:
-        return ["string", "QGuidPath", "QGuidCollection"];
+        return ["string", "QGuidPath", "QGuidCollection", "QGuidParam"];
       default:
-        return ["string", "QStringPath", "QStringCollection"];
+        return ["string", "QStringPath", "QStringCollection", "QStringParam"];
     }
   }
 
@@ -142,6 +144,8 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       this.dataModel.addOperationType(binding, {
         odataName: op.$.Name,
         name: this.getOperationName(op.$.Name),
+        qName: this.getQOperationName(op.$.Name),
+        paramsModelName: this.getOperationParamsModelName(op.$.Name),
         type: type,
         parameters: params,
         returnType: returnType,

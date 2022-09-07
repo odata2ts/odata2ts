@@ -1,8 +1,18 @@
 import { StandardFilterOperators } from "../../odata/ODataModel";
 import { QFilterExpression } from "../../QFilterExpression";
-import { QLiteralPath } from "./QLiteralPath";
+import { QLiteralPath } from "../base/QLiteralPath";
+import { UrlParamValueFormatter, UrlParamValueParser } from "../../param/UrlParamModel";
+import { getParamValue, parseParamValue } from "../../param/UrlParamHelper";
 
 export abstract class DateTimeBasePath extends QLiteralPath<string, StandardFilterOperators> {
+  public static getUrlConformValue: UrlParamValueFormatter<string> = (value) => {
+    return getParamValue(value);
+  };
+
+  public static parseValueFromUrl: UrlParamValueParser<string> = (urlConformValue) => {
+    return parseParamValue(urlConformValue);
+  };
+
   public equals(value: string) {
     return this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
   }

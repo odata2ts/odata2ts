@@ -2,15 +2,11 @@ import { HttpResponseModel } from "@odata2ts/odata-client-api";
 import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
 import { ODataCollectionResponseV2 } from "../../src/";
-import { MockODataClient } from "../mock/MockODataClient";
-import { PersonModel } from "../fixture/PersonModel";
-import {
-  PersonModelCollectionService,
-  PersonModelService,
-  qPersonV2,
-  QPersonV2,
-} from "../fixture/v2/PersonModelService";
 import { commonEntitySetTests } from "../EntitySetServiceTests";
+import { PersonModel } from "../fixture/PersonModel";
+import { PersonModelCollectionService, PersonModelService } from "../fixture/v2/PersonModelService";
+import { QPersonV2, qPersonV2 } from "../fixture/v2/QPersonV2";
+import { MockODataClient } from "../mock/MockODataClient";
 
 describe("V2 EntitySetService Test", () => {
   const odataClient = new MockODataClient();

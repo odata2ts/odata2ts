@@ -7,6 +7,23 @@ describe("QBooleanPath test", () => {
     toTest = new QBooleanPath("done");
   });
 
+  test("get URL conform value", () => {
+    expect(QBooleanPath.getUrlConformValue(true)).toBe("true");
+    expect(QBooleanPath.getUrlConformValue(false)).toBe("false");
+    expect(QBooleanPath.getUrlConformValue(null)).toBe("null");
+    expect(QBooleanPath.getUrlConformValue(undefined)).toBeUndefined();
+  });
+
+  test("parse URL conform value", () => {
+    expect(QBooleanPath.parseValueFromUrl("null")).toBeNull();
+    expect(QBooleanPath.parseValueFromUrl("true")).toBe(true);
+    expect(QBooleanPath.parseValueFromUrl("false")).toBe(false);
+
+    expect(QBooleanPath.parseValueFromUrl(undefined)).toBeUndefined();
+    expect(QBooleanPath.parseValueFromUrl("dddd")).toBeUndefined();
+    expect(QBooleanPath.parseValueFromUrl("")).toBeUndefined();
+  });
+
   test("get path", () => {
     expect(toTest.getPath()).toBe("done");
   });

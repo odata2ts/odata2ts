@@ -1,21 +1,35 @@
 import { SourceFile } from "ts-morph";
+
+import { ODataVesions } from "../app";
 import { DataModel } from "../data-model/DataModel";
-import { ComplexType, DataTypes, PropertyModel } from "../data-model/DataTypeModel";
+import { ComplexType, DataTypes, ModelType, OperationType, PropertyModel } from "../data-model/DataTypeModel";
+import { EntityBasedGeneratorFunction } from "../FactoryFunctionModel";
+import { GenerationOptions } from "../OptionModel";
 import { ModelImportContainer } from "./ModelImportContainer";
 
-export function generateModels(dataModel: DataModel, sourceFile: SourceFile) {
-  const generator = new ModelGenerator(dataModel, sourceFile);
+export const generateModels: EntityBasedGeneratorFunction = (dataModel, sourceFile, version, options) => {
+  const generator = new ModelGenerator(dataModel, sourceFile, version, options);
   return generator.generate();
-}
+};
 
 const DEFERRED_CONTENT = "DeferredContent";
 
 class ModelGenerator {
-  constructor(private dataModel: DataModel, private sourceFile: SourceFile) {}
+  constructor(
+    private dataModel: DataModel,
+    private sourceFile: SourceFile,
+    private version: ODataVesions,
+    private options: GenerationOptions | undefined
+  ) {}
 
   public generate(): void {
+    const importContainer = new ModelImportContainer();
+
     this.generateEnums();
-    this.generateModels();
+    this.generateModels(importContainer);
+    if (!this.options?.skipOperationModel) {
+      this.generateUnboundOperationParams(importContainer);
+    }
   }
 
   private generateEnums() {
@@ -28,13 +42,24 @@ class ModelGenerator {
     });
   }
 
-  private generateModels() {
-    const importContainer = new ModelImportContainer();
-    const models = [...this.dataModel.getModels(), ...this.dataModel.getComplexTypes()];
-
-    models.forEach((model) => {
+  private generateModels(importContainer: ModelImportContainer) {
+    this.dataModel.getModels().forEach((model) => {
       this.generateModel(model, importContainer);
-      this.generateEditableModel(model, importContainer);
+      if (!this.options?.skipIdModel) {
+        this.generateIdModel(model, importContainer);
+      }
+      if (!this.options?.skipEditableModel) {
+        this.generateEditableModel(model, importContainer);
+      }
+      if (!this.options?.skipOperationModel) {
+        this.generateBoundOperationParams(model.name, importContainer);
+      }
+    });
+    this.dataModel.getComplexTypes().forEach((model) => {
+      this.generateModel(model, importContainer);
+      if (!this.options?.skipEditableModel) {
+        this.generateEditableModel(model, importContainer);
+      }
     });
 
     this.sourceFile.addImportDeclarations(importContainer.getImportDeclarations());
@@ -74,6 +99,20 @@ class ModelGenerator {
 
     // primitive, enum & complex types
     return prop.type + (prop.required ? "" : " | null") + suffix;
+  }
+
+  private generateIdModel(model: ModelType, importContainer: ModelImportContainer) {
+    const singleType = model.keys.length === 1 ? `${model.keys[0].type} | ` : "";
+    const keyTypes = model.keys
+      .map((keyProp) => `${keyProp.odataName}: ${this.getPropType(keyProp, importContainer)}`)
+      .join(",");
+    const type = `${singleType}{${keyTypes}}`;
+
+    this.sourceFile.addTypeAlias({
+      name: model.idModelName,
+      isExported: true,
+      type,
+    });
   }
 
   private generateEditableModel(model: ComplexType, importContainer: ModelImportContainer) {
@@ -124,5 +163,34 @@ class ModelGenerator {
 
     // primitive, enum & complex types
     return type + (prop.required ? "" : " | null");
+  }
+
+  private generateUnboundOperationParams(importContainer: ModelImportContainer) {
+    this.dataModel.getUnboundOperationTypes().forEach((operation) => {
+      this.generateOperationParams(operation, importContainer);
+    });
+  }
+
+  private generateBoundOperationParams(entityName: string, importContainer: ModelImportContainer) {
+    this.dataModel.getOperationTypeByBinding(entityName).forEach((operation) => {
+      this.generateOperationParams(operation, importContainer);
+    });
+  }
+
+  private generateOperationParams(operation: OperationType, importContainer: ModelImportContainer) {
+    if (!operation.parameters.length) {
+      return;
+    }
+    this.sourceFile.addInterface({
+      name: operation.paramsModelName,
+      isExported: true,
+      properties: operation.parameters.map((p) => {
+        return {
+          name: p.odataName, //TODO: mappedName
+          type: this.getPropType(p, importContainer),
+          hasQuestionToken: !p.required,
+        };
+      }),
+    });
   }
 }

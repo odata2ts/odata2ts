@@ -77,10 +77,11 @@ X-Http-Method: MERGE
 
 {
   "Description": "Test Descriptioning!!!",
-  "Rating": 3
+  "Rating": 3,
+  "Price": "123.1234567890123456789"
 }
 
-### PATCH doesn't work and merge is not supported by HTTPClient
+### PATCH  => 501
 ### @name update new product
 PATCH {{baseUrl}}/Products(999)
 Accept: {{contentType}}

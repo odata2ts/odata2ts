@@ -1,15 +1,15 @@
 import path from "path";
 
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
-import { createFixtureComparator, FixtureComparator } from "../comparator/FixtureComparator";
-import { SERVICE_NAME } from "./EntityBasedGenerationTests";
-import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { generateServices } from "../../../src/generator";
-import { createProjectManager, ProjectManager } from "../../../src/project/ProjectManager";
-import { ProjectFiles } from "../../../src/data-model/DataModel";
-import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
-import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
 import { ODataVesions } from "../../../src/app";
+import { ProjectFiles } from "../../../src/data-model/DataModel";
+import { digest } from "../../../src/data-model/DataModelDigestionV2";
+import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
+import { generateServices } from "../../../src/generator";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
+import { ProjectManager, createProjectManager } from "../../../src/project/ProjectManager";
+import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
+import { FixtureComparator, createFixtureComparator } from "../comparator/FixtureComparator";
+import { SERVICE_NAME } from "./EntityBasedGenerationTests";
 
 describe("Service Generator Tests V2", () => {
   const FIXTURE_PATH = "generator/service";
@@ -69,7 +69,7 @@ describe("Service Generator Tests V2", () => {
     expect(projectManager.getServiceFiles().length).toEqual(0);
   });
 
-  test("Service Generator: one EntitySet", async () => {
+  test("Service Generator: main service with one EntitySet", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) =>

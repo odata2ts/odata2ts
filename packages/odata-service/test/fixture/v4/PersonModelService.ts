@@ -1,31 +1,10 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
-import { EntityTypeServiceV4, CollectionServiceV4, EntitySetServiceV4 } from "../../../src";
-import {
-  QCollectionPath,
-  QEntityCollectionPath,
-  QEnumPath,
-  QNumberPath,
-  QStringPath,
-  QEntityPath,
-  QueryObject,
-  QEnumCollection,
-} from "@odata2ts/odata-query-objects";
-import { EditablePersonModel, PersonModel } from "../PersonModel";
+import { QEnumCollection } from "@odata2ts/odata-query-objects";
 
-export class QPersonV4 extends QueryObject {
-  public readonly userName = new QStringPath(this.withPrefix("UserName"));
-  public readonly age = new QNumberPath(this.withPrefix("Age"));
-  public readonly favFeature = new QEnumPath(this.withPrefix("FavFeature"));
-  public readonly features = new QCollectionPath(this.withPrefix("Features"), () => QEnumCollection);
-  public readonly friends = new QEntityCollectionPath(this.withPrefix("Friends"), () => QPersonV4);
-  public readonly bestFriend = new QEntityPath(this.withPrefix("BestFriend"), () => QPersonV4);
-
-  constructor(path?: string) {
-    super(path);
-  }
-}
-
-export const qPersonV4 = new QPersonV4();
+import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4 } from "../../../src";
+import { EditablePersonModel, PersonId, PersonModel } from "../PersonModel";
+import { QPersonIdFunction } from "../QPerson";
+import { QPersonV4, qPersonV4 } from "./QPersonV4";
 
 export class PersonModelService<ClientType extends ODataClient> extends EntityTypeServiceV4<
   ClientType,
@@ -55,12 +34,10 @@ export class PersonModelCollectionService<ClientType extends ODataClient> extend
   PersonModel,
   EditablePersonModel,
   QPersonV4,
-  string | { UserName: string },
+  PersonId,
   PersonModelService<ClientType>
 > {
   constructor(client: ODataClient, path: string) {
-    super(client, path, qPersonV4, PersonModelService, [
-      { isLiteral: false, type: "string", name: "userName", odataName: "UserName" },
-    ]);
+    super(client, path, qPersonV4, PersonModelService, new QPersonIdFunction(path));
   }
 }

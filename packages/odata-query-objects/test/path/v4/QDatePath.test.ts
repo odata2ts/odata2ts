@@ -8,6 +8,18 @@ describe("QDatePath test", () => {
     toTest = new QDatePath("startDate");
   });
 
+  test("get URL conform value", () => {
+    expect(QDatePath.getUrlConformValue(example)).toBe(example);
+    expect(QDatePath.getUrlConformValue(null)).toBe("null");
+    expect(QDatePath.getUrlConformValue(undefined)).toBeUndefined();
+  });
+
+  test("parse URL conform value", () => {
+    expect(QDatePath.parseValueFromUrl(example)).toBe(example);
+    expect(QDatePath.parseValueFromUrl("null")).toBeNull();
+    expect(QDatePath.parseValueFromUrl(undefined)).toBeUndefined();
+  });
+
   test("get path", () => {
     expect(toTest.getPath()).toBe("startDate");
   });

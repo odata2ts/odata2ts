@@ -1,16 +1,18 @@
-import { TestODataClient } from "../../TestODataClient";
-import { ODataDemoService } from "../../../build/v2/odata/ODataDemoService";
-import { ProductModel, EditableProductModel } from "../../../build/v2/odata/ODataDemoModel";
 import { AxiosError } from "axios";
 
+import { EditableProductModel, ProductModel } from "../../../build/v2/odata/ODataDemoModel";
+import { ODataDemoService } from "../../../build/v2/odata/ODataDemoService";
+import { TestODataClient } from "../../TestODataClient";
+
 /**
- * This sample service is a little buggy:
+ * This sample service is buggy:
  * - with session ID querying for an unknown entity => 500 instead of 404
  * - Result type is different depending on count mode => without count data.d holds the collection instead of data.d.results
+ * - Posting date type in ISO Date form => should be "/Date(...)/"
  */
 describe("Integration Testing of generated stuff for Sample V2 OData Service", () => {
   const BASE_URL = "https://services.odata.org/V2/OData/OData.svc";
-  const BASE_URL_WITH_SESSION = "https://services.odata.org/V2/(S(1nrhmelh1szkxjo0y4qlmzwm))/OData/OData.svc";
+  const BASE_URL_WITH_SESSION = "https://services.odata.org/V2/(S(2hntt5kx3f4sldtpf2aypgro))/OData/OData.svc";
   const odataClient = new TestODataClient({
     headers: { Accept: "application/json", "Content-Type": "application/json" },
   });
@@ -74,7 +76,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
       Name: "TestName",
       Price: "12.88",
       Rating: 1,
-      ReleaseDate: "2022-12-31T12:15:59",
+      ReleaseDate: "2022-12-31T12:15:59", //WTF?! => this should be "/Date(...)"
     };
 
     // when creating the product

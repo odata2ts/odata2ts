@@ -22,12 +22,15 @@ export interface PropertyModel {
   type: string;
   qObject?: string;
   qPath: string;
+  qParam?: string;
   required: boolean;
   isCollection: boolean;
   dataType: DataTypes;
 }
 
 export interface ModelType extends ComplexType {
+  idModelName: string;
+  qIdFunctionName: string;
   keyNames: Array<string>;
   keys: Array<PropertyModel>;
   getKeyUnion(): string;
@@ -51,6 +54,8 @@ export interface EnumType {
 export interface OperationType {
   odataName: string;
   name: string;
+  paramsModelName: string;
+  qName: string;
   type: OperationTypes;
   parameters: Array<PropertyModel>;
   returnType?: ReturnTypeModel;
@@ -69,7 +74,7 @@ export type EntityContainerModel = {
 export interface SingletonType {
   odataName: string;
   name: string;
-  type: ModelType;
+  entityType: ModelType;
   navPropBinding?: Array<NavPropBindingType>;
 }
 

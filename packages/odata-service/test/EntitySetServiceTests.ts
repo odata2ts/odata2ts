@@ -1,50 +1,23 @@
-import { MockODataClient } from "./mock/MockODataClient";
-import { EditablePersonModel, Feature, PersonModel } from "./fixture/PersonModel";
-import { QPersonV4 } from "./fixture/v4/PersonModelService";
-import { QPersonV2 } from "./fixture/v2/PersonModelService";
 import { ODataClient } from "@odata2ts/odata-client-api";
+
 import { EntitySetServiceV2, EntitySetServiceV4 } from "../src";
+import { EditablePersonModel, Feature, PersonId, PersonModel } from "./fixture/PersonModel";
+import { QPersonV2 } from "./fixture/v2/QPersonV2";
+import { QPersonV4 } from "./fixture/v4/QPersonV4";
+import { MockODataClient } from "./mock/MockODataClient";
 
 export function commonEntitySetTests(
   odataClient: MockODataClient,
   serviceConstructor: new (odataClient: ODataClient, baseUrl: string) =>
-    | EntitySetServiceV4<
-        MockODataClient,
-        PersonModel,
-        EditablePersonModel,
-        QPersonV4,
-        string | { UserName: string },
-        any
-      >
-    | EntitySetServiceV2<
-        MockODataClient,
-        PersonModel,
-        EditablePersonModel,
-        QPersonV2,
-        string | { UserName: string },
-        any
-      >
+    | EntitySetServiceV4<MockODataClient, PersonModel, EditablePersonModel, QPersonV4, PersonId, any>
+    | EntitySetServiceV2<MockODataClient, PersonModel, EditablePersonModel, QPersonV2, PersonId, any>
 ) {
   const BASE_URL = "/test";
   const REQUEST_CONFIG = { test: "Test" };
 
   let testService:
-    | EntitySetServiceV4<
-        MockODataClient,
-        PersonModel,
-        EditablePersonModel,
-        QPersonV4,
-        string | { UserName: string },
-        any
-      >
-    | EntitySetServiceV2<
-        MockODataClient,
-        PersonModel,
-        EditablePersonModel,
-        QPersonV2,
-        string | { UserName: string },
-        any
-      >;
+    | EntitySetServiceV4<MockODataClient, PersonModel, EditablePersonModel, QPersonV4, PersonId, any>
+    | EntitySetServiceV2<MockODataClient, PersonModel, EditablePersonModel, QPersonV2, PersonId, any>;
 
   beforeEach(() => {
     testService = new serviceConstructor(odataClient, BASE_URL);
@@ -56,18 +29,13 @@ export function commonEntitySetTests(
   });
 
   test("entitySet: createKey", async () => {
-    expect(testService.createKey("xxx")).toBe("test('xxx')");
-    expect(testService.createKey({ UserName: "xxx" })).toBe("test(UserName='xxx')");
+    expect(testService.createKey("xxx")).toBe("test/Person('xxx')");
+    expect(testService.createKey({ UserName: "xxx" })).toBe("test/Person(UserName='xxx')");
   });
 
   test("entitySet: parseKey", async () => {
-    const expected = {
-      path: "test",
-      keys: { UserName: "xxx" },
-    };
-
-    expect(testService.parseKey("test('xxx')")).toStrictEqual(expected);
-    expect(testService.parseKey("test(UserName='xxx')")).toStrictEqual(expected);
+    expect(testService.parseKey("test/Person('xxx')")).toBe("xxx");
+    expect(testService.parseKey("test/Person(UserName='xxx')")).toStrictEqual({ UserName: "xxx" });
   });
 
   test("entitySet: query", async () => {
@@ -128,7 +96,7 @@ export function commonEntitySetTests(
     };
     await testService.patch("tester", model);
 
-    expect(odataClient.lastUrl).toBe(`${BASE_URL}('tester')`);
+    expect(odataClient.lastUrl).toBe(`${BASE_URL}/Person('tester')`);
     expect(odataClient.lastOperation).toBe("PATCH");
     expect(odataClient.lastData).toEqual(model);
     expect(odataClient.lastRequestConfig).toBeUndefined();
@@ -140,7 +108,7 @@ export function commonEntitySetTests(
   test("entitySet: delete", async () => {
     await testService.delete("tester");
 
-    expect(odataClient.lastUrl).toBe(`${BASE_URL}('tester')`);
+    expect(odataClient.lastUrl).toBe(`${BASE_URL}/Person('tester')`);
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastRequestConfig).toBeUndefined();

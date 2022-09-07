@@ -1,44 +1,63 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import {
-  ODataService,
-  ODataCollectionResponseV2,
-  compileFunctionPathV2,
-  ODataModelResponseV2,
-} from "@odata2ts/odata-service";
+import { ODataCollectionResponseV2, ODataModelResponseV2, ODataService } from "@odata2ts/odata-service";
+
 // @ts-ignore
-import { TestEntity } from "./TesterModel";
+import { QBestBook, QMostPop, QPostBestBook } from "./QTester";
+// @ts-ignore
+import { BestBookParams, PostBestBookParams, TestEntity } from "./TesterModel";
 
 export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
   private _name: string = "Tester";
+  private _qMostPop?: QMostPop;
+  private _qBestBook?: QBestBook;
+  private _qPostBestBook?: QPostBestBook;
 
   constructor(client: ClientType, basePath: string) {
     super(client, basePath);
   }
 
+  private _getQMostPop() {
+    if (!this._qMostPop) {
+      this._qMostPop = new QMostPop(this.getPath());
+    }
+
+    return this._qMostPop;
+  }
+
   public mostPop(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataCollectionResponseV2<TestEntity>> {
-    const url = compileFunctionPathV2(this.getPath(), "MostPop");
+    const url = this._getQMostPop().buildUrl();
     return this.client.get(url, requestConfig);
+  }
+
+  private _getQBestBook() {
+    if (!this._qBestBook) {
+      this._qBestBook = new QBestBook(this.getPath());
+    }
+
+    return this._qBestBook;
   }
 
   public bestBook(
-    params: { TestString: string; TEST_NUMBER?: number },
+    params: BestBookParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<TestEntity>> {
-    const url = compileFunctionPathV2(this.getPath(), "BEST_BOOK", {
-      TestString: { isLiteral: false, value: params.TestString },
-      TEST_NUMBER: { isLiteral: true, value: params.TEST_NUMBER },
-    });
+    const url = this._getQBestBook().buildUrl(params);
     return this.client.get(url, requestConfig);
   }
 
+  private _getQPostBestBook() {
+    if (!this._qPostBestBook) {
+      this._qPostBestBook = new QPostBestBook(this.getPath());
+    }
+
+    return this._qPostBestBook;
+  }
+
   public postBestBook(
-    params: { TestString: string; TEST_NUMBER?: number },
+    params: PostBestBookParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<TestEntity>> {
-    const url = compileFunctionPathV2(this.getPath(), "postBestBook", {
-      TestString: { isLiteral: false, value: params.TestString },
-      TEST_NUMBER: { isLiteral: true, value: params.TEST_NUMBER },
-    });
+    const url = this._getQPostBestBook().buildUrl(params);
     return this.client.post(url, undefined, requestConfig);
   }
 }

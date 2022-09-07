@@ -1,9 +1,9 @@
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
 import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
-import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
-import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
 import { OperationType } from "../../../src/data-model/DataTypeModel";
+import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
+import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
 
 describe("Function Digestion Test", () => {
   const SERVICE_NAME = "FunctionTest";
@@ -38,6 +38,8 @@ describe("Function Digestion Test", () => {
       {
         odataName: "GetBestFriend",
         name: "getBestFriend",
+        qName: "QGetBestFriend",
+        paramsModelName: "GetBestFriendParams",
         type: OperationTypes.Function,
         parameters: [],
         returnType: undefined,
@@ -151,6 +153,8 @@ describe("Function Digestion Test", () => {
       {
         odataName: "GetBestFriend",
         name: "getBestFriend",
+        qName: "QGetBestFriend",
+        paramsModelName: "GetBestFriendParams",
         type: OperationTypes.Function,
         usePost: true,
         returnType: undefined,

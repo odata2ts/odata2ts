@@ -1,9 +1,10 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
-import { EntityTypeServiceV4, EntitySetServiceV4 } from "@odata2ts/odata-service";
+import { EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
+
 // @ts-ignore
-import { TestEntity, EditableTestEntity } from "../TesterModel";
+import { QTestEntity, QTestEntityId, qTestEntity } from "../QTester";
 // @ts-ignore
-import { QTestEntity, qTestEntity } from "../QTester";
+import { EditableTestEntity, TestEntity, TestEntityId } from "../TesterModel";
 
 export class TestEntityService<ClientType extends ODataClient> extends EntityTypeServiceV4<
   ClientType,
@@ -21,15 +22,10 @@ export class TestEntityCollectionService<ClientType extends ODataClient> extends
   TestEntity,
   EditableTestEntity,
   QTestEntity,
-  { id: string; age: number; deceased: boolean; desc: string },
+  TestEntityId,
   TestEntityService<ClientType>
 > {
   constructor(client: ClientType, path: string) {
-    super(client, path, qTestEntity, TestEntityService, [
-      { isLiteral: true, type: "string", name: "id", odataName: "id" },
-      { isLiteral: true, type: "number", name: "age", odataName: "age" },
-      { isLiteral: true, type: "boolean", name: "deceased", odataName: "deceased" },
-      { isLiteral: false, type: "string", name: "desc", odataName: "desc" },
-    ]);
+    super(client, path, qTestEntity, TestEntityService, new QTestEntityId(path));
   }
 }

@@ -1,26 +1,35 @@
 import {
-  QueryObject,
-  QGuidV2Path,
-  QBooleanPath,
-  QTimeV2Path,
-  QDateTimeV2Path,
-  QDateTimeOffsetV2Path,
-  QNumberPath,
-  QBinaryPath,
-  QStringV2Path,
-  QCollectionPath,
-  QGuidV2Collection,
-  QStringV2Collection,
-  QBooleanCollection,
-  QTimeV2Collection,
-  QDateTimeV2Collection,
-  QDateTimeOffsetV2Collection,
-  QNumberCollection,
   QBinaryCollection,
+  QBinaryPath,
+  QBooleanCollection,
+  QBooleanParam,
+  QBooleanPath,
+  QCollectionPath,
+  QDateTimeOffsetV2Collection,
+  QDateTimeOffsetV2Path,
+  QDateTimeV2Collection,
+  QDateTimeV2Path,
+  QFunction,
+  QGuidV2Collection,
+  QGuidV2Param,
+  QGuidV2Path,
+  QNumberCollection,
+  QNumberParam,
+  QNumberPath,
+  QStringV2Collection,
+  QStringV2Path,
+  QTimeV2Collection,
+  QTimeV2Path,
+  QueryObject,
 } from "@odata2ts/odata-query-objects";
+
+// @ts-ignore
+import { BookId } from "./TesterModel";
 
 export class QBook extends QueryObject {
   public readonly id = new QGuidV2Path(this.withPrefix("id"));
+  public readonly id2 = new QNumberPath(this.withPrefix("id2"));
+  public readonly id3 = new QBooleanPath(this.withPrefix("id3"));
   public readonly requiredOption = new QBooleanPath(this.withPrefix("requiredOption"));
   public readonly time = new QTimeV2Path(this.withPrefix("time"));
   public readonly optionalDate = new QDateTimeV2Path(this.withPrefix("optionalDate"));
@@ -53,3 +62,15 @@ export class QBook extends QueryObject {
 }
 
 export const qBook = new QBook();
+
+export class QBookId extends QFunction<BookId> {
+  private readonly params = [new QGuidV2Param("id"), new QNumberParam("id2"), new QBooleanParam("id3")];
+
+  constructor(path: string) {
+    super(path, "", true);
+  }
+
+  getParams() {
+    return this.params;
+  }
+}

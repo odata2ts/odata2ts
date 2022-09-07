@@ -2,6 +2,8 @@ import { StandardFilterOperators } from "../../odata/ODataModel";
 import { QFilterExpression } from "../../QFilterExpression";
 import { QOrderByExpression } from "../../QOrderByExpression";
 import { QPathModel } from "../QPathModel";
+import { UrlParamModel } from "../../param/UrlParamModel";
+import { getExpressionValue } from "../../param/UrlParamHelper";
 
 export abstract class DateTimeBasePath implements QPathModel {
   constructor(private path: string) {
@@ -10,10 +12,10 @@ export abstract class DateTimeBasePath implements QPathModel {
     }
   }
 
-  protected abstract getFinalValue(value: string | this): string;
+  protected abstract getUrlParamConfig(): UrlParamModel | undefined;
 
   private buildBuiltInOp(operator: StandardFilterOperators, value: string | this) {
-    return new QFilterExpression(`${this.path} ${operator} ${this.getFinalValue(value)}`);
+    return new QFilterExpression(`${this.path} ${operator} ${getExpressionValue(value, this.getUrlParamConfig())}`);
   }
 
   /**
