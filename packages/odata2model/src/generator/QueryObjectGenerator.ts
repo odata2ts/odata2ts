@@ -46,7 +46,7 @@ class QueryObjectGenerator {
         this.generateIdFunction(model, importContainer);
       }
       if (!this.options?.skipOperationModel) {
-        this.generateBoundOperations(model.odataName, importContainer);
+        this.generateBoundOperations(model.name, importContainer);
       }
     });
     this.dataModel.getComplexTypes().forEach((model) => {
@@ -142,7 +142,7 @@ class QueryObjectGenerator {
       ctors: [
         {
           parameters: [{ name: "path", type: "string" }],
-          statements: [`super(path, "${model.odataName}"${this.version === ODataVesions.V2 ? ", true" : ""})`],
+          statements: [`super(path, ""${this.version === ODataVesions.V2 ? ", true" : ""})`],
         },
       ],
       methods: [
@@ -209,14 +209,15 @@ class QueryObjectGenerator {
           name: "getParams",
           statements: ["return this.params"],
         },
-        ...(hasParams
-          ? []
-          : [
+        // functions without params: add an overriding buildUrl() to not force users to have to pass undefined as param
+        ...(operation.type === OperationTypes.Function && !hasParams
+          ? [
               {
                 name: "buildUrl",
                 statements: ["return super.buildUrl(undefined)"],
               },
-            ]),
+            ]
+          : []),
       ],
     });
   }

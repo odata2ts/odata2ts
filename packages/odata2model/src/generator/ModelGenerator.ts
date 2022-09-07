@@ -52,7 +52,7 @@ class ModelGenerator {
         this.generateEditableModel(model, importContainer);
       }
       if (!this.options?.skipOperationModel) {
-        this.generateBoundOperationParams(model.odataName, importContainer);
+        this.generateBoundOperationParams(model.name, importContainer);
       }
     });
     this.dataModel.getComplexTypes().forEach((model) => {
