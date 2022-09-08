@@ -1,5 +1,6 @@
-import { TestODataClient } from "../../TestODataClient";
+import { PersonModelIdModel } from "../../../build/v4/trippin/TrippinModel";
 import { TrippinService } from "../../../build/v4/trippin/TrippinService";
+import { TestODataClient } from "../../TestODataClient";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
@@ -118,5 +119,20 @@ describe("Integration Testing of Service Generation", () => {
     expect(result.data).toBeDefined();
     expect(result.data.value.length).toBe(1);
     expect(result.data.value[0].Address).toBe("187 Suffolk Ln.");
+  });
+
+  test("create key and parse key", async () => {
+    const expectedSimple = "test@testing.de";
+    const expectedComplex: PersonModelIdModel = { UserName: expectedSimple };
+
+    // simple version
+    let result = testService.getPeopleSrv().createKey(expectedSimple);
+    expect(result).toBe(`${BASE_URL}/People('${expectedSimple}')`);
+    expect(testService.getPeopleSrv().parseKey(result)).toBe(expectedSimple);
+
+    // complex version
+    result = testService.getPeopleSrv().createKey(expectedComplex);
+    expect(result).toBe(`${BASE_URL}/People(UserName='${expectedSimple}')`);
+    expect(testService.getPeopleSrv().parseKey(result)).toStrictEqual(expectedComplex);
   });
 });

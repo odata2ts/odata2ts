@@ -125,4 +125,19 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
       },
     });
   });
+
+  test("create key and parse key", async () => {
+    const expectedSimple = 333;
+    const expectedComplex = { ID: expectedSimple };
+
+    // simple version
+    let result = testService.getProductsSrv().createKey(expectedSimple);
+    expect(result).toBe(`${BASE_URL}/Products(333)`);
+    expect(testService.getProductsSrv().parseKey(result)).toBe(expectedSimple);
+
+    // complex version
+    result = testService.getProductsSrv().createKey(expectedComplex);
+    expect(result).toBe(`${BASE_URL}/Products(ID=333)`);
+    expect(testService.getProductsSrv().parseKey(result)).toStrictEqual(expectedComplex);
+  });
 });

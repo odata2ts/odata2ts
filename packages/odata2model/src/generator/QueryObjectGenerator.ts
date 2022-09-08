@@ -142,7 +142,7 @@ class QueryObjectGenerator {
       ctors: [
         {
           parameters: [{ name: "path", type: "string" }],
-          statements: [`super(path, ""${this.version === ODataVesions.V2 ? ", true" : ""})`],
+          statements: [`super(path, "")`],
         },
       ],
       methods: [
