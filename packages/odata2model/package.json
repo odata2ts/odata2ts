@@ -23,7 +23,7 @@
     "dev-v2": "yarn clean-v2 && yarn dev-nw2 && yarn dev-odata",
     "dev-v4": "yarn clean-v4 &&yarn dev-nw4 && yarn dev-trippin",
     "generate": "ts-node --cwd-mode src/run-cli.ts ",
-    "int-test": "yarn clean && yarn dev-trippin && jest ./int-test",
+    "int-test": "yarn clean && yarn dev && jest ./int-test",
     "prepublish": "yarn build",
     "test": "jest ./test"
   },

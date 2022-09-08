@@ -50,7 +50,6 @@ describe("Testing Generation of TrippinService", () => {
     expect(JSON.stringify(testService.getPeopleSrv().getQObject())).toEqual(JSON.stringify(qPerson));
     expect(testService.getPeopleSrv().getKeySpec().length).toBe(1);
     expect(testService.getPeopleSrv().getKeySpec()[0].getName()).toEqual("UserName");
-    expect(testService.getPeopleSrv().getKeySpec()[0].getMappedName()).toEqual("userName");
   });
 
   test("entitySet: create", async () => {
