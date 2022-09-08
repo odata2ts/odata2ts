@@ -160,7 +160,7 @@ class QueryObjectGenerator {
         if (prop.qParam) {
           importContainer.addFromQObject(prop.qParam);
         }
-        const isMappedNameNecessary = prop.odataName !== prop.name;
+        const isMappedNameNecessary = false; //TODO prop.odataName !== prop.name;
         return `new ${prop.qParam}("${prop.odataName}"${isMappedNameNecessary ? `, "${prop.name}"` : ""})`;
       })
       .join(",")}]`;

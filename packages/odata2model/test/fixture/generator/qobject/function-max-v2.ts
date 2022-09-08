@@ -14,7 +14,7 @@ import { MaxFunctionParams } from "./TesterModel";
 
 export class QMaxFunction extends QFunction<MaxFunctionParams> {
   private readonly params = [
-    new QStringParam("TEST_STRING", "testString"),
+    new QStringParam("TEST_STRING"),
     new QNumberParam("testNumber"),
     new QBooleanParam("testBoolean"),
     new QGuidV2Param("testGuid"),
