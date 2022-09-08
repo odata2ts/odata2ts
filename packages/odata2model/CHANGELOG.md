@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.14.0...@odata2ts/odata2model@0.14.1) (2022-09-08)
+
+
+### Bug Fixes
+
+* corrected int tests ([fff88be](https://github.com/odata2ts/odata2ts/commit/fff88be110cc53a5193ed72bd39a53cddc997a93))
+* don't map param names for now ([f39f541](https://github.com/odata2ts/odata2ts/commit/f39f541672f8a61a1d7554b8e86e58f606bd117b))
+
+
+
+
+
 # [0.14.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.13.1...@odata2ts/odata2model@0.14.0) (2022-09-08)
 
 
