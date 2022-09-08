@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.11.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.10.4...@odata2ts/odata-query-objects@0.11.0) (2022-09-08)
+
+
+### Code Refactoring
+
+* centralize formatting and parsing of params & attributes ([#62](https://github.com/odata2ts/odata2ts/issues/62)) ([ba93a27](https://github.com/odata2ts/odata2ts/commit/ba93a278afd2de356675973fb2889483bc370f7a))
+
+
+### BREAKING CHANGES
+
+* UrlHelper including compile and parse methods have been removed; interfaces for EntityKeyProp, EntityKeySpec, InlineUrlProp, and InlineUrlProps have been removed; parsing of passed parameters is more strict.
+
+Introducing static functions on QPath objects to format and parse url conform values.
+Introducing QParams, QFunction and QAction to bundle logic around operations including the id function (url path generation).
+Generate models for IdType of entity & parameter models for functions / actions in general
+Generate Q-objects for EntityIdFunctions, and functions & actions in general
+
+
+
+
+
 ## [0.10.4](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.10.3...@odata2ts/odata-query-objects@0.10.4) (2022-08-25)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-client-api@0.3.1...@odata2ts/odata-client-api@0.4.0) (2022-09-08)
+
+
+### Features
+
+* **odata-service:** allow to pass custom headers per request ([#58](https://github.com/odata2ts/odata2ts/issues/58)) ([d783e51](https://github.com/odata2ts/odata2ts/commit/d783e51e4b5a69892c79a03bedc6bf041abba9ec))
+
+
+
+
+
 ## [0.3.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-client-api@0.3.0...@odata2ts/odata-client-api@0.3.1) (2022-06-30)
 
 

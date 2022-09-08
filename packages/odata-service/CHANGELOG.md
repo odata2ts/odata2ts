@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.7.1...@odata2ts/odata-service@0.8.0) (2022-09-08)
+
+
+### Bug Fixes
+
+* **odata-service:** V2 function params: nullable values should be filtered instead of using value null ([#60](https://github.com/odata2ts/odata2ts/issues/60)) ([e412f83](https://github.com/odata2ts/odata2ts/commit/e412f83e5f096c25781048c25e26768e1cccae2b))
+
+
+### Code Refactoring
+
+* centralize formatting and parsing of params & attributes ([#62](https://github.com/odata2ts/odata2ts/issues/62)) ([ba93a27](https://github.com/odata2ts/odata2ts/commit/ba93a278afd2de356675973fb2889483bc370f7a))
+
+
+### Features
+
+* **odata-service:** allow to pass custom headers per request ([#58](https://github.com/odata2ts/odata2ts/issues/58)) ([d783e51](https://github.com/odata2ts/odata2ts/commit/d783e51e4b5a69892c79a03bedc6bf041abba9ec))
+
+
+### BREAKING CHANGES
+
+* UrlHelper including compile and parse methods have been removed; interfaces for EntityKeyProp, EntityKeySpec, InlineUrlProp, and InlineUrlProps have been removed; parsing of passed parameters is more strict.
+
+Introducing static functions on QPath objects to format and parse url conform values.
+Introducing QParams, QFunction and QAction to bundle logic around operations including the id function (url path generation).
+Generate models for IdType of entity & parameter models for functions / actions in general
+Generate Q-objects for EntityIdFunctions, and functions & actions in general
+
+
+
+
+
 ## [0.7.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.7.0...@odata2ts/odata-service@0.7.1) (2022-08-25)
 
 
