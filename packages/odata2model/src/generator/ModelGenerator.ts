@@ -102,6 +102,9 @@ class ModelGenerator {
   }
 
   private generateIdModel(model: ModelType, importContainer: ModelImportContainer) {
+    if (!model.generateId) {
+      return;
+    }
     const singleType = model.keys.length === 1 ? `${model.keys[0].type} | ` : "";
     const keyTypes = model.keys
       .map((keyProp) => `${keyProp.odataName}: ${this.getPropType(keyProp, importContainer)}`)
@@ -117,7 +120,7 @@ class ModelGenerator {
 
   private generateEditableModel(model: ComplexType, importContainer: ModelImportContainer) {
     const entityTypes = [DataTypes.ModelType, DataTypes.ComplexType];
-    const allProps = [...model.props, ...model.baseProps];
+    const allProps = [...model.baseProps, ...model.props];
 
     const requiredProps = allProps
       .filter((p) => p.required && !entityTypes.includes(p.dataType))

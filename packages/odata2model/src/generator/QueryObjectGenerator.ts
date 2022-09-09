@@ -59,11 +59,18 @@ class QueryObjectGenerator {
   }
 
   private generateModel(model: ComplexType, importContainer: ImportContainer) {
+    let extendsClause = "QueryObject";
+    if (model.baseClasses.length) {
+      const baseClass = model.baseClasses[0];
+      const baseModel = this.dataModel.getModel(baseClass) || this.dataModel.getComplexType(baseClass);
+      extendsClause = baseModel.qName;
+    }
+
     this.sourceFile.addClass({
       name: model.qName,
       isExported: true,
-      extends: "QueryObject",
-      properties: this.generateQueryObjectProps([...model.baseProps, ...model.props], importContainer),
+      extends: extendsClause,
+      properties: this.generateQueryObjectProps(model.props, importContainer),
     });
 
     this.sourceFile.addVariableStatement({
@@ -123,6 +130,10 @@ class QueryObjectGenerator {
   }
 
   private generateIdFunction(model: ModelType, importContainer: ImportContainer) {
+    if (!model.generateId) {
+      return;
+    }
+
     const qFunc = "QId";
     importContainer.addFromQObject(qFunc);
     importContainer.addGeneratedModel(model.idModelName);

@@ -31,6 +31,7 @@ export interface PropertyModel {
 export interface ModelType extends ComplexType {
   idModelName: string;
   qIdFunctionName: string;
+  generateId: boolean;
   keyNames: Array<string>;
   keys: Array<PropertyModel>;
   getKeyUnion(): string;

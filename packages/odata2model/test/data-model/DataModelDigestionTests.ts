@@ -1,7 +1,7 @@
-import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
 import { DataModel } from "../../src/data-model/DataModel";
-import { Schema } from "../../src/data-model/edmx/ODataEdmxModelBase";
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
+import { Schema } from "../../src/data-model/edmx/ODataEdmxModelBase";
+import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
 import { ODataModelBuilder } from "./builder/ODataModelBuilder";
 
 export type DigestionFunction = <S extends Schema<any, any>>(schema: S, runOpts: RunOptions) => Promise<DataModel>;
@@ -66,5 +66,41 @@ export function createDataModelTests(
     expect(result.getComplexTypes()[0].props[0].name).toBe("abcDef");
     expect(result.getEnums()[0].name).toBe("FavFeat");
     expect(result.getEnums()[0].members[0]).toBe("HEY");
+  });
+
+  test("using Id of base class", async () => {
+    odataBuilder
+      .addEntityType("GrandParent", undefined, (builder) => {
+        builder.addKeyProp("ID", "Edm.String");
+      })
+      .addEntityType("Parent", "GrandParent", () => {});
+
+    const result = await digest(odataBuilder.getSchema(), runOpts);
+
+    expect(result.getModels().length).toBe(2);
+    expect(result.getModels()[1].name).toBe("Parent");
+    expect(result.getModels()[1].idModelName).toBe("GrandParentId");
+    expect(result.getModels()[1].qIdFunctionName).toBe("QGrandParentId");
+    expect(result.getModels()[1].generateId).toBe(false);
+  });
+
+  test("complex Id with base class", async () => {
+    odataBuilder
+      .addEntityType("GrandParent", undefined, (builder) => {
+        builder.addKeyProp("ID", "Edm.String");
+      })
+      .addEntityType("Parent", "GrandParent", (builder) => {
+        builder.addKeyProp("ID2", "Edm.String");
+      });
+
+    const result = await digest(odataBuilder.getSchema(), runOpts);
+
+    expect(result.getModels().length).toBe(2);
+    expect(result.getModels()[1].name).toBe("Parent");
+    expect(result.getModels()[1].keys.length).toBe(2);
+    expect(result.getModels()[1].keyNames).toStrictEqual(["ID", "ID2"]);
+    expect(result.getModels()[1].idModelName).toBe("ParentId");
+    expect(result.getModels()[1].qIdFunctionName).toBe("QParentId");
+    expect(result.getModels()[1].generateId).toBe(true);
   });
 }

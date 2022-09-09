@@ -216,4 +216,28 @@ describe("Service Generator Tests V2", () => {
       "v2" + path.sep + "test-entity-service-enum.ts"
     );
   });
+
+  test("Service Generator: EntityService with Hierarchy", async () => {
+    // given one EntitySet
+    odataBuilder
+      .addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV3.Boolean))
+      .addEntityType("Parent", "GrandParent", (builder) => builder.addProp("parentalAdvice", ODataTypesV3.Boolean))
+      .addEntityType("Child", "Parent", (builder) =>
+        builder.addKeyProp("id2", ODataTypesV3.Boolean).addProp("Ch1ld1shF4n", ODataTypesV3.Boolean)
+      );
+
+    // when generating
+    await doGenerate();
+
+    // then we get two additional service file
+    expect(projectManager.getServiceFiles().length).toEqual(3);
+    await fixtureComparator.compareWithFixture(
+      projectManager.getServiceFiles()[1].getFullText(),
+      "v2" + path.sep + "test-entity-service-hierarchy-parent.ts"
+    );
+    await fixtureComparator.compareWithFixture(
+      projectManager.getServiceFiles()[2].getFullText(),
+      "v2" + path.sep + "test-entity-service-hierarchy-child.ts"
+    );
+  });
 });

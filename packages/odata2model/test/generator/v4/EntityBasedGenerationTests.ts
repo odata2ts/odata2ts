@@ -1,5 +1,4 @@
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
 import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
 import { GenerationOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
@@ -128,7 +127,9 @@ export function createEntityBasedGenerationTests(
     odataBuilder.addEntityType("Parent", "GrandParent", (builder) =>
       builder.addProp("parentalAdvice", ODataTypesV4.Boolean)
     );
-    odataBuilder.addEntityType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", ODataTypesV4.Boolean));
+    odataBuilder.addEntityType("Child", "Parent", (builder) =>
+      builder.addKeyProp("id2", ODataTypesV4.Boolean).addProp("Ch1ld1shF4n", ODataTypesV4.Boolean)
+    );
 
     // when generating model
     // then match fixture text

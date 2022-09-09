@@ -169,6 +169,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         ...baseModel,
         idModelName,
         qIdFunctionName: `Q${idModelName}`,
+        generateId: true,
         keyNames: keys, // postprocess required to include key specs from base classes
         keys: [], // postprocess required to include props from base classes
         getKeyUnion: () => keys.join(" | "),
@@ -184,16 +185,22 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     });
     // entity types
     this.dataModel.getModels().forEach((model) => {
-      const [baseProps, baseKeys] = this.collectBaseClassPropsAndKeys(model);
+      const [baseProps, baseKeys, idName, qIdName] = this.collectBaseClassPropsAndKeys(model);
       model.baseProps = baseProps;
-      model.keyNames.push(...baseKeys);
+
+      if (!model.keyNames.length && idName) {
+        model.idModelName = idName;
+        model.qIdFunctionName = qIdName;
+        model.generateId = false;
+      }
+      model.keyNames.unshift(...baseKeys);
 
       // sanity check: entity types require key specification
       if (!model.keyNames.length) {
         throw new Error(`Key property is missing from Entity "${model.name}" (${model.odataName})!`);
       }
 
-      const props = [...model.props, ...model.baseProps];
+      const props = [...model.baseProps, ...model.props];
       model.keys = model.keyNames.map((keyName) => {
         const prop = props.find((p) => p.odataName === keyName);
         if (!prop) {
@@ -204,25 +211,33 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     });
   }
 
-  private collectBaseClassPropsAndKeys(model: ComplexModelType): [Array<PropertyModel>, Array<string>] {
+  private collectBaseClassPropsAndKeys(model: ComplexModelType): [Array<PropertyModel>, Array<string>, string, string] {
     return model.baseClasses.reduce(
-      ([props, keys], bc) => {
+      ([props, keys, idName, qIdName], bc) => {
         const baseModel = this.dataModel.getModel(bc) || this.dataModel.getComplexType(bc);
+        let idNameResult = idName;
+        let qIdNameResult = qIdName;
 
         // recursive
         if (baseModel.baseClasses.length) {
-          const [parentProps, parentKeys] = this.collectBaseClassPropsAndKeys(baseModel);
-          props.push(...parentProps);
-          keys.push(...parentKeys);
+          const [parentProps, parentKeys, parentIdName, parentQIdName] = this.collectBaseClassPropsAndKeys(baseModel);
+          props.unshift(...parentProps);
+          keys.unshift(...parentKeys);
+          if (parentIdName) {
+            idNameResult = parentIdName;
+            qIdNameResult = parentQIdName;
+          }
         }
 
         props.push(...baseModel.props);
         if (baseModel.keyNames) {
           keys.push(...baseModel.keyNames.filter((kn) => !keys.includes(kn)));
+          idNameResult = baseModel.idModelName;
+          qIdNameResult = baseModel.qIdFunctionName;
         }
-        return [props, keys];
+        return [props, keys, idNameResult, qIdNameResult];
       },
-      [[], []] as [Array<PropertyModel>, Array<string>]
+      [[], [], "", ""] as [Array<PropertyModel>, Array<string>, string, string]
     );
   }
 

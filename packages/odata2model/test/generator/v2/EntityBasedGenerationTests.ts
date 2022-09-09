@@ -131,15 +131,16 @@ export function createEntityBasedGenerationTests(
 
   test(`${testSuiteName}: base class`, async () => {
     // given an entity hierarchy
-    odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV3.Boolean));
-    odataBuilder.addEntityType("Parent", "GrandParent", (builder) =>
-      builder.addProp("parentalAdvice", ODataTypesV3.Boolean)
-    );
-    odataBuilder.addEntityType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", ODataTypesV3.Boolean));
+    odataBuilder
+      .addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV3.Boolean))
+      .addEntityType("Parent", "GrandParent", (builder) => builder.addProp("parentalAdvice", ODataTypesV3.Boolean))
+      .addEntityType("Child", "Parent", (builder) =>
+        builder.addKeyProp("id2", ODataTypesV3.Boolean).addProp("Ch1ld1shF4n", ODataTypesV3.Boolean)
+      );
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("baseClass", "entity-hierarchy-v2.ts", { skipIdModel: false, skipEditableModel: false });
+    await generateAndCompare("baseClass", "entity-hierarchy.ts", { skipIdModel: false, skipEditableModel: false });
   });
 
   test(`${testSuiteName}: entity & enum`, async () => {

@@ -10,14 +10,15 @@ export interface Parent extends GrandParent {
   parentalAdvice: boolean | null;
 }
 
-export type ParentId = boolean | { id: boolean };
-
 export interface EditableParent extends Pick<Parent, "id">, Partial<Pick<Parent, "parentalAdvice">> {}
 
 export interface Child extends Parent {
+  id2: boolean;
   Ch1ld1shF4n: boolean | null;
 }
 
-export type ChildId = boolean | { id: boolean };
+export type ChildId = { id: boolean; id2: boolean };
 
-export interface EditableChild extends Pick<Child, "id">, Partial<Pick<Child, "Ch1ld1shF4n" | "parentalAdvice">> {}
+export interface EditableChild
+  extends Pick<Child, "id" | "id2">,
+    Partial<Pick<Child, "parentalAdvice" | "Ch1ld1shF4n">> {}

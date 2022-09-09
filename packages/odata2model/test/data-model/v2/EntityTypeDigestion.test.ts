@@ -157,6 +157,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       odataName: "GrandParent",
       idModelName: "GrandParentId",
       qIdFunctionName: "QGrandParentId",
+      generateId: true,
       keyNames: ["id"],
       props: [expectedGrandParentProp],
       baseClasses: [],
@@ -164,8 +165,9 @@ describe("V2: EntityTypeDigestion Test", () => {
     });
     expect(result.getModel("Parent")).toMatchObject({
       name: "Parent",
-      idModelName: "ParentId",
-      qIdFunctionName: "QParentId",
+      idModelName: "GrandParentId",
+      qIdFunctionName: "QGrandParentId",
+      generateId: false,
       keyNames: ["id"],
       props: [expectedParentProp],
       baseClasses: ["GrandParent"],
@@ -173,8 +175,9 @@ describe("V2: EntityTypeDigestion Test", () => {
     });
     expect(result.getModel("Child")).toMatchObject({
       name: "Child",
-      idModelName: "ChildId",
-      qIdFunctionName: "QChildId",
+      idModelName: "GrandParentId",
+      qIdFunctionName: "QGrandParentId",
+      generateId: false,
       keyNames: ["id"],
       props: [expectedChildProp],
       baseClasses: ["Parent"],
