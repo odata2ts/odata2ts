@@ -1,5 +1,4 @@
 import { QParam } from "./";
-import { compileOperationPath } from "./OperationHelper";
 
 type FunctionParams = Record<string, string>;
 type FilteredParamModel = [string, string];
@@ -39,13 +38,9 @@ function compileQueryParams(params: FunctionParams | undefined) {
  * This includes handling of entity id paths which have exactly the same form.
  */
 export abstract class QFunction<ParamModel = undefined> {
-  public constructor(protected path: string, protected name: string, protected v2Mode: boolean = false) {}
+  public constructor(protected name: string, protected v2Mode: boolean = false) {}
 
   public abstract getParams(): Array<QParam<any>>;
-
-  public getPath(): string {
-    return this.path;
-  }
 
   public getName(): string {
     return this.name;
@@ -72,7 +67,7 @@ export abstract class QFunction<ParamModel = undefined> {
       paramsString = this.isV2() ? compileQueryParams(formatted) : compileUrlParams(formatted);
     }
 
-    return compileOperationPath(this.path, this.name) + paramsString;
+    return this.name + paramsString;
   }
 
   private formatParams(params: ParamModel): FunctionParams | undefined {

@@ -1,8 +1,8 @@
 import { QFunction } from "../../../src";
 
 export class QGetSomethingFunction extends QFunction {
-  constructor(path: string) {
-    super(path, "getSomething");
+  constructor() {
+    super("getSomething");
   }
 
   public getParams() {
@@ -15,8 +15,8 @@ export class QGetSomethingFunction extends QFunction {
 }
 
 export class QGetSomethingFunctionV2 extends QFunction {
-  constructor(path: string) {
-    super(path, "getSomething", true);
+  constructor() {
+    super("getSomething", true);
   }
 
   public getParams() {

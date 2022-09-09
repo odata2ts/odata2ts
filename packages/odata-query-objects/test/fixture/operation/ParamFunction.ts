@@ -38,8 +38,8 @@ export class QBestBookFunction extends QFunction<BestBookParamModel> {
     new QDateTimeOffsetParam("testDateTimeOffset"),
   ];
 
-  constructor(path: string) {
-    super(path, "BestBook");
+  constructor() {
+    super("BestBook");
   }
 
   public getParams() {
@@ -66,8 +66,8 @@ export class QBestBookFunctionV2 extends QFunction<BestBookParamModelV2> {
     new QStringParam("testString"),
   ];
 
-  constructor(path: string) {
-    super(path, "BestBook", true);
+  constructor() {
+    super("BestBook", true);
   }
 
   public getParams() {

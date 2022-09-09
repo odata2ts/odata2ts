@@ -1,4 +1,5 @@
-import { QFunction, QStringParam } from "../../../src";
+import { QStringParam } from "../../../src";
+import { QId } from "../../../src/operation/QId";
 
 export type BookIdModel =
   | string
@@ -6,13 +7,7 @@ export type BookIdModel =
       isbn: string;
     };
 
-export class BookIdFunction extends QFunction<BookIdModel> {
-  constructor(path: string) {
-    // Note: the name of the entity must be supplied as part of the path, because it depends on EntitySet and NavigationProps
-    // Note: ids are handled the same for v2 & v4 => setting isV2 to true would be wrong
-    super(path, "");
-  }
-
+export class BookIdFunction extends QId<BookIdModel> {
   private readonly params = [new QStringParam("isbn")];
 
   public getParams() {

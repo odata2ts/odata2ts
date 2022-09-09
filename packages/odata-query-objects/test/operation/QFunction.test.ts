@@ -9,41 +9,31 @@ import {
 
 describe("QFunction Tests", () => {
   test("QFunction: base props", () => {
-    const exampleFunction = new QGetSomethingFunction("");
+    const exampleFunction = new QGetSomethingFunction();
     expect(exampleFunction.getName()).toBe("getSomething");
-    expect(exampleFunction.getPath()).toBe("");
-    expect(exampleFunction.buildUrl()).toBe("/getSomething()");
+    expect(exampleFunction.buildUrl()).toBe("getSomething()");
     expect(exampleFunction.parseUrl("xyz")).toBeUndefined();
-  });
-
-  test("QFunction: set path", () => {
-    const exampleFunction = new QGetSomethingFunction("test-path");
-    expect(exampleFunction.getName()).toBe("getSomething");
-    expect(exampleFunction.getPath()).toBe("test-path");
-    expect(exampleFunction.buildUrl()).toBe("test-path/getSomething()");
-    expect(exampleFunction.parseUrl("xyz")).toBeUndefined();
-    expect(exampleFunction.parseUrl("xyz(123)")).toBeUndefined();
+    expect(exampleFunction.parseUrl("xyz()")).toBeUndefined();
   });
 
   test("QFunction: V2 mode", () => {
-    const exampleFunction = new QGetSomethingFunctionV2("test-path");
+    const exampleFunction = new QGetSomethingFunctionV2();
     expect(exampleFunction.getName()).toBe("getSomething");
-    expect(exampleFunction.getPath()).toBe("test-path");
-    expect(exampleFunction.buildUrl()).toBe("test-path/getSomething");
+    expect(exampleFunction.buildUrl()).toBe("getSomething");
     expect(exampleFunction.parseUrl("xyz")).toBeUndefined();
     expect(exampleFunction.parseUrl("xyz(123)")).toBeUndefined();
   });
 
   test("QFunction: for IDs", () => {
-    const exampleFunction = new BookIdFunction("test/EntityXy");
-    expect(exampleFunction.buildUrl({ isbn: "123" })).toBe("test/EntityXy(isbn='123')");
-    expect(exampleFunction.buildUrl("123")).toBe("test/EntityXy('123')");
-    expect(exampleFunction.parseUrl("test/EntityXy(isbn='123')")).toMatchObject({ isbn: "123" });
-    expect(exampleFunction.parseUrl("test/EntityXy('123')")).toBe("123");
+    const exampleFunction = new BookIdFunction("EntityXy");
+    expect(exampleFunction.buildUrl({ isbn: "123" })).toBe("EntityXy(isbn='123')");
+    expect(exampleFunction.buildUrl("123")).toBe("EntityXy('123')");
+    expect(exampleFunction.parseUrl("EntityXy(isbn='123')")).toMatchObject({ isbn: "123" });
+    expect(exampleFunction.parseUrl("EntityXy('123')")).toBe("123");
   });
 
   test("QFunction: multiple params", () => {
-    const exampleFunction = new QBestBookFunction("");
+    const exampleFunction = new QBestBookFunction();
     const requiredParams: BestBookParamModel = {
       // TODO: mappedName
       TestNumber: 3,
@@ -60,15 +50,15 @@ describe("QFunction Tests", () => {
     };
 
     expect(exampleFunction.buildUrl(requiredParams)).toBe(
-      "/BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb)"
+      "BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb)"
     );
     expect(exampleFunction.buildUrl(allParams)).toBe(
-      "/BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb,testDate=null,testDateTimeOffset=dateTime)"
+      "BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb,testDate=null,testDateTimeOffset=dateTime)"
     );
   });
 
   test("QFunction: V2 multiple params", () => {
-    const exampleFunction = new QBestBookFunctionV2("");
+    const exampleFunction = new QBestBookFunctionV2();
     const requiredParams: BestBookParamModelV2 = {
       testGuid: "aa-bb",
       testDateTime: "testDt",
@@ -81,7 +71,7 @@ describe("QFunction Tests", () => {
       testString: null,
     };
     const expected =
-      "/BestBook?testGuid=guid'aa-bb'&testDateTime=datetime'testDt'&testTime=time'testTime'&testDateTimeOffset=datetimeoffset'testDtOffset'";
+      "BestBook?testGuid=guid'aa-bb'&testDateTime=datetime'testDt'&testTime=time'testTime'&testDateTimeOffset=datetimeoffset'testDtOffset'";
 
     expect(exampleFunction.buildUrl(requiredParams)).toBe(expected);
     expect(exampleFunction.buildUrl(allParams)).toBe(expected + "&testString=null");
