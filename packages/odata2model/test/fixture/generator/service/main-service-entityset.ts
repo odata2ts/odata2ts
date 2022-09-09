@@ -14,7 +14,7 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
 
   public getListSrv() {
     if (!this._listSrv) {
-      this._listSrv = new TestEntityCollectionService(this.client, this.getPath() + "/list");
+      this._listSrv = new TestEntityCollectionService(this.client, this.getPath(), "list");
     }
 
     return this._listSrv;

@@ -17,20 +17,20 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
 
   private _getQPing() {
     if (!this._qPing) {
-      this._qPing = new QPing(this.getPath());
+      this._qPing = new QPing();
     }
 
     return this._qPing;
   }
 
   public keepAlive(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
-    const url = this._getQPing().buildUrl();
+    const url = this.addFullPath(this._getQPing().buildUrl());
     return this.client.post(url, {}, requestConfig);
   }
 
   private _getQVote() {
     if (!this._qVote) {
-      this._qVote = new QVote(this.getPath());
+      this._qVote = new QVote();
     }
 
     return this._qVote;
@@ -40,7 +40,7 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
     params: VoteParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV4<TestEntity>> {
-    const url = this._getQVote().buildUrl();
+    const url = this.addFullPath(this._getQVote().buildUrl());
     return this.client.post(url, params, requestConfig);
   }
 }

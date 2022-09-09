@@ -132,12 +132,12 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
 
     // simple version
     let result = testService.getProductsSrv().createKey(expectedSimple);
-    expect(result).toBe(`${BASE_URL}/Products(333)`);
+    expect(result).toBe(`Products(${expectedSimple})`);
     expect(testService.getProductsSrv().parseKey(result)).toBe(expectedSimple);
 
     // complex version
     result = testService.getProductsSrv().createKey(expectedComplex);
-    expect(result).toBe(`${BASE_URL}/Products(ID=333)`);
+    expect(result).toBe(`Products(ID=${expectedSimple})`);
     expect(testService.getProductsSrv().parseKey(result)).toStrictEqual(expectedComplex);
   });
 });

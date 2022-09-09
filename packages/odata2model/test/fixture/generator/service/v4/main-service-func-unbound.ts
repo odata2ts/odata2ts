@@ -17,20 +17,20 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
 
   private _getQGetBestsellers() {
     if (!this._qGetBestsellers) {
-      this._qGetBestsellers = new QGetBestsellers(this.getPath());
+      this._qGetBestsellers = new QGetBestsellers();
     }
 
     return this._qGetBestsellers;
   }
 
   public mostPop(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataCollectionResponseV4<TestEntity>> {
-    const url = this._getQGetBestsellers().buildUrl();
+    const url = this.addFullPath(this._getQGetBestsellers().buildUrl());
     return this.client.get(url, requestConfig);
   }
 
   private _getQFirstBook() {
     if (!this._qFirstBook) {
-      this._qFirstBook = new QFirstBook(this.getPath());
+      this._qFirstBook = new QFirstBook();
     }
 
     return this._qFirstBook;
@@ -40,7 +40,7 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
     params: FirstBookParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV4<TestEntity>> {
-    const url = this._getQFirstBook().buildUrl(params);
+    const url = this.addFullPath(this._getQFirstBook().buildUrl(params));
     return this.client.get(url, requestConfig);
   }
 }

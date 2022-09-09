@@ -12,8 +12,8 @@ export class TestEntityService<ClientType extends ODataClient> extends EntityTyp
   EditableTestEntity,
   QTestEntity
 > {
-  constructor(client: ClientType, path: string) {
-    super(client, path, qTestEntity);
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qTestEntity);
   }
 }
 
@@ -25,7 +25,7 @@ export class TestEntityCollectionService<ClientType extends ODataClient> extends
   TestEntityId,
   TestEntityService<ClientType>
 > {
-  constructor(client: ClientType, path: string) {
-    super(client, path, qTestEntity, TestEntityService, new QTestEntityId(path));
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qTestEntity, TestEntityService, new QTestEntityId(name));
   }
 }

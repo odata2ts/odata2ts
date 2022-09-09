@@ -12,8 +12,8 @@ export const qBook = new QBook();
 export class QMinFunction extends QFunction<MinFunctionParams> {
   private readonly params = [new QStringParam("test"), new QStringParam("optTest")];
 
-  constructor(path: string) {
-    super(path, "MinFunction");
+  constructor() {
+    super("MinFunction");
   }
 
   getParams() {

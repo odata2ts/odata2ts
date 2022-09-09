@@ -6,8 +6,8 @@ import { MinFunctionParams } from "./TesterModel";
 export class QMinFunction extends QFunction<MinFunctionParams> {
   private readonly params = [new QStringParam("test"), new QStringParam("optTest")];
 
-  constructor(path: string) {
-    super(path, "MinFunction", true);
+  constructor() {
+    super("MinFunction", true);
   }
 
   getParams() {

@@ -17,13 +17,13 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
   private _authorSrv?: AuthorService<ClientType>;
   private _relatedAuthorsSrv?: AuthorCollectionService<ClientType>;
 
-  constructor(client: ClientType, path: string) {
-    super(client, path, qBook);
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qBook);
   }
 
   public getAuthorSrv(): AuthorService<ClientType> {
     if (!this._authorSrv) {
-      this._authorSrv = new AuthorService(this.client, this.path + "/author");
+      this._authorSrv = new AuthorService(this.client, this.getPath(), "author");
     }
 
     return this._authorSrv;
@@ -31,7 +31,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
 
   public getRelatedAuthorsSrv(): AuthorCollectionService<ClientType> {
     if (!this._relatedAuthorsSrv) {
-      this._relatedAuthorsSrv = new AuthorCollectionService(this.client, this.path + "/relatedAuthors");
+      this._relatedAuthorsSrv = new AuthorCollectionService(this.client, this.getPath(), "relatedAuthors");
     }
 
     return this._relatedAuthorsSrv;
@@ -46,7 +46,7 @@ export class BookCollectionService<ClientType extends ODataClient> extends Entit
   BookId,
   BookService<ClientType>
 > {
-  constructor(client: ClientType, path: string) {
-    super(client, path, qBook, BookService, new QBookId(path));
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qBook, BookService, new QBookId(name));
   }
 }

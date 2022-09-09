@@ -15,13 +15,13 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
 > {
   private _altChoicesSrv?: CollectionServiceV4<ClientType, EnumCollection<Choice>, QEnumCollection>;
 
-  constructor(client: ClientType, path: string) {
-    super(client, path, qBook);
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qBook);
   }
 
   public getAltChoicesSrv() {
     if (!this._altChoicesSrv) {
-      this._altChoicesSrv = new CollectionServiceV4(this.client, this.path + "/altChoices", qEnumCollection);
+      this._altChoicesSrv = new CollectionServiceV4(this.client, this.getPath(), "altChoices", qEnumCollection);
     }
 
     return this._altChoicesSrv;
@@ -36,7 +36,7 @@ export class BookCollectionService<ClientType extends ODataClient> extends Entit
   BookId,
   BookService<ClientType>
 > {
-  constructor(client: ClientType, path: string) {
-    super(client, path, qBook, BookService, new QBookId(path));
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qBook, BookService, new QBookId(name));
   }
 }

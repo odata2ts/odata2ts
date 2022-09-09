@@ -23,8 +23,8 @@ export class QMaxFunction extends QFunction<MaxFunctionParams> {
     new QDateTimeOffsetV2Param("testDateTimeOffset"),
   ];
 
-  constructor(path: string) {
-    super(path, "MAX_FUNCTION", true);
+  constructor() {
+    super("MAX_FUNCTION", true);
   }
 
   getParams() {

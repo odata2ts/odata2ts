@@ -20,26 +20,26 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
   private _qBestReview?: QBestReview;
   private _qFilterReviews?: QFilterReviews;
 
-  constructor(client: ClientType, path: string) {
-    super(client, path, qBook);
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qBook);
   }
 
   private _getQBestReview() {
     if (!this._qBestReview) {
-      this._qBestReview = new QBestReview(this.getPath());
+      this._qBestReview = new QBestReview();
     }
 
     return this._qBestReview;
   }
 
   public bestReview(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<string>> {
-    const url = this._getQBestReview().buildUrl();
+    const url = this.addFullPath(this._getQBestReview().buildUrl());
     return this.client.get(url, requestConfig);
   }
 
   private _getQFilterReviews() {
     if (!this._qFilterReviews) {
-      this._qFilterReviews = new QFilterReviews(this.getPath());
+      this._qFilterReviews = new QFilterReviews();
     }
 
     return this._qFilterReviews;
@@ -49,7 +49,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     params: FilterReviewsParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<Review>> {
-    const url = this._getQFilterReviews().buildUrl(params);
+    const url = this.addFullPath(this._getQFilterReviews().buildUrl(params));
     return this.client.get(url, requestConfig);
   }
 }
@@ -62,7 +62,7 @@ export class BookCollectionService<ClientType extends ODataClient> extends Entit
   BookId,
   BookService<ClientType>
 > {
-  constructor(client: ClientType, path: string) {
-    super(client, path, qBook, BookService, new QBookId(path));
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qBook, BookService, new QBookId(name));
   }
 }

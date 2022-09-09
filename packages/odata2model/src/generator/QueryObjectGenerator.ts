@@ -123,7 +123,7 @@ class QueryObjectGenerator {
   }
 
   private generateIdFunction(model: ModelType, importContainer: ImportContainer) {
-    const qFunc = "QFunction";
+    const qFunc = "QId";
     importContainer.addFromQObject(qFunc);
     importContainer.addGeneratedModel(model.idModelName);
 
@@ -141,8 +141,8 @@ class QueryObjectGenerator {
       ],
       ctors: [
         {
-          parameters: [{ name: "path", type: "string" }],
-          statements: [`super(path, "")`],
+          parameters: [{ name: "name", type: "string" }],
+          statements: [`super(name)`],
         },
       ],
       methods: [
@@ -200,8 +200,7 @@ class QueryObjectGenerator {
       ],
       ctors: [
         {
-          parameters: [{ name: "path", type: "string" }],
-          statements: [`super(path, "${operation.odataName}"${this.version === ODataVesions.V2 ? ", true" : ""})`],
+          statements: [`super("${operation.odataName}"${this.version === ODataVesions.V2 ? ", true" : ""})`],
         },
       ],
       methods: [

@@ -128,7 +128,7 @@ class ServiceGenerator {
         statements: [
           `if(!this.${propName}) {`,
           // prettier-ignore
-          `  this.${propName} = new ${serviceType}(this.client, this.getPath() + "/${odataName}")`,
+          `  this.${propName} = new ${serviceType}(this.client, this.getPath(), "${odataName}")`,
           "}",
           `return this.${propName}`,
         ],
@@ -174,9 +174,10 @@ class ServiceGenerator {
         {
           parameters: [
             { name: "client", type: "ClientType" },
-            { name: "path", type: "string" },
+            { name: "basePath", type: "string" },
+            { name: "name", type: "string" },
           ],
-          statements: [`super(client, path, ${firstCharLowerCase(model.qName)});`],
+          statements: [`super(client, basePath, name, ${firstCharLowerCase(model.qName)});`],
         },
       ],
       properties: [
@@ -281,7 +282,7 @@ class ServiceGenerator {
         statements: [
           `if(!this.${propName}) {`,
           // prettier-ignore
-          `  this.${propName} = new ${type}(this.client, this.path + "/${prop.odataName}"${isComplexCollection ? `, ${firstCharLowerCase(complexType.qName)}`: ""})`,
+          `  this.${propName} = new ${type}(this.client, this.getPath(), "${prop.odataName}"${isComplexCollection ? `, ${firstCharLowerCase(complexType.qName)}`: ""})`,
           "}",
           `return this.${propName}`,
         ],
@@ -301,7 +302,7 @@ class ServiceGenerator {
         statements: [
           `if(!this.${propName}) {`,
           // prettier-ignore
-          `  this.${propName} = new ${collectionServiceType}(this.client, this.path + "/${prop.odataName}", ${firstCharLowerCase(prop.qObject!)})`,
+          `  this.${propName} = new ${collectionServiceType}(this.client, this.getPath(), "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)})`,
           "}",
           `return this.${propName}`,
         ],
@@ -336,9 +337,12 @@ class ServiceGenerator {
         {
           parameters: [
             { name: "client", type: "ClientType" },
-            { name: "path", type: "string" },
+            { name: "basePath", type: "string" },
+            { name: "name", type: "string" },
           ],
-          statements: [`super(client, path, ${qObjectName}, ${serviceName}, new ${model.qIdFunctionName}(path));`],
+          statements: [
+            `super(client, basePath, name, ${qObjectName}, ${serviceName}, new ${model.qIdFunctionName}(name));`,
+          ],
         },
       ],
       properties: [...collectionOperations.map(this.generateQOperationProps)],
@@ -406,7 +410,7 @@ class ServiceGenerator {
       statements: [
         `if(!this.${propName}) {`,
         // prettier-ignore
-        `  this.${propName} = new ${operation.qName}(this.getPath())`,
+        `  this.${propName} = new ${operation.qName}()`,
         "}",
         `return this.${propName}`,
       ],
@@ -447,7 +451,9 @@ class ServiceGenerator {
         : [requestConfigParam],
       returnType: `ODataResponse<${odataType}<${returnType}>>`,
       statements: [
-        `const url = this.${getPrivateGetterName(operation.qName)}().buildUrl(${isFunc && hasParams ? "params" : ""})`,
+        `const url = this.addFullPath(this.${getPrivateGetterName(operation.qName)}().buildUrl(${
+          isFunc && hasParams ? "params" : ""
+        }))`,
         `return this.client.${
           !isFunc
             ? // actions: since V4

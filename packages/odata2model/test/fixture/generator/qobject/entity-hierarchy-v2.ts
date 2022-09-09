@@ -1,4 +1,4 @@
-import { QBooleanParam, QBooleanPath, QFunction, QueryObject } from "@odata2ts/odata-query-objects";
+import { QBooleanParam, QBooleanPath, QId, QueryObject } from "@odata2ts/odata-query-objects";
 
 // @ts-ignore
 import { ChildId, GrandParentId, ParentId } from "./TesterModel";
@@ -9,11 +9,11 @@ export class QGrandParent extends QueryObject {
 
 export const qGrandParent = new QGrandParent();
 
-export class QGrandParentId extends QFunction<GrandParentId> {
+export class QGrandParentId extends QId<GrandParentId> {
   private readonly params = [new QBooleanParam("id")];
 
-  constructor(path: string) {
-    super(path, "");
+  constructor(name: string) {
+    super(name);
   }
 
   getParams() {
@@ -28,11 +28,11 @@ export class QParent extends QueryObject {
 
 export const qParent = new QParent();
 
-export class QParentId extends QFunction<ParentId> {
+export class QParentId extends QId<ParentId> {
   private readonly params = [new QBooleanParam("id")];
 
-  constructor(path: string) {
-    super(path, "");
+  constructor(name: string) {
+    super(name);
   }
 
   getParams() {
@@ -48,11 +48,11 @@ export class QChild extends QueryObject {
 
 export const qChild = new QChild();
 
-export class QChildId extends QFunction<ChildId> {
+export class QChildId extends QId<ChildId> {
   private readonly params = [new QBooleanParam("id")];
 
-  constructor(path: string) {
-    super(path, "");
+  constructor(name: string) {
+    super(name);
   }
 
   getParams() {

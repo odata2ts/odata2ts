@@ -12,7 +12,7 @@ export class ReviewerService<ClientType extends ODataClient> extends EntityTypeS
   EditableReviewer,
   QReviewer
 > {
-  constructor(client: ClientType, path: string) {
-    super(client, path, qReviewer);
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qReviewer);
   }
 }

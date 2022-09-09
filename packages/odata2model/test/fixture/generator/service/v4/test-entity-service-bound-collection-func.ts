@@ -12,8 +12,8 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
   EditableBook,
   QBook
 > {
-  constructor(client: ClientType, path: string) {
-    super(client, path, qBook);
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qBook);
   }
 }
 
@@ -27,20 +27,20 @@ export class BookCollectionService<ClientType extends ODataClient> extends Entit
 > {
   private _qBestReview?: QBestReview;
 
-  constructor(client: ClientType, path: string) {
-    super(client, path, qBook, BookService, new QBookId(path));
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qBook, BookService, new QBookId(name));
   }
 
   private _getQBestReview() {
     if (!this._qBestReview) {
-      this._qBestReview = new QBestReview(this.getPath());
+      this._qBestReview = new QBestReview();
     }
 
     return this._qBestReview;
   }
 
   public bestReview(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<string>> {
-    const url = this._getQBestReview().buildUrl();
+    const url = this.addFullPath(this._getQBestReview().buildUrl());
     return this.client.get(url, requestConfig);
   }
 }

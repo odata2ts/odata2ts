@@ -15,26 +15,26 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
   private _qLike?: QLike;
   private _qPostReview?: QPostReview;
 
-  constructor(client: ClientType, path: string) {
-    super(client, path, qBook);
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qBook);
   }
 
   private _getQLike() {
     if (!this._qLike) {
-      this._qLike = new QLike(this.getPath());
+      this._qLike = new QLike();
     }
 
     return this._qLike;
   }
 
   public like(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
-    const url = this._getQLike().buildUrl();
+    const url = this.addFullPath(this._getQLike().buildUrl());
     return this.client.post(url, {}, requestConfig);
   }
 
   private _getQPostReview() {
     if (!this._qPostReview) {
-      this._qPostReview = new QPostReview(this.getPath());
+      this._qPostReview = new QPostReview();
     }
 
     return this._qPostReview;
@@ -44,7 +44,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     params: PostReviewParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV4<Review>> {
-    const url = this._getQPostReview().buildUrl();
+    const url = this.addFullPath(this._getQPostReview().buildUrl());
     return this.client.post(url, params, requestConfig);
   }
 }
@@ -57,7 +57,7 @@ export class BookCollectionService<ClientType extends ODataClient> extends Entit
   BookId,
   BookService<ClientType>
 > {
-  constructor(client: ClientType, path: string) {
-    super(client, path, qBook, BookService, new QBookId(path));
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qBook, BookService, new QBookId(name));
   }
 }

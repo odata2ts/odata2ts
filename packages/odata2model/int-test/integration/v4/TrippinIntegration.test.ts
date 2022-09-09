@@ -127,12 +127,12 @@ describe("Integration Testing of Service Generation", () => {
 
     // simple version
     let result = testService.getPeopleSrv().createKey(expectedSimple);
-    expect(result).toBe(`${BASE_URL}/People('${expectedSimple}')`);
+    expect(result).toBe(`People('${expectedSimple}')`);
     expect(testService.getPeopleSrv().parseKey(result)).toBe(expectedSimple);
 
     // complex version
     result = testService.getPeopleSrv().createKey(expectedComplex);
-    expect(result).toBe(`${BASE_URL}/People(UserName='${expectedSimple}')`);
+    expect(result).toBe(`People(UserName='${expectedSimple}')`);
     expect(testService.getPeopleSrv().parseKey(result)).toStrictEqual(expectedComplex);
   });
 });

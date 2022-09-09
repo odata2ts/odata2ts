@@ -9,10 +9,10 @@ import {
   QDatePath,
   QDateTimeOffsetCollection,
   QDateTimeOffsetPath,
-  QFunction,
   QGuidCollection,
   QGuidParam,
   QGuidPath,
+  QId,
   QNumberCollection,
   QNumberParam,
   QNumberPath,
@@ -52,11 +52,11 @@ export class QBook extends QueryObject {
 
 export const qBook = new QBook();
 
-export class QBookId extends QFunction<BookId> {
+export class QBookId extends QId<BookId> {
   private readonly params = [new QGuidParam("id"), new QNumberParam("id2"), new QBooleanParam("id3")];
 
-  constructor(path: string) {
-    super(path, "");
+  constructor(name: string) {
+    super(name);
   }
 
   getParams() {

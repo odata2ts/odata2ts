@@ -14,7 +14,7 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
 
   public getCurrentUserSrv() {
     if (!this._currentUserSrv) {
-      this._currentUserSrv = new TestEntityService(this.client, this.getPath() + "/CURRENT_USER");
+      this._currentUserSrv = new TestEntityService(this.client, this.getPath(), "CURRENT_USER");
     }
 
     return this._currentUserSrv;
