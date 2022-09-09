@@ -1,10 +1,12 @@
 import {
-  QAction, QBooleanParam,
+  QAction,
+  QBooleanParam,
   QDateParam,
   QDateTimeOffsetParam,
-  QGuidParam, QNumberParam,
+  QGuidParam,
+  QNumberParam,
   QStringParam,
-  QTimeOfDayParam
+  QTimeOfDayParam,
 } from "../../../src";
 
 export const PARAM_ACTION_NAME = "ParaM_ACTion";
@@ -28,14 +30,13 @@ export class QParamAction extends QAction<ParamActionParamModel> {
     new QDateParam("testDate"),
     new QTimeOfDayParam("testTime"),
     new QDateTimeOffsetParam("testDateTimeOffset"),
-  ]
+  ];
 
-  constructor(path: string) {
-    super(path, PARAM_ACTION_NAME);
+  constructor() {
+    super(PARAM_ACTION_NAME);
   }
 
   public getParams() {
     return this.params;
   }
-
 }

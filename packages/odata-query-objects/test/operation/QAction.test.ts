@@ -34,7 +34,7 @@ describe("QAction Tests", () => {
       testDate: null,
       testTime: "PY32",
     };
-    const exampleOperation = new QParamAction("");
+    const exampleOperation = new QParamAction();
 
     expect(exampleOperation.getParams()).toBeDefined();
     expect(exampleOperation.getParams().length).toBe(7);
