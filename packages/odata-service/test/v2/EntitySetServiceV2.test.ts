@@ -10,14 +10,15 @@ import { MockODataClient } from "../mock/MockODataClient";
 
 describe("V2 EntitySetService Test", () => {
   const odataClient = new MockODataClient();
-  const BASE_URL = "/test";
+  const BASE_URL = "";
+  const NAME = "test";
 
   let testService: PersonModelCollectionService<MockODataClient>;
 
   commonEntitySetTests(odataClient, PersonModelCollectionService);
 
   beforeEach(() => {
-    testService = new PersonModelCollectionService(odataClient, BASE_URL);
+    testService = new PersonModelCollectionService(odataClient, BASE_URL, NAME);
   });
 
   test("entitySet V2: QObject", async () => {

@@ -2,15 +2,18 @@ import { HttpResponseModel } from "@odata2ts/odata-client-api";
 import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
 import { ODataModelResponseV2 } from "../../src";
-import { MockODataClient } from "../mock/MockODataClient";
+import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { PersonModel } from "../fixture/PersonModel";
 import { PersonModelService } from "../fixture/v2/PersonModelService";
-import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
-import {QPersonV2} from "../fixture/v2/QPersonV2";
+import { QPersonV2 } from "../fixture/v2/QPersonV2";
+import { MockODataClient } from "../mock/MockODataClient";
 
 describe("EntityTypeService V2 Test", () => {
   const odataClient = new MockODataClient();
-  const BASE_URL = "/test('tester')";
+  const BASE_URL = "path";
+  const NAME = "test('tester')";
+  const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
+
   const REQUEST_CONFIG = { test: "Test" };
 
   let testService: PersonModelService<MockODataClient>;
@@ -18,7 +21,7 @@ describe("EntityTypeService V2 Test", () => {
   commonEntityTypeServiceTests(odataClient, PersonModelService);
 
   beforeEach(() => {
-    testService = new PersonModelService(odataClient, BASE_URL);
+    testService = new PersonModelService(odataClient, BASE_URL, NAME);
   });
 
   // TODO
@@ -37,7 +40,7 @@ describe("EntityTypeService V2 Test", () => {
   test("entityType V2: function params", async () => {
     await testService.getSomething({ testGuid: "123", testDateTime: "1", testDateTimeO: "2", testTime: "3" });
     expect(odataClient.lastUrl).toBe(
-      BASE_URL +
+      EXPECTED_PATH +
         "/GET_SOMETHING?testGuid=guid'123'&testDateTime=datetime'1'&testDateTimeO=datetimeoffset'2'&testTime=time'3'"
     );
     expect(odataClient.lastData).toBeUndefined();

@@ -13,4 +13,8 @@ export class ODataService<ClientType extends ODataClient> {
   public getPath(): string {
     return this.basePath;
   }
+
+  protected addFullPath(path?: string) {
+    return `${this.getPath()}${path ? "/" + path : ""}`;
+  }
 }

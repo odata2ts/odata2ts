@@ -44,12 +44,12 @@ export interface GetSomethingFunctionParams {
 export type PersonModelServiceVersion = PMServiceV2<MockODataClient> | PMServiceV4<MockODataClient>;
 export type PersonCollectionServiceVersion = PMCServiceV2<MockODataClient> | PMCServiceV4<MockODataClient>;
 
-export type StringCollectionServiceConstructor = (url: string) => StringCollectionService;
+export type StringCollectionServiceConstructor = (basePath: string, name: string) => StringCollectionService;
 export type StringCollectionService =
   | CollectionServiceV4<MockODataClient, StringCollection, QStringCollection>
   | CollectionServiceV2<MockODataClient, StringCollection, QStringV2Collection>;
 
-export type EnumCollectionServiceConstructor = (url: string) => EnumCollectionService;
+export type EnumCollectionServiceConstructor = (basePath: string, name: string) => EnumCollectionService;
 export type EnumCollectionService =
   | CollectionServiceV4<MockODataClient, EnumCollection<Feature>, QEnumCollection>
   | CollectionServiceV2<MockODataClient, EnumCollection<Feature>, QEnumCollection>;

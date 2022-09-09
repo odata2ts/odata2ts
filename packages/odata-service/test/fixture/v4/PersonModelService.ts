@@ -12,20 +12,20 @@ export class PersonModelService<ClientType extends ODataClient> extends EntityTy
   EditablePersonModel,
   QPersonV4
 > {
-  constructor(client: ODataClient, path: string) {
-    super(client, path, new QPersonV4());
+  constructor(client: ODataClient, basePath: string, name: string) {
+    super(client, basePath, name, new QPersonV4());
   }
 
   public get features() {
-    return new CollectionServiceV4(this.client, this.path + "/Features", new QEnumCollection());
+    return new CollectionServiceV4(this.client, this.getPath(), "Features", new QEnumCollection());
   }
 
   public get bestFriend() {
-    return new PersonModelService(this.client, this.path + "/BestFriend");
+    return new PersonModelService(this.client, this.getPath(), "BestFriend");
   }
 
   public get friends() {
-    return new PersonModelCollectionService(this.client, this.path + "/Friends");
+    return new PersonModelCollectionService(this.client, this.getPath(), "Friends");
   }
 }
 
@@ -37,7 +37,7 @@ export class PersonModelCollectionService<ClientType extends ODataClient> extend
   PersonId,
   PersonModelService<ClientType>
 > {
-  constructor(client: ODataClient, path: string) {
-    super(client, path, qPersonV4, PersonModelService, new QPersonIdFunction(path));
+  constructor(client: ODataClient, basePath: string, name: string) {
+    super(client, basePath, name, qPersonV4, PersonModelService, new QPersonIdFunction(name));
   }
 }

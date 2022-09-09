@@ -9,7 +9,6 @@ import {
   QFunction,
   QGuidV2Param,
   QNumberPath,
-  QParam,
   QStringV2Path,
   QTimeV2Param,
   QueryObject,
@@ -32,8 +31,8 @@ export class QPersonV2 extends QueryObject {
 export const qPersonV2 = new QPersonV2();
 
 export class QGetSomethingFunction extends QFunction<GetSomethingFunctionParams> {
-  constructor(path: string) {
-    super(path, "GET_SOMETHING", true);
+  constructor() {
+    super("GET_SOMETHING", true);
   }
 
   getParams() {

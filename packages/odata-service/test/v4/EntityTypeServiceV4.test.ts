@@ -2,22 +2,23 @@ import { HttpResponseModel } from "@odata2ts/odata-client-api";
 import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
 import { ODataModelResponseV4 } from "../../src";
-import { MockODataClient } from "../mock/MockODataClient";
-import { PersonModelService } from "../fixture/v4/PersonModelService";
-import { PersonModel } from "../fixture/PersonModel";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
-import {QPersonV4, qPersonV4} from "../fixture/v4/QPersonV4";
+import { PersonModel } from "../fixture/PersonModel";
+import { PersonModelService } from "../fixture/v4/PersonModelService";
+import { QPersonV4, qPersonV4 } from "../fixture/v4/QPersonV4";
+import { MockODataClient } from "../mock/MockODataClient";
 
 describe("EntityTypeService V4 Tests", () => {
   const odataClient = new MockODataClient();
-  const BASE_URL = "/test('tester')";
+  const BASE_URL = "";
+  const NAME = "test('tester')";
 
   let testService: PersonModelService<MockODataClient>;
 
   commonEntityTypeServiceTests(odataClient, PersonModelService);
 
   beforeEach(() => {
-    testService = new PersonModelService(odataClient, BASE_URL);
+    testService = new PersonModelService(odataClient, BASE_URL, NAME);
   });
 
   // TODO

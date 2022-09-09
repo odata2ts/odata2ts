@@ -1,4 +1,3 @@
-import { MockODataClient } from "./mock/MockODataClient";
 import {
   EnumCollectionService,
   EnumCollectionServiceConstructor,
@@ -6,6 +5,7 @@ import {
   StringCollectionService,
   StringCollectionServiceConstructor,
 } from "./fixture/PersonModel";
+import { MockODataClient } from "./mock/MockODataClient";
 
 export function getParams(params: { [key: string]: string }) {
   const ps = Object.entries(params).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
@@ -18,16 +18,18 @@ export function commonCollectionTests(
   enumCollectionServiceConstructor: EnumCollectionServiceConstructor
 ) {
   const BASE_URL = "/test";
-  const STRING_URL = `${BASE_URL}/Name`;
-  const ENUM_URL = `${BASE_URL}/Feature`;
+  const NAME_STRING = "Name";
+  const STRING_URL = `${BASE_URL}/${NAME_STRING}`;
+  const NAME_ENUM = "Feature";
+  const ENUM_URL = `${BASE_URL}/${NAME_ENUM}`;
   const REQUEST_CONFIG = { test: "Test" };
 
   let stringService: StringCollectionService;
   let enumService: EnumCollectionService;
 
   beforeEach(() => {
-    stringService = stringCollectionServiceConstructor(STRING_URL);
-    enumService = enumCollectionServiceConstructor(ENUM_URL);
+    stringService = stringCollectionServiceConstructor(BASE_URL, NAME_STRING);
+    enumService = enumCollectionServiceConstructor(BASE_URL, NAME_ENUM);
   });
 
   test("collection: query", async () => {

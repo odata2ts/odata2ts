@@ -1,16 +1,18 @@
+import { ODataClient } from "@odata2ts/odata-client-api";
 import {
+  QCollectionPath,
+  QDatePath,
+  QEntityCollectionPath,
+  QEntityPath,
+  QGuidCollection,
   QGuidPath,
   QNumberPath,
-  QDatePath,
-  QCollectionPath,
-  QEntityPath,
-  QEntityCollectionPath,
   QueryObject,
-  QGuidCollection,
 } from "@odata2ts/odata-query-objects";
-import { ODataClient } from "@odata2ts/odata-client-api";
 
-import { EntityTypeServiceV4, EntitySetServiceV4 } from "../../../src";
+import { EntitySetServiceV4, EntityTypeServiceV4 } from "../../../src";
+import { QTypingIdFunction } from "../QTyping";
+import { TypingId } from "../TypingModel";
 
 export interface TestModel {
   ID: string;
@@ -44,8 +46,8 @@ export class TestService<ClientType extends ODataClient> extends EntityTypeServi
   EditableTestModel,
   QTest
 > {
-  constructor(client: ODataClient, path: string) {
-    super(client, path, qTest);
+  constructor(client: ODataClient, basePath: string, name: string) {
+    super(client, basePath, name, qTest);
   }
 }
 
@@ -54,10 +56,10 @@ export class TestCollectionService<ClientType extends ODataClient> extends Entit
   TestModel,
   EditableTestModel,
   QTest,
-  string | { ID: string },
+  TypingId,
   TestService<ClientType>
 > {
-  constructor(client: ODataClient, path: string) {
-    super(client, path, qTest, TestService, [{ isLiteral: false, type: "guid", name: "id", odataName: "ID" }]);
+  constructor(client: ODataClient, basePath: string, name: string) {
+    super(client, basePath, name, qTest, TestService, new QTypingIdFunction(name));
   }
 }

@@ -1,8 +1,8 @@
 import { QueryObject } from "@odata2ts/odata-query-objects";
-import { createUriBuilderV4, ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
+import { ODataUriBuilderV4, createUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
-import { ODataModelResponseV4 } from "./ResponseModelV4";
 import { OperationBaseService } from "../OperationBaseService";
+import { ODataModelResponseV4 } from "./ResponseModelV4";
 
 export class ServiceBaseV4<T, Q extends QueryObject> extends OperationBaseService<
   Q,
@@ -10,6 +10,6 @@ export class ServiceBaseV4<T, Q extends QueryObject> extends OperationBaseServic
   ODataUriBuilderV4<Q>
 > {
   protected createBuilder(): ODataUriBuilderV4<Q> {
-    return createUriBuilderV4(this.path, this.qModel);
+    return createUriBuilderV4(this.getPath(), this.qModel);
   }
 }

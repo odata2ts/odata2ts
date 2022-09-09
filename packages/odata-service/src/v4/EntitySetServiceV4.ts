@@ -19,7 +19,8 @@ export abstract class EntitySetServiceV4<
    * Also support key spec.
    *
    * @param client the odata client responsible for data requests
-   * @param path the base URL path
+   * @param basePath the base URL path
+   * @param name name of the service
    * @param qModel query object
    * @param entityTypeServiceConstructor the corresponding service for a single entity
    * @param idFunction the id function
@@ -27,12 +28,13 @@ export abstract class EntitySetServiceV4<
    */
   protected constructor(
     client: ODataClient,
-    path: string,
+    basePath: string,
+    name: string,
     qModel: Q,
-    protected entityTypeServiceConstructor: new (client: ODataClient, path: string) => ETS,
+    protected entityTypeServiceConstructor: new (client: ODataClient, basePath: string, name: string) => ETS,
     protected idFunction: QFunction<EIdType>
   ) {
-    super(client, path, qModel);
+    super(client, basePath, name, qModel);
   }
 
   /**
@@ -47,9 +49,9 @@ export abstract class EntitySetServiceV4<
    * Create an OData path for an entity with a given id.
    * Might be useful for routing.
    *
-   * @example myEntity(1234)
-   * @example myEntity(id=1234,name='Test')
-   * @param id either a primitive value or an object for a composite key
+   * @example createKey(1234) => myEntity(1234)
+   * @example createKey({id: 1234, name: "Test"}) => myEntity(id=1234,name='Test')
+   * @param id either a primitive value (single key entities only) or an object
    */
   public createKey(id: EIdType): string {
     const url = this.idFunction.buildUrl(id);
@@ -60,6 +62,8 @@ export abstract class EntitySetServiceV4<
    * Parse an OData path representing the id of an entity.
    * Might be useful for routing in combination with createKey.
    *
+   * @example parseKey("myEntity(1234)") => 1234
+   * @example parseKey("myEntity(id=1234,name='Test')") => { id: 1234, name: "Test" }
    * @param keyPath e.g. myEntity(id=1234,name='Test')
    */
   public parseKey(keyPath: string): EIdType {
@@ -79,7 +83,7 @@ export abstract class EntitySetServiceV4<
 
   public get(id: EIdType) {
     const url = this.idFunction.buildUrl(id);
-    return new this.entityTypeServiceConstructor(this.client, url);
+    return new this.entityTypeServiceConstructor(this.client, this.basePath, url);
   }
 
   public patch(

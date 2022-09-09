@@ -1,12 +1,13 @@
 import {
-  QCollectionPath, QEntityCollectionPath, QEntityPath,
+  QCollectionPath,
+  QEntityCollectionPath,
+  QEntityPath,
   QEnumCollection,
-  QEnumPath, QFunction,
-  QNumberPath, QParam, QStringParam,
+  QEnumPath,
+  QNumberPath,
   QStringPath,
-  QueryObject
+  QueryObject,
 } from "@odata2ts/odata-query-objects";
-import {PersonId} from "../PersonModel";
 
 export class QPersonV4 extends QueryObject {
   public readonly userName = new QStringPath(this.withPrefix("UserName"));
