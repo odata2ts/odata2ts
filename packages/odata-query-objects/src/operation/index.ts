@@ -1,5 +1,6 @@
 export { QFunction } from "./QFunction";
 export { QAction } from "./QAction";
+export { QId } from "./QId";
 export { QParam } from "./QParam";
 
 export { QBooleanParam } from "./common/QBooleanParam";
