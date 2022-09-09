@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.14.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.14.1...@odata2ts/odata2model@0.14.2) (2022-09-09)
+
+
+### Bug Fixes
+
+* IdFunction never gets v2Mode flag ([f36d173](https://github.com/odata2ts/odata2ts/commit/f36d173c3e48255777e5346441030b711706b1ad))
+
+
+
+
+
 ## [0.14.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.14.0...@odata2ts/odata2model@0.14.1) (2022-09-08)
 
 

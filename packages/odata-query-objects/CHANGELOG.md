@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.11.0...@odata2ts/odata-query-objects@0.11.1) (2022-09-09)
+
+
+### Bug Fixes
+
+* **odata-query-objects:** export QId ([eced875](https://github.com/odata2ts/odata2ts/commit/eced875fb2306156b0324850490f50a9b396812d))
+* **odata-query-objects:** fix tests ([561cb70](https://github.com/odata2ts/odata2ts/commit/561cb701b60f888d72b7225409ec70b4b08e6c9b))
+
+
+
+
+
 # [0.11.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.10.4...@odata2ts/odata-query-objects@0.11.0) (2022-09-08)
 
 
