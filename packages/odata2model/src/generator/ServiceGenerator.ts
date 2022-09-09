@@ -62,15 +62,6 @@ class ServiceGenerator {
       name: serviceName,
       typeParameters: ["ClientType extends ODataClient"],
       extends: `${ROOT_SERVICE}<ClientType>`,
-      ctors: [
-        {
-          parameters: [
-            { name: "client", type: "ClientType" },
-            { name: "basePath", type: "string" },
-          ],
-          statements: ["super(client, basePath);"],
-        },
-      ],
       properties: [
         { scope: Scope.Private, name: "_name", type: "string", initializer: `"${this.dataModel.getServiceName()}"` },
         ...this.generateServiceTypeProps(container.entitySets, getCollectionServiceName, importContainer),

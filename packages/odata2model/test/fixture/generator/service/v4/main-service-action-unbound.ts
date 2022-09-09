@@ -11,10 +11,6 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
   private _qPing?: QPing;
   private _qVote?: QVote;
 
-  constructor(client: ClientType, basePath: string) {
-    super(client, basePath);
-  }
-
   private _getQPing() {
     if (!this._qPing) {
       this._qPing = new QPing();

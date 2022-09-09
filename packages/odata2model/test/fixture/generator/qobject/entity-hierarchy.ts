@@ -12,10 +12,6 @@ export const qGrandParent = new QGrandParent();
 export class QGrandParentId extends QId<GrandParentId> {
   private readonly params = [new QBooleanParam("id")];
 
-  constructor(name: string) {
-    super(name);
-  }
-
   getParams() {
     return this.params;
   }
@@ -36,10 +32,6 @@ export const qChild = new QChild();
 
 export class QChildId extends QId<ChildId> {
   private readonly params = [new QBooleanParam("id"), new QBooleanParam("id2")];
-
-  constructor(name: string) {
-    super(name);
-  }
 
   getParams() {
     return this.params;

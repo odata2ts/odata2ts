@@ -12,10 +12,6 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
   private _qBestBook?: QBestBook;
   private _qPostBestBook?: QPostBestBook;
 
-  constructor(client: ClientType, basePath: string) {
-    super(client, basePath);
-  }
-
   private _getQMostPop() {
     if (!this._qMostPop) {
       this._qMostPop = new QMostPop();

@@ -8,10 +8,6 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
   private _name: string = "Tester";
   private _listSrv?: TestEntityCollectionService<ClientType>;
 
-  constructor(client: ClientType, basePath: string) {
-    super(client, basePath);
-  }
-
   public getListSrv() {
     if (!this._listSrv) {
       this._listSrv = new TestEntityCollectionService(this.client, this.getPath(), "list");

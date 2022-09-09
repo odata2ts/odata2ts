@@ -11,10 +11,6 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
   private _qGetBestsellers?: QGetBestsellers;
   private _qFirstBook?: QFirstBook;
 
-  constructor(client: ClientType, basePath: string) {
-    super(client, basePath);
-  }
-
   private _getQGetBestsellers() {
     if (!this._qGetBestsellers) {
       this._qGetBestsellers = new QGetBestsellers();

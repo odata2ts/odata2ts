@@ -10,10 +10,6 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
   private _name: string = "Tester";
   private _qBestBook?: QBestBook;
 
-  constructor(client: ClientType, basePath: string) {
-    super(client, basePath);
-  }
-
   private _getQBestBook() {
     if (!this._qBestBook) {
       this._qBestBook = new QBestBook();

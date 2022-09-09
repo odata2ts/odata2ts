@@ -66,10 +66,6 @@ export const qBook = new QBook();
 export class QBookId extends QId<BookId> {
   private readonly params = [new QGuidV2Param("id"), new QNumberParam("id2"), new QBooleanParam("id3")];
 
-  constructor(name: string) {
-    super(name);
-  }
-
   getParams() {
     return this.params;
   }

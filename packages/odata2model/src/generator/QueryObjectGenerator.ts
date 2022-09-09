@@ -150,12 +150,6 @@ class QueryObjectGenerator {
           initializer: this.getParamInitString(model.keys, importContainer),
         },
       ],
-      ctors: [
-        {
-          parameters: [{ name: "name", type: "string" }],
-          statements: [`super(name)`],
-        },
-      ],
       methods: [
         {
           name: "getParams",
