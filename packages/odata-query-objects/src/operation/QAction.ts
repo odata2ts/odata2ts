@@ -1,4 +1,4 @@
-import { QParam } from "./QParam";
+import { QParam } from "../param";
 
 type ActionParams = Record<string, any>;
 type FilteredParamModel = [string, any];

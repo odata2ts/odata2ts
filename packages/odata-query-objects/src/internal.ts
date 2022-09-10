@@ -6,21 +6,23 @@ export { QueryObject } from "./QueryObject";
 
 export { QFunction } from "./operation/QFunction";
 export { QAction } from "./operation/QAction";
-export { QParam } from "./operation/QParam";
+export { QId } from "./operation/QId";
 
-export { QBooleanParam } from "./operation/common/QBooleanParam";
-export { QNumberParam } from "./operation/common/QNumberParam";
-export { QStringParam } from "./operation/common/QStringParam";
+export { QParam } from "./param/QParam";
 
-export { QGuidV2Param } from "./operation/v2/QGuidV2Param";
-export { QDateTimeV2Param } from "./operation/v2/QDateTimeV2Param";
-export { QDateTimeOffsetV2Param } from "./operation/v2/QDateTimeOffsetV2Param";
-export { QTimeV2Param } from "./operation/v2/QTimeV2Param";
+export { QBooleanParam } from "./param/common/QBooleanParam";
+export { QNumberParam } from "./param/common/QNumberParam";
+export { QStringParam } from "./param/common/QStringParam";
 
-export { QGuidParam } from "./operation/v4/QGuidParam";
-export { QDateParam } from "./operation/v4/QDateParam";
-export { QTimeOfDayParam } from "./operation/v4/QTimeOfDayParam";
-export { QDateTimeOffsetParam } from "./operation/v4/QDateTimeOffsetParam";
+export { QGuidV2Param } from "./param/v2/QGuidV2Param";
+export { QDateTimeV2Param } from "./param/v2/QDateTimeV2Param";
+export { QDateTimeOffsetV2Param } from "./param/v2/QDateTimeOffsetV2Param";
+export { QTimeV2Param } from "./param/v2/QTimeV2Param";
+
+export { QGuidParam } from "./param/v4/QGuidParam";
+export { QDateParam } from "./param/v4/QDateParam";
+export { QTimeOfDayParam } from "./param/v4/QTimeOfDayParam";
+export { QDateTimeOffsetParam } from "./param/v4/QDateTimeOffsetParam";
 
 export * from "./path";
 

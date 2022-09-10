@@ -1,4 +1,4 @@
-import { QFunction } from "../internal";
+import { QFunction } from "./QFunction";
 
 /**
  * Represents a function to produce the id path of an entity, e.g. MyEntity(number=123,name='Test').
