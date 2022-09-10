@@ -5,4 +5,5 @@ export * from "./QSingletons";
 export { QueryObject } from "./QueryObject";
 
 export * from "./operation";
+export * from "./param";
 export * from "./path";
