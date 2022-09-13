@@ -1,6 +1,6 @@
-import { QParam, QDateTimeOffsetPath } from "../../internal";
+import { QDateTimeOffsetPath, QParam } from "../../internal";
 
 export class QDateTimeOffsetParam extends QParam<string> {
-  formatUrlValue = QDateTimeOffsetPath.getUrlConformValue;
-  parseUrlValue = QDateTimeOffsetPath.parseValueFromUrl;
+  getUrlConformValue = QDateTimeOffsetPath.getUrlConformValue;
+  parseValueFromUrl = QDateTimeOffsetPath.parseValueFromUrl;
 }

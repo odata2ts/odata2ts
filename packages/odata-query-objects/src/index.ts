@@ -7,3 +7,4 @@ export { QueryObject } from "./QueryObject";
 export * from "./operation";
 export * from "./param";
 export * from "./path";
+export * from "./converter";

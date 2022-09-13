@@ -1,23 +1,12 @@
-import { QOrderByExpression } from "../../QOrderByExpression";
 import { StandardFilterOperators, StringFilterFunctions } from "../../odata/ODataModel";
-import { QPathModel } from "../QPathModel";
-import { QNumberPath } from "../QNumberPath";
+import { URL_PARAM_CONFIG } from "../../param/common/QStringParam";
+import { getExpressionValue } from "../../param/UrlParamHelper";
 import { QFilterExpression } from "../../QFilterExpression";
-import { createParsingRegexp, getParamValue, parseParamValue } from "../../param/UrlParamHelper";
-import { UrlParamModel, UrlParamValueFormatter, UrlParamValueParser } from "../../param/UrlParamModel";
-
-const URL_PARAM_CONFIG: UrlParamModel = { isQuoted: true };
-const URL_PARAM_REGEXP = createParsingRegexp(URL_PARAM_CONFIG);
+import { QOrderByExpression } from "../../QOrderByExpression";
+import { QNumberPath } from "../QNumberPath";
+import { QPathModel } from "../QPathModel";
 
 export abstract class QStringBasePath<SubClass extends QStringBasePath<any>> implements QPathModel {
-  public static getUrlConformValue: UrlParamValueFormatter<string> = (value) => {
-    return getParamValue(value, URL_PARAM_CONFIG);
-  };
-
-  public static parseValueFromUrl: UrlParamValueParser<string> = (urlConformValue) => {
-    return parseParamValue(urlConformValue, URL_PARAM_REGEXP);
-  };
-
   constructor(private path: string) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
@@ -56,11 +45,7 @@ export abstract class QStringBasePath<SubClass extends QStringBasePath<any>> imp
   public desc = this.descending;
 
   protected getFinalValue(value: string | SubClass) {
-    return typeof value === "string"
-      ? QStringBasePath.getUrlConformValue(value)
-      : typeof value.getPath === "function"
-      ? value.getPath()
-      : "null";
+    return getExpressionValue(value, URL_PARAM_CONFIG);
   }
 
   protected buildBuiltInOp(operator: StandardFilterOperators, value: string | SubClass) {

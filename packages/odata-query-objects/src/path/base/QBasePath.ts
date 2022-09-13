@@ -1,27 +1,20 @@
 import { ValueConverter } from "../../converter";
-import { getExpressionValue } from "../../param/UrlParamHelper";
+import { UrlExpressionValueModel, UrlParamModel } from "../../param/UrlParamModel";
 import { QFilterExpression } from "../../QFilterExpression";
 import { QOrderByExpression } from "../../QOrderByExpression";
-import { QPathModel } from "../QPathModel";
+import { PathOperator } from "./PathOperator";
 
-export abstract class QLiteralPath<
-  ValueType extends boolean | number | string | QPathModel,
-  OperatorTypes,
-  ConvertedType = ValueType
-> implements QPathModel
-{
-  constructor(protected path: string, protected converter?: ValueConverter<ValueType, ConvertedType>) {
+export abstract class QBasePath<ValueType extends UrlExpressionValueModel, ConvertedType = ValueType> {
+  protected pathOperator: PathOperator<ValueType, ConvertedType>;
+
+  protected abstract getOptions(): UrlParamModel | undefined;
+
+  public constructor(protected path: string, protected converter?: ValueConverter<ValueType, ConvertedType>) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
     }
-  }
 
-  protected buildBuiltInExpression(operator: OperatorTypes, value: ValueType) {
-    return new QFilterExpression(this.buildBuiltInOp(operator, value));
-  }
-
-  protected buildBuiltInOp(operator: OperatorTypes, value: ValueType) {
-    return `${this.path} ${operator} ${getExpressionValue(value)}`;
+    this.pathOperator = new PathOperator<ValueType, ConvertedType>(path, this.getOptions(), converter);
   }
 
   /**
@@ -54,10 +47,10 @@ export abstract class QLiteralPath<
   public desc = this.descending;
 
   public isNull() {
-    return `${this.path} eq null`;
+    return new QFilterExpression(`${this.path} eq null`);
   }
 
   public isNotNull() {
-    return `${this.path} ne null`;
+    return new QFilterExpression(`${this.path} ne null`);
   }
 }

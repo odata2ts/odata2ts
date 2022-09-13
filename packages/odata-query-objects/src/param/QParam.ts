@@ -1,5 +1,6 @@
+import { ValueConverter } from "../converter/ConverterModel";
 import { UrlParamValueFormatter, UrlParamValueParser } from "../internal";
-import { ValueConverter } from "./ParamModel";
+import { ParamValueModel } from "./UrlParamModel";
 
 export abstract class QParam<Type extends string | number | boolean, ConvertedType = Type>
   implements ValueConverter<Type, ConvertedType>
@@ -22,15 +23,28 @@ export abstract class QParam<Type extends string | number | boolean, ConvertedTy
     return this.mappedName ?? this.getName();
   }
 
-  public abstract formatUrlValue: UrlParamValueFormatter<Type>;
-
-  public abstract parseUrlValue: UrlParamValueParser<Type>;
-
-  public convertFrom(value: Type): ConvertedType {
-    return this.converter ? this.converter.convertFrom(value) : (value as unknown as ConvertedType);
+  public getConverter() {
+    return this.converter;
   }
 
-  public convertTo(value: ConvertedType): Type {
-    return this.converter ? this.converter.convertTo(value) : (value as unknown as Type);
+  protected abstract getUrlConformValue: UrlParamValueFormatter<Type>;
+  protected abstract parseValueFromUrl: UrlParamValueParser<Type>;
+
+  public formatUrlValue(value: ParamValueModel<ConvertedType>): string | undefined {
+    const result: ParamValueModel<Type> = this.converter ? this.converter.convertTo(value) : (value as unknown as Type);
+    return this.getUrlConformValue(result);
+  }
+
+  public parseUrlValue(value: string | undefined) {
+    const parsed = this.parseValueFromUrl(value);
+    return this.convertFrom(parsed);
+  }
+
+  public convertFrom(value: ParamValueModel<Type>): ParamValueModel<ConvertedType> {
+    return this.converter ? this.converter.convertFrom(value) : (value as unknown as ParamValueModel<ConvertedType>);
+  }
+
+  public convertTo(value: ParamValueModel<ConvertedType>): ParamValueModel<Type> {
+    return this.converter ? this.converter.convertTo(value) : (value as unknown as ParamValueModel<Type>);
   }
 }

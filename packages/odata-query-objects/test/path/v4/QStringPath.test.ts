@@ -12,18 +12,6 @@ describe("QStringPath test", () => {
     otherProp = new QStringPath("Language");
   });
 
-  test("get URL conform value", () => {
-    expect(QStringPath.getUrlConformValue("Tester")).toBe("'Tester'");
-    expect(QStringPath.getUrlConformValue(null)).toBe("null");
-    expect(QStringPath.getUrlConformValue(undefined)).toBeUndefined();
-  });
-
-  test("parse URL value", () => {
-    expect(QStringPath.parseValueFromUrl("'Tester'")).toBe("Tester");
-    expect(QStringPath.parseValueFromUrl("null")).toBeNull();
-    expect(QStringPath.parseValueFromUrl(undefined)).toBeUndefined();
-  });
-
   test("contains", () => {
     const result = toTest.contains("ran");
 

@@ -1,6 +1,19 @@
-import { QParam, QDateTimeV2Path } from "../../internal";
+import { QParam, UrlParamValueFormatter, UrlParamValueParser } from "../../internal";
+import { createParsingRegexp, getParamValue, parseParamValue } from "../UrlParamHelper";
+import { UrlParamModel } from "../UrlParamModel";
+
+export const URL_PARAM_CONFIG: UrlParamModel = { typePrefix: "datetime" };
+const URL_PARAM_REGEXP = createParsingRegexp(URL_PARAM_CONFIG);
+
+export const getUrlConformValue: UrlParamValueFormatter<string> = (value) => {
+  return getParamValue(value, URL_PARAM_CONFIG);
+};
+
+export const parseValueFromUrl: UrlParamValueParser<string> = (urlConformValue) => {
+  return parseParamValue(urlConformValue, URL_PARAM_REGEXP);
+};
 
 export class QDateTimeV2Param extends QParam<string> {
-  formatUrlValue = QDateTimeV2Path.getUrlConformValue;
-  parseUrlValue = QDateTimeV2Path.parseValueFromUrl;
+  getUrlConformValue = getUrlConformValue;
+  parseValueFromUrl = parseValueFromUrl;
 }

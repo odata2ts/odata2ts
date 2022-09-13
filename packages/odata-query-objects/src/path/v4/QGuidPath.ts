@@ -1,52 +1,26 @@
-import { QFilterExpression } from "../../QFilterExpression";
-import { StandardFilterOperators } from "../../odata/ODataModel";
-import { QLiteralPath } from "../base/QLiteralPath";
-import { UrlParamValueFormatter, UrlParamValueParser } from "../../param/UrlParamModel";
-import { getParamValue, parseParamValue } from "../../param/UrlParamHelper";
+import { UrlParamModel } from "../../param/UrlParamModel";
+import { QBasePath } from "../base/QBasePath";
 
-export class QGuidPath extends QLiteralPath<string, StandardFilterOperators> {
-  public static getUrlConformValue: UrlParamValueFormatter<string> = (value) => {
-    return getParamValue(value);
-  };
-
-  public static parseValueFromUrl: UrlParamValueParser<string> = (urlConformValue) => {
-    return parseParamValue(urlConformValue);
-  };
-
-  public equals(value: string) {
-    return this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
+export class QGuidPath extends QBasePath<string | QGuidPath> {
+  protected getOptions(): UrlParamModel | undefined {
+    return undefined;
   }
-  public eq = this.equals;
+  public equals = this.pathOperator.equals;
+  public eq = this.pathOperator.equals;
+  public notEquals = this.pathOperator.notEquals;
+  public ne = this.pathOperator.notEquals;
 
-  public notEquals(value: string) {
-    return this.buildBuiltInExpression(StandardFilterOperators.NOT_EQUALS, value);
-  }
-  public ne = this.notEquals;
+  public lowerThan = this.pathOperator.lowerThan;
+  public lt = this.pathOperator.lowerThan;
 
-  public lowerThan(value: string) {
-    return this.buildBuiltInExpression(StandardFilterOperators.LOWER_THAN, value);
-  }
-  public lt = this.lowerThan;
+  public lowerEquals = this.pathOperator.lowerEquals;
+  public le = this.pathOperator.lowerEquals;
 
-  public lowerEquals(value: string) {
-    return this.buildBuiltInExpression(StandardFilterOperators.LOWER_EQUALS, value);
-  }
-  public le = this.lowerEquals;
-
-  public greaterThan(value: string) {
-    return this.buildBuiltInExpression(StandardFilterOperators.GREATER_THAN, value);
-  }
+  public greaterThan = this.pathOperator.greaterThan;
   public gt = this.greaterThan;
 
-  public greaterEquals(value: string) {
-    return this.buildBuiltInExpression(StandardFilterOperators.GREATER_EQUALS, value);
-  }
+  public greaterEquals = this.pathOperator.greaterEquals;
   public ge = this.greaterEquals;
 
-  public in(...values: Array<string>) {
-    return values.reduce((expression, value) => {
-      const expr = this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
-      return expression ? expression.or(expr) : expr;
-    }, null as unknown as QFilterExpression);
-  }
+  public in = this.pathOperator.in;
 }

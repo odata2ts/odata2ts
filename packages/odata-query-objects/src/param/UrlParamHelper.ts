@@ -1,5 +1,4 @@
-import { UrlParamModel } from "./UrlParamModel";
-import { QPathModel } from "../path/QPathModel";
+import { UrlExpressionValueModel, UrlParamModel } from "./UrlParamModel";
 
 /**
  * Convert a given value to a URL conform parameter value, which can be used in
@@ -26,6 +25,24 @@ function getValue(value: number | string | boolean, options: UrlParamModel = {})
 }
 
 /**
+ * Get value suitable for an expression, e.g. filter expression value.
+ *
+ * @param value another path, null or a primitive type
+ * @param options meta infos about value conversion
+ */
+export function getExpressionValue(value: UrlExpressionValueModel, options?: UrlParamModel) {
+  // an expression might reference another attribute
+  if (typeof value === "object" && typeof value?.getPath === "function") {
+    return value.getPath();
+  }
+  // null is a regular value
+  if (value === null) {
+    return "null";
+  }
+  return getValue(value as string | number | boolean, options);
+}
+
+/**
  * Get value suitable for parameters, e.g. function parameters.
  *
  * @param value null or any primitive type; if undefined consumer is responsible to filter out that parameter
@@ -45,24 +62,6 @@ export function getParamValue(
     default:
       return getValue(value, options);
   }
-}
-
-/**
- * Get value suitable for an expression, e.g. filter expression value.
- *
- * @param value another path, null or a primitive type
- * @param options meta infos about value conversion
- */
-export function getExpressionValue(value: QPathModel | number | string | boolean | null, options?: UrlParamModel) {
-  // an expression might reference another attribute
-  if (typeof value === "object" && typeof value?.getPath === "function") {
-    return value.getPath();
-  }
-  // null is a regular value
-  if (value === null) {
-    return "null";
-  }
-  return getValue(value as string | number | boolean, options);
 }
 
 /**

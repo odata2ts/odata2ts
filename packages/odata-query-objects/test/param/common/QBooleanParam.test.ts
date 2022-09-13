@@ -28,4 +28,6 @@ describe("QBooleanParam Tests", () => {
     // @ts-expect-error
     expect(() => new QBooleanParam(null)).toThrowError();
   });
+
+  test("QBooleanParam: convertFrom", () => {});
 });

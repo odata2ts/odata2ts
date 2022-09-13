@@ -1,22 +1,11 @@
-import { QFilterExpression } from "../../QFilterExpression";
 import { StandardFilterOperators } from "../../odata/ODataModel";
+import { getExpressionValue } from "../../param/UrlParamHelper";
+import { URL_PARAM_CONFIG } from "../../param/v2/QGuidV2Param";
+import { QFilterExpression } from "../../QFilterExpression";
 import { QOrderByExpression } from "../../QOrderByExpression";
-import { createParsingRegexp, getExpressionValue, getParamValue, parseParamValue } from "../../param/UrlParamHelper";
-import { UrlParamModel, UrlParamValueFormatter, UrlParamValueParser } from "../../param/UrlParamModel";
 import { QPathModel } from "../QPathModel";
 
-const URL_PARAM_CONFIG: UrlParamModel = { typePrefix: "guid" };
-const URL_PARAM_REGEXP = createParsingRegexp(URL_PARAM_CONFIG);
-
 export class QGuidV2Path implements QPathModel {
-  public static getUrlConformValue: UrlParamValueFormatter<string> = (value) => {
-    return getParamValue(value, URL_PARAM_CONFIG);
-  };
-
-  public static parseValueFromUrl: UrlParamValueParser<string> = (urlConformValue) => {
-    return parseParamValue(urlConformValue, URL_PARAM_REGEXP);
-  };
-
   constructor(private path: string) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");

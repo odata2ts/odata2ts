@@ -1,28 +1,7 @@
 import { QBooleanPath } from "../../src";
 
 describe("QBooleanPath test", () => {
-  let toTest: QBooleanPath;
-
-  beforeEach(() => {
-    toTest = new QBooleanPath("done");
-  });
-
-  test("get URL conform value", () => {
-    expect(QBooleanPath.getUrlConformValue(true)).toBe("true");
-    expect(QBooleanPath.getUrlConformValue(false)).toBe("false");
-    expect(QBooleanPath.getUrlConformValue(null)).toBe("null");
-    expect(QBooleanPath.getUrlConformValue(undefined)).toBeUndefined();
-  });
-
-  test("parse URL conform value", () => {
-    expect(QBooleanPath.parseValueFromUrl("null")).toBeNull();
-    expect(QBooleanPath.parseValueFromUrl("true")).toBe(true);
-    expect(QBooleanPath.parseValueFromUrl("false")).toBe(false);
-
-    expect(QBooleanPath.parseValueFromUrl(undefined)).toBeUndefined();
-    expect(QBooleanPath.parseValueFromUrl("dddd")).toBeUndefined();
-    expect(QBooleanPath.parseValueFromUrl("")).toBeUndefined();
-  });
+  let toTest = new QBooleanPath("done");
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("done");
@@ -59,6 +38,28 @@ describe("QBooleanPath test", () => {
 
     expect(result).toBe("done eq true");
     expect(result).toBe(toTest.eq(value).toString());
+  });
+
+  test("not equals", () => {
+    const value = true;
+    const result = toTest.notEquals(value).toString();
+
+    expect(result).toBe("done ne true");
+    expect(result).toBe(toTest.ne(value).toString());
+  });
+
+  test("equals other path", () => {
+    const otherPath = new QBooleanPath("Test");
+
+    expect(toTest.equals(otherPath).toString()).toBe("done eq Test");
+    expect(toTest.ne(otherPath).toString()).toBe("done ne Test");
+  });
+
+  test("equals fails with null or undefined", () => {
+    // @ts-expect-error
+    expect(() => toTest.equals(null)).toThrow();
+    // @ts-expect-error
+    expect(() => toTest.equals(undefined)).toThrow();
   });
 
   test("isTrue", () => {

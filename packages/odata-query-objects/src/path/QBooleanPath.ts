@@ -1,22 +1,10 @@
-import { StandardFilterOperators } from "../odata/ODataModel";
-import { QLiteralPath } from "./base/QLiteralPath";
-import { getParamValue, parseParamValue } from "../param/UrlParamHelper";
-import { UrlParamValueFormatter, UrlParamValueParser } from "../param/UrlParamModel";
+import { QBasePath } from "./base/QBasePath";
 
-export class QBooleanPath extends QLiteralPath<boolean | QBooleanPath, StandardFilterOperators> {
-  public static getUrlConformValue: UrlParamValueFormatter<boolean> = (value) => {
-    return getParamValue(value);
-  };
-
-  public static parseValueFromUrl: UrlParamValueParser<boolean> = (urlConformValue) => {
-    const value = parseParamValue(urlConformValue);
-    return typeof value !== "string" ? value : value === "true" ? true : value === "false" ? false : undefined;
-  };
-
-  public equals(value: boolean) {
-    return this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
-  }
-  public eq = this.equals;
+export class QBooleanPath extends QBasePath<boolean | QBooleanPath> {
+  public equals = this.pathOperator.equals;
+  public eq = this.pathOperator.equals;
+  public notEquals = this.pathOperator.notEquals;
+  public ne = this.pathOperator.notEquals;
 
   public isTrue() {
     return this.equals(true);
@@ -24,5 +12,9 @@ export class QBooleanPath extends QLiteralPath<boolean | QBooleanPath, StandardF
 
   public isFalse() {
     return this.equals(false);
+  }
+
+  protected getOptions() {
+    return undefined;
   }
 }
