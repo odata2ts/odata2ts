@@ -31,4 +31,12 @@ describe("QDateTimeOffsetPath test", () => {
   createBaseDateTimeTests(toTest, EXAMPLE_DATE_TIME_OFFSET);
   createDateFunctionTests(toTest);
   createTimeFunctionTests(toTest);
+
+  test("date function", () => {
+    expect(toTest.date().eq("xxx").toString()).toBe(`date(${EXAMPLE_PATH_NAME}) eq xxx`);
+  });
+
+  test("time function", () => {
+    expect(toTest.time().eq("xxx").toString()).toBe(`time(${EXAMPLE_PATH_NAME}) eq xxx`);
+  });
 });
