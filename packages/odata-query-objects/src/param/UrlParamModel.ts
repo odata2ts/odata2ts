@@ -1,5 +1,3 @@
-import { QPathModel } from "../path";
-
 /**
  *
  */

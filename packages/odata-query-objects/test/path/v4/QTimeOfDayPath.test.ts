@@ -1,4 +1,5 @@
 import { QTimeOfDayPath } from "../../../src";
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 import { EXAMPLE_PATH_NAME, EXAMPLE_TIME, createBaseDateTimeTests, createTimeFunctionTests } from "./DateTimeBaseTests";
 
 describe("QTimeOfDayPath test", () => {
@@ -13,6 +14,12 @@ describe("QTimeOfDayPath test", () => {
     expect(() => new QTimeOfDayPath(undefined)).toThrow();
     expect(() => new QTimeOfDayPath("")).toThrow();
     expect(() => new QTimeOfDayPath(" ")).toThrow();
+  });
+
+  test("with converter", () => {
+    const testWithConv = new QTimeOfDayPath(EXAMPLE_PATH_NAME, fixedDateConverter);
+
+    expect(testWithConv.gt(FIXED_DATE).toString()).toBe(`${EXAMPLE_PATH_NAME} gt ${FIXED_STRING}`);
   });
 
   createBaseDateTimeTests(toTest, EXAMPLE_TIME);

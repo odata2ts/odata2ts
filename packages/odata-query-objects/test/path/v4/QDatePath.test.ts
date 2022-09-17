@@ -1,4 +1,5 @@
 import { QDatePath } from "../../../src";
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 import {
   EXAMPLE_DATE,
   EXAMPLE_PATH_NAME,
@@ -18,6 +19,12 @@ describe("QDatePath test", () => {
     expect(() => new QDatePath(undefined)).toThrow();
     expect(() => new QDatePath("")).toThrow();
     expect(() => new QDatePath(" ")).toThrow();
+  });
+
+  test("with converter", () => {
+    const testWithConv = new QDatePath(EXAMPLE_PATH_NAME, fixedDateConverter);
+
+    expect(testWithConv.gt(FIXED_DATE).toString()).toBe(`${EXAMPLE_PATH_NAME} gt ${FIXED_STRING}`);
   });
 
   createBaseDateTimeTests(toTest, EXAMPLE_DATE);

@@ -1,4 +1,5 @@
 import { QTimeV2Path } from "../../../src";
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 import { EXAMPLE_PATH_NAME, EXAMPLE_TIME, createBaseDateTimeTests, createTimeFunctionTests } from "./DateTimeBaseTests";
 
 describe("QTimeV2Path test", () => {
@@ -14,6 +15,12 @@ describe("QTimeV2Path test", () => {
     expect(() => new QTimeV2Path(undefined)).toThrow();
     expect(() => new QTimeV2Path("")).toThrow();
     expect(() => new QTimeV2Path(" ")).toThrow();
+  });
+
+  test("with converter", () => {
+    const testWithConv = new QTimeV2Path(EXAMPLE_PATH_NAME, fixedDateConverter);
+
+    expect(testWithConv.gt(FIXED_DATE).toString()).toBe(`createdAt gt time'${FIXED_STRING}'`);
   });
 
   createBaseDateTimeTests(toTest, EXAMPLE_TIME, exampleResult);

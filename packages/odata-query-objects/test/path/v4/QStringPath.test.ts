@@ -1,5 +1,6 @@
 import { QStringPath } from "../../../src";
 import { getIdentityConverter } from "../../../src/converter/IdentityConverter";
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 import { createStringTests } from "../StringBaseTests";
 
 describe("QStringPath test", () => {
@@ -17,6 +18,12 @@ describe("QStringPath test", () => {
     expect(() => new QStringPath(undefined)).toThrow();
     expect(() => new QStringPath("", getIdentityConverter())).toThrow();
     expect(() => new QStringPath(" ", getIdentityConverter())).toThrow();
+  });
+
+  test("with converter", () => {
+    const testWithConv = new QStringPath("ID", fixedDateConverter);
+
+    expect(testWithConv.gt(FIXED_DATE).toString()).toBe(`ID gt '${FIXED_STRING}'`);
   });
 
   test("contains", () => {

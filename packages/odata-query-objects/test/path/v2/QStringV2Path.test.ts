@@ -1,5 +1,6 @@
 import { QStringV2Path } from "../../../src";
 import { getIdentityConverter } from "../../../src/converter/IdentityConverter";
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 import { createStringTests } from "../StringBaseTests";
 
 describe("QStringV2Path test", () => {
@@ -19,7 +20,11 @@ describe("QStringV2Path test", () => {
     expect(() => new QStringV2Path(" ", getIdentityConverter())).toThrow();
   });
 
-  beforeEach(() => {});
+  test("with converter", () => {
+    const testWithConv = new QStringV2Path("Country", fixedDateConverter);
+
+    expect(testWithConv.gt(FIXED_DATE).toString()).toBe(`Country gt '${FIXED_STRING}'`);
+  });
 
   test("contains", () => {
     const result = toTest.contains("ran");
