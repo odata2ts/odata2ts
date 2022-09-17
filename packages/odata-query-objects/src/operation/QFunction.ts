@@ -40,7 +40,7 @@ function compileQueryParams(params: FunctionParams | undefined) {
 export abstract class QFunction<ParamModel = undefined> {
   public constructor(protected name: string, protected v2Mode: boolean = false) {}
 
-  public abstract getParams(): Array<QParam<any>>;
+  public abstract getParams(): Array<QParam<any, any>>;
 
   public getName(): string {
     return this.name;

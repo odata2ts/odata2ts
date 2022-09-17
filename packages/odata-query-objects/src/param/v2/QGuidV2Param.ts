@@ -15,7 +15,7 @@ export const parseValueFromUrl: UrlParamValueParser<string> = (urlConformValue) 
   return parseParamValue(urlConformValue, URL_PARAM_REGEXP);
 };
 
-export class QGuidV2Param extends QParam<string> {
+export class QGuidV2Param<ConvertedType = string> extends QParam<string, ConvertedType> {
   getUrlConformValue = getUrlConformValue;
   parseValueFromUrl = parseValueFromUrl;
 }

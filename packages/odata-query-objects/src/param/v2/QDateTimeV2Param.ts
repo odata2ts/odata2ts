@@ -14,7 +14,7 @@ const parseValueFromUrl: UrlParamValueParser<string> = (urlConformValue) => {
   return parseParamValue(urlConformValue, URL_PARAM_REGEXP);
 };
 
-export class QDateTimeV2Param extends QParam<string> {
+export class QDateTimeV2Param<ConvertedType = string> extends QParam<string, ConvertedType> {
   getUrlConformValue = getUrlConformValue;
   parseValueFromUrl = parseValueFromUrl;
 }

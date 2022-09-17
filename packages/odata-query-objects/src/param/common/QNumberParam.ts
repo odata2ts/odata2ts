@@ -10,7 +10,7 @@ export const parseValueFromUrl: UrlParamValueParser<number> = (urlConformValue) 
   return typeof value === "string" ? Number(urlConformValue) : value;
 };
 
-export class QNumberParam extends QParam<number> {
+export class QNumberParam<ConvertedType = number> extends QParam<number, ConvertedType> {
   getUrlConformValue = getUrlConformValue;
   parseValueFromUrl = parseValueFromUrl;
 }

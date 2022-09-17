@@ -1,8 +1,8 @@
 import { ParamValueModel } from "../param/UrlParamModel";
 
-export interface IdentityConverter<OriginalType> extends ValueConverter<OriginalType> {}
+export interface IdentityConverter<OriginalType, ConvertedType> extends ValueConverter<OriginalType, ConvertedType> {}
 
-export interface ValueConverter<OriginalType, ConvertedType = OriginalType> {
+export interface ValueConverter<OriginalType, ConvertedType> {
   convertFrom(value: ParamValueModel<OriginalType>): ParamValueModel<ConvertedType>;
   convertTo(value: ParamValueModel<ConvertedType>): ParamValueModel<OriginalType>;
 }

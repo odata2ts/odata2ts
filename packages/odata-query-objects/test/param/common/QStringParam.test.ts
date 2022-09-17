@@ -1,75 +1,58 @@
 import { QStringParam } from "../../../src";
-import { ParamValueModel } from "../../../src/param/UrlParamModel";
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
+import { fixedPrefixConverter } from "../../fixture/converter/FixedPrefixConverter";
 
 describe("QStringParam Tests", () => {
   const NAME = "T3st_bbb";
-  const TO_TEST = new QStringParam(NAME);
+  const toTest = new QStringParam(NAME);
+  const toTestWithConverter = new QStringParam(NAME, undefined, fixedPrefixConverter);
 
-  test("QStringParam: base attributes", () => {
-    expect(TO_TEST.getName()).toBe(NAME);
-    expect(TO_TEST.getMappedName()).toBe(NAME);
-    expect(TO_TEST.getConverter()).toBeUndefined();
+  test("base attributes", () => {
+    expect(toTest.getName()).toBe(NAME);
+    expect(toTest.getMappedName()).toBe(NAME);
+    expect(toTest.getConverter()).toBeDefined();
   });
 
-  test("QStringParam: formatUrlValue", () => {
-    expect(TO_TEST.formatUrlValue("Te3st")).toBe("'Te3st'");
-    expect(TO_TEST.formatUrlValue(null)).toBe("null");
-    expect(TO_TEST.formatUrlValue(undefined)).toBe(undefined);
-  });
-
-  test("QStringParam: parseUrlValue", () => {
-    expect(TO_TEST.parseUrlValue("'Te3st'")).toBe("Te3st");
-    expect(TO_TEST.parseUrlValue("null")).toBe(null);
-    expect(TO_TEST.parseUrlValue(undefined)).toBe(undefined);
-  });
-
-  test("QStringParam: fail creation", () => {
+  test("fail creation", () => {
     // @ts-expect-error
     expect(() => new QStringParam()).toThrowError();
     // @ts-expect-error
     expect(() => new QStringParam(null)).toThrowError();
   });
 
-  test("QStringParam: mapped name", () => {
+  test("mapped name", () => {
     const mappedName = "t3stBbb";
     const toTest = new QStringParam(NAME, mappedName);
 
     expect(toTest.getName()).toBe(NAME);
     expect(toTest.getMappedName()).toBe(mappedName);
-    expect(toTest.getConverter()).toBeUndefined();
+    expect(toTest.getConverter()).toBeDefined();
   });
 
-  test("QStringParam: converter", () => {
-    const toTest = new QStringParam(NAME, undefined, {
-      convertFrom(value: ParamValueModel<string>): ParamValueModel<string> {
-        return typeof value === "string" ? `PREFIX_${value}` : value;
-      },
-      convertTo(value: ParamValueModel<string> | undefined): ParamValueModel<string> {
-        return typeof value === "string" ? value.replace(/^PREFIX_/, "") : value;
-      },
-    });
-    expect(toTest.getName()).toBe(NAME);
-    expect(toTest.getMappedName()).toBe(NAME);
-    expect(toTest.getConverter()).toBeDefined();
-    expect(toTest.convertTo("PREFIX_Tester")).toBe("Tester");
-    expect(toTest.convertFrom("Tester")).toBe("PREFIX_Tester");
-    expect(toTest.convertFrom(null)).toBe(null);
-    expect(toTest.convertFrom(undefined)).toBeUndefined();
+  test("converter", () => {
+    expect(toTestWithConverter.convertTo("PREFIX_Tester")).toBe("Tester");
+    expect(toTestWithConverter.convertFrom("Tester")).toBe("PREFIX_Tester");
   });
 
-  test("QStringParam: converter to different type", () => {
-    const toTest = new QStringParam<number>(NAME, undefined, {
-      convertFrom(value: ParamValueModel<string>): number {
-        return value?.length || 0;
-      },
-      convertTo(value: number): ParamValueModel<string> {
-        return "three";
-      },
-    });
-    expect(toTest.getName()).toBe(NAME);
-    expect(toTest.getMappedName()).toBe(NAME);
-    expect(toTest.getConverter()).toBeDefined();
-    expect(toTest.convertTo(3)).toBe("three");
-    expect(toTest.convertFrom("Tester")).toBe(6);
+  test("converter to different type", () => {
+    const toTest = new QStringParam<Date>(NAME, undefined, fixedDateConverter);
+    expect(toTest.convertFrom("Tester")).toBe(FIXED_DATE);
+    expect(toTest.convertTo(new Date())).toBe(FIXED_STRING);
+  });
+
+  test("formatUrlValue", () => {
+    expect(toTest.formatUrlValue("Te3st")).toBe("'Te3st'");
+    expect(toTest.formatUrlValue(null)).toBe("null");
+    expect(toTest.formatUrlValue(undefined)).toBe(undefined);
+
+    expect(toTestWithConverter.formatUrlValue("PREFIX_Test")).toBe("'Test'");
+  });
+
+  test("parseUrlValue", () => {
+    expect(toTest.parseUrlValue("'Te3st'")).toBe("Te3st");
+    expect(toTest.parseUrlValue("null")).toBe(null);
+    expect(toTest.parseUrlValue(undefined)).toBe(undefined);
+
+    expect(toTestWithConverter.parseUrlValue("'Te3st'")).toBe("PREFIX_Te3st");
   });
 });

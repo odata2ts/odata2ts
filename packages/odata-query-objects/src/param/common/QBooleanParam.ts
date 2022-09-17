@@ -10,7 +10,7 @@ export const parseValueFromUrl: UrlParamValueParser<boolean> = (urlConformValue)
   return typeof value !== "string" ? value : value === "true" ? true : value === "false" ? false : undefined;
 };
 
-export class QBooleanParam extends QParam<boolean> {
+export class QBooleanParam<ConvertedType = boolean> extends QParam<boolean, ConvertedType> {
   getUrlConformValue = getUrlConformValue;
   parseValueFromUrl = parseValueFromUrl;
 }
