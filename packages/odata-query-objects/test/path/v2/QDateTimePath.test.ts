@@ -1,27 +1,28 @@
 import { QDateTimeV2Path } from "../../../src";
 import {
   EXAMPLE_DATE_TIME,
+  EXAMPLE_PATH_NAME,
   createBaseDateTimeTests,
   createDateFunctionTests,
   createTimeFunctionTests,
 } from "./DateTimeBaseTests";
 
 describe("QDateTimeV2Path test", () => {
+  const toTest = new QDateTimeV2Path(EXAMPLE_PATH_NAME);
   const exampleResult = `datetime'${EXAMPLE_DATE_TIME}'`;
 
-  createBaseDateTimeTests(QDateTimeV2Path, EXAMPLE_DATE_TIME, exampleResult);
-  createDateFunctionTests(QDateTimeV2Path);
-  createTimeFunctionTests(QDateTimeV2Path);
-
-  test("get URL conform value", () => {
-    expect(QDateTimeV2Path.getUrlConformValue(EXAMPLE_DATE_TIME)).toBe(exampleResult);
-    expect(QDateTimeV2Path.getUrlConformValue(null)).toBe("null");
-    expect(QDateTimeV2Path.getUrlConformValue(undefined)).toBeUndefined();
+  test("fails with null, undefined, empty string", () => {
+    // @ts-expect-error
+    expect(() => new QDateTimeV2Path(null)).toThrow();
+    // @ts-expect-error
+    expect(() => new QDateTimeV2Path()).toThrow();
+    // @ts-expect-error
+    expect(() => new QDateTimeV2Path(undefined)).toThrow();
+    expect(() => new QDateTimeV2Path("")).toThrow();
+    expect(() => new QDateTimeV2Path(" ")).toThrow();
   });
 
-  test("parse URL conform value", () => {
-    expect(QDateTimeV2Path.parseValueFromUrl(exampleResult)).toBe(EXAMPLE_DATE_TIME);
-    expect(QDateTimeV2Path.parseValueFromUrl("null")).toBeNull();
-    expect(QDateTimeV2Path.parseValueFromUrl(undefined)).toBeUndefined();
-  });
+  createBaseDateTimeTests(toTest, EXAMPLE_DATE_TIME, exampleResult);
+  createDateFunctionTests(toTest);
+  createTimeFunctionTests(toTest);
 });

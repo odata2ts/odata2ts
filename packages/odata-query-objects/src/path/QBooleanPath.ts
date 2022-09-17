@@ -1,20 +1,17 @@
+import { StandardFilterOperators } from "../odata/ODataModel";
+import { buildQFilterOperation } from "../param/UrlParamHelper";
 import { QBasePath } from "./base/QBasePath";
 
-export class QBooleanPath extends QBasePath<boolean | QBooleanPath> {
-  public equals = this.pathOperator.equals;
-  public eq = this.pathOperator.equals;
-  public notEquals = this.pathOperator.notEquals;
-  public ne = this.pathOperator.notEquals;
+export class QBooleanPath<ConvertedType = boolean> extends QBasePath<boolean, ConvertedType> {
+  protected formatValue(value: boolean): string {
+    return String(value);
+  }
 
   public isTrue() {
-    return this.equals(true);
+    return buildQFilterOperation(this.path, StandardFilterOperators.EQUALS, "true");
   }
 
   public isFalse() {
-    return this.equals(false);
-  }
-
-  protected getOptions() {
-    return undefined;
+    return buildQFilterOperation(this.path, StandardFilterOperators.EQUALS, "false");
   }
 }

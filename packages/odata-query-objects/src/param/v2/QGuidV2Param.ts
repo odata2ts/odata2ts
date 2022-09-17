@@ -2,7 +2,9 @@ import { QParam, UrlParamValueFormatter, UrlParamValueParser } from "../../inter
 import { createParsingRegexp, getParamValue, parseParamValue } from "../UrlParamHelper";
 import { UrlParamModel } from "../UrlParamModel";
 
-export const URL_PARAM_CONFIG: UrlParamModel = { typePrefix: "guid" };
+export const GUID_V2_TYPE_PREFIX = "guid";
+
+const URL_PARAM_CONFIG: UrlParamModel = { typePrefix: GUID_V2_TYPE_PREFIX };
 const URL_PARAM_REGEXP = createParsingRegexp(URL_PARAM_CONFIG);
 
 export const getUrlConformValue: UrlParamValueFormatter<string> = (value) => {

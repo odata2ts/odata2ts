@@ -1,4 +1,4 @@
-import { QDatePath, QGuidPath } from "../../../src";
+import { QGuidPath } from "../../../src";
 
 describe("QGuidPath test", () => {
   let toTest: QGuidPath;
@@ -6,14 +6,6 @@ describe("QGuidPath test", () => {
 
   beforeEach(() => {
     toTest = new QGuidPath("ID");
-  });
-
-  test("get URL conform value", () => {
-    expect(QGuidPath.getUrlConformValue(exampleGuid)).toBe(exampleGuid);
-  });
-
-  test("parse URL conform value", () => {
-    expect(QGuidPath.parseValueFromUrl(exampleGuid)).toBe(exampleGuid);
   });
 
   test("get path", () => {

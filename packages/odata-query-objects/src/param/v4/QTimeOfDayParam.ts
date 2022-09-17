@@ -1,6 +1,7 @@
-import { QParam, QTimeOfDayPath } from "../../internal";
+import { QParam } from "../QParam";
+import { getParamValue, parseParamValue } from "../UrlParamHelper";
 
 export class QTimeOfDayParam extends QParam<string> {
-  getUrlConformValue = QTimeOfDayPath.getUrlConformValue;
-  parseValueFromUrl = QTimeOfDayPath.parseValueFromUrl;
+  getUrlConformValue = getParamValue;
+  parseValueFromUrl = parseParamValue;
 }

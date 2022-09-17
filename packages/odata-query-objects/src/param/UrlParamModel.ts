@@ -11,7 +11,7 @@ export interface UrlParamModel {
 
 export type ParamValueModel<Type> = Type | null | undefined;
 export type UrlValueModel = string | undefined;
-export type UrlExpressionValueModel = QPathModel | number | string | boolean | null;
+export type UrlExpressionValueModel = number | string | boolean;
 
 /**
  * Takes a primitive value and formats it appropriate for usage in URLs, taking care of

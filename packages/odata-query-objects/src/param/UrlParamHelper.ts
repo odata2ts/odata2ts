@@ -1,3 +1,13 @@
+import {
+  CollectionFilterFunctions,
+  DateTimeFilterFunctions,
+  NumberFilterFunctions,
+  NumberFilterOperators,
+  StandardFilterOperators,
+  StringFilterFunctions,
+} from "../odata/ODataModel";
+import { QPathModel } from "../path";
+import { QFilterExpression } from "../QFilterExpression";
 import { UrlExpressionValueModel, UrlParamModel } from "./UrlParamModel";
 
 /**
@@ -16,12 +26,28 @@ function getValue(value: number | string | boolean, options: UrlParamModel = {})
   const { isQuoted = false, typePrefix, typeSuffix } = options;
 
   if (typePrefix) {
-    return `${typePrefix}'${value}'`;
+    return withTypePrefix(typePrefix, value);
   }
   if (typeSuffix) {
-    return `${value}${typeSuffix}`;
+    return withTypeSuffix(typeSuffix, value);
   }
-  return isQuoted ? `'${value}'` : String(value);
+  return isQuoted ? withQuotes(value) : String(value);
+}
+
+export function withTypePrefix(typePrefix: string, value: number | string | boolean) {
+  return `${typePrefix}'${value}'`;
+}
+
+export function withTypeSuffix(typeSuffix: string, value: number | string | boolean) {
+  return `${value}${typeSuffix}`;
+}
+
+export function withQuotes(value: number | string | boolean) {
+  return `'${value}'`;
+}
+
+export function isPathValue(value: QPathModel | any): value is QPathModel {
+  return typeof value === "object" && typeof value?.getPath === "function";
 }
 
 /**
@@ -30,9 +56,8 @@ function getValue(value: number | string | boolean, options: UrlParamModel = {})
  * @param value another path, null or a primitive type
  * @param options meta infos about value conversion
  */
-export function getExpressionValue(value: UrlExpressionValueModel, options?: UrlParamModel) {
-  // an expression might reference another attribute
-  if (typeof value === "object" && typeof value?.getPath === "function") {
+export function getExpressionValue(value: UrlExpressionValueModel | QPathModel | null, options?: UrlParamModel) {
+  if (isPathValue(value)) {
     return value.getPath();
   }
   // null is a regular value
@@ -40,6 +65,30 @@ export function getExpressionValue(value: UrlExpressionValueModel, options?: Url
     return "null";
   }
   return getValue(value as string | number | boolean, options);
+}
+
+export function buildOperatorExpression(
+  path: string,
+  operator: StandardFilterOperators | NumberFilterOperators,
+  value: string
+) {
+  return `${path} ${operator} ${value}`;
+}
+
+export function buildFunctionExpression(
+  functionName: CollectionFilterFunctions | StringFilterFunctions | NumberFilterFunctions | DateTimeFilterFunctions,
+  param1: string,
+  param2?: string
+) {
+  return `${functionName}(${param1}${param2 ? `,${param2}` : ""})`;
+}
+
+export function buildQFilterOperation(
+  path: string,
+  operator: StandardFilterOperators | NumberFilterOperators,
+  value: string
+) {
+  return new QFilterExpression(buildOperatorExpression(path, operator, value));
 }
 
 /**

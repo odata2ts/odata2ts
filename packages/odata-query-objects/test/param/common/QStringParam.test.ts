@@ -70,6 +70,6 @@ describe("QStringParam Tests", () => {
     expect(toTest.getMappedName()).toBe(NAME);
     expect(toTest.getConverter()).toBeDefined();
     expect(toTest.convertTo(3)).toBe("three");
-    expect(toTest.convertFrom("Tester")).toBe(5);
+    expect(toTest.convertFrom("Tester")).toBe(6);
   });
 });

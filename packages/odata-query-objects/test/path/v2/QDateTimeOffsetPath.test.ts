@@ -1,27 +1,28 @@
 import { QDateTimeOffsetV2Path } from "../../../src";
 import {
   EXAMPLE_DATE_TIME_OFFSET,
+  EXAMPLE_PATH_NAME,
   createBaseDateTimeTests,
   createDateFunctionTests,
   createTimeFunctionTests,
 } from "./DateTimeBaseTests";
 
 describe("QDateTimeOffsetV2Path test", () => {
+  const toTest = new QDateTimeOffsetV2Path(EXAMPLE_PATH_NAME);
   const exampleResult = `datetimeoffset'${EXAMPLE_DATE_TIME_OFFSET}'`;
 
-  createBaseDateTimeTests(QDateTimeOffsetV2Path, EXAMPLE_DATE_TIME_OFFSET, exampleResult);
-  createDateFunctionTests(QDateTimeOffsetV2Path);
-  createTimeFunctionTests(QDateTimeOffsetV2Path);
-
-  test("get URL conform value", () => {
-    expect(QDateTimeOffsetV2Path.getUrlConformValue(EXAMPLE_DATE_TIME_OFFSET)).toBe(exampleResult);
-    expect(QDateTimeOffsetV2Path.getUrlConformValue(null)).toBe("null");
-    expect(QDateTimeOffsetV2Path.getUrlConformValue(undefined)).toBeUndefined();
+  test("fails with null, undefined, empty string", () => {
+    // @ts-expect-error
+    expect(() => new QDateTimeOffsetV2Path(null)).toThrow();
+    // @ts-expect-error
+    expect(() => new QDateTimeOffsetV2Path()).toThrow();
+    // @ts-expect-error
+    expect(() => new QDateTimeOffsetV2Path(undefined)).toThrow();
+    expect(() => new QDateTimeOffsetV2Path("")).toThrow();
+    expect(() => new QDateTimeOffsetV2Path(" ")).toThrow();
   });
 
-  test("parse URL conform value", () => {
-    expect(QDateTimeOffsetV2Path.parseValueFromUrl(exampleResult)).toBe(EXAMPLE_DATE_TIME_OFFSET);
-    expect(QDateTimeOffsetV2Path.parseValueFromUrl("null")).toBeNull();
-    expect(QDateTimeOffsetV2Path.parseValueFromUrl(undefined)).toBeUndefined();
-  });
+  createBaseDateTimeTests(toTest, EXAMPLE_DATE_TIME_OFFSET, exampleResult);
+  createDateFunctionTests(toTest);
+  createTimeFunctionTests(toTest);
 });

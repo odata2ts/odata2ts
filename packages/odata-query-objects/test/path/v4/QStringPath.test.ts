@@ -1,15 +1,22 @@
 import { QStringPath } from "../../../src";
+import { getIdentityConverter } from "../../../src/converter/IdentityConverter";
 import { createStringTests } from "../StringBaseTests";
 
 describe("QStringPath test", () => {
-  createStringTests(QStringPath);
+  const toTest = new QStringPath("Country");
+  const otherProp = new QStringPath("Language");
 
-  let toTest: QStringPath;
-  let otherProp: QStringPath;
+  createStringTests(toTest, otherProp);
 
-  beforeEach(() => {
-    toTest = new QStringPath("Country");
-    otherProp = new QStringPath("Language");
+  test("fails with null, undefined, empty string", () => {
+    // @ts-expect-error
+    expect(() => new QStringPath(null)).toThrow();
+    // @ts-expect-error
+    expect(() => new QStringPath()).toThrow();
+    // @ts-expect-error
+    expect(() => new QStringPath(undefined)).toThrow();
+    expect(() => new QStringPath("", getIdentityConverter())).toThrow();
+    expect(() => new QStringPath(" ", getIdentityConverter())).toThrow();
   });
 
   test("contains", () => {

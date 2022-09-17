@@ -1,14 +1,13 @@
-import { QDateTimeOffsetV2Path, QDateTimeV2Path, QTimeV2Path } from "../../../src";
+import { QDatePath, QDateTimeOffsetPath, QTimeOfDayPath } from "../../../src";
 
 export const EXAMPLE_PATH_NAME = "createdAt";
 export const EXAMPLE_TIME = "20:15:59";
-export const EXAMPLE_DATE_TIME = `2021-07-03T${EXAMPLE_TIME}`;
-export const EXAMPLE_DATE_TIME_OFFSET = `${EXAMPLE_DATE_TIME}Z`;
+export const EXAMPLE_DATE = `2021-07-03`;
+export const EXAMPLE_DATE_TIME_OFFSET = `${EXAMPLE_DATE}T${EXAMPLE_TIME}Z`;
 
-export function createBaseDateTimeTests<T extends QDateTimeOffsetV2Path | QDateTimeV2Path | QTimeV2Path>(
+export function createBaseDateTimeTests<T extends QDateTimeOffsetPath | QDatePath | QTimeOfDayPath>(
   toTest: T,
-  example: string,
-  exampleResult: string
+  example: string
 ) {
   test("get path", () => {
     expect(toTest.getPath()).toBe(EXAMPLE_PATH_NAME);
@@ -31,59 +30,59 @@ export function createBaseDateTimeTests<T extends QDateTimeOffsetV2Path | QDateT
   test("equals", () => {
     const result = toTest.equals(example).toString();
 
-    expect(result).toBe(`createdAt eq ${exampleResult}`);
+    expect(result).toBe(`createdAt eq ${example}`);
     expect(result).toBe(toTest.eq(example).toString());
   });
 
   test("not equals", () => {
     const result = toTest.notEquals(example).toString();
 
-    expect(result).toBe(`createdAt ne ${exampleResult}`);
+    expect(result).toBe(`createdAt ne ${example}`);
     expect(result).toBe(toTest.ne(example).toString());
   });
 
   test("lower than", () => {
     const result = toTest.lowerThan(example).toString();
 
-    expect(result).toBe(`createdAt lt ${exampleResult}`);
+    expect(result).toBe(`createdAt lt ${example}`);
     expect(result).toBe(toTest.lt(example).toString());
   });
 
   test("lower equals", () => {
     const result = toTest.lowerEquals(example).toString();
 
-    expect(result).toBe(`createdAt le ${exampleResult}`);
+    expect(result).toBe(`createdAt le ${example}`);
     expect(result).toBe(toTest.le(example).toString());
   });
 
   test("greater than", () => {
     const result = toTest.greaterThan(example).toString();
 
-    expect(result).toBe(`createdAt gt ${exampleResult}`);
+    expect(result).toBe(`createdAt gt ${example}`);
     expect(result).toBe(toTest.gt(example).toString());
   });
 
   test("greater equals", () => {
     const result = toTest.greaterEquals(example).toString();
 
-    expect(result).toBe(`createdAt ge ${exampleResult}`);
+    expect(result).toBe(`createdAt ge ${example}`);
     expect(result).toBe(toTest.ge(example).toString());
   });
 
   test("in", () => {
     const result = toTest.in(example).toString();
 
-    expect(result).toBe(`createdAt eq ${exampleResult}`);
+    expect(result).toBe(`createdAt eq ${example}`);
   });
 
   test("in with multiple", () => {
     const result = toTest.in(example, example).toString();
 
-    expect(result).toBe(`(createdAt eq ${exampleResult} or createdAt eq ${exampleResult})`);
+    expect(result).toBe(`(createdAt eq ${example} or createdAt eq ${example})`);
   });
 }
 
-export function createDateFunctionTests<T extends QDateTimeOffsetV2Path | QDateTimeV2Path>(toTest: T) {
+export function createDateFunctionTests<T extends QDateTimeOffsetPath | QDatePath>(toTest: T) {
   test("year", () => {
     const result = toTest.year().equals(2021).toString();
 
@@ -102,7 +101,7 @@ export function createDateFunctionTests<T extends QDateTimeOffsetV2Path | QDateT
   });
 }
 
-export function createTimeFunctionTests<T extends QDateTimeOffsetV2Path | QDateTimeV2Path | QTimeV2Path>(toTest: T) {
+export function createTimeFunctionTests<T extends QDateTimeOffsetPath | QTimeOfDayPath>(toTest: T) {
   test("hour", () => {
     const result = toTest.hour().equals(20).toString();
 

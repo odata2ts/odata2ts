@@ -1,6 +1,7 @@
-import { QDatePath, QParam } from "../../internal";
+import { QParam } from "../QParam";
+import { getParamValue, parseParamValue } from "../UrlParamHelper";
 
 export class QDateParam extends QParam<string> {
-  getUrlConformValue = QDatePath.getUrlConformValue;
-  parseValueFromUrl = QDatePath.parseValueFromUrl;
+  getUrlConformValue = getParamValue;
+  parseValueFromUrl = parseParamValue;
 }

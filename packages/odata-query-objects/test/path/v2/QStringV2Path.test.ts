@@ -1,37 +1,34 @@
 import { QStringV2Path } from "../../../src";
+import { getIdentityConverter } from "../../../src/converter/IdentityConverter";
 import { createStringTests } from "../StringBaseTests";
 
 describe("QStringV2Path test", () => {
-  createStringTests(QStringV2Path);
+  const toTest = new QStringV2Path("Country");
+  const otherProp = new QStringV2Path("Language");
 
-  let toTest: QStringV2Path;
-  let otherProp: QStringV2Path;
+  createStringTests(toTest, otherProp);
 
-  beforeEach(() => {
-    toTest = new QStringV2Path("Country");
-    otherProp = new QStringV2Path("Language");
+  test("fails with null, undefined, empty string", () => {
+    // @ts-expect-error
+    expect(() => new QStringV2Path(null)).toThrow();
+    // @ts-expect-error
+    expect(() => new QStringV2Path()).toThrow();
+    // @ts-expect-error
+    expect(() => new QStringV2Path(undefined)).toThrow();
+    expect(() => new QStringV2Path("", getIdentityConverter())).toThrow();
+    expect(() => new QStringV2Path(" ", getIdentityConverter())).toThrow();
   });
 
-  test("get URL conform value", () => {
-    expect(QStringV2Path.getUrlConformValue("Tester")).toBe("'Tester'");
-    expect(QStringV2Path.getUrlConformValue(null)).toBe("null");
-    expect(QStringV2Path.getUrlConformValue(undefined)).toBeUndefined();
-  });
+  beforeEach(() => {});
 
-  test("parse URL value", () => {
-    expect(QStringV2Path.parseValueFromUrl("'Tester'")).toBe("Tester");
-    expect(QStringV2Path.parseValueFromUrl("null")).toBeNull();
-    expect(QStringV2Path.parseValueFromUrl(undefined)).toBeUndefined();
-  });
-
-  test("substringOf", () => {
-    const result = toTest.substringOf("ran");
+  test("contains", () => {
+    const result = toTest.contains("ran");
 
     expect(result.toString()).toBe("substringof('ran',Country)");
   });
 
   test("contains prop", () => {
-    const result = toTest.substringOf(otherProp);
+    const result = toTest.contains(otherProp);
 
     expect(result.toString()).toBe("substringof(Language,Country)");
   });

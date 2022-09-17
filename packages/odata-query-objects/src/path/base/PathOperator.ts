@@ -1,38 +1,25 @@
 import { ValueConverter } from "../../converter";
 import { StandardFilterOperators } from "../../odata/ODataModel";
 import { getExpressionValue } from "../../param/UrlParamHelper";
-import { ParamValueModel, UrlExpressionValueModel, UrlParamModel } from "../../param/UrlParamModel";
+import { UrlExpressionValueModel, UrlParamModel } from "../../param/UrlParamModel";
 import { QFilterExpression } from "../../QFilterExpression";
 
 export class PathOperator<ValueType extends UrlExpressionValueModel, ConvertedType> {
   constructor(
     protected path: string,
-    protected options?: UrlParamModel,
-    protected converter?: ValueConverter<ValueType, ConvertedType>
+    protected converter: ValueConverter<ValueType, ConvertedType>,
+    protected options?: UrlParamModel
   ) {}
 
   private buildExpression(operator: StandardFilterOperators, value: ConvertedType) {
-    return new QFilterExpression(this.buildOperation(operator, value));
-  }
-
-  private buildOperation(operator: StandardFilterOperators, value: ConvertedType) {
-    const converted = this.converter
-      ? this.converter.convertTo(value)
-      : (value as unknown as ParamValueModel<ValueType>);
+    const converted = this.converter.convertTo(value);
     if (converted === undefined) {
       throw new Error(`Value "${value}" converts to undefined!`);
     }
 
-    return `${this.path} ${operator} ${getExpressionValue(converted)}`;
+    const expression = `${this.path} ${operator} ${getExpressionValue(converted)}`;
+    return new QFilterExpression(expression);
   }
-
-  public equals = (value: ConvertedType) => {
-    return this.buildExpression(StandardFilterOperators.EQUALS, value);
-  };
-
-  public notEquals = (value: ConvertedType) => {
-    return this.buildExpression(StandardFilterOperators.NOT_EQUALS, value);
-  };
 
   public lowerThan = (value: ConvertedType) => {
     return this.buildExpression(StandardFilterOperators.LOWER_THAN, value);

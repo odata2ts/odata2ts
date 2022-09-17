@@ -1,4 +1,5 @@
-import { QBooleanPath } from "../../src";
+import { QBooleanPath, ValueConverter } from "../../src";
+import { ParamValueModel } from "../../src/param/UrlParamModel";
 
 describe("QBooleanPath test", () => {
   let toTest = new QBooleanPath("done");
@@ -55,11 +56,19 @@ describe("QBooleanPath test", () => {
     expect(toTest.ne(otherPath).toString()).toBe("done ne Test");
   });
 
-  test("equals fails with null or undefined", () => {
-    // @ts-expect-error
-    expect(() => toTest.equals(null)).toThrow();
+  test("equals null", () => {
+    expect(toTest.equals(null).toString()).toBe("done eq null");
+    expect(toTest.notEquals(null).toString()).toBe("done ne null");
+  });
+
+  test("equals fails with undefined", () => {
     // @ts-expect-error
     expect(() => toTest.equals(undefined)).toThrow();
+  });
+
+  test("typing tests", () => {
+    // @ts-expect-error
+    expect(toTest.equals("test").toString()).toEqual("done eq test");
   });
 
   test("isTrue", () => {
@@ -72,5 +81,23 @@ describe("QBooleanPath test", () => {
     const result = toTest.isFalse().toString();
 
     expect(result).toBe("done eq false");
+  });
+
+  test("with converter", () => {
+    const converter: ValueConverter<boolean, number> = {
+      convertFrom(value: ParamValueModel<boolean>): ParamValueModel<number> {
+        return value ? 1 : 0;
+      },
+      convertTo(value: ParamValueModel<number>): ParamValueModel<boolean> {
+        return value === 1;
+      },
+    };
+
+    const newPath = new QBooleanPath("test", converter);
+
+    expect(newPath.eq(1).toString()).toBe("test eq true");
+    expect(newPath.ne(0).toString()).toBe("test ne false");
+
+    expect(newPath.isTrue().toString()).toBe("test eq true");
   });
 });
