@@ -1,10 +1,10 @@
 import { ParamValueModel } from "../param/UrlParamModel";
-import { ChainableValueConverter } from "./ConverterModel";
+import { ChainableValueConverter, ValueConverter } from "./ConverterModel";
 
 export class ChainedConverter<FromType, IntermediateType, ToType> implements ChainableValueConverter<FromType, ToType> {
   constructor(
-    private converter: ChainableValueConverter<FromType, IntermediateType>,
-    private converter2: ChainableValueConverter<IntermediateType, ToType>
+    private converter: ValueConverter<FromType, IntermediateType>,
+    private converter2: ValueConverter<IntermediateType, ToType>
   ) {}
 
   public convertFrom(value: ParamValueModel<FromType>): ParamValueModel<ToType> {
@@ -15,7 +15,7 @@ export class ChainedConverter<FromType, IntermediateType, ToType> implements Cha
     return this.converter.convertTo(this.converter2.convertTo(value));
   }
 
-  public chain<T>(converterToChain: ChainableValueConverter<ToType, T>): ChainableValueConverter<FromType, T> {
+  public chain<T>(converterToChain: ValueConverter<ToType, T>): ChainableValueConverter<FromType, T> {
     return new ChainedConverter(this, converterToChain);
   }
 }

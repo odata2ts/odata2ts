@@ -9,5 +9,5 @@ export interface ValueConverter<OriginalType, ConvertedType> {
 
 export interface ChainableValueConverter<OriginalType, ConvertedType>
   extends ValueConverter<OriginalType, ConvertedType> {
-  chain<T>(converterToChain: ChainableValueConverter<ConvertedType, T>): ChainableValueConverter<OriginalType, T>;
+  chain<T>(converterToChain: ValueConverter<ConvertedType, T>): ChainableValueConverter<OriginalType, T>;
 }

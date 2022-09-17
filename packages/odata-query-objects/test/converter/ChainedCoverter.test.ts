@@ -1,13 +1,19 @@
-import { dateToIso8601Converter, v2DateTimeToDateConverter } from "../../src";
+import { ChainedConverter } from "../../src";
+import { fixedNumberConverter } from "../fixture/converter/FixedNumberConverter";
+import { fixedPrefixConverter } from "../fixture/converter/FixedPrefixConverter";
 
 describe("ChainedConverter Test", () => {
-  const TIMESTAMP = 1672531199000;
-  const FROM_STRING = `/Date(${TIMESTAMP})/`;
-  const TO_STRING = "2022-12-31T23:59:59.000Z";
+  const toTest = new ChainedConverter(fixedNumberConverter, fixedPrefixConverter);
 
-  test("Chained Converter: from v2 datetime string via Date to ISO 8601 string", () => {
-    const toTest = v2DateTimeToDateConverter.chain(dateToIso8601Converter);
+  test("from number to prefixed string and back", () => {
+    expect(toTest.convertFrom(3)).toBe("PREFIX_3");
+    expect(toTest.convertTo("PREFIX_22")).toBe(22);
+  });
 
-    expect(toTest.convertFrom(FROM_STRING)).toBe(TO_STRING);
+  test("Chained Converter: one more chaining", () => {
+    const doubleChained = toTest.chain(fixedPrefixConverter);
+
+    expect(doubleChained.convertFrom(3)).toBe("PREFIX_PREFIX_3");
+    expect(doubleChained.convertTo("PREFIX_PREFIX_22")).toBe(22);
   });
 });

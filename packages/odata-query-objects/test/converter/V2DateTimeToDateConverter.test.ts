@@ -1,4 +1,4 @@
-import { v2DateTimeToDateConverter } from "../../src";
+import { dateToIso8601Converter, v2DateTimeToDateConverter } from "../../src";
 
 describe("V2DateTimeToDateConverter Test", () => {
   const TIMESTAMP = 1672531199000;
@@ -7,8 +7,6 @@ describe("V2DateTimeToDateConverter Test", () => {
   const TO_TEST = v2DateTimeToDateConverter;
 
   test("from v2 datetime string to Date", () => {
-    const result = TO_TEST.convertFrom(FROM_STRING);
-
     expect(TO_TEST.convertFrom(FROM_STRING)?.toISOString()).toBe(TO_STRING);
   });
 
@@ -23,5 +21,12 @@ describe("V2DateTimeToDateConverter Test", () => {
 
     expect(TO_TEST.convertTo(null)).toBeNull();
     expect(TO_TEST.convertTo(undefined)).toBeUndefined();
+  });
+
+  test("chaining", () => {
+    const chained = v2DateTimeToDateConverter.chain(dateToIso8601Converter);
+
+    expect(chained.convertFrom(FROM_STRING)).toBe(TO_STRING);
+    expect(chained.convertTo(TO_STRING)).toBe(FROM_STRING);
   });
 });

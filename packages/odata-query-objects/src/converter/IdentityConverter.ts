@@ -1,6 +1,5 @@
 import { ParamValueModel } from "../param/UrlParamModel";
-import { ChainedConverter } from "./ChainedConverter";
-import { ChainableValueConverter, IdentityConverter } from "./ConverterModel";
+import { IdentityConverter } from "./ConverterModel";
 
 export class IdentityConverterImpl implements IdentityConverter<any, any> {
   convertFrom<ValueType>(value: ParamValueModel<ValueType>) {
@@ -9,10 +8,6 @@ export class IdentityConverterImpl implements IdentityConverter<any, any> {
 
   convertTo<ValueType>(value: ParamValueModel<ValueType>) {
     return value;
-  }
-
-  chain<T>(converterToChain: ChainableValueConverter<any, T>): ChainableValueConverter<any, T> {
-    return new ChainedConverter(this, converterToChain);
   }
 }
 

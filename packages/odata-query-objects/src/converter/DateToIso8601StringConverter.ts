@@ -1,6 +1,6 @@
 import { ParamValueModel } from "../param/UrlParamModel";
 import { ChainedConverter } from "./ChainedConverter";
-import { ChainableValueConverter } from "./ConverterModel";
+import { ChainableValueConverter, ValueConverter } from "./ConverterModel";
 
 class DateToIso8601StringConverter implements ChainableValueConverter<Date, string> {
   convertFrom(value: ParamValueModel<Date>) {
@@ -11,7 +11,7 @@ class DateToIso8601StringConverter implements ChainableValueConverter<Date, stri
     return typeof value === "string" ? new Date(value) : value;
   }
 
-  chain<T>(converterToChain: ChainableValueConverter<string, T>): ChainableValueConverter<Date, T> {
+  chain<T>(converterToChain: ValueConverter<string, T>): ChainableValueConverter<Date, T> {
     return new ChainedConverter(this, converterToChain);
   }
 }
