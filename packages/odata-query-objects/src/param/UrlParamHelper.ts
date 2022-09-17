@@ -22,7 +22,7 @@ import { UrlExpressionValueModel, UrlParamModel } from "./UrlParamModel";
  * @param value
  * @param options by default values are interpreted as literals, i.e. without surrounding single quotes
  */
-function getValue(value: number | string | boolean, options: UrlParamModel = {}): string {
+function getValue(value: UrlExpressionValueModel, options: UrlParamModel = {}): string {
   const { isQuoted = false, typePrefix, typeSuffix } = options;
 
   if (typePrefix) {
@@ -34,15 +34,15 @@ function getValue(value: number | string | boolean, options: UrlParamModel = {})
   return isQuoted ? withQuotes(value) : String(value);
 }
 
-export function withTypePrefix(typePrefix: string, value: number | string | boolean) {
+export function withTypePrefix(typePrefix: string, value: UrlExpressionValueModel) {
   return `${typePrefix}'${value}'`;
 }
 
-export function withTypeSuffix(typeSuffix: string, value: number | string | boolean) {
+export function withTypeSuffix(typeSuffix: string, value: UrlExpressionValueModel) {
   return `${value}${typeSuffix}`;
 }
 
-export function withQuotes(value: number | string | boolean) {
+export function withQuotes(value: UrlExpressionValueModel) {
   return `'${value}'`;
 }
 

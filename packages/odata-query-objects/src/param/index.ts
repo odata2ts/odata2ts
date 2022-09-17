@@ -1,5 +1,6 @@
-export { QParam } from "./QParam";
 export * from "./UrlParamModel";
+export * from "./UrlParamHelper";
+export { QParam } from "./QParam";
 
 export { QBooleanParam } from "./common/QBooleanParam";
 export { QNumberParam } from "./common/QNumberParam";

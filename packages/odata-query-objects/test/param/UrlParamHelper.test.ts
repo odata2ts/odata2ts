@@ -1,11 +1,21 @@
-import { UrlParamModel } from "../../src/param/UrlParamModel";
 import {
+  NumberFilterOperators,
+  QPathModel,
+  StandardFilterOperators,
+  StringFilterFunctions,
+  UrlParamModel,
+  buildFunctionExpression,
+  buildOperatorExpression,
+  buildQFilterOperation,
   createParsingRegexp,
   getExpressionValue,
   getParamValue,
+  isPathValue,
   parseParamValue,
-} from "../../src/param/UrlParamHelper";
-import { QPathModel } from "../../src";
+  withQuotes,
+  withTypePrefix,
+  withTypeSuffix,
+} from "../../src";
 
 describe("UrlParamHelper Tests", () => {
   const quotedTest: UrlParamModel = { isQuoted: true };
@@ -14,6 +24,73 @@ describe("UrlParamHelper Tests", () => {
   const qPathTest: QPathModel = {
     getPath: () => "qpath",
   };
+
+  test("withTypePrefix", () => {
+    expect(withTypePrefix("PRE", "test")).toBe("PRE'test'");
+    expect(withTypePrefix("PRE", 3)).toBe("PRE'3'");
+    expect(withTypePrefix("PRE", false)).toBe("PRE'false'");
+    // @ts-expect-error
+    expect(withTypePrefix("PRE", null)).toBe("PRE'null'");
+    // @ts-expect-error
+    expect(withTypePrefix("PRE", undefined)).toBe("PRE'undefined'");
+  });
+
+  test("withTypeSuffix", () => {
+    expect(withTypeSuffix("SUF", "test")).toBe("testSUF");
+    expect(withTypeSuffix("suf", 3)).toBe("3suf");
+    expect(withTypeSuffix("SUF", false)).toBe("falseSUF");
+    // @ts-expect-error
+    expect(withTypeSuffix("SUF", null)).toBe("nullSUF");
+    // @ts-expect-error
+    expect(withTypeSuffix("SUF", undefined)).toBe("undefinedSUF");
+  });
+
+  test("withQuotes", () => {
+    expect(withQuotes("test")).toBe("'test'");
+    expect(withQuotes(3)).toBe("'3'");
+    expect(withQuotes(false)).toBe("'false'");
+    // @ts-expect-error
+    expect(withQuotes(null)).toBe("'null'");
+    // @ts-expect-error
+    expect(withQuotes(undefined)).toBe("'undefined'");
+  });
+
+  test("isPathValue", () => {
+    expect(isPathValue(qPathTest)).toBe(true);
+
+    expect(isPathValue("test")).toBe(false);
+    expect(isPathValue(3)).toBe(false);
+    expect(isPathValue(false)).toBe(false);
+    expect(isPathValue(null)).toBe(false);
+    expect(isPathValue(undefined)).toBe(false);
+  });
+
+  test("getExpressionValue", () => {
+    expect(getExpressionValue(qPathTest)).toBe(qPathTest.getPath());
+    expect(getExpressionValue(null)).toBe("null");
+
+    expect(getExpressionValue("test")).toBe("test");
+    expect(getExpressionValue(3)).toBe("3");
+    expect(getExpressionValue(false)).toBe("false");
+    expect(getExpressionValue(3, { typePrefix: "aba" })).toBe("aba'3'");
+
+    // @ts-expect-error
+    expect(getExpressionValue(undefined)).toBe("undefined");
+  });
+
+  test("buildOperatorExpression", () => {
+    expect(buildOperatorExpression("test", NumberFilterOperators.ADDITION, "5")).toBe("test add 5");
+    expect(buildOperatorExpression("test", StandardFilterOperators.LOWER_THAN, "5")).toBe("test lt 5");
+  });
+
+  test("buildFunctionExpression", () => {
+    expect(buildFunctionExpression(StringFilterFunctions.LENGTH, "test")).toBe("length(test)");
+    expect(buildFunctionExpression(StringFilterFunctions.CONTAINS, "Test", "ttt")).toBe("contains(Test,ttt)");
+  });
+
+  test("buildQFilterOperation", () => {
+    expect(buildQFilterOperation("test", StandardFilterOperators.EQUALS, "hhh").toString()).toBe("test eq hhh");
+  });
 
   test("getParamValue", () => {
     expect(getParamValue(undefined)).toBeUndefined();
