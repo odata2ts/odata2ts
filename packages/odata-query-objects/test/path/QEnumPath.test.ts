@@ -12,20 +12,6 @@ describe("QEnumPath test", () => {
     toTest = new QEnumPath("feature");
   });
 
-  test("get URL conform value", () => {
-    expect(QEnumPath.getUrlConformValue(FeatureEnum.Feature1)).toBe("'Feature1'");
-    expect(QEnumPath.getUrlConformValue("test")).toBe("'test'");
-    expect(QEnumPath.getUrlConformValue(null)).toBe("null");
-    expect(QEnumPath.getUrlConformValue(undefined)).toBeUndefined();
-  });
-
-  test("parse URL conform value", () => {
-    expect(QEnumPath.parseValueFromUrl("'Feature1'")).toBe(FeatureEnum.Feature1);
-    expect(QEnumPath.parseValueFromUrl("test")).toBe("test");
-    expect(QEnumPath.parseValueFromUrl("null")).toBeNull();
-    expect(QEnumPath.parseValueFromUrl(undefined)).toBeUndefined();
-  });
-
   test("get path", () => {
     expect(toTest.getPath()).toBe("feature");
   });

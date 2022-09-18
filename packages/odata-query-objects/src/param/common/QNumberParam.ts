@@ -1,16 +1,12 @@
-import { QParam, UrlParamValueFormatter, UrlParamValueParser } from "../../internal";
-import { getParamValue, parseParamValue } from "../UrlParamHelper";
-
-export const getUrlConformValue: UrlParamValueFormatter<number> = (value) => {
-  return getParamValue(value);
-};
+import { QParam, UrlParamValueParser } from "../../internal";
+import { formatLiteralParam, parseLiteral } from "../UrlParamHelper";
 
 export const parseValueFromUrl: UrlParamValueParser<number> = (urlConformValue) => {
-  const value = parseParamValue(urlConformValue);
+  const value = parseLiteral(urlConformValue);
   return typeof value === "string" ? Number(urlConformValue) : value;
 };
 
 export class QNumberParam<ConvertedType = number> extends QParam<number, ConvertedType> {
-  getUrlConformValue = getUrlConformValue;
+  getUrlConformValue = formatLiteralParam;
   parseValueFromUrl = parseValueFromUrl;
 }

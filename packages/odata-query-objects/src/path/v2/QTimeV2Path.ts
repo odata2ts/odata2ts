@@ -1,11 +1,11 @@
-import { withTypePrefix } from "../../param/UrlParamHelper";
+import { formatWithTypePrefix } from "../../param/UrlParamHelper";
 import { TIME_V2_TYPE_PREFIX } from "../../param/v2/QTimeV2Param";
 import { hourFn, minuteFn, secondFn } from "../base/DateTimeFunctions";
 import { QBasePath } from "../base/QBasePath";
 
 export class QTimeV2Path<ConvertedType = string> extends QBasePath<string, ConvertedType> {
   protected formatValue(value: string): string {
-    return withTypePrefix(TIME_V2_TYPE_PREFIX, value);
+    return formatWithTypePrefix(TIME_V2_TYPE_PREFIX, value);
   }
 
   public hour = hourFn(this.getPath());

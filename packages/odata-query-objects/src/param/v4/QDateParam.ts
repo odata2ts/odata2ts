@@ -1,7 +1,7 @@
 import { QParam } from "../QParam";
-import { getParamValue, parseParamValue } from "../UrlParamHelper";
+import { formatLiteralParam, parseLiteral } from "../UrlParamHelper";
 
 export class QDateParam<ConvertedType = string> extends QParam<string, ConvertedType> {
-  getUrlConformValue = getParamValue;
-  parseValueFromUrl = parseParamValue;
+  getUrlConformValue = formatLiteralParam;
+  parseValueFromUrl = parseLiteral;
 }

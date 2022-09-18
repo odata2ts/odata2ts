@@ -1,5 +1,5 @@
 import { StringFilterFunctions } from "../../odata/ODataModel";
-import { buildFunctionExpression, withQuotes } from "../../param/UrlParamHelper";
+import { buildFunctionExpression, formatWithQuotes } from "../../param/UrlParamHelper";
 import { QFilterExpression } from "../../QFilterExpression";
 import { QNumberPath } from "../QNumberPath";
 import { InputModel, QBasePath } from "./QBasePath";
@@ -10,7 +10,7 @@ export abstract class QStringBasePath<SubClass extends QStringBasePath<any, any>
 > {
   protected abstract create(path: string): SubClass;
 
-  protected formatValue = withQuotes;
+  protected formatValue = formatWithQuotes;
 
   protected getFunctionExpression(func: StringFilterFunctions, value: InputModel<this["converter"]>) {
     const converted = this.convertInput(value);
