@@ -57,7 +57,7 @@ export abstract class QFunction<ParamModel = undefined> {
     // short form of id: just primitive value for single key entities
     if (SINGLE_VALUE_TYPES.includes(typeof params)) {
       if (qParams?.length !== 1) {
-        throw new Error("Only one primitive value was provided, but the function has multiple parameters!");
+        throw new Error("Only one primitive value was provided, but the function requires multiple parameters!");
       }
       paramsString = `(${qParams[0].formatUrlValue(params) || ""})`;
     }
@@ -104,10 +104,14 @@ export abstract class QFunction<ParamModel = undefined> {
     const paramMatcher = url.match(this.isV2() ? REGEXP_V2_PARAMS : REGEXP_PARAMS);
     const params = paramMatcher?.length === 2 ? paramMatcher[1].split(this.isV2() ? "&" : ",") : [];
 
+    if (!params.length) {
+      throw new Error(`Parsing url "${url}" did not yield any params!`);
+    }
+
     // handle short form => myEntity(123)
     if (params.length === 1 && params[0].indexOf("=") === -1) {
       if (qParams.length !== 1) {
-        throw new Error("");
+        throw new Error("Only one primitive value was provided, but the function requires multiple parameters!");
       }
       const qParam = qParams[0];
       return qParam.parseUrlValue(params[0]);
