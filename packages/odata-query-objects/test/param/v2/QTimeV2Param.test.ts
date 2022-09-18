@@ -1,29 +1,49 @@
 import { QTimeV2Param } from "../../../src";
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 
 describe("QTimeV2Param Tests", () => {
   const name = "T3st_bbb";
   const toTest = new QTimeV2Param(name);
+  const toTestWithConverter = new QTimeV2Param(name, undefined, fixedDateConverter);
 
-  test("QTimeV2Param: base attributes", () => {
+  test("base attributes", () => {
     expect(toTest.getName()).toBe(name);
+    expect(toTest.getMappedName()).toBe(name);
+    expect(toTest.getConverter()).toBeDefined();
   });
 
-  test("QTimeV2Param: formatUrlValue", () => {
-    expect(toTest.formatUrlValue("test")).toBe("time'test'");
-    expect(toTest.formatUrlValue(null)).toBe("null");
-    expect(toTest.formatUrlValue(undefined)).toBe(undefined);
-  });
-
-  test("QTimeV2Param: parseUrlValue", () => {
-    expect(toTest.parseUrlValue("time'test'")).toBe("test");
-    expect(toTest.parseUrlValue("null")).toBe(null);
-    expect(toTest.parseUrlValue(undefined)).toBe(undefined);
-  });
-
-  test("QTimeV2Param: fail creation", () => {
+  test("fail creation", () => {
     // @ts-expect-error
     expect(() => new QTimeV2Param()).toThrowError();
     // @ts-expect-error
     expect(() => new QTimeV2Param(null)).toThrowError();
+  });
+
+  test("mapped name", () => {
+    const test = new QTimeV2Param(name, "xxx");
+
+    expect(test.getName()).toBe(name);
+    expect(test.getMappedName()).toBe("xxx");
+  });
+
+  test("converter", () => {
+    expect(toTestWithConverter.convertFrom("Tester")).toBe(FIXED_DATE);
+    expect(toTestWithConverter.convertTo(new Date())).toBe(FIXED_STRING);
+  });
+
+  test("formatUrlValue", () => {
+    expect(toTest.formatUrlValue("test")).toBe("time'test'");
+    expect(toTest.formatUrlValue(null)).toBe("null");
+    expect(toTest.formatUrlValue(undefined)).toBe(undefined);
+
+    expect(toTestWithConverter.formatUrlValue(new Date())).toBe(`time'${FIXED_STRING}'`);
+  });
+
+  test("parseUrlValue", () => {
+    expect(toTest.parseUrlValue("time'test'")).toBe("test");
+    expect(toTest.parseUrlValue("null")).toBe(null);
+    expect(toTest.parseUrlValue(undefined)).toBe(undefined);
+
+    expect(toTestWithConverter.parseUrlValue("time'test'")).toBe(FIXED_DATE);
   });
 });

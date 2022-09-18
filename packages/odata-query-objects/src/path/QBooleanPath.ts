@@ -1,28 +1,17 @@
 import { StandardFilterOperators } from "../odata/ODataModel";
-import { QLiteralPath } from "./base/QLiteralPath";
-import { getParamValue, parseParamValue } from "../param/UrlParamHelper";
-import { UrlParamValueFormatter, UrlParamValueParser } from "../param/UrlParamModel";
+import { buildQFilterOperation } from "../param/UrlParamHelper";
+import { QBasePath } from "./base/QBasePath";
 
-export class QBooleanPath extends QLiteralPath<boolean | QBooleanPath, StandardFilterOperators> {
-  public static getUrlConformValue: UrlParamValueFormatter<boolean> = (value) => {
-    return getParamValue(value);
-  };
-
-  public static parseValueFromUrl: UrlParamValueParser<boolean> = (urlConformValue) => {
-    const value = parseParamValue(urlConformValue);
-    return typeof value !== "string" ? value : value === "true" ? true : value === "false" ? false : undefined;
-  };
-
-  public equals(value: boolean) {
-    return this.buildBuiltInExpression(StandardFilterOperators.EQUALS, value);
+export class QBooleanPath<ConvertedType = boolean> extends QBasePath<boolean, ConvertedType> {
+  protected formatValue(value: boolean): string {
+    return String(value);
   }
-  public eq = this.equals;
 
   public isTrue() {
-    return this.equals(true);
+    return buildQFilterOperation(this.path, StandardFilterOperators.EQUALS, "true");
   }
 
   public isFalse() {
-    return this.equals(false);
+    return buildQFilterOperation(this.path, StandardFilterOperators.EQUALS, "false");
   }
 }

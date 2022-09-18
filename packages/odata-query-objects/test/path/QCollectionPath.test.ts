@@ -1,17 +1,24 @@
-import { QCollectionPath, QFilterExpression, QStringCollection } from "../../src";
-
-export interface SampleEntity {}
+import { QCollectionPath, QFilterExpression, QStringCollection, QStringPath } from "../../src";
 
 describe("QCollectionPath test", () => {
+  const toTest = new QCollectionPath("test", () => QStringCollection);
+
   const createToTest = () => {
     return new QCollectionPath("test", () => QStringCollection);
   };
 
   test("smoke test", () => {
-    const result = createToTest();
-    expect(result.getPath()).toBe("test");
-    expect(result.getEntity()).toStrictEqual(new QStringCollection());
-    expect(result.getEntity(true)).toStrictEqual(new QStringCollection("test"));
+    expect(toTest.getPath()).toBe("test");
+
+    const entity = toTest.getEntity();
+    expect(entity).toBeInstanceOf(QStringCollection);
+    expect(entity.it).toBeInstanceOf(QStringPath);
+    expect(entity.it.getPath()).toBe("$it");
+    expect(entity.createQPathType("myPath").getPath()).toBe("myPath");
+
+    const prefixedEntity = toTest.getEntity(true);
+    expect(prefixedEntity.it.getPath()).toBe("test/$it");
+    expect(prefixedEntity.createQPathType("myPath").getPath()).toBe("myPath");
   });
 
   test("fails with null, undefined, empty string", () => {

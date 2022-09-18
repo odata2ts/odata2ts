@@ -1,6 +1,7 @@
-import { QParam, QGuidPath } from "../../internal";
+import { QParam } from "../QParam";
+import { formatLiteralParam, parseLiteral } from "../UrlParamHelper";
 
-export class QGuidParam extends QParam<string> {
-  formatUrlValue = QGuidPath.getUrlConformValue;
-  parseUrlValue = QGuidPath.parseValueFromUrl;
+export class QGuidParam<ConvertedType = string> extends QParam<string, ConvertedType> {
+  getUrlConformValue = formatLiteralParam;
+  parseValueFromUrl = parseLiteral;
 }

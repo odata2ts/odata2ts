@@ -1,5 +1,5 @@
 import { QGetSomethingFunction, QGetSomethingFunctionV2 } from "../fixture/operation/EmptyFunction";
-import { BookIdFunction } from "../fixture/operation/IdFunction";
+import { BookIdFunction, ComplexBookIdFunction } from "../fixture/operation/IdFunction";
 import {
   BestBookParamModel,
   BestBookParamModelV2,
@@ -30,6 +30,29 @@ describe("QFunction Tests", () => {
     expect(exampleFunction.buildUrl("123")).toBe("EntityXy('123')");
     expect(exampleFunction.parseUrl("EntityXy(isbn='123')")).toMatchObject({ isbn: "123" });
     expect(exampleFunction.parseUrl("EntityXy('123')")).toBe("123");
+  });
+
+  test("QFunction: failures", () => {
+    const exampleFunction = new ComplexBookIdFunction("EntityXy");
+
+    expect(exampleFunction.buildUrl({ title: "test", author: "xxx" })).toBe("EntityXy(title='test',author='xxx')");
+    expect(exampleFunction.parseUrl("EntityXy(title='test',author='xxx')")).toStrictEqual({
+      title: "test",
+      author: "xxx",
+    });
+
+    // @ts-expect-error
+    expect(() => exampleFunction.buildUrl({ isbn: "123" })).toThrow("Unknown parameter");
+    // @ts-expect-error
+    expect(() => exampleFunction.buildUrl("123")).toThrow("the function requires multiple parameters!");
+
+    expect(() => exampleFunction.parseUrl("123")).toThrow("did not yield any params");
+    expect(() => exampleFunction.parseUrl("EntityXy()")).toThrow("did not yield any params");
+    expect(() => exampleFunction.parseUrl("EntityXy('123')")).toThrow("the function requires multiple parameters!");
+    expect(() => exampleFunction.parseUrl("EntityXy(title,author=xxx)")).toThrow("Key and value must be specified");
+    expect(() => exampleFunction.parseUrl("EntityXy(tiger=xxx)")).toThrow(
+      "not part of this function's method signature"
+    );
   });
 
   test("QFunction: multiple params", () => {

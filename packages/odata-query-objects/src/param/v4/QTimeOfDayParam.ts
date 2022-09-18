@@ -1,6 +1,7 @@
-import { QParam, QTimeOfDayPath } from "../../internal";
+import { QParam } from "../QParam";
+import { formatLiteralParam, parseLiteral } from "../UrlParamHelper";
 
-export class QTimeOfDayParam extends QParam<string> {
-  formatUrlValue = QTimeOfDayPath.getUrlConformValue;
-  parseUrlValue = QTimeOfDayPath.parseValueFromUrl;
+export class QTimeOfDayParam<ConvertedType = string> extends QParam<string, ConvertedType> {
+  getUrlConformValue = formatLiteralParam;
+  parseValueFromUrl = parseLiteral;
 }

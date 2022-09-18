@@ -1,27 +1,29 @@
 import { QStringPath } from "../../../src";
+import { getIdentityConverter } from "../../../src/converter/IdentityConverter";
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 import { createStringTests } from "../StringBaseTests";
 
 describe("QStringPath test", () => {
-  createStringTests(QStringPath);
+  const toTest = new QStringPath("Country");
+  const otherProp = new QStringPath("Language");
 
-  let toTest: QStringPath;
-  let otherProp: QStringPath;
+  createStringTests(toTest, otherProp);
 
-  beforeEach(() => {
-    toTest = new QStringPath("Country");
-    otherProp = new QStringPath("Language");
+  test("fails with null, undefined, empty string", () => {
+    // @ts-expect-error
+    expect(() => new QStringPath(null)).toThrow();
+    // @ts-expect-error
+    expect(() => new QStringPath()).toThrow();
+    // @ts-expect-error
+    expect(() => new QStringPath(undefined)).toThrow();
+    expect(() => new QStringPath("", getIdentityConverter())).toThrow();
+    expect(() => new QStringPath(" ", getIdentityConverter())).toThrow();
   });
 
-  test("get URL conform value", () => {
-    expect(QStringPath.getUrlConformValue("Tester")).toBe("'Tester'");
-    expect(QStringPath.getUrlConformValue(null)).toBe("null");
-    expect(QStringPath.getUrlConformValue(undefined)).toBeUndefined();
-  });
+  test("with converter", () => {
+    const testWithConv = new QStringPath("ID", fixedDateConverter);
 
-  test("parse URL value", () => {
-    expect(QStringPath.parseValueFromUrl("'Tester'")).toBe("Tester");
-    expect(QStringPath.parseValueFromUrl("null")).toBeNull();
-    expect(QStringPath.parseValueFromUrl(undefined)).toBeUndefined();
+    expect(testWithConv.gt(FIXED_DATE).toString()).toBe(`ID gt '${FIXED_STRING}'`);
   });
 
   test("contains", () => {

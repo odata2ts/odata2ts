@@ -1,8 +1,11 @@
+export * from "./UrlParamModel";
+export * from "./UrlParamHelper";
 export { QParam } from "./QParam";
 
 export { QBooleanParam } from "./common/QBooleanParam";
 export { QNumberParam } from "./common/QNumberParam";
 export { QStringParam } from "./common/QStringParam";
+export { QEnumParam } from "./common/QEnumParam";
 
 export { QGuidV2Param } from "./v2/QGuidV2Param";
 export { QDateTimeV2Param } from "./v2/QDateTimeV2Param";

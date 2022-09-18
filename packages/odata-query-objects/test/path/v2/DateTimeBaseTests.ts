@@ -1,36 +1,17 @@
-import { DateTimeBasePath } from "../../../src/path/v2/DateTimeBase";
-import { QNumberPath } from "../../../src";
+import { QDateTimeOffsetV2Path, QDateTimeV2Path, QTimeV2Path } from "../../../src";
 
-export type DateTimeConstructor<T extends DateTimeBasePath> = new (path: string) => T;
-
+export const EXAMPLE_PATH_NAME = "createdAt";
 export const EXAMPLE_TIME = "20:15:59";
 export const EXAMPLE_DATE_TIME = `2021-07-03T${EXAMPLE_TIME}`;
 export const EXAMPLE_DATE_TIME_OFFSET = `${EXAMPLE_DATE_TIME}Z`;
 
-export function createBaseDateTimeTests<T extends DateTimeBasePath>(
-  DtConstructor: DateTimeConstructor<T>,
+export function createBaseDateTimeTests<T extends QDateTimeOffsetV2Path | QDateTimeV2Path | QTimeV2Path>(
+  toTest: T,
   example: string,
   exampleResult: string
 ) {
-  let toTest: T;
-
-  beforeEach(() => {
-    toTest = new DtConstructor("createdAt");
-  });
-
   test("get path", () => {
-    expect(toTest.getPath()).toBe("createdAt");
-  });
-
-  test("fails with null, undefined, empty string", () => {
-    // @ts-expect-error
-    expect(() => new DtConstructor(null)).toThrow();
-    // @ts-expect-error
-    expect(() => new DtConstructor()).toThrow();
-    // @ts-expect-error
-    expect(() => new DtConstructor(undefined)).toThrow();
-    expect(() => new DtConstructor("")).toThrow();
-    expect(() => new DtConstructor(" ")).toThrow();
+    expect(toTest.getPath()).toBe(EXAMPLE_PATH_NAME);
   });
 
   test("orderBy asc", () => {
@@ -102,19 +83,7 @@ export function createBaseDateTimeTests<T extends DateTimeBasePath>(
   });
 }
 
-export interface PathWithDateFunctions {
-  year: () => QNumberPath;
-  month: () => QNumberPath;
-  day: () => QNumberPath;
-}
-
-export function createDateFunctionTests(DtConstructor: new (path: string) => PathWithDateFunctions) {
-  let toTest: PathWithDateFunctions;
-
-  beforeEach(() => {
-    toTest = new DtConstructor("createdAt");
-  });
-
+export function createDateFunctionTests<T extends QDateTimeOffsetV2Path | QDateTimeV2Path>(toTest: T) {
   test("year", () => {
     const result = toTest.year().equals(2021).toString();
 
@@ -133,19 +102,7 @@ export function createDateFunctionTests(DtConstructor: new (path: string) => Pat
   });
 }
 
-export interface PathWithTimeFunctions {
-  hour: () => QNumberPath;
-  minute: () => QNumberPath;
-  second: () => QNumberPath;
-}
-
-export function createTimeFunctionTests(DtConstructor: new (path: string) => PathWithTimeFunctions) {
-  let toTest: PathWithTimeFunctions;
-
-  beforeEach(() => {
-    toTest = new DtConstructor("createdAt");
-  });
-
+export function createTimeFunctionTests<T extends QDateTimeOffsetV2Path | QDateTimeV2Path | QTimeV2Path>(toTest: T) {
   test("hour", () => {
     const result = toTest.hour().equals(20).toString();
 

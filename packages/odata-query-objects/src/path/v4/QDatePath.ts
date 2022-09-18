@@ -1,10 +1,9 @@
-import { DateTimeBasePath } from "./DateTimeBase";
 import { dayFn, monthFn, yearFn } from "../base/DateTimeFunctions";
+import { QBasePath } from "../base/QBasePath";
+import { identityFormatter } from "./IdentityFormatter";
 
-export class QDatePath extends DateTimeBasePath {
-  constructor(path: string) {
-    super(path);
-  }
+export class QDatePath<ConvertedType = string> extends QBasePath<string, ConvertedType> {
+  protected formatValue = identityFormatter;
 
   public year = yearFn(this.path);
   public month = monthFn(this.path);

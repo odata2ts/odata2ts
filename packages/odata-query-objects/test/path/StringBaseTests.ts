@@ -1,27 +1,8 @@
-import { QStringBasePath } from "../../src/path/base/QStringBasePath";
+import { QStringPath, QStringV2Path } from "../../src";
 
-export function createStringTests<T extends QStringBasePath<any>>(QSConstructor: new (path: string) => T) {
-  let toTest: T;
-  let otherProp: T;
-
-  beforeEach(() => {
-    toTest = new QSConstructor("Country");
-    otherProp = new QSConstructor("Language");
-  });
-
+export function createStringTests<T extends QStringPath | QStringV2Path>(toTest: T, otherProp: T) {
   test("get path", () => {
     expect(toTest.getPath()).toBe("Country");
-  });
-
-  test("fails with null, undefined, empty string", () => {
-    // @ts-expect-error
-    expect(() => new QSConstructor(null)).toThrow();
-    // @ts-expect-error
-    expect(() => new QSConstructor()).toThrow();
-    // @ts-expect-error
-    expect(() => new QSConstructor(undefined)).toThrow();
-    expect(() => new QSConstructor("")).toThrow();
-    expect(() => new QSConstructor(" ")).toThrow();
   });
 
   test("orderBy asc", () => {

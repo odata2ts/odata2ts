@@ -6,7 +6,7 @@ type FilteredParamModel = [string, any];
 export abstract class QAction<ParamModel = undefined> {
   public constructor(protected name: string) {}
 
-  public abstract getParams(): Array<QParam<any>> | undefined;
+  public abstract getParams(): Array<QParam<any, any>> | undefined;
 
   public getName(): string {
     return this.name;

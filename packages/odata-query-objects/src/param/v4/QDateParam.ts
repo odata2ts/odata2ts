@@ -1,6 +1,7 @@
-import { QParam, QDatePath } from "../../internal";
+import { QParam } from "../QParam";
+import { formatLiteralParam, parseLiteral } from "../UrlParamHelper";
 
-export class QDateParam extends QParam<string> {
-  formatUrlValue = QDatePath.getUrlConformValue;
-  parseUrlValue = QDatePath.parseValueFromUrl;
+export class QDateParam<ConvertedType = string> extends QParam<string, ConvertedType> {
+  getUrlConformValue = formatLiteralParam;
+  parseValueFromUrl = parseLiteral;
 }

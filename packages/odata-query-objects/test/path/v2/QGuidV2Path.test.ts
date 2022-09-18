@@ -1,4 +1,5 @@
 import { QGuidV2Path } from "../../../src";
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 
 describe("QGuidV2Path test", () => {
   let toTest: QGuidV2Path;
@@ -7,18 +8,6 @@ describe("QGuidV2Path test", () => {
 
   beforeEach(() => {
     toTest = new QGuidV2Path("ID");
-  });
-
-  test("get URL conform value", () => {
-    expect(QGuidV2Path.getUrlConformValue(exampleGuid)).toBe(exampleGuidValue);
-    expect(QGuidV2Path.getUrlConformValue(null)).toBe("null");
-    expect(QGuidV2Path.getUrlConformValue(undefined)).toBeUndefined();
-  });
-
-  test("parse URL value", () => {
-    expect(QGuidV2Path.parseValueFromUrl(exampleGuidValue)).toBe(exampleGuid);
-    expect(QGuidV2Path.parseValueFromUrl("null")).toBeNull();
-    expect(QGuidV2Path.parseValueFromUrl(undefined)).toBeUndefined();
   });
 
   test("get path", () => {
@@ -34,6 +23,12 @@ describe("QGuidV2Path test", () => {
     expect(() => new QGuidV2Path(undefined)).toThrow();
     expect(() => new QGuidV2Path("")).toThrow();
     expect(() => new QGuidV2Path(" ")).toThrow();
+  });
+
+  test("with converter", () => {
+    const testWithConv = new QGuidV2Path("ID", fixedDateConverter);
+
+    expect(testWithConv.gt(FIXED_DATE).toString()).toBe(`ID gt guid'${FIXED_STRING}'`);
   });
 
   test("is null", () => {

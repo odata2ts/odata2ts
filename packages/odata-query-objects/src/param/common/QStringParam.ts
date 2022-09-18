@@ -1,6 +1,7 @@
-import { QParam, QStringPath } from "../../internal";
+import { QParam } from "../../internal";
+import { formatParamWithQuotes, parseWithQuotes } from "../UrlParamHelper";
 
-export class QStringParam extends QParam<string> {
-  formatUrlValue = QStringPath.getUrlConformValue;
-  parseUrlValue = QStringPath.parseValueFromUrl;
+export class QStringParam<ConvertedType = string> extends QParam<string, ConvertedType> {
+  getUrlConformValue = formatParamWithQuotes;
+  parseValueFromUrl = parseWithQuotes;
 }

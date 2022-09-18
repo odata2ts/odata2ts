@@ -44,5 +44,21 @@ describe("QAction Tests", () => {
     expect(exampleOperation.convertODataParams(allODataParams)).toMatchObject(allUserParams);
   });
 
-  // TODO: Edge cases & strict vs lenient parsing, i.e. throwing errors
+  test("with wrong params", () => {
+    const requiredUserParams: ParamActionParamModel = {
+      testGuid: "aaa-bbb",
+      testString: "hi",
+      testBoolean: true,
+      testNumber: 3,
+    };
+    const exampleOperation = new QParamAction();
+
+    // @ts-expect-error
+    expect(exampleOperation.convertUserParams()).toBeUndefined();
+    // @ts-expect-error
+    expect(exampleOperation.convertODataParams()).toBeUndefined();
+    // @ts-expect-error
+    expect(() => exampleOperation.convertUserParams({ dummy: "xxx" })).toThrow("Unknown parameter");
+    expect(() => exampleOperation.convertODataParams({ dummy: "xxx" })).toThrow("Unknown parameter");
+  });
 });

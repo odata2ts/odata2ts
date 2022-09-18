@@ -1,4 +1,5 @@
-import { QDatePath, QGuidPath } from "../../../src";
+import { QGuidPath } from "../../../src";
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 
 describe("QGuidPath test", () => {
   let toTest: QGuidPath;
@@ -6,14 +7,6 @@ describe("QGuidPath test", () => {
 
   beforeEach(() => {
     toTest = new QGuidPath("ID");
-  });
-
-  test("get URL conform value", () => {
-    expect(QGuidPath.getUrlConformValue(exampleGuid)).toBe(exampleGuid);
-  });
-
-  test("parse URL conform value", () => {
-    expect(QGuidPath.parseValueFromUrl(exampleGuid)).toBe(exampleGuid);
   });
 
   test("get path", () => {
@@ -29,6 +22,12 @@ describe("QGuidPath test", () => {
     expect(() => new QGuidPath(undefined)).toThrow();
     expect(() => new QGuidPath("")).toThrow();
     expect(() => new QGuidPath(" ")).toThrow();
+  });
+
+  test("with converter", () => {
+    const testWithConv = new QGuidPath("ID", fixedDateConverter);
+
+    expect(testWithConv.gt(FIXED_DATE).toString()).toBe(`ID gt ${FIXED_STRING}`);
   });
 
   test("orderBy asc", () => {

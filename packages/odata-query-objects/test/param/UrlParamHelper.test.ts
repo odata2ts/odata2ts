@@ -1,152 +1,164 @@
-import { UrlParamModel } from "../../src/param/UrlParamModel";
 import {
-  createParsingRegexp,
-  getExpressionValue,
-  getParamValue,
-  parseParamValue,
-} from "../../src/param/UrlParamHelper";
-import { QPathModel } from "../../src";
+  NumberFilterOperators,
+  QPathModel,
+  StandardFilterOperators,
+  StringFilterFunctions,
+  buildFunctionExpression,
+  buildOperatorExpression,
+  buildQFilterOperation,
+  formatLiteral,
+  formatLiteralParam,
+  formatParamWithQuotes,
+  formatParamWithTypePrefix,
+  formatParamWithTypeSuffix,
+  formatWithQuotes,
+  formatWithTypePrefix,
+  formatWithTypeSuffix,
+  isPathValue,
+  parseLiteral,
+  parseWithQuotes,
+  parseWithTypePrefix,
+  parseWithTypeSuffix,
+} from "../../src";
 
 describe("UrlParamHelper Tests", () => {
-  const quotedTest: UrlParamModel = { isQuoted: true };
-  const prefixedTest: UrlParamModel = { typePrefix: "guid" };
-  const suffixedTest: UrlParamModel = { typeSuffix: ".mysuffix" };
   const qPathTest: QPathModel = {
     getPath: () => "qpath",
   };
 
-  test("getParamValue", () => {
-    expect(getParamValue(undefined)).toBeUndefined();
-    // null is a regular data type
-    expect(getParamValue(null)).toBe("null");
-
-    expect(getParamValue("test")).toBe("test");
-    expect(getParamValue(3)).toBe("3");
-    expect(getParamValue(0)).toBe("0");
-    expect(getParamValue(-3.2)).toBe("-3.2");
-    expect(getParamValue(true)).toBe("true");
-    expect(getParamValue(false)).toBe("false");
-
-    expect(getParamValue("test", {})).toBe("test");
+  test("formatLiteral", () => {
+    expect(formatLiteral("test")).toBe("test");
+    expect(formatLiteral(3)).toBe("3");
+    expect(formatLiteral(0)).toBe("0");
+    expect(formatLiteral(-3.2)).toBe("-3.2");
+    expect(formatLiteral(true)).toBe("true");
+    expect(formatLiteral(false)).toBe("false");
   });
 
-  test("getParamValue: quoted", () => {
-    expect(getParamValue("test", quotedTest)).toBe("'test'");
-    expect(getParamValue("test", { isQuoted: false })).toBe("test");
-    expect(getParamValue(3, quotedTest)).toBe("'3'");
-    expect(getParamValue(false, quotedTest)).toBe("'false'");
-    expect(getParamValue(null, quotedTest)).toBe("null");
-    expect(getParamValue(undefined, quotedTest)).toBeUndefined();
+  test("formatLiteralParam", () => {
+    expect(formatLiteralParam(0)).toBe("0");
+    expect(formatLiteralParam(null)).toBe("null");
+    expect(formatLiteralParam(undefined)).toBeUndefined();
   });
 
-  test("getParamValue: prefixed", () => {
-    expect(getParamValue("test", prefixedTest)).toBe("guid'test'");
-    expect(getParamValue(3, prefixedTest)).toBe("guid'3'");
-    expect(getParamValue(true, prefixedTest)).toBe("guid'true'");
-    expect(getParamValue(null, prefixedTest)).toBe("null");
-    expect(getParamValue(undefined, prefixedTest)).toBeUndefined();
+  test("parseLiteral", () => {
+    expect(parseLiteral("test")).toBe("test");
+    expect(parseLiteral("3")).toBe("3");
+    expect(parseLiteral("0")).toBe("0");
+    expect(parseLiteral("-3.2")).toBe("-3.2");
+    expect(parseLiteral("true")).toBe("true");
+    expect(parseLiteral("false")).toBe("false");
+
+    expect(parseLiteral(undefined)).toBeUndefined();
+
+    // @ts-expect-error
+    expect(parseLiteral(null)).toBe(null);
   });
 
-  test("getParamValue: suffixed", () => {
-    expect(getParamValue("test", suffixedTest)).toBe("test.mysuffix");
-    expect(getParamValue(3, suffixedTest)).toBe("3.mysuffix");
-    expect(getParamValue(false, suffixedTest)).toBe("false.mysuffix");
-    expect(getParamValue(null, suffixedTest)).toBe("null");
-    expect(getParamValue(undefined, suffixedTest)).toBeUndefined();
+  test("formatWithTypePrefix", () => {
+    expect(formatWithTypePrefix("PRE", "test")).toBe("PRE'test'");
+    expect(formatWithTypePrefix("PRE", 3)).toBe("PRE'3'");
+    expect(formatWithTypePrefix("PRE", false)).toBe("PRE'false'");
   });
 
-  test("getParamValue: mutual exclusion", () => {
-    const testValue = "test";
-    // prefixed wins
-    expect(getParamValue(testValue, { ...prefixedTest, ...suffixedTest, ...quotedTest })).toBe(
-      getParamValue(testValue, prefixedTest)
-    );
-    // suffixed comes in second
-    expect(getParamValue(testValue, { ...quotedTest, ...suffixedTest })).toBe(getParamValue(testValue, suffixedTest));
-    // quoted only when the other ones are not specified
+  test("formatParamWithTypePrefix", () => {
+    expect(formatParamWithTypePrefix("PRE", 0)).toBe("PRE'0'");
+    expect(formatParamWithTypePrefix("PRE", null)).toBe("null");
+    expect(formatParamWithTypePrefix("PRE", undefined)).toBeUndefined();
   });
 
-  test("getExpressionValue", () => {
-    expect(getExpressionValue(null)).toBe("null");
-    expect(getExpressionValue(qPathTest)).toBe("qpath");
-    expect(getExpressionValue("test")).toBe("test");
-    expect(getExpressionValue(3)).toBe("3");
-    expect(getExpressionValue(0)).toBe("0");
-    expect(getExpressionValue(-3.222)).toBe("-3.222");
-    expect(getExpressionValue(true)).toBe("true");
-    expect(getExpressionValue(false)).toBe("false");
+  test("parseWithTypePrefix", () => {
+    expect(parseWithTypePrefix("guid", "guid''")).toBe("");
+    expect(parseWithTypePrefix("guid", "guid'ABA'")).toBe("ABA");
+    expect(parseWithTypeSuffix("guid", "null")).toBe(null);
+    expect(parseWithTypePrefix("guid", undefined)).toBeUndefined();
+
+    // strict parsing: throw error if pattern doesn't match
+    expect(() => parseWithTypePrefix("guid", "test")).toThrow();
+    expect(() => parseWithTypePrefix("guid", "guid'test")).toThrow();
+    expect(() => parseWithTypePrefix("guid", "guidtest'")).toThrow();
+
+    // @ts-expect-error
+    expect(parseWithTypePrefix("SUF", null)).toBe(null);
   });
 
-  test("getExpressionValue: quoted", () => {
-    expect(getExpressionValue(null, quotedTest)).toBe("null");
-    expect(getExpressionValue(qPathTest, quotedTest)).toBe("qpath");
-    expect(getExpressionValue("test", quotedTest)).toBe("'test'");
-    expect(getExpressionValue(3, quotedTest)).toBe("'3'");
-    expect(getExpressionValue(true, quotedTest)).toBe("'true'");
+  test("formatWithTypeSuffix", () => {
+    expect(formatWithTypeSuffix("SUF", "test")).toBe("testSUF");
+    expect(formatWithTypeSuffix("suf", 3)).toBe("3suf");
+    expect(formatWithTypeSuffix("SUF", false)).toBe("falseSUF");
   });
 
-  test("getExpressionValue: prefixed", () => {
-    expect(getExpressionValue(null, prefixedTest)).toBe("null");
-    expect(getExpressionValue(qPathTest, prefixedTest)).toBe("qpath");
-    expect(getExpressionValue("test", prefixedTest)).toBe("guid'test'");
-    expect(getExpressionValue(3, prefixedTest)).toBe("guid'3'");
-    expect(getExpressionValue(true, prefixedTest)).toBe("guid'true'");
+  test("formatParamWithTypeSuffix", () => {
+    expect(formatParamWithTypeSuffix("SUF", 0)).toBe("0SUF");
+    expect(formatParamWithTypeSuffix("SUF", null)).toBe("null");
+    expect(formatParamWithTypeSuffix("SUF", undefined)).toBeUndefined();
   });
 
-  test("getExpressionValue: suffixed", () => {
-    expect(getExpressionValue(null, suffixedTest)).toBe("null");
-    expect(getExpressionValue(qPathTest, suffixedTest)).toBe("qpath");
-    expect(getExpressionValue("test", suffixedTest)).toBe("test.mysuffix");
-    expect(getExpressionValue(3, suffixedTest)).toBe("3.mysuffix");
-    expect(getExpressionValue(true, suffixedTest)).toBe("true.mysuffix");
+  test("parseWithTypeSuffix", () => {
+    expect(parseWithTypeSuffix("SUF", "SUF")).toBe("");
+    expect(parseWithTypeSuffix("SUF", "testSUF")).toBe("test");
+    expect(parseWithTypeSuffix("SUF", "null")).toBe(null);
+    expect(parseWithTypeSuffix("SUF", undefined)).toBeUndefined();
+
+    // lenient parsing: not throwing errors
+    expect(parseWithTypeSuffix("SUF", "test")).toBe("test");
+
+    // @ts-expect-error
+    expect(parseWithTypeSuffix("SUF", null)).toBe(null);
   });
 
-  test("getExpressionValue: mutual exclusion", () => {
-    const testValue = "test";
-    // prefixed wins
-    expect(getExpressionValue(testValue, { ...prefixedTest, ...suffixedTest, ...quotedTest })).toBe(
-      getExpressionValue(testValue, prefixedTest)
-    );
-    // suffixed comes in second
-    expect(getExpressionValue(testValue, { ...quotedTest, ...suffixedTest })).toBe(
-      getExpressionValue(testValue, suffixedTest)
-    );
-    // quoted only when the other ones are not specified
+  test("formatWithQuotes", () => {
+    expect(formatWithQuotes("test")).toBe("'test'");
+    expect(formatWithQuotes(3)).toBe("'3'");
+    expect(formatWithQuotes(false)).toBe("'false'");
   });
 
-  test("parseParamValue", () => {
-    expect(parseParamValue(undefined)).toBeUndefined();
-    expect(parseParamValue("null")).toBeNull();
-    expect(parseParamValue("")).toBe("");
-    expect(parseParamValue("test")).toBe("test");
-
-    expect(parseParamValue("3", createParsingRegexp())).toBe("3");
+  test("formatParamWithQuotes", () => {
+    expect(formatParamWithQuotes(0)).toBe("'0'");
+    expect(formatParamWithQuotes(null)).toBe("null");
+    expect(formatParamWithQuotes(undefined)).toBeUndefined();
   });
 
-  test("parseParamValue: quoted", () => {
-    expect(parseParamValue(undefined, createParsingRegexp(quotedTest))).toBeUndefined();
-    expect(parseParamValue("null", createParsingRegexp(quotedTest))).toBeNull();
-    expect(parseParamValue("", createParsingRegexp(quotedTest))).toBe("");
-    expect(parseParamValue("''", createParsingRegexp(quotedTest))).toBe("");
-    expect(parseParamValue("test", createParsingRegexp(quotedTest))).toBe("test");
-    expect(parseParamValue("'test'", createParsingRegexp(quotedTest))).toBe("test");
+  test("parseWithQuotes", () => {
+    expect(parseWithQuotes("''")).toBe("");
+    expect(parseWithQuotes("'AbA'")).toBe("AbA");
+    expect(parseWithQuotes("null")).toBe(null);
+    expect(parseWithQuotes(undefined)).toBeUndefined();
+
+    expect(parseWithQuotes("'Ab'ddd'A'")).toBe("Ab'ddd'A");
+
+    // strict parsing: throw error if pattern doesn't match
+    expect(() => parseWithQuotes("")).toThrow();
+    expect(() => parseWithQuotes("test")).toThrow();
+    expect(() => parseWithQuotes("'tes't")).toThrow();
+    expect(() => parseWithQuotes("test'")).toThrow();
+    expect(() => parseWithQuotes("t''est")).toThrow();
+
+    // @ts-expect-error
+    expect(parseWithQuotes(null)).toBe(null);
   });
 
-  test("parseParamValue: prefixed", () => {
-    expect(parseParamValue(undefined, createParsingRegexp(prefixedTest))).toBeUndefined();
-    expect(parseParamValue("null", createParsingRegexp(prefixedTest))).toBeNull();
-    expect(parseParamValue("", createParsingRegexp(prefixedTest))).toBe("");
-    expect(parseParamValue("guid''", createParsingRegexp(prefixedTest))).toBe("");
-    expect(parseParamValue("test", createParsingRegexp(prefixedTest))).toBe("test");
-    expect(parseParamValue("guid'test'", createParsingRegexp(prefixedTest))).toBe("test");
+  test("isPathValue", () => {
+    expect(isPathValue(qPathTest)).toBe(true);
+
+    expect(isPathValue("test")).toBe(false);
+    expect(isPathValue(3)).toBe(false);
+    expect(isPathValue(false)).toBe(false);
+    expect(isPathValue(null)).toBe(false);
+    expect(isPathValue(undefined)).toBe(false);
   });
 
-  test("parseParamValue: quoted", () => {
-    expect(parseParamValue(undefined, createParsingRegexp(suffixedTest))).toBeUndefined();
-    expect(parseParamValue("null", createParsingRegexp(suffixedTest))).toBeNull();
-    expect(parseParamValue("", createParsingRegexp(suffixedTest))).toBe("");
-    expect(parseParamValue(".mysuffix", createParsingRegexp(suffixedTest))).toBe("");
-    expect(parseParamValue("test", createParsingRegexp(suffixedTest))).toBe("test");
-    expect(parseParamValue("test.mysuffix", createParsingRegexp(suffixedTest))).toBe("test");
+  test("buildOperatorExpression", () => {
+    expect(buildOperatorExpression("test", NumberFilterOperators.ADDITION, "5")).toBe("test add 5");
+    expect(buildOperatorExpression("test", StandardFilterOperators.LOWER_THAN, "5")).toBe("test lt 5");
+  });
+
+  test("buildFunctionExpression", () => {
+    expect(buildFunctionExpression(StringFilterFunctions.LENGTH, "test")).toBe("length(test)");
+    expect(buildFunctionExpression(StringFilterFunctions.CONTAINS, "Test", "ttt")).toBe("contains(Test,ttt)");
+  });
+
+  test("buildQFilterOperation", () => {
+    expect(buildQFilterOperation("test", StandardFilterOperators.EQUALS, "hhh").toString()).toBe("test eq hhh");
   });
 });

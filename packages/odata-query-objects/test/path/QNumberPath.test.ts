@@ -1,4 +1,6 @@
 import { QNumberPath } from "../../src/";
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../fixture/converter/FixedDateConverter";
+import { fixedNumberConverter } from "../fixture/converter/FixedNumberConverter";
 
 describe("QNumberPath test", () => {
   let toTest: QNumberPath;
@@ -7,18 +9,6 @@ describe("QNumberPath test", () => {
   beforeEach(() => {
     toTest = new QNumberPath("Price");
     otherProp = new QNumberPath("Budget");
-  });
-
-  test("get URL conform value", () => {
-    expect(QNumberPath.getUrlConformValue(333.22)).toBe("333.22");
-    expect(QNumberPath.getUrlConformValue(null)).toBe("null");
-    expect(QNumberPath.getUrlConformValue(undefined)).toBeUndefined();
-  });
-
-  test("parse URL conform value", () => {
-    expect(QNumberPath.parseValueFromUrl("333.22")).toBe(333.22);
-    expect(QNumberPath.parseValueFromUrl("null")).toBeNull();
-    expect(QNumberPath.parseValueFromUrl(undefined)).toBeUndefined();
   });
 
   test("get path", () => {
@@ -34,6 +24,12 @@ describe("QNumberPath test", () => {
     expect(() => new QNumberPath(undefined)).toThrow();
     expect(() => new QNumberPath("")).toThrow();
     expect(() => new QNumberPath(" ")).toThrow();
+  });
+
+  test("with converter", () => {
+    const testWithConv = new QNumberPath("ID", fixedNumberConverter);
+
+    expect(testWithConv.gt("12").toString()).toBe(`ID gt 12`);
   });
 
   test("orderBy asc", () => {

@@ -7,6 +7,10 @@ export interface UrlParamModel {
   typeSuffix?: string;
 }
 
+export type ParamValueModel<Type> = Type | null | undefined;
+export type UrlValueModel = string | undefined;
+export type UrlExpressionValueModel = number | string | boolean;
+
 /**
  * Takes a primitive value and formats it appropriate for usage in URLs, taking care of
  * - null values are formatted as "null"
@@ -17,8 +21,8 @@ export interface UrlParamModel {
  * Useful for function parameter values.
  */
 export type UrlParamValueFormatter<Type extends boolean | number | string> = (
-  value: Type | null | undefined
-) => string | undefined;
+  value: ParamValueModel<Type>
+) => UrlValueModel;
 
 /**
  * Retrieves the value string from the given URL param value without any quotes, type suffixes or prefixes
@@ -30,5 +34,5 @@ export type UrlParamValueFormatter<Type extends boolean | number | string> = (
  * @param parsingRegExp the regular expression to use to parse the value
  */
 export type UrlParamValueParser<Type extends boolean | number | string> = (
-  urlConformValue: string | undefined
-) => Type | null | undefined;
+  urlConformValue: UrlValueModel
+) => ParamValueModel<Type>;

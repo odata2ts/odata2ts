@@ -1,17 +1,13 @@
-import { DateTimeBasePath } from "./DateTimeBase";
-import { dayFn, hourFn, minuteFn, monthFn, secondFn, yearFn } from "../base/DateTimeFunctions";
 import { DateTimeFilterFunctions } from "../../odata/ODataModel";
+import { buildFunctionExpression } from "../../param/UrlParamHelper";
+import { dayFn, hourFn, minuteFn, monthFn, secondFn, yearFn } from "../base/DateTimeFunctions";
+import { QBasePath } from "../base/QBasePath";
+import { identityFormatter } from "./IdentityFormatter";
 import { QDatePath } from "./QDatePath";
 import { QTimeOfDayPath } from "./QTimeOfDayPath";
 
-export class QDateTimeOffsetPath extends DateTimeBasePath {
-  constructor(path: string) {
-    super(path);
-  }
-
-  protected buildNoValueFunc(func: DateTimeFilterFunctions) {
-    return `${func}(${this.path})`;
-  }
+export class QDateTimeOffsetPath<ConvertedType = string> extends QBasePath<string, ConvertedType> {
+  protected formatValue = identityFormatter;
 
   public year = yearFn(this.path);
   public month = monthFn(this.path);
@@ -22,12 +18,12 @@ export class QDateTimeOffsetPath extends DateTimeBasePath {
   public second = secondFn(this.path);
 
   public date() {
-    const pathExpression = this.buildNoValueFunc(DateTimeFilterFunctions.DATE);
+    const pathExpression = buildFunctionExpression(DateTimeFilterFunctions.DATE, this.path);
     return new QDatePath(pathExpression);
   }
 
   public time() {
-    const pathExpression = this.buildNoValueFunc(DateTimeFilterFunctions.TIME);
+    const pathExpression = buildFunctionExpression(DateTimeFilterFunctions.TIME, this.path);
     return new QTimeOfDayPath(pathExpression);
   }
 }

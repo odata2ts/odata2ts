@@ -1,6 +1,17 @@
-import { QParam, QDateTimeOffsetV2Path } from "../../internal";
+import { QParam, UrlParamValueFormatter, UrlParamValueParser } from "../../internal";
+import { formatParamWithTypePrefix, parseWithTypePrefix } from "../UrlParamHelper";
 
-export class QDateTimeOffsetV2Param extends QParam<string> {
-  formatUrlValue = QDateTimeOffsetV2Path.getUrlConformValue;
-  parseUrlValue = QDateTimeOffsetV2Path.parseValueFromUrl;
+export const DATE_TIME_OFFSET_V2_TYPE_PREFIX = "datetimeoffset";
+
+const getUrlConformValue: UrlParamValueFormatter<string> = (value) => {
+  return formatParamWithTypePrefix(DATE_TIME_OFFSET_V2_TYPE_PREFIX, value);
+};
+
+const parseValueFromUrl: UrlParamValueParser<string> = (urlConformValue) => {
+  return parseWithTypePrefix(DATE_TIME_OFFSET_V2_TYPE_PREFIX, urlConformValue);
+};
+
+export class QDateTimeOffsetV2Param<ConvertedType = string> extends QParam<string, ConvertedType> {
+  getUrlConformValue = getUrlConformValue;
+  parseValueFromUrl = parseValueFromUrl;
 }

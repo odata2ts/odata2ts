@@ -2,10 +2,11 @@ import { QStringCollection } from "../src";
 import { qComplex, qSimple } from "./fixture/SimpleComplexModel";
 
 describe("QEntity tests", () => {
-  test("simple prop", () => {
-    // @ts-expect-error
-    qSimple.name.eq(3);
+  // typing test
+  // @ts-expect-error
+  qSimple.name.eq(3);
 
+  test("simple prop", () => {
     const result = qSimple.name.eq("hi").toString();
     expect(result).toBe("name eq 'hi'");
   });
@@ -38,8 +39,7 @@ describe("QEntity tests", () => {
   test("collection path", () => {
     const pc = qComplex.primitiveCollection;
 
-    expect(pc.getEntity()).toStrictEqual(new QStringCollection());
-    expect(pc.getEntity(true)).toStrictEqual(new QStringCollection("PrimitiveCollection"));
+    expect(pc.getEntity()).toBeInstanceOf(QStringCollection);
     expect(pc.getPath()).toBe("PrimitiveCollection");
   });
 });

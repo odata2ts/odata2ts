@@ -1,22 +1,11 @@
-import { DateTimeBasePath } from "./DateTimeBase";
+import { formatWithTypePrefix } from "../../param/UrlParamHelper";
+import { DATE_TIME_OFFSET_V2_TYPE_PREFIX } from "../../param/v2/QDateTimeOffsetV2Param";
 import { dayFn, hourFn, minuteFn, monthFn, secondFn, yearFn } from "../base/DateTimeFunctions";
-import { UrlParamModel, UrlParamValueFormatter, UrlParamValueParser } from "../../param/UrlParamModel";
-import { createParsingRegexp, getParamValue, parseParamValue } from "../../param/UrlParamHelper";
+import { QBasePath } from "../base/QBasePath";
 
-const URL_PARAM_CONFIG: UrlParamModel = { typePrefix: "datetimeoffset" };
-const URL_PARAM_REGEXP = createParsingRegexp(URL_PARAM_CONFIG);
-
-export class QDateTimeOffsetV2Path extends DateTimeBasePath {
-  public static getUrlConformValue: UrlParamValueFormatter<string> = (value) => {
-    return getParamValue(value, URL_PARAM_CONFIG);
-  };
-
-  public static parseValueFromUrl: UrlParamValueParser<string> = (urlConformValue) => {
-    return parseParamValue(urlConformValue, URL_PARAM_REGEXP);
-  };
-
-  protected getUrlParamConfig() {
-    return URL_PARAM_CONFIG;
+export class QDateTimeOffsetV2Path<ConvertedType = string> extends QBasePath<string, ConvertedType> {
+  protected formatValue(value: string): string {
+    return formatWithTypePrefix(DATE_TIME_OFFSET_V2_TYPE_PREFIX, value);
   }
 
   public year = yearFn(this.getPath());

@@ -1,28 +1,9 @@
-import { QBooleanPath } from "../../src";
+import { QBooleanPath, ValueConverter } from "../../src";
+import { ParamValueModel } from "../../src/param/UrlParamModel";
+import { fixedBooleanConverter } from "../fixture/converter/FixedBooleanConverter";
 
 describe("QBooleanPath test", () => {
-  let toTest: QBooleanPath;
-
-  beforeEach(() => {
-    toTest = new QBooleanPath("done");
-  });
-
-  test("get URL conform value", () => {
-    expect(QBooleanPath.getUrlConformValue(true)).toBe("true");
-    expect(QBooleanPath.getUrlConformValue(false)).toBe("false");
-    expect(QBooleanPath.getUrlConformValue(null)).toBe("null");
-    expect(QBooleanPath.getUrlConformValue(undefined)).toBeUndefined();
-  });
-
-  test("parse URL conform value", () => {
-    expect(QBooleanPath.parseValueFromUrl("null")).toBeNull();
-    expect(QBooleanPath.parseValueFromUrl("true")).toBe(true);
-    expect(QBooleanPath.parseValueFromUrl("false")).toBe(false);
-
-    expect(QBooleanPath.parseValueFromUrl(undefined)).toBeUndefined();
-    expect(QBooleanPath.parseValueFromUrl("dddd")).toBeUndefined();
-    expect(QBooleanPath.parseValueFromUrl("")).toBeUndefined();
-  });
+  let toTest = new QBooleanPath("done");
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("done");
@@ -61,6 +42,36 @@ describe("QBooleanPath test", () => {
     expect(result).toBe(toTest.eq(value).toString());
   });
 
+  test("not equals", () => {
+    const value = true;
+    const result = toTest.notEquals(value).toString();
+
+    expect(result).toBe("done ne true");
+    expect(result).toBe(toTest.ne(value).toString());
+  });
+
+  test("equals other path", () => {
+    const otherPath = new QBooleanPath("Test");
+
+    expect(toTest.equals(otherPath).toString()).toBe("done eq Test");
+    expect(toTest.ne(otherPath).toString()).toBe("done ne Test");
+  });
+
+  test("equals null", () => {
+    expect(toTest.equals(null).toString()).toBe("done eq null");
+    expect(toTest.notEquals(null).toString()).toBe("done ne null");
+  });
+
+  test("equals fails with undefined", () => {
+    // @ts-expect-error
+    expect(() => toTest.equals(undefined)).toThrow();
+  });
+
+  test("typing tests", () => {
+    // @ts-expect-error
+    expect(toTest.equals("test").toString()).toEqual("done eq test");
+  });
+
   test("isTrue", () => {
     const result = toTest.isTrue().toString();
 
@@ -71,5 +82,14 @@ describe("QBooleanPath test", () => {
     const result = toTest.isFalse().toString();
 
     expect(result).toBe("done eq false");
+  });
+
+  test("with converter", () => {
+    const newPath = new QBooleanPath("test", fixedBooleanConverter);
+
+    expect(newPath.eq(1).toString()).toBe("test eq true");
+    expect(newPath.ne(0).toString()).toBe("test ne false");
+
+    expect(newPath.isTrue().toString()).toBe("test eq true");
   });
 });
