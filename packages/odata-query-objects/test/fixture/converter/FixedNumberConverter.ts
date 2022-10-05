@@ -1,13 +1,9 @@
 import { ParamValueModel, ValueConverter } from "../../../src";
 
-class FixedNumberConverter implements ValueConverter<number, string> {
-  convertFrom(value: ParamValueModel<number>): ParamValueModel<string> {
-    return String(value);
-  }
-
-  convertTo(value: ParamValueModel<string>): ParamValueModel<number> {
-    return Number(value);
-  }
-}
-
-export const fixedNumberConverter = new FixedNumberConverter();
+export const fixedNumberConverter: ValueConverter<number, string> = {
+  id: "FixedNumber",
+  from: "number",
+  to: "string",
+  convertFrom: (value: ParamValueModel<number>): ParamValueModel<string> => String(value),
+  convertTo: (value: ParamValueModel<string>): ParamValueModel<number> => Number(value),
+};

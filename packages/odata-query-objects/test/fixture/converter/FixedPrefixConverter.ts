@@ -1,6 +1,10 @@
 import { ParamValueModel, ValueConverter } from "../../../src";
 
 export const fixedPrefixConverter: ValueConverter<string, string> = {
+  id: "FixedPrefix",
+  from: "string",
+  to: "string",
+
   convertFrom(value: ParamValueModel<string>): ParamValueModel<string> {
     return typeof value === "string" ? `PREFIX_${value}` : value;
   },
