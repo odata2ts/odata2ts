@@ -4,7 +4,7 @@ export interface IdentityConverter<OriginalType, ConvertedType> extends ValueCon
 
 export interface ValueConverter<OriginalType, ConvertedType> {
   id: string;
-  from: string;
+  from: string | Array<string>;
   to: string;
   convertFrom(value: ParamValueModel<OriginalType>): ParamValueModel<ConvertedType>;
   convertTo(value: ParamValueModel<ConvertedType>): ParamValueModel<OriginalType>;
