@@ -1,11 +1,11 @@
 import {
-  ODataEdmxModelBase,
+  ComplexType,
   EntityContainer,
-  Schema,
+  EntityType,
+  ODataEdmxModelBase,
   Property,
   ReturnType,
-  EntityType,
-  ComplexType,
+  Schema,
 } from "./ODataEdmxModelBase";
 
 export interface ODataEdmxModelV3 extends ODataEdmxModelBase<SchemaV3> {}
@@ -80,7 +80,7 @@ export interface AssociationEnd {
   };
 }
 
-export const enum ODataTypesV3 {
+export enum ODataTypesV3 {
   Binary = "Edm.Binary",
   Boolean = "Edm.Boolean",
   String = "Edm.String",

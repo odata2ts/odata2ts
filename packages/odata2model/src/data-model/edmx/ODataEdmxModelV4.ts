@@ -1,12 +1,12 @@
 import {
-  ODataEdmxModelBase,
-  Schema,
+  ComplexType,
   EntityContainer,
   EntitySet,
+  EntityType,
+  ODataEdmxModelBase,
   Property,
   ReturnType,
-  EntityType,
-  ComplexType,
+  Schema,
 } from "./ODataEdmxModelBase";
 
 export interface ODataEdmxModelV4 extends ODataEdmxModelBase<SchemaV4> {}
@@ -88,7 +88,7 @@ export interface Parameter extends Property {
   Unicode?: boolean;
 }
 
-export const enum ODataTypesV4 {
+export enum ODataTypesV4 {
   Binary = "Edm.Binary",
   Boolean = "Edm.Boolean",
   String = "Edm.String",
