@@ -2,7 +2,7 @@ import { ParamValueModel, ValueConverter } from "@odata2ts/odata-query-objects";
 
 export const stringToNumberConverter: ValueConverter<string, number> = {
   id: "StringToNumber",
-  from: "string",
+  from: ["Edm.Byte", "Edm.SByte", "Edm.Int64", "Edm.Single", "Edm.Double", "Edm.Decimal"],
   to: "number",
 
   convertFrom: function (value: ParamValueModel<string>): ParamValueModel<number> {
