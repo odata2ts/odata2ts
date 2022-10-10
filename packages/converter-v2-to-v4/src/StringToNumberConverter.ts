@@ -1,4 +1,4 @@
-import { ParamValueModel, ValueConverter } from "@odata2ts/odata-query-objects";
+import { ParamValueModel, ValueConverter } from "@odata2ts/converter";
 
 export const stringToNumberConverter: ValueConverter<string, number> = {
   id: "StringToNumber",

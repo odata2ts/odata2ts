@@ -6,7 +6,15 @@ export { dateTimeToDateTimeOffsetConverter } from "./DateTimeToDateTimeOffsetCon
 export { stringToNumberConverter } from "./StringToNumberConverter";
 export { timeToTimeOfDayConverter } from "./TimeToTimeOfDayConverter";
 
-export default {
-  id: "V2ToV4",
-  converters: [dateTimeToDateTimeOffsetConverter, stringToNumberConverter, timeToTimeOfDayConverter],
-};
+const allConverters = [dateTimeToDateTimeOffsetConverter, stringToNumberConverter, timeToTimeOfDayConverter];
+
+export default function (specifiedConverters: Array<string> | undefined) {
+  const converters = !specifiedConverters?.length
+    ? allConverters
+    : allConverters.filter((c) => specifiedConverters.includes(c.id));
+
+  return {
+    id: "V2ToV4",
+    converters,
+  };
+}

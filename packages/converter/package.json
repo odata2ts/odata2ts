@@ -1,5 +1,5 @@
 {
-  "name": "@odata2ts/converter-v2-to-v4",
+  "name": "@odata2ts/converter",
   "version": "0.0.0",
   "publishConfig": {
     "access": "public"
@@ -20,9 +20,6 @@
     "lib",
     "LICENSE"
   ],
-  "dependencies": {
-    "@odata2ts/converter": "^0.0.0"
-  },
   "devDependencies": {
     "@types/jest": "^27.4.1",
     "@types/node": "^17.0.23",

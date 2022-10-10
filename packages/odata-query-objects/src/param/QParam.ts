@@ -1,9 +1,6 @@
-import { ValueConverter } from "../converter/ConverterModel";
-import { getIdentityConverter } from "../converter/IdentityConverter";
-import { UrlParamValueFormatter, UrlParamValueParser } from "../internal";
-import { ParamValueModel } from "./UrlParamModel";
+import { ParamValueModel, ValueConverter, getIdentityConverter } from "@odata2ts/converter";
 
-// export type ExtractConverted<T> = T extends ValueConverter<any, infer Converted> ? Converted : never;
+import { UrlParamValueFormatter, UrlParamValueParser } from "../internal";
 
 export abstract class QParam<Type extends string | number | boolean, ConvertedType> {
   constructor(

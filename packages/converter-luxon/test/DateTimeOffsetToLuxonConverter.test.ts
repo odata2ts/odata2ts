@@ -1,5 +1,3 @@
-import { DateTime } from "luxon";
-
 import { dateTimeOffsetToLuxonConverter } from "../src";
 import { execCommonConverterTests } from "./CommonTests.test";
 

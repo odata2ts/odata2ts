@@ -1,5 +1,4 @@
-import { QBooleanPath, ValueConverter } from "../../src";
-import { ParamValueModel } from "../../src/param/UrlParamModel";
+import { QBooleanPath } from "../../src";
 import { fixedBooleanConverter } from "../fixture/converter/FixedBooleanConverter";
 
 describe("QBooleanPath test", () => {

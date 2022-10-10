@@ -1,3 +1,5 @@
+import { ParamValueModel } from "@odata2ts/converter";
+
 import {
   CollectionFilterFunctions,
   DateTimeFilterFunctions,
@@ -8,13 +10,13 @@ import {
 } from "../odata/ODataModel";
 import { QPathModel } from "../path";
 import { QFilterExpression } from "../QFilterExpression";
-import { ParamValueModel, UrlExpressionValueModel, UrlParamModel } from "./UrlParamModel";
+import { UrlExpressionValueModel, UrlValueModel } from "./UrlParamModel";
 
 function parseNullValue(value: string | undefined): string | null | undefined {
   return value === "null" ? null : value;
 }
 
-export function formatLiteralParam(value: ParamValueModel<UrlExpressionValueModel>): string | undefined {
+export function formatLiteralParam(value: ParamValueModel<UrlExpressionValueModel>): UrlValueModel {
   if (value === null) {
     return "null";
   }
@@ -28,7 +30,7 @@ export function formatLiteral(value: UrlExpressionValueModel): string {
   return String(value);
 }
 
-export function parseLiteral(value: string | undefined): string | null | undefined {
+export function parseLiteral(value: UrlValueModel): ParamValueModel<string> {
   return parseNullValue(value);
 }
 
@@ -46,7 +48,7 @@ export function formatWithTypePrefix(typePrefix: string, value: UrlExpressionVal
   return `${typePrefix}'${value}'`;
 }
 
-export function parseWithTypePrefix(typePrefix: string, value: string | undefined) {
+export function parseWithTypePrefix(typePrefix: string, value: UrlValueModel) {
   const cleanedValue = parseNullValue(value);
   if (typeof cleanedValue === "string") {
     // we throw an error here if value doesn't conform to pattern
@@ -72,7 +74,7 @@ export function formatWithTypeSuffix(typeSuffix: string, value: UrlExpressionVal
   return `${value}${typeSuffix}`;
 }
 
-export function parseWithTypeSuffix(typeSuffix: string, value: string | undefined): string | null | undefined {
+export function parseWithTypeSuffix(typeSuffix: string, value: UrlValueModel): ParamValueModel<string> {
   const cleanedValue = parseNullValue(value);
   // lenient: allow the type suffix to be left out
   if (typeof cleanedValue === "string" && cleanedValue.endsWith(typeSuffix)) {
@@ -81,7 +83,7 @@ export function parseWithTypeSuffix(typeSuffix: string, value: string | undefine
   return cleanedValue;
 }
 
-export function formatParamWithQuotes(value: ParamValueModel<UrlExpressionValueModel>): string | undefined {
+export function formatParamWithQuotes(value: ParamValueModel<UrlExpressionValueModel>): UrlValueModel {
   if (value === null) {
     return "null";
   }
@@ -95,7 +97,7 @@ export function formatWithQuotes(value: UrlExpressionValueModel): string {
   return `'${value}'`;
 }
 
-export function parseWithQuotes(value: string | undefined) {
+export function parseWithQuotes(value: UrlValueModel) {
   const cleanedValue = parseNullValue(value);
   if (typeof cleanedValue === "string") {
     // we throw an error here if value doesn't conform to pattern

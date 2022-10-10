@@ -24,7 +24,7 @@
     "luxon": "^3.0.4"
   },
   "dependencies": {
-    "@odata2ts/odata-query-objects": "^0.11.1"
+    "@odata2ts/converter": "^0.0.0"
   },
   "devDependencies": {
     "@types/jest": "^27.4.1",

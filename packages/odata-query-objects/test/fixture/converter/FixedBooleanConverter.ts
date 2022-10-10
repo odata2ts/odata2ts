@@ -1,13 +1,13 @@
-import { ParamValueModel, ValueConverter } from "../../../src";
+import { ParamValueModel, ValueConverter } from "@odata2ts/converter";
 
-class FixedBooleanConverter implements ValueConverter<boolean, number> {
-  convertFrom(value: ParamValueModel<boolean>): ParamValueModel<number> {
+export const fixedBooleanConverter: ValueConverter<boolean, number> = {
+  id: "FixedBoolean",
+  from: "Edm.Boolean",
+  to: "number",
+  convertFrom: (value: ParamValueModel<boolean>): ParamValueModel<number> => {
     return value ? 1 : 0;
-  }
-
-  convertTo(value: ParamValueModel<number>): ParamValueModel<boolean> {
+  },
+  convertTo: (value: ParamValueModel<number>): ParamValueModel<boolean> => {
     return value === 1;
-  }
-}
-
-export const fixedBooleanConverter = new FixedBooleanConverter();
+  },
+};

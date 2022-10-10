@@ -1,4 +1,4 @@
-import { timeToTimeOfDayConverter } from "../src/TimeToTimeOfDayConverter";
+import { timeToTimeOfDayConverter } from "../src";
 
 describe("TimeToTimeOfDayConverter Test", () => {
   const TO_TEST = timeToTimeOfDayConverter;

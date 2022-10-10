@@ -1,4 +1,4 @@
-import { ParamValueModel, ValueConverter } from "@odata2ts/odata-query-objects";
+import { ParamValueModel, ValueConverter } from "@odata2ts/converter";
 
 function padZerosLeft(input: number) {
   return input < 10 ? `0${input}` : input;

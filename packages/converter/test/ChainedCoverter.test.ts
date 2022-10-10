@@ -1,6 +1,6 @@
-import { ChainedConverter } from "../../src";
-import { fixedNumberConverter } from "../fixture/converter/FixedNumberConverter";
-import { fixedPrefixConverter } from "../fixture/converter/FixedPrefixConverter";
+import { fixedNumberConverter } from "../../odata-query-objects/test/fixture/converter/FixedNumberConverter";
+import { fixedPrefixConverter } from "../../odata-query-objects/test/fixture/converter/FixedPrefixConverter";
+import { ChainedConverter } from "../src";
 
 describe("ChainedConverter Test", () => {
   const toTest = new ChainedConverter(fixedNumberConverter, fixedPrefixConverter);

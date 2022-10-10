@@ -1,5 +1,5 @@
-import { ValueConverter } from "../../converter";
-import { getIdentityConverter } from "../../converter/IdentityConverter";
+import { ValueConverter, getIdentityConverter } from "@odata2ts/converter";
+
 import { StandardFilterOperators } from "../../odata/ODataModel";
 import { buildQFilterOperation, isPathValue } from "../../param/UrlParamHelper";
 import { UrlExpressionValueModel } from "../../param/UrlParamModel";

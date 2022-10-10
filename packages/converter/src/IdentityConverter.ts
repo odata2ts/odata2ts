@@ -1,5 +1,4 @@
-import { ParamValueModel } from "../param/UrlParamModel";
-import { IdentityConverter } from "./ConverterModel";
+import { IdentityConverter, ParamValueModel } from "./ConverterModel";
 
 export class IdentityConverterImpl implements IdentityConverter<any, any> {
   id = "Identity";

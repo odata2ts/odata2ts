@@ -7,14 +7,20 @@ export { dateToLuxonConverter } from "./DateToLuxonConverter";
 export { dateTimeOffsetToLuxonConverter } from "./DateTimeOffsetToLuxonConverter";
 export { durationToLuxonConverter } from "./DurationToLuxonConverter";
 
-export default function () {
+const allConverters = [
+  dateToLuxonConverter,
+  timeOfDayToLuxonConverter,
+  dateTimeOffsetToLuxonConverter,
+  durationToLuxonConverter,
+];
+
+export default function (specifiedConverters: Array<string> | undefined) {
+  const converters = !specifiedConverters?.length
+    ? allConverters
+    : allConverters.filter((c) => specifiedConverters.includes(c.id));
+
   return {
     id: "Luxon",
-    converters: [
-      dateToLuxonConverter,
-      timeOfDayToLuxonConverter,
-      dateTimeOffsetToLuxonConverter,
-      durationToLuxonConverter,
-    ],
+    converters,
   };
 }

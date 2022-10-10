@@ -1,4 +1,4 @@
-import { ParamValueModel } from "../param/UrlParamModel";
+export type ParamValueModel<Type> = Type | null | undefined;
 
 export interface IdentityConverter<OriginalType, ConvertedType> extends ValueConverter<OriginalType, ConvertedType> {}
 

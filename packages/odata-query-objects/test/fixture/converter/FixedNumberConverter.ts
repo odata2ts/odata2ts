@@ -1,4 +1,4 @@
-import { ParamValueModel, ValueConverter } from "../../../src";
+import { ParamValueModel, ValueConverter } from "@odata2ts/converter";
 
 export const fixedNumberConverter: ValueConverter<number, string> = {
   id: "FixedNumber",

@@ -1,5 +1,4 @@
-import { ParamValueModel } from "../param/UrlParamModel";
-import { ChainableValueConverter, ValueConverter } from "./ConverterModel";
+import { ChainableValueConverter, ParamValueModel, ValueConverter } from "./ConverterModel";
 
 export class ChainedConverter<FromType, IntermediateType, ToType> implements ChainableValueConverter<FromType, ToType> {
   public readonly id = "ChainedConverter";

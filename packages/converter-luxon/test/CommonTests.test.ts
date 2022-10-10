@@ -1,4 +1,4 @@
-import { ValueConverter } from "@odata2ts/odata-query-objects";
+import { ValueConverter } from "@odata2ts/converter";
 
 export const execCommonConverterTests = (converter: ValueConverter<any, any>) => {
   test("null and undefined", () => {

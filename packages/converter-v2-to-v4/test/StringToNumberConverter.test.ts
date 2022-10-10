@@ -1,4 +1,4 @@
-import { stringToNumberConverter } from "../src/StringToNumberConverter";
+import { stringToNumberConverter } from "../src";
 
 describe("StringToNumberConverter Test", () => {
   const TO_TEST = stringToNumberConverter;

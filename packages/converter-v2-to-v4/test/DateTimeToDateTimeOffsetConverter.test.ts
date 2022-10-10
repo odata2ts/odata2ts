@@ -1,6 +1,4 @@
-import { dateTimeToDateTimeOffsetConverter } from "../src/DateTimeToDateTimeOffsetConverter";
-
-//"\/Date(1210204800000)\/"
+import { dateTimeToDateTimeOffsetConverter } from "../src";
 
 describe("V2DateTimeToDateTimeOffset Test", () => {
   const TIMESTAMP = 1672531199000;
