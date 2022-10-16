@@ -1,6 +1,6 @@
-import { ConfigOptions, ProjectOptions } from "./src/OptionModel";
+import { ConfigFileOptions } from "./src/OptionModel";
 
-export default {
+const config: ConfigFileOptions = {
   mode: "all",
   debug: false,
   prettier: true,
@@ -11,22 +11,53 @@ export default {
       suffix: "Model",
     },
     idModel: {
-      suffix: "Model",
+      suffix: "IdModel",
     },
-    custom: {
-      ODataDemo: {
-        entityType: {
-          Product: {
-            mappedName: "product",
-            properties: {
-              ReleaseDate: {
-                mappedName: "released",
-                converter: "DateTimeToDateTimeOffset",
-              },
-            },
-          },
-        },
+    converters: [
+      "@odata2ts/converter-v2-to-v4",
+      {
+        module: "@odata2ts/converter-luxon",
+        use: ["DateTimeOffsetToLuxon", "DurationToLuxon"],
       },
+    ],
+    custom: {
+      propertyTypes: [
+        {
+          name: "ID",
+          mappedName: "id",
+          managed: true,
+        },
+        {
+          name: "createdAt",
+          managed: true,
+        },
+        {
+          name: "createdBy",
+          managed: true,
+        },
+        {
+          name: "modifiedAt",
+          managed: true,
+        },
+        {
+          name: "modifiedBy",
+          managed: true,
+        },
+      ],
+      modelTypes: [
+        {
+          name: "Product",
+          mappedName: "prod666uct",
+          properties: [
+            {
+              name: "ReleaseDate",
+              mappedName: "released",
+            },
+          ],
+        },
+      ],
     },
   },
-} as ConfigOptions;
+};
+
+export default config;

@@ -1,7 +1,7 @@
+import { ODataVersions } from "@odata2ts/odata-core";
 import { OptionalKind, PropertyDeclarationStructure, Scope, SourceFile, VariableDeclarationKind } from "ts-morph";
 import { firstCharLowerCase } from "xml2js/lib/processors";
 
-import { ODataVesions } from "../app";
 import { DataModel } from "../data-model/DataModel";
 import {
   ComplexType,
@@ -24,7 +24,7 @@ class QueryObjectGenerator {
   constructor(
     private dataModel: DataModel,
     private sourceFile: SourceFile,
-    private version: ODataVesions,
+    private version: ODataVersions,
     private options: GenerationOptions | undefined
   ) {}
 
@@ -205,7 +205,7 @@ class QueryObjectGenerator {
       ],
       ctors: [
         {
-          statements: [`super("${operation.odataName}"${this.version === ODataVesions.V2 ? ", true" : ""})`],
+          statements: [`super("${operation.odataName}"${this.version === ODataVersions.V2 ? ", true" : ""})`],
         },
       ],
       methods: [

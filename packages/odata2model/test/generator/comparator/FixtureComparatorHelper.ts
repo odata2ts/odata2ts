@@ -1,6 +1,6 @@
+import { ODataVersions } from "@odata2ts/odata-core";
 import { Project, SourceFile } from "ts-morph";
 
-import { ODataVesions } from "../../../src/app";
 import { DataModel } from "../../../src/data-model/DataModel";
 import { Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
 import { DigesterFunction } from "../../../src/FactoryFunctionModel";
@@ -71,7 +71,7 @@ export class FixtureComparatorHelper {
 export const createServiceHelper = async (
   fixtureBasePath: string,
   digest: DigesterFunction<any>,
-  version: ODataVesions
+  version: ODataVersions
 ) => {
   const comparator = await createFixtureComparator(fixtureBasePath);
   return new ServiceFixtureComparatorHelper(comparator, digest, version);
@@ -81,7 +81,7 @@ export class ServiceFixtureComparatorHelper {
   constructor(
     private comparator: FixtureComparator,
     private digest: DigesterFunction<any>,
-    private version: ODataVesions
+    private version: ODataVersions
   ) {}
 
   public async generateService(

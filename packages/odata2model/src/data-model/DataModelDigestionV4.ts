@@ -1,25 +1,28 @@
-import { pascalCase } from "pascal-case";
+import { MappedConverterChains, loadConverters } from "@odata2ts/converter";
+import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
 import { DigesterFunction } from "../FactoryFunctionModel";
 import { RunOptions } from "../OptionModel";
-import { Digester } from "./DataModelDigestion";
+import { Digester, TypeModel } from "./DataModelDigestion";
 import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
-import { ComplexTypeV4, EntityTypeV4, ODataTypesV4, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4";
+import { ComplexTypeV4, EntityTypeV4, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4";
 
 /**
  * Takes an EDMX schema
  * @param schema
  * @param options
  */
-export const digest: DigesterFunction<SchemaV4> = (schema, options) => {
-  const digester = new DigesterV4(schema, options);
+export const digest: DigesterFunction<SchemaV4> = async (schema, options) => {
+  const converters = await loadConverters(ODataVersions.V2, options.generation?.converters);
+
+  const digester = new DigesterV4(schema, options, converters);
   return digester.digest();
 };
 
 class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
-  constructor(schema: SchemaV4, options: RunOptions) {
-    super(ODataVersion.V4, schema, options);
+  constructor(schema: SchemaV4, options: RunOptions, converters?: MappedConverterChains) {
+    super(ODataVersion.V4, schema, options, converters);
   }
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV4): Array<Property> {
@@ -89,10 +92,17 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     }
   }
 
-  protected mapODataType(type: string): [string, string, string, string | undefined] {
+  protected mapODataType(type: string): TypeModel {
+    const converter = this.dataModel.getConverter(type);
     switch (type) {
       case ODataTypesV4.Boolean:
-        return ["boolean", "QBooleanPath", "QBooleanCollection", "QBooleanParam"];
+        return {
+          outputType: converter?.to ?? "boolean",
+          qPath: "QBooleanPath",
+          qCollection: "QBooleanCollection",
+          qParam: "QBooleanParam",
+          converters: converter?.converters ?? [],
+        };
       case ODataTypesV4.Byte:
       case ODataTypesV4.SByte:
       case ODataTypesV4.Int16:
@@ -101,21 +111,69 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       case ODataTypesV4.Single:
       case ODataTypesV4.Double:
       case ODataTypesV4.Decimal:
-        return ["number", "QNumberPath", "QNumberCollection", "QNumberParam"];
+        return {
+          outputType: converter?.to ?? "number",
+          qPath: "QNumberPath",
+          qCollection: "QNumberCollection",
+          qParam: "QNumberParam",
+          converters: converter?.converters ?? [],
+        };
       case ODataTypesV4.String:
-        return ["string", "QStringPath", "QStringCollection", "QStringParam"];
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QStringPath",
+          qCollection: "QStringCollection",
+          qParam: "QStringParam",
+          converters: converter?.converters ?? [],
+        };
       case ODataTypesV4.Date:
-        return ["string", "QDatePath", "QDateCollection", "QDateParam"];
-      case ODataTypesV4.Time:
-        return ["string", "QTimeOfDayPath", "QTimeOfDayCollection", "QTimeOfDayParam"];
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QDatePath",
+          qCollection: "QDateCollection",
+          qParam: "QDateParam",
+          converters: converter?.converters ?? [],
+        };
+      case ODataTypesV4.TimeOfDay:
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QTimeOfDayPath",
+          qCollection: "QTimeOfDayCollection",
+          qParam: "QTimeOfDayParam",
+          converters: converter?.converters ?? [],
+        };
       case ODataTypesV4.DateTimeOffset:
-        return ["string", "QDateTimeOffsetPath", "QDateTimeOffsetCollection", "QDateTimeOffsetParam"];
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QDateTimeOffsetPath",
+          qCollection: "QDateTimeOffsetCollection",
+          qParam: "QDateTimeOffsetParam",
+          converters: converter?.converters ?? [],
+        };
       case ODataTypesV4.Binary:
-        return ["string", "QBinaryPath", "QBinaryCollection", undefined];
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QBinaryPath",
+          qCollection: "QBinaryCollection",
+          qParam: undefined,
+          converters: converter?.converters ?? [],
+        };
       case ODataTypesV4.Guid:
-        return ["string", "QGuidPath", "QGuidCollection", "QGuidParam"];
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QGuidPath",
+          qCollection: "QGuidCollection",
+          qParam: "QGuidParam",
+          converters: converter?.converters ?? [],
+        };
       default:
-        return ["string", "QStringPath", "QStringCollection", "QStringParam"];
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QStringPath",
+          qCollection: "QStringCollection",
+          qParam: "QStringParam",
+          converters: converter?.converters ?? [],
+        };
     }
   }
 

@@ -1,5 +1,6 @@
+import { ODataTypesV4 } from "@odata2ts/odata-core";
+
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
 import { GenerationOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import {
@@ -81,7 +82,7 @@ export function createEntityBasedGenerationTests(
         .addKeyProp("id2", ODataTypesV4.Int32)
         .addKeyProp("id3", ODataTypesV4.Boolean)
         .addProp("requiredOption", ODataTypesV4.Boolean, false)
-        .addProp("time", ODataTypesV4.Time)
+        .addProp("time", ODataTypesV4.TimeOfDay)
         .addProp("optionalDate", ODataTypesV4.Date)
         .addProp("dateTimeOffset", ODataTypesV4.DateTimeOffset)
         .addProp("TestDecimal", ODataTypesV4.Decimal)
@@ -91,7 +92,7 @@ export function createEntityBasedGenerationTests(
         .addProp("multipleNumbers", `Collection(${ODataTypesV4.Decimal})`)
         .addProp("multipleBooleans", `Collection(${ODataTypesV4.Boolean})`)
         .addProp("multipleIds", `Collection(${ODataTypesV4.Guid})`)
-        .addProp("multipleTimes", `Collection(${ODataTypesV4.Time})`)
+        .addProp("multipleTimes", `Collection(${ODataTypesV4.TimeOfDay})`)
         .addProp("multipleDates", `Collection(${ODataTypesV4.Date})`)
         .addProp("multipleDateTimeOffsets", `Collection(${ODataTypesV4.DateTimeOffset})`)
         .addProp("multipleBinaries", `Collection(${ODataTypesV4.Binary})`)

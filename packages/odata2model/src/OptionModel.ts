@@ -1,3 +1,5 @@
+import { TypeConverterConfig } from "@odata2ts/converter";
+
 /**
  * Generation mode, by default "all".
  */
@@ -49,7 +51,6 @@ export interface RunOptions extends Omit<CliOptions, "source" | "mode" | "emitMo
   generation?: GenerationOptions;
 }
 
-
 export interface GenerationOptions {
   /**
    * If activated, no Editable models are generated.
@@ -89,25 +90,11 @@ export interface GenerationOptions {
    * To only use specific converters, the object syntax must be used, where supported converters
    * must be listed by their ids.
    */
-  converters?: Array<string | TypeConverterModel>;
+  converters?: Array<string | TypeConverterConfig>;
   /**
    * Custom generation options which are dependent on a specific odata service.
    */
   custom?: CustomGenerationOptions;
-}
-
-/**
- * Allows for further configuration of a converter.
- */
-export interface TypeConverterModel {
-  /**
-   * The package or module name, e.g. "@odata2ts/converter-v2-to-v4".
-   */
-  module: string;
-  /**
-   * List of converter ids of this module, which should be used.
-   */
-  use: Array<string>;
 }
 
 /**

@@ -1,5 +1,5 @@
-import { ODataTypesV3 } from "../../../lib/data-model/edmx/ODataEdmxModelV3";
-import { ODataVesions } from "../../../src/app";
+import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
+
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { generateModels } from "../../../src/generator";
 import { GenerationOptions } from "../../../src/OptionModel";
@@ -15,7 +15,7 @@ describe("Model Generator Tests V2", () => {
   const TEST_SUITE_NAME = "Model Generator";
   const FIXTURE_BASE_PATH = "generator/model";
   const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = (dataModel, sourceFile, genOptions) => {
-    return generateModels(dataModel, sourceFile, ODataVesions.V2, genOptions);
+    return generateModels(dataModel, sourceFile, ODataVersions.V2, genOptions);
   };
 
   let odataBuilder: ODataModelBuilderV2;
@@ -37,8 +37,8 @@ describe("Model Generator Tests V2", () => {
 
   test(`${TEST_SUITE_NAME}: min function param model`, async () => {
     // given a simple function
-    odataBuilder.addFunctionImport("MinOperation", ODataTypesV3.String, (builder) =>
-      builder.addParam("test", ODataTypesV3.String, false).addParam("optTest", ODataTypesV3.String, true)
+    odataBuilder.addFunctionImport("MinOperation", ODataTypesV2.String, (builder) =>
+      builder.addParam("test", ODataTypesV2.String, false).addParam("optTest", ODataTypesV2.String, true)
     );
 
     // when generating model
@@ -47,15 +47,15 @@ describe("Model Generator Tests V2", () => {
   });
 
   test(`${TEST_SUITE_NAME}: max function param model`, async () => {
-    odataBuilder.addFunctionImport("maxOperation", ODataTypesV3.String, (builder) =>
+    odataBuilder.addFunctionImport("maxOperation", ODataTypesV2.String, (builder) =>
       builder
-        .addParam("test", ODataTypesV3.String, false)
-        .addParam("testNumber", ODataTypesV3.Int32, false)
-        .addParam("testBoolean", ODataTypesV3.Boolean, false)
-        .addParam("testGuid", ODataTypesV3.Guid, false)
-        .addParam("testTime", ODataTypesV3.Time, false)
-        .addParam("testDateOrDateTime", ODataTypesV3.DateTime, false)
-        .addParam("testDateTimeOffset", ODataTypesV3.DateTimeOffset, false)
+        .addParam("test", ODataTypesV2.String, false)
+        .addParam("testNumber", ODataTypesV2.Int32, false)
+        .addParam("testBoolean", ODataTypesV2.Boolean, false)
+        .addParam("testGuid", ODataTypesV2.Guid, false)
+        .addParam("testTime", ODataTypesV2.Time, false)
+        .addParam("testDateOrDateTime", ODataTypesV2.DateTime, false)
+        .addParam("testDateTimeOffset", ODataTypesV2.DateTimeOffset, false)
     );
 
     // when generating model

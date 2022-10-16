@@ -1,7 +1,6 @@
-import { ODataTypesV4 } from "../../../lib/data-model/edmx/ODataEdmxModelV4";
-import { ODataVesions } from "../../../src/app";
+import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
+
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
 import { generateQueryObjects } from "../../../src/generator";
 import { GenerationOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
@@ -18,7 +17,7 @@ describe("Query Object Generator Tests V4", () => {
   const FIXTURE_BASE_PATH = "generator/qobject";
 
   const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = (dataModel, sourceFile, options) => {
-    return generateQueryObjects(dataModel, sourceFile, ODataVesions.V4, options);
+    return generateQueryObjects(dataModel, sourceFile, ODataVersions.V4, options);
   };
 
   let odataBuilder: ODataModelBuilderV4;
@@ -57,7 +56,7 @@ describe("Query Object Generator Tests V4", () => {
         .addParam("testNumber", ODataTypesV4.Int32, false)
         .addParam("testBoolean", ODataTypesV4.Boolean, false)
         .addParam("testGuid", ODataTypesV4.Guid, false)
-        .addParam("testTime", ODataTypesV4.Time, false)
+        .addParam("testTime", ODataTypesV4.TimeOfDay, false)
         .addParam("testDate", ODataTypesV4.Date, false)
         .addParam("testDateTimeOffset", ODataTypesV4.DateTimeOffset, false)
     );

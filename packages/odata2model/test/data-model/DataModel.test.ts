@@ -1,3 +1,6 @@
+import { MappedConverterChains, ValueConverterChain } from "@odata2ts/converter";
+import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
+
 import { DataModel } from "../../src/data-model/DataModel";
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
 
@@ -79,5 +82,22 @@ describe("Data Model Tests", function () {
 
     dataModel = new DataModel(ODataVersion.V4, SERVICE_NAME, "abc_DEFGhi");
     expect(dataModel.getFileNames()).toEqual(expRes);
+  });
+
+  test("adding converter", () => {
+    const pkg = "test";
+    const converterId = "testId";
+    const expected = {
+      from: ODataTypesV2.Time,
+      to: ODataTypesV4.Duration,
+      converters: [{ package: pkg, converterId }],
+    };
+
+    const convMap: MappedConverterChains = new Map();
+    convMap.set(ODataTypesV2.Time, expected);
+
+    dataModel = new DataModel(ODataVersion.V4, SERVICE_NAME, undefined, convMap);
+
+    expect(dataModel.getConverter(ODataTypesV2.Time)).toStrictEqual(expected);
   });
 });

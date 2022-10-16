@@ -1,25 +1,30 @@
+import { MappedConverterChains, loadConverters } from "@odata2ts/converter";
+import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 import { pascalCase } from "pascal-case";
 
 import { DigesterFunction } from "../FactoryFunctionModel";
 import { RunOptions } from "../OptionModel";
-import { Digester } from "./DataModelDigestion";
+import { Digester, TypeModel } from "./DataModelDigestion";
 import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
-import { ComplexTypeV3, EntityTypeV3, ODataTypesV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
+import { ComplexTypeV3, EntityTypeV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
 
 /**
- * Takes an EDMX schema
+ * Digests an EDMX schema to produce a DataModel.
+ *
  * @param schema
  * @param options
  */
 export const digest: DigesterFunction<SchemaV3> = async (schema, options) => {
-  const digester = new DigesterV3(schema, options);
+  const converters = await loadConverters(ODataVersions.V2, options.generation?.converters);
+
+  const digester = new DigesterV3(schema, options, converters);
   return digester.digest();
 };
 
 class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
-  constructor(schema: SchemaV3, options: RunOptions) {
-    super(ODataVersion.V2, schema, options);
+  constructor(schema: SchemaV3, options: RunOptions, converters: MappedConverterChains | undefined) {
+    super(ODataVersion.V2, schema, options, converters);
   }
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV3): Array<Property> {
@@ -101,34 +106,95 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
     }
   }
 
-  protected mapODataType(type: string): [string, string, string, string | undefined] {
+  protected mapODataType(type: string): TypeModel {
+    const converter = this.dataModel.getConverter(type);
     switch (type) {
-      case ODataTypesV3.Boolean:
-        return ["boolean", "QBooleanPath", "QBooleanCollection", "QBooleanParam"];
-      case ODataTypesV3.Int16:
-      case ODataTypesV3.Int32:
-        return ["number", "QNumberPath", "QNumberCollection", "QNumberParam"];
-      case ODataTypesV3.Byte:
-      case ODataTypesV3.SByte:
-      case ODataTypesV3.Int64:
-      case ODataTypesV3.Single:
-      case ODataTypesV3.Double:
-      case ODataTypesV3.Decimal:
-        return ["string", "QNumberPath", "QNumberCollection", "QNumberParam"];
-      case ODataTypesV3.String:
-        return ["string", "QStringV2Path", "QStringV2Collection", "QStringParam"];
-      case ODataTypesV3.DateTime:
-        return ["string", "QDateTimeV2Path", "QDateTimeV2Collection", "QDateTimeV2Param"];
-      case ODataTypesV3.Time:
-        return ["string", "QTimeV2Path", "QTimeV2Collection", "QTimeV2Param"];
-      case ODataTypesV3.DateTimeOffset:
-        return ["string", "QDateTimeOffsetV2Path", "QDateTimeOffsetV2Collection", "QDateTimeOffsetV2Param"];
-      case ODataTypesV3.Binary:
-        return ["string", "QBinaryPath", "QBinaryCollection", undefined];
-      case ODataTypesV3.Guid:
-        return ["string", "QGuidV2Path", "QGuidV2Collection", "QGuidV2Param"];
+      case ODataTypesV2.Boolean:
+        return {
+          outputType: converter?.to ?? "boolean",
+          qPath: "QBooleanPath",
+          qCollection: "QBooleanCollection",
+          qParam: "QBooleanParam",
+          converters: converter?.converters ?? [],
+        };
+      case ODataTypesV2.Int16:
+      case ODataTypesV2.Int32:
+        return {
+          outputType: converter?.to ?? "number",
+          qPath: "QNumberPath",
+          qCollection: "QNumberCollection",
+          qParam: "QNumberParam",
+          converters: converter?.converters ?? [],
+        };
+      case ODataTypesV2.Byte:
+      case ODataTypesV2.SByte:
+      case ODataTypesV2.Int64:
+      case ODataTypesV2.Single:
+      case ODataTypesV2.Double:
+      case ODataTypesV2.Decimal:
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QNumberPath",
+          qCollection: "QNumberCollection",
+          qParam: "QNumberParam",
+          converters: converter?.converters ?? [],
+        };
+      case ODataTypesV2.String:
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QStringV2Path",
+          qCollection: "QStringV2Collection",
+          qParam: "QStringParam",
+          converters: converter?.converters ?? [],
+        };
+      case ODataTypesV2.DateTime:
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QDateTimeV2Path",
+          qCollection: "QDateTimeV2Collection",
+          qParam: "QDateTimeV2Param",
+          converters: converter?.converters ?? [],
+        };
+      case ODataTypesV2.Time:
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QTimeV2Path",
+          qCollection: "QTimeV2Collection",
+          qParam: "QTimeV2Param",
+          converters: converter?.converters ?? [],
+        };
+      case ODataTypesV2.DateTimeOffset:
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QDateTimeOffsetV2Path",
+          qCollection: "QDateTimeOffsetV2Collection",
+          qParam: "QDateTimeOffsetV2Param",
+          converters: converter?.converters ?? [],
+        };
+      case ODataTypesV2.Binary:
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QBinaryPath",
+          qCollection: "QBinaryCollection",
+          qParam: undefined,
+          converters: converter?.converters ?? [],
+        };
+      case ODataTypesV2.Guid:
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QGuidV2Path",
+          qCollection: "QGuidV2Collection",
+          qParam: "QGuidV2Param",
+          converters: converter?.converters ?? [],
+        };
       default:
-        return ["string", "QStringV2Path", "QStringV2Collection", "QStringParam"];
+        return {
+          outputType: converter?.to ?? "string",
+          qPath: "QStringV2Path",
+          qCollection: "QStringV2Collection",
+          qParam: "QStringParam",
+          converters: converter?.converters ?? [],
+        };
     }
   }
 }

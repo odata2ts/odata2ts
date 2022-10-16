@@ -1,6 +1,7 @@
+import { ODataTypesV2 } from "@odata2ts/odata-core";
+
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
-import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
 import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
 
 describe("EntitySet Digestion Test", () => {
@@ -28,7 +29,7 @@ describe("EntitySet Digestion Test", () => {
 
   test("EntitySet: min case", async () => {
     odataBuilder.addEntitySet("Products", "Product").addEntityType("Product", undefined, (builder) => {
-      builder.addKeyProp("id", ODataTypesV3.String);
+      builder.addKeyProp("id", ODataTypesV2.String);
     });
 
     const result = await doDigest();

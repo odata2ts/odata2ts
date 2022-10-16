@@ -1,6 +1,6 @@
+import { ODataVersions } from "@odata2ts/odata-core";
 import { SourceFile } from "ts-morph";
 
-import { ODataVesions } from "../app";
 import { DataModel } from "../data-model/DataModel";
 import { ComplexType, DataTypes, ModelType, OperationType, PropertyModel } from "../data-model/DataTypeModel";
 import { EntityBasedGeneratorFunction } from "../FactoryFunctionModel";
@@ -18,7 +18,7 @@ class ModelGenerator {
   constructor(
     private dataModel: DataModel,
     private sourceFile: SourceFile,
-    private version: ODataVesions,
+    private version: ODataVersions,
     private options: GenerationOptions | undefined
   ) {}
 

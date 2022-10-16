@@ -1,16 +1,13 @@
+import { ODataVersions } from "@odata2ts/odata-core";
+
 import { digest as digestV2 } from "./data-model/DataModelDigestionV2";
 import { digest as digestV4 } from "./data-model/DataModelDigestionV4";
 import { ODataEdmxModelBase, Schema } from "./data-model/edmx/ODataEdmxModelBase";
 import { SchemaV3 } from "./data-model/edmx/ODataEdmxModelV3";
 import { SchemaV4 } from "./data-model/edmx/ODataEdmxModelV4";
 import { generateModels, generateQueryObjects, generateServices } from "./generator";
-import { GenerationOptions, Modes, RunOptions } from "./OptionModel";
+import { Modes, RunOptions } from "./OptionModel";
 import { createProjectManager } from "./project/ProjectManager";
-
-export enum ODataVesions {
-  V2,
-  V4,
-}
 
 function isQObjectGen(mode: Modes) {
   return [Modes.qobjects, Modes.service, Modes.all].includes(mode);
@@ -20,18 +17,19 @@ function isServiceGen(mode: Modes) {
   return [Modes.service, Modes.all].includes(mode);
 }
 
-function useGenerationOptions({ mode, generation }: RunOptions): GenerationOptions {
-  if (!generation) {
-    return {};
+/**
+ * Modifies generation options in place.
+ * @param options
+ */
+function safeGuardGenerationOptions(options: RunOptions): void {
+  if (options.generation && isServiceGen(options.mode)) {
+    options.generation = {
+      ...options.generation,
+      skipEditableModel: false,
+      skipIdModel: false,
+      skipOperationModel: false,
+    };
   }
-  return isServiceGen(mode)
-    ? {
-        ...generation,
-        skipEditableModel: false,
-        skipIdModel: false,
-        skipOperationModel: false,
-      }
-    : generation;
 }
 
 /**
@@ -42,12 +40,11 @@ function useGenerationOptions({ mode, generation }: RunOptions): GenerationOptio
 export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: RunOptions): Promise<void> {
   // determine edmx edmxVersion attribute
   const edmxVersion = metadataJson["edmx:Edmx"].$.Version;
-  const version = edmxVersion === "1.0" ? ODataVesions.V2 : ODataVesions.V4;
+  const version = edmxVersion === "1.0" ? ODataVersions.V2 : ODataVersions.V4;
 
-  // get file name based on service name
   const dataService = metadataJson["edmx:Edmx"]["edmx:DataServices"][0];
 
-  // merge all schemas & take name from first schema
+  // handling multiple schemas => merge them
   // TODO only necessary for NorthwindModel => other use cases?
   const schemaRaw = dataService.Schema.reduce(
     (collector, schema) => ({
@@ -57,10 +54,14 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
     {} as Schema<any, any>
   );
 
+  // safeguard generation options, depending on generation mode
+  // => options are directly modified
+  safeGuardGenerationOptions(options);
+
   // parse model information from edmx into something we can really work with
   // => that stuff is called dataModel!
   const dataModel =
-    version === ODataVesions.V2
+    version === ODataVersions.V2
       ? await digestV2(schemaRaw as SchemaV3, options)
       : await digestV4(schemaRaw as SchemaV4, options);
   // handling the overall generation project
@@ -70,20 +71,18 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
     options.emitMode,
     options.prettier
   );
-  // safe guard generation options, depending on generation mode
-  const generationOptions = useGenerationOptions(options);
 
   // Generate Model Interfaces
   // supported edmx types: EntityType, ComplexType, EnumType
   const modelsFile = await project.createModelFile();
-  generateModels(dataModel, modelsFile, version, generationOptions);
+  generateModels(dataModel, modelsFile, version, options.generation);
 
   // Generate Query Objects
   // supported edmx types: EntityType, ComplexType
   // supported edmx prop types: primitive types, enum types, primitive collection (incl enum types), entity collection, entity object, complex object
   if (isQObjectGen(options.mode)) {
     const qFile = await project.createQObjectFile();
-    generateQueryObjects(dataModel, qFile, version, generationOptions);
+    generateQueryObjects(dataModel, qFile, version, options.generation);
   }
 
   // Generate Individual OData-Service

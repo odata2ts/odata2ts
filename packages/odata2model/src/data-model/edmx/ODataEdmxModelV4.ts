@@ -87,38 +87,3 @@ export interface Operation {
 export interface Parameter extends Property {
   Unicode?: boolean;
 }
-
-export enum ODataTypesV4 {
-  Binary = "Edm.Binary",
-  Boolean = "Edm.Boolean",
-  String = "Edm.String",
-  Byte = "Edm.Byte",
-  SByte = "Edm.SByte",
-  Int16 = "Edm.Int16",
-  Int32 = "Edm.Int32",
-  Int64 = "Edm.Int64",
-  Decimal = "Edm.Decimal",
-  Double = "Edm.Double",
-  Single = "Edm.Single",
-  Guid = "Edm.Guid",
-  Date = "Edm.Date",
-  Time = "Edm.TimeOfDay",
-  DateTimeOffset = "Edm.DateTimeOffset",
-  // TODO
-  // Duration = "Edm.Duration",
-  // Stream = "Edm.Stream",
-  // Geography = "Geography",
-  // GeographyPoint = "GeographyPoint",
-  // GeographyLineString = "GeographyLineString",
-  // GeographyPolygon = "GeographyPolygon",
-  // GeographyMultiPoint = "GeographyMultiPoint",
-  // GeographyMultiLineString = "GeographyMultiLineString",
-  // GeographyCollection = "GeographyCollection",
-  // Geometry = "Geometry",
-  // GeometryPoint = "GeometryPoint",
-  // GeometryLineString = "GeometryLineString",
-  // GeometryPolygon = "GeometryPolygon",
-  // GeometryMultiPoint = "GeometryMultiPoint",
-  // GeometryMultiPolygon = "GeometryMultiPolygon",
-  // GeometryCollection = "GeometryCollection",
-}

@@ -66,7 +66,7 @@ export enum ODataTypesV4 {
    * Represent a specific time of a day, which conforms to ISO 8601 time format,
    * e.g. "12:59:59" or with millisecond precision "10:40:12.123".
    */
-  Time = "Edm.TimeOfDay",
+  TimeOfDay = "Edm.TimeOfDay",
   /**
    * Represents a specific day, which conforms to ISO 8601 date format,
    * e.g. "2022-12-31".
@@ -95,6 +95,12 @@ export enum ODataTypesV4 {
    * - PT1.123S = with millisecond precision
    */
   Duration = "Edm.Duration",
+  /**
+   * Represents fixed- or variable- length binary data.
+   *
+   * Represented as Base64 encoded string.
+   */
+  Binary = "Edm.Binary",
   /**
    * Represents a streamable property.
    *

@@ -1,3 +1,4 @@
+import { MappedConverterChains, ValueConverterImport } from "@odata2ts/converter";
 import { camelCase } from "camel-case";
 import { pascalCase } from "pascal-case";
 
@@ -8,6 +9,16 @@ import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModel
 
 const ID_SUFFIX = "Id";
 
+export type DigesterOptions = Pick<RunOptions, "serviceName" | "generation" | "modelPrefix" | "modelSuffix">;
+
+export interface TypeModel {
+  outputType: string;
+  qPath: string;
+  qCollection: string;
+  qParam: string | undefined;
+  converters: Array<ValueConverterImport>;
+}
+
 export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, CT extends ComplexType> {
   protected static EDM_PREFIX = "Edm.";
   protected static ROOT_OPERATION = "/";
@@ -16,9 +27,14 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   protected readonly dataModel: DataModel;
   private model2Type: Map<string, DataTypes> = new Map<string, DataTypes>();
 
-  protected constructor(protected version: ODataVersion, protected schema: S, protected options: RunOptions) {
+  protected constructor(
+    protected version: ODataVersion,
+    protected schema: S,
+    protected options: DigesterOptions,
+    converters?: MappedConverterChains
+  ) {
     const serviceName = schema.$.Namespace;
-    this.dataModel = new DataModel(version, serviceName, options.serviceName);
+    this.dataModel = new DataModel(version, serviceName, options.serviceName, converters);
     this.collectModelTypes(this.schema);
   }
 
@@ -32,7 +48,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    * @param type
    * @return tuple of return type, query object, query collection object
    */
-  protected abstract mapODataType(type: string): [string, string, string, string | undefined];
+  protected abstract mapODataType(type: string): TypeModel;
 
   public async digest(): Promise<DataModel> {
     this.digestSchema(this.schema);
@@ -280,12 +296,12 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // OData built-in data types
     else if (dataType.startsWith(Digester.EDM_PREFIX)) {
       resultDt = DataTypes.PrimitiveType;
-      const [type, qPath, qCollectionClass, qParam] = this.mapODataType(dataType);
-      resultType = type;
-      resultQPath = qPath;
-      resultQParam = qParam;
+      const typeModel = this.mapODataType(dataType);
+      resultType = typeModel.outputType;
+      resultQPath = typeModel.qPath;
+      resultQParam = typeModel.qParam;
       if (isCollection) {
-        qClass = qCollectionClass;
+        qClass = typeModel.qCollection;
       }
     } else {
       throw new Error(
