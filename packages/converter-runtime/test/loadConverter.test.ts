@@ -1,6 +1,6 @@
+import { ValueConverterChain } from "@odata2ts/converter-api";
 import { ODataTypesV2, ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
-import { ValueConverterChain } from "../lib";
 import { loadConverters } from "../src";
 
 describe("LoadConverters Test", () => {

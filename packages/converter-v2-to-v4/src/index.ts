@@ -1,4 +1,4 @@
-import { ConverterPackage } from "@odata2ts/converter";
+import { ConverterPackage } from "@odata2ts/converter-api";
 
 import { dateTimeToDateTimeOffsetConverter } from "./DateTimeToDateTimeOffsetConverter";
 import { stringToNumberConverter } from "./StringToNumberConverter";

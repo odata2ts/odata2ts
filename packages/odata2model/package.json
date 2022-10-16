@@ -39,7 +39,8 @@
     "@odata2ts/odata-service": "*"
   },
   "dependencies": {
-    "@odata2ts/odata-core": "workspace:^",
+    "@odata2ts/converter-api": "^0.0.0",
+    "@odata2ts/converter-runtime": "^0.0.0",
     "camel-case": "^4.1.2",
     "commander": "^9.1.0",
     "cosmiconfig": "^7.0.1",

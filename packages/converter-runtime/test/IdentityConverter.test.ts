@@ -1,4 +1,4 @@
-import { getIdentityConverter } from "../src/IdentityConverter";
+import { getIdentityConverter } from "../src";
 
 describe("IdentityConverter Test", () => {
   const toTest = getIdentityConverter();

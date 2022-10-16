@@ -1,4 +1,5 @@
-import { MappedConverterChains, ValueConverterImport } from "@odata2ts/converter";
+import { ValueConverterImport } from "@odata2ts/converter-api";
+import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { camelCase } from "camel-case";
 import { pascalCase } from "pascal-case";
 

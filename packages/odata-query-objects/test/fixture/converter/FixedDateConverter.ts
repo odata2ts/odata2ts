@@ -1,4 +1,4 @@
-import { ParamValueModel, ValueConverter } from "@odata2ts/converter";
+import { ParamValueModel, ValueConverter } from "@odata2ts/converter-api";
 
 export const FIXED_DATE = new Date(2022, 12, 31, 23, 59, 59);
 export const FIXED_STRING = FIXED_DATE.toISOString();

@@ -1,4 +1,4 @@
-import { ParamValueModel, ValueConverter } from "@odata2ts/converter";
+import { ParamValueModel, ValueConverter } from "@odata2ts/converter-api";
 
 export const fixedPrefixConverter: ValueConverter<string, string> = {
   id: "FixedPrefix",

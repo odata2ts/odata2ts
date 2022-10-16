@@ -1,4 +1,4 @@
-import { MappedConverterChains, loadConverters } from "@odata2ts/converter";
+import { MappedConverterChains, loadConverters } from "@odata2ts/converter-runtime";
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
 import { DigesterFunction } from "../FactoryFunctionModel";

@@ -1,7 +1,11 @@
+import {
+  ConverterPackage,
+  RuntimeConverterPackage,
+  TypeConverterConfig,
+  ValueConverterChain,
+  ValueConverterType,
+} from "@odata2ts/converter-api";
 import { ODataTypesV2, ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
-
-import { ConverterPackage, RuntimeConverterPackage, ValueConverterChain, ValueConverterType } from "./";
-import { TypeConverterConfig } from "./ConverterModel";
 
 type MappedConverters = Map<string, ValueConverterType & { package: string }>;
 

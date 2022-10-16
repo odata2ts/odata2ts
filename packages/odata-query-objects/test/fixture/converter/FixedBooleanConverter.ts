@@ -1,4 +1,4 @@
-import { ParamValueModel, ValueConverter } from "@odata2ts/converter";
+import { ParamValueModel, ValueConverter } from "@odata2ts/converter-api";
 
 export const fixedBooleanConverter: ValueConverter<boolean, number> = {
   id: "FixedBoolean",

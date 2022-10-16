@@ -1,4 +1,5 @@
-import { ParamValueModel, ValueConverter, getIdentityConverter } from "@odata2ts/converter";
+import { ParamValueModel, ValueConverter } from "@odata2ts/converter-api";
+import { getIdentityConverter } from "@odata2ts/converter-runtime";
 
 import { UrlParamValueFormatter, UrlParamValueParser } from "../internal";
 

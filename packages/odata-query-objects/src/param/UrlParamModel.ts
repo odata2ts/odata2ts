@@ -1,4 +1,4 @@
-import { ParamValueModel } from "@odata2ts/converter";
+import { ParamValueModel } from "@odata2ts/converter-api";
 
 /**
  * Configuration to format an URL param.

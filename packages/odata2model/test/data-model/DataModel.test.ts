@@ -1,4 +1,4 @@
-import { MappedConverterChains, ValueConverterChain } from "@odata2ts/converter";
+import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { DataModel } from "../../src/data-model/DataModel";

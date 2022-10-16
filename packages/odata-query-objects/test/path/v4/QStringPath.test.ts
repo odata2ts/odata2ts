@@ -1,4 +1,4 @@
-import { getIdentityConverter } from "@odata2ts/converter";
+import { getIdentityConverter } from "@odata2ts/converter-runtime";
 
 import { QStringPath } from "../../../src";
 import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";

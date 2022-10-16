@@ -1,4 +1,4 @@
-import { ParamValueModel, ValueConverter } from "@odata2ts/converter";
+import { ParamValueModel, ValueConverter } from "@odata2ts/converter-api";
 import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
 
 /**

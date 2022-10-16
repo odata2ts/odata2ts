@@ -1,4 +1,4 @@
-import { ParamValueModel, ValueConverter } from "@odata2ts/converter";
+import { ParamValueModel, ValueConverter } from "@odata2ts/converter-api";
 import { Duration } from "luxon";
 
 export const durationToLuxonConverter: ValueConverter<string, Duration> = {

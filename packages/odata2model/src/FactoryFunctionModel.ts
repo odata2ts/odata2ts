@@ -1,4 +1,4 @@
-import { MappedConverterChains } from "@odata2ts/converter";
+import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { ODataVersions } from "@odata2ts/odata-core";
 import { SourceFile } from "ts-morph";
 

@@ -1,4 +1,4 @@
-import { TypeConverterConfig } from "@odata2ts/converter";
+import { TypeConverterConfig } from "@odata2ts/converter-api";
 
 /**
  * Generation mode, by default "all".

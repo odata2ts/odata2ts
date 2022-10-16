@@ -1,4 +1,4 @@
-import { IdentityConverter, ParamValueModel } from "./ConverterModel";
+import { IdentityConverter, ParamValueModel } from "@odata2ts/converter-api";
 
 export class IdentityConverterImpl implements IdentityConverter<any, any> {
   id = "Identity";
