@@ -7,7 +7,7 @@
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "scripts": {
     "build": "yarn clean && lerna run build",
-    "clean": "rimraf coverage && lerna run clean",
+    "clean": "rimraf coverage",
     "coverage": "yarn workspace @odata2ts/odata2model dev && jest --coverage",
     "int-test": "lerna run int-test",
     "postversion": "lerna publish from-git",
