@@ -1,3 +1,5 @@
+import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
+
 import { dateTimeToDateTimeOffsetConverter } from "../src";
 
 describe("V2DateTimeToDateTimeOffset Test", () => {
@@ -8,6 +10,12 @@ describe("V2DateTimeToDateTimeOffset Test", () => {
 
   const createWithOffset = (offset: number, negative = false) => `/Date(${TIMESTAMP}${negative ? "-" : "+"}${offset})/`;
   const createIsoWithOffset = (offset: string) => `2022-12-31T23:59:59.000${offset}`;
+
+  test("base attributes", () => {
+    expect(TO_TEST.id).toBe("dateTimeToDateTimeOffsetConverter");
+    expect(TO_TEST.from).toBe(ODataTypesV2.DateTime);
+    expect(TO_TEST.to).toBe(ODataTypesV4.DateTimeOffset);
+  });
 
   test("conversion", () => {
     expect(TO_TEST.convertFrom(FROM_STRING)).toBe(TO_STRING);

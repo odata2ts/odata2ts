@@ -1,7 +1,15 @@
+import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
+
 import { timeToTimeOfDayConverter } from "../src";
 
 describe("TimeToTimeOfDayConverter Test", () => {
   const TO_TEST = timeToTimeOfDayConverter;
+
+  test("base attributes", () => {
+    expect(TO_TEST.id).toBe("timeToTimeOfDayConverter");
+    expect(TO_TEST.from).toBe(ODataTypesV2.Time);
+    expect(TO_TEST.to).toBe(ODataTypesV4.TimeOfDay);
+  });
 
   test("conversion", () => {
     expect(TO_TEST.convertFrom("PT23H59M59S")).toBe("23:59:59");

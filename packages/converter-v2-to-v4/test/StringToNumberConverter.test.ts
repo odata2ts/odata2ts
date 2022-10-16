@@ -1,7 +1,22 @@
+import { ODataTypesV2 } from "@odata2ts/odata-core";
+
 import { stringToNumberConverter } from "../src";
 
 describe("StringToNumberConverter Test", () => {
   const TO_TEST = stringToNumberConverter;
+
+  test("base attributes", () => {
+    expect(TO_TEST.id).toBe("stringToNumberConverter");
+    expect(TO_TEST.from).toStrictEqual([
+      ODataTypesV2.Byte,
+      ODataTypesV2.SByte,
+      ODataTypesV2.Single,
+      ODataTypesV2.Double,
+      ODataTypesV2.Int64,
+      ODataTypesV2.Decimal,
+    ]);
+    expect(TO_TEST.to).toBe("number");
+  });
 
   test("conversion", () => {
     expect(TO_TEST.convertFrom("12.59")).toBe(12.59);

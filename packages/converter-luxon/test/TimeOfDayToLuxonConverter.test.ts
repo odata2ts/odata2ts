@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 
 import { timeOfDayToLuxonConverter } from "../src";
-import { execCommonConverterTests } from "./CommonTests.test";
+import { execCommonConverterTests } from "./CommonTests";
 
 describe("TimeOfDayToLuxonConverter Test", () => {
   const TO_TEST = timeOfDayToLuxonConverter;

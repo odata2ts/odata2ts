@@ -2,7 +2,7 @@ import { ParamValueModel, ValueConverter } from "@odata2ts/converter";
 import { DateTime } from "luxon";
 
 export const dateToLuxonConverter: ValueConverter<string, DateTime> = {
-  id: "DateToLuxon",
+  id: "dateToLuxonConverter",
   from: "Edm.Date",
   to: "luxon.DateTime",
 

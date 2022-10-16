@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 
 import { dateToLuxonConverter } from "../src";
-import { execCommonConverterTests } from "./CommonTests.test";
+import { execCommonConverterTests } from "./CommonTests";
 
 describe("DateToLuxonConverter Test", () => {
   const FROM_STRING = "2022-12-31";

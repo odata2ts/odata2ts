@@ -1,5 +1,5 @@
 import { durationToLuxonConverter } from "../src";
-import { execCommonConverterTests } from "./CommonTests.test";
+import { execCommonConverterTests } from "./CommonTests";
 
 describe("DurationToLuxonConverter Test", () => {
   const TO_TEST = durationToLuxonConverter;

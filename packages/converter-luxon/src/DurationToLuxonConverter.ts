@@ -2,7 +2,7 @@ import { ParamValueModel, ValueConverter } from "@odata2ts/converter";
 import { Duration } from "luxon";
 
 export const durationToLuxonConverter: ValueConverter<string, Duration> = {
-  id: "DurationToLuxon",
+  id: "durationToLuxonConverter",
   from: ["Edm.Time", "Edm.Duration"],
   to: "luxon.Duration",
 

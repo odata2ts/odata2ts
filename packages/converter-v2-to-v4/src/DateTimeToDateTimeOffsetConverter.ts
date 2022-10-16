@@ -1,4 +1,5 @@
 import { ParamValueModel, ValueConverter } from "@odata2ts/converter";
+import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
 
 function padZerosLeft(input: number) {
   return input < 10 ? `0${input}` : input;
@@ -17,10 +18,17 @@ function formatDateTimeV2(iso8601: string, offset?: string) {
 const DATE_TIME_V2_REGEXP = /\/Date\(([0-9]+)(([+-])([0-9]+))?\)\//;
 const ISO_OFFSET_REGEXP = /([+-])(\d{2}):(\d{2})/;
 
+/**
+ * Converts Edm.DateTime, which is a very special construct, to Edm.DateTimeOffset, which is the typical
+ * ISO 8601 date time format: "2022-12-31T23:59:59.000Z".
+ *
+ * Edm.DateTime is based on a timestamp ("/Date(1672531199000)/") and also supports offsets in minutes
+ * ("/Date(1672531199000+120)/".
+ */
 export const dateTimeToDateTimeOffsetConverter: ValueConverter<string, string> = {
-  id: "DateTimeToDateTimeOffset",
-  from: "Edm.DateTime",
-  to: "Edm.DateTimeOffset",
+  id: "dateTimeToDateTimeOffsetConverter",
+  from: ODataTypesV2.DateTime,
+  to: ODataTypesV4.DateTimeOffset,
 
   convertFrom: function (value: ParamValueModel<string>): ParamValueModel<string> {
     if (typeof value !== "string") {

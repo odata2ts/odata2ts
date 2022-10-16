@@ -1,20 +1,19 @@
+import { ConverterPackage } from "@odata2ts/converter";
+
 import { dateTimeToDateTimeOffsetConverter } from "./DateTimeToDateTimeOffsetConverter";
 import { stringToNumberConverter } from "./StringToNumberConverter";
+import { timeToDurationConverter } from "./TimeToDurationConverter";
 import { timeToTimeOfDayConverter } from "./TimeToTimeOfDayConverter";
 
-export { dateTimeToDateTimeOffsetConverter } from "./DateTimeToDateTimeOffsetConverter";
-export { stringToNumberConverter } from "./StringToNumberConverter";
-export { timeToTimeOfDayConverter } from "./TimeToTimeOfDayConverter";
+const pkg: ConverterPackage = {
+  id: "V2ToV4",
+  converters: [dateTimeToDateTimeOffsetConverter, stringToNumberConverter, timeToDurationConverter],
+};
 
-const allConverters = [dateTimeToDateTimeOffsetConverter, stringToNumberConverter, timeToTimeOfDayConverter];
-
-export default function (specifiedConverters: Array<string> | undefined) {
-  const converters = !specifiedConverters?.length
-    ? allConverters
-    : allConverters.filter((c) => specifiedConverters.includes(c.id));
-
-  return {
-    id: "V2ToV4",
-    converters,
-  };
-}
+export default pkg;
+export {
+  dateTimeToDateTimeOffsetConverter,
+  stringToNumberConverter,
+  timeToDurationConverter,
+  timeToTimeOfDayConverter,
+};

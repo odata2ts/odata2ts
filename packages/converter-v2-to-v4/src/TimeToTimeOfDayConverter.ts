@@ -1,4 +1,5 @@
 import { ParamValueModel, ValueConverter } from "@odata2ts/converter";
+import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
 
 function padZerosLeft(input: string, defaultValue: string) {
   if (!input) {
@@ -14,10 +15,18 @@ function getSafeSuffixedNumber(input: string, suffix: string) {
   return asNumber ? asNumber + suffix : "";
 }
 
+/**
+ * V2 type Edm.Time is actually specified in ISO 8601 (day) duration format.
+ * But Edm.Time was also intended to represent the time of a day, like 12:15:00.
+ * V4 dispensed with Edm.Time and introduced two new data types: Edm.Duration and Edm.TimeOfDay.
+ *
+ * This converter takes an Edm.Time and converts it to Edm.TimeOfDay, which is the well known
+ * ISO 8601 time format.
+ */
 export const timeToTimeOfDayConverter: ValueConverter<string, string> = {
-  id: "TimeToTimeOfDay",
-  from: "Edm.Time",
-  to: "Edm.TimeOfDay",
+  id: "timeToTimeOfDayConverter",
+  from: ODataTypesV2.Time,
+  to: ODataTypesV4.TimeOfDay,
 
   convertFrom: function (value: ParamValueModel<string>): ParamValueModel<string> {
     if (typeof value !== "string") {
