@@ -1,3 +1,4 @@
 export * from "./ConverterModel";
-export { ChainedConverter } from "./ChainedConverter";
+export * from "./loadConverter";
 export { getIdentityConverter } from "./IdentityConverter";
+export { ChainedConverter } from "./ChainedConverter";

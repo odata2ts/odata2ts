@@ -21,6 +21,8 @@
     "LICENSE"
   ],
   "devDependencies": {
+    "@odata2ts/converter-luxon": "workspace:^",
+    "@odata2ts/converter-v2-to-v4": "workspace:^",
     "@types/jest": "^27.4.1",
     "@types/node": "^17.0.23",
     "jest": "27.5.1",
@@ -29,5 +31,8 @@
     "ts-node": "10.7.0",
     "typescript": "4.6.3"
   },
-  "types": "./lib/index.d.ts"
+  "types": "./lib/index.d.ts",
+  "dependencies": {
+    "@odata2ts/odata-core": "workspace:^"
+  }
 }
