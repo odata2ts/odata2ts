@@ -1,10 +1,11 @@
+import { booleanToNumberConverter } from "@odata2ts/test-converters";
+
 import { QBooleanParam } from "../../../src";
-import { fixedBooleanConverter } from "../../fixture/converter/FixedBooleanConverter";
 
 describe("QBooleanParam Tests", () => {
   const name = "T3st_bbb";
   const toTest = new QBooleanParam(name);
-  const toTestWithConverter = new QBooleanParam(name, undefined, fixedBooleanConverter);
+  const toTestWithConverter = new QBooleanParam(name, undefined, booleanToNumberConverter);
 
   test("base attributes", () => {
     expect(toTest.getName()).toBe(name);
@@ -27,12 +28,15 @@ describe("QBooleanParam Tests", () => {
 
   test("converter", () => {
     expect(toTestWithConverter.convertFrom(false)).toBe(0);
-    expect(toTestWithConverter.convertFrom(true)).toBe(1);
     expect(toTestWithConverter.convertTo(1)).toBe(true);
 
-    expect(toTestWithConverter.convertFrom(null)).toBe(0);
-    expect(toTestWithConverter.convertTo(null)).toBe(false);
-    expect(toTestWithConverter.convertTo(undefined)).toBe(false);
+    // identity converter
+    expect(toTest.convertFrom(true)).toBe(true);
+    expect(toTest.convertTo(true)).toBe(true);
+    expect(toTest.convertFrom(null)).toBe(null);
+    expect(toTest.convertTo(null)).toBe(null);
+    expect(toTest.convertFrom(undefined)).toBe(undefined);
+    expect(toTest.convertTo(undefined)).toBe(undefined);
   });
 
   test("formatUrlValue", () => {

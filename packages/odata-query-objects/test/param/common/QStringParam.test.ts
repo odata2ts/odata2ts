@@ -1,11 +1,12 @@
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter, stringToPrefixModelConverter } from "@odata2ts/test-converters";
+
 import { QStringParam } from "../../../src";
-import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
-import { fixedPrefixConverter } from "../../fixture/converter/FixedPrefixConverter";
 
 describe("QStringParam Tests", () => {
   const NAME = "T3st_bbb";
   const toTest = new QStringParam(NAME);
-  const toTestWithConverter = new QStringParam(NAME, undefined, fixedPrefixConverter);
+  const inputModel = { prefix: "PREFIX_", value: "Tester" };
+  const toTestWithConverter = new QStringParam(NAME, undefined, stringToPrefixModelConverter);
 
   test("base attributes", () => {
     expect(toTest.getName()).toBe(NAME);
@@ -30,8 +31,8 @@ describe("QStringParam Tests", () => {
   });
 
   test("converter", () => {
-    expect(toTestWithConverter.convertTo("PREFIX_Tester")).toBe("Tester");
-    expect(toTestWithConverter.convertFrom("Tester")).toBe("PREFIX_Tester");
+    expect(toTestWithConverter.convertFrom("Tester")).toStrictEqual(inputModel);
+    expect(toTestWithConverter.convertTo(inputModel)).toBe("Tester");
   });
 
   test("converter to different type", () => {
@@ -45,7 +46,7 @@ describe("QStringParam Tests", () => {
     expect(toTest.formatUrlValue(null)).toBe("null");
     expect(toTest.formatUrlValue(undefined)).toBe(undefined);
 
-    expect(toTestWithConverter.formatUrlValue("PREFIX_Test")).toBe("'Test'");
+    expect(toTestWithConverter.formatUrlValue(inputModel)).toBe(`'${inputModel.value}'`);
   });
 
   test("parseUrlValue", () => {
@@ -53,6 +54,6 @@ describe("QStringParam Tests", () => {
     expect(toTest.parseUrlValue("null")).toBe(null);
     expect(toTest.parseUrlValue(undefined)).toBe(undefined);
 
-    expect(toTestWithConverter.parseUrlValue("'Te3st'")).toBe("PREFIX_Te3st");
+    expect(toTestWithConverter.parseUrlValue(`'${inputModel.value}'`)).toStrictEqual(inputModel);
   });
 });

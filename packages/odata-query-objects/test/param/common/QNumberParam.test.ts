@@ -1,10 +1,11 @@
+import { numberToStringConverter } from "@odata2ts/test-converters";
+
 import { QNumberParam } from "../../../src";
-import { fixedNumberConverter } from "../../fixture/converter/FixedNumberConverter";
 
 describe("QNumberParam Tests", () => {
   const name = "T3st_bbb";
   const toTest = new QNumberParam(name);
-  const toTestWithConverter = new QNumberParam(name, undefined, fixedNumberConverter);
+  const toTestWithConverter = new QNumberParam(name, undefined, numberToStringConverter);
 
   test("base attributes", () => {
     expect(toTest.getName()).toBe(name);
@@ -28,11 +29,6 @@ describe("QNumberParam Tests", () => {
   test("converter", () => {
     expect(toTestWithConverter.convertFrom(4)).toBe("4");
     expect(toTestWithConverter.convertTo("23.5")).toBe(23.5);
-
-    expect(toTestWithConverter.convertFrom(null)).toBe("null");
-    expect(toTestWithConverter.convertFrom(undefined)).toBe("undefined");
-    expect(toTestWithConverter.convertTo(null)).toBe(0);
-    expect(toTestWithConverter.convertTo(undefined)).toBeNaN();
   });
 
   test("formatUrlValue", () => {

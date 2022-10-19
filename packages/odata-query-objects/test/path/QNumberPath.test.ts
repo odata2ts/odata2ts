@@ -1,6 +1,6 @@
+import { numberToStringConverter } from "@odata2ts/test-converters";
+
 import { QNumberPath } from "../../src/";
-import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../fixture/converter/FixedDateConverter";
-import { fixedNumberConverter } from "../fixture/converter/FixedNumberConverter";
 
 describe("QNumberPath test", () => {
   let toTest: QNumberPath;
@@ -27,8 +27,9 @@ describe("QNumberPath test", () => {
   });
 
   test("with converter", () => {
-    const testWithConv = new QNumberPath("ID", fixedNumberConverter);
+    const testWithConv = new QNumberPath("ID", numberToStringConverter);
 
+    // based on the converter, the user can now input strings instead of numbers
     expect(testWithConv.gt("12").toString()).toBe(`ID gt 12`);
   });
 
