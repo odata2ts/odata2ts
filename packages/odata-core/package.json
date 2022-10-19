@@ -13,7 +13,7 @@
     "clean": "rimraf lib coverage",
     "compile": "tsc",
     "prepublish": "yarn build",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "files": [
     "*.md",
