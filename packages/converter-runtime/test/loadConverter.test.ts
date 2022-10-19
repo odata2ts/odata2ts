@@ -62,6 +62,7 @@ describe("LoadConverters Test", () => {
     expect(result?.get(ODataTypesV2.Time)).toStrictEqual({
       from: ODataTypesV2.Time,
       to: ODataTypesV4.TimeOfDay,
+      toModule: undefined,
       converters: [
         {
           package: V2_TO_V4_PKG,
@@ -89,7 +90,8 @@ describe("LoadConverters Test", () => {
     const dateTimeToLuxon = result?.get(ODataTypesV2.DateTime);
     expect(dateTimeToLuxon).toStrictEqual({
       from: ODataTypesV2.DateTime,
-      to: "luxon.DateTime",
+      to: "DateTime",
+      toModule: "luxon",
       converters: [
         {
           package: V2_TO_V4_PKG,

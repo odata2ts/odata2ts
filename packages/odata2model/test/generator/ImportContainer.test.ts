@@ -1,12 +1,16 @@
-import { ModelImportContainer } from "../../src/generator/ModelImportContainer";
+import { ImportContainer } from "../../src/generator/ImportContainer";
 
-describe("ModelImportContainer tests", function () {
+describe("ImportContainer tests", function () {
   const SERVICE = "@odata2ts/odata-service";
   const API = "@odata2ts/odata-client-api";
-  let importContainer: ModelImportContainer;
+  let importContainer: ImportContainer;
 
   beforeEach(() => {
-    importContainer = new ModelImportContainer();
+    importContainer = new ImportContainer({
+      model: "TestModel",
+      qObject: "QTest",
+      service: "TestService",
+    });
   });
 
   test("smoke test", () => {

@@ -13,13 +13,6 @@ const config: ConfigFileOptions = {
     idModel: {
       suffix: "IdModel",
     },
-    converters: [
-      "@odata2ts/converter-v2-to-v4",
-      {
-        module: "@odata2ts/converter-luxon",
-        use: ["DateTimeOffsetToLuxon", "DurationToLuxon"],
-      },
-    ],
     custom: {
       propertyTypes: [
         {

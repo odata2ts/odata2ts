@@ -1,5 +1,6 @@
 import { ImportDeclarationStructure } from "ts-morph";
-import { DataModel } from "../data-model/DataModel";
+
+import { ProjectFiles } from "../data-model/DataModel";
 
 type ImportContainerType = {
   qobjects: Set<string>;
@@ -8,6 +9,7 @@ type ImportContainerType = {
   genModel: Set<string>;
   genQObjects: Set<string>;
   genServices: { [key: string]: Set<string> };
+  customTypes: Map<string, Set<string>>;
 };
 
 export class ImportContainer {
@@ -28,10 +30,10 @@ export class ImportContainer {
     genModel: new Set(),
     genQObjects: new Set(),
     genServices: {},
+    customTypes: new Map(),
   };
 
-  constructor(dataModel: DataModel) {
-    const fileNames = dataModel.getFileNames();
+  constructor(fileNames: ProjectFiles) {
     this.mapping.genModel.moduleName = fileNames.model;
     this.mapping.genQObjects.moduleName = fileNames.qObject;
   }
@@ -56,6 +58,15 @@ export class ImportContainer {
     names.forEach((n) => this.container.genQObjects.add(n));
   }
 
+  public addCustomType(moduleName: string, typeName: string) {
+    let importList = this.container.customTypes.get(moduleName);
+    if (!importList) {
+      importList = new Set();
+      this.container.customTypes.set(moduleName, importList);
+    }
+    importList.add(typeName);
+  }
+
   public addGeneratedService(key: string, ...names: Array<string>) {
     let serv = this.container.genServices[key];
     if (!serv) {
@@ -66,9 +77,17 @@ export class ImportContainer {
   }
 
   public getImportDeclarations(fromSubPath: boolean = false): Array<ImportDeclarationStructure> {
-    const { genServices, ...standardImports } = this.container;
+    const { genServices, customTypes, ...standardImports } = this.container;
 
     return [
+      ...[...customTypes.keys()]
+        .filter((key) => !!customTypes.get(key)?.size)
+        .map((key) => {
+          return {
+            namedImports: [...customTypes.get(key)!],
+            moduleSpecifier: key,
+          } as ImportDeclarationStructure;
+        }),
       ...Object.entries(standardImports)
         .filter(([key, values]) => !!values.size)
         .map(([key, values]) => {

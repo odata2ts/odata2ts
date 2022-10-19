@@ -7,7 +7,7 @@ import {
 } from "@odata2ts/converter-api";
 import { ODataTypesV2, ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
-type MappedConverters = Map<string, ValueConverterType & { package: string }>;
+type MappedConverters = Map<string, ValueConverterType & { package: string; toModule?: string }>;
 
 export type MappedConverterChains = Map<string, ValueConverterChain>;
 
@@ -69,11 +69,14 @@ function mapConvertersBySource(converterPkgs: Array<RuntimeConverterPackage>): M
     for (let converter of converterPkg.converters) {
       const froms = typeof converter.from === "string" ? [converter.from] : converter.from;
       for (let from of froms) {
+        const [fromType] = getPropTypeAndModule(from);
+        const [toType, toModule] = getPropTypeAndModule(converter.to);
         collector.set(from, {
           package: converterPkg.package,
-          from: from,
-          to: converter.to,
           id: converter.id,
+          from: fromType,
+          to: toType,
+          toModule,
         });
       }
     }
@@ -133,6 +136,15 @@ function chainConverters(converters: MappedConverters, dataType: string): ValueC
   return {
     from: dataType,
     to: chainedConv?.to ?? conv.to,
+    toModule: chainedConv?.to ? chainedConv.toModule : conv.toModule,
     converters: [{ package: conv.package, converterId: conv.id }, ...(chainedConv?.converters ?? [])],
   };
+}
+
+function getPropTypeAndModule(typeName: string) {
+  if (typeName.match(/\./)?.length === 1 && !typeName.startsWith("Edm.")) {
+    const [module, type] = typeName.split(".");
+    return [type, module];
+  }
+  return [typeName];
 }

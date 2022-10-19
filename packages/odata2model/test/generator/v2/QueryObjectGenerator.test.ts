@@ -62,6 +62,8 @@ describe("Query Object Generator Tests V2", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("maxFunction", "function-max-v2.ts");
+    await generateAndCompare("maxFunction", "function-max-v2.ts", {
+      converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
+    });
   });
 });

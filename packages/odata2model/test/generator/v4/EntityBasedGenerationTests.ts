@@ -196,4 +196,28 @@ export function createEntityBasedGenerationTests(
     // then match fixture text
     await generateAndCompare("emptyAction", "action-empty.ts");
   });
+
+  test(`${testSuiteName}: convert boolean to string`, async () => {
+    // given a simple function
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder.addKeyProp("id", ODataTypesV4.Boolean).addProp("optional", ODataTypesV4.Boolean, true)
+    );
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("converter", "entity-converter.ts", { converters: ["@odata2ts/test-converters"] });
+  });
+
+  test(`${testSuiteName}: convert with 3-party model`, async () => {
+    // given a simple function
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder.addKeyProp("id", ODataTypesV4.Boolean).addProp("optional", ODataTypesV4.String, true)
+    );
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("converter-with-model", "entity-converter-with-model.ts", {
+      converters: [{ module: "@odata2ts/test-converters", use: ["stringToPrefixModelConverter"] }],
+    });
+  });
 }

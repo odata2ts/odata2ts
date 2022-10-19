@@ -56,7 +56,10 @@ export class FixtureComparatorHelper {
     options?: GenerationOptions
   ) {
     const sourceFile = project.createSourceFile(id);
-    const dataModel = await this.digest(schema, DEFAULT_RUN_OPTIONS);
+    const mergedOpts = options
+      ? { ...DEFAULT_RUN_OPTIONS, generation: { ...DEFAULT_RUN_OPTIONS.generation, ...options } }
+      : DEFAULT_RUN_OPTIONS;
+    const dataModel = await this.digest(schema, mergedOpts);
 
     const genOptions: GenerationOptions | undefined = options
       ? { ...DEFAULT_RUN_OPTIONS.generation, ...options }

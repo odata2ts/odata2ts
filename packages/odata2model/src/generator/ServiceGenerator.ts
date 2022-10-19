@@ -53,7 +53,7 @@ class ServiceGenerator {
 
     await this.generateModelServices();
 
-    const importContainer = new ImportContainer(this.dataModel);
+    const importContainer = new ImportContainer(this.dataModel.getFileNames());
     importContainer.addFromClientApi("ODataClient");
     importContainer.addFromService(ROOT_SERVICE);
 
@@ -346,7 +346,7 @@ class ServiceGenerator {
     for (const model of this.dataModel.getModels()) {
       const serviceName = getServiceName(model.name);
       const serviceFile = await this.project.createServiceFile(serviceName);
-      const importContainer = new ImportContainer(this.dataModel);
+      const importContainer = new ImportContainer(this.dataModel.getFileNames());
 
       // entity type service
       await this.generateModelService(model, serviceName, serviceFile, importContainer);
@@ -361,7 +361,7 @@ class ServiceGenerator {
     for (const model of this.dataModel.getComplexTypes()) {
       const serviceName = getServiceName(model.name);
       const serviceFile = await this.project.createServiceFile(serviceName);
-      const importContainer = new ImportContainer(this.dataModel);
+      const importContainer = new ImportContainer(this.dataModel.getFileNames());
 
       // entity type service
       await this.generateModelService(model, serviceName, serviceFile, importContainer);

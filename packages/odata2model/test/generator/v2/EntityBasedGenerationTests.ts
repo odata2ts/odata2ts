@@ -1,4 +1,4 @@
-import { ODataTypesV2 } from "@odata2ts/odata-core";
+import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { GenerationOptions } from "../../../src/OptionModel";
@@ -183,5 +183,16 @@ export function createEntityBasedGenerationTests(
     // when generating model
     // then match fixture text
     await generateAndCompare("entityComplex", "entity-complex.ts");
+  });
+
+  test(`${testSuiteName}: convert boolean to string`, async () => {
+    // given a simple function
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder.addKeyProp("id", ODataTypesV2.Boolean).addProp("optional", ODataTypesV2.Boolean, true)
+    );
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("entityConverter", "entity-converter.ts", { converters: ["@odata2ts/test-converters"] });
   });
 }

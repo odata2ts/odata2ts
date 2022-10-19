@@ -103,4 +103,26 @@ export function createDataModelTests(
     expect(result.getModels()[1].qIdFunctionName).toBe("QParentId");
     expect(result.getModels()[1].generateId).toBe(true);
   });
+
+  test.skip("converter test", async () => {
+    odataBuilder.addEntityType("Test", undefined, (builder) => {
+      builder.addKeyProp("id", "Edm.String");
+      builder.addProp("truth", "Edm.Boolean", false);
+      builder.addProp("optionalTruth", "Edm.Boolean", true);
+    });
+    runOpts.generation = {
+      converters: ["test"],
+    };
+
+    // TODO: mock loadConverters method from converter-runtime
+    const result = await digest(odataBuilder.getSchema(), runOpts);
+
+    expect(result.getModels().length).toBe(2);
+    expect(result.getModels()[1].name).toBe("Parent");
+    expect(result.getModels()[1].keys.length).toBe(2);
+    expect(result.getModels()[1].keyNames).toStrictEqual(["ID", "ID2"]);
+    expect(result.getModels()[1].idModelName).toBe("ParentId");
+    expect(result.getModels()[1].qIdFunctionName).toBe("QParentId");
+    expect(result.getModels()[1].generateId).toBe(true);
+  });
 }

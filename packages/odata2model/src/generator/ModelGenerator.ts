@@ -5,7 +5,7 @@ import { DataModel } from "../data-model/DataModel";
 import { ComplexType, DataTypes, ModelType, OperationType, PropertyModel } from "../data-model/DataTypeModel";
 import { EntityBasedGeneratorFunction } from "../FactoryFunctionModel";
 import { GenerationOptions } from "../OptionModel";
-import { ModelImportContainer } from "./ModelImportContainer";
+import { ImportContainer } from "./ImportContainer";
 
 export const generateModels: EntityBasedGeneratorFunction = (dataModel, sourceFile, version, options) => {
   const generator = new ModelGenerator(dataModel, sourceFile, version, options);
@@ -15,6 +15,8 @@ export const generateModels: EntityBasedGeneratorFunction = (dataModel, sourceFi
 const DEFERRED_CONTENT = "DeferredContent";
 
 class ModelGenerator {
+  private importContainer!: ImportContainer;
+
   constructor(
     private dataModel: DataModel,
     private sourceFile: SourceFile,
@@ -23,12 +25,12 @@ class ModelGenerator {
   ) {}
 
   public generate(): void {
-    const importContainer = new ModelImportContainer();
+    this.importContainer = new ImportContainer(this.dataModel.getFileNames());
 
     this.generateEnums();
-    this.generateModels(importContainer);
+    this.generateModels();
     if (!this.options?.skipOperationModel) {
-      this.generateUnboundOperationParams(importContainer);
+      this.generateUnboundOperationParams();
     }
   }
 
@@ -42,30 +44,30 @@ class ModelGenerator {
     });
   }
 
-  private generateModels(importContainer: ModelImportContainer) {
+  private generateModels() {
     this.dataModel.getModels().forEach((model) => {
-      this.generateModel(model, importContainer);
+      this.generateModel(model);
       if (!this.options?.skipIdModel) {
-        this.generateIdModel(model, importContainer);
+        this.generateIdModel(model);
       }
       if (!this.options?.skipEditableModel) {
-        this.generateEditableModel(model, importContainer);
+        this.generateEditableModel(model);
       }
       if (!this.options?.skipOperationModel) {
-        this.generateBoundOperationParams(model.name, importContainer);
+        this.generateBoundOperationParams(model.name);
       }
     });
     this.dataModel.getComplexTypes().forEach((model) => {
-      this.generateModel(model, importContainer);
+      this.generateModel(model);
       if (!this.options?.skipEditableModel) {
-        this.generateEditableModel(model, importContainer);
+        this.generateEditableModel(model);
       }
     });
 
-    this.sourceFile.addImportDeclarations(importContainer.getImportDeclarations());
+    this.sourceFile.addImportDeclarations(this.importContainer.getImportDeclarations());
   }
 
-  private generateModel(model: ComplexType, importContainer: ModelImportContainer) {
+  private generateModel(model: ComplexType) {
     this.sourceFile.addInterface({
       name: model.name,
       isExported: true,
@@ -73,7 +75,7 @@ class ModelGenerator {
         const isEntity = p.dataType == DataTypes.ModelType;
         return {
           name: p.odataName, // todo: map to lowercase
-          type: this.getPropType(p, importContainer),
+          type: this.getPropType(p),
           // props for entities or entity collections are not added in V4 if not explicitly expanded
           hasQuestionToken: this.dataModel.isV4() && isEntity,
         };
@@ -82,14 +84,18 @@ class ModelGenerator {
     });
   }
 
-  private getPropType(prop: PropertyModel, importContainer: ModelImportContainer): string {
+  private getPropType(prop: PropertyModel): string {
     const isEntity = prop.dataType == DataTypes.ModelType;
 
     // V2 entity special: deferred content
     let suffix = "";
     if (isEntity && this.dataModel.isV2()) {
-      importContainer.addFromService(DEFERRED_CONTENT);
+      this.importContainer.addFromService(DEFERRED_CONTENT);
       suffix = ` | ${DEFERRED_CONTENT}`;
+    }
+    // custom types which require type imports => possible via converters
+    else if (prop.typeModule) {
+      this.importContainer.addCustomType(prop.typeModule, prop.type);
     }
 
     // Collections
@@ -101,14 +107,12 @@ class ModelGenerator {
     return prop.type + (prop.required ? "" : " | null") + suffix;
   }
 
-  private generateIdModel(model: ModelType, importContainer: ModelImportContainer) {
+  private generateIdModel(model: ModelType) {
     if (!model.generateId) {
       return;
     }
     const singleType = model.keys.length === 1 ? `${model.keys[0].type} | ` : "";
-    const keyTypes = model.keys
-      .map((keyProp) => `${keyProp.odataName}: ${this.getPropType(keyProp, importContainer)}`)
-      .join(",");
+    const keyTypes = model.keys.map((keyProp) => `${keyProp.odataName}: ${this.getPropType(keyProp)}`).join(",");
     const type = `${singleType}{${keyTypes}}`;
 
     this.sourceFile.addTypeAlias({
@@ -118,7 +122,7 @@ class ModelGenerator {
     });
   }
 
-  private generateEditableModel(model: ComplexType, importContainer: ModelImportContainer) {
+  private generateEditableModel(model: ComplexType) {
     const entityTypes = [DataTypes.ModelType, DataTypes.ComplexType];
     const allProps = [...model.baseProps, ...model.props];
 
@@ -146,7 +150,7 @@ class ModelGenerator {
         : complexProps.map((p) => {
             return {
               name: p.odataName,
-              type: this.getEditablePropType(p, importContainer),
+              type: this.getEditablePropType(p),
               // optional props don't need to be specified in editable model
               // also, entities would require deep insert func => we make it optional for now
               hasQuestionToken: !p.required || p.dataType === DataTypes.ModelType,
@@ -155,7 +159,7 @@ class ModelGenerator {
     });
   }
 
-  private getEditablePropType(prop: PropertyModel, importContainer: ModelImportContainer): string {
+  private getEditablePropType(prop: PropertyModel): string {
     const isEditableModel = [DataTypes.ModelType, DataTypes.ComplexType].includes(prop.dataType);
     let type = isEditableModel ? this.dataModel.getEditableModelName(prop.type) : prop.type;
 
@@ -168,19 +172,19 @@ class ModelGenerator {
     return type + (prop.required ? "" : " | null");
   }
 
-  private generateUnboundOperationParams(importContainer: ModelImportContainer) {
+  private generateUnboundOperationParams() {
     this.dataModel.getUnboundOperationTypes().forEach((operation) => {
-      this.generateOperationParams(operation, importContainer);
+      this.generateOperationParams(operation);
     });
   }
 
-  private generateBoundOperationParams(entityName: string, importContainer: ModelImportContainer) {
+  private generateBoundOperationParams(entityName: string) {
     this.dataModel.getOperationTypeByBinding(entityName).forEach((operation) => {
-      this.generateOperationParams(operation, importContainer);
+      this.generateOperationParams(operation);
     });
   }
 
-  private generateOperationParams(operation: OperationType, importContainer: ModelImportContainer) {
+  private generateOperationParams(operation: OperationType) {
     if (!operation.parameters.length) {
       return;
     }
@@ -190,7 +194,7 @@ class ModelGenerator {
       properties: operation.parameters.map((p) => {
         return {
           name: p.odataName, //TODO: mappedName
-          type: this.getPropType(p, importContainer),
+          type: this.getPropType(p),
           hasQuestionToken: !p.required,
         };
       }),

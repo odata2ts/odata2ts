@@ -90,6 +90,7 @@ export interface ValueConverterImport {
 export interface ValueConverterChain {
   from: string;
   to: string;
+  toModule?: string;
   converters: Array<ValueConverterImport>;
 }
 

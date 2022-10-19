@@ -1,19 +1,21 @@
-import { fixedNumberConverter } from "../../odata-query-objects/test/fixture/converter/FixedNumberConverter";
-import { fixedPrefixConverter } from "../../odata-query-objects/test/fixture/converter/FixedPrefixConverter";
-import { ChainedConverter } from "../src";
+import { numberToStringConverter, stringToPrefixModelConverter } from "@odata2ts/test-converters";
+
+import { createChain, getIdentityConverter } from "../src";
 
 describe("ChainedConverter Test", () => {
-  const toTest = new ChainedConverter(fixedNumberConverter, fixedPrefixConverter);
+  const toTest = createChain(numberToStringConverter, stringToPrefixModelConverter);
 
   test("from number to prefixed string and back", () => {
-    expect(toTest.convertFrom(3)).toBe("PREFIX_3");
-    expect(toTest.convertTo("PREFIX_22")).toBe(22);
+    expect(toTest.convertFrom(3)).toStrictEqual({ prefix: "PREFIX_", value: "3" });
+    expect(toTest.convertTo({ prefix: "PREFIX", value: "22" })).toBe(22);
   });
 
   test("Chained Converter: one more chaining", () => {
-    const doubleChained = toTest.chain(fixedPrefixConverter);
+    const chained = createChain(numberToStringConverter, getIdentityConverter())
+      .chain(getIdentityConverter())
+      .chain(stringToPrefixModelConverter);
 
-    expect(doubleChained.convertFrom(3)).toBe("PREFIX_PREFIX_3");
-    expect(doubleChained.convertTo("PREFIX_PREFIX_22")).toBe(22);
+    expect(toTest.convertFrom(3)).toStrictEqual({ prefix: "PREFIX_", value: "3" });
+    expect(toTest.convertTo({ prefix: "PREFIX", value: "22" })).toBe(22);
   });
 });

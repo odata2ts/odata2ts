@@ -63,7 +63,9 @@ describe("Query Object Generator Tests V4", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("maxFunction", "function-max.ts");
+    await generateAndCompare("maxFunction", "function-max.ts", {
+      converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
+    });
   });
 
   test(`${TEST_SUITE_NAME}: bound QFunction`, async () => {
@@ -74,12 +76,14 @@ describe("Query Object Generator Tests V4", () => {
         builder
           .addParam("book", `${SERVICE_NAME}.Book`)
           .addParam("test", ODataTypesV4.String, false)
-          .addParam("optTest", ODataTypesV4.String, true)
+          .addParam("optTest", ODataTypesV4.Boolean, true)
       );
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("boundFunc", "function-bound.ts");
+    await generateAndCompare("boundFunc", "function-bound.ts", {
+      converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
+    });
   });
 
   test(`${TEST_SUITE_NAME}: min QAction`, async () => {
@@ -91,5 +95,18 @@ describe("Query Object Generator Tests V4", () => {
     // when generating model
     // then match fixture text
     await generateAndCompare("minAction", "action-min.ts");
+  });
+
+  test(`${TEST_SUITE_NAME}: QAction with converter`, async () => {
+    // given a simple function
+    odataBuilder.addAction("ActionWithConverter", ODataTypesV4.String, false, (builder) =>
+      builder.addParam("test", ODataTypesV4.String, false)
+    );
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("actionWithConverter", "action-converter.ts", {
+      converters: [{ module: "@odata2ts/test-converters", use: ["stringToPrefixModelConverter"] }],
+    });
   });
 });
