@@ -1,5 +1,6 @@
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "@odata2ts/test-converters";
+
 import { QTimeV2Param } from "../../../src";
-import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 
 describe("QTimeV2Param Tests", () => {
   const name = "T3st_bbb";

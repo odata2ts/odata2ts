@@ -1,5 +1,6 @@
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "@odata2ts/test-converters";
+
 import { QDateTimeOffsetV2Path } from "../../../src";
-import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 import {
   EXAMPLE_DATE_TIME_OFFSET,
   EXAMPLE_PATH_NAME,

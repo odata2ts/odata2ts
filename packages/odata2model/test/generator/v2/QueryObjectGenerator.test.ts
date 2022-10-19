@@ -1,6 +1,6 @@
-import { ODataVesions } from "../../../src/app";
+import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
+
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
 import { generateQueryObjects } from "../../../src/generator";
 import { GenerationOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
@@ -16,7 +16,7 @@ describe("Query Object Generator Tests V2", () => {
   const FIXTURE_BASE_PATH = "generator/qobject";
 
   const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = (dataModel, sourceFile, genOptions) => {
-    return generateQueryObjects(dataModel, sourceFile, ODataVesions.V2, genOptions);
+    return generateQueryObjects(dataModel, sourceFile, ODataVersions.V2, genOptions);
   };
 
   let odataBuilder: ODataModelBuilderV2;
@@ -38,8 +38,8 @@ describe("Query Object Generator Tests V2", () => {
 
   test(`${TEST_SUITE_NAME}: min function param model`, async () => {
     // given a simple function
-    odataBuilder.addFunctionImport("MinFunction", ODataTypesV3.String, (builder) =>
-      builder.addParam("test", ODataTypesV3.String, false).addParam("optTest", ODataTypesV3.String, true)
+    odataBuilder.addFunctionImport("MinFunction", ODataTypesV2.String, (builder) =>
+      builder.addParam("test", ODataTypesV2.String, false).addParam("optTest", ODataTypesV2.String, true)
     );
 
     // when generating model
@@ -49,19 +49,21 @@ describe("Query Object Generator Tests V2", () => {
 
   test(`${TEST_SUITE_NAME}: max function param model`, async () => {
     // given a simple function
-    odataBuilder.addFunctionImport("MAX_FUNCTION", ODataTypesV3.String, (builder) =>
+    odataBuilder.addFunctionImport("MAX_FUNCTION", ODataTypesV2.String, (builder) =>
       builder
-        .addParam("TEST_STRING", ODataTypesV3.String, false)
-        .addParam("testNumber", ODataTypesV3.Int32, false)
-        .addParam("testBoolean", ODataTypesV3.Boolean, false)
-        .addParam("testGuid", ODataTypesV3.Guid, false)
-        .addParam("testTime", ODataTypesV3.Time, false)
-        .addParam("testDate", ODataTypesV3.DateTime, false)
-        .addParam("testDateTimeOffset", ODataTypesV3.DateTimeOffset, false)
+        .addParam("TEST_STRING", ODataTypesV2.String, false)
+        .addParam("testNumber", ODataTypesV2.Int32, false)
+        .addParam("testBoolean", ODataTypesV2.Boolean, false)
+        .addParam("testGuid", ODataTypesV2.Guid, false)
+        .addParam("testTime", ODataTypesV2.Time, false)
+        .addParam("testDate", ODataTypesV2.DateTime, false)
+        .addParam("testDateTimeOffset", ODataTypesV2.DateTimeOffset, false)
     );
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("maxFunction", "function-max-v2.ts");
+    await generateAndCompare("maxFunction", "function-max-v2.ts", {
+      converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
+    });
   });
 });

@@ -1,7 +1,8 @@
+import { ODataTypesV2 } from "@odata2ts/odata-core";
+
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
 import { OperationType } from "../../../src/data-model/DataTypeModel";
-import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
 import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
 
@@ -49,7 +50,7 @@ describe("Function Digestion Test", () => {
   });
 
   test("Function: with returnType", async () => {
-    odataBuilder.addFunctionImport("getBestFriend", ODataTypesV3.Boolean);
+    odataBuilder.addFunctionImport("getBestFriend", ODataTypesV2.Boolean);
 
     const result = await doDigest();
 
@@ -72,12 +73,12 @@ describe("Function Digestion Test", () => {
   });
 
   test("Function: with params", async () => {
-    odataBuilder.addFunctionImport("GetBestFriend", ODataTypesV3.String, (builder) => {
+    odataBuilder.addFunctionImport("GetBestFriend", ODataTypesV2.String, (builder) => {
       builder
-        .addParam("test", ODataTypesV3.String, false)
-        .addParam("testTruth", ODataTypesV3.Boolean)
-        .addParam("testNumber", ODataTypesV3.Int16)
-        .addParam("testDateTime", ODataTypesV3.DateTime);
+        .addParam("test", ODataTypesV2.String, false)
+        .addParam("testTruth", ODataTypesV2.Boolean)
+        .addParam("testNumber", ODataTypesV2.Int16)
+        .addParam("testDateTime", ODataTypesV2.DateTime);
     });
 
     const result = await doDigest();

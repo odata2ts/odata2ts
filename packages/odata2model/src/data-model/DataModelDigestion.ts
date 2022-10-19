@@ -1,3 +1,4 @@
+import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { camelCase } from "camel-case";
 import { pascalCase } from "pascal-case";
 
@@ -8,6 +9,15 @@ import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModel
 
 const ID_SUFFIX = "Id";
 
+export type DigesterOptions = Pick<RunOptions, "serviceName" | "generation" | "modelPrefix" | "modelSuffix">;
+
+export interface TypeModel {
+  outputType: string;
+  qPath: string;
+  qCollection: string;
+  qParam: string | undefined;
+}
+
 export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, CT extends ComplexType> {
   protected static EDM_PREFIX = "Edm.";
   protected static ROOT_OPERATION = "/";
@@ -16,9 +26,14 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   protected readonly dataModel: DataModel;
   private model2Type: Map<string, DataTypes> = new Map<string, DataTypes>();
 
-  protected constructor(protected version: ODataVersion, protected schema: S, protected options: RunOptions) {
+  protected constructor(
+    protected version: ODataVersion,
+    protected schema: S,
+    protected options: DigesterOptions,
+    converters?: MappedConverterChains
+  ) {
     const serviceName = schema.$.Namespace;
-    this.dataModel = new DataModel(version, serviceName, options.serviceName);
+    this.dataModel = new DataModel(version, serviceName, options.serviceName, converters);
     this.collectModelTypes(this.schema);
   }
 
@@ -32,7 +47,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    * @param type
    * @return tuple of return type, query object, query collection object
    */
-  protected abstract mapODataType(type: string): [string, string, string, string | undefined];
+  protected abstract mapODataType(type: string): TypeModel;
 
   public async digest(): Promise<DataModel> {
     this.digestSchema(this.schema);
@@ -249,44 +264,51 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     const isCollection = !!p.$.Type.match(/^Collection\(/);
     const dataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
 
-    let resultDt: DataTypes | undefined;
-    let resultType: string;
-    let resultQPath: string;
-    let resultQParam: string | undefined;
-    let qClass: string | undefined;
+    let result: Pick<PropertyModel, "dataType" | "type" | "typeModule" | "qPath" | "qParam" | "qObject" | "converters">;
 
-    // domain object known from service: EntityType, ComplexType or EnumType
+    // domain object known from service:
+    // EntityType, ComplexType or EnumType
     if (dataType.startsWith(this.dataModel.getServicePrefix())) {
-      resultDt = this.model2Type.get(this.stripServicePrefix(dataType));
+      const resultDt = this.model2Type.get(this.stripServicePrefix(dataType));
       if (!resultDt) {
         throw new Error(`Couldn't determine model type for data type with name '${dataType}'`);
       }
 
       // special handling for enums
       if (resultDt === DataTypes.EnumType) {
-        resultType = this.getEnumName(dataType);
-        resultQPath = "QEnumPath";
-        if (isCollection) {
-          qClass = "QEnumCollection";
-        }
+        result = {
+          dataType: resultDt,
+          type: this.getEnumName(dataType),
+          qPath: "QEnumPath",
+          qObject: isCollection ? "QEnumCollection" : undefined,
+        };
       }
       // handling of complex & entity types
       else {
-        resultType = this.getModelName(dataType);
-        resultQPath = "QEntityPath";
-        qClass = this.getQName(dataType);
+        result = {
+          dataType: resultDt,
+          type: this.getModelName(dataType),
+          qPath: "QEntityPath",
+          qObject: this.getQName(dataType),
+        };
       }
     }
     // OData built-in data types
     else if (dataType.startsWith(Digester.EDM_PREFIX)) {
-      resultDt = DataTypes.PrimitiveType;
-      const [type, qPath, qCollectionClass, qParam] = this.mapODataType(dataType);
-      resultType = type;
-      resultQPath = qPath;
-      resultQParam = qParam;
-      if (isCollection) {
-        qClass = qCollectionClass;
-      }
+      const { outputType, qPath, qParam, qCollection } = this.mapODataType(dataType);
+      const { to, toModule: typeModule, converters } = this.dataModel.getConverter(dataType) || {};
+
+      const type = !to ? outputType : to.startsWith(Digester.EDM_PREFIX) ? this.mapODataType(to).outputType : to;
+
+      result = {
+        dataType: DataTypes.PrimitiveType,
+        type,
+        typeModule,
+        qPath,
+        qParam,
+        qObject: isCollection ? qCollection : undefined,
+        converters,
+      };
     } else {
       throw new Error(
         `Unknown type [${dataType}]: Not 'Collection(...)', not '${this.dataModel.getServicePrefix()}*', not OData type 'Edm.*'`
@@ -300,13 +322,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       odataName,
       name,
       odataType: p.$.Type,
-      type: resultType,
-      qObject: qClass,
-      qPath: resultQPath,
-      qParam: resultQParam,
-      dataType: resultDt!,
       required: p.$.Nullable === "false",
       isCollection: isCollection,
+      ...result,
     };
   };
 }

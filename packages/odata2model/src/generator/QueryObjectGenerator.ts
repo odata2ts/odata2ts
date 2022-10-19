@@ -1,7 +1,9 @@
+import { ValueConverterImport } from "@odata2ts/converter-api";
+import { ODataVersions } from "@odata2ts/odata-core";
+import { camelCase } from "camel-case";
 import { OptionalKind, PropertyDeclarationStructure, Scope, SourceFile, VariableDeclarationKind } from "ts-morph";
 import { firstCharLowerCase } from "xml2js/lib/processors";
 
-import { ODataVesions } from "../app";
 import { DataModel } from "../data-model/DataModel";
 import {
   ComplexType,
@@ -24,12 +26,12 @@ class QueryObjectGenerator {
   constructor(
     private dataModel: DataModel,
     private sourceFile: SourceFile,
-    private version: ODataVesions,
+    private version: ODataVersions,
     private options: GenerationOptions | undefined
   ) {}
 
   public generate(): void {
-    const importContainer = new ImportContainer(this.dataModel);
+    const importContainer = new ImportContainer(this.dataModel.getFileNames());
 
     this.generateModels(importContainer);
     if (!this.options?.skipOperationModel) {
@@ -97,7 +99,8 @@ class QueryObjectGenerator {
       if (isModelType) {
         qPathInit = `new ${prop.qPath}(this.withPrefix("${odataName}"), () => ${prop.qObject!})`;
       } else {
-        qPathInit = `new ${prop.qPath}(this.withPrefix("${odataName}"))`;
+        let converterStmt = this.generateConverterStmt(prop.converters, importContainer);
+        qPathInit = `new ${prop.qPath}(this.withPrefix("${odataName}")${converterStmt ? `, ${converterStmt}` : ""})`;
       }
 
       // factor in collections
@@ -127,6 +130,27 @@ class QueryObjectGenerator {
         initializer: qPathInit,
       } as OptionalKind<PropertyDeclarationStructure>;
     });
+  }
+
+  private generateConverterStmt(converters: Array<ValueConverterImport> | undefined, importContainer: ImportContainer) {
+    if (!converters?.length) {
+      return;
+    }
+    converters.forEach((converter) => {
+      importContainer.addCustomType(converter.package, converter.converterId);
+    });
+
+    if (converters.length === 1) {
+      return converters[0].converterId;
+    } else {
+      importContainer.addCustomType("@odata2ts/converter-runtime", "createChain");
+
+      const [first, second, ...moreConverters] = converters;
+      return moreConverters.reduce(
+        (stmt, conv) => `${stmt}.chain(${conv.converterId})`,
+        `createChain(${first.converterId}, ${second.converterId})`
+      );
+    }
   }
 
   private generateIdFunction(model: ModelType, importContainer: ImportContainer) {
@@ -166,7 +190,11 @@ class QueryObjectGenerator {
           importContainer.addFromQObject(prop.qParam);
         }
         const isMappedNameNecessary = false; //TODO prop.odataName !== prop.name;
-        return `new ${prop.qParam}("${prop.odataName}"${isMappedNameNecessary ? `, "${prop.name}"` : ""})`;
+        const mappedName = isMappedNameNecessary ? `"${prop.name}"` : prop.converters?.length ? "undefined" : undefined;
+        const converterStmt = this.generateConverterStmt(prop.converters, importContainer);
+        return `new ${prop.qParam}("${prop.odataName}"${mappedName ? `, ${mappedName}` : ""}${
+          converterStmt ? `, ${converterStmt}` : ""
+        })`;
       })
       .join(",")}]`;
   }
@@ -205,7 +233,7 @@ class QueryObjectGenerator {
       ],
       ctors: [
         {
-          statements: [`super("${operation.odataName}"${this.version === ODataVesions.V2 ? ", true" : ""})`],
+          statements: [`super("${operation.odataName}"${this.version === ODataVersions.V2 ? ", true" : ""})`],
         },
       ],
       methods: [

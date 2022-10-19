@@ -1,6 +1,7 @@
+import { getIdentityConverter } from "@odata2ts/converter-runtime";
+import { stringToPrefixModelConverter } from "@odata2ts/test-converters";
+
 import { QStringPath } from "../../../src";
-import { getIdentityConverter } from "../../../src/converter/IdentityConverter";
-import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 import { createStringTests } from "../StringBaseTests";
 
 describe("QStringPath test", () => {
@@ -21,9 +22,9 @@ describe("QStringPath test", () => {
   });
 
   test("with converter", () => {
-    const testWithConv = new QStringPath("ID", fixedDateConverter);
+    const testWithConv = new QStringPath("ID", stringToPrefixModelConverter);
 
-    expect(testWithConv.gt(FIXED_DATE).toString()).toBe(`ID gt '${FIXED_STRING}'`);
+    expect(testWithConv.gt({ prefix: "_", value: "a" }).toString()).toBe(`ID gt 'a'`);
   });
 
   test("contains", () => {

@@ -1,0 +1,29 @@
+{
+  "name": "@odata2ts/test-converters",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "repository": "git@github.com:odata2ts/odata2ts.git",
+  "author": "texttechne",
+  "main": "./lib/index.js",
+  "scripts": {
+    "build": "yarn clean && yarn compile",
+    "clean": "rimraf lib coverage",
+    "compile": "tsc",
+    "prepublish": "yarn build",
+    "test": "jest --passWithNoTests"
+  },
+  "files": [
+    "*.md",
+    "lib",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "@odata2ts/converter-api": "^0.0.0"
+  },
+  "devDependencies": {
+    "rimraf": "^3.0.2",
+    "typescript": "4.6.3"
+  },
+  "types": "./lib/index.d.ts"
+}

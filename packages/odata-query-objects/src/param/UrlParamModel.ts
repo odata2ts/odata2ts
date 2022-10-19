@@ -1,5 +1,7 @@
+import { ParamValueModel } from "@odata2ts/converter-api";
+
 /**
- *
+ * Configuration to format an URL param.
  */
 export interface UrlParamModel {
   isQuoted?: boolean;
@@ -7,9 +9,15 @@ export interface UrlParamModel {
   typeSuffix?: string;
 }
 
-export type ParamValueModel<Type> = Type | null | undefined;
-export type UrlValueModel = string | undefined;
+/**
+ * Type of URl parameter value before formatting.
+ */
 export type UrlExpressionValueModel = number | string | boolean;
+
+/**
+ * Type of URL parameter value before parsing.
+ */
+export type UrlValueModel = string | undefined;
 
 /**
  * Takes a primitive value and formats it appropriate for usage in URLs, taking care of

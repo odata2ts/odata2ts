@@ -1,3 +1,5 @@
+import { MappedConverterChains } from "@odata2ts/converter-runtime";
+import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
 import { pascalCase } from "pascal-case";
 
 import {
@@ -24,6 +26,7 @@ const ROOT_OPERATION_BINDING = "/";
 export class DataModel {
   private readonly servicePrefix: string;
   private readonly fileNames: ProjectFiles;
+  private readonly converters: MappedConverterChains;
 
   private modelTypes: { [name: string]: ModelType } = {};
   private complexTypes: { [name: string]: ComplexType } = {};
@@ -32,8 +35,14 @@ export class DataModel {
   private operationTypes: { [binding: string]: Array<OperationType> } = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
 
-  constructor(private version: ODataVersion, private serviceName: string, overridingServiceName?: string) {
+  constructor(
+    private version: ODataVersion,
+    private serviceName: string,
+    overridingServiceName?: string,
+    converters: MappedConverterChains = new Map()
+  ) {
     this.servicePrefix = serviceName + ".";
+    this.converters = converters;
 
     const name = pascalCase(overridingServiceName || serviceName);
     this.fileNames = {
@@ -177,5 +186,9 @@ export class DataModel {
 
   public getEntityContainer() {
     return this.container;
+  }
+
+  public getConverter(dataType: ODataTypesV2 | ODataTypesV4 | string) {
+    return this.converters.get(dataType);
   }
 }

@@ -1,6 +1,6 @@
-import { QBooleanPath, ValueConverter } from "../../src";
-import { ParamValueModel } from "../../src/param/UrlParamModel";
-import { fixedBooleanConverter } from "../fixture/converter/FixedBooleanConverter";
+import { booleanToNumberConverter } from "@odata2ts/test-converters";
+
+import { QBooleanPath } from "../../src";
 
 describe("QBooleanPath test", () => {
   let toTest = new QBooleanPath("done");
@@ -85,11 +85,9 @@ describe("QBooleanPath test", () => {
   });
 
   test("with converter", () => {
-    const newPath = new QBooleanPath("test", fixedBooleanConverter);
+    const newPath = new QBooleanPath("test", booleanToNumberConverter);
 
     expect(newPath.eq(1).toString()).toBe("test eq true");
     expect(newPath.ne(0).toString()).toBe("test ne false");
-
-    expect(newPath.isTrue().toString()).toBe("test eq true");
   });
 });

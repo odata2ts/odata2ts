@@ -1,8 +1,8 @@
+import { ODataVersions } from "@odata2ts/odata-core";
 import { MethodDeclarationStructure, OptionalKind, PropertyDeclarationStructure, Scope, SourceFile } from "ts-morph";
 import { upperCaseFirst } from "upper-case-first";
 import { firstCharLowerCase } from "xml2js/lib/processors";
 
-import { ODataVesions } from "../app";
 import { DataModel } from "../data-model/DataModel";
 import {
   ActionImportType,
@@ -37,13 +37,13 @@ const RESPONSE_TYPES = {
   value: "ODataValueResponse",
 };
 
-export async function generateServices(dataModel: DataModel, project: ProjectManager, version: ODataVesions) {
+export async function generateServices(dataModel: DataModel, project: ProjectManager, version: ODataVersions) {
   const generator = new ServiceGenerator(dataModel, project, version);
   return generator.generate();
 }
 
 class ServiceGenerator {
-  constructor(private dataModel: DataModel, private project: ProjectManager, private version: ODataVesions) {}
+  constructor(private dataModel: DataModel, private project: ProjectManager, private version: ODataVersions) {}
 
   public async generate(): Promise<void> {
     const sourceFile = await this.project.createMainServiceFile();
@@ -53,7 +53,7 @@ class ServiceGenerator {
 
     await this.generateModelServices();
 
-    const importContainer = new ImportContainer(this.dataModel);
+    const importContainer = new ImportContainer(this.dataModel.getFileNames());
     importContainer.addFromClientApi("ODataClient");
     importContainer.addFromService(ROOT_SERVICE);
 
@@ -128,7 +128,7 @@ class ServiceGenerator {
   }
 
   private getVersionSuffix() {
-    return this.version === ODataVesions.V2 ? "V2" : "V4";
+    return this.version === ODataVersions.V2 ? "V2" : "V4";
   }
 
   private async generateModelService(
@@ -346,7 +346,7 @@ class ServiceGenerator {
     for (const model of this.dataModel.getModels()) {
       const serviceName = getServiceName(model.name);
       const serviceFile = await this.project.createServiceFile(serviceName);
-      const importContainer = new ImportContainer(this.dataModel);
+      const importContainer = new ImportContainer(this.dataModel.getFileNames());
 
       // entity type service
       await this.generateModelService(model, serviceName, serviceFile, importContainer);
@@ -361,7 +361,7 @@ class ServiceGenerator {
     for (const model of this.dataModel.getComplexTypes()) {
       const serviceName = getServiceName(model.name);
       const serviceFile = await this.project.createServiceFile(serviceName);
-      const importContainer = new ImportContainer(this.dataModel);
+      const importContainer = new ImportContainer(this.dataModel.getFileNames());
 
       // entity type service
       await this.generateModelService(model, serviceName, serviceFile, importContainer);

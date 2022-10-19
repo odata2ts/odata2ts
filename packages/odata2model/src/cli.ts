@@ -6,7 +6,7 @@ import { parseStringPromise } from "xml2js";
 
 import { runApp } from "./app";
 import { ODataEdmxModelBase } from "./data-model/edmx/ODataEdmxModelBase";
-import { EmitModes, Modes, ProjectOptions, RunOptions } from "./OptionModel";
+import { EmitModes, Modes, CliOptions, RunOptions } from "./OptionModel";
 import { logFilePath } from "./project/logger/logFilePath";
 
 export class Cli {
@@ -45,7 +45,7 @@ export class Cli {
       prettier: false,
       debug: false,
     };
-    const cliOpts = cli.opts() as Partial<ProjectOptions>;
+    const cliOpts = cli.opts() as Partial<CliOptions>;
     const moduleName = "odata2ts";
     const explorer = cosmiconfig(moduleName, {
       searchPlaces: [

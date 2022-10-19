@@ -1,9 +1,9 @@
+import { ODataTypesV4 } from "@odata2ts/odata-core";
+
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
-import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
 import { DataTypes } from "../../../src/data-model/DataTypeModel";
+import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
-import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
 
 const NOOP_FN = () => {};
 
@@ -179,7 +179,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       builder
         .addKeyProp("ID", ODataTypesV4.Guid)
         .addProp("isTrue", ODataTypesV4.Boolean, false)
-        .addProp("time", ODataTypesV4.Time)
+        .addProp("time", ODataTypesV4.TimeOfDay)
         .addProp("optionalDate", ODataTypesV4.Date)
         .addProp("dateTimeOffset", ODataTypesV4.DateTimeOffset)
         .addProp("TestInt16", ODataTypesV4.Int16)
@@ -196,7 +196,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         .addProp("multipleStrings", `Collection(${ODataTypesV4.String})`)
         .addProp("multipleNumbers", `Collection(${ODataTypesV4.Decimal})`)
         .addProp("multipleBooleans", `Collection(${ODataTypesV4.Boolean})`)
-        .addProp("multipleTimes", `Collection(${ODataTypesV4.Time})`)
+        .addProp("multipleTimes", `Collection(${ODataTypesV4.TimeOfDay})`)
         .addProp("multipleDates", `Collection(${ODataTypesV4.Date})`)
         .addProp("multipleDateTimes", `Collection(${ODataTypesV4.DateTimeOffset})`)
         .addProp("multipleBinaries", `Collection(${ODataTypesV4.Binary})`)
@@ -209,7 +209,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "id",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.Guid,
+        odataType: ODataTypesV4.Guid,
         type: "string",
         required: true,
         qObject: undefined,
@@ -227,7 +227,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "time",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV4.Time,
+        odataType: ODataTypesV4.TimeOfDay,
         type: "string",
         required: false,
         qObject: undefined,
@@ -365,7 +365,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       },
       {
         name: "multipleTimes",
-        odataType: `Collection(${ODataTypesV4.Time})`,
+        odataType: `Collection(${ODataTypesV4.TimeOfDay})`,
         type: "string",
         isCollection: true,
         qObject: "QTimeOfDayCollection",

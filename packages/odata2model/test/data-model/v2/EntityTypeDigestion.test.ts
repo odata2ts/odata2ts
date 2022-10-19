@@ -1,6 +1,7 @@
+import { ODataTypesV2 } from "@odata2ts/odata-core";
+
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { DataTypes, PropertyModel } from "../../../src/data-model/DataTypeModel";
-import { ODataTypesV3 } from "../../../src/data-model/edmx/ODataEdmxModelV3";
 import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
 
@@ -31,7 +32,7 @@ describe("V2: EntityTypeDigestion Test", () => {
 
   test("EntityTypes: simple entity", async () => {
     odataBuilder.addEntityType("min", undefined, (builder) => {
-      builder.addKeyProp("id", ODataTypesV3.String);
+      builder.addKeyProp("id", ODataTypesV2.String);
     });
 
     const result = await doDigest();
@@ -58,7 +59,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       isCollection: false,
       name: "id",
       odataName: "id",
-      odataType: ODataTypesV3.String,
+      odataType: ODataTypesV2.String,
       qObject: undefined,
       qPath: "QStringV2Path",
       required: true,
@@ -98,9 +99,9 @@ describe("V2: EntityTypeDigestion Test", () => {
   test("EntityTypes: composite keys", async () => {
     odataBuilder.addEntityType("CompoKey", undefined, (builder) => {
       builder
-        .addKeyProp("cat", ODataTypesV3.String)
-        .addKeyProp("subCat", ODataTypesV3.String)
-        .addKeyProp("counter", ODataTypesV3.Int16);
+        .addKeyProp("cat", ODataTypesV2.String)
+        .addKeyProp("subCat", ODataTypesV2.String)
+        .addKeyProp("counter", ODataTypesV2.Int16);
     });
 
     const dataModel = await doDigest();
@@ -123,29 +124,29 @@ describe("V2: EntityTypeDigestion Test", () => {
   });
 
   test("EntityTypes: base class hierarchy", async () => {
-    odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV3.Guid));
+    odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Guid));
     odataBuilder.addEntityType("Parent", "GrandParent", (builder) =>
-      builder.addProp("parentalAdvice", ODataTypesV3.Boolean)
+      builder.addProp("parentalAdvice", ODataTypesV2.Boolean)
     );
-    odataBuilder.addEntityType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", ODataTypesV3.String));
+    odataBuilder.addEntityType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", ODataTypesV2.String));
 
     const expectedGrandParentProp = {
       dataType: DataTypes.PrimitiveType,
       name: "id",
-      odataType: ODataTypesV3.Guid,
+      odataType: ODataTypesV2.Guid,
       required: true,
       type: "string",
     };
     const expectedParentProp = {
       dataType: DataTypes.PrimitiveType,
       name: "parentalAdvice",
-      odataType: ODataTypesV3.Boolean,
+      odataType: ODataTypesV2.Boolean,
       type: "boolean",
     };
     const expectedChildProp = {
       dataType: DataTypes.PrimitiveType,
       name: "ch1ld1shF4n",
-      odataType: ODataTypesV3.String,
+      odataType: ODataTypesV2.String,
       type: "string",
     };
 
@@ -188,29 +189,29 @@ describe("V2: EntityTypeDigestion Test", () => {
   test("EntityTypes: max prop types", async () => {
     odataBuilder.addEntityType("max", undefined, (builder) =>
       builder
-        .addKeyProp("ID", ODataTypesV3.Guid)
-        .addProp("isTrue", ODataTypesV3.Boolean, false)
-        .addProp("time", ODataTypesV3.Time)
-        .addProp("optionalDate", ODataTypesV3.DateTime)
-        .addProp("dateTimeOffset", ODataTypesV3.DateTimeOffset)
-        .addProp("TestInt16", ODataTypesV3.Int16)
-        .addProp("TestInt32", ODataTypesV3.Int32)
-        .addProp("TestInt64", ODataTypesV3.Int64)
-        .addProp("TestDecimal", ODataTypesV3.Decimal)
-        .addProp("TestDouble", ODataTypesV3.Double)
-        .addProp("testByte", ODataTypesV3.Byte)
-        .addProp("testSByte", ODataTypesV3.SByte)
-        .addProp("testSingle", ODataTypesV3.Single)
-        .addProp("testBinary", ODataTypesV3.Binary)
+        .addKeyProp("ID", ODataTypesV2.Guid)
+        .addProp("isTrue", ODataTypesV2.Boolean, false)
+        .addProp("time", ODataTypesV2.Time)
+        .addProp("optionalDate", ODataTypesV2.DateTime)
+        .addProp("dateTimeOffset", ODataTypesV2.DateTimeOffset)
+        .addProp("TestInt16", ODataTypesV2.Int16)
+        .addProp("TestInt32", ODataTypesV2.Int32)
+        .addProp("TestInt64", ODataTypesV2.Int64)
+        .addProp("TestDecimal", ODataTypesV2.Decimal)
+        .addProp("TestDouble", ODataTypesV2.Double)
+        .addProp("testByte", ODataTypesV2.Byte)
+        .addProp("testSByte", ODataTypesV2.SByte)
+        .addProp("testSingle", ODataTypesV2.Single)
+        .addProp("testBinary", ODataTypesV2.Binary)
         .addProp("testAny", "Edm.AnythingYouWant")
-        .addProp("multipleIds", `Collection(${ODataTypesV3.Guid})`)
-        .addProp("multipleStrings", `Collection(${ODataTypesV3.String})`)
-        .addProp("multipleNumbers", `Collection(${ODataTypesV3.Decimal})`)
-        .addProp("multipleBooleans", `Collection(${ODataTypesV3.Boolean})`)
-        .addProp("multipleTimes", `Collection(${ODataTypesV3.Time})`)
-        .addProp("multipleDateTimes", `Collection(${ODataTypesV3.DateTime})`)
-        .addProp("multipleDateTimeOffsets", `Collection(${ODataTypesV3.DateTimeOffset})`)
-        .addProp("multipleBinaries", `Collection(${ODataTypesV3.Binary})`)
+        .addProp("multipleIds", `Collection(${ODataTypesV2.Guid})`)
+        .addProp("multipleStrings", `Collection(${ODataTypesV2.String})`)
+        .addProp("multipleNumbers", `Collection(${ODataTypesV2.Decimal})`)
+        .addProp("multipleBooleans", `Collection(${ODataTypesV2.Boolean})`)
+        .addProp("multipleTimes", `Collection(${ODataTypesV2.Time})`)
+        .addProp("multipleDateTimes", `Collection(${ODataTypesV2.DateTime})`)
+        .addProp("multipleDateTimeOffsets", `Collection(${ODataTypesV2.DateTimeOffset})`)
+        .addProp("multipleBinaries", `Collection(${ODataTypesV2.Binary})`)
     );
     const result = await digest(odataBuilder.getSchema(), runOpts);
 
@@ -220,7 +221,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "id",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.Guid,
+        odataType: ODataTypesV2.Guid,
         type: "string",
         required: true,
         qObject: undefined,
@@ -229,7 +230,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "isTrue",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.Boolean,
+        odataType: ODataTypesV2.Boolean,
         type: "boolean",
         required: true,
         qObject: undefined,
@@ -238,7 +239,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "time",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.Time,
+        odataType: ODataTypesV2.Time,
         type: "string",
         required: false,
         qObject: undefined,
@@ -247,7 +248,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "optionalDate",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.DateTime,
+        odataType: ODataTypesV2.DateTime,
         type: "string",
         required: false,
         qObject: undefined,
@@ -256,7 +257,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "dateTimeOffset",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.DateTimeOffset,
+        odataType: ODataTypesV2.DateTimeOffset,
         type: "string",
         qObject: undefined,
         qPath: "QDateTimeOffsetV2Path",
@@ -264,7 +265,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "testInt16",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.Int16,
+        odataType: ODataTypesV2.Int16,
         type: "number",
         qObject: undefined,
         qPath: "QNumberPath",
@@ -272,7 +273,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "testInt32",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.Int32,
+        odataType: ODataTypesV2.Int32,
         type: "number",
         qObject: undefined,
         qPath: "QNumberPath",
@@ -280,7 +281,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "testInt64",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.Int64,
+        odataType: ODataTypesV2.Int64,
         type: "string",
         qObject: undefined,
         qPath: "QNumberPath",
@@ -288,7 +289,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "testDecimal",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.Decimal,
+        odataType: ODataTypesV2.Decimal,
         type: "string",
         qObject: undefined,
         qPath: "QNumberPath",
@@ -296,7 +297,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "testDouble",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.Double,
+        odataType: ODataTypesV2.Double,
         type: "string",
         qObject: undefined,
         qPath: "QNumberPath",
@@ -304,7 +305,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "testByte",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.Byte,
+        odataType: ODataTypesV2.Byte,
         type: "string",
         qObject: undefined,
         qPath: "QNumberPath",
@@ -312,7 +313,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "testSByte",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.SByte,
+        odataType: ODataTypesV2.SByte,
         type: "string",
         qObject: undefined,
         qPath: "QNumberPath",
@@ -320,7 +321,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "testSingle",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.Single,
+        odataType: ODataTypesV2.Single,
         type: "string",
         qObject: undefined,
         qPath: "QNumberPath",
@@ -328,7 +329,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "testBinary",
         dataType: DataTypes.PrimitiveType,
-        odataType: ODataTypesV3.Binary,
+        odataType: ODataTypesV2.Binary,
         type: "string",
         qObject: undefined,
         qPath: "QBinaryPath",
@@ -344,7 +345,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       {
         name: "multipleIds",
         dataType: DataTypes.PrimitiveType,
-        odataType: `Collection(${ODataTypesV3.Guid})`,
+        odataType: `Collection(${ODataTypesV2.Guid})`,
         type: "string",
         isCollection: true,
         qObject: "QGuidV2Collection",
@@ -352,7 +353,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       },
       {
         name: "multipleStrings",
-        odataType: `Collection(${ODataTypesV3.String})`,
+        odataType: `Collection(${ODataTypesV2.String})`,
         type: "string",
         isCollection: true,
         qObject: "QStringV2Collection",
@@ -360,7 +361,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       },
       {
         name: "multipleNumbers",
-        odataType: `Collection(${ODataTypesV3.Decimal})`,
+        odataType: `Collection(${ODataTypesV2.Decimal})`,
         type: "string",
         isCollection: true,
         qObject: "QNumberCollection",
@@ -368,7 +369,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       },
       {
         name: "multipleBooleans",
-        odataType: `Collection(${ODataTypesV3.Boolean})`,
+        odataType: `Collection(${ODataTypesV2.Boolean})`,
         type: "boolean",
         isCollection: true,
         qObject: "QBooleanCollection",
@@ -376,7 +377,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       },
       {
         name: "multipleTimes",
-        odataType: `Collection(${ODataTypesV3.Time})`,
+        odataType: `Collection(${ODataTypesV2.Time})`,
         type: "string",
         isCollection: true,
         qObject: "QTimeV2Collection",
@@ -384,7 +385,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       },
       {
         name: "multipleDateTimes",
-        odataType: `Collection(${ODataTypesV3.DateTime})`,
+        odataType: `Collection(${ODataTypesV2.DateTime})`,
         type: "string",
         isCollection: true,
         qObject: "QDateTimeV2Collection",
@@ -392,7 +393,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       },
       {
         name: "multipleDateTimeOffsets",
-        odataType: `Collection(${ODataTypesV3.DateTimeOffset})`,
+        odataType: `Collection(${ODataTypesV2.DateTimeOffset})`,
         type: "string",
         isCollection: true,
         qObject: "QDateTimeOffsetV2Collection",
@@ -400,7 +401,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       },
       {
         name: "multipleBinaries",
-        odataType: `Collection(${ODataTypesV3.Binary})`,
+        odataType: `Collection(${ODataTypesV2.Binary})`,
         type: "string",
         isCollection: true,
         qObject: "QBinaryCollection",
@@ -415,18 +416,18 @@ describe("V2: EntityTypeDigestion Test", () => {
     odataBuilder
       .addEntityType("Product", undefined, (builder) =>
         builder
-          .addKeyProp("ID", ODataTypesV3.Guid)
+          .addKeyProp("ID", ODataTypesV2.Guid)
           .addNavProp("Category", `${SERVICE_NAME}.Category`, relationshipCat, "1")
           .addNavProp("supplier", `${SERVICE_NAME}.Supplier`, relationshipSupp, "0..1")
       )
       .addEntityType("Category", undefined, (builder) =>
         builder
-          .addKeyProp("ID", ODataTypesV3.Guid)
+          .addKeyProp("ID", ODataTypesV2.Guid)
           .addNavProp("products", `${SERVICE_NAME}.Product`, relationshipCat, "*")
       )
       .addEntityType("Supplier", undefined, (builder) =>
         builder
-          .addKeyProp("ID", ODataTypesV3.Guid)
+          .addKeyProp("ID", ODataTypesV2.Guid)
           .addNavProp("products", `${SERVICE_NAME}.Product`, relationshipSupp, "*")
       );
 

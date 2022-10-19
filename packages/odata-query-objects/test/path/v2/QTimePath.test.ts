@@ -1,5 +1,6 @@
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "@odata2ts/test-converters";
+
 import { QTimeV2Path } from "../../../src";
-import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 import { EXAMPLE_PATH_NAME, EXAMPLE_TIME, createBaseDateTimeTests, createTimeFunctionTests } from "./DateTimeBaseTests";
 
 describe("QTimeV2Path test", () => {

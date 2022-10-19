@@ -1,5 +1,6 @@
+import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "@odata2ts/test-converters";
+
 import { QGuidV2Path } from "../../../src";
-import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "../../fixture/converter/FixedDateConverter";
 
 describe("QGuidV2Path test", () => {
   let toTest: QGuidV2Path;

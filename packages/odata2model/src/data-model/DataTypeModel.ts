@@ -1,3 +1,5 @@
+import { ValueConverterImport } from "@odata2ts/converter-api";
+
 export enum ODataVersion {
   V2 = "2.0",
   V4 = "4.0",
@@ -20,12 +22,14 @@ export interface PropertyModel {
   name: string;
   odataType: string;
   type: string;
+  typeModule?: string;
   qObject?: string;
   qPath: string;
   qParam?: string;
   required: boolean;
   isCollection: boolean;
   dataType: DataTypes;
+  converters?: Array<ValueConverterImport>;
 }
 
 export interface ModelType extends ComplexType {

@@ -1,11 +1,10 @@
 import path from "path";
 
+import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { SourceFile } from "ts-morph";
 
-import { ODataVesions } from "../../../src/app";
 import { ProjectFiles } from "../../../src/data-model/DataModel";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { ODataTypesV4 } from "../../../src/data-model/edmx/ODataEdmxModelV4";
 import { EmitModes } from "../../../src/OptionModel";
 import { ProjectManager, createProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
@@ -25,7 +24,7 @@ describe("Service Generator Tests V4", () => {
   let fixtureComparatorHelper: ServiceFixtureComparatorHelper;
 
   beforeAll(async () => {
-    fixtureComparatorHelper = await createServiceHelper(FIXTURE_PATH, digest, ODataVesions.V4);
+    fixtureComparatorHelper = await createServiceHelper(FIXTURE_PATH, digest, ODataVersions.V4);
   });
 
   beforeEach(async () => {
