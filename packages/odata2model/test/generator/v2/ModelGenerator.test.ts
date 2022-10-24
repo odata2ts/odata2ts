@@ -1,8 +1,8 @@
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
+import { DigestionOptions } from "../../../src/FactoryFunctionModel";
 import { generateModels } from "../../../src/generator";
-import { GenerationOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
 import {
   EntityBasedGeneratorFunctionWithoutVersion,
@@ -23,7 +23,7 @@ describe("Model Generator Tests V2", () => {
 
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, GENERATE);
 
-  async function generateAndCompare(id: string, fixturePath: string, genOptions?: GenerationOptions) {
+  async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<DigestionOptions>) {
     await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), genOptions);
   }
 
@@ -43,7 +43,7 @@ describe("Model Generator Tests V2", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("minFunction", "operation-min.ts");
+    await generateAndCompare("minFunction", "operation-min.ts", { operations: { skip: false } });
   });
 
   test(`${TEST_SUITE_NAME}: max function param model`, async () => {
@@ -60,6 +60,6 @@ describe("Model Generator Tests V2", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("maxFunction", "operation-max.ts");
+    await generateAndCompare("maxFunction", "operation-max.ts", { operations: { skip: false } });
   });
 });

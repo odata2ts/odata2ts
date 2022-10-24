@@ -1,7 +1,7 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { GenerationOptions } from "../../../src/OptionModel";
+import { DigestionOptions } from "../../../src/FactoryFunctionModel";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import {
   EntityBasedGeneratorFunctionWithoutVersion,
@@ -11,6 +11,11 @@ import {
 
 export const SERVICE_NAME = "Tester";
 export const ENTITY_NAME = "Book";
+
+const USE_ID_AND_EDITABLE_MODEL = {
+  idModels: { skip: false },
+  editableModels: { skip: false },
+};
 
 export function createEntityBasedGenerationTests(
   testSuiteName: string,
@@ -28,7 +33,7 @@ export function createEntityBasedGenerationTests(
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
   });
 
-  async function generateAndCompare(id: string, fixturePath: string, genOptions?: GenerationOptions) {
+  async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<DigestionOptions>) {
     await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), genOptions);
   }
 
@@ -59,10 +64,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("complexTypeEdit", "complex-editable.ts", {
-      skipIdModel: false,
-      skipEditableModel: false,
-    });
+    await generateAndCompare("complexTypeEdit", "complex-editable.ts", USE_ID_AND_EDITABLE_MODEL);
   });
 
   test(`${testSuiteName}: one minimal model`, async () => {
@@ -100,7 +102,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("oneMaxModel", "entity-max.ts", { skipIdModel: false, skipEditableModel: false });
+    await generateAndCompare("oneMaxModel", "entity-max.ts", USE_ID_AND_EDITABLE_MODEL);
   });
 
   test(`${testSuiteName}: entity relationships`, async () => {
@@ -134,7 +136,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("baseClass", "entity-hierarchy.ts", { skipIdModel: false, skipEditableModel: false });
+    await generateAndCompare("baseClass", "entity-hierarchy.ts", USE_ID_AND_EDITABLE_MODEL);
   });
 
   test(`${testSuiteName}: entity & enum`, async () => {

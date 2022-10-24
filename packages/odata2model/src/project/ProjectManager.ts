@@ -1,4 +1,5 @@
 import * as path from "path";
+
 import { emptyDir, remove, writeFile } from "fs-extra";
 import { Project, SourceFile } from "ts-morph";
 
@@ -109,6 +110,8 @@ export class ProjectManager {
       case EmitModes.ts:
         await this.emitTsFiles();
         break;
+      default:
+        throw new Error(`Emit mode "${this.emitMode}" is invalid!`);
     }
   }
 

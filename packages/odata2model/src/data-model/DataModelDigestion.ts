@@ -2,14 +2,12 @@ import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { camelCase } from "camel-case";
 import { pascalCase } from "pascal-case";
 
-import { RunOptions } from "../OptionModel";
+import { DigestionOptions } from "../FactoryFunctionModel";
 import { DataModel } from "./DataModel";
 import { ComplexType as ComplexModelType, DataTypes, ODataVersion, PropertyModel } from "./DataTypeModel";
 import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModelBase";
 
 const ID_SUFFIX = "Id";
-
-export type DigesterOptions = Pick<RunOptions, "serviceName" | "generation" | "modelPrefix" | "modelSuffix">;
 
 export interface TypeModel {
   outputType: string;
@@ -29,7 +27,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   protected constructor(
     protected version: ODataVersion,
     protected schema: S,
-    protected options: DigesterOptions,
+    protected options: DigestionOptions,
     converters?: MappedConverterChains
   ) {
     const serviceName = schema.$.Namespace;
@@ -56,10 +54,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   protected getModelName(name: string, typeSuffix?: string): string {
     return (
-      this.options.modelPrefix +
+      (this.options.models.prefix || "") +
       pascalCase(this.stripServicePrefix(name)) +
       (typeSuffix || "") +
-      this.options.modelSuffix
+      (this.options.models.suffix || "")
     );
   }
 

@@ -4,8 +4,10 @@ import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 
 import { ProjectFiles } from "../../../src/data-model/DataModel";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
+import { getDefaultConfig } from "../../../src/evaluateConfig";
+import { DigestionOptions } from "../../../src/FactoryFunctionModel";
 import { generateServices } from "../../../src/generator";
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
+import { EmitModes } from "../../../src/OptionModel";
 import { ProjectManager, createProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
 import { FixtureComparator, createFixtureComparator } from "../comparator/FixtureComparator";
@@ -14,7 +16,7 @@ import { SERVICE_NAME } from "./EntityBasedGenerationTests";
 describe("Service Generator Tests V2", () => {
   const FIXTURE_PATH = "generator/service";
 
-  let runOptions: RunOptions;
+  let runOptions: DigestionOptions;
   let odataBuilder: ODataModelBuilderV2;
 
   let projectFiles: ProjectFiles = {
@@ -31,15 +33,7 @@ describe("Service Generator Tests V2", () => {
 
   beforeEach(async () => {
     odataBuilder = new ODataModelBuilderV2(SERVICE_NAME);
-    runOptions = {
-      mode: Modes.all,
-      emitMode: EmitModes.js_dts,
-      output: "ignore",
-      prettier: false,
-      debug: false,
-      modelPrefix: "",
-      modelSuffix: "",
-    };
+    runOptions = getDefaultConfig();
     projectManager = await createProjectManager(projectFiles, "build", EmitModes.ts, true);
   });
 

@@ -2,30 +2,21 @@ import { ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
+import { getDefaultConfig } from "../../../src/evaluateConfig";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 describe("Action Digestion Test", () => {
   const SERVICE_NAME = "ActionTest";
+  const CONFIG = getDefaultConfig();
 
   let odataBuilder: ODataModelBuilderV4;
-  let runOpts: RunOptions;
 
   function doDigest() {
-    return digest(odataBuilder.getSchema(), runOpts);
+    return digest(odataBuilder.getSchema(), CONFIG);
   }
 
   beforeEach(() => {
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
-    runOpts = {
-      mode: Modes.all,
-      emitMode: EmitModes.js_dts,
-      output: "ignore",
-      prettier: false,
-      debug: false,
-      modelPrefix: "",
-      modelSuffix: "",
-    };
   });
 
   test("Action: min case", async () => {

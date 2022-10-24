@@ -1,37 +1,27 @@
-import { DataModel } from "../../src/data-model/DataModel";
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
-import { Schema } from "../../src/data-model/edmx/ODataEdmxModelBase";
-import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
+import { getDefaultConfig } from "../../src/evaluateConfig";
+import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel";
 import { ODataModelBuilder } from "./builder/ODataModelBuilder";
 
-export type DigestionFunction = <S extends Schema<any, any>>(schema: S, runOpts: RunOptions) => Promise<DataModel>;
 export type ModelBuilderConstructor<MB extends ODataModelBuilder<any, any, any, any>> = new (serviceName: string) => MB;
 
 export function createDataModelTests(
   version: ODataVersion,
   ODataBuilderConstructor: ModelBuilderConstructor<any>,
-  digest: DigestionFunction
+  digest: DigesterFunction<any>
 ) {
   const SERVICE_NAME = "Tester";
 
   let odataBuilder: ODataModelBuilder<any, any, any, any>;
-  let runOpts: RunOptions;
+  let digestionOptions: DigestionOptions;
 
   beforeEach(() => {
     odataBuilder = new ODataBuilderConstructor(SERVICE_NAME);
-    runOpts = {
-      mode: Modes.all,
-      emitMode: EmitModes.js_dts,
-      output: "ignore",
-      prettier: false,
-      debug: false,
-      modelPrefix: "",
-      modelSuffix: "",
-    };
+    digestionOptions = getDefaultConfig();
   });
 
   test("Smoke Test", async () => {
-    const result = await digest(odataBuilder.getSchema(), runOpts);
+    const result = await digest(odataBuilder.getSchema(), digestionOptions);
 
     expect(result).toBeTruthy();
     expect(result.getServiceName()).toBe(SERVICE_NAME);
@@ -58,7 +48,7 @@ export function createDataModelTests(
       })
       .addEnumType("fav_FEAT", [{ name: "HEY", value: 0 }]);
 
-    const result = await digest(odataBuilder.getSchema(), runOpts);
+    const result = await digest(odataBuilder.getSchema(), digestionOptions);
 
     expect(result.getModels()[0].name).toBe("MyType");
     expect(result.getModels()[0].props[0].name).toBe("id");
@@ -75,7 +65,7 @@ export function createDataModelTests(
       })
       .addEntityType("Parent", "GrandParent", () => {});
 
-    const result = await digest(odataBuilder.getSchema(), runOpts);
+    const result = await digest(odataBuilder.getSchema(), digestionOptions);
 
     expect(result.getModels().length).toBe(2);
     expect(result.getModels()[1].name).toBe("Parent");
@@ -93,7 +83,7 @@ export function createDataModelTests(
         builder.addKeyProp("ID2", "Edm.String");
       });
 
-    const result = await digest(odataBuilder.getSchema(), runOpts);
+    const result = await digest(odataBuilder.getSchema(), digestionOptions);
 
     expect(result.getModels().length).toBe(2);
     expect(result.getModels()[1].name).toBe("Parent");
@@ -110,12 +100,10 @@ export function createDataModelTests(
       builder.addProp("truth", "Edm.Boolean", false);
       builder.addProp("optionalTruth", "Edm.Boolean", true);
     });
-    runOpts.generation = {
-      converters: ["test"],
-    };
+    digestionOptions.converters = ["test"];
 
     // TODO: mock loadConverters method from converter-runtime
-    const result = await digest(odataBuilder.getSchema(), runOpts);
+    const result = await digest(odataBuilder.getSchema(), digestionOptions);
 
     expect(result.getModels().length).toBe(2);
     expect(result.getModels()[1].name).toBe("Parent");

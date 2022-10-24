@@ -1,19 +1,16 @@
-import { ConfigFileOptions } from "./src/OptionModel";
+import { ConfigFileOptions, NamingStrategies } from "./src/OptionModel";
 
 const config: ConfigFileOptions = {
   mode: "all",
-  debug: false,
+  debug: true,
   prettier: true,
-  emitMode: "ts",
-  modelSuffix: "Model",
-  generation: {
-    model: {
-      suffix: "Model",
-    },
-    idModel: {
-      suffix: "IdModel",
-    },
-    custom: {
+  emitMode: "js_dts",
+  /*  services: [
+    {
+      name: "Trippin",
+      mappedName: "TrippinService",
+      source: "/int-test/fixture/v4/trippin.xml",
+      output: "build/v4/trippin",
       propertyTypes: [
         {
           name: "ID",
@@ -49,6 +46,21 @@ const config: ConfigFileOptions = {
           ],
         },
       ],
+    },
+  ],*/
+  generation: {
+    models: {
+      suffix: "Model",
+      idModels: {
+        suffix: "Key",
+      },
+      editableModels: {
+        suffix: "Edit",
+      },
+    },
+    queryObjects: {
+      namingStrategy: NamingStrategies.CONSTANT_CASE,
+      suffix: "QueryObject",
     },
   },
 };

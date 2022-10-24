@@ -3,8 +3,7 @@ import { SourceFile } from "ts-morph";
 
 import { DataModel } from "../data-model/DataModel";
 import { ComplexType, DataTypes, ModelType, OperationType, PropertyModel } from "../data-model/DataTypeModel";
-import { EntityBasedGeneratorFunction } from "../FactoryFunctionModel";
-import { GenerationOptions } from "../OptionModel";
+import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel";
 import { ImportContainer } from "./ImportContainer";
 
 export const generateModels: EntityBasedGeneratorFunction = (dataModel, sourceFile, version, options) => {
@@ -21,7 +20,7 @@ class ModelGenerator {
     private dataModel: DataModel,
     private sourceFile: SourceFile,
     private version: ODataVersions,
-    private options: GenerationOptions | undefined
+    private options: GeneratorFunctionOptions
   ) {}
 
   public generate(): void {
@@ -29,7 +28,7 @@ class ModelGenerator {
 
     this.generateEnums();
     this.generateModels();
-    if (!this.options?.skipOperationModel) {
+    if (!this.options.operations.skip) {
       this.generateUnboundOperationParams();
     }
   }
@@ -47,19 +46,19 @@ class ModelGenerator {
   private generateModels() {
     this.dataModel.getModels().forEach((model) => {
       this.generateModel(model);
-      if (!this.options?.skipIdModel) {
+      if (!this.options.idModels.skip) {
         this.generateIdModel(model);
       }
-      if (!this.options?.skipEditableModel) {
+      if (!this.options.editableModels.skip) {
         this.generateEditableModel(model);
       }
-      if (!this.options?.skipOperationModel) {
+      if (!this.options.operations.skip) {
         this.generateBoundOperationParams(model.name);
       }
     });
     this.dataModel.getComplexTypes().forEach((model) => {
       this.generateModel(model);
-      if (!this.options?.skipEditableModel) {
+      if (!this.options.editableModels.skip) {
         this.generateEditableModel(model);
       }
     });

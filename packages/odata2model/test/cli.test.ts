@@ -1,10 +1,11 @@
-import fsExtra from "fs-extra";
 import * as cosmiConfig from "cosmiconfig";
 import type { CosmiconfigResult } from "cosmiconfig/dist/types";
+import fsExtra from "fs-extra";
 
-import { Cli } from "../src/cli";
-import { EmitModes, Modes, RunOptions } from "../src/OptionModel";
 import * as app from "../src/app";
+import { Cli } from "../src/cli";
+import { getDefaultConfig } from "../src/evaluateConfig";
+import { CliOptions, ConfigFileOptions, EmitModes, Modes, RunOptions } from "../src/OptionModel";
 
 jest.mock("fs-extra");
 jest.mock("../src/app");
@@ -14,12 +15,20 @@ describe("Cli Test", () => {
   const EXIT_MSG = "process.exit was called.";
   const ORIGINAL_ARGS = process.argv;
   const STANDARD_ARGS = ["node-bin.js", "cli.ts"];
+  const DEFAULT_OPTS: CliOptions = {
+    mode: Modes.all,
+    emitMode: EmitModes.js_dts,
+    output: "./test/fixture",
+    prettier: false,
+    debug: false,
+  };
+  const CONFIG: RunOptions = { ...getDefaultConfig(), source: "./test/fixture/dummy.xml", output: "./test/fixture" };
 
   let processExitSpy: jest.SpyInstance;
   let logInfoSpy: jest.SpyInstance;
   let logErrorSpy: jest.SpyInstance;
-  let defaultArgs = ["-s", "./test/fixture/dummy.xml", "-o", "./test/fixture"];
-  let runOptions: Partial<RunOptions>;
+  let defaultArgs = ["-s", CONFIG.source, "-o", CONFIG.output];
+  let runOptions: CliOptions;
   let mockCosmi = {
     search: jest.fn().mockResolvedValue({}),
   };
@@ -53,15 +62,7 @@ describe("Cli Test", () => {
     });
 
     // default run options
-    runOptions = {
-      mode: Modes.all,
-      emitMode: EmitModes.js_dts,
-      output: "./test/fixture",
-      modelPrefix: "",
-      modelSuffix: "",
-      prettier: false,
-      debug: false,
-    };
+    runOptions = { ...DEFAULT_OPTS };
 
     mockConfig = {
       config: {},
@@ -102,11 +103,13 @@ describe("Cli Test", () => {
     await expect(runCli(args)).resolves.toBeUndefined();
 
     expect(process.exit).not.toHaveBeenCalled();
-    expect(app.runApp).toHaveBeenCalledWith(null, runOptions);
+    expect(app.runApp).toHaveBeenCalledWith(null, { ...CONFIG, ...runOptions });
   }
 
   test("Smoke Test", async () => {
-    await expect(runCli()).rejects.toThrow(EXIT_MSG);
+    await expect(runCli()).rejects.toThrow(
+      "Without any configuration file options --source and --output must be specified!"
+    );
 
     expect(process.exit).not.toHaveBeenCalledWith(0);
     expect(app.runApp).not.toHaveBeenCalled();
@@ -143,21 +146,6 @@ describe("Cli Test", () => {
     await testEmitMode(EmitModes.js);
     await testEmitMode(EmitModes.dts);
     await testEmitMode(EmitModes.ts);
-  });
-
-  async function testModelPrefixSuffix(prefix: string = "", suffix: string = "") {
-    const args = [...defaultArgs, "-prefix", prefix, "-suffix", suffix];
-    runOptions.modelPrefix = prefix;
-    runOptions.modelSuffix = suffix;
-
-    await testCli(args);
-  }
-
-  test("Test model-prefix and model-suffix option", async () => {
-    await testModelPrefixSuffix();
-    await testModelPrefixSuffix("I");
-    await testModelPrefixSuffix("", "Model");
-    await testModelPrefixSuffix("I", "Model");
   });
 
   async function testPrettier(prettier: boolean) {
@@ -234,13 +222,15 @@ describe("Cli Test", () => {
   test("Config loaded", async () => {
     // given a custom config
     mockConfig!.config = {
-      mode: Modes[Modes.models],
+      mode: Modes.models,
       emitMode: EmitModes.dts,
-      modelPrefix: "I",
-      modelSuffix: "Model",
+      model: {
+        prefix: "I",
+        suffix: "Model",
+      },
       prettier: true,
       debug: true,
-    };
+    } as ConfigFileOptions;
 
     // when returning empty config
     mockCosmi.search = jest.fn().mockResolvedValue(mockConfig);
@@ -249,7 +239,7 @@ describe("Cli Test", () => {
     // then config should have been used to determine runOptions
     const { mode, ...mockOpts } = mockConfig!.config;
     expect(app.runApp).toHaveBeenCalledWith(null, {
-      output: "./test/fixture",
+      ...CONFIG,
       mode: Modes.models,
       ...mockOpts,
     });

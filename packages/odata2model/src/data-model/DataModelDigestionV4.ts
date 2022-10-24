@@ -1,8 +1,7 @@
 import { MappedConverterChains, loadConverters } from "@odata2ts/converter-runtime";
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
-import { DigesterFunction } from "../FactoryFunctionModel";
-import { RunOptions } from "../OptionModel";
+import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel";
 import { Digester, TypeModel } from "./DataModelDigestion";
 import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
@@ -14,14 +13,14 @@ import { ComplexTypeV4, EntityTypeV4, Operation, SchemaV4 } from "./edmx/ODataEd
  * @param options
  */
 export const digest: DigesterFunction<SchemaV4> = async (schema, options) => {
-  const converters = await loadConverters(ODataVersions.V2, options.generation?.converters);
+  const converters = await loadConverters(ODataVersions.V2, options.converters);
 
   const digester = new DigesterV4(schema, options, converters);
   return digester.digest();
 };
 
 class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
-  constructor(schema: SchemaV4, options: RunOptions, converters?: MappedConverterChains) {
+  constructor(schema: SchemaV4, options: DigestionOptions, converters?: MappedConverterChains) {
     super(ODataVersion.V4, schema, options, converters);
   }
 
