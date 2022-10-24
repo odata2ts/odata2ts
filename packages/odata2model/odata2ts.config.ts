@@ -1,10 +1,10 @@
-import { ConfigFileOptions, NamingStrategies } from "./src/OptionModel";
+import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "./src/OptionModel";
 
 const config: ConfigFileOptions = {
-  mode: "all",
+  mode: Modes.all,
   debug: true,
   prettier: true,
-  emitMode: "js_dts",
+  emitMode: EmitModes.js_dts,
   /*  services: [
     {
       name: "Trippin",
@@ -48,20 +48,18 @@ const config: ConfigFileOptions = {
       ],
     },
   ],*/
-  generation: {
-    models: {
-      suffix: "Model",
-      idModels: {
-        suffix: "Key",
-      },
-      editableModels: {
-        suffix: "Edit",
-      },
-    },
-    queryObjects: {
-      namingStrategy: NamingStrategies.CONSTANT_CASE,
-      suffix: "QueryObject",
-    },
+  idModels: {
+    suffix: "Key",
+  },
+  editableModels: {
+    suffix: "Edit",
+  },
+  models: {
+    suffix: "Model",
+  },
+  queryObjects: {
+    namingStrategy: NamingStrategies.CONSTANT_CASE,
+    suffix: "QueryObject",
   },
 };
 
