@@ -1,11 +1,7 @@
-import {
-  ConverterPackage,
-  RuntimeConverterPackage,
-  TypeConverterConfig,
-  ValueConverterChain,
-  ValueConverterType,
-} from "@odata2ts/converter-api";
+import { ConverterPackage, ValueConverterType } from "@odata2ts/converter-api";
 import { ODataTypesV2, ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
+
+import { RuntimeConverterPackage, TypeConverterConfig, ValueConverterChain } from "./ConverterModels";
 
 type MappedConverters = Map<string, ValueConverterType & { package: string; toModule?: string }>;
 
@@ -44,9 +40,9 @@ async function doLoad(converters: Array<TypeConverterConfig>): Promise<Array<Run
             if (!candidate || typeof candidate.id !== "string" || typeof candidate.converters?.length !== "number") {
               throw new Error(`Default export of loaded module "${conv.module}" doesn't conform to specification!`);
             }
-            const { id } = candidate as ConverterPackage;
+            const pkg = candidate as ConverterPackage;
             // console.log(`Dynamically loaded converter package ${conv.module} with id "${id}"`);
-            converters = candidate.converters;
+            converters = pkg.converters;
           }
 
           return {

@@ -1,4 +1,4 @@
-import { ValueConverterImport } from "@odata2ts/converter-api";
+import { ValueConverterImport } from "@odata2ts/converter-runtime";
 import { ODataVersions } from "@odata2ts/odata-core";
 import { camelCase } from "camel-case";
 import { OptionalKind, PropertyDeclarationStructure, Scope, SourceFile, VariableDeclarationKind } from "ts-morph";

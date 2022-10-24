@@ -1,18 +1,4 @@
 /**
- * Allows for further configuration of a converter.
- */
-export interface TypeConverterConfig {
-  /**
-   * The package or module name, e.g. "@odata2ts/converter-v2-to-v4".
-   */
-  module: string;
-  /**
-   * List of converter ids of this module, which should be used.
-   */
-  use?: Array<string>;
-}
-
-/**
  * Specifies the format of the default export of a valid converter package.
  */
 export interface ConverterPackage {
@@ -22,14 +8,6 @@ export interface ConverterPackage {
    * Only needed for debug purposes right now.
    */
   id: string;
-  /**
-   * List of converters offered by this package.
-   */
-  converters: Array<ValueConverterType>;
-}
-
-export interface RuntimeConverterPackage {
-  package: string;
   /**
    * List of converters offered by this package.
    */
@@ -81,18 +59,6 @@ export type ParamValueModel<Type> = Type | null | undefined;
  * Noop converter.
  */
 export interface IdentityConverter<OriginalType, ConvertedType> extends ValueConverter<OriginalType, ConvertedType> {}
-
-export interface ValueConverterImport {
-  package: string;
-  converterId: string;
-}
-
-export interface ValueConverterChain {
-  from: string;
-  to: string;
-  toModule?: string;
-  converters: Array<ValueConverterImport>;
-}
 
 export interface ChainableValueConverter<OriginalType, ConvertedType>
   extends ValueConverter<OriginalType, ConvertedType> {
