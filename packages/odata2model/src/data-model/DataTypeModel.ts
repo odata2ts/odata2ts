@@ -1,4 +1,4 @@
-import { ValueConverterImport } from "@odata2ts/converter-api";
+import { ValueConverterImport } from "@odata2ts/converter-runtime";
 
 export enum ODataVersion {
   V2 = "2.0",
