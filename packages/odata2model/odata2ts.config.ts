@@ -1,15 +1,28 @@
 import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "./src/OptionModel";
 
 const config: ConfigFileOptions = {
-  mode: Modes.all,
-  debug: true,
+  debug: false,
+  mode: Modes.service,
+  emitMode: EmitModes.ts,
   prettier: true,
-  emitMode: EmitModes.js_dts,
-  /*  services: [
-    {
-      name: "Trippin",
-      mappedName: "TrippinService",
-      source: "/int-test/fixture/v4/trippin.xml",
+  models: {
+    suffix: "Model",
+  },
+  idModels: {
+    suffix: "Key",
+  },
+  queryObjects: {
+    namingStrategy: NamingStrategies.CONSTANT_CASE,
+    suffix: "QueryObject",
+  },
+  services: {
+    odata: {
+      source: "int-test/fixture/v2/odata.xml",
+      output: "build/v2/odata",
+    },
+    trippin: {
+      // serviceName: "TrippinService",
+      source: "int-test/fixture/v4/trippin.xml",
       output: "build/v4/trippin",
       propertyTypes: [
         {
@@ -17,22 +30,10 @@ const config: ConfigFileOptions = {
           mappedName: "id",
           managed: true,
         },
-        {
-          name: "createdAt",
+        ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({
+          name: prop,
           managed: true,
-        },
-        {
-          name: "createdBy",
-          managed: true,
-        },
-        {
-          name: "modifiedAt",
-          managed: true,
-        },
-        {
-          name: "modifiedBy",
-          managed: true,
-        },
+        })),
       ],
       modelTypes: [
         {
@@ -47,19 +48,14 @@ const config: ConfigFileOptions = {
         },
       ],
     },
-  ],*/
-  idModels: {
-    suffix: "Key",
-  },
-  editableModels: {
-    suffix: "Edit",
-  },
-  models: {
-    suffix: "Model",
-  },
-  queryObjects: {
-    namingStrategy: NamingStrategies.CONSTANT_CASE,
-    suffix: "QueryObject",
+    nw2: {
+      source: "int-test/fixture/v2/northwind.xml",
+      output: "build/v2/northwind",
+    },
+    nw4: {
+      source: "int-test/fixture/v4/northwind.xml",
+      output: "build/v4/northwind",
+    },
   },
 };
 

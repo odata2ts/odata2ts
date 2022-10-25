@@ -44,7 +44,7 @@ function processCliArgs() {
   const cli = new commander.Command()
     .version("0.3.0")
     .description("CLI to generate Typescript Interfaces for models of a given OData service.")
-    .option("-srv, --service [serviceNames...]", "Name the services as specified in config")
+    .argument("[services...]", "Run the generation process only for certain services specified in config file", [])
     .option("-s, --source <metadata.xml>", "Metadata file describing the OData service")
     .option("-o, --output <path>", "Output location for generated files")
     .addOption(
@@ -65,7 +65,11 @@ function processCliArgs() {
     .option("-name, --service-name <serviceName>", "Give the service your own name")
     .parse(process.argv);
 
-  return cli.opts() as CliOptions;
+  const args = cli.args?.length ? { services: cli.args } : {};
+  return {
+    ...cli.opts(),
+    ...args,
+  } as CliOptions;
 }
 
 async function processConfigFile() {
@@ -90,6 +94,9 @@ async function processConfigFile() {
 export class Cli {
   async run(): Promise<void> {
     const cliOpts = processCliArgs();
+    if (cliOpts.debug) {
+      console.log("CLI opts:", cliOpts);
+    }
     const fileOpts = await processConfigFile();
 
     const runs = evaluateConfigOptions(cliOpts, fileOpts);
@@ -101,10 +108,20 @@ export class Cli {
 }
 
 async function startServiceGenerationRun(options: RunOptions) {
-  const { source, output, debug } = options;
+  const { source, output, debug, mode, emitMode, prettier, serviceName } = options;
+  console.log("---------------------------");
+  console.log("Starting generation process");
 
   if (debug) {
-    console.log("Resolved config:", options);
+    console.log("Resolved config:", {
+      source,
+      output,
+      debug,
+      mode: Modes[mode],
+      emitMode,
+      prettier,
+      serviceName,
+    });
   }
 
   console.log("Reading file:", source);
