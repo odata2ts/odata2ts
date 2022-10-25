@@ -21,11 +21,11 @@ function parseMode(value: string, dummyPrevious: Modes | undefined) {
     case "all":
       return Modes.all;
     default:
-      return undefined;
+      throw new Error(`Not a valid Mode: ${value}`);
   }
 }
 
-function parseEmitMode(value: string, dummyPrevious: EmitModes | undefined) {
+function parseEmitMode(value: string, dummyPrevious: EmitModes) {
   switch (value) {
     case "dts":
       return EmitModes.dts;
@@ -36,7 +36,7 @@ function parseEmitMode(value: string, dummyPrevious: EmitModes | undefined) {
     case "js_dts":
       return EmitModes.js_dts;
     default:
-      return undefined;
+      throw new Error(`Not a valid EmitMode: ${value}`);
   }
 }
 
@@ -50,7 +50,7 @@ function processCliArgs() {
     .addOption(
       new Option("-m, --mode <mode>", "What kind of stuff gets generated")
         .choices(Object.values(Modes).filter((t): t is string => isNaN(Number(t))))
-        .argParser<Modes | undefined>(parseMode)
+        .argParser<Modes>(parseMode)
     )
     .addOption(
       new Option(
@@ -58,7 +58,7 @@ function processCliArgs() {
         "Output TS source files, compiled JS files with/wihthout generated d.ts files"
       )
         .choices(Object.values(EmitModes))
-        .argParser<EmitModes | undefined>(parseEmitMode)
+        .argParser<EmitModes>(parseEmitMode)
     )
     .option("-p, --prettier", "Format result with prettier")
     .option("-d, --debug", "Verbose debug infos")
@@ -93,13 +93,19 @@ async function processConfigFile() {
 
 export class Cli {
   async run(): Promise<void> {
-    const cliOpts = processCliArgs();
-    if (cliOpts.debug) {
-      console.log("CLI opts:", cliOpts);
-    }
-    const fileOpts = await processConfigFile();
+    let runs;
+    try {
+      const cliOpts = processCliArgs();
+      if (cliOpts.debug) {
+        console.log("CLI opts:", cliOpts);
+      }
+      const fileOpts = await processConfigFile();
 
-    const runs = evaluateConfigOptions(cliOpts, fileOpts);
+      runs = evaluateConfigOptions(cliOpts, fileOpts);
+    } catch (error: any) {
+      console.error("Bad arguments!", error?.message);
+      process.exit(1);
+    }
 
     for (let run of runs) {
       await startServiceGenerationRun(run);

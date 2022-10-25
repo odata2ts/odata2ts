@@ -96,8 +96,6 @@ describe("Cli Test", () => {
    * Test successful CLI run:
    * - no errors occur
    * - run options which are passed to app are matching with ours
-   *
-   * @param args
    */
   async function testCli(args: Array<string> = defaultArgs) {
     await expect(runCli(args)).resolves.toBeUndefined();
@@ -106,17 +104,26 @@ describe("Cli Test", () => {
     expect(app.runApp).toHaveBeenCalledWith(null, { ...CONFIG, ...runOptions });
   }
 
-  test("Smoke Test", async () => {
-    await expect(runCli()).rejects.toThrow(
-      "Without any configuration file options --source and --output must be specified!"
-    );
-
-    expect(process.exit).not.toHaveBeenCalledWith(0);
-    expect(app.runApp).not.toHaveBeenCalled();
+  test("Most simple successful run", async () => {
+    await testCli(defaultArgs);
   });
 
-  test("Most simple successful run", async () => {
-    await testCli();
+  async function failBadArgs(args: Array<string>) {
+    await expect(runCli(args)).rejects.toThrow();
+
+    expect(process.exit).toHaveBeenCalledWith(1);
+    // expect(process.exit).toHaveBeenCalledWith(1);
+    expect(app.runApp).not.toHaveBeenCalled();
+  }
+
+  test("Fail without source", async () => {
+    await failBadArgs(defaultArgs.slice(0, 2));
+  });
+  test("Fail without output", async () => {
+    await failBadArgs(defaultArgs.slice(2));
+  });
+  test("Fail with unknown option", async () => {
+    await failBadArgs([...defaultArgs, "--unknown"]);
   });
 
   async function testMode(mode: Modes) {
@@ -133,6 +140,10 @@ describe("Cli Test", () => {
     await testMode(Modes.models);
   });
 
+  test("Fail with unknown mode", async () => {
+    await failBadArgs([...defaultArgs, "-m", "xxx"]);
+  });
+
   async function testEmitMode(mode: EmitModes) {
     const args = [...defaultArgs, "-e", mode];
     runOptions.emitMode = mode;
@@ -146,6 +157,10 @@ describe("Cli Test", () => {
     await testEmitMode(EmitModes.js);
     await testEmitMode(EmitModes.dts);
     await testEmitMode(EmitModes.ts);
+  });
+
+  test("Fail with unknown mode", async () => {
+    await failBadArgs([...defaultArgs, "-e", "xxx"]);
   });
 
   async function testPrettier(prettier: boolean) {
