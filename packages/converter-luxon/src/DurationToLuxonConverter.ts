@@ -3,7 +3,7 @@ import { Duration } from "luxon";
 
 export const durationToLuxonConverter: ValueConverter<string, Duration> = {
   id: "durationToLuxonConverter",
-  from: ["Edm.Time", "Edm.Duration"],
+  from: "Edm.Duration",
   to: "luxon.Duration",
 
   convertFrom: function (value: ParamValueModel<string>): ParamValueModel<Duration> {

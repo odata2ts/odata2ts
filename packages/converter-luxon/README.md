@@ -2,8 +2,7 @@
 
 # Luxon Converters
 
-Luxon based [`@odat2ts`](https://github.com/odata2ts/odata2ts) compatible converters for date and time related OData types.
-This converter package has been tested to work with [v2-to-v4-converter](), so that.
+[Luxon](https://moment.github.io/luxon) based [`@odat2ts`](https://github.com/odata2ts/odata2ts) compatible converters for date and time related OData types.
 
 User facing data types:
 * [DateTime](https://moment.github.io/luxon/api-docs/index.html#datetime)
@@ -32,9 +31,7 @@ For V4 you just leave it out.
 import { ConfigOptions } from "@odata2ts/odata2model";
 
 const config: ConfigOptions = {
-  generation: {
-    converters: ["@odata2ts/converter-v2-to-v4", "@odata2ts/converter-luxon"],
-  },
+  converters: ["@odata2ts/converter-v2-to-v4", "@odata2ts/converter-luxon"],
 };
 
 export default config;
@@ -50,7 +47,7 @@ These converter ids are listed in the "Conversions" table.
     converters: [
       {
         module: "@odata2ts/converter-luxon",
-        use: ["DateTimeOffsetToLuxon", "DurationToLuxon"],
+        use: ["dateTimeOffsetToLuxonConverter", "durationToLuxonConverter"],
       },
     ],
     ...
@@ -58,11 +55,9 @@ These converter ids are listed in the "Conversions" table.
 
 ## Conversions
 
-| OData Type         | OData Version | Converter Id          | Luxon Type | Description                                                                     |
-|--------------------|:-------------:|-----------------------|------------|---------------------------------------------------------------------------------| 
-| Edm.DateTimeOffset |V2 & V4| DateTimeOffsetToLuxon | DateTime   ||
-| (Edm.DateTime)     |V2| ---                   | DateTime   | Only in combination with [v2-to-v4-converter](), which converts to DateTimeOffset, which in turn is supported as stated in the previos row. 
-| Edm.Date           |V4| DateToLuxon           | DateTime   | Luxon's DateTime will still have the time part, which should be ignored by user |
-| Edm.TimeOfDay      |V4| TimeOfDayToLuxon      | DateTime   | Luxon's DateTime will still have the date part, which should be ignored by user |
-| Edm.Duration       |V4| DurationToLuxon       | Duration   ||
-| Edm.Time           |V2| DurationToLuxon       | Duration   | Yeah, the initial spec of time is actually a duration |
+| OData Type         | Converter Id                   | Luxon Type | Description                                                                      |
+|--------------------|--------------------------------|:----------:|----------------------------------------------------------------------------------| 
+| Edm.DateTimeOffset | dateTimeOffsetToLuxonConverter |  DateTime  |                                                                                  |
+| Edm.Date           | dateToLuxonConverter           |  DateTime  | Luxon's DateTime will still have the time part, which should be ignored by user  |
+| Edm.TimeOfDay      | timeOfDayToLuxonConverter      |  DateTime  | Luxon's DateTime will still have the date part, which should be ignored by user  |
+| Edm.Duration       | durationToLuxonConverter       |  Duration  |                                                                                  |

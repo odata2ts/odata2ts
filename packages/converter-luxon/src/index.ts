@@ -5,11 +5,6 @@ import { dateToLuxonConverter } from "./DateToLuxonConverter";
 import { durationToLuxonConverter } from "./DurationToLuxonConverter";
 import { timeOfDayToLuxonConverter } from "./TimeOfDayToLuxonConverter";
 
-export { timeOfDayToLuxonConverter } from "./TimeOfDayToLuxonConverter";
-export { dateToLuxonConverter } from "./DateToLuxonConverter";
-export { dateTimeOffsetToLuxonConverter } from "./DateTimeOffsetToLuxonConverter";
-export { durationToLuxonConverter } from "./DurationToLuxonConverter";
-
 const pkg: ConverterPackage = {
   id: "Luxon",
   converters: [
@@ -19,4 +14,6 @@ const pkg: ConverterPackage = {
     durationToLuxonConverter,
   ],
 };
+
 export default pkg;
+export { timeOfDayToLuxonConverter, dateToLuxonConverter, dateTimeOffsetToLuxonConverter, durationToLuxonConverter };

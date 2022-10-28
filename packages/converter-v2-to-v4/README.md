@@ -7,10 +7,11 @@ Thus, other converters only need to take care of the V4 data models.
 
 Conversions:
 * Edm.DateTime => Edm.DateTimeOffset
-* Edm.Time => Edm.TimeOfDay
 * Number types represented as strings => number
+* Edm.Time => Edm.TimeOfDay (or Edm.Duration)
 
 ## Installation
+
 Via npm:
 ```
 npm install --save @odata2ts/converter-v2-to-v4
@@ -28,15 +29,13 @@ Converters are referenced by their package name, so in this case `@odata2ts/conv
 import { ConfigOptions } from "@odata2ts/odata2model";
 
 const config: ConfigOptions = {
-  generation: {
-    converters: ["@odata2ts/converter-v2-to-v4"],
-  },
+  converters: ["@odata2ts/converter-v2-to-v4"],
 };
 
 export default config;
 ```
 
-### Configuration
+### Select Converters
 You can also choose to exactly specify which converters to use instead of automatically integrating all of them.
 Instead of a simple string you specify an object where the converters are listed by their id.
 These converter ids are listed in the "Conversions" table.
@@ -46,7 +45,7 @@ These converter ids are listed in the "Conversions" table.
     converters: [
       {
         module: "@odata2ts/converter-v2-to-v4",
-        use: ["DateTimeToDateTimeOffset", "StringToNumber"],
+        use: ["dateTimeToDateTimeOffsetConverter", "stringToNumberConverter", "timeToDurationConverter"],
       },
     ],
     ...
@@ -54,13 +53,34 @@ These converter ids are listed in the "Conversions" table.
 
 ## Conversions
 
-| OData V2 Type | OData V4 Type      | Converter Id             | Description                                                                                            |
-|---------------|--------------------|:-------------------------|--------------------------------------------------------------------------------------------------------| 
-| Edm.DateTime  | Edm.DateTimeOffset | DateTimeToDateTimeOffset | Converts "/Date(123...)/" to ISO8601 "2022-02-22T12:00:00Z"; offsets are supported "/Date(123..+120)/" |
-| Edm.Byte      | number             | StringToNumber           | fits into JS number                                                                                    |
-| Edm.SByte     | number             | StringToNumber           | fits into JS number                                                                                    |
-| Edm.Int64     | number             | StringToNumber           | might exceed JS number capacity                                                                        |
-| Edm.Single    | number             | StringToNumber           | fits into JS number                                                                                    |
-| Edm.Double    | number             | StringToNumber           | might exceed JS number capacity                                                                        |
-| Edm.Decimal   | number             | StringToNumber           | might exceed JS number capacity                                                                        |
-| Edm.Time      | Edm.TimeOfDay      | TimeToTimeOfDay          |                                                                                                        |
+| OData V2 Type | OData V4 Type      | Converter Id                      | Description                                                                                                |
+|---------------|--------------------|:----------------------------------|------------------------------------------------------------------------------------------------------------| 
+| Edm.DateTime  | Edm.DateTimeOffset | dateTimeToDateTimeOffsetConverter | Converts "/Date(123...)/" to ISO8601 "2022-02-22T12:00:00Z"; offsets are supported "/Date(123..+120)/"     |
+| Edm.Byte      | number             | stringToNumberConverter           | fits into JS number                                                                                        |
+| Edm.SByte     | number             | stringToNumberConverter           | fits into JS number                                                                                        |
+| Edm.Int64     | number             | stringToNumberConverter           | might exceed JS number capacity                                                                            |
+| Edm.Single    | number             | stringToNumberConverter           | fits into JS number                                                                                        |
+| Edm.Double    | number             | stringToNumberConverter           | fits into JS number                                                                                        |
+| Edm.Decimal   | number             | stringToNumberConverter           | might exceed JS number capacity                                                                            |
+| Edm.Time      | Edm.TimeOfDay      | timeToTimeOfDayConverter          | Converts PT12H15M to "12:15:00"                                                                            |
+| Edm.Time      | Edm.Duration       | timeToDurationConverter           | alternative which doesn't convert => Edm.Time has the same format as Edm.Duration; not a default converter |
+
+### Notes on `Edm.Time`
+
+By default `Edm.Time` is converted to `Edm.TimeOfDay`, since that is what I believe the spec intended it to mean.
+However, it can also be used to mean a duration. In that case you could use the `timeToDurationConverter` by 
+selecting converters (see chapter "Select Converters").
+
+`Edm.Time` has an unfortunate definition: On the one hand the spec states that it is intended to represent
+a certain time of a day, but on the other hand it is defined as duration.
+Formally, it adheres to the [ISO8601 duration format](https://en.wikipedia.org/wiki/ISO_8601#Durations), 
+but restricts it to the time part (actually, the formal spec allows for day durations, 
+so that `P12D` (12 days) would be valid, which is not representable as time of day).
+
+However, durations and times are two different things. A duration might span days, weeks, etc. 
+(and Edm.Time nearly correctly restricts this) and a duration only needs to specify one part,
+e.g. PT12S (12 seconds) is a valid duration. In contrast, the time part of an ISO 8601 DateTime format
+requires the specification of hours and minutes as minimum, e.g. "12:15".
+
+I think that these are the reasons why `Edm.Time` was replaced in V4 by `Edm.TimeOfDay` 
+and `Edm.Duration`.
