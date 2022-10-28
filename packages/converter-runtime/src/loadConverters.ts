@@ -36,7 +36,7 @@ async function doLoad(converters: Array<TypeConverterConfig>): Promise<Array<Run
           }
           // use converter list from default export
           else {
-            const candidate = module.default;
+            const candidate = module.config || module.default;
             if (!candidate || typeof candidate.id !== "string" || typeof candidate.converters?.length !== "number") {
               throw new Error(`Default export of loaded module "${conv.module}" doesn't conform to specification!`);
             }
