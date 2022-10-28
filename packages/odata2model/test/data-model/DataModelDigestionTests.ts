@@ -1,5 +1,5 @@
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
-import { getDefaultConfig } from "../../src/evaluateConfig";
+import { getDefaultConfig } from "../../src/defaultConfig";
 import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel";
 import { ODataModelBuilder } from "./builder/ODataModelBuilder";
 

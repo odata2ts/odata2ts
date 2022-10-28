@@ -2,9 +2,8 @@ import { ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { digest } from "../../src/data-model/DataModelDigestionV4";
 import { DataTypes } from "../../src/data-model/DataTypeModel";
-import { getDefaultConfig } from "../../src/evaluateConfig";
+import { getDefaultConfig } from "../../src/defaultConfig";
 import { DigestionOptions } from "../../src/FactoryFunctionModel";
-import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
 import { ODataModelBuilderV4 } from "./builder/v4/ODataModelBuilderV4";
 
 export function createComplexAndEnumTests() {
