@@ -2,13 +2,11 @@ import { ODataVersions } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
 import { Project, SourceFile } from "ts-morph";
 
-import { ConfigFileOptions } from "../../../lib/OptionModel";
+import { ConfigFileOptions, RunOptions, getDefaultConfig } from "../../../src";
 import { DataModel } from "../../../src/data-model/DataModel";
 import { Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
-import { getDefaultConfig } from "../../../src/defaultConfig";
-import { DigesterFunction, DigestionOptions } from "../../../src/FactoryFunctionModel";
+import { DigesterFunction } from "../../../src/FactoryFunctionModel";
 import { generateServices } from "../../../src/generator";
-import { RunOptions } from "../../../src/OptionModel";
 import { ProjectManager } from "../../../src/project/ProjectManager";
 import { FixtureComparator, createFixtureComparator } from "./FixtureComparator";
 

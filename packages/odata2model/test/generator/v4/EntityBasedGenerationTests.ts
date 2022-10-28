@@ -1,6 +1,6 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 
-import { ConfigFileOptions } from "../../../lib/OptionModel";
+import { ConfigFileOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { DigestionOptions } from "../../../src/FactoryFunctionModel";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";

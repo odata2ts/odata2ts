@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "./src";
+import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "@odata2ts/odata2model";
 
 const config: ConfigFileOptions = {
   debug: false,
