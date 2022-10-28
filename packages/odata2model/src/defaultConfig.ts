@@ -1,6 +1,7 @@
 import deepmerge from "deepmerge";
 
-import { EmitModes, Modes, NamingStrategies, RunOptions } from "./OptionModel";
+import { NamingStrategies } from "./NamingModel";
+import { EmitModes, Modes, RunOptions } from "./OptionModel";
 
 /**
  * The default configuration.
@@ -11,30 +12,32 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
   debug: false,
   prettier: false,
   converters: [],
-  models: {
-    namingStrategy: NamingStrategies.PASCAL_CASE,
-    propNamingStrategy: NamingStrategies.CAMEL_CASE,
-  },
-  editableModels: {
-    skip: false,
-    prefix: "Editable",
-    applyModelNaming: true,
-  },
-  idModels: {
-    skip: false,
-    suffix: "Id",
-    applyModelNaming: true,
-  },
-  queryObjects: {
-    namingStrategy: NamingStrategies.PASCAL_CASE,
-    propNamingStrategy: NamingStrategies.CAMEL_CASE,
-    prefix: "Q",
-  },
-  operations: {
-    skip: false,
-    namingStrategy: NamingStrategies.PASCAL_CASE,
-    paramModel: {
-      namingStrategy: NamingStrategies.CAMEL_CASE,
+  skipEditableModels: false,
+  skipIdModels: false,
+  skipOperations: false,
+  naming: {
+    models: {
+      namingStrategy: NamingStrategies.PASCAL_CASE,
+      propNamingStrategy: NamingStrategies.CAMEL_CASE,
+    },
+    editableModels: {
+      prefix: "Editable",
+      applyModelNaming: true,
+    },
+    idModels: {
+      suffix: "Id",
+      applyModelNaming: true,
+    },
+    queryObjects: {
+      namingStrategy: NamingStrategies.PASCAL_CASE,
+      propNamingStrategy: NamingStrategies.CAMEL_CASE,
+      prefix: "Q",
+    },
+    operations: {
+      namingStrategy: NamingStrategies.PASCAL_CASE,
+      paramModel: {
+        namingStrategy: NamingStrategies.CAMEL_CASE,
+      },
     },
   },
   propertyTypes: [],

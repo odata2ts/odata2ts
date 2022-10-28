@@ -54,10 +54,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   protected getModelName(name: string, typeSuffix?: string): string {
     return (
-      (this.options.models.prefix || "") +
+      (this.options.naming.models?.prefix || "") +
       pascalCase(this.stripServicePrefix(name)) +
       (typeSuffix || "") +
-      (this.options.models.suffix || "")
+      (this.options.naming.models?.suffix || "")
     );
   }
 

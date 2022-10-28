@@ -32,7 +32,7 @@ class QueryObjectGenerator {
     const importContainer = new ImportContainer(this.dataModel.getFileNames());
 
     this.generateModels(importContainer);
-    if (!this.options.operations.skip) {
+    if (!this.options.skipOperations) {
       this.generateUnboundOperations(importContainer);
     }
 
@@ -42,10 +42,10 @@ class QueryObjectGenerator {
   private generateModels(importContainer: ImportContainer) {
     this.dataModel.getModels().forEach((model) => {
       this.generateModel(model, importContainer);
-      if (!this.options.idModels.skip) {
+      if (!this.options.skipIdModels) {
         this.generateIdFunction(model, importContainer);
       }
-      if (!this.options.operations.skip) {
+      if (!this.options.skipOperations) {
         this.generateBoundOperations(model.name, importContainer);
       }
     });

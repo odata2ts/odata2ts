@@ -43,7 +43,7 @@ describe("Model Generator Tests V2", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("minFunction", "operation-min.ts", { operations: { skip: false } });
+    await generateAndCompare("minFunction", "operation-min.ts");
   });
 
   test(`${TEST_SUITE_NAME}: max function param model`, async () => {
@@ -60,6 +60,6 @@ describe("Model Generator Tests V2", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("maxFunction", "operation-max.ts", { operations: { skip: false } });
+    await generateAndCompare("maxFunction", "operation-max.ts");
   });
 });
