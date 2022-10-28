@@ -4,7 +4,7 @@ import fsExtra from "fs-extra";
 
 import * as app from "../src/app";
 import { Cli } from "../src/cli";
-import { getDefaultConfig } from "../src/evaluateConfig";
+import { getDefaultConfig } from "../src/defaultConfig";
 import { CliOptions, ConfigFileOptions, EmitModes, Modes, RunOptions } from "../src/OptionModel";
 
 jest.mock("fs-extra");

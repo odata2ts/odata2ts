@@ -1,5 +1,5 @@
 import { runApp } from "../src/app";
-import { getDefaultConfig } from "../src/evaluateConfig";
+import { getDefaultConfig } from "../src/defaultConfig";
 import * as Generator from "../src/generator";
 import { EmitModes, Modes, RunOptions } from "../src/OptionModel";
 import * as ProjectManager from "../src/project/ProjectManager";
