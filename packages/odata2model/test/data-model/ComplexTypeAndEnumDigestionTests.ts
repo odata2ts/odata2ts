@@ -2,7 +2,8 @@ import { ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { digest } from "../../src/data-model/DataModelDigestionV4";
 import { DataTypes } from "../../src/data-model/DataTypeModel";
-import { EmitModes, Modes, RunOptions } from "../../src/OptionModel";
+import { getDefaultConfig } from "../../src/defaultConfig";
+import { DigestionOptions } from "../../src/FactoryFunctionModel";
 import { ODataModelBuilderV4 } from "./builder/v4/ODataModelBuilderV4";
 
 export function createComplexAndEnumTests() {
@@ -10,7 +11,7 @@ export function createComplexAndEnumTests() {
   const ENTITY_NAME = "Product";
 
   let odataBuilder: ODataModelBuilderV4;
-  let runOpts: RunOptions;
+  let runOpts: DigestionOptions = getDefaultConfig();
 
   function doDigest() {
     return digest(odataBuilder.getSchema(), runOpts);
@@ -18,15 +19,6 @@ export function createComplexAndEnumTests() {
 
   beforeEach(() => {
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
-    runOpts = {
-      mode: Modes.all,
-      emitMode: EmitModes.js_dts,
-      output: "ignore",
-      prettier: false,
-      debug: false,
-      modelPrefix: "",
-      modelSuffix: "",
-    };
   });
 
   test("EnumType: enum type", async () => {

@@ -1,41 +1,39 @@
-import { ConfigFileOptions } from "./src/OptionModel";
+import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "./src/OptionModel";
 
 const config: ConfigFileOptions = {
-  mode: "all",
   debug: false,
+  mode: Modes.service,
+  emitMode: EmitModes.ts,
   prettier: true,
-  emitMode: "ts",
-  modelSuffix: "Model",
-  generation: {
-    model: {
-      suffix: "Model",
+  models: {
+    suffix: "Model",
+  },
+  idModels: {
+    suffix: "Key",
+  },
+  queryObjects: {
+    namingStrategy: NamingStrategies.CONSTANT_CASE,
+    suffix: "QueryObject",
+  },
+  services: {
+    odata: {
+      source: "int-test/fixture/v2/odata.xml",
+      output: "build/v2/odata",
     },
-    idModel: {
-      suffix: "IdModel",
-    },
-    custom: {
+    trippin: {
+      // serviceName: "TrippinService",
+      source: "int-test/fixture/v4/trippin.xml",
+      output: "build/v4/trippin",
       propertyTypes: [
         {
           name: "ID",
           mappedName: "id",
           managed: true,
         },
-        {
-          name: "createdAt",
+        ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({
+          name: prop,
           managed: true,
-        },
-        {
-          name: "createdBy",
-          managed: true,
-        },
-        {
-          name: "modifiedAt",
-          managed: true,
-        },
-        {
-          name: "modifiedBy",
-          managed: true,
-        },
+        })),
       ],
       modelTypes: [
         {
@@ -49,6 +47,14 @@ const config: ConfigFileOptions = {
           ],
         },
       ],
+    },
+    nw2: {
+      source: "int-test/fixture/v2/northwind.xml",
+      output: "build/v2/northwind",
+    },
+    nw4: {
+      source: "int-test/fixture/v4/northwind.xml",
+      output: "build/v4/northwind",
     },
   },
 };

@@ -1,37 +1,29 @@
 import { ODataVersions } from "@odata2ts/odata-core";
+import deepmerge from "deepmerge";
 import { Project, SourceFile } from "ts-morph";
 
 import { DataModel } from "../../../src/data-model/DataModel";
 import { Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
-import { DigesterFunction } from "../../../src/FactoryFunctionModel";
+import { getDefaultConfig } from "../../../src/defaultConfig";
+import { DigesterFunction, DigestionOptions } from "../../../src/FactoryFunctionModel";
 import { generateServices } from "../../../src/generator";
-import { GenerationOptions, RunOptions } from "../../../src/OptionModel";
-import { EmitModes, Modes } from "../../../src/OptionModel";
+import { RunOptions } from "../../../src/OptionModel";
 import { ProjectManager } from "../../../src/project/ProjectManager";
 import { FixtureComparator, createFixtureComparator } from "./FixtureComparator";
 
 export type EntityBasedGeneratorFunctionWithoutVersion = (
   dataModel: DataModel,
   sourceFile: SourceFile,
-  options: GenerationOptions
+  options: RunOptions
 ) => void;
 
 const project: Project = new Project({ skipAddingFilesFromTsConfig: true });
 
-const DEFAULT_RUN_OPTIONS: RunOptions = {
-  mode: Modes.all,
-  emitMode: EmitModes.js_dts,
-  output: "ignore",
-  prettier: false,
-  debug: false,
-  modelPrefix: "",
-  modelSuffix: "",
-  generation: {
-    skipIdModel: true,
-    skipEditableModel: true,
-    skipOperationModel: false,
-  },
-};
+const DEFAULT_RUN_OPTIONS = deepmerge(getDefaultConfig(), {
+  idModels: { skip: true },
+  editableModels: { skip: true },
+  operations: { skip: false },
+}) as RunOptions;
 
 export const createHelper = async (
   fixtureBasePath: string,
@@ -53,18 +45,13 @@ export class FixtureComparatorHelper {
     id: string,
     fixturePath: string,
     schema: Schema<any, any>,
-    options?: GenerationOptions
+    options?: Partial<DigestionOptions>
   ) {
     const sourceFile = project.createSourceFile(id);
-    const mergedOpts = options
-      ? { ...DEFAULT_RUN_OPTIONS, generation: { ...DEFAULT_RUN_OPTIONS.generation, ...options } }
-      : DEFAULT_RUN_OPTIONS;
+    const mergedOpts = options ? (deepmerge(DEFAULT_RUN_OPTIONS, options) as RunOptions) : DEFAULT_RUN_OPTIONS;
     const dataModel = await this.digest(schema, mergedOpts);
 
-    const genOptions: GenerationOptions | undefined = options
-      ? { ...DEFAULT_RUN_OPTIONS.generation, ...options }
-      : DEFAULT_RUN_OPTIONS.generation;
-    this.generate(dataModel, sourceFile, genOptions || {});
+    this.generate(dataModel, sourceFile, mergedOpts);
 
     const result = sourceFile.getFullText().trim();
     await this.comparator.compareWithFixture(result, fixturePath);

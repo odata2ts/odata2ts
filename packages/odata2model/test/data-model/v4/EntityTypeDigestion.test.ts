@@ -2,32 +2,23 @@ import { ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { DataTypes } from "../../../src/data-model/DataTypeModel";
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
+import { getDefaultConfig } from "../../../src/defaultConfig";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 const NOOP_FN = () => {};
 
 describe("V2: EntityTypeDigestion Test", () => {
   const SERVICE_NAME = "Tester";
+  const CONFIG = getDefaultConfig();
 
   let odataBuilder: ODataModelBuilderV4;
-  let runOpts: RunOptions;
 
   function doDigest() {
-    return digest(odataBuilder.getSchema(), runOpts);
+    return digest(odataBuilder.getSchema(), CONFIG);
   }
 
   beforeEach(() => {
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
-    runOpts = {
-      mode: Modes.all,
-      emitMode: EmitModes.js_dts,
-      output: "ignore",
-      prettier: false,
-      debug: false,
-      modelPrefix: "",
-      modelSuffix: "",
-    };
   });
 
   test("EntityTypes: simple entity", async () => {
@@ -201,7 +192,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         .addProp("multipleDateTimes", `Collection(${ODataTypesV4.DateTimeOffset})`)
         .addProp("multipleBinaries", `Collection(${ODataTypesV4.Binary})`)
     );
-    const result = await digest(odataBuilder.getSchema(), runOpts);
+    const result = await doDigest();
 
     // now check all props regarding their type
     const model = result.getModel("Max");
@@ -410,7 +401,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         builder.addKeyProp("ID", ODataTypesV4.Guid);
       });
 
-    const result = await digest(odataBuilder.getSchema(), runOpts);
+    const result = await doDigest();
     const model = result.getModel("Category");
 
     expect(model.props[1]).toMatchObject({
@@ -448,7 +439,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         builder.addKeyProp("ID", ODataTypesV4.Guid);
       });
 
-    const result = await digest(odataBuilder.getSchema(), runOpts);
+    const result = await doDigest();
 
     expect(result.getModels().length).toBe(3);
   });

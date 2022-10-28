@@ -2,32 +2,23 @@ import { ODataTypesV2 } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { DataTypes, PropertyModel } from "../../../src/data-model/DataTypeModel";
-import { EmitModes, Modes, RunOptions } from "../../../src/OptionModel";
+import { getDefaultConfig } from "../../../src/defaultConfig";
 import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
 
 const NOOP_FN = () => {};
 
 describe("V2: EntityTypeDigestion Test", () => {
   const SERVICE_NAME = "Tester";
+  const CONFIG = getDefaultConfig();
 
   let odataBuilder: ODataModelBuilderV2;
-  let runOpts: RunOptions;
 
   function doDigest() {
-    return digest(odataBuilder.getSchema(), runOpts);
+    return digest(odataBuilder.getSchema(), CONFIG);
   }
 
   beforeEach(() => {
     odataBuilder = new ODataModelBuilderV2(SERVICE_NAME);
-    runOpts = {
-      mode: Modes.all,
-      emitMode: EmitModes.js_dts,
-      output: "ignore",
-      prettier: false,
-      debug: false,
-      modelPrefix: "",
-      modelSuffix: "",
-    };
   });
 
   test("EntityTypes: simple entity", async () => {
@@ -213,7 +204,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         .addProp("multipleDateTimeOffsets", `Collection(${ODataTypesV2.DateTimeOffset})`)
         .addProp("multipleBinaries", `Collection(${ODataTypesV2.Binary})`)
     );
-    const result = await digest(odataBuilder.getSchema(), runOpts);
+    const result = await doDigest();
 
     // now check all props regarding their type
     const model = result.getModel("Max");
@@ -431,7 +422,7 @@ describe("V2: EntityTypeDigestion Test", () => {
           .addNavProp("products", `${SERVICE_NAME}.Product`, relationshipSupp, "*")
       );
 
-    const result = await digest(odataBuilder.getSchema(), runOpts);
+    const result = await doDigest();
 
     expect(result.getModels().length).toBe(3);
 

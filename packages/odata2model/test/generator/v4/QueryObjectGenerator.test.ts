@@ -1,8 +1,8 @@
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
+import { DigestionOptions } from "../../../src/FactoryFunctionModel";
 import { generateQueryObjects } from "../../../src/generator";
-import { GenerationOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import {
   EntityBasedGeneratorFunctionWithoutVersion,
@@ -25,7 +25,7 @@ describe("Query Object Generator Tests V4", () => {
 
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, GENERATE);
 
-  async function generateAndCompare(id: string, fixturePath: string, genOptions?: GenerationOptions) {
+  async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<DigestionOptions>) {
     await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), genOptions);
   }
 

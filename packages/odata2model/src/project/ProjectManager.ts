@@ -1,4 +1,5 @@
 import * as path from "path";
+
 import { emptyDir, remove, writeFile } from "fs-extra";
 import { Project, SourceFile } from "ts-morph";
 
@@ -109,6 +110,8 @@ export class ProjectManager {
       case EmitModes.ts:
         await this.emitTsFiles();
         break;
+      default:
+        throw new Error(`Emit mode "${this.emitMode}" is invalid!`);
     }
   }
 
@@ -128,10 +131,7 @@ export class ProjectManager {
 
   private async emitTsFiles() {
     const files = [this.getModelFile(), this.getQObjectFile(), this.getMainServiceFile(), ...this.getServiceFiles()];
-    console.log(
-      "Emitting TS files: ",
-      files.filter((f) => !!f).map((f) => logFilePath(f.getFilePath()))
-    );
+    console.log(`Emitting ${files.length} TS files`);
     return Promise.all([...files.filter((file) => !!file).map(this.formatAndWriteFile)]);
   }
 

@@ -18,21 +18,6 @@ function isServiceGen(mode: Modes) {
 }
 
 /**
- * Modifies generation options in place.
- * @param options
- */
-function safeGuardGenerationOptions(options: RunOptions): void {
-  if (options.generation && isServiceGen(options.mode)) {
-    options.generation = {
-      ...options.generation,
-      skipEditableModel: false,
-      skipIdModel: false,
-      skipOperationModel: false,
-    };
-  }
-}
-
-/**
  *
  * @param metadataJson metadata of a given OData service already parsed as JSON
  * @param options further options
@@ -54,10 +39,6 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
     {} as Schema<any, any>
   );
 
-  // safeguard generation options, depending on generation mode
-  // => options are directly modified
-  safeGuardGenerationOptions(options);
-
   // parse model information from edmx into something we can really work with
   // => that stuff is called dataModel!
   const dataModel =
@@ -75,14 +56,14 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   // Generate Model Interfaces
   // supported edmx types: EntityType, ComplexType, EnumType
   const modelsFile = await project.createModelFile();
-  generateModels(dataModel, modelsFile, version, options.generation);
+  generateModels(dataModel, modelsFile, version, options);
 
   // Generate Query Objects
   // supported edmx types: EntityType, ComplexType
   // supported edmx prop types: primitive types, enum types, primitive collection (incl enum types), entity collection, entity object, complex object
   if (isQObjectGen(options.mode)) {
     const qFile = await project.createQObjectFile();
-    generateQueryObjects(dataModel, qFile, version, options.generation);
+    generateQueryObjects(dataModel, qFile, version, options);
   }
 
   // Generate Individual OData-Service

@@ -1,7 +1,8 @@
-import { EmitModes, Modes, RunOptions } from "../src/OptionModel";
 import { runApp } from "../src/app";
-import * as ProjectManager from "../src/project/ProjectManager";
+import { getDefaultConfig } from "../src/defaultConfig";
 import * as Generator from "../src/generator";
+import { EmitModes, Modes, RunOptions } from "../src/OptionModel";
+import * as ProjectManager from "../src/project/ProjectManager";
 import { ODataModelBuilderV4 } from "./data-model/builder/v4/ODataModelBuilderV4";
 
 jest.mock("fs-extra");
@@ -35,13 +36,13 @@ describe("App Test", () => {
 
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
     runOptions = {
+      ...getDefaultConfig(),
       mode: Modes.models,
       emitMode: EmitModes.ts,
+      source: "ignore",
       output: "ignore",
       prettier: false,
       debug: false,
-      modelPrefix: "",
-      modelSuffix: "",
     };
   });
 

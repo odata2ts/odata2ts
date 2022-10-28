@@ -1,6 +1,5 @@
 import { ValueConverterImport } from "@odata2ts/converter-runtime";
 import { ODataVersions } from "@odata2ts/odata-core";
-import { camelCase } from "camel-case";
 import { OptionalKind, PropertyDeclarationStructure, Scope, SourceFile, VariableDeclarationKind } from "ts-morph";
 import { firstCharLowerCase } from "xml2js/lib/processors";
 
@@ -13,8 +12,7 @@ import {
   OperationTypes,
   PropertyModel,
 } from "../data-model/DataTypeModel";
-import { EntityBasedGeneratorFunction } from "../FactoryFunctionModel";
-import { GenerationOptions } from "../OptionModel";
+import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel";
 import { ImportContainer } from "./ImportContainer";
 
 export const generateQueryObjects: EntityBasedGeneratorFunction = (dataModel, sourceFile, version, options) => {
@@ -27,14 +25,14 @@ class QueryObjectGenerator {
     private dataModel: DataModel,
     private sourceFile: SourceFile,
     private version: ODataVersions,
-    private options: GenerationOptions | undefined
+    private options: GeneratorFunctionOptions
   ) {}
 
   public generate(): void {
     const importContainer = new ImportContainer(this.dataModel.getFileNames());
 
     this.generateModels(importContainer);
-    if (!this.options?.skipOperationModel) {
+    if (!this.options.operations.skip) {
       this.generateUnboundOperations(importContainer);
     }
 
@@ -44,10 +42,10 @@ class QueryObjectGenerator {
   private generateModels(importContainer: ImportContainer) {
     this.dataModel.getModels().forEach((model) => {
       this.generateModel(model, importContainer);
-      if (!this.options?.skipIdModel) {
+      if (!this.options.idModels.skip) {
         this.generateIdFunction(model, importContainer);
       }
-      if (!this.options?.skipOperationModel) {
+      if (!this.options.operations.skip) {
         this.generateBoundOperations(model.name, importContainer);
       }
     });
