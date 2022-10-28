@@ -1,7 +1,7 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { getDefaultConfig } from "../../../src/evaluateConfig";
+import { getDefaultConfig } from "../../../src/defaultConfig";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 describe("EntitySet Digestion Test", () => {

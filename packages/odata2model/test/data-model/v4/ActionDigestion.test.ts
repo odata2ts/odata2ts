@@ -2,7 +2,7 @@ import { ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
-import { getDefaultConfig } from "../../../src/evaluateConfig";
+import { getDefaultConfig } from "../../../src/defaultConfig";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 describe("Action Digestion Test", () => {

@@ -1,4 +1,5 @@
-import { evaluateConfigOptions, getDefaultConfig } from "../src/evaluateConfig";
+import { getDefaultConfig } from "../lib/evaluateConfig";
+import { evaluateConfigOptions } from "../src/evaluateConfig";
 import { CliOptions, ConfigFileOptions, EmitModes, Modes } from "../src/OptionModel";
 
 describe("Config Evaluation Tests", () => {

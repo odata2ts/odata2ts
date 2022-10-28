@@ -3,7 +3,7 @@ import { ODataTypesV2 } from "@odata2ts/odata-core";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
 import { OperationType } from "../../../src/data-model/DataTypeModel";
-import { getDefaultConfig } from "../../../src/evaluateConfig";
+import { getDefaultConfig } from "../../../src/defaultConfig";
 import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
 
 describe("Function Digestion Test", () => {

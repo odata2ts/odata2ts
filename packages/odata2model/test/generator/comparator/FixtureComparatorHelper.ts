@@ -4,7 +4,7 @@ import { Project, SourceFile } from "ts-morph";
 
 import { DataModel } from "../../../src/data-model/DataModel";
 import { Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
-import { getDefaultConfig } from "../../../src/evaluateConfig";
+import { getDefaultConfig } from "../../../src/defaultConfig";
 import { DigesterFunction, DigestionOptions } from "../../../src/FactoryFunctionModel";
 import { generateServices } from "../../../src/generator";
 import { RunOptions } from "../../../src/OptionModel";

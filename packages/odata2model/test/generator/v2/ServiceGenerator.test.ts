@@ -4,7 +4,7 @@ import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 
 import { ProjectFiles } from "../../../src/data-model/DataModel";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { getDefaultConfig } from "../../../src/evaluateConfig";
+import { getDefaultConfig } from "../../../src/defaultConfig";
 import { DigestionOptions } from "../../../src/FactoryFunctionModel";
 import { generateServices } from "../../../src/generator";
 import { EmitModes } from "../../../src/OptionModel";
