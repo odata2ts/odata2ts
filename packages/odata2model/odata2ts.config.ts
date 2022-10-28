@@ -1,20 +1,10 @@
-import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "./src/OptionModel";
+import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "./src";
 
 const config: ConfigFileOptions = {
   debug: false,
   mode: Modes.service,
   emitMode: EmitModes.ts,
   prettier: true,
-  models: {
-    suffix: "Model",
-  },
-  idModels: {
-    suffix: "Key",
-  },
-  queryObjects: {
-    namingStrategy: NamingStrategies.CONSTANT_CASE,
-    suffix: "QueryObject",
-  },
   services: {
     odata: {
       source: "int-test/fixture/v2/odata.xml",
@@ -55,6 +45,18 @@ const config: ConfigFileOptions = {
     nw4: {
       source: "int-test/fixture/v4/northwind.xml",
       output: "build/v4/northwind",
+    },
+  },
+  naming: {
+    models: {
+      suffix: "Model",
+    },
+    idModels: {
+      suffix: "Key",
+    },
+    queryObjects: {
+      namingStrategy: NamingStrategies.CONSTANT_CASE,
+      suffix: "QueryObject",
     },
   },
 };
