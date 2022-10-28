@@ -1,4 +1,4 @@
-import { getDefaultConfig } from "../lib/evaluateConfig";
+import { getDefaultConfig } from "../src/defaultConfig";
 import { evaluateConfigOptions } from "../src/evaluateConfig";
 import { CliOptions, ConfigFileOptions, EmitModes, Modes } from "../src/OptionModel";
 
