@@ -1,5 +1,7 @@
 import { TypeConverterConfig } from "@odata2ts/converter-runtime";
 
+import { NamingOptions } from "./NamingModel";
+
 /**
  * Generation mode, by default "all".
  */
@@ -18,13 +20,6 @@ export enum EmitModes {
   js = "js",
   dts = "dts",
   js_dts = "js_dts",
-}
-
-export enum NamingStrategies {
-  NONE = "",
-  PASCAL_CASE = "pascalCase",
-  CAMEL_CASE = "camelCase",
-  CONSTANT_CASE = "constantCase",
 }
 
 /**
@@ -94,6 +89,8 @@ export interface RunOptions extends Required<Omit<ServiceGenerationOptions, "ser
  * Available options for configuration files, i.e. odata2ts.config.ts.
  */
 export interface ConfigFileOptions extends Omit<CliOptions, "source" | "output" | "services"> {
+  services?: { [serviceName: string]: ServiceGenerationOptions };
+
   /**
    * Specify which converters to use by their package name, e.g. "@odata2ts/converter-v2-to-v4".
    * Each converter knows which data type to map.
@@ -104,28 +101,13 @@ export interface ConfigFileOptions extends Omit<CliOptions, "source" | "output" 
   converters?: Array<string | TypeConverterConfig>;
 
   /**
-   * Generation options for models, i.e. interfaces representing entity or complex types.
-   */
-  models?: EntityBasedNamingOptions;
-
-  /**
-   * Generation options for Query Objects.
-   *
-   * By default, prefix = "Q"
-   */
-  queryObjects?: EntityBasedNamingOptions;
-
-  /**
    * For each model an editable version is generated which represents the model definition for
    * create, update and patch actions.
    *
    * You can skip the generation altogether, not generating editable model variants,
    * if the generation mode is {@code Mode.model} or {@code Mode.qobject}.
-   *
-   * You can also configure some naming options.
-   * By default, prefix = "Editable"
    */
-  editableModels?: SkipAndNamingOptions;
+  skipEditableModels?: boolean;
 
   /**
    * ID models are generated from entity id parameters.
@@ -135,12 +117,8 @@ export interface ConfigFileOptions extends Omit<CliOptions, "source" | "output" 
    *
    * You can skip the generation altogether, not generating models and QId objects, if the
    * generation mode is {@code Mode.model} or {@code Mode.qobject}.
-   *
-   * You can also configure some naming options.
-   * By default, suffix = "Id"
    */
-  idModels?: SkipAndNamingOptions;
-
+  skipIdModels?: boolean;
   /**
    * Operations are functions and actions of the OData service.
    * The generation for one operation entails one parameter model interface
@@ -148,67 +126,10 @@ export interface ConfigFileOptions extends Omit<CliOptions, "source" | "output" 
    *
    * You can skip the generation altogether, neither generating model nor query object,
    * if the generation mode is {@code Mode.model} or {@code Mode.qobject}.
-   *
-   * You can also configure some naming options.
-   * By default, prefix = "Editable"
    */
-  operations?: OperationNamingOptions;
+  skipOperations?: boolean;
 
-  services?: { [serviceName: string]: ServiceGenerationOptions };
-}
-
-export interface EntityBasedNamingOptions extends NamingStrategyOption, StandardNamingOptions {
-  /**
-   * Choose a specific strategy to format property names of models: pascal-case, camel-case, etc.
-   * By default, camel-case.
-   */
-  propNamingStrategy?: NamingStrategies;
-}
-
-export interface SkipAndNamingOptions extends StandardNamingOptions {
-  skip?: boolean;
-  applyModelNaming?: boolean;
-}
-
-export interface OperationNamingOptions extends NamingStrategyOption, StandardNamingOptions {
-  skip?: boolean;
-  /**
-   * Naming options for generated models representing parameters for functions or actions.
-   * Operation name is always used and must be suffixed or prefixed.
-   * By default, suffix = "Params"
-   */
-  paramModel?: NamingStrategyOption & StandardNamingOptions;
-  /**
-   * Naming options for actions only.
-   * When this configuration is provided, the parent configuration regarding suffix and prefix is ignored.
-   * By default, parent configuration.
-   */
-  action?: StandardNamingOptions;
-  /**
-   * Naming options for functions.
-   * When this configuration is provided, the parent configuration regarding suffix and prefix is ignored.
-   * By default, parent configuration.
-   */
-  function?: StandardNamingOptions;
-}
-
-export interface NamingStrategyOption {
-  /**
-   * Choose a specific strategy to format model names: pascal-case, camel-case, etc.
-   * Defaults to pascal-case.
-   */
-  namingStrategy?: NamingStrategies;
-}
-
-export interface StandardNamingOptions {
-  /**
-   * Prefix all names, e.g. "I" => "ITest"
-   */
-  prefix?: string;
-  /**
-   * Suffix all names, e.g. "model" => "TestModel"
-   */
-  suffix?: string;
+  naming?: NamingOptions;
 }
 
 /**

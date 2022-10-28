@@ -60,8 +60,8 @@ export function createEntityBasedGenerationTests(
     // when generating model
     // then match fixture text
     await generateAndCompare("complexTypeEdit", "complex-editable.ts", {
-      idModels: { skip: false },
-      editableModels: { skip: false },
+      skipIdModels: false,
+      skipEditableModels: false,
     });
   });
 
@@ -109,8 +109,8 @@ export function createEntityBasedGenerationTests(
     // when generating model
     // then match fixture text
     await generateAndCompare("oneMaxModel", "entity-max-v2.ts", {
-      idModels: { skip: false },
-      editableModels: { skip: false },
+      skipIdModels: false,
+      skipEditableModels: false,
     });
   });
 
@@ -145,8 +145,8 @@ export function createEntityBasedGenerationTests(
     // when generating model
     // then match fixture text
     await generateAndCompare("baseClass", "entity-hierarchy.ts", {
-      idModels: { skip: false },
-      editableModels: { skip: false },
+      skipIdModels: false,
+      skipEditableModels: false,
     });
   });
 

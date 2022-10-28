@@ -1,5 +1,6 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 
+import { ConfigFileOptions } from "../../../lib/OptionModel";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { DigestionOptions } from "../../../src/FactoryFunctionModel";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
@@ -12,9 +13,9 @@ import {
 export const SERVICE_NAME = "Tester";
 export const ENTITY_NAME = "Book";
 
-const USE_ID_AND_EDITABLE_MODEL = {
-  idModels: { skip: false },
-  editableModels: { skip: false },
+const USE_ID_AND_EDITABLE_MODEL: ConfigFileOptions = {
+  skipIdModels: false,
+  skipEditableModels: false,
 };
 
 export function createEntityBasedGenerationTests(

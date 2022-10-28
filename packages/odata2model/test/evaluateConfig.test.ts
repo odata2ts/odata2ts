@@ -47,26 +47,21 @@ describe("Config Evaluation Tests", () => {
   });
 
   test("with config file opts", () => {
-    const { prettier, models, idModels } = defaultConfig;
+    const { prettier } = defaultConfig;
     const minOpts: CliOptions = { source: "source", output: "output" };
-    const opts: ConfigFileOptions = { debug: true, mode: Modes.qobjects, idModels: { skip: true, prefix: "T" } };
+    const opts: ConfigFileOptions = { debug: true, mode: Modes.qobjects, skipIdModels: true, converters: ["test"] };
     const result = evaluateConfigOptions(minOpts, opts);
 
     expect(result.length).toBe(1);
     expect(result[0]).toMatchObject({
       ...minOpts,
-      models,
       prettier,
-    });
-    expect(result[0].idModels).toStrictEqual({
-      ...idModels,
-      skip: true,
-      prefix: "T",
+      ...opts,
     });
   });
 
   test("fail with config but without source or output", () => {
-    const opts: ConfigFileOptions = { debug: true, mode: Modes.qobjects, idModels: { skip: true, prefix: "T" } };
+    const opts: ConfigFileOptions = { debug: true, mode: Modes.qobjects };
     expect(() => evaluateConfigOptions({}, opts)).toThrow(
       "No services were configured in config file, so options --source and --output must be specified!"
     );
@@ -194,17 +189,19 @@ describe("Config Evaluation Tests", () => {
     const cliOpts: CliOptions = { source: "source", output: "output" };
     const opts: ConfigFileOptions = {
       mode: Modes.service,
-      idModels: { skip: true },
-      editableModels: { skip: true },
-      operations: { skip: true },
+      debug: true,
+      skipEditableModels: true,
+      skipIdModels: true,
+      skipOperations: true,
     };
     const result = evaluateConfigOptions(cliOpts, opts);
 
     expect(result.length).toBe(1);
     expect(result[0]).toMatchObject({
-      idModels: { skip: false },
-      editableModels: { skip: false },
-      operations: { skip: false },
+      debug: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      skipOperations: false,
     });
   });
 });

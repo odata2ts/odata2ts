@@ -6,10 +6,7 @@ import { DataModel } from "./data-model/DataModel";
 import { Schema } from "./data-model/edmx/ODataEdmxModelBase";
 import { RunOptions } from "./OptionModel";
 
-export type DigestionOptions = Pick<
-  RunOptions,
-  "converters" | "serviceName" | "models" | "editableModels" | "idModels" | "operations"
->;
+export type DigestionOptions = Pick<RunOptions, "converters" | "serviceName" | "naming">;
 
 /**
  * Takes an EdmxSchema plus the run options and creates a DataModel.
@@ -20,7 +17,7 @@ export type DigesterFunction<S extends Schema<any, any>> = (
   converters?: MappedConverterChains
 ) => Promise<DataModel>;
 
-export type GeneratorFunctionOptions = Pick<RunOptions, "models" | "editableModels" | "idModels" | "operations">;
+export type GeneratorFunctionOptions = Pick<RunOptions, "skipEditableModels" | "skipIdModels" | "skipOperations">;
 
 export type EntityBasedGeneratorFunction = (
   dataModel: DataModel,

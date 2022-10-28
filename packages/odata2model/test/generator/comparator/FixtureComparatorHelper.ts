@@ -2,6 +2,7 @@ import { ODataVersions } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
 import { Project, SourceFile } from "ts-morph";
 
+import { ConfigFileOptions } from "../../../lib/OptionModel";
 import { DataModel } from "../../../src/data-model/DataModel";
 import { Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
 import { getDefaultConfig } from "../../../src/defaultConfig";
@@ -20,9 +21,9 @@ export type EntityBasedGeneratorFunctionWithoutVersion = (
 const project: Project = new Project({ skipAddingFilesFromTsConfig: true });
 
 const DEFAULT_RUN_OPTIONS = deepmerge(getDefaultConfig(), {
-  idModels: { skip: true },
-  editableModels: { skip: true },
-  operations: { skip: false },
+  skipIdModels: true,
+  skipEditableModels: true,
+  skipOperations: false,
 }) as RunOptions;
 
 export const createHelper = async (
@@ -45,7 +46,7 @@ export class FixtureComparatorHelper {
     id: string,
     fixturePath: string,
     schema: Schema<any, any>,
-    options?: Partial<DigestionOptions>
+    options?: ConfigFileOptions
   ) {
     const sourceFile = project.createSourceFile(id);
     const mergedOpts = options ? (deepmerge(DEFAULT_RUN_OPTIONS, options) as RunOptions) : DEFAULT_RUN_OPTIONS;

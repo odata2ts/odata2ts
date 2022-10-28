@@ -72,9 +72,9 @@ export function evaluateConfigOptions(
  */
 function safeGuardSkippingOptions(options: RunOptions): RunOptions {
   if (options.mode === Modes.service || options.mode === Modes.all) {
-    options.editableModels.skip = false;
-    options.idModels.skip = false;
-    options.operations.skip = false;
+    options.skipEditableModels = false;
+    options.skipIdModels = false;
+    options.skipOperations = false;
   }
 
   return options;

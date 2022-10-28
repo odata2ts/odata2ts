@@ -44,7 +44,7 @@ describe("Query Object Generator Tests V2", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("minFunction", "function-min-v2.ts", { operations: { skip: false } });
+    await generateAndCompare("minFunction", "function-min-v2.ts");
   });
 
   test(`${TEST_SUITE_NAME}: max function param model`, async () => {
@@ -64,7 +64,6 @@ describe("Query Object Generator Tests V2", () => {
     // then match fixture text
     await generateAndCompare("maxFunction", "function-max-v2.ts", {
       converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
-      operations: { skip: false },
     });
   });
 });
