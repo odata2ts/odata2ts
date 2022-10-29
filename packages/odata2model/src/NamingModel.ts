@@ -14,14 +14,24 @@ export interface NamingOptions {
   /**
    * Generation options for models, i.e. interfaces representing entity or complex types.
    */
-  models?: EntityBasedNamingOptions;
+  models?: ModelNamingOptions;
 
   /**
    * Generation options for Query Objects.
    *
    * By default, prefix = "Q"
    */
-  queryObjects?: EntityBasedNamingOptions;
+  queryObjects?: QueryObjectNamingOptions;
+
+  services?: ServiceNamingOptions;
+}
+
+export interface ModelNamingOptions extends NamingStrategyOption, StandardNamingOptions {
+  /**
+   * Choose a specific strategy to format property names of models: pascal-case, camel-case, etc.
+   * By default, camel-case.
+   */
+  propNamingStrategy?: NamingStrategies;
 
   /**
    * For each model an editable version is generated which represents the model definition for
@@ -44,44 +54,37 @@ export interface NamingOptions {
   idModels?: EntityDerivedNamingOptions;
 
   /**
-   * Operations are functions and actions of the OData service.
-   * The generation for one operation entails one parameter model interface
-   * and one QFunction / QAction class.
+   * Operation parameter models are generated from function or action signatures.
    *
    * You can configure the naming options here.
+   * By default, suffix = "Params"
    */
-  operations?: OperationNamingOptions;
-}
-
-export interface EntityBasedNamingOptions extends NamingStrategyOption, StandardNamingOptions {
-  /**
-   * Choose a specific strategy to format property names of models: pascal-case, camel-case, etc.
-   * By default, camel-case.
-   */
-  propNamingStrategy?: NamingStrategies;
+  operationParamModels?: EntityDerivedNamingOptions;
 }
 
 export interface EntityDerivedNamingOptions extends StandardNamingOptions {
   applyModelNaming?: boolean;
 }
 
-export interface OperationNamingOptions extends NamingStrategyOption, StandardNamingOptions {
+export interface QueryObjectNamingOptions extends NamingStrategyOption, StandardNamingOptions {
   /**
-   * Naming options for generated models representing parameters for functions or actions.
-   * Operation name is always used and must be suffixed or prefixed.
-   * By default, suffix = "Params"
+   * Choose a specific strategy to format property names of query objects: pascal-case, camel-case, etc.
+   * By default, camel-case.
    */
-  paramModel?: NamingStrategyOption & StandardNamingOptions;
+  propNamingStrategy?: NamingStrategies;
+
+  operations?: OperationNamingOptions;
+}
+
+export interface OperationNamingOptions extends StandardNamingOptions {
   /**
    * Naming options for actions only.
    * When this configuration is provided, the parent configuration regarding suffix and prefix is ignored.
-   * By default, parent configuration.
    */
   action?: StandardNamingOptions;
   /**
-   * Naming options for functions.
+   * Naming options for functions only.
    * When this configuration is provided, the parent configuration regarding suffix and prefix is ignored.
-   * By default, parent configuration.
    */
   function?: StandardNamingOptions;
 }
@@ -103,4 +106,41 @@ export interface StandardNamingOptions {
    * Suffix all names, e.g. "model" => "TestModel"
    */
   suffix?: string;
+}
+
+/**
+ * Naming options for generated service classes.
+ *
+ * By default, suffix = Service and namingStrategy = pascalCase
+ */
+export interface ServiceNamingOptions extends NamingStrategyOption, StandardNamingOptions {
+  /**
+   * Name of the service responsible for entity collections.
+   *
+   * By default, suffix = Collection and applyServiceNaming = true
+   */
+  collection: StandardNamingOptions & { applyServiceNaming?: boolean };
+
+  /**
+   * Naming for getter method. Another related service is returned.
+   *
+   * By default, prefix = "get" and suffix = "Srv" and namingStrategy = camelCase
+   */
+  relatedServiceGetter: NamingStrategyOption & StandardNamingOptions;
+
+  /**
+   * Operations are functions and actions of the OData service and are represented as methods
+   * of the generated service class. This setting controls the naming of the corresponding
+   * function.
+   *
+   * By default, namingStrategy = camelCase
+   */
+  operations?: NamingStrategyOption & OperationNamingOptions;
+
+  /**
+   * Property names for EntitySets and Singletons within the main OData service client class.
+   *
+   * By default, namingStrategy = camelCase
+   */
+  entryPointNames?: NamingStrategyOption & StandardNamingOptions;
 }

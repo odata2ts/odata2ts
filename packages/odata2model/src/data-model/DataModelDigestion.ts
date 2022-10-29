@@ -1,13 +1,10 @@
 import { MappedConverterChains } from "@odata2ts/converter-runtime";
-import { camelCase } from "camel-case";
-import { pascalCase } from "pascal-case";
 
 import { DigestionOptions } from "../FactoryFunctionModel";
 import { DataModel } from "./DataModel";
 import { ComplexType as ComplexModelType, DataTypes, ODataVersion, PropertyModel } from "./DataTypeModel";
 import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModelBase";
-
-const ID_SUFFIX = "Id";
+import { NamingHelper } from "./NamingHelper";
 
 export interface TypeModel {
   outputType: string;
@@ -19,9 +16,10 @@ export interface TypeModel {
 export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, CT extends ComplexType> {
   protected static EDM_PREFIX = "Edm.";
   protected static ROOT_OPERATION = "/";
-  protected static PARAMS_MODEL_SUFFIX = "Params";
 
   protected readonly dataModel: DataModel;
+  protected namingHelper: NamingHelper;
+
   private model2Type: Map<string, DataTypes> = new Map<string, DataTypes>();
 
   protected constructor(
@@ -32,6 +30,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   ) {
     const serviceName = schema.$.Namespace;
     this.dataModel = new DataModel(version, serviceName, options.serviceName, converters);
+    this.namingHelper = new NamingHelper(options.naming, this.dataModel.getServicePrefix());
     this.collectModelTypes(this.schema);
   }
 
@@ -52,52 +51,16 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     return this.dataModel;
   }
 
-  protected getModelName(name: string, typeSuffix?: string): string {
-    return (
-      (this.options.naming.models?.prefix || "") +
-      pascalCase(this.stripServicePrefix(name)) +
-      (typeSuffix || "") +
-      (this.options.naming.models?.suffix || "")
-    );
-  }
-
-  protected getQName(name: string) {
-    return `Q${pascalCase(this.stripServicePrefix(name))}`;
-  }
-
-  protected getEnumName(name: string) {
-    return `${pascalCase(this.stripServicePrefix(name))}`;
-  }
-
-  protected getEntryPointName(name: string) {
-    return camelCase(name);
-  }
-
-  protected stripServicePrefix(token: string) {
-    return token.replace(new RegExp(this.dataModel.getServicePrefix()), "");
-  }
-
-  protected getOperationName(name: string) {
-    return camelCase(this.stripServicePrefix(name));
-  }
-
-  protected getQOperationName(name: string) {
-    return `Q${pascalCase(this.getOperationName(name))}`;
-  }
-
-  protected getOperationParamsModelName(name: string) {
-    return pascalCase(this.stripServicePrefix(name)) + Digester.PARAMS_MODEL_SUFFIX;
-  }
-
   private collectModelTypes(schema: Schema<ET, CT>) {
+    const servicePrefix = this.dataModel.getServicePrefix();
     schema.EnumType?.forEach((et) => {
-      this.model2Type.set(et.$.Name, DataTypes.EnumType);
+      this.model2Type.set(servicePrefix + et.$.Name, DataTypes.EnumType);
     });
     schema.ComplexType?.forEach((ct) => {
-      this.model2Type.set(ct.$.Name, DataTypes.ComplexType);
+      this.model2Type.set(servicePrefix + ct.$.Name, DataTypes.ComplexType);
     });
     schema.EntityType?.forEach((et) => {
-      this.model2Type.set(et.$.Name, DataTypes.ModelType);
+      this.model2Type.set(servicePrefix + et.$.Name, DataTypes.ModelType);
     });
   }
 
@@ -108,7 +71,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         const name = et.$.Name;
         this.dataModel.addEnum(name, {
           odataName: name,
-          name: this.getEnumName(name),
+          name: this.namingHelper.getEnumName(name),
           members: et.Member.map((m) => m.$.Name),
         });
       }
@@ -126,8 +89,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   }
 
   private getBaseModel(model: ComplexType) {
-    const name = this.getModelName(model.$.Name);
-    const qName = this.getQName(model.$.Name);
+    const name = this.namingHelper.getModelName(model.$.Name);
+    const qName = this.namingHelper.getQName(model.$.Name);
     const odataName = model.$.Name;
     const bType = model.$.BaseType;
     const props = [...(model.Property ?? []), ...this.getNavigationProps(model)];
@@ -135,7 +98,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // support for base types, i.e. extends clause of interfaces
     const baseClasses = [];
     if (bType) {
-      baseClasses.push(this.getModelName(bType));
+      baseClasses.push(this.namingHelper.getModelName(bType));
     }
 
     return {
@@ -143,7 +106,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       qName,
       odataName,
       baseClasses,
-      props: props.map(this.mapProperty),
+      props: props.map(this.mapProp),
       baseProps: [], // postprocess required
     };
   }
@@ -177,7 +140,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         keys.push(...propNames);
       }
 
-      const idModelName = this.getModelName(baseModel.name, ID_SUFFIX);
+      const idModelName = this.namingHelper.getIdModelName(baseModel.name);
       this.dataModel.addModel(baseModel.name, {
         ...baseModel,
         idModelName,
@@ -254,7 +217,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     );
   }
 
-  protected mapProperty = (p: Property): PropertyModel => {
+  protected mapProp = (p: Property): PropertyModel => {
     if (!p.$.Type) {
       throw new Error(`No type information given for property [${p.$.Name}]!`);
     }
@@ -267,7 +230,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // domain object known from service:
     // EntityType, ComplexType or EnumType
     if (dataType.startsWith(this.dataModel.getServicePrefix())) {
-      const resultDt = this.model2Type.get(this.stripServicePrefix(dataType));
+      const resultDt = this.model2Type.get(dataType);
       if (!resultDt) {
         throw new Error(`Couldn't determine model type for data type with name '${dataType}'`);
       }
@@ -276,7 +239,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       if (resultDt === DataTypes.EnumType) {
         result = {
           dataType: resultDt,
-          type: this.getEnumName(dataType),
+          type: this.namingHelper.getEnumName(dataType),
           qPath: "QEnumPath",
           qObject: isCollection ? "QEnumCollection" : undefined,
         };
@@ -285,9 +248,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       else {
         result = {
           dataType: resultDt,
-          type: this.getModelName(dataType),
+          type: this.namingHelper.getModelName(dataType),
           qPath: "QEntityPath",
-          qObject: this.getQName(dataType),
+          qObject: this.namingHelper.getQName(dataType),
         };
       }
     }
@@ -313,7 +276,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       );
     }
 
-    const name = camelCase(p.$.Name);
+    const name = this.namingHelper.getModelPropName(p.$.Name);
     const odataName = p.$.Name;
 
     return {

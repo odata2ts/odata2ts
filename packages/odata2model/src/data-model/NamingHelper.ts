@@ -1,0 +1,168 @@
+import { camelCase } from "camel-case";
+import { constantCase } from "constant-case";
+import { pascalCase } from "pascal-case";
+
+import { NamingStrategies } from "../../lib";
+import { NamingOptions, StandardNamingOptions } from "../NamingModel";
+
+function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
+  switch (strategy) {
+    case NamingStrategies.CAMEL_CASE:
+      return camelCase;
+    case NamingStrategies.PASCAL_CASE:
+      return pascalCase;
+    case NamingStrategies.CONSTANT_CASE:
+      return constantCase;
+    default:
+      return undefined;
+  }
+}
+
+const noopNamingFunction = (value: string, options?: StandardNamingOptions) => {
+  return (options?.prefix || "") + value + (options?.suffix || "");
+};
+
+export class NamingHelper {
+  constructor(private options: NamingOptions, private servicePrefix: string) {
+    if (!options) {
+      throw new Error("NamingHelper: Options must be supplied!");
+    }
+    if (!servicePrefix?.trim()) {
+      throw new Error("NamingHelper: ServicePrefix must be supplied!");
+    }
+  }
+
+  public stripServicePrefix(token: string) {
+    return token.replace(this.servicePrefix, "");
+  }
+
+  private namingFunction(strategy: NamingStrategies | undefined) {
+    const strategyFn = getNamingStrategyImpl(strategy);
+    if (!strategyFn || this.options.disableNamingStrategy) {
+      return noopNamingFunction;
+    }
+
+    return (value: string, options?: StandardNamingOptions) => {
+      return strategyFn(
+        (options?.prefix ? options.prefix + "_" : "") + value + (options?.suffix ? "_" + options.suffix : "")
+      );
+    };
+  }
+
+  private getName(
+    name: string,
+    strategy: (value: string, options?: StandardNamingOptions) => string,
+    options?: StandardNamingOptions
+  ) {
+    return strategy(this.stripServicePrefix(name), options);
+  }
+
+  private getModelNamingStrategy() {
+    return this.namingFunction(this.options.models?.namingStrategy);
+  }
+
+  private getModelPropNamingStrategy() {
+    return this.namingFunction(this.options.models?.propNamingStrategy);
+  }
+
+  private getQObjectNamingStrategy() {
+    return this.namingFunction(this.options.queryObjects?.namingStrategy);
+  }
+
+  private getQObjectPropNamingStrategy() {
+    return this.namingFunction(this.options.queryObjects?.propNamingStrategy);
+  }
+
+  private getOperationNamingStrategy() {
+    return this.namingFunction(this.options.services?.operations?.namingStrategy);
+  }
+
+  public getModelName(name: string): string {
+    return this.getName(name, this.getModelNamingStrategy(), this.options.models);
+  }
+
+  public getModelPropName(name: string): string {
+    return this.getName(name, this.getModelPropNamingStrategy());
+  }
+
+  public getEnumName(name: string) {
+    return this.getName(name, this.getModelNamingStrategy(), this.options.models);
+  }
+
+  public getEditableModelName(name: string) {
+    let options = this.options.models?.editableModels;
+    const result = this.getName(name, this.getModelNamingStrategy(), options);
+    return options?.applyModelNaming
+      ? this.getName(result, this.getModelNamingStrategy(), this.options.models)
+      : result;
+  }
+
+  public getIdModelName(name: string) {
+    let options = this.options.models?.idModels;
+    const result = this.getName(name, this.getModelNamingStrategy(), options);
+    return options?.applyModelNaming
+      ? this.getName(result, this.getModelNamingStrategy(), this.options.models)
+      : result;
+  }
+
+  public getOperationParamsModelName(name: string) {
+    const settings = this.options.models?.operationParamModels;
+    const result = this.getName(name, this.getModelNamingStrategy(), settings);
+    return settings?.applyModelNaming
+      ? this.getName(result, this.getModelNamingStrategy(), this.options.models)
+      : result;
+  }
+
+  public getQName(name: string) {
+    return this.getName(name, this.getQObjectNamingStrategy(), this.options.queryObjects);
+  }
+
+  public getQPropName(name: string): string {
+    return this.getName(name, this.getQObjectPropNamingStrategy());
+  }
+
+  public getQFunctionName(name: string) {
+    const opts = this.options.queryObjects?.operations;
+    const result = this.getName(name, this.getQObjectNamingStrategy(), opts?.function || opts);
+    return this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
+  }
+
+  public getQActionName(name: string) {
+    const opts = this.options.queryObjects?.operations;
+    const result = this.getName(name, this.getQObjectNamingStrategy(), opts?.action || opts);
+    return this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
+  }
+
+  public getFunctionName(name: string) {
+    const opts = this.options.services?.operations;
+    return this.getName(name, this.getOperationNamingStrategy(), opts?.function || opts);
+  }
+
+  public getActionName(name: string) {
+    const opts = this.options.services?.operations;
+    return this.getName(name, this.getOperationNamingStrategy(), opts?.action || opts);
+  }
+
+  public getServiceName(name: string) {
+    const opts = this.options.services;
+    return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
+  }
+
+  public getCollectionServiceName(name: string) {
+    const opts = this.options.services;
+    const strategy = this.namingFunction(opts?.namingStrategy);
+    const result = this.getName(name, strategy, opts?.collection);
+    return opts?.collection.applyServiceNaming ? this.getName(result, strategy, opts) : result;
+  }
+
+  public getEntryPointName(name: string) {
+    const settings = this.options.services?.entryPointNames;
+    const strategy = this.namingFunction(settings?.namingStrategy);
+    return this.getName(name, strategy, settings);
+  }
+
+  public getRelatedServiceGetter(name: string) {
+    const opts = this.options.services?.relatedServiceGetter;
+    return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
+  }
+}
