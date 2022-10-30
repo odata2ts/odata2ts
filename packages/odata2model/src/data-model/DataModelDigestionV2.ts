@@ -7,6 +7,7 @@ import { Digester, TypeModel } from "./DataModelDigestion";
 import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
 import { ComplexTypeV3, EntityTypeV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
+import { NamingHelper } from "./NamingHelper";
 
 /**
  * Digests an EDMX schema to produce a DataModel.
@@ -14,16 +15,21 @@ import { ComplexTypeV3, EntityTypeV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
  * @param schema
  * @param options
  */
-export const digest: DigesterFunction<SchemaV3> = async (schema, options) => {
+export const digest: DigesterFunction<SchemaV3> = async (schema, options, namingHelper) => {
   const converters = await loadConverters(ODataVersions.V2, options.converters);
 
-  const digester = new DigesterV3(schema, options, converters);
+  const digester = new DigesterV3(schema, options, namingHelper, converters);
   return digester.digest();
 };
 
 class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
-  constructor(schema: SchemaV3, options: DigestionOptions, converters: MappedConverterChains | undefined) {
-    super(ODataVersion.V2, schema, options, converters);
+  constructor(
+    schema: SchemaV3,
+    options: DigestionOptions,
+    namingHelper: NamingHelper,
+    converters: MappedConverterChains | undefined
+  ) {
+    super(ODataVersion.V2, schema, options, namingHelper, converters);
   }
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV3): Array<Property> {

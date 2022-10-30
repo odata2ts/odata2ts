@@ -18,7 +18,6 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   protected static ROOT_OPERATION = "/";
 
   protected readonly dataModel: DataModel;
-  protected namingHelper: NamingHelper;
 
   private model2Type: Map<string, DataTypes> = new Map<string, DataTypes>();
 
@@ -26,11 +25,11 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     protected version: ODataVersion,
     protected schema: S,
     protected options: DigestionOptions,
+    protected namingHelper: NamingHelper,
     converters?: MappedConverterChains
   ) {
     const serviceName = schema.$.Namespace;
-    this.dataModel = new DataModel(version, serviceName, options.serviceName, converters);
-    this.namingHelper = new NamingHelper(options.naming, this.dataModel.getServicePrefix());
+    this.dataModel = new DataModel(version, namingHelper, converters);
     this.collectModelTypes(this.schema);
   }
 

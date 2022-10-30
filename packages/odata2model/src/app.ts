@@ -5,6 +5,7 @@ import { digest as digestV4 } from "./data-model/DataModelDigestionV4";
 import { ODataEdmxModelBase, Schema } from "./data-model/edmx/ODataEdmxModelBase";
 import { SchemaV3 } from "./data-model/edmx/ODataEdmxModelV3";
 import { SchemaV4 } from "./data-model/edmx/ODataEdmxModelV4";
+import { NamingHelper } from "./data-model/NamingHelper";
 import { generateModels, generateQueryObjects, generateServices } from "./generator";
 import { Modes, RunOptions } from "./OptionModel";
 import { createProjectManager } from "./project/ProjectManager";
@@ -39,15 +40,17 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
     {} as Schema<any, any>
   );
 
+  // encapsulate the whole naming logic
+  const namingHelper = new NamingHelper(options.naming, (schemaRaw as SchemaV3).$.Namespace, options.serviceName);
   // parse model information from edmx into something we can really work with
   // => that stuff is called dataModel!
   const dataModel =
     version === ODataVersions.V2
-      ? await digestV2(schemaRaw as SchemaV3, options)
-      : await digestV4(schemaRaw as SchemaV4, options);
+      ? await digestV2(schemaRaw as SchemaV3, options, namingHelper)
+      : await digestV4(schemaRaw as SchemaV4, options, namingHelper);
   // handling the overall generation project
   const project = await createProjectManager(
-    dataModel.getFileNames(),
+    namingHelper.getFileNames(),
     options.output,
     options.emitMode,
     options.prettier
@@ -56,20 +59,20 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   // Generate Model Interfaces
   // supported edmx types: EntityType, ComplexType, EnumType
   const modelsFile = await project.createModelFile();
-  generateModels(dataModel, modelsFile, version, options);
+  generateModels(dataModel, modelsFile, version, options, namingHelper);
 
   // Generate Query Objects
   // supported edmx types: EntityType, ComplexType
   // supported edmx prop types: primitive types, enum types, primitive collection (incl enum types), entity collection, entity object, complex object
   if (isQObjectGen(options.mode)) {
     const qFile = await project.createQObjectFile();
-    generateQueryObjects(dataModel, qFile, version, options);
+    generateQueryObjects(dataModel, qFile, version, options, namingHelper);
   }
 
   // Generate Individual OData-Service
   if (isServiceGen(options.mode)) {
     await project.cleanServiceDir();
-    await generateServices(dataModel, project, version);
+    await generateServices(dataModel, project, version, namingHelper);
   }
 
   await project.writeFiles();

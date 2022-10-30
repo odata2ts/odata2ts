@@ -1,6 +1,5 @@
 import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
-import { pascalCase } from "pascal-case";
 
 import {
   ActionImportType,
@@ -14,6 +13,7 @@ import {
   OperationType,
   SingletonType,
 } from "./DataTypeModel";
+import { NamingHelper } from "./NamingHelper";
 
 export interface ProjectFiles {
   model: string;
@@ -24,8 +24,6 @@ export interface ProjectFiles {
 const ROOT_OPERATION_BINDING = "/";
 
 export class DataModel {
-  private readonly servicePrefix: string;
-  private readonly fileNames: ProjectFiles;
   private readonly converters: MappedConverterChains;
 
   private modelTypes: { [name: string]: ModelType } = {};
@@ -37,19 +35,10 @@ export class DataModel {
 
   constructor(
     private version: ODataVersion,
-    private serviceName: string,
-    overridingServiceName?: string,
+    private namingHelper: NamingHelper,
     converters: MappedConverterChains = new Map()
   ) {
-    this.servicePrefix = serviceName + ".";
     this.converters = converters;
-
-    const name = pascalCase(overridingServiceName || serviceName);
-    this.fileNames = {
-      model: `${name}Model`,
-      qObject: `Q${name}`,
-      service: `${name}${name.endsWith("Service") ? "" : "Service"}`,
-    };
   }
 
   /**
@@ -73,7 +62,7 @@ export class DataModel {
    * @returns
    */
   public getServiceName() {
-    return this.serviceName;
+    return this.namingHelper.getODataServiceName();
   }
 
   /**
@@ -81,11 +70,7 @@ export class DataModel {
    * @returns service prefix
    */
   public getServicePrefix() {
-    return this.servicePrefix;
-  }
-
-  public getFileNames() {
-    return { ...this.fileNames };
+    return this.namingHelper.getServicePrefix();
   }
 
   public getEditableModelName(modelName: string) {

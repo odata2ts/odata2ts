@@ -28,6 +28,12 @@ export interface NamingOptions {
 
 export interface ModelNamingOptions extends NamingStrategyOption, StandardNamingOptions {
   /**
+   * All generated models are bundled into one file.
+   * This option specifies the formatting of the file name.
+   */
+  fileName?: NamingStrategyOption & StandardNamingOptions;
+
+  /**
    * Choose a specific strategy to format property names of models: pascal-case, camel-case, etc.
    * By default, camel-case.
    */
@@ -64,6 +70,12 @@ export interface EntityDerivedNamingOptions extends StandardNamingOptions {
 }
 
 export interface QueryObjectNamingOptions extends NamingStrategyOption, StandardNamingOptions {
+  /**
+   * All generated models are bundled into one file.
+   * This option specifies the formatting of the file name.
+   */
+  fileName?: NamingStrategyOption & StandardNamingOptions;
+
   /**
    * Choose a specific strategy to format property names of query objects: pascal-case, camel-case, etc.
    * By default, camel-case.
@@ -114,18 +126,24 @@ export interface StandardNamingOptions {
  */
 export interface ServiceNamingOptions extends NamingStrategyOption, StandardNamingOptions {
   /**
+   * For each service one file is generated.
+   * This option specifies the formatting of the file name.
+   */
+  fileNames?: NamingStrategyOption & StandardNamingOptions;
+
+  /**
    * Name of the service responsible for entity collections.
    *
    * By default, suffix = Collection and applyServiceNaming = true
    */
-  collection: StandardNamingOptions & { applyServiceNaming?: boolean };
+  collection?: StandardNamingOptions & { applyServiceNaming?: boolean };
 
   /**
    * Naming for getter method. Another related service is returned.
    *
    * By default, prefix = "get" and suffix = "Srv" and namingStrategy = camelCase
    */
-  relatedServiceGetter: NamingStrategyOption & StandardNamingOptions;
+  relatedServiceGetter?: NamingStrategyOption & StandardNamingOptions;
 
   /**
    * Operations are functions and actions of the OData service and are represented as methods

@@ -3,9 +3,9 @@ import path from "path";
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { SourceFile } from "ts-morph";
 
-import { ProjectFiles } from "../../../src/data-model/DataModel";
+import { EmitModes, RunOptions, getDefaultConfig } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { EmitModes } from "../../../src/OptionModel";
+import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { ProjectManager, createProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import { ServiceFixtureComparatorHelper, createServiceHelper } from "../comparator/FixtureComparatorHelper";
@@ -13,12 +13,8 @@ import { SERVICE_NAME } from "./EntityBasedGenerationTests";
 
 describe("Service Generator Tests V4", () => {
   const FIXTURE_PATH = "generator/service";
-  const PROJECT_FILES: ProjectFiles = {
-    model: `${SERVICE_NAME}Model`,
-    qObject: `q${SERVICE_NAME}`,
-    service: `${SERVICE_NAME}Service`,
-  };
 
+  let runOptions: Omit<RunOptions, "source" | "output">;
   let odataBuilder: ODataModelBuilderV4;
   let projectManager: ProjectManager;
   let fixtureComparatorHelper: ServiceFixtureComparatorHelper;
@@ -28,11 +24,14 @@ describe("Service Generator Tests V4", () => {
   });
 
   beforeEach(async () => {
-    projectManager = await createProjectManager(PROJECT_FILES, "build", EmitModes.ts, true);
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
+    runOptions = getDefaultConfig();
   });
 
   async function doGenerate() {
+    const namingHelper = new NamingHelper(runOptions.naming, SERVICE_NAME);
+    projectManager = await createProjectManager(namingHelper.getFileNames(), "build", EmitModes.ts, true);
+
     await fixtureComparatorHelper.generateService(odataBuilder.getSchema(), projectManager);
   }
 

@@ -16,6 +16,7 @@ import {
   PropertyModel,
   SingletonType,
 } from "../data-model/DataTypeModel";
+import { NamingHelper } from "../data-model/NamingHelper";
 import { ProjectManager } from "../project/ProjectManager";
 import { ImportContainer } from "./ImportContainer";
 import {
@@ -37,23 +38,33 @@ const RESPONSE_TYPES = {
   value: "ODataValueResponse",
 };
 
-export async function generateServices(dataModel: DataModel, project: ProjectManager, version: ODataVersions) {
-  const generator = new ServiceGenerator(dataModel, project, version);
+export async function generateServices(
+  dataModel: DataModel,
+  project: ProjectManager,
+  version: ODataVersions,
+  namingHelper: NamingHelper
+) {
+  const generator = new ServiceGenerator(dataModel, project, version, namingHelper);
   return generator.generate();
 }
 
 class ServiceGenerator {
-  constructor(private dataModel: DataModel, private project: ProjectManager, private version: ODataVersions) {}
+  constructor(
+    private dataModel: DataModel,
+    private project: ProjectManager,
+    private version: ODataVersions,
+    private namingHelper: NamingHelper
+  ) {}
 
   public async generate(): Promise<void> {
     const sourceFile = await this.project.createMainServiceFile();
-    const serviceName = this.dataModel.getFileNames().service;
+    const serviceName = this.namingHelper.getFileNames().service;
     const container = this.dataModel.getEntityContainer();
     const unboundOperations = [...Object.values(container.functions), ...Object.values(container.actions)];
 
     await this.generateModelServices();
 
-    const importContainer = new ImportContainer(this.dataModel.getFileNames());
+    const importContainer = new ImportContainer(this.namingHelper.getFileNames());
     importContainer.addFromClientApi("ODataClient");
     importContainer.addFromService(ROOT_SERVICE);
 
@@ -140,7 +151,7 @@ class ServiceGenerator {
     const entityServiceType = "EntityTypeService" + this.getVersionSuffix();
     const collectionServiceType = "CollectionService" + this.getVersionSuffix();
 
-    const editableModelName = this.dataModel.getEditableModelName(model.name);
+    const editableModelName = model.editableName;
     const operations = this.dataModel.getOperationTypeByBinding(model.name);
     const props = [...model.baseProps, ...model.props];
     const modelProps = props.filter(
@@ -195,7 +206,7 @@ class ServiceGenerator {
       let [key, propModelType] = getServiceNamesForProp(prop);
 
       if (prop.isCollection && complexType) {
-        const editableName = this.dataModel.getEditableModelName(complexType.name);
+        const editableName = complexType.editableName;
         importContainer.addFromService(collectionServiceType);
         importContainer.addGeneratedModel(complexType.name, editableName);
         importContainer.addGeneratedQObject(complexType.qName, firstCharLowerCase(complexType.qName));
@@ -261,9 +272,7 @@ class ServiceGenerator {
       const isComplexCollection = prop.isCollection && complexType;
       const type = isComplexCollection ? collectionServiceType : getServiceNameForProp(prop);
       const typeWithGenerics = isComplexCollection
-        ? `${collectionServiceType}<ClientType, ${complexType.name}, ${
-            complexType.qName
-          }, ${this.dataModel.getEditableModelName(complexType.name)}>`
+        ? `${collectionServiceType}<ClientType, ${complexType.name}, ${complexType.qName}, ${complexType.editableName}>`
         : `${type}<ClientType>`;
 
       return {
@@ -308,7 +317,7 @@ class ServiceGenerator {
     importContainer: ImportContainer
   ) {
     const entitySetServiceType = "EntitySetService" + this.getVersionSuffix();
-    const editableModelName = this.dataModel.getEditableModelName(model.name);
+    const editableModelName = model.editableName;
     const qObjectName = firstCharLowerCase(model.qName);
 
     importContainer.addFromService(entitySetServiceType);
@@ -346,7 +355,7 @@ class ServiceGenerator {
     for (const model of this.dataModel.getModels()) {
       const serviceName = getServiceName(model.name);
       const serviceFile = await this.project.createServiceFile(serviceName);
-      const importContainer = new ImportContainer(this.dataModel.getFileNames());
+      const importContainer = new ImportContainer(this.namingHelper.getFileNames());
 
       // entity type service
       await this.generateModelService(model, serviceName, serviceFile, importContainer);
@@ -361,7 +370,7 @@ class ServiceGenerator {
     for (const model of this.dataModel.getComplexTypes()) {
       const serviceName = getServiceName(model.name);
       const serviceFile = await this.project.createServiceFile(serviceName);
-      const importContainer = new ImportContainer(this.dataModel.getFileNames());
+      const importContainer = new ImportContainer(this.namingHelper.getFileNames());
 
       // entity type service
       await this.generateModelService(model, serviceName, serviceFile, importContainer);

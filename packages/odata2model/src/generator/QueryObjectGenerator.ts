@@ -12,11 +12,18 @@ import {
   OperationTypes,
   PropertyModel,
 } from "../data-model/DataTypeModel";
+import { NamingHelper } from "../data-model/NamingHelper";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel";
 import { ImportContainer } from "./ImportContainer";
 
-export const generateQueryObjects: EntityBasedGeneratorFunction = (dataModel, sourceFile, version, options) => {
-  const generator = new QueryObjectGenerator(dataModel, sourceFile, version, options);
+export const generateQueryObjects: EntityBasedGeneratorFunction = (
+  dataModel,
+  sourceFile,
+  version,
+  options,
+  namingHelper
+) => {
+  const generator = new QueryObjectGenerator(dataModel, sourceFile, version, options, namingHelper);
   return generator.generate();
 };
 
@@ -25,11 +32,12 @@ class QueryObjectGenerator {
     private dataModel: DataModel,
     private sourceFile: SourceFile,
     private version: ODataVersions,
-    private options: GeneratorFunctionOptions
+    private options: GeneratorFunctionOptions,
+    private namingHelper: NamingHelper
   ) {}
 
   public generate(): void {
-    const importContainer = new ImportContainer(this.dataModel.getFileNames());
+    const importContainer = new ImportContainer(this.namingHelper.getFileNames());
 
     this.generateModels(importContainer);
     if (!this.options.skipOperations) {

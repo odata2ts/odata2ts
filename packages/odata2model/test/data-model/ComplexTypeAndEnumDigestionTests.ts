@@ -1,9 +1,10 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 
+import { RunOptions } from "../../src";
+import { getDefaultConfig } from "../../src";
 import { digest } from "../../src/data-model/DataModelDigestionV4";
 import { DataTypes } from "../../src/data-model/DataTypeModel";
-import { getDefaultConfig } from "../../src/defaultConfig";
-import { DigestionOptions } from "../../src/FactoryFunctionModel";
+import { NamingHelper } from "../../src/data-model/NamingHelper";
 import { ODataModelBuilderV4 } from "./builder/v4/ODataModelBuilderV4";
 
 export function createComplexAndEnumTests() {
@@ -11,10 +12,11 @@ export function createComplexAndEnumTests() {
   const ENTITY_NAME = "Product";
 
   let odataBuilder: ODataModelBuilderV4;
-  let runOpts: DigestionOptions = getDefaultConfig();
+  let runOpts: Omit<RunOptions, "source" | "output"> = getDefaultConfig();
 
   function doDigest() {
-    return digest(odataBuilder.getSchema(), runOpts);
+    const namingHelper = new NamingHelper(runOpts.naming, SERVICE_NAME);
+    return digest(odataBuilder.getSchema(), runOpts, namingHelper);
   }
 
   beforeEach(() => {

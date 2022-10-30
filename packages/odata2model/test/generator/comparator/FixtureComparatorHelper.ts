@@ -5,6 +5,7 @@ import { Project, SourceFile } from "ts-morph";
 import { ConfigFileOptions, RunOptions, getDefaultConfig } from "../../../src";
 import { DataModel } from "../../../src/data-model/DataModel";
 import { Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
+import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { DigesterFunction } from "../../../src/FactoryFunctionModel";
 import { generateServices } from "../../../src/generator";
 import { ProjectManager } from "../../../src/project/ProjectManager";
@@ -13,7 +14,8 @@ import { FixtureComparator, createFixtureComparator } from "./FixtureComparator"
 export type EntityBasedGeneratorFunctionWithoutVersion = (
   dataModel: DataModel,
   sourceFile: SourceFile,
-  options: RunOptions
+  options: RunOptions,
+  namingHelper: NamingHelper
 ) => void;
 
 const project: Project = new Project({ skipAddingFilesFromTsConfig: true });
@@ -48,9 +50,10 @@ export class FixtureComparatorHelper {
   ) {
     const sourceFile = project.createSourceFile(id);
     const mergedOpts = options ? (deepmerge(DEFAULT_RUN_OPTIONS, options) as RunOptions) : DEFAULT_RUN_OPTIONS;
-    const dataModel = await this.digest(schema, mergedOpts);
+    const namingHelper = new NamingHelper(mergedOpts.naming, schema.$.Namespace, mergedOpts.serviceName);
+    const dataModel = await this.digest(schema, mergedOpts, namingHelper);
 
-    this.generate(dataModel, sourceFile, mergedOpts);
+    this.generate(dataModel, sourceFile, mergedOpts, namingHelper);
 
     const result = sourceFile.getFullText().trim();
     await this.comparator.compareWithFixture(result, fixturePath);
@@ -78,9 +81,10 @@ export class ServiceFixtureComparatorHelper {
     project: ProjectManager,
     runOptions: RunOptions = DEFAULT_RUN_OPTIONS
   ) {
-    const dataModel = await this.digest(schema, runOptions);
+    const namingHelper = new NamingHelper(runOptions.naming, schema.$.Namespace, runOptions.serviceName);
+    const dataModel = await this.digest(schema, runOptions, namingHelper);
 
-    await generateServices(dataModel, project, this.version);
+    await generateServices(dataModel, project, this.version, namingHelper);
   }
 
   public async compareService(fixturePath: string, service: SourceFile) {

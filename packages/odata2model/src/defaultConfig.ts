@@ -31,6 +31,10 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
         suffix: "Params",
         applyModelNaming: true,
       },
+      fileName: {
+        namingStrategy: NamingStrategies.PASCAL_CASE,
+        suffix: "Model",
+      },
     },
     queryObjects: {
       namingStrategy: NamingStrategies.PASCAL_CASE,
@@ -38,6 +42,10 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
       prefix: "Q",
       idFunctions: {
         suffix: "Id",
+      },
+      fileName: {
+        namingStrategy: NamingStrategies.PASCAL_CASE,
+        prefix: "Q",
       },
     },
     services: {
@@ -57,6 +65,10 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
         namingStrategy: NamingStrategies.CAMEL_CASE,
         prefix: "get",
         suffix: "Srv",
+      },
+      fileNames: {
+        namingStrategy: NamingStrategies.PASCAL_CASE,
+        suffix: "Service",
       },
     },
   },

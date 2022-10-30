@@ -3,11 +3,12 @@ import { SourceFile } from "ts-morph";
 
 import { DataModel } from "../data-model/DataModel";
 import { ComplexType, DataTypes, ModelType, OperationType, PropertyModel } from "../data-model/DataTypeModel";
+import { NamingHelper } from "../data-model/NamingHelper";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel";
 import { ImportContainer } from "./ImportContainer";
 
-export const generateModels: EntityBasedGeneratorFunction = (dataModel, sourceFile, version, options) => {
-  const generator = new ModelGenerator(dataModel, sourceFile, version, options);
+export const generateModels: EntityBasedGeneratorFunction = (dataModel, sourceFile, version, options, namingHelper) => {
+  const generator = new ModelGenerator(dataModel, sourceFile, version, options, namingHelper);
   return generator.generate();
 };
 
@@ -20,11 +21,12 @@ class ModelGenerator {
     private dataModel: DataModel,
     private sourceFile: SourceFile,
     private version: ODataVersions,
-    private options: GeneratorFunctionOptions
+    private options: GeneratorFunctionOptions,
+    private namingHelper: NamingHelper
   ) {}
 
   public generate(): void {
-    this.importContainer = new ImportContainer(this.dataModel.getFileNames());
+    this.importContainer = new ImportContainer(this.namingHelper.getFileNames());
 
     this.generateEnums();
     this.generateModels();
@@ -141,7 +143,7 @@ class ModelGenerator {
     ].filter((e): e is string => !!e);
 
     this.sourceFile.addInterface({
-      name: this.dataModel.getEditableModelName(model.name),
+      name: model.editableName,
       isExported: true,
       extends: extendsClause,
       properties: !complexProps

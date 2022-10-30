@@ -2,7 +2,7 @@ import { camelCase } from "camel-case";
 import { constantCase } from "constant-case";
 import { pascalCase } from "pascal-case";
 
-import { NamingOptions, NamingStrategies, StandardNamingOptions } from "../NamingModel";
+import { NamingOptions, NamingStrategies, NamingStrategyOption, StandardNamingOptions } from "../NamingModel";
 
 function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
   switch (strategy) {
@@ -22,13 +22,44 @@ const noopNamingFunction = (value: string, options?: StandardNamingOptions) => {
 };
 
 export class NamingHelper {
-  constructor(private options: NamingOptions, private servicePrefix: string) {
+  private readonly serviceName: string;
+  private readonly servicePrefix: string;
+
+  constructor(private readonly options: NamingOptions, serviceName: string, overridingServiceName?: string) {
     if (!options) {
       throw new Error("NamingHelper: Options must be supplied!");
     }
-    if (!servicePrefix?.trim()) {
+    if (!serviceName?.trim()) {
       throw new Error("NamingHelper: ServicePrefix must be supplied!");
     }
+
+    this.servicePrefix = serviceName + ".";
+    this.serviceName = overridingServiceName || serviceName;
+  }
+
+  public getServicePrefix() {
+    return this.servicePrefix;
+  }
+
+  public getODataServiceName() {
+    return this.serviceName;
+  }
+
+  private getFileName(opts?: NamingStrategyOption & StandardNamingOptions) {
+    return this.getName(this.serviceName, this.namingFunction(opts?.namingStrategy), opts);
+  }
+
+  public getFileNames() {
+    return {
+      model: this.getFileName(this.options.models?.fileName),
+      qObject: this.getFileName(this.options.queryObjects?.fileName),
+      service: this.getFileName(this.options.services?.fileNames),
+    };
+  }
+
+  public getFileNameService(name: string) {
+    const opts = this.options.services?.fileNames;
+    return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
   }
 
   public stripServicePrefix(token: string) {
@@ -138,6 +169,11 @@ export class NamingHelper {
     return this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
   }
 
+  public getServiceName(name: string) {
+    const opts = this.options.services;
+    return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
+  }
+
   public getFunctionName(name: string) {
     const opts = this.options.services?.operations;
     return this.getName(name, this.getOperationNamingStrategy(), opts?.function || opts);
@@ -148,16 +184,11 @@ export class NamingHelper {
     return this.getName(name, this.getOperationNamingStrategy(), opts?.action || opts);
   }
 
-  public getServiceName(name: string) {
-    const opts = this.options.services;
-    return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
-  }
-
   public getCollectionServiceName(name: string) {
     const opts = this.options.services;
     const strategy = this.namingFunction(opts?.namingStrategy);
     const result = this.getName(name, strategy, opts?.collection);
-    return opts?.collection.applyServiceNaming ? this.getName(result, strategy, opts) : result;
+    return opts?.collection?.applyServiceNaming ? this.getName(result, strategy, opts) : result;
   }
 
   public getEntryPointName(name: string) {

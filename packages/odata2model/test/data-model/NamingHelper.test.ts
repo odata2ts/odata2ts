@@ -1,34 +1,33 @@
-import { NamingOptions, NamingStrategies, getDefaultConfig } from "../../src";
+import { NamingOptions, NamingStrategies, RunOptions, getDefaultConfig } from "../../src";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
 
 describe("NamingHelper Tests", function () {
-  const SERVICE_PREFIX = "Test.";
+  const SERVICE_NAME = "TRIPPIN";
+  const OVERRIDING_SERVICE_NAME = "MyTrip";
 
-  let options: NamingOptions;
+  let options: NamingOptions & Pick<RunOptions, "serviceName">;
   let toTest: NamingHelper;
 
-  function createHelper() {
-    toTest = new NamingHelper(options, SERVICE_PREFIX);
+  function createHelper(overrideServiceName: boolean = false) {
+    toTest = new NamingHelper(options, SERVICE_NAME, overrideServiceName ? OVERRIDING_SERVICE_NAME : undefined);
   }
 
   beforeEach(() => {
     options = getDefaultConfig().naming;
   });
 
-  test("stripServicePrefix", () => {
-    createHelper();
-
-    expect(toTest.stripServicePrefix("")).toBe("");
-    expect(toTest.stripServicePrefix("test")).toBe("test");
-    expect(toTest.stripServicePrefix("B.test")).toBe("B.test");
-    expect(toTest.stripServicePrefix("Test_test")).toBe("Test_test");
-
-    expect(toTest.stripServicePrefix("Test.test")).toBe("test");
-    expect(toTest.stripServicePrefix("Test.B.test")).toBe("B.test");
-  });
-
   test("with defaultConfig", () => {
     createHelper();
+
+    expect(toTest.getODataServiceName()).toBe(SERVICE_NAME);
+    expect(toTest.getServicePrefix()).toBe(SERVICE_NAME + ".");
+
+    expect(toTest.getFileNames()).toStrictEqual({
+      model: "TrippinModel",
+      qObject: "QTrippin",
+      service: "TrippinService",
+    });
+    expect(toTest.getFileNameService("test")).toBe("TestService");
 
     expect(toTest.getModelName("hi")).toBe("Hi");
     expect(toTest.getModelPropName("Test_Test")).toBe("testTest");
@@ -53,8 +52,53 @@ describe("NamingHelper Tests", function () {
     // @ts-expect-error
     expect(() => new NamingHelper(null, null)).toThrow();
     // @ts-expect-error
-    expect(() => new NamingHelper(null, "Test.")).toThrow();
+    expect(() => new NamingHelper(null, SERVICE_NAME)).toThrow();
     expect(() => new NamingHelper(options, " ")).toThrow();
+  });
+
+  test("override service name", () => {
+    createHelper(true);
+
+    expect(toTest.getODataServiceName()).toBe(OVERRIDING_SERVICE_NAME);
+    expect(toTest.getServicePrefix()).toBe(SERVICE_NAME + ".");
+
+    expect(toTest.getFileNames()).toStrictEqual({
+      model: "MyTripModel",
+      qObject: "QMyTrip",
+      service: "MyTripService",
+    });
+    expect(toTest.getFileNameService("test")).toBe("TestService");
+  });
+
+  test("fileName settings", () => {
+    const newNaming = {
+      namingStrategy: NamingStrategies.CONSTANT_CASE,
+      prefix: "PREF",
+      suffix: "suf",
+    };
+    options.models!.fileName = newNaming;
+    options.queryObjects!.fileName = newNaming;
+    options.services!.fileNames = newNaming;
+    createHelper();
+
+    expect(toTest.getFileNames()).toStrictEqual({
+      model: "PREF_TRIPPIN_SUF",
+      qObject: "PREF_TRIPPIN_SUF",
+      service: "PREF_TRIPPIN_SUF",
+    });
+    expect(toTest.getFileNameService("test")).toBe("PREF_TEST_SUF");
+  });
+
+  test("stripServicePrefix", () => {
+    createHelper();
+
+    expect(toTest.stripServicePrefix("")).toBe("");
+    expect(toTest.stripServicePrefix("test")).toBe("test");
+    expect(toTest.stripServicePrefix("B.test")).toBe("B.test");
+    expect(toTest.stripServicePrefix("Test_test")).toBe("Test_test");
+
+    expect(toTest.stripServicePrefix(SERVICE_NAME + ".test")).toBe("test");
+    expect(toTest.stripServicePrefix(SERVICE_NAME + ".B.test")).toBe("B.test");
   });
 
   test("disable naming strategy", () => {

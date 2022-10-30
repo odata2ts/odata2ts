@@ -1,19 +1,21 @@
 import { ODataTypesV2 } from "@odata2ts/odata-core";
 
+import { getDefaultConfig } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
 import { OperationType } from "../../../src/data-model/DataTypeModel";
-import { getDefaultConfig } from "../../../src/defaultConfig";
+import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
 
 describe("Function Digestion Test", () => {
   const SERVICE_NAME = "FunctionTest";
   const CONFIG = getDefaultConfig();
+  const NAMING_HELPER = new NamingHelper(CONFIG.naming, SERVICE_NAME);
 
   let odataBuilder: ODataModelBuilderV2;
 
   function doDigest() {
-    return digest(odataBuilder.getSchema(), CONFIG);
+    return digest(odataBuilder.getSchema(), CONFIG, NAMING_HELPER);
   }
 
   beforeEach(() => {

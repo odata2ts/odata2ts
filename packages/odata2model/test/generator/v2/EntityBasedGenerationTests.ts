@@ -1,7 +1,7 @@
 import { ODataTypesV2 } from "@odata2ts/odata-core";
 
+import { RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { RunOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
 import {
   EntityBasedGeneratorFunctionWithoutVersion,
