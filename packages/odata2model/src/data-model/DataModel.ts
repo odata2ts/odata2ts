@@ -33,11 +33,7 @@ export class DataModel {
   private operationTypes: { [binding: string]: Array<OperationType> } = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
 
-  constructor(
-    private version: ODataVersion,
-    private namingHelper: NamingHelper,
-    converters: MappedConverterChains = new Map()
-  ) {
+  constructor(private version: ODataVersion, converters: MappedConverterChains = new Map()) {
     this.converters = converters;
   }
 
@@ -55,26 +51,6 @@ export class DataModel {
 
   public isV4() {
     return this.version === ODataVersion.V4;
-  }
-
-  /**
-   * The service name.
-   * @returns
-   */
-  public getServiceName() {
-    return this.namingHelper.getODataServiceName();
-  }
-
-  /**
-   * The prefix used to reference model or enum types in this schema.
-   * @returns service prefix
-   */
-  public getServicePrefix() {
-    return this.namingHelper.getServicePrefix();
-  }
-
-  public getEditableModelName(modelName: string) {
-    return `Editable${modelName}`;
   }
 
   public addModel(name: string, model: ModelType) {

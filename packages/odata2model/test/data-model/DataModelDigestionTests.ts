@@ -30,8 +30,6 @@ export function createDataModelTests(
     const result = await digest(odataBuilder.getSchema(), digestionOptions, getNamingHelper());
 
     expect(result).toBeTruthy();
-    expect(result.getServiceName()).toBe(SERVICE_NAME);
-    expect(result.getServicePrefix()).toBe(SERVICE_NAME + ".");
     expect(result.getODataVersion()).toBe(version);
 
     expect(result.getModels()).toEqual([]);

@@ -28,8 +28,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     protected namingHelper: NamingHelper,
     converters?: MappedConverterChains
   ) {
-    const serviceName = schema.$.Namespace;
-    this.dataModel = new DataModel(version, namingHelper, converters);
+    this.dataModel = new DataModel(version, converters);
     this.collectModelTypes(this.schema);
   }
 
@@ -51,7 +50,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   }
 
   private collectModelTypes(schema: Schema<ET, CT>) {
-    const servicePrefix = this.dataModel.getServicePrefix();
+    const servicePrefix = this.namingHelper.getServicePrefix();
     schema.EnumType?.forEach((et) => {
       this.model2Type.set(servicePrefix + et.$.Name, DataTypes.EnumType);
     });
@@ -229,7 +228,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     // domain object known from service:
     // EntityType, ComplexType or EnumType
-    if (dataType.startsWith(this.dataModel.getServicePrefix())) {
+    if (dataType.startsWith(this.namingHelper.getServicePrefix())) {
       const resultDt = this.model2Type.get(dataType);
       if (!resultDt) {
         throw new Error(`Couldn't determine model type for data type with name '${dataType}'`);
@@ -272,7 +271,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       };
     } else {
       throw new Error(
-        `Unknown type [${dataType}]: Not 'Collection(...)', not '${this.dataModel.getServicePrefix()}*', not OData type 'Edm.*'`
+        `Unknown type [${dataType}]: Not 'Collection(...)', not '${this.namingHelper.getServicePrefix()}*', not OData type 'Edm.*'`
       );
     }
 

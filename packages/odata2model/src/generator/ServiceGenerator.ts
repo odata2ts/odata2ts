@@ -74,7 +74,12 @@ class ServiceGenerator {
       typeParameters: ["ClientType extends ODataClient"],
       extends: `${ROOT_SERVICE}<ClientType>`,
       properties: [
-        { scope: Scope.Private, name: "_name", type: "string", initializer: `"${this.dataModel.getServiceName()}"` },
+        {
+          scope: Scope.Private,
+          name: "_name",
+          type: "string",
+          initializer: `"${this.namingHelper.getODataServiceName()}"`,
+        },
         ...this.generateServiceTypeProps(container.entitySets, getCollectionServiceName, importContainer),
         ...this.generateServiceTypeProps(container.singletons, getServiceName, importContainer),
         ...Object.values(unboundOperations).map(({ operation }) => this.generateQOperationProps(operation)),

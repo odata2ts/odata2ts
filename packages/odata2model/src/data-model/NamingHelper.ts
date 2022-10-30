@@ -37,10 +37,20 @@ export class NamingHelper {
     this.serviceName = overridingServiceName || serviceName;
   }
 
+  /**
+   * The prefix used to reference model or enum types in this schema.
+   *
+   * @returns service prefix
+   */
   public getServicePrefix() {
     return this.servicePrefix;
   }
 
+  /**
+   * The OData service name as it was found and is used in metadata file.
+   *
+   * @returns
+   */
   public getODataServiceName() {
     return this.serviceName;
   }
