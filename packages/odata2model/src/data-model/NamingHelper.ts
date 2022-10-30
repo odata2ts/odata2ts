@@ -2,8 +2,7 @@ import { camelCase } from "camel-case";
 import { constantCase } from "constant-case";
 import { pascalCase } from "pascal-case";
 
-import { NamingStrategies } from "../../lib";
-import { NamingOptions, StandardNamingOptions } from "../NamingModel";
+import { NamingOptions, NamingStrategies, StandardNamingOptions } from "../NamingModel";
 
 function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
   switch (strategy) {

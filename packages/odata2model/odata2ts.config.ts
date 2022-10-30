@@ -50,9 +50,9 @@ const config: ConfigFileOptions = {
   naming: {
     models: {
       suffix: "Model",
-    },
-    idModels: {
-      suffix: "Key",
+      idModels: {
+        suffix: "Key",
+      },
     },
     queryObjects: {
       namingStrategy: NamingStrategies.CONSTANT_CASE,
