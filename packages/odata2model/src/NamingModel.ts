@@ -44,9 +44,6 @@ export interface ModelNamingOptions extends NamingStrategyOption, StandardNaming
 
   /**
    * ID models are generated from entity id parameters.
-   * The generation for one entity entails one model interface representing the id parameters and
-   * one QId function which allows to format the parameters for URL usage and to parse parameters
-   * from a URL string.
    *
    * You can configure the naming options here.
    * By default, suffix = "Id"
@@ -72,6 +69,8 @@ export interface QueryObjectNamingOptions extends NamingStrategyOption, Standard
    * By default, camel-case.
    */
   propNamingStrategy?: NamingStrategies;
+
+  idFunctions?: StandardNamingOptions;
 
   operations?: OperationNamingOptions;
 }

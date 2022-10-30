@@ -91,6 +91,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   private getBaseModel(model: ComplexType) {
     const name = this.namingHelper.getModelName(model.$.Name);
     const qName = this.namingHelper.getQName(model.$.Name);
+    const editableName = this.namingHelper.getEditableModelName(model.$.Name);
     const odataName = model.$.Name;
     const bType = model.$.BaseType;
     const props = [...(model.Property ?? []), ...this.getNavigationProps(model)];
@@ -105,6 +106,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       name,
       qName,
       odataName,
+      editableName,
       baseClasses,
       props: props.map(this.mapProp),
       baseProps: [], // postprocess required
@@ -140,11 +142,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         keys.push(...propNames);
       }
 
-      const idModelName = this.namingHelper.getIdModelName(baseModel.name);
       this.dataModel.addModel(baseModel.name, {
         ...baseModel,
-        idModelName,
-        qIdFunctionName: `Q${idModelName}`,
+        idModelName: this.namingHelper.getIdModelName(model.$.Name),
+        qIdFunctionName: this.namingHelper.getQIdFunctionName(model.$.Name),
         generateId: true,
         keyNames: keys, // postprocess required to include key specs from base classes
         keys: [], // postprocess required to include props from base classes

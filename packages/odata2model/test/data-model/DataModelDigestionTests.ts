@@ -1,3 +1,4 @@
+import { NamingStrategies } from "../../src";
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
 import { getDefaultConfig } from "../../src/defaultConfig";
 import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel";
@@ -112,5 +113,59 @@ export function createDataModelTests(
     expect(result.getModels()[1].idModelName).toBe("ParentId");
     expect(result.getModels()[1].qIdFunctionName).toBe("QParentId");
     expect(result.getModels()[1].generateId).toBe(true);
+  });
+
+  test("naming", async () => {
+    digestionOptions.naming = {
+      models: {
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+        propNamingStrategy: NamingStrategies.CONSTANT_CASE,
+        suffix: "Model",
+        idModels: {
+          suffix: "Key",
+          applyModelNaming: true,
+        },
+        editableModels: {
+          suffix: "EditDummy",
+          applyModelNaming: false,
+        },
+      },
+      queryObjects: {
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+        propNamingStrategy: NamingStrategies.CONSTANT_CASE,
+        prefix: "YYY",
+      },
+      services: {
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+        suffix: "srv",
+        collection: {
+          prefix: "col",
+          suffix: "Service",
+          applyServiceNaming: false,
+        },
+        relatedServiceGetter: {
+          prefix: "get",
+        },
+      },
+    };
+
+    odataBuilder
+      .addEntityType("Test", undefined, (builder) => {
+        builder.addKeyProp("ID", "Edm.String");
+      })
+      .addComplexType("ComplexTest", undefined, (builder) => {
+        builder.addProp("ageOfEmpire", "Edm.Int32");
+      });
+
+    const result = await digest(odataBuilder.getSchema(), digestionOptions);
+
+    expect(result.getModels().length).toBe(1);
+
+    let toTest = result.getModels()[0];
+    expect(toTest.name).toBe("TEST_MODEL");
+    expect(toTest.keyNames).toStrictEqual(["ID"]);
+    expect(toTest.idModelName).toBe("TEST_KEY_MODEL");
+    expect(toTest.qIdFunctionName).toBe("YYY_TEST");
+    expect(toTest.editableName).toBe("TEST_EDIT_DUMMY");
   });
 }

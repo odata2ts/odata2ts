@@ -44,6 +44,7 @@ export interface ModelType extends ComplexType {
 export interface ComplexType {
   odataName: string;
   name: string;
+  editableName: string;
   qName: string;
   props: Array<PropertyModel>;
   baseProps: Array<PropertyModel>;

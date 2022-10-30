@@ -36,6 +36,9 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
       namingStrategy: NamingStrategies.PASCAL_CASE,
       propNamingStrategy: NamingStrategies.CAMEL_CASE,
       prefix: "Q",
+      idFunctions: {
+        suffix: "Id",
+      },
     },
     services: {
       namingStrategy: NamingStrategies.PASCAL_CASE,

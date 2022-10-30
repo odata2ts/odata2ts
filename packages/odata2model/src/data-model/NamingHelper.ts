@@ -120,6 +120,12 @@ export class NamingHelper {
     return this.getName(name, this.getQObjectPropNamingStrategy());
   }
 
+  public getQIdFunctionName(name: string) {
+    const opts = this.options.queryObjects?.idFunctions;
+    const result = this.getName(name, this.getQObjectNamingStrategy(), opts);
+    return this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
+  }
+
   public getQFunctionName(name: string) {
     const opts = this.options.queryObjects?.operations;
     const result = this.getName(name, this.getQObjectNamingStrategy(), opts?.function || opts);

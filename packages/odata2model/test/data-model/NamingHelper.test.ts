@@ -143,8 +143,20 @@ describe("NamingHelper Tests", function () {
     createHelper();
     expect(toTest.getQName("test")).toBe("PREF_TEST_SUF");
     expect(toTest.getQPropName("myTEST")).toBe("MY_TEST");
+    expect(toTest.getQIdFunctionName("test")).toBe("PREF_TEST_SUF");
     expect(toTest.getQFunctionName("TEST")).toBe("PREF_TEST_SUF");
     expect(toTest.getQActionName("TEST")).toBe("PREF_TEST_SUF");
+  });
+
+  test("QIdFunctions settings", () => {
+    options.queryObjects!.idFunctions = {
+      prefix: "PREF",
+      suffix: "suf",
+    };
+    createHelper();
+
+    // naming strategy is taken over from QueryObjects
+    expect(toTest.getQIdFunctionName("TEST")).toBe("QPrefTestSuf");
   });
 
   test("QOperation base settings", () => {
