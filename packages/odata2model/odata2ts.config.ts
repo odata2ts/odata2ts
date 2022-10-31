@@ -47,18 +47,6 @@ const config: ConfigFileOptions = {
       output: "build/v4/northwind",
     },
   },
-  naming: {
-    models: {
-      suffix: "Model",
-      idModels: {
-        suffix: "Key",
-      },
-    },
-    queryObjects: {
-      namingStrategy: NamingStrategies.CONSTANT_CASE,
-      suffix: "QueryObject",
-    },
-  },
 };
 
 export default config;
