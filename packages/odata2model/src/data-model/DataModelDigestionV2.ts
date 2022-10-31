@@ -100,7 +100,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
       });
 
       container.EntitySet?.forEach((entitySet) => {
-        const name = this.namingHelper.getEntryPointName(entitySet.$.Name);
+        const name = entitySet.$.Name;
 
         this.dataModel.addEntitySet(name, {
           name,

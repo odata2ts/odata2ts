@@ -155,13 +155,6 @@ export interface ServiceNamingOptions extends NamingStrategyOption, StandardNami
   operations?: NamingStrategyOption & OperationNamingOptions;
 
   /**
-   * Property names for EntitySets and Singletons within the main OData service client class.
-   *
-   * By default, namingStrategy = camelCase
-   */
-  entryPointNames?: NamingStrategyOption & StandardNamingOptions;
-
-  /**
    * Private property naming for service classes.
    */
   privateProps?: NamingStrategyOption & StandardNamingOptions;

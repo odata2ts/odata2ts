@@ -44,7 +44,6 @@ describe("NamingHelper Tests", function () {
     expect(toTest.getCollectionServiceName("TEST")).toBe("TestCollectionService");
     expect(toTest.getFunctionName("TEST")).toBe("test");
     expect(toTest.getActionName("TEST")).toBe("test");
-    expect(toTest.getEntryPointName("TEST")).toBe("test");
     expect(toTest.getRelatedServiceGetter("TEST")).toBe("getTestSrv");
     expect(toTest.getPrivatePropName("TEST")).toBe("_test");
   });
@@ -118,7 +117,6 @@ describe("NamingHelper Tests", function () {
     expect(toTest.getQFunctionName("TEST")).toBe("QTEST");
     expect(toTest.getQActionName("TEST")).toBe("QTEST");
     expect(toTest.getOperationParamsModelName("TEST")).toBe("TESTParams");
-    expect(toTest.getEntryPointName("TEST")).toBe("TEST");
   });
 
   test("ModelName settings", () => {

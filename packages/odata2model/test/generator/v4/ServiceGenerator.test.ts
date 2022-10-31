@@ -1,9 +1,10 @@
 import path from "path";
 
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
+import deepmerge from "deepmerge";
 import { SourceFile } from "ts-morph";
 
-import { EmitModes, RunOptions, getDefaultConfig } from "../../../src";
+import { EmitModes, NamingOptions, NamingStrategies, RunOptions, getDefaultConfig } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { ProjectManager, createProjectManager } from "../../../src/project/ProjectManager";
@@ -28,7 +29,8 @@ describe("Service Generator Tests V4", () => {
     runOptions = getDefaultConfig();
   });
 
-  async function doGenerate() {
+  async function doGenerate(options?: Partial<Omit<RunOptions, "source" | "output">>) {
+    runOptions = options ? deepmerge(runOptions, options) : runOptions;
     const namingHelper = new NamingHelper(runOptions.naming, SERVICE_NAME);
     projectManager = await createProjectManager(namingHelper.getFileNames(), "build", EmitModes.ts, true);
 
@@ -50,7 +52,7 @@ describe("Service Generator Tests V4", () => {
     await fixtureComparatorHelper.compareService(getV4SpecificPath(fixture, v4Specific), service);
   }
 
-  test("Service Generator: empty", async () => {
+  test("Service Generator: Main Service Min Case", async () => {
     // given nothing in particular
 
     // when generating
@@ -61,7 +63,7 @@ describe("Service Generator Tests V4", () => {
     expect(projectManager.getServiceFiles().length).toEqual(0);
   });
 
-  test("Service Generator: one EntitySet", async () => {
+  test("Service Generator: Main Service one EntitySet", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) =>
@@ -134,6 +136,59 @@ describe("Service Generator Tests V4", () => {
 
     // then main service file encompasses an unbound function
     await compareMainService("main-service-action-unbound.ts", true);
+  });
+
+  test("Service Generator: Services with Naming", async () => {
+    // given one EntitySet
+    odataBuilder
+      .addEntityType("TestEntity", undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Guid)
+          // simple props don't make a difference
+          .addProp("test", ODataTypesV4.String)
+      )
+      .addEntitySet("list", `${SERVICE_NAME}.TestEntity`);
+    const naming: NamingOptions = {
+      models: {
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+      },
+      queryObjects: {
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+      },
+      services: {
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+        suffix: "srv",
+        privateProps: {
+          namingStrategy: NamingStrategies.CONSTANT_CASE,
+          prefix: "",
+          suffix: "_",
+        },
+        relatedServiceGetter: {
+          namingStrategy: NamingStrategies.CONSTANT_CASE,
+          prefix: "navigateTo",
+          suffix: "",
+        },
+        operations: {
+          namingStrategy: NamingStrategies.CONSTANT_CASE,
+          function: {
+            suffix: "Function",
+          },
+          action: {
+            suffix: "Action",
+          },
+        },
+      },
+    };
+
+    // when generating
+    await doGenerate({ naming });
+
+    // then main service file lists an entity set
+    await compareMainService("main-service-naming.ts", true);
+
+    // then we get one additional service file
+    expect(projectManager.getServiceFiles().length).toEqual(1);
+    await compareService(projectManager.getServiceFiles()[0], "test-entity-service-naming.ts", true);
   });
 
   test("Service Generator: one bound function", async () => {

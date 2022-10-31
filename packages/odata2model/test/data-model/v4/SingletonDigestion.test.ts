@@ -27,7 +27,7 @@ describe("Singleton Digestion Test", () => {
 
     const result = await doDigest();
     expect(result.getEntityContainer().singletons).toMatchObject({
-      me: { odataName: "Me", name: "me", entityType: { name: "User" } },
+      Me: { odataName: "Me", name: "Me", entityType: { name: "User" } },
     });
   });
 
@@ -37,7 +37,7 @@ describe("Singleton Digestion Test", () => {
     // TODO: this should throw
     const result = await doDigest();
     expect(result.getEntityContainer().singletons).toMatchObject({
-      me: { odataName: "Me", name: "me", entityType: undefined },
+      Me: { odataName: "Me", name: "Me", entityType: undefined },
     });
   });
 
@@ -53,7 +53,7 @@ describe("Singleton Digestion Test", () => {
     const result = await doDigest();
 
     expect(result.getEntityContainer().singletons).toMatchObject({
-      me: { odataName: "Me", name: "me", entityType: { name: "User" }, navPropBinding: navProps },
+      Me: { odataName: "Me", name: "Me", entityType: { name: "User" }, navPropBinding: navProps },
     });
   });
 });

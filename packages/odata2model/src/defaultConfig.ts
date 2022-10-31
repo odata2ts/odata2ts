@@ -58,9 +58,6 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
       operations: {
         namingStrategy: NamingStrategies.CAMEL_CASE,
       },
-      entryPointNames: {
-        namingStrategy: NamingStrategies.CAMEL_CASE,
-      },
       relatedServiceGetter: {
         namingStrategy: NamingStrategies.CAMEL_CASE,
         prefix: "get",

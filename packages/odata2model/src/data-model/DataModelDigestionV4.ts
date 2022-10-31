@@ -8,11 +8,6 @@ import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
 import { ComplexTypeV4, EntityTypeV4, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4";
 import { NamingHelper } from "./NamingHelper";
 
-/**
- * Takes an EDMX schema
- * @param schema
- * @param options
- */
 export const digest: DigesterFunction<SchemaV4> = async (schema, options, namingHelper) => {
   const converters = await loadConverters(ODataVersions.V2, options.converters);
 
@@ -66,7 +61,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       });
 
       container.Singleton?.forEach((singleton) => {
-        const name = this.namingHelper.getEntryPointName(singleton.$.Name);
+        const name = singleton.$.Name;
         const navPropBindings = singleton.NavigationPropertyBinding || [];
 
         this.dataModel.addSingleton(name, {
@@ -81,7 +76,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       });
 
       container.EntitySet?.forEach((entitySet) => {
-        const name = this.namingHelper.getEntryPointName(entitySet.$.Name);
+        const name = entitySet.$.Name;
         const navPropBindings = entitySet.NavigationPropertyBinding || [];
 
         this.dataModel.addEntitySet(name, {

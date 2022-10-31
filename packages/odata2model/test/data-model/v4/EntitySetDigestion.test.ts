@@ -27,7 +27,7 @@ describe("EntitySet Digestion Test", () => {
 
     const result = await doDigest();
     expect(result.getEntityContainer().entitySets).toMatchObject({
-      products: { odataName: "Products", name: "products", entityType: { name: "Product" } },
+      Products: { odataName: "Products", name: "Products", entityType: { name: "Product" } },
     });
   });
 
@@ -37,7 +37,7 @@ describe("EntitySet Digestion Test", () => {
     // TODO: this should throw
     const result = await doDigest();
     expect(result.getEntityContainer().entitySets).toMatchObject({
-      products: { odataName: "Products", name: "products", entityType: undefined },
+      Products: { odataName: "Products", name: "Products", entityType: undefined },
     });
   });
 
@@ -55,7 +55,7 @@ describe("EntitySet Digestion Test", () => {
     const result = await doDigest();
 
     expect(result.getEntityContainer().entitySets).toMatchObject({
-      products: { odataName: "Products", name: "products", entityType: { name: "Product" }, navPropBinding: navProps },
+      Products: { odataName: "Products", name: "Products", entityType: { name: "Product" }, navPropBinding: navProps },
     });
   });
 });

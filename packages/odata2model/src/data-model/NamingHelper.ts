@@ -211,12 +211,6 @@ export class NamingHelper {
     return this.getName(name, this.getOperationNamingStrategy(), opts?.action || opts);
   }
 
-  public getEntryPointName(name: string) {
-    const settings = this.options.services?.entryPointNames;
-    const strategy = this.namingFunction(settings?.namingStrategy);
-    return this.getName(name, strategy, settings);
-  }
-
   public getRelatedServiceGetter(name: string) {
     const opts = this.options.services?.relatedServiceGetter;
     return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
