@@ -2,9 +2,9 @@ import { qLocation, qPerson } from "../../build/v4/trippin/QTrippin";
 import {
   EditableLocationModel,
   EditablePersonModel,
-  Feature,
-  PersonGender,
-  PersonModelIdModel,
+  FeatureModel,
+  PersonGenderModel,
+  PersonIdModel,
 } from "../../build/v4/trippin/TrippinModel";
 import { TrippinService } from "../../build/v4/trippin/TrippinService";
 import { MockODataClient } from "../MockODataClient";
@@ -20,10 +20,10 @@ describe("Testing Generation of TrippinService", () => {
   beforeEach(() => {
     editModel = {
       UserName: "williams",
-      FavoriteFeature: Feature.Feature1,
+      FavoriteFeature: FeatureModel.Feature1,
       Features: [],
       FirstName: "Heinz",
-      Gender: PersonGender.Unknown,
+      Gender: PersonGenderModel.Unknown,
     };
   });
 
@@ -73,7 +73,7 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("entitySet: get with complex id", async () => {
-    const testId: PersonModelIdModel = { UserName: "williams" };
+    const testId: PersonIdModel = { UserName: "williams" };
     const expected = `${BASE_URL}/People(UserName='williams')`;
 
     expect(testService.getPeopleSrv().get(testId).getPath()).toBe(expected);
@@ -84,10 +84,10 @@ describe("Testing Generation of TrippinService", () => {
     const expectedUrl = `${BASE_URL}/People('${id}')`;
     const model: EditablePersonModel = {
       UserName: "williams",
-      FavoriteFeature: Feature.Feature1,
+      FavoriteFeature: FeatureModel.Feature1,
       Features: [],
       FirstName: "Heinz",
-      Gender: PersonGender.Unknown,
+      Gender: PersonGenderModel.Unknown,
       Age: 33,
     };
 

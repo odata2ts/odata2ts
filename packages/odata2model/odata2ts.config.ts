@@ -47,6 +47,11 @@ const config: ConfigFileOptions = {
       output: "build/v4/northwind",
     },
   },
+  naming: {
+    models: {
+      suffix: "Model",
+    },
+  },
 };
 
 export default config;

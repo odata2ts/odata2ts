@@ -1,4 +1,4 @@
-import { PersonModelIdModel } from "../../../build/v4/trippin/TrippinModel";
+import { PersonIdModel } from "../../../build/v4/trippin/TrippinModel";
 import { TrippinService } from "../../../build/v4/trippin/TrippinService";
 import { TestODataClient } from "../../TestODataClient";
 
@@ -123,7 +123,7 @@ describe("Integration Testing of Service Generation", () => {
 
   test("create key and parse key", async () => {
     const expectedSimple = "test@testing.de";
-    const expectedComplex: PersonModelIdModel = { UserName: expectedSimple };
+    const expectedComplex: PersonIdModel = { UserName: expectedSimple };
 
     // simple version
     let result = testService.getPeopleSrv().createKey(expectedSimple);
