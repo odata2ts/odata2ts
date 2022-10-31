@@ -1,17 +1,19 @@
 import { ODataTypesV2 } from "@odata2ts/odata-core";
 
+import { getDefaultConfig } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { getDefaultConfig } from "../../../src/defaultConfig";
+import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
 
 describe("EntitySet Digestion Test", () => {
   const SERVICE_NAME = "EntitySetTest";
   const CONFIG = getDefaultConfig();
+  const NAMING_HELPER = new NamingHelper(CONFIG.naming, SERVICE_NAME);
 
   let odataBuilder: ODataModelBuilderV2;
 
   function doDigest() {
-    return digest(odataBuilder.getSchema(), CONFIG);
+    return digest(odataBuilder.getSchema(), CONFIG, NAMING_HELPER);
   }
 
   beforeEach(() => {
@@ -25,7 +27,7 @@ describe("EntitySet Digestion Test", () => {
 
     const result = await doDigest();
     expect(result.getEntityContainer().entitySets).toMatchObject({
-      products: { odataName: "Products", name: "products", entityType: { name: "Product" } },
+      Products: { odataName: "Products", name: "Products", entityType: { name: "Product" } },
     });
   });
 
@@ -35,7 +37,7 @@ describe("EntitySet Digestion Test", () => {
     // TODO: this should throw
     const result = await doDigest();
     expect(result.getEntityContainer().entitySets).toMatchObject({
-      products: { odataName: "Products", name: "products", entityType: undefined },
+      Products: { odataName: "Products", name: "Products", entityType: undefined },
     });
   });
 });

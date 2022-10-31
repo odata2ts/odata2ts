@@ -6,13 +6,13 @@ import { TestEntityCollectionService } from "./service/TestEntityService";
 
 export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
   private _name: string = "Tester";
-  private _listSrv?: TestEntityCollectionService<ClientType>;
+  private _list?: TestEntityCollectionService<ClientType>;
 
   public getListSrv() {
-    if (!this._listSrv) {
-      this._listSrv = new TestEntityCollectionService(this.client, this.getPath(), "list");
+    if (!this._list) {
+      this._list = new TestEntityCollectionService(this.client, this.getPath(), "list");
     }
 
-    return this._listSrv;
+    return this._list;
   }
 }

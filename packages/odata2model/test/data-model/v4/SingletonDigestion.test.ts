@@ -1,17 +1,19 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
+import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { getDefaultConfig } from "../../../src/defaultConfig";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 describe("Singleton Digestion Test", () => {
   const SERVICE_NAME = "SingletonTest";
   const CONFIG = getDefaultConfig();
+  const NAMING_HELPER = new NamingHelper(CONFIG.naming, SERVICE_NAME);
 
   let odataBuilder: ODataModelBuilderV4;
 
   function doDigest() {
-    return digest(odataBuilder.getSchema(), CONFIG);
+    return digest(odataBuilder.getSchema(), CONFIG, NAMING_HELPER);
   }
 
   beforeEach(() => {
@@ -25,7 +27,7 @@ describe("Singleton Digestion Test", () => {
 
     const result = await doDigest();
     expect(result.getEntityContainer().singletons).toMatchObject({
-      me: { odataName: "Me", name: "me", entityType: { name: "User" } },
+      Me: { odataName: "Me", name: "Me", entityType: { name: "User" } },
     });
   });
 
@@ -35,7 +37,7 @@ describe("Singleton Digestion Test", () => {
     // TODO: this should throw
     const result = await doDigest();
     expect(result.getEntityContainer().singletons).toMatchObject({
-      me: { odataName: "Me", name: "me", entityType: undefined },
+      Me: { odataName: "Me", name: "Me", entityType: undefined },
     });
   });
 
@@ -51,7 +53,7 @@ describe("Singleton Digestion Test", () => {
     const result = await doDigest();
 
     expect(result.getEntityContainer().singletons).toMatchObject({
-      me: { odataName: "Me", name: "me", entityType: { name: "User" }, navPropBinding: navProps },
+      Me: { odataName: "Me", name: "Me", entityType: { name: "User" }, navPropBinding: navProps },
     });
   });
 });

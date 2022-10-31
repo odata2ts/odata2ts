@@ -19,32 +19,24 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     super(client, basePath, name, qBook);
   }
 
-  private _getQLike() {
+  public like(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
     if (!this._qLike) {
       this._qLike = new QLike();
     }
 
-    return this._qLike;
-  }
-
-  public like(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
-    const url = this.addFullPath(this._getQLike().buildUrl());
+    const url = this.addFullPath(this._qLike.buildUrl());
     return this.client.post(url, {}, requestConfig);
-  }
-
-  private _getQPostReview() {
-    if (!this._qPostReview) {
-      this._qPostReview = new QPostReview();
-    }
-
-    return this._qPostReview;
   }
 
   public postReview(
     params: PostReviewParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV4<Review>> {
-    const url = this.addFullPath(this._getQPostReview().buildUrl());
+    if (!this._qPostReview) {
+      this._qPostReview = new QPostReview();
+    }
+
+    const url = this.addFullPath(this._qPostReview.buildUrl());
     return this.client.post(url, params, requestConfig);
   }
 }

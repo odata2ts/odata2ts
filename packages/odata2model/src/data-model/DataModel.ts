@@ -1,6 +1,5 @@
 import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
-import { pascalCase } from "pascal-case";
 
 import {
   ActionImportType,
@@ -14,6 +13,7 @@ import {
   OperationType,
   SingletonType,
 } from "./DataTypeModel";
+import { NamingHelper } from "./NamingHelper";
 
 export interface ProjectFiles {
   model: string;
@@ -24,8 +24,6 @@ export interface ProjectFiles {
 const ROOT_OPERATION_BINDING = "/";
 
 export class DataModel {
-  private readonly servicePrefix: string;
-  private readonly fileNames: ProjectFiles;
   private readonly converters: MappedConverterChains;
 
   private modelTypes: { [name: string]: ModelType } = {};
@@ -35,21 +33,8 @@ export class DataModel {
   private operationTypes: { [binding: string]: Array<OperationType> } = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
 
-  constructor(
-    private version: ODataVersion,
-    private serviceName: string,
-    overridingServiceName?: string,
-    converters: MappedConverterChains = new Map()
-  ) {
-    this.servicePrefix = serviceName + ".";
+  constructor(private version: ODataVersion, converters: MappedConverterChains = new Map()) {
     this.converters = converters;
-
-    const name = pascalCase(overridingServiceName || serviceName);
-    this.fileNames = {
-      model: `${name}Model`,
-      qObject: `Q${name}`,
-      service: `${name}${name.endsWith("Service") ? "" : "Service"}`,
-    };
   }
 
   /**
@@ -66,30 +51,6 @@ export class DataModel {
 
   public isV4() {
     return this.version === ODataVersion.V4;
-  }
-
-  /**
-   * The service name.
-   * @returns
-   */
-  public getServiceName() {
-    return this.serviceName;
-  }
-
-  /**
-   * The prefix used to reference model or enum types in this schema.
-   * @returns service prefix
-   */
-  public getServicePrefix() {
-    return this.servicePrefix;
-  }
-
-  public getFileNames() {
-    return { ...this.fileNames };
-  }
-
-  public getEditableModelName(modelName: string) {
-    return `Editable${modelName}`;
   }
 
   public addModel(name: string, model: ModelType) {

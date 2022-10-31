@@ -19,24 +19,57 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,
       propNamingStrategy: NamingStrategies.CAMEL_CASE,
-    },
-    editableModels: {
-      prefix: "Editable",
-      applyModelNaming: true,
-    },
-    idModels: {
-      suffix: "Id",
-      applyModelNaming: true,
+      editableModels: {
+        prefix: "Editable",
+        applyModelNaming: true,
+      },
+      idModels: {
+        suffix: "Id",
+        applyModelNaming: true,
+      },
+      operationParamModels: {
+        suffix: "Params",
+        applyModelNaming: true,
+      },
+      fileName: {
+        namingStrategy: NamingStrategies.PASCAL_CASE,
+        suffix: "Model",
+      },
     },
     queryObjects: {
       namingStrategy: NamingStrategies.PASCAL_CASE,
       propNamingStrategy: NamingStrategies.CAMEL_CASE,
       prefix: "Q",
+      idFunctions: {
+        suffix: "Id",
+      },
+      fileName: {
+        namingStrategy: NamingStrategies.PASCAL_CASE,
+        prefix: "Q",
+      },
     },
-    operations: {
+    services: {
       namingStrategy: NamingStrategies.PASCAL_CASE,
-      paramModel: {
+      suffix: "Service",
+      collection: {
+        suffix: "Collection",
+        applyServiceNaming: true,
+      },
+      operations: {
         namingStrategy: NamingStrategies.CAMEL_CASE,
+      },
+      relatedServiceGetter: {
+        namingStrategy: NamingStrategies.CAMEL_CASE,
+        prefix: "get",
+        suffix: "Srv",
+      },
+      fileNames: {
+        namingStrategy: NamingStrategies.PASCAL_CASE,
+        suffix: "Service",
+      },
+      privateProps: {
+        namingStrategy: NamingStrategies.CAMEL_CASE,
+        prefix: "_",
       },
     },
   },

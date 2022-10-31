@@ -2,12 +2,10 @@ import path from "path";
 
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 
-import { ProjectFiles } from "../../../src/data-model/DataModel";
+import { EmitModes, RunOptions, getDefaultConfig } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { getDefaultConfig } from "../../../src/defaultConfig";
-import { DigestionOptions } from "../../../src/FactoryFunctionModel";
+import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { generateServices } from "../../../src/generator";
-import { EmitModes } from "../../../src/OptionModel";
 import { ProjectManager, createProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
 import { FixtureComparator, createFixtureComparator } from "../comparator/FixtureComparator";
@@ -16,14 +14,8 @@ import { SERVICE_NAME } from "./EntityBasedGenerationTests";
 describe("Service Generator Tests V2", () => {
   const FIXTURE_PATH = "generator/service";
 
-  let runOptions: DigestionOptions;
+  let runOptions: Omit<RunOptions, "source" | "output">;
   let odataBuilder: ODataModelBuilderV2;
-
-  let projectFiles: ProjectFiles = {
-    model: `${SERVICE_NAME}Model`,
-    qObject: `q${SERVICE_NAME}`,
-    service: `${SERVICE_NAME}Service`,
-  };
   let projectManager: ProjectManager;
   let fixtureComparator: FixtureComparator;
 
@@ -34,13 +26,14 @@ describe("Service Generator Tests V2", () => {
   beforeEach(async () => {
     odataBuilder = new ODataModelBuilderV2(SERVICE_NAME);
     runOptions = getDefaultConfig();
-    projectManager = await createProjectManager(projectFiles, "build", EmitModes.ts, true);
   });
 
   async function doGenerate() {
-    const dataModel = await digest(odataBuilder.getSchema(), runOptions);
+    const namingHelper = new NamingHelper(runOptions.naming, SERVICE_NAME);
+    projectManager = await createProjectManager(namingHelper.getFileNames(), "build", EmitModes.ts, true);
+    const dataModel = await digest(odataBuilder.getSchema(), runOptions, namingHelper);
 
-    await generateServices(dataModel, projectManager, ODataVersions.V2);
+    await generateServices(dataModel, projectManager, ODataVersions.V2, namingHelper);
   }
 
   async function compareMainService(fixture: string, v2Specific: boolean) {

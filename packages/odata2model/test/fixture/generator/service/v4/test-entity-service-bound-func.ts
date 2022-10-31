@@ -24,32 +24,24 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     super(client, basePath, name, qBook);
   }
 
-  private _getQBestReview() {
+  public bestReview(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<string>> {
     if (!this._qBestReview) {
       this._qBestReview = new QBestReview();
     }
 
-    return this._qBestReview;
-  }
-
-  public bestReview(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<string>> {
-    const url = this.addFullPath(this._getQBestReview().buildUrl());
+    const url = this.addFullPath(this._qBestReview.buildUrl());
     return this.client.get(url, requestConfig);
-  }
-
-  private _getQFilterReviews() {
-    if (!this._qFilterReviews) {
-      this._qFilterReviews = new QFilterReviews();
-    }
-
-    return this._qFilterReviews;
   }
 
   public filterReviews(
     params: FilterReviewsParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<Review>> {
-    const url = this.addFullPath(this._getQFilterReviews().buildUrl(params));
+    if (!this._qFilterReviews) {
+      this._qFilterReviews = new QFilterReviews();
+    }
+
+    const url = this.addFullPath(this._qFilterReviews.buildUrl(params));
     return this.client.get(url, requestConfig);
   }
 }

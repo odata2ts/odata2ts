@@ -16,8 +16,8 @@ describe("Query Object Generator Tests V4", () => {
   const TEST_SUITE_NAME = "Query Object Generator";
   const FIXTURE_BASE_PATH = "generator/qobject";
 
-  const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = (dataModel, sourceFile, options) => {
-    return generateQueryObjects(dataModel, sourceFile, ODataVersions.V4, options);
+  const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = (dataModel, sourceFile, options, namingHelper) => {
+    return generateQueryObjects(dataModel, sourceFile, ODataVersions.V4, options, namingHelper);
   };
 
   let odataBuilder: ODataModelBuilderV4;

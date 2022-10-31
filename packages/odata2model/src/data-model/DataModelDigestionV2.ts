@@ -7,6 +7,7 @@ import { Digester, TypeModel } from "./DataModelDigestion";
 import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
 import { ComplexTypeV3, EntityTypeV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
+import { NamingHelper } from "./NamingHelper";
 
 /**
  * Digests an EDMX schema to produce a DataModel.
@@ -14,16 +15,21 @@ import { ComplexTypeV3, EntityTypeV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
  * @param schema
  * @param options
  */
-export const digest: DigesterFunction<SchemaV3> = async (schema, options) => {
+export const digest: DigesterFunction<SchemaV3> = async (schema, options, namingHelper) => {
   const converters = await loadConverters(ODataVersions.V2, options.converters);
 
-  const digester = new DigesterV3(schema, options, converters);
+  const digester = new DigesterV3(schema, options, namingHelper, converters);
   return digester.digest();
 };
 
 class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
-  constructor(schema: SchemaV3, options: DigestionOptions, converters: MappedConverterChains | undefined) {
-    super(ODataVersion.V2, schema, options, converters);
+  constructor(
+    schema: SchemaV3,
+    options: DigestionOptions,
+    namingHelper: NamingHelper,
+    converters: MappedConverterChains | undefined
+  ) {
+    super(ODataVersion.V2, schema, options, namingHelper, converters);
   }
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV3): Array<Property> {
@@ -31,7 +37,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
     const et = entityType as EntityTypeV3;
     if (et.NavigationProperty) {
       return et.NavigationProperty.map((np) => {
-        const relationship = this.stripServicePrefix(np.$.Relationship);
+        const relationship = this.namingHelper.stripServicePrefix(np.$.Relationship);
         const association = this.schema.Association?.find((a) => a.$.Name === relationship);
         const end = association?.End.find((e) => e.$.Role === np.$.ToRole);
         if (!end) {
@@ -59,9 +65,9 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
       const container = this.schema.EntityContainer[0];
 
       container.FunctionImport?.forEach((funcImport) => {
-        const name = this.getOperationName(funcImport.$.Name);
+        const name = this.namingHelper.getFunctionName(funcImport.$.Name);
         const usePost = funcImport.$["m:HttpMethod"]?.toUpperCase() === "POST";
-        const parameters = funcImport.Parameter?.map(this.mapProperty) ?? [];
+        const parameters = funcImport.Parameter?.map(this.mapProp) ?? [];
 
         // TODO: the spec allows for multiple ReturnType elements
         // https://docs.microsoft.com/en-us/openspecs/windows_protocols/mc-csdl/f510f36a-36bf-47f4-ac41-4a0ff921fbfa
@@ -69,14 +75,14 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
         const returnTypeDef =
           funcImport.$.ReturnType || (funcImport.ReturnType?.length ? funcImport.ReturnType[0].$.Type : undefined);
         const returnType: PropertyModel | undefined = returnTypeDef
-          ? this.mapProperty({ $: { Name: "NO_NAME_BECAUSE_RETURN_TYPE", Type: returnTypeDef } })
+          ? this.mapProp({ $: { Name: "NO_NAME_BECAUSE_RETURN_TYPE", Type: returnTypeDef } })
           : undefined;
 
         const operation: OperationType = {
           name,
           odataName: funcImport.$.Name,
-          paramsModelName: pascalCase(funcImport.$.Name) + Digester.PARAMS_MODEL_SUFFIX,
-          qName: this.getQOperationName(funcImport.$.Name),
+          paramsModelName: this.namingHelper.getOperationParamsModelName(funcImport.$.Name),
+          qName: this.namingHelper.getQFunctionName(funcImport.$.Name),
           type: OperationTypes.Function,
           parameters,
           returnType,
@@ -94,12 +100,12 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
       });
 
       container.EntitySet?.forEach((entitySet) => {
-        const name = this.getEntryPointName(entitySet.$.Name);
+        const name = entitySet.$.Name;
 
         this.dataModel.addEntitySet(name, {
           name,
           odataName: entitySet.$.Name,
-          entityType: this.dataModel.getModel(this.getModelName(entitySet.$.EntityType)),
+          entityType: this.dataModel.getModel(this.namingHelper.getModelName(entitySet.$.EntityType)),
         });
       });
     }

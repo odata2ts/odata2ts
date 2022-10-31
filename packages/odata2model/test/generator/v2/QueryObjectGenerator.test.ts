@@ -1,8 +1,8 @@
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 
+import { RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { generateQueryObjects } from "../../../src/generator";
-import { RunOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
 import {
   EntityBasedGeneratorFunctionWithoutVersion,
@@ -15,8 +15,8 @@ describe("Query Object Generator Tests V2", () => {
   const TEST_SUITE_NAME = "Query Object Generator";
   const FIXTURE_BASE_PATH = "generator/qobject";
 
-  const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = (dataModel, sourceFile, genOptions) => {
-    return generateQueryObjects(dataModel, sourceFile, ODataVersions.V2, genOptions);
+  const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = (dataModel, sourceFile, genOptions, namingHelper) => {
+    return generateQueryObjects(dataModel, sourceFile, ODataVersions.V2, genOptions, namingHelper);
   };
 
   let odataBuilder: ODataModelBuilderV2;

@@ -12,48 +12,36 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
   private _qBestBook?: QBestBook;
   private _qPostBestBook?: QPostBestBook;
 
-  private _getQMostPop() {
+  public mostPop(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataCollectionResponseV2<TestEntity>> {
     if (!this._qMostPop) {
       this._qMostPop = new QMostPop();
     }
 
-    return this._qMostPop;
-  }
-
-  public mostPop(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataCollectionResponseV2<TestEntity>> {
-    const url = this.addFullPath(this._getQMostPop().buildUrl());
+    const url = this.addFullPath(this._qMostPop.buildUrl());
     return this.client.get(url, requestConfig);
-  }
-
-  private _getQBestBook() {
-    if (!this._qBestBook) {
-      this._qBestBook = new QBestBook();
-    }
-
-    return this._qBestBook;
   }
 
   public bestBook(
     params: BestBookParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<TestEntity>> {
-    const url = this.addFullPath(this._getQBestBook().buildUrl(params));
-    return this.client.get(url, requestConfig);
-  }
-
-  private _getQPostBestBook() {
-    if (!this._qPostBestBook) {
-      this._qPostBestBook = new QPostBestBook();
+    if (!this._qBestBook) {
+      this._qBestBook = new QBestBook();
     }
 
-    return this._qPostBestBook;
+    const url = this.addFullPath(this._qBestBook.buildUrl(params));
+    return this.client.get(url, requestConfig);
   }
 
   public postBestBook(
     params: PostBestBookParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<TestEntity>> {
-    const url = this.addFullPath(this._getQPostBestBook().buildUrl(params));
+    if (!this._qPostBestBook) {
+      this._qPostBestBook = new QPostBestBook();
+    }
+
+    const url = this.addFullPath(this._qPostBestBook.buildUrl(params));
     return this.client.post(url, undefined, requestConfig);
   }
 }

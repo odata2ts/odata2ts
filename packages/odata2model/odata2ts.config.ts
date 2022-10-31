@@ -51,13 +51,6 @@ const config: ConfigFileOptions = {
     models: {
       suffix: "Model",
     },
-    idModels: {
-      suffix: "Key",
-    },
-    queryObjects: {
-      namingStrategy: NamingStrategies.CONSTANT_CASE,
-      suffix: "QueryObject",
-    },
   },
 };
 

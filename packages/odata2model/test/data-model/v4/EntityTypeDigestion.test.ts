@@ -2,6 +2,7 @@ import { ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { DataTypes } from "../../../src/data-model/DataTypeModel";
+import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { getDefaultConfig } from "../../../src/defaultConfig";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
@@ -10,11 +11,12 @@ const NOOP_FN = () => {};
 describe("V2: EntityTypeDigestion Test", () => {
   const SERVICE_NAME = "Tester";
   const CONFIG = getDefaultConfig();
+  const NAMING_HELPER = new NamingHelper(CONFIG.naming, SERVICE_NAME);
 
   let odataBuilder: ODataModelBuilderV4;
 
   function doDigest() {
-    return digest(odataBuilder.getSchema(), CONFIG);
+    return digest(odataBuilder.getSchema(), CONFIG, NAMING_HELPER);
   }
 
   beforeEach(() => {

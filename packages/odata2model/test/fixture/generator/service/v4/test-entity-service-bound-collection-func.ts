@@ -31,16 +31,12 @@ export class BookCollectionService<ClientType extends ODataClient> extends Entit
     super(client, basePath, name, qBook, BookService, new QBookId(name));
   }
 
-  private _getQBestReview() {
+  public bestReview(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<string>> {
     if (!this._qBestReview) {
       this._qBestReview = new QBestReview();
     }
 
-    return this._qBestReview;
-  }
-
-  public bestReview(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<string>> {
-    const url = this.addFullPath(this._getQBestReview().buildUrl());
+    const url = this.addFullPath(this._qBestReview.buildUrl());
     return this.client.get(url, requestConfig);
   }
 }

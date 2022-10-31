@@ -10,19 +10,15 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
   private _name: string = "Tester";
   private _qBestBook?: QBestBook;
 
-  private _getQBestBook() {
-    if (!this._qBestBook) {
-      this._qBestBook = new QBestBook();
-    }
-
-    return this._qBestBook;
-  }
-
   public bestBook(
     params: BestBookParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<TestEntity>> {
-    const url = this.addFullPath(this._getQBestBook().buildUrl(params));
+    if (!this._qBestBook) {
+      this._qBestBook = new QBestBook();
+    }
+
+    const url = this.addFullPath(this._qBestBook.buildUrl(params));
     return this.client.get(url, requestConfig);
   }
 }

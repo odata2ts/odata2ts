@@ -14,27 +14,27 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
   EditableBook,
   QBook
 > {
-  private _authorSrv?: AuthorService<ClientType>;
-  private _relatedAuthorsSrv?: AuthorCollectionService<ClientType>;
+  private _author?: AuthorService<ClientType>;
+  private _relatedAuthors?: AuthorCollectionService<ClientType>;
 
   constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qBook);
   }
 
   public getAuthorSrv(): AuthorService<ClientType> {
-    if (!this._authorSrv) {
-      this._authorSrv = new AuthorService(this.client, this.getPath(), "author");
+    if (!this._author) {
+      this._author = new AuthorService(this.client, this.getPath(), "author");
     }
 
-    return this._authorSrv;
+    return this._author;
   }
 
   public getRelatedAuthorsSrv(): AuthorCollectionService<ClientType> {
-    if (!this._relatedAuthorsSrv) {
-      this._relatedAuthorsSrv = new AuthorCollectionService(this.client, this.getPath(), "relatedAuthors");
+    if (!this._relatedAuthors) {
+      this._relatedAuthors = new AuthorCollectionService(this.client, this.getPath(), "relatedAuthors");
     }
 
-    return this._relatedAuthorsSrv;
+    return this._relatedAuthors;
   }
 }
 

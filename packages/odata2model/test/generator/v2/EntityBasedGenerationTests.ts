@@ -1,7 +1,7 @@
-import { ODataTypesV2 } from "@odata2ts/odata-core";
+import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
 
+import { RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { RunOptions } from "../../../src/OptionModel";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
 import {
   EntityBasedGeneratorFunctionWithoutVersion,
@@ -55,7 +55,11 @@ export function createEntityBasedGenerationTests(
 
   test(`${testSuiteName}: complex type with editable`, async () => {
     // given one minimal model
-    odataBuilder.addComplexType("Brand", undefined, (builder) => builder.addProp("naming", ODataTypesV2.Boolean));
+    odataBuilder
+      .addComplexType("Brand", undefined, (builder) =>
+        builder.addProp("naming", ODataTypesV2.Boolean).addProp("complex", SERVICE_NAME + ".Test")
+      )
+      .addComplexType("Test", undefined, (builder) => builder.addProp("test", ODataTypesV2.Boolean));
 
     // when generating model
     // then match fixture text

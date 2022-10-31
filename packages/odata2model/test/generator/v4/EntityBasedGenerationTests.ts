@@ -1,8 +1,7 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 
-import { ConfigFileOptions } from "../../../src";
+import { ConfigFileOptions, NamingStrategies, RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { DigestionOptions } from "../../../src/FactoryFunctionModel";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import {
   EntityBasedGeneratorFunctionWithoutVersion,
@@ -34,7 +33,11 @@ export function createEntityBasedGenerationTests(
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
   });
 
-  async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<DigestionOptions>) {
+  async function generateAndCompare(
+    id: string,
+    fixturePath: string,
+    genOptions?: Partial<Omit<RunOptions, "source" | "output">>
+  ) {
     await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), genOptions);
   }
 
@@ -61,7 +64,11 @@ export function createEntityBasedGenerationTests(
 
   test(`${testSuiteName}: complex type with editable`, async () => {
     // given one minimal model
-    odataBuilder.addComplexType("Brand", undefined, (builder) => builder.addProp("naming", ODataTypesV4.Boolean));
+    odataBuilder
+      .addComplexType("Brand", undefined, (builder) =>
+        builder.addProp("naming", ODataTypesV4.Boolean).addProp("complex", SERVICE_NAME + ".Test")
+      )
+      .addComplexType("Test", undefined, (builder) => builder.addProp("test", ODataTypesV4.Boolean));
 
     // when generating model
     // then match fixture text
@@ -122,7 +129,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("entity-relationships", "entity-relationships.ts");
+    await generateAndCompare("entity-relationships", "entity-relationships.ts", { skipEditableModels: false });
   });
 
   test(`${testSuiteName}: base class`, async () => {
@@ -221,6 +228,44 @@ export function createEntityBasedGenerationTests(
     // then match fixture text
     await generateAndCompare("converter-with-model", "entity-converter-with-model.ts", {
       converters: [{ module: "@odata2ts/test-converters", use: ["stringToPrefixModelConverter"] }],
+    });
+  });
+
+  test(`${testSuiteName}: model naming`, async () => {
+    // given an entity with enum props
+    odataBuilder
+      .addEntityType("parent", undefined, (builder) => builder.addKeyProp("parentId", ODataTypesV4.Boolean))
+      .addEntityType(ENTITY_NAME, SERVICE_NAME + ".parent", (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Boolean)
+          .addProp("myChoice", `${SERVICE_NAME}.Choice`, false)
+          .addProp("address", `${SERVICE_NAME}.LOCATION`)
+      )
+      .addEnumType("Choice", [
+        { name: "A", value: 1 },
+        { name: "B", value: 2 },
+      ])
+      .addComplexType("LOCATION", undefined, (builder) => builder.addProp("TEST", ODataTypesV4.Boolean));
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("modelNaming", "model-naming.ts", {
+      skipEditableModels: false,
+      skipIdModels: false,
+      naming: {
+        models: {
+          suffix: "model",
+          namingStrategy: NamingStrategies.CONSTANT_CASE,
+          idModels: {
+            suffix: "Key",
+            applyModelNaming: false,
+          },
+          editableModels: {
+            prefix: "Edit",
+          },
+        },
+        queryObjects: { prefix: "", suffix: "QObj", namingStrategy: NamingStrategies.CONSTANT_CASE },
+      },
     });
   });
 }

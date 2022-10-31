@@ -14,8 +14,8 @@ import { SERVICE_NAME, createEntityBasedGenerationTests } from "./EntityBasedGen
 describe("Model Generator Tests V2", () => {
   const TEST_SUITE_NAME = "Model Generator";
   const FIXTURE_BASE_PATH = "generator/model";
-  const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = (dataModel, sourceFile, genOptions) => {
-    return generateModels(dataModel, sourceFile, ODataVersions.V2, genOptions);
+  const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = (dataModel, sourceFile, genOptions, namingHelper) => {
+    return generateModels(dataModel, sourceFile, ODataVersions.V2, genOptions, namingHelper);
   };
 
   let odataBuilder: ODataModelBuilderV2;
