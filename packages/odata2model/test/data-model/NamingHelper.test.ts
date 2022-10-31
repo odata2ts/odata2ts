@@ -46,6 +46,7 @@ describe("NamingHelper Tests", function () {
     expect(toTest.getActionName("TEST")).toBe("test");
     expect(toTest.getEntryPointName("TEST")).toBe("test");
     expect(toTest.getRelatedServiceGetter("TEST")).toBe("getTestSrv");
+    expect(toTest.getPrivatePropName("TEST")).toBe("_test");
   });
 
   test("failure cases", () => {
@@ -298,5 +299,16 @@ describe("NamingHelper Tests", function () {
     createHelper();
 
     expect(toTest.getRelatedServiceGetter("TEST")).toBe("PREF_TEST_SUF");
+  });
+
+  test("Service: get private prop name", () => {
+    options.services!.privateProps = {
+      namingStrategy: NamingStrategies.CONSTANT_CASE,
+      prefix: "PREF",
+      suffix: "suf",
+    };
+    createHelper();
+
+    expect(toTest.getPrivatePropName("test")).toBe("PREF_TEST_SUF");
   });
 });

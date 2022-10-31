@@ -160,4 +160,9 @@ export interface ServiceNamingOptions extends NamingStrategyOption, StandardNami
    * By default, namingStrategy = camelCase
    */
   entryPointNames?: NamingStrategyOption & StandardNamingOptions;
+
+  /**
+   * Private property naming for service classes.
+   */
+  privateProps?: NamingStrategyOption & StandardNamingOptions;
 }

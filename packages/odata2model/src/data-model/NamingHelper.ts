@@ -83,9 +83,19 @@ export class NamingHelper {
     }
 
     return (value: string, options?: StandardNamingOptions) => {
-      return strategyFn(
-        (options?.prefix ? options.prefix + "_" : "") + value + (options?.suffix ? "_" + options.suffix : "")
-      );
+      const prefix = options?.prefix;
+      const suffix = options?.suffix;
+      const isPrefixSpecialChar = prefix?.startsWith("_");
+      const isSuffixSpecialChar = suffix?.endsWith("_");
+
+      let result = strategyFn((prefix ? prefix + "_" : "") + value + (suffix ? "_" + suffix : ""));
+      if (isPrefixSpecialChar) {
+        result = "_" + result;
+      }
+      if (isSuffixSpecialChar) {
+        result = result + "_";
+      }
+      return result;
     };
   }
 
@@ -179,10 +189,17 @@ export class NamingHelper {
     return this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
   }
 
-  public getServiceName(name: string) {
+  public getServiceName = (name: string) => {
     const opts = this.options.services;
     return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
-  }
+  };
+
+  public getCollectionServiceName = (name: string) => {
+    const opts = this.options.services;
+    const strategy = this.namingFunction(opts?.namingStrategy);
+    const result = this.getName(name, strategy, opts?.collection);
+    return opts?.collection?.applyServiceNaming ? this.getName(result, strategy, opts) : result;
+  };
 
   public getFunctionName(name: string) {
     const opts = this.options.services?.operations;
@@ -192,13 +209,6 @@ export class NamingHelper {
   public getActionName(name: string) {
     const opts = this.options.services?.operations;
     return this.getName(name, this.getOperationNamingStrategy(), opts?.action || opts);
-  }
-
-  public getCollectionServiceName(name: string) {
-    const opts = this.options.services;
-    const strategy = this.namingFunction(opts?.namingStrategy);
-    const result = this.getName(name, strategy, opts?.collection);
-    return opts?.collection?.applyServiceNaming ? this.getName(result, strategy, opts) : result;
   }
 
   public getEntryPointName(name: string) {
@@ -211,4 +221,9 @@ export class NamingHelper {
     const opts = this.options.services?.relatedServiceGetter;
     return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
   }
+
+  public getPrivatePropName = (name: string) => {
+    const opts = this.options.services?.privateProps;
+    return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
+  };
 }

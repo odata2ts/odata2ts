@@ -2,7 +2,7 @@ import { ODataVersions } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
 import { Project, SourceFile } from "ts-morph";
 
-import { ConfigFileOptions, RunOptions, getDefaultConfig } from "../../../src";
+import { RunOptions, getDefaultConfig } from "../../../src";
 import { DataModel } from "../../../src/data-model/DataModel";
 import { Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
@@ -46,7 +46,7 @@ export class FixtureComparatorHelper {
     id: string,
     fixturePath: string,
     schema: Schema<any, any>,
-    options?: ConfigFileOptions
+    options?: Partial<Omit<RunOptions, "source" | "output">>
   ) {
     const sourceFile = project.createSourceFile(id);
     const mergedOpts = options ? (deepmerge(DEFAULT_RUN_OPTIONS, options) as RunOptions) : DEFAULT_RUN_OPTIONS;
@@ -79,9 +79,9 @@ export class ServiceFixtureComparatorHelper {
   public async generateService(
     schema: Schema<any, any>,
     project: ProjectManager,
+    namingHelper: NamingHelper,
     runOptions: RunOptions = DEFAULT_RUN_OPTIONS
   ) {
-    const namingHelper = new NamingHelper(runOptions.naming, schema.$.Namespace, runOptions.serviceName);
     const dataModel = await this.digest(schema, runOptions, namingHelper);
 
     await generateServices(dataModel, project, this.version, namingHelper);

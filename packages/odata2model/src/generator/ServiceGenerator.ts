@@ -19,16 +19,6 @@ import {
 import { NamingHelper } from "../data-model/NamingHelper";
 import { ProjectManager } from "../project/ProjectManager";
 import { ImportContainer } from "./ImportContainer";
-import {
-  getCollectionServiceName,
-  getGetterNameForService,
-  getPrivateGetterName,
-  getPrivatePropName,
-  getPropNameForService,
-  getServiceName,
-  getServiceNameForProp,
-  getServiceNamesForProp,
-} from "./ServiceNamingHelper";
 
 const ROOT_SERVICE = "ODataService";
 
@@ -76,17 +66,21 @@ class ServiceGenerator {
       properties: [
         {
           scope: Scope.Private,
-          name: "_name",
+          name: this.namingHelper.getPrivatePropName("name"),
           type: "string",
           initializer: `"${this.namingHelper.getODataServiceName()}"`,
         },
-        ...this.generateServiceTypeProps(container.entitySets, getCollectionServiceName, importContainer),
-        ...this.generateServiceTypeProps(container.singletons, getServiceName, importContainer),
+        ...this.generateServiceTypeProps(
+          container.entitySets,
+          this.namingHelper.getCollectionServiceName,
+          importContainer
+        ),
+        ...this.generateServiceTypeProps(container.singletons, this.namingHelper.getServiceName, importContainer),
         ...Object.values(unboundOperations).map(({ operation }) => this.generateQOperationProps(operation)),
       ],
       methods: [
-        ...this.generateServiceTypeGetters(container.entitySets, getCollectionServiceName),
-        ...this.generateServiceTypeGetters(container.singletons, getServiceName),
+        ...this.generateServiceTypeGetters(container.entitySets, this.namingHelper.getCollectionServiceName),
+        ...this.generateServiceTypeGetters(container.singletons, this.namingHelper.getServiceName),
         ...this.generateUnboundOperations(unboundOperations, importContainer),
       ],
     });
@@ -102,42 +96,42 @@ class ServiceGenerator {
     return Object.values(services).map(({ name, entityType }) => {
       const type = typeRetriever(entityType.name);
 
-      importContainer.addGeneratedService(getServiceName(entityType.name), type);
+      importContainer.addGeneratedService(this.namingHelper.getServiceName(entityType.name), type);
 
       return {
         scope: Scope.Private,
-        name: getPropNameForService(name),
+        name: this.namingHelper.getPrivatePropName(name),
         type: `${type}<ClientType>`,
         hasQuestionToken: true,
       };
     });
   }
 
-  private generateQOperationProps(operation: OperationType) {
+  private generateQOperationProps = (operation: OperationType) => {
     return {
       scope: Scope.Private,
-      name: getPrivatePropName(operation.qName),
+      name: this.namingHelper.getPrivatePropName(operation.qName),
       type: operation.qName,
       hasQuestionToken: true,
     };
-  }
+  };
 
   private generateServiceTypeGetters(
     services: Record<string, SingletonType | EntitySetType>,
     typeRetriever: (name: string) => string
   ): OptionalKind<MethodDeclarationStructure>[] {
     return Object.values(services).map(({ name, odataName, entityType }) => {
-      const propName = getPropNameForService(name);
+      const propName = "this." + this.namingHelper.getPrivatePropName(name);
       const serviceType = typeRetriever(entityType.name);
       return {
         scope: Scope.Public,
-        name: getGetterNameForService(name),
+        name: this.namingHelper.getRelatedServiceGetter(name),
         statements: [
-          `if(!this.${propName}) {`,
+          `if(!${propName}) {`,
           // prettier-ignore
-          `  this.${propName} = new ${serviceType}(this.client, this.getPath(), "${odataName}")`,
+          `  ${propName} = new ${serviceType}(this.client, this.getPath(), "${odataName}")`,
           "}",
-          `return this.${propName}`,
+          `return ${propName}`,
         ],
       };
     });
@@ -208,7 +202,8 @@ class ServiceGenerator {
   ): Array<PropertyDeclarationStructure> {
     return modelProps.map((prop) => {
       const complexType = this.dataModel.getComplexType(prop.type);
-      let [key, propModelType] = getServiceNamesForProp(prop);
+      const key = this.namingHelper.getServiceName(prop.type);
+      let propModelType = prop.isCollection ? this.namingHelper.getCollectionServiceName(prop.type) : key;
 
       if (prop.isCollection && complexType) {
         const editableName = complexType.editableName;
@@ -227,7 +222,7 @@ class ServiceGenerator {
 
       return {
         scope: Scope.Private,
-        name: getPropNameForService(prop.name),
+        name: this.namingHelper.getPrivatePropName(prop.name),
         type: propModelType,
         hasQuestionToken: true,
       } as PropertyDeclarationStructure;
@@ -260,7 +255,7 @@ class ServiceGenerator {
 
       return {
         scope: Scope.Private,
-        name: getPropNameForService(prop.name),
+        name: this.namingHelper.getPrivatePropName(prop.name),
         type: `${collectionType}`,
         hasQuestionToken: true,
       } as PropertyDeclarationStructure;
@@ -272,24 +267,29 @@ class ServiceGenerator {
     collectionServiceType: string
   ): Array<MethodDeclarationStructure> {
     return modelProps.map((prop) => {
-      const propName = getPropNameForService(prop.name);
       const complexType = this.dataModel.getComplexType(prop.type);
       const isComplexCollection = prop.isCollection && complexType;
-      const type = isComplexCollection ? collectionServiceType : getServiceNameForProp(prop);
+      const type = isComplexCollection
+        ? collectionServiceType
+        : prop.isCollection
+        ? this.namingHelper.getCollectionServiceName(prop.type)
+        : this.namingHelper.getServiceName(prop.type);
       const typeWithGenerics = isComplexCollection
         ? `${collectionServiceType}<ClientType, ${complexType.name}, ${complexType.qName}, ${complexType.editableName}>`
         : `${type}<ClientType>`;
 
+      const privateSrvProp = "this." + this.namingHelper.getPrivatePropName(prop.name);
+
       return {
         scope: Scope.Public,
-        name: getGetterNameForService(prop.name),
+        name: this.namingHelper.getRelatedServiceGetter(prop.name),
         returnType: typeWithGenerics,
         statements: [
-          `if(!this.${propName}) {`,
+          `if(!${privateSrvProp}) {`,
           // prettier-ignore
-          `  this.${propName} = new ${type}(this.client, this.getPath(), "${prop.odataName}"${isComplexCollection ? `, ${firstCharLowerCase(complexType.qName)}`: ""})`,
+          `  ${privateSrvProp} = new ${type}(this.client, this.getPath(), "${prop.odataName}"${isComplexCollection ? `, ${firstCharLowerCase(complexType.qName)}`: ""})`,
           "}",
-          `return this.${propName}`,
+          `return ${privateSrvProp}`,
         ],
       } as MethodDeclarationStructure;
     });
@@ -300,16 +300,16 @@ class ServiceGenerator {
     collectionServiceType: string
   ): Array<MethodDeclarationStructure> {
     return primColProps.map((prop) => {
-      const propName = getPropNameForService(prop.name);
+      const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
       return {
         scope: Scope.Public,
-        name: getGetterNameForService(prop.name),
+        name: this.namingHelper.getRelatedServiceGetter(prop.name),
         statements: [
-          `if(!this.${propName}) {`,
+          `if(!${propName}) {`,
           // prettier-ignore
-          `  this.${propName} = new ${collectionServiceType}(this.client, this.getPath(), "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)})`,
+          `  ${propName} = new ${collectionServiceType}(this.client, this.getPath(), "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)})`,
           "}",
-          `return this.${propName}`,
+          `return ${propName}`,
         ],
       } as MethodDeclarationStructure;
     });
@@ -333,7 +333,7 @@ class ServiceGenerator {
 
     serviceFile.addClass({
       isExported: true,
-      name: getCollectionServiceName(model.name),
+      name: this.namingHelper.getCollectionServiceName(model.name),
       typeParameters: ["ClientType extends ODataClient"],
       extends:
         entitySetServiceType +
@@ -358,7 +358,7 @@ class ServiceGenerator {
   private async generateModelServices() {
     // build service file for each entity, consisting of EntityTypeService & EntityCollectionService
     for (const model of this.dataModel.getModels()) {
-      const serviceName = getServiceName(model.name);
+      const serviceName = this.namingHelper.getServiceName(model.name);
       const serviceFile = await this.project.createServiceFile(serviceName);
       const importContainer = new ImportContainer(this.namingHelper.getFileNames());
 
@@ -373,7 +373,7 @@ class ServiceGenerator {
 
     // build service file for complex types
     for (const model of this.dataModel.getComplexTypes()) {
-      const serviceName = getServiceName(model.name);
+      const serviceName = this.namingHelper.getServiceName(model.name);
       const serviceFile = await this.project.createServiceFile(serviceName);
       const importContainer = new ImportContainer(this.namingHelper.getFileNames());
 
@@ -385,7 +385,6 @@ class ServiceGenerator {
 
   private generateBoundOperations(operations: Array<OperationType>, importContainer: ImportContainer) {
     return operations.reduce<Array<OptionalKind<MethodDeclarationStructure>>>((collector, operation) => {
-      collector.push(this.generateQOperationGetter(operation));
       collector.push(this.generateMethod(operation.name, operation, importContainer));
 
       return collector;
@@ -398,28 +397,12 @@ class ServiceGenerator {
   ) {
     return Object.values(operations).reduce<Array<OptionalKind<MethodDeclarationStructure>>>(
       (collector, { name, operation }) => {
-        collector.push(this.generateQOperationGetter(operation));
         collector.push(this.generateMethod(name, operation, importContainer));
 
         return collector;
       },
       []
     );
-  }
-
-  private generateQOperationGetter(operation: OperationType): OptionalKind<MethodDeclarationStructure> {
-    const propName = getPrivatePropName(operation.qName);
-    return {
-      scope: Scope.Private,
-      name: getPrivateGetterName(operation.qName),
-      statements: [
-        `if(!this.${propName}) {`,
-        // prettier-ignore
-        `  this.${propName} = new ${operation.qName}()`,
-        "}",
-        `return this.${propName}`,
-      ],
-    };
   }
 
   private generateMethod(
@@ -448,6 +431,8 @@ class ServiceGenerator {
       importContainer.addGeneratedModel(operation.paramsModelName);
     }
 
+    const qOpProp = "this." + this.namingHelper.getPrivatePropName(operation.qName);
+
     return {
       scope: Scope.Public,
       name,
@@ -456,9 +441,12 @@ class ServiceGenerator {
         : [requestConfigParam],
       returnType: `ODataResponse<${odataType}<${returnType}>>`,
       statements: [
-        `const url = this.addFullPath(this.${getPrivateGetterName(operation.qName)}().buildUrl(${
-          isFunc && hasParams ? "params" : ""
-        }))`,
+        `if(!${qOpProp}) {`,
+        // prettier-ignore
+        `  ${qOpProp} = new ${operation.qName}()`,
+        "}",
+
+        `const url = this.addFullPath(${qOpProp}.buildUrl(${isFunc && hasParams ? "params" : ""}))`,
         `return this.client.${
           !isFunc
             ? // actions: since V4

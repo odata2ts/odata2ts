@@ -70,6 +70,10 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
         namingStrategy: NamingStrategies.PASCAL_CASE,
         suffix: "Service",
       },
+      privateProps: {
+        namingStrategy: NamingStrategies.CAMEL_CASE,
+        prefix: "_",
+      },
     },
   },
   propertyTypes: [],

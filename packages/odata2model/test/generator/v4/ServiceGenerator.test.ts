@@ -32,7 +32,7 @@ describe("Service Generator Tests V4", () => {
     const namingHelper = new NamingHelper(runOptions.naming, SERVICE_NAME);
     projectManager = await createProjectManager(namingHelper.getFileNames(), "build", EmitModes.ts, true);
 
-    await fixtureComparatorHelper.generateService(odataBuilder.getSchema(), projectManager);
+    await fixtureComparatorHelper.generateService(odataBuilder.getSchema(), projectManager, namingHelper);
   }
 
   function getV4SpecificPath(fixture: string, v4Specific: boolean) {
