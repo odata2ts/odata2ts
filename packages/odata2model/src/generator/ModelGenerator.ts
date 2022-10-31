@@ -161,8 +161,12 @@ class ModelGenerator {
   }
 
   private getEditablePropType(prop: PropertyModel): string {
-    const isEditableModel = [DataTypes.ModelType, DataTypes.ComplexType].includes(prop.dataType);
-    let type = isEditableModel ? this.namingHelper.getEditableModelName(prop.type) : prop.type;
+    const type =
+      prop.dataType === DataTypes.ModelType
+        ? this.dataModel.getModel(prop.type).editableName
+        : prop.dataType === DataTypes.ComplexType
+        ? this.dataModel.getComplexType(prop.type).editableName
+        : prop.type;
 
     // Collections
     if (prop.isCollection) {
