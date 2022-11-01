@@ -4,7 +4,7 @@ import { QAction, QStringParam } from "@odata2ts/odata-query-objects";
 import { MinActionParams } from "./TesterModel";
 
 export class QMinAction extends QAction<MinActionParams> {
-  private readonly params = [new QStringParam("test"), new QStringParam("optTest")];
+  private readonly params = [new QStringParam("test"), new QStringParam("opt_Test", "optTest")];
 
   constructor() {
     super("MinAction");

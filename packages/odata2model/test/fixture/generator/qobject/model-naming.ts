@@ -10,7 +10,7 @@ export class PARENT_Q_OBJ extends QueryObject {
 export const pARENT_Q_OBJ = new PARENT_Q_OBJ();
 
 export class PARENT_ID_Q_OBJ extends QId<PARENT_KEY> {
-  private readonly params = [new QBooleanParam("parentId")];
+  private readonly params = [new QBooleanParam("parentId", "PARENT_ID")];
 
   getParams() {
     return this.params;
@@ -19,14 +19,14 @@ export class PARENT_ID_Q_OBJ extends QId<PARENT_KEY> {
 
 export class BOOK_Q_OBJ extends PARENT_Q_OBJ {
   public readonly id = new QBooleanPath(this.withPrefix("id"));
-  public readonly myChoice = new QEnumPath(this.withPrefix("myChoice"));
-  public readonly address = new QEntityPath(this.withPrefix("address"), () => LOCATION_Q_OBJ);
+  public readonly myChoice = new QEnumPath(this.withPrefix("my_Choice"));
+  public readonly address = new QEntityPath(this.withPrefix("Address"), () => LOCATION_Q_OBJ);
 }
 
 export const bOOK_Q_OBJ = new BOOK_Q_OBJ();
 
 export class BOOK_ID_Q_OBJ extends QId<BOOK_KEY> {
-  private readonly params = [new QBooleanParam("parentId"), new QBooleanParam("id")];
+  private readonly params = [new QBooleanParam("parentId", "PARENT_ID"), new QBooleanParam("id", "ID")];
 
   getParams() {
     return this.params;

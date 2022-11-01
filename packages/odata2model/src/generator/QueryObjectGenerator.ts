@@ -196,7 +196,7 @@ class QueryObjectGenerator {
         if (prop.qParam) {
           importContainer.addFromQObject(prop.qParam);
         }
-        const isMappedNameNecessary = false; //TODO prop.odataName !== prop.name;
+        const isMappedNameNecessary = prop.odataName !== prop.name;
         const mappedName = isMappedNameNecessary ? `"${prop.name}"` : prop.converters?.length ? "undefined" : undefined;
         const converterStmt = this.generateConverterStmt(prop.converters, importContainer);
         return `new ${prop.qParam}("${prop.odataName}"${mappedName ? `, ${mappedName}` : ""}${
