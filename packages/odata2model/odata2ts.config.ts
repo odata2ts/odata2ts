@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "@odata2ts/odata2model";
+import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2model";
 
 const config: ConfigFileOptions = {
   debug: false,
@@ -14,18 +14,15 @@ const config: ConfigFileOptions = {
       // serviceName: "TrippinService",
       source: "int-test/fixture/v4/trippin.xml",
       output: "build/v4/trippin",
-      propertyTypes: [
+      propertiesByName: [
         {
-          name: "ID",
+          name: "UserName",
           mappedName: "id",
           managed: true,
         },
-        ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({
-          name: prop,
-          managed: true,
-        })),
+        ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
       ],
-      modelTypes: [
+      entitiesByName: [
         {
           name: "Product",
           mappedName: "prod666uct",

@@ -73,8 +73,8 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
       },
     },
   },
-  propertyTypes: [],
-  modelTypes: [],
+  propertiesByName: [],
+  entitiesByName: [],
 };
 
 /**

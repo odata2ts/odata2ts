@@ -256,6 +256,7 @@ export function createEntityBasedGenerationTests(
         models: {
           suffix: "model",
           namingStrategy: NamingStrategies.CONSTANT_CASE,
+          propNamingStrategy: NamingStrategies.CONSTANT_CASE,
           idModels: {
             suffix: "Key",
             applyModelNaming: false,

@@ -6,7 +6,7 @@ export interface Book {
   time: string | null;
   optionalDate: string | null;
   dateTimeOffset: string | null;
-  TestDecimal: number | null;
+  testDecimal: number | null;
   testBinary: string | null;
   testAny: string | null;
   multipleStrings: Array<string>;
@@ -29,7 +29,7 @@ export interface EditableBook
         | "time"
         | "optionalDate"
         | "dateTimeOffset"
-        | "TestDecimal"
+        | "testDecimal"
         | "testBinary"
         | "testAny"
         | "multipleStrings"

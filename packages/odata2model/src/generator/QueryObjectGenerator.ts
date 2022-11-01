@@ -98,7 +98,8 @@ class QueryObjectGenerator {
     importContainer: ImportContainer
   ): Array<OptionalKind<PropertyDeclarationStructure>> {
     return props.map((prop) => {
-      const { name, odataName } = prop;
+      const { odataName } = prop;
+      const name = this.namingHelper.getQPropName(odataName);
       const isModelType = prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
       let qPathInit: string;
 

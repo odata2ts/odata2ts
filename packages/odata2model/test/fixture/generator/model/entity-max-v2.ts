@@ -13,7 +13,7 @@ export interface Book {
   testInt64: string | null;
   testSingle: string | null;
   testDouble: string | null;
-  TestDecimal: string | null;
+  testDecimal: string | null;
   testBinary: string | null;
   testAny: string | null;
   multipleIds: Array<string>;
@@ -44,7 +44,7 @@ export interface EditableBook
         | "testInt64"
         | "testSingle"
         | "testDouble"
-        | "TestDecimal"
+        | "testDecimal"
         | "testBinary"
         | "testAny"
         | "multipleIds"
