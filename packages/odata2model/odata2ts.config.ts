@@ -5,19 +5,43 @@ const config: ConfigFileOptions = {
   mode: Modes.service,
   emitMode: EmitModes.ts,
   prettier: true,
+  naming: {
+    models: {
+      suffix: "Model",
+    },
+  },
   services: {
     odata: {
       source: "int-test/fixture/v2/odata.xml",
       output: "build/v2/odata",
+      propertiesByName: [
+        {
+          name: "ID",
+          mappedName: "id",
+        },
+      ],
     },
     trippin: {
       // serviceName: "TrippinService",
       source: "int-test/fixture/v4/trippin.xml",
       output: "build/v4/trippin",
+      naming: {
+        queryObjects: {
+          operations: {
+            function: { suffix: "Function" },
+            action: { suffix: "Action" },
+          },
+        },
+      },
       propertiesByName: [
         {
           name: "UserName",
-          mappedName: "id",
+          mappedName: "user",
+          managed: true,
+        },
+        {
+          name: "Gender",
+          mappedName: "TraditionalGenderCategories",
           managed: true,
         },
         ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
@@ -42,11 +66,6 @@ const config: ConfigFileOptions = {
     nw4: {
       source: "int-test/fixture/v4/northwind.xml",
       output: "build/v4/northwind",
-    },
-  },
-  naming: {
-    models: {
-      suffix: "Model",
     },
   },
 };

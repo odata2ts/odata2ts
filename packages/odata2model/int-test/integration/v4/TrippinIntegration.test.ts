@@ -3,33 +3,35 @@ import { TrippinService } from "../../../build/v4/trippin/TrippinService";
 import { TestODataClient } from "../../TestODataClient";
 
 describe("Integration Testing of Service Generation", () => {
-  const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
+  const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(0i1abrnxnvfig05jk1s4yxpi))";
   const odataClient = new TestODataClient();
 
   const testService = new TrippinService(odataClient, BASE_URL);
 
-  test("unbound action", async () => {
+  // skipped, because it breaks the session state
+  test.skip("unbound action", async () => {
     const result = await testService.resetDataSource();
     expect(result.data).toBe("");
   });
 
   test("unbound function", async () => {
     const result = await testService.getPersonWithMostFriends();
-    expect(result.data.FirstName).toBe("Russell");
-    expect(result.data.LastName).toBe("Whyte");
+    expect(result.data.firstName).toBe("Russell");
+    expect(result.data.lastName).toBe("Whyte");
   });
 
   test("unbound function with params", async () => {
     const result = await testService.getNearestAirport({ lat: 123, lon: 345 });
-    expect(result.data.IcaoCode).toBe("ZBAA");
+    expect(result.data.icaoCode).toBe("ZBAA");
   });
 
   test("entityType query", async () => {
     const result = await testService.getPeopleSrv().get("russellwhyte").query();
     expect(result.status).toBe(200);
-    expect(result.data).toBeDefined();
-    expect(result.data.FirstName).toBe("Russell");
-    expect(result.data.LastName).toBe("Whyte");
+    expect(result.data).toMatchObject({
+      firstName: "Russell",
+      lastName: "Whyte",
+    });
   });
 
   test("entitySet query", async () => {
@@ -118,12 +120,12 @@ describe("Integration Testing of Service Generation", () => {
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data.value.length).toBe(1);
-    expect(result.data.value[0].Address).toBe("187 Suffolk Ln.");
+    expect(result.data.value[0].address).toBe("187 Suffolk Ln.");
   });
 
   test("create key and parse key", async () => {
     const expectedSimple = "test@testing.de";
-    const expectedComplex: PersonIdModel = { UserName: expectedSimple };
+    const expectedComplex: PersonIdModel = { user: expectedSimple };
 
     // simple version
     let result = testService.getPeopleSrv().createKey(expectedSimple);

@@ -19,11 +19,11 @@ describe("Testing Generation of TrippinService", () => {
 
   beforeEach(() => {
     editModel = {
-      UserName: "williams",
-      FavoriteFeature: FeatureModel.Feature1,
-      Features: [],
-      FirstName: "Heinz",
-      Gender: PersonGenderModel.Unknown,
+      user: "williams",
+      favoriteFeature: FeatureModel.Feature1,
+      features: [],
+      firstName: "Heinz",
+      traditionalGenderCategories: PersonGenderModel.Unknown,
     };
   });
 
@@ -73,7 +73,7 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("entitySet: get with complex id", async () => {
-    const testId: PersonIdModel = { UserName: "williams" };
+    const testId: PersonIdModel = { user: "williams" };
     const expected = `${BASE_URL}/People(UserName='williams')`;
 
     expect(testService.getPeopleSrv().get(testId).getPath()).toBe(expected);
@@ -83,12 +83,12 @@ describe("Testing Generation of TrippinService", () => {
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
     const model: EditablePersonModel = {
-      UserName: "williams",
-      FavoriteFeature: FeatureModel.Feature1,
-      Features: [],
-      FirstName: "Heinz",
-      Gender: PersonGenderModel.Unknown,
-      Age: 33,
+      user: "williams",
+      favoriteFeature: FeatureModel.Feature1,
+      features: [],
+      firstName: "Heinz",
+      traditionalGenderCategories: PersonGenderModel.Unknown,
+      age: 33,
     };
 
     await testService.getPeopleSrv().get(id).update(model);
@@ -102,7 +102,7 @@ describe("Testing Generation of TrippinService", () => {
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
     const model = {
-      Age: 44,
+      age: 44,
     };
 
     await testService.getPeopleSrv().get(id).patch(model);
@@ -142,8 +142,8 @@ describe("Testing Generation of TrippinService", () => {
     const complex = testService.getPeopleSrv().get("tester").getHomeAddressSrv();
 
     const model: EditableLocationModel = {
-      Address: "Test Address",
-      City: { Name: "Test City" },
+      address: "Test Address",
+      city: { name: "Test City" },
     };
     await complex.update(model);
 
@@ -168,7 +168,7 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("complex collection: create", async () => {
-    const model: EditableLocationModel = { Address: "TestAdress" };
+    const model: EditableLocationModel = { address: "TestAdress" };
     await testService.getPeopleSrv().get("tester").getAddressInfoSrv().add(model);
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
@@ -177,7 +177,7 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("complex collection: update", async () => {
-    const models = [{ Address: "TestAddress 1" }, { Address: "test 2" }];
+    const models = [{ address: "TestAddress 1" }, { address: "test 2" }];
     await testService.getPeopleSrv().get("tester").getAddressInfoSrv().update(models);
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);

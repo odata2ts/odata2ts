@@ -19,14 +19,14 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
 
   const testService = new ODataDemoService(odataClient, BASE_URL);
 
-  const PRODUCT_ZERO: Omit<ProductModel, "Category" | "Supplier"> = {
-    ID: 0,
-    Name: "Bread",
-    Description: "Whole grain bread",
-    ReleaseDate: "/Date(694224000000)/",
-    DiscontinuedDate: null,
-    Rating: 4,
-    Price: "2.5",
+  const PRODUCT_ZERO: Omit<ProductModel, "category" | "supplier"> = {
+    id: 0,
+    name: "Bread",
+    description: "Whole grain bread",
+    releaseDate: "/Date(694224000000)/",
+    discontinuedDate: null,
+    rating: 4,
+    price: "2.5",
   };
 
   test("list products with count", async () => {
@@ -71,12 +71,12 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
 
     // given
     const product: EditableProductModel = {
-      ID: 999,
-      Description: "Test Description",
-      Name: "TestName",
-      Price: "12.88",
-      Rating: 1,
-      ReleaseDate: "2022-12-31T12:15:59", //WTF?! => this should be "/Date(...)"
+      id: 999,
+      description: "Test Description",
+      name: "TestName",
+      price: "12.88",
+      rating: 1,
+      releaseDate: "2022-12-31T12:15:59", //WTF?! => this should be "/Date(...)"
     };
 
     // when creating the product
@@ -85,9 +85,9 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
     expect(result.data.d).toMatchObject({ ...product, ReleaseDate: "/Date(1672488959000)/" });
 
     // given a service for the new product
-    const productService = editableService.getProductsSrv().get(product.ID);
+    const productService = editableService.getProductsSrv().get(product.id);
     // when updating the description, we expect no error
-    await productService.patch({ Description: "Updated Desc" });
+    await productService.patch({ description: "Updated Desc" });
 
     // when deleting this new product, we expect no error
     await new Promise((res) => setTimeout(res, 1000));
@@ -128,7 +128,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
 
   test("create key and parse key", async () => {
     const expectedSimple = 333;
-    const expectedComplex = { ID: expectedSimple };
+    const expectedComplex = { id: expectedSimple };
 
     // simple version
     let result = testService.getProductsSrv().createKey(expectedSimple);
