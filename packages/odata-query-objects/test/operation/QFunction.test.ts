@@ -58,10 +58,8 @@ describe("QFunction Tests", () => {
   test("QFunction: multiple params", () => {
     const exampleFunction = new QBestBookFunction();
     const requiredParams: BestBookParamModel = {
-      // TODO: mappedName
-      TestNumber: 3,
-      // TODO: mappedName
-      test_Boolean: false,
+      testNumber: 3,
+      testBoolean: false,
       testString: "testing",
       testGuid: "aaa-bbb",
     };

@@ -14,12 +14,8 @@ import {
 } from "../../../src";
 
 export interface BestBookParamModel {
-  // TODO: mappedName
-  // testNumber: number;
-  TestNumber: number;
-  // TODO: mappedName
-  // testBoolean: boolean;
-  test_Boolean: boolean;
+  testNumber: number;
+  testBoolean: boolean;
   testString: string;
   testGuid: string;
   testDate?: string | null;
