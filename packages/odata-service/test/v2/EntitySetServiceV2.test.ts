@@ -22,7 +22,7 @@ describe("V2 EntitySetService Test", () => {
   });
 
   test("entitySet V2: QObject", async () => {
-    testService.patch("abab", { UserName: "holla" }, { test: "tester" });
+    await testService.patch("abab", { UserName: "holla" }, { test: "tester" });
 
     expect(testService.getQObject()).toBe(qPersonV2);
   });
