@@ -34,7 +34,7 @@ export interface ComplexEntity {
   y?: string;
   Z: boolean;
   az?: string; // DateString;
-  bz?: string; /// TimeOfDayString;
+  bz?: string; // TimeOfDayString;
   cz: string; //DateTimeOffsetString;
   xy?: SimpleEntity;
   xx: Array<SimpleEntity>;
@@ -49,16 +49,12 @@ export class QSimpleEntity extends QueryObject {
   public readonly name = new QStringPath(this.withPrefix("name"));
   public readonly feat = new QEnumPath(this.withPrefix("feat"));
   public readonly complexton = new QEntityPath(this.withPrefix("complexton"), () => QComplexEntity);
-
-  constructor(prefix?: string) {
-    super(prefix);
-  }
 }
 
 export const qSimple = new QSimpleEntity();
 
 export class QComplexEntity extends QueryObject {
-  public readonly id = new QGuidPath(this.withPrefix("ID"));
+  public readonly id = new QGuidPath(this.withPrefix("id"));
   public readonly x = new QNumberPath(this.withPrefix("x"));
   public readonly y = new QStringPath(this.withPrefix("y"));
   public readonly z = new QBooleanPath(this.withPrefix("Z"));
@@ -77,10 +73,6 @@ export class QComplexEntity extends QueryObject {
   );
   public readonly features = new QCollectionPath("features", () => QEnumCollection);
   public readonly favFeature = new QEnumPath("favFeature");
-
-  constructor(prefix?: string) {
-    super(prefix);
-  }
 }
 
 export const qComplex = new QComplexEntity();

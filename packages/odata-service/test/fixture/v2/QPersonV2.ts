@@ -14,19 +14,15 @@ import {
   QueryObject,
 } from "@odata2ts/odata-query-objects";
 
-import { GetSomethingFunctionParams } from "../PersonModel";
+import { GetSomethingFunctionParams, PersonModel } from "../PersonModel";
 
-export class QPersonV2 extends QueryObject {
+export class QPersonV2 extends QueryObject<PersonModel> {
   public readonly userName = new QStringV2Path(this.withPrefix("UserName"));
   public readonly age = new QNumberPath(this.withPrefix("Age"));
   public readonly favFeature = new QEnumPath(this.withPrefix("FavFeature"));
   public readonly features = new QCollectionPath(this.withPrefix("Features"), () => QEnumCollection);
   public readonly friends = new QEntityCollectionPath(this.withPrefix("Friends"), () => QPersonV2);
   public readonly bestFriend = new QEntityPath(this.withPrefix("BestFriend"), () => QPersonV2);
-
-  constructor(path?: string) {
-    super(path);
-  }
 }
 export const qPersonV2 = new QPersonV2();
 
