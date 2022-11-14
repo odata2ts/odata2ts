@@ -1,5 +1,7 @@
-import { QPathModel, QFilterExpression, QueryObject } from "..";
 import { LambdaFunctions } from "../odata/ODataModel";
+import { QFilterExpression } from "../QFilterExpression";
+import { QueryObject } from "../QueryObject";
+import { QPathModel } from "./QPathModel";
 
 export class QEntityCollectionPath<Q extends QueryObject> implements QPathModel {
   constructor(private path: string, private qEntityFn: () => new (prefix?: string) => Q) {

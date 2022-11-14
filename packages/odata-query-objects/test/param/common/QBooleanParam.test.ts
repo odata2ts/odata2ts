@@ -52,6 +52,7 @@ describe("QBooleanParam Tests", () => {
     expect(toTest.parseUrlValue("true")).toBe(true);
     expect(toTest.parseUrlValue("false")).toBe(false);
     expect(toTest.parseUrlValue("null")).toBe(null);
+    expect(toTest.parseUrlValue("test")).toBe(undefined);
     expect(toTest.parseUrlValue(undefined)).toBe(undefined);
 
     expect(toTestWithConverter.parseUrlValue("false")).toBe(0);

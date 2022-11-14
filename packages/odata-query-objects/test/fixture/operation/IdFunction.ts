@@ -1,5 +1,4 @@
-import { QStringParam } from "../../../src";
-import { QId } from "../../../src/operation/QId";
+import { QId, QStringParam } from "../../../src";
 
 export type BookIdModel =
   | string

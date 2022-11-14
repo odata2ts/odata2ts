@@ -8,6 +8,8 @@ export { QFunction } from "./operation/QFunction";
 export { QAction } from "./operation/QAction";
 export { QId } from "./operation/QId";
 
+export * from "./param/UrlParamModel";
+export * from "./param/UrlParamHelper";
 export { QParam } from "./param/QParam";
 
 export { QBooleanParam } from "./param/common/QBooleanParam";

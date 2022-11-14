@@ -1,4 +1,6 @@
-import { QEntityPath, QPath, QPathModel } from "./path";
+import { PartialDeep } from "type-fest";
+
+import { QEntityCollectionPath, QEntityPath, QPath, QPathModel } from "./internal";
 
 function getMapping(q: QueryObject) {
   return Object.entries(q)
@@ -9,7 +11,7 @@ function getMapping(q: QueryObject) {
     }, new Map());
 }
 
-export class QueryObject<T = any> {
+export class QueryObject<T extends object = any> {
   private __propMapping?: Map<string, keyof this>;
 
   constructor(private __prefix?: string) {}
@@ -44,29 +46,48 @@ export class QueryObject<T = any> {
    * @param odataModel data model as it is retrieved from the OData service
    * @returns the data model that the user is facing
    */
-  public convertFromOData(odataModel: object): Partial<T> {
+  public convertFromOData(odataModel: null): null;
+  public convertFromOData(odataModel: undefined): undefined;
+  public convertFromOData(odataModel: object): PartialDeep<T>;
+  public convertFromOData(odataModel: Array<object>): Array<PartialDeep<T>>;
+  public convertFromOData(odataModel: object | Array<object> | null | undefined) {
+    if (odataModel === null || odataModel === undefined) {
+      return odataModel;
+    }
     if (typeof odataModel !== "object") {
       throw new Error("The model must be an object!");
     }
 
-    return Object.entries(odataModel).reduce<any>((collector, [key, value]) => {
-      const propKey = this.__getPropMapping().get(key);
-      const prop = propKey ? (this[propKey] as unknown as QPathModel) : undefined;
-      if (prop && propKey) {
-        const asEntity = prop as QEntityPath<any>;
-        if (typeof asEntity.getEntity === "function") {
-          collector[propKey] = asEntity.getEntity().convertFromOData(value);
-        } else {
-          collector[propKey] = prop.converter ? prop.converter.convertFrom(value) : value;
-        }
-      }
-      // be permissive here to allow passing unknown values as they are
-      else {
-        collector[key] = value;
-      }
+    const isList = Array.isArray(odataModel);
+    const models = isList ? odataModel : [odataModel];
 
-      return collector;
-    }, {}) as T;
+    const result = models.map((model) => {
+      return Object.entries(model).reduce<any>((collector, [key, value]) => {
+        const propKey = this.__getPropMapping().get(key);
+        const prop = propKey ? (this[propKey] as unknown as QPathModel) : undefined;
+        if (prop && propKey) {
+          // complex props
+          const asComplexType = prop as QEntityPath<any>;
+          if (typeof asComplexType.getEntity === "function") {
+            const entity = asComplexType.getEntity();
+            collector[propKey] = entity.convertFromOData(value);
+          }
+          // primitive props
+          else {
+            collector[propKey] = prop.converter ? prop.converter.convertFrom(value) : value;
+          }
+        }
+
+        // be permissive here to allow passing unknown values as they are
+        else {
+          collector[key] = value;
+        }
+
+        return collector;
+      }, {}) as PartialDeep<T>;
+    });
+
+    return isList ? result : result[0];
   }
 
   /**
@@ -81,25 +102,40 @@ export class QueryObject<T = any> {
    * @param userModel the data model the user is facing
    * @retuns the data model that is consumable by the OData service
    */
-  public convertToOData(userModel: Partial<T>): object {
+  public convertToOData(userModel: null): null;
+  public convertToOData(userModel: undefined): undefined;
+  public convertToOData(userModel: PartialDeep<T>): object;
+  public convertToOData(userModel: Array<PartialDeep<T>>): Array<object>;
+  public convertToOData(userModel: PartialDeep<T> | Array<PartialDeep<T>> | null | undefined) {
+    if (userModel === null || userModel === undefined) {
+      return userModel;
+    }
     if (typeof userModel !== "object") {
       throw new Error("The model must be an object!");
     }
 
-    return Object.entries(userModel).reduce((collector, [key, value]) => {
-      // @ts-ignore
-      const prop: QPathModel = this[key];
-      const asEntity = prop as QEntityPath<any>;
-      if (typeof asEntity?.getEntity === "function") {
-        collector[prop.getPath()] = asEntity.getEntity().convertToOData(value);
-      } else if (prop) {
-        collector[prop.getPath()] = prop.converter ? prop.converter.convertTo(value) : value;
-      } else {
-        const knownProps = [...this.__getPropMapping().values()].join(",");
-        throw new Error(`Property [${key}] not found (in strict mode)! Known user model props: ${knownProps}`);
-      }
+    const isList = Array.isArray(userModel);
+    const models = isList ? userModel : [userModel];
 
-      return collector;
-    }, {} as any);
+    const result = models.map((model) => {
+      return Object.entries(model).reduce((collector, [key, value]) => {
+        // @ts-ignore
+        const prop: QPathModel = this[key];
+        const asEntity = prop as QEntityPath<any>;
+        if (typeof asEntity?.getEntity === "function") {
+          const entity = asEntity.getEntity();
+          collector[prop.getPath()] = entity.convertToOData(value);
+        } else if (prop) {
+          collector[prop.getPath()] = prop.converter ? prop.converter.convertTo(value) : value;
+        } else {
+          const knownProps = [...this.__getPropMapping().values()].join(",");
+          throw new Error(`Property [${key}] not found (in strict mode)! Known user model props: ${knownProps}`);
+        }
+
+        return collector;
+      }, {} as any);
+    });
+
+    return isList ? result : result[0];
   }
 }
