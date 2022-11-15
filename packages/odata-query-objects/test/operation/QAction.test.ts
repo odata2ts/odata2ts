@@ -15,7 +15,7 @@ describe("QAction Tests", () => {
     const requiredUserParams: ParamActionParamModel = {
       testGuid: "aaa-bbb",
       testString: "hi",
-      testBoolean: true,
+      testBoolean: 1,
       testNumber: 3,
     };
     const allUserParams: ParamActionParamModel = {
@@ -26,7 +26,7 @@ describe("QAction Tests", () => {
     const requiredODataParams: Record<string, any> = {
       testGuid: requiredUserParams.testGuid,
       TEST_STRING: requiredUserParams.testString,
-      testBoolean: requiredUserParams.testBoolean,
+      testBoolean: true,
       testNumber: requiredUserParams.testNumber,
     };
     const allODataParams: Record<string, any> = {
@@ -48,7 +48,7 @@ describe("QAction Tests", () => {
     const requiredUserParams: ParamActionParamModel = {
       testGuid: "aaa-bbb",
       testString: "hi",
-      testBoolean: true,
+      testBoolean: 1,
       testNumber: 3,
     };
     const exampleOperation = new QParamAction();

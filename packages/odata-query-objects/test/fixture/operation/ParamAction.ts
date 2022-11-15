@@ -1,3 +1,5 @@
+import { booleanToNumberConverter } from "@odata2ts/test-converters";
+
 import {
   QAction,
   QBooleanParam,
@@ -14,7 +16,7 @@ export const PARAM_ACTION_NAME = "ParaM_ACTion";
 export interface ParamActionParamModel {
   testString: string;
   testNumber: number;
-  testBoolean: boolean;
+  testBoolean: number;
   testGuid: string;
   testDate?: string | null;
   testTime?: string | null;
@@ -25,7 +27,7 @@ export class QParamAction extends QAction<ParamActionParamModel> {
   private params = [
     new QStringParam("TEST_STRING", "testString"),
     new QNumberParam("testNumber"),
-    new QBooleanParam("testBoolean"),
+    new QBooleanParam("testBoolean", undefined, booleanToNumberConverter),
     new QGuidParam("testGuid"),
     new QDateParam("testDate"),
     new QTimeOfDayParam("testTime"),

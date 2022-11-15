@@ -35,7 +35,8 @@ function compileQueryParams(params: FunctionParams | undefined) {
 
 /**
  * Base class for handling an OData function (v2 and V4).
- * This includes handling of entity id paths which have exactly the same form.
+ *
+ * This includes handling of entity id paths (same format as V4 functions).
  */
 export abstract class QFunction<ParamModel = undefined> {
   public constructor(protected name: string, protected v2Mode: boolean = false) {}
@@ -114,9 +115,6 @@ export abstract class QFunction<ParamModel = undefined> {
       }
       const qParam = qParams[0];
       return qParam.parseUrlValue(params[0]);
-      /*return {
-        [key]: qParam.parseUrlValue(params[0]),
-      } as ParamModel;*/
     }
 
     // regular form
@@ -135,8 +133,7 @@ export abstract class QFunction<ParamModel = undefined> {
         );
       }
 
-      // TODO: mappedName
-      model[qParam.getName() as keyof ParamModel] = qParam.parseUrlValue(value);
+      model[qParam.getMappedName() as keyof ParamModel] = qParam.parseUrlValue(value);
       return model;
     }, {} as ParamModel);
   }

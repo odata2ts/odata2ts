@@ -30,9 +30,8 @@ export abstract class QAction<ParamModel = undefined> {
           throw new Error(`Unknown parameter "${key}"!`);
         }
 
-        // maps the name
-        // TODO: convert value here via qParam
-        return [qParam.getName(), value];
+        // maps the name and converts the value
+        return [qParam.getName(), qParam.convertTo(value)];
       })
       .filter((p): p is FilteredParamModel => p[1] !== undefined)
       .reduce((collector, [key, value]) => {
@@ -55,8 +54,8 @@ export abstract class QAction<ParamModel = undefined> {
           throw new Error(`Unknown parameter "${key}"!`);
         }
 
-        // TODO: value conversion
-        return [qParam.getMappedName(), value];
+        // maps the name and converts the value
+        return [qParam.getMappedName(), qParam.convertFrom(value)];
       })
       .filter((p): p is FilteredParamModel => p[1] !== undefined)
       .reduce((collector, [key, value]) => {

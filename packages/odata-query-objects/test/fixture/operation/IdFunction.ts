@@ -1,4 +1,6 @@
-import { QId, QStringParam } from "../../../src";
+import { booleanToNumberConverter } from "@odata2ts/test-converters";
+
+import { QBooleanParam, QId, QStringParam } from "../../../src";
 
 export type BookIdModel =
   | string
@@ -8,6 +10,20 @@ export type BookIdModel =
 
 export class BookIdFunction extends QId<BookIdModel> {
   private readonly params = [new QStringParam("isbn")];
+
+  public getParams() {
+    return this.params;
+  }
+}
+
+export type BookIdModelWithConversion =
+  | number
+  | {
+      test: number;
+    };
+
+export class BookIdFunctionWithConversion extends QId<BookIdModelWithConversion> {
+  private readonly params = [new QBooleanParam("Test", "test", booleanToNumberConverter)];
 
   public getParams() {
     return this.params;

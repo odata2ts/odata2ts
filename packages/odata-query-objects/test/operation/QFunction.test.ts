@@ -1,5 +1,5 @@
 import { QGetSomethingFunction, QGetSomethingFunctionV2 } from "../fixture/operation/EmptyFunction";
-import { BookIdFunction, ComplexBookIdFunction } from "../fixture/operation/IdFunction";
+import { BookIdFunction, BookIdFunctionWithConversion, ComplexBookIdFunction } from "../fixture/operation/IdFunction";
 import {
   BestBookParamModel,
   BestBookParamModelV2,
@@ -32,6 +32,14 @@ describe("QFunction Tests", () => {
     expect(exampleFunction.parseUrl("EntityXy('123')")).toBe("123");
   });
 
+  test("QFunction: for IDs with conversion", () => {
+    const exampleFunction = new BookIdFunctionWithConversion("EntityXy");
+    expect(exampleFunction.buildUrl({ test: 1 })).toBe("EntityXy(Test=true)");
+    expect(exampleFunction.buildUrl(0)).toBe("EntityXy(false)");
+    expect(exampleFunction.parseUrl("EntityXy(Test=true)")).toMatchObject({ test: 1 });
+    expect(exampleFunction.parseUrl("EntityXy(true)")).toBe(1);
+  });
+
   test("QFunction: failures", () => {
     const exampleFunction = new ComplexBookIdFunction("EntityXy");
 
@@ -59,8 +67,8 @@ describe("QFunction Tests", () => {
     const exampleFunction = new QBestBookFunction();
     const requiredParams: BestBookParamModel = {
       testNumber: 3,
-      testBoolean: false,
-      testString: "testing",
+      testBoolean: 0,
+      testString: { prefix: "PREFIX_", value: "testing" },
       testGuid: "aaa-bbb",
     };
     const allParams: BestBookParamModel = {
@@ -70,9 +78,9 @@ describe("QFunction Tests", () => {
       testDateTimeOffset: "dateTime",
     };
 
-    expect(exampleFunction.buildUrl(requiredParams)).toBe(
-      "BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb)"
-    );
+    const resultRequired = "BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb)";
+    expect(exampleFunction.buildUrl(requiredParams)).toBe(resultRequired);
+    expect(exampleFunction.parseUrl(resultRequired)).toStrictEqual(requiredParams);
     expect(exampleFunction.buildUrl(allParams)).toBe(
       "BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb,testDate=null,testDateTimeOffset=dateTime)"
     );

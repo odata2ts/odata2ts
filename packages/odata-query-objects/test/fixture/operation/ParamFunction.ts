@@ -1,3 +1,5 @@
+import { PrefixModel, booleanToNumberConverter, stringToPrefixModelConverter } from "@odata2ts/test-converters";
+
 import {
   QBooleanParam,
   QDateParam,
@@ -15,8 +17,8 @@ import {
 
 export interface BestBookParamModel {
   testNumber: number;
-  testBoolean: boolean;
-  testString: string;
+  testBoolean: number;
+  testString: PrefixModel;
   testGuid: string;
   testDate?: string | null;
   testTime?: string | null;
@@ -26,8 +28,8 @@ export interface BestBookParamModel {
 export class QBestBookFunction extends QFunction<BestBookParamModel> {
   private readonly params = [
     new QNumberParam("TestNumber", "testNumber"),
-    new QBooleanParam("test_Boolean", "testBoolean"),
-    new QStringParam("testString"),
+    new QBooleanParam("test_Boolean", "testBoolean", booleanToNumberConverter),
+    new QStringParam("testString", undefined, stringToPrefixModelConverter),
     new QGuidParam("testGuid"),
     new QDateParam("testDate"),
     new QTimeOfDayParam("testTime"),
