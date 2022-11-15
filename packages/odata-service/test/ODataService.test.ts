@@ -2,9 +2,8 @@ import { ODataService } from "../src";
 import { MockODataClient } from "./mock/MockODataClient";
 
 describe("ODataService Test", () => {
-  const odataClient = new MockODataClient();
+  const odataClient = new MockODataClient(false);
   const BASE_URL = "/test";
-  const NAME = "TestName"
 
   test("odataService: simple init", async () => {
     const subject = new ODataService(odataClient, BASE_URL);

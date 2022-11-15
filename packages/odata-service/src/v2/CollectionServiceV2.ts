@@ -1,6 +1,6 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 import { PrimitiveCollectionType, QueryObject } from "@odata2ts/odata-query-objects";
+import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
 import { ODataCollectionResponseV2, ODataModelResponseV2 } from "./ResponseModelV2";
 import { ServiceBaseV2 } from "./ServiceBaseV2";
@@ -17,19 +17,25 @@ export class CollectionServiceV2<
    * Add a new item to the collection.
    *
    * @param model primitive value
+   * @param requestConfig
    */
-  public add: (
+  public async add(
     model: EditableT,
     requestConfig?: ODataClientConfig<ClientType>
-  ) => ODataResponse<ODataModelResponseV2<T>> = this.doPost;
+  ): ODataResponse<ODataModelResponseV2<T>> {
+    const result = await this.doPost<ODataModelResponseV2<T>>(this.qModel.convertToOData(model), requestConfig);
+    return this.convertModelResponse(result);
+  }
 
   /**
    * Update the whole collection.
    *
    * @param models set of primitive values
+   * @param requestConfig
    */
-  public update: (models: Array<EditableT>, requestConfig?: ODataClientConfig<ClientType>) => ODataResponse<void> =
-    this.doPut;
+  public update(models: Array<EditableT>, requestConfig?: ODataClientConfig<ClientType>): ODataResponse<void> {
+    return this.doPut(this.qModel.convertToOData(models), requestConfig);
+  }
 
   /**
    * Delete the whole collection.
@@ -39,7 +45,11 @@ export class CollectionServiceV2<
   /**
    * Query collection.
    */
-  public query: (
-    queryFn?: (builder: ODataUriBuilderV2<Q>, qObject: Q, requestConfig?: ODataClientConfig<ClientType>) => void
-  ) => ODataResponse<ODataCollectionResponseV2<T>> = this.doQuery;
+  public async query(
+    queryFn?: (builder: ODataUriBuilderV2<Q>, qObject: Q) => void,
+    requestConfig?: ODataClientConfig<ClientType>
+  ): ODataResponse<ODataCollectionResponseV2<T>> {
+    const response = await this.doQuery<ODataCollectionResponseV2<any>>(queryFn, requestConfig);
+    return this.convertCollectionResponse(response);
+  }
 }

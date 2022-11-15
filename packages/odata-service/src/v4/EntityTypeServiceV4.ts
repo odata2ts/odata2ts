@@ -2,8 +2,8 @@ import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-c
 import { QueryObject } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
-import { ServiceBaseV4 } from "./ServiceBaseV4";
 import { ODataModelResponseV4 } from "./ResponseModelV4";
+import { ServiceBaseV4 } from "./ServiceBaseV4";
 
 export class EntityTypeServiceV4<
   ClientType extends ODataClient,
@@ -11,15 +11,29 @@ export class EntityTypeServiceV4<
   EditableT,
   Q extends QueryObject
 > extends ServiceBaseV4<T, Q> {
-  public patch: (model: Partial<EditableT>, requestConfig?: ODataClientConfig<ClientType>) => ODataResponse<void> =
-    this.doPatch;
+  public async patch(
+    model: Partial<EditableT>,
+    requestConfig?: ODataClientConfig<ClientType>
+  ): ODataResponse<void | ODataModelResponseV4<T>> {
+    const result = await this.doPatch<void | ODataModelResponseV4<T>>(this.qModel.convertToOData(model), requestConfig);
+    return this.convertModelResponse(result);
+  }
 
-  public update: (model: EditableT, requestConfig?: ODataClientConfig<ClientType>) => ODataResponse<void> = this.doPut;
+  public async update(
+    model: EditableT,
+    requestConfig?: ODataClientConfig<ClientType>
+  ): ODataResponse<void | ODataModelResponseV4<T>> {
+    const result = await this.doPut<void | ODataModelResponseV4<T>>(this.qModel.convertToOData(model), requestConfig);
+    return this.convertModelResponse(result);
+  }
 
   public delete: (requestConfig?: ODataClientConfig<ClientType>) => ODataResponse<void> = this.doDelete;
 
-  public query: (
+  public async query(
     queryFn?: (builder: ODataUriBuilderV4<Q>, qObject: Q) => void,
     requestConfig?: ODataClientConfig<ClientType>
-  ) => ODataResponse<ODataModelResponseV4<T>> = this.doQuery;
+  ): ODataResponse<ODataModelResponseV4<T>> {
+    const response = await this.doQuery<ODataModelResponseV4<any>>(queryFn, requestConfig);
+    return this.convertModelResponse(response);
+  }
 }

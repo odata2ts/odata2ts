@@ -7,7 +7,7 @@ import { Feature } from "../fixture/PersonModel";
 import { MockODataClient } from "../mock/MockODataClient";
 
 describe("CollectionService V4 Tests", () => {
-  const odataClient = new MockODataClient();
+  const odataClient = new MockODataClient(false);
   const BASE_PATH = "";
   const NAME_STRING = "testString";
   const NAME_ENUM = "testEnum";

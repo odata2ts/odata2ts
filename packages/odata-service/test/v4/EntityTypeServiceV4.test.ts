@@ -9,7 +9,7 @@ import { QPersonV4, qPersonV4 } from "../fixture/v4/QPersonV4";
 import { MockODataClient } from "../mock/MockODataClient";
 
 describe("EntityTypeService V4 Tests", () => {
-  const odataClient = new MockODataClient();
+  const odataClient = new MockODataClient(false);
   const BASE_URL = "";
   const NAME = "test('tester')";
 

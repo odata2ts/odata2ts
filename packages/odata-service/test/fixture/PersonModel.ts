@@ -5,6 +5,7 @@ import {
   QStringV2Collection,
   StringCollection,
 } from "@odata2ts/odata-query-objects";
+import { PrefixModel } from "@odata2ts/test-converters";
 
 import { CollectionServiceV2, CollectionServiceV4 } from "../../src";
 import { MockODataClient } from "../mock/MockODataClient";
@@ -22,20 +23,20 @@ export const enum Feature {
 }
 
 export interface PersonModel {
-  UserName: string;
-  Age: number;
+  userName: string;
+  Age: string;
   FavFeature: Feature;
   Features: Array<Feature>;
   Friends: Array<PersonModel>;
   BestFriend?: PersonModel;
 }
 
-export interface EditablePersonModel extends Pick<PersonModel, "UserName" | "Age" | "FavFeature" | "Features"> {}
+export interface EditablePersonModel extends Pick<PersonModel, "userName" | "Age" | "FavFeature" | "Features"> {}
 
-export type PersonId = string | { UserName: string };
+export type PersonId = string | { userName: string };
 
 export interface GetSomethingFunctionParams {
-  testGuid: string;
+  testGuid: PrefixModel;
   testDateTime: string;
   testDateTimeO: string;
   testTime: string;

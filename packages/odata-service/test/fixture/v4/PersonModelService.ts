@@ -1,10 +1,10 @@
-import { ODataClient } from "@odata2ts/odata-client-api";
+import { ODataClient, ODataClientConfig } from "@odata2ts/odata-client-api";
 import { QEnumCollection } from "@odata2ts/odata-query-objects";
 
 import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4 } from "../../../src";
-import { EditablePersonModel, PersonId, PersonModel } from "../PersonModel";
+import { EditablePersonModel, GetSomethingFunctionParams, PersonId, PersonModel } from "../PersonModel";
 import { QPersonIdFunction } from "../QPerson";
-import { QPersonV4, qPersonV4 } from "./QPersonV4";
+import { QGetSomethingFunction, QPersonV4, qPersonV4 } from "./QPersonV4";
 
 export class PersonModelService<ClientType extends ODataClient> extends EntityTypeServiceV4<
   ClientType,
@@ -12,6 +12,8 @@ export class PersonModelService<ClientType extends ODataClient> extends EntityTy
   EditablePersonModel,
   QPersonV4
 > {
+  private __qGetSomething = new QGetSomethingFunction();
+
   constructor(client: ODataClient, basePath: string, name: string) {
     super(client, basePath, name, new QPersonV4());
   }
@@ -26,6 +28,11 @@ export class PersonModelService<ClientType extends ODataClient> extends EntityTy
 
   public get friends() {
     return new PersonModelCollectionService(this.client, this.getPath(), "Friends");
+  }
+
+  public getSomething(params: GetSomethingFunctionParams, requestConfig?: ODataClientConfig<ClientType>) {
+    const url = this.addFullPath(this.__qGetSomething.buildUrl(params));
+    return this.client.get(url, requestConfig);
   }
 }
 

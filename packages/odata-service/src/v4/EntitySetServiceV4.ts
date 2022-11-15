@@ -74,12 +74,16 @@ export abstract class EntitySetServiceV4<
    * Create a new model.
    *
    * @param model
+   * @param requestConfig
    * @return
    */
-  public create: (
+  public async create(
     model: EditableT,
     requestConfig?: ODataClientConfig<ClientType>
-  ) => ODataResponse<ODataModelResponseV4<T>> = this.doPost;
+  ): ODataResponse<ODataModelResponseV4<T> | void> {
+    const result = await this.doPost<ODataModelResponseV4<T> | void>(this.qModel.convertToOData(model), requestConfig);
+    return this.convertModelResponse(result);
+  }
 
   public get(id: EIdType) {
     const url = this.idFunction.buildUrl(id);
@@ -90,7 +94,7 @@ export abstract class EntitySetServiceV4<
     id: EIdType,
     model: Partial<EditableT>,
     requestConfig?: ODataClientConfig<ClientType>
-  ): ODataResponse<void> {
+  ): ODataResponse<void | ODataModelResponseV4<T>> {
     return this.get(id).patch(model, requestConfig);
   }
 
@@ -98,8 +102,11 @@ export abstract class EntitySetServiceV4<
     return this.get(id).delete(requestConfig);
   }
 
-  public query: (
+  public async query(
     queryFn?: (builder: ODataUriBuilderV4<Q>, qObject: Q) => void,
     requestConfig?: ODataClientConfig<ClientType>
-  ) => ODataResponse<ODataCollectionResponseV4<T>> = this.doQuery;
+  ): ODataResponse<ODataCollectionResponseV4<T>> {
+    const response = await this.doQuery<ODataCollectionResponseV4<any>>(queryFn, requestConfig);
+    return this.convertCollectionResponse(response);
+  }
 }

@@ -14,6 +14,10 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
   public lastOperation?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   public lastRequestConfig?: MockRequestConfig;
 
+  public responseData?: any;
+
+  constructor(public isV2: boolean) {}
+
   post<T, ResponseModel>(url: string, data: T, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = data;
@@ -31,7 +35,7 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     // @ts-ignore
     return this.respond();
   }
-  put<T>(url: string, data: T, requestConfig?: MockRequestConfig): ODataResponse<void> {
+  put<T, ResponseModel>(url: string, data: T, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = data;
     this.lastOperation = "PUT";
@@ -40,7 +44,11 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     // @ts-ignore
     return this.respond();
   }
-  patch<T>(url: string, data: Partial<T>, requestConfig?: MockRequestConfig): ODataResponse<void> {
+  patch<T, ResponseModel>(
+    url: string,
+    data: Partial<T>,
+    requestConfig?: MockRequestConfig
+  ): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = data;
     this.lastOperation = "PATCH";
@@ -59,13 +67,23 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     return this.respond();
   }
 
+  setModelResponse(data: any) {
+    this.responseData = this.isV2 ? { d: data } : data;
+  }
+
+  setCollectionResponse(data: any) {
+    this.responseData = this.isV2 ? { d: { results: data } } : { value: data };
+  }
+
   private respond() {
-    const genericResponse = {
+    const result = Promise.resolve({
       status: 200,
       statusText: "OK",
       headers: {},
-      data: null,
-    };
-    return Promise.resolve(genericResponse);
+      data: this.responseData ?? null,
+    });
+
+    this.responseData = null;
+    return result;
   }
 }

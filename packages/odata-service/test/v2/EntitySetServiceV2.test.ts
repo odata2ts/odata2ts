@@ -9,7 +9,7 @@ import { QPersonV2, qPersonV2 } from "../fixture/v2/QPersonV2";
 import { MockODataClient } from "../mock/MockODataClient";
 
 describe("V2 EntitySetService Test", () => {
-  const odataClient = new MockODataClient();
+  const odataClient = new MockODataClient(true);
   const BASE_URL = "";
   const NAME = "test";
 
@@ -22,7 +22,7 @@ describe("V2 EntitySetService Test", () => {
   });
 
   test("entitySet V2: QObject", async () => {
-    await testService.patch("abab", { UserName: "holla" }, { test: "tester" });
+    await testService.patch("abab", { userName: "holla" }, { test: "tester" });
 
     expect(testService.getQObject()).toBe(qPersonV2);
   });
@@ -36,6 +36,6 @@ describe("V2 EntitySetService Test", () => {
 
   test("entitySet V2: ensure typing of EntityTypeService", async () => {
     // just a typing test: this only needs to compile
-    const result: PersonModelService<MockODataClient> = testService.get({ UserName: "heinz" });
+    const result: PersonModelService<MockODataClient> = testService.get({ userName: "heinz" });
   });
 });

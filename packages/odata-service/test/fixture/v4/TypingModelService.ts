@@ -4,18 +4,18 @@ import {
   QDatePath,
   QEntityCollectionPath,
   QEntityPath,
+  QFunction,
   QGuidCollection,
-  QGuidPath,
+  QNumberParam,
   QNumberPath,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
+import { numberToStringConverter } from "@odata2ts/test-converters";
 
 import { EntitySetServiceV4, EntityTypeServiceV4 } from "../../../src";
-import { QTypingIdFunction } from "../QTyping";
-import { TypingId } from "../TypingModel";
 
 export interface TestModel {
-  ID: string;
+  id: string;
   counter: number;
   date?: string;
   tags: Array<string>;
@@ -23,10 +23,12 @@ export interface TestModel {
   others?: Array<TestModel>;
 }
 
-export type EditableTestModel = Pick<TestModel, "ID" | "counter"> & Partial<Omit<TestModel, "ID" | "counter">>;
+export type TestModelId = string | { id: string };
+
+export type EditableTestModel = Pick<TestModel, "id" | "counter"> & Partial<Omit<TestModel, "id" | "counter">>;
 
 export class QTest extends QueryObject {
-  public readonly id = new QGuidPath(this.withPrefix("ID"));
+  public readonly id = new QNumberPath(this.withPrefix("ID"), numberToStringConverter);
   public readonly counter = new QNumberPath(this.withPrefix("counter"));
   public readonly date = new QDatePath(this.withPrefix("date"));
   public readonly tags = new QCollectionPath(this.withPrefix("tags"), () => QGuidCollection);
@@ -39,6 +41,16 @@ export class QTest extends QueryObject {
 }
 
 export const qTest = new QTest();
+
+export class QTestIdFunction extends QFunction<TestModelId> {
+  constructor(path: string) {
+    super(path, false);
+  }
+
+  getParams() {
+    return [new QNumberParam("ID", "id", numberToStringConverter)];
+  }
+}
 
 export class TestService<ClientType extends ODataClient> extends EntityTypeServiceV4<
   ClientType,
@@ -56,10 +68,10 @@ export class TestCollectionService<ClientType extends ODataClient> extends Entit
   TestModel,
   EditableTestModel,
   QTest,
-  TypingId,
+  TestModelId,
   TestService<ClientType>
 > {
   constructor(client: ODataClient, basePath: string, name: string) {
-    super(client, basePath, name, qTest, TestService, new QTypingIdFunction(name));
+    super(client, basePath, name, qTest, TestService, new QTestIdFunction(name));
   }
 }
