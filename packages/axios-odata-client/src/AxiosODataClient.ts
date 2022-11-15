@@ -122,10 +122,14 @@ export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
   public get<T>(url: string, requestConfig?: AxiosRequestConfig): AxiosPromise<T> {
     return this.handleError(this.client.get(url, requestConfig));
   }
-  public put<T>(url: string, data: T, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
+  public put<T, ResponseModel>(url: string, data: T, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
     return this.handleError(this.client.put(url, data, requestConfig));
   }
-  public patch<T>(url: string, data: Partial<T>, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
+  public patch<T, ResponseModel>(
+    url: string,
+    data: Partial<T>,
+    requestConfig?: AxiosRequestConfig
+  ): AxiosPromise<ResponseModel> {
     return this.handleError(this.client.patch(url, data, requestConfig));
   }
   public delete(url: string, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
