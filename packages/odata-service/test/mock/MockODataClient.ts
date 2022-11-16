@@ -18,7 +18,7 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
 
   constructor(public isV2: boolean) {}
 
-  post<T, ResponseModel>(url: string, data: T, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
+  post<ResponseModel>(url: string, data: any, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = data;
     this.lastOperation = "POST";
@@ -26,7 +26,7 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     // @ts-ignore
     return this.respond();
   }
-  get<T>(url: string, requestConfig?: MockRequestConfig): ODataResponse<T> {
+  get<ResponseModel>(url: string, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = undefined;
     this.lastOperation = "GET";
@@ -35,7 +35,7 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     // @ts-ignore
     return this.respond();
   }
-  put<T, ResponseModel>(url: string, data: T, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
+  put<ResponseModel>(url: string, data: any, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = data;
     this.lastOperation = "PUT";
@@ -44,11 +44,7 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     // @ts-ignore
     return this.respond();
   }
-  patch<T, ResponseModel>(
-    url: string,
-    data: Partial<T>,
-    requestConfig?: MockRequestConfig
-  ): ODataResponse<ResponseModel> {
+  patch<ResponseModel>(url: string, data: any, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = data;
     this.lastOperation = "PATCH";

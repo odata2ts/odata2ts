@@ -15,9 +15,9 @@ export interface ODataClient<RequestConfig = any> {
    * @param data
    * @param requestConfig
    */
-  post<T, ResponseModel>(url: string, data: T, requestConfig?: RequestConfig): ODataResponse<ResponseModel>;
+  post<ResponseModel>(url: string, data: any, requestConfig?: RequestConfig): ODataResponse<ResponseModel>;
 
-  get<T>(url: string, requestConfig?: RequestConfig): ODataResponse<T>;
+  get<ResponseModel>(url: string, requestConfig?: RequestConfig): ODataResponse<ResponseModel>;
 
   /**
    * Replace a model.
@@ -26,7 +26,7 @@ export interface ODataClient<RequestConfig = any> {
    * @param data
    * @param requestConfig
    */
-  put<T, ResponseModel>(url: string, data: T, requestConfig?: RequestConfig): ODataResponse<ResponseModel>;
+  put<ResponseModel>(url: string, data: any, requestConfig?: RequestConfig): ODataResponse<ResponseModel>;
 
   /**
    * Partially update a model.
@@ -35,7 +35,7 @@ export interface ODataClient<RequestConfig = any> {
    * @param data
    * @param requestConfig
    */
-  patch<T, ResponseModel>(url: string, data: Partial<T>, requestConfig?: RequestConfig): ODataResponse<ResponseModel>;
+  patch<ResponseModel>(url: string, data: any, requestConfig?: RequestConfig): ODataResponse<ResponseModel>;
 
   /**
    * OData V2 only feature.
@@ -51,7 +51,7 @@ export interface ODataClient<RequestConfig = any> {
    * @param data
    * @param requestConfig
    */
-  merge?<T, ResponseModel>(url: string, data: Partial<T>, requestConfig?: RequestConfig): ODataResponse<ResponseModel>;
+  merge?<ResponseModel>(url: string, data: any, requestConfig?: RequestConfig): ODataResponse<ResponseModel>;
 
   /**
    * Delete a model or collection.

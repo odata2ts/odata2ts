@@ -8,19 +8,19 @@ export class TestODataClient implements ODataClient<AxiosRequestConfig> {
     this.axisoInstance = axios.create(config);
   }
 
-  post<T, ResponseModel>(url: string, data: T, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
+  post<ResponseModel>(url: string, data: any, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
     return this.axisoInstance.post(url, data, requestConfig);
   }
-  get<T>(url: string, requestConfig?: AxiosRequestConfig): AxiosPromise<T> {
+  get<ResponseModel>(url: string, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
     return this.axisoInstance.get(url, requestConfig);
   }
-  put<T>(url: string, data: T, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
+  put<ResponseModel>(url: string, data: any, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
     return this.axisoInstance.put(url, data, requestConfig);
   }
-  patch<T>(url: string, data: Partial<T>, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
+  patch<ResponseModel>(url: string, data: any, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
     return this.axisoInstance.patch(url, data, requestConfig);
   }
-  merge<T>(url: string, data: Partial<T>, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
+  merge<ResponseModel>(url: string, data: any, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
     return this.axisoInstance.request({
       // @ts-ignore: custom old-fashioned V2 merge method
       method: "MERGE",
