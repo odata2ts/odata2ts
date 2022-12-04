@@ -1,9 +1,9 @@
 import { HttpResponseModel } from "@odata2ts/odata-client-api";
+import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
 import { QueryObject } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV2, createUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
 import { OperationBaseService } from "../OperationBaseService";
-import { ODataCollectionResponseV2, ODataModelResponseV2 } from "./ResponseModelV2";
 
 export class ServiceBaseV2<T, Q extends QueryObject> extends OperationBaseService<Q, ODataUriBuilderV2<Q>> {
   protected createBuilder(): ODataUriBuilderV2<Q> {

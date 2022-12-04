@@ -1,8 +1,8 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { PrimitiveCollectionType, QueryObject } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
-import { ODataCollectionResponseV4, ODataModelResponseV4 } from "./ResponseModelV4";
 import { ServiceBaseV4 } from "./ServiceBaseV4";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;

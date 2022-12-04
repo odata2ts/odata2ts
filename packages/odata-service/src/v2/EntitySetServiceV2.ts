@@ -1,9 +1,9 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
 import { QFunction, QueryObject } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
 import { EntityTypeServiceV2 } from "./EntityTypeServiceV2";
-import { ODataCollectionResponseV2, ODataModelResponseV2 } from "./ResponseModelV2";
 import { ServiceBaseV2 } from "./ServiceBaseV2";
 
 export abstract class EntitySetServiceV2<

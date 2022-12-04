@@ -1,7 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/odata-client-api";
+import { ODataModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
-import { ODataModelResponseV2 } from "../../src";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { PersonModel } from "../fixture/PersonModel";
 import { PersonModelService } from "../fixture/v2/PersonModelService";

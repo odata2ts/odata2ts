@@ -1,9 +1,9 @@
 /**
- * Response to a collection query.
+ * Response to a query for entity collections, complex collections or primitive collections.
  */
 export interface ODataCollectionResponseV2<T> {
   d: {
-    results: Array<T>;
+    results: Array<EntityModelV2<T>>;
     /**
      * Count of items in the collection.
      * Only present, if OData has been instructed to do counting.
@@ -20,35 +20,23 @@ export interface ODataCollectionResponseV2<T> {
 }
 
 /**
- * Response to query for an EntityType or ComplexType
+ * Response to a query for an EntityType or ComplexType.
  */
 export interface ODataModelResponseV2<T> {
   d: EntityModelV2<T> | ComplexModelV2<T>;
 }
 
 /**
- * Response to a value query on a property.
+ * Response to a query for a single property of primitive type.
  */
-export interface ODataValueResponseV2<T> {
-  d: {
-    results: Partial<T>;
-  };
+export interface ODataValueResponseV2<T extends object> {
+  d: Partial<T>;
 }
 
 export interface EntityMetaModelV2 {
   uri: string;
   type: string;
   etag?: string;
-}
-
-/**
- * Properties which represent a relationship to another entity and which are not expanded,
- * are deferred (aka lazy loading).
- */
-export interface DeferredContent {
-  __deferred: {
-    uri: string;
-  };
 }
 
 export interface ComplexMetaModelV2 extends Omit<EntityMetaModelV2, "uri" | "etag"> {}
@@ -60,3 +48,13 @@ export type EntityModelV2<T> = T & {
 export type ComplexModelV2<T> = T & {
   __metadata: ComplexMetaModelV2;
 };
+
+/**
+ * Properties which represent a relationship to another entity and which are not expanded,
+ * are deferred (aka lazy loading).
+ */
+export interface DeferredContent {
+  __deferred: {
+    uri: string;
+  };
+}
