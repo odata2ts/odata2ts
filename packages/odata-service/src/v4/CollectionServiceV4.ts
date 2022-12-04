@@ -1,6 +1,11 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { PrimitiveCollectionType, QueryObject } from "@odata2ts/odata-query-objects";
+import {
+  PrimitiveCollectionType,
+  QueryObject,
+  convertV4CollectionResponse,
+  convertV4ModelResponse,
+} from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
 import { ServiceBaseV4 } from "./ServiceBaseV4";
@@ -24,7 +29,7 @@ export class CollectionServiceV4<
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<void | ODataModelResponseV4<T>> {
     const result = await this.doPost<void | ODataModelResponseV4<T>>(this.qModel.convertToOData(model), requestConfig);
-    return this.convertModelResponse(result);
+    return convertV4ModelResponse(result, this.qResponseType);
   }
 
   /**
@@ -41,7 +46,7 @@ export class CollectionServiceV4<
       this.qModel.convertToOData(models),
       requestConfig
     );
-    return this.convertModelResponse(result);
+    return convertV4ModelResponse(result, this.qResponseType);
   }
 
   /**
@@ -57,6 +62,6 @@ export class CollectionServiceV4<
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<T>> {
     const response = await this.doQuery<ODataCollectionResponseV4<any>>(queryFn, requestConfig);
-    return this.convertCollectionResponse(response);
+    return convertV4CollectionResponse(response, this.qResponseType);
   }
 }

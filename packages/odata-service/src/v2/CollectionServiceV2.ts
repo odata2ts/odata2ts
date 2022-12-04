@@ -1,6 +1,11 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
-import { PrimitiveCollectionType, QueryObject } from "@odata2ts/odata-query-objects";
+import {
+  PrimitiveCollectionType,
+  QueryObject,
+  convertV2CollectionResponse,
+  convertV2ModelResponse,
+} from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
 import { ServiceBaseV2 } from "./ServiceBaseV2";
@@ -24,7 +29,7 @@ export class CollectionServiceV2<
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<T>> {
     const result = await this.doPost<ODataModelResponseV2<T>>(this.qModel.convertToOData(model), requestConfig);
-    return this.convertModelResponse(result);
+    return convertV2ModelResponse(result, this.qResponseType);
   }
 
   /**
@@ -50,6 +55,6 @@ export class CollectionServiceV2<
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV2<T>> {
     const response = await this.doQuery<ODataCollectionResponseV2<any>>(queryFn, requestConfig);
-    return this.convertCollectionResponse(response);
+    return convertV2CollectionResponse(response, this.qResponseType);
   }
 }

@@ -1,13 +1,17 @@
 import { ODataClient, ODataResponse } from "@odata2ts/odata-client-api";
-import { QueryObject } from "@odata2ts/odata-query-objects";
+import { QComplexParam, QueryObject } from "@odata2ts/odata-query-objects";
 
 export abstract class OperationBaseService<Q extends QueryObject, UB extends { build: () => string }> {
+  protected readonly qResponseType: QComplexParam<any, Q>;
+
   public constructor(
     protected client: ODataClient,
     protected basePath: string,
     protected name: string,
     protected qModel: Q
-  ) {}
+  ) {
+    this.qResponseType = new QComplexParam("NONE", qModel);
+  }
 
   protected abstract createBuilder(): UB;
 

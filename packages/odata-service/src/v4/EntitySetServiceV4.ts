@@ -1,6 +1,11 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { QFunction, QueryObject } from "@odata2ts/odata-query-objects";
+import {
+  QFunction,
+  QueryObject,
+  convertV4CollectionResponse,
+  convertV4ModelResponse,
+} from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
 import { EntityTypeServiceV4 } from "./EntityTypeServiceV4";
@@ -82,7 +87,7 @@ export abstract class EntitySetServiceV4<
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV4<T> | void> {
     const result = await this.doPost<ODataModelResponseV4<T> | void>(this.qModel.convertToOData(model), requestConfig);
-    return this.convertModelResponse(result);
+    return convertV4ModelResponse(result, this.qResponseType);
   }
 
   public get(id: EIdType) {
@@ -107,6 +112,6 @@ export abstract class EntitySetServiceV4<
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<T>> {
     const response = await this.doQuery<ODataCollectionResponseV4<any>>(queryFn, requestConfig);
-    return this.convertCollectionResponse(response);
+    return convertV4CollectionResponse(response, this.qResponseType);
   }
 }

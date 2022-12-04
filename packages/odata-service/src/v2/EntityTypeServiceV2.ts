@@ -1,6 +1,6 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import { ODataModelResponseV2 } from "@odata2ts/odata-core";
-import { QueryObject } from "@odata2ts/odata-query-objects";
+import { QueryObject, convertV2ModelResponse } from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
 import { ServiceBaseV2 } from "./ServiceBaseV2";
@@ -26,6 +26,6 @@ export class EntityTypeServiceV2<
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<T>> {
     const response = await this.doQuery<ODataModelResponseV2<any>>(queryFn, requestConfig);
-    return this.convertModelResponse(response);
+    return convertV2ModelResponse(response, this.qResponseType);
   }
 }

@@ -13,6 +13,7 @@ import {
   QTimeV2Param,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
+import { ReturnTypes, emptyOperationReturnType } from "@odata2ts/odata-query-objects/lib/operation/OperationReturnType";
 import { numberToStringConverter, stringToPrefixModelConverter } from "@odata2ts/test-converters";
 
 import { GetSomethingFunctionParams, PersonModel } from "../PersonModel";
@@ -29,7 +30,7 @@ export const qPersonV2 = new QPersonV2();
 
 export class QGetSomethingFunction extends QFunction<GetSomethingFunctionParams> {
   constructor() {
-    super("GET_SOMETHING", true);
+    super("GET_SOMETHING", undefined, true);
   }
 
   getParams() {
