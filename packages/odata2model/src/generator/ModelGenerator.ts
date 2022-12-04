@@ -75,7 +75,7 @@ class ModelGenerator {
       properties: model.props.map((p) => {
         const isEntity = p.dataType == DataTypes.ModelType;
         return {
-          name: p.odataName, // todo: map to lowercase
+          name: p.name,
           type: this.getPropType(p),
           // props for entities or entity collections are not added in V4 if not explicitly expanded
           hasQuestionToken: this.dataModel.isV4() && isEntity,
@@ -113,7 +113,7 @@ class ModelGenerator {
       return;
     }
     const singleType = model.keys.length === 1 ? `${model.keys[0].type} | ` : "";
-    const keyTypes = model.keys.map((keyProp) => `${keyProp.odataName}: ${this.getPropType(keyProp)}`).join(",");
+    const keyTypes = model.keys.map((keyProp) => `${keyProp.name}: ${this.getPropType(keyProp)}`).join(",");
     const type = `${singleType}{${keyTypes}}`;
 
     this.sourceFile.addTypeAlias({
@@ -129,11 +129,11 @@ class ModelGenerator {
 
     const requiredProps = allProps
       .filter((p) => p.required && !entityTypes.includes(p.dataType))
-      .map((p) => `"${p.odataName}"`)
+      .map((p) => `"${p.name}"`)
       .join(" | ");
     const optionalProps = allProps
       .filter((p) => !p.required && !entityTypes.includes(p.dataType))
-      .map((p) => `"${p.odataName}"`)
+      .map((p) => `"${p.name}"`)
       .join(" | ");
     const complexProps = allProps.filter((p) => p.dataType === DataTypes.ComplexType);
 
@@ -150,7 +150,7 @@ class ModelGenerator {
         ? undefined
         : complexProps.map((p) => {
             return {
-              name: p.odataName,
+              name: p.name,
               type: this.getEditablePropType(p),
               // optional props don't need to be specified in editable model
               // also, entities would require deep insert func => we make it optional for now
@@ -198,7 +198,7 @@ class ModelGenerator {
       isExported: true,
       properties: operation.parameters.map((p) => {
         return {
-          name: p.odataName, //TODO: mappedName
+          name: p.name,
           type: this.getPropType(p),
           hasQuestionToken: !p.required,
         };

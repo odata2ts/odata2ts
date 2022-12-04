@@ -10,11 +10,29 @@ GET {{rootUrl}}
 ### @name DateTime
 GET {{baseUrl}}/Products?$inlinecount=allpages&$select=ReleaseDate
 Accept: {{contentType}}
+### @name ComplexType
+GET {{baseUrl}}/Suppliers(0)/Address
+Accept: {{contentType}}
+### @name Single Value
+GET {{baseUrl}}/Suppliers(0)/Name
+Accept: {{contentType}}
+### @name Raw Value
+GET {{baseUrl}}/Suppliers(0)/Name/$value
+
+
+#--- Functions ---
+### @name Function
+GET {{baseUrl}}/GetProductsByRating?rating=3
+Accept: {{contentType}}
 
 
 # --- Queries ---
 ### @name list products
 GET {{baseUrl}}/Products?$inlinecount=allpages
+Accept: {{contentType}}
+
+### @name get complex property
+GET {{baseUrl}}/Suppliers(0)/Address
 Accept: {{contentType}}
 
 ### @name get product zero
@@ -28,7 +46,6 @@ Accept: {{contentType}}
 ### @name filter by price (decimal)
 GET {{rootUrl}}/Products?$inlinecount=allpages&$filter=Price eq 22.8m
 Accept: {{contentType}}
-
 
 ### @name expanding
 GET {{baseUrl}}/Products?$expand=Category
