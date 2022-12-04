@@ -1,6 +1,6 @@
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
 
-import { QBooleanParam, QId, QStringParam } from "../../../src";
+import { QBooleanParam, QGuidParam, QGuidV2Param, QId, QStringParam } from "../../../src";
 
 export type BookIdModel =
   | string
@@ -9,7 +9,15 @@ export type BookIdModel =
     };
 
 export class BookIdFunction extends QId<BookIdModel> {
-  private readonly params = [new QStringParam("isbn")];
+  private readonly params = [new QGuidParam("isbn")];
+
+  public getParams() {
+    return this.params;
+  }
+}
+
+export class BookIdV2Function extends QId<BookIdModel> {
+  private readonly params = [new QGuidV2Param("isbn")];
 
   public getParams() {
     return this.params;

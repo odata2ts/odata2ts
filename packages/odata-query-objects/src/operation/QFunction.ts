@@ -1,4 +1,7 @@
-import { QParam } from "../internal";
+import { HttpResponseModel } from "@odata2ts/odata-client-api";
+
+import { QParamModel } from "../param/QParamModel";
+import { OperationReturnType, emptyOperationReturnType } from "./OperationReturnType";
 
 type FunctionParams = Record<string, string>;
 type FilteredParamModel = [string, string];
@@ -39,9 +42,13 @@ function compileQueryParams(params: FunctionParams | undefined) {
  * This includes handling of entity id paths (same format as V4 functions).
  */
 export abstract class QFunction<ParamModel = undefined> {
-  public constructor(protected name: string, protected v2Mode: boolean = false) {}
+  public constructor(
+    protected name: string,
+    protected qReturnType: OperationReturnType<any> = emptyOperationReturnType,
+    protected v2Mode: boolean = false
+  ) {}
 
-  public abstract getParams(): Array<QParam<any, any>>;
+  public abstract getParams(): Array<QParamModel<any, any>>;
 
   public getName(): string {
     return this.name;
@@ -136,5 +143,9 @@ export abstract class QFunction<ParamModel = undefined> {
       model[qParam.getMappedName() as keyof ParamModel] = qParam.parseUrlValue(value);
       return model;
     }, {} as ParamModel);
+  }
+
+  public convertResponse(response: HttpResponseModel<any>) {
+    return this.isV2() ? this.qReturnType.convertResponseV2(response) : this.qReturnType.convertResponse(response);
   }
 }

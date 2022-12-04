@@ -1,11 +1,18 @@
 import { QGetSomethingFunction, QGetSomethingFunctionV2 } from "../fixture/operation/EmptyFunction";
-import { BookIdFunction, BookIdFunctionWithConversion, ComplexBookIdFunction } from "../fixture/operation/IdFunction";
+import {
+  BookIdFunction,
+  BookIdFunctionWithConversion,
+  BookIdV2Function,
+  ComplexBookIdFunction,
+} from "../fixture/operation/IdFunction";
 import {
   BestBookParamModel,
   BestBookParamModelV2,
   QBestBookFunction,
   QBestBookFunctionV2,
 } from "../fixture/operation/ParamFunction";
+import { QPrimitiveReturningFunction, QPrimitiveReturningFunctionV2 } from "../fixture/operation/ReturningFunctions";
+import { createResponse } from "../test-infra/TestResponseHelper";
 
 describe("QFunction Tests", () => {
   test("QFunction: base props", () => {
@@ -26,10 +33,18 @@ describe("QFunction Tests", () => {
 
   test("QFunction: for IDs", () => {
     const exampleFunction = new BookIdFunction("EntityXy");
-    expect(exampleFunction.buildUrl({ isbn: "123" })).toBe("EntityXy(isbn='123')");
-    expect(exampleFunction.buildUrl("123")).toBe("EntityXy('123')");
-    expect(exampleFunction.parseUrl("EntityXy(isbn='123')")).toMatchObject({ isbn: "123" });
-    expect(exampleFunction.parseUrl("EntityXy('123')")).toBe("123");
+    expect(exampleFunction.buildUrl({ isbn: "123" })).toBe("EntityXy(isbn=123)");
+    expect(exampleFunction.buildUrl("123")).toBe("EntityXy(123)");
+    expect(exampleFunction.parseUrl("EntityXy(isbn=123)")).toMatchObject({ isbn: "123" });
+    expect(exampleFunction.parseUrl("EntityXy(123)")).toBe("123");
+  });
+
+  test("QFunction: for IDs with V2 Param", () => {
+    const exampleFunction = new BookIdV2Function("EntityXy");
+    expect(exampleFunction.buildUrl({ isbn: "123" })).toBe("EntityXy(isbn=guid'123')");
+    expect(exampleFunction.buildUrl("123")).toBe("EntityXy(guid'123')");
+    expect(exampleFunction.parseUrl("EntityXy(isbn=guid'123')")).toMatchObject({ isbn: "123" });
+    expect(exampleFunction.parseUrl("EntityXy(guid'123')")).toBe("123");
   });
 
   test("QFunction: for IDs with conversion", () => {
@@ -76,13 +91,19 @@ describe("QFunction Tests", () => {
       testDate: null,
       testTime: undefined,
       testDateTimeOffset: "dateTime",
+      testCollection: ["a", "b"],
+      testEntity: { title: "testBook", author: { name: { prefix: "___", value: "testAuthor" } } },
     };
 
     const resultRequired = "BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb)";
     expect(exampleFunction.buildUrl(requiredParams)).toBe(resultRequired);
     expect(exampleFunction.parseUrl(resultRequired)).toStrictEqual(requiredParams);
     expect(exampleFunction.buildUrl(allParams)).toBe(
-      "BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb,testDate=null,testDateTimeOffset=dateTime)"
+      "BestBook(" +
+        "TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb,testDate=null,testDateTimeOffset=dateTime" +
+        ',testCollection=["a","b"]' +
+        ',TEST_ENTITY={"title":"testBook","AUTHOR":{"name":"testAuthor"}}' +
+        ")"
     );
   });
 
@@ -104,5 +125,17 @@ describe("QFunction Tests", () => {
 
     expect(exampleFunction.buildUrl(requiredParams)).toBe(expected);
     expect(exampleFunction.buildUrl(allParams)).toBe(expected + "&testString=null");
+  });
+
+  test("QFunction: primitive response conversion", () => {
+    const exampleFunction = new QPrimitiveReturningFunction();
+
+    expect(exampleFunction.convertResponse(createResponse({ value: true })).data).toStrictEqual({ value: 1 });
+  });
+
+  test("QFunction: V2 primitive response conversion", () => {
+    const exampleFunction = new QPrimitiveReturningFunctionV2();
+
+    expect(exampleFunction.convertResponse(createResponse({ d: { any: true } })).data).toStrictEqual({ d: { any: 1 } });
   });
 });

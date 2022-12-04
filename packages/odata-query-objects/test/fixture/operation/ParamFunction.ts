@@ -2,6 +2,7 @@ import { PrefixModel, booleanToNumberConverter, stringToPrefixModelConverter } f
 
 import {
   QBooleanParam,
+  QComplexParam,
   QDateParam,
   QDateTimeOffsetParam,
   QDateTimeOffsetV2Param,
@@ -13,7 +14,10 @@ import {
   QStringParam,
   QTimeOfDayParam,
   QTimeV2Param,
+  qStringCollection,
 } from "../../../src";
+import { OperationReturnType, ReturnTypes } from "../../../src/operation/OperationReturnType";
+import { BookModel, QBook } from "./BookModel";
 
 export interface BestBookParamModel {
   testNumber: number;
@@ -23,6 +27,8 @@ export interface BestBookParamModel {
   testDate?: string | null;
   testTime?: string | null;
   testDateTimeOffset?: string | null;
+  testCollection?: Array<string>;
+  testEntity?: BookModel | null;
 }
 
 export class QBestBookFunction extends QFunction<BestBookParamModel> {
@@ -34,10 +40,12 @@ export class QBestBookFunction extends QFunction<BestBookParamModel> {
     new QDateParam("testDate"),
     new QTimeOfDayParam("testTime"),
     new QDateTimeOffsetParam("testDateTimeOffset"),
+    new QComplexParam("testCollection", qStringCollection),
+    new QComplexParam("TEST_ENTITY", new QBook(), "testEntity"),
   ];
 
   constructor() {
-    super("BestBook");
+    super("BestBook", new OperationReturnType(ReturnTypes.VALUE, new QBooleanParam("NONE")));
   }
 
   public getParams() {
@@ -65,7 +73,7 @@ export class QBestBookFunctionV2 extends QFunction<BestBookParamModelV2> {
   ];
 
   constructor() {
-    super("BestBook", true);
+    super("BestBook", new OperationReturnType(ReturnTypes.VALUE, new QBooleanParam("NONE")), true);
   }
 
   public getParams() {

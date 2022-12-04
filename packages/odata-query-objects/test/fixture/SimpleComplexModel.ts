@@ -44,7 +44,7 @@ export interface ComplexEntity {
   favFeature: FeaturesEnum;
 }
 
-export class QSimpleEntity extends QueryObject {
+export class QSimpleEntity extends QueryObject<SimpleEntity> {
   public readonly id = new QNumberPath(this.withPrefix("id"));
   public readonly name = new QStringPath(this.withPrefix("name"));
   public readonly feat = new QEnumPath(this.withPrefix("feat"));
@@ -53,7 +53,7 @@ export class QSimpleEntity extends QueryObject {
 
 export const qSimple = new QSimpleEntity();
 
-export class QComplexEntity extends QueryObject {
+export class QComplexEntity extends QueryObject<ComplexEntity> {
   public readonly id = new QGuidPath(this.withPrefix("id"));
   public readonly x = new QNumberPath(this.withPrefix("x"));
   public readonly y = new QStringPath(this.withPrefix("y"));

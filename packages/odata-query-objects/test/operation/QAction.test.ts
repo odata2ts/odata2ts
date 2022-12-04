@@ -1,5 +1,8 @@
 import { EMPTY_ACTION_NAME, QEmptyAction } from "../fixture/operation/EmptyAction";
 import { ParamActionParamModel, QParamAction } from "../fixture/operation/ParamAction";
+import { QComplexReturningAction, QPrimitiveReturningFunction } from "../fixture/operation/ReturningFunctions";
+import { SimpleEntityUnconverted, SimpleEntityWithConverter } from "../fixture/SimpleEntityWithConverter";
+import { createResponse } from "../test-infra/TestResponseHelper";
 
 describe("QAction Tests", () => {
   test("QAction: base props", () => {
@@ -60,5 +63,21 @@ describe("QAction Tests", () => {
     // @ts-expect-error
     expect(() => exampleOperation.convertUserParams({ dummy: "xxx" })).toThrow("Unknown parameter");
     expect(() => exampleOperation.convertODataParams({ dummy: "xxx" })).toThrow("Unknown parameter");
+  });
+
+  test("QAction: model response conversion", () => {
+    const exampleAction = new QComplexReturningAction();
+    const MODEL_INPUT: SimpleEntityUnconverted = {
+      ID: 123,
+      truth: true,
+      AGE: 62,
+    };
+    const MODEL_CONVERTED: SimpleEntityWithConverter = {
+      id: 123,
+      truth: 1,
+      age: "62",
+    };
+
+    expect(exampleAction.convertResponse(createResponse(MODEL_INPUT)).data).toStrictEqual(MODEL_CONVERTED);
   });
 });

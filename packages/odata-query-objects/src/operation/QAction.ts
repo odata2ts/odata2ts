@@ -1,12 +1,18 @@
-import { QParam } from "../internal";
+import { HttpResponseModel } from "@odata2ts/odata-client-api";
+
+import { QParamModel } from "../param/QParamModel";
+import { OperationReturnType, emptyOperationReturnType } from "./OperationReturnType";
 
 type ActionParams = Record<string, any>;
 type FilteredParamModel = [string, any];
 
 export abstract class QAction<ParamModel = undefined> {
-  public constructor(protected name: string) {}
+  public constructor(
+    protected name: string,
+    protected qReturnType: OperationReturnType<any> = emptyOperationReturnType
+  ) {}
 
-  public abstract getParams(): Array<QParam<any, any>> | undefined;
+  public abstract getParams(): Array<QParamModel<any, any>> | undefined;
 
   public getName(): string {
     return this.name;
@@ -62,5 +68,9 @@ export abstract class QAction<ParamModel = undefined> {
         collector[key as keyof ParamModel] = value;
         return collector;
       }, {} as ParamModel);
+  }
+
+  public convertResponse(response: HttpResponseModel<any>) {
+    return this.qReturnType.convertResponse(response);
   }
 }

@@ -1,6 +1,6 @@
 import { PartialDeep } from "type-fest";
 
-import { QEntityCollectionPath, QEntityPath, QPath, QPathModel } from "./internal";
+import { QEntityPath, QPath, QPathModel } from "./internal";
 
 function getMapping(q: QueryObject) {
   return Object.entries(q)
@@ -48,8 +48,8 @@ export class QueryObject<T extends object = any> {
    */
   public convertFromOData(odataModel: null): null;
   public convertFromOData(odataModel: undefined): undefined;
-  public convertFromOData(odataModel: object): PartialDeep<T>;
-  public convertFromOData(odataModel: Array<object>): Array<PartialDeep<T>>;
+  public convertFromOData(odataModel: object): PartialDeep<T> | Array<PartialDeep<T>>;
+  // public convertFromOData(odataModel: Array<object>): Array<PartialDeep<T>>;
   public convertFromOData(odataModel: object | Array<object> | null | undefined) {
     if (odataModel === null || odataModel === undefined) {
       return odataModel;

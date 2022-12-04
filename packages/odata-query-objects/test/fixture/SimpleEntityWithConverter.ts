@@ -11,6 +11,12 @@ import {
   QueryObject,
 } from "../../src";
 
+export interface SimpleEntityUnconverted {
+  ID: number;
+  truth: boolean | null;
+  AGE: number | null;
+}
+
 export interface SimpleEntityWithConverter {
   id: number;
   truth: number | null;
