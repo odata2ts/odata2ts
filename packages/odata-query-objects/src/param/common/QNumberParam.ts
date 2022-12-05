@@ -1,5 +1,6 @@
-import { QParam, UrlParamValueParser } from "../../internal";
+import { QParam } from "../QParam";
 import { formatLiteralParam, parseLiteral } from "../UrlParamHelper";
+import { UrlParamValueParser } from "../UrlParamModel";
 
 export const parseValueFromUrl: UrlParamValueParser<number> = (urlConformValue) => {
   const value = parseLiteral(urlConformValue);
