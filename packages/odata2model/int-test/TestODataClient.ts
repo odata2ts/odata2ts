@@ -22,7 +22,7 @@ export class TestODataClient implements ODataClient<AxiosRequestConfig> {
   }
   merge<ResponseModel>(url: string, data: any, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
     return this.axisoInstance.request({
-      // @ts-ignore: custom old-fashioned V2 merge method
+      // @ts-ignore: custom V2 merge method
       method: "MERGE",
       url,
       data,

@@ -40,8 +40,7 @@ export abstract class OperationBaseService<Q extends QueryObject, UB extends { b
   }
 
   protected doPut<DataResponse>(model: any, requestConfig?: unknown): ODataResponse<DataResponse> {
-    const oModel = model ? this.qModel.convertToOData(model) : model;
-    return this.client.put(this.getPath(), oModel, requestConfig);
+    return this.client.put(this.getPath(), model, requestConfig);
   }
 
   protected doDelete(requestConfig?: unknown): ODataResponse<void> {

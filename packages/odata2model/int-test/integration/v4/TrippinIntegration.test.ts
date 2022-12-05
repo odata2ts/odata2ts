@@ -54,58 +54,58 @@ describe("Integration Testing of Service Generation", () => {
     expect(result.data.value.length).toBe(4);
     expect(result.data.value).toStrictEqual([
       {
-        FirstName: "Ronald",
-        LastName: "Mundy",
-        Trips: [
+        firstName: "Ronald",
+        lastName: "Mundy",
+        trips: [
           {
-            Budget: 6000,
-            Description: "Gradution trip with friends",
+            budget: 6000,
+            description: "Gradution trip with friends",
           },
         ],
       },
       {
-        FirstName: "Russell",
-        LastName: "Whyte",
-        Trips: [
+        firstName: "Russell",
+        lastName: "Whyte",
+        trips: [
           {
-            Budget: 3000,
-            Description: "Trip from San Francisco to New York City",
+            budget: 3000,
+            description: "Trip from San Francisco to New York City",
           },
           {
-            Budget: 2000,
-            Description: "Trip from Shanghai to Beijing",
+            budget: 2000,
+            description: "Trip from Shanghai to Beijing",
           },
           {
-            Budget: 2650,
-            Description: "Happy honeymoon trip",
-          },
-        ],
-      },
-      {
-        FirstName: "Scott",
-        LastName: "Ketchum",
-        Trips: [
-          {
-            Budget: 5000,
-            Description: "Trip from San Francisco to New York City",
-          },
-          {
-            Budget: 11000,
-            Description: "Trip from Shanghai to Beijing",
+            budget: 2650,
+            description: "Happy honeymoon trip",
           },
         ],
       },
       {
-        FirstName: "Willie",
-        LastName: "Ashmore",
-        Trips: [
+        firstName: "Scott",
+        lastName: "Ketchum",
+        trips: [
           {
-            Budget: 3800.5,
-            Description: "This is my first business trip",
+            budget: 5000,
+            description: "Trip from San Francisco to New York City",
           },
           {
-            Budget: 2000,
-            Description: "The trip is currently in plan.",
+            budget: 11000,
+            description: "Trip from Shanghai to Beijing",
+          },
+        ],
+      },
+      {
+        firstName: "Willie",
+        lastName: "Ashmore",
+        trips: [
+          {
+            budget: 3800.5,
+            description: "This is my first business trip",
+          },
+          {
+            budget: 2000,
+            description: "The trip is currently in plan.",
           },
         ],
       },

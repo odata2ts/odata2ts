@@ -12,7 +12,7 @@ import { TestODataClient } from "../../TestODataClient";
  */
 describe("Integration Testing of generated stuff for Sample V2 OData Service", () => {
   const BASE_URL = "https://services.odata.org/V2/OData/OData.svc";
-  const BASE_URL_WITH_SESSION = "https://services.odata.org/V2/(S(2hntt5kx3f4sldtpf2aypgro))/OData/OData.svc";
+  const BASE_URL_WITH_SESSION = "https://services.odata.org/V2/(S(00uijutit22ymzk5avtjixeh))/OData/OData.svc";
   const odataClient = new TestODataClient({
     headers: { Accept: "application/json", "Content-Type": "application/json" },
   });
@@ -71,7 +71,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
 
     // given
     const product: EditableProductModel = {
-      id: 999,
+      id: 888,
       description: "Test Description",
       name: "TestName",
       price: "12.88",
@@ -82,11 +82,12 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
     // when creating the product
     let result = await editableService.getProductsSrv().create(product);
     // then return object matches our product
-    expect(result.data.d).toMatchObject({ ...product, ReleaseDate: "/Date(1672488959000)/" });
+    expect(result.data.d).toMatchObject({ ...product, releaseDate: "/Date(1672488959000)/" });
 
     // given a service for the new product
     const productService = editableService.getProductsSrv().get(product.id);
     // when updating the description, we expect no error
+    // await new Promise((res) => setTimeout(res, 1000));
     await productService.patch({ description: "Updated Desc" });
 
     // when deleting this new product, we expect no error
@@ -117,11 +118,11 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
 
     const products: Array<Partial<ProductModel>> = result.data.d.results;
     expect(products[0]).toMatchObject({
-      ID: 0,
-      Name: "Bread",
-      Category: {
-        ID: 0,
-        Name: "Food",
+      id: 0,
+      name: "Bread",
+      category: {
+        id: 0,
+        name: "Food",
       },
     });
   });
