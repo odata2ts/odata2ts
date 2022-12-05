@@ -14,11 +14,11 @@ export interface EditableParent extends Pick<Parent, "id">, Partial<Pick<Parent,
 
 export interface Child extends Parent {
   id2: boolean;
-  Ch1ld1shF4n: boolean | null;
+  ch1ld1shF4n: boolean | null;
 }
 
 export type ChildId = { id: boolean; id2: boolean };
 
 export interface EditableChild
   extends Pick<Child, "id" | "id2">,
-    Partial<Pick<Child, "parentalAdvice" | "Ch1ld1shF4n">> {}
+    Partial<Pick<Child, "parentalAdvice" | "ch1ld1shF4n">> {}

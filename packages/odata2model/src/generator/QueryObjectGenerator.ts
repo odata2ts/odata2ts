@@ -218,11 +218,32 @@ class QueryObjectGenerator {
   }
 
   private generateOperation(operation: OperationType, importContainer: ImportContainer) {
+    const isV2 = this.version === ODataVersions.V2;
     const qOperation = operation.type === OperationTypes.Action ? "QAction" : "QFunction";
+    const returnType = operation.returnType;
+    let returnTypeOpStmt: string = "";
     const hasParams = operation.parameters.length > 0;
     importContainer.addFromQObject(qOperation);
     if (hasParams) {
       importContainer.addGeneratedModel(operation.paramsModelName);
+    }
+    if (returnType) {
+      if (returnType.dataType === DataTypes.ComplexType || returnType.dataType === DataTypes.ModelType) {
+        if (returnType.qObject) {
+          importContainer.addFromQObject("OperationReturnType", "ReturnTypes", "QComplexParam");
+          returnTypeOpStmt = `new OperationReturnType(ReturnTypes.COMPLEX${
+            returnType.isCollection ? "_COLLECTION" : ""
+          }, new QComplexParam("NONE", new ${returnType.qObject}))`;
+        }
+      } else if (returnType.converters && returnType.qParam) {
+        importContainer.addFromQObject("OperationReturnType", "ReturnTypes", returnType.qParam);
+        returnTypeOpStmt = `new OperationReturnType(ReturnTypes.VALUE${
+          returnType.isCollection ? "_COLLECTION" : ""
+        }, new ${returnType.qParam}("NONE", undefined, ${this.generateConverterStmt(
+          returnType.converters,
+          importContainer
+        )}))`;
+      }
     }
 
     this.sourceFile.addClass({
@@ -239,7 +260,11 @@ class QueryObjectGenerator {
       ],
       ctors: [
         {
-          statements: [`super("${operation.odataName}"${this.version === ODataVersions.V2 ? ", true" : ""})`],
+          statements: [
+            `super("${operation.odataName}"${returnTypeOpStmt ? ", " + returnTypeOpStmt : isV2 ? ", undefined" : ""}${
+              isV2 ? ", true" : ""
+            })`,
+          ],
         },
       ],
       methods: [
