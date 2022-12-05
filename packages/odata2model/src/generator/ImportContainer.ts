@@ -3,6 +3,7 @@ import { ImportDeclarationStructure } from "ts-morph";
 import { ProjectFiles } from "../data-model/DataModel";
 
 type ImportContainerType = {
+  core: Set<string>;
   qobjects: Set<string>;
   clientApi: Set<string>;
   service: Set<string>;
@@ -16,6 +17,7 @@ export class ImportContainer {
   private mapping: {
     [K in keyof ImportContainerType as string]: { moduleName: string; isRelative: boolean; addName?: boolean };
   } = {
+    core: { moduleName: "@odata2ts/odata-core", isRelative: false },
     qobjects: { moduleName: "@odata2ts/odata-query-objects", isRelative: false },
     clientApi: { moduleName: "@odata2ts/odata-client-api", isRelative: false },
     service: { moduleName: "@odata2ts/odata-service", isRelative: false },
@@ -24,6 +26,7 @@ export class ImportContainer {
   };
 
   private container: ImportContainerType = {
+    core: new Set(),
     qobjects: new Set(),
     clientApi: new Set(),
     service: new Set(),
@@ -36,6 +39,10 @@ export class ImportContainer {
   constructor(fileNames: ProjectFiles) {
     this.mapping.genModel.moduleName = fileNames.model;
     this.mapping.genQObjects.moduleName = fileNames.qObject;
+  }
+
+  public addFromCore(...names: Array<string>) {
+    names.forEach((n) => this.container.core.add(n));
   }
 
   public addFromQObject(...names: Array<string>) {

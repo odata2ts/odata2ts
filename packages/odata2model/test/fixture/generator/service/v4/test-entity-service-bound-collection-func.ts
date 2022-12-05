@@ -1,5 +1,6 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import { EntitySetServiceV4, EntityTypeServiceV4, ODataModelResponseV4 } from "@odata2ts/odata-service";
+import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QBestReview, QBook, QBookId, qBook } from "../QTester";
@@ -31,12 +32,13 @@ export class BookCollectionService<ClientType extends ODataClient> extends Entit
     super(client, basePath, name, qBook, BookService, new QBookId(name));
   }
 
-  public bestReview(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<string>> {
+  public async bestReview(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<string>> {
     if (!this._qBestReview) {
       this._qBestReview = new QBestReview();
     }
 
     const url = this.addFullPath(this._qBestReview.buildUrl());
-    return this.client.get(url, requestConfig);
+    const response = await this.client.get(url, requestConfig);
+    return this._qBestReview.convertResponse(response);
   }
 }

@@ -1,5 +1,6 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import { EntitySetServiceV4, EntityTypeServiceV4, ODataModelResponseV4 } from "@odata2ts/odata-service";
+import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QBook, QBookId, QLike, QPostReview, qBook } from "../QTester";
@@ -19,7 +20,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     super(client, basePath, name, qBook);
   }
 
-  public like(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
+  public async like(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
     if (!this._qLike) {
       this._qLike = new QLike();
     }
@@ -28,7 +29,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     return this.client.post(url, {}, requestConfig);
   }
 
-  public postReview(
+  public async postReview(
     params: PostReviewParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV4<Review>> {
@@ -37,7 +38,8 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     }
 
     const url = this.addFullPath(this._qPostReview.buildUrl());
-    return this.client.post(url, params, requestConfig);
+    const response = await this.client.post(url, this._qPostReview.convertUserParams(params), requestConfig);
+    return this._qPostReview.convertResponse(response);
   }
 }
 

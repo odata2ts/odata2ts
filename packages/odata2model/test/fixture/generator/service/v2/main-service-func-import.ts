@@ -1,5 +1,6 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import { ODataCollectionResponseV2, ODataModelResponseV2, ODataService } from "@odata2ts/odata-service";
+import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
+import { ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QBestBook, QMostPop, QPostBestBook } from "./QTester";
@@ -12,16 +13,19 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
   private _qBestBook?: QBestBook;
   private _qPostBestBook?: QPostBestBook;
 
-  public mostPop(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataCollectionResponseV2<TestEntity>> {
+  public async mostPop(
+    requestConfig?: ODataClientConfig<ClientType>
+  ): ODataResponse<ODataCollectionResponseV2<TestEntity>> {
     if (!this._qMostPop) {
       this._qMostPop = new QMostPop();
     }
 
     const url = this.addFullPath(this._qMostPop.buildUrl());
-    return this.client.get(url, requestConfig);
+    const response = await this.client.get(url, requestConfig);
+    return this._qMostPop.convertResponse(response);
   }
 
-  public bestBook(
+  public async bestBook(
     params: BestBookParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<TestEntity>> {
@@ -30,10 +34,11 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
     }
 
     const url = this.addFullPath(this._qBestBook.buildUrl(params));
-    return this.client.get(url, requestConfig);
+    const response = await this.client.get(url, requestConfig);
+    return this._qBestBook.convertResponse(response);
   }
 
-  public postBestBook(
+  public async postBestBook(
     params: PostBestBookParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<TestEntity>> {
@@ -42,6 +47,7 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
     }
 
     const url = this.addFullPath(this._qPostBestBook.buildUrl(params));
-    return this.client.post(url, undefined, requestConfig);
+    const response = await this.client.post(url, undefined, requestConfig);
+    return this._qPostBestBook.convertResponse(response);
   }
 }

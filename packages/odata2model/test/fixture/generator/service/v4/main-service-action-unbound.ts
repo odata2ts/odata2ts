@@ -1,8 +1,9 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import { ODataModelResponseV4, ODataService } from "@odata2ts/odata-service";
+import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QPing, QVote, qTestEntity } from "./QTester";
+import { QPing, QVote } from "./QTester";
 // @ts-ignore
 import { TestEntity, VoteParams } from "./TesterModel";
 
@@ -29,7 +30,7 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
     }
 
     const url = this.addFullPath(this._qVote.buildUrl());
-    const result = await this.client.post(url, this._qVote.convertUserParams(params), requestConfig);
-    return this._qVote.convertResponse(result);
+    const response = await this.client.post(url, this._qVote.convertUserParams(params), requestConfig);
+    return this._qVote.convertResponse(response);
   }
 }

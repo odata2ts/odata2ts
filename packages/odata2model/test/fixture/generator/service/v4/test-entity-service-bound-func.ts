@@ -1,10 +1,6 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import {
-  EntitySetServiceV4,
-  EntityTypeServiceV4,
-  ODataCollectionResponseV4,
-  ODataModelResponseV4,
-} from "@odata2ts/odata-service";
+import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QBestReview, QBook, QBookId, QFilterReviews, qBook } from "../QTester";
@@ -24,16 +20,17 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     super(client, basePath, name, qBook);
   }
 
-  public bestReview(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<string>> {
+  public async bestReview(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<string>> {
     if (!this._qBestReview) {
       this._qBestReview = new QBestReview();
     }
 
     const url = this.addFullPath(this._qBestReview.buildUrl());
-    return this.client.get(url, requestConfig);
+    const response = await this.client.get(url, requestConfig);
+    return this._qBestReview.convertResponse(response);
   }
 
-  public filterReviews(
+  public async filterReviews(
     params: FilterReviewsParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<Review>> {
@@ -42,7 +39,8 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     }
 
     const url = this.addFullPath(this._qFilterReviews.buildUrl(params));
-    return this.client.get(url, requestConfig);
+    const response = await this.client.get(url, requestConfig);
+    return this._qFilterReviews.convertResponse(response);
   }
 }
 
