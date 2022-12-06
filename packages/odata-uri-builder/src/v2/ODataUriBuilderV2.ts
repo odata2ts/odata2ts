@@ -1,16 +1,15 @@
-import { QComplexPath, QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
+import { QEntityPath, QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
+
+import { ODataUriBuilder } from "../ODataUriBuilder";
 import {
-  EntityExtractor,
-  ExpandingODataUriBuilderV2,
   ExpandType,
-  ODataUriBuilder,
-  ODataUriBuilderConfig,
-  ODataUriBuilderV2 as ODataUriBuilderV2Model,
-  createExpandingUriBuilderV2,
-  NullableParamList,
   ExpandingFunctionV2,
   NullableParam,
-} from "../internal";
+  NullableParamList,
+  ODataUriBuilderConfig,
+  ODataUriBuilderV2 as ODataUriBuilderV2Model,
+} from "../ODataUriBuilderModel";
+import { createExpandingUriBuilderV2 } from "./ExpandingODataUriBuilderV2";
 
 /**
  * Create an UriBuilder by passing in a query object, which already contains the base path
@@ -66,7 +65,7 @@ class ODataUriBuilderV2<Q extends QueryObject> implements ODataUriBuilderV2Model
       return this;
     }
 
-    const entityProp = this.builder.getEntityProp<QComplexPath>(prop);
+    const entityProp = this.builder.getEntityProp<QEntityPath<any>>(prop);
     const entity = entityProp.getEntity();
 
     const expander = createExpandingUriBuilderV2(entityProp.getPath(), entity);

@@ -1,13 +1,14 @@
 import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
+
+import { ODataUriBuilder } from "../ODataUriBuilder";
 import {
-  ExpandingFunction,
   ExpandType,
+  ExpandingFunction,
   NullableParam,
   NullableParamList,
-  ODataUriBuilder,
   ODataUriBuilderConfig,
   ODataUriBuilderV4 as ODataUriBuilderV4Model,
-} from "../internal";
+} from "../ODataUriBuilderModel";
 
 /**
  * Create an UriBuilder by passing in a path and a query object.
