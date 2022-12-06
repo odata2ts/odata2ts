@@ -7,6 +7,7 @@
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "scripts": {
     "build": "yarn clean && lerna run build",
+    "check-circular-deps": "lerna run check-circular-deps",
     "clean": "rimraf coverage",
     "coverage": "yarn workspace @odata2ts/odata2model dev && jest --coverage",
     "int-test": "lerna run int-test",
@@ -23,6 +24,7 @@
     "jest": "^27.5.1",
     "lerna": "^4.0.0",
     "lint-staged": "^12.3.7",
+    "madge": "^5.0.1",
     "prettier": "^2.7.1",
     "prettier-plugin-import-sort": "^0.0.7",
     "prettier-plugin-package": "^1.3.0",

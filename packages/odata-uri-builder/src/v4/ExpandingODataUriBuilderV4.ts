@@ -1,13 +1,13 @@
 import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
+
+import { ODataUriBuilder } from "../ODataUriBuilder";
 import {
-  ODataUriBuilder,
-  EntityExtractor,
-  ExpandingODataUriBuilderV4 as ExpandingODataUriBuilderV4Model,
   ExpandType,
-  NullableParamList,
   ExpandingFunction,
+  ExpandingODataUriBuilderV4 as ExpandingODataUriBuilderV4Model,
   NullableParam,
-} from "../internal";
+  NullableParamList,
+} from "../ODataUriBuilderModel";
 
 export function createExpandingUriBuilderV4<Q extends QueryObject>(
   property: string,
@@ -39,7 +39,7 @@ class ExpandingODataUriBuilderV4<Q extends QueryObject> implements ExpandingODat
 
   public expanding<Prop extends ExpandType<Q>>(prop: Prop, builderFn: ExpandingFunction<Q[Prop]>) {
     if (builderFn) {
-      this.builder.expanding(prop, builderFn);
+      this.builder.expanding(createExpandingUriBuilderV4, prop, builderFn);
     }
     return this;
   }

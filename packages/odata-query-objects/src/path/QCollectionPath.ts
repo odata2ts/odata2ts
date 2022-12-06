@@ -3,9 +3,9 @@ import { ValueConverter } from "@odata2ts/converter-api";
 import { LambdaFunctions } from "../odata/ODataModel";
 import { QFilterExpression } from "../QFilterExpression";
 import { QueryObject } from "../QueryObject";
-import { QPathModel } from "./QPathModel";
+import { QEntityPathModel, QPathModel } from "./QPathModel";
 
-export class QCollectionPath<CollectionType extends QueryObject> implements QPathModel {
+export class QCollectionPath<CollectionType extends QueryObject> implements QEntityPathModel<CollectionType> {
   constructor(
     private path: string,
     private qEntityFn: () => new (prefix?: string, converter?: ValueConverter<any, any>) => CollectionType,

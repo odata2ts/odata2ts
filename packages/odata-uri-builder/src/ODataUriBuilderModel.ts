@@ -38,11 +38,6 @@ export type NullableParam<OptionType> = OptionType | Nullable;
 
 export type NullableParamList<OptionType> = Array<OptionType | Nullable>;
 
-/**
- * @deprecated use NullableParamList<keyof Q> directly
- */
-export type EntityPropNames<Q extends QueryObject> = NullableParamList<keyof Q>;
-
 export type ExpandingFunction<Prop> =
   | ((expBuilder: ExpandingODataUriBuilderV4<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void)
   | Nullable;

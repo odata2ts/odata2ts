@@ -31,6 +31,8 @@ jobs:
         run: yarn --immutable
       - name: Build packages
         run: yarn build
+      - name: Check for circular dependencies
+        run: yarn check-circular-deps
       - name: Test with coverage
         run: yarn coverage
       - name: Coveralls

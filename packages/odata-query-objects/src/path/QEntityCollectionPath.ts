@@ -1,9 +1,9 @@
 import { LambdaFunctions } from "../odata/ODataModel";
 import { QFilterExpression } from "../QFilterExpression";
 import { QueryObject } from "../QueryObject";
-import { QPathModel } from "./QPathModel";
+import { QEntityPathModel } from "./QPathModel";
 
-export class QEntityCollectionPath<Q extends QueryObject> implements QPathModel {
+export class QEntityCollectionPath<Q extends QueryObject> implements QEntityPathModel<Q> {
   constructor(private path: string, private qEntityFn: () => new (prefix?: string) => Q) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");

@@ -1,12 +1,13 @@
-import { QComplexPath, QueryObject } from "@odata2ts/odata-query-objects";
+import { QEntityPath, QueryObject } from "@odata2ts/odata-query-objects";
+
+import { ODataUriBuilder } from "../ODataUriBuilder";
 import {
   EntityExtractor,
+  ExpandType,
   ExpandingFunctionV2,
   ExpandingODataUriBuilderV2 as ExpandingODataUriBuilderV2Model,
-  ExpandType,
   NullableParamList,
 } from "../ODataUriBuilderModel";
-import { ODataUriBuilder } from "../ODataUriBuilder";
 
 export function createExpandingUriBuilderV2<Q extends QueryObject>(
   property: string,
@@ -64,7 +65,7 @@ class ExpandingODataUriBuilderV2<Q extends QueryObject> implements ExpandingODat
       return this;
     }
 
-    const entityProp = this.builder.getEntityProp<QComplexPath>(prop);
+    const entityProp = this.builder.getEntityProp<QEntityPath<any>>(prop);
     const entity = entityProp.getEntity();
     const expander = new ExpandingODataUriBuilderV2<EntityExtractor<Q[Prop]>>(entityProp.getPath(), entity);
 

@@ -8,7 +8,7 @@ import {
   StandardFilterOperators,
   StringFilterFunctions,
 } from "../odata/ODataModel";
-import { QPathModel } from "../path";
+import { QPathModel } from "../path/QPathModel";
 import { QFilterExpression } from "../QFilterExpression";
 import { UrlExpressionValueModel, UrlValueModel } from "./UrlParamModel";
 

@@ -1,12 +1,19 @@
-import { QComplexPath, QFilterExpression, QOrderByExpression, QPath, QueryObject } from "@odata2ts/odata-query-objects";
 import {
-  createExpandingUriBuilderV4,
+  QEntityPathModel,
+  QFilterExpression,
+  QOrderByExpression,
+  QPathModel,
+  QueryObject,
+} from "@odata2ts/odata-query-objects";
+
+import { ODataOperators } from "./ODataModel";
+import {
   ExpandType,
+  ExpandingODataUriBuilderV4,
   NullableParam,
   NullableParamList,
-  ODataOperators,
   ODataUriBuilderConfig,
-} from "./internal";
+} from "./ODataUriBuilderModel";
 
 /**
  * Bundles all the logic about handling system query params for OData (V2 and V4).
@@ -77,7 +84,7 @@ export class ODataUriBuilder<Q extends QueryObject> {
    *
    * @param prop
    */
-  public getEntityProp<PropType = QPath>(prop: keyof Q) {
+  public getEntityProp<PropType extends QPathModel>(prop: keyof Q) {
     return this.entity[prop] as unknown as PropType;
   }
 
@@ -121,16 +128,28 @@ export class ODataUriBuilder<Q extends QueryObject> {
     }
   }
 
-  public expanding<Prop extends ExpandType<Q>>(prop: Prop, builderFn: (builder: any, qObject: any) => void) {
+  /**
+   * V4 only method used by regular and expanding builder.
+   * The regular V2 builder has an own and quite special implementation.
+   *
+   * @param creator
+   * @param prop
+   * @param builderFn
+   */
+  public expanding<Prop extends ExpandType<Q>>(
+    creator: (property: string, qEntity: Q) => ExpandingODataUriBuilderV4<Q>,
+    prop: Prop,
+    builderFn: (builder: any, qObject: any) => void
+  ) {
     if (!prop) {
       throw new Error("Expanding prop must be defined!");
     }
 
-    const entityProp = this.getEntityProp<QComplexPath>(prop);
+    const entityProp = this.getEntityProp<QEntityPathModel<Q>>(prop);
     const path = entityProp.getPath();
     const entity = entityProp.getEntity();
 
-    const expander = createExpandingUriBuilderV4(path, entity);
+    const expander = creator(path, entity);
 
     builderFn(expander, entity);
 

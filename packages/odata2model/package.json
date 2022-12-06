@@ -12,6 +12,7 @@
   "bin": "lib/run-cli.js",
   "scripts": {
     "build": "yarn clean && yarn compile",
+    "check-circular-deps": "madge ./src --extensions ts --circular",
     "clean": "rimraf lib build",
     "clean-v2": "rimraf build/v2",
     "clean-v4": "rimraf build/v4",

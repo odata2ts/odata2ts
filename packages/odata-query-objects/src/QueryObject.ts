@@ -1,10 +1,12 @@
 import { PartialDeep } from "type-fest";
 
-import { QEntityPath, QPath, QPathModel } from "./internal";
+import { QEntityPathModel, QPathModel, QValuePathModel } from "./path/QPathModel";
 
 function getMapping(q: QueryObject) {
   return Object.entries(q)
-    .filter((prop): prop is [string, QPath] => typeof prop[1] === "object" && typeof prop[1].getPath === "function")
+    .filter(
+      (prop): prop is [string, QPathModel] => typeof prop[1] === "object" && typeof prop[1].getPath === "function"
+    )
     .reduce<Map<string, string>>((collector, [key, value]) => {
       collector.set(value.getPath(), key);
       return collector;
@@ -64,10 +66,10 @@ export class QueryObject<T extends object = any> {
     const result = models.map((model) => {
       return Object.entries(model).reduce<any>((collector, [key, value]) => {
         const propKey = this.__getPropMapping().get(key);
-        const prop = propKey ? (this[propKey] as unknown as QPathModel) : undefined;
+        const prop = propKey ? (this[propKey] as unknown as QValuePathModel) : undefined;
         if (prop && propKey) {
           // complex props
-          const asComplexType = prop as QEntityPath<any>;
+          const asComplexType = prop as QEntityPathModel<any>;
           if (typeof asComplexType.getEntity === "function") {
             const entity = asComplexType.getEntity();
             collector[propKey] = entity.convertFromOData(value);
@@ -120,8 +122,8 @@ export class QueryObject<T extends object = any> {
     const result = models.map((model) => {
       return Object.entries(model).reduce((collector, [key, value]) => {
         // @ts-ignore
-        const prop: QPathModel = this[key];
-        const asEntity = prop as QEntityPath<any>;
+        const prop: QValuePathModel = this[key];
+        const asEntity = prop as QEntityPathModel<any>;
         if (typeof asEntity?.getEntity === "function") {
           const entity = asEntity.getEntity();
           collector[prop.getPath()] = entity.convertToOData(value);

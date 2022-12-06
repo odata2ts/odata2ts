@@ -1,5 +1,6 @@
-import { QParam, UrlParamValueFormatter, UrlParamValueParser } from "../../internal";
+import { QParam } from "../QParam";
 import { formatParamWithTypePrefix, parseWithTypePrefix } from "../UrlParamHelper";
+import { UrlParamValueFormatter, UrlParamValueParser } from "../UrlParamModel";
 
 export const GUID_V2_TYPE_PREFIX = "guid";
 
