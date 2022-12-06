@@ -7,6 +7,7 @@
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "scripts": {
     "build": "yarn clean && lerna run build",
+    "check-circular-deps": "lerna run check-circular-deps",
     "clean": "rimraf coverage",
     "coverage": "yarn workspace @odata2ts/odata2model dev && jest --coverage",
     "int-test": "lerna run int-test",
