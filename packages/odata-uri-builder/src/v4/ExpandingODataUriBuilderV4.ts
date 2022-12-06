@@ -39,7 +39,7 @@ class ExpandingODataUriBuilderV4<Q extends QueryObject> implements ExpandingODat
 
   public expanding<Prop extends ExpandType<Q>>(prop: Prop, builderFn: ExpandingFunction<Q[Prop]>) {
     if (builderFn) {
-      this.builder.expanding(prop, builderFn);
+      this.builder.expanding(createExpandingUriBuilderV4, prop, builderFn);
     }
     return this;
   }

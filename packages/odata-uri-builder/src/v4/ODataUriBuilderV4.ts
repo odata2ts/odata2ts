@@ -9,6 +9,7 @@ import {
   ODataUriBuilderConfig,
   ODataUriBuilderV4 as ODataUriBuilderV4Model,
 } from "../ODataUriBuilderModel";
+import { createExpandingUriBuilderV4 } from "./ExpandingODataUriBuilderV4";
 
 /**
  * Create an UriBuilder by passing in a path and a query object.
@@ -65,7 +66,7 @@ class ODataUriBuilderV4<Q extends QueryObject> implements ODataUriBuilderV4Model
 
   public expanding<Prop extends ExpandType<Q>>(prop: Prop, builderFn: ExpandingFunction<Q[Prop]>) {
     if (builderFn) {
-      this.builder.expanding(prop, builderFn);
+      this.builder.expanding(createExpandingUriBuilderV4, prop, builderFn);
     }
     return this;
   }
