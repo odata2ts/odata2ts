@@ -4,8 +4,8 @@ import {
   QDatePath,
   QEntityCollectionPath,
   QEntityPath,
-  QFunction,
   QGuidCollection,
+  QId,
   QNumberParam,
   QNumberPath,
   QueryObject,
@@ -42,11 +42,7 @@ export class QTest extends QueryObject {
 
 export const qTest = new QTest();
 
-export class QTestIdFunction extends QFunction<TestModelId> {
-  constructor(path: string) {
-    super(path, false);
-  }
-
+export class QTestIdFunction extends QId<TestModelId> {
   getParams() {
     return [new QNumberParam("ID", "id", numberToStringConverter)];
   }
