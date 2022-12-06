@@ -28,4 +28,23 @@ export { QDateParam } from "./param/v4/QDateParam";
 export { QTimeOfDayParam } from "./param/v4/QTimeOfDayParam";
 export { QDateTimeOffsetParam } from "./param/v4/QDateTimeOffsetParam";
 
-export * from "./path";
+export { QBinaryPath } from "./path/QBinaryPath";
+export { QBooleanPath } from "./path/QBooleanPath";
+export { QCollectionPath } from "./path/QCollectionPath";
+export { QEntityCollectionPath } from "./path/QEntityCollectionPath";
+export { QEntityPath } from "./path/QEntityPath";
+export { QEnumPath } from "./path/QEnumPath";
+export { QNumberPath } from "./path/QNumberPath";
+export * from "./path/QPathModel";
+
+export { QDateTimeOffsetV2Path } from "./path/v2/QDateTimeOffsetV2Path";
+export { QDateTimeV2Path } from "./path/v2/QDateTimeV2Path";
+export { QGuidV2Path } from "./path/v2/QGuidV2Path";
+export { QStringV2Path } from "./path/v2/QStringV2Path";
+export { QTimeV2Path } from "./path/v2/QTimeV2Path";
+
+export { QDatePath } from "./path/v4/QDatePath";
+export { QDateTimeOffsetPath } from "./path/v4/QDateTimeOffsetPath";
+export { QGuidPath } from "./path/v4/QGuidPath";
+export { QStringPath } from "./path/v4/QStringPath";
+export { QTimeOfDayPath } from "./path/v4/QTimeOfDayPath";

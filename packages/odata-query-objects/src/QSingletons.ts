@@ -1,24 +1,21 @@
 import { ValueConverter } from "@odata2ts/converter-api";
-import { PartialDeep } from "type-fest";
 
-import {
-  QBinaryPath,
-  QBooleanPath,
-  QDatePath,
-  QDateTimeOffsetPath,
-  QDateTimeOffsetV2Path,
-  QDateTimeV2Path,
-  QEnumPath,
-  QGuidPath,
-  QGuidV2Path,
-  QNumberPath,
-  QPathModel,
-  QStringPath,
-  QStringV2Path,
-  QTimeOfDayPath,
-  QTimeV2Path,
-  QueryObject,
-} from "./internal";
+import { QBinaryPath } from "./path/QBinaryPath";
+import { QBooleanPath } from "./path/QBooleanPath";
+import { QEnumPath } from "./path/QEnumPath";
+import { QNumberPath } from "./path/QNumberPath";
+import { QValuePathModel } from "./path/QPathModel";
+import { QDateTimeOffsetV2Path } from "./path/v2/QDateTimeOffsetV2Path";
+import { QDateTimeV2Path } from "./path/v2/QDateTimeV2Path";
+import { QGuidV2Path } from "./path/v2/QGuidV2Path";
+import { QStringV2Path } from "./path/v2/QStringV2Path";
+import { QTimeV2Path } from "./path/v2/QTimeV2Path";
+import { QDatePath } from "./path/v4/QDatePath";
+import { QDateTimeOffsetPath } from "./path/v4/QDateTimeOffsetPath";
+import { QGuidPath } from "./path/v4/QGuidPath";
+import { QStringPath } from "./path/v4/QStringPath";
+import { QTimeOfDayPath } from "./path/v4/QTimeOfDayPath";
+import { QueryObject } from "./QueryObject";
 
 const ATTRIBUTE_NAME = "it";
 const PRIMITIVE_VALUE_REFERENCE = "$it";
@@ -34,7 +31,7 @@ export type EnumCollection<T> = PrimitiveCollectionType<T>;
 
 export type PrimitiveCollection = StringCollection | NumberCollection | BooleanCollection | EnumCollection<any>;
 
-export abstract class QPrimitiveCollection<Type, QType extends QPathModel> extends QueryObject {
+export abstract class QPrimitiveCollection<Type, QType extends QValuePathModel> extends QueryObject {
   public readonly it;
 
   constructor(prefix?: string, converter?: ValueConverter<any, Type>) {

@@ -6,12 +6,12 @@ import { buildQFilterOperation, isPathValue } from "../../param/UrlParamHelper";
 import { UrlExpressionValueModel } from "../../param/UrlParamModel";
 import { QFilterExpression } from "../../QFilterExpression";
 import { QOrderByExpression } from "../../QOrderByExpression";
-import { QPathModel } from "../QPathModel";
+import { QValuePathModel } from "../QPathModel";
 
 export type ExtractConverted<T> = T extends ValueConverter<any, infer Converted> ? Converted : never;
-export type InputModel<T> = QPathModel | ExtractConverted<T>;
+export type InputModel<T> = QValuePathModel | ExtractConverted<T>;
 
-export abstract class QBasePath<ValueType extends UrlExpressionValueModel, ConvertedType> implements QPathModel {
+export abstract class QBasePath<ValueType extends UrlExpressionValueModel, ConvertedType> implements QValuePathModel {
   protected abstract formatValue(value: ValueType): string;
 
   public constructor(
