@@ -1,13 +1,17 @@
 import { ODataClient, ODataResponse } from "@odata2ts/odata-client-api";
-import { QueryObject } from "@odata2ts/odata-query-objects";
+import { QComplexParam, QueryObject } from "@odata2ts/odata-query-objects";
 
-export abstract class OperationBaseService<Q extends QueryObject, ModelResponse, UB extends { build: () => string }> {
+export abstract class OperationBaseService<Q extends QueryObject, UB extends { build: () => string }> {
+  protected readonly qResponseType: QComplexParam<any, Q>;
+
   public constructor(
     protected client: ODataClient,
     protected basePath: string,
     protected name: string,
     protected qModel: Q
-  ) {}
+  ) {
+    this.qResponseType = new QComplexParam("NONE", qModel);
+  }
 
   protected abstract createBuilder(): UB;
 
@@ -19,15 +23,15 @@ export abstract class OperationBaseService<Q extends QueryObject, ModelResponse,
     return this.qModel;
   }
 
-  protected doPost<S>(model: S, requestConfig?: unknown): ODataResponse<ModelResponse> {
+  protected doPost<DataResponse>(model: any, requestConfig?: unknown): ODataResponse<DataResponse> {
     return this.client.post(this.getPath(), model, requestConfig);
   }
 
-  protected doPatch<S>(model: S, requestConfig?: unknown): ODataResponse<void> {
+  protected doPatch<DataResponse>(model: any, requestConfig?: unknown): ODataResponse<DataResponse> {
     return this.client.patch(this.getPath(), model, requestConfig);
   }
 
-  protected doMerge<S>(model: S, requestConfig?: unknown): ODataResponse<void> {
+  protected doMerge<DataResponse>(model: any, requestConfig?: unknown): ODataResponse<DataResponse> {
     if (this.client.merge) {
       return this.client.merge(this.getPath(), model, requestConfig);
     } else {
@@ -35,7 +39,7 @@ export abstract class OperationBaseService<Q extends QueryObject, ModelResponse,
     }
   }
 
-  protected doPut<S>(model: S, requestConfig?: unknown): ODataResponse<void> {
+  protected doPut<DataResponse>(model: any, requestConfig?: unknown): ODataResponse<DataResponse> {
     return this.client.put(this.getPath(), model, requestConfig);
   }
 
@@ -43,7 +47,10 @@ export abstract class OperationBaseService<Q extends QueryObject, ModelResponse,
     return this.client.delete(this.getPath(), requestConfig);
   }
 
-  protected doQuery<QR>(queryFn?: (builder: UB, qObject: Q) => void, requestConfig?: unknown): ODataResponse<QR> {
+  protected doQuery<DataResponse>(
+    queryFn?: (builder: UB, qObject: Q) => void,
+    requestConfig?: unknown
+  ): ODataResponse<DataResponse> {
     let url = this.getPath();
 
     if (queryFn) {

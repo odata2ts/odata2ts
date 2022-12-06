@@ -88,20 +88,24 @@ describe("Query Object Generator Tests V4", () => {
 
   test(`${TEST_SUITE_NAME}: min QAction`, async () => {
     // given a simple function
-    odataBuilder.addAction("MinAction", ODataTypesV4.String, false, (builder) =>
-      builder.addParam("test", ODataTypesV4.String, false).addParam("opt_Test", ODataTypesV4.String, true)
+    odataBuilder.addAction("MinAction", ODataTypesV4.Boolean, false, (builder) =>
+      builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true)
     );
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("minAction", "action-min.ts");
+    await generateAndCompare("minAction", "action-min.ts", {
+      converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
+    });
   });
 
   test(`${TEST_SUITE_NAME}: QAction with converter`, async () => {
     // given a simple function
-    odataBuilder.addAction("ActionWithConverter", ODataTypesV4.String, false, (builder) =>
-      builder.addParam("test", ODataTypesV4.String, false)
-    );
+    odataBuilder
+      .addEntityType("Person", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addAction("ActionWithConverter", `${SERVICE_NAME}.Person`, false, (builder) =>
+        builder.addParam("test", ODataTypesV4.String, false)
+      );
 
     // when generating model
     // then match fixture text

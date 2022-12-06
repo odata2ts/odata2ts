@@ -414,16 +414,16 @@ class ServiceGenerator {
     const odataType = operation.returnType?.isCollection
       ? RESPONSE_TYPES.collection + this.getVersionSuffix()
       : RESPONSE_TYPES.model + this.getVersionSuffix();
-    const returnType = !operation.returnType ? "void" : operation.returnType.type;
+    const returnType = operation.returnType;
     const requestConfigParam = { name: "requestConfig", hasQuestionToken: true, type: "ODataClientConfig<ClientType>" };
     const hasParams = operation.parameters.length > 0;
 
     // importing dependencies
     importContainer.addFromClientApi("ODataClientConfig", "ODataResponse");
-    importContainer.addFromService(odataType);
-    if (operation.returnType?.type && returnType) {
-      if ([DataTypes.EnumType, DataTypes.ModelType, DataTypes.ComplexType].includes(operation.returnType.dataType)) {
-        importContainer.addGeneratedModel(returnType);
+    importContainer.addFromCore(odataType);
+    if (returnType?.type) {
+      if ([DataTypes.EnumType, DataTypes.ModelType, DataTypes.ComplexType].includes(returnType.dataType)) {
+        importContainer.addGeneratedModel(returnType.type);
       }
     }
     importContainer.addGeneratedQObject(operation.qName);
@@ -435,28 +435,29 @@ class ServiceGenerator {
 
     return {
       scope: Scope.Public,
+      isAsync: true,
       name,
       parameters: hasParams
         ? [{ name: "params", type: operation.paramsModelName }, requestConfigParam]
         : [requestConfigParam],
-      returnType: `ODataResponse<${odataType}<${returnType}>>`,
+      returnType: `ODataResponse<${odataType}<${returnType?.type || "void"}>>`,
       statements: [
         `if(!${qOpProp}) {`,
-        // prettier-ignore
         `  ${qOpProp} = new ${operation.qName}()`,
         "}",
 
-        `const url = this.addFullPath(${qOpProp}.buildUrl(${isFunc && hasParams ? "params" : ""}))`,
-        `return this.client.${
+        `const url = this.addFullPath(${qOpProp}.buildUrl(${isFunc && hasParams ? "params" : ""}));`,
+        `${returnType ? "const response = await " : "return"} this.client.${
           !isFunc
             ? // actions: since V4
-              `post(url, ${hasParams ? "params" : "{}"}, ${requestConfigParam.name})`
+              `post(url, ${hasParams ? `${qOpProp}.convertUserParams(params)` : "{}"}, ${requestConfigParam.name})`
             : operation.usePost
             ? // V2 POST => BUT values are still query params, they are not part of the request body
               `post(url, undefined, ${requestConfigParam.name})`
             : // functions: since V2
               `get(url, ${requestConfigParam.name})`
         };`,
+        returnType ? `return ${qOpProp}.convertResponse(response);` : "",
       ],
     };
   }

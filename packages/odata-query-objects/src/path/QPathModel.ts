@@ -1,31 +1,13 @@
-import { QEnumPath } from "./QEnumPath";
-import { QDatePath } from "./v4/QDatePath";
-import { QDateTimeOffsetPath } from "./v4/QDateTimeOffsetPath";
-import { QTimeOfDayPath } from "./v4/QTimeOfDayPath";
-import { QBooleanPath } from "./QBooleanPath";
-import { QCollectionPath } from "./QCollectionPath";
-import { QEntityPath } from "./QEntityPath";
-import { QNumberPath } from "./QNumberPath";
-import { QStringPath } from "./v4/QStringPath";
-import { QBinaryPath } from "./QBinaryPath";
-import { QGuidPath } from "./v4/QGuidPath";
-import { QEntityCollectionPath } from "./QEntityCollectionPath";
+import { ValueConverter } from "@odata2ts/converter-api";
 
 export interface QPathModel {
   getPath(): string;
 }
 
-export type QPrimitivePath =
-  | QBooleanPath
-  | QNumberPath
-  | QStringPath
-  | QDatePath
-  | QTimeOfDayPath
-  | QDateTimeOffsetPath
-  | QBinaryPath
-  | QGuidPath
-  | QEnumPath;
+export interface QValuePathModel extends QPathModel {
+  converter?: ValueConverter<any, any>;
+}
 
-export type QComplexPath = QEntityPath<any> | QEntityCollectionPath<any> | QCollectionPath<any>;
-
-export type QPath = QPrimitivePath | QComplexPath;
+export interface QEntityPathModel<Q> extends QPathModel {
+  getEntity(withPrefix?: boolean): Q;
+}

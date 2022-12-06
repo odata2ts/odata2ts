@@ -1,4 +1,7 @@
-import { QParam } from "../param";
+import { HttpResponseModel } from "@odata2ts/odata-client-api";
+
+import { QParamModel } from "../param/QParamModel";
+import { OperationReturnType, emptyOperationReturnType } from "./OperationReturnType";
 
 type FunctionParams = Record<string, string>;
 type FilteredParamModel = [string, string];
@@ -35,12 +38,17 @@ function compileQueryParams(params: FunctionParams | undefined) {
 
 /**
  * Base class for handling an OData function (v2 and V4).
- * This includes handling of entity id paths which have exactly the same form.
+ *
+ * This includes handling of entity id paths (same format as V4 functions).
  */
 export abstract class QFunction<ParamModel = undefined> {
-  public constructor(protected name: string, protected v2Mode: boolean = false) {}
+  public constructor(
+    protected name: string,
+    protected qReturnType: OperationReturnType<any> = emptyOperationReturnType,
+    protected v2Mode: boolean = false
+  ) {}
 
-  public abstract getParams(): Array<QParam<any, any>>;
+  public abstract getParams(): Array<QParamModel<any, any>>;
 
   public getName(): string {
     return this.name;
@@ -79,8 +87,7 @@ export abstract class QFunction<ParamModel = undefined> {
 
     return Object.entries<any>(params)
       .map(([key, value]) => {
-        // TODO: mappedName
-        const qParam = qParams.find((q) => q.getName() === key);
+        const qParam = qParams.find((q) => q.getMappedName() === key);
         if (!qParam) {
           throw new Error(`Unknown parameter "${key}"!`);
         }
@@ -115,9 +122,6 @@ export abstract class QFunction<ParamModel = undefined> {
       }
       const qParam = qParams[0];
       return qParam.parseUrlValue(params[0]);
-      /*return {
-        [key]: qParam.parseUrlValue(params[0]),
-      } as ParamModel;*/
     }
 
     // regular form
@@ -136,9 +140,12 @@ export abstract class QFunction<ParamModel = undefined> {
         );
       }
 
-      // TODO: mappedName
-      model[qParam.getName() as keyof ParamModel] = qParam.parseUrlValue(value);
+      model[qParam.getMappedName() as keyof ParamModel] = qParam.parseUrlValue(value);
       return model;
     }, {} as ParamModel);
+  }
+
+  public convertResponse(response: HttpResponseModel<any>) {
+    return this.isV2() ? this.qReturnType.convertResponseV2(response) : this.qReturnType.convertResponse(response);
   }
 }

@@ -3,46 +3,45 @@ import { TrippinService } from "../../../build/v4/trippin/TrippinService";
 import { TestODataClient } from "../../TestODataClient";
 
 describe("Integration Testing of Service Generation", () => {
-  const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(0i1abrnxnvfig05jk1s4yxpi))";
+  const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
   const odataClient = new TestODataClient();
 
   const testService = new TrippinService(odataClient, BASE_URL);
 
   // skipped, because it breaks the session state
   test.skip("unbound action", async () => {
-    const result = await testService.resetDataSource();
+    const result = await testService.resetDataSourceAction();
     expect(result.data).toBe("");
   });
 
   test("unbound function", async () => {
-    const result = await testService.getPersonWithMostFriends();
+    const result = await testService.getPersonWithMostFriendsFunction();
     expect(result.data.firstName).toBe("Russell");
     expect(result.data.lastName).toBe("Whyte");
   });
 
   test("unbound function with params", async () => {
-    const result = await testService.getNearestAirport({ lat: 123, lon: 345 });
+    const result = await testService.getNearestAirportFunction({ lat: 123, lon: 345 });
     expect(result.data.icaoCode).toBe("ZBAA");
   });
 
   test("entityType query", async () => {
-    const result = await testService.getPeopleSrv().get("russellwhyte").query();
+    const result = await testService.navToPeople().get("russellwhyte").query();
     expect(result.status).toBe(200);
-    expect(result.data).toMatchObject({
-      firstName: "Russell",
-      lastName: "Whyte",
-    });
+    expect(result.data).toBeDefined();
+    expect(result.data.firstName).toBe("Russell");
+    expect(result.data.lastName).toBe("Whyte");
   });
 
   test("entitySet query", async () => {
-    const result = await testService.getPeopleSrv().query();
+    const result = await testService.navToPeople().query();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data.value.length).toBe(20);
   });
 
   test("entitySet query people with any Feature 1", async () => {
-    const result = await testService.getPeopleSrv().query((builder, qPerson) => {
+    const result = await testService.navToPeople().query((builder, qPerson) => {
       return builder
         .count()
         .top(10)
@@ -56,58 +55,58 @@ describe("Integration Testing of Service Generation", () => {
     expect(result.data.value.length).toBe(4);
     expect(result.data.value).toStrictEqual([
       {
-        FirstName: "Ronald",
-        LastName: "Mundy",
-        Trips: [
+        firstName: "Ronald",
+        lastName: "Mundy",
+        trips: [
           {
-            Budget: 6000,
-            Description: "Gradution trip with friends",
+            budget: 6000,
+            description: "Gradution trip with friends",
           },
         ],
       },
       {
-        FirstName: "Russell",
-        LastName: "Whyte",
-        Trips: [
+        firstName: "Russell",
+        lastName: "Whyte",
+        trips: [
           {
-            Budget: 3000,
-            Description: "Trip from San Francisco to New York City",
+            budget: 3000,
+            description: "Trip from San Francisco to New York City",
           },
           {
-            Budget: 2000,
-            Description: "Trip from Shanghai to Beijing",
+            budget: 2000,
+            description: "Trip from Shanghai to Beijing",
           },
           {
-            Budget: 2650,
-            Description: "Happy honeymoon trip",
-          },
-        ],
-      },
-      {
-        FirstName: "Scott",
-        LastName: "Ketchum",
-        Trips: [
-          {
-            Budget: 5000,
-            Description: "Trip from San Francisco to New York City",
-          },
-          {
-            Budget: 11000,
-            Description: "Trip from Shanghai to Beijing",
+            budget: 2650,
+            description: "Happy honeymoon trip",
           },
         ],
       },
       {
-        FirstName: "Willie",
-        LastName: "Ashmore",
-        Trips: [
+        firstName: "Scott",
+        lastName: "Ketchum",
+        trips: [
           {
-            Budget: 3800.5,
-            Description: "This is my first business trip",
+            budget: 5000,
+            description: "Trip from San Francisco to New York City",
           },
           {
-            Budget: 2000,
-            Description: "The trip is currently in plan.",
+            budget: 11000,
+            description: "Trip from Shanghai to Beijing",
+          },
+        ],
+      },
+      {
+        firstName: "Willie",
+        lastName: "Ashmore",
+        trips: [
+          {
+            budget: 3800.5,
+            description: "This is my first business trip",
+          },
+          {
+            budget: 2000,
+            description: "The trip is currently in plan.",
           },
         ],
       },
@@ -115,7 +114,7 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("collection of strings", async () => {
-    const result = await testService.getPeopleSrv().get("russellwhyte").getAddressInfoSrv().query();
+    const result = await testService.navToPeople().get("russellwhyte").navToAddressInfo().query();
 
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
@@ -128,13 +127,13 @@ describe("Integration Testing of Service Generation", () => {
     const expectedComplex: PersonIdModel = { user: expectedSimple };
 
     // simple version
-    let result = testService.getPeopleSrv().createKey(expectedSimple);
+    let result = testService.navToPeople().createKey(expectedSimple);
     expect(result).toBe(`People('${expectedSimple}')`);
-    expect(testService.getPeopleSrv().parseKey(result)).toBe(expectedSimple);
+    expect(testService.navToPeople().parseKey(result)).toBe(expectedSimple);
 
     // complex version
-    result = testService.getPeopleSrv().createKey(expectedComplex);
+    result = testService.navToPeople().createKey(expectedComplex);
     expect(result).toBe(`People(UserName='${expectedSimple}')`);
-    expect(testService.getPeopleSrv().parseKey(result)).toStrictEqual(expectedComplex);
+    expect(testService.navToPeople().parseKey(result)).toStrictEqual(expectedComplex);
   });
 });

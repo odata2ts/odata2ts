@@ -114,7 +114,7 @@ describe("Service Generator Tests V2", () => {
     // given two functions: one without and one with params
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.String))
-      .addFunctionImport("bestBook", `${SERVICE_NAME}.TestEntity`, (builder) =>
+      .addFunctionImport("bestBook", `Collection(${SERVICE_NAME}.TestEntity)`, (builder) =>
         builder
           .addParam("testGuid", ODataTypesV2.Guid, false)
           .addParam("testDateTime", ODataTypesV2.DateTime)

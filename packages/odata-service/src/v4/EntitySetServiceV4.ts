@@ -1,9 +1,14 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import { QFunction, QueryObject } from "@odata2ts/odata-query-objects";
+import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import {
+  QFunction,
+  QueryObject,
+  convertV4CollectionResponse,
+  convertV4ModelResponse,
+} from "@odata2ts/odata-query-objects";
 import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
 import { EntityTypeServiceV4 } from "./EntityTypeServiceV4";
-import { ODataCollectionResponseV4, ODataModelResponseV4 } from "./ResponseModelV4";
 import { ServiceBaseV4 } from "./ServiceBaseV4";
 
 export abstract class EntitySetServiceV4<
@@ -74,12 +79,16 @@ export abstract class EntitySetServiceV4<
    * Create a new model.
    *
    * @param model
+   * @param requestConfig
    * @return
    */
-  public create: (
+  public async create(
     model: EditableT,
     requestConfig?: ODataClientConfig<ClientType>
-  ) => ODataResponse<ODataModelResponseV4<T>> = this.doPost;
+  ): ODataResponse<ODataModelResponseV4<T> | void> {
+    const result = await this.doPost<ODataModelResponseV4<T> | void>(this.qModel.convertToOData(model), requestConfig);
+    return convertV4ModelResponse(result, this.qResponseType);
+  }
 
   public get(id: EIdType) {
     const url = this.idFunction.buildUrl(id);
@@ -90,7 +99,7 @@ export abstract class EntitySetServiceV4<
     id: EIdType,
     model: Partial<EditableT>,
     requestConfig?: ODataClientConfig<ClientType>
-  ): ODataResponse<void> {
+  ): ODataResponse<void | ODataModelResponseV4<T>> {
     return this.get(id).patch(model, requestConfig);
   }
 
@@ -98,8 +107,11 @@ export abstract class EntitySetServiceV4<
     return this.get(id).delete(requestConfig);
   }
 
-  public query: (
+  public async query(
     queryFn?: (builder: ODataUriBuilderV4<Q>, qObject: Q) => void,
     requestConfig?: ODataClientConfig<ClientType>
-  ) => ODataResponse<ODataCollectionResponseV4<T>> = this.doQuery;
+  ): ODataResponse<ODataCollectionResponseV4<T>> {
+    const response = await this.doQuery<ODataCollectionResponseV4<any>>(queryFn, requestConfig);
+    return convertV4CollectionResponse(response, this.qResponseType);
+  }
 }

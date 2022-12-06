@@ -1,8 +1,16 @@
-import { LambdaFunctions } from "../odata/ODataModel";
-import { QFilterExpression, QPathModel } from "./../";
+import { ValueConverter } from "@odata2ts/converter-api";
 
-export class QCollectionPath<CollectionType> implements QPathModel {
-  constructor(private path: string, private qEntityFn: () => new (prefix?: string) => CollectionType) {
+import { LambdaFunctions } from "../odata/ODataModel";
+import { QFilterExpression } from "../QFilterExpression";
+import { QueryObject } from "../QueryObject";
+import { QEntityPathModel, QPathModel } from "./QPathModel";
+
+export class QCollectionPath<CollectionType extends QueryObject> implements QEntityPathModel<CollectionType> {
+  constructor(
+    private path: string,
+    private qEntityFn: () => new (prefix?: string, converter?: ValueConverter<any, any>) => CollectionType,
+    private __converter?: ValueConverter<any, any>
+  ) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
     }
@@ -16,7 +24,7 @@ export class QCollectionPath<CollectionType> implements QPathModel {
   }
 
   public getEntity(withPrefix: boolean = false): CollectionType {
-    return new (this.qEntityFn())(withPrefix ? this.path : undefined);
+    return new (this.qEntityFn())(withPrefix ? this.path : undefined, this.__converter);
   }
 
   private lambdaFunction(operationName: string, fn: (qObject: CollectionType) => QFilterExpression, prefix: string) {

@@ -1,5 +1,6 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import { ODataModelResponseV2, ODataService } from "@odata2ts/odata-service";
+import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
+import { ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QBestBook } from "./QTester";
@@ -10,15 +11,16 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
   private _name: string = "Tester";
   private _qBestBook?: QBestBook;
 
-  public bestBook(
+  public async bestBook(
     params: BestBookParams,
     requestConfig?: ODataClientConfig<ClientType>
-  ): ODataResponse<ODataModelResponseV2<TestEntity>> {
+  ): ODataResponse<ODataCollectionResponseV2<TestEntity>> {
     if (!this._qBestBook) {
       this._qBestBook = new QBestBook();
     }
 
     const url = this.addFullPath(this._qBestBook.buildUrl(params));
-    return this.client.get(url, requestConfig);
+    const response = await this.client.get(url, requestConfig);
+    return this._qBestBook.convertResponse(response);
   }
 }

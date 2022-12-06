@@ -12,7 +12,7 @@ export class PersonModelService<ClientType extends ODataClient> extends EntityTy
   EditablePersonModel,
   QPersonV2
 > {
-  private qGetSomething = new QGetSomethingFunction();
+  private __qGetSomething = new QGetSomethingFunction();
 
   public get features() {
     return new CollectionServiceV2(this.client, this.basePath, "Features", new QEnumCollection());
@@ -31,7 +31,7 @@ export class PersonModelService<ClientType extends ODataClient> extends EntityTy
   }
 
   public getSomething(params: GetSomethingFunctionParams, requestConfig?: ODataClientConfig<ClientType>) {
-    const url = this.addFullPath(this.qGetSomething.buildUrl(params));
+    const url = this.addFullPath(this.__qGetSomething.buildUrl(params));
     return this.client.get(url, requestConfig);
   }
 }

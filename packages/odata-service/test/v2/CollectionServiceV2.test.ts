@@ -1,13 +1,14 @@
 import { HttpResponseModel } from "@odata2ts/odata-client-api";
+import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 import { EnumCollection, QEnumCollection, QStringV2Collection, StringCollection } from "@odata2ts/odata-query-objects";
 
-import { CollectionServiceV2, ODataCollectionResponseV2 } from "../../src";
+import { CollectionServiceV2 } from "../../src";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
 import { Feature } from "../fixture/PersonModel";
 import { MockODataClient } from "../mock/MockODataClient";
 
 describe("CollectionService V2 Tests", () => {
-  const odataClient = new MockODataClient();
+  const odataClient = new MockODataClient(true);
   const BASE_PATH = "";
   const NAME_STRING = "testString";
   const NAME_ENUM = "testEnum";

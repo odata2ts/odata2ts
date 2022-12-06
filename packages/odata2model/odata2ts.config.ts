@@ -14,30 +14,34 @@ const config: ConfigFileOptions = {
     odata: {
       source: "int-test/fixture/v2/odata.xml",
       output: "build/v2/odata",
-      propertiesByName: [
-        {
-          name: "ID",
-          mappedName: "id",
-        },
-      ],
     },
     trippin: {
       // serviceName: "TrippinService",
       source: "int-test/fixture/v4/trippin.xml",
       output: "build/v4/trippin",
       naming: {
-        queryObjects: {
+        // models: {
+        //   propNamingStrategy: NamingStrategies.CONSTANT_CASE,
+        // },
+        services: {
+          relatedServiceGetter: {
+            prefix: "navTo",
+            suffix: "",
+          },
           operations: {
-            function: { suffix: "Function" },
-            action: { suffix: "Action" },
+            function: {
+              suffix: "Function",
+            },
+            action: {
+              suffix: "Action",
+            },
           },
         },
       },
-      propertiesByName: [
+      propertyTypes: [
         {
           name: "UserName",
           mappedName: "user",
-          managed: true,
         },
         {
           name: "Gender",
@@ -46,7 +50,7 @@ const config: ConfigFileOptions = {
         },
         ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
       ],
-      entitiesByName: [
+      modelTypes: [
         {
           name: "Product",
           mappedName: "prod666uct",

@@ -1,7 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/odata-client-api";
+import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
-import { ODataModelResponseV4 } from "../../src";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { PersonModel } from "../fixture/PersonModel";
 import { PersonModelService } from "../fixture/v4/PersonModelService";
@@ -9,7 +9,7 @@ import { QPersonV4, qPersonV4 } from "../fixture/v4/QPersonV4";
 import { MockODataClient } from "../mock/MockODataClient";
 
 describe("EntityTypeService V4 Tests", () => {
-  const odataClient = new MockODataClient();
+  const odataClient = new MockODataClient(false);
   const BASE_URL = "";
   const NAME = "test('tester')";
 

@@ -1,5 +1,6 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import { ODataModelResponseV4, ODataService } from "@odata2ts/odata-service";
+import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QPing, QVote } from "./QTester";
@@ -11,7 +12,7 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
   private _qPing?: QPing;
   private _qVote?: QVote;
 
-  public keepAlive(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
+  public async keepAlive(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
     if (!this._qPing) {
       this._qPing = new QPing();
     }
@@ -20,7 +21,7 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
     return this.client.post(url, {}, requestConfig);
   }
 
-  public doLike(
+  public async doLike(
     params: VoteParams,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV4<TestEntity>> {
@@ -29,6 +30,7 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
     }
 
     const url = this.addFullPath(this._qVote.buildUrl());
-    return this.client.post(url, params, requestConfig);
+    const response = await this.client.post(url, this._qVote.convertUserParams(params), requestConfig);
+    return this._qVote.convertResponse(response);
   }
 }

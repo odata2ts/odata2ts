@@ -36,6 +36,9 @@ GET {{baseUrl}}/Airports?$count=true&$expand=*
 
 
 ### Entity by id
+# @name get default user
+GET {{baseUrl}}/People('russellwhyte')
+###
 # @name get in canonical form
 GET {{baseUrl}}/Airports('KSFO')
 ###
@@ -339,7 +342,9 @@ GET {{baseUrl}}/People('russellwhyte')/Trips?$filter=cast(Budget, Edm.Double) su
 ###
 # @name filtering number casted as Edm.String
 GET {{baseUrl}}/People('russellwhyte')/Trips?$filter=startswith(cast(Budget, Emd.String), '2')
-
+###
+# @name filtering number casted as Edm.String
+GET {{baseUrl}}/People('russellwhyte')/Trips?$filter=startswith(cast(Budget, Emd.String), '2')
 
 # --- Group by ---
 

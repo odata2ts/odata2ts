@@ -10,11 +10,29 @@ GET {{rootUrl}}
 ### @name DateTime
 GET {{baseUrl}}/Products?$inlinecount=allpages&$select=ReleaseDate
 Accept: {{contentType}}
+### @name ComplexType
+GET {{baseUrl}}/Suppliers(0)/Address
+Accept: {{contentType}}
+### @name Single Value
+GET {{baseUrl}}/Suppliers(0)/Name
+Accept: {{contentType}}
+### @name Raw Value
+GET {{baseUrl}}/Suppliers(0)/Name/$value
+
+
+#--- Functions ---
+### @name Function
+GET {{baseUrl}}/GetProductsByRating?rating=3
+Accept: {{contentType}}
 
 
 # --- Queries ---
 ### @name list products
 GET {{baseUrl}}/Products?$inlinecount=allpages
+Accept: {{contentType}}
+
+### @name get complex property
+GET {{baseUrl}}/Suppliers(0)/Address
 Accept: {{contentType}}
 
 ### @name get product zero
@@ -28,7 +46,6 @@ Accept: {{contentType}}
 ### @name filter by price (decimal)
 GET {{rootUrl}}/Products?$inlinecount=allpages&$filter=Price eq 22.8m
 Accept: {{contentType}}
-
 
 ### @name expanding
 GET {{baseUrl}}/Products?$expand=Category
@@ -61,7 +78,7 @@ Accept: {{contentType}}
 Content-Type: {{contentType}}
 
 {
-  "ID": 999,
+  "ID": 998,
   "Description": "Test Description",
   "Name": "TestName",
   "Price": "12.88",
@@ -70,29 +87,28 @@ Content-Type: {{contentType}}
 }
 
 ### @name merge new product
-POST {{baseUrl}}/Products(999)
+POST {{baseUrl}}/Products(998)
 Accept: {{contentType}}
 Content-Type: {{contentType}}
 X-Http-Method: MERGE
 
 {
-  "Description": "Test Descriptioning!!!",
-  "Rating": 3,
-  "Price": "123.1234567890123456789"
+  "Description": "Test Descriptioning!!!"
 }
 
 ### PATCH  => 501
 ### @name update new product
-PATCH {{baseUrl}}/Products(999)
+PATCH {{baseUrl}}/Products(998)
 Accept: {{contentType}}
 Content-Type: {{contentType}}
 
 
 
 ### @name update category association
-PATCH {{baseUrl}}/Products(999)
+POST {{baseUrl}}/Products(999)
 Accept: {{contentType}}
 Content-Type: {{contentType}}
+X-Http-Method: MERGE
 
 {
   "Category": { uri: "{{baseUrl}}/Categories(1)" }
@@ -100,7 +116,7 @@ Content-Type: {{contentType}}
 
 
 ### @name delete new product
-DELETE {{baseUrl}}/Products(999)
+DELETE {{baseUrl}}/Products(998)
 Accept: {{contentType}}
 
 # --- Create Entity With Association ---

@@ -13,7 +13,7 @@ describe("QEntity tests", () => {
 
   test("ID prop", () => {
     const result = qComplex.id.eq("123").toString();
-    expect(result).toBe("ID eq 123");
+    expect(result).toBe("id eq 123");
   });
 
   test("entity path", () => {

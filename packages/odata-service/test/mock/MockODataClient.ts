@@ -14,7 +14,11 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
   public lastOperation?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   public lastRequestConfig?: MockRequestConfig;
 
-  post<T, ResponseModel>(url: string, data: T, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
+  public responseData?: any;
+
+  constructor(public isV2: boolean) {}
+
+  post<ResponseModel>(url: string, data: any, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = data;
     this.lastOperation = "POST";
@@ -22,7 +26,7 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     // @ts-ignore
     return this.respond();
   }
-  get<T>(url: string, requestConfig?: MockRequestConfig): ODataResponse<T> {
+  get<ResponseModel>(url: string, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = undefined;
     this.lastOperation = "GET";
@@ -31,7 +35,7 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     // @ts-ignore
     return this.respond();
   }
-  put<T>(url: string, data: T, requestConfig?: MockRequestConfig): ODataResponse<void> {
+  put<ResponseModel>(url: string, data: any, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = data;
     this.lastOperation = "PUT";
@@ -40,7 +44,7 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     // @ts-ignore
     return this.respond();
   }
-  patch<T>(url: string, data: Partial<T>, requestConfig?: MockRequestConfig): ODataResponse<void> {
+  patch<ResponseModel>(url: string, data: any, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = data;
     this.lastOperation = "PATCH";
@@ -59,13 +63,23 @@ export class MockODataClient implements ODataClient<MockRequestConfig> {
     return this.respond();
   }
 
+  setModelResponse(data: any) {
+    this.responseData = this.isV2 ? { d: data } : data;
+  }
+
+  setCollectionResponse(data: any) {
+    this.responseData = this.isV2 ? { d: { results: data } } : { value: data };
+  }
+
   private respond() {
-    const genericResponse = {
+    const result = Promise.resolve({
       status: 200,
       statusText: "OK",
       headers: {},
-      data: null,
-    };
-    return Promise.resolve(genericResponse);
+      data: this.responseData ?? null,
+    });
+
+    this.responseData = null;
+    return result;
   }
 }

@@ -30,6 +30,10 @@ describe("QBooleanParam Tests", () => {
     expect(toTestWithConverter.convertFrom(false)).toBe(0);
     expect(toTestWithConverter.convertTo(1)).toBe(true);
 
+    // collections
+    expect(toTestWithConverter.convertFrom([false, true])).toStrictEqual([0, 1]);
+    expect(toTestWithConverter.convertTo([0, 1])).toStrictEqual([false, true]);
+
     // identity converter
     expect(toTest.convertFrom(true)).toBe(true);
     expect(toTest.convertTo(true)).toBe(true);
@@ -42,6 +46,7 @@ describe("QBooleanParam Tests", () => {
   test("formatUrlValue", () => {
     expect(toTest.formatUrlValue(true)).toBe("true");
     expect(toTest.formatUrlValue(false)).toBe("false");
+    expect(toTest.formatUrlValue([true, false, true])).toBe("[true,false,true]");
     expect(toTest.formatUrlValue(null)).toBe("null");
     expect(toTest.formatUrlValue(undefined)).toBe(undefined);
 
@@ -52,6 +57,8 @@ describe("QBooleanParam Tests", () => {
     expect(toTest.parseUrlValue("true")).toBe(true);
     expect(toTest.parseUrlValue("false")).toBe(false);
     expect(toTest.parseUrlValue("null")).toBe(null);
+    expect(toTest.parseUrlValue("test")).toBe(undefined);
+    expect(toTest.parseUrlValue("[true, false, true]")).toStrictEqual([true, false, true]);
     expect(toTest.parseUrlValue(undefined)).toBe(undefined);
 
     expect(toTestWithConverter.parseUrlValue("false")).toBe(0);

@@ -1,5 +1,8 @@
+import { PrefixModel, booleanToNumberConverter, stringToPrefixModelConverter } from "@odata2ts/test-converters";
+
 import {
   QBooleanParam,
+  QComplexParam,
   QDateParam,
   QDateTimeOffsetParam,
   QDateTimeOffsetV2Param,
@@ -11,35 +14,38 @@ import {
   QStringParam,
   QTimeOfDayParam,
   QTimeV2Param,
+  qStringCollection,
 } from "../../../src";
+import { OperationReturnType, ReturnTypes } from "../../../src/operation/OperationReturnType";
+import { BookModel, QBook } from "./BookModel";
 
 export interface BestBookParamModel {
-  // TODO: mappedName
-  // testNumber: number;
-  TestNumber: number;
-  // TODO: mappedName
-  // testBoolean: boolean;
-  test_Boolean: boolean;
-  testString: string;
+  testNumber: number;
+  testBoolean: number;
+  testString: PrefixModel;
   testGuid: string;
   testDate?: string | null;
   testTime?: string | null;
   testDateTimeOffset?: string | null;
+  testCollection?: Array<string>;
+  testEntity?: BookModel | null;
 }
 
 export class QBestBookFunction extends QFunction<BestBookParamModel> {
   private readonly params = [
     new QNumberParam("TestNumber", "testNumber"),
-    new QBooleanParam("test_Boolean", "testBoolean"),
-    new QStringParam("testString"),
+    new QBooleanParam("test_Boolean", "testBoolean", booleanToNumberConverter),
+    new QStringParam("testString", undefined, stringToPrefixModelConverter),
     new QGuidParam("testGuid"),
     new QDateParam("testDate"),
     new QTimeOfDayParam("testTime"),
     new QDateTimeOffsetParam("testDateTimeOffset"),
+    new QComplexParam("testCollection", qStringCollection),
+    new QComplexParam("TEST_ENTITY", new QBook(), "testEntity"),
   ];
 
   constructor() {
-    super("BestBook");
+    super("BestBook", new OperationReturnType(ReturnTypes.VALUE, new QBooleanParam("NONE")));
   }
 
   public getParams() {
@@ -67,7 +73,7 @@ export class QBestBookFunctionV2 extends QFunction<BestBookParamModelV2> {
   ];
 
   constructor() {
-    super("BestBook", true);
+    super("BestBook", new OperationReturnType(ReturnTypes.VALUE, new QBooleanParam("NONE")), true);
   }
 
   public getParams() {

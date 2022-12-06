@@ -1,12 +1,18 @@
-import { QParam } from "../param";
+import { HttpResponseModel } from "@odata2ts/odata-client-api";
+
+import { QParamModel } from "../param/QParamModel";
+import { OperationReturnType, emptyOperationReturnType } from "./OperationReturnType";
 
 type ActionParams = Record<string, any>;
 type FilteredParamModel = [string, any];
 
 export abstract class QAction<ParamModel = undefined> {
-  public constructor(protected name: string) {}
+  public constructor(
+    protected name: string,
+    protected qReturnType: OperationReturnType<any> = emptyOperationReturnType
+  ) {}
 
-  public abstract getParams(): Array<QParam<any, any>> | undefined;
+  public abstract getParams(): Array<QParamModel<any, any>> | undefined;
 
   public getName(): string {
     return this.name;
@@ -30,9 +36,8 @@ export abstract class QAction<ParamModel = undefined> {
           throw new Error(`Unknown parameter "${key}"!`);
         }
 
-        // maps the name
-        // TODO: convert value here via qParam
-        return [qParam.getName(), value];
+        // maps the name and converts the value
+        return [qParam.getName(), qParam.convertTo(value)];
       })
       .filter((p): p is FilteredParamModel => p[1] !== undefined)
       .reduce((collector, [key, value]) => {
@@ -55,13 +60,17 @@ export abstract class QAction<ParamModel = undefined> {
           throw new Error(`Unknown parameter "${key}"!`);
         }
 
-        // TODO: value conversion
-        return [qParam.getMappedName(), value];
+        // maps the name and converts the value
+        return [qParam.getMappedName(), qParam.convertFrom(value)];
       })
       .filter((p): p is FilteredParamModel => p[1] !== undefined)
       .reduce((collector, [key, value]) => {
         collector[key as keyof ParamModel] = value;
         return collector;
       }, {} as ParamModel);
+  }
+
+  public convertResponse(response: HttpResponseModel<any>) {
+    return this.qReturnType.convertResponse(response);
   }
 }

@@ -1,7 +1,143 @@
-export class QueryObject {
-  constructor(private _prefix?: string) {}
+import { PartialDeep } from "type-fest";
 
+import { QEntityPathModel, QPathModel, QValuePathModel } from "./path/QPathModel";
+
+function getMapping(q: QueryObject) {
+  return Object.entries(q)
+    .filter(
+      (prop): prop is [string, QPathModel] => typeof prop[1] === "object" && typeof prop[1].getPath === "function"
+    )
+    .reduce<Map<string, string>>((collector, [key, value]) => {
+      collector.set(value.getPath(), key);
+      return collector;
+    }, new Map());
+}
+
+export class QueryObject<T extends object = any> {
+  private __propMapping?: Map<string, keyof this>;
+
+  constructor(private __prefix?: string) {}
+
+  private __getPropMapping(): Map<string, keyof this> {
+    if (!this.__propMapping) {
+      this.__propMapping = getMapping(this) as Map<string, keyof this>;
+    }
+    return this.__propMapping;
+  }
+
+  /**
+   * Adds the prefix of this QueryObject including a separating slash in front of the given path.
+   * Only applies, if this QueryObject has a prefix.
+   *
+   * @param path the path to be prefixed
+   * @protected
+   */
   protected withPrefix(path: string) {
-    return this._prefix ? `${this._prefix}/${path}` : path;
+    return this.__prefix ? `${this.__prefix}/${path}` : path;
+  }
+
+  /**
+   * Convert the data model (or parts of it) as it is retrieved from the OData service to the data model
+   * that the user is facing. This includes:
+   * - renaming of property names
+   * - converting property values to different types
+   * - handling nested types
+   *
+   * Unknown properties (not advertised in the metadata) are passed as they are.
+   *
+   * @param odataModel data model as it is retrieved from the OData service
+   * @returns the data model that the user is facing
+   */
+  public convertFromOData(odataModel: null): null;
+  public convertFromOData(odataModel: undefined): undefined;
+  public convertFromOData(odataModel: object): PartialDeep<T> | Array<PartialDeep<T>>;
+  // public convertFromOData(odataModel: Array<object>): Array<PartialDeep<T>>;
+  public convertFromOData(odataModel: object | Array<object> | null | undefined) {
+    if (odataModel === null || odataModel === undefined) {
+      return odataModel;
+    }
+    if (typeof odataModel !== "object") {
+      throw new Error("The model must be an object!");
+    }
+
+    const isList = Array.isArray(odataModel);
+    const models = isList ? odataModel : [odataModel];
+
+    const result = models.map((model) => {
+      return Object.entries(model).reduce<any>((collector, [key, value]) => {
+        const propKey = this.__getPropMapping().get(key);
+        const prop = propKey ? (this[propKey] as unknown as QValuePathModel) : undefined;
+        if (prop && propKey) {
+          // complex props
+          const asComplexType = prop as QEntityPathModel<any>;
+          if (typeof asComplexType.getEntity === "function") {
+            const entity = asComplexType.getEntity();
+            collector[propKey] = entity.convertFromOData(value);
+          }
+          // primitive props
+          else {
+            collector[propKey] = prop.converter ? prop.converter.convertFrom(value) : value;
+          }
+        }
+
+        // be permissive here to allow passing unknown values as they are
+        else {
+          collector[key] = value;
+        }
+
+        return collector;
+      }, {}) as PartialDeep<T>;
+    });
+
+    return isList ? result : result[0];
+  }
+
+  /**
+   * Convert the data model (or parts of it) that the user is facing to the data model as it is
+   * used by the OData service. This includes:
+   * - renaming of property names
+   * - converting property values to different types
+   * - handling nested types
+   *
+   * Passing unknown properties results in errors.
+   *
+   * @param userModel the data model the user is facing
+   * @retuns the data model that is consumable by the OData service
+   */
+  public convertToOData(userModel: null): null;
+  public convertToOData(userModel: undefined): undefined;
+  public convertToOData(userModel: PartialDeep<T>): object;
+  public convertToOData(userModel: Array<PartialDeep<T>>): Array<object>;
+  public convertToOData(userModel: PartialDeep<T> | Array<PartialDeep<T>> | null | undefined) {
+    if (userModel === null || userModel === undefined) {
+      return userModel;
+    }
+    if (typeof userModel !== "object") {
+      throw new Error("The model must be an object!");
+    }
+
+    const isList = Array.isArray(userModel);
+    const models = isList ? userModel : [userModel];
+
+    const result = models.map((model) => {
+      return Object.entries(model).reduce((collector, [key, value]) => {
+        // @ts-ignore
+        const prop: QValuePathModel = this[key];
+        const asEntity = prop as QEntityPathModel<any>;
+        if (typeof asEntity?.getEntity === "function") {
+          const entity = asEntity.getEntity();
+          collector[prop.getPath()] = entity.convertToOData(value);
+        } else if (prop) {
+          collector[prop.getPath()] = prop.converter ? prop.converter.convertTo(value) : value;
+        } else {
+          const knownProps = [...this.__getPropMapping().values()].join(",");
+          throw new Error(`Property [${key}] not found (in strict mode)! Known user model props: ${knownProps}`);
+        }
+
+        return collector;
+      }, {} as any);
+    });
+
+    return isList ? result : result[0];
   }
 }
