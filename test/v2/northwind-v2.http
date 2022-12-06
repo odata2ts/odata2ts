@@ -15,7 +15,6 @@ Accept: {{contentType}}
 GET {{rootUrl}}/Products?$inlinecount=allpages&$filter=UnitPrice ge 21.2m
 Accept: {{contentType}}
 
-
 ### @name get product zero
 GET {{rootUrl}}/Products(4)
 Accept: {{contentType}}
@@ -48,6 +47,10 @@ Accept: {{contentType}}
 GET {{rootUrl}}/Products(4)?$select=ProductID,ProductName,Category/CategoryID,Category/Products/ProductName&$expand=Category,Category/Products
 Accept: {{contentType}}
 
+### @name filter boolean by ge
+GET {{rootUrl}}/Products?$inlinecount=allpages&$filter=Discontinued gt null
+Accept: {{contentType}}
+
 
 # --- Create Entity ---
 ### @name create new product
@@ -64,7 +67,7 @@ Content-Type: {{contentType}}
   "ReleaseDate": "2022-01-01T00:00:00"
 }
 
-# PATCH doesn't work and merge is not supported by HTTPClient
+### PATCH doesn't work and merge is not supported by HTTPClient
 ### @name update new product
 PATCH {{rootUrl}}/Products(999)
 Accept: {{contentType}}
