@@ -1,4 +1,4 @@
-import { MappedConverterChains } from "@odata2ts/converter-runtime";
+import { MappedConverterChains, ValueConverterImport } from "@odata2ts/converter-runtime";
 
 import { DigestionOptions } from "../FactoryFunctionModel";
 import { DataModel } from "./DataModel";
@@ -225,6 +225,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     const isCollection = !!p.$.Type.match(/^Collection\(/);
     const dataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
+    const configProp = this.serviceConfigHelper.findConfigPropByName(p.$.Name);
+    const name = this.namingHelper.getModelPropName(configProp?.mappedName || p.$.Name);
 
     let result: Pick<PropertyModel, "dataType" | "type" | "typeModule" | "qPath" | "qParam" | "qObject" | "converters">;
 
@@ -276,9 +278,6 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         `Unknown type [${dataType}]: Not 'Collection(...)', not '${this.namingHelper.getServicePrefix()}*', not OData type 'Edm.*'`
       );
     }
-
-    const configProp = this.serviceConfigHelper.findConfigPropByName(p.$.Name);
-    const name = this.namingHelper.getModelPropName(configProp?.mappedName || p.$.Name);
 
     return {
       odataName: p.$.Name,

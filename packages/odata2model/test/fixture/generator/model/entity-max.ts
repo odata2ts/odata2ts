@@ -2,7 +2,7 @@ export interface Book {
   id: string;
   id2: number;
   id3: boolean;
-  requiredOption: boolean;
+  truth: boolean;
   time: string | null;
   optionalDate: string | null;
   dateTimeOffset: string | null;
@@ -22,7 +22,7 @@ export interface Book {
 export type BookId = { id: string; id2: number; id3: boolean };
 
 export interface EditableBook
-  extends Pick<Book, "id" | "id2" | "id3" | "requiredOption">,
+  extends Pick<Book, "id3" | "truth">,
     Partial<
       Pick<
         Book,
@@ -35,7 +35,6 @@ export interface EditableBook
         | "multipleStrings"
         | "multipleNumbers"
         | "multipleBooleans"
-        | "multipleIds"
         | "multipleTimes"
         | "multipleDates"
         | "multipleDateTimeOffsets"

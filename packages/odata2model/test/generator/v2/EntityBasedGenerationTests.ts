@@ -1,4 +1,4 @@
-import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
+import { ODataTypesV2 } from "@odata2ts/odata-core";
 
 import { RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
@@ -115,6 +115,15 @@ export function createEntityBasedGenerationTests(
     await generateAndCompare("oneMaxModel", "entity-max-v2.ts", {
       skipIdModels: false,
       skipEditableModels: false,
+      propertiesByName: [
+        // EditableModel will not have managed props
+        ...["id", "id2", "multipleIds"].map((name) => ({ name, managed: true })),
+        {
+          name: "requiredOption",
+          mappedName: "truth",
+          // converters: [{ module: "@odata2ts/test-converter", use: ["booleanToNumberConverter"] }],
+        },
+      ],
     });
   });
 

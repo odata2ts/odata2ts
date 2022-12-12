@@ -13,7 +13,6 @@ import {
   OperationType,
   SingletonType,
 } from "./DataTypeModel";
-import { NamingHelper } from "./NamingHelper";
 
 export interface ProjectFiles {
   model: string;

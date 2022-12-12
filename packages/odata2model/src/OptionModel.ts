@@ -222,6 +222,8 @@ export interface PropertyGenerationOptions {
   managed?: boolean;
 
   /**
+   * TODO
+   *
    * Each converter must specify its package name, e.g. "@odata2ts/converter-v2-to-v4",
    * as well it's i
    * and their ids, e.g. "timeToDurationConverter".
@@ -229,5 +231,5 @@ export interface PropertyGenerationOptions {
    * To only use specific converters, the object syntax must be used, where supported converters
    * must be listed by their ids.
    */
-  converters?: Array<Required<TypeConverterConfig>>;
+  // converters?: Array<Required<TypeConverterConfig>>;
 }

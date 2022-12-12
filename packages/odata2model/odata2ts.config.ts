@@ -38,7 +38,7 @@ const config: ConfigFileOptions = {
           },
         },
       },
-      propertyTypes: [
+      propertiesByName: [
         {
           name: "UserName",
           mappedName: "user",
@@ -50,7 +50,7 @@ const config: ConfigFileOptions = {
         },
         ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
       ],
-      modelTypes: [
+      entitiesByName: [
         {
           name: "Product",
           mappedName: "prod666uct",

@@ -89,7 +89,7 @@ describe("Query Object Generator Tests V4", () => {
   test(`${TEST_SUITE_NAME}: min QAction`, async () => {
     // given a simple function
     odataBuilder.addAction("MinAction", ODataTypesV4.Boolean, false, (builder) =>
-      builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true)
+      builder.addParam("test", ODataTypesV4.String, false).addParam("opt_Test", ODataTypesV4.String, true)
     );
 
     // when generating model

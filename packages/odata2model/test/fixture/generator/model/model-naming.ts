@@ -24,7 +24,7 @@ export interface EDIT_BOOK_MODEL extends Pick<BOOK_MODEL, "PARENT_ID" | "ID" | "
 }
 
 export interface LOCATION_MODEL {
-  test: boolean | null;
+  TEST: boolean | null;
 }
 
-export interface EDIT_LOCATION_MODEL extends Partial<Pick<LOCATION_MODEL, "test">> {}
+export interface EDIT_LOCATION_MODEL extends Partial<Pick<LOCATION_MODEL, "TEST">> {}

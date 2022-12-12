@@ -110,7 +110,17 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("oneMaxModel", "entity-max.ts", USE_ID_AND_EDITABLE_MODEL);
+    await generateAndCompare("oneMaxModel", "entity-max.ts", {
+      ...USE_ID_AND_EDITABLE_MODEL,
+      propertiesByName: [
+        ...["id", "id2", "multipleIds"].map((name) => ({ name, managed: true })),
+        {
+          name: "requiredOption",
+          mappedName: "truth",
+          // converters: [{ module: "@odata2ts/test-converter", use: ["booleanToNumberConverter"] }],
+        },
+      ],
+    });
   });
 
   test(`${testSuiteName}: entity relationships`, async () => {
