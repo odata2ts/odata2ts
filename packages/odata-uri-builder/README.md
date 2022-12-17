@@ -4,84 +4,138 @@
 
 Allows for building type-safe OData queries.
 
-OData URI Builder depends on `odata-query-objects` in order to have appropriate types & an easy-to-use API.
-It also relies on having appropriate TypeScript interfaces for OData models. Both, interfaces & query objects
-can be generated via `odata2model` out of an existing OData service.
+OData URI Builder depends on `odata-query-objects` to offer a powerful and easy-to-use API.
+Query objects can be generated via `odata2ts` out of an existing OData service.
 
 ## Usage
 
-Let's take the following simple model as example:
+Let's take the Trippin service as example. In this context it's enough to know that it allows to 
+list people and the trips they've made. The main focus lies on the `Person` entity which is
+exposed under the URL `/People`.
 
+<p>
+  <details>
+    <summary>Relevant EDMX extract</summary>
+
+```xml
+<Schema Namespace="Trippin" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+  <EntityType Name="Person">
+    <Key>
+      <PropertyRef Name="UserName" />
+    </Key>
+    <Property Name="UserName" Type="Edm.String" Nullable="false" />
+    <Property Name="LastName" Type="Edm.String" MaxLength="26" />
+    <Property Name="Age" Type="Edm.Int64" />
+    <Property Name="Emails" Type="Collection(Edm.String)" />
+    <Property Name="AddressInfo" Type="Collection(Trippin.Location)" />
+    <Property Name="HomeAddress" Type="Trippin.Location" />
+    <Property Name="FavoriteFeature" Type="Trippin.Feature" Nullable="false" />
+    <Property Name="Features" Type="Collection(Trippin.Feature)" Nullable="false" />
+    <NavigationProperty Name="Friends" Type="Collection(Trippin.Person)" />
+    <NavigationProperty Name="BestFriend" Type="Trippin.Person" />
+    <NavigationProperty Name="Trips" Type="Collection(Trippin.Trip)" />
+  </EntityType>
+  <EntityContainer Name="Container">
+    <EntitySet Name="People" EntityType="Trippin.Person">
+      ...
+    </EntitySet>
+  </EntityContainer>
+</Schema>
 ```
-export interface Person {
-  age: number;
-  name: string;
-  deceased: boolean;
-  createdAt: DateTimeOffsetString; // you find these special types in odata-query-objects package
-  address: Address;                // 1:1 relationship
-  altAddresses: Array<Address>;     // 1:n relationship
-}
-```
+
+  </details>
+</p>
 
 A complex query could look like this:
 
-```
-ODataUriBuilder.create(QPerson)
-  .select("name", "age")
-  .filter(QPerson.name.equals("Horst").or(QPerson.age.gt(18)))
-  .expand("address")
-  .expanding("altAddresses", (builder, qEntity) => {
+```ts
+import { createUriBuilderV4 } from "@odata2ts/odata-uri-builder";
+import { qPerson } from "../generated-src/QTrippin.ts"
+
+createUriBuilderV4("People", qPerson)
+  .select("lastName", "age") // => typesafe: only model attributes are allowed
+  .filter(qPerson.userName.equals("russellwhyte"))
+  .expand("homeAddress") // => typesafe: only expandable properties are allowed
+  .expanding("trips", (builder, qTrip) => {
     builder
-      .select("street")
-      .skip(1)
-      .top(0)
-      .filter(qEntity.street.startsWith("Teststr"));
+      .select("tripId", "budget", "description")
+      .top(1)
+      .filter(qTrip.budget.gt(1000));
   })
   .build();
 
-// Result is (without encoding):
-// /Persons?$select=name,age&$filter=name eq 'Horst' or age gt 18&$expand=altAddresses($select=street;skip=1;top=0;$filter=startswith(street,'Teststr'))
 ```
+Result without encoding:<br>
+`/People?$select=LastName,Age`<br>
+`&$filter=UserName eq 'russellwhyte'`<br>
+`&$expand=HomeAddress,Trips($select=TripId,Budget,Description;top=5;$filter=Budget gt 1000)`
 
-A typical search:
+### Stay Fluent 
+To don't break the fluent API style, your expressions can evaluate to `null` or `undefined` 
+and will automatically get filtered out. This applies to all operations on the query builder
+(select, filter, expand, skip, top, ...).
 
+```ts
+createUriBuilderV4("People", qPerson)
+  .select("lastName", isAgeRelevant ? "age" : undefined)
+  .filter(null)
+  .build()
 ```
-const builder = ODataUriBuilder.create(QPerson);
+Result, if age doesn't matter: `/People?$select=LastName`
 
-if (searchForm.name) {
-  builder.filter(QPerson.name.contains(searchForm.name))
-}
-if (searchForm.age) {
-  builder.filter(QPerson.age.eq(searchForm.age))
-}
-...
+### Keep Adding
+You can call most operations multiple times and will just keep adding stuff.
+Exceptions: skip, top, count
+```ts
+createUriBuilderV4("People", qPerson)
+  .select("lastName")
+  .select("age")
+  .filter(qPerson.age.gt(18))
+  .filter(qPerson.age.lowerThan(66))
+  .build()
 ```
+Result: `/People?$select=LastName,Age&$filter=Age gt 18 AND Age lt 66`
 
-## Model Intefaces & Query Objects
+### Expanding
+Expanding will fetch associated entities (complex types are part of the entity and are always expanded, so to say).
+The query builder offers two different methods: `expand` and `expanding`. 
 
-First we need typescript interfaces for a given OData service (you can generate them via `odata2model`).
-Of course, you can also build them manually; however you would need to take care regarding OData's special
-types like date & time or binary and guid types.
-
-Secondly, we also need query objects (also generated via `odata2model`).
-Creating them manually would look like this:
-
+Use `expand` to expand the complete entity. Just name the attributes to expand.
+```ts
+createUriBuilderV4("People", qPerson)
+  .expand("trips", "bestFriend")
+  .build()
 ```
-export const QPerson: QEntityModel<Person, "name" | "age"> = {
-  __collectionPath: "Persons",
-  age: new QNumberPath("age"),
-  name: new QStringPath("name"),
-  deceased: new QBooleanPath("deceased"),
-  createdAt: new QDateTimeOffsetPath("createdAt"),
-  address: new QEntityPath<Address>("address", () => QAddress),
-  altAdresses: new QEntityCollectionPath<Address>("altAdresses", () => QAddress),
-};
+Result: `/People?$expand=Trips,BestFriend`
+
+Use `expanding` to further shape the response object to your needs.
+Provide a callback function, which will receive an own query builder as first parameter
+and the appropriate query object as second parameter. 
+The function should return the passed query builder.
+
+```ts
+createUriBuilderV4("People", qPerson)
+  .expanding("trips", (tripsBuilder, qTrip) => 
+    tripsBuilder
+      .select("budget")
+      .orderBy(qTrip.budget.desc())
+      .top(1)
+  )
+  .build()
 ```
+Result: `/People?$expand=Trips(select=Budget;orderby=Trips desc;top=1)`
 
-`QEntityModel` takes the entity and it's primary key as generic arguments: in this case, the person interface
-and a composite key of "name" and "age".
+`expand` and `expanding` are supported in the same way by the V2 query builder (well, the expanding builder only
+offers select, filter, expand, expanding in V2). However, in V2 the syntax for expanding is different, but
+the V2 query builder takes care of that.
 
-The `__collectionPath` attribute corresponds to an EntitySet in the metadata
-description of the given OData service & represents the entry path to this collection.
+```ts
+import { createUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
-Each attribute is then mapped to a corresponding QPath object.
+createUriBuilderV2("Product", qProduct)
+  .expanding("supplier", (catBuilder, qSupplier) => 
+    catBuilder
+      .select("name", "id")
+  )
+  .build()
+```
