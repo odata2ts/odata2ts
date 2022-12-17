@@ -23,7 +23,6 @@ describe("Testing Generation of TrippinService", () => {
       favoriteFeature: FeatureModel.Feature1,
       features: [],
       firstName: "Heinz",
-      traditionalGenderCategories: PersonGenderModel.Unknown,
     };
   });
 
@@ -64,7 +63,6 @@ describe("Testing Generation of TrippinService", () => {
       FavoriteFeature: "Feature1",
       Features: [],
       FirstName: "Heinz",
-      Gender: "Unknown",
     });
   });
 
@@ -93,7 +91,6 @@ describe("Testing Generation of TrippinService", () => {
       favoriteFeature: FeatureModel.Feature1,
       features: [],
       firstName: "Heinz",
-      traditionalGenderCategories: PersonGenderModel.Unknown,
       age: 33,
     };
 
@@ -106,9 +103,8 @@ describe("Testing Generation of TrippinService", () => {
       FavoriteFeature: FeatureModel.Feature1,
       Features: [],
       FirstName: "Heinz",
-      Gender: PersonGenderModel.Unknown,
       Age: 33,
-    });;
+    });
   });
 
   test("entityType: patch", async () => {
