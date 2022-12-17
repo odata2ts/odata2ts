@@ -129,79 +129,90 @@ export interface ConfigFileOptions extends Omit<CliOptions, "source" | "output" 
    */
   skipOperations?: boolean;
 
+  /**
+   * The naming options regarding the generated artefacts.
+   */
   naming?: NamingOptions;
 }
 
 /**
  * Custom generation options which are dependent on a specific odata service.
  */
-interface ServiceGenerationOptions
+export interface ServiceGenerationOptions
   extends Required<Pick<CliOptions, "source" | "output">>,
     Omit<ConfigFileOptions, "services"> {
   /**
    * Configure generation process for EntityTypes and ComplexTypes including their properties.
    */
-  modelTypes?: Array<ModelTypeGenerationOptions>;
+  entitiesByName?: Array<EntityGenerationOptions>;
   /**
    * Configure generation process for individual properties based on their name.
    */
-  propertyTypes?: Array<PropertyGenerationOptions>;
+  propertiesByName?: Array<PropertyGenerationOptions>;
 }
 
 /**
- * All configurations for EntityTypes and ComplexTypes.
+ * Configuration options for EntityTypes and ComplexTypes.
+ * This config applies if the name matches the name of an EntityType or ComplexType as it is specified
+ * in the metadata (e.g. in EDMX <EntityType name="Test" ....)
  */
-interface ModelTypeGenerationOptions {
+export interface EntityGenerationOptions {
   /**
    * Name of the EntityType or ComplexType, e.g. "Person".
+   * Must match exactly or can be a regular expression.
    */
-  name: string;
+  name: string | RegExp;
   /**
-   * Map the name to a different name.
+   * Use a different name.
+   * If name is a regular expression, mappedName allows to specify captured groups (via $1, $2, ...).
    */
   mappedName?: string;
-  /**
-   * Whether the generated service should allow for querying this model.
-   * True by default.
-   */
-  queryable?: boolean;
-  /**
-   * Whether the generated service should allow for creating new models (POST).
-   * True by default.
-   */
-  creatable?: boolean;
-  /**
-   * Whether the generated service should allow for updates (PUT).
-   * True by default.
-   */
-  updatable?: boolean;
-  /**
-   * Whether the generated service should allow for partial updates (PATCH).
-   * True by default.
-   */
-  patchable?: boolean;
-  /**
-   * Whether the generated service should allow for deletion.
-   * True by default.
-   */
-  deletable?: boolean;
-  // converter: string | Array<string>
   /**
    * Configuration of individual properties.
    */
   properties?: Array<PropertyGenerationOptions>;
+
+  // converter: string | Array<string>
+
+  /**
+   * Whether the generated service should allow for querying this model.
+   * True by default.
+   */
+  // queryable?: boolean;
+  /**
+   * Whether the generated service should allow for creating new models (POST).
+   * True by default.
+   */
+  // creatable?: boolean;
+  /**
+   * Whether the generated service should allow for updates (PUT).
+   * True by default.
+   */
+  // updatable?: boolean;
+  /**
+   * Whether the generated service should allow for partial updates (PATCH).
+   * True by default.
+   */
+  // patchable?: boolean;
+  /**
+   * Whether the generated service should allow for deletion.
+   * True by default.
+   */
+  // deletable?: boolean;
 }
 
 /**
  * All configuration options for properties of models.
  */
-interface PropertyGenerationOptions {
+export interface PropertyGenerationOptions {
   /**
-   * Name of the property to match. Must match exactly.
+   * Name of the property to match.
+   * Must match exactly or can be a regular expression.
    */
-  name: string;
+  name: string | RegExp;
   /**
-   * Map the name to a different name.
+   * Use a different name.
+   * If name is a regular expression, mappedName allows to specify captured groups (via $1, $2, ...).
    */
   mappedName?: string;
   /**
@@ -211,6 +222,8 @@ interface PropertyGenerationOptions {
   managed?: boolean;
 
   /**
+   * TODO
+   *
    * Each converter must specify its package name, e.g. "@odata2ts/converter-v2-to-v4",
    * as well it's i
    * and their ids, e.g. "timeToDurationConverter".
@@ -218,5 +231,5 @@ interface PropertyGenerationOptions {
    * To only use specific converters, the object syntax must be used, where supported converters
    * must be listed by their ids.
    */
-  converters?: Array<Required<TypeConverterConfig>>;
+  // converters?: Array<Required<TypeConverterConfig>>;
 }

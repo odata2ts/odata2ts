@@ -30,7 +30,7 @@ export class QBook extends QueryObject {
   public readonly id = new QGuidPath(this.withPrefix("id"));
   public readonly id2 = new QNumberPath(this.withPrefix("id2"));
   public readonly id3 = new QBooleanPath(this.withPrefix("id3"));
-  public readonly requiredOption = new QBooleanPath(this.withPrefix("requiredOption"));
+  public readonly truth = new QBooleanPath(this.withPrefix("requiredOption"));
   public readonly time = new QTimeOfDayPath(this.withPrefix("time"));
   public readonly optionalDate = new QDatePath(this.withPrefix("optionalDate"));
   public readonly dateTimeOffset = new QDateTimeOffsetPath(this.withPrefix("dateTimeOffset"));

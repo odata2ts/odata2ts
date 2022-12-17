@@ -1,10 +1,11 @@
-import { MappedConverterChains } from "@odata2ts/converter-runtime";
+import { MappedConverterChains, ValueConverterImport } from "@odata2ts/converter-runtime";
 
 import { DigestionOptions } from "../FactoryFunctionModel";
 import { DataModel } from "./DataModel";
 import { ComplexType as ComplexModelType, DataTypes, ODataVersion, PropertyModel } from "./DataTypeModel";
 import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModelBase";
 import { NamingHelper } from "./NamingHelper";
+import { ServiceConfigHelper } from "./ServiceConfigHelper";
 
 export interface TypeModel {
   outputType: string;
@@ -18,6 +19,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   protected static ROOT_OPERATION = "/";
 
   protected readonly dataModel: DataModel;
+  protected readonly serviceConfigHelper: ServiceConfigHelper;
 
   private model2Type: Map<string, DataTypes> = new Map<string, DataTypes>();
 
@@ -29,6 +31,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     converters?: MappedConverterChains
   ) {
     this.dataModel = new DataModel(version, converters);
+    this.serviceConfigHelper = new ServiceConfigHelper(options);
     this.collectModelTypes(this.schema);
   }
 
@@ -130,14 +133,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     for (const model of models) {
       const baseModel = this.getBaseModel(model);
 
-      // key support
-      // we cannot add keys now stemming from base classes
-      // => postprocess required
-      const keys: Array<string> = [];
+      // key support: we add keys from this entity,
+      // but not keys stemming from base classes (postprocess required)
+      const keyNames: Array<string> = [];
       const entity = model as EntityType;
       if (entity.Key && entity.Key.length && entity.Key[0].PropertyRef.length) {
         const propNames = entity.Key[0].PropertyRef.map((key) => key.$.Name);
-        keys.push(...propNames);
+        keyNames.push(...propNames);
       }
 
       this.dataModel.addModel(baseModel.name, {
@@ -145,9 +147,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         idModelName: this.namingHelper.getIdModelName(model.$.Name),
         qIdFunctionName: this.namingHelper.getQIdFunctionName(model.$.Name),
         generateId: true,
-        keyNames: keys, // postprocess required to include key specs from base classes
+        keyNames: keyNames, // postprocess required to include key specs from base classes
         keys: [], // postprocess required to include props from base classes
-        getKeyUnion: () => keys.join(" | "),
+        getKeyUnion: () => keyNames.join(" | "),
       });
     }
   }
@@ -223,6 +225,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     const isCollection = !!p.$.Type.match(/^Collection\(/);
     const dataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
+    const configProp = this.serviceConfigHelper.findConfigPropByName(p.$.Name);
+    const name = this.namingHelper.getModelPropName(configProp?.mappedName || p.$.Name);
 
     let result: Pick<PropertyModel, "dataType" | "type" | "typeModule" | "qPath" | "qParam" | "qObject" | "converters">;
 
@@ -275,15 +279,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       );
     }
 
-    const name = this.namingHelper.getModelPropName(p.$.Name);
-    const odataName = p.$.Name;
-
     return {
-      odataName,
+      odataName: p.$.Name,
       name,
       odataType: p.$.Type,
       required: p.$.Nullable === "false",
       isCollection: isCollection,
+      managed: !!configProp?.managed,
       ...result,
     };
   };

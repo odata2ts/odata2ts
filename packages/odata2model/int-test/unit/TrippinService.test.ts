@@ -19,11 +19,10 @@ describe("Testing Generation of TrippinService", () => {
 
   beforeEach(() => {
     editModel = {
-      userName: "williams",
+      user: "williams",
       favoriteFeature: FeatureModel.Feature1,
       features: [],
       firstName: "Heinz",
-      gender: PersonGenderModel.Unknown,
     };
   });
 
@@ -64,7 +63,6 @@ describe("Testing Generation of TrippinService", () => {
       FavoriteFeature: "Feature1",
       Features: [],
       FirstName: "Heinz",
-      Gender: "Unknown",
     });
   });
 
@@ -79,7 +77,7 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("entitySet: get with complex id", async () => {
-    const testId: PersonIdModel = { userName: "williams" };
+    const testId: PersonIdModel = { user: "williams" };
     const expected = `${BASE_URL}/People(UserName='williams')`;
 
     expect(testService.navToPeople().get(testId).getPath()).toBe(expected);
@@ -89,11 +87,10 @@ describe("Testing Generation of TrippinService", () => {
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
     const model: EditablePersonModel = {
-      userName: "williams",
+      user: "williams",
       favoriteFeature: FeatureModel.Feature1,
       features: [],
       firstName: "Heinz",
-      gender: PersonGenderModel.Unknown,
       age: 33,
     };
 
@@ -106,7 +103,6 @@ describe("Testing Generation of TrippinService", () => {
       FavoriteFeature: FeatureModel.Feature1,
       Features: [],
       FirstName: "Heinz",
-      Gender: PersonGenderModel.Unknown,
       Age: 33,
     });
   });

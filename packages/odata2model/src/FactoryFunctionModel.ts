@@ -1,4 +1,3 @@
-import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { ODataVersions } from "@odata2ts/odata-core";
 import { SourceFile } from "ts-morph";
 
@@ -7,7 +6,7 @@ import { Schema } from "./data-model/edmx/ODataEdmxModelBase";
 import { NamingHelper } from "./data-model/NamingHelper";
 import { RunOptions } from "./OptionModel";
 
-export type DigestionOptions = Pick<RunOptions, "converters">;
+export type DigestionOptions = Pick<RunOptions, "converters" | "propertiesByName" | "entitiesByName">;
 
 /**
  * Takes an EdmxSchema plus the run options and creates a DataModel.

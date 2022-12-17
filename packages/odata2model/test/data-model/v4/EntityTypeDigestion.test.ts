@@ -8,7 +8,7 @@ import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 const NOOP_FN = () => {};
 
-describe("V2: EntityTypeDigestion Test", () => {
+describe("V4: EntityTypeDigestion Test", () => {
   const SERVICE_NAME = "Tester";
   const CONFIG = getDefaultConfig();
   const NAMING_HELPER = new NamingHelper(CONFIG.naming, SERVICE_NAME);
@@ -48,6 +48,7 @@ describe("V2: EntityTypeDigestion Test", () => {
     const expectedProp = {
       dataType: DataTypes.PrimitiveType,
       isCollection: false,
+      managed: false,
       name: "id",
       odataName: "id",
       odataType: ODataTypesV4.String,

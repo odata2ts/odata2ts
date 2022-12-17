@@ -5,7 +5,7 @@ import { booleanToNumberConverter } from "@odata2ts/test-converters";
 import { MinActionParams } from "./TesterModel";
 
 export class QMinAction extends QAction<MinActionParams> {
-  private readonly params = [new QStringParam("test"), new QStringParam("optTest")];
+  private readonly params = [new QStringParam("test"), new QStringParam("opt_Test", "optTest")];
 
   constructor() {
     super(

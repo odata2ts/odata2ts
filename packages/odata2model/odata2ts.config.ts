@@ -1,10 +1,15 @@
-import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "@odata2ts/odata2model";
+import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2model";
 
 const config: ConfigFileOptions = {
   debug: false,
   mode: Modes.service,
   emitMode: EmitModes.ts,
   prettier: true,
+  naming: {
+    models: {
+      suffix: "Model",
+    },
+  },
   services: {
     odata: {
       source: "int-test/fixture/v2/odata.xml",
@@ -33,18 +38,19 @@ const config: ConfigFileOptions = {
           },
         },
       },
-      propertyTypes: [
+      propertiesByName: [
         {
-          name: "ID",
-          mappedName: "id",
+          name: "UserName",
+          mappedName: "user",
+        },
+        {
+          name: "Gender",
+          mappedName: "TraditionalGenderCategories",
           managed: true,
         },
-        ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({
-          name: prop,
-          managed: true,
-        })),
+        ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
       ],
-      modelTypes: [
+      entitiesByName: [
         {
           name: "Product",
           mappedName: "prod666uct",
@@ -64,11 +70,6 @@ const config: ConfigFileOptions = {
     nw4: {
       source: "int-test/fixture/v4/northwind.xml",
       output: "build/v4/northwind",
-    },
-  },
-  naming: {
-    models: {
-      suffix: "Model",
     },
   },
 };

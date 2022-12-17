@@ -125,7 +125,7 @@ class ModelGenerator {
 
   private generateEditableModel(model: ComplexType) {
     const entityTypes = [DataTypes.ModelType, DataTypes.ComplexType];
-    const allProps = [...model.baseProps, ...model.props];
+    const allProps = [...model.baseProps, ...model.props].filter((p) => !p.managed);
 
     const requiredProps = allProps
       .filter((p) => p.required && !entityTypes.includes(p.dataType))

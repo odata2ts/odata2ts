@@ -30,6 +30,7 @@ export interface PropertyModel {
   isCollection: boolean;
   dataType: DataTypes;
   converters?: Array<ValueConverterImport>;
+  managed?: boolean;
 }
 
 export interface ModelType extends ComplexType {

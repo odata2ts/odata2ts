@@ -110,7 +110,17 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("oneMaxModel", "entity-max.ts", USE_ID_AND_EDITABLE_MODEL);
+    await generateAndCompare("oneMaxModel", "entity-max.ts", {
+      ...USE_ID_AND_EDITABLE_MODEL,
+      propertiesByName: [
+        ...["id", "id2", "multipleIds"].map((name) => ({ name, managed: true })),
+        {
+          name: "requiredOption",
+          mappedName: "truth",
+          // converters: [{ module: "@odata2ts/test-converter", use: ["booleanToNumberConverter"] }],
+        },
+      ],
+    });
   });
 
   test(`${testSuiteName}: entity relationships`, async () => {
@@ -234,12 +244,14 @@ export function createEntityBasedGenerationTests(
   test(`${testSuiteName}: model naming`, async () => {
     // given an entity with enum props
     odataBuilder
-      .addEntityType("parent", undefined, (builder) => builder.addKeyProp("parentId", ODataTypesV4.Boolean))
+      .addEntityType("parent", undefined, (builder) => {
+        return builder.addKeyProp("parentId", ODataTypesV4.Boolean);
+      })
       .addEntityType(ENTITY_NAME, SERVICE_NAME + ".parent", (builder) =>
         builder
           .addKeyProp("id", ODataTypesV4.Boolean)
-          .addProp("myChoice", `${SERVICE_NAME}.Choice`, false)
-          .addProp("address", `${SERVICE_NAME}.LOCATION`)
+          .addProp("my_Choice", `${SERVICE_NAME}.Choice`, false)
+          .addProp("Address", `${SERVICE_NAME}.LOCATION`)
       )
       .addEnumType("Choice", [
         { name: "A", value: 1 },
@@ -256,6 +268,7 @@ export function createEntityBasedGenerationTests(
         models: {
           suffix: "model",
           namingStrategy: NamingStrategies.CONSTANT_CASE,
+          propNamingStrategy: NamingStrategies.CONSTANT_CASE,
           idModels: {
             suffix: "Key",
             applyModelNaming: false,

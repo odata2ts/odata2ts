@@ -8,6 +8,7 @@ describe("Integration Testing of Service Generation", () => {
 
   const testService = new TrippinService(odataClient, BASE_URL);
 
+  // skipped, because it breaks the session state
   test.skip("unbound action", async () => {
     const result = await testService.resetDataSourceAction();
     expect(result.data).toBe("");
@@ -123,7 +124,7 @@ describe("Integration Testing of Service Generation", () => {
 
   test("create key and parse key", async () => {
     const expectedSimple = "test@testing.de";
-    const expectedComplex: PersonIdModel = { userName: expectedSimple };
+    const expectedComplex: PersonIdModel = { user: expectedSimple };
 
     // simple version
     let result = testService.navToPeople().createKey(expectedSimple);
