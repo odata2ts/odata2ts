@@ -50,7 +50,7 @@ const config: ConfigFileOptions = {
         },
         ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
       ],
-      entitiesByName: [
+      /*entitiesByName: [
         {
           name: "Product",
           mappedName: "prod666uct",
@@ -61,7 +61,7 @@ const config: ConfigFileOptions = {
             },
           ],
         },
-      ],
+      ],*/
     },
     nw2: {
       source: "int-test/fixture/v2/northwind.xml",
