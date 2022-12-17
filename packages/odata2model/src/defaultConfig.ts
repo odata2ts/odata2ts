@@ -74,7 +74,7 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
     },
   },
   propertiesByName: [],
-  entitiesByName: [],
+  // entitiesByName: [],
 };
 
 /**

@@ -144,7 +144,7 @@ export interface ServiceGenerationOptions
   /**
    * Configure generation process for EntityTypes and ComplexTypes including their properties.
    */
-  entitiesByName?: Array<EntityGenerationOptions>;
+  // entitiesByName?: Array<EntityGenerationOptions>;
   /**
    * Configure generation process for individual properties based on their name.
    */
