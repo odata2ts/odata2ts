@@ -2265,66 +2265,32 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/converter-api@^0.0.0, @odata2ts/converter-api@workspace:packages/converter-api":
-  version: 0.0.0-use.local
-  resolution: "@odata2ts/converter-api@workspace:packages/converter-api"
+"@odata2ts/converter-api@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@odata2ts/converter-api@npm:0.1.0"
   dependencies:
-    "@odata2ts/odata-core": ^0.0.0
-    rimraf: ^3.0.2
-    typescript: 4.6.3
-  languageName: unknown
-  linkType: soft
+    "@odata2ts/odata-core": ^0.1.0
+  checksum: ada22feba6e5eb2e94fb8a61204e5c189b9fbd5d316c913f9abfbbf8e96315cf237c2f1921c61dab33693e77fce29b88f0fedb29cbd6527b3a8d80de77601862
+  languageName: node
+  linkType: hard
 
-"@odata2ts/converter-luxon@^0.0.0, @odata2ts/converter-luxon@workspace:packages/converter-luxon":
-  version: 0.0.0-use.local
-  resolution: "@odata2ts/converter-luxon@workspace:packages/converter-luxon"
+"@odata2ts/converter-runtime@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@odata2ts/converter-runtime@npm:0.1.0"
   dependencies:
-    "@odata2ts/converter-api": ^0.0.0
-    "@types/jest": ^27.4.1
-    "@types/luxon": ^3.0.1
-    "@types/node": ^17.0.23
-    jest: 27.5.1
-    luxon: ^3.0.4
-    rimraf: ^3.0.2
-    ts-jest: ^27.1.4
-    ts-node: 10.7.0
-    typescript: 4.6.3
-  peerDependencies:
-    luxon: ^3.0.4
-  languageName: unknown
-  linkType: soft
+    "@odata2ts/converter-api": ^0.1.0
+  checksum: 675f6fd0d2a457cd2740a38d55ab2f56fdb6b549ef3c8a829932f8f5872f5c863a4040029413f08b030f6ce6c96cb13d9f383d328d3bcce72a0d0dba6282d6fc
+  languageName: node
+  linkType: hard
 
-"@odata2ts/converter-runtime@^0.0.0, @odata2ts/converter-runtime@workspace:packages/converter-runtime":
-  version: 0.0.0-use.local
-  resolution: "@odata2ts/converter-runtime@workspace:packages/converter-runtime"
+"@odata2ts/converter-v2-to-v4@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@odata2ts/converter-v2-to-v4@npm:0.1.0"
   dependencies:
-    "@odata2ts/converter-api": ^0.0.0
-    "@odata2ts/converter-luxon": ^0.0.0
-    "@odata2ts/converter-v2-to-v4": ^0.0.0
-    "@types/jest": ^27.4.1
-    "@types/node": ^17.0.23
-    jest: 27.5.1
-    rimraf: ^3.0.2
-    ts-jest: ^27.1.4
-    ts-node: 10.7.0
-    typescript: 4.6.3
-  languageName: unknown
-  linkType: soft
-
-"@odata2ts/converter-v2-to-v4@^0.0.0, @odata2ts/converter-v2-to-v4@workspace:packages/converter-v2-to-v4":
-  version: 0.0.0-use.local
-  resolution: "@odata2ts/converter-v2-to-v4@workspace:packages/converter-v2-to-v4"
-  dependencies:
-    "@odata2ts/converter-api": ^0.0.0
-    "@types/jest": ^27.4.1
-    "@types/node": ^17.0.23
-    jest: 27.5.1
-    rimraf: ^3.0.2
-    ts-jest: ^27.1.4
-    ts-node: 10.7.0
-    typescript: 4.6.3
-  languageName: unknown
-  linkType: soft
+    "@odata2ts/converter-api": ^0.1.0
+  checksum: bc54c36d36a6fe94adc6b97c0ad5d0d7e94894033ea22fbb64e1d660c8fa689adbdd78b3a47f8fc4f8260754da591b6549b01969e16521c24a55c72e991bbc07
+  languageName: node
+  linkType: hard
 
 "@odata2ts/odata-client-api@^0.4.0, @odata2ts/odata-client-api@workspace:packages/odata-client-api":
   version: 0.0.0-use.local
@@ -2340,7 +2306,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-core@^0.0.0, @odata2ts/odata-core@workspace:packages/odata-core":
+"@odata2ts/odata-core@^0.1.0, @odata2ts/odata-core@workspace:packages/odata-core":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-core@workspace:packages/odata-core"
   dependencies:
@@ -2358,9 +2324,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
-    "@odata2ts/converter-api": ^0.0.0
-    "@odata2ts/converter-runtime": ^0.0.0
-    "@odata2ts/odata-core": ^0.0.0
+    "@odata2ts/converter-api": ^0.1.0
+    "@odata2ts/converter-runtime": ^0.1.0
+    "@odata2ts/odata-core": ^0.1.0
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: 27.5.1
@@ -2412,9 +2378,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2model@workspace:packages/odata2model"
   dependencies:
-    "@odata2ts/converter-api": ^0.0.0
-    "@odata2ts/converter-runtime": ^0.0.0
-    "@odata2ts/converter-v2-to-v4": ^0.0.0
+    "@odata2ts/converter-api": ^0.1.0
+    "@odata2ts/converter-runtime": ^0.1.0
+    "@odata2ts/converter-v2-to-v4": ^0.1.0
     "@odata2ts/odata-client-api": ^0.4.0
     "@odata2ts/odata-query-objects": ^0.11.1
     "@odata2ts/odata-service": ^0.8.1
@@ -2475,7 +2441,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/test-converters@workspace:examples/test-converters"
   dependencies:
-    "@odata2ts/converter-api": ^0.0.0
+    "@odata2ts/converter-api": ^0.1.0
     rimraf: ^3.0.2
     typescript: 4.6.3
   languageName: unknown
@@ -2654,13 +2620,6 @@ __metadata:
   version: 0.0.29
   resolution: "@types/json5@npm:0.0.29"
   checksum: e60b153664572116dfea673c5bda7778dbff150498f44f998e34b5886d8afc47f16799280e4b6e241c0472aef1bc36add771c569c68fc5125fc2ae519a3eb9ac
-  languageName: node
-  linkType: hard
-
-"@types/luxon@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "@types/luxon@npm:3.0.1"
-  checksum: a81444f9b474ea9b3063ab4cc68b917a2634e38b4e229f86c78c35023a32bf5e8d1044d7c229c011291662c976cb6c4cf109dc3d2077c571790a31779a554178
   languageName: node
   linkType: hard
 
@@ -7324,13 +7283,6 @@ fsevents@^2.3.2:
   dependencies:
     yallist: ^4.0.0
   checksum: f97f499f898f23e4585742138a22f22526254fdba6d75d41a1c2526b3b6cc5747ef59c5612ba7375f42aca4f8461950e925ba08c991ead0651b4918b7c978297
-  languageName: node
-  linkType: hard
-
-"luxon@npm:^3.0.4":
-  version: 3.0.4
-  resolution: "luxon@npm:3.0.4"
-  checksum: d0908c3951da2a10ccf23040210ead23b0da5366a9d0954e7d5db3560189a7bd703d8af1e00084f197effc9cd7158d1bddf32886d98a70d59ce9bc3fe88bbce0
   languageName: node
   linkType: hard
 
