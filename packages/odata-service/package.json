@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-service",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "publishConfig": {
     "access": "public"
   },
@@ -22,9 +22,9 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@odata2ts/odata-client-api": "^0.4.0",
-    "@odata2ts/odata-query-objects": "^0.11.1",
-    "@odata2ts/odata-uri-builder": "^0.11.2"
+    "@odata2ts/odata-client-api": "^0.5.0",
+    "@odata2ts/odata-query-objects": "^0.12.0",
+    "@odata2ts/odata-uri-builder": "^0.12.0"
   },
   "devDependencies": {
     "@types/jest": "^27.4.1",

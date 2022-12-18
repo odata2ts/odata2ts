@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/axios-odata-client@0.2.3...@odata2ts/axios-odata-client@0.3.0) (2022-12-18)
+
+
+### Features
+
+* **odata-client-api:** dynamic response data model for put and patch ([b6d9a7d](https://github.com/odata2ts/odata2ts/commit/b6d9a7de45b39106693515c6e2b5490112547ae4))
+
+
+### BREAKING CHANGES
+
+* **odata-client-api:** put and patch allow for response values now => OData v4 specifies that either void or the model representation might be returned (void is more usual though)
+
+
+
+
+
+
 ## [0.2.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/axios-odata-client@0.2.2...@odata2ts/axios-odata-client@0.2.3) (2022-09-08)
 
 **Note:** Version bump only for package @odata2ts/axios-odata-client
