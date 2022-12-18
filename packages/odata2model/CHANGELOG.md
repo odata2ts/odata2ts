@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.16.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.14.2...@odata2ts/odata2model@0.16.0) (2022-12-18)
+
+
+### Bug Fixes
+
+* **odata2model:** don't generate useless constructors ([f495604](https://github.com/odata2ts/odata2ts/commit/f4956044df9cc081e90208fb3a961fa6572911db))
+* **odata2ts:** disable entities by name from config interfaces => not implemented yet ([96fefbe](https://github.com/odata2ts/odata2ts/commit/96fefbe22dc10cf7549a61551eadc93b870dcc0d))
+* **odata2ts:** disable own section about entitiesByName ([78d9c6e](https://github.com/odata2ts/odata2ts/commit/78d9c6e7e9eccd31f47a7f7b34af9e77dfeeb000))
+
+
+### Features
+
+* **odata2model:** extensive configuration model via config file ([#67](https://github.com/odata2ts/odata2ts/issues/67)) ([a42aee4](https://github.com/odata2ts/odata2ts/commit/a42aee494a4e30d8704569d7262fc31020ed7711))
+* **odata2ts:** adapt method generation for services ([486a85c](https://github.com/odata2ts/odata2ts/commit/486a85cffc2ee06e6461ecd1f3dd00a8208b95f7))
+* **odata2ts:** adapt query object generation to OperationReturnTypes ([734e2bd](https://github.com/odata2ts/odata2ts/commit/734e2bd51a67cc285153c97f96655b950c62a230))
+* **odata2ts:** apply name mapping in all places ([dd5a6fd](https://github.com/odata2ts/odata2ts/commit/dd5a6fdde83cdc3f803eb1d96553571e78364849))
+* **odata2ts:** property configuration with name mapping and managed flag ([#78](https://github.com/odata2ts/odata2ts/issues/78)) ([797566c](https://github.com/odata2ts/odata2ts/commit/797566cf962e8c9b1f3a1a8081e066c9f0829b91))
+
+
+
+
+
 # [0.15.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.14.2...@odata2ts/odata2model@0.15.0) (2022-12-18)
 
 

@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-client-api@0.4.0...@odata2ts/odata-client-api@0.6.0) (2022-12-18)
+
+
+### Features
+
+* **odata-client-api:** dynamic response data model for put and patch ([b6d9a7d](https://github.com/odata2ts/odata2ts/commit/b6d9a7de45b39106693515c6e2b5490112547ae4))
+
+
+### BREAKING CHANGES
+
+* **odata-client-api:** put and patch allow for response values now => OData v4 specifies that either void or the model representation might be returned (void is more usual though)
+
+
+
+
+
 # [0.5.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-client-api@0.4.0...@odata2ts/odata-client-api@0.5.0) (2022-12-18)
 
 

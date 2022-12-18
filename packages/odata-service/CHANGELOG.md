@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.8.1...@odata2ts/odata-service@0.10.0) (2022-12-18)
+
+
+### Bug Fixes
+
+* **odata-service:** adapt fixture ([6c0c302](https://github.com/odata2ts/odata2ts/commit/6c0c302114bcf7643ba3f20f1185f5d30ebe37e1))
+
+
+### Features
+
+* **odata-query-objects:** conversion functions for QueryObject ([#73](https://github.com/odata2ts/odata2ts/issues/73)) ([86cc256](https://github.com/odata2ts/odata2ts/commit/86cc2563568ff5b6dd079de701521ae43437087d))
+* **odata-service:** name mapping and conversion for request and response (all CRUD actions) ([b124d5c](https://github.com/odata2ts/odata2ts/commit/b124d5cc870d022303ee3ef36b1b09f2061e6037))
+
+
+
+
+
 # [0.9.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.8.1...@odata2ts/odata-service@0.9.0) (2022-12-18)
 
 

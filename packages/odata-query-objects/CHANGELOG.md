@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.13.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.11.1...@odata2ts/odata-query-objects@0.13.0) (2022-12-18)
+
+
+### Features
+
+* **odata-query-objects:** add mapped name to Q-operation params ([#71](https://github.com/odata2ts/odata2ts/issues/71)) ([4ff0cfc](https://github.com/odata2ts/odata2ts/commit/4ff0cfc94182dfa12c817844a31d2fd5e134dc27))
+* **odata-query-objects:** conversion functions for QueryObject ([#73](https://github.com/odata2ts/odata2ts/issues/73)) ([86cc256](https://github.com/odata2ts/odata2ts/commit/86cc2563568ff5b6dd079de701521ae43437087d))
+* **odata-query-objects:** conversion functions must handle null, undefined and arrays & special conversion functions for collections ([11edf2c](https://github.com/odata2ts/odata2ts/commit/11edf2c0897b696feeb3278a6ee18263b10767d8))
+* **odata-query-objects:** implement converters in QPath and QParam ([#65](https://github.com/odata2ts/odata2ts/issues/65)) ([c839a98](https://github.com/odata2ts/odata2ts/commit/c839a9888d014ba93ba791e8ce4c96f6fcdb9d57))
+* **odata-query-objects:** introduce OperationReturnType to handle response conversion in operations ([96775e0](https://github.com/odata2ts/odata2ts/commit/96775e0e9a3a87afd502c46371db81794d4356db))
+* **odata-query-objects:** name mapping and conversion for function and action params ([5092fea](https://github.com/odata2ts/odata2ts/commit/5092fea3f000034f2ae49d153f57e5308731c8ea))
+
+
+
+
+
 # [0.12.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.11.1...@odata2ts/odata-query-objects@0.12.0) (2022-12-18)
 
 
