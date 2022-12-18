@@ -2,6 +2,7 @@
 .env
 .env.*
 node_modules/
+example-ignored/
 
 # build folders
 lib
