@@ -2442,6 +2442,7 @@ __metadata:
   resolution: "@odata2ts/test-converters@workspace:examples/test-converters"
   dependencies:
     "@odata2ts/converter-api": ^0.1.0
+    "@odata2ts/odata-core": ^0.1.0
     rimraf: ^3.0.2
     typescript: 4.6.3
   languageName: unknown

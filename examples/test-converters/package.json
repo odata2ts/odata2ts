@@ -19,7 +19,8 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@odata2ts/converter-api": "^0.1.0"
+    "@odata2ts/converter-api": "^0.1.0",
+    "@odata2ts/odata-core": "^0.1.0"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",
