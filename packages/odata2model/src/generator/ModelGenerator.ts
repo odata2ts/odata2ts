@@ -91,7 +91,7 @@ class ModelGenerator {
     // V2 entity special: deferred content
     let suffix = "";
     if (isEntity && this.dataModel.isV2()) {
-      this.importContainer.addFromService(DEFERRED_CONTENT);
+      this.importContainer.addFromCore(DEFERRED_CONTENT);
       suffix = ` | ${DEFERRED_CONTENT}`;
     }
     // custom types which require type imports => possible via converters
