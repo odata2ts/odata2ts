@@ -103,13 +103,6 @@ class QueryObjectGenerator {
       const isModelType = prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
       let qPathInit: string;
 
-      if (isModelType) {
-        qPathInit = `new ${prop.qPath}(this.withPrefix("${odataName}"), () => ${prop.qObject!})`;
-      } else {
-        let converterStmt = this.generateConverterStmt(prop.converters, importContainer);
-        qPathInit = `new ${prop.qPath}(this.withPrefix("${odataName}")${converterStmt ? `, ${converterStmt}` : ""})`;
-      }
-
       // factor in collections
       if (prop.isCollection) {
         const cType = `Q${isModelType ? "Entity" : ""}CollectionPath`;
@@ -125,10 +118,16 @@ class QueryObjectGenerator {
         if (!isModelType) {
           importContainer.addFromQObject(qObject);
         }
+      } else {
+        if (isModelType) {
+          qPathInit = `new ${prop.qPath}(this.withPrefix("${odataName}"), () => ${prop.qObject!})`;
+        } else {
+          let converterStmt = this.generateConverterStmt(prop.converters, importContainer);
+          qPathInit = `new ${prop.qPath}(this.withPrefix("${odataName}")${converterStmt ? `, ${converterStmt}` : ""})`;
+        }
+        // add import for data type
+        importContainer.addFromQObject(prop.qPath);
       }
-
-      // add import for data type
-      importContainer.addFromQObject(prop.qPath);
 
       return {
         name,
