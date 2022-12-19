@@ -17,12 +17,13 @@
     "clean-v2": "rimraf build/v2",
     "clean-v4": "rimraf build/v4",
     "compile": "tsc",
+    "compile-fixtures": "tsc -p ./tsconfig.fixture.json",
     "dev": "yarn generate trippin odata",
     "generate": "ts-node --cwd-mode src/run-cli.ts ",
     "int-test": "yarn clean && yarn dev && jest ./int-test",
     "odata2ts": "yarn odata2model",
     "prepublish": "yarn build",
-    "test": "jest ./test"
+    "test": "yarn compile-fixtures && jest ./test"
   },
   "files": [
     "*.md",
