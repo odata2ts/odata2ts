@@ -1,4 +1,4 @@
-import { DeferredContent } from "@odata2ts/odata-service";
+import { DeferredContent } from "@odata2ts/odata-core";
 
 export interface Author {
   id: number;
