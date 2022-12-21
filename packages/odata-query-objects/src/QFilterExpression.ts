@@ -7,34 +7,28 @@ export class QFilterExpression {
 
   public not(): QFilterExpression {
     if (this.expression?.trim()) {
-      this.expression = `not(${this.expression})`;
+      return new QFilterExpression(`not(${this.expression})`);
     }
     return this;
   }
 
-  public and(expression: QFilterExpression): QFilterExpression {
-    const thisIsEmpty = !this.expression?.toString();
-    const newIsEmpty = !expression.toString();
-
-    if (!thisIsEmpty && !newIsEmpty) {
-      this.expression = `${this.expression} and ${expression.toString()}`;
-    }
-    if (thisIsEmpty) {
-      this.expression = expression.toString();
+  private combine(expression: QFilterExpression | null | undefined, isOrOperation: boolean) {
+    if (expression?.toString()) {
+      if (this.expression) {
+        const newExpr = `${this.expression} ${isOrOperation ? "or" : "and"} ${expression.toString()}`;
+        return new QFilterExpression(isOrOperation ? `(${newExpr})` : newExpr);
+      } else {
+        return expression;
+      }
     }
     return this;
   }
 
-  public or(expression: QFilterExpression): QFilterExpression {
-    const thisIsEmpty = !this.expression?.toString();
-    const newIsEmpty = !expression.toString();
+  public and(expression: QFilterExpression | null | undefined): QFilterExpression {
+    return this.combine(expression, false);
+  }
 
-    if (!thisIsEmpty && !newIsEmpty) {
-      return new QFilterExpression(`(${this.expression} or ${expression.toString()})`);
-    }
-    if (thisIsEmpty) {
-      this.expression = expression.toString();
-    }
-    return this;
+  public or(expression: QFilterExpression | null | undefined): QFilterExpression {
+    return this.combine(expression, true);
   }
 }

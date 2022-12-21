@@ -52,14 +52,9 @@ describe("QEntityCollectionPath test", () => {
     const checkForName = false;
 
     const result = createToTest().any((qTest) => {
-      const filter = new QFilterExpression();
-      if (checkForAge) {
-        filter.and(qTest.id.gt(18));
-      }
-      if (checkForName) {
-        filter.and(qTest.name.contains("Humunkulus"));
-      }
-      return filter;
+      return new QFilterExpression()
+        .and(checkForAge ? qTest.id.gt(18) : null)
+        .and(checkForName ? qTest.name.contains("Humunkulus") : null);
     });
     expect(result.toString()).toBe("test/any(a:a/id gt 18)");
   });
@@ -95,14 +90,9 @@ describe("QEntityCollectionPath test", () => {
     const checkForName = false;
 
     const result = createToTest().all((qTest) => {
-      const filter = new QFilterExpression();
-      if (checkForAge) {
-        filter.and(qTest.id.gt(18));
-      }
-      if (checkForName) {
-        filter.and(qTest.name.contains("Humunkulus"));
-      }
-      return filter;
+      return new QFilterExpression()
+        .and(checkForAge ? qTest.id.gt(18) : null)
+        .and(checkForName ? qTest.name.contains("Humunkulus") : null);
     });
     expect(result.toString()).toBe("test/all(a:a/id gt 18)");
   });
