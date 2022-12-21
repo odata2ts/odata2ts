@@ -1,17 +1,10 @@
 import { QFilterExpression, QNumberPath, QStringPath } from "../src";
 
 describe("QFilterExpression test", () => {
-  let exampleExpression: QFilterExpression;
-  let exampleResult: string;
-  let exampleNumberExpr: QFilterExpression;
-  let exampleNumberResult: string;
-
-  beforeEach(() => {
-    exampleExpression = new QStringPath("text").equals("hi there!");
-    exampleResult = "text eq 'hi there!'";
-    exampleNumberExpr = new QNumberPath("number").equals(3);
-    exampleNumberResult = "number eq 3";
-  });
+  const exampleExpression = new QStringPath("text").equals("hi there!");
+  const exampleResult = "text eq 'hi there!'";
+  const exampleNumberExpr = new QNumberPath("number").equals(3);
+  const exampleNumberResult = "number eq 3";
 
   test("might be empty", () => {
     // @ts-ignore
@@ -51,6 +44,8 @@ describe("QFilterExpression test", () => {
 
     expect(toTest).toBe(exampleResult);
     expect(toTest2).toBe(exampleResult);
+    expect(exampleExpression.and(null).toString()).toBe(exampleResult);
+    expect(exampleExpression.and(undefined).toString()).toBe(exampleResult);
   });
 
   test("and operator multiple times", () => {
@@ -71,6 +66,8 @@ describe("QFilterExpression test", () => {
 
     expect(toTest).toBe(exampleResult);
     expect(toTest2).toBe(exampleResult);
+    expect(exampleExpression.or(null).toString()).toBe(exampleResult);
+    expect(exampleExpression.or(undefined).toString()).toBe(exampleResult);
   });
 
   test("or operator multiple times", () => {
