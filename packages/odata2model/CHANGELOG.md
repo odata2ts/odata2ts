@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.16.0...@odata2ts/odata2model@0.16.1) (2022-12-21)
+
+
+### Bug Fixes
+
+* **odata2ts:** import deferred content from core (V2 only) ([66bee43](https://github.com/odata2ts/odata2ts/commit/66bee43bfe16bc930614bd82df48c46348e25b2b))
+* only import QEntityPath when needed ([81a4e77](https://github.com/odata2ts/odata2ts/commit/81a4e77b78d0fb02505b7989e7ae6737dc279e80))
+
+
+
+
+
+
 # [0.16.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.14.2...@odata2ts/odata2model@0.16.0) (2022-12-18)
 
 

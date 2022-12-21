@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.14.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.13.0...@odata2ts/odata-query-objects@0.14.0) (2022-12-21)
+
+
+### Bug Fixes
+
+* **odata-query-objects:** missing dep on odata-client-api ([de42b24](https://github.com/odata2ts/odata2ts/commit/de42b247181537479787a1bb8e9d462964e69e6e))
+* **odata-query-objects:** QFilterExpression without state and accepting null | undefined ([79aa3f7](https://github.com/odata2ts/odata2ts/commit/79aa3f7980c551b398b0560027289bcc542519b3))
+
+
+### Features
+
+* **odata-query-objects:** proper QSearchTerm to support V4 $search query option ([1aaef9a](https://github.com/odata2ts/odata2ts/commit/1aaef9a8e1390a104699126f48741134e189f93a))
+
+
+### BREAKING CHANGES
+
+* **odata-query-objects:** QFilterExpressions might have been used in stateful manner, work with dynamically evaluating to null | undefined
+
+
+
+
+
+
 # [0.13.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.11.1...@odata2ts/odata-query-objects@0.13.0) (2022-12-18)
 
 

@@ -2327,7 +2327,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/odata-query-objects@^0.13.0, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
+"@odata2ts/odata-query-objects@^0.14.0, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
@@ -2346,13 +2346,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-service@^0.10.0, @odata2ts/odata-service@workspace:packages/odata-service":
+"@odata2ts/odata-service@^0.10.1, @odata2ts/odata-service@workspace:packages/odata-service":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
     "@odata2ts/odata-client-api": ^0.6.0
-    "@odata2ts/odata-query-objects": ^0.13.0
-    "@odata2ts/odata-uri-builder": ^0.13.0
+    "@odata2ts/odata-query-objects": ^0.14.0
+    "@odata2ts/odata-uri-builder": ^0.14.0
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: 27.5.1
@@ -2365,11 +2365,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-uri-builder@^0.13.0, @odata2ts/odata-uri-builder@workspace:packages/odata-uri-builder":
+"@odata2ts/odata-uri-builder@^0.14.0, @odata2ts/odata-uri-builder@workspace:packages/odata-uri-builder":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-uri-builder@workspace:packages/odata-uri-builder"
   dependencies:
-    "@odata2ts/odata-query-objects": ^0.13.0
+    "@odata2ts/odata-query-objects": ^0.14.0
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     axios: ^0.26.1
@@ -2390,8 +2390,8 @@ __metadata:
     "@odata2ts/converter-runtime": ^0.1.0
     "@odata2ts/converter-v2-to-v4": ^0.1.0
     "@odata2ts/odata-client-api": ^0.6.0
-    "@odata2ts/odata-query-objects": ^0.13.0
-    "@odata2ts/odata-service": ^0.10.0
+    "@odata2ts/odata-query-objects": ^0.14.0
+    "@odata2ts/odata-service": ^0.10.1
     "@types/fs-extra": ^9.0.13
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
