@@ -1,4 +1,6 @@
-import { createUriBuilderV4, ODataUriBuilderV4 } from "../src/";
+import { searchTerm } from "@odata2ts/odata-query-objects";
+
+import { ODataUriBuilderV4, createUriBuilderV4 } from "../src/";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 import { createBaseTests } from "./ODataUriBuilderBaseTests";
 
@@ -14,13 +16,15 @@ function addBase(urlPart: string) {
 
 describe("ODataUriBuilderV4 Test", () => {
   let toTest: ODataUriBuilderV4<QPerson>;
+  let toTest2: ODataUriBuilderV4<QPerson>;
 
-  // @ts-ignore: hard to get the right typing right, so we always use the V2 model as common ground
-  // all we care about here, ist that V4 covers all the functionally V2 has
+  // @ts-ignore: hard to get the typing right here, so we always use the V2 model as common ground
+  // all we care about here, is that V4 covers all the functionally V2 has
   createBaseTests(createUriBuilderV4);
 
   function refresh() {
     toTest = createUriBuilderV4("/Persons", qPerson, { unencoded: true });
+    toTest2 = createUriBuilderV4("/Persons", qPerson, { unencoded: true });
   }
 
   /**
@@ -148,22 +152,49 @@ describe("ODataUriBuilderV4 Test", () => {
 
   test("search with single term", () => {
     const candidate = toTest.search("testing").build();
+    const candidate2 = toTest2.search(searchTerm("testing")).build();
 
     expect(candidate).toBe(addBase("$search=testing"));
+    expect(candidate2).toBe(candidate);
   });
 
   test("search with phrase", () => {
     const candidate = toTest.search("testing more").build();
+    const candidate2 = toTest2.search(searchTerm("testing more")).build();
 
     expect(candidate).toBe(addBase('$search="testing more"'));
+    expect(candidate2).toBe(candidate);
   });
 
   test("search with no term", () => {
     const noopPath = addBase("");
 
     expect(toTest.search(undefined).build()).toBe(noopPath);
+    expect(toTest.search(searchTerm(undefined)).build()).toBe(noopPath);
     expect(toTest.search(null).build()).toBe(noopPath);
+    expect(toTest.search(searchTerm(null)).build()).toBe(noopPath);
     expect(toTest.search("").build()).toBe(noopPath);
-    expect(toTest.search(" ").build()).toBe(addBase('$search=" "'));
+    expect(toTest.search(" ").build()).toBe(noopPath);
+    expect(toTest.search(searchTerm(" ")).build()).toBe(noopPath);
+  });
+
+  test("search with multiple terms", () => {
+    const candidate = toTest.search("testing", "test2", "phrase is a phrase").build();
+    const candidate2 = toTest2.search(searchTerm("testing"), "test2", searchTerm("phrase is a phrase")).build();
+
+    expect(candidate).toBe(addBase('$search=testing AND test2 AND "phrase is a phrase"'));
+    expect(candidate2).toBe(candidate);
+  });
+
+  test("search: ignore nullables", () => {
+    const candidate = toTest.search("testing", null, searchTerm(null), "test2", undefined).build();
+
+    expect(candidate).toBe(addBase("$search=testing AND test2"));
+  });
+
+  test("search: with operators", () => {
+    const candidate = toTest.search(searchTerm("testing").not().and("test2").or("phrase is a phrase")).build();
+
+    expect(candidate).toBe(addBase('$search=(NOT testing AND test2 OR "phrase is a phrase")'));
   });
 });

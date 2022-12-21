@@ -3,7 +3,9 @@ import {
   QFilterExpression,
   QOrderByExpression,
   QPathModel,
+  QSearchTerm,
   QueryObject,
+  searchTerm,
 } from "@odata2ts/odata-query-objects";
 
 import { ODataOperators } from "./ODataModel";
@@ -34,7 +36,7 @@ export class ODataUriBuilder<Q extends QueryObject> {
   private orderBys: Array<QOrderByExpression> | undefined;
   private expands: Array<string> | undefined;
   private groupBys: Array<string> | undefined;
-  private searchTerm: string | undefined;
+  private searchTerms: Array<QSearchTerm> | undefined;
 
   constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
     if (!qEntity || !path || !path.trim()) {
@@ -207,8 +209,15 @@ export class ODataUriBuilder<Q extends QueryObject> {
     }
   }
 
-  public search(term: NullableParam<string>) {
-    this.searchTerm = term || undefined;
+  public search(terms: NullableParamList<string | QSearchTerm>) {
+    // single word is a term (literal value), multiple terms are a phrase (quoted value with double quotes)
+    const filteredTerms = terms?.filter((t): t is string => !!t?.toString()?.trim()).map(searchTerm);
+    if (filteredTerms?.length) {
+      if (!this.searchTerms) {
+        this.searchTerms = [];
+      }
+      this.searchTerms.push(...filteredTerms);
+    }
   }
 
   private param(operator: string, value: string) {
@@ -254,10 +263,8 @@ export class ODataUriBuilder<Q extends QueryObject> {
     if (this.itemsToSkip !== undefined) {
       add(ODataOperators.SKIP, String(this.itemsToSkip));
     }
-    if (this.searchTerm) {
-      // single word is a term (literal value), multiple terms are a phrase (quoted value with double quotes)
-      const encodedSearchTerm = this.searchTerm.indexOf(" ") > -1 ? `"${this.searchTerm}"` : this.searchTerm;
-      add(ODataOperators.SEARCH, encodedSearchTerm);
+    if (this.searchTerms?.length) {
+      add(ODataOperators.SEARCH, this.searchTerms.map((st) => st.toString()).join(" AND "));
     }
 
     return params;

@@ -1,4 +1,4 @@
-import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
+import { QFilterExpression, QOrderByExpression, QSearchTerm, QueryObject } from "@odata2ts/odata-query-objects";
 
 import { ODataUriBuilder } from "../ODataUriBuilder";
 import {
@@ -91,7 +91,7 @@ class ODataUriBuilderV4<Q extends QueryObject> implements ODataUriBuilderV4Model
     return this;
   }
 
-  public search(term: NullableParam<string>) {
+  public search(...term: NullableParamList<string | QSearchTerm>) {
     this.builder.search(term);
     return this;
   }
