@@ -2333,6 +2333,7 @@ __metadata:
   dependencies:
     "@odata2ts/converter-api": ^0.1.0
     "@odata2ts/converter-runtime": ^0.1.0
+    "@odata2ts/odata-client-api": ^0.6.0
     "@odata2ts/odata-core": ^0.3.0
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
