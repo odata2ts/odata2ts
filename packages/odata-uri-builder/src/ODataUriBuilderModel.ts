@@ -4,6 +4,7 @@ import {
   QEntityPath,
   QFilterExpression,
   QOrderByExpression,
+  QSearchTerm,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
 
@@ -92,14 +93,18 @@ export interface ODataUriBuilderModel<Q extends QueryObject, ReturnType> {
    * V4 search option, where the server decides how to apply the search value.
    * Null or undefined are allowed and will be ignored.
    *
+   * Each passed expression is concatenated to the other ones by an and expression.
+   *
+   * This method can be called multiple times in order to add filters successively.
+   *
    * Uses system query option $search.
    *
    * @example
-   * builder.search("
-   * @param term
+   * builder.search("term1", "this is a phrase) // $search=term1 AND "this is a phrase"
+   * @param terms
    * @returns this query builder
    */
-  search: (term: NullableParam<string>) => ReturnType;
+  search: (...terms: NullableParamList<string | QSearchTerm>) => ReturnType;
 
   /**
    * Simple & plain expand of attributes which are entities or entity collections.
