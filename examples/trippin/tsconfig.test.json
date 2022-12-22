@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.settings.json",
+  "compilerOptions": {
+    "types": ["reflect-metadata", "jest"],
+    "outDir": "./build",
+    "noEmit": true
+  },
+  "include": ["**/*"],
+  "exclude": ["node_modules", "lib", "build"]
+}
