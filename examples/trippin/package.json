@@ -11,12 +11,10 @@
   "author": "texttechne",
   "scripts": {
     "build": "yarn clean && yarn compile",
-    "check-circular-deps": "madge ./src --extensions ts --circular",
     "clean": "rimraf build src/trippin",
     "compile": "tsc",
-    "compile-fixtures": "tsc -p ./tsconfig.fixture.json",
     "generate": "odata2model",
-    "test": "yarn clean && yarn generate && yarn compile-fixtures && jest ./test"
+    "test": "yarn clean && yarn generate && yarn compile && jest ./test"
   },
   "dependencies": {
     "@odata2ts/axios-odata-client": "*",

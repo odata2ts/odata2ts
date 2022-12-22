@@ -1,10 +1,41 @@
-import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2model";
+import { ConfigFileOptions, EmitModes, Modes, NamingOptions, PropertyGenerationOptions } from "@odata2ts/odata2model";
+
+const sharedNaming: NamingOptions = {
+  // models: {
+  //   propNamingStrategy: NamingStrategies.CONSTANT_CASE,
+  // },
+  services: {
+    relatedServiceGetter: {
+      prefix: "navTo",
+      suffix: "",
+    },
+    operations: {
+      function: {
+        suffix: "Function",
+      },
+      action: {
+        suffix: "Action",
+      },
+    },
+  },
+};
+
+const sharedPropNaming: Array<PropertyGenerationOptions> = [
+  {
+    name: "UserName",
+    mappedName: "user",
+  },
+  {
+    name: "Gender",
+    mappedName: "TraditionalGenderCategories",
+    managed: true,
+  },
+  ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
+];
 
 const config: ConfigFileOptions = {
   debug: false,
   mode: Modes.service,
-  emitMode: EmitModes.ts,
-  prettier: true,
   naming: {
     models: {
       suffix: "Model",
@@ -15,42 +46,17 @@ const config: ConfigFileOptions = {
       source: "resource/trippin.xml",
       output: "build/trippin",
       emitMode: EmitModes.js_dts,
+      naming: sharedNaming,
+      propertiesByName: sharedPropNaming,
     },
     trippin: {
       // serviceName: "TrippinService",
       source: "resource/trippin.xml",
       output: "src/trippin",
-      naming: {
-        // models: {
-        //   propNamingStrategy: NamingStrategies.CONSTANT_CASE,
-        // },
-        services: {
-          relatedServiceGetter: {
-            prefix: "navTo",
-            suffix: "",
-          },
-          operations: {
-            function: {
-              suffix: "Function",
-            },
-            action: {
-              suffix: "Action",
-            },
-          },
-        },
-      },
-      propertiesByName: [
-        {
-          name: "UserName",
-          mappedName: "user",
-        },
-        {
-          name: "Gender",
-          mappedName: "TraditionalGenderCategories",
-          managed: true,
-        },
-        ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
-      ],
+      emitMode: EmitModes.ts,
+      prettier: true,
+      naming: sharedNaming,
+      propertiesByName: sharedPropNaming,
       /*entitiesByName: [
         {
           name: "Product",
