@@ -10,17 +10,17 @@
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
   "scripts": {
-    "build": "yarn clean && yarn compile",
+    "build": "yarn clean && yarn generate && yarn compile",
     "clean": "rimraf build src/trippin",
     "compile": "tsc",
     "generate": "odata2model",
-    "test": "yarn clean && yarn generate && yarn compile && jest ./test"
+    "test": "jest ./test"
   },
   "dependencies": {
     "@odata2ts/axios-odata-client": "*",
     "@odata2ts/odata-service": "*",
     "@odata2ts/odata2model": "*",
-    "axios": "^0.26.1"
+    "axios": "^1.2.1"
   },
   "devDependencies": {
     "@types/jest": "^27.4.1",
