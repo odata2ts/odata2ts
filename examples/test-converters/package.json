@@ -5,6 +5,7 @@
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
+  "main": "./lib/index.js",
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf lib coverage",
