@@ -2418,7 +2418,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2model@^0.16.0, @odata2ts/odata2model@^0.16.1, @odata2ts/odata2model@workspace:packages/odata2model":
+"@odata2ts/odata2model@^0.16.1, @odata2ts/odata2model@workspace:packages/odata2model":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2model@workspace:packages/odata2model"
   dependencies:
@@ -9461,17 +9461,6 @@ resolve@^1.20.0:
   checksum: cab8f25ae6f1434abee8d80023d7e72b598cf1327164ddab31003c51215526801e40b66c5e65d658a0af1e9d6478cadcb4c745f4bd6751f97d8644786c0978b0
   languageName: node
   linkType: hard
-
-"sap-examples@workspace:example-ignored/sap":
-  version: 0.0.0-use.local
-  resolution: "sap-examples@workspace:example-ignored/sap"
-  dependencies:
-    "@odata2ts/odata2model": ^0.16.0
-    jest: ^27.5.1
-    rimraf: ^3.0.2
-    typescript: 4.6.3
-  languageName: unknown
-  linkType: soft
 
 "sass-lookup@npm:^3.0.0":
   version: 3.0.0

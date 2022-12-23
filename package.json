@@ -50,7 +50,6 @@
   },
   "workspaces": [
     "packages/*",
-    "examples/*",
-    "example-ignored/*"
+    "examples/*"
   ]
 }
