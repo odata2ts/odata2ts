@@ -1,10 +1,15 @@
-import { PersonIdModel } from "../../../build/v4/trippin/TrippinModel";
-import { TrippinService } from "../../../build/v4/trippin/TrippinService";
-import { TestODataClient } from "../../TestODataClient";
+import { AxiosODataClient, RequestError } from "@odata2ts/axios-odata-client";
+import { AxiosError } from "axios";
+
+import { FeatureModel, PersonGenderModel, PersonModel } from "../../build/trippin/TrippinModel";
+import { PersonIdModel } from "../../src/trippin/TrippinModel";
+import { TrippinService } from "../../src/trippin/TrippinService";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
-  const odataClient = new TestODataClient();
+  const odataClient = new AxiosODataClient((error) => {
+    return (error as AxiosError)?.response?.data?.error?.message;
+  });
 
   const testService = new TrippinService(odataClient, BASE_URL);
 
@@ -25,12 +30,79 @@ describe("Integration Testing of Service Generation", () => {
     expect(result.data.icaoCode).toBe("ZBAA");
   });
 
-  test("entityType query", async () => {
+  test("get entity by id", async () => {
+    const expected: PersonModel = {
+      user: "russellwhyte",
+      firstName: "Russell",
+      lastName: "Whyte",
+      middleName: null,
+      age: null,
+      traditionalGenderCategories: PersonGenderModel.Male,
+      emails: ["Russell@example.com", "Russell@contoso.com"],
+      favoriteFeature: FeatureModel.Feature1,
+      features: [FeatureModel.Feature1, FeatureModel.Feature2],
+      homeAddress: null,
+      addressInfo: [
+        {
+          address: "187 Suffolk Ln.",
+          city: {
+            countryRegion: "United States",
+            name: "Boise",
+            region: "ID",
+          },
+        },
+      ],
+      // bestFriend: null,
+      // friends: [],
+      // trips: [],
+    };
+
     const result = await testService.navToPeople().get("russellwhyte").query();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
-    expect(result.data.firstName).toBe("Russell");
-    expect(result.data.lastName).toBe("Whyte");
+
+    const rw: PersonModel = result.data;
+    expect(rw.firstName).toBe("Russell");
+    expect(result.data).toMatchObject(expected);
+  });
+
+  test("get entity with related entities", async () => {
+    const expectedBestFriend: Partial<PersonModel> = {
+      firstName: "Scott",
+      lastName: "Ketchum",
+    };
+    const result = await testService
+      .navToPeople()
+      .get("russellwhyte")
+      .query((qb) => qb.select("bestFriend", "friends").expand("bestFriend", "friends"));
+
+    expect(result.status).toBe(200);
+    expect(result.data.bestFriend).toMatchObject(expectedBestFriend);
+    expect(result.data.friends?.length).toBe(3);
+    expect(result.data.friends![0]).toMatchObject(expectedBestFriend);
+  });
+
+  test("fail to get unknown person", async () => {
+    const failMsg = "The request resource is not found.";
+    await expect(() => testService.navToPeople().get("XXX").query()).rejects.toThrow(failMsg);
+
+    // again, but now inspect error in detail
+    try {
+      await testService.navToPeople().get("XXX").query();
+      // we expect an error and no success
+      expect(1).toBe(2);
+    } catch (error) {
+      const e = error as RequestError;
+      expect(e.isRequestError).toBeTruthy();
+      expect(e.status).toBe(404);
+      expect(e.message).toBe(failMsg);
+      expect(e.data).toStrictEqual({
+        error: {
+          code: "",
+          message: failMsg,
+        },
+      });
+    }
   });
 
   test("entitySet query", async () => {

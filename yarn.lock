@@ -2249,7 +2249,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/axios-odata-client@workspace:packages/axios-odata-client":
+"@odata2ts/axios-odata-client@^0.4.0, @odata2ts/axios-odata-client@workspace:packages/axios-odata-client":
   version: 0.0.0-use.local
   resolution: "@odata2ts/axios-odata-client@workspace:packages/axios-odata-client"
   dependencies:
@@ -2291,6 +2291,42 @@ __metadata:
   checksum: bc54c36d36a6fe94adc6b97c0ad5d0d7e94894033ea22fbb64e1d660c8fa689adbdd78b3a47f8fc4f8260754da591b6549b01969e16521c24a55c72e991bbc07
   languageName: node
   linkType: hard
+
+"@odata2ts/example-odata-v2@workspace:examples/odata-v2":
+  version: 0.0.0-use.local
+  resolution: "@odata2ts/example-odata-v2@workspace:examples/odata-v2"
+  dependencies:
+    "@odata2ts/axios-odata-client": ^0.4.0
+    "@odata2ts/odata-service": ^0.10.1
+    "@odata2ts/odata2model": ^0.16.1
+    "@types/jest": ^27.4.1
+    "@types/node": ^17.0.23
+    axios: ^1.2.1
+    jest: ^27.5.1
+    rimraf: ^3.0.2
+    ts-jest: ^27.1.4
+    ts-node: ^10.7.0
+    typescript: ^4.6.3
+  languageName: unknown
+  linkType: soft
+
+"@odata2ts/example-trippin@workspace:examples/trippin":
+  version: 0.0.0-use.local
+  resolution: "@odata2ts/example-trippin@workspace:examples/trippin"
+  dependencies:
+    "@odata2ts/axios-odata-client": ^0.4.0
+    "@odata2ts/odata-service": ^0.10.1
+    "@odata2ts/odata2model": ^0.16.1
+    "@types/jest": ^27.4.1
+    "@types/node": ^17.0.23
+    axios: ^1.2.1
+    jest: ^27.5.1
+    rimraf: ^3.0.2
+    ts-jest: ^27.1.4
+    ts-node: ^10.7.0
+    typescript: ^4.6.3
+  languageName: unknown
+  linkType: soft
 
 "@odata2ts/odata-client-api@^0.6.0, @odata2ts/odata-client-api@workspace:packages/odata-client-api":
   version: 0.0.0-use.local
@@ -2382,7 +2418,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2model@workspace:packages/odata2model":
+"@odata2ts/odata2model@^0.16.1, @odata2ts/odata2model@workspace:packages/odata2model":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2model@workspace:packages/odata2model"
   dependencies:
@@ -3159,6 +3195,17 @@ __metadata:
     follow-redirects: ^1.14.9
     form-data: ^4.0.0
   checksum: 38cb7540465fe8c4102850c4368053c21683af85c5fdf0ea619f9628abbcb59415d1e22ebc8a6390d2bbc9b58a9806c874f139767389c862ec9b772235f06854
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "axios@npm:1.2.1"
+  dependencies:
+    follow-redirects: ^1.15.0
+    form-data: ^4.0.0
+    proxy-from-env: ^1.1.0
+  checksum: c4dc4e119064c9aed09a3de309bedb797a139a6fb372223aafe3e0c10a7d4a14e4d3e9c9d309467fadb9d2b490b891ee3df96ef5b55716bb971910466ff9f0c5
   languageName: node
   linkType: hard
 
@@ -5034,6 +5081,16 @@ __metadata:
     debug:
       optional: true
   checksum: 6aa4e3e3cdfa3b9314801a1cd192ba756a53479d9d8cca65bf4db3a3e8834e62139245cd2f9566147c8dfe2efff1700d3e6aefd103de4004a7b99985e71dd533
+  languageName: node
+  linkType: hard
+
+"follow-redirects@npm:^1.15.0":
+  version: 1.15.2
+  resolution: "follow-redirects@npm:1.15.2"
+  peerDependenciesMeta:
+    debug:
+      optional: true
+  checksum: faa66059b66358ba65c234c2f2a37fcec029dc22775f35d9ad6abac56003268baf41e55f9ee645957b32c7d9f62baf1f0b906e68267276f54ec4b4c597c2b190
   languageName: node
   linkType: hard
 
@@ -8838,6 +8895,13 @@ fsevents@^2.3.2:
   version: 2.0.1
   resolution: "protocols@npm:2.0.1"
   checksum: 4a9bef6aa0449a0245ded319ac3cbfd032c3e76ebb562777037a3a832c99253d0e8bc2847f7be350236df620a11f7d4fe683ea7f59a2cc14c69f746b6259eda4
+  languageName: node
+  linkType: hard
+
+"proxy-from-env@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "proxy-from-env@npm:1.1.0"
+  checksum: ed7fcc2ba0a33404958e34d95d18638249a68c430e30fcb6c478497d72739ba64ce9810a24f53a7d921d0c065e5b78e3822759800698167256b04659366ca4d4
   languageName: node
   linkType: hard
 

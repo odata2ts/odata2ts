@@ -1,13 +1,12 @@
-import { qLocation, qPerson } from "../../build/v4/trippin/QTrippin";
+import { qLocation, qPerson } from "../../src/trippin/QTrippin";
 import {
   EditableLocationModel,
   EditablePersonModel,
   FeatureModel,
-  PersonGenderModel,
   PersonIdModel,
-} from "../../build/v4/trippin/TrippinModel";
-import { TrippinService } from "../../build/v4/trippin/TrippinService";
-import { MockODataClient } from "../MockODataClient";
+} from "../../src/trippin/TrippinModel";
+import { TrippinService } from "../../src/trippin/TrippinService";
+import { MockODataClient } from "./MockODataClient";
 
 describe("Testing Generation of TrippinService", () => {
   const BASE_URL = "/test";
