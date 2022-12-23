@@ -7,8 +7,8 @@ import { TrippinService } from "../../src/trippin/TrippinService";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
-  const odataClient = new AxiosODataClient((error) => {
-    return (error as AxiosError)?.response?.data?.error?.message;
+  const odataClient = new AxiosODataClient((error: AxiosError) => {
+    return (error as AxiosError<{ error: { message: string } }>)?.response?.data?.error?.message;
   });
 
   const testService = new TrippinService(odataClient, BASE_URL);

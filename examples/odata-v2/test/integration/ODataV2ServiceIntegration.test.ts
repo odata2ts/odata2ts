@@ -14,8 +14,8 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   const BASE_URL = "https://services.odata.org/V2/OData/OData.svc";
   const BASE_URL_WITH_SESSION = "https://services.odata.org/V2/(S(00uijutit22ymzk5avtjixeh))/OData/OData.svc";
   const odataClient = new AxiosODataClient(
-    (error) => {
-      return (error as AxiosError)?.response?.data?.error?.message?.value;
+    (error: AxiosError) => {
+      return (error as AxiosError<{ error: { message: { value: string } } }>)?.response?.data?.error?.message?.value;
     },
     {
       headers: { Accept: "application/json", "Content-Type": "application/json" },
@@ -103,7 +103,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
     // given a service for the new product
     const productService = editableService.getProductsSrv().get(product.id);
     // when updating the description, we expect no error
-    // TODO await productService.patch({ description: "Updated Desc" });
+    await productService.patch({ description: "Updated Desc" });
 
     // when deleting this new product, we expect no error
     await new Promise((res) => setTimeout(res, 1000));

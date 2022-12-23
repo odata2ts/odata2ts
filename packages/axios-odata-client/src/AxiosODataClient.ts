@@ -1,5 +1,5 @@
-import { ODataClient } from "@odata2ts/odata-client-api";
-import axios, { AxiosError, AxiosInstance, AxiosPromise, AxiosRequestConfig, AxiosResponse } from "axios";
+import { HttpResponseModel, ODataClient } from "@odata2ts/odata-client-api";
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 
 import { RequestError } from "./ODataRequestErrorModel";
 
@@ -68,7 +68,7 @@ export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
     }
   }
 
-  private async fetchSecurityToken(): Promise<string> {
+  private async fetchSecurityToken(): Promise<string | undefined> {
     const fetchUrl = this.clientOptions?.csrfTokenFetchUrl ?? "/";
     const response = await this.client.get(fetchUrl, {
       headers: {
@@ -81,7 +81,7 @@ export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
     return response.headers["x-csrf-token"];
   }
 
-  private handleError<T>(instance: AxiosPromise): Promise<AxiosResponse<T>> {
+  private handleError<T>(instance: Promise<HttpResponseModel<T>>): Promise<HttpResponseModel<T>> {
     return instance.catch((err) => {
       return Promise.reject(this.convertError(err));
     });
@@ -94,7 +94,7 @@ export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
       const status = axiosError.response != null ? axiosError.response.status : 0;
       const message = this.getErrorMessage(axiosError);
 
-      const serverError: RequestError = Object.assign(new Error(), {
+      return Object.assign(new Error(), {
         isRequestError: true,
         stack: axiosError.stack,
         message: message,
@@ -103,7 +103,6 @@ export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
         status: status,
         data: axiosError.response != null ? axiosError.response.data : undefined,
       });
-      return serverError;
     }
     return error;
   }
@@ -116,19 +115,34 @@ export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
     return this.client;
   }
 
-  public post<ResponseModel>(url: string, data: any, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
+  public post<ResponseModel>(
+    url: string,
+    data: any,
+    requestConfig?: AxiosRequestConfig
+  ): Promise<HttpResponseModel<ResponseModel>> {
     return this.handleError(this.client.post(url, data, requestConfig));
   }
-  public get<ResponseModel>(url: string, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
+  public get<ResponseModel>(
+    url: string,
+    requestConfig?: AxiosRequestConfig
+  ): Promise<HttpResponseModel<ResponseModel>> {
     return this.handleError(this.client.get(url, requestConfig));
   }
-  public put<ResponseModel>(url: string, data: any, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
+  public put<ResponseModel>(
+    url: string,
+    data: any,
+    requestConfig?: AxiosRequestConfig
+  ): Promise<HttpResponseModel<ResponseModel>> {
     return this.handleError(this.client.put(url, data, requestConfig));
   }
-  public patch<ResponseModel>(url: string, data: any, requestConfig?: AxiosRequestConfig): AxiosPromise<ResponseModel> {
+  public patch<ResponseModel>(
+    url: string,
+    data: any,
+    requestConfig?: AxiosRequestConfig
+  ): Promise<HttpResponseModel<ResponseModel>> {
     return this.handleError(this.client.patch(url, data, requestConfig));
   }
-  public delete(url: string, requestConfig?: AxiosRequestConfig): AxiosPromise<void> {
+  public delete(url: string, requestConfig?: AxiosRequestConfig): Promise<HttpResponseModel<void>> {
     return this.handleError(this.client.delete(url, requestConfig));
   }
 }
