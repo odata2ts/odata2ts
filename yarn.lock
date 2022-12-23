@@ -2249,7 +2249,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/axios-odata-client@*, @odata2ts/axios-odata-client@workspace:packages/axios-odata-client":
+"@odata2ts/axios-odata-client@^0.4.0, @odata2ts/axios-odata-client@workspace:packages/axios-odata-client":
   version: 0.0.0-use.local
   resolution: "@odata2ts/axios-odata-client@workspace:packages/axios-odata-client"
   dependencies:
@@ -2296,9 +2296,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-odata-v2@workspace:examples/odata-v2"
   dependencies:
-    "@odata2ts/axios-odata-client": "*"
-    "@odata2ts/odata-service": "*"
-    "@odata2ts/odata2model": "*"
+    "@odata2ts/axios-odata-client": ^0.4.0
+    "@odata2ts/odata-service": ^0.10.1
+    "@odata2ts/odata2model": ^0.16.1
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     axios: ^1.2.1
@@ -2314,9 +2314,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-trippin@workspace:examples/trippin"
   dependencies:
-    "@odata2ts/axios-odata-client": "*"
-    "@odata2ts/odata-service": "*"
-    "@odata2ts/odata2model": "*"
+    "@odata2ts/axios-odata-client": ^0.4.0
+    "@odata2ts/odata-service": ^0.10.1
+    "@odata2ts/odata2model": ^0.16.1
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     axios: ^1.2.1
@@ -2382,7 +2382,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-service@*, @odata2ts/odata-service@^0.10.1, @odata2ts/odata-service@workspace:packages/odata-service":
+"@odata2ts/odata-service@^0.10.1, @odata2ts/odata-service@workspace:packages/odata-service":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
@@ -2418,7 +2418,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2model@*, @odata2ts/odata2model@^0.16.0, @odata2ts/odata2model@workspace:packages/odata2model":
+"@odata2ts/odata2model@^0.16.0, @odata2ts/odata2model@^0.16.1, @odata2ts/odata2model@workspace:packages/odata2model":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2model@workspace:packages/odata2model"
   dependencies:

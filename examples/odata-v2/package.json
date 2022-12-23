@@ -17,9 +17,9 @@
     "test": "jest ./test"
   },
   "dependencies": {
-    "@odata2ts/axios-odata-client": "*",
-    "@odata2ts/odata-service": "*",
-    "@odata2ts/odata2model": "*",
+    "@odata2ts/axios-odata-client": "^0.4.0",
+    "@odata2ts/odata-service": "^0.10.1",
+    "@odata2ts/odata2model": "^0.16.1",
     "axios": "^1.2.1"
   },
   "devDependencies": {
