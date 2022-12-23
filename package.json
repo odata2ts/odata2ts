@@ -9,7 +9,7 @@
     "build": "yarn clean && lerna run build",
     "check-circular-deps": "lerna run check-circular-deps",
     "clean": "rimraf coverage",
-    "coverage": "yarn workspace @odata2ts/odata2model dev && jest --coverage",
+    "coverage": "jest --coverage",
     "int-test": "lerna run int-test",
     "postversion": "lerna publish from-git",
     "release": "env-cmd -f .env.local --no-override lerna version",
