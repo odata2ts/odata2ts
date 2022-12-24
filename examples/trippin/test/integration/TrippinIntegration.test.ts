@@ -1,5 +1,4 @@
 import { AxiosODataClient, RequestError } from "@odata2ts/axios-odata-client";
-import { AxiosError } from "axios";
 
 import { FeatureModel, PersonGenderModel, PersonModel } from "../../build/trippin/TrippinModel";
 import { PersonIdModel } from "../../src/trippin/TrippinModel";
@@ -7,9 +6,7 @@ import { TrippinService } from "../../src/trippin/TrippinService";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
-  const odataClient = new AxiosODataClient((error) => {
-    return (error as AxiosError)?.response?.data?.error?.message;
-  });
+  const odataClient = new AxiosODataClient();
 
   const testService = new TrippinService(odataClient, BASE_URL);
 
