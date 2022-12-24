@@ -3,27 +3,44 @@ import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 
 import { RequestError } from "./ODataRequestErrorModel";
 
-export type ErrorMessageRetriever = (error: AxiosError) => string | null | undefined;
+export type ErrorMessageRetriever<ResponseType = any> = (error: AxiosError<ResponseType>) => string | null | undefined;
 
 export interface ClientOptions {
   useCsrfProtection?: boolean;
   csrfTokenFetchUrl?: string;
 }
 
+export const getV2OrV4ErrorMessage: ErrorMessageRetriever = (error: AxiosError<any>): string | undefined => {
+  const eMsg = error?.response?.data?.error?.message;
+  return typeof eMsg?.value === "string" ? eMsg.value : eMsg;
+};
+
+const DEFAULT_CONFIG: AxiosRequestConfig = {
+  headers: { Accept: "application/json", "Content-Type": "application/json" },
+};
+
 export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
   private readonly client: AxiosInstance;
   private csrfToken: string | undefined;
+  private getErrorMessage: ErrorMessageRetriever = getV2OrV4ErrorMessage;
 
-  constructor(
-    private getErrorMessage: ErrorMessageRetriever,
-    config?: AxiosRequestConfig,
-    private clientOptions?: ClientOptions
-  ) {
-    this.client = axios.create(config);
+  constructor(config?: AxiosRequestConfig, private clientOptions?: ClientOptions) {
+    const { headers, ...passThrough } = config || {};
+    this.client = axios.create({
+      ...passThrough,
+      headers: {
+        ...DEFAULT_CONFIG.headers,
+        ...headers,
+      },
+    });
 
     if (clientOptions?.useCsrfProtection) {
       this.setupSecurityTokenInterceptors();
     }
+  }
+
+  public setErrorMessageRetriever<T>(getErrorMsg: ErrorMessageRetriever<T>) {
+    this.getErrorMessage = getErrorMsg;
   }
 
   private setupSecurityTokenInterceptors() {
@@ -97,11 +114,11 @@ export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
       return Object.assign(new Error(), {
         isRequestError: true,
         stack: axiosError.stack,
-        message: message,
+        message,
         canceled: axios.isCancel(axiosError),
         code: axiosError.code,
-        status: status,
-        data: axiosError.response != null ? axiosError.response.data : undefined,
+        status,
+        data: axiosError.response ? axiosError.response.data : undefined,
       });
     }
     return error;
