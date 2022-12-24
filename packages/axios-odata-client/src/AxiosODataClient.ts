@@ -159,6 +159,21 @@ export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
   ): Promise<HttpResponseModel<ResponseModel>> {
     return this.handleError(this.client.patch(url, data, requestConfig));
   }
+  public merge<ResponseModel>(
+    url: string,
+    data: any,
+    requestConfig?: AxiosRequestConfig
+  ): Promise<HttpResponseModel<ResponseModel>> {
+    const { headers, ...passThrough } = requestConfig || {};
+    const mergedConfig: AxiosRequestConfig = {
+      headers: {
+        "X-Http-Method": "MERGE",
+        ...headers,
+      },
+      ...passThrough,
+    };
+    return this.handleError(this.client.post(url, data, mergedConfig));
+  }
   public delete(url: string, requestConfig?: AxiosRequestConfig): Promise<HttpResponseModel<void>> {
     return this.handleError(this.client.delete(url, requestConfig));
   }
