@@ -95,7 +95,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
     // given a service for the new product
     const productService = editableService.getProductsSrv().get(product.id);
     // when updating the description, we expect no error
-    // await productService.patch({ description: "Updated Desc" });
+    await productService.patch({ description: "Updated Desc" });
 
     // when deleting this new product, we expect no error
     await new Promise((res) => setTimeout(res, 1000));
