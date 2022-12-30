@@ -1,6 +1,5 @@
 import { MappedConverterChains, loadConverters } from "@odata2ts/converter-runtime";
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
-import { pascalCase } from "pascal-case";
 
 import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel";
 import { Digester, TypeModel } from "./DataModelDigestion";
@@ -130,15 +129,39 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
         };
       case ODataTypesV2.Byte:
       case ODataTypesV2.SByte:
+        return {
+          outputType: "string",
+          qPath: "QNumberPath",
+          qCollection: "QNumberCollection",
+          qParam: "QStringNumberV2Param",
+        };
       case ODataTypesV2.Int64:
+        return {
+          outputType: "string",
+          qPath: "QNumberPath",
+          qCollection: "QNumberCollection",
+          qParam: "QInt64V2Param",
+        };
       case ODataTypesV2.Single:
+        return {
+          outputType: "string",
+          qPath: "QNumberPath",
+          qCollection: "QNumberCollection",
+          qParam: "QSingleV2Param",
+        };
       case ODataTypesV2.Double:
+        return {
+          outputType: "string",
+          qPath: "QNumberPath",
+          qCollection: "QNumberCollection",
+          qParam: "QDoubleV2Param",
+        };
       case ODataTypesV2.Decimal:
         return {
           outputType: "string",
           qPath: "QNumberPath",
           qCollection: "QNumberCollection",
-          qParam: "QNumberParam",
+          qParam: "QDecimalV2Param",
         };
       case ODataTypesV2.String:
         return {
