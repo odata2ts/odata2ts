@@ -52,7 +52,14 @@ describe("Query Object Generator Tests V2", () => {
     odataBuilder.addFunctionImport("MAX_FUNCTION", ODataTypesV2.String, (builder) =>
       builder
         .addParam("TEST_STRING", ODataTypesV2.String, false)
-        .addParam("testNumber", ODataTypesV2.Int32, false)
+        .addParam("testInt16", ODataTypesV2.Int16, false)
+        .addParam("testInt32", ODataTypesV2.Int32, false)
+        .addParam("testByte", ODataTypesV2.Byte, false)
+        .addParam("testSByte", ODataTypesV2.SByte, false)
+        .addParam("testInt64", ODataTypesV2.Int64, false)
+        .addParam("testSingle", ODataTypesV2.Single, false)
+        .addParam("testDouble", ODataTypesV2.Double, false)
+        .addParam("testDecimal", ODataTypesV2.Decimal, false)
         .addParam("testBoolean", ODataTypesV2.Boolean, false)
         .addParam("testGuid", ODataTypesV2.Guid, false)
         .addParam("testTime", ODataTypesV2.Time, false)
