@@ -13,6 +13,7 @@ import { NamingHelper } from "./NamingHelper";
  *
  * @param schema
  * @param options
+ * @param namingHelper
  */
 export const digest: DigesterFunction<SchemaV3> = async (schema, options, namingHelper) => {
   const converters = await loadConverters(ODataVersions.V2, options.converters);
@@ -123,44 +124,44 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
       case ODataTypesV2.Int32:
         return {
           outputType: "number",
-          qPath: "QNumberPath",
-          qCollection: "QNumberCollection",
+          qPath: "QNumberV2Path",
+          qCollection: "QNumberV2Collection",
           qParam: "QNumberParam",
         };
       case ODataTypesV2.Byte:
       case ODataTypesV2.SByte:
         return {
           outputType: "string",
-          qPath: "QNumberPath",
-          qCollection: "QNumberCollection",
+          qPath: "QStringNumberV2Path",
+          qCollection: "QStringNumberV2Collection",
           qParam: "QStringNumberV2Param",
         };
       case ODataTypesV2.Int64:
         return {
           outputType: "string",
-          qPath: "QNumberPath",
-          qCollection: "QNumberCollection",
+          qPath: "QStringNumberV2Path",
+          qCollection: "QStringNumberV2Collection",
           qParam: "QInt64V2Param",
         };
       case ODataTypesV2.Single:
         return {
           outputType: "string",
-          qPath: "QNumberPath",
-          qCollection: "QNumberCollection",
+          qPath: "QStringNumberV2Path",
+          qCollection: "QStringNumberV2Collection",
           qParam: "QSingleV2Param",
         };
       case ODataTypesV2.Double:
         return {
           outputType: "string",
-          qPath: "QNumberPath",
-          qCollection: "QNumberCollection",
+          qPath: "QStringNumberV2Path",
+          qCollection: "QStringNumberV2Collection",
           qParam: "QDoubleV2Param",
         };
       case ODataTypesV2.Decimal:
         return {
           outputType: "string",
-          qPath: "QNumberPath",
-          qCollection: "QNumberCollection",
+          qPath: "QStringNumberV2Path",
+          qCollection: "QStringNumberV2Collection",
           qParam: "QDecimalV2Param",
         };
       case ODataTypesV2.String:

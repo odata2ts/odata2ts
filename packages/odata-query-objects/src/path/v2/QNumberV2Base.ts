@@ -1,20 +1,21 @@
-import { NumberFilterFunctions, NumberFilterOperators } from "../odata/ODataModel";
-import { buildFunctionExpression, buildOperatorExpression } from "../param/UrlParamHelper";
-import { InputModel, QBasePath } from "./base/QBasePath";
+import { NumberFilterFunctions, NumberFilterOperators } from "../../odata/ODataModel";
+import { InputModel, QBasePath } from "../base/QBasePath";
 
-export class QNumberPath<ConvertedType = number> extends QBasePath<number, ConvertedType> {
-  protected formatValue(value: number): string {
+export abstract class QNumberV2Base<
+  BaseType extends number | string,
+  ConvertedType,
+  SubClass extends QNumberV2Base<BaseType, ConvertedType, any>
+> extends QBasePath<BaseType, ConvertedType> {
+  protected formatValue(value: BaseType): string {
     return String(value);
   }
 
-  private createNewFunctionPath(func: NumberFilterFunctions) {
-    return new QNumberPath(buildFunctionExpression(func, this.path));
-  }
+  protected abstract createNewFunctionPath(func: NumberFilterFunctions): SubClass;
 
-  private createNewOperationPath(operator: NumberFilterOperators, value: InputModel<this["converter"]>) {
-    const converted = this.convertInput(value);
-    return new QNumberPath(buildOperatorExpression(this.path, operator, converted));
-  }
+  protected abstract createNewOperationPath(
+    operator: NumberFilterOperators,
+    value: InputModel<this["converter"]>
+  ): SubClass;
 
   public plus(value: InputModel<this["converter"]>) {
     return this.createNewOperationPath(NumberFilterOperators.ADDITION, value);
@@ -35,11 +36,6 @@ export class QNumberPath<ConvertedType = number> extends QBasePath<number, Conve
     return this.createNewOperationPath(NumberFilterOperators.DIVISION, value);
   }
   public div = this.divide;
-
-  public divideWithFraction(value: InputModel<this["converter"]>) {
-    return this.createNewOperationPath(NumberFilterOperators.DIVISION_WITH_FRACTION, value);
-  }
-  public divBy = this.divideWithFraction;
 
   public modulo(value: InputModel<this["converter"]>) {
     return this.createNewOperationPath(NumberFilterOperators.MODULO, value);

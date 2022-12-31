@@ -261,7 +261,8 @@ describe("V2: EntityTypeDigestion Test", () => {
         odataType: ODataTypesV2.Int16,
         type: "number",
         qObject: undefined,
-        qPath: "QNumberPath",
+        qPath: "QNumberV2Path",
+        qParam: "QNumberParam",
       },
       {
         name: "testInt32",
@@ -269,7 +270,8 @@ describe("V2: EntityTypeDigestion Test", () => {
         odataType: ODataTypesV2.Int32,
         type: "number",
         qObject: undefined,
-        qPath: "QNumberPath",
+        qPath: "QNumberV2Path",
+        qParam: "QNumberParam",
       },
       {
         name: "testInt64",
@@ -277,7 +279,8 @@ describe("V2: EntityTypeDigestion Test", () => {
         odataType: ODataTypesV2.Int64,
         type: "string",
         qObject: undefined,
-        qPath: "QNumberPath",
+        qPath: "QStringNumberV2Path",
+        qParam: "QInt64V2Param",
       },
       {
         name: "testDecimal",
@@ -285,7 +288,8 @@ describe("V2: EntityTypeDigestion Test", () => {
         odataType: ODataTypesV2.Decimal,
         type: "string",
         qObject: undefined,
-        qPath: "QNumberPath",
+        qPath: "QStringNumberV2Path",
+        qParam: "QDecimalV2Param",
       },
       {
         name: "testDouble",
@@ -293,7 +297,8 @@ describe("V2: EntityTypeDigestion Test", () => {
         odataType: ODataTypesV2.Double,
         type: "string",
         qObject: undefined,
-        qPath: "QNumberPath",
+        qPath: "QStringNumberV2Path",
+        qParam: "QDoubleV2Param",
       },
       {
         name: "testByte",
@@ -301,7 +306,8 @@ describe("V2: EntityTypeDigestion Test", () => {
         odataType: ODataTypesV2.Byte,
         type: "string",
         qObject: undefined,
-        qPath: "QNumberPath",
+        qPath: "QStringNumberV2Path",
+        qParam: "QStringNumberV2Param",
       },
       {
         name: "testSByte",
@@ -309,7 +315,8 @@ describe("V2: EntityTypeDigestion Test", () => {
         odataType: ODataTypesV2.SByte,
         type: "string",
         qObject: undefined,
-        qPath: "QNumberPath",
+        qPath: "QStringNumberV2Path",
+        qParam: "QStringNumberV2Param",
       },
       {
         name: "testSingle",
@@ -317,7 +324,8 @@ describe("V2: EntityTypeDigestion Test", () => {
         odataType: ODataTypesV2.Single,
         type: "string",
         qObject: undefined,
-        qPath: "QNumberPath",
+        qPath: "QStringNumberV2Path",
+        qParam: "QSingleV2Param",
       },
       {
         name: "testBinary",
@@ -357,8 +365,8 @@ describe("V2: EntityTypeDigestion Test", () => {
         odataType: `Collection(${ODataTypesV2.Decimal})`,
         type: "string",
         isCollection: true,
-        qObject: "QNumberCollection",
-        qPath: "QNumberPath",
+        qObject: "QStringNumberV2Collection",
+        qPath: "QStringNumberV2Path",
       },
       {
         name: "multipleBooleans",

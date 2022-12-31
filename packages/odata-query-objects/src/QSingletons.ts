@@ -3,16 +3,18 @@ import { ValueConverter } from "@odata2ts/converter-api";
 import { QBinaryPath } from "./path/QBinaryPath";
 import { QBooleanPath } from "./path/QBooleanPath";
 import { QEnumPath } from "./path/QEnumPath";
-import { QNumberPath } from "./path/QNumberPath";
 import { QValuePathModel } from "./path/QPathModel";
 import { QDateTimeOffsetV2Path } from "./path/v2/QDateTimeOffsetV2Path";
 import { QDateTimeV2Path } from "./path/v2/QDateTimeV2Path";
 import { QGuidV2Path } from "./path/v2/QGuidV2Path";
+import { QNumberV2Path } from "./path/v2/QNumberV2Path";
+import { QStringNumberV2Path } from "./path/v2/QStringNumberV2Path";
 import { QStringV2Path } from "./path/v2/QStringV2Path";
 import { QTimeV2Path } from "./path/v2/QTimeV2Path";
 import { QDatePath } from "./path/v4/QDatePath";
 import { QDateTimeOffsetPath } from "./path/v4/QDateTimeOffsetPath";
 import { QGuidPath } from "./path/v4/QGuidPath";
+import { QNumberPath } from "./path/v4/QNumberPath";
 import { QStringPath } from "./path/v4/QStringPath";
 import { QTimeOfDayPath } from "./path/v4/QTimeOfDayPath";
 import { QueryObject } from "./QueryObject";
@@ -89,6 +91,20 @@ export class QNumberCollection extends QPrimitiveCollection<number, QNumberPath>
   }
 }
 export const qNumberCollection = new QNumberCollection();
+
+export class QNumberV2Collection extends QPrimitiveCollection<number, QNumberV2Path> {
+  createQPathType(path: string, converter?: ValueConverter<number, any>) {
+    return new QNumberV2Path(path, converter);
+  }
+}
+export const qNumberV2Collection = new QNumberV2Collection();
+
+export class QStringNumberV2Collection extends QPrimitiveCollection<string, QStringNumberV2Path> {
+  createQPathType(path: string, converter?: ValueConverter<string, any>) {
+    return new QStringNumberV2Path(path, converter);
+  }
+}
+export const qStringNumberV2Collection = new QStringNumberV2Collection();
 
 export class QBooleanCollection extends QPrimitiveCollection<boolean, QBooleanPath> {
   createQPathType(path: string, converter?: ValueConverter<boolean, any>) {
