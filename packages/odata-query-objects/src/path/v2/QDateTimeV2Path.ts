@@ -1,7 +1,7 @@
 import { formatWithTypePrefix } from "../../param/UrlParamHelper";
 import { DATE_TIME_V2_TYPE_PREFIX } from "../../param/v2/QDateTimeV2Param";
-import { dayFn, hourFn, minuteFn, monthFn, secondFn, yearFn } from "../base/DateTimeFunctions";
 import { QBasePath } from "../base/QBasePath";
+import { dayFn, hourFn, minuteFn, monthFn, secondFn, yearFn } from "./DateTimeFunctions";
 
 export class QDateTimeV2Path<ConvertedType = string> extends QBasePath<string, ConvertedType> {
   protected formatValue(value: string): string {

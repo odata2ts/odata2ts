@@ -1,7 +1,7 @@
 import { DateTimeFilterFunctions } from "../../odata/ODataModel";
 import { buildFunctionExpression } from "../../param/UrlParamHelper";
-import { dayFn, hourFn, minuteFn, monthFn, secondFn, yearFn } from "../base/DateTimeFunctions";
 import { QBasePath } from "../base/QBasePath";
+import { dayFn, hourFn, minuteFn, monthFn, secondFn, yearFn } from "./DateTimeFunctions";
 import { identityFormatter } from "./IdentityFormatter";
 import { QDatePath } from "./QDatePath";
 import { QTimeOfDayPath } from "./QTimeOfDayPath";
