@@ -8,12 +8,12 @@ export class QNumberPath<ConvertedType = number> extends QBasePath<number, Conve
   }
 
   private createNewFunctionPath(func: NumberFilterFunctions) {
-    return new QNumberPath(buildFunctionExpression(func, this.path));
+    return new QNumberPath(buildFunctionExpression(func, this.path), this.converter);
   }
 
   private createNewOperationPath(operator: NumberFilterOperators, value: InputModel<this["converter"]>) {
     const converted = this.convertInput(value);
-    return new QNumberPath(buildOperatorExpression(this.path, operator, converted));
+    return new QNumberPath(buildOperatorExpression(this.path, operator, converted), this.converter);
   }
 
   public plus(value: InputModel<this["converter"]>) {

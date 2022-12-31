@@ -1,7 +1,6 @@
 import { StringFilterFunctions } from "../../odata/ODataModel";
 import { buildFunctionExpression, formatWithQuotes } from "../../param/UrlParamHelper";
 import { QFilterExpression } from "../../QFilterExpression";
-import { QNumberPath } from "../v4/QNumberPath";
 import { InputModel, QBasePath } from "./QBasePath";
 
 export abstract class QStringBasePath<SubClass extends QStringBasePath<any, any>, ConvertedType> extends QBasePath<
@@ -40,15 +39,6 @@ export abstract class QStringBasePath<SubClass extends QStringBasePath<any, any>
 
   public endsWith(value: InputModel<this["converter"]>) {
     return this.buildFunctionFilter(StringFilterFunctions.ENDS_WITH, value);
-  }
-
-  public indexOf(value: InputModel<this["converter"]>) {
-    return new QNumberPath(this.getFunctionExpression(StringFilterFunctions.INDEX_OF, value));
-  }
-
-  public length() {
-    const pathExpression = this.buildNoValueFunc(StringFilterFunctions.LENGTH);
-    return new QNumberPath(pathExpression.getPath());
   }
 
   public toLower() {

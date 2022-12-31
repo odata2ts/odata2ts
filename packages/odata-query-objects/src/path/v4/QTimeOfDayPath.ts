@@ -1,5 +1,5 @@
-import { hourFn, minuteFn, secondFn } from "../base/DateTimeFunctions";
 import { QBasePath } from "../base/QBasePath";
+import { hourFn, minuteFn, secondFn } from "./DateTimeFunctions";
 import { identityFormatter } from "./IdentityFormatter";
 
 export class QTimeOfDayPath<ConvertedType = string> extends QBasePath<string, ConvertedType> {
