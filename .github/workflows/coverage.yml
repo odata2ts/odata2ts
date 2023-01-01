@@ -40,4 +40,4 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Integration Tests
-          run: yarn int-test
+        run: yarn int-test
