@@ -139,7 +139,10 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("entity-relationships", "entity-relationships.ts", { skipEditableModels: false });
+    await generateAndCompare("entity-relationships", "entity-relationships.ts", {
+      skipEditableModels: false,
+      disableAutoManagedKey: true,
+    });
   });
 
   test(`${testSuiteName}: base class`, async () => {
@@ -154,7 +157,10 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("baseClass", "entity-hierarchy.ts", USE_ID_AND_EDITABLE_MODEL);
+    await generateAndCompare("baseClass", "entity-hierarchy.ts", {
+      ...USE_ID_AND_EDITABLE_MODEL,
+      disableAutoManagedKey: true,
+    });
   });
 
   test(`${testSuiteName}: entity & enum`, async () => {
@@ -264,6 +270,7 @@ export function createEntityBasedGenerationTests(
     await generateAndCompare("modelNaming", "model-naming.ts", {
       skipEditableModels: false,
       skipIdModels: false,
+      disableAutoManagedKey: true,
       naming: {
         models: {
           suffix: "model",

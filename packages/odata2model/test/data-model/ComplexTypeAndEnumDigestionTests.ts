@@ -40,7 +40,7 @@ export function createComplexAndEnumTests() {
     expect(model.props[1]).toEqual({
       dataType: DataTypes.EnumType,
       isCollection: false,
-      managed: false,
+      managed: undefined,
       name: "myChoice",
       odataName: "myChoice",
       odataType: `${SERVICE_NAME}.Choice`,
@@ -67,7 +67,7 @@ export function createComplexAndEnumTests() {
     expect(model.props[1]).toEqual({
       dataType: DataTypes.EnumType,
       isCollection: true,
-      managed: false,
+      managed: undefined,
       name: "myChoices",
       odataName: "myChoices",
       odataType: `Collection(${SERVICE_NAME}.Choice)`,
@@ -92,7 +92,7 @@ export function createComplexAndEnumTests() {
     expect(model.props[1]).toEqual({
       dataType: DataTypes.ComplexType,
       isCollection: false,
-      managed: false,
+      managed: undefined,
       name: "branding",
       odataName: "branding",
       odataType: `${SERVICE_NAME}.Brand`,

@@ -7,6 +7,7 @@ describe("ServiceConfigHelper Tests", function () {
   function createHelperWithProps(...propsSetting: Array<PropertyGenerationOptions>) {
     toTest = new ServiceConfigHelper({
       converters: [],
+      disableAutoManagedKey: false,
       // entitiesByName: [],
       propertiesByName: propsSetting || [],
     });

@@ -6,7 +6,7 @@ import { Schema } from "./data-model/edmx/ODataEdmxModelBase";
 import { NamingHelper } from "./data-model/NamingHelper";
 import { RunOptions } from "./OptionModel";
 
-export type DigestionOptions = Pick<RunOptions, "converters" | "propertiesByName">; //TODO  | "entitiesByName">;
+export type DigestionOptions = Pick<RunOptions, "converters" | "disableAutoManagedKey" | "propertiesByName">; //TODO  | "entitiesByName">;
 
 /**
  * Takes an EdmxSchema plus the run options and creates a DataModel.

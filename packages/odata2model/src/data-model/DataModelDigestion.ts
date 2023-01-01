@@ -1,4 +1,4 @@
-import { MappedConverterChains, ValueConverterImport } from "@odata2ts/converter-runtime";
+import { MappedConverterChains } from "@odata2ts/converter-runtime";
 
 import { DigestionOptions } from "../FactoryFunctionModel";
 import { DataModel } from "./DataModel";
@@ -177,11 +177,16 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         throw new Error(`Key property is missing from Entity "${model.name}" (${model.odataName})!`);
       }
 
+      const isSingleKey = model.keyNames.length === 1;
       const props = [...model.baseProps, ...model.props];
       model.keys = model.keyNames.map((keyName) => {
         const prop = props.find((p) => p.odataName === keyName);
         if (!prop) {
           throw new Error(`Key with name [${keyName}] not found in props!`);
+        }
+        // automatically set key prop to managed, if this is the only key of the given entity
+        if (prop.managed === undefined) {
+          prop.managed = !this.options.disableAutoManagedKey && isSingleKey;
         }
         return prop;
       });
@@ -285,7 +290,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       odataType: p.$.Type,
       required: p.$.Nullable === "false",
       isCollection: isCollection,
-      managed: !!configProp?.managed,
+      managed: configProp?.managed,
       ...result,
     };
   };

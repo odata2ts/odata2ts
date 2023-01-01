@@ -447,7 +447,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       odataType: `${SERVICE_NAME}.Category`,
       isCollection: false,
       dataType: DataTypes.ModelType,
-      managed: false,
+      managed: undefined,
       required: true,
     } as PropertyModel);
     expect(product.props[2]).toEqual({
@@ -459,7 +459,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       odataType: `${SERVICE_NAME}.Supplier`,
       isCollection: false,
       dataType: DataTypes.ModelType,
-      managed: false,
+      managed: undefined,
       required: false,
     } as PropertyModel);
 
@@ -474,7 +474,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       odataType: `Collection(${SERVICE_NAME}.Product)`,
       isCollection: true,
       dataType: DataTypes.ModelType,
-      managed: false,
+      managed: undefined,
       required: false,
     } as PropertyModel);
   });
