@@ -160,6 +160,7 @@ export function createEntityBasedGenerationTests(
     await generateAndCompare("baseClass", "entity-hierarchy.ts", {
       skipIdModels: false,
       skipEditableModels: false,
+      disableAutoManagedKey: true,
     });
   });
 

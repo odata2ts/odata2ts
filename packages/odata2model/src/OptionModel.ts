@@ -75,6 +75,14 @@ export interface CliOptions {
    * that serves as entry point for the user.
    */
   serviceName?: string;
+  /**
+   * odata2ts will automatically decide if a key prop is managed on the server side.
+   * If managed, the property will not be editable (create, update, patch).
+   * The following rule applies:
+   * If a property is the only key prop of an entity, then the prop is deemed to be managed;
+   * in ony other case the prop is unmanaged.
+   */
+  disableAutoManagedKey?: boolean;
 }
 
 /**

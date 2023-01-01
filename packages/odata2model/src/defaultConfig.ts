@@ -15,6 +15,7 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
   skipEditableModels: false,
   skipIdModels: false,
   skipOperations: false,
+  disableAutoManagedKey: false,
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,

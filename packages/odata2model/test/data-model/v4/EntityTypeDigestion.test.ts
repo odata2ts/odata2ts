@@ -48,7 +48,7 @@ describe("V4: EntityTypeDigestion Test", () => {
     const expectedProp = {
       dataType: DataTypes.PrimitiveType,
       isCollection: false,
-      managed: false,
+      managed: true,
       name: "id",
       odataName: "id",
       odataType: ODataTypesV4.String,

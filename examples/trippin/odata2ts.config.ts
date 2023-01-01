@@ -36,6 +36,8 @@ const sharedPropNaming: Array<PropertyGenerationOptions> = [
 const config: ConfigFileOptions = {
   debug: false,
   mode: Modes.service,
+  // TrippinService does not generate IDs on the server, but the client side => demo service
+  disableAutoManagedKey: true,
   naming: {
     models: {
       suffix: "Model",
