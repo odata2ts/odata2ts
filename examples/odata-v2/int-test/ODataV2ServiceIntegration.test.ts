@@ -1,7 +1,7 @@
 import { AxiosODataClient, RequestError } from "@odata2ts/axios-odata-client";
 
-import { EditableProductModel, ProductModel } from "../../src/odata/ODataDemoModel";
-import { ODataDemoService } from "../../src/odata/ODataDemoService";
+import { EditableProductModel, ProductModel } from "../src/odata/ODataDemoModel";
+import { ODataDemoService } from "../src/odata/ODataDemoService";
 
 /**
  * This sample service is buggy:

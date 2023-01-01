@@ -14,6 +14,7 @@
     "clean": "rimraf build src/trippin",
     "compile": "tsc",
     "generate": "odata2model",
+    "int-test": "yarn test && jest ./int-test",
     "test": "jest ./test"
   },
   "dependencies": {
