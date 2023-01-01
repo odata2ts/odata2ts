@@ -39,3 +39,5 @@ jobs:
         uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run Integration Tests
+          run: yarn int-test
