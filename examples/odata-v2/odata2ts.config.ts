@@ -3,6 +3,8 @@ import { ConfigFileOptions, EmitModes, Modes, NamingOptions, PropertyGenerationO
 const config: ConfigFileOptions = {
   debug: false,
   mode: Modes.service,
+  // this demo service does not generate IDs, but requires the client to create new IDs
+  disableAutoManagedKey: true,
   naming: {
     models: {
       suffix: "Model",
