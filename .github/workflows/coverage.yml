@@ -33,12 +33,14 @@ jobs:
         run: yarn build
   check_circular_deps:
     name: Check for Circular Deps
+    runs-on: ubuntu-latest
     needs: build
     steps:
       - name: Check for circular dependencies
         run: yarn check-circular-deps
   tests_with_coverage:
     name: Testing With Coverage
+    runs-on: ubuntu-latest
     needs: build
     steps:
       - name: Test with coverage
