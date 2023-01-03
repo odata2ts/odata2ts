@@ -413,6 +413,8 @@ class ServiceGenerator {
     const isFunc = operation.type === OperationTypes.Function;
     const odataType = operation.returnType?.isCollection
       ? RESPONSE_TYPES.collection + this.getVersionSuffix()
+      : operation.returnType?.dataType === DataTypes.PrimitiveType
+      ? RESPONSE_TYPES.value + this.getVersionSuffix()
       : RESPONSE_TYPES.model + this.getVersionSuffix();
     const returnType = operation.returnType;
     const requestConfigParam = { name: "requestConfig", hasQuestionToken: true, type: "ODataClientConfig<ClientType>" };

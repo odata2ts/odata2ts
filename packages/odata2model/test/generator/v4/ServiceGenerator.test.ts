@@ -102,7 +102,7 @@ describe("Service Generator Tests V4", () => {
     await compareMainService("main-service-singleton.ts", true);
   });
 
-  test("Service Generator: one unbound function", async () => {
+  test("Service Generator: unbound functions", async () => {
     // given two functions: one without and one with params
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
@@ -136,6 +136,23 @@ describe("Service Generator Tests V4", () => {
 
     // then main service file encompasses an unbound function
     await compareMainService("main-service-action-unbound.ts", true);
+  });
+
+  test("Service Generator: operation with primitives", async () => {
+    // given one EntitySet
+    odataBuilder
+      .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addAction("pingString", ODataTypesV4.String, false)
+      .addAction("pingNumber", ODataTypesV4.Int16, false)
+      .addActionImport("pingString", `${SERVICE_NAME}.pingString`)
+      .addActionImport("pingNumber", `${SERVICE_NAME}.pingNumber`)
+      .addAction("pingCollection", `Collection(${ODataTypesV4.DateTimeOffset})`, false)
+      .addActionImport("pingCollection", `${SERVICE_NAME}.pingCollection`);
+
+    // when generating
+    await doGenerate();
+
+    await compareMainService("main-service-operation-with-primitives.ts", true);
   });
 
   test("Service Generator: Services with Naming", async () => {
@@ -195,10 +212,12 @@ describe("Service Generator Tests V4", () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
-      .addEntityType("Review", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
-      // given function without params, but with special return type which should simply become string
-      .addFunction("BestReview", ODataTypesV4.Guid, true, (builder) => builder.addParam("book", `${SERVICE_NAME}.Book`))
-      // given function with params which returns collection
+      .addComplexType("Review", undefined, (builder) => builder.addProp("content", ODataTypesV4.String))
+      // complex return type
+      .addFunction("BestReview", `${SERVICE_NAME}.Review`, true, (builder) =>
+        builder.addParam("book", `${SERVICE_NAME}.Book`)
+      )
+      // collection of complex return type
       .addFunction("filterReviews", `Collection(${SERVICE_NAME}.Review)`, true, (builder) =>
         builder
           .addParam("Book", `${SERVICE_NAME}.Book`)
@@ -219,13 +238,19 @@ describe("Service Generator Tests V4", () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
-      .addComplexType("Review", undefined, (builder) => builder.addProp("test", ODataTypesV4.String))
+      .addEnumType("Rating", [
+        { name: "1", value: 1 },
+        { name: "9", value: 2 },
+      ])
+      // no return type
       .addAction("like", undefined, true, (builder) => builder.addParam("book", `${SERVICE_NAME}.Book`))
-      .addAction("postReview", `${SERVICE_NAME}.Review`, true, (builder) =>
-        builder
-          .addParam("Book", `${SERVICE_NAME}.Book`)
-          .addParam("Rating", ODataTypesV4.Int16, false)
-          .addParam("PUBLICATION_DATE", ODataTypesV4.Date)
+      // enum return type,
+      .addAction("rate", `${SERVICE_NAME}.Rating`, true, (builder) =>
+        builder.addParam("book", `${SERVICE_NAME}.Book`).addParam("rating", `${SERVICE_NAME}.Rating`)
+      )
+      // return type: collection of enums
+      .addAction("ratings", `Collection(${SERVICE_NAME}.Rating)`, true, (builder) =>
+        builder.addParam("book", `${SERVICE_NAME}.Book`).addParam("ratings", `Collection(${SERVICE_NAME}.Rating)`)
       );
 
     // when generating
@@ -233,7 +258,7 @@ describe("Service Generator Tests V4", () => {
 
     // then service has actions
     const services = projectManager.getServiceFiles();
-    expect(services.length).toEqual(2);
+    expect(services.length).toEqual(1);
     await compareService(services[0], "test-entity-service-bound-action.ts", true);
   });
 
@@ -298,24 +323,5 @@ describe("Service Generator Tests V4", () => {
     // then we get two additional service file
     expect(projectManager.getServiceFiles().length).toEqual(1);
     await compareService(projectManager.getServiceFiles()[0], "test-entity-service-enum.ts", true);
-  });
-
-  test("Service Generator: function bound to collection", async () => {
-    // given one EntitySet
-    odataBuilder
-      .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
-      // given function without params, but with special return type which should simply become string
-      .addFunction("BestReview", ODataTypesV4.Guid, true, (builder) =>
-        // here's the trick => binding first param to Collection of Entity Type
-        builder.addParam("book", `Collection(${SERVICE_NAME}.Book)`)
-      );
-
-    // when generating
-    await doGenerate();
-
-    // then service has those functions
-    const services = projectManager.getServiceFiles();
-    expect(services.length).toEqual(1);
-    await compareService(services[0], "test-entity-service-bound-collection-func.ts", true);
   });
 });
