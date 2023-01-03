@@ -1,11 +1,11 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
-import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QBook, QBookId, QLike, QPostReview, qBook } from "../QTester";
+import { QBook, QBookId, QLike, QRate, QRatings, qBook } from "../QTester";
 // @ts-ignore
-import { Book, BookId, EditableBook, PostReviewParams, Review } from "../TesterModel";
+import { Book, BookId, EditableBook, RateParams, Rating, RatingsParams } from "../TesterModel";
 
 export class BookService<ClientType extends ODataClient> extends EntityTypeServiceV4<
   ClientType,
@@ -14,7 +14,8 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
   QBook
 > {
   private _qLike?: QLike;
-  private _qPostReview?: QPostReview;
+  private _qRate?: QRate;
+  private _qRatings?: QRatings;
 
   constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qBook);
@@ -29,17 +30,30 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     return this.client.post(url, {}, requestConfig);
   }
 
-  public async postReview(
-    params: PostReviewParams,
+  public async rate(
+    params: RateParams,
     requestConfig?: ODataClientConfig<ClientType>
-  ): ODataResponse<ODataModelResponseV4<Review>> {
-    if (!this._qPostReview) {
-      this._qPostReview = new QPostReview();
+  ): ODataResponse<ODataModelResponseV4<Rating>> {
+    if (!this._qRate) {
+      this._qRate = new QRate();
     }
 
-    const url = this.addFullPath(this._qPostReview.buildUrl());
-    const response = await this.client.post(url, this._qPostReview.convertUserParams(params), requestConfig);
-    return this._qPostReview.convertResponse(response);
+    const url = this.addFullPath(this._qRate.buildUrl());
+    const response = await this.client.post(url, this._qRate.convertUserParams(params), requestConfig);
+    return this._qRate.convertResponse(response);
+  }
+
+  public async ratings(
+    params: RatingsParams,
+    requestConfig?: ODataClientConfig<ClientType>
+  ): ODataResponse<ODataCollectionResponseV4<Rating>> {
+    if (!this._qRatings) {
+      this._qRatings = new QRatings();
+    }
+
+    const url = this.addFullPath(this._qRatings.buildUrl());
+    const response = await this.client.post(url, this._qRatings.convertUserParams(params), requestConfig);
+    return this._qRatings.convertResponse(response);
   }
 }
 

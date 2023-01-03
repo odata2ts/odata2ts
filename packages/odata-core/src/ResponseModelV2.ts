@@ -29,8 +29,8 @@ export interface ODataModelResponseV2<T> {
 /**
  * Response to a query for a single property of primitive type.
  */
-export interface ODataValueResponseV2<T extends object> {
-  d: Partial<T>;
+export interface ODataValueResponseV2<T extends number | string | boolean | null> {
+  d: { [key: string]: T };
 }
 
 export interface EntityMetaModelV2 {

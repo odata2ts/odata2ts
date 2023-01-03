@@ -7,13 +7,19 @@
 GET {{server}}/browse
 Authorization: {{me}}
 
-###
-# @name Metadata
+
+### ------------------------------------------------------------------------
+# @name CatService Metadata
 GET {{server}}/browse/$metadata
 Authorization: {{me}}
 
 ###
-# @name Metadata
+# @name CatService V2 Metadata
+GET {{server}}/v2/browse/$metadata
+Authorization: {{me}}
+
+###
+# @name AdminService Metadata
 GET {{server}}/admin/$metadata
 Authorization: Basic alice
 
@@ -21,6 +27,11 @@ Authorization: Basic alice
 # @name Books
 GET {{server}}/browse/Books
 Authorization: {{me}}
+###
+# @name Books V2
+GET {{server}}/v2/browse/Books
+Authorization: {{me}}
+
 
 ### Function Response Types V4
 # @name primitive type response
