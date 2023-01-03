@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
+    <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Core.V1.xml">
+    <edmx:Include Alias="Core" Namespace="Org.OData.Core.V1"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/UI.xml">
+    <edmx:Include Alias="UI" Namespace="com.sap.vocabularies.UI.v1"/>
+  </edmx:Reference>
+  <edmx:DataServices>
+    <Schema Namespace="AdminService" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityContainer Name="EntityContainer">
+        <EntitySet Name="Books" EntityType="AdminService.Books">
+          <NavigationPropertyBinding Path="author" Target="Authors"/>
+          <NavigationPropertyBinding Path="genre" Target="Genres"/>
+          <NavigationPropertyBinding Path="currency" Target="Currencies"/>
+          <NavigationPropertyBinding Path="texts" Target="Books_texts"/>
+          <NavigationPropertyBinding Path="localized" Target="Books_texts"/>
+        </EntitySet>
+        <EntitySet Name="Authors" EntityType="AdminService.Authors">
+          <NavigationPropertyBinding Path="books" Target="Books"/>
+        </EntitySet>
+        <EntitySet Name="Genres" EntityType="AdminService.Genres">
+          <NavigationPropertyBinding Path="parent" Target="Genres"/>
+          <NavigationPropertyBinding Path="children" Target="Genres"/>
+          <NavigationPropertyBinding Path="texts" Target="Genres_texts"/>
+          <NavigationPropertyBinding Path="localized" Target="Genres_texts"/>
+        </EntitySet>
+        <EntitySet Name="Currencies" EntityType="AdminService.Currencies">
+          <NavigationPropertyBinding Path="texts" Target="Currencies_texts"/>
+          <NavigationPropertyBinding Path="localized" Target="Currencies_texts"/>
+        </EntitySet>
+        <EntitySet Name="Books_texts" EntityType="AdminService.Books_texts"/>
+        <EntitySet Name="Genres_texts" EntityType="AdminService.Genres_texts"/>
+        <EntitySet Name="Currencies_texts" EntityType="AdminService.Currencies_texts"/>
+      </EntityContainer>
+      <EntityType Name="Books">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="ID" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="title" Type="Edm.String" MaxLength="111"/>
+        <Property Name="descr" Type="Edm.String" MaxLength="1111"/>
+        <NavigationProperty Name="author" Type="AdminService.Authors" Partner="books">
+          <ReferentialConstraint Property="author_ID" ReferencedProperty="ID"/>
+        </NavigationProperty>
+        <Property Name="author_ID" Type="Edm.Int32"/>
+        <NavigationProperty Name="genre" Type="AdminService.Genres">
+          <ReferentialConstraint Property="genre_ID" ReferencedProperty="ID"/>
+        </NavigationProperty>
+        <Property Name="genre_ID" Type="Edm.Int32"/>
+        <Property Name="stock" Type="Edm.Int32"/>
+        <Property Name="price" Type="Edm.Decimal" Scale="variable"/>
+        <NavigationProperty Name="currency" Type="AdminService.Currencies">
+          <ReferentialConstraint Property="currency_code" ReferencedProperty="code"/>
+        </NavigationProperty>
+        <Property Name="currency_code" Type="Edm.String" MaxLength="3"/>
+        <Property Name="image" Type="Edm.Stream"/>
+        <NavigationProperty Name="texts" Type="Collection(AdminService.Books_texts)">
+          <OnDelete Action="Cascade"/>
+        </NavigationProperty>
+        <NavigationProperty Name="localized" Type="AdminService.Books_texts">
+          <ReferentialConstraint Property="ID" ReferencedProperty="ID"/>
+        </NavigationProperty>
+      </EntityType>
+      <EntityType Name="Authors">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="createdAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="createdBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="modifiedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="modifiedBy" Type="Edm.String" MaxLength="255"/>
+        <Property Name="ID" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="name" Type="Edm.String" MaxLength="111"/>
+        <Property Name="dateOfBirth" Type="Edm.Date"/>
+        <Property Name="dateOfDeath" Type="Edm.Date"/>
+        <Property Name="placeOfBirth" Type="Edm.String"/>
+        <Property Name="placeOfDeath" Type="Edm.String"/>
+        <NavigationProperty Name="books" Type="Collection(AdminService.Books)" Partner="author"/>
+      </EntityType>
+      <EntityType Name="Genres">
+        <Key>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="name" Type="Edm.String" MaxLength="255"/>
+        <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
+        <Property Name="ID" Type="Edm.Int32" Nullable="false"/>
+        <NavigationProperty Name="parent" Type="AdminService.Genres" Partner="children">
+          <ReferentialConstraint Property="parent_ID" ReferencedProperty="ID"/>
+        </NavigationProperty>
+        <Property Name="parent_ID" Type="Edm.Int32"/>
+        <NavigationProperty Name="children" Type="Collection(AdminService.Genres)" Partner="parent">
+          <OnDelete Action="Cascade"/>
+        </NavigationProperty>
+        <NavigationProperty Name="texts" Type="Collection(AdminService.Genres_texts)">
+          <OnDelete Action="Cascade"/>
+        </NavigationProperty>
+        <NavigationProperty Name="localized" Type="AdminService.Genres_texts">
+          <ReferentialConstraint Property="ID" ReferencedProperty="ID"/>
+        </NavigationProperty>
+      </EntityType>
+      <EntityType Name="Currencies">
+        <Key>
+          <PropertyRef Name="code"/>
+        </Key>
+        <Property Name="name" Type="Edm.String" MaxLength="255"/>
+        <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
+        <Property Name="code" Type="Edm.String" MaxLength="3" Nullable="false"/>
+        <Property Name="symbol" Type="Edm.String" MaxLength="5"/>
+        <NavigationProperty Name="texts" Type="Collection(AdminService.Currencies_texts)">
+          <OnDelete Action="Cascade"/>
+        </NavigationProperty>
+        <NavigationProperty Name="localized" Type="AdminService.Currencies_texts">
+          <ReferentialConstraint Property="code" ReferencedProperty="code"/>
+        </NavigationProperty>
+      </EntityType>
+      <EntityType Name="Books_texts">
+        <Key>
+          <PropertyRef Name="locale"/>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="locale" Type="Edm.String" MaxLength="14" Nullable="false"/>
+        <Property Name="ID" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="title" Type="Edm.String" MaxLength="111"/>
+        <Property Name="descr" Type="Edm.String" MaxLength="1111"/>
+      </EntityType>
+      <EntityType Name="Genres_texts">
+        <Key>
+          <PropertyRef Name="locale"/>
+          <PropertyRef Name="ID"/>
+        </Key>
+        <Property Name="locale" Type="Edm.String" MaxLength="14" Nullable="false"/>
+        <Property Name="name" Type="Edm.String" MaxLength="255"/>
+        <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
+        <Property Name="ID" Type="Edm.Int32" Nullable="false"/>
+      </EntityType>
+      <EntityType Name="Currencies_texts">
+        <Key>
+          <PropertyRef Name="locale"/>
+          <PropertyRef Name="code"/>
+        </Key>
+        <Property Name="locale" Type="Edm.String" MaxLength="14" Nullable="false"/>
+        <Property Name="name" Type="Edm.String" MaxLength="255"/>
+        <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
+        <Property Name="code" Type="Edm.String" MaxLength="3" Nullable="false"/>
+      </EntityType>
+      <Annotations Target="AdminService.Books/createdAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="Angelegt am"/>
+      </Annotations>
+      <Annotations Target="AdminService.Books/createdBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="Die eindeutige ID eines Benutzers"/>
+        <Annotation Term="Common.Label" String="Angelegt von"/>
+      </Annotations>
+      <Annotations Target="AdminService.Books/modifiedAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="Geändert am"/>
+      </Annotations>
+      <Annotations Target="AdminService.Books/modifiedBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="Die eindeutige ID eines Benutzers"/>
+        <Annotation Term="Common.Label" String="Geändert von"/>
+      </Annotations>
+      <Annotations Target="AdminService.Books/genre_ID">
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label" String="Genres"/>
+            <PropertyValue Property="CollectionPath" String="Genres"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty" PropertyPath="genre_ID"/>
+                  <PropertyValue Property="ValueListProperty" String="ID"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                  <PropertyValue Property="ValueListProperty" String="name"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="AdminService.Books/currency">
+        <Annotation Term="Common.Label" String="Währung"/>
+        <Annotation Term="Core.Description" String="Währungscode gemäß ISO 4217"/>
+      </Annotations>
+      <Annotations Target="AdminService.Books/currency_code">
+        <Annotation Term="Common.Label" String="Währung"/>
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label" String="Währung"/>
+            <PropertyValue Property="CollectionPath" String="Currencies"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty" PropertyPath="currency_code"/>
+                  <PropertyValue Property="ValueListProperty" String="code"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                  <PropertyValue Property="ValueListProperty" String="name"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+        <Annotation Term="Core.Description" String="Währungscode gemäß ISO 4217"/>
+      </Annotations>
+      <Annotations Target="AdminService.Books/image">
+        <Annotation Term="Core.MediaType" String="image/png"/>
+      </Annotations>
+      <Annotations Target="AdminService.Authors/createdAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="Angelegt am"/>
+      </Annotations>
+      <Annotations Target="AdminService.Authors/createdBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="Core.Immutable" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="Die eindeutige ID eines Benutzers"/>
+        <Annotation Term="Common.Label" String="Angelegt von"/>
+      </Annotations>
+      <Annotations Target="AdminService.Authors/modifiedAt">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Common.Label" String="Geändert am"/>
+      </Annotations>
+      <Annotations Target="AdminService.Authors/modifiedBy">
+        <Annotation Term="UI.HiddenFilter" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Description" String="Die eindeutige ID eines Benutzers"/>
+        <Annotation Term="Common.Label" String="Geändert von"/>
+      </Annotations>
+      <Annotations Target="AdminService.Genres">
+        <Annotation Term="UI.Identification">
+          <Collection>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="name"/>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="AdminService.Genres/name">
+        <Annotation Term="Common.Label" String="Name"/>
+      </Annotations>
+      <Annotations Target="AdminService.Genres/descr">
+        <Annotation Term="Common.Label" String="Beschreibung"/>
+      </Annotations>
+      <Annotations Target="AdminService.Genres/parent_ID">
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label" String="Genres"/>
+            <PropertyValue Property="CollectionPath" String="Genres"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty" PropertyPath="parent_ID"/>
+                  <PropertyValue Property="ValueListProperty" String="ID"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                  <PropertyValue Property="ValueListProperty" String="name"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="AdminService.Currencies">
+        <Annotation Term="UI.Identification">
+          <Collection>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="name"/>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="AdminService.Currencies/name">
+        <Annotation Term="Common.Label" String="Name"/>
+      </Annotations>
+      <Annotations Target="AdminService.Currencies/descr">
+        <Annotation Term="Common.Label" String="Beschreibung"/>
+      </Annotations>
+      <Annotations Target="AdminService.Currencies/code">
+        <Annotation Term="Common.Text" Path="name"/>
+        <Annotation Term="Common.Label" String="Währungscode"/>
+      </Annotations>
+      <Annotations Target="AdminService.Currencies/symbol">
+        <Annotation Term="Common.Label" String="Währungssymbol"/>
+      </Annotations>
+      <Annotations Target="AdminService.Books_texts/locale">
+        <Annotation Term="Common.Label" String="Sprachencode"/>
+      </Annotations>
+      <Annotations Target="AdminService.Genres_texts/locale">
+        <Annotation Term="Common.Label" String="Sprachencode"/>
+      </Annotations>
+      <Annotations Target="AdminService.Genres_texts/name">
+        <Annotation Term="Common.Label" String="Name"/>
+      </Annotations>
+      <Annotations Target="AdminService.Genres_texts/descr">
+        <Annotation Term="Common.Label" String="Beschreibung"/>
+      </Annotations>
+      <Annotations Target="AdminService.Currencies_texts/locale">
+        <Annotation Term="Common.Label" String="Sprachencode"/>
+      </Annotations>
+      <Annotations Target="AdminService.Currencies_texts/name">
+        <Annotation Term="Common.Label" String="Name"/>
+      </Annotations>
+      <Annotations Target="AdminService.Currencies_texts/descr">
+        <Annotation Term="Common.Label" String="Beschreibung"/>
+      </Annotations>
+      <Annotations Target="AdminService.Currencies_texts/code">
+        <Annotation Term="Common.Text" Path="name"/>
+        <Annotation Term="Common.Label" String="Währungscode"/>
+      </Annotations>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

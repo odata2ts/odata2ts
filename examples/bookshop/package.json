@@ -1,0 +1,48 @@
+{
+  "name": "@odata2ts/example-bookshop",
+  "version": "0.1.0",
+  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Example using CAP",
+  "license": "MIT",
+  "repository": "git@github.com:odata2ts/odata2ts.git",
+  "author": "texttechne",
+  "scripts": {
+    "build": "yarn clean && yarn generate && yarn compile",
+    "clean": "rimraf build src/odata",
+    "compile": "tsc",
+    "generate": "odata2model",
+    "int-test": "jest ./int-test",
+    "start": "cds run",
+    "watch": "cds watch"
+  },
+  "files": [
+    "app",
+    "db",
+    "server/index.cds",
+    "server/index.js",
+    "srv"
+  ],
+  "dependencies": {
+    "@odata2ts/axios-odata-client": "^0.4.0",
+    "@odata2ts/odata-service": "^0.10.1",
+    "@odata2ts/odata2model": "^0.16.1",
+    "@sap/cds": ">=5.9",
+    "@sap/cds-odata-v2-adapter-proxy": "^1.9.4",
+    "express": "^4.17.1",
+    "passport": ">=0.4.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.4.1",
+    "@types/node": "^17.0.23",
+    "jest": "^27.5.1",
+    "rimraf": "^3.0.2",
+    "sqlite3": "^5",
+    "ts-jest": "^27.1.4",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.3"
+  },
+  "readme": "README.md"
+}
