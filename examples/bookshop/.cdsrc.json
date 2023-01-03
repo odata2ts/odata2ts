@@ -1,0 +1,32 @@
+{
+  "requires": {
+    "db": "sql",
+    "auth": { "kind": "mocked" },
+    "users": {
+      "alice": {
+        "roles": ["admin", "cds.Subscriber"]
+      },
+      "bob": {
+        "roles": ["cds.ExtensionDeveloper", "cds.UIFlexDeveloper"]
+      },
+      "carol": {
+        "roles": ["admin", "cds.Subscriber", "cds.ExtensionDeveloper", "cds.UIFlexDeveloper"]
+      },
+      "dave": {
+        "roles": ["admin", "cds.Subscriber"]
+      },
+      "erin": {
+        "roles": ["admin", "cds.Subscriber", "cds.ExtensionDeveloper", "cds.UIFlexDeveloper"]
+      },
+      "fred": {},
+      "me": {},
+      "*": true
+    }
+  },
+  "folders": {
+    "db": "server/db",
+    "srv": "server/srv",
+    "app": "server/app"
+  },
+  "roots": ["server/db", "server/srv", "server/app", "schema", "services", "server"]
+}
