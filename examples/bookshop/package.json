@@ -13,6 +13,7 @@
     "build": "yarn clean && yarn generate && yarn compile",
     "clean": "rimraf build src/odata",
     "compile": "tsc",
+    "gen-meta": "cds server/srv/cat-service.cds -2 edmx > resource/catalog-srv.xml && cds server/srv/admin-service.cds -2 edmx > resource/admin-srv.xml ",
     "generate": "odata2model",
     "int-test": "jest ./int-test",
     "start": "cds run",
