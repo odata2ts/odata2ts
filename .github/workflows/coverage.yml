@@ -51,6 +51,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
   int_tests:
     name: Integration Tests
+    runs-on: ubuntu-latest
     needs: build
     steps:
       - name: Start CAP server & run integration tests
