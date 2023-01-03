@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 18
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
@@ -31,13 +31,28 @@ jobs:
         run: yarn --immutable
       - name: Build packages
         run: yarn build
+  check_circular_deps:
+    name: Check for Circular Deps
+    needs: build
+    steps:
       - name: Check for circular dependencies
         run: yarn check-circular-deps
+  tests_with_coverage:
+    name: Testing With Coverage
+    needs: build
+    steps:
       - name: Test with coverage
         run: yarn coverage
       - name: Coveralls
         uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Run Integration Tests
-        run: yarn int-test
+  int_tests:
+    name: Integration Tests
+    needs: build
+    steps:
+      - name: Start CAP server & run integration tests
+        run: |
+          yarn workspace @odata2ts/example-bookshop start &
+          sleep 20
+          yarn int-test
