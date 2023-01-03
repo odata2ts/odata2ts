@@ -85,6 +85,6 @@ jobs:
         run: yarn build
       - name: Start CAP server & run integration tests
         run: |
-          yarn workspace @odata2ts/example-bookshop start &
-          sleep 20
+          yarn start-cap &
+          sleep 15
           yarn int-test
