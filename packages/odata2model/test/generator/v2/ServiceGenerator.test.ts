@@ -2,12 +2,13 @@ import path from "path";
 
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 
-import { EmitModes, RunOptions, getDefaultConfig } from "../../../src";
+import { EmitModes, RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { generateServices } from "../../../src/generator";
 import { ProjectManager, createProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
+import { getTestConfig } from "../../test.config";
 import { FixtureComparator, createFixtureComparator } from "../comparator/FixtureComparator";
 import { SERVICE_NAME } from "./EntityBasedGenerationTests";
 
@@ -25,11 +26,11 @@ describe("Service Generator Tests V2", () => {
 
   beforeEach(async () => {
     odataBuilder = new ODataModelBuilderV2(SERVICE_NAME);
-    runOptions = getDefaultConfig();
+    runOptions = getTestConfig();
   });
 
   async function doGenerate() {
-    const namingHelper = new NamingHelper(runOptions.naming, SERVICE_NAME);
+    const namingHelper = new NamingHelper(runOptions, SERVICE_NAME);
     projectManager = await createProjectManager(namingHelper.getFileNames(), "build", EmitModes.ts, true);
     const dataModel = await digest(odataBuilder.getSchema(), runOptions, namingHelper);
 

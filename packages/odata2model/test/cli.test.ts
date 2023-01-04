@@ -2,10 +2,10 @@ import * as cosmiConfig from "cosmiconfig";
 import type { CosmiconfigResult } from "cosmiconfig/dist/types";
 import fsExtra from "fs-extra";
 
+import { getDefaultConfig } from "../src";
+import { CliOptions, ConfigFileOptions, EmitModes, Modes, RunOptions } from "../src";
 import * as app from "../src/app";
 import { Cli } from "../src/cli";
-import { getDefaultConfig } from "../src/defaultConfig";
-import { CliOptions, ConfigFileOptions, EmitModes, Modes, RunOptions } from "../src/OptionModel";
 
 jest.mock("fs-extra");
 jest.mock("../src/app");
@@ -188,9 +188,51 @@ describe("Cli Test", () => {
     await testCli(args);
   }
 
-  test("Test prettier option", async () => {
+  test("Test debug option", async () => {
     await testDebug(true);
     await testDebug(false);
+  });
+
+  async function testNoAuto(noAuto: boolean) {
+    const args = [...defaultArgs];
+    if (noAuto) {
+      args.push("-n");
+    }
+    runOptions.disableAutoManagedKey = noAuto;
+
+    await testCli(args);
+  }
+
+  async function testServiceName(name: string) {
+    const args = [...defaultArgs, "-name", name];
+    runOptions.serviceName = name;
+
+    await testCli(args);
+  }
+
+  test("Test serviceName option", async () => {
+    await testServiceName("Tester");
+    await testServiceName("none");
+  });
+
+  test("Test DisableAutoManagedKey option", async () => {
+    await testNoAuto(false);
+    await testNoAuto(true);
+  });
+
+  async function testAllowRenaming(allow: boolean) {
+    const args = [...defaultArgs];
+    if (allow) {
+      args.push("-r");
+    }
+    runOptions.allowRenaming = allow;
+
+    await testCli(args);
+  }
+
+  test("Test AllowRenaming option", async () => {
+    await testAllowRenaming(false);
+    await testAllowRenaming(true);
   });
 
   test("Fail pathExists", async () => {

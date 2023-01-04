@@ -38,6 +38,7 @@ const config: ConfigFileOptions = {
   mode: Modes.service,
   // TrippinService does not generate IDs on the server, but the client side => demo service
   disableAutoManagedKey: true,
+  allowRenaming: true,
   naming: {
     models: {
       suffix: "Model",

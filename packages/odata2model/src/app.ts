@@ -41,7 +41,7 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   );
 
   // encapsulate the whole naming logic
-  const namingHelper = new NamingHelper(options.naming, (schemaRaw as SchemaV3).$.Namespace, options.serviceName);
+  const namingHelper = new NamingHelper(options, (schemaRaw as SchemaV3).$.Namespace, options.serviceName);
   // parse model information from edmx into something we can really work with
   // => that stuff is called dataModel!
   const dataModel =

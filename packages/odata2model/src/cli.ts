@@ -63,6 +63,8 @@ function processCliArgs() {
     .option("-p, --prettier", "Format result with prettier")
     .option("-d, --debug", "Verbose debug infos")
     .option("-name, --service-name <serviceName>", "Give the service your own name")
+    .option("-n, --disable-auto-managed-key", "Give the service your own name")
+    .option("-r, --allow-renaming ", "Give the service your own name")
     .parse(process.argv);
 
   const args = cli.args?.length ? { services: cli.args } : {};

@@ -2,13 +2,14 @@ import { ODataVersions } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
 import { Project, SourceFile } from "ts-morph";
 
-import { RunOptions, getDefaultConfig } from "../../../src";
+import { RunOptions } from "../../../src";
 import { DataModel } from "../../../src/data-model/DataModel";
 import { Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { DigesterFunction } from "../../../src/FactoryFunctionModel";
 import { generateServices } from "../../../src/generator";
 import { ProjectManager } from "../../../src/project/ProjectManager";
+import { getTestConfig } from "../../test.config";
 import { FixtureComparator, createFixtureComparator } from "./FixtureComparator";
 
 export type EntityBasedGeneratorFunctionWithoutVersion = (
@@ -20,7 +21,7 @@ export type EntityBasedGeneratorFunctionWithoutVersion = (
 
 const project: Project = new Project({ skipAddingFilesFromTsConfig: true });
 
-const DEFAULT_RUN_OPTIONS = deepmerge(getDefaultConfig(), {
+const DEFAULT_RUN_OPTIONS = deepmerge(getTestConfig(), {
   skipIdModels: true,
   skipEditableModels: true,
   skipOperations: false,
@@ -50,7 +51,7 @@ export class FixtureComparatorHelper {
   ) {
     const sourceFile = project.createSourceFile(id);
     const mergedOpts = options ? (deepmerge(DEFAULT_RUN_OPTIONS, options) as RunOptions) : DEFAULT_RUN_OPTIONS;
-    const namingHelper = new NamingHelper(mergedOpts.naming, schema.$.Namespace, mergedOpts.serviceName);
+    const namingHelper = new NamingHelper(mergedOpts, schema.$.Namespace, mergedOpts.serviceName);
     const dataModel = await this.digest(schema, mergedOpts, namingHelper);
 
     this.generate(dataModel, sourceFile, mergedOpts, namingHelper);

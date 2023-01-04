@@ -1,9 +1,9 @@
 import { runApp } from "../src/app";
-import { getDefaultConfig } from "../src/defaultConfig";
 import * as Generator from "../src/generator";
 import { EmitModes, Modes, RunOptions } from "../src/OptionModel";
 import * as ProjectManager from "../src/project/ProjectManager";
 import { ODataModelBuilderV4 } from "./data-model/builder/v4/ODataModelBuilderV4";
+import { getTestConfig } from "./test.config";
 
 jest.mock("fs-extra");
 jest.mock("ts-morph");
@@ -36,7 +36,7 @@ describe("App Test", () => {
 
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
     runOptions = {
-      ...getDefaultConfig(),
+      ...getTestConfig(),
       mode: Modes.models,
       emitMode: EmitModes.ts,
       source: "ignore",

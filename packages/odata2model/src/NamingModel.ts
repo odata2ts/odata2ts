@@ -9,8 +9,6 @@ export enum NamingStrategies {
 }
 
 export interface NamingOptions {
-  disableNamingStrategy?: boolean;
-
   /**
    * Generation options for models, i.e. interfaces representing entity or complex types.
    */

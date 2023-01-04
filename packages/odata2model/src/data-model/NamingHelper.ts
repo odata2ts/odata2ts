@@ -3,6 +3,7 @@ import { constantCase } from "constant-case";
 import { pascalCase } from "pascal-case";
 
 import { NamingOptions, NamingStrategies, NamingStrategyOption, StandardNamingOptions } from "../NamingModel";
+import { ConfigFileOptions } from "../OptionModel";
 
 function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
   switch (strategy) {
@@ -22,10 +23,16 @@ const noopNamingFunction = (value: string, options?: StandardNamingOptions) => {
 };
 
 export class NamingHelper {
+  private readonly allowModelPropRenaming: boolean;
   private readonly serviceName: string;
   private readonly servicePrefix: string;
+  private readonly options: NamingOptions;
 
-  constructor(private readonly options: NamingOptions, serviceName: string, overridingServiceName?: string) {
+  constructor(
+    options: Pick<ConfigFileOptions, "naming" | "allowRenaming">,
+    serviceName: string,
+    overridingServiceName?: string
+  ) {
     if (!options) {
       throw new Error("NamingHelper: Options must be supplied!");
     }
@@ -33,6 +40,8 @@ export class NamingHelper {
       throw new Error("NamingHelper: ServicePrefix must be supplied!");
     }
 
+    this.allowModelPropRenaming = options.allowRenaming ?? false;
+    this.options = options.naming || {};
     this.servicePrefix = serviceName + ".";
     this.serviceName = overridingServiceName || serviceName;
   }
@@ -78,7 +87,7 @@ export class NamingHelper {
 
   private namingFunction(strategy: NamingStrategies | undefined) {
     const strategyFn = getNamingStrategyImpl(strategy);
-    if (!strategyFn || this.options.disableNamingStrategy) {
+    if (!strategyFn || !this.allowModelPropRenaming) {
       return noopNamingFunction;
     }
 

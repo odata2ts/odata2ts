@@ -1,8 +1,8 @@
 import { NamingStrategies, RunOptions } from "../../src";
-import { getDefaultConfig } from "../../src";
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
 import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel";
+import { getTestConfig } from "../test.config";
 import { ODataModelBuilder } from "./builder/ODataModelBuilder";
 
 export type ModelBuilderConstructor<MB extends ODataModelBuilder<any, any, any, any>> = new (serviceName: string) => MB;
@@ -15,15 +15,15 @@ export function createDataModelTests(
   const SERVICE_NAME = "Tester";
 
   let odataBuilder: ODataModelBuilder<any, any, any, any>;
-  let digestionOptions: DigestionOptions & Pick<RunOptions, "naming">;
+  let digestionOptions: DigestionOptions & Pick<RunOptions, "naming" | "allowRenaming">;
 
   function getNamingHelper() {
-    return new NamingHelper(digestionOptions.naming, SERVICE_NAME);
+    return new NamingHelper(digestionOptions, SERVICE_NAME);
   }
 
   beforeEach(() => {
     odataBuilder = new ODataBuilderConstructor(SERVICE_NAME);
-    digestionOptions = getDefaultConfig();
+    digestionOptions = getTestConfig();
   });
 
   test("Smoke Test", async () => {
@@ -114,6 +114,7 @@ export function createDataModelTests(
   });
 
   test("naming", async () => {
+    digestionOptions.allowRenaming = true;
     digestionOptions.naming = {
       models: {
         namingStrategy: NamingStrategies.CONSTANT_CASE,

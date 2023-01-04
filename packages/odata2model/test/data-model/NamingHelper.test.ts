@@ -1,11 +1,12 @@
-import { NamingOptions, NamingStrategies, RunOptions, getDefaultConfig } from "../../src";
+import { ConfigFileOptions, NamingOptions, NamingStrategies, RunOptions } from "../../src";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
+import { getTestConfig } from "../test.config";
 
 describe("NamingHelper Tests", function () {
   const SERVICE_NAME = "TRIPPIN";
   const OVERRIDING_SERVICE_NAME = "MyTrip";
 
-  let options: NamingOptions & Pick<RunOptions, "serviceName">;
+  let options: Pick<ConfigFileOptions, "serviceName" | "allowRenaming" | "naming">;
   let toTest: NamingHelper;
 
   function createHelper(overrideServiceName: boolean = false) {
@@ -13,7 +14,7 @@ describe("NamingHelper Tests", function () {
   }
 
   beforeEach(() => {
-    options = getDefaultConfig().naming;
+    options = getTestConfig();
   });
 
   test("with defaultConfig", () => {
@@ -76,9 +77,9 @@ describe("NamingHelper Tests", function () {
       prefix: "PREF",
       suffix: "suf",
     };
-    options.models!.fileName = newNaming;
-    options.queryObjects!.fileName = newNaming;
-    options.services!.fileNames = newNaming;
+    options.naming!.models!.fileName = newNaming;
+    options.naming!.queryObjects!.fileName = newNaming;
+    options.naming!.services!.fileNames = newNaming;
     createHelper();
 
     expect(toTest.getFileNames()).toStrictEqual({
@@ -102,7 +103,7 @@ describe("NamingHelper Tests", function () {
   });
 
   test("disable naming strategy", () => {
-    options.disableNamingStrategy = true;
+    options.allowRenaming = false;
     createHelper();
 
     expect(toTest.getModelName("hi")).toBe("hi");
@@ -120,10 +121,10 @@ describe("NamingHelper Tests", function () {
   });
 
   test("ModelName settings", () => {
-    options.models!.prefix = "PREF";
-    options.models!.suffix = "suf";
-    options.models!.namingStrategy = NamingStrategies.CONSTANT_CASE;
-    options.models!.propNamingStrategy = NamingStrategies.CONSTANT_CASE;
+    options.naming!.models!.prefix = "PREF";
+    options.naming!.models!.suffix = "suf";
+    options.naming!.models!.namingStrategy = NamingStrategies.CONSTANT_CASE;
+    options.naming!.models!.propNamingStrategy = NamingStrategies.CONSTANT_CASE;
     createHelper();
 
     expect(toTest.getModelName("hi")).toBe("PREF_HI_SUF");
@@ -135,7 +136,7 @@ describe("NamingHelper Tests", function () {
   });
 
   test("EditableModel settings", () => {
-    options.models = {
+    options.naming!.models = {
       prefix: "PREF",
       suffix: "suf",
       namingStrategy: NamingStrategies.CONSTANT_CASE,
@@ -150,7 +151,7 @@ describe("NamingHelper Tests", function () {
   });
 
   test("IdModel settings", () => {
-    options.models = {
+    options.naming!.models = {
       prefix: "PREF",
       suffix: "suf",
       namingStrategy: NamingStrategies.CONSTANT_CASE,
@@ -165,9 +166,9 @@ describe("NamingHelper Tests", function () {
   });
 
   test("ParamsModel settings", () => {
-    options.models!.suffix = "MODEL";
-    options.models!.namingStrategy = NamingStrategies.CONSTANT_CASE;
-    options.models!.operationParamModels = {
+    options.naming!.models!.suffix = "MODEL";
+    options.naming!.models!.namingStrategy = NamingStrategies.CONSTANT_CASE;
+    options.naming!.models!.operationParamModels = {
       prefix: "PREF",
       applyModelNaming: false,
     };
@@ -177,7 +178,7 @@ describe("NamingHelper Tests", function () {
   });
 
   test("QueryObject settings", () => {
-    options.queryObjects = {
+    options.naming!.queryObjects = {
       prefix: "PREF",
       suffix: "suf",
       namingStrategy: NamingStrategies.CONSTANT_CASE,
@@ -192,7 +193,7 @@ describe("NamingHelper Tests", function () {
   });
 
   test("QIdFunctions settings", () => {
-    options.queryObjects!.idFunctions = {
+    options.naming!.queryObjects!.idFunctions = {
       prefix: "PREF",
       suffix: "suf",
     };
@@ -203,7 +204,7 @@ describe("NamingHelper Tests", function () {
   });
 
   test("QOperation base settings", () => {
-    options.queryObjects!.operations = {
+    options.naming!.queryObjects!.operations = {
       prefix: "PREF",
       suffix: "suf",
     };
@@ -215,7 +216,7 @@ describe("NamingHelper Tests", function () {
   });
 
   test("QFunction & QAction settings", () => {
-    options.queryObjects!.operations = {
+    options.naming!.queryObjects!.operations = {
       // gets ignored
       prefix: "PREF",
       // ignored
@@ -234,9 +235,9 @@ describe("NamingHelper Tests", function () {
   });
 
   test("Service: Base Settings", () => {
-    options.services!.prefix = "PRE";
-    options.services!.suffix = "suf";
-    options.services!.namingStrategy = NamingStrategies.CONSTANT_CASE;
+    options.naming!.services!.prefix = "PRE";
+    options.naming!.services!.suffix = "suf";
+    options.naming!.services!.namingStrategy = NamingStrategies.CONSTANT_CASE;
     createHelper();
 
     expect(toTest.getServiceName("test")).toBe("PRE_TEST_SUF");
@@ -244,9 +245,9 @@ describe("NamingHelper Tests", function () {
   });
 
   test("Service: Collection Settings", () => {
-    options.services!.prefix = "PRE";
-    options.services!.suffix = "suf";
-    options.services!.collection = {
+    options.naming!.services!.prefix = "PRE";
+    options.naming!.services!.suffix = "suf";
+    options.naming!.services!.collection = {
       prefix: "Col",
       applyServiceNaming: false,
     };
@@ -257,7 +258,7 @@ describe("NamingHelper Tests", function () {
   });
 
   test("Service: Operation base settings", () => {
-    options.services!.operations = {
+    options.naming!.services!.operations = {
       prefix: "PREF",
       suffix: "suf",
       namingStrategy: NamingStrategies.CONSTANT_CASE,
@@ -269,7 +270,7 @@ describe("NamingHelper Tests", function () {
   });
 
   test("Service: Function & Action settings", () => {
-    options.services!.operations = {
+    options.naming!.services!.operations = {
       namingStrategy: NamingStrategies.PASCAL_CASE,
       // gets ignored
       prefix: "PREF",
@@ -289,7 +290,7 @@ describe("NamingHelper Tests", function () {
   });
 
   test("Service: Related service getter settings", () => {
-    options.services!.relatedServiceGetter = {
+    options.naming!.services!.relatedServiceGetter = {
       namingStrategy: NamingStrategies.CONSTANT_CASE,
       prefix: "PREF",
       suffix: "suf",
@@ -300,7 +301,7 @@ describe("NamingHelper Tests", function () {
   });
 
   test("Service: get private prop name", () => {
-    options.services!.privateProps = {
+    options.naming!.services!.privateProps = {
       namingStrategy: NamingStrategies.CONSTANT_CASE,
       prefix: "PREF",
       suffix: "suf",
