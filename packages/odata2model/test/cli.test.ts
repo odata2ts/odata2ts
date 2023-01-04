@@ -178,6 +178,14 @@ describe("Cli Test", () => {
     await testPrettier(true);
   });
 
+  test("Test TsConfig option", async () => {
+    const testPath = "testPath";
+    const args = [...defaultArgs, "-t", "testPath"];
+
+    runOptions.tsconfig = testPath;
+    await testCli(args);
+  });
+
   async function testDebug(debug: boolean) {
     const args = [...defaultArgs];
     if (debug) {

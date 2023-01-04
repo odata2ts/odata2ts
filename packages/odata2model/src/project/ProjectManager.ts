@@ -1,22 +1,85 @@
 import * as path from "path";
 
 import { emptyDir, remove, writeFile } from "fs-extra";
-import { Project, SourceFile } from "ts-morph";
+import { CompilerOptions, ModuleResolutionKind, NewLineKind, Project, ScriptTarget, SourceFile } from "ts-morph";
+import load from "tsconfig-loader";
+import { ModuleKind } from "typescript";
 
 import { ProjectFiles } from "../data-model/DataModel";
 import { EmitModes } from "../OptionModel";
 import { createFormatter } from "./formatter";
 import { FileFormatter } from "./formatter/FileFormatter";
-import { logFilePath } from "./logger/logFilePath";
 
 export async function createProjectManager(
   projectFiles: ProjectFiles,
   outputDir: string,
   emitMode: EmitModes,
-  usePrettier: boolean
+  usePrettier: boolean,
+  tsConfigPath: string = "tsconfig.json"
 ): Promise<ProjectManager> {
+  const generateDeclarations = [EmitModes.js_dts, EmitModes.dts].includes(emitMode);
+  const conf = load({ filename: tsConfigPath });
   const formatter = await createFormatter(outputDir, usePrettier);
-  return new ProjectManager(projectFiles, outputDir, emitMode, formatter);
+
+  const {
+    // ignored props
+    noEmit, // we always want to emit
+    importsNotUsedAsValues, // type is missing
+    jsx,
+    plugins,
+    // mapped props
+    moduleResolution,
+    lib,
+    module,
+    newLine,
+    target,
+    ...passThrough
+  } = conf?.tsConfig.compilerOptions || {};
+
+  const compilerOpts: CompilerOptions = {
+    ...passThrough,
+    outDir: outputDir,
+    declaration: generateDeclarations,
+    moduleResolution: getModuleResolutionKind(moduleResolution),
+    module: getModuleKind(module),
+    target: getTarget(target),
+    lib: lib as string[],
+    newLine:
+      newLine?.toLowerCase() === "crlf"
+        ? NewLineKind.CarriageReturnLineFeed
+        : newLine?.toLowerCase() === "lf"
+        ? NewLineKind.LineFeed
+        : undefined,
+  };
+
+  return new ProjectManager(projectFiles, outputDir, emitMode, formatter, compilerOpts);
+}
+
+function getModuleResolutionKind(
+  moduleResolution: string | undefined | Record<string, any>
+): ModuleResolutionKind | undefined {
+  const modRes =
+    typeof moduleResolution === "string"
+      ? moduleResolution.toLowerCase() === "node"
+        ? "nodejs"
+        : moduleResolution.toLowerCase()
+      : undefined;
+  const matchedKey = Object.keys(ModuleResolutionKind).find(
+    (mk): mk is keyof typeof ModuleResolutionKind => mk.toLowerCase() === modRes
+  );
+  return matchedKey ? ModuleResolutionKind[matchedKey] : undefined;
+}
+
+function getModuleKind(module: string | undefined | Record<string, any>): ModuleKind | undefined {
+  const mod = typeof module === "string" ? module.toLowerCase() : undefined;
+  const matchedKey = Object.keys(ModuleKind).find((mk): mk is keyof typeof ModuleKind => mk.toLowerCase() === mod);
+  return matchedKey ? ModuleKind[matchedKey] : undefined;
+}
+
+function getTarget(target: string | undefined | Record<string, any>): ScriptTarget | undefined {
+  const t = typeof target === "string" ? target.toLowerCase() : undefined;
+  const matchedKey = Object.keys(ScriptTarget).find((st): st is keyof typeof ScriptTarget => st.toLowerCase() === t);
+  return matchedKey ? ScriptTarget[matchedKey] : undefined;
 }
 
 const STATIC_SERVICE_DIR = "service";
@@ -31,18 +94,14 @@ export class ProjectManager {
     private projectFiles: ProjectFiles,
     private outputDir: string,
     private emitMode: EmitModes,
-    private formatter: FileFormatter
+    private formatter: FileFormatter,
+    compilerOptions: CompilerOptions | undefined
   ) {
-    const generateDeclarations = [EmitModes.js_dts, EmitModes.dts].includes(emitMode);
-
     // Create ts-morph project
     this.project = new Project({
       manipulationSettings: this.formatter.getSettings(),
       skipAddingFilesFromTsConfig: true,
-      compilerOptions: {
-        outDir: outputDir,
-        declaration: generateDeclarations,
-      },
+      compilerOptions,
     });
   }
 

@@ -60,7 +60,11 @@ function processCliArgs() {
         .choices(Object.values(EmitModes))
         .argParser<EmitModes>(parseEmitMode)
     )
-    .option("-p, --prettier", "Format result with prettier")
+    .option("-p, --prettier", "Format result with prettier (only applies if emitMode=ts)")
+    .option(
+      "-t, --tsconfig <path>",
+      "Specify alternative to 'tsconfig.json' to use specific compilerOptions (applies if emitMode is not ts)"
+    )
     .option("-d, --debug", "Verbose debug infos")
     .option("-name, --service-name <serviceName>", "Give the service your own name")
     .option("-n, --disable-auto-managed-key", "Give the service your own name")

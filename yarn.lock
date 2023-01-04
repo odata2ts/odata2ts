@@ -2487,6 +2487,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-morph: ^14.0.0
     ts-node: ^10.7.0
+    tsconfig-loader: ^1.1.0
     typescript: ^4.6.3
     upper-case-first: ^2.0.2
     xml2js: ^0.4.23
@@ -7477,6 +7478,15 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
+"json5@npm:^2.1.1":
+  version: 2.2.3
+  resolution: "json5@npm:2.2.3"
+  bin:
+    json5: lib/cli.js
+  checksum: 2a7436a93393830bce797d4626275152e37e877b265e94ca69c99e3d20c2b9dab021279146a39cdb700e71b2dd32a4cebd1514cd57cee102b1af906ce5040349
+  languageName: node
+  linkType: hard
+
 "json5@npm:^2.2.1":
   version: 2.2.1
   resolution: "json5@npm:2.2.1"
@@ -9946,7 +9956,7 @@ resolve@^1.20.0:
   languageName: node
   linkType: hard
 
-"resolve@npm:^1.10.0, resolve@npm:^1.21.0, resolve@npm:^1.8.1":
+"resolve@npm:^1.10.0, resolve@npm:^1.15.1, resolve@npm:^1.21.0, resolve@npm:^1.8.1":
   version: 1.22.1
   resolution: "resolve@npm:1.22.1"
   dependencies:
@@ -9959,7 +9969,7 @@ resolve@^1.20.0:
   languageName: node
   linkType: hard
 
-"resolve@patch:resolve@^1.10.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.21.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.8.1#~builtin<compat/resolve>":
+"resolve@patch:resolve@^1.10.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.15.1#~builtin<compat/resolve>, resolve@patch:resolve@^1.21.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.8.1#~builtin<compat/resolve>":
   version: 1.22.1
   resolution: "resolve@patch:resolve@npm%3A1.22.1#~builtin<compat/resolve>::version=1.22.1&hash=07638b"
   dependencies:
@@ -11176,6 +11186,18 @@ resolve@^1.20.0:
     ts-node-transpile-only: dist/bin-transpile.js
     ts-script: dist/bin-script-deprecated.js
   checksum: 2a379e43f7478d0b79e1e63af91fe222d83857727957df4bd3bdf3c0a884de5097b12feb9bbf530074526b8874c0338b0e6328cf334f3a5e2c49c71e837273f7
+  languageName: node
+  linkType: hard
+
+"tsconfig-loader@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "tsconfig-loader@npm:1.1.0"
+  dependencies:
+    deepmerge: ^4.2.2
+    json5: ^2.1.1
+    resolve: ^1.15.1
+    strip-bom: ^4.0.0
+  checksum: 7e51abd5b6ced2dc4214cbc0999f22c8d4161caec2962f97eed06a3866a86a2da30851dcccdc016ee5a2d506bbcb6d6f1d56b1f73ffda39de394dd36febd909f
   languageName: node
   linkType: hard
 
