@@ -7,6 +7,7 @@ const config: ConfigFileOptions = {
   mode: Modes.service,
   emitMode: EmitModes.ts,
   prettier: true,
+  allowRenaming: true,
   naming: {
     models: {
       suffix: "Model",

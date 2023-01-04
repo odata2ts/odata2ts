@@ -5,6 +5,7 @@ const config: ConfigFileOptions = {
   mode: Modes.service,
   // this demo service does not generate IDs, but requires the client to create new IDs
   disableAutoManagedKey: true,
+  allowRenaming: true,
   naming: {
     models: {
       suffix: "Model",
