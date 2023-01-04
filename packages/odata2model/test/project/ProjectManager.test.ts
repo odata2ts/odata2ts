@@ -1,12 +1,13 @@
 import path from "path";
-import { Project, SourceFile } from "ts-morph";
-import * as TsMorph from "ts-morph";
-import { emptyDir, remove, writeFile } from "fs-extra";
 
-import { createProjectManager } from "../../src/project/ProjectManager";
-import { EmitModes } from "../../src/OptionModel";
+import { emptyDir, remove, writeFile } from "fs-extra";
+import { ModuleKind, ModuleResolutionKind, Project, ScriptTarget, SourceFile } from "ts-morph";
+import * as TsMorph from "ts-morph";
+
+import { EmitModes } from "../../src";
 import { ProjectFiles } from "../../src/data-model/DataModel";
 import * as Formatter from "../../src/project/formatter";
+import { createProjectManager } from "../../src/project/ProjectManager";
 
 // global mock for file operations
 jest.mock("fs-extra");
@@ -64,8 +65,8 @@ describe("ProjectManager Test", () => {
     jest.resetAllMocks();
   });
 
-  async function doCreateProjectManager() {
-    return createProjectManager(projectFiles, outputDir, emitMode, usePrettier);
+  async function doCreateProjectManager(tsConfig: string | undefined = undefined) {
+    return createProjectManager(projectFiles, outputDir, emitMode, usePrettier, tsConfig);
   }
 
   test("Smoke Test", async () => {
@@ -76,6 +77,51 @@ describe("ProjectManager Test", () => {
       compilerOptions: {
         declaration: false,
         outDir: outputDir,
+        target: ScriptTarget.ES2016,
+        module: ModuleKind.CommonJS,
+        moduleResolution: ModuleResolutionKind.NodeJs,
+        lib: ["esnext"],
+        types: ["node"],
+        strict: true,
+        allowJs: true,
+      },
+    });
+  });
+
+  // does work locally, but not in the cloud
+  test.skip("Use tsconfig.example.json", async () => {
+    await doCreateProjectManager("tsconfig.example.json");
+
+    expect(projectConstructorSpy.mock.calls[0][0]).toStrictEqual({
+      skipAddingFilesFromTsConfig: true,
+      manipulationSettings: {},
+      compilerOptions: {
+        declaration: false,
+        outDir: outputDir,
+        target: ScriptTarget.ESNext,
+        module: ModuleKind.UMD,
+        moduleResolution: ModuleResolutionKind.NodeNext,
+        lib: undefined,
+        newLine: undefined,
+      },
+    });
+  });
+
+  test("Different Config Test", async () => {
+    await doCreateProjectManager();
+
+    expect(projectConstructorSpy.mock.calls[0][0]).toMatchObject({
+      skipAddingFilesFromTsConfig: true,
+      compilerOptions: {
+        declaration: false,
+        outDir: outputDir,
+        target: ScriptTarget.ES2016,
+        module: ModuleKind.CommonJS,
+        moduleResolution: ModuleResolutionKind.NodeJs,
+        lib: ["esnext"],
+        types: ["node"],
+        strict: true,
+        allowJs: true,
       },
     });
   });
@@ -88,7 +134,7 @@ describe("ProjectManager Test", () => {
     await doCreateProjectManager();
 
     // then compiler options have been set correctly
-    expect(projectConstructorSpy.mock.calls[counter][0].compilerOptions).toEqual({
+    expect(projectConstructorSpy.mock.calls[counter][0].compilerOptions).toMatchObject({
       declaration: declarationsShouldBeSet,
       outDir: outputDir,
     });

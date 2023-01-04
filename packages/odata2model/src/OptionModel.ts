@@ -65,6 +65,13 @@ export interface CliOptions {
    */
   prettier?: boolean;
   /**
+   * When compiling TypeScript to JS, "tsconfig.json" is used by default to add compilerOptions.
+   * This option allows to specify an alternative file.
+   *
+   * Only takes effect, when mode is set to anything else than {@code EmitModes.ts}.
+   */
+  tsconfig?: string;
+  /**
    * Verbose debugging information.
    */
   debug?: boolean;

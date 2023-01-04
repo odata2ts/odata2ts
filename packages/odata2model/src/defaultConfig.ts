@@ -11,6 +11,7 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
   emitMode: EmitModes.js_dts,
   debug: false,
   prettier: false,
+  tsconfig: "tsconfig.json",
   converters: [],
   skipEditableModels: false,
   skipIdModels: false,

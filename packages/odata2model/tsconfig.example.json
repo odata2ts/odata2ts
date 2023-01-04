@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "outDir": "./NON_EXISTING",
+    "noEmit": true,
+    "moduleResolution": "nodenext",
+    "module": "UMD",
+    "target": "ESNext"
+  }
+}

@@ -53,7 +53,8 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
     namingHelper.getFileNames(),
     options.output,
     options.emitMode,
-    options.prettier
+    options.prettier,
+    options.tsconfig
   );
 
   // Generate Model Interfaces
