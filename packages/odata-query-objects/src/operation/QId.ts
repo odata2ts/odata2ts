@@ -6,6 +6,6 @@ import { QFunction } from "./QFunction";
  */
 export abstract class QId<ParamModel> extends QFunction<ParamModel> {
   public constructor(name: string) {
-    super(name, undefined, false);
+    super(name, undefined, { v2Mode: false });
   }
 }

@@ -31,53 +31,6 @@ describe("QFunction Tests", () => {
     expect(exampleFunction.parseUrl("xyz(123)")).toBeUndefined();
   });
 
-  test("QFunction: for IDs", () => {
-    const exampleFunction = new BookIdFunction("EntityXy");
-    expect(exampleFunction.buildUrl({ isbn: "123" })).toBe("EntityXy(isbn=123)");
-    expect(exampleFunction.buildUrl("123")).toBe("EntityXy(123)");
-    expect(exampleFunction.parseUrl("EntityXy(isbn=123)")).toMatchObject({ isbn: "123" });
-    expect(exampleFunction.parseUrl("EntityXy(123)")).toBe("123");
-  });
-
-  test("QFunction: for IDs with V2 Param", () => {
-    const exampleFunction = new BookIdV2Function("EntityXy");
-    expect(exampleFunction.buildUrl({ isbn: "123" })).toBe("EntityXy(isbn=guid'123')");
-    expect(exampleFunction.buildUrl("123")).toBe("EntityXy(guid'123')");
-    expect(exampleFunction.parseUrl("EntityXy(isbn=guid'123')")).toMatchObject({ isbn: "123" });
-    expect(exampleFunction.parseUrl("EntityXy(guid'123')")).toBe("123");
-  });
-
-  test("QFunction: for IDs with conversion", () => {
-    const exampleFunction = new BookIdFunctionWithConversion("EntityXy");
-    expect(exampleFunction.buildUrl({ test: 1 })).toBe("EntityXy(Test=true)");
-    expect(exampleFunction.buildUrl(0)).toBe("EntityXy(false)");
-    expect(exampleFunction.parseUrl("EntityXy(Test=true)")).toMatchObject({ test: 1 });
-    expect(exampleFunction.parseUrl("EntityXy(true)")).toBe(1);
-  });
-
-  test("QFunction: failures", () => {
-    const exampleFunction = new ComplexBookIdFunction("EntityXy");
-
-    expect(exampleFunction.buildUrl({ title: "test", author: "xxx" })).toBe("EntityXy(title='test',author='xxx')");
-    expect(exampleFunction.parseUrl("EntityXy(title='test',author='xxx')")).toStrictEqual({
-      title: "test",
-      author: "xxx",
-    });
-
-    // @ts-expect-error
-    expect(() => exampleFunction.buildUrl({ isbn: "123" })).toThrow("Unknown parameter");
-    // @ts-expect-error
-    expect(() => exampleFunction.buildUrl("123")).toThrow("the function requires multiple parameters!");
-
-    expect(() => exampleFunction.parseUrl("123")).toThrow("did not yield any params");
-    expect(() => exampleFunction.parseUrl("EntityXy()")).toThrow("did not yield any params");
-    expect(() => exampleFunction.parseUrl("EntityXy('123')")).toThrow("the function requires multiple parameters!");
-    expect(() => exampleFunction.parseUrl("EntityXy(title,author=xxx)")).toThrow("Key and value must be specified");
-    expect(() => exampleFunction.parseUrl("EntityXy(tiger=xxx)")).toThrow(
-      "not part of this function's method signature"
-    );
-  });
-
   test("QFunction: multiple params", () => {
     const exampleFunction = new QBestBookFunction();
     const requiredParams: BestBookParamModel = {
@@ -98,7 +51,7 @@ describe("QFunction Tests", () => {
     const resultRequired = "BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb)";
     expect(exampleFunction.buildUrl(requiredParams)).toBe(resultRequired);
     expect(exampleFunction.parseUrl(resultRequired)).toStrictEqual(requiredParams);
-    expect(exampleFunction.buildUrl(allParams)).toBe(
+    expect(exampleFunction.buildUrl(allParams, true)).toBe(
       "BestBook(" +
         "TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb,testDate=null,testDateTimeOffset=dateTime" +
         ',testCollection=["a","b"]' +

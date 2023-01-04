@@ -192,17 +192,18 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("create key and parse key", async () => {
-    const expectedSimple = "test@testing.de";
-    const expectedComplex: PersonIdModel = { user: expectedSimple };
+    const simpleInput = "test@testing.de";
+    const simpleResult = "test%40testing.de";
+    const complexInput: PersonIdModel = { user: simpleInput };
 
     // simple version
-    let result = testService.navToPeople().createKey(expectedSimple);
-    expect(result).toBe(`People('${expectedSimple}')`);
-    expect(testService.navToPeople().parseKey(result)).toBe(expectedSimple);
+    let result = testService.navToPeople().createKey(simpleInput);
+    expect(result).toBe(`People('${simpleResult}')`);
+    expect(testService.navToPeople().parseKey(result)).toBe(simpleInput);
 
     // complex version
-    result = testService.navToPeople().createKey(expectedComplex);
-    expect(result).toBe(`People(UserName='${expectedSimple}')`);
-    expect(testService.navToPeople().parseKey(result)).toStrictEqual(expectedComplex);
+    result = testService.navToPeople().createKey(complexInput);
+    expect(result).toBe(`People(UserName='${simpleResult}')`);
+    expect(testService.navToPeople().parseKey(result)).toStrictEqual(complexInput);
   });
 });

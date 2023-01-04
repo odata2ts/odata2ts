@@ -1,6 +1,7 @@
 import { PrefixModel, booleanToNumberConverter, stringToPrefixModelConverter } from "@odata2ts/test-converters";
 
 import {
+  OperationReturnType,
   QBooleanParam,
   QComplexParam,
   QDateParam,
@@ -14,9 +15,9 @@ import {
   QStringParam,
   QTimeOfDayParam,
   QTimeV2Param,
+  ReturnTypes,
   qStringCollection,
 } from "../../../src";
-import { OperationReturnType, ReturnTypes } from "../../../src/operation/OperationReturnType";
 import { BookModel, QBook } from "./BookModel";
 
 export interface BestBookParamModel {
@@ -73,7 +74,7 @@ export class QBestBookFunctionV2 extends QFunction<BestBookParamModelV2> {
   ];
 
   constructor() {
-    super("BestBook", new OperationReturnType(ReturnTypes.VALUE, new QBooleanParam("NONE")), true);
+    super("BestBook", new OperationReturnType(ReturnTypes.VALUE, new QBooleanParam("NONE")), { v2Mode: true });
   }
 
   public getParams() {

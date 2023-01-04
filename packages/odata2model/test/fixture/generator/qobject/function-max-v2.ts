@@ -37,7 +37,7 @@ export class QMaxFunction extends QFunction<MaxFunctionParams> {
   ];
 
   constructor() {
-    super("MAX_FUNCTION", undefined, true);
+    super("MAX_FUNCTION", undefined, { v2Mode: true });
   }
 
   getParams() {

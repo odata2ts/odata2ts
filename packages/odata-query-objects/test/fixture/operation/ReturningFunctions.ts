@@ -1,7 +1,6 @@
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
 
-import { OperationReturnType, QAction, QBooleanParam, QComplexParam, QFunction } from "../../../src";
-import { ReturnTypes } from "../../../src/operation/OperationReturnType";
+import { OperationReturnType, QAction, QBooleanParam, QComplexParam, QFunction, ReturnTypes } from "../../../src";
 import { QSimpleEntityWithConverter } from "../SimpleEntityWithConverter";
 
 export const PRIMITIVE = new OperationReturnType(
@@ -23,7 +22,7 @@ export class QPrimitiveReturningFunction extends QFunction<{}> {
 
 export class QPrimitiveReturningFunctionV2 extends QFunction<{}> {
   constructor() {
-    super("Primitive", PRIMITIVE, true);
+    super("Primitive", PRIMITIVE, { v2Mode: true });
   }
 
   public getParams() {
