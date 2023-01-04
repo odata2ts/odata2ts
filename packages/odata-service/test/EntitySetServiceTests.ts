@@ -35,9 +35,19 @@ export function commonEntitySetTests(
     expect(testService.createKey({ userName: "xxx" })).toBe(`${NAME}(UserName='xxx')`);
   });
 
+  test("entitySet: createKey without encoding", async () => {
+    expect(testService.createKey("&/?", true)).toBe(`${NAME}('&/?')`);
+    expect(testService.createKey({ userName: "&/?" }, true)).toBe(`${NAME}(UserName='&/?')`);
+  });
+
   test("entitySet: parseKey", async () => {
     expect(testService.parseKey(`${NAME}('xxx')`)).toBe("xxx");
     expect(testService.parseKey(`${NAME}(UserName='xxx')`)).toStrictEqual({ userName: "xxx" });
+  });
+
+  test("entitySet: parseKey not decoding", async () => {
+    expect(testService.parseKey(`${NAME}('&/?')`, true)).toBe("&/?");
+    expect(testService.parseKey(`${NAME}(UserName='&/?')`, true)).toStrictEqual({ userName: "&/?" });
   });
 
   test("entitySet: query", async () => {
