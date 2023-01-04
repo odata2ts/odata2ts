@@ -7,7 +7,7 @@ export class QMinFunction extends QFunction<MinFunctionParams> {
   private readonly params = [new QStringParam("test"), new QStringParam("optTest")];
 
   constructor() {
-    super("MinFunction", undefined, true);
+    super("MinFunction", undefined, { v2Mode: true });
   }
 
   getParams() {

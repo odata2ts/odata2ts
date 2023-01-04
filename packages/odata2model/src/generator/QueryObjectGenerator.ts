@@ -262,7 +262,7 @@ class QueryObjectGenerator {
         {
           statements: [
             `super("${operation.odataName}"${returnTypeOpStmt ? ", " + returnTypeOpStmt : isV2 ? ", undefined" : ""}${
-              isV2 ? ", true" : ""
+              isV2 ? ", { v2Mode: true }" : ""
             })`,
           ],
         },
