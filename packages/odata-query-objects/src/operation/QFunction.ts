@@ -12,26 +12,26 @@ const REGEXP_V2_PARAMS = /.*\?(.+)/;
 
 const SINGLE_VALUE_TYPES = ["string", "number", "boolean"];
 
-function compileUrlParams(params: FunctionParams | undefined) {
+function compileUrlParams(params: FunctionParams | undefined, unencoded: boolean = false) {
   const result =
     !params || !Object.keys(params).length
       ? ""
       : Object.entries(params)
           .map(([key, value]) => {
-            return key + "=" + value;
+            return unencoded ? key + "=" + value : encodeURIComponent(key) + "=" + encodeURIComponent(value);
           })
           .join(",");
 
   return `(${result})`;
 }
 
-function compileQueryParams(params: FunctionParams | undefined) {
+function compileQueryParams(params: FunctionParams | undefined, unencoded: boolean = false) {
   return !params || !Object.keys(params).length
     ? ""
     : "?" +
         Object.entries(params)
           .map(([key, value]) => {
-            return encodeURIComponent(key) + "=" + encodeURIComponent(value);
+            return unencoded ? key + "=" + value : encodeURIComponent(key) + "=" + encodeURIComponent(value);
           })
           .join("&");
 }
@@ -45,7 +45,7 @@ export abstract class QFunction<ParamModel = undefined> {
   public constructor(
     protected name: string,
     protected qReturnType: OperationReturnType<any> = emptyOperationReturnType,
-    protected v2Mode: boolean = false
+    protected config: { unencoded?: boolean; v2Mode?: boolean } = {}
   ) {}
 
   public abstract getParams(): Array<QParamModel<any, any>>;
@@ -55,7 +55,7 @@ export abstract class QFunction<ParamModel = undefined> {
   }
 
   public isV2(): boolean {
-    return this.v2Mode;
+    return !!this.config.v2Mode;
   }
 
   public buildUrl(params: ParamModel): string {
@@ -67,12 +67,15 @@ export abstract class QFunction<ParamModel = undefined> {
       if (qParams?.length !== 1) {
         throw new Error("Only one primitive value was provided, but the function requires multiple parameters!");
       }
-      paramsString = `(${qParams[0].formatUrlValue(params) || ""})`;
+      const singleParam = qParams[0].formatUrlValue(params) || "";
+      paramsString = `(${this.config.unencoded ? singleParam : encodeURIComponent(singleParam)})`;
     }
     // complex form or undefined
     else {
       const formatted = this.formatParams(params);
-      paramsString = this.isV2() ? compileQueryParams(formatted) : compileUrlParams(formatted);
+      paramsString = this.isV2()
+        ? compileQueryParams(formatted, this.config.unencoded)
+        : compileUrlParams(formatted, this.config.unencoded);
     }
 
     return this.name + paramsString;

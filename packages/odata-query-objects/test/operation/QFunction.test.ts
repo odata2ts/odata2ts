@@ -32,11 +32,21 @@ describe("QFunction Tests", () => {
   });
 
   test("QFunction: for IDs", () => {
+    const exampleFunction = new BookIdFunction("EntityXy", { unencoded: true });
+    expect(exampleFunction.buildUrl({ isbn: "123" })).toBe("EntityXy(isbn=123)");
+    expect(exampleFunction.buildUrl("123")).toBe("EntityXy(123)");
+    expect(exampleFunction.buildUrl("1?2/3&")).toBe("EntityXy(1?2/3&)");
+    expect(exampleFunction.parseUrl("EntityXy(isbn=123)")).toMatchObject({ isbn: "123" });
+    expect(exampleFunction.parseUrl("EntityXy(123)")).toBe("123");
+    expect(exampleFunction.parseUrl("EntityXy(1?2/3&)")).toBe("1?2/3&");
+  });
+
+  test("QFunction: for IDs (encoded)", () => {
     const exampleFunction = new BookIdFunction("EntityXy");
     expect(exampleFunction.buildUrl({ isbn: "123" })).toBe("EntityXy(isbn=123)");
     expect(exampleFunction.buildUrl("123")).toBe("EntityXy(123)");
-    expect(exampleFunction.parseUrl("EntityXy(isbn=123)")).toMatchObject({ isbn: "123" });
-    expect(exampleFunction.parseUrl("EntityXy(123)")).toBe("123");
+    expect(exampleFunction.buildUrl({ isbn: "1?2/3&" })).toBe("EntityXy(isbn=1%3F2%2F3%26)");
+    expect(exampleFunction.buildUrl("1?2/3&")).toBe("EntityXy(1%3F2%2F3%26)");
   });
 
   test("QFunction: for IDs with V2 Param", () => {
