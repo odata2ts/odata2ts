@@ -12,26 +12,26 @@ const REGEXP_V2_PARAMS = /.*\?(.+)/;
 
 const SINGLE_VALUE_TYPES = ["string", "number", "boolean"];
 
-function compileUrlParams(params: FunctionParams | undefined, unencoded: boolean = false) {
+function compileUrlParams(params: FunctionParams | undefined, notEncoded: boolean = false) {
   const result =
     !params || !Object.keys(params).length
       ? ""
       : Object.entries(params)
           .map(([key, value]) => {
-            return unencoded ? key + "=" + value : encodeURIComponent(key) + "=" + encodeURIComponent(value);
+            return notEncoded ? key + "=" + value : encodeURIComponent(key) + "=" + encodeURIComponent(value);
           })
           .join(",");
 
   return `(${result})`;
 }
 
-function compileQueryParams(params: FunctionParams | undefined, unencoded: boolean = false) {
+function compileQueryParams(params: FunctionParams | undefined, notEncoded: boolean = false) {
   return !params || !Object.keys(params).length
     ? ""
     : "?" +
         Object.entries(params)
           .map(([key, value]) => {
-            return unencoded ? key + "=" + value : encodeURIComponent(key) + "=" + encodeURIComponent(value);
+            return notEncoded ? key + "=" + value : encodeURIComponent(key) + "=" + encodeURIComponent(value);
           })
           .join("&");
 }
@@ -45,7 +45,7 @@ export abstract class QFunction<ParamModel = undefined> {
   public constructor(
     protected name: string,
     protected qReturnType: OperationReturnType<any> = emptyOperationReturnType,
-    protected config: { unencoded?: boolean; v2Mode?: boolean } = {}
+    protected config: { v2Mode?: boolean } = {}
   ) {}
 
   public abstract getParams(): Array<QParamModel<any, any>>;
@@ -58,7 +58,7 @@ export abstract class QFunction<ParamModel = undefined> {
     return !!this.config.v2Mode;
   }
 
-  public buildUrl(params: ParamModel): string {
+  public buildUrl(params: ParamModel, notEncoded = false): string {
     const qParams = this.getParams();
     let paramsString: string = "";
 
@@ -68,14 +68,12 @@ export abstract class QFunction<ParamModel = undefined> {
         throw new Error("Only one primitive value was provided, but the function requires multiple parameters!");
       }
       const singleParam = qParams[0].formatUrlValue(params) || "";
-      paramsString = `(${this.config.unencoded ? singleParam : encodeURIComponent(singleParam)})`;
+      paramsString = `(${notEncoded ? singleParam : encodeURIComponent(singleParam)})`;
     }
     // complex form or undefined
     else {
       const formatted = this.formatParams(params);
-      paramsString = this.isV2()
-        ? compileQueryParams(formatted, this.config.unencoded)
-        : compileUrlParams(formatted, this.config.unencoded);
+      paramsString = this.isV2() ? compileQueryParams(formatted, notEncoded) : compileUrlParams(formatted, notEncoded);
     }
 
     return this.name + paramsString;
@@ -103,7 +101,7 @@ export abstract class QFunction<ParamModel = undefined> {
       }, {} as FunctionParams);
   }
 
-  public parseUrl(url: string): ParamModel {
+  public parseUrl(url: string, notDecoded = false): ParamModel {
     const qParams = this.getParams();
     if (!qParams?.length) {
       return undefined!;
@@ -124,7 +122,7 @@ export abstract class QFunction<ParamModel = undefined> {
         throw new Error("Only one primitive value was provided, but the function requires multiple parameters!");
       }
       const qParam = qParams[0];
-      return qParam.parseUrlValue(params[0]);
+      return qParam.parseUrlValue(notDecoded ? params[0] : decodeURIComponent(params[0]));
     }
 
     // regular form
@@ -134,7 +132,9 @@ export abstract class QFunction<ParamModel = undefined> {
         throw new Error(`Failed to parse function params: Key and value must be specified!`);
       }
 
-      const [key, value] = keyAndValue;
+      const key = notDecoded ? keyAndValue[0] : decodeURIComponent(keyAndValue[0]);
+      const value = notDecoded ? keyAndValue[1] : decodeURIComponent(keyAndValue[1]);
+
       const qParam = qParams.find((q) => q.getName() === key);
 
       if (!qParam) {

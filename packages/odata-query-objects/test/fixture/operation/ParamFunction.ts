@@ -46,7 +46,7 @@ export class QBestBookFunction extends QFunction<BestBookParamModel> {
   ];
 
   constructor() {
-    super("BestBook", new OperationReturnType(ReturnTypes.VALUE, new QBooleanParam("NONE")), { unencoded: true });
+    super("BestBook", new OperationReturnType(ReturnTypes.VALUE, new QBooleanParam("NONE")));
   }
 
   public getParams() {

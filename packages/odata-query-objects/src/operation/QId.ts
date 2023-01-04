@@ -5,7 +5,7 @@ import { QFunction } from "./QFunction";
  * There's no difference between V2 and V4 here.
  */
 export abstract class QId<ParamModel> extends QFunction<ParamModel> {
-  public constructor(name: string, config?: { unencoded?: boolean }) {
-    super(name, undefined, { ...config, v2Mode: false });
+  public constructor(name: string) {
+    super(name, undefined, { v2Mode: false });
   }
 }
