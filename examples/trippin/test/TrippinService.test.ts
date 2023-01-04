@@ -1,6 +1,6 @@
-import { qLocation, qPerson } from "../src/trippin/QTrippin";
-import { EditableLocationModel, EditablePersonModel, FeatureModel, PersonIdModel } from "../src/trippin/TrippinModel";
-import { TrippinService } from "../src/trippin/TrippinService";
+import { qLocation, qPerson } from "../build/trippin/QTrippin";
+import { EditableLocationModel, EditablePersonModel, FeatureModel, PersonIdModel } from "../build/trippin/TrippinModel";
+import { TrippinService } from "../build/trippin/TrippinService";
 import { MockODataClient } from "./MockODataClient";
 
 describe("Testing Generation of TrippinService", () => {
