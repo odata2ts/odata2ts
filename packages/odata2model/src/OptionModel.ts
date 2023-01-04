@@ -83,6 +83,17 @@ export interface CliOptions {
    * in ony other case the prop is unmanaged.
    */
   disableAutoManagedKey?: boolean;
+  /**
+   * By default, odata2ts doesn't change param, operation, property or model names.
+   * The generated models and their properties are named exactly as advertised by the server.
+   *
+   * By allowing odata2ts to change these names, certain predefined formatting strategies are used:
+   * Model / class names are formatted with PascalCase; property, param, and operation names with camelCase.
+   *
+   * The naming configuration allows to control this and other naming related settings.
+   * Note: Even if renaming is disabled, model prefixing / suffing still applies.
+   */
+  allowRenaming?: boolean;
 }
 
 /**

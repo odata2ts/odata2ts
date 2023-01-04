@@ -2,10 +2,10 @@ import * as cosmiConfig from "cosmiconfig";
 import type { CosmiconfigResult } from "cosmiconfig/dist/types";
 import fsExtra from "fs-extra";
 
+import { getDefaultConfig } from "../src";
+import { CliOptions, ConfigFileOptions, EmitModes, Modes, RunOptions } from "../src";
 import * as app from "../src/app";
 import { Cli } from "../src/cli";
-import { getDefaultConfig } from "../src/defaultConfig";
-import { CliOptions, ConfigFileOptions, EmitModes, Modes, RunOptions } from "../src/OptionModel";
 
 jest.mock("fs-extra");
 jest.mock("../src/app");

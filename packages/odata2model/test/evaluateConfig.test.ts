@@ -1,6 +1,5 @@
-import { getDefaultConfig } from "../src/defaultConfig";
+import { CliOptions, ConfigFileOptions, EmitModes, Modes, getDefaultConfig } from "../src";
 import { evaluateConfigOptions } from "../src/evaluateConfig";
-import { CliOptions, ConfigFileOptions, EmitModes, Modes } from "../src/OptionModel";
 
 describe("Config Evaluation Tests", () => {
   const defaultConfig = getDefaultConfig();

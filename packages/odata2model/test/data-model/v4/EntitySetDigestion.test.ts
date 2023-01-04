@@ -1,14 +1,14 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 
-import { getDefaultConfig } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
+import { getTestConfig } from "../../test.config";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 describe("EntitySet Digestion Test", () => {
   const SERVICE_NAME = "EntitySetTest";
-  const CONFIG = getDefaultConfig();
-  const NAMING_HELPER = new NamingHelper(CONFIG.naming, SERVICE_NAME);
+  const CONFIG = getTestConfig();
+  const NAMING_HELPER = new NamingHelper(CONFIG, SERVICE_NAME);
 
   let odataBuilder: ODataModelBuilderV4;
 
