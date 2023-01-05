@@ -92,11 +92,13 @@ export abstract class EntitySetServiceV4<
     return convertV4ModelResponse(result, this.qResponseType);
   }
 
+  // TODO: Remove
   public get(id: EIdType) {
     const url = this.idFunction.buildUrl(id);
     return new this.entityTypeServiceConstructor(this.client, this.basePath, url);
   }
 
+  // TODO: Remove
   public patch(
     id: EIdType,
     model: Partial<EditableT>,
@@ -105,6 +107,7 @@ export abstract class EntitySetServiceV4<
     return this.get(id).patch(model, requestConfig);
   }
 
+  // TODO: Remove
   public delete(id: EIdType, requestConfig?: ODataClientConfig<ClientType>): ODataResponse<void> {
     return this.get(id).delete(requestConfig);
   }

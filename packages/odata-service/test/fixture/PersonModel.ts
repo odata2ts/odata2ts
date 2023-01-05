@@ -10,9 +10,9 @@ import { PrefixModel } from "@odata2ts/test-converters";
 import { CollectionServiceV2, CollectionServiceV4 } from "../../src";
 import { MockODataClient } from "../mock/MockODataClient";
 import {
-  PersonModelCollectionService as PMCServiceV2,
-  PersonModelService as PMServiceV2,
-} from "./v2/PersonModelService";
+  PersonModelV2CollectionService as PMCServiceV2,
+  PersonModelV2Service as PMServiceV2,
+} from "./v2/PersonModelV2Service";
 import {
   PersonModelCollectionService as PMCServiceV4,
   PersonModelService as PMServiceV4,
