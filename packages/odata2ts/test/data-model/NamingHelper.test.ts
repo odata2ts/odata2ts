@@ -45,7 +45,7 @@ describe("NamingHelper Tests", function () {
     expect(toTest.getCollectionServiceName("TEST")).toBe("TestCollectionService");
     expect(toTest.getFunctionName("TEST")).toBe("test");
     expect(toTest.getActionName("TEST")).toBe("test");
-    expect(toTest.getRelatedServiceGetter("TEST")).toBe("getTestSrv");
+    expect(toTest.getRelatedServiceGetter("TEST")).toBe("navToTest");
     expect(toTest.getPrivatePropName("TEST")).toBe("_test");
   });
 

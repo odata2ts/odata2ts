@@ -21,7 +21,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     super(client, basePath, name, qBook);
   }
 
-  public getAuthorSrv(): AuthorService<ClientType> {
+  public navToAuthor(): AuthorService<ClientType> {
     if (!this._author) {
       this._author = new AuthorService(this.client, this.getPath(), "author");
     }
@@ -29,7 +29,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     return this._author;
   }
 
-  public getRelatedAuthorsSrv(): AuthorCollectionService<ClientType> {
+  public navToRelatedAuthors(): AuthorCollectionService<ClientType> {
     if (!this._relatedAuthors) {
       this._relatedAuthors = new AuthorCollectionService(this.client, this.getPath(), "relatedAuthors");
     }

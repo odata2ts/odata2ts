@@ -21,7 +21,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     super(client, basePath, name, qBook);
   }
 
-  public getLectorSrv(): ReviewerService<ClientType> {
+  public navToLector(): ReviewerService<ClientType> {
     if (!this._lector) {
       this._lector = new ReviewerService(this.client, this.getPath(), "lector");
     }
@@ -29,7 +29,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     return this._lector;
   }
 
-  public getReviewersSrv(): CollectionServiceV2<ClientType, Reviewer, QReviewer, EditableReviewer> {
+  public navToReviewers(): CollectionServiceV2<ClientType, Reviewer, QReviewer, EditableReviewer> {
     if (!this._reviewers) {
       this._reviewers = new CollectionServiceV2(this.client, this.getPath(), "reviewers", qReviewer);
     }
