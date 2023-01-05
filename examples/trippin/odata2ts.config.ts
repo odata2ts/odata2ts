@@ -18,10 +18,6 @@ const config: ConfigFileOptions = {
       output: "build/trippin",
       naming: {
         services: {
-          relatedServiceGetter: {
-            prefix: "navTo",
-            suffix: "",
-          },
           operations: {
             function: {
               suffix: "Function",

@@ -16,18 +16,10 @@ const config: ConfigFileOptions = {
       output: "build/v2/odata",
     },
     trippin: {
-      // serviceName: "TrippinService",
       source: "int-test/fixture/v4/trippin.xml",
       output: "build/v4/trippin",
       naming: {
-        // models: {
-        //   propNamingStrategy: NamingStrategies.CONSTANT_CASE,
-        // },
         services: {
-          relatedServiceGetter: {
-            prefix: "navTo",
-            suffix: "",
-          },
           operations: {
             function: {
               suffix: "Function",

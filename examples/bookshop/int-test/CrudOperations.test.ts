@@ -1,4 +1,3 @@
-import { AxiosODataClient, RequestError } from "@odata2ts/axios-odata-client";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 
 import { BooksModel, EditableBooksModel } from "../src/admin/AdminModel";
@@ -22,7 +21,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
       modifiedBy: "anonymous",
     };
 
-    const result = await testService.getBooksSrv().get(BOOK_ZERO.id).query();
+    const result = await testService.navToBooks().get(BOOK_ZERO.id).query();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
 
@@ -34,7 +33,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     jest.setTimeout(15000);
 
     // given
-    const bookSrv = testService.getBooksSrv();
+    const bookSrv = testService.navToBooks();
     const book: EditableBooksModel = {
       // @ts-ignore
       id: 999,
@@ -69,7 +68,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
       title: "new title!",
     };
 
-    const srv = testService.getBooksSrv().get(271);
+    const srv = testService.navToBooks().get(271);
     const result = await srv.patch(updated);
 
     expect(result.status).toBe(200);
@@ -86,7 +85,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
       descr: "Updated Description",
     };
 
-    const srv = testService.getBooksSrv().get(252);
+    const srv = testService.navToBooks().get(252);
     const queried = await srv.query();
     const {
       "@odata.context": ctxt,
@@ -119,7 +118,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
       genreId: undefined,
     };
 
-    const srv = testService.getBooksSrv().get(251);
+    const srv = testService.navToBooks().get(251);
 
     const result = await srv.update(toUpdate);
 
@@ -134,5 +133,4 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     // createdAt is still set
     expect(result.data!.createdAt!.length).toBe(24);
   });
-
 });

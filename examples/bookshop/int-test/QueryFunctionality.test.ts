@@ -19,7 +19,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   };
 
   test("list books with count", async () => {
-    const result = await testService.getBooksSrv().query((b) => b.count());
+    const result = await testService.navToBooks().query((b) => b.count());
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data["@odata.count"]).toBe(5);
@@ -30,7 +30,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   });
 
   test("get book zero", async () => {
-    const result = await testService.getBooksSrv().get(BOOK_ZERO.id).query();
+    const result = await testService.navToBooks().get(BOOK_ZERO.id).query();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
 
@@ -40,11 +40,11 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
 
   test("get unknown book", async () => {
     let failMsg = "Not Found";
-    await expect(() => testService.getBooksSrv().get(-1).query()).rejects.toThrow(failMsg);
+    await expect(() => testService.navToBooks().get(-1).query()).rejects.toThrow(failMsg);
 
     // again, but now inspect error in detail
     try {
-      await testService.getBooksSrv().get(-1).query();
+      await testService.navToBooks().get(-1).query();
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
@@ -62,7 +62,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   });
 
   test("deep select query", async () => {
-    const result = await testService.getBooksSrv().query((b, qBook) => {
+    const result = await testService.navToBooks().query((b, qBook) => {
       b.count()
         .select("id", "title", "stock", "price")
         .expanding("genre", (expBuilder) => {
@@ -111,13 +111,13 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
     const expectedComplex = { id: expectedSimple };
 
     // simple version
-    let result = testService.getProductsSrv().createKey(expectedSimple);
+    let result = testService.navToProducts().createKey(expectedSimple);
     expect(result).toBe(`Products(${expectedSimple})`);
-    expect(testService.getProductsSrv().parseKey(result)).toBe(expectedSimple);
+    expect(testService.navToProducts().parseKey(result)).toBe(expectedSimple);
 
     // complex version
-    result = testService.getProductsSrv().createKey(expectedComplex);
+    result = testService.navToProducts().createKey(expectedComplex);
     expect(result).toBe(`Products(ID=${expectedSimple})`);
-    expect(testService.getProductsSrv().parseKey(result)).toStrictEqual(expectedComplex);
+    expect(testService.navToProducts().parseKey(result)).toStrictEqual(expectedComplex);
   });*/
 });

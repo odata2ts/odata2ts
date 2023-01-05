@@ -63,8 +63,7 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
       },
       relatedServiceGetter: {
         namingStrategy: NamingStrategies.CAMEL_CASE,
-        prefix: "get",
-        suffix: "Srv",
+        prefix: "navTo",
       },
       fileNames: {
         namingStrategy: NamingStrategies.PASCAL_CASE,

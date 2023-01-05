@@ -19,7 +19,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     super(client, basePath, name, qBook);
   }
 
-  public getAltChoicesSrv() {
+  public navToAltChoices() {
     if (!this._altChoices) {
       this._altChoices = new CollectionServiceV2(this.client, this.getPath(), "altChoices", qEnumCollection);
     }

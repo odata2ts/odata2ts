@@ -1,5 +1,5 @@
 import { EditableProductModel } from "../build/odata/ODataDemoModel";
-import { ODataDemoService } from "../src/odata/ODataDemoService";
+import { ODataDemoService } from "../build/odata/ODataDemoService";
 import { MockODataClient } from "./MockODataClient";
 
 describe("V2 CRUD Functionality Tests", function () {
@@ -17,7 +17,7 @@ describe("V2 CRUD Functionality Tests", function () {
       description: "Description",
       discontinuedDate: null,
     };
-    testService.getProductsSrv().create(model);
+    testService.navToProducts().create(model);
 
     expect(odataClient.lastOperation).toBe("POST");
     expect(odataClient.lastUrl).toBe("test/Products");
@@ -41,7 +41,7 @@ describe("V2 CRUD Functionality Tests", function () {
       releaseDate: "xyz",
       discontinuedDate: null,
     };
-    testService.getProductsSrv().get(123).update(model);
+    testService.navToProducts().get(123).update(model);
 
     expect(odataClient.lastOperation).toBe("PUT");
     expect(odataClient.lastUrl).toBe("test/Products(123)");
@@ -59,7 +59,7 @@ describe("V2 CRUD Functionality Tests", function () {
     const model: Partial<EditableProductModel> = {
       description: "test",
     };
-    testService.getProductsSrv().get(123).patch(model);
+    testService.navToProducts().get(123).patch(model);
 
     expect(odataClient.lastOperation).toBe("MERGE");
     expect(odataClient.lastUrl).toBe("test/Products(123)");
@@ -69,7 +69,7 @@ describe("V2 CRUD Functionality Tests", function () {
   });
 
   test("delete", () => {
-    testService.getProductsSrv().get(123).delete();
+    testService.navToProducts().get(123).delete();
 
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastUrl).toBe("test/Products(123)");
