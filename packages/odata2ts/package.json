@@ -1,5 +1,5 @@
 {
-  "name": "@odata2ts/odata2model",
+  "name": "@odata2ts/odata2ts",
   "version": "0.17.0",
   "publishConfig": {
     "access": "public"
@@ -21,7 +21,6 @@
     "dev": "yarn generate trippin odata",
     "generate": "ts-node --cwd-mode src/run-cli.ts ",
     "int-test": "yarn clean && jest ./int-test",
-    "odata2ts": "yarn odata2model",
     "prepublish": "yarn build",
     "test": "yarn compile-fixtures && jest ./test"
   },
