@@ -1,8 +1,8 @@
 import { HttpResponseModel } from "@odata2ts/odata-client-api";
 import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 
-import { EditableProductModel, ProductModel } from "../build/odata/ODataDemoModel";
-import { ODataDemoService } from "../src/odata/ODataDemoService";
+import { ProductModel } from "../build/odata/ODataDemoModel";
+import { ODataDemoService } from "../build/odata/ODataDemoService";
 import { MockODataClient } from "./MockODataClient";
 
 describe("V2 Operation (FunctionImport) Tests", function () {

@@ -12,16 +12,10 @@ const config: ConfigFileOptions = {
     },
   },
   services: {
-    "odata-js": {
+    odata: {
       source: "resource/odata.xml",
       output: "build/odata",
       emitMode: EmitModes.js_dts,
-    },
-    odata: {
-      source: "resource/odata.xml",
-      output: "src/odata",
-      emitMode: EmitModes.ts,
-      prettier: true,
     },
   },
 };
