@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/example-bookshop",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "publishConfig": {
     "access": "public"
@@ -27,9 +27,9 @@
     "srv"
   ],
   "dependencies": {
-    "@odata2ts/axios-odata-client": "^0.4.0",
-    "@odata2ts/odata-service": "^0.10.1",
-    "@odata2ts/odata2model": "^0.16.1",
+    "@odata2ts/axios-odata-client": "^0.5.0",
+    "@odata2ts/odata-service": "^0.11.0",
+    "@odata2ts/odata2model": "^0.17.0",
     "@sap/cds": ">=5.9",
     "@sap/cds-odata-v2-adapter-proxy": "^1.9.4",
     "express": "^4.17.1",

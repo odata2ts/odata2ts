@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.15.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.14.0...@odata2ts/odata-query-objects@0.15.0) (2023-01-05)
+
+
+### Bug Fixes
+
+* **odata-query-objects:** v2 query functions must return QNumberV2Path ([#87](https://github.com/odata2ts/odata2ts/issues/87)) ([cc36d68](https://github.com/odata2ts/odata2ts/commit/cc36d68c9fe6d1632da2ee92b803e57e3e293fae))
+
+
+### Features
+
+* dedicated number params for V2 ([#84](https://github.com/odata2ts/odata2ts/issues/84)) ([7a440d9](https://github.com/odata2ts/odata2ts/commit/7a440d92c40b39aedd4479ceed4afa18cc3a0ce9))
+* encode & decode function params properly ([#96](https://github.com/odata2ts/odata2ts/issues/96)) ([ca88f57](https://github.com/odata2ts/odata2ts/commit/ca88f572674181962760005cf33f820e231a2b51))
+* improved number handling ([#86](https://github.com/odata2ts/odata2ts/issues/86)) ([08e9fe0](https://github.com/odata2ts/odata2ts/commit/08e9fe0feaf5af6fcfe0ab8af7ff27d1d52eb097))
+
+
+
+
+
 # [0.14.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.13.0...@odata2ts/odata-query-objects@0.14.0) (2022-12-21)
 
 

@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.17.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.16.1...@odata2ts/odata2model@0.17.0) (2023-01-05)
+
+
+### Bug Fixes
+
+* **odata2ts:** broken js generation ([#95](https://github.com/odata2ts/odata2ts/issues/95)) ([6df7392](https://github.com/odata2ts/odata2ts/commit/6df7392b6bf72fc1621585d299ed3adebee53021))
+* **odata2ts:** operation return type for primitive values is wrong ([#91](https://github.com/odata2ts/odata2ts/issues/91)) ([fcbc28a](https://github.com/odata2ts/odata2ts/commit/fcbc28a8c388d256cb14ddf2a5935431e3a50478))
+
+
+### Code Refactoring
+
+* **odata2ts:** changing default regarding renaming ([#94](https://github.com/odata2ts/odata2ts/issues/94)) ([67124a2](https://github.com/odata2ts/odata2ts/commit/67124a206d28442e86ab4db50b4aa3eb17056727))
+
+
+### Features
+
+* dedicated number params for V2 ([#84](https://github.com/odata2ts/odata2ts/issues/84)) ([7a440d9](https://github.com/odata2ts/odata2ts/commit/7a440d92c40b39aedd4479ceed4afa18cc3a0ce9))
+* encode & decode function params properly ([#96](https://github.com/odata2ts/odata2ts/issues/96)) ([ca88f57](https://github.com/odata2ts/odata2ts/commit/ca88f572674181962760005cf33f820e231a2b51))
+* improved number handling ([#86](https://github.com/odata2ts/odata2ts/issues/86)) ([08e9fe0](https://github.com/odata2ts/odata2ts/commit/08e9fe0feaf5af6fcfe0ab8af7ff27d1d52eb097))
+* **odata2ts:** automatically handle managed props ([#88](https://github.com/odata2ts/odata2ts/issues/88)) ([37eef19](https://github.com/odata2ts/odata2ts/commit/37eef1918f25a4943ae19475dc987463639ab9f4))
+
+
+### BREAKING CHANGES
+
+* **odata2ts:** new default: allowRenaming=false; removed prop `naming.disableNamingStrategy`
+
+
+
+
+
 ## [0.16.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.16.0...@odata2ts/odata2model@0.16.1) (2022-12-21)
 
 
