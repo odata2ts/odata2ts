@@ -2457,9 +2457,38 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2model@^0.17.0, @odata2ts/odata2model@workspace:packages/odata2model":
+"@odata2ts/odata2model@npm:^0.17.0":
+  version: 0.17.0
+  resolution: "@odata2ts/odata2model@npm:0.17.0"
+  dependencies:
+    "@odata2ts/converter-api": ^0.1.0
+    "@odata2ts/converter-runtime": ^0.1.0
+    camel-case: ^4.1.2
+    commander: ^9.1.0
+    constant-case: ^3.0.4
+    cosmiconfig: ^7.0.1
+    cosmiconfig-typescript-loader: ^4.0.0
+    deepmerge: ^4.2.2
+    fs-extra: ^10.0.1
+    pascal-case: ^3.1.2
+    prettier: ^2.7.1
+    ts-morph: ^14.0.0
+    tsconfig-loader: ^1.1.0
+    upper-case-first: ^2.0.2
+    xml2js: ^0.4.23
+  peerDependencies:
+    "@odata2ts/odata-client-api": "*"
+    "@odata2ts/odata-query-objects": "*"
+    "@odata2ts/odata-service": "*"
+  bin:
+    odata2model: lib/run-cli.js
+  checksum: f79075f4a780d67075503572ca99472e92da71349f78b9a2f76d338346732b622072a1737bd642391ce6e09be5d63a8845bd1e4546c3b00a66a2452ca5e7d04d
+  languageName: node
+  linkType: hard
+
+"@odata2ts/odata2ts@workspace:packages/odata2ts":
   version: 0.0.0-use.local
-  resolution: "@odata2ts/odata2model@workspace:packages/odata2model"
+  resolution: "@odata2ts/odata2ts@workspace:packages/odata2ts"
   dependencies:
     "@odata2ts/converter-api": ^0.1.0
     "@odata2ts/converter-runtime": ^0.1.0
@@ -2496,13 +2525,24 @@ __metadata:
     "@odata2ts/odata-query-objects": "*"
     "@odata2ts/odata-service": "*"
   bin:
-    odata2model: lib/run-cli.js
+    odata2ts: lib/run-cli.js
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2ts@workspace:.":
+"@odata2ts/test-converters@workspace:examples/test-converters":
   version: 0.0.0-use.local
-  resolution: "@odata2ts/odata2ts@workspace:."
+  resolution: "@odata2ts/test-converters@workspace:examples/test-converters"
+  dependencies:
+    "@odata2ts/converter-api": ^0.1.0
+    "@odata2ts/odata-core": ^0.3.1
+    rimraf: ^3.0.2
+    typescript: 4.6.3
+  languageName: unknown
+  linkType: soft
+
+"@odata2ts/workspace-core@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@odata2ts/workspace-core@workspace:."
   dependencies:
     "@prettier/plugin-xml": ^2.0.1
     env-cmd: ^10.1.0
@@ -2518,17 +2558,6 @@ __metadata:
     prettier-plugin-properties: ^0.1.0
     rimraf: ^3.0.2
     typescript: ^4.6.3
-  languageName: unknown
-  linkType: soft
-
-"@odata2ts/test-converters@workspace:examples/test-converters":
-  version: 0.0.0-use.local
-  resolution: "@odata2ts/test-converters@workspace:examples/test-converters"
-  dependencies:
-    "@odata2ts/converter-api": ^0.1.0
-    "@odata2ts/odata-core": ^0.3.1
-    rimraf: ^3.0.2
-    typescript: 4.6.3
   languageName: unknown
   linkType: soft
 
