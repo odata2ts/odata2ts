@@ -1,7 +1,7 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import { ODataModelResponseV2 } from "@odata2ts/odata-core";
+import { ODataUriBuilderV2 } from "@odata2ts/odata-query-builder";
 import { QueryObject, convertV2ModelResponse } from "@odata2ts/odata-query-objects";
-import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
 import { ServiceBaseV2 } from "./ServiceBaseV2";
 

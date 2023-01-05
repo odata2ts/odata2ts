@@ -1,10 +1,10 @@
-[![npm (scoped)](https://img.shields.io/npm/v/@odata2ts/odata-uri-builder?style=for-the-badge)](https://www.npmjs.com/package/@odata2ts/odata-uri-builder)
+[![npm (scoped)](https://img.shields.io/npm/v/@odata2ts/odata-query-builder?style=for-the-badge)](https://www.npmjs.com/package/@odata2ts/odata-query-builder)
 
-# OData URI Builder
+# OData Query Builder
 
 Allows for building type-safe OData queries.
 
-OData URI Builder depends on `odata-query-objects` to offer a powerful and easy-to-use API.
+OData Query Builder depends on `odata-query-objects` to offer a powerful and easy-to-use API.
 Query objects can be generated via `odata2ts` out of an existing OData service.
 
 ## Usage
@@ -52,7 +52,7 @@ A complex query could look like this:
 import { createUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 import { qPerson } from "../generated-src/QTrippin.ts"
 
-createUriBuilderV4("People", qPerson)
+createQueryBuilderV4("People", qPerson)
   .select("lastName", "age") // => typesafe: only model attributes are allowed
   .filter(qPerson.userName.equals("russellwhyte"))
   .expand("homeAddress") // => typesafe: only expandable properties are allowed
@@ -130,7 +130,7 @@ offers select, filter, expand, expanding in V2). However, in V2 the syntax for e
 the V2 query builder takes care of that.
 
 ```ts
-import { createUriBuilderV2 } from "@odata2ts/odata-uri-builder";
+import { createUriBuilderV2 } from "@odata2ts/odata-query-builder";
 
 createUriBuilderV2("Product", qProduct)
   .expanding("supplier", (catBuilder, qSupplier) => 

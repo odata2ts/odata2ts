@@ -1,5 +1,5 @@
+import { ODataUriBuilderV4, createUriBuilderV4 } from "@odata2ts/odata-query-builder";
 import { QueryObject } from "@odata2ts/odata-query-objects";
-import { ODataUriBuilderV4, createUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
 import { OperationBaseService } from "../OperationBaseService";
 

@@ -1,12 +1,12 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataUriBuilderV4 } from "@odata2ts/odata-query-builder";
 import {
   PrimitiveCollectionType,
   QueryObject,
   convertV4CollectionResponse,
   convertV4ModelResponse,
 } from "@odata2ts/odata-query-objects";
-import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
 import { ServiceBaseV4 } from "./ServiceBaseV4";
 

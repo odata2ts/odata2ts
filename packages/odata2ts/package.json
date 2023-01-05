@@ -31,9 +31,9 @@
     "LICENSE"
   ],
   "peerDependencies": {
-    "@odata2ts/odata-client-api": "*",
-    "@odata2ts/odata-query-objects": "*",
-    "@odata2ts/odata-service": "*"
+    "@odata2ts/odata-client-api": "^0.6.0",
+    "@odata2ts/odata-query-objects": "^0.15.0",
+    "@odata2ts/odata-service": "^0.11.0"
   },
   "dependencies": {
     "@odata2ts/converter-api": "^0.1.0",

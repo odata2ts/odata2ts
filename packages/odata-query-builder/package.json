@@ -1,5 +1,5 @@
 {
-  "name": "@odata2ts/odata-uri-builder",
+  "name": "@odata2ts/odata-query-builder",
   "version": "0.14.1",
   "publishConfig": {
     "access": "public"
