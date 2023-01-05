@@ -1,5 +1,6 @@
-import { QueryObject, QFilterExpression } from "@odata2ts/odata-query-objects";
-import { ODataUriBuilderConfig, ODataUriBuilderV2 } from "../src";
+import { QFilterExpression, QueryObject } from "@odata2ts/odata-query-objects";
+
+import { ODataQueryBuilderConfig, ODataQueryBuilderV2 } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 
 /**
@@ -15,11 +16,11 @@ function addBase(urlPart: string) {
 export type BuilderFactoryFunction<Q extends QueryObject> = (
   path: string,
   qEntity: Q,
-  config?: ODataUriBuilderConfig
-) => ODataUriBuilderV2<QPerson>;
+  config?: ODataQueryBuilderConfig
+) => ODataQueryBuilderV2<QPerson>;
 
 export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) {
-  let toTest: Omit<ODataUriBuilderV2<QPerson>, "expanding" | "count">;
+  let toTest: Omit<ODataQueryBuilderV2<QPerson>, "expanding" | "count">;
 
   function refresh() {
     toTest = createBuilder("/Persons", qPerson, { unencoded: true });

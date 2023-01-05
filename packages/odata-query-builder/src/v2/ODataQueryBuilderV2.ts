@@ -1,22 +1,22 @@
 import { QEntityPath, QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
 
-import { ODataUriBuilder } from "../ODataUriBuilder";
+import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
   ExpandType,
   ExpandingFunctionV2,
   NullableParam,
   NullableParamList,
-  ODataUriBuilderConfig,
-  ODataUriBuilderV2 as ODataUriBuilderV2Model,
-} from "../ODataUriBuilderModel";
-import { createExpandingUriBuilderV2 } from "./ExpandingODataUriBuilderV2";
+  ODataQueryBuilderConfig,
+  ODataQueryBuilderV2 as ODataQueryBuilderV2Model,
+} from "../ODataQueryBuilderModel";
+import { createExpandingQueryBuilderV2 } from "./ExpandingODataQueryBuilderV2";
 
 /**
- * Create an UriBuilder by passing in a query object, which already contains the base path
+ * Create an QueryBuilder by passing in a query object, which already contains the base path
  * to the OData service & the given entity.
  *
  * Example:
- * ODataUriBuilder.create("people", qPerson)
+ * ODataQueryBuilder.create("people", qPerson)
  *   .select(...)
  *   .filter(qPerson.age.greaterThan(...))
  *   ...
@@ -25,24 +25,24 @@ import { createExpandingUriBuilderV2 } from "./ExpandingODataUriBuilderV2";
  * @param path base path to
  * @param qEntity the query object
  * @param config optionally pass a configuration
- * @returns a UriBuilder
+ * @returns a QueryBuilder
  */
-export function createUriBuilderV2<Q extends QueryObject>(
+export function createQueryBuilderV2<Q extends QueryObject>(
   path: string,
   qEntity: Q,
-  config?: ODataUriBuilderConfig
-): ODataUriBuilderV2<Q> {
-  return new ODataUriBuilderV2<Q>(path, qEntity, config);
+  config?: ODataQueryBuilderConfig
+): ODataQueryBuilderV2<Q> {
+  return new ODataQueryBuilderV2<Q>(path, qEntity, config);
 }
 
 /**
  * Create an OData URI string in a typesafe way by facilitating generated query objects.
  */
-class ODataUriBuilderV2<Q extends QueryObject> implements ODataUriBuilderV2Model<Q> {
-  private builder: ODataUriBuilder<Q>;
+class ODataQueryBuilderV2<Q extends QueryObject> implements ODataQueryBuilderV2Model<Q> {
+  private builder: ODataQueryBuilder<Q>;
 
-  constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
-    this.builder = new ODataUriBuilder(path, qEntity, config);
+  constructor(path: string, qEntity: Q, config?: ODataQueryBuilderConfig) {
+    this.builder = new ODataQueryBuilder(path, qEntity, config);
   }
 
   public select(...props: NullableParamList<keyof Q>) {
@@ -68,7 +68,7 @@ class ODataUriBuilderV2<Q extends QueryObject> implements ODataUriBuilderV2Model
     const entityProp = this.builder.getEntityProp<QEntityPath<any>>(prop);
     const entity = entityProp.getEntity();
 
-    const expander = createExpandingUriBuilderV2(entityProp.getPath(), entity);
+    const expander = createExpandingQueryBuilderV2(entityProp.getPath(), entity);
 
     builderFn(expander, entity);
 

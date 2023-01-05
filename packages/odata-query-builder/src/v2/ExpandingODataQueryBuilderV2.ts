@@ -1,33 +1,33 @@
 import { QEntityPath, QueryObject } from "@odata2ts/odata-query-objects";
 
-import { ODataUriBuilder } from "../ODataUriBuilder";
+import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
   EntityExtractor,
   ExpandType,
   ExpandingFunctionV2,
-  ExpandingODataUriBuilderV2 as ExpandingODataUriBuilderV2Model,
+  ExpandingODataQueryBuilderV2 as ExpandingODataQueryBuilderV2Model,
   NullableParamList,
-} from "../ODataUriBuilderModel";
+} from "../ODataQueryBuilderModel";
 
-export function createExpandingUriBuilderV2<Q extends QueryObject>(
+export function createExpandingQueryBuilderV2<Q extends QueryObject>(
   property: string,
   qEntity: Q
-): ExpandingODataUriBuilderV2Model<Q> {
+): ExpandingODataQueryBuilderV2Model<Q> {
   // must never be encoded, since it is part of $expand
-  return new ExpandingODataUriBuilderV2<Q>(property, qEntity);
+  return new ExpandingODataQueryBuilderV2<Q>(property, qEntity);
 }
 
 /**
  * Builder for expanded entities or entity collections.
  */
-class ExpandingODataUriBuilderV2<Q extends QueryObject> implements ExpandingODataUriBuilderV2Model<Q> {
+class ExpandingODataQueryBuilderV2<Q extends QueryObject> implements ExpandingODataQueryBuilderV2Model<Q> {
   private selects = new Set<string>();
   private expands = new Set<string>();
 
-  private builder: ODataUriBuilder<Q>;
+  private builder: ODataQueryBuilder<Q>;
 
   constructor(property: string, qEntity: Q) {
-    this.builder = new ODataUriBuilder(property, qEntity, { expandingBuilder: true });
+    this.builder = new ODataQueryBuilder(property, qEntity, { expandingBuilder: true });
     this.expands.add(property);
   }
 
@@ -67,7 +67,7 @@ class ExpandingODataUriBuilderV2<Q extends QueryObject> implements ExpandingODat
 
     const entityProp = this.builder.getEntityProp<QEntityPath<any>>(prop);
     const entity = entityProp.getEntity();
-    const expander = new ExpandingODataUriBuilderV2<EntityExtractor<Q[Prop]>>(entityProp.getPath(), entity);
+    const expander = new ExpandingODataQueryBuilderV2<EntityExtractor<Q[Prop]>>(entityProp.getPath(), entity);
 
     builderFn(expander, entity);
 

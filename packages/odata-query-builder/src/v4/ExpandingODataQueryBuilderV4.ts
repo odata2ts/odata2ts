@@ -1,30 +1,30 @@
 import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
 
-import { ODataUriBuilder } from "../ODataUriBuilder";
+import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
   ExpandType,
   ExpandingFunction,
-  ExpandingODataUriBuilderV4 as ExpandingODataUriBuilderV4Model,
+  ExpandingODataQueryBuilderV4 as ExpandingODataQueryBuilderV4Model,
   NullableParam,
   NullableParamList,
-} from "../ODataUriBuilderModel";
+} from "../ODataQueryBuilderModel";
 
-export function createExpandingUriBuilderV4<Q extends QueryObject>(
+export function createExpandingQueryBuilderV4<Q extends QueryObject>(
   property: string,
   qEntity: Q
-): ExpandingODataUriBuilderV4Model<Q> {
-  return new ExpandingODataUriBuilderV4<Q>(property, qEntity);
+): ExpandingODataQueryBuilderV4Model<Q> {
+  return new ExpandingODataQueryBuilderV4<Q>(property, qEntity);
 }
 
 /**
  * Builder for expanded entities or entity collections.
  */
-class ExpandingODataUriBuilderV4<Q extends QueryObject> implements ExpandingODataUriBuilderV4Model<Q> {
-  private builder: ODataUriBuilder<Q>;
+class ExpandingODataQueryBuilderV4<Q extends QueryObject> implements ExpandingODataQueryBuilderV4Model<Q> {
+  private builder: ODataQueryBuilder<Q>;
 
   public constructor(property: string, qEntity: Q) {
     // must never be encoded, since it is part of $expand
-    this.builder = new ODataUriBuilder(property, qEntity, { expandingBuilder: true });
+    this.builder = new ODataQueryBuilder(property, qEntity, { expandingBuilder: true });
   }
 
   public select(...props: NullableParamList<keyof Q>) {
@@ -39,7 +39,7 @@ class ExpandingODataUriBuilderV4<Q extends QueryObject> implements ExpandingODat
 
   public expanding<Prop extends ExpandType<Q>>(prop: Prop, builderFn: ExpandingFunction<Q[Prop]>) {
     if (builderFn) {
-      this.builder.expanding(createExpandingUriBuilderV4, prop, builderFn);
+      this.builder.expanding(createExpandingQueryBuilderV4, prop, builderFn);
     }
     return this;
   }
