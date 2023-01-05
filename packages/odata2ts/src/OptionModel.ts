@@ -46,7 +46,7 @@ export interface CliOptions {
   /**
    * Specifies what to generate:
    * - {@code Modes.models} will only generate TS interfaces
-   * - {@code Modes.qobjects} will generate functional units used in UriBuilder and for functions and actions
+   * - {@code Modes.qobjects} will generate functional units used in QueryBuilder and for functions and actions
    * - {@code Modes.service} will generate one main OData service client and one per each entity
    * - {@code Modes.all} the same as {@code Modes.service}
    *

@@ -1,6 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/odata-client-api";
 import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
-import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
+import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 
 import { commonEntitySetTests } from "../EntitySetServiceTests";
 import { PersonModel } from "../fixture/PersonModel";
@@ -30,7 +30,7 @@ describe("V2 EntitySetService Test", () => {
   test("entitySet V2: ensure query typings", async () => {
     // just a typing test: this only needs to compile
     const result: HttpResponseModel<ODataCollectionResponseV2<PersonModel>> = await testService.query((builder) => {
-      const bResult: ODataUriBuilderV2<QPersonV2> = builder;
+      const bResult: ODataQueryBuilderV2<QPersonV2> = builder;
     });
   });
 

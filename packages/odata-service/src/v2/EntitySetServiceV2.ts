@@ -1,12 +1,12 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
+import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import {
   QFunction,
   QueryObject,
   convertV2CollectionResponse,
   convertV2ModelResponse,
 } from "@odata2ts/odata-query-objects";
-import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
 import { EntityTypeServiceV2 } from "./EntityTypeServiceV2";
 import { ServiceBaseV2 } from "./ServiceBaseV2";
@@ -110,7 +110,7 @@ export abstract class EntitySetServiceV2<
   }
 
   public async query(
-    queryFn?: (builder: ODataUriBuilderV2<Q>, qObject: Q) => void,
+    queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV2<T>> {
     const response = await this.doQuery<ODataCollectionResponseV2<any>>(queryFn, requestConfig);

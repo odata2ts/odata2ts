@@ -1,12 +1,12 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import {
   PrimitiveCollectionType,
   QueryObject,
   convertV4CollectionResponse,
   convertV4ModelResponse,
 } from "@odata2ts/odata-query-objects";
-import { ODataUriBuilderV4 } from "@odata2ts/odata-uri-builder";
 
 import { ServiceBaseV4 } from "./ServiceBaseV4";
 
@@ -58,7 +58,7 @@ export class CollectionServiceV4<
    * Query collection of primitive values.
    */
   public async query(
-    queryFn?: (builder: ODataUriBuilderV4<Q>, qObject: Q) => void,
+    queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<T>> {
     const response = await this.doQuery<ODataCollectionResponseV4<any>>(queryFn, requestConfig);

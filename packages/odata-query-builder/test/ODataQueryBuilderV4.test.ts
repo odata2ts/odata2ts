@@ -1,8 +1,8 @@
 import { searchTerm } from "@odata2ts/odata-query-objects";
 
-import { ODataUriBuilderV4, createUriBuilderV4 } from "../src/";
+import { ODataQueryBuilderV4, createQueryBuilderV4 } from "../src/";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
-import { createBaseTests } from "./ODataUriBuilderBaseTests";
+import { createBaseTests } from "./ODataQueryBuilderBaseTests";
 
 /**
  * Helper function which adds the base path.
@@ -14,17 +14,17 @@ function addBase(urlPart: string) {
   return `/Persons${urlPart ? `?${urlPart}` : ""}`;
 }
 
-describe("ODataUriBuilderV4 Test", () => {
-  let toTest: ODataUriBuilderV4<QPerson>;
-  let toTest2: ODataUriBuilderV4<QPerson>;
+describe("ODataQueryBuilderV4 Test", () => {
+  let toTest: ODataQueryBuilderV4<QPerson>;
+  let toTest2: ODataQueryBuilderV4<QPerson>;
 
   // @ts-ignore: hard to get the typing right here, so we always use the V2 model as common ground
   // all we care about here, is that V4 covers all the functionally V2 has
-  createBaseTests(createUriBuilderV4);
+  createBaseTests(createQueryBuilderV4);
 
   function refresh() {
-    toTest = createUriBuilderV4("/Persons", qPerson, { unencoded: true });
-    toTest2 = createUriBuilderV4("/Persons", qPerson, { unencoded: true });
+    toTest = createQueryBuilderV4("/Persons", qPerson, { unencoded: true });
+    toTest2 = createQueryBuilderV4("/Persons", qPerson, { unencoded: true });
   }
 
   /**
@@ -35,7 +35,7 @@ describe("ODataUriBuilderV4 Test", () => {
   });
 
   test("config: encoded & no double encoding for expanded entities", () => {
-    const candidate = createUriBuilderV4("/Persons", qPerson)
+    const candidate = createQueryBuilderV4("/Persons", qPerson)
       .select("name", "age")
       .expanding("altAdresses", (expBuilder, qEntity) => {
         expBuilder.filter(qEntity.street.equals("AC/DC & Brothers"));

@@ -1,7 +1,7 @@
 import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
 import { ODataModelResponseV2 } from "@odata2ts/odata-core";
+import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { QueryObject, convertV2ModelResponse } from "@odata2ts/odata-query-objects";
-import { ODataUriBuilderV2 } from "@odata2ts/odata-uri-builder";
 
 import { ServiceBaseV2 } from "./ServiceBaseV2";
 
@@ -22,7 +22,7 @@ export class EntityTypeServiceV2<
   public delete: (requestConfig?: ODataClientConfig<ClientType>) => ODataResponse<void> = this.doDelete;
 
   public async query(
-    queryFn?: (builder: ODataUriBuilderV2<Q>, qObject: Q) => void,
+    queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void,
     requestConfig?: ODataClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<T>> {
     const response = await this.doQuery<ODataModelResponseV2<any>>(queryFn, requestConfig);

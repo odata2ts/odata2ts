@@ -11,21 +11,21 @@ import {
 import { ODataOperators } from "./ODataModel";
 import {
   ExpandType,
-  ExpandingODataUriBuilderV4,
+  ExpandingODataQueryBuilderV4,
   NullableParam,
   NullableParamList,
-  ODataUriBuilderConfig,
-} from "./ODataUriBuilderModel";
+  ODataQueryBuilderConfig,
+} from "./ODataQueryBuilderModel";
 
 /**
  * Bundles all the logic about handling system query params for OData (V2 and V4).
  */
-export class ODataUriBuilder<Q extends QueryObject> {
+export class ODataQueryBuilder<Q extends QueryObject> {
   private readonly path: string;
   private readonly entity: Q;
 
   private readonly unencoded: boolean;
-  private readonly config?: ODataUriBuilderConfig;
+  private readonly config?: ODataQueryBuilderConfig;
 
   private itemsCount: [ODataOperators, string] | undefined;
   private itemsToSkip: number | undefined;
@@ -38,7 +38,7 @@ export class ODataUriBuilder<Q extends QueryObject> {
   private groupBys: Array<string> | undefined;
   private searchTerms: Array<QSearchTerm> | undefined;
 
-  constructor(path: string, qEntity: Q, config?: ODataUriBuilderConfig) {
+  constructor(path: string, qEntity: Q, config?: ODataQueryBuilderConfig) {
     if (!qEntity || !path || !path.trim()) {
       throw new Error("A valid collection name must be provided!");
     }
@@ -139,7 +139,7 @@ export class ODataUriBuilder<Q extends QueryObject> {
    * @param builderFn
    */
   public expanding<Prop extends ExpandType<Q>>(
-    creator: (property: string, qEntity: Q) => ExpandingODataUriBuilderV4<Q>,
+    creator: (property: string, qEntity: Q) => ExpandingODataQueryBuilderV4<Q>,
     prop: Prop,
     builderFn: (builder: any, qObject: any) => void
   ) {
