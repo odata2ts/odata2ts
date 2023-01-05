@@ -1,6 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/odata-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { ODataUriBuilderV4 } from "@odata2ts/odata-query-builder";
+import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { PersonModel } from "../fixture/PersonModel";
@@ -30,7 +30,7 @@ describe("EntityTypeService V4 Tests", () => {
     // typing test of result
     const result: HttpResponseModel<ODataModelResponseV4<PersonModel>> = await testService.query((builder) => {
       // typing test of builder
-      const resultB: ODataUriBuilderV4<QPersonV4> = builder;
+      const resultB: ODataQueryBuilderV4<QPersonV4> = builder;
     });
   });
 });
