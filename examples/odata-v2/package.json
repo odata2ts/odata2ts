@@ -10,9 +10,8 @@
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
   "scripts": {
-    "build": "yarn clean && yarn generate && yarn compile",
-    "clean": "rimraf build src/odata",
-    "compile": "tsc",
+    "build": "yarn clean && yarn generate",
+    "clean": "rimraf build",
     "generate": "odata2ts",
     "int-test": "jest test && jest ./int-test",
     "test": "jest ./test"
