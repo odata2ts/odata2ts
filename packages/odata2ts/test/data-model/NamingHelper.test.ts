@@ -23,6 +23,7 @@ describe("NamingHelper Tests", function () {
     expect(toTest.getODataServiceName()).toBe(SERVICE_NAME);
     expect(toTest.getServicePrefix()).toBe(SERVICE_NAME + ".");
 
+    expect(toTest.getMainServiceName()).toBe("TrippinService");
     expect(toTest.getFileNames()).toStrictEqual({
       model: "TrippinModel",
       qObject: "QTrippin",
@@ -70,6 +71,7 @@ describe("NamingHelper Tests", function () {
       qObject: "QMyTrip",
       service: "MyTripService",
     });
+    expect(toTest.getMainServiceName()).toBe("MyTripService");
     expect(toTest.getFileNameService("test")).toBe("TestService");
   });
 
@@ -81,14 +83,23 @@ describe("NamingHelper Tests", function () {
     };
     options.naming!.models!.fileName = newNaming;
     options.naming!.queryObjects!.fileName = newNaming;
-    options.naming!.services!.fileNames = newNaming;
+    options.naming!.services!.namingStrategy = newNaming.namingStrategy;
+    options.naming!.services!.prefix = newNaming.prefix;
+    options.naming!.services!.suffix = newNaming.suffix;
+    options.naming!.services!.main = {
+      applyServiceNaming: false,
+      namingStrategy: NamingStrategies.SNAKE_CASE,
+      prefix: "main",
+      suffix: "service",
+    };
     createHelper();
 
     expect(toTest.getFileNames()).toStrictEqual({
       model: "PREF_TRIPPIN_SUF",
       qObject: "PREF_TRIPPIN_SUF",
-      service: "PREF_TRIPPIN_SUF",
+      service: "main_trippin_service",
     });
+    expect(toTest.getMainServiceName()).toBe("main_trippin_service");
     expect(toTest.getFileNameService("test")).toBe("PREF_TEST_SUF");
   });
 

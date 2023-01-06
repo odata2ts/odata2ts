@@ -67,20 +67,20 @@ export class NamingHelper {
     return this.serviceName;
   }
 
-  private getFileName(opts?: FileNamingStrategyOption & StandardNamingOptions) {
-    return this.getName(this.serviceName, this.namingFunction(opts?.namingStrategy), opts);
-  }
-
   public getFileNames() {
     return {
       model: this.getFileName(this.options.models?.fileName),
       qObject: this.getFileName(this.options.queryObjects?.fileName),
-      service: this.getFileName(this.options.services?.fileNames),
+      service: this.getMainServiceName(),
     };
   }
 
+  private getFileName(opts?: FileNamingStrategyOption & StandardNamingOptions) {
+    return this.getName(this.serviceName, this.namingFunction(opts?.namingStrategy), opts);
+  }
+
   public getFileNameService(name: string) {
-    const opts = this.options.services?.fileNames;
+    const opts = this.options.services;
     return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
   }
 
@@ -199,6 +199,16 @@ export class NamingHelper {
     const opts = this.options.queryObjects?.operations;
     const result = this.getName(name, this.getQObjectNamingStrategy(), opts?.action || opts);
     return this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
+  }
+
+  public getMainServiceName() {
+    const name = this.getODataServiceName();
+    const opts = this.options.services;
+    const strategy = this.namingFunction(
+      opts?.main?.namingStrategy ?? (opts?.main?.applyServiceNaming ? opts.namingStrategy : undefined)
+    );
+    const result = this.getName(name, strategy, opts?.main);
+    return opts?.main?.applyServiceNaming ? this.getName(result, strategy, opts) : result;
   }
 
   public getServiceName = (name: string) => {
