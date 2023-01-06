@@ -6,6 +6,7 @@ export enum NamingStrategies {
   PASCAL_CASE = "pascalCase",
   CAMEL_CASE = "camelCase",
   CONSTANT_CASE = "constantCase",
+  SNAKE_CASE = "snakeCase",
 }
 
 export interface NamingOptions {
@@ -29,7 +30,7 @@ export interface ModelNamingOptions extends NamingStrategyOption, StandardNaming
    * All generated models are bundled into one file.
    * This option specifies the formatting of the file name.
    */
-  fileName?: NamingStrategyOption & StandardNamingOptions;
+  fileName?: FileNamingStrategyOption & StandardNamingOptions;
 
   /**
    * Choose a specific strategy to format property names of models: pascal-case, camel-case, etc.
@@ -72,7 +73,7 @@ export interface QueryObjectNamingOptions extends NamingStrategyOption, Standard
    * All generated models are bundled into one file.
    * This option specifies the formatting of the file name.
    */
-  fileName?: NamingStrategyOption & StandardNamingOptions;
+  fileName?: FileNamingStrategyOption & StandardNamingOptions;
 
   /**
    * Choose a specific strategy to format property names of query objects: pascal-case, camel-case, etc.
@@ -106,6 +107,14 @@ export interface NamingStrategyOption {
   namingStrategy?: NamingStrategies;
 }
 
+export interface FileNamingStrategyOption {
+  /**
+   * Choose a specific strategy to format names: pascal-case, camel-case, etc.
+   * Defaults to pascal-case.
+   */
+  namingStrategy?: NamingStrategies;
+}
+
 export interface StandardNamingOptions {
   /**
    * Prefix all names, e.g. "I" => "ITest"
@@ -127,7 +136,7 @@ export interface ServiceNamingOptions extends NamingStrategyOption, StandardNami
    * For each service one file is generated.
    * This option specifies the formatting of the file name.
    */
-  fileNames?: NamingStrategyOption & StandardNamingOptions;
+  fileNames?: FileNamingStrategyOption & StandardNamingOptions;
 
   /**
    * Name of the service responsible for entity collections.
