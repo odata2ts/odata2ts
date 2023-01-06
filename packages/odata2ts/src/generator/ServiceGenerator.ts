@@ -48,7 +48,7 @@ class ServiceGenerator {
 
   public async generate(): Promise<void> {
     const sourceFile = await this.project.createMainServiceFile();
-    const serviceName = this.namingHelper.getFileNames().service;
+    const serviceName = this.namingHelper.getMainServiceName();
     const container = this.dataModel.getEntityContainer();
     const unboundOperations = [...Object.values(container.functions), ...Object.values(container.actions)];
 
