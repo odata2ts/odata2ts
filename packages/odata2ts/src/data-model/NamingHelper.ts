@@ -210,6 +210,11 @@ export class NamingHelper {
     return opts?.collection?.applyServiceNaming ? this.getName(result, strategy, opts) : result;
   };
 
+  public getServiceResolverName = (name: string) => {
+    const opts = this.options.services?.serviceResolverFunction;
+    return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
+  };
+
   public getFunctionName(name: string) {
     const opts = this.options.services?.operations;
     return this.getName(name, this.getOperationNamingStrategy(), opts?.function || opts);

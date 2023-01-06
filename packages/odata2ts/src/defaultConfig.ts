@@ -58,6 +58,11 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
         suffix: "Collection",
         applyServiceNaming: true,
       },
+      serviceResolverFunction: {
+        namingStrategy: NamingStrategies.CAMEL_CASE,
+        prefix: "create",
+        suffix: "serviceResolver",
+      },
       operations: {
         namingStrategy: NamingStrategies.CAMEL_CASE,
       },

@@ -137,6 +137,14 @@ export interface ServiceNamingOptions extends NamingStrategyOption, StandardNami
   collection?: StandardNamingOptions & { applyServiceNaming?: boolean };
 
   /**
+   * Naming for factory function for EntityServiceResolvers.
+   *
+   * By default, prefix = create, suffix = ServiceResolver
+   * @example createTestEntityServiceResolver
+   */
+  serviceResolverFunction?: NamingStrategyOption & StandardNamingOptions;
+
+  /**
    * Naming for getter method. Another related service is returned.
    *
    * By default, prefix = "get" and suffix = "Srv" and namingStrategy = camelCase

@@ -1,4 +1,4 @@
-import { ConfigFileOptions, NamingOptions, NamingStrategies, RunOptions } from "../../src";
+import { ConfigFileOptions, NamingStrategies } from "../../src";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
 import { getTestConfig } from "../test.config";
 
@@ -43,6 +43,7 @@ describe("NamingHelper Tests", function () {
 
     expect(toTest.getServiceName("TEST")).toBe("TestService");
     expect(toTest.getCollectionServiceName("TEST")).toBe("TestCollectionService");
+    expect(toTest.getServiceResolverName("TEST")).toBe("createTestServiceResolver");
     expect(toTest.getFunctionName("TEST")).toBe("test");
     expect(toTest.getActionName("TEST")).toBe("test");
     expect(toTest.getRelatedServiceGetter("TEST")).toBe("navToTest");
@@ -255,6 +256,18 @@ describe("NamingHelper Tests", function () {
 
     expect(toTest.getServiceName("test")).toBe("PreTestSuf");
     expect(toTest.getCollectionServiceName("test")).toBe("ColTest");
+  });
+
+  test("Service: EntityServiceResolver factory function", () => {
+    options.naming!.services!.prefix = "PRE";
+    options.naming!.services!.suffix = "suf";
+    options.naming!.services!.serviceResolverFunction = {
+      prefix: "get",
+      namingStrategy: NamingStrategies.CONSTANT_CASE,
+    };
+    createHelper();
+
+    expect(toTest.getServiceResolverName("test")).toBe("GET_TEST");
   });
 
   test("Service: Operation base settings", () => {
