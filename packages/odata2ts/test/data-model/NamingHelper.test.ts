@@ -23,6 +23,7 @@ describe("NamingHelper Tests", function () {
     expect(toTest.getODataServiceName()).toBe(SERVICE_NAME);
     expect(toTest.getServicePrefix()).toBe(SERVICE_NAME + ".");
 
+    expect(toTest.getMainServiceName()).toBe("TrippinService");
     expect(toTest.getFileNames()).toStrictEqual({
       model: "TrippinModel",
       qObject: "QTrippin",
@@ -70,6 +71,7 @@ describe("NamingHelper Tests", function () {
       qObject: "QMyTrip",
       service: "MyTripService",
     });
+    expect(toTest.getMainServiceName()).toBe("MyTripService");
     expect(toTest.getFileNameService("test")).toBe("TestService");
   });
 
@@ -81,14 +83,23 @@ describe("NamingHelper Tests", function () {
     };
     options.naming!.models!.fileName = newNaming;
     options.naming!.queryObjects!.fileName = newNaming;
-    options.naming!.services!.fileNames = newNaming;
+    options.naming!.services!.namingStrategy = newNaming.namingStrategy;
+    options.naming!.services!.prefix = newNaming.prefix;
+    options.naming!.services!.suffix = newNaming.suffix;
+    options.naming!.services!.main = {
+      applyServiceNaming: false,
+      namingStrategy: NamingStrategies.SNAKE_CASE,
+      prefix: "main",
+      suffix: "service",
+    };
     createHelper();
 
     expect(toTest.getFileNames()).toStrictEqual({
       model: "PREF_TRIPPIN_SUF",
       qObject: "PREF_TRIPPIN_SUF",
-      service: "PREF_TRIPPIN_SUF",
+      service: "main_trippin_service",
     });
+    expect(toTest.getMainServiceName()).toBe("main_trippin_service");
     expect(toTest.getFileNameService("test")).toBe("PREF_TEST_SUF");
   });
 
@@ -126,11 +137,11 @@ describe("NamingHelper Tests", function () {
     options.naming!.models!.prefix = "PREF";
     options.naming!.models!.suffix = "suf";
     options.naming!.models!.namingStrategy = NamingStrategies.CONSTANT_CASE;
-    options.naming!.models!.propNamingStrategy = NamingStrategies.CONSTANT_CASE;
+    options.naming!.models!.propNamingStrategy = NamingStrategies.SNAKE_CASE;
     createHelper();
 
     expect(toTest.getModelName("hi")).toBe("PREF_HI_SUF");
-    expect(toTest.getModelPropName("TestTest")).toBe("TEST_TEST");
+    expect(toTest.getModelPropName("TestTest")).toBe("test_test");
     expect(toTest.getEnumName("myTest")).toBe("PREF_MY_TEST_SUF");
     expect(toTest.getEditableModelName("test")).toBe("PREF_EDITABLE_TEST_SUF");
     expect(toTest.getIdModelName("test")).toBe("PREF_TEST_ID_SUF");
@@ -184,11 +195,11 @@ describe("NamingHelper Tests", function () {
       prefix: "PREF",
       suffix: "suf",
       namingStrategy: NamingStrategies.CONSTANT_CASE,
-      propNamingStrategy: NamingStrategies.CONSTANT_CASE,
+      propNamingStrategy: NamingStrategies.SNAKE_CASE,
     };
     createHelper();
     expect(toTest.getQName("test")).toBe("PREF_TEST_SUF");
-    expect(toTest.getQPropName("myTEST")).toBe("MY_TEST");
+    expect(toTest.getQPropName("myTEST")).toBe("my_test");
     expect(toTest.getQIdFunctionName("test")).toBe("PREF_TEST_SUF");
     expect(toTest.getQFunctionName("TEST")).toBe("PREF_TEST_SUF");
     expect(toTest.getQActionName("TEST")).toBe("PREF_TEST_SUF");

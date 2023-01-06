@@ -6,6 +6,7 @@ export enum NamingStrategies {
   PASCAL_CASE = "pascalCase",
   CAMEL_CASE = "camelCase",
   CONSTANT_CASE = "constantCase",
+  SNAKE_CASE = "snakeCase",
 }
 
 export interface NamingOptions {
@@ -29,7 +30,7 @@ export interface ModelNamingOptions extends NamingStrategyOption, StandardNaming
    * All generated models are bundled into one file.
    * This option specifies the formatting of the file name.
    */
-  fileName?: NamingStrategyOption & StandardNamingOptions;
+  fileName?: FileNamingStrategyOption & StandardNamingOptions;
 
   /**
    * Choose a specific strategy to format property names of models: pascal-case, camel-case, etc.
@@ -72,7 +73,7 @@ export interface QueryObjectNamingOptions extends NamingStrategyOption, Standard
    * All generated models are bundled into one file.
    * This option specifies the formatting of the file name.
    */
-  fileName?: NamingStrategyOption & StandardNamingOptions;
+  fileName?: FileNamingStrategyOption & StandardNamingOptions;
 
   /**
    * Choose a specific strategy to format property names of query objects: pascal-case, camel-case, etc.
@@ -106,6 +107,14 @@ export interface NamingStrategyOption {
   namingStrategy?: NamingStrategies;
 }
 
+export interface FileNamingStrategyOption {
+  /**
+   * Choose a specific strategy to format names: pascal-case, camel-case, etc.
+   * Defaults to pascal-case.
+   */
+  namingStrategy?: NamingStrategies;
+}
+
 export interface StandardNamingOptions {
   /**
    * Prefix all names, e.g. "I" => "ITest"
@@ -119,15 +128,23 @@ export interface StandardNamingOptions {
 
 /**
  * Naming options for generated service classes.
+ * These options affect the main service as well as all services generated for each entity, complex and collection type.
  *
- * By default, suffix = Service and namingStrategy = pascalCase
+ * There exists one specialty about services: The file names are not configurable.
+ * File names are determined by the name of their corresponding classes, so that service file name
+ * and service class name always correspond.
+ *
+ * By default, suffix = Service and namingStrategy = PascalCase
  */
 export interface ServiceNamingOptions extends NamingStrategyOption, StandardNamingOptions {
   /**
-   * For each service one file is generated.
-   * This option specifies the formatting of the file name.
+   * Controls the naming options for the main odata service.
+   * By default, the base service naming options are applied.
+   * But since this is the main entry point for users, it can be configured individually here.
+   *
+   * By default, applyServiceNaming = true
    */
-  fileNames?: NamingStrategyOption & StandardNamingOptions;
+  main?: NamingStrategyOption & StandardNamingOptions & { applyServiceNaming?: boolean };
 
   /**
    * Name of the service responsible for entity collections.

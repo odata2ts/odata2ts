@@ -54,6 +54,9 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
     services: {
       suffix: "Service",
       namingStrategy: NamingStrategies.PASCAL_CASE,
+      main: {
+        applyServiceNaming: true,
+      },
       collection: {
         suffix: "Collection",
         applyServiceNaming: true,
@@ -69,10 +72,6 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
       relatedServiceGetter: {
         namingStrategy: NamingStrategies.CAMEL_CASE,
         prefix: "navTo",
-      },
-      fileNames: {
-        namingStrategy: NamingStrategies.PASCAL_CASE,
-        suffix: "Service",
       },
       privateProps: {
         namingStrategy: NamingStrategies.CAMEL_CASE,

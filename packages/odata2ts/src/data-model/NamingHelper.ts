@@ -1,8 +1,9 @@
 import { camelCase } from "camel-case";
 import { constantCase } from "constant-case";
 import { pascalCase } from "pascal-case";
+import { snakeCase } from "snake-case";
 
-import { NamingOptions, NamingStrategies, NamingStrategyOption, StandardNamingOptions } from "../NamingModel";
+import { FileNamingStrategyOption, NamingOptions, NamingStrategies, StandardNamingOptions } from "../NamingModel";
 import { ConfigFileOptions } from "../OptionModel";
 
 function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
@@ -13,6 +14,8 @@ function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
       return pascalCase;
     case NamingStrategies.CONSTANT_CASE:
       return constantCase;
+    case NamingStrategies.SNAKE_CASE:
+      return snakeCase;
     default:
       return undefined;
   }
@@ -64,20 +67,20 @@ export class NamingHelper {
     return this.serviceName;
   }
 
-  private getFileName(opts?: NamingStrategyOption & StandardNamingOptions) {
-    return this.getName(this.serviceName, this.namingFunction(opts?.namingStrategy), opts);
-  }
-
   public getFileNames() {
     return {
       model: this.getFileName(this.options.models?.fileName),
       qObject: this.getFileName(this.options.queryObjects?.fileName),
-      service: this.getFileName(this.options.services?.fileNames),
+      service: this.getMainServiceName(),
     };
   }
 
+  private getFileName(opts?: FileNamingStrategyOption & StandardNamingOptions) {
+    return this.getName(this.serviceName, this.namingFunction(opts?.namingStrategy), opts);
+  }
+
   public getFileNameService(name: string) {
-    const opts = this.options.services?.fileNames;
+    const opts = this.options.services;
     return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
   }
 
@@ -196,6 +199,16 @@ export class NamingHelper {
     const opts = this.options.queryObjects?.operations;
     const result = this.getName(name, this.getQObjectNamingStrategy(), opts?.action || opts);
     return this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
+  }
+
+  public getMainServiceName() {
+    const name = this.getODataServiceName();
+    const opts = this.options.services;
+    const strategy = this.namingFunction(
+      opts?.main?.namingStrategy ?? (opts?.main?.applyServiceNaming ? opts.namingStrategy : undefined)
+    );
+    const result = this.getName(name, strategy, opts?.main);
+    return opts?.main?.applyServiceNaming ? this.getName(result, strategy, opts) : result;
   }
 
   public getServiceName = (name: string) => {

@@ -176,6 +176,10 @@ describe("Service Generator Tests V4", () => {
       services: {
         suffix: "srv",
         namingStrategy: NamingStrategies.CONSTANT_CASE,
+        main: {
+          applyServiceNaming: false,
+          namingStrategy: NamingStrategies.SNAKE_CASE,
+        },
         privateProps: {
           namingStrategy: NamingStrategies.CONSTANT_CASE,
           prefix: "",
