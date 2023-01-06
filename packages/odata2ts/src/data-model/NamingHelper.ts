@@ -1,8 +1,9 @@
 import { camelCase } from "camel-case";
 import { constantCase } from "constant-case";
 import { pascalCase } from "pascal-case";
+import { snakeCase } from "snake-case";
 
-import { NamingOptions, NamingStrategies, NamingStrategyOption, StandardNamingOptions } from "../NamingModel";
+import { FileNamingStrategyOption, NamingOptions, NamingStrategies, StandardNamingOptions } from "../NamingModel";
 import { ConfigFileOptions } from "../OptionModel";
 
 function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
@@ -13,6 +14,8 @@ function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
       return pascalCase;
     case NamingStrategies.CONSTANT_CASE:
       return constantCase;
+    case NamingStrategies.SNAKE_CASE:
+      return snakeCase;
     default:
       return undefined;
   }
@@ -64,7 +67,7 @@ export class NamingHelper {
     return this.serviceName;
   }
 
-  private getFileName(opts?: NamingStrategyOption & StandardNamingOptions) {
+  private getFileName(opts?: FileNamingStrategyOption & StandardNamingOptions) {
     return this.getName(this.serviceName, this.namingFunction(opts?.namingStrategy), opts);
   }
 
