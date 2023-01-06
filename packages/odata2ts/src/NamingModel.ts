@@ -161,7 +161,11 @@ export interface ServiceNamingOptions extends NamingStrategyOption, StandardNami
   operations?: NamingStrategyOption & OperationNamingOptions;
 
   /**
-   * Private property naming for service classes.
+   * Naming options for private properties of service classes.
    */
-  privateProps?: NamingStrategyOption & StandardNamingOptions;
+  privateProps?: StandardNamingOptions & NamingStrategyOption;
+  /**
+   * Naming options for public properties of service classes.
+   */
+  publicProps?: NamingStrategyOption;
 }

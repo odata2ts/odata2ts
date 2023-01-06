@@ -230,6 +230,11 @@ export class NamingHelper {
     return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
   }
 
+  public getPublicPropNameForService(name: string) {
+    const opts = this.options.services?.publicProps;
+    return this.getName(name, this.namingFunction(opts?.namingStrategy));
+  }
+
   public getPrivatePropName = (name: string) => {
     const opts = this.options.services?.privateProps;
     return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
