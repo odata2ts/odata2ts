@@ -77,7 +77,7 @@ describe("Service Generator Tests V4", () => {
           .addProp("test", ODataTypesV4.String)
           .addProp("test2", ODataTypesV4.Guid)
       )
-      .addEntitySet("list", `${SERVICE_NAME}.TestEntity`);
+      .addEntitySet("Ents", `${SERVICE_NAME}.TestEntity`);
 
     // when generating
     await doGenerate();
@@ -174,12 +174,19 @@ describe("Service Generator Tests V4", () => {
         namingStrategy: NamingStrategies.CONSTANT_CASE,
       },
       services: {
-        namingStrategy: NamingStrategies.CONSTANT_CASE,
         suffix: "srv",
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
         privateProps: {
           namingStrategy: NamingStrategies.CONSTANT_CASE,
           prefix: "",
           suffix: "_",
+        },
+        publicProps: {
+          namingStrategy: NamingStrategies.CONSTANT_CASE,
+        },
+        serviceResolverFunction: {
+          namingStrategy: NamingStrategies.CONSTANT_CASE,
+          suffix: "RSLVR",
         },
         relatedServiceGetter: {
           namingStrategy: NamingStrategies.CONSTANT_CASE,

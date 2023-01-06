@@ -1,6 +1,11 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
 import { EnumCollection, QEnumCollection, qEnumCollection } from "@odata2ts/odata-query-objects";
-import { CollectionServiceV2, EntitySetServiceV2, EntityTypeServiceV2 } from "@odata2ts/odata-service";
+import {
+  CollectionServiceV2,
+  EntityServiceResolver,
+  EntitySetServiceV2,
+  EntityTypeServiceV2,
+} from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QBook, QBookId, qBook } from "../QTester";
@@ -39,4 +44,8 @@ export class BookCollectionService<ClientType extends ODataClient> extends Entit
   constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qBook, BookService, new QBookId(name));
   }
+}
+
+export function createBookServiceResolver(client: ODataClient, basePath: string, entityName: string) {
+  return new EntityServiceResolver(client, basePath, entityName, QBookId, BookService, BookCollectionService);
 }
