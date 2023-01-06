@@ -14,7 +14,7 @@ const config: ConfigFileOptions = {
       naming: {
         models: {
           namingStrategy: NamingStrategies.CONSTANT_CASE,
-          propNamingStrategy: NamingStrategies.CONSTANT_CASE, // TODO
+          propNamingStrategy: NamingStrategies.SNAKE_CASE,
           fileName: {
             prefix: "",
             suffix: "types",
@@ -25,7 +25,7 @@ const config: ConfigFileOptions = {
           prefix: "",
           suffix: "queryObject",
           namingStrategy: NamingStrategies.CONSTANT_CASE,
-          propNamingStrategy: NamingStrategies.CONSTANT_CASE, // TODO
+          propNamingStrategy: NamingStrategies.SNAKE_CASE,
           fileName: {
             prefix: "",
             suffix: "queryObjects",
@@ -33,35 +33,39 @@ const config: ConfigFileOptions = {
           },
         },
         services: {
-          suffix: "srv",
+          prefix: "service",
+          suffix: "",
           namingStrategy: NamingStrategies.CONSTANT_CASE,
+          main: {
+            applyServiceNaming: true,
+            namingStrategy: NamingStrategies.NONE,
+            prefix: "xxx_",
+            suffix: "_xxxs",
+          },
           privateProps: {
-            namingStrategy: NamingStrategies.CONSTANT_CASE,
+            namingStrategy: NamingStrategies.SNAKE_CASE,
             suffix: "_",
           },
           publicProps: {
             namingStrategy: NamingStrategies.CONSTANT_CASE,
           },
           serviceResolverFunction: {
-            namingStrategy: NamingStrategies.CONSTANT_CASE,
+            namingStrategy: NamingStrategies.SNAKE_CASE,
             suffix: "RSLVR",
           },
           relatedServiceGetter: {
-            namingStrategy: NamingStrategies.CONSTANT_CASE,
+            namingStrategy: NamingStrategies.SNAKE_CASE,
             prefix: "navigateTo",
             suffix: "",
           },
           operations: {
-            namingStrategy: NamingStrategies.CONSTANT_CASE,
+            namingStrategy: NamingStrategies.SNAKE_CASE,
             function: {
               suffix: "Func",
             },
             action: {
               suffix: "Act",
             },
-          },
-          fileNames: {
-            namingStrategy: NamingStrategies.,
           },
         },
       },
