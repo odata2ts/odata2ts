@@ -1,12 +1,12 @@
 import { ODataClient, ODataClientConfig } from "@odata2ts/odata-client-api";
 import { QEnumCollection } from "@odata2ts/odata-query-objects";
 
-import { CollectionServiceV2, EntitySetServiceV2, EntityTypeServiceV2 } from "../../../src";
+import { CollectionServiceV2, EntityServiceResolver, EntitySetServiceV2, EntityTypeServiceV2 } from "../../../src";
 import { EditablePersonModel, GetSomethingFunctionParams, PersonId, PersonModel } from "../PersonModel";
 import { QPersonIdFunction } from "../QPerson";
 import { QGetSomethingFunction, QPersonV2, qPersonV2 } from "./QPersonV2";
 
-export class PersonModelService<ClientType extends ODataClient> extends EntityTypeServiceV2<
+export class PersonModelV2Service<ClientType extends ODataClient> extends EntityTypeServiceV2<
   ClientType,
   PersonModel,
   EditablePersonModel,
@@ -19,11 +19,11 @@ export class PersonModelService<ClientType extends ODataClient> extends EntityTy
   }
 
   public get bestFriend() {
-    return new PersonModelService(this.client, this.basePath, "BestFriend");
+    return new PersonModelV2Service(this.client, this.basePath, "BestFriend");
   }
 
   public get friends() {
-    return new PersonModelCollectionService(this.client, this.basePath, "Friends");
+    return new PersonModelV2CollectionService(this.client, this.basePath, "Friends");
   }
 
   constructor(client: ODataClient, basePath: string, name: string) {
@@ -36,15 +36,26 @@ export class PersonModelService<ClientType extends ODataClient> extends EntityTy
   }
 }
 
-export class PersonModelCollectionService<ClientType extends ODataClient> extends EntitySetServiceV2<
+export class PersonModelV2CollectionService<ClientType extends ODataClient> extends EntitySetServiceV2<
   ClientType,
   PersonModel,
   EditablePersonModel,
   QPersonV2,
   PersonId,
-  PersonModelService<ClientType>
+  PersonModelV2Service<ClientType>
 > {
   constructor(client: ODataClient, basePath: string, name: string) {
-    super(client, basePath, name, qPersonV2, PersonModelService, new QPersonIdFunction(name));
+    super(client, basePath, name, qPersonV2, PersonModelV2Service, new QPersonIdFunction(name));
   }
+}
+
+export function createPersonModelV2ServiceResolver(client: ODataClient, basePath: string, name: string) {
+  return new EntityServiceResolver(
+    client,
+    basePath,
+    name,
+    QPersonIdFunction,
+    PersonModelV2Service,
+    PersonModelV2CollectionService
+  );
 }

@@ -52,11 +52,16 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
       },
     },
     services: {
-      namingStrategy: NamingStrategies.PASCAL_CASE,
       suffix: "Service",
+      namingStrategy: NamingStrategies.PASCAL_CASE,
       collection: {
         suffix: "Collection",
         applyServiceNaming: true,
+      },
+      serviceResolverFunction: {
+        namingStrategy: NamingStrategies.CAMEL_CASE,
+        prefix: "create",
+        suffix: "serviceResolver",
       },
       operations: {
         namingStrategy: NamingStrategies.CAMEL_CASE,
@@ -72,6 +77,9 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
       privateProps: {
         namingStrategy: NamingStrategies.CAMEL_CASE,
         prefix: "_",
+      },
+      publicProps: {
+        namingStrategy: NamingStrategies.PASCAL_CASE,
       },
     },
   },

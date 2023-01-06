@@ -70,22 +70,48 @@ class ServiceGenerator {
           type: "string",
           initializer: `"${this.namingHelper.getODataServiceName()}"`,
         },
-        ...this.generateServiceTypeProps(
-          container.entitySets,
-          this.namingHelper.getCollectionServiceName,
-          importContainer
-        ),
+        ...this.generateEntityServiceResolverProp(container.entitySets, importContainer),
+        ...this.generateServiceGettersByAssignment(container.entitySets),
         ...this.generateServiceTypeProps(container.singletons, this.namingHelper.getServiceName, importContainer),
         ...Object.values(unboundOperations).map(({ operation }) => this.generateQOperationProps(operation)),
       ],
       methods: [
-        ...this.generateServiceTypeGetters(container.entitySets, this.namingHelper.getCollectionServiceName),
         ...this.generateServiceTypeGetters(container.singletons, this.namingHelper.getServiceName),
         ...this.generateUnboundOperations(unboundOperations, importContainer),
       ],
     });
 
     sourceFile.addImportDeclarations(importContainer.getImportDeclarations(false));
+  }
+
+  private generateEntityServiceResolverProp(
+    services: Record<string, EntitySetType>,
+    importContainer: ImportContainer
+  ): OptionalKind<PropertyDeclarationStructure>[] {
+    return Object.values(services).map(({ name, entityType }) => {
+      const resolverName = this.namingHelper.getServiceResolverName(entityType.name);
+
+      importContainer.addGeneratedService(this.namingHelper.getServiceName(entityType.name), resolverName);
+
+      return {
+        name: this.namingHelper.getPublicPropNameForService(name),
+        scope: Scope.Public,
+        initializer: `${resolverName}(this.client, this.getPath(), "${name}")`,
+      };
+    });
+  }
+
+  private generateServiceGettersByAssignment(
+    services: Record<string, EntitySetType>
+  ): OptionalKind<PropertyDeclarationStructure>[] {
+    return Object.values(services).map(({ name, odataName, entityType }) => {
+      const propName = this.namingHelper.getPublicPropNameForService(name);
+      return {
+        scope: Scope.Public,
+        name: this.namingHelper.getRelatedServiceGetter(name),
+        initializer: `this.${propName}.get.bind(this.${propName})`,
+      };
+    });
   }
 
   private generateServiceTypeProps(
@@ -355,6 +381,42 @@ class ServiceGenerator {
     });
   }
 
+  private generateEntityServiceResolver(
+    model: ModelType,
+    serviceName: string,
+    serviceFile: SourceFile,
+    importContainer: ImportContainer
+  ) {
+    const idFunctionName = this.namingHelper.getQIdFunctionName(model.odataName);
+    const collectionName = this.namingHelper.getCollectionServiceName(model.name);
+
+    importContainer.addFromClientApi("ODataClient");
+    importContainer.addFromService("EntityServiceResolver");
+    importContainer.addGeneratedQObject(idFunctionName);
+
+    serviceFile.addFunction({
+      name: this.namingHelper.getServiceResolverName(model.name),
+      isExported: true,
+      parameters: [
+        {
+          name: "client",
+          type: "ODataClient",
+        },
+        {
+          name: "basePath",
+          type: "string",
+        },
+        {
+          name: "entityName",
+          type: "string",
+        },
+      ],
+      statements: [
+        `return new EntityServiceResolver(client, basePath, entityName, ${idFunctionName}, ${serviceName}, ${collectionName});`,
+      ],
+    });
+  }
+
   private async generateModelServices() {
     // build service file for each entity, consisting of EntityTypeService & EntityCollectionService
     for (const model of this.dataModel.getModels()) {
@@ -367,6 +429,9 @@ class ServiceGenerator {
 
       // entity collection service
       await this.generateEntityCollectionService(model, serviceName, serviceFile, importContainer);
+
+      // the resolver function
+      await this.generateEntityServiceResolver(model, serviceName, serviceFile, importContainer);
 
       serviceFile.addImportDeclarations(importContainer.getImportDeclarations(true));
     }

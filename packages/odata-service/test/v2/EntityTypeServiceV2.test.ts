@@ -4,7 +4,7 @@ import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { PersonModel } from "../fixture/PersonModel";
-import { PersonModelService } from "../fixture/v2/PersonModelService";
+import { PersonModelV2Service } from "../fixture/v2/PersonModelV2Service";
 import { QPersonV2 } from "../fixture/v2/QPersonV2";
 import { MockODataClient } from "../mock/MockODataClient";
 
@@ -16,12 +16,12 @@ describe("EntityTypeService V2 Test", () => {
 
   const REQUEST_CONFIG = { test: "Test" };
 
-  let testService: PersonModelService<MockODataClient>;
+  let testService: PersonModelV2Service<MockODataClient>;
 
-  commonEntityTypeServiceTests(odataClient, PersonModelService);
+  commonEntityTypeServiceTests(odataClient, PersonModelV2Service);
 
   beforeEach(() => {
-    testService = new PersonModelService(odataClient, BASE_URL, NAME);
+    testService = new PersonModelV2Service(odataClient, BASE_URL, NAME);
   });
 
   // TODO

@@ -4,7 +4,7 @@ import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 
 import { commonEntitySetTests } from "../EntitySetServiceTests";
 import { PersonModel } from "../fixture/PersonModel";
-import { PersonModelCollectionService, PersonModelService } from "../fixture/v2/PersonModelService";
+import { PersonModelV2CollectionService, PersonModelV2Service } from "../fixture/v2/PersonModelV2Service";
 import { QPersonV2, qPersonV2 } from "../fixture/v2/QPersonV2";
 import { MockODataClient } from "../mock/MockODataClient";
 
@@ -13,12 +13,12 @@ describe("V2 EntitySetService Test", () => {
   const BASE_URL = "";
   const NAME = "test";
 
-  let testService: PersonModelCollectionService<MockODataClient>;
+  let testService: PersonModelV2CollectionService<MockODataClient>;
 
-  commonEntitySetTests(odataClient, PersonModelCollectionService);
+  commonEntitySetTests(odataClient, PersonModelV2CollectionService);
 
   beforeEach(() => {
-    testService = new PersonModelCollectionService(odataClient, BASE_URL, NAME);
+    testService = new PersonModelV2CollectionService(odataClient, BASE_URL, NAME);
   });
 
   test("entitySet V2: QObject", async () => {
@@ -36,6 +36,6 @@ describe("V2 EntitySetService Test", () => {
 
   test("entitySet V2: ensure typing of EntityTypeService", async () => {
     // just a typing test: this only needs to compile
-    const result: PersonModelService<MockODataClient> = testService.get({ userName: "heinz" });
+    const result: PersonModelV2Service<MockODataClient> = testService.get({ userName: "heinz" });
   });
 });

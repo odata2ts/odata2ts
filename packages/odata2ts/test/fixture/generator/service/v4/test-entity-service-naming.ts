@@ -1,5 +1,5 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
-import { EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
+import { EntityServiceResolver, EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { Q_TEST_ENTITY, Q_TEST_ENTITY_ID, q_TEST_ENTITY } from "../QTester";
@@ -28,4 +28,15 @@ export class TEST_ENTITY_COLLECTION_SRV<ClientType extends ODataClient> extends 
   constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, q_TEST_ENTITY, TEST_ENTITY_SRV, new Q_TEST_ENTITY_ID(name));
   }
+}
+
+export function CREATE_TEST_ENTITY_RSLVR(client: ODataClient, basePath: string, entityName: string) {
+  return new EntityServiceResolver(
+    client,
+    basePath,
+    entityName,
+    Q_TEST_ENTITY_ID,
+    TEST_ENTITY_SRV,
+    TEST_ENTITY_COLLECTION_SRV
+  );
 }

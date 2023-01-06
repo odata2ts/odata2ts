@@ -1,4 +1,4 @@
-import { ConfigFileOptions, NamingOptions, NamingStrategies, RunOptions } from "../../src";
+import { ConfigFileOptions, NamingStrategies } from "../../src";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
 import { getTestConfig } from "../test.config";
 
@@ -43,10 +43,12 @@ describe("NamingHelper Tests", function () {
 
     expect(toTest.getServiceName("TEST")).toBe("TestService");
     expect(toTest.getCollectionServiceName("TEST")).toBe("TestCollectionService");
+    expect(toTest.getServiceResolverName("TEST")).toBe("createTestServiceResolver");
     expect(toTest.getFunctionName("TEST")).toBe("test");
     expect(toTest.getActionName("TEST")).toBe("test");
     expect(toTest.getRelatedServiceGetter("TEST")).toBe("navToTest");
     expect(toTest.getPrivatePropName("TEST")).toBe("_test");
+    expect(toTest.getPublicPropNameForService("TEST")).toBe("Test");
   });
 
   test("failure cases", () => {
@@ -257,6 +259,18 @@ describe("NamingHelper Tests", function () {
     expect(toTest.getCollectionServiceName("test")).toBe("ColTest");
   });
 
+  test("Service: EntityServiceResolver factory function", () => {
+    options.naming!.services!.prefix = "PRE";
+    options.naming!.services!.suffix = "suf";
+    options.naming!.services!.serviceResolverFunction = {
+      prefix: "get",
+      namingStrategy: NamingStrategies.CONSTANT_CASE,
+    };
+    createHelper();
+
+    expect(toTest.getServiceResolverName("test")).toBe("GET_TEST");
+  });
+
   test("Service: Operation base settings", () => {
     options.naming!.services!.operations = {
       prefix: "PREF",
@@ -300,7 +314,7 @@ describe("NamingHelper Tests", function () {
     expect(toTest.getRelatedServiceGetter("TEST")).toBe("PREF_TEST_SUF");
   });
 
-  test("Service: get private prop name", () => {
+  test("Service: get private prop name for service", () => {
     options.naming!.services!.privateProps = {
       namingStrategy: NamingStrategies.CONSTANT_CASE,
       prefix: "PREF",
@@ -309,5 +323,12 @@ describe("NamingHelper Tests", function () {
     createHelper();
 
     expect(toTest.getPrivatePropName("test")).toBe("PREF_TEST_SUF");
+  });
+
+  test("Service: get public prop name for service", () => {
+    options.naming!.services!.publicProps!.namingStrategy = NamingStrategies.CONSTANT_CASE;
+    createHelper();
+
+    expect(toTest.getPublicPropNameForService("test")).toBe("TEST");
   });
 });

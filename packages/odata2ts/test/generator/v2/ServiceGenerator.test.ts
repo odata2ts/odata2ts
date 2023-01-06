@@ -73,7 +73,7 @@ describe("Service Generator Tests V2", () => {
           .addProp("test", ODataTypesV2.String)
           .addProp("test2", ODataTypesV2.Guid)
       )
-      .addEntitySet("list", `${SERVICE_NAME}.TestEntity`);
+      .addEntitySet("Ents", `${SERVICE_NAME}.TestEntity`);
 
     // when generating
     await doGenerate();
