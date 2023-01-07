@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-odata-v2@0.1.0...@odata2ts/example-odata-v2@0.2.0) (2023-01-07)
+
+
+### Code Refactoring
+
+* odata2model => odata2ts ([#97](https://github.com/odata2ts/odata2ts/issues/97)) ([4085c7c](https://github.com/odata2ts/odata2ts/commit/4085c7ccf173c6712c5238f8b43e86842eecb19a))
+
+
+### Features
+
+* **odata2ts:** use navToX instead of getXSrv ([#99](https://github.com/odata2ts/odata2ts/issues/99)) ([4aafcb0](https://github.com/odata2ts/odata2ts/commit/4aafcb0cd307748feed4df075459e17e83876f3b))
+
+
+### BREAKING CHANGES
+
+* **odata2ts:** changed default: uses "navToX" instead of "getXSrv" to navigate to other services; old behaviour can be restored via naming configuration prefix: "get", suffix: "Srv"
+* rename odata2model to odata2ts; affects import in `odata2ts.config`, affects scripts in `package.json` or any scripts which use to call `odata2model` command directly
+
+
+
+
+
 # 0.1.0 (2023-01-05)
 
 

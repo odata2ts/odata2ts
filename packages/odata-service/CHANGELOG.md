@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.12.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.11.0...@odata2ts/odata-service@0.12.0) (2023-01-07)
+
+
+### Code Refactoring
+
+* rename odata-uri-builder to odata-query-builder ([#98](https://github.com/odata2ts/odata2ts/issues/98)) ([e0de825](https://github.com/odata2ts/odata2ts/commit/e0de825663fab15c37854ae08f75ab8df761cd3e))
+
+
+### Features
+
+* **odata-service:** introduce entity service resolver ([#100](https://github.com/odata2ts/odata2ts/issues/100)) ([66dd853](https://github.com/odata2ts/odata2ts/commit/66dd853bbc28a0758fae04abd5e8885689aeabc2))
+
+
+### BREAKING CHANGES
+
+* rename module odata-uri-builder to odata-query-builder; API completely refactored by renaming all models, classes, functions, props from "uri" to "query"
+
+
+
+
+
 # [0.11.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.10.1...@odata2ts/odata-service@0.11.0) (2023-01-05)
 
 

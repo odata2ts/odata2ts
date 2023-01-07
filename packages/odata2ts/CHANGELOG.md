@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.18.0 (2023-01-07)
+
+
+### Bug Fixes
+
+* **odata2ts:** configurable naming of main service ([c2bdeeb](https://github.com/odata2ts/odata2ts/commit/c2bdeeb9e35f8a4ed31e35c41e4f01ddef9bd9a6))
+
+
+### Code Refactoring
+
+* odata2model => odata2ts ([#97](https://github.com/odata2ts/odata2ts/issues/97)) ([4085c7c](https://github.com/odata2ts/odata2ts/commit/4085c7ccf173c6712c5238f8b43e86842eecb19a))
+* rename odata-uri-builder to odata-query-builder ([#98](https://github.com/odata2ts/odata2ts/issues/98)) ([e0de825](https://github.com/odata2ts/odata2ts/commit/e0de825663fab15c37854ae08f75ab8df761cd3e))
+
+
+### Features
+
+* **odata-service:** introduce entity service resolver ([#100](https://github.com/odata2ts/odata2ts/issues/100)) ([66dd853](https://github.com/odata2ts/odata2ts/commit/66dd853bbc28a0758fae04abd5e8885689aeabc2))
+* **odata2ts:** add snakeCase as new renaming strategy ([#101](https://github.com/odata2ts/odata2ts/issues/101)) ([09f9bfb](https://github.com/odata2ts/odata2ts/commit/09f9bfbde7f1e75c9a29ff774f7d771cfab7106b))
+* **odata2ts:** minimal naming options ([#104](https://github.com/odata2ts/odata2ts/issues/104)) ([67ddfa7](https://github.com/odata2ts/odata2ts/commit/67ddfa74f977e164892c2953dc8c5459a92c11d4))
+* **odata2ts:** use navToX instead of getXSrv ([#99](https://github.com/odata2ts/odata2ts/issues/99)) ([4aafcb0](https://github.com/odata2ts/odata2ts/commit/4aafcb0cd307748feed4df075459e17e83876f3b))
+
+
+### BREAKING CHANGES
+
+* **odata2ts:** option `service.fileNames` was removed in favour of `service.main`, so that the main service can be configured individually; the underlying bug was that file names SHOULD NOT be configurable for services
+* **odata2ts:** changed default: uses "navToX" instead of "getXSrv" to navigate to other services; old behaviour can be restored via naming configuration prefix: "get", suffix: "Srv"
+* rename module odata-uri-builder to odata-query-builder; API completely refactored by renaming all models, classes, functions, props from "uri" to "query"
+* rename odata2model to odata2ts; affects import in `odata2ts.config`, affects scripts in `package.json` or any scripts which use to call `odata2model` command directly
+
+
+
+
+
+
 # [0.17.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2model@0.16.1...@odata2ts/odata2model@0.17.0) (2023-01-05)
 
 
