@@ -1,6 +1,6 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 
-import { ConfigFileOptions, NamingStrategies, RunOptions } from "../../../src";
+import { ConfigFileOptions, NamingStrategies, RunOptions, ServiceGenerationOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import {
@@ -8,6 +8,7 @@ import {
   FixtureComparatorHelper,
   createHelper,
 } from "../comparator/FixtureComparatorHelper";
+import { TestOptions } from "../TestTypes";
 
 export const SERVICE_NAME = "Tester";
 export const ENTITY_NAME = "Book";
@@ -33,11 +34,7 @@ export function createEntityBasedGenerationTests(
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
   });
 
-  async function generateAndCompare(
-    id: string,
-    fixturePath: string,
-    genOptions?: Partial<Omit<RunOptions, "source" | "output">>
-  ) {
+  async function generateAndCompare(id: string, fixturePath: string, genOptions?: TestOptions) {
     await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), genOptions);
   }
 
@@ -285,6 +282,36 @@ export function createEntityBasedGenerationTests(
           },
         },
         queryObjects: { prefix: "", suffix: "QObj", namingStrategy: NamingStrategies.CONSTANT_CASE },
+      },
+    });
+  });
+
+  test(`${testSuiteName}: model naming min`, async () => {
+    // given an entity with enum props
+    odataBuilder
+      .addEntityType("parent", undefined, (builder) => {
+        return builder.addKeyProp("parentId", ODataTypesV4.Boolean);
+      })
+      .addEntityType(ENTITY_NAME, SERVICE_NAME + ".parent", (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Boolean)
+          .addProp("my_Choice", `${SERVICE_NAME}.Choice`, false)
+          .addProp("Address", `${SERVICE_NAME}.LOCATION`)
+      )
+      .addEnumType("Choice", [
+        { name: "A", value: 1 },
+        { name: "B", value: 2 },
+      ])
+      .addComplexType("LOCATION", undefined, (builder) => builder.addProp("TEST", ODataTypesV4.Boolean));
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("modelNamingMin", "model-naming-min.ts", {
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+      naming: {
+        minimalDefaults: true,
       },
     });
   });

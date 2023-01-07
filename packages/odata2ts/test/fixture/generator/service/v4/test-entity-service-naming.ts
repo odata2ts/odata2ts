@@ -30,7 +30,7 @@ export class TEST_ENTITY_COLLECTION_SRV<ClientType extends ODataClient> extends 
   }
 }
 
-export function CREATE_TEST_ENTITY_RSLVR(client: ODataClient, basePath: string, entityName: string) {
+export function TEST_ENTITY_RSLVR(client: ODataClient, basePath: string, entityName: string) {
   return new EntityServiceResolver(
     client,
     basePath,

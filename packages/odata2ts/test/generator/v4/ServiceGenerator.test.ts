@@ -4,7 +4,7 @@ import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
 import { SourceFile } from "ts-morph";
 
-import { EmitModes, NamingOptions, NamingStrategies, RunOptions } from "../../../src";
+import { ConfigFileOptions, EmitModes, NamingStrategies, OverridableNamingOptions, RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { ProjectManager, createProjectManager } from "../../../src/project/ProjectManager";
@@ -30,7 +30,7 @@ describe("Service Generator Tests V4", () => {
     runOptions = getTestConfig();
   });
 
-  async function doGenerate(options?: Partial<Omit<RunOptions, "source" | "output">>) {
+  async function doGenerate(options?: ConfigFileOptions) {
     runOptions = options ? deepmerge(runOptions, options) : runOptions;
     const namingHelper = new NamingHelper(runOptions, SERVICE_NAME);
     projectManager = await createProjectManager(namingHelper.getFileNames(), "build", EmitModes.ts, true);
@@ -166,7 +166,8 @@ describe("Service Generator Tests V4", () => {
           .addProp("test", ODataTypesV4.String)
       )
       .addEntitySet("list", `${SERVICE_NAME}.TestEntity`);
-    const naming: NamingOptions = {
+    const naming: OverridableNamingOptions = {
+      minimalDefaults: true,
       models: {
         namingStrategy: NamingStrategies.CONSTANT_CASE,
       },
@@ -174,6 +175,7 @@ describe("Service Generator Tests V4", () => {
         namingStrategy: NamingStrategies.CONSTANT_CASE,
       },
       services: {
+        prefix: "",
         suffix: "srv",
         namingStrategy: NamingStrategies.CONSTANT_CASE,
         main: {
@@ -190,6 +192,7 @@ describe("Service Generator Tests V4", () => {
         },
         serviceResolverFunction: {
           namingStrategy: NamingStrategies.CONSTANT_CASE,
+          prefix: "",
           suffix: "RSLVR",
         },
         relatedServiceGetter: {
@@ -200,9 +203,11 @@ describe("Service Generator Tests V4", () => {
         operations: {
           namingStrategy: NamingStrategies.CONSTANT_CASE,
           function: {
+            prefix: "",
             suffix: "Function",
           },
           action: {
+            prefix: "",
             suffix: "Action",
           },
         },

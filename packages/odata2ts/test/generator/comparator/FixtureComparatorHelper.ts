@@ -9,23 +9,34 @@ import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { DigesterFunction } from "../../../src/FactoryFunctionModel";
 import { generateServices } from "../../../src/generator";
 import { ProjectManager } from "../../../src/project/ProjectManager";
-import { getTestConfig } from "../../test.config";
+import { getTestConfig, getTestConfigMinimal } from "../../test.config";
+import { TestOptions, TestSettings } from "../TestTypes";
 import { FixtureComparator, createFixtureComparator } from "./FixtureComparator";
 
 export type EntityBasedGeneratorFunctionWithoutVersion = (
   dataModel: DataModel,
   sourceFile: SourceFile,
-  options: RunOptions,
+  options: TestSettings,
   namingHelper: NamingHelper
 ) => void;
 
 const project: Project = new Project({ skipAddingFilesFromTsConfig: true });
 
-const DEFAULT_RUN_OPTIONS = deepmerge(getTestConfig(), {
+const DEFAULT_COMPARE_OPTS: TestOptions = {
   skipIdModels: true,
   skipEditableModels: true,
   skipOperations: false,
-}) as RunOptions;
+};
+
+const DEFAULT_RUN_OPTIONS = {
+  ...getTestConfig(),
+  ...DEFAULT_COMPARE_OPTS,
+} as TestSettings;
+
+const DEFAULT_MIN_OPTIONS = {
+  ...getTestConfigMinimal(),
+  ...DEFAULT_COMPARE_OPTS,
+} as TestSettings;
 
 export const createHelper = async (
   fixtureBasePath: string,
@@ -43,14 +54,10 @@ export class FixtureComparatorHelper {
     private generate: EntityBasedGeneratorFunctionWithoutVersion
   ) {}
 
-  public async generateAndCompare(
-    id: string,
-    fixturePath: string,
-    schema: Schema<any, any>,
-    options?: Partial<Omit<RunOptions, "source" | "output">>
-  ) {
+  public async generateAndCompare(id: string, fixturePath: string, schema: Schema<any, any>, options?: TestOptions) {
     const sourceFile = project.createSourceFile(id);
-    const mergedOpts = options ? (deepmerge(DEFAULT_RUN_OPTIONS, options) as RunOptions) : DEFAULT_RUN_OPTIONS;
+    const defaultOpts: TestSettings = options?.naming?.minimalDefaults ? DEFAULT_MIN_OPTIONS : DEFAULT_RUN_OPTIONS;
+    const mergedOpts: TestSettings = options ? (deepmerge(defaultOpts, options) as RunOptions) : defaultOpts;
     const namingHelper = new NamingHelper(mergedOpts, schema.$.Namespace, mergedOpts.serviceName);
     const dataModel = await this.digest(schema, mergedOpts, namingHelper);
 
@@ -77,13 +84,8 @@ export class ServiceFixtureComparatorHelper {
     private version: ODataVersions
   ) {}
 
-  public async generateService(
-    schema: Schema<any, any>,
-    project: ProjectManager,
-    namingHelper: NamingHelper,
-    runOptions: RunOptions = DEFAULT_RUN_OPTIONS
-  ) {
-    const dataModel = await this.digest(schema, runOptions, namingHelper);
+  public async generateService(schema: Schema<any, any>, project: ProjectManager, namingHelper: NamingHelper) {
+    const dataModel = await this.digest(schema, DEFAULT_RUN_OPTIONS, namingHelper);
 
     await generateServices(dataModel, project, this.version, namingHelper);
   }

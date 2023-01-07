@@ -1,7 +1,10 @@
-import { NamingStrategies, RunOptions } from "../../src";
+import deepmerge from "deepmerge";
+
+import { NamingStrategies } from "../../src";
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
 import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel";
+import { TestOptions, TestSettings } from "../generator/TestTypes";
 import { getTestConfig } from "../test.config";
 import { ODataModelBuilder } from "./builder/ODataModelBuilder";
 
@@ -13,21 +16,23 @@ export function createDataModelTests(
   digest: DigesterFunction<any>
 ) {
   const SERVICE_NAME = "Tester";
+  const TEST_CONFIG = getTestConfig();
 
   let odataBuilder: ODataModelBuilder<any, any, any, any>;
-  let digestionOptions: DigestionOptions & Pick<RunOptions, "naming" | "allowRenaming">;
+  let digestionOptions: Partial<DigestionOptions> & Pick<TestOptions, "naming" | "allowRenaming">;
 
-  function getNamingHelper() {
-    return new NamingHelper(digestionOptions, SERVICE_NAME);
+  async function doDigest() {
+    const opts = digestionOptions ? (deepmerge(TEST_CONFIG, digestionOptions) as TestSettings) : TEST_CONFIG;
+    return await digest(odataBuilder.getSchema(), opts, new NamingHelper(opts, SERVICE_NAME));
   }
 
   beforeEach(() => {
     odataBuilder = new ODataBuilderConstructor(SERVICE_NAME);
-    digestionOptions = getTestConfig();
+    digestionOptions = {};
   });
 
   test("Smoke Test", async () => {
-    const result = await digest(odataBuilder.getSchema(), digestionOptions, getNamingHelper());
+    const result = await doDigest();
 
     expect(result).toBeTruthy();
     expect(result.getODataVersion()).toBe(version);
@@ -47,7 +52,7 @@ export function createDataModelTests(
       })
       .addEnumType("fav_FEAT", [{ name: "HEY", value: 0 }]);
 
-    const result = await digest(odataBuilder.getSchema(), digestionOptions, getNamingHelper());
+    const result = await doDigest();
 
     expect(result.getModels()[0].name).toBe("MyType");
     expect(result.getModels()[0].props[0].name).toBe("id");
@@ -64,7 +69,7 @@ export function createDataModelTests(
       })
       .addEntityType("Parent", "GrandParent", () => {});
 
-    const result = await digest(odataBuilder.getSchema(), digestionOptions, getNamingHelper());
+    const result = await doDigest();
 
     expect(result.getModels().length).toBe(2);
     expect(result.getModels()[1].name).toBe("Parent");
@@ -82,7 +87,7 @@ export function createDataModelTests(
         builder.addKeyProp("ID2", "Edm.String");
       });
 
-    const result = await digest(odataBuilder.getSchema(), digestionOptions, getNamingHelper());
+    const result = await doDigest();
 
     expect(result.getModels().length).toBe(2);
     expect(result.getModels()[1].name).toBe("Parent");
@@ -102,7 +107,7 @@ export function createDataModelTests(
     digestionOptions.converters = ["test"];
 
     // TODO: mock loadConverters method from converter-runtime
-    const result = await digest(odataBuilder.getSchema(), digestionOptions, getNamingHelper());
+    const result = await doDigest();
 
     expect(result.getModels().length).toBe(2);
     expect(result.getModels()[1].name).toBe("Parent");
@@ -121,10 +126,12 @@ export function createDataModelTests(
         propNamingStrategy: NamingStrategies.CONSTANT_CASE,
         suffix: "Model",
         idModels: {
+          prefix: "",
           suffix: "Key",
           applyModelNaming: true,
         },
         editableModels: {
+          prefix: "",
           suffix: "EditDummy",
           applyModelNaming: false,
         },
@@ -133,6 +140,11 @@ export function createDataModelTests(
         namingStrategy: NamingStrategies.CONSTANT_CASE,
         propNamingStrategy: NamingStrategies.CONSTANT_CASE,
         prefix: "YYY",
+        suffix: "",
+        idFunctions: {
+          prefix: "",
+          suffix: "keyFunc",
+        },
       },
       services: {
         namingStrategy: NamingStrategies.CONSTANT_CASE,
@@ -144,6 +156,7 @@ export function createDataModelTests(
         },
         relatedServiceGetter: {
           prefix: "get",
+          suffix: "",
         },
       },
     };
@@ -156,7 +169,7 @@ export function createDataModelTests(
         builder.addProp("ageOfEmpire", "Edm.Int32");
       });
 
-    const result = await digest(odataBuilder.getSchema(), digestionOptions, getNamingHelper());
+    const result = await doDigest();
 
     expect(result.getModels().length).toBe(1);
 
@@ -164,7 +177,7 @@ export function createDataModelTests(
     expect(toTest.name).toBe("TEST_MODEL");
     expect(toTest.keyNames).toStrictEqual(["ID"]);
     expect(toTest.idModelName).toBe("TEST_KEY_MODEL");
-    expect(toTest.qIdFunctionName).toBe("YYY_TEST");
+    expect(toTest.qIdFunctionName).toBe("YYY_TEST_KEY_FUNC");
     expect(toTest.editableName).toBe("TEST_EDIT_DUMMY");
   });
 }

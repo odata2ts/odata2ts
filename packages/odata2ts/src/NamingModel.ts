@@ -1,6 +1,8 @@
 /**
  * The available naming strategies.
  */
+import { PartialDeep } from "type-fest";
+
 export enum NamingStrategies {
   NONE = "",
   PASCAL_CASE = "pascalCase",
@@ -9,20 +11,40 @@ export enum NamingStrategies {
   SNAKE_CASE = "snakeCase",
 }
 
-export interface NamingOptions {
+/**
+ * Based on an existing configuration (for example default settings) the user only specifies what needs
+ * to be changed. Hence, all options are completely optional.
+ */
+export interface OverridableNamingOptions extends PartialDeep<NameSettings> {}
+
+/**
+ * The required and optional name settings for the generator.
+ */
+export interface NameSettings {
+  /**
+   * Because multiple artefacts are generated out of the same entity, some name settings are required in order
+   * to differentiate those artefacts. Out-of-the-box odata2ts provides you with sensible default settings,
+   * so that you only need to override those settings you want to change.
+   *
+   * However, sometimes it makes more sense to start from scratch, so that the defaults don't interfere with
+   * your own configuration. In this scenario this switch should be enabled to only have default values for
+   * the required name settings.
+   */
+  minimalDefaults?: boolean;
+
   /**
    * Generation options for models, i.e. interfaces representing entity or complex types.
    */
-  models?: ModelNamingOptions;
+  models: ModelNamingOptions;
 
   /**
    * Generation options for Query Objects.
    *
    * By default, prefix = "Q"
    */
-  queryObjects?: QueryObjectNamingOptions;
+  queryObjects: QueryObjectNamingOptions;
 
-  services?: ServiceNamingOptions;
+  services: ServiceNamingOptions;
 }
 
 export interface ModelNamingOptions extends NamingStrategyOption, StandardNamingOptions {
@@ -30,7 +52,7 @@ export interface ModelNamingOptions extends NamingStrategyOption, StandardNaming
    * All generated models are bundled into one file.
    * This option specifies the formatting of the file name.
    */
-  fileName?: FileNamingStrategyOption & StandardNamingOptions;
+  fileName: FileNamingStrategyOption & RequiredNamingOptions;
 
   /**
    * Choose a specific strategy to format property names of models: pascal-case, camel-case, etc.
@@ -45,7 +67,7 @@ export interface ModelNamingOptions extends NamingStrategyOption, StandardNaming
    * You can override the naming options here.
    * By default, prefix = "Editable"
    */
-  editableModels?: EntityDerivedNamingOptions;
+  editableModels: EntityDerivedNamingOptions;
 
   /**
    * ID models are generated from entity id parameters.
@@ -53,7 +75,7 @@ export interface ModelNamingOptions extends NamingStrategyOption, StandardNaming
    * You can configure the naming options here.
    * By default, suffix = "Id"
    */
-  idModels?: EntityDerivedNamingOptions;
+  idModels: EntityDerivedNamingOptions;
 
   /**
    * Operation parameter models are generated from function or action signatures.
@@ -61,19 +83,19 @@ export interface ModelNamingOptions extends NamingStrategyOption, StandardNaming
    * You can configure the naming options here.
    * By default, suffix = "Params"
    */
-  operationParamModels?: EntityDerivedNamingOptions;
+  operationParamModels: EntityDerivedNamingOptions;
 }
 
-export interface EntityDerivedNamingOptions extends StandardNamingOptions {
+export interface EntityDerivedNamingOptions extends RequiredNamingOptions {
   applyModelNaming?: boolean;
 }
 
-export interface QueryObjectNamingOptions extends NamingStrategyOption, StandardNamingOptions {
+export interface QueryObjectNamingOptions extends NamingStrategyOption, RequiredNamingOptions {
   /**
    * All generated models are bundled into one file.
    * This option specifies the formatting of the file name.
    */
-  fileName?: FileNamingStrategyOption & StandardNamingOptions;
+  fileName: FileNamingStrategyOption & RequiredNamingOptions;
 
   /**
    * Choose a specific strategy to format property names of query objects: pascal-case, camel-case, etc.
@@ -81,7 +103,7 @@ export interface QueryObjectNamingOptions extends NamingStrategyOption, Standard
    */
   propNamingStrategy?: NamingStrategies;
 
-  idFunctions?: StandardNamingOptions;
+  idFunctions: RequiredNamingOptions;
 
   operations?: OperationNamingOptions;
 }
@@ -126,6 +148,8 @@ export interface StandardNamingOptions {
   suffix?: string;
 }
 
+export interface RequiredNamingOptions extends Required<StandardNamingOptions> {}
+
 /**
  * Naming options for generated service classes.
  * These options affect the main service as well as all services generated for each entity, complex and collection type.
@@ -136,7 +160,7 @@ export interface StandardNamingOptions {
  *
  * By default, suffix = Service and namingStrategy = PascalCase
  */
-export interface ServiceNamingOptions extends NamingStrategyOption, StandardNamingOptions {
+export interface ServiceNamingOptions extends NamingStrategyOption, RequiredNamingOptions {
   /**
    * Controls the naming options for the main odata service.
    * By default, the base service naming options are applied.
@@ -151,7 +175,7 @@ export interface ServiceNamingOptions extends NamingStrategyOption, StandardNami
    *
    * By default, suffix = Collection and applyServiceNaming = true
    */
-  collection?: StandardNamingOptions & { applyServiceNaming?: boolean };
+  collection: RequiredNamingOptions & { applyServiceNaming?: boolean };
 
   /**
    * Naming for factory function for EntityServiceResolvers.
@@ -159,14 +183,14 @@ export interface ServiceNamingOptions extends NamingStrategyOption, StandardNami
    * By default, prefix = create, suffix = ServiceResolver
    * @example createTestEntityServiceResolver
    */
-  serviceResolverFunction?: NamingStrategyOption & StandardNamingOptions;
+  serviceResolverFunction: NamingStrategyOption & RequiredNamingOptions;
 
   /**
    * Naming for getter method. Another related service is returned.
    *
-   * By default, prefix = "get" and suffix = "Srv" and namingStrategy = camelCase
+   * By default, prefix = "navTo" and namingStrategy = camelCase
    */
-  relatedServiceGetter?: NamingStrategyOption & StandardNamingOptions;
+  relatedServiceGetter: NamingStrategyOption & RequiredNamingOptions;
 
   /**
    * Operations are functions and actions of the OData service and are represented as methods
@@ -180,7 +204,8 @@ export interface ServiceNamingOptions extends NamingStrategyOption, StandardNami
   /**
    * Naming options for private properties of service classes.
    */
-  privateProps?: StandardNamingOptions & NamingStrategyOption;
+  privateProps: NamingStrategyOption & RequiredNamingOptions;
+
   /**
    * Naming options for public properties of service classes.
    */

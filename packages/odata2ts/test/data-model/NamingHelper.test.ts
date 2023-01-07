@@ -1,23 +1,29 @@
-import { ConfigFileOptions, NamingStrategies } from "../../src";
+import deepmerge from "deepmerge";
+
+import { NamingStrategies, RunOptions, getDefaultConfig } from "../../src";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
-import { getTestConfig } from "../test.config";
+import { TestOptions } from "../generator/TestTypes";
+import { getTestConfigMinimal } from "../test.config";
 
 describe("NamingHelper Tests", function () {
   const SERVICE_NAME = "TRIPPIN";
-  const OVERRIDING_SERVICE_NAME = "MyTrip";
+  const OVERRIDING_SERVICE_NAME = "my_Trip";
+  const TEST_CONFIG = getTestConfigMinimal();
 
-  let options: Pick<ConfigFileOptions, "serviceName" | "allowRenaming" | "naming">;
+  let options: Pick<TestOptions, "serviceName" | "allowRenaming" | "naming">;
   let toTest: NamingHelper;
 
   function createHelper(overrideServiceName: boolean = false) {
-    toTest = new NamingHelper(options, SERVICE_NAME, overrideServiceName ? OVERRIDING_SERVICE_NAME : undefined);
+    const config = deepmerge(TEST_CONFIG, options) as Pick<RunOptions, "allowRenaming" | "naming">;
+    toTest = new NamingHelper(config, SERVICE_NAME, overrideServiceName ? OVERRIDING_SERVICE_NAME : undefined);
   }
 
   beforeEach(() => {
-    options = getTestConfig();
+    options = {};
   });
 
   test("with defaultConfig", () => {
+    options.naming = getDefaultConfig().naming;
     createHelper();
 
     expect(toTest.getODataServiceName()).toBe(SERVICE_NAME);
@@ -57,7 +63,7 @@ describe("NamingHelper Tests", function () {
     expect(() => new NamingHelper(null, null)).toThrow();
     // @ts-expect-error
     expect(() => new NamingHelper(null, SERVICE_NAME)).toThrow();
-    expect(() => new NamingHelper(options, " ")).toThrow();
+    expect(() => new NamingHelper(TEST_CONFIG, " ")).toThrow();
   });
 
   test("override service name", () => {
@@ -67,12 +73,12 @@ describe("NamingHelper Tests", function () {
     expect(toTest.getServicePrefix()).toBe(SERVICE_NAME + ".");
 
     expect(toTest.getFileNames()).toStrictEqual({
-      model: "MyTripModel",
-      qObject: "QMyTrip",
-      service: "MyTripService",
+      model: `${OVERRIDING_SERVICE_NAME}Model`,
+      qObject: `Q${OVERRIDING_SERVICE_NAME}`,
+      service: `${OVERRIDING_SERVICE_NAME}Service`,
     });
-    expect(toTest.getMainServiceName()).toBe("MyTripService");
-    expect(toTest.getFileNameService("test")).toBe("TestService");
+    expect(toTest.getMainServiceName()).toBe(`${OVERRIDING_SERVICE_NAME}Service`);
+    expect(toTest.getFileNameService("test")).toBe("testService");
   });
 
   test("fileName settings", () => {
@@ -81,25 +87,36 @@ describe("NamingHelper Tests", function () {
       prefix: "PREF",
       suffix: "suf",
     };
-    options.naming!.models!.fileName = newNaming;
-    options.naming!.queryObjects!.fileName = newNaming;
-    options.naming!.services!.namingStrategy = newNaming.namingStrategy;
-    options.naming!.services!.prefix = newNaming.prefix;
-    options.naming!.services!.suffix = newNaming.suffix;
-    options.naming!.services!.main = {
-      applyServiceNaming: false,
-      namingStrategy: NamingStrategies.SNAKE_CASE,
-      prefix: "main",
-      suffix: "service",
+
+    options.naming = {
+      models: {
+        fileName: newNaming,
+      },
+      queryObjects: {
+        fileName: newNaming,
+      },
+      services: {
+        prefix: newNaming.prefix,
+        suffix: newNaming.suffix,
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+        main: {
+          applyServiceNaming: false,
+          namingStrategy: NamingStrategies.SNAKE_CASE,
+          prefix: "main",
+          suffix: "service",
+        },
+      },
     };
+
     createHelper();
 
-    expect(toTest.getFileNames()).toStrictEqual({
+    const fileNames = toTest.getFileNames();
+    expect(fileNames).toStrictEqual({
       model: "PREF_TRIPPIN_SUF",
       qObject: "PREF_TRIPPIN_SUF",
       service: "main_trippin_service",
     });
-    expect(toTest.getMainServiceName()).toBe("main_trippin_service");
+    expect(toTest.getMainServiceName()).toBe(fileNames.service);
     expect(toTest.getFileNameService("test")).toBe("PREF_TEST_SUF");
   });
 
@@ -134,10 +151,24 @@ describe("NamingHelper Tests", function () {
   });
 
   test("ModelName settings", () => {
-    options.naming!.models!.prefix = "PREF";
-    options.naming!.models!.suffix = "suf";
-    options.naming!.models!.namingStrategy = NamingStrategies.CONSTANT_CASE;
-    options.naming!.models!.propNamingStrategy = NamingStrategies.SNAKE_CASE;
+    options.naming = {
+      models: {
+        prefix: "PREF",
+        suffix: "suf",
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+        propNamingStrategy: NamingStrategies.SNAKE_CASE,
+        editableModels: {
+          applyModelNaming: true,
+        },
+        idModels: {
+          applyModelNaming: true,
+        },
+        operationParamModels: {
+          applyModelNaming: true,
+        },
+      },
+    };
+
     createHelper();
 
     expect(toTest.getModelName("hi")).toBe("PREF_HI_SUF");
@@ -149,13 +180,16 @@ describe("NamingHelper Tests", function () {
   });
 
   test("EditableModel settings", () => {
-    options.naming!.models = {
-      prefix: "PREF",
-      suffix: "suf",
-      namingStrategy: NamingStrategies.CONSTANT_CASE,
-      editableModels: {
-        suffix: "EditSuffix",
-        applyModelNaming: false,
+    options.naming = {
+      models: {
+        prefix: "PREF",
+        suffix: "suf",
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+        editableModels: {
+          prefix: "",
+          suffix: "EditSuffix",
+          applyModelNaming: false,
+        },
       },
     };
     createHelper();
@@ -164,13 +198,16 @@ describe("NamingHelper Tests", function () {
   });
 
   test("IdModel settings", () => {
-    options.naming!.models = {
-      prefix: "PREF",
-      suffix: "suf",
-      namingStrategy: NamingStrategies.CONSTANT_CASE,
-      idModels: {
-        prefix: "id",
-        applyModelNaming: false,
+    options.naming = {
+      models: {
+        prefix: "PREF",
+        suffix: "suf",
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+        idModels: {
+          prefix: "id",
+          suffix: "",
+          applyModelNaming: false,
+        },
       },
     };
     createHelper();
@@ -179,11 +216,17 @@ describe("NamingHelper Tests", function () {
   });
 
   test("ParamsModel settings", () => {
-    options.naming!.models!.suffix = "MODEL";
-    options.naming!.models!.namingStrategy = NamingStrategies.CONSTANT_CASE;
-    options.naming!.models!.operationParamModels = {
-      prefix: "PREF",
-      applyModelNaming: false,
+    options.naming = {
+      models: {
+        prefix: "",
+        suffix: "MODEL",
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+        operationParamModels: {
+          prefix: "PREF",
+          suffix: "",
+          applyModelNaming: false,
+        },
+      },
     };
     createHelper();
 
@@ -191,66 +234,92 @@ describe("NamingHelper Tests", function () {
   });
 
   test("QueryObject settings", () => {
-    options.naming!.queryObjects = {
-      prefix: "PREF",
-      suffix: "suf",
-      namingStrategy: NamingStrategies.CONSTANT_CASE,
-      propNamingStrategy: NamingStrategies.SNAKE_CASE,
+    options.naming = {
+      queryObjects: {
+        prefix: "PREF",
+        suffix: "suf",
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+        propNamingStrategy: NamingStrategies.SNAKE_CASE,
+      },
     };
     createHelper();
     expect(toTest.getQName("test")).toBe("PREF_TEST_SUF");
     expect(toTest.getQPropName("myTEST")).toBe("my_test");
-    expect(toTest.getQIdFunctionName("test")).toBe("PREF_TEST_SUF");
+    expect(toTest.getQIdFunctionName("test")).toBe("PREF_TEST_ID_SUF");
     expect(toTest.getQFunctionName("TEST")).toBe("PREF_TEST_SUF");
     expect(toTest.getQActionName("TEST")).toBe("PREF_TEST_SUF");
   });
 
   test("QIdFunctions settings", () => {
-    options.naming!.queryObjects!.idFunctions = {
-      prefix: "PREF",
-      suffix: "suf",
+    options.naming = {
+      queryObjects: {
+        idFunctions: {
+          prefix: "PREF",
+          suffix: "suf",
+        },
+      },
     };
     createHelper();
 
     // naming strategy is taken over from QueryObjects
-    expect(toTest.getQIdFunctionName("TEST")).toBe("QPrefTestSuf");
+    expect(toTest.getQIdFunctionName("tESt")).toBe("QPREFtEStsuf");
+
+    options.naming!.queryObjects!.namingStrategy = NamingStrategies.SNAKE_CASE;
+    createHelper();
+    expect(toTest.getQIdFunctionName("test")).toBe("q_pref_test_suf");
   });
 
   test("QOperation base settings", () => {
-    options.naming!.queryObjects!.operations = {
-      prefix: "PREF",
-      suffix: "suf",
+    options.naming = {
+      queryObjects: {
+        operations: {
+          prefix: "PREF",
+          suffix: "suf",
+        },
+      },
     };
     createHelper();
 
     // naming strategy is taken over from QueryObjects
-    expect(toTest.getQFunctionName("TEST")).toBe("QPrefTestSuf");
-    expect(toTest.getQActionName("TEST")).toBe("QPrefTestSuf");
+    expect(toTest.getQFunctionName("tESt")).toBe("QPREFtEStsuf");
+    expect(toTest.getQActionName("tESt")).toBe("QPREFtEStsuf");
+
+    options.naming!.queryObjects!.namingStrategy = NamingStrategies.SNAKE_CASE;
+    createHelper();
+    expect(toTest.getQFunctionName("test")).toBe("q_pref_test_suf");
   });
 
   test("QFunction & QAction settings", () => {
-    options.naming!.queryObjects!.operations = {
-      // gets ignored
-      prefix: "PREF",
-      // ignored
-      suffix: "suf",
-      action: {
-        suffix: "Action",
-      },
-      function: {
-        suffix: "Function",
+    options.naming = {
+      queryObjects: {
+        operations: {
+          // gets ignored
+          prefix: "PREF",
+          // ignored
+          suffix: "suf",
+          action: {
+            suffix: "Action",
+          },
+          function: {
+            suffix: "Function",
+          },
+        },
       },
     };
     createHelper();
 
-    expect(toTest.getQFunctionName("TEST")).toBe("QTestFunction");
-    expect(toTest.getQActionName("TEST")).toBe("QTestAction");
+    expect(toTest.getQFunctionName("TEST")).toBe("QTESTFunction");
+    expect(toTest.getQActionName("TEST")).toBe("QTESTAction");
   });
 
   test("Service: Base Settings", () => {
-    options.naming!.services!.prefix = "PRE";
-    options.naming!.services!.suffix = "suf";
-    options.naming!.services!.namingStrategy = NamingStrategies.CONSTANT_CASE;
+    options.naming = {
+      services: {
+        prefix: "PRE",
+        suffix: "suf",
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+      },
+    };
     createHelper();
 
     expect(toTest.getServiceName("test")).toBe("PRE_TEST_SUF");
@@ -258,24 +327,34 @@ describe("NamingHelper Tests", function () {
   });
 
   test("Service: Collection Settings", () => {
-    options.naming!.services!.prefix = "PRE";
-    options.naming!.services!.suffix = "suf";
-    options.naming!.services!.collection = {
-      prefix: "Col",
-      applyServiceNaming: false,
+    options.naming = {
+      services: {
+        prefix: "PRE",
+        suffix: "suf",
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+        collection: {
+          prefix: "Col",
+          suffix: "",
+          applyServiceNaming: false,
+        },
+      },
     };
     createHelper();
 
-    expect(toTest.getServiceName("test")).toBe("PreTestSuf");
-    expect(toTest.getCollectionServiceName("test")).toBe("ColTest");
+    expect(toTest.getCollectionServiceName("test")).toBe("COL_TEST");
   });
 
   test("Service: EntityServiceResolver factory function", () => {
-    options.naming!.services!.prefix = "PRE";
-    options.naming!.services!.suffix = "suf";
-    options.naming!.services!.serviceResolverFunction = {
-      prefix: "get",
-      namingStrategy: NamingStrategies.CONSTANT_CASE,
+    options.naming = {
+      services: {
+        prefix: "PRE",
+        suffix: "suf",
+        serviceResolverFunction: {
+          prefix: "get",
+          suffix: "",
+          namingStrategy: NamingStrategies.CONSTANT_CASE,
+        },
+      },
     };
     createHelper();
 
@@ -283,11 +362,16 @@ describe("NamingHelper Tests", function () {
   });
 
   test("Service: Operation base settings", () => {
-    options.naming!.services!.operations = {
-      prefix: "PREF",
-      suffix: "suf",
-      namingStrategy: NamingStrategies.CONSTANT_CASE,
+    options.naming = {
+      services: {
+        operations: {
+          prefix: "PREF",
+          suffix: "suf",
+          namingStrategy: NamingStrategies.CONSTANT_CASE,
+        },
+      },
     };
+
     createHelper();
 
     expect(toTest.getFunctionName("test")).toBe("PREF_TEST_SUF");
@@ -295,17 +379,21 @@ describe("NamingHelper Tests", function () {
   });
 
   test("Service: Function & Action settings", () => {
-    options.naming!.services!.operations = {
-      namingStrategy: NamingStrategies.PASCAL_CASE,
-      // gets ignored
-      prefix: "PREF",
-      // ignored
-      suffix: "suf",
-      action: {
-        suffix: "Action",
-      },
-      function: {
-        suffix: "Function",
+    options.naming = {
+      services: {
+        operations: {
+          namingStrategy: NamingStrategies.PASCAL_CASE,
+          // gets ignored
+          prefix: "PREF",
+          // ignored
+          suffix: "suf",
+          action: {
+            suffix: "Action",
+          },
+          function: {
+            suffix: "Function",
+          },
+        },
       },
     };
     createHelper();
@@ -315,10 +403,14 @@ describe("NamingHelper Tests", function () {
   });
 
   test("Service: Related service getter settings", () => {
-    options.naming!.services!.relatedServiceGetter = {
-      namingStrategy: NamingStrategies.CONSTANT_CASE,
-      prefix: "PREF",
-      suffix: "suf",
+    options.naming = {
+      services: {
+        relatedServiceGetter: {
+          namingStrategy: NamingStrategies.CONSTANT_CASE,
+          prefix: "PREF",
+          suffix: "suf",
+        },
+      },
     };
     createHelper();
 
@@ -326,18 +418,28 @@ describe("NamingHelper Tests", function () {
   });
 
   test("Service: get private prop name for service", () => {
-    options.naming!.services!.privateProps = {
-      namingStrategy: NamingStrategies.CONSTANT_CASE,
-      prefix: "PREF",
-      suffix: "suf",
+    options.naming = {
+      services: {
+        privateProps: {
+          prefix: "PRE",
+          suffix: "suf",
+          namingStrategy: NamingStrategies.CONSTANT_CASE,
+        },
+      },
     };
     createHelper();
 
-    expect(toTest.getPrivatePropName("test")).toBe("PREF_TEST_SUF");
+    expect(toTest.getPrivatePropName("test")).toBe("PRE_TEST_SUF");
   });
 
   test("Service: get public prop name for service", () => {
-    options.naming!.services!.publicProps!.namingStrategy = NamingStrategies.CONSTANT_CASE;
+    options.naming = {
+      services: {
+        publicProps: {
+          namingStrategy: NamingStrategies.CONSTANT_CASE,
+        },
+      },
+    };
     createHelper();
 
     expect(toTest.getPublicPropNameForService("test")).toBe("TEST");

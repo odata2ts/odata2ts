@@ -1,5 +1,14 @@
 import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "@odata2ts/odata2ts";
 
+const sharedPropConfig = [
+  {
+    name: "Gender",
+    mappedName: "TraditionalGenderCategories",
+    managed: true,
+  },
+  ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
+];
+
 const config: ConfigFileOptions = {
   debug: true,
   mode: Modes.service,
@@ -8,9 +17,18 @@ const config: ConfigFileOptions = {
   disableAutoManagedKey: true,
   allowRenaming: true,
   services: {
+    trippinMin: {
+      source: "resource/trippin.xml",
+      output: "generated-src/trippin-min",
+      propertiesByName: sharedPropConfig,
+      naming: {
+        minimalDefaults: true,
+      },
+    },
     trippin: {
       source: "resource/trippin.xml",
       output: "generated-src/TRIPPIN",
+      propertiesByName: sharedPropConfig,
       naming: {
         models: {
           namingStrategy: NamingStrategies.CONSTANT_CASE,
@@ -69,14 +87,6 @@ const config: ConfigFileOptions = {
           },
         },
       },
-      propertiesByName: [
-        {
-          name: "Gender",
-          mappedName: "TraditionalGenderCategories",
-          managed: true,
-        },
-        ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
-      ],
     },
   },
 };

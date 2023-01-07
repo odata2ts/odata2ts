@@ -1,6 +1,5 @@
 import { ODataTypesV2 } from "@odata2ts/odata-core";
 
-import { RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
 import {
@@ -8,6 +7,7 @@ import {
   FixtureComparatorHelper,
   createHelper,
 } from "../comparator/FixtureComparatorHelper";
+import { TestOptions } from "../TestTypes";
 
 export const SERVICE_NAME = "Tester";
 export const ENTITY_NAME = "Book";
@@ -20,7 +20,7 @@ export function createEntityBasedGenerationTests(
   let odataBuilder: ODataModelBuilderV2;
   let fixtureComparatorHelper: FixtureComparatorHelper;
 
-  async function generateAndCompare(id: string, fixturePath: string, options?: Partial<RunOptions>) {
+  async function generateAndCompare(id: string, fixturePath: string, options?: TestOptions) {
     await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), options);
   }
 
