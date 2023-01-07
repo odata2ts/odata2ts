@@ -1,6 +1,6 @@
 import deepmerge from "deepmerge";
 
-import { getDefaultConfig } from "./defaultConfig";
+import { getDefaultConfig, getMinimalConfig } from "./defaultConfig";
 import { CliOptions, ConfigFileOptions, Modes, RunOptions } from "./OptionModel";
 
 /**
@@ -30,7 +30,7 @@ export function evaluateConfigOptions(
   cliOpts: CliOptions,
   configOpts: ConfigFileOptions | undefined
 ): Array<RunOptions> {
-  const defaultConfig = getDefaultConfig();
+  const defaultConfig = configOpts?.naming?.minimalDefaults ? getMinimalConfig() : getDefaultConfig();
   // No config file
   if (!configOpts) {
     if (!cliOpts.source || !cliOpts.output) {

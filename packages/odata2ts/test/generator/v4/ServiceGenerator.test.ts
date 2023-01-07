@@ -167,6 +167,7 @@ describe("Service Generator Tests V4", () => {
       )
       .addEntitySet("list", `${SERVICE_NAME}.TestEntity`);
     const naming: OverridableNamingOptions = {
+      minimalDefaults: true,
       models: {
         namingStrategy: NamingStrategies.CONSTANT_CASE,
       },
@@ -174,6 +175,7 @@ describe("Service Generator Tests V4", () => {
         namingStrategy: NamingStrategies.CONSTANT_CASE,
       },
       services: {
+        prefix: "",
         suffix: "srv",
         namingStrategy: NamingStrategies.CONSTANT_CASE,
         main: {
@@ -190,6 +192,7 @@ describe("Service Generator Tests V4", () => {
         },
         serviceResolverFunction: {
           namingStrategy: NamingStrategies.CONSTANT_CASE,
+          prefix: "",
           suffix: "RSLVR",
         },
         relatedServiceGetter: {
@@ -200,9 +203,11 @@ describe("Service Generator Tests V4", () => {
         operations: {
           namingStrategy: NamingStrategies.CONSTANT_CASE,
           function: {
+            prefix: "",
             suffix: "Function",
           },
           action: {
+            prefix: "",
             suffix: "Action",
           },
         },

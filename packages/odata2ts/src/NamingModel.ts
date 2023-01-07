@@ -30,7 +30,7 @@ export interface NameSettings {
    * your own configuration. In this scenario this switch should be enabled to only have default values for
    * the required name settings.
    */
-  // minimalDefaults?: boolean;
+  minimalDefaults?: boolean;
 
   /**
    * Generation options for models, i.e. interfaces representing entity or complex types.

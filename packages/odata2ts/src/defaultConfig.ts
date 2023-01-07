@@ -166,7 +166,7 @@ export function getDefaultConfig(): Omit<RunOptions, "source" | "output"> {
 }
 
 /**
- * Creates a defensive copy of the minimal config.
+ * Creates a defensive copy of the minimal config: minimal in respect to naming.
  */
 export function getMinimalConfig(): Omit<RunOptions, "source" | "output"> {
   const { naming, ...passThrough } = defaultConfig;

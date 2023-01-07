@@ -1,8 +1,17 @@
-import { CliOptions, ConfigFileOptions, EmitModes, Modes, getDefaultConfig } from "../src";
+import {
+  CliOptions,
+  ConfigFileOptions,
+  EmitModes,
+  Modes,
+  NamingStrategies,
+  getDefaultConfig,
+  getMinimalConfig,
+} from "../src";
 import { evaluateConfigOptions } from "../src/evaluateConfig";
 
 describe("Config Evaluation Tests", () => {
   const defaultConfig = getDefaultConfig();
+  const minConfig = getMinimalConfig();
 
   test("minimal CLI opts", () => {
     const minOpts = { source: "source", output: "output" };
@@ -57,6 +66,27 @@ describe("Config Evaluation Tests", () => {
       prettier,
       ...opts,
     });
+  });
+
+  test("with min naming", () => {
+    const minOpts: CliOptions = { source: "source", output: "output" };
+    const resultMin = evaluateConfigOptions(minOpts, { naming: { minimalDefaults: true } });
+    const resultDefault = evaluateConfigOptions(minOpts, { naming: { minimalDefaults: false } });
+
+    const idModels = {
+      applyModelNaming: true,
+      prefix: "",
+      suffix: "Id",
+    };
+
+    expect(resultMin.length).toBe(1);
+    expect(resultMin[0].naming.models.idModels).toStrictEqual(idModels);
+    expect(resultMin[0].naming.models.namingStrategy).toBeUndefined();
+    expect(resultMin[0].naming.models.propNamingStrategy).toBeUndefined();
+
+    expect(resultDefault[0].naming.models.idModels).toStrictEqual(idModels);
+    expect(resultDefault[0].naming.models.namingStrategy).toStrictEqual(NamingStrategies.PASCAL_CASE);
+    expect(resultDefault[0].naming.models.propNamingStrategy).toStrictEqual(NamingStrategies.CAMEL_CASE);
   });
 
   test("fail with config but without source or output", () => {
