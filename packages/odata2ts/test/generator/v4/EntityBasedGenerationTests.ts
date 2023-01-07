@@ -1,6 +1,6 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 
-import { ConfigFileOptions, NamingStrategies, RunOptions } from "../../../src";
+import { ConfigFileOptions, NamingStrategies, RunOptions, ServiceGenerationOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import {
@@ -33,11 +33,7 @@ export function createEntityBasedGenerationTests(
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
   });
 
-  async function generateAndCompare(
-    id: string,
-    fixturePath: string,
-    genOptions?: Partial<Omit<RunOptions, "source" | "output">>
-  ) {
+  async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<ServiceGenerationOptions>) {
     await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), genOptions);
   }
 

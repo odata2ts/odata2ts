@@ -1,6 +1,6 @@
 import { TypeConverterConfig } from "@odata2ts/converter-runtime";
 
-import { NamingOptions } from "./NamingModel";
+import { NameSettings, OverridableNamingOptions } from "./NamingModel";
 
 /**
  * Generation mode, by default "all".
@@ -109,6 +109,7 @@ export interface CliOptions {
  */
 export interface RunOptions extends Required<Omit<ServiceGenerationOptions, "serviceName">> {
   serviceName?: string;
+  naming: NameSettings;
 }
 
 /**
@@ -158,7 +159,7 @@ export interface ConfigFileOptions extends Omit<CliOptions, "source" | "output" 
   /**
    * The naming options regarding the generated artefacts.
    */
-  naming?: NamingOptions;
+  naming?: OverridableNamingOptions;
 }
 
 /**

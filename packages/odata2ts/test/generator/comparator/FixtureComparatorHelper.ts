@@ -10,6 +10,7 @@ import { DigesterFunction } from "../../../src/FactoryFunctionModel";
 import { generateServices } from "../../../src/generator";
 import { ProjectManager } from "../../../src/project/ProjectManager";
 import { getTestConfig } from "../../test.config";
+import { TestOptions } from "../TestTypes";
 import { FixtureComparator, createFixtureComparator } from "./FixtureComparator";
 
 export type EntityBasedGeneratorFunctionWithoutVersion = (
@@ -43,12 +44,7 @@ export class FixtureComparatorHelper {
     private generate: EntityBasedGeneratorFunctionWithoutVersion
   ) {}
 
-  public async generateAndCompare(
-    id: string,
-    fixturePath: string,
-    schema: Schema<any, any>,
-    options?: Partial<Omit<RunOptions, "source" | "output">>
-  ) {
+  public async generateAndCompare(id: string, fixturePath: string, schema: Schema<any, any>, options?: TestOptions) {
     const sourceFile = project.createSourceFile(id);
     const mergedOpts = options ? (deepmerge(DEFAULT_RUN_OPTIONS, options) as RunOptions) : DEFAULT_RUN_OPTIONS;
     const namingHelper = new NamingHelper(mergedOpts, schema.$.Namespace, mergedOpts.serviceName);
@@ -77,13 +73,8 @@ export class ServiceFixtureComparatorHelper {
     private version: ODataVersions
   ) {}
 
-  public async generateService(
-    schema: Schema<any, any>,
-    project: ProjectManager,
-    namingHelper: NamingHelper,
-    runOptions: RunOptions = DEFAULT_RUN_OPTIONS
-  ) {
-    const dataModel = await this.digest(schema, runOptions, namingHelper);
+  public async generateService(schema: Schema<any, any>, project: ProjectManager, namingHelper: NamingHelper) {
+    const dataModel = await this.digest(schema, DEFAULT_RUN_OPTIONS, namingHelper);
 
     await generateServices(dataModel, project, this.version, namingHelper);
   }
