@@ -4,6 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "description": "Enums and interfaces for OData V2 and V4 data types and response models",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
@@ -20,6 +21,19 @@
     "*.md",
     "lib",
     "LICENSE"
+  ],
+  "keywords": [
+    "odatats",
+    "odata",
+    "odata types",
+    "odata versions",
+    "odata v2",
+    "odata v4",
+    "typescript",
+    "ts",
+    "types",
+    "enum",
+    "response model"
   ],
   "devDependencies": {
     "@types/jest": "^27.4.1",

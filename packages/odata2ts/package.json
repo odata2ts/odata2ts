@@ -4,7 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "Generates TypeScript interfaces & Query Objects from a given OData service",
+  "description": "Flexible generator to produce various TypeScript artefacts (from simple model interfaces to complete odata clients) from OData metadata files",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
@@ -29,6 +29,20 @@
     "bin",
     "lib",
     "LICENSE"
+  ],
+  "keywords": [
+    "odata2ts",
+    "odata",
+    "odata v2",
+    "odata v4",
+    "odata client",
+    "cli",
+    "generator",
+    "odata client generator",
+    "typescript",
+    "ts",
+    "javascript",
+    "js"
   ],
   "peerDependencies": {
     "@odata2ts/odata-client-api": "^0.6.0",

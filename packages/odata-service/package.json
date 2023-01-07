@@ -4,6 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "description": "Main runtime dependency of odata2ts for generated odata client services",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
@@ -20,6 +21,19 @@
     "*.md",
     "lib",
     "LICENSE"
+  ],
+  "keywords": [
+    "odata2ts",
+    "odata",
+    "odata v2",
+    "odata v4",
+    "odata service",
+    "odata client",
+    "typescript",
+    "ts",
+    "javascript",
+    "js",
+    "typesafe"
   ],
   "dependencies": {
     "@odata2ts/odata-client-api": "^0.6.0",

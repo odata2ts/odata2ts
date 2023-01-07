@@ -4,6 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "description": "Query Objects are the magic sauce for the odata-query-builder",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
@@ -20,6 +21,21 @@
     "*.md",
     "lib",
     "LICENSE"
+  ],
+  "keywords": [
+    "odata2ts",
+    "odata",
+    "odata v2",
+    "odata v4",
+    "query",
+    "query builder",
+    "query object",
+    "typescript",
+    "ts",
+    "javascript",
+    "js",
+    "typesafe",
+    "odata client"
   ],
   "dependencies": {
     "@odata2ts/converter-api": "^0.1.0",

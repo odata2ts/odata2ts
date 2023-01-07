@@ -4,6 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "description": "Axios based odata client consumable by odata2ts",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
@@ -20,6 +21,19 @@
     "*.md",
     "lib",
     "LICENSE"
+  ],
+  "keywords": [
+    "odata2ts",
+    "axios",
+    "axios odata",
+    "odata client",
+    "odata",
+    "odata v2",
+    "odata v4",
+    "typescript",
+    "ts",
+    "javascript",
+    "js"
   ],
   "dependencies": {
     "@odata2ts/odata-client-api": "^0.6.0",
