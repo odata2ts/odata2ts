@@ -3,10 +3,8 @@
 
 # ODATA 2 TS
 
-Monorepo for a set of tools for generating useful stuff out of a given OData service:
+Monorepo for a set of tools for generating useful stuff out of given OData services:
 From TypeScript model interfaces to complete TypeScript based OData client services.
-
-OData V2 and V4 are supported.
 
 The generated code artefacts can be used in Browser or Node.js environments.
 
@@ -92,4 +90,7 @@ Runtime dependencies:
 You can fine-tune the naming of the generated services via config option `naming.services`.
 All model and query object settings also apply.
 
+## Examples
+
+See `examples` packages for examples of how to integrate `odata2ts`. 
 
