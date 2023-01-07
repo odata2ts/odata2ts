@@ -1,11 +1,17 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@odata2ts/odata-core?style=for-the-badge)](https://www.npmjs.com/package/@odata2ts/odata-core)
 
 # OData Core
+Bundles central and constant information about OData as protocol, like the versions or data types.
+As such this package has no dependencies and can be used for any purpose.
 
 Contains enumerations of 
 * the main OData versions, i.e. V2 and V4
 * all V2 data types
 * all V4 data types
+
+Contains interfaces for
+* V2 Response Models
+* V4 Response Models
 
 ## Installation
 Via npm:

@@ -4,6 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "description": "Specifies the contract between odata clients and odata2ts",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
@@ -20,6 +21,16 @@
     "*.md",
     "lib",
     "LICENSE"
+  ],
+  "keywords": [
+    "odata2ts",
+    "odata",
+    "odata client",
+    "api",
+    "typescript",
+    "ts",
+    "javascript",
+    "js"
   ],
   "devDependencies": {
     "@types/jest": "^27.4.1",
