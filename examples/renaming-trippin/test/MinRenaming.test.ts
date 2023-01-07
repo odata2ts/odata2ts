@@ -1,38 +1,41 @@
-import { servicexxx_Trippin_xxxs } from "../generated-src/TRIPPIN/servicexxx_Trippin_xxxs";
-import { lOCATION_QUERY_OBJECT, pERSON_QUERY_OBJECT } from "../generated-src/TRIPPIN/TRIPPIN_QUERY_OBJECTS";
-import { EDITABLE_LOCATION, EDITABLE_PERSON, FEATURE, PERSON_ID } from "../generated-src/TRIPPIN/TRIPPIN_TYPES";
+import { qLocation, qPerson } from "../generated-src/trippin-min/QTrippin";
+import { EditableLocation, EditablePerson, Feature, PersonId } from "../generated-src/trippin-min/TrippinModel";
+import { TrippinService } from "../generated-src/trippin-min/TrippinService";
 import { MockODataClient } from "./MockODataClient";
 
-describe("Testing Generated TrippinService - generated with renaming options", () => {
+// import { qLocation, qPerson } from "../generated-src/trippin-min/QTrippin";
+// import { EditableLocation, EditablePerson, Feature, PersonId } from "../generated-src/trippin-min/TrippinModel";
+
+describe("Testing Generation with min renaming options", () => {
   const BASE_URL = "/test";
   const odataClient = new MockODataClient();
 
-  // noinspection JSPotentiallyInvalidConstructorUsage
-  const testService = new servicexxx_Trippin_xxxs(odataClient, BASE_URL);
+  // noinspection JSPotentiallyInvalidConstructorUsAge
+  const testService = new TrippinService(odataClient, BASE_URL);
 
-  let editModel: EDITABLE_PERSON;
+  let editModel: EditablePerson;
 
   beforeEach(() => {
     editModel = {
-      user_name: "williams",
-      favorite_feature: FEATURE.Feature1,
-      features: [],
-      first_name: "Heinz",
+      UserName: "williams",
+      FavoriteFeature: Feature.Feature1,
+      Features: [],
+      FirstName: "Heinz",
     };
   });
 
   test("unbound function", async () => {
-    await testService.get_person_with_most_friends_func();
+    await testService.GetPersonWithMostFriends();
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/GetPersonWithMostFriends()`);
   });
 
   test("unbound function with params", async () => {
-    await testService.get_nearest_airport_func({ lat: 123, lon: 345 });
+    await testService.GetNearestAirport({ lat: 123, lon: 345 });
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/GetNearestAirport(lat=123,lon=345)`);
   });
 
   test("unbound action", async () => {
-    await testService.reset_data_source_act();
+    await testService.ResetDataSource();
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/ResetDataSource`);
     expect(odataClient.lastData).toEqual({});
   });
@@ -40,16 +43,16 @@ describe("Testing Generated TrippinService - generated with renaming options", (
   test("entitySet", async () => {
     const expected = `${BASE_URL}/People`;
 
-    expect(testService.navigate_to_people().getPath()).toBe(expected);
-    expect(JSON.stringify(testService.navigate_to_people().getQObject())).toEqual(JSON.stringify(pERSON_QUERY_OBJECT));
-    expect(testService.navigate_to_people().getKeySpec().length).toBe(1);
-    expect(testService.navigate_to_people().getKeySpec()[0].getName()).toEqual("UserName");
+    expect(testService.navToPeople().getPath()).toBe(expected);
+    expect(JSON.stringify(testService.navToPeople().getQObject())).toEqual(JSON.stringify(qPerson));
+    expect(testService.navToPeople().getKeySpec().length).toBe(1);
+    expect(testService.navToPeople().getKeySpec()[0].getName()).toEqual("UserName");
   });
 
   test("entitySet: create", async () => {
     const expectedUrl = `${BASE_URL}/People`;
 
-    await testService.navigate_to_people().create(editModel);
+    await testService.navToPeople().create(editModel);
 
     expect(odataClient.lastOperation).toBe("POST");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -65,37 +68,37 @@ describe("Testing Generated TrippinService - generated with renaming options", (
     const testId = "test";
     const expected = `${BASE_URL}/People('${testId}')`;
 
-    const etService = testService.navigate_to_people().get(testId);
+    const etService = testService.navToPeople().get(testId);
 
     expect(etService.getPath()).toBe(expected);
-    expect(JSON.stringify(etService.getQObject())).toEqual(JSON.stringify(pERSON_QUERY_OBJECT));
+    expect(JSON.stringify(etService.getQObject())).toEqual(JSON.stringify(qPerson));
   });
 
   test("entitySet: get with complex id", async () => {
-    const testId: PERSON_ID = { user_name: "williams" };
+    const testId: PersonId = { UserName: "williams" };
     const expected = `${BASE_URL}/People(UserName='williams')`;
 
-    expect(testService.navigate_to_people().get(testId).getPath()).toBe(expected);
+    expect(testService.navToPeople().get(testId).getPath()).toBe(expected);
   });
 
   test("entityType: update", async () => {
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
-    const model: EDITABLE_PERSON = {
-      user_name: "williams",
-      favorite_feature: FEATURE.Feature1,
-      features: [],
-      first_name: "Heinz",
-      age: 33,
+    const model: EditablePerson = {
+      UserName: "williams",
+      FavoriteFeature: Feature.Feature1,
+      Features: [],
+      FirstName: "Heinz",
+      Age: 33,
     };
 
-    await testService.navigate_to_people().get(id).update(model);
+    await testService.navToPeople().get(id).update(model);
 
     expect(odataClient.lastOperation).toBe("PUT");
     expect(odataClient.lastUrl).toBe(expectedUrl);
     expect(odataClient.lastData).toStrictEqual({
       UserName: "williams",
-      FavoriteFeature: FEATURE.Feature1,
+      FavoriteFeature: Feature.Feature1,
       Features: [],
       FirstName: "Heinz",
       Age: 33,
@@ -106,10 +109,10 @@ describe("Testing Generated TrippinService - generated with renaming options", (
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
     const model = {
-      age: 44,
+      Age: 44,
     };
 
-    await testService.navigate_to_people().get(id).patch(model);
+    await testService.navToPeople().get(id).patch(model);
 
     expect(odataClient.lastOperation).toBe("PATCH");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -120,7 +123,7 @@ describe("Testing Generated TrippinService - generated with renaming options", (
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
 
-    await testService.navigate_to_people().get(id).delete();
+    await testService.navToPeople().get(id).delete();
 
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -128,14 +131,14 @@ describe("Testing Generated TrippinService - generated with renaming options", (
   });
 
   test("complex type", async () => {
-    const complex = testService.navigate_to_people().get("tester").navigate_to_home_address();
+    const complex = testService.navToPeople().get("tester").navToHomeAddress();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
-    expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(lOCATION_QUERY_OBJECT));
+    expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
   });
 
   test("complex type: query", async () => {
-    await testService.navigate_to_people().get("tester").navigate_to_home_address().query();
+    await testService.navToPeople().get("tester").navToHomeAddress().query();
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
     expect(odataClient.lastOperation).toBe("GET");
@@ -143,11 +146,11 @@ describe("Testing Generated TrippinService - generated with renaming options", (
   });
 
   test("complex type: update", async () => {
-    const complex = testService.navigate_to_people().get("tester").navigate_to_home_address();
+    const complex = testService.navToPeople().get("tester").navToHomeAddress();
 
-    const model: EDITABLE_LOCATION = {
-      address: "Test Address",
-      city: { name: "Test City" },
+    const model: EditableLocation = {
+      Address: "Test Address",
+      City: { Name: "Test City" },
     };
     await complex.update(model);
 
@@ -160,14 +163,14 @@ describe("Testing Generated TrippinService - generated with renaming options", (
   });
 
   test("complex collection", async () => {
-    const complex = testService.navigate_to_people().get("tester").navigate_to_address_info();
+    const complex = testService.navToPeople().get("tester").navToAddressInfo();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
-    expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(lOCATION_QUERY_OBJECT));
+    expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
   });
 
   test("complex collection: query", async () => {
-    await testService.navigate_to_people().get("tester").navigate_to_address_info().query();
+    await testService.navToPeople().get("tester").navToAddressInfo().query();
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("GET");
@@ -175,8 +178,8 @@ describe("Testing Generated TrippinService - generated with renaming options", (
   });
 
   test("complex collection: create", async () => {
-    const model: EDITABLE_LOCATION = { address: "TestAdress" };
-    await testService.navigate_to_people().get("tester").navigate_to_address_info().add(model);
+    const model: EditableLocation = { Address: "TestAdress" };
+    await testService.navToPeople().get("tester").navToAddressInfo().add(model);
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("POST");
@@ -184,8 +187,8 @@ describe("Testing Generated TrippinService - generated with renaming options", (
   });
 
   test("complex collection: update", async () => {
-    const models = [{ address: "TestAddress 1" }, { address: "test 2" }];
-    await testService.navigate_to_people().get("tester").navigate_to_address_info().update(models);
+    const models = [{ Address: "TestAddress 1" }, { Address: "test 2" }];
+    await testService.navToPeople().get("tester").navToAddressInfo().update(models);
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("PUT");
@@ -193,7 +196,7 @@ describe("Testing Generated TrippinService - generated with renaming options", (
   });
 
   test("complex collection: delete", async () => {
-    await testService.navigate_to_people().get("tester").navigate_to_address_info().delete();
+    await testService.navToPeople().get("tester").navToAddressInfo().delete();
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("DELETE");
@@ -202,21 +205,21 @@ describe("Testing Generated TrippinService - generated with renaming options", (
 
   test("navigation", async () => {
     const result = testService
-      .navigate_to_people()
+      .navToPeople()
       .get("tester")
-      .navigate_to_best_friend()
-      .navigate_to_best_friend()
-      .navigate_to_best_friend()
-      .navigate_to_home_address()
-      .navigate_to_city();
+      .navToBestFriend()
+      .navToBestFriend()
+      .navToBestFriend()
+      .navToHomeAddress()
+      .navToCity();
 
     expect(result.getPath()).toBe(`${BASE_URL}/People('tester')/BestFriend/BestFriend/BestFriend/HomeAddress/City`);
   });
 
   test("singleton", async () => {
-    const result = testService.navigate_to_me();
+    const result = testService.navToMe();
 
     expect(result.getPath()).toBe(`${BASE_URL}/Me`);
-    expect(JSON.stringify(result.getQObject())).toEqual(JSON.stringify(pERSON_QUERY_OBJECT));
+    expect(JSON.stringify(result.getQObject())).toEqual(JSON.stringify(qPerson));
   });
 });

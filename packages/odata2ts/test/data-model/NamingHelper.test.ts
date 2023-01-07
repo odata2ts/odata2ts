@@ -3,7 +3,7 @@ import deepmerge from "deepmerge";
 import { NamingStrategies, RunOptions, getDefaultConfig } from "../../src";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
 import { TestOptions } from "../generator/TestTypes";
-import { getTestConfig, getTestConfigMinimal } from "../test.config";
+import { getTestConfigMinimal } from "../test.config";
 
 describe("NamingHelper Tests", function () {
   const SERVICE_NAME = "TRIPPIN";
