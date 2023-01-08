@@ -98,12 +98,14 @@ describe("QueryObject tests", () => {
 
   test("convertToOData: null and undefined", () => {
     expect(qToTest.convertToOData(null)).toBeNull();
+    expect(qToTest.convertToOData(null, true)).toBeNull();
     expect(qToTest.convertToOData(undefined)).toBeUndefined();
+    expect(qToTest.convertToOData(undefined, true)).toBeUndefined();
   });
 
   test("fail convertToOData", () => {
     // @ts-expect-error
-    expect(() => qToTest.convertToOData("2")).toThrow();
+    expect(() => qToTest.convertToOData("2")).toThrow("must be an object");
   });
 
   test("convertToOData: strict => no wrong or extra props allowed", () => {
@@ -115,6 +117,15 @@ describe("QueryObject tests", () => {
       // @ts-expect-error
       return qToTest.convertToOData({ unknownProp: "hi!" });
     }).toThrow("Known user model props: id,truth,age");
+  });
+
+  test("convertToOData: permissiveness", () => {
+    // @ts-ignore: on purpose in order to pass an unknown property
+    const result = qToTest.convertToOData({ id: 123, unknownProp: "hi!" }, true);
+    expect(result).toStrictEqual({
+      ID: 123,
+      unknownProp: "hi!",
+    });
   });
 
   test("convertToOData: nesting", () => {

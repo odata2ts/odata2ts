@@ -43,7 +43,11 @@ export class QueryObject<T extends object = any> {
    * - converting property values to different types
    * - handling nested types
    *
-   * Unknown properties (not advertised in the metadata) are passed as they are.
+   * Conversion rules:
+   * - null & undefined are not converted, they're just passed back
+   * - trying to convert primitive values will raise an error
+   * - it's allowed to pass a single model or a collection of these
+   * - unknown properties (not advertised in the metadata) are passed as they are
    *
    * @param odataModel data model as it is retrieved from the OData service
    * @returns the data model that the user is facing
@@ -79,7 +83,6 @@ export class QueryObject<T extends object = any> {
             collector[propKey] = prop.converter ? prop.converter.convertFrom(value) : value;
           }
         }
-
         // be permissive here to allow passing unknown values as they are
         else {
           collector[key] = value;
@@ -99,16 +102,25 @@ export class QueryObject<T extends object = any> {
    * - converting property values to different types
    * - handling nested types
    *
-   * Passing unknown properties results in errors.
+   * Conversion rules:
+   * - null & undefined are not converted, they're just passed back
+   * - primitive values will raise an error
+   * - it's allowed to pass a single model or a collection of these
+   * - passing unknown properties results in errors
+   * - with the option allowUnknownProps=true unknown properties are passed as they are
    *
    * @param userModel the data model the user is facing
+   * @param allowUnknownProps (false by default) passes unknown values as they are instead of raising an error
    * @retuns the data model that is consumable by the OData service
    */
-  public convertToOData(userModel: null): null;
-  public convertToOData(userModel: undefined): undefined;
-  public convertToOData(userModel: PartialDeep<T>): object;
-  public convertToOData(userModel: Array<PartialDeep<T>>): Array<object>;
-  public convertToOData(userModel: PartialDeep<T> | Array<PartialDeep<T>> | null | undefined) {
+  public convertToOData(userModel: null, allowUnknownProps?: boolean): null;
+  public convertToOData(userModel: undefined, allowUnknownProps?: boolean): undefined;
+  public convertToOData(userModel: PartialDeep<T>, allowUnknownProps?: boolean): object;
+  public convertToOData(userModel: Array<PartialDeep<T>>, allowUnknownProps?: boolean): Array<object>;
+  public convertToOData(
+    userModel: PartialDeep<T> | Array<PartialDeep<T>> | null | undefined,
+    allowUnknownProps = false
+  ) {
     if (userModel === null || userModel === undefined) {
       return userModel;
     }
@@ -129,9 +141,12 @@ export class QueryObject<T extends object = any> {
           collector[prop.getPath()] = entity.convertToOData(value);
         } else if (prop) {
           collector[prop.getPath()] = prop.converter ? prop.converter.convertTo(value) : value;
-        } else {
+        } else if (!allowUnknownProps) {
           const knownProps = [...this.__getPropMapping().values()].join(",");
           throw new Error(`Property [${key}] not found (in strict mode)! Known user model props: ${knownProps}`);
+        } else {
+          // passing unknown value as is
+          collector[key] = value;
         }
 
         return collector;
