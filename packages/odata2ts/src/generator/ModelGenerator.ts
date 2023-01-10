@@ -184,7 +184,7 @@ class ModelGenerator {
   }
 
   private generateBoundOperationParams(entityName: string) {
-    this.dataModel.getOperationTypeByBinding(entityName).forEach((operation) => {
+    this.dataModel.getOperationTypeByEntityOrCollectionBinding(entityName).forEach((operation) => {
       this.generateOperationParams(operation);
     });
   }

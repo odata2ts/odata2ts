@@ -128,6 +128,12 @@ export class DataModel {
     return !operations ? [] : [...operations];
   }
 
+  public getOperationTypeByEntityOrCollectionBinding(binding: string): Array<OperationType> {
+    const entityOps = this.operationTypes[binding] || [];
+    const collOps = this.operationTypes[`Collection(${binding})`] || [];
+    return [...collOps, ...entityOps];
+  }
+
   public addAction(name: string, action: ActionImportType) {
     this.container.actions[name] = action;
   }
