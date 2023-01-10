@@ -57,10 +57,10 @@ export class CollectionServiceV4<
   /**
    * Query collection of primitive values.
    */
-  public async query(
+  public async query<ReturnType = T>(
     queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
     requestConfig?: ODataClientConfig<ClientType>
-  ): ODataResponse<ODataCollectionResponseV4<T>> {
+  ): ODataResponse<ODataCollectionResponseV4<ReturnType>> {
     const response = await this.doQuery<ODataCollectionResponseV4<any>>(queryFn, requestConfig);
     return convertV4CollectionResponse(response, this.qResponseType);
   }

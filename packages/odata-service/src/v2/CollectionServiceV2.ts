@@ -50,10 +50,10 @@ export class CollectionServiceV2<
   /**
    * Query collection.
    */
-  public async query(
+  public async query<ReturnType = T>(
     queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void,
     requestConfig?: ODataClientConfig<ClientType>
-  ): ODataResponse<ODataCollectionResponseV2<T>> {
+  ): ODataResponse<ODataCollectionResponseV2<ReturnType>> {
     const response = await this.doQuery<ODataCollectionResponseV2<any>>(queryFn, requestConfig);
     return convertV2CollectionResponse(response, this.qResponseType);
   }

@@ -21,10 +21,10 @@ export class EntityTypeServiceV2<
 
   public delete: (requestConfig?: ODataClientConfig<ClientType>) => ODataResponse<void> = this.doDelete;
 
-  public async query(
+  public async query<ReturnType extends Partial<T> = T>(
     queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void,
     requestConfig?: ODataClientConfig<ClientType>
-  ): ODataResponse<ODataModelResponseV2<T>> {
+  ): ODataResponse<ODataModelResponseV2<ReturnType>> {
     const response = await this.doQuery<ODataModelResponseV2<any>>(queryFn, requestConfig);
     return convertV2ModelResponse(response, this.qResponseType);
   }

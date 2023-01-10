@@ -33,8 +33,9 @@ describe("CollectionService V2 Tests", () => {
     const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
 
     // typing tests
-    const result: HttpResponseModel<ODataCollectionResponseV2<StringCollection>> = await stringService.query();
-    const resultEnum: HttpResponseModel<ODataCollectionResponseV2<StringCollection>> = await enumService.query();
+    const result: HttpResponseModel<ODataCollectionResponseV2<string>> = await stringService.query();
+    const resultEnum: HttpResponseModel<ODataCollectionResponseV2<string>> = await enumService.query();
+    const result2: HttpResponseModel<ODataCollectionResponseV2<number>> = await enumService.query<number>();
   });
 
   test("collection: count", async () => {

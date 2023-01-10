@@ -35,6 +35,14 @@ describe("EntityTypeService V2 Test", () => {
       // typing test of builder
       const resultB: ODataQueryBuilderV2<QPersonV2> = builder;
     });
+
+    // manual typings provided
+    const result2: HttpResponseModel<ODataModelResponseV2<{ userName: string }>> = await testService.query<
+      Pick<PersonModel, "userName">
+    >((builder) => {
+      // typing test of builder
+      const resultB: ODataQueryBuilderV2<QPersonV2> = builder;
+    });
   });
 
   test("entityType V2: function params", async () => {
