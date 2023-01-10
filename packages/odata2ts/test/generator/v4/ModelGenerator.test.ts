@@ -109,4 +109,20 @@ describe("Model Generator Tests V4", () => {
     // then match fixture text
     await generateAndCompare("boundFunction", "operation-bound.ts");
   });
+
+  test(`${TEST_SUITE_NAME}: collection bound function`, async () => {
+    // given one minimal model with bound function
+    odataBuilder
+      .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
+      .addFunction("MinOperation", ODataTypesV4.String, true, (builder) =>
+        builder
+          .addParam("book", `Collection(${SERVICE_NAME}.Book)`)
+          .addParam("test", ODataTypesV4.String, false)
+          .addParam("optTest", ODataTypesV4.String, true)
+      );
+
+    // when generating model
+    // then match fixture text => actually there's no diff in the generated param models between bound-to-entity and bound-to-collection
+    await generateAndCompare("collBoundFunction", "operation-bound.ts");
+  });
 });

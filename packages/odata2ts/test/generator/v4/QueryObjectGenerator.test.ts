@@ -37,7 +37,7 @@ describe("Query Object Generator Tests V4", () => {
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
   });
 
-  test(`${TEST_SUITE_NAME}: min QFunction`, async () => {
+  test(`min QFunction`, async () => {
     // given a simple function
     odataBuilder.addFunction("MinFunction", ODataTypesV4.String, false, (builder) =>
       builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true)
@@ -48,7 +48,7 @@ describe("Query Object Generator Tests V4", () => {
     await generateAndCompare("minFunction", "function-min.ts");
   });
 
-  test(`${TEST_SUITE_NAME}: max QFunction`, async () => {
+  test(`max QFunction`, async () => {
     // given a function
     odataBuilder.addFunction("MAX_FUNCTION", ODataTypesV4.String, false, (builder) =>
       builder
@@ -68,7 +68,7 @@ describe("Query Object Generator Tests V4", () => {
     });
   });
 
-  test(`${TEST_SUITE_NAME}: bound QFunction`, async () => {
+  test(`bound QFunction`, async () => {
     // given one minimal model with bound function
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
@@ -86,7 +86,25 @@ describe("Query Object Generator Tests V4", () => {
     });
   });
 
-  test(`${TEST_SUITE_NAME}: min QAction`, async () => {
+  test(`collection bound QFunction`, async () => {
+    // given one minimal model with bound function
+    odataBuilder
+      .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
+      .addFunction("MinFunction", ODataTypesV4.String, true, (builder) =>
+        builder
+          .addParam("_it", `Collection(${SERVICE_NAME}.Book)`)
+          .addParam("test", ODataTypesV4.String, false)
+          .addParam("optTest", ODataTypesV4.Boolean, true)
+      );
+
+    // when generating model
+    // then match fixture text => actually there's no diff in the generated q objects between bound-to-entity and bound-to-collection
+    await generateAndCompare("collBoundFunc", "function-bound.ts", {
+      converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
+    });
+  });
+
+  test(`min QAction`, async () => {
     // given a simple function
     odataBuilder.addAction("MinAction", ODataTypesV4.Boolean, false, (builder) =>
       builder.addParam("test", ODataTypesV4.String, false).addParam("opt_Test", ODataTypesV4.String, true)
@@ -99,7 +117,7 @@ describe("Query Object Generator Tests V4", () => {
     });
   });
 
-  test(`${TEST_SUITE_NAME}: QAction with converter`, async () => {
+  test(`QAction with converter`, async () => {
     // given a simple function
     odataBuilder
       .addEntityType("Person", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))

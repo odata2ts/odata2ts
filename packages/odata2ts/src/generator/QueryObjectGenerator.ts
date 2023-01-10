@@ -212,7 +212,7 @@ class QueryObjectGenerator {
   }
 
   private generateBoundOperations(bindingName: string, importContainer: ImportContainer) {
-    this.dataModel.getOperationTypeByBinding(bindingName).forEach((operation) => {
+    this.dataModel.getOperationTypeByEntityOrCollectionBinding(bindingName).forEach((operation) => {
       this.generateOperation(operation, importContainer);
     });
   }
