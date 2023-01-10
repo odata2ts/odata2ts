@@ -2316,8 +2316,8 @@ __metadata:
   resolution: "@odata2ts/example-bookshop@workspace:examples/bookshop"
   dependencies:
     "@odata2ts/axios-odata-client": ^0.5.1
-    "@odata2ts/odata-service": ^0.12.0
-    "@odata2ts/odata2ts": ^0.18.0
+    "@odata2ts/odata-service": ^0.13.0
+    "@odata2ts/odata2ts": ^0.18.1
     "@sap/cds": ">=5.9"
     "@sap/cds-odata-v2-adapter-proxy": ^1.9.4
     "@types/jest": ^27.4.1
@@ -2338,8 +2338,8 @@ __metadata:
   resolution: "@odata2ts/example-odata-v2@workspace:examples/odata-v2"
   dependencies:
     "@odata2ts/axios-odata-client": ^0.5.1
-    "@odata2ts/odata-service": ^0.12.0
-    "@odata2ts/odata2ts": ^0.18.0
+    "@odata2ts/odata-service": ^0.13.0
+    "@odata2ts/odata2ts": ^0.18.1
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: ^27.5.1
@@ -2355,8 +2355,8 @@ __metadata:
   resolution: "@odata2ts/example-renaming@workspace:examples/renaming-trippin"
   dependencies:
     "@odata2ts/axios-odata-client": ^0.5.1
-    "@odata2ts/odata-service": ^0.12.0
-    "@odata2ts/odata2ts": ^0.18.0
+    "@odata2ts/odata-service": ^0.13.0
+    "@odata2ts/odata2ts": ^0.18.1
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: ^27.5.1
@@ -2372,8 +2372,8 @@ __metadata:
   resolution: "@odata2ts/example-trippin@workspace:examples/trippin"
   dependencies:
     "@odata2ts/axios-odata-client": ^0.5.1
-    "@odata2ts/odata-service": ^0.12.0
-    "@odata2ts/odata2ts": ^0.18.0
+    "@odata2ts/odata-service": ^0.13.0
+    "@odata2ts/odata2ts": ^0.18.1
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: ^27.5.1
@@ -2419,11 +2419,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/odata-query-builder@^0.15.0, @odata2ts/odata-query-builder@workspace:packages/odata-query-builder":
+"@odata2ts/odata-query-builder@^0.15.1, @odata2ts/odata-query-builder@workspace:packages/odata-query-builder":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-builder@workspace:packages/odata-query-builder"
   dependencies:
-    "@odata2ts/odata-query-objects": ^0.15.1
+    "@odata2ts/odata-query-objects": ^0.16.0
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     axios: ^0.26.1
@@ -2436,7 +2436,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-query-objects@^0.15.1, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
+"@odata2ts/odata-query-objects@^0.16.0, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
@@ -2455,13 +2455,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-service@^0.12.0, @odata2ts/odata-service@workspace:packages/odata-service":
+"@odata2ts/odata-service@^0.13.0, @odata2ts/odata-service@workspace:packages/odata-service":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
     "@odata2ts/odata-client-api": ^0.6.1
-    "@odata2ts/odata-query-builder": ^0.15.0
-    "@odata2ts/odata-query-objects": ^0.15.1
+    "@odata2ts/odata-query-builder": ^0.15.1
+    "@odata2ts/odata-query-objects": ^0.16.0
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: 27.5.1
@@ -2474,7 +2474,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2ts@^0.18.0, @odata2ts/odata2ts@workspace:packages/odata2ts":
+"@odata2ts/odata2ts@^0.18.1, @odata2ts/odata2ts@workspace:packages/odata2ts":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2ts@workspace:packages/odata2ts"
   dependencies:
@@ -2482,8 +2482,8 @@ __metadata:
     "@odata2ts/converter-runtime": ^0.1.0
     "@odata2ts/converter-v2-to-v4": ^0.1.0
     "@odata2ts/odata-client-api": ^0.6.1
-    "@odata2ts/odata-query-objects": ^0.15.1
-    "@odata2ts/odata-service": ^0.12.0
+    "@odata2ts/odata-query-objects": ^0.16.0
+    "@odata2ts/odata-service": ^0.13.0
     "@types/fs-extra": ^9.0.13
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.13.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.12.0...@odata2ts/odata-service@0.13.0) (2023-01-10)
+
+
+### Features
+
+* **odata-service:** allow for manual response typings ([#109](https://github.com/odata2ts/odata2ts/issues/109)) ([2e21575](https://github.com/odata2ts/odata2ts/commit/2e215752563565942955489b627e67f64dba5530))
+
+
+
+
+
 # [0.12.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.11.0...@odata2ts/odata-service@0.12.0) (2023-01-07)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.18.0...@odata2ts/odata2ts@0.18.1) (2023-01-10)
+
+
+### Bug Fixes
+
+* **odata2ts:** no model param and no q operation generation for collection bound operations ([#110](https://github.com/odata2ts/odata2ts/issues/110)) ([71769c2](https://github.com/odata2ts/odata2ts/commit/71769c22affa37c3a443e91f5070fa07f90d03d6))
+
+
+
+
+
 # 0.18.0 (2023-01-07)
 
 
