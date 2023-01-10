@@ -84,10 +84,10 @@ export abstract class EntitySetServiceV4<
    * @param requestConfig
    * @return
    */
-  public async create(
+  public async create<ReturnType extends Partial<T> | void = T>(
     model: EditableT,
     requestConfig?: ODataClientConfig<ClientType>
-  ): ODataResponse<ODataModelResponseV4<T> | void> {
+  ): ODataResponse<ReturnType> {
     const result = await this.doPost<ODataModelResponseV4<T> | void>(this.qModel.convertToOData(model), requestConfig);
     return convertV4ModelResponse(result, this.qResponseType);
   }
@@ -112,10 +112,10 @@ export abstract class EntitySetServiceV4<
     return this.get(id).delete(requestConfig);
   }
 
-  public async query(
+  public async query<ReturnType extends Partial<T> = T>(
     queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
     requestConfig?: ODataClientConfig<ClientType>
-  ): ODataResponse<ODataCollectionResponseV4<T>> {
+  ): ODataResponse<ODataCollectionResponseV4<ReturnType>> {
     const response = await this.doQuery<ODataCollectionResponseV4<any>>(queryFn, requestConfig);
     return convertV4CollectionResponse(response, this.qResponseType);
   }

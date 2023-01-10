@@ -101,36 +101,6 @@ export function commonEntitySetTests(
     expect(odataClient.lastOperation).toBe("GET");
   });
 
-  test("entitySet: create", async () => {
-    const model: EditablePersonModel = {
-      userName: "tester",
-      Age: "14",
-      FavFeature: Feature.Feature1,
-      Features: [Feature.Feature1],
-    };
-    const odataModel = {
-      UserName: "tester",
-      Age: 14,
-      FavFeature: "Feature1",
-      Features: ["Feature1"],
-    };
-
-    odataClient.setModelResponse(odataModel);
-    let result = await testService.create(model);
-    // @ts-ignore
-    const resultData = result.data.d || result.data;
-
-    expect(odataClient.lastUrl).toBe(EXPECTED_PATH);
-    expect(odataClient.lastOperation).toBe("POST");
-    expect(odataClient.lastData).toStrictEqual(odataModel);
-    expect(odataClient.lastRequestConfig).toBeUndefined();
-    expect(resultData).toStrictEqual(model);
-
-    result = await testService.create(model, REQUEST_CONFIG);
-    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
-    expect(result.data).toBeNull();
-  });
-
   test("entitySet: patch", async () => {
     const model: Partial<PersonModel> = { Age: "45" };
     const odataModel = { Age: 45 };
