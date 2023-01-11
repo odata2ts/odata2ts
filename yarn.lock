@@ -2333,6 +2333,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@odata2ts/example-hand-made@workspace:examples/hand-made":
+  version: 0.0.0-use.local
+  resolution: "@odata2ts/example-hand-made@workspace:examples/hand-made"
+  dependencies:
+    "@odata2ts/odata-service": ^0.13.0
+    "@odata2ts/odata2ts": ^0.18.1
+    "@types/jest": ^27.4.1
+    "@types/node": ^17.0.23
+    jest: ^27.5.1
+    rimraf: ^3.0.2
+    ts-jest: ^27.1.4
+    ts-node: ^10.7.0
+    typescript: ^4.6.3
+  languageName: unknown
+  linkType: soft
+
 "@odata2ts/example-odata-v2@workspace:examples/odata-v2":
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-odata-v2@workspace:examples/odata-v2"

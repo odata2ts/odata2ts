@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx"
+           xmlns="http://docs.oasis-open.org/odata/ns/edm">
+  <edmx:DataServices>
+    <Schema Namespace="SRV">
+      <EnumType Name="PrinterType">
+        <Member Name="Printer1" Value="0" />
+        <Member Name="Printer2" Value="1" />
+        <Member Name="Printer3" Value="2" />
+        <Member Name="Printer4" Value="3" />
+      </EnumType>
+      <EntityType Name="UserParamType">
+        <Key>
+          <PropertyRef Name="UserId"/>
+        </Key>
+        <Property Name="UserId" Type="Edm.String" Nullable="false" MaxLength="12"/>
+        <Property Name="Warehouse" Type="Edm.String" Nullable="false" MaxLength="4"/>
+        <Property Name="Plant" Type="Edm.String" Nullable="false" MaxLength="4"/>
+      </EntityType>
+      <Function Name="GetParam" IsBound="true">
+        <Parameter Name="_it" Type="Collection(SRV.UserParamType)"
+                   Nullable="false"/>
+        <ReturnType Type="SRV.UserParamType" Nullable="false"/>
+      </Function>
+      <EntityType Name="HandlingUnitType">
+        <Key>
+          <PropertyRef Name="Warehouse"/>
+          <PropertyRef Name="HuIdent"/>
+        </Key>
+        <Property Name="Warehouse" Type="Edm.String" Nullable="false" MaxLength="4"/>
+        <Property Name="HuIdent" Type="Edm.String" Nullable="false" MaxLength="20"/>
+        <Property Name="Type" Type="Edm.String" Nullable="false" MaxLength="4"/>
+        <Property Name="StorageType" Type="Edm.String" Nullable="false" MaxLength="4"/>
+        <Property Name="StorageBin" Type="Edm.String" Nullable="false" MaxLength="18"/>
+        <Property Name="PackagingMaterialUUID" Type="Edm.Guid"/>
+        <Property Name="HandlingUnitUUID" Type="Edm.Guid"/>
+        <Property Name="ChangedAt" Type="Edm.DateTimeOffset"/>
+        <NavigationProperty Name="_Items"
+                            Type="Collection(SRV.HuItemType)"/>
+      </EntityType>
+      <EntityType Name="HuItemType">
+        <Key>
+          <PropertyRef Name="Warehouse"/>
+          <PropertyRef Name="HuIdent"/>
+          <PropertyRef Name="GUID_STOCK"/>
+        </Key>
+        <Property Name="Warehouse" Type="SRV.WarehouseType" Nullable="false" MaxLength="4"/>
+        <Property Name="HuIdent" Type="Edm.String" Nullable="false" MaxLength="20"/>
+        <Property Name="GUID_STOCK" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Product" Type="Edm.String" Nullable="false" MaxLength="18"/>
+        <Property Name="Batch" Type="Edm.String" Nullable="false" MaxLength="10"/>
+        <Property Name="Blocked" Type="Edm.Boolean" Nullable="false"/>
+        <Property Name="LotCode" Type="Edm.Int64"  MaxLength="70"/>
+        <Property Name="QuantityInBaseUnit" Type="Edm.Decimal" Nullable="false" Precision="31" Scale="14"/>
+        <Property Name="BaseUnit" Type="Edm.String" Nullable="false" MaxLength="3"/>
+      </EntityType>
+      <EntityType Name="WarehouseType">
+        <Key>
+          <PropertyRef Name="Warehouse"/>
+        </Key>
+        <Property Name="Warehouse" Type="Edm.String" Nullable="false" MaxLength="4"/>
+        <Property Name="WarehouseName" Type="Edm.String" Nullable="false" MaxLength="40"/>
+      </EntityType>
+      <Action Name="AssignUser" IsBound="true">
+        <Parameter Name="_it" Type="SRV.WarehouseType" Nullable="false"/>
+      </Action>
+      <ComplexType Name="ZCDS_SCM_HU_PRINT_RESULT">
+        <Property Name="message" Type="Edm.String" Nullable="false" MaxLength="220"/>
+        <Property Name="type" Type="Edm.String" Nullable="false" MaxLength="1"/>
+      </ComplexType>
+      <Function Name="PrintLabel" IsBound="true">
+        <Parameter Name="_it" Type="SRV.HandlingUnitType"
+                   Nullable="false"/>
+        <Parameter Name="Printer" Type="SRV.PrinterType" Nullable="false" MaxLength="30"/>
+        <Parameter Name="Warehouse" Type="SRV.WarehouseType" Nullable="false"/>
+        <ReturnType Type="SRV.ZCDS_SCM_HU_PRINT_RESULT"
+                    Nullable="false"/>
+      </Function>
+
+      <EntityContainer Name="Container">
+        <EntitySet Name="HandlingUnit" EntityType="SRV.HandlingUnitType">
+          <NavigationPropertyBinding Path="_Items" Target="HuItem"/>
+        </EntitySet>
+        <EntitySet Name="HuItem" EntityType="SRV.HuItemType"/>
+        <EntitySet Name="UserParam" EntityType="SRV.UserParamType"/>
+        <EntitySet Name="Warehouse" EntityType="SRV.WarehouseType"/>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
