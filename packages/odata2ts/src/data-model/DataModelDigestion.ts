@@ -250,6 +250,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
           type: this.namingHelper.getEnumName(dataType),
           qPath: "QEnumPath",
           qObject: isCollection ? "QEnumCollection" : undefined,
+          qParam: "QEnumParam",
         };
       }
       // handling of complex & entity types
@@ -259,6 +260,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
           type: this.namingHelper.getModelName(dataType),
           qPath: "QEntityPath",
           qObject: this.namingHelper.getQName(dataType),
+          qParam: "QComplexParam",
         };
       }
     }

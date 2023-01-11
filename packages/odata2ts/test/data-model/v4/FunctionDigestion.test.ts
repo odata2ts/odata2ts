@@ -95,6 +95,47 @@ describe("Function Digestion Test", () => {
     ]);
   });
 
+  test("Function: with complex and enum params", async () => {
+    odataBuilder
+      .addComplexType("Complex", undefined, (builder) => builder.addProp("a", ODataTypesV4.String))
+      .addEntityType("TheEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addEnumType("TheEnum", [{ name: "One", value: 1 }])
+      .addFunction("test", ODataTypesV4.String, false, (builder) => {
+        return builder
+          .addParam("complex", `${SERVICE_NAME}.Complex`)
+          .addParam("entity", `${SERVICE_NAME}.TheEntity`)
+          .addParam("enum", `${SERVICE_NAME}.TheEnum`);
+      });
+
+    const result = await doDigest();
+
+    expect(result.getUnboundOperationTypes()).toMatchObject([
+      {
+        name: "test",
+        qName: "QTest",
+        paramsModelName: "TestParams",
+        type: OperationTypes.Function,
+        parameters: [
+          {
+            name: "complex",
+            type: "Complex",
+            qParam: "QComplexParam",
+          },
+          {
+            name: "entity",
+            type: "TheEntity",
+            qParam: "QComplexParam",
+          },
+          {
+            name: "enum",
+            type: "TheEnum",
+            qParam: "QEnumParam",
+          },
+        ],
+      },
+    ]);
+  });
+
   test("Function: bound function returning string list", async () => {
     odataBuilder
       .addEntityType("User", undefined, (builder) => {
