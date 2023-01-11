@@ -192,15 +192,17 @@ class QueryObjectGenerator {
   private getParamInitString(props: Array<PropertyModel>, importContainer: ImportContainer) {
     return `[${props
       .map((prop) => {
+        const isComplexParam = prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
         if (prop.qParam) {
           importContainer.addFromQObject(prop.qParam);
         }
         const isMappedNameNecessary = prop.odataName !== prop.name;
         const mappedName = isMappedNameNecessary ? `"${prop.name}"` : prop.converters?.length ? "undefined" : undefined;
         const converterStmt = this.generateConverterStmt(prop.converters, importContainer);
-        return `new ${prop.qParam}("${prop.odataName}"${mappedName ? `, ${mappedName}` : ""}${
-          converterStmt ? `, ${converterStmt}` : ""
-        })`;
+        const mappedNameParam = mappedName ? `, ${mappedName}` : "";
+        const complexQParam = isComplexParam ? `, new ${prop.qObject}()` : "";
+        const converterParam = converterStmt ? `, ${converterStmt}` : "";
+        return `new ${prop.qParam}("${prop.odataName}"${complexQParam}${mappedNameParam}${converterParam})`;
       })
       .join(",")}]`;
   }

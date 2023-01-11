@@ -143,7 +143,7 @@ describe("Function Digestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding("/")).toStrictEqual([
+    expect(result.getUnboundOperationTypes()).toStrictEqual([
       {
         odataName: "GetBestFriend",
         name: "getBestFriend",
@@ -154,6 +154,47 @@ describe("Function Digestion Test", () => {
         returnType: undefined,
         parameters: [],
       } as OperationType,
+    ]);
+  });
+
+  test("Function: with complex and enum params", async () => {
+    odataBuilder
+      .addComplexType("Complex", undefined, (builder) => builder.addProp("a", ODataTypesV2.String))
+      .addEntityType("TheEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.String))
+      .addEnumType("TheEnum", [{ name: "One", value: 1 }])
+      .addFunctionImport("test", ODataTypesV2.String, (builder) => {
+        return builder
+          .addParam("complex", `${SERVICE_NAME}.Complex`)
+          .addParam("entity", `${SERVICE_NAME}.TheEntity`)
+          .addParam("enum", `${SERVICE_NAME}.TheEnum`);
+      });
+
+    const result = await doDigest();
+
+    expect(result.getUnboundOperationTypes()).toMatchObject([
+      {
+        name: "test",
+        qName: "QTest",
+        paramsModelName: "TestParams",
+        type: OperationTypes.Function,
+        parameters: [
+          {
+            name: "complex",
+            type: "Complex",
+            qParam: "QComplexParam",
+          },
+          {
+            name: "entity",
+            type: "TheEntity",
+            qParam: "QComplexParam",
+          },
+          {
+            name: "enum",
+            type: "TheEnum",
+            qParam: "QEnumParam",
+          },
+        ],
+      },
     ]);
   });
 });

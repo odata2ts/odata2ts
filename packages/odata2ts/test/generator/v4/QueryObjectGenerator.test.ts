@@ -50,16 +50,24 @@ describe("Query Object Generator Tests V4", () => {
 
   test(`max QFunction`, async () => {
     // given a function
-    odataBuilder.addFunction("MAX_FUNCTION", ODataTypesV4.String, false, (builder) =>
-      builder
-        .addParam("TEST_STRING", ODataTypesV4.String, false)
-        .addParam("testNumber", ODataTypesV4.Int32, false)
-        .addParam("testBoolean", ODataTypesV4.Boolean, false)
-        .addParam("testGuid", ODataTypesV4.Guid, false)
-        .addParam("testTime", ODataTypesV4.TimeOfDay, false)
-        .addParam("testDate", ODataTypesV4.Date, false)
-        .addParam("testDateTimeOffset", ODataTypesV4.DateTimeOffset, false)
-    );
+    odataBuilder
+      .addComplexType("Complex", undefined, (builder) => builder.addProp("a", ODataTypesV4.String))
+      .addEntityType("TheEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addEnumType("TheEnum", [{ name: "One", value: 1 }])
+      .addFunction("MAX_FUNCTION", ODataTypesV4.String, false, (builder) =>
+        builder
+          .addParam("TEST_STRING", ODataTypesV4.String, false)
+          .addParam("testNumber", ODataTypesV4.Int32, false)
+          .addParam("testBoolean", ODataTypesV4.Boolean, false)
+          .addParam("testGuid", ODataTypesV4.Guid, false)
+          .addParam("testTime", ODataTypesV4.TimeOfDay, false)
+          .addParam("testDate", ODataTypesV4.Date, false)
+          .addParam("testDateTimeOffset", ODataTypesV4.DateTimeOffset, false)
+          .addParam("testDateTimeOffset", ODataTypesV4.DateTimeOffset, false)
+          .addParam("complex", `${SERVICE_NAME}.Complex`)
+          .addParam("ENTITY", `${SERVICE_NAME}.TheEntity`)
+          .addParam("enum", `${SERVICE_NAME}.TheEnum`)
+      );
 
     // when generating model
     // then match fixture text
