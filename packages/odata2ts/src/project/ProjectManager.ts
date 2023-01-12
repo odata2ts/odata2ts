@@ -1,9 +1,16 @@
 import * as path from "path";
 
 import { emptyDir, remove, writeFile } from "fs-extra";
-import { CompilerOptions, ModuleResolutionKind, NewLineKind, Project, ScriptTarget, SourceFile } from "ts-morph";
+import {
+  CompilerOptions,
+  ModuleKind,
+  ModuleResolutionKind,
+  NewLineKind,
+  Project,
+  ScriptTarget,
+  SourceFile,
+} from "ts-morph";
 import load from "tsconfig-loader";
-import { ModuleKind } from "typescript";
 
 import { ProjectFiles } from "../data-model/DataModel";
 import { EmitModes } from "../OptionModel";
