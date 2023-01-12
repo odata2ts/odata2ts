@@ -49,7 +49,7 @@
     "ts-jest": "^27.1.4",
     "ts-node": "10.7.0",
     "type-fest": "^2.12.2",
-    "typescript": "4.6.3"
+    "typescript": "4.9.4"
   },
   "types": "./lib/index.d.ts",
   "gitHead": "b88f1a6e7ce84d26d1d7efa5a61dfc66a4626ec3"
