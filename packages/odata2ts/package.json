@@ -46,12 +46,13 @@
   ],
   "peerDependencies": {
     "@odata2ts/odata-client-api": "^0.6.0",
-    "@odata2ts/odata-query-objects": "^0.15.0",
-    "@odata2ts/odata-service": "^0.11.0"
+    "@odata2ts/odata-query-objects": "^0.16.0",
+    "@odata2ts/odata-service": "^0.13.0"
   },
   "dependencies": {
     "@odata2ts/converter-api": "^0.1.0",
     "@odata2ts/converter-runtime": "^0.1.0",
+    "@odata2ts/odata-core": "^0.3.2",
     "camel-case": "^4.1.2",
     "commander": "^9.1.0",
     "constant-case": "^3.0.4",

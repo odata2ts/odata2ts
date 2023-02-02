@@ -2498,6 +2498,7 @@ __metadata:
     "@odata2ts/converter-runtime": ^0.1.0
     "@odata2ts/converter-v2-to-v4": ^0.1.0
     "@odata2ts/odata-client-api": ^0.6.1
+    "@odata2ts/odata-core": ^0.3.2
     "@odata2ts/odata-query-objects": ^0.16.0
     "@odata2ts/odata-service": ^0.13.0
     "@types/fs-extra": ^9.0.13
@@ -2526,10 +2527,6 @@ __metadata:
     typescript: ^4.9.4
     upper-case-first: ^2.0.2
     xml2js: ^0.4.23
-  peerDependencies:
-    "@odata2ts/odata-client-api": ^0.6.0
-    "@odata2ts/odata-query-objects": ^0.15.0
-    "@odata2ts/odata-service": ^0.11.0
   bin:
     odata2ts: lib/run-cli.js
   languageName: unknown
