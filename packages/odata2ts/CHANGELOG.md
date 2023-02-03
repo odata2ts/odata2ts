@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.18.2...@odata2ts/odata2ts@0.18.3) (2023-02-03)
+
+
+### Bug Fixes
+
+* **odata2ts:** peer dep versions did not get auto upated ([#120](https://github.com/odata2ts/odata2ts/issues/120)) ([586627e](https://github.com/odata2ts/odata2ts/commit/586627e354c03ed36135d0b7f21a05b97a11072f))
+
+
+
+
+
 ## [0.18.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.18.1...@odata2ts/odata2ts@0.18.2) (2023-01-11)
 
 
