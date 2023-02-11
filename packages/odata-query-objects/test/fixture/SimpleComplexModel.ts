@@ -8,13 +8,17 @@ import {
   QEnumCollection,
   QEnumPath,
   QGuidCollection,
+  QGuidParam,
   QGuidPath,
+  QId,
+  QNumberParam,
   QNumberPath,
   QStringCollection,
   QStringPath,
   QTimeOfDayPath,
   QueryObject,
 } from "../../src";
+import { QParamModel } from "../../src/param/QParamModel";
 
 export enum FeaturesEnum {
   Feature1 = "Feature1",
@@ -28,8 +32,11 @@ export interface SimpleEntity {
   complexton: ComplexEntity;
 }
 
+export type SimpleEntityId = number | Pick<SimpleEntity, "id">;
+
 export interface ComplexEntity {
   ID: string; // GUID
+  ID2: number;
   x?: number;
   y?: string;
   Z: boolean;
@@ -44,11 +51,19 @@ export interface ComplexEntity {
   favFeature: FeaturesEnum;
 }
 
+export type ComplexEntityId = Pick<ComplexEntity, "ID" | "ID2">;
+
 export class QSimpleEntity extends QueryObject<SimpleEntity> {
   public readonly id = new QNumberPath(this.withPrefix("id"));
   public readonly name = new QStringPath(this.withPrefix("name"));
   public readonly feat = new QEnumPath(this.withPrefix("feat"));
   public readonly complexton = new QEntityPath(this.withPrefix("complexton"), () => QComplexEntity);
+}
+
+export class QSimpleEntityId extends QId<SimpleEntityId> {
+  getParams(): Array<QParamModel<any, any>> {
+    return [new QNumberParam("id")];
+  }
 }
 
 export const qSimple = new QSimpleEntity();
@@ -73,6 +88,12 @@ export class QComplexEntity extends QueryObject<ComplexEntity> {
   );
   public readonly features = new QCollectionPath("features", () => QEnumCollection);
   public readonly favFeature = new QEnumPath("favFeature");
+}
+
+export class QComplexEntityId extends QId<ComplexEntityId> {
+  getParams(): Array<QParamModel<any, any>> {
+    return [new QGuidParam("ID", "id"), new QNumberParam("  ID2", "idZwo")];
+  }
 }
 
 export const qComplex = new QComplexEntity();
