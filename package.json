@@ -2,9 +2,10 @@
   "name": "@odata2ts/workspace-core",
   "version": "1.0.0",
   "private": true,
-  "description": "Root project which allows for running single apps or deploy the whole stack.",
+  "description": "Root project for odata2ts",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
+  "homepage": "https://odata2ts.github.io/",
   "scripts": {
     "build": "yarn clean && lerna run build",
     "check-circular-deps": "lerna run check-circular-deps",

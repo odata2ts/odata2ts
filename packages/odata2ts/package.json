@@ -8,6 +8,7 @@
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
+  "homepage": "https://odata2ts.github.io/",
   "main": "lib/index.js",
   "bin": "lib/run-cli.js",
   "scripts": {

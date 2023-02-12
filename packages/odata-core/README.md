@@ -99,4 +99,6 @@ Second, a duration might be able to represent a time of day, in the sense that a
 Time of day requires the specification of hours and minutes, while duration might specify any of its 
 parts, e.g. only seconds "PT12S".
 
+## License
+MIT
 

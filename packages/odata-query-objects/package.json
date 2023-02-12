@@ -4,10 +4,11 @@
   "publishConfig": {
     "access": "public"
   },
-  "description": "Query Objects are the magic sauce for the odata-query-builder",
+  "description": "Q-Objects are the magic sauce for the odata-query-builder and allow for renaming and type conversion",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
+  "homepage": "https://odata2ts.github.io/",
   "main": "./lib/index.js",
   "scripts": {
     "build": "yarn clean && yarn compile",
