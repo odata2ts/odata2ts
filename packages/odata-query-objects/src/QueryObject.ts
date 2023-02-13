@@ -1,5 +1,7 @@
 import { PartialDeep } from "type-fest";
 
+import { QCollectionPath } from "./path/QCollectionPath";
+import { QEntityCollectionPath } from "./path/QEntityCollectionPath";
 import { QEntityPathModel, QPathModel, QValuePathModel } from "./path/QPathModel";
 
 function getMapping(q: QueryObject) {
@@ -72,11 +74,23 @@ export class QueryObject<T extends object = any> {
         const propKey = this.__getPropMapping().get(key);
         const prop = propKey ? (this[propKey] as unknown as QValuePathModel) : undefined;
         if (prop && propKey) {
-          // complex props
           const asComplexType = prop as QEntityPathModel<any>;
+
+          // complex props
           if (typeof asComplexType.getEntity === "function") {
+            // workaround: some V2 services wrap expanded entity collections in an extra results object #125
+            // => we unwrap this to stay true to the generated model interfaces
+            const wrappedValue = value as unknown as { results: Array<object> };
+            const sanitizedValue =
+              (asComplexType instanceof QEntityCollectionPath || asComplexType instanceof QCollectionPath) &&
+              typeof wrappedValue === "object" &&
+              typeof wrappedValue.results === "object" &&
+              Array.isArray(wrappedValue.results)
+                ? wrappedValue.results
+                : value;
+
             const entity = asComplexType.getEntity();
-            collector[propKey] = entity.convertFromOData(value);
+            collector[propKey] = entity.convertFromOData(sanitizedValue);
           }
           // primitive props
           else {
