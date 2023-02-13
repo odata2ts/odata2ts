@@ -72,9 +72,8 @@ export class QueryObject<T extends object = any> {
         const propKey = this.__getPropMapping().get(key);
         const prop = propKey ? (this[propKey] as unknown as QValuePathModel) : undefined;
         if (prop && propKey) {
-          const asComplexType = prop as QEntityPathModel<any>;
-
           // complex props
+          const asComplexType = prop as QEntityPathModel<any>;
           if (typeof asComplexType.getEntity === "function") {
             // workaround: some V2 services wrap expanded entity collections in an extra results object #125
             // => we unwrap this to stay true to the generated model interfaces
