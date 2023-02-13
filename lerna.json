@@ -5,12 +5,11 @@
   "version": "independent",
   "command": {
     "version": {
-      "allowBranch": "chore/upgrade-lerna",
+      "allowBranch": "main",
       "conventionalCommits": true,
       "createRelease": "github",
       "message": "chore(release): publish",
-      "allowPeerDependenciesUpdate": true,
-      "noGitTagVersion": true
+      "allowPeerDependenciesUpdate": true
     }
   }
 }

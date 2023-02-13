@@ -40,8 +40,8 @@ jobs:
         with:
           node-version: 18
       - name: Get yarn cache directory path
-          id: yarn-cache-dir-path
-          run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
       - name: Restore yarn cache
         uses: actions/cache@v2
         id: yarn-cache
