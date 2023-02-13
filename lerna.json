@@ -1,13 +1,16 @@
 {
+  "$schema": "node_modules/@lerna-lite/cli/schemas/lerna-schema.json",
   "npmClient": "yarn",
   "useWorkspaces": true,
   "version": "independent",
   "command": {
     "version": {
-      "allowBranch": "main",
+      "allowBranch": "chore/upgrade-lerna",
       "conventionalCommits": true,
       "createRelease": "github",
-      "message": "chore(release): publish"
+      "message": "chore(release): publish",
+      "allowPeerDependenciesUpdate": true,
+      "noGitTagVersion": true
     }
   }
 }
