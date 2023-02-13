@@ -1780,12 +1780,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@odata2ts/converter-api@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "@odata2ts/converter-api@npm:0.1.1"
+  dependencies:
+    "@odata2ts/odata-core": ^0.1.0
+  checksum: 864e768f65bf4e44de33f65d12101569a6155851b9cabe2d934f3f4e7a63fae3cb857a70901cad16cf98794b759bbf46fa2b451486704c16d63f9004256a5088
+  languageName: node
+  linkType: hard
+
 "@odata2ts/converter-runtime@npm:^0.1.0":
   version: 0.1.0
   resolution: "@odata2ts/converter-runtime@npm:0.1.0"
   dependencies:
     "@odata2ts/converter-api": ^0.1.0
   checksum: 675f6fd0d2a457cd2740a38d55ab2f56fdb6b549ef3c8a829932f8f5872f5c863a4040029413f08b030f6ce6c96cb13d9f383d328d3bcce72a0d0dba6282d6fc
+  languageName: node
+  linkType: hard
+
+"@odata2ts/converter-runtime@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "@odata2ts/converter-runtime@npm:0.1.2"
+  dependencies:
+    "@odata2ts/converter-api": ^0.1.1
+  checksum: e8f164bde96fc661ef4fb2bb1c2a8ccc187b9a78e6a59e5b4511e465ce36febf3d91bfdb03b01cff34535fc41552bc1189928a25ea5c9cd4f770f7503a3c0532
   languageName: node
   linkType: hard
 
@@ -1981,11 +1999,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2ts@workspace:packages/odata2ts"
   dependencies:
-    "@odata2ts/converter-api": ^0.1.0
-    "@odata2ts/converter-runtime": ^0.1.0
+    "@odata2ts/converter-api": ^0.1.1
+    "@odata2ts/converter-runtime": ^0.1.2
     "@odata2ts/converter-v2-to-v4": ^0.1.0
     "@odata2ts/odata-client-api": ^0.6.2
-    "@odata2ts/odata-core": ^0.3.4
+    "@odata2ts/odata-core": ^0.3.3
     "@odata2ts/odata-query-objects": ^0.16.2
     "@odata2ts/odata-service": ^0.13.2
     "@types/fs-extra": ^9.0.13
