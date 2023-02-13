@@ -15,8 +15,7 @@
     "postversion": "lerna publish from-git",
     "release": "env-cmd -f .env.local --no-override lerna version",
     "start-cap": "yarn workspace @odata2ts/example-bookshop start",
-    "test": "lerna run test -- --no-cache",
-    "version": "yarn install && git add yarn.lock"
+    "test": "lerna run test -- --no-cache"
   },
   "devDependencies": {
     "@prettier/plugin-xml": "^2.0.1",
@@ -24,7 +23,7 @@
     "husky": "^7.0.4",
     "import-sort-style-module": "^6.0.0",
     "jest": "^27.5.1",
-    "lerna": "^4.0.0",
+    "lerna": "^6.4.1",
     "lint-staged": "^12.3.7",
     "madge": "^5.0.1",
     "prettier": "^2.7.1",
