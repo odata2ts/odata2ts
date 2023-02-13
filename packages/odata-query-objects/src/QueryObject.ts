@@ -1,7 +1,5 @@
 import { PartialDeep } from "type-fest";
 
-import { QCollectionPath } from "./path/QCollectionPath";
-import { QEntityCollectionPath } from "./path/QEntityCollectionPath";
 import { QEntityPathModel, QPathModel, QValuePathModel } from "./path/QPathModel";
 
 function getMapping(q: QueryObject) {
@@ -82,7 +80,7 @@ export class QueryObject<T extends object = any> {
             // => we unwrap this to stay true to the generated model interfaces
             const wrappedValue = value as unknown as { results: Array<object> };
             const sanitizedValue =
-              (asComplexType instanceof QEntityCollectionPath || asComplexType instanceof QCollectionPath) &&
+              wrappedValue &&
               typeof wrappedValue === "object" &&
               typeof wrappedValue.results === "object" &&
               Array.isArray(wrappedValue.results)

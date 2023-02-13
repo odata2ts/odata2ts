@@ -3,7 +3,7 @@ import { ValueConverter } from "@odata2ts/converter-api";
 import { LambdaFunctions } from "../odata/ODataModel";
 import { QFilterExpression } from "../QFilterExpression";
 import { QueryObject } from "../QueryObject";
-import { QEntityPathModel, QPathModel } from "./QPathModel";
+import { QEntityPathModel } from "./QPathModel";
 
 export class QCollectionPath<CollectionType extends QueryObject> implements QEntityPathModel<CollectionType> {
   constructor(
