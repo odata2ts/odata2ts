@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@lerna-lite/cli": "^1.15.1",
+    "@lerna-lite/run": "^1.15.1",
     "@prettier/plugin-xml": "^2.0.1",
     "env-cmd": "^10.1.0",
     "husky": "^7.0.4",
