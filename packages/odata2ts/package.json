@@ -23,7 +23,8 @@
     "generate": "ts-node --cwd-mode src/run-cli.ts ",
     "int-test": "yarn clean && jest ./int-test",
     "prepublish": "yarn build",
-    "test": "yarn compile-fixtures && jest ./test"
+    "test": "yarn compile-fixtures && jest ./test",
+    "version": "yarn install && git add yarn.lock"
   },
   "files": [
     "*.md",
