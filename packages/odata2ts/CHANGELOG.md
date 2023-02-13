@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.5](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.18.3...@odata2ts/odata2ts@0.18.5) (2023-02-13)
+
+**Note:** Version bump only for package @odata2ts/odata2ts
+
 ## [0.18.4](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.18.3...@odata2ts/odata2ts@0.18.4) (2023-02-13)
 
 **Note:** Version bump only for package @odata2ts/odata2ts
