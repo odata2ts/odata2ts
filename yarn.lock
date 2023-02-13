@@ -1807,12 +1807,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/converter-v2-to-v4@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "@odata2ts/converter-v2-to-v4@npm:0.1.0"
+"@odata2ts/converter-v2-to-v4@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "@odata2ts/converter-v2-to-v4@npm:0.1.2"
   dependencies:
-    "@odata2ts/converter-api": ^0.1.0
-  checksum: bc54c36d36a6fe94adc6b97c0ad5d0d7e94894033ea22fbb64e1d660c8fa689adbdd78b3a47f8fc4f8260754da591b6549b01969e16521c24a55c72e991bbc07
+    "@odata2ts/converter-api": ^0.1.1
+  checksum: b5ee74d1c095da5a0363b05907ee086f7b0e52f0a32a2705fe8f268d0561a1f2cc5e6e92f3c85d2631fa2feaaa5354933c7f6197c672443bda4c43064c652a54
   languageName: node
   linkType: hard
 
@@ -2001,7 +2001,7 @@ __metadata:
   dependencies:
     "@odata2ts/converter-api": ^0.1.1
     "@odata2ts/converter-runtime": ^0.1.2
-    "@odata2ts/converter-v2-to-v4": ^0.1.0
+    "@odata2ts/converter-v2-to-v4": ^0.1.2
     "@odata2ts/odata-client-api": ^0.6.2
     "@odata2ts/odata-core": ^0.3.3
     "@odata2ts/odata-query-objects": ^0.16.2
