@@ -11,7 +11,7 @@
     "composite": false,
     "declaration": true,
     "declarationMap": false,
-    "sourceMap": true,
+    "sourceMap": false,
     "skipLibCheck": true,
     "importHelpers": true,
     "esModuleInterop": true,
