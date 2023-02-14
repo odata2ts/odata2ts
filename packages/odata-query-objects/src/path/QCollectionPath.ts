@@ -27,6 +27,10 @@ export class QCollectionPath<CollectionType extends QueryObject> implements QEnt
     return new (this.qEntityFn())(withPrefix ? this.path : undefined, this.__converter);
   }
 
+  public isCollectionType() {
+    return true;
+  }
+
   private lambdaFunction(operationName: string, fn: (qObject: CollectionType) => QFilterExpression, prefix: string) {
     // no prefix here => because $it needs to be replaced
     const expression = fn(new (this.qEntityFn())());

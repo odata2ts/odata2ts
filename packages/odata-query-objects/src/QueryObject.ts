@@ -79,6 +79,7 @@ export class QueryObject<T extends object = any> {
             // => we unwrap this to stay true to the generated model interfaces
             const wrappedValue = value as unknown as { results: Array<object> };
             const sanitizedValue =
+              asComplexType.isCollectionType() &&
               wrappedValue &&
               typeof wrappedValue === "object" &&
               typeof wrappedValue.results === "object" &&

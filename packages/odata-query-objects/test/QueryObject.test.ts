@@ -1,5 +1,6 @@
 import { FIXED_DATE, FIXED_STRING } from "@odata2ts/test-converters";
 
+import { QEntityCollectionPath, QEntityPath, QStringV2Path, QueryObject } from "../src";
 import { QSimpleEntityWithConverter, QTestEntity } from "./fixture/SimpleEntityWithConverter";
 
 describe("QueryObject tests", () => {
@@ -97,6 +98,28 @@ describe("QueryObject tests", () => {
     });
     expect(qToTestWithAssoc.convertFromOData({ options: null })).toStrictEqual({ options: null });
     expect(qToTestWithAssoc.convertFromOData({ options: undefined })).toStrictEqual({ options: undefined });
+  });
+
+  test("convertFromOData: check that workaround is only applied when needed", () => {
+    interface ResultModel {
+      NAME: string;
+    }
+    interface TestModel {
+      results: Array<ResultModel>;
+    }
+    class QResult extends QueryObject<ResultModel> {
+      public readonly name = new QStringV2Path("NAME");
+    }
+    class QTest extends QueryObject<TestModel> {
+      public readonly results = new QEntityCollectionPath("results", () => QResult);
+    }
+    class QOuter extends QueryObject<{ test: TestModel }> {
+      public readonly test = new QEntityPath("test", () => QTest);
+    }
+
+    const model = { test: { results: [{ NAME: "Test" }] } };
+    const output = { test: { results: [{ name: "Test" }] } };
+    expect(new QOuter().convertFromOData(model)).toStrictEqual(output);
   });
 
   test("convertToOData: full model", () => {
