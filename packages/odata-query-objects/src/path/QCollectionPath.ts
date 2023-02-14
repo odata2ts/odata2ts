@@ -3,7 +3,7 @@ import { ValueConverter } from "@odata2ts/converter-api";
 import { LambdaFunctions } from "../odata/ODataModel";
 import { QFilterExpression } from "../QFilterExpression";
 import { QueryObject } from "../QueryObject";
-import { QEntityPathModel, QPathModel } from "./QPathModel";
+import { QEntityPathModel } from "./QPathModel";
 
 export class QCollectionPath<CollectionType extends QueryObject> implements QEntityPathModel<CollectionType> {
   constructor(
@@ -25,6 +25,10 @@ export class QCollectionPath<CollectionType extends QueryObject> implements QEnt
 
   public getEntity(withPrefix: boolean = false): CollectionType {
     return new (this.qEntityFn())(withPrefix ? this.path : undefined, this.__converter);
+  }
+
+  public isCollectionType() {
+    return true;
   }
 
   private lambdaFunction(operationName: string, fn: (qObject: CollectionType) => QFilterExpression, prefix: string) {

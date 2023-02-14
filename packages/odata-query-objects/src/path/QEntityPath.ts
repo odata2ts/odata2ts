@@ -19,6 +19,10 @@ export class QEntityPath<Q extends QueryObject> implements QEntityPathModel<Q> {
     return new (this.qEntityFn())(withPrefix ? this.path : undefined);
   }
 
+  public isCollectionType() {
+    return false;
+  }
+
   public get props(): Q {
     return new (this.qEntityFn())(this.path);
   }
