@@ -31,7 +31,6 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   const dataService = metadataJson["edmx:Edmx"]["edmx:DataServices"][0];
 
   // handling multiple schemas => merge them
-  // TODO only necessary for NorthwindModel => other use cases?
   const schemaRaw = dataService.Schema.reduce(
     (collector, schema) => ({
       ...schema,
@@ -39,9 +38,13 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
     }),
     {} as Schema<any, any>
   );
+  const detectedServiceName =
+    dataService.Schema.length === 1
+      ? dataService.Schema[0].$.Namespace
+      : dataService.Schema.find((schema) => !schema.EntityContainer)?.$.Namespace;
 
   // encapsulate the whole naming logic
-  const namingHelper = new NamingHelper(options, (schemaRaw as SchemaV3).$.Namespace, options.serviceName);
+  const namingHelper = new NamingHelper(options, detectedServiceName, options.serviceName);
   // parse model information from edmx into something we can really work with
   // => that stuff is called dataModel!
   const dataModel =
