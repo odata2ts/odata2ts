@@ -21,6 +21,7 @@ export interface Schema<ET extends EntityType, CT extends ComplexType> {
   EntityType?: Array<ET>;
   ComplexType?: Array<CT>;
   EnumType?: Array<EnumType>;
+  EntityContainer?: Array<any>;
 }
 
 export interface EntityContainer<ES = EntitySet> {
