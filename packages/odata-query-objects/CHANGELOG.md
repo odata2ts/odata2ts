@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.17.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.16.4...@odata2ts/odata-query-objects@0.17.0) (2023-02-14)
+
+### Features
+
+* workaround for extra results wrapping ([#131](https://github.com/odata2ts/odata2ts/issues/131)) ([abef1d2](https://github.com/odata2ts/odata2ts/commit/abef1d2e6765bee7be764add5aae6a1f3b77adb0))
+
 ## [0.16.4](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.16.1...@odata2ts/odata-query-objects@0.16.4) (2023-02-13)
 
 **Note:** Version bump only for package @odata2ts/odata-query-objects

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.19.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.18.6...@odata2ts/odata2ts@0.19.0) (2023-02-14)
+
+### Features
+
+* improved handling of multiple schemas ([#133](https://github.com/odata2ts/odata2ts/issues/133)) ([9c7733f](https://github.com/odata2ts/odata2ts/commit/9c7733f5f95e8f65df52ed13889d352cc9c7f4fb))
+
 ## [0.18.6](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.18.3...@odata2ts/odata2ts@0.18.6) (2023-02-13)
 
 ### Bug Fixes
