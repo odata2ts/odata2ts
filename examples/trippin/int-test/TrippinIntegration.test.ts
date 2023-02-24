@@ -10,7 +10,7 @@ import { TrippinService } from "../build/trippin/TrippinService";
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
   // const odataClient = new AxiosODataClient();
-  const $ = jQuery(new JSDOM().window);
+  const $ = jQuery(new JSDOM().window) as unknown as JQueryStatic;
   const odataClient = new JQueryODataClient($);
 
   const testService = new TrippinService(odataClient, BASE_URL);
