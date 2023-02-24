@@ -32,7 +32,7 @@
     "js"
   ],
   "peerDependencies": {
-    "jquery": "*"
+    "jquery": ">1.0"
   },
   "dependencies": {
     "@odata2ts/odata-client-api": "^0.6.2"

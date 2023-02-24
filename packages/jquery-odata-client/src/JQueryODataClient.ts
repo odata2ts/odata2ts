@@ -1,14 +1,11 @@
 import { HttpResponseModel, ODataClient } from "@odata2ts/odata-client-api";
-import $ from "jquery";
+// only needed for typings; imported via namespace
+import type jq from "jquery";
 
 import { AjaxRequestConfig, getDefaultConfig, mergeAjaxConfig } from "./AjaxConfig";
 import { RequestError } from "./ODataRequestErrorModel";
 
-import jqXHR = JQuery.jqXHR;
-
 export type ErrorMessageRetriever = (errorResponse: any) => string | undefined;
-
-type JQueryInstance = JQuery<any> & Pick<JQueryStatic, "ajax">;
 
 export interface ClientOptions {
   // useCsrfProtection?: boolean;
@@ -21,12 +18,12 @@ export const getV2OrV4ErrorMessage: ErrorMessageRetriever = (errorResponse: any)
 };
 
 export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
-  private client: JQueryInstance;
+  private client: JQueryStatic;
   private config: JQuery.AjaxSettings;
   private getErrorMessage: ErrorMessageRetriever = getV2OrV4ErrorMessage;
 
-  constructor(jquery: JQuery<any>, config?: AjaxRequestConfig, private clientOptions?: ClientOptions) {
-    this.client = jquery as JQueryInstance;
+  constructor(jquery: JQueryStatic, config?: AjaxRequestConfig, private clientOptions?: ClientOptions) {
+    this.client = jquery;
     this.config = getDefaultConfig(config);
   }
 
@@ -42,7 +39,7 @@ export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
     return new Promise((resolve, reject) => {
       this.client.ajax({
         ...mergedConfig,
-        success: (response: any, textStatus: string, jqXHR: jqXHR) => {
+        success: (response: any, textStatus: string, jqXHR: JQuery.jqXHR) => {
           resolve({
             status: jqXHR.status,
             statusText: jqXHR.statusText,
@@ -50,7 +47,7 @@ export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
             data: response,
           });
         },
-        error: (jqXHR: jqXHR, textStatus: string, thrownError: string) => {
+        error: (jqXHR: JQuery.jqXHR, textStatus: string, thrownError: string) => {
           const message = this.getErrorMessage(jqXHR.responseJSON);
 
           reject(
