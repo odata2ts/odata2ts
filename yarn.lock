@@ -1963,7 +1963,7 @@ __metadata:
     ts-node: 10.7.0
     typescript: 4.9.4
   peerDependencies:
-    jquery: "*"
+    jquery: ">1.0"
   languageName: unknown
   linkType: soft
 

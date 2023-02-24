@@ -1,6 +1,7 @@
+/// <reference path="../../../node_modules/@types/jquery/misc.d.ts" />
+/// <reference path="../../../node_modules/@types/jquery/JQueryStatic.d.ts" />
+
 import { HttpResponseModel, ODataClient } from "@odata2ts/odata-client-api";
-// only needed for typings; imported via namespace
-import type jq from "jquery";
 
 import { AjaxRequestConfig, getDefaultConfig, mergeAjaxConfig } from "./AjaxConfig";
 import { RequestError } from "./ODataRequestErrorModel";
