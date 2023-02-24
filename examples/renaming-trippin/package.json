@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/example-renaming",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "publishConfig": {
     "access": "public"

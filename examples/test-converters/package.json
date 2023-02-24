@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/test-converters",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "private": true,
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",

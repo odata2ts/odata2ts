@@ -1931,7 +1931,7 @@ __metadata:
   resolution: "@odata2ts/example-trippin@workspace:examples/trippin"
   dependencies:
     "@odata2ts/axios-odata-client": ^0.5.2
-    "@odata2ts/jquery-odata-client": 0.0.0
+    "@odata2ts/jquery-odata-client": ^0.1.0
     "@odata2ts/odata-service": ^0.13.5
     "@odata2ts/odata2ts": ^0.19.0
     "@types/jest": ^27.4.1
@@ -1948,7 +1948,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/jquery-odata-client@0.0.0, @odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client":
+"@odata2ts/jquery-odata-client@^0.1.0, @odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client":
   version: 0.0.0-use.local
   resolution: "@odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client"
   dependencies:

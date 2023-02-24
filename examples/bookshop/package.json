@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/example-bookshop",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "private": true,
   "publishConfig": {
     "access": "public"

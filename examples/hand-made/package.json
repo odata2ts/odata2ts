@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/example-hand-made",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "private": true,
   "publishConfig": {
     "access": "public"
