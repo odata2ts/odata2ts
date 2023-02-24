@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.19.0...@odata2ts/odata2ts@0.19.1) (2023-02-24)
+
+### Bug Fixes
+
+* **odata2ts:** ts-node as proper dep instead of peer-dep ([2050524](https://github.com/odata2ts/odata2ts/commit/2050524e8102549f2fca3911d55834892f0caf94))
+
 # [0.19.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.18.6...@odata2ts/odata2ts@0.19.0) (2023-02-14)
 
 ### Features
