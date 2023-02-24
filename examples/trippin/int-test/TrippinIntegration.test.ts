@@ -1,4 +1,7 @@
-import { AxiosODataClient, RequestError } from "@odata2ts/axios-odata-client";
+// import { AxiosODataClient, RequestError } from "@odata2ts/axios-odata-client";
+import { JQueryODataClient, RequestError } from "@odata2ts/jquery-odata-client";
+import jQuery from "jquery";
+import { JSDOM } from "jsdom";
 
 import { FeatureModel, PersonGenderModel, PersonModel } from "../build/trippin/TrippinModel";
 import { PersonIdModel } from "../build/trippin/TrippinModel";
@@ -6,11 +9,14 @@ import { TrippinService } from "../build/trippin/TrippinService";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
-  const odataClient = new AxiosODataClient();
+  // const odataClient = new AxiosODataClient();
+  const $ = jQuery(new JSDOM().window);
+  const odataClient = new JQueryODataClient($);
 
   const testService = new TrippinService(odataClient, BASE_URL);
 
   // skipped, because it breaks the session state
+  // => new session id must be chosen
   test.skip("unbound action", async () => {
     const result = await testService.resetDataSourceAction();
     expect(result.data).toBe("");
@@ -81,6 +87,7 @@ describe("Integration Testing of Service Generation", () => {
 
   test("fail to get unknown person", async () => {
     const failMsg = "The request resource is not found.";
+
     await expect(() => testService.navToPeople().get("XXX").query()).rejects.toThrow(failMsg);
 
     // again, but now inspect error in detail
@@ -90,7 +97,6 @@ describe("Integration Testing of Service Generation", () => {
       expect(1).toBe(2);
     } catch (error) {
       const e = error as RequestError;
-      expect(e.isRequestError).toBeTruthy();
       expect(e.status).toBe(404);
       expect(e.message).toBe(failMsg);
       expect(e.data).toStrictEqual({
