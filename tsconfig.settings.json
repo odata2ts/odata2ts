@@ -12,6 +12,7 @@
     "declaration": true,
     "declarationMap": false,
     "sourceMap": true,
+    "inlineSources": true,
     "skipLibCheck": true,
     "importHelpers": true,
     "esModuleInterop": true,

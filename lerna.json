@@ -1,4 +1,5 @@
 {
+  "$schema": "node_modules/@lerna-lite/cli/schemas/lerna-schema.json",
   "npmClient": "yarn",
   "useWorkspaces": true,
   "version": "independent",
@@ -7,7 +8,8 @@
       "allowBranch": "main",
       "conventionalCommits": true,
       "createRelease": "github",
-      "message": "chore(release): publish"
+      "message": "chore(release): publish",
+      "allowPeerDependenciesUpdate": true
     }
   }
 }

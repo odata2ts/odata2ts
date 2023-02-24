@@ -21,6 +21,10 @@ export class QEntityCollectionPath<Q extends QueryObject> implements QEntityPath
     return new (this.qEntityFn())(withPrefix ? this.path : undefined);
   }
 
+  public isCollectionType() {
+    return true;
+  }
+
   private lambdaFunction(operationName: string, fn: (qObject: Q) => QFilterExpression, prefix: string) {
     // create new qObject with given prefix
     const qEntity = new (this.qEntityFn())(prefix);

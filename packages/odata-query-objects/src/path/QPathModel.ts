@@ -10,4 +10,5 @@ export interface QValuePathModel extends QPathModel {
 
 export interface QEntityPathModel<Q> extends QPathModel {
   getEntity(withPrefix?: boolean): Q;
+  isCollectionType(): boolean;
 }
