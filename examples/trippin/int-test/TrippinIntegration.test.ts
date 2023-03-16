@@ -1,5 +1,5 @@
-// import { AxiosODataClient, RequestError } from "@odata2ts/axios-odata-client";
-import { JQueryODataClient, RequestError } from "@odata2ts/jquery-odata-client";
+// import { AxiosODataClient, AxiosODataClientError } from "@odata2ts/axios-odata-client";
+import { JQueryODataClient, JQueryODataClientError } from "@odata2ts/jquery-odata-client";
 import jQuery from "jquery";
 import { JSDOM } from "jsdom";
 
@@ -86,9 +86,12 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("fail to get unknown person", async () => {
-    const failMsg = "The request resource is not found.";
+    const jQueryClientMsgPrefix = "OData server error: ";
+    const jQueryFailMsg = "The request resource is not found.";
 
-    await expect(() => testService.navToPeople().get("XXX").query()).rejects.toThrow(failMsg);
+    await expect(() => testService.navToPeople().get("XXX").query()).rejects.toThrow(
+      jQueryClientMsgPrefix + jQueryFailMsg
+    );
 
     // again, but now inspect error in detail
     try {
@@ -96,13 +99,17 @@ describe("Integration Testing of Service Generation", () => {
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
-      const e = error as RequestError;
-      expect(e.status).toBe(404);
-      expect(e.message).toBe(failMsg);
-      expect(e.data).toStrictEqual({
+      const e = error as JQueryODataClientError;
+      expect(e.name).toBe("JQueryODataClientError");
+      expect(e.isJQueryODataClientError).toBeTruthy();
+      expect(e.message).toBe(jQueryClientMsgPrefix + jQueryFailMsg);
+      expect(e.cause).toBeDefined();
+      const jqXHR = e.cause;
+      expect(jqXHR?.status).toBe(404);
+      expect(jqXHR?.responseJSON).toStrictEqual({
         error: {
           code: "",
-          message: failMsg,
+          message: jQueryFailMsg,
         },
       });
     }

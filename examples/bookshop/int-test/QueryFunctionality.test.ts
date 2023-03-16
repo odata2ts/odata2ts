@@ -1,4 +1,4 @@
-import { RequestError } from "@odata2ts/axios-odata-client";
+import { AxiosODataClientError } from "@odata2ts/axios-odata-client";
 
 import { BooksModel } from "../src/catalog/CatalogModel";
 import { catalogService } from "./services";
@@ -39,8 +39,9 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   });
 
   test("get unknown book", async () => {
-    let failMsg = "Not Found";
-    await expect(() => testService.navToBooks().get(-1).query()).rejects.toThrow(failMsg);
+    const axiosClientMsgPrefix = "OData server error: ";
+    const axiosFailMsg = "Not Found";
+    await expect(() => testService.navToBooks().get(-1).query()).rejects.toThrow(axiosClientMsgPrefix + axiosFailMsg);
 
     // again, but now inspect error in detail
     try {
@@ -48,14 +49,18 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
-      const e = error as RequestError;
-      expect(e.isRequestError).toBeTruthy();
-      expect(e.status).toBe(404);
-      expect(e.message).toBe(failMsg);
-      expect(e.data).toStrictEqual({
+      const e = error as AxiosODataClientError;
+      expect(e.name).toBe("AxiosODataClientError");
+      expect(e.isAxiosOdataClientError).toBeTruthy();
+      expect(e.message).toBe(axiosClientMsgPrefix + axiosFailMsg);
+      expect(e.cause).toBeDefined();
+      const axiosError = e.cause;
+      expect(axiosError?.response).toBeDefined();
+      expect(axiosError?.response?.status).toBe(404);
+      expect(axiosError?.response?.data).toStrictEqual({
         error: {
           code: "404",
-          message: failMsg,
+          message: axiosFailMsg,
         },
       });
     }

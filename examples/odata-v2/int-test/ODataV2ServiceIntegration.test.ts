@@ -1,4 +1,4 @@
-import { AxiosODataClient, RequestError } from "@odata2ts/axios-odata-client";
+import { AxiosODataClient, AxiosODataClientError } from "@odata2ts/axios-odata-client";
 
 import { EditableProductModel, ProductModel } from "../build/odata/ODataDemoModel";
 import { ODataDemoService } from "../build/odata/ODataDemoService";
@@ -49,8 +49,9 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   });
 
   test("get unknown product", async () => {
-    let failMsg = "Resource not found for the segment 'Products'.";
-    await expect(() => testService.navToProducts().get(666).query()).rejects.toThrow(failMsg);
+    const axiosFailMsg = "Resource not found for the segment 'Products'.";
+    const axiosClientMsgPrefix = "OData server error: ";
+    await expect(() => testService.navToProducts().get(666).query()).rejects.toThrow(axiosFailMsg);
 
     // again, but now inspect error in detail
     try {
@@ -58,14 +59,18 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
-      const e = error as RequestError;
-      expect(e.isRequestError).toBeTruthy();
-      expect(e.status).toBe(404);
-      expect(e.message).toBe(failMsg);
-      expect(e.data).toStrictEqual({
+      const e = error as AxiosODataClientError;
+      expect(e.name).toBe("AxiosODataClientError");
+      expect(e.isAxiosOdataClientError).toBeTruthy();
+      expect(e.message).toBe(axiosClientMsgPrefix + axiosFailMsg);
+      expect(e.cause).toBeDefined();
+      const axiosError = e.cause;
+      expect(axiosError?.response).toBeDefined();
+      expect(axiosError?.response?.status).toBe(404);
+      expect(axiosError?.response?.data).toStrictEqual({
         error: {
           code: "",
-          message: { lang: "en-US", value: failMsg },
+          message: { lang: "en-US", value: axiosFailMsg },
         },
       });
     }
