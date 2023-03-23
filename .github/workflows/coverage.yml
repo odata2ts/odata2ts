@@ -54,6 +54,8 @@ jobs:
         run: yarn --immutable
       - name: Build packages
         run: yarn build
+      - name: Type Test
+        run: yarn type-test
       - name: Test with coverage
         run: yarn coverage
       - name: Coveralls

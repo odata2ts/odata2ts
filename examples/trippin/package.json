@@ -15,7 +15,7 @@
     "generate": "odata2ts",
     "int-test": "jest ./int-test",
     "type-test": "tsc -p tsconfig.type-test.json",
-    "test": "yarn type-test && jest ./test"
+    "test": "jest ./test"
   },
   "dependencies": {
     "@odata2ts/axios-odata-client": "^0.5.2",
