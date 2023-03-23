@@ -1,7 +1,4 @@
-// import { AxiosODataClient, RequestError } from "@odata2ts/axios-odata-client";
-import { JQueryODataClient, RequestError } from "@odata2ts/jquery-odata-client";
-import jQuery from "jquery";
-import { JSDOM } from "jsdom";
+import { AxiosODataClient, RequestError } from "@odata2ts/axios-odata-client";
 
 import { FeatureModel, PersonGenderModel, PersonModel } from "../build/trippin/TrippinModel";
 import { PersonIdModel } from "../build/trippin/TrippinModel";
@@ -9,9 +6,7 @@ import { TrippinService } from "../build/trippin/TrippinService";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
-  // const odataClient = new AxiosODataClient();
-  const $ = jQuery(new JSDOM().window) as unknown as JQueryStatic;
-  const odataClient = new JQueryODataClient($);
+  const odataClient = new AxiosODataClient();
 
   const testService = new TrippinService(odataClient, BASE_URL);
 
