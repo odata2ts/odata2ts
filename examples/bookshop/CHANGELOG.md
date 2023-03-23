@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.6](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-bookshop@0.3.5...@odata2ts/example-bookshop@0.3.6) (2023-03-23)
+
+**Note:** Version bump only for package @odata2ts/example-bookshop
+
 ## [0.3.5](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-bookshop@0.3.4...@odata2ts/example-bookshop@0.3.5) (2023-02-24)
 
 **Note:** Version bump only for package @odata2ts/example-bookshop
@@ -38,6 +42,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### BREAKING CHANGES
 
 * **odata2ts:** changed default: uses "navToX" instead of "getXSrv" to navigate to other services; old behaviour can be restored via naming configuration prefix: "get", suffix: "Srv"
+
 * rename odata2model to odata2ts; affects import in `odata2ts.config`, affects scripts in `package.json` or any scripts which use to call `odata2model` command directly
 
 # 0.2.0 (2023-01-05)
