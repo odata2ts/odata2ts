@@ -387,7 +387,7 @@ class ServiceGenerator {
     serviceFile: SourceFile,
     importContainer: ImportContainer
   ) {
-    const idFunctionName = this.namingHelper.getQIdFunctionName(model.odataName);
+    const idFunctionName = model.qIdFunctionName;
     const collectionName = this.namingHelper.getCollectionServiceName(model.name);
 
     importContainer.addFromClientApi("ODataClient");
