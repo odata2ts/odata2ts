@@ -3,7 +3,7 @@ import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
 const config: ConfigFileOptions = {
   debug: true,
   mode: Modes.service,
-  emitMode: EmitModes.js_dts,
+  emitMode: EmitModes.ts,
   // TrippinService does not generate IDs on the server, but the client side => demo service
   disableAutoManagedKey: true,
   allowRenaming: true,

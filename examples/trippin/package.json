@@ -13,8 +13,9 @@
     "build": "yarn clean && yarn generate",
     "clean": "rimraf build src/trippin",
     "generate": "odata2ts",
-    "int-test": "yarn test && jest ./int-test",
-    "test": "jest ./test"
+    "int-test": "jest ./int-test",
+    "type-test": "tsc -p tsconfig.type-test.json",
+    "test": "yarn type-test && jest ./test"
   },
   "dependencies": {
     "@odata2ts/axios-odata-client": "^0.5.2",
