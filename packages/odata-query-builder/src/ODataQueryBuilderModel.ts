@@ -100,7 +100,7 @@ export interface ODataQueryBuilderModel<Q extends QueryObject, ReturnType> {
    * Uses system query option $search.
    *
    * @example
-   * builder.search("term1", "this is a phrase) // $search=term1 AND "this is a phrase"
+   * builder.search("term1", "this is a phrase") // $search=term1 AND "this is a phrase"
    * @param terms
    * @returns this query builder
    */
