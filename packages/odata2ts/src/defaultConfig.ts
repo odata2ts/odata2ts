@@ -94,7 +94,7 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
     },
   },
   propertiesByName: [],
-  // entitiesByName: [],
+  entitiesByName: [],
 };
 
 const { models, queryObjects, services } = defaultConfig.naming;

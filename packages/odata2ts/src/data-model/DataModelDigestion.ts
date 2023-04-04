@@ -90,9 +90,12 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   }
 
   private getBaseModel(model: ComplexType) {
-    const name = this.namingHelper.getModelName(model.$.Name);
-    const qName = this.namingHelper.getQName(model.$.Name);
-    const editableName = this.namingHelper.getEditableModelName(model.$.Name);
+    const entityConfig = this.serviceConfigHelper.findConfigEntityByName(model.$.Name);
+    const entityName = entityConfig?.mappedName || model.$.Name;
+
+    const name = this.namingHelper.getModelName(entityName);
+    const qName = this.namingHelper.getQName(entityName);
+    const editableName = this.namingHelper.getEditableModelName(entityName);
     const odataName = model.$.Name;
     const bType = model.$.BaseType;
     const props = [...(model.Property ?? []), ...this.getNavigationProps(model)];
@@ -132,20 +135,26 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     for (const model of models) {
       const baseModel = this.getBaseModel(model);
+      const entityConfig = this.serviceConfigHelper.findConfigEntityByName(model.$.Name);
+      const entityName = entityConfig?.mappedName || model.$.Name;
 
       // key support: we add keys from this entity,
       // but not keys stemming from base classes (postprocess required)
       const keyNames: Array<string> = [];
-      const entity = model as EntityType;
-      if (entity.Key && entity.Key.length && entity.Key[0].PropertyRef.length) {
-        const propNames = entity.Key[0].PropertyRef.map((key) => key.$.Name);
-        keyNames.push(...propNames);
+      if (entityConfig?.keys?.length) {
+        keyNames.push(...entityConfig.keys);
+      } else {
+        const entity = model as EntityType;
+        if (entity.Key && entity.Key.length && entity.Key[0].PropertyRef.length) {
+          const propNames = entity.Key[0].PropertyRef.map((key) => key.$.Name);
+          keyNames.push(...propNames);
+        }
       }
 
       this.dataModel.addModel(baseModel.name, {
         ...baseModel,
-        idModelName: this.namingHelper.getIdModelName(model.$.Name),
-        qIdFunctionName: this.namingHelper.getQIdFunctionName(model.$.Name),
+        idModelName: this.namingHelper.getIdModelName(entityName),
+        qIdFunctionName: this.namingHelper.getQIdFunctionName(entityName),
         generateId: true,
         keyNames: keyNames, // postprocess required to include key specs from base classes
         keys: [], // postprocess required to include props from base classes
