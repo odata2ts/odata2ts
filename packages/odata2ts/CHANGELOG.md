@@ -3,11 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.20.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.19.2...@odata2ts/odata2ts@0.20.0) (2023-04-04)
+
+### Features
+
+* **odata2ts:** Entity configuration options ([#145](https://github.com/odata2ts/odata2ts/issues/145)) ([03264c5](https://github.com/odata2ts/odata2ts/commit/03264c5f31a758f9b8d854630cf2c90632e9d8d8))
+
 ## [0.19.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.19.1...@odata2ts/odata2ts@0.19.2) (2023-03-23)
 
 ### Bug Fixes
 
 * **odata2ts:** entity resolver uses wrong Q-Id function when id is inherited ([e05f4eb](https://github.com/odata2ts/odata2ts/commit/e05f4ebd8afd472cdad0194f899159d2a60c3d92))
+
 * **odata2ts:** semantically wrong unit test ([541a687](https://github.com/odata2ts/odata2ts/commit/541a6874517ef6444fe6f428b64dc894158b066b))
 
 ## [0.19.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.19.0...@odata2ts/odata2ts@0.19.1) (2023-02-24)
