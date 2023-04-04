@@ -180,4 +180,62 @@ export function createDataModelTests(
     expect(toTest.qIdFunctionName).toBe("YYY_TEST_KEY_FUNC");
     expect(toTest.editableName).toBe("TEST_EDIT_DUMMY");
   });
+
+  test("property configuration", async () => {
+    digestionOptions.allowRenaming = true;
+    digestionOptions.propertiesByName = [
+      { name: "ID", mappedName: "newId", managed: true },
+      { name: /ageOfEmpire/, mappedName: "age" },
+    ];
+
+    odataBuilder
+      .addEntityType("Test", undefined, (builder) => {
+        builder.addKeyProp("ID", "Edm.String");
+      })
+      .addComplexType("ComplexTest", undefined, (builder) => {
+        builder.addProp("ageOfEmpire", "Edm.Int32");
+      });
+
+    const result = await doDigest();
+
+    let toTest = result.getModels()[0].props[0];
+    expect(toTest.odataName).toBe("ID");
+    expect(toTest.name).toBe("newId");
+    expect(toTest.managed).toBe(true);
+
+    toTest = result.getComplexTypes()[0].props[0];
+    expect(toTest.odataName).toBe("ageOfEmpire");
+    expect(toTest.name).toBe("age");
+    expect(toTest.managed).toBeUndefined();
+  });
+
+  test("entity configuration", async () => {
+    digestionOptions.allowRenaming = true;
+    digestionOptions.entitiesByName = [
+      { name: "Test", mappedName: "newTest" },
+      { name: /Complex.*/, mappedName: "cmplx" },
+    ];
+
+    odataBuilder
+      .addEntityType("Test", undefined, (builder) => {
+        builder.addKeyProp("ID", "Edm.String");
+      })
+      .addComplexType("ComplexTest", undefined, (builder) => {
+        builder.addProp("ageOfEmpire", "Edm.Int32");
+      });
+
+    const result = await doDigest();
+
+    let toTest = result.getModels()[0];
+    expect(toTest.odataName).toBe("Test");
+    expect(toTest.name).toBe("NewTest");
+    expect(toTest.idModelName).toBe("NewTestId");
+    expect(toTest.qIdFunctionName).toBe("QNewTestId");
+    expect(toTest.editableName).toBe("EditableNewTest");
+
+    let toTestCmplx = result.getComplexTypes()[0];
+    expect(toTestCmplx.odataName).toBe("ComplexTest");
+    expect(toTestCmplx.name).toBe("Cmplx");
+    expect(toTestCmplx.editableName).toBe("EditableCmplx");
+  });
 }
