@@ -195,6 +195,10 @@ export interface EntityGenerationOptions {
    */
   mappedName?: string;
   /**
+   * Overwrite the key specification by naming the props by their EDMX name.
+   */
+  keys?: Array<string>;
+  /**
    * Configuration of individual properties.
    */
   // properties?: Array<PropertyGenerationOptions>;

@@ -141,10 +141,14 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       // key support: we add keys from this entity,
       // but not keys stemming from base classes (postprocess required)
       const keyNames: Array<string> = [];
-      const entity = model as EntityType;
-      if (entity.Key && entity.Key.length && entity.Key[0].PropertyRef.length) {
-        const propNames = entity.Key[0].PropertyRef.map((key) => key.$.Name);
-        keyNames.push(...propNames);
+      if (entityConfig?.keys?.length) {
+        keyNames.push(...entityConfig.keys);
+      } else {
+        const entity = model as EntityType;
+        if (entity.Key && entity.Key.length && entity.Key[0].PropertyRef.length) {
+          const propNames = entity.Key[0].PropertyRef.map((key) => key.$.Name);
+          keyNames.push(...propNames);
+        }
       }
 
       this.dataModel.addModel(baseModel.name, {
