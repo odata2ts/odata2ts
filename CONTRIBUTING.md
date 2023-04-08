@@ -21,13 +21,14 @@ then by all means **open an issue** on Github. Please feel encouraged to do so, 
 a shortcoming of the documentation.
 
 Also, if your OData service doesn't behave according to the specification, please create an issue as well.
-The world's not perfect and `odata2ts` should cope with that (see #144 for an example).
+The world's not perfect and `odata2ts` should cope with that 
+(see [issue #144](https://github.com/odata2ts/odata2ts/issues/144) for an example).
 
 ## Creating Issues
-Currently there's no template for creating issues in place.
-Take the previous issues as examples, they were all relevant and pretty well written.
+Currently, there's no template in place for creating issues.
+Use the closed issues as examples, they were all relevant and pretty well written.
 
-So you have read the relevant documentation parts and skimmed through the existing issues,
+So, you have read the relevant documentation parts and skimmed through the existing issues,
 then [go for it](https://github.com/odata2ts/odata2ts/issues/new).
 
 ## Code Contributions 
@@ -76,7 +77,7 @@ You execute them by changing to the module and calling `yarn int-test` from ther
 
 Nearly all integration tests are to be found in the [example projects](https://github.com/odata2ts/odata2ts/tree/main/examples).
 
-### Commits & Pull Request
+### Commits & Pull Requests
 We love [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) and use them to drive
 our semantic versioning. Try to adhere to these conventions. `odata2ts` uses the following `types`:
 - `fix`: Bug fixes, fixing typos, etc.

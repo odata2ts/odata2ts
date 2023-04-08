@@ -30,7 +30,7 @@ via [GitHub issues](https://github.com/odata2ts/odata2ts/issues).
 
 Contributions and feedback are encouraged and always welcome.
 
-See the [contribution guidelines](./CONTRIBUTING) for further information.
+See the [contribution guidelines](https://github.com/odata2ts/odata2ts/blob/main/CONTRIBUTING.md) for further information.
 
 ## Spirit
 This project and this module have been created and are maintained in the following spirit:
