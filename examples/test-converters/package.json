@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/test-converters",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "private": true,
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
@@ -20,7 +20,7 @@
   ],
   "dependencies": {
     "@odata2ts/converter-api": "^0.1.1",
-    "@odata2ts/odata-core": "^0.3.6"
+    "@odata2ts/odata-core": "^0.3.7"
   },
   "devDependencies": {
     "rimraf": "^3.0.2",

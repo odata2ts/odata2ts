@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-core",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "publishConfig": {
     "access": "public"
   },

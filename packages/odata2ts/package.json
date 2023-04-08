@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata2ts",
-  "version": "0.20.0",
+  "version": "0.20.1",
   "publishConfig": {
     "access": "public"
   },
@@ -46,14 +46,14 @@
     "js"
   ],
   "peerDependencies": {
-    "@odata2ts/odata-client-api": "^0.6.0",
-    "@odata2ts/odata-query-objects": "^0.17.0",
-    "@odata2ts/odata-service": "^0.13.6"
+    "@odata2ts/odata-client-api": "^0.6.3",
+    "@odata2ts/odata-query-objects": "^0.17.1",
+    "@odata2ts/odata-service": "^0.13.7"
   },
   "dependencies": {
     "@odata2ts/converter-api": "^0.1.1",
     "@odata2ts/converter-runtime": "^0.1.2",
-    "@odata2ts/odata-core": "^0.3.6",
+    "@odata2ts/odata-core": "^0.3.7",
     "camel-case": "^4.1.2",
     "commander": "^9.1.0",
     "constant-case": "^3.0.4",
@@ -72,9 +72,9 @@
   },
   "devDependencies": {
     "@odata2ts/converter-v2-to-v4": "^0.1.2",
-    "@odata2ts/odata-client-api": "^0.6.2",
-    "@odata2ts/odata-query-objects": "^0.17.0",
-    "@odata2ts/odata-service": "^0.13.6",
+    "@odata2ts/odata-client-api": "^0.6.3",
+    "@odata2ts/odata-query-objects": "^0.17.1",
+    "@odata2ts/odata-service": "^0.13.7",
     "@types/fs-extra": "^9.0.13",
     "@types/jest": "^27.4.1",
     "@types/node": "^17.0.23",

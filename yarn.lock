@@ -1793,11 +1793,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/axios-odata-client@^0.5.2, @odata2ts/axios-odata-client@workspace:packages/axios-odata-client":
+"@odata2ts/axios-odata-client@^0.5.3, @odata2ts/axios-odata-client@workspace:packages/axios-odata-client":
   version: 0.0.0-use.local
   resolution: "@odata2ts/axios-odata-client@workspace:packages/axios-odata-client"
   dependencies:
-    "@odata2ts/odata-client-api": ^0.6.2
+    "@odata2ts/odata-client-api": ^0.6.3
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     axios: ^0.27.2
@@ -1858,9 +1858,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-bookshop@workspace:examples/bookshop"
   dependencies:
-    "@odata2ts/axios-odata-client": ^0.5.2
-    "@odata2ts/odata-service": ^0.13.6
-    "@odata2ts/odata2ts": ^0.20.0
+    "@odata2ts/axios-odata-client": ^0.5.3
+    "@odata2ts/odata-service": ^0.13.7
+    "@odata2ts/odata2ts": ^0.20.1
     "@sap/cds": ">=5.9"
     "@sap/cds-odata-v2-adapter-proxy": ^1.9.4
     "@types/jest": ^27.4.1
@@ -1880,8 +1880,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-hand-made@workspace:examples/hand-made"
   dependencies:
-    "@odata2ts/odata-service": ^0.13.6
-    "@odata2ts/odata2ts": ^0.20.0
+    "@odata2ts/odata-service": ^0.13.7
+    "@odata2ts/odata2ts": ^0.20.1
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: ^27.5.1
@@ -1896,9 +1896,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-odata-v2@workspace:examples/odata-v2"
   dependencies:
-    "@odata2ts/axios-odata-client": ^0.5.2
-    "@odata2ts/odata-service": ^0.13.6
-    "@odata2ts/odata2ts": ^0.20.0
+    "@odata2ts/axios-odata-client": ^0.5.3
+    "@odata2ts/odata-service": ^0.13.7
+    "@odata2ts/odata2ts": ^0.20.1
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: ^27.5.1
@@ -1913,9 +1913,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-renaming@workspace:examples/renaming-trippin"
   dependencies:
-    "@odata2ts/axios-odata-client": ^0.5.2
-    "@odata2ts/odata-service": ^0.13.6
-    "@odata2ts/odata2ts": ^0.20.0
+    "@odata2ts/axios-odata-client": ^0.5.3
+    "@odata2ts/odata-service": ^0.13.7
+    "@odata2ts/odata2ts": ^0.20.1
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: ^27.5.1
@@ -1930,10 +1930,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-trippin@workspace:examples/trippin"
   dependencies:
-    "@odata2ts/axios-odata-client": ^0.5.2
-    "@odata2ts/jquery-odata-client": ^0.1.1
-    "@odata2ts/odata-service": ^0.13.6
-    "@odata2ts/odata2ts": ^0.20.0
+    "@odata2ts/axios-odata-client": ^0.5.3
+    "@odata2ts/jquery-odata-client": ^0.1.2
+    "@odata2ts/odata-service": ^0.13.7
+    "@odata2ts/odata2ts": ^0.20.1
     "@types/jest": ^27.4.1
     "@types/jquery": ^3.5.16
     "@types/jsdom": ^21.1.0
@@ -1948,11 +1948,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/jquery-odata-client@^0.1.1, @odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client":
+"@odata2ts/jquery-odata-client@^0.1.2, @odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client":
   version: 0.0.0-use.local
   resolution: "@odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client"
   dependencies:
-    "@odata2ts/odata-client-api": ^0.6.2
+    "@odata2ts/odata-client-api": ^0.6.3
     "@types/jest": ^27.4.1
     "@types/jquery": ^3.5.16
     "@types/node": ^17.0.23
@@ -1967,7 +1967,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-client-api@^0.6.2, @odata2ts/odata-client-api@workspace:packages/odata-client-api":
+"@odata2ts/odata-client-api@^0.6.3, @odata2ts/odata-client-api@workspace:packages/odata-client-api":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-client-api@workspace:packages/odata-client-api"
   dependencies:
@@ -1981,7 +1981,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-core@^0.3.6, @odata2ts/odata-core@workspace:packages/odata-core":
+"@odata2ts/odata-core@^0.3.7, @odata2ts/odata-core@workspace:packages/odata-core":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-core@workspace:packages/odata-core"
   dependencies:
@@ -2002,11 +2002,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/odata-query-builder@^0.15.7, @odata2ts/odata-query-builder@workspace:packages/odata-query-builder":
+"@odata2ts/odata-query-builder@^0.15.8, @odata2ts/odata-query-builder@workspace:packages/odata-query-builder":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-builder@workspace:packages/odata-query-builder"
   dependencies:
-    "@odata2ts/odata-query-objects": ^0.17.0
+    "@odata2ts/odata-query-objects": ^0.17.1
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     axios: ^0.26.1
@@ -2019,14 +2019,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-query-objects@^0.17.0, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
+"@odata2ts/odata-query-objects@^0.17.1, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
     "@odata2ts/converter-api": ^0.1.0
     "@odata2ts/converter-runtime": ^0.1.0
-    "@odata2ts/odata-client-api": ^0.6.2
-    "@odata2ts/odata-core": ^0.3.6
+    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/odata-core": ^0.3.7
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: 27.5.1
@@ -2038,13 +2038,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-service@^0.13.6, @odata2ts/odata-service@workspace:packages/odata-service":
+"@odata2ts/odata-service@^0.13.7, @odata2ts/odata-service@workspace:packages/odata-service":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
-    "@odata2ts/odata-client-api": ^0.6.2
-    "@odata2ts/odata-query-builder": ^0.15.7
-    "@odata2ts/odata-query-objects": ^0.17.0
+    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/odata-query-builder": ^0.15.8
+    "@odata2ts/odata-query-objects": ^0.17.1
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: 27.5.1
@@ -2057,17 +2057,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2ts@^0.20.0, @odata2ts/odata2ts@workspace:packages/odata2ts":
+"@odata2ts/odata2ts@^0.20.1, @odata2ts/odata2ts@workspace:packages/odata2ts":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2ts@workspace:packages/odata2ts"
   dependencies:
     "@odata2ts/converter-api": ^0.1.1
     "@odata2ts/converter-runtime": ^0.1.2
     "@odata2ts/converter-v2-to-v4": ^0.1.2
-    "@odata2ts/odata-client-api": ^0.6.2
-    "@odata2ts/odata-core": ^0.3.6
-    "@odata2ts/odata-query-objects": ^0.17.0
-    "@odata2ts/odata-service": ^0.13.6
+    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/odata-core": ^0.3.7
+    "@odata2ts/odata-query-objects": ^0.17.1
+    "@odata2ts/odata-service": ^0.13.7
     "@types/fs-extra": ^9.0.13
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
@@ -2095,9 +2095,9 @@ __metadata:
     upper-case-first: ^2.0.2
     xml2js: ^0.4.23
   peerDependencies:
-    "@odata2ts/odata-client-api": ^0.6.0
-    "@odata2ts/odata-query-objects": ^0.17.0
-    "@odata2ts/odata-service": ^0.13.6
+    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/odata-query-objects": ^0.17.1
+    "@odata2ts/odata-service": ^0.13.7
   bin:
     odata2ts: lib/run-cli.js
   languageName: unknown
@@ -2108,7 +2108,7 @@ __metadata:
   resolution: "@odata2ts/test-converters@workspace:examples/test-converters"
   dependencies:
     "@odata2ts/converter-api": ^0.1.1
-    "@odata2ts/odata-core": ^0.3.6
+    "@odata2ts/odata-core": ^0.3.7
     rimraf: ^3.0.2
     typescript: 4.9.4
   languageName: unknown
