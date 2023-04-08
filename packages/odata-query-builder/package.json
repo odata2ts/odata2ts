@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-query-builder",
-  "version": "0.15.6",
+  "version": "0.15.7",
   "publishConfig": {
     "access": "public"
   },
