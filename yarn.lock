@@ -2083,7 +2083,7 @@ __metadata:
     type-fest: 2.19.0
     typescript: ^4.9.4
     upper-case-first: ^2.0.2
-    xml2js: ^0.4.23
+    xml2js: ^0.5.0
   peerDependencies:
     "@odata2ts/odata-client-api": ^0.6.3
     "@odata2ts/odata-query-objects": ^0.17.2
@@ -11277,6 +11277,16 @@ resolve@^1.20.0:
     sax: ">=0.6.0"
     xmlbuilder: ~11.0.0
   checksum: ca0cf2dfbf6deeaae878a891c8fbc0db6fd04398087084edf143cdc83d0509ad0fe199b890f62f39c4415cf60268a27a6aed0d343f0658f8779bd7add690fa98
+  languageName: node
+  linkType: hard
+
+"xml2js@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "xml2js@npm:0.5.0"
+  dependencies:
+    sax: ">=0.6.0"
+    xmlbuilder: ~11.0.0
+  checksum: 1aa71d62e5bc2d89138e3929b9ea46459157727759cbc62ef99484b778641c0cd21fb637696c052d901a22f82d092a3e740a16b4ce218e81ac59b933535124ea
   languageName: node
   linkType: hard
 

@@ -68,7 +68,7 @@
     "ts-node": "^10.7.0",
     "tsconfig-loader": "^1.1.0",
     "upper-case-first": "^2.0.2",
-    "xml2js": "^0.4.23"
+    "xml2js": "^0.5.0"
   },
   "devDependencies": {
     "@odata2ts/converter-v2-to-v4": "^0.1.2",
