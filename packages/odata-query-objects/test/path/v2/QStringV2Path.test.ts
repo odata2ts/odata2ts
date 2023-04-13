@@ -1,7 +1,7 @@
-import { getIdentityConverter } from "@odata2ts/converter-runtime";
 import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "@odata2ts/test-converters";
 
 import { QStringV2Path } from "../../../src";
+import { getIdentityConverter } from "../../../src/IdentityConverter";
 import { createStringTests } from "../StringBaseTests";
 
 describe("QStringV2Path test", () => {
