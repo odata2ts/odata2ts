@@ -1,7 +1,7 @@
-import { getIdentityConverter } from "@odata2ts/converter-runtime";
 import { stringToPrefixModelConverter } from "@odata2ts/test-converters";
 
 import { QStringPath } from "../../../src";
+import { getIdentityConverter } from "../../../src/IdentityConverter";
 import { createStringTests } from "../StringBaseTests";
 
 describe("QStringPath test", () => {

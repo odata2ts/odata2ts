@@ -1827,15 +1827,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/converter-runtime@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "@odata2ts/converter-runtime@npm:0.1.0"
-  dependencies:
-    "@odata2ts/converter-api": ^0.1.0
-  checksum: 675f6fd0d2a457cd2740a38d55ab2f56fdb6b549ef3c8a829932f8f5872f5c863a4040029413f08b030f6ce6c96cb13d9f383d328d3bcce72a0d0dba6282d6fc
-  languageName: node
-  linkType: hard
-
 "@odata2ts/converter-runtime@npm:^0.1.2":
   version: 0.1.2
   resolution: "@odata2ts/converter-runtime@npm:0.1.2"
@@ -2024,7 +2015,6 @@ __metadata:
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
     "@odata2ts/converter-api": ^0.1.0
-    "@odata2ts/converter-runtime": ^0.1.0
     "@odata2ts/odata-client-api": ^0.6.2
     "@odata2ts/odata-core": ^0.3.6
     "@types/jest": ^27.4.1
