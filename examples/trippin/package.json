@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/example-trippin",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "private": true,
   "publishConfig": {
     "access": "public"
@@ -18,12 +18,12 @@
     "test": "jest ./test"
   },
   "dependencies": {
-    "@odata2ts/axios-odata-client": "^0.5.2",
-    "@odata2ts/odata-service": "^0.13.5"
+    "@odata2ts/axios-odata-client": "^0.5.3",
+    "@odata2ts/odata-service": "^0.13.7"
   },
   "devDependencies": {
-    "@odata2ts/jquery-odata-client": "^0.1.1",
-    "@odata2ts/odata2ts": "^0.19.2",
+    "@odata2ts/jquery-odata-client": "^0.1.2",
+    "@odata2ts/odata2ts": "^0.20.1",
     "@types/jest": "^27.4.1",
     "@types/jquery": "^3.5.16",
     "@types/jsdom": "^21.1.0",

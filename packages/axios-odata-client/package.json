@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/axios-odata-client",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "publishConfig": {
     "access": "public"
   },
@@ -36,7 +36,7 @@
     "js"
   ],
   "dependencies": {
-    "@odata2ts/odata-client-api": "^0.6.2",
+    "@odata2ts/odata-client-api": "^0.6.3",
     "axios": "^0.27.2"
   },
   "devDependencies": {

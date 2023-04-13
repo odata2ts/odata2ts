@@ -169,9 +169,9 @@ export interface ServiceGenerationOptions
   extends Required<Pick<CliOptions, "source" | "output">>,
     Omit<ConfigFileOptions, "services"> {
   /**
-   * Configure generation process for EntityTypes and ComplexTypes including their properties.
+   * Configure generation process for EntityTypes and ComplexTypes including their keys and properties.
    */
-  // entitiesByName?: Array<EntityGenerationOptions>;
+  entitiesByName?: Array<EntityGenerationOptions>;
   /**
    * Configure generation process for individual properties based on their name.
    */
@@ -181,7 +181,7 @@ export interface ServiceGenerationOptions
 /**
  * Configuration options for EntityTypes and ComplexTypes.
  * This config applies if the name matches the name of an EntityType or ComplexType as it is specified
- * in the metadata (e.g. in EDMX <EntityType name="Test" ....)
+ * in the metadata (e.g. in EDMX <EntityType name="Test" ...)
  */
 export interface EntityGenerationOptions {
   /**
@@ -195,9 +195,13 @@ export interface EntityGenerationOptions {
    */
   mappedName?: string;
   /**
+   * Overwrite the key specification by naming the props by their EDMX name.
+   */
+  keys?: Array<string>;
+  /**
    * Configuration of individual properties.
    */
-  properties?: Array<PropertyGenerationOptions>;
+  // properties?: Array<PropertyGenerationOptions>;
 
   // converter: string | Array<string>
 
