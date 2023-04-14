@@ -221,7 +221,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         }
 
         props.push(...baseModel.props);
-        if (baseModel.keyNames) {
+        if (baseModel.keyNames.length) {
           keys.push(...baseModel.keyNames.filter((kn) => !keys.includes(kn)));
           idNameResult = baseModel.idModelName;
           qIdNameResult = baseModel.qIdFunctionName;
