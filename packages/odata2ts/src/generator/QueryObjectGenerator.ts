@@ -48,7 +48,14 @@ class QueryObjectGenerator {
   }
 
   private generateModels(importContainer: ImportContainer) {
-    this.dataModel.getModels().forEach((model) => {
+    const inheritedModels = this.dataModel.getModels().filter((m) => m.baseClasses.length);
+    const baseModels = this.dataModel.getModels().filter((m) => !m.baseClasses.length);
+    for (const model of inheritedModels) {
+      let index = baseModels.findIndex((m) => m.name == model.baseClasses[0]);
+      if (index != -1) index += 1;
+      baseModels.splice(index, 0, model);
+    }
+    baseModels.forEach((model) => {
       this.generateModel(model, importContainer);
       if (!this.options.skipIdModels) {
         this.generateIdFunction(model, importContainer);
@@ -57,7 +64,15 @@ class QueryObjectGenerator {
         this.generateBoundOperations(model.name, importContainer);
       }
     });
-    this.dataModel.getComplexTypes().forEach((model) => {
+
+    const inheritedComplexTypes = this.dataModel.getComplexTypes().filter((m) => m.baseClasses.length);
+    const baseComplexTypes = this.dataModel.getComplexTypes().filter((m) => !m.baseClasses.length);
+    for (const model of inheritedComplexTypes) {
+      let index = baseComplexTypes.findIndex((m) => m.name == model.baseClasses[0]);
+      if (index != -1) index += 1;
+      baseComplexTypes.splice(index, 0, model);
+    }
+    baseComplexTypes.forEach((model) => {
       this.generateModel(model, importContainer);
     });
 
