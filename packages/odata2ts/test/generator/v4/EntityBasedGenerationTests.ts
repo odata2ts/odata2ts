@@ -160,6 +160,24 @@ export function createEntityBasedGenerationTests(
     });
   });
 
+  test(`${testSuiteName}: base class order`, async () => {
+    // given an entity hierarchy not in order of inheritance
+    odataBuilder
+      .addEntityType("Child", "Parent", (builder) =>
+        builder.addKeyProp("id2", ODataTypesV4.Boolean).addProp("Ch1ld1shF4n", ODataTypesV4.Boolean)
+      )
+      .addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
+      .addEntityType("Parent", "GrandParent", (builder) => builder.addProp("parentalAdvice", ODataTypesV4.Boolean));
+
+    // when generating model
+    // then match fixture text from hierachy in order
+    await generateAndCompare("baseClassOrder", "entity-hierarchy.ts", {
+      skipIdModels: false,
+      skipEditableModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
   test(`${testSuiteName}: entity & enum`, async () => {
     // given an entity with enum props
     odataBuilder

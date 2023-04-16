@@ -15,6 +15,7 @@ import {
 import { NamingHelper } from "../data-model/NamingHelper";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel";
 import { ImportContainer } from "./ImportContainer";
+import { reorderModelsByInheritance } from "./ModelGenerator";
 
 export const generateQueryObjects: EntityBasedGeneratorFunction = (
   dataModel,
@@ -48,7 +49,7 @@ class QueryObjectGenerator {
   }
 
   private generateModels(importContainer: ImportContainer) {
-    const modelTypes = this.reorderModelsByInheritance<ModelType>(this.dataModel.getModels());
+    const modelTypes = reorderModelsByInheritance<ModelType>(this.dataModel.getModels());
     modelTypes.forEach((model) => {
       this.generateModel(model, importContainer);
       if (!this.options.skipIdModels) {
@@ -58,7 +59,7 @@ class QueryObjectGenerator {
         this.generateBoundOperations(model.name, importContainer);
       }
     });
-    const complexTypes = this.reorderModelsByInheritance<ComplexType>(this.dataModel.getComplexTypes());
+    const complexTypes = reorderModelsByInheritance<ComplexType>(this.dataModel.getComplexTypes());
     complexTypes.forEach((model) => {
       this.generateModel(model, importContainer);
     });
@@ -66,18 +67,6 @@ class QueryObjectGenerator {
     if (this.dataModel.getModels().length || this.dataModel.getComplexTypes().length) {
       importContainer.addFromQObject("QueryObject");
     }
-  }
-
-  private reorderModelsByInheritance<T extends ComplexType>(models: T[]): T[] {
-    // bring models in order of inheritance (base classes first)
-    const inheritedModels = models.filter((m) => m.baseClasses.length);
-    const baseModels = models.filter((m) => !m.baseClasses.length);
-    for (const model of inheritedModels) {
-      let index = baseModels.findIndex((m) => m.name == model.baseClasses[0]);
-      index = index == -1 ? baseModels.length : index + 1;
-      baseModels.splice(index, 0, model);
-    }
-    return baseModels;
   }
 
   private generateModel(model: ComplexType, importContainer: ImportContainer) {

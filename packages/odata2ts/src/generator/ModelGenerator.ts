@@ -12,6 +12,18 @@ export const generateModels: EntityBasedGeneratorFunction = (dataModel, sourceFi
   return generator.generate();
 };
 
+export function reorderModelsByInheritance<T extends ComplexType>(models: T[]): T[] {
+  // bring models in order of inheritance (base classes first)
+  const inheritedModels = models.filter((m) => m.baseClasses.length);
+  const baseModels = models.filter((m) => !m.baseClasses.length);
+  for (const model of inheritedModels) {
+    let index = baseModels.findIndex((m) => m.name == model.baseClasses[0]);
+    index = index == -1 ? baseModels.length : index + 1;
+    baseModels.splice(index, 0, model);
+  }
+  return baseModels;
+}
+
 const DEFERRED_CONTENT = "DeferredContent";
 
 class ModelGenerator {
@@ -46,7 +58,8 @@ class ModelGenerator {
   }
 
   private generateModels() {
-    this.dataModel.getModels().forEach((model) => {
+    const modelTypes = reorderModelsByInheritance(this.dataModel.getModels());
+    modelTypes.forEach((model) => {
       this.generateModel(model);
       if (!this.options.skipIdModels) {
         this.generateIdModel(model);
@@ -58,7 +71,8 @@ class ModelGenerator {
         this.generateBoundOperationParams(model.name);
       }
     });
-    this.dataModel.getComplexTypes().forEach((model) => {
+    const complexTypes = reorderModelsByInheritance(this.dataModel.getComplexTypes());
+    complexTypes.forEach((model) => {
       this.generateModel(model);
       if (!this.options.skipEditableModels) {
         this.generateEditableModel(model);
