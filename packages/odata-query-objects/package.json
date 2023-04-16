@@ -24,22 +24,15 @@
     "LICENSE"
   ],
   "keywords": [
-    "odata2ts",
-    "odata",
-    "odata v2",
-    "odata v4",
-    "query",
-    "query builder",
     "query object",
-    "typescript",
     "ts",
-    "javascript",
-    "js",
-    "typesafe",
-    "odata client"
+    "odata",
+    "odata2ts",
+    "typescript",
+    "type-safe"
   ],
   "dependencies": {
-    "@odata2ts/converter-api": "^0.1.0",
+    "@odata2ts/converter-api": "^0.1.2",
     "@odata2ts/odata-client-api": "^0.6.3",
     "@odata2ts/odata-core": "^0.3.7"
   },
