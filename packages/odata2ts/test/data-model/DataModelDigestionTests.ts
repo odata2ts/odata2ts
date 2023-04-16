@@ -64,6 +64,7 @@ export function createDataModelTests(
 
   test("using Id of base class", async () => {
     odataBuilder
+      .addEntityType("Child", "Parent", () => {})
       .addEntityType("GrandParent", undefined, (builder) => {
         builder.addKeyProp("ID", "Edm.String");
       })
@@ -71,11 +72,11 @@ export function createDataModelTests(
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(2);
-    expect(result.getModels()[1].name).toBe("Parent");
-    expect(result.getModels()[1].idModelName).toBe("GrandParentId");
-    expect(result.getModels()[1].qIdFunctionName).toBe("QGrandParentId");
-    expect(result.getModels()[1].generateId).toBe(false);
+    expect(result.getModels().length).toBe(3);
+    expect(result.getModels()[0].name).toBe("Child");
+    expect(result.getModels()[0].idModelName).toBe("GrandParentId");
+    expect(result.getModels()[0].qIdFunctionName).toBe("QGrandParentId");
+    expect(result.getModels()[0].generateId).toBe(false);
   });
 
   test("complex Id with base class", async () => {
