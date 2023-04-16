@@ -48,12 +48,11 @@ class QueryObjectGenerator {
   }
 
   private generateModels(importContainer: ImportContainer) {
-    // bring models in order of inheritance (base classes first)
     const inheritedModels = this.dataModel.getModels().filter((m) => m.baseClasses.length);
     const baseModels = this.dataModel.getModels().filter((m) => !m.baseClasses.length);
     for (const model of inheritedModels) {
       let index = baseModels.findIndex((m) => m.name == model.baseClasses[0]);
-      index = index == -1 ? baseModels.length : index + 1;
+      if (index != -1) index += 1;
       baseModels.splice(index, 0, model);
     }
     baseModels.forEach((model) => {
@@ -70,7 +69,7 @@ class QueryObjectGenerator {
     const baseComplexTypes = this.dataModel.getComplexTypes().filter((m) => !m.baseClasses.length);
     for (const model of inheritedComplexTypes) {
       let index = baseComplexTypes.findIndex((m) => m.name == model.baseClasses[0]);
-      index = index == -1 ? baseModels.length : index + 1;
+      if (index != -1) index += 1;
       baseComplexTypes.splice(index, 0, model);
     }
     baseComplexTypes.forEach((model) => {

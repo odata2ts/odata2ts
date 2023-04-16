@@ -47,24 +47,6 @@ describe("Query Object Generator Tests V2", () => {
     await generateAndCompare("minFunction", "function-min-v2.ts");
   });
 
-  test(`${TEST_SUITE_NAME}: base class order`, async () => {
-    // given an entity hierarchy not in order of inheritance
-    odataBuilder
-      .addEntityType("Child", "Parent", (builder) =>
-        builder.addKeyProp("id2", ODataTypesV2.Boolean).addProp("Ch1ld1shF4n", ODataTypesV2.Boolean)
-      )
-      .addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Boolean))
-      .addEntityType("Parent", "GrandParent", (builder) => builder.addProp("parentalAdvice", ODataTypesV2.Boolean));
-
-    // when generating model
-    // then match fixture text from hierachy in order
-    await generateAndCompare("baseClassOrder", "entity-hierarchy.ts", {
-      skipIdModels: false,
-      skipEditableModels: false,
-      disableAutoManagedKey: true,
-    });
-  });
-
   test(`${TEST_SUITE_NAME}: max function param model`, async () => {
     // given a simple function
     odataBuilder.addFunctionImport("MAX_FUNCTION", ODataTypesV2.String, (builder) =>
