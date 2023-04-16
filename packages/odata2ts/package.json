@@ -32,18 +32,17 @@
     "LICENSE"
   ],
   "keywords": [
-    "odata2ts",
-    "odata",
-    "odata v2",
-    "odata v4",
     "odata client",
-    "cli",
     "generator",
-    "odata client generator",
-    "typescript",
     "ts",
-    "javascript",
-    "js"
+    "model",
+    "interface",
+    "odata",
+    "typescript",
+    "odata2ts",
+    "v2",
+    "v4",
+    "cli"
   ],
   "peerDependencies": {
     "@odata2ts/odata-client-api": "^0.6.3",
@@ -51,8 +50,8 @@
     "@odata2ts/odata-service": "^0.13.8"
   },
   "dependencies": {
-    "@odata2ts/converter-api": "^0.1.1",
-    "@odata2ts/converter-runtime": "^0.1.2",
+    "@odata2ts/converter-api": "^0.1.2",
+    "@odata2ts/converter-runtime": "^0.1.5",
     "@odata2ts/odata-core": "^0.3.7",
     "camel-case": "^4.1.2",
     "commander": "^9.1.0",
@@ -71,7 +70,7 @@
     "xml2js": "^0.5.0"
   },
   "devDependencies": {
-    "@odata2ts/converter-v2-to-v4": "^0.1.2",
+    "@odata2ts/converter-v2-to-v4": "^0.1.4",
     "@odata2ts/odata-client-api": "^0.6.3",
     "@odata2ts/odata-query-objects": "^0.17.2",
     "@odata2ts/odata-service": "^0.13.8",
