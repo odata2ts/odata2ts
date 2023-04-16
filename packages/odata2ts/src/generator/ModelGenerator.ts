@@ -58,7 +58,7 @@ class ModelGenerator {
   }
 
   private generateModels() {
-    const modelTypes = reorderModelsByInheritance(this.dataModel.getModels());
+    const modelTypes = reorderModelsByInheritance<ModelType>(this.dataModel.getModels());
     modelTypes.forEach((model) => {
       this.generateModel(model);
       if (!this.options.skipIdModels) {
@@ -71,7 +71,7 @@ class ModelGenerator {
         this.generateBoundOperationParams(model.name);
       }
     });
-    const complexTypes = reorderModelsByInheritance(this.dataModel.getComplexTypes());
+    const complexTypes = reorderModelsByInheritance<ComplexType>(this.dataModel.getComplexTypes());
     complexTypes.forEach((model) => {
       this.generateModel(model);
       if (!this.options.skipEditableModels) {
