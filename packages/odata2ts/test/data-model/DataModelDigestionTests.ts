@@ -113,6 +113,9 @@ export function createDataModelTests(
     odataBuilder
       .addEntityType("GrandChild", "Child", (builder) => builder)
       .addEntityType("Child", "Parent", (builder) => builder)
+      .addEntityType("StandAlone", undefined, (builder) => {
+        builder.addKeyProp("ID", "Edm.String");
+      })
       .addEntityType("GrandParent", undefined, (builder) => {
         builder.addKeyProp("ID", "Edm.String");
       })
@@ -120,11 +123,12 @@ export function createDataModelTests(
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(4);
+    expect(result.getModels().length).toBe(5);
     expect(result.getModels()[0].name).toBe("GrandParent");
     expect(result.getModels()[1].name).toBe("Parent");
     expect(result.getModels()[2].name).toBe("Child");
     expect(result.getModels()[3].name).toBe("GrandChild");
+    expect(result.getModels()[4].name).toBe("StandAlone");
   });
 
   test.skip("converter test", async () => {
