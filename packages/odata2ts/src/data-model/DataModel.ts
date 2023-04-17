@@ -67,12 +67,21 @@ export class DataModel {
   }
 
   /**
-   * Retrieve all known models, i.e. EntityType and ComplexType nodes from the EDMX model.
+   * Retrieve all known EntityType models from the EDMX model.
    *
    * @returns list of model types
    */
   public getModels() {
     return Object.values(this.modelTypes);
+  }
+
+  /**
+   * Set all model entity types
+   *
+   * @param models new model types
+   */
+  public setModels(models: { [name: string]: ModelType }) {
+    this.modelTypes = models;
   }
 
   public addComplexType(name: string, model: ComplexType) {
@@ -90,12 +99,21 @@ export class DataModel {
   }
 
   /**
-   * Retrieve all known models, i.e. EntityType and ComplexType nodes from the EDMX model.
+   * Retrieve all known ComplexType models from the EDMX model.
    *
    * @returns list of model types
    */
   public getComplexTypes() {
     return Object.values(this.complexTypes);
+  }
+
+  /**
+   * Set all complex types
+   *
+   * @param models new complex types
+   */
+  public setComplexTypes(complexTypes: { [name: string]: ComplexType }) {
+    this.complexTypes = complexTypes;
   }
 
   public addEnum(name: string, type: EnumType) {

@@ -2,7 +2,7 @@ import { MappedConverterChains } from "@odata2ts/converter-runtime";
 
 import { DigestionOptions } from "../FactoryFunctionModel";
 import { DataModel } from "./DataModel";
-import { ComplexType as ComplexModelType, DataTypes, ODataVersion, PropertyModel } from "./DataTypeModel";
+import { ComplexType as ComplexModelType, DataTypes, ModelType, ODataVersion, PropertyModel } from "./DataTypeModel";
 import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModelBase";
 import { NamingHelper } from "./NamingHelper";
 import { ServiceConfigHelper } from "./ServiceConfigHelper";
@@ -22,6 +22,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   protected readonly serviceConfigHelper: ServiceConfigHelper;
 
   private model2Type: Map<string, DataTypes> = new Map<string, DataTypes>();
+
+  private visitedModelsCircuitBreaker: string[] = [];
 
   protected constructor(
     protected version: ODataVersion,
@@ -165,12 +167,16 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   private postProcessModel() {
     // complex types
-    this.dataModel.getComplexTypes().forEach((model) => {
+    const complexTypes = this.dataModel.getComplexTypes();
+    complexTypes.forEach((model) => {
+      this.visitedModelsCircuitBreaker = [];
       const [baseProps] = this.collectBaseClassPropsAndKeys(model);
       model.baseProps = baseProps;
     });
+    const modelTypes = this.dataModel.getModels();
     // entity types
-    this.dataModel.getModels().forEach((model) => {
+    modelTypes.forEach((model) => {
+      this.visitedModelsCircuitBreaker = [];
       const [baseProps, baseKeys, idName, qIdName] = this.collectBaseClassPropsAndKeys(model);
       model.baseProps = baseProps;
 
@@ -200,9 +206,52 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         return prop;
       });
     });
+
+    const sortedModelTypes = this.sortModelsByInheritance<ModelType>(modelTypes);
+    this.dataModel.setModels(sortedModelTypes);
+
+    const sortedComplexTypes = this.sortModelsByInheritance<ComplexModelType>(complexTypes);
+    this.dataModel.setComplexTypes(sortedComplexTypes);
+  }
+
+  private sortModelsByInheritance<Type extends ComplexModelType>(models: Type[]): { [name: string]: Type } {
+    // recursively visit all models and sort them by inheritance such that base classes
+    // are always before derived classes
+    const sortedModels: { [name: string]: Type } = {};
+    const visitedModels = new Set<Type>();
+    const inProgressModels = new Set<Type>();
+
+    function visit(model: Type) {
+      if (inProgressModels.has(model)) {
+        throw new Error("Cyclic dependencies detected!");
+      }
+
+      if (!visitedModels.has(model)) {
+        inProgressModels.add(model);
+
+        for (const baseClassName of model.baseClasses) {
+          const baseClass = models.find((e) => e.name === baseClassName);
+          if (baseClass) {
+            visit(baseClass);
+          }
+        }
+        visitedModels.add(model);
+        inProgressModels.delete(model);
+        sortedModels[model.name] = model;
+      }
+    }
+
+    for (const model of models) {
+      visit(model);
+    }
+    return sortedModels;
   }
 
   private collectBaseClassPropsAndKeys(model: ComplexModelType): [Array<PropertyModel>, Array<string>, string, string] {
+    if (this.visitedModelsCircuitBreaker.includes(model.name)) {
+      throw new Error(`Cyclic inheritance detected for model ${model.name}!`);
+    }
+    this.visitedModelsCircuitBreaker.push(model.name);
     return model.baseClasses.reduce(
       ([props, keys, idName, qIdName], bc) => {
         const baseModel = this.dataModel.getModel(bc) || this.dataModel.getComplexType(bc);

@@ -73,10 +73,10 @@ export function createDataModelTests(
     const result = await doDigest();
 
     expect(result.getModels().length).toBe(3);
-    expect(result.getModels()[0].name).toBe("Child");
-    expect(result.getModels()[0].idModelName).toBe("GrandParentId");
-    expect(result.getModels()[0].qIdFunctionName).toBe("QGrandParentId");
-    expect(result.getModels()[0].generateId).toBe(false);
+    expect(result.getModels()[2].name).toBe("Child");
+    expect(result.getModels()[2].idModelName).toBe("GrandParentId");
+    expect(result.getModels()[2].qIdFunctionName).toBe("QGrandParentId");
+    expect(result.getModels()[2].generateId).toBe(false);
   });
 
   test("complex Id with base class", async () => {
@@ -97,6 +97,34 @@ export function createDataModelTests(
     expect(result.getModels()[1].idModelName).toBe("ParentId");
     expect(result.getModels()[1].qIdFunctionName).toBe("QParentId");
     expect(result.getModels()[1].generateId).toBe(true);
+  });
+
+  test(`base classes with cyclical dependencies`, async () => {
+    expect.assertions(1);
+
+    odataBuilder
+      .addEntityType("Child", "Parent", (builder) => builder)
+      .addEntityType("Parent", "Child", (builder) => builder);
+
+    await expect(doDigest()).rejects.toThrowError("Cyclic inheritance detected for model Child!");
+  });
+
+  test(`reordering of classes by inheritance`, async () => {
+    odataBuilder
+      .addEntityType("GrandChild", "Child", (builder) => builder)
+      .addEntityType("Child", "Parent", (builder) => builder)
+      .addEntityType("GrandParent", undefined, (builder) => {
+        builder.addKeyProp("ID", "Edm.String");
+      })
+      .addEntityType("Parent", "GrandParent", (builder) => builder);
+
+    const result = await doDigest();
+
+    expect(result.getModels().length).toBe(4);
+    expect(result.getModels()[0].name).toBe("GrandParent");
+    expect(result.getModels()[1].name).toBe("Parent");
+    expect(result.getModels()[2].name).toBe("Child");
+    expect(result.getModels()[3].name).toBe("GrandChild");
   });
 
   test.skip("converter test", async () => {
