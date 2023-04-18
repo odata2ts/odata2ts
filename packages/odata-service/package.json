@@ -24,17 +24,14 @@
     "LICENSE"
   ],
   "keywords": [
-    "odata2ts",
-    "odata",
-    "odata v2",
-    "odata v4",
-    "odata service",
     "odata client",
-    "typescript",
+    "odata",
     "ts",
-    "javascript",
-    "js",
-    "typesafe"
+    "type-safe",
+    "odata2ts",
+    "v2",
+    "v4",
+    "typescript"
   ],
   "dependencies": {
     "@odata2ts/odata-client-api": "^0.6.3",
