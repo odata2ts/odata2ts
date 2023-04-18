@@ -24,19 +24,16 @@
     "LICENSE"
   ],
   "keywords": [
-    "odata2ts",
-    "odata",
-    "odata v2",
-    "odata v4",
-    "query",
     "query builder",
-    "query object",
-    "typescript",
+    "odata",
     "ts",
-    "javascript",
-    "js",
-    "typesafe",
-    "odata client"
+    "odata client",
+    "query",
+    "v2",
+    "v4",
+    "odata2ts",
+    "typescript",
+    "type-safe"
   ],
   "dependencies": {
     "@odata2ts/odata-query-objects": "^0.17.2"
