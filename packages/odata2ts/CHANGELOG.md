@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.20.2...@odata2ts/odata2ts@0.20.3) (2023-04-18)
+
+### Bug Fixes
+
+* **odata2ts:** add empty array as type for empty params ([#154](https://github.com/odata2ts/odata2ts/issues/154)) ([fbdd000](https://github.com/odata2ts/odata2ts/commit/fbdd0005d46d7d402d8039bec3ea4aecdb593b88))
+* prevent idModel and qIdFunction from baseclass to be overwritten in digester which breaks multiple inheritance ([#150](https://github.com/odata2ts/odata2ts/issues/150)) ([e17038e](https://github.com/odata2ts/odata2ts/commit/e17038ee0e924101f9dd6ed97e10da5847cb8857))
+* Reorder models and qobjects by inheritance (base types first) ([#151](https://github.com/odata2ts/odata2ts/issues/151)) ([7d456fe](https://github.com/odata2ts/odata2ts/commit/7d456fe3fd28b246721a170cd878d04c3dbc2d80))
+
 ## [0.20.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.20.1...@odata2ts/odata2ts@0.20.2) (2023-04-13)
 
 **Note:** Version bump only for package @odata2ts/odata2ts

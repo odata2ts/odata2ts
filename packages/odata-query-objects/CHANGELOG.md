@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.17.2...@odata2ts/odata-query-objects@0.17.3) (2023-04-18)
+
+**Note:** Version bump only for package @odata2ts/odata-query-objects
+
 ## [0.17.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.17.1...@odata2ts/odata-query-objects@0.17.2) (2023-04-13)
 
 ### Bug Fixes
