@@ -23,8 +23,6 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   private model2Type: Map<string, DataTypes> = new Map<string, DataTypes>();
 
-  private visitedModelsCircuitBreaker: string[] = [];
-
   protected constructor(
     protected version: ODataVersion,
     protected schema: S,
@@ -169,15 +167,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // complex types
     const complexTypes = this.dataModel.getComplexTypes();
     complexTypes.forEach((model) => {
-      this.visitedModelsCircuitBreaker = [];
-      const [baseProps] = this.collectBaseClassPropsAndKeys(model);
+      const [baseProps] = this.collectBaseClassPropsAndKeys(model, []);
       model.baseProps = baseProps;
     });
     const modelTypes = this.dataModel.getModels();
     // entity types
     modelTypes.forEach((model) => {
-      this.visitedModelsCircuitBreaker = [];
-      const [baseProps, baseKeys, idName, qIdName] = this.collectBaseClassPropsAndKeys(model);
+      const [baseProps, baseKeys, idName, qIdName] = this.collectBaseClassPropsAndKeys(model, []);
       model.baseProps = baseProps;
 
       if (!model.keyNames.length && idName) {
@@ -247,11 +243,14 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     return sortedModels;
   }
 
-  private collectBaseClassPropsAndKeys(model: ComplexModelType): [Array<PropertyModel>, Array<string>, string, string] {
-    if (this.visitedModelsCircuitBreaker.includes(model.name)) {
+  private collectBaseClassPropsAndKeys(
+    model: ComplexModelType,
+    visitedModels: string[]
+  ): [Array<PropertyModel>, Array<string>, string, string] {
+    if (visitedModels.includes(model.name)) {
       throw new Error(`Cyclic inheritance detected for model ${model.name}!`);
     }
-    this.visitedModelsCircuitBreaker.push(model.name);
+    visitedModels.push(model.name);
     return model.baseClasses.reduce(
       ([props, keys, idName, qIdName], bc) => {
         const baseModel = this.dataModel.getModel(bc) || this.dataModel.getComplexType(bc);
@@ -260,7 +259,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
         // recursive
         if (baseModel.baseClasses.length) {
-          const [parentProps, parentKeys, parentIdName, parentQIdName] = this.collectBaseClassPropsAndKeys(baseModel);
+          const [parentProps, parentKeys, parentIdName, parentQIdName] = this.collectBaseClassPropsAndKeys(
+            baseModel,
+            visitedModels
+          );
           props.unshift(...parentProps);
           keys.unshift(...parentKeys);
           if (parentIdName) {

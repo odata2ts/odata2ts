@@ -101,7 +101,6 @@ export function createDataModelTests(
 
   test(`base classes with cyclical dependencies`, async () => {
     expect.assertions(1);
-
     odataBuilder
       .addEntityType("Child", "Parent", (builder) => builder)
       .addEntityType("Parent", "Child", (builder) => builder);
