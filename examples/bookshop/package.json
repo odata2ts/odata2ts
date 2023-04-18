@@ -30,9 +30,9 @@
     "@odata2ts/axios-odata-client": "^0.5.3",
     "@odata2ts/odata-service": "^0.13.8",
     "@sap/cds": ">=5.9",
-    "@sap/cds-odata-v2-adapter-proxy": "^1.9.4",
-    "express": "^4.17.1",
-    "passport": ">=0.4.1"
+    "@sap/cds-odata-v2-adapter-proxy": "^1.9.21",
+    "express": "^4.18.2",
+    "passport": ">=0.6.0"
   },
   "devDependencies": {
     "@odata2ts/odata2ts": "^0.20.2",

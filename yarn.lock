@@ -1853,12 +1853,12 @@ __metadata:
     "@odata2ts/odata-service": ^0.13.8
     "@odata2ts/odata2ts": ^0.20.2
     "@sap/cds": ">=5.9"
-    "@sap/cds-odata-v2-adapter-proxy": ^1.9.4
+    "@sap/cds-odata-v2-adapter-proxy": ^1.9.21
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
-    express: ^4.17.1
+    express: ^4.18.2
     jest: ^27.5.1
-    passport: ">=0.4.1"
+    passport: ">=0.6.0"
     rimraf: ^3.0.2
     sqlite3: ^5
     ts-jest: ^27.1.4
@@ -2162,18 +2162,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sap/cds-odata-v2-adapter-proxy@npm:^1.9.4":
-  version: 1.9.16
-  resolution: "@sap/cds-odata-v2-adapter-proxy@npm:1.9.16"
+"@sap/cds-odata-v2-adapter-proxy@npm:^1.9.21":
+  version: 1.9.21
+  resolution: "@sap/cds-odata-v2-adapter-proxy@npm:1.9.21"
   dependencies:
-    body-parser: ^1.20.1
+    body-parser: ^1.20.2
     body-parser-xml: ^2.0.3
     express: ^4.18.2
     express-fileupload: ^1.4.0
     http-proxy-middleware: ^2.0.6
-    node-fetch: ^2.6.7
+    node-fetch: ^2.6.9
     xml2js: ^0.4.23
-  checksum: 88f876404bde17b5fb8850f8dd58d1af725b3d6c290b9521be883ec5b96a97017f21a72c679f4e05a7eae2e0abcfedc317e6e8199294ab3aadd26e51be9fa1be
+  checksum: 727567fe1c76ceab0db54649406221a0df5b71fc56417205ae30eeab585fd40465e60f758ea63a0df98cb61bcbb823be25015801ad09b1db61346f18bd2ce160
   languageName: node
   linkType: hard
 
@@ -3117,7 +3117,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"body-parser@npm:1.20.1, body-parser@npm:^1.20.1":
+"body-parser@npm:1.20.1":
   version: 1.20.1
   resolution: "body-parser@npm:1.20.1"
   dependencies:
@@ -3134,6 +3134,26 @@ __metadata:
     type-is: ~1.6.18
     unpipe: 1.0.0
   checksum: f1050dbac3bede6a78f0b87947a8d548ce43f91ccc718a50dd774f3c81f2d8b04693e52acf62659fad23101827dd318da1fb1363444ff9a8482b886a3e4a5266
+  languageName: node
+  linkType: hard
+
+"body-parser@npm:^1.20.2":
+  version: 1.20.2
+  resolution: "body-parser@npm:1.20.2"
+  dependencies:
+    bytes: 3.1.2
+    content-type: ~1.0.5
+    debug: 2.6.9
+    depd: 2.0.0
+    destroy: 1.2.0
+    http-errors: 2.0.0
+    iconv-lite: 0.4.24
+    on-finished: 2.4.1
+    qs: 6.11.0
+    raw-body: 2.5.2
+    type-is: ~1.6.18
+    unpipe: 1.0.0
+  checksum: 14d37ec638ab5c93f6099ecaed7f28f890d222c650c69306872e00b9efa081ff6c596cd9afb9930656aae4d6c4e1c17537bea12bb73c87a217cb3cfea8896737
   languageName: node
   linkType: hard
 
@@ -3884,6 +3904,13 @@ __metadata:
   version: 1.0.4
   resolution: "content-type@npm:1.0.4"
   checksum: 3d93585fda985d1554eca5ebd251994327608d2e200978fdbfba21c0c679914d5faf266d17027de44b34a72c7b0745b18584ecccaa7e1fdfb6a68ac7114f12e0
+  languageName: node
+  linkType: hard
+
+"content-type@npm:~1.0.5":
+  version: 1.0.5
+  resolution: "content-type@npm:1.0.5"
+  checksum: 566271e0a251642254cde0f845f9dd4f9856e52d988f4eb0d0dcffbb7a1f8ec98de7a5215fc628f3bce30fe2fb6fd2bc064b562d721658c59b544e2d34ea2766
   languageName: node
   linkType: hard
 
@@ -4823,7 +4850,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:^4.17.1, express@npm:^4.18.2":
+"express@npm:^4.18.2":
   version: 4.18.2
   resolution: "express@npm:4.18.2"
   dependencies:
@@ -7923,6 +7950,20 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
+"node-fetch@npm:^2.6.9":
+  version: 2.6.9
+  resolution: "node-fetch@npm:2.6.9"
+  dependencies:
+    whatwg-url: ^5.0.0
+  peerDependencies:
+    encoding: ^0.1.0
+  peerDependenciesMeta:
+    encoding:
+      optional: true
+  checksum: acb04f9ce7224965b2b59e71b33c639794d8991efd73855b0b250921382b38331ffc9d61bce502571f6cc6e11a8905ca9b1b6d4aeb586ab093e2756a1fd190d0
+  languageName: node
+  linkType: hard
+
 "node-gyp@npm:8.x":
   version: 8.4.1
   resolution: "node-gyp@npm:8.4.1"
@@ -8566,7 +8607,7 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
-"passport@npm:>=0.4.1":
+"passport@npm:>=0.6.0":
   version: 0.6.0
   resolution: "passport@npm:0.6.0"
   dependencies:
@@ -9072,6 +9113,18 @@ fsevents@^2.3.2:
     iconv-lite: 0.4.24
     unpipe: 1.0.0
   checksum: 5362adff1575d691bb3f75998803a0ffed8c64eabeaa06e54b4ada25a0cd1b2ae7f4f5ec46565d1bec337e08b5ac90c76eaa0758de6f72a633f025d754dec29e
+  languageName: node
+  linkType: hard
+
+"raw-body@npm:2.5.2":
+  version: 2.5.2
+  resolution: "raw-body@npm:2.5.2"
+  dependencies:
+    bytes: 3.1.2
+    http-errors: 2.0.0
+    iconv-lite: 0.4.24
+    unpipe: 1.0.0
+  checksum: ba1583c8d8a48e8fbb7a873fdbb2df66ea4ff83775421bfe21ee120140949ab048200668c47d9ae3880012f6e217052690628cf679ddfbd82c9fc9358d574676
   languageName: node
   linkType: hard
 
