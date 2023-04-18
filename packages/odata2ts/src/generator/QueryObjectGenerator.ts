@@ -257,6 +257,7 @@ class QueryObjectGenerator {
           name: "params",
           scope: Scope.Private,
           isReadonly: true,
+          type: operation.parameters?.length ? undefined : "[]",
           initializer: this.getParamInitString(operation.parameters, importContainer),
         },
       ],
