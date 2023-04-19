@@ -10,6 +10,8 @@ describe("ServiceConfigHelper Tests", function () {
       disableAutoManagedKey: false,
       entitiesByName: [],
       propertiesByName: propsSetting || [],
+      skipEditableModels: false,
+      v2ModelsWithExtraResultsWrapping: false,
     });
   }
 
@@ -19,6 +21,8 @@ describe("ServiceConfigHelper Tests", function () {
       disableAutoManagedKey: false,
       entitiesByName: entsSetting || [],
       propertiesByName: [],
+      skipEditableModels: false,
+      v2ModelsWithExtraResultsWrapping: false,
     });
   }
 

@@ -51,7 +51,7 @@ export function evaluateConfigOptions(
       );
     }
     const merged = deepmerge.all([defaultConfig, confBaseOpts, cliOpts]) as RunOptions;
-    return [safeGuardSkippingOptions(merged)];
+    return [safeGuardOptions(merged)];
   }
 
   // Either services are specified or we use all configured services
@@ -64,19 +64,24 @@ export function evaluateConfigOptions(
     const serviceDefault =
       service.naming?.minimalDefaults && !configOpts?.naming?.minimalDefaults ? getMinimalConfig() : defaultConfig;
     const merged = deepmerge.all([serviceDefault, confBaseOpts, service, cliBaseOpts]) as RunOptions;
-    return safeGuardSkippingOptions(merged);
+    return safeGuardOptions(merged);
   });
 }
 
 /**
- * Make sure that skipping options are deactivated for service generation.
+ * Make sure that some options are only active if in correct mode.
  * @param options
  */
-function safeGuardSkippingOptions(options: RunOptions): RunOptions {
+function safeGuardOptions(options: RunOptions): RunOptions {
+  // skip options are not valid for service generation
   if (options.mode === Modes.service || options.mode === Modes.all) {
     options.skipEditableModels = false;
     options.skipIdModels = false;
     options.skipOperations = false;
+  }
+  // special option which is only valid for model generation
+  if (options.mode !== Modes.models) {
+    options.v2ModelsWithExtraResultsWrapping = false;
   }
 
   return options;

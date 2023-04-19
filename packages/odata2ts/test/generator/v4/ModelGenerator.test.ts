@@ -125,4 +125,28 @@ describe("Model Generator Tests V4", () => {
     // then match fixture text => actually there's no diff in the generated param models between bound-to-entity and bound-to-collection
     await generateAndCompare("collBoundFunction", "operation-bound.ts");
   });
+
+  test(`${TEST_SUITE_NAME}: no extra results wrapping`, async () => {
+    // given one minimal model
+    // given one minimal model
+    odataBuilder
+      .addEntityType("Author", undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.Int32).addProp("name", ODataTypesV4.Boolean, true)
+      )
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Int32)
+          .addProp("author", `${SERVICE_NAME}.Author`, false)
+          .addProp("altAuthor", `${SERVICE_NAME}.Author`, true)
+          .addProp("relatedAuthors", `Collection(${SERVICE_NAME}.Author)`)
+      );
+
+    // when generating model
+    // then match original fixture => config option has no effect
+    await generateAndCompare("no-extra-results-wrapping", "entity-relationships.ts", {
+      v2ModelsWithExtraResultsWrapping: true,
+      skipEditableModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
 });

@@ -101,7 +101,12 @@ class ModelGenerator {
 
     // Collections
     if (prop.isCollection) {
-      return `Array<${prop.type}>` + suffix;
+      const type = `Array<${prop.type}>`;
+      if (this.dataModel.isV2() && this.options.v2ModelsWithExtraResultsWrapping) {
+        return `{ results: ${type} }` + suffix;
+      } else {
+        return type + suffix;
+      }
     }
 
     // primitive, enum & complex types

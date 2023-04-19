@@ -160,6 +160,21 @@ export interface ConfigFileOptions extends Omit<CliOptions, "source" | "output" 
    * The naming options regarding the generated artefacts.
    */
   naming?: OverridableNamingOptions;
+
+  /**
+   * Some OData V2 services generate an extra wrapping for entity collection attributes:
+   * <code>trips: {results: [...]}</code>. So instead of directly returning an array of entities
+   * an object with the property "results" is wrapped around the entity collection.
+   *
+   * If you're using the odata client then there's a build-in workaround in place which transforms
+   * the results to remove this extra mapping. However, if you're only interested in the types, then
+   * the generated models will not match that extra wrapping.
+   *
+   * Setting this configuration option to <code>true</code> (default: false) will add this extra
+   * wrapping to the generated models. But this option is only valid if the generation mode is set
+   * to <code>models</code>; it is ignored otherwise.
+   */
+  v2ModelsWithExtraResultsWrapping?: boolean;
 }
 
 /**

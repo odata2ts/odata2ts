@@ -8,7 +8,12 @@ import { RunOptions } from "./OptionModel";
 
 export type DigestionOptions = Pick<
   RunOptions,
-  "converters" | "disableAutoManagedKey" | "propertiesByName" | "entitiesByName"
+  | "converters"
+  | "disableAutoManagedKey"
+  | "propertiesByName"
+  | "entitiesByName"
+  | "v2ModelsWithExtraResultsWrapping"
+  | "skipEditableModels"
 >;
 
 /**
@@ -20,7 +25,10 @@ export type DigesterFunction<S extends Schema<any, any>> = (
   namingHelper: NamingHelper
 ) => Promise<DataModel>;
 
-export type GeneratorFunctionOptions = Pick<RunOptions, "skipEditableModels" | "skipIdModels" | "skipOperations">;
+export type GeneratorFunctionOptions = Pick<
+  RunOptions,
+  "skipEditableModels" | "skipIdModels" | "skipOperations" | "v2ModelsWithExtraResultsWrapping"
+>;
 
 export type EntityBasedGeneratorFunction = (
   dataModel: DataModel,

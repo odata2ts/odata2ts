@@ -222,6 +222,7 @@ describe("Config Evaluation Tests", () => {
       skipEditableModels: true,
       skipIdModels: true,
       skipOperations: true,
+      v2ModelsWithExtraResultsWrapping: true,
     };
     const result = evaluateConfigOptions(cliOpts, opts);
 
@@ -231,6 +232,21 @@ describe("Config Evaluation Tests", () => {
       skipEditableModels: false,
       skipIdModels: false,
       skipOperations: false,
+      v2ModelsWithExtraResultsWrapping: false,
+    });
+  });
+
+  test("safeguard v2ModelsWithExtraResultsWrapping options", () => {
+    const cliOpts: CliOptions = { source: "source", output: "output" };
+    const opts: ConfigFileOptions = {
+      mode: Modes.qobjects,
+      v2ModelsWithExtraResultsWrapping: true,
+    };
+    const result = evaluateConfigOptions(cliOpts, opts);
+
+    expect(result.length).toBe(1);
+    expect(result[0]).toMatchObject({
+      v2ModelsWithExtraResultsWrapping: false,
     });
   });
 });
