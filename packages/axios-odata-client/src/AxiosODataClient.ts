@@ -108,7 +108,7 @@ export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
     if ((error as AxiosError).isAxiosError) {
       const axiosError: AxiosError = error as AxiosError;
       if (axiosError.response) {
-        const eMsg = (axiosError.response.data as any)?.error?.message?.value;
+        const eMsg = this.getErrorMessage(axiosError);
         if (typeof eMsg === "string") {
           return new AxiosODataClientError("Server responded with error: " + eMsg, axiosError.response.status, {
             cause: error,
