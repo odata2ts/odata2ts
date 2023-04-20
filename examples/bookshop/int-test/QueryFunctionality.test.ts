@@ -39,9 +39,11 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   });
 
   test("get unknown book", async () => {
-    const axiosClientMsgPrefix = "OData server error: ";
+    const axiosClientMsgPrefix = "Server responded with error: ";
     const axiosFailMsg = "Not Found";
-    await expect(() => testService.navToBooks().get(-1).query()).rejects.toThrow(axiosClientMsgPrefix + axiosFailMsg);
+    await expect(() => testService.navToBooks().get(-1).query()).rejects.toThrow(
+      new Error(axiosClientMsgPrefix + axiosFailMsg)
+    );
 
     // again, but now inspect error in detail
     try {

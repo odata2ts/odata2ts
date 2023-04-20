@@ -85,8 +85,8 @@ describe("Integration Testing of Service Generation", () => {
     const axiosFailMsg = "The request resource is not found.";
 
     await expect(() => testService.navToPeople().get("XXX").query()).rejects.toThrow(
-      axiosFailMsg
-		)
+      new Error(axiosClientMsgPrefix + axiosFailMsg)
+    );
 
     // again, but now inspect error in detail
     try {
@@ -95,17 +95,17 @@ describe("Integration Testing of Service Generation", () => {
       expect(1).toBe(2);
     } catch (error) {
       const e = error as AxiosODataClientError;
-      expect(e.name).toBe("JQueryODataClientError");
+      expect(e.name).toBe("AxiosODataClientError");
       expect(e.message).toBe(axiosClientMsgPrefix + axiosFailMsg);
       expect(e.cause).toBeDefined();
       expect(e.status).toBe(404);
       const axiosError = e.cause;
-			expect(axiosError?.response).toBeDefined();
+      expect(axiosError?.response).toBeDefined();
       expect(axiosError?.response?.status).toBe(404);
       expect(axiosError?.response?.data).toStrictEqual({
         error: {
           code: "",
-          message: { lang: "en-US", value: axiosFailMsg },
+          message: axiosFailMsg,
         },
       });
     }
