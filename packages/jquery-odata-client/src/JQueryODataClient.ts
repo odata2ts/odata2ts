@@ -51,9 +51,12 @@ export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
         error: (jqXHR: JQuery.jqXHR, textStatus: string, thrownError: string) => {
           const message = this.getErrorMessage(jqXHR.responseJSON);
           if (message) {
-            reject(new JQueryODataClientError("OData server error: " + message, { cause: jqXHR }));
+            reject(
+              new JQueryODataClientError("Server responded with error: " + message, jqXHR.status, { cause: jqXHR })
+            );
+          } else {
+            reject(new JQueryODataClientError(textStatus + " " + thrownError, jqXHR.status, { cause: jqXHR }));
           }
-          reject(new JQueryODataClientError("Internal Error", { cause: jqXHR }));
         },
       });
 

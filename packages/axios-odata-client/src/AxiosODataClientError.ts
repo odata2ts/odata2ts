@@ -2,9 +2,10 @@ import { AxiosError } from "axios";
 
 export class AxiosODataClientError extends Error {
   name = "AxiosODataClientError";
-  isAxiosOdataClientError = true;
+  status?: number;
   cause?: AxiosError;
-  constructor(msg: string, options?: { cause?: Error }) {
+  constructor(msg: string, status?: number, options?: { cause?: Error }) {
     super(msg, options);
+    this.status = status;
   }
 }

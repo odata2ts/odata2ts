@@ -51,9 +51,9 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
     } catch (error) {
       const e = error as AxiosODataClientError;
       expect(e.name).toBe("AxiosODataClientError");
-      expect(e.isAxiosOdataClientError).toBeTruthy();
       expect(e.message).toBe(axiosClientMsgPrefix + axiosFailMsg);
       expect(e.cause).toBeDefined();
+      expect(e.status).toBe(404);
       const axiosError = e.cause;
       expect(axiosError?.response).toBeDefined();
       expect(axiosError?.response?.status).toBe(404);

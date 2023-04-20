@@ -107,16 +107,22 @@ export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
   private convertError(error: Error): AxiosODataClientError {
     if ((error as AxiosError).isAxiosError) {
       const axiosError: AxiosError = error as AxiosError;
-
-      const message = this.getErrorMessage(axiosError);
-
-      if (message) {
-        return new AxiosODataClientError("OData server error: " + message, { cause: error });
+      if (axiosError.response) {
+        const eMsg = (axiosError.response.data as any)?.error?.message?.value;
+        if (typeof eMsg === "string") {
+          return new AxiosODataClientError("Server responded with error: " + eMsg, axiosError.response.status, {
+            cause: error,
+          });
+        } else {
+          return new AxiosODataClientError("Server responded with error", axiosError.response.status, { cause: error });
+        }
+      } else if (axiosError.request) {
+        return new AxiosODataClientError("No response from server", undefined, { cause: error });
       } else {
-        return new AxiosODataClientError("Axios error", { cause: error });
+        return new AxiosODataClientError("Axios Error: no request was sent", undefined, { cause: error });
       }
     }
-    return new AxiosODataClientError("Internal Error", { cause: error });
+    return new AxiosODataClientError("Error", undefined, { cause: error });
   }
 
   public async refreshCsrfToken() {

@@ -2,9 +2,10 @@
 
 export class JQueryODataClientError extends Error {
   name = "JQueryODataClientError";
-  isJQueryODataClientError = true;
+  status?: number;
   cause?: JQuery.jqXHR;
-  constructor(msg: string, options?: { cause?: JQuery.jqXHR }) {
+  constructor(msg: string, status?: number, options?: { cause?: JQuery.jqXHR }) {
     super(msg, options);
+    this.status = status;
   }
 }

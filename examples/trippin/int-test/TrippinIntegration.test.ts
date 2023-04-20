@@ -86,7 +86,7 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("fail to get unknown person", async () => {
-    const jQueryClientMsgPrefix = "OData server error: ";
+    const jQueryClientMsgPrefix = "Server responded with error: ";
     const jQueryFailMsg = "The request resource is not found.";
 
     await expect(() => testService.navToPeople().get("XXX").query()).rejects.toThrow(
@@ -101,9 +101,9 @@ describe("Integration Testing of Service Generation", () => {
     } catch (error) {
       const e = error as JQueryODataClientError;
       expect(e.name).toBe("JQueryODataClientError");
-      expect(e.isJQueryODataClientError).toBeTruthy();
       expect(e.message).toBe(jQueryClientMsgPrefix + jQueryFailMsg);
       expect(e.cause).toBeDefined();
+      expect(e.status).toBe(404);
       const jqXHR = e.cause;
       expect(jqXHR?.status).toBe(404);
       expect(jqXHR?.responseJSON).toStrictEqual({
