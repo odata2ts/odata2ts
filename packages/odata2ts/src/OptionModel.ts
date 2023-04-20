@@ -160,6 +160,21 @@ export interface ConfigFileOptions extends Omit<CliOptions, "source" | "output" 
    * The naming options regarding the generated artefacts.
    */
   naming?: OverridableNamingOptions;
+
+  /**
+   * Some OData V2 services generate an extra wrapping for entity collection attributes:
+   * <code>trips: {results: [...]}</code>. So instead of directly returning an array of entities
+   * an object with the property "results" is wrapped around the entity collection.
+   *
+   * If you're using the odata client then there's a build-in workaround in place which transforms
+   * the results to remove this extra mapping. However, if you're only interested in the types, then
+   * the generated models will not match that extra wrapping.
+   *
+   * Setting this configuration option to <code>true</code> (default: false) will add this extra
+   * wrapping to the generated models. But this option is only valid if the generation mode is set
+   * to <code>models</code>; it is ignored otherwise.
+   */
+  v2ModelsWithExtraResultsWrapping?: boolean;
 }
 
 /**
@@ -169,9 +184,9 @@ export interface ServiceGenerationOptions
   extends Required<Pick<CliOptions, "source" | "output">>,
     Omit<ConfigFileOptions, "services"> {
   /**
-   * Configure generation process for EntityTypes and ComplexTypes including their properties.
+   * Configure generation process for EntityTypes and ComplexTypes including their keys and properties.
    */
-  // entitiesByName?: Array<EntityGenerationOptions>;
+  entitiesByName?: Array<EntityGenerationOptions>;
   /**
    * Configure generation process for individual properties based on their name.
    */
@@ -181,7 +196,7 @@ export interface ServiceGenerationOptions
 /**
  * Configuration options for EntityTypes and ComplexTypes.
  * This config applies if the name matches the name of an EntityType or ComplexType as it is specified
- * in the metadata (e.g. in EDMX <EntityType name="Test" ....)
+ * in the metadata (e.g. in EDMX <EntityType name="Test" ...)
  */
 export interface EntityGenerationOptions {
   /**
@@ -195,9 +210,13 @@ export interface EntityGenerationOptions {
    */
   mappedName?: string;
   /**
+   * Overwrite the key specification by naming the props by their EDMX name.
+   */
+  keys?: Array<string>;
+  /**
    * Configuration of individual properties.
    */
-  properties?: Array<PropertyGenerationOptions>;
+  // properties?: Array<PropertyGenerationOptions>;
 
   // converter: string | Array<string>
 

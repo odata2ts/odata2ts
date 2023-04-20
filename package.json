@@ -13,9 +13,10 @@
     "coverage": "jest --coverage",
     "int-test": "lerna run int-test",
     "postversion": "lerna publish from-git",
-    "release": "env-cmd -f .env.local --no-override lerna version",
+    "release": "env-cmd -f .env.local --no-override lerna version --no-private",
     "start-cap": "yarn workspace @odata2ts/example-bookshop start",
     "test": "lerna run test -- --no-cache",
+    "type-test": "lerna run type-test",
     "version": "yarn install && git add yarn.lock"
   },
   "devDependencies": {

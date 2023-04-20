@@ -18,6 +18,7 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
   skipOperations: false,
   disableAutoManagedKey: false,
   allowRenaming: false,
+  v2ModelsWithExtraResultsWrapping: false,
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,
@@ -94,7 +95,7 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
     },
   },
   propertiesByName: [],
-  // entitiesByName: [],
+  entitiesByName: [],
 };
 
 const { models, queryObjects, services } = defaultConfig.naming;

@@ -1,7 +1,7 @@
 import { QFunction } from "@odata2ts/odata-query-objects";
 
 export class QEmptyFunction extends QFunction {
-  private readonly params = [];
+  private readonly params: [] = [];
 
   constructor() {
     super("EmptyFunction");

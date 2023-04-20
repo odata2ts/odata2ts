@@ -1,6 +1,6 @@
 import { ParamValueModel, ValueConverter } from "@odata2ts/converter-api";
-import { getIdentityConverter } from "@odata2ts/converter-runtime";
 
+import { getIdentityConverter } from "../IdentityConverter";
 import { QParamModel } from "./QParamModel";
 import { UrlParamValueFormatter, UrlParamValueParser } from "./UrlParamModel";
 

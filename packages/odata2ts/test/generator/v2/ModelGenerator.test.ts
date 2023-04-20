@@ -9,7 +9,7 @@ import {
   FixtureComparatorHelper,
   createHelper,
 } from "../comparator/FixtureComparatorHelper";
-import { SERVICE_NAME, createEntityBasedGenerationTests } from "./EntityBasedGenerationTests";
+import { ENTITY_NAME, SERVICE_NAME, createEntityBasedGenerationTests } from "./EntityBasedGenerationTests";
 
 describe("Model Generator Tests V2", () => {
   const TEST_SUITE_NAME = "Model Generator";
@@ -61,5 +61,22 @@ describe("Model Generator Tests V2", () => {
     // when generating model
     // then match fixture text
     await generateAndCompare("maxFunction", "operation-max.ts");
+  });
+
+  test(`${TEST_SUITE_NAME}: extra results wrapping`, async () => {
+    // given one minimal model
+    odataBuilder
+      .addEntityType("Author", undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV2.Int32).addProp("name", ODataTypesV2.Boolean, true)
+      )
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV2.Int32).addProp("relatedAuthors", `Collection(${SERVICE_NAME}.Author)`)
+      );
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("extra-results-wrapping", "entity-relationships-v2-extra-wrapping.ts", {
+      v2ModelsWithExtraResultsWrapping: true,
+    });
   });
 });

@@ -1,7 +1,4 @@
-// import { AxiosODataClient, AxiosODataClientError } from "@odata2ts/axios-odata-client";
-import { JQueryODataClient, JQueryODataClientError } from "@odata2ts/jquery-odata-client";
-import jQuery from "jquery";
-import { JSDOM } from "jsdom";
+import { AxiosODataClient, AxiosODataClientError } from "@odata2ts/axios-odata-client";
 
 import { FeatureModel, PersonGenderModel, PersonModel } from "../build/trippin/TrippinModel";
 import { PersonIdModel } from "../build/trippin/TrippinModel";
@@ -9,9 +6,7 @@ import { TrippinService } from "../build/trippin/TrippinService";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
-  // const odataClient = new AxiosODataClient();
-  const $ = jQuery(new JSDOM().window) as unknown as JQueryStatic;
-  const odataClient = new JQueryODataClient($);
+  const odataClient = new AxiosODataClient();
 
   const testService = new TrippinService(odataClient, BASE_URL);
 
@@ -86,12 +81,12 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("fail to get unknown person", async () => {
-    const jQueryClientMsgPrefix = "Server responded with error: ";
-    const jQueryFailMsg = "The request resource is not found.";
+    const axiosClientMsgPrefix = "Server responded with error: ";
+    const axiosFailMsg = "The request resource is not found.";
 
     await expect(() => testService.navToPeople().get("XXX").query()).rejects.toThrow(
-      jQueryClientMsgPrefix + jQueryFailMsg
-    );
+      axiosFailMsg
+		)
 
     // again, but now inspect error in detail
     try {
@@ -99,17 +94,18 @@ describe("Integration Testing of Service Generation", () => {
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
-      const e = error as JQueryODataClientError;
+      const e = error as AxiosODataClientError;
       expect(e.name).toBe("JQueryODataClientError");
-      expect(e.message).toBe(jQueryClientMsgPrefix + jQueryFailMsg);
+      expect(e.message).toBe(axiosClientMsgPrefix + axiosFailMsg);
       expect(e.cause).toBeDefined();
       expect(e.status).toBe(404);
-      const jqXHR = e.cause;
-      expect(jqXHR?.status).toBe(404);
-      expect(jqXHR?.responseJSON).toStrictEqual({
+      const axiosError = e.cause;
+			expect(axiosError?.response).toBeDefined();
+      expect(axiosError?.response?.status).toBe(404);
+      expect(axiosError?.response?.data).toStrictEqual({
         error: {
           code: "",
-          message: jQueryFailMsg,
+          message: { lang: "en-US", value: axiosFailMsg },
         },
       });
     }

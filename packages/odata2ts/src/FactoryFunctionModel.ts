@@ -6,7 +6,15 @@ import { Schema } from "./data-model/edmx/ODataEdmxModelBase";
 import { NamingHelper } from "./data-model/NamingHelper";
 import { RunOptions } from "./OptionModel";
 
-export type DigestionOptions = Pick<RunOptions, "converters" | "disableAutoManagedKey" | "propertiesByName">; //TODO  | "entitiesByName">;
+export type DigestionOptions = Pick<
+  RunOptions,
+  | "converters"
+  | "disableAutoManagedKey"
+  | "propertiesByName"
+  | "entitiesByName"
+  | "v2ModelsWithExtraResultsWrapping"
+  | "skipEditableModels"
+>;
 
 /**
  * Takes an EdmxSchema plus the run options and creates a DataModel.
@@ -17,7 +25,10 @@ export type DigesterFunction<S extends Schema<any, any>> = (
   namingHelper: NamingHelper
 ) => Promise<DataModel>;
 
-export type GeneratorFunctionOptions = Pick<RunOptions, "skipEditableModels" | "skipIdModels" | "skipOperations">;
+export type GeneratorFunctionOptions = Pick<
+  RunOptions,
+  "skipEditableModels" | "skipIdModels" | "skipOperations" | "v2ModelsWithExtraResultsWrapping"
+>;
 
 export type EntityBasedGeneratorFunction = (
   dataModel: DataModel,

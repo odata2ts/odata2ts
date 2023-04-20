@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.17.2...@odata2ts/odata-query-objects@0.17.3) (2023-04-18)
+
+**Note:** Version bump only for package @odata2ts/odata-query-objects
+
+## [0.17.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.17.1...@odata2ts/odata-query-objects@0.17.2) (2023-04-13)
+
+### Bug Fixes
+
+* **qobjects:** add IdentityConverter and remove dep to converter-runtime ([#148](https://github.com/odata2ts/odata2ts/issues/148)) ([78282c8](https://github.com/odata2ts/odata2ts/commit/78282c8c121c6c8a8891e495e04b0e75800d9d02))
+
+## [0.17.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.17.0...@odata2ts/odata-query-objects@0.17.1) (2023-04-08)
+
+**Note:** Version bump only for package @odata2ts/odata-query-objects
+
 # [0.17.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.16.4...@odata2ts/odata-query-objects@0.17.0) (2023-02-14)
 
 ### Features

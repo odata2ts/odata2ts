@@ -14,13 +14,8 @@ Contains interfaces for
 * V4 Response Models
 
 ## Installation
-Via npm:
 ```
 npm install --save @odata2ts/odata-core
-```
-Via yarn:
-```
-yarn add @odata2ts/odata-core
 ```
 
 ## V4 Data Types
@@ -99,6 +94,17 @@ Second, a duration might be able to represent a time of day, in the sense that a
 Time of day requires the specification of hours and minutes, while duration might specify any of its 
 parts, e.g. only seconds "PT12S".
 
+## Documentation
+No further documentation currently.
+
+## Support, Feedback, Contributing
+This project is open to feature requests, suggestions, bug reports, usage questions etc.
+via [GitHub issues](https://github.com/odata2ts/odata2ts/issues).
+
+Contributions and feedback are encouraged and always welcome.
+
+See the [contribution guidelines](https://github.com/odata2ts/odata2ts/blob/main/CONTRIBUTING.md) for further information.
+
 ## License
-MIT
+MIT - see [License](./LICENSE).
 

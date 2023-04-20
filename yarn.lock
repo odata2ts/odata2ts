@@ -1793,11 +1793,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/axios-odata-client@^0.5.2, @odata2ts/axios-odata-client@workspace:packages/axios-odata-client":
+"@odata2ts/axios-odata-client@^0.5.3, @odata2ts/axios-odata-client@workspace:packages/axios-odata-client":
   version: 0.0.0-use.local
   resolution: "@odata2ts/axios-odata-client@workspace:packages/axios-odata-client"
   dependencies:
-    "@odata2ts/odata-client-api": ^0.6.2
+    "@odata2ts/odata-client-api": ^0.6.3
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     axios: ^0.27.2
@@ -1809,15 +1809,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/converter-api@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "@odata2ts/converter-api@npm:0.1.0"
-  dependencies:
-    "@odata2ts/odata-core": ^0.1.0
-  checksum: ada22feba6e5eb2e94fb8a61204e5c189b9fbd5d316c913f9abfbbf8e96315cf237c2f1921c61dab33693e77fce29b88f0fedb29cbd6527b3a8d80de77601862
-  languageName: node
-  linkType: hard
-
 "@odata2ts/converter-api@npm:^0.1.1":
   version: 0.1.1
   resolution: "@odata2ts/converter-api@npm:0.1.1"
@@ -1827,30 +1818,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/converter-runtime@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "@odata2ts/converter-runtime@npm:0.1.0"
+"@odata2ts/converter-api@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "@odata2ts/converter-api@npm:0.1.2"
   dependencies:
-    "@odata2ts/converter-api": ^0.1.0
-  checksum: 675f6fd0d2a457cd2740a38d55ab2f56fdb6b549ef3c8a829932f8f5872f5c863a4040029413f08b030f6ce6c96cb13d9f383d328d3bcce72a0d0dba6282d6fc
+    "@odata2ts/odata-core": ^0.1.0
+  checksum: 5717277a3471152bcbe31735b2e3ee4deabd2ca7c01eb3102528a7c8b7bd5e83a38f0ab575b6bd8c831d5dbb80cdb4b15a10241274296df8297822f01cbc1659
   languageName: node
   linkType: hard
 
-"@odata2ts/converter-runtime@npm:^0.1.2":
-  version: 0.1.2
-  resolution: "@odata2ts/converter-runtime@npm:0.1.2"
+"@odata2ts/converter-runtime@npm:^0.1.5":
+  version: 0.1.5
+  resolution: "@odata2ts/converter-runtime@npm:0.1.5"
   dependencies:
-    "@odata2ts/converter-api": ^0.1.1
-  checksum: e8f164bde96fc661ef4fb2bb1c2a8ccc187b9a78e6a59e5b4511e465ce36febf3d91bfdb03b01cff34535fc41552bc1189928a25ea5c9cd4f770f7503a3c0532
+    "@odata2ts/converter-api": ^0.1.2
+  checksum: c84c8b5fcbf71a144873adac6dcc8c517ff0589ee654f72d38bc0806ed191a04a9c78554b021b5a920d17326e90f41c929d6ab324b4b79225df60a1bfb9f6d98
   languageName: node
   linkType: hard
 
-"@odata2ts/converter-v2-to-v4@npm:^0.1.2":
-  version: 0.1.2
-  resolution: "@odata2ts/converter-v2-to-v4@npm:0.1.2"
+"@odata2ts/converter-v2-to-v4@npm:^0.1.4":
+  version: 0.1.4
+  resolution: "@odata2ts/converter-v2-to-v4@npm:0.1.4"
   dependencies:
-    "@odata2ts/converter-api": ^0.1.1
-  checksum: b5ee74d1c095da5a0363b05907ee086f7b0e52f0a32a2705fe8f268d0561a1f2cc5e6e92f3c85d2631fa2feaaa5354933c7f6197c672443bda4c43064c652a54
+    "@odata2ts/converter-api": ^0.1.2
+  checksum: 231a74f4aaa08516bd00773d39de3ad705ecfa801839a4da2f961d632c0324a38935e702c3725b3f2713e1fe5f151c1c47e594d64b4f4dd5be2a0a985313cf1b
   languageName: node
   linkType: hard
 
@@ -1858,16 +1849,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-bookshop@workspace:examples/bookshop"
   dependencies:
-    "@odata2ts/axios-odata-client": ^0.5.2
-    "@odata2ts/odata-service": ^0.13.1
-    "@odata2ts/odata2ts": ^0.19.1
+    "@odata2ts/axios-odata-client": ^0.5.3
+    "@odata2ts/odata-service": ^0.13.8
+    "@odata2ts/odata2ts": ^0.20.2
     "@sap/cds": ">=5.9"
-    "@sap/cds-odata-v2-adapter-proxy": ^1.9.4
+    "@sap/cds-odata-v2-adapter-proxy": ^1.9.21
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
-    express: ^4.17.1
+    express: ^4.18.2
     jest: ^27.5.1
-    passport: ">=0.4.1"
+    passport: ">=0.6.0"
     rimraf: ^3.0.2
     sqlite3: ^5
     ts-jest: ^27.1.4
@@ -1880,8 +1871,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-hand-made@workspace:examples/hand-made"
   dependencies:
-    "@odata2ts/odata-service": ^0.13.5
-    "@odata2ts/odata2ts": ^0.19.1
+    "@odata2ts/odata-service": ^0.13.8
+    "@odata2ts/odata2ts": ^0.20.2
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: ^27.5.1
@@ -1896,9 +1887,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-odata-v2@workspace:examples/odata-v2"
   dependencies:
-    "@odata2ts/axios-odata-client": ^0.5.2
-    "@odata2ts/odata-service": ^0.13.5
-    "@odata2ts/odata2ts": ^0.19.1
+    "@odata2ts/axios-odata-client": ^0.5.3
+    "@odata2ts/odata-service": ^0.13.8
+    "@odata2ts/odata2ts": ^0.20.2
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: ^27.5.1
@@ -1913,9 +1904,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-renaming@workspace:examples/renaming-trippin"
   dependencies:
-    "@odata2ts/axios-odata-client": ^0.5.2
-    "@odata2ts/odata-service": ^0.13.5
-    "@odata2ts/odata2ts": ^0.19.1
+    "@odata2ts/axios-odata-client": ^0.5.3
+    "@odata2ts/odata-service": ^0.13.8
+    "@odata2ts/odata2ts": ^0.20.2
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: ^27.5.1
@@ -1930,10 +1921,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-trippin@workspace:examples/trippin"
   dependencies:
-    "@odata2ts/axios-odata-client": ^0.5.2
-    "@odata2ts/jquery-odata-client": ^0.1.1
-    "@odata2ts/odata-service": ^0.13.5
-    "@odata2ts/odata2ts": ^0.19.1
+    "@odata2ts/axios-odata-client": ^0.5.3
+    "@odata2ts/jquery-odata-client": ^0.1.2
+    "@odata2ts/odata-service": ^0.13.8
+    "@odata2ts/odata2ts": ^0.20.2
     "@types/jest": ^27.4.1
     "@types/jquery": ^3.5.16
     "@types/jsdom": ^21.1.0
@@ -1948,11 +1939,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/jquery-odata-client@^0.1.1, @odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client":
+"@odata2ts/jquery-odata-client@^0.1.2, @odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client":
   version: 0.0.0-use.local
   resolution: "@odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client"
   dependencies:
-    "@odata2ts/odata-client-api": ^0.6.2
+    "@odata2ts/odata-client-api": ^0.6.3
     "@types/jest": ^27.4.1
     "@types/jquery": ^3.5.16
     "@types/node": ^17.0.23
@@ -1967,7 +1958,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-client-api@^0.6.2, @odata2ts/odata-client-api@workspace:packages/odata-client-api":
+"@odata2ts/odata-client-api@^0.6.3, @odata2ts/odata-client-api@workspace:packages/odata-client-api":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-client-api@workspace:packages/odata-client-api"
   dependencies:
@@ -1981,7 +1972,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-core@^0.3.6, @odata2ts/odata-core@workspace:packages/odata-core":
+"@odata2ts/odata-core@^0.3.7, @odata2ts/odata-core@workspace:packages/odata-core":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-core@workspace:packages/odata-core"
   dependencies:
@@ -2002,11 +1993,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/odata-query-builder@^0.15.6, @odata2ts/odata-query-builder@workspace:packages/odata-query-builder":
+"@odata2ts/odata-query-builder@^0.15.10, @odata2ts/odata-query-builder@workspace:packages/odata-query-builder":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-builder@workspace:packages/odata-query-builder"
   dependencies:
-    "@odata2ts/odata-query-objects": ^0.17.0
+    "@odata2ts/odata-query-objects": ^0.17.3
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     axios: ^0.26.1
@@ -2019,14 +2010,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-query-objects@^0.17.0, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
+"@odata2ts/odata-query-objects@^0.17.3, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
-    "@odata2ts/converter-api": ^0.1.0
-    "@odata2ts/converter-runtime": ^0.1.0
-    "@odata2ts/odata-client-api": ^0.6.2
-    "@odata2ts/odata-core": ^0.3.6
+    "@odata2ts/converter-api": ^0.1.2
+    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/odata-core": ^0.3.7
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: 27.5.1
@@ -2038,13 +2028,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-service@^0.13.1, @odata2ts/odata-service@^0.13.5, @odata2ts/odata-service@workspace:packages/odata-service":
+"@odata2ts/odata-service@^0.13.8, @odata2ts/odata-service@^0.13.9, @odata2ts/odata-service@workspace:packages/odata-service":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
-    "@odata2ts/odata-client-api": ^0.6.2
-    "@odata2ts/odata-query-builder": ^0.15.6
-    "@odata2ts/odata-query-objects": ^0.17.0
+    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/odata-query-builder": ^0.15.10
+    "@odata2ts/odata-query-objects": ^0.17.3
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
     jest: 27.5.1
@@ -2057,17 +2047,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2ts@^0.19.1, @odata2ts/odata2ts@workspace:packages/odata2ts":
+"@odata2ts/odata2ts@^0.20.2, @odata2ts/odata2ts@workspace:packages/odata2ts":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2ts@workspace:packages/odata2ts"
   dependencies:
-    "@odata2ts/converter-api": ^0.1.1
-    "@odata2ts/converter-runtime": ^0.1.2
-    "@odata2ts/converter-v2-to-v4": ^0.1.2
-    "@odata2ts/odata-client-api": ^0.6.2
-    "@odata2ts/odata-core": ^0.3.6
-    "@odata2ts/odata-query-objects": ^0.17.0
-    "@odata2ts/odata-service": ^0.13.5
+    "@odata2ts/converter-api": ^0.1.2
+    "@odata2ts/converter-runtime": ^0.1.5
+    "@odata2ts/converter-v2-to-v4": ^0.1.4
+    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/odata-core": ^0.3.7
+    "@odata2ts/odata-query-objects": ^0.17.3
+    "@odata2ts/odata-service": ^0.13.9
     "@types/fs-extra": ^9.0.13
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
@@ -2093,11 +2083,11 @@ __metadata:
     type-fest: 2.19.0
     typescript: ^4.9.4
     upper-case-first: ^2.0.2
-    xml2js: ^0.4.23
+    xml2js: ^0.5.0
   peerDependencies:
-    "@odata2ts/odata-client-api": ^0.6.0
-    "@odata2ts/odata-query-objects": ^0.17.0
-    "@odata2ts/odata-service": ^0.13.5
+    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/odata-query-objects": ^0.17.3
+    "@odata2ts/odata-service": ^0.13.9
   bin:
     odata2ts: lib/run-cli.js
   languageName: unknown
@@ -2108,7 +2098,7 @@ __metadata:
   resolution: "@odata2ts/test-converters@workspace:examples/test-converters"
   dependencies:
     "@odata2ts/converter-api": ^0.1.1
-    "@odata2ts/odata-core": ^0.3.6
+    "@odata2ts/odata-core": ^0.3.7
     rimraf: ^3.0.2
     typescript: 4.9.4
   languageName: unknown
@@ -2172,18 +2162,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sap/cds-odata-v2-adapter-proxy@npm:^1.9.4":
-  version: 1.9.16
-  resolution: "@sap/cds-odata-v2-adapter-proxy@npm:1.9.16"
+"@sap/cds-odata-v2-adapter-proxy@npm:^1.9.21":
+  version: 1.9.21
+  resolution: "@sap/cds-odata-v2-adapter-proxy@npm:1.9.21"
   dependencies:
-    body-parser: ^1.20.1
+    body-parser: ^1.20.2
     body-parser-xml: ^2.0.3
     express: ^4.18.2
     express-fileupload: ^1.4.0
     http-proxy-middleware: ^2.0.6
-    node-fetch: ^2.6.7
+    node-fetch: ^2.6.9
     xml2js: ^0.4.23
-  checksum: 88f876404bde17b5fb8850f8dd58d1af725b3d6c290b9521be883ec5b96a97017f21a72c679f4e05a7eae2e0abcfedc317e6e8199294ab3aadd26e51be9fa1be
+  checksum: 727567fe1c76ceab0db54649406221a0df5b71fc56417205ae30eeab585fd40465e60f758ea63a0df98cb61bcbb823be25015801ad09b1db61346f18bd2ce160
   languageName: node
   linkType: hard
 
@@ -3127,7 +3117,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"body-parser@npm:1.20.1, body-parser@npm:^1.20.1":
+"body-parser@npm:1.20.1":
   version: 1.20.1
   resolution: "body-parser@npm:1.20.1"
   dependencies:
@@ -3144,6 +3134,26 @@ __metadata:
     type-is: ~1.6.18
     unpipe: 1.0.0
   checksum: f1050dbac3bede6a78f0b87947a8d548ce43f91ccc718a50dd774f3c81f2d8b04693e52acf62659fad23101827dd318da1fb1363444ff9a8482b886a3e4a5266
+  languageName: node
+  linkType: hard
+
+"body-parser@npm:^1.20.2":
+  version: 1.20.2
+  resolution: "body-parser@npm:1.20.2"
+  dependencies:
+    bytes: 3.1.2
+    content-type: ~1.0.5
+    debug: 2.6.9
+    depd: 2.0.0
+    destroy: 1.2.0
+    http-errors: 2.0.0
+    iconv-lite: 0.4.24
+    on-finished: 2.4.1
+    qs: 6.11.0
+    raw-body: 2.5.2
+    type-is: ~1.6.18
+    unpipe: 1.0.0
+  checksum: 14d37ec638ab5c93f6099ecaed7f28f890d222c650c69306872e00b9efa081ff6c596cd9afb9930656aae4d6c4e1c17537bea12bb73c87a217cb3cfea8896737
   languageName: node
   linkType: hard
 
@@ -3894,6 +3904,13 @@ __metadata:
   version: 1.0.4
   resolution: "content-type@npm:1.0.4"
   checksum: 3d93585fda985d1554eca5ebd251994327608d2e200978fdbfba21c0c679914d5faf266d17027de44b34a72c7b0745b18584ecccaa7e1fdfb6a68ac7114f12e0
+  languageName: node
+  linkType: hard
+
+"content-type@npm:~1.0.5":
+  version: 1.0.5
+  resolution: "content-type@npm:1.0.5"
+  checksum: 566271e0a251642254cde0f845f9dd4f9856e52d988f4eb0d0dcffbb7a1f8ec98de7a5215fc628f3bce30fe2fb6fd2bc064b562d721658c59b544e2d34ea2766
   languageName: node
   linkType: hard
 
@@ -4833,7 +4850,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:^4.17.1, express@npm:^4.18.2":
+"express@npm:^4.18.2":
   version: 4.18.2
   resolution: "express@npm:4.18.2"
   dependencies:
@@ -7933,6 +7950,20 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
+"node-fetch@npm:^2.6.9":
+  version: 2.6.9
+  resolution: "node-fetch@npm:2.6.9"
+  dependencies:
+    whatwg-url: ^5.0.0
+  peerDependencies:
+    encoding: ^0.1.0
+  peerDependenciesMeta:
+    encoding:
+      optional: true
+  checksum: acb04f9ce7224965b2b59e71b33c639794d8991efd73855b0b250921382b38331ffc9d61bce502571f6cc6e11a8905ca9b1b6d4aeb586ab093e2756a1fd190d0
+  languageName: node
+  linkType: hard
+
 "node-gyp@npm:8.x":
   version: 8.4.1
   resolution: "node-gyp@npm:8.4.1"
@@ -8576,7 +8607,7 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
-"passport@npm:>=0.4.1":
+"passport@npm:>=0.6.0":
   version: 0.6.0
   resolution: "passport@npm:0.6.0"
   dependencies:
@@ -9082,6 +9113,18 @@ fsevents@^2.3.2:
     iconv-lite: 0.4.24
     unpipe: 1.0.0
   checksum: 5362adff1575d691bb3f75998803a0ffed8c64eabeaa06e54b4ada25a0cd1b2ae7f4f5ec46565d1bec337e08b5ac90c76eaa0758de6f72a633f025d754dec29e
+  languageName: node
+  linkType: hard
+
+"raw-body@npm:2.5.2":
+  version: 2.5.2
+  resolution: "raw-body@npm:2.5.2"
+  dependencies:
+    bytes: 3.1.2
+    http-errors: 2.0.0
+    iconv-lite: 0.4.24
+    unpipe: 1.0.0
+  checksum: ba1583c8d8a48e8fbb7a873fdbb2df66ea4ff83775421bfe21ee120140949ab048200668c47d9ae3880012f6e217052690628cf679ddfbd82c9fc9358d574676
   languageName: node
   linkType: hard
 
@@ -9865,8 +9908,8 @@ resolve@^1.20.0:
   linkType: hard
 
 "sqlite3@npm:^5":
-  version: 5.1.4
-  resolution: "sqlite3@npm:5.1.4"
+  version: 5.1.5
+  resolution: "sqlite3@npm:5.1.5"
   dependencies:
     "@mapbox/node-pre-gyp": ^1.0.0
     node-addon-api: ^4.2.0
@@ -9880,7 +9923,7 @@ resolve@^1.20.0:
   peerDependenciesMeta:
     node-gyp:
       optional: true
-  checksum: a265220515b0168cb166ece9b7fd3b230fe93fe9dabea8f426b0bfbb833bf39be1177fba4e161a7796e471caace6ca2c312fb3fc44c1f053a3b5617b250a5575
+  checksum: b7df68c8d4a16cd1d8d42e34035973c2e4cff33e0b917ff8830fa21c84e3bc0d16beaf51589a4a45df9c52e30bf0224122e6c67d0f17ff1d776be738d8706b02
   languageName: node
   linkType: hard
 
@@ -11287,6 +11330,16 @@ resolve@^1.20.0:
     sax: ">=0.6.0"
     xmlbuilder: ~11.0.0
   checksum: ca0cf2dfbf6deeaae878a891c8fbc0db6fd04398087084edf143cdc83d0509ad0fe199b890f62f39c4415cf60268a27a6aed0d343f0658f8779bd7add690fa98
+  languageName: node
+  linkType: hard
+
+"xml2js@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "xml2js@npm:0.5.0"
+  dependencies:
+    sax: ">=0.6.0"
+    xmlbuilder: ~11.0.0
+  checksum: 1aa71d62e5bc2d89138e3929b9ea46459157727759cbc62ef99484b778641c0cd21fb637696c052d901a22f82d092a3e740a16b4ce218e81ac59b933535124ea
   languageName: node
   linkType: hard
 
