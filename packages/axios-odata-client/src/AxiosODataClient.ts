@@ -1,7 +1,7 @@
 import { HttpResponseModel, ODataClient } from "@odata2ts/odata-client-api";
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from "axios";
 
-import { RequestError } from "./ODataRequestErrorModel";
+import { AxiosODataClientError } from "./AxiosODataClientError";
 
 export type ErrorMessageRetriever<ResponseType = any> = (error: AxiosError<ResponseType>) => string | null | undefined;
 
@@ -104,24 +104,25 @@ export class AxiosODataClient implements ODataClient<AxiosRequestConfig> {
     });
   }
 
-  private convertError(error: Error): Error | RequestError {
+  private convertError(error: Error): AxiosODataClientError {
     if ((error as AxiosError).isAxiosError) {
       const axiosError: AxiosError = error as AxiosError;
-
-      const status = axiosError.response != null ? axiosError.response.status : 0;
-      const message = this.getErrorMessage(axiosError);
-
-      return Object.assign(new Error(), {
-        isRequestError: true,
-        stack: axiosError.stack,
-        message,
-        canceled: axios.isCancel(axiosError),
-        code: axiosError.code,
-        status,
-        data: axiosError.response ? axiosError.response.data : undefined,
-      });
+      if (axiosError.response) {
+        const eMsg = this.getErrorMessage(axiosError);
+        if (typeof eMsg === "string") {
+          return new AxiosODataClientError("Server responded with error: " + eMsg, axiosError.response.status, {
+            cause: error,
+          });
+        } else {
+          return new AxiosODataClientError("Server responded with error", axiosError.response.status, { cause: error });
+        }
+      } else if (axiosError.request) {
+        return new AxiosODataClientError("No response from server", undefined, { cause: error });
+      } else {
+        return new AxiosODataClientError("Axios Error: no request was sent", undefined, { cause: error });
+      }
     }
-    return error;
+    return new AxiosODataClientError("Error", undefined, { cause: error });
   }
 
   public async refreshCsrfToken() {

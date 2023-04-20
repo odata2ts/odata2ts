@@ -4,7 +4,7 @@
 import { HttpResponseModel, ODataClient } from "@odata2ts/odata-client-api";
 
 import { AjaxRequestConfig, getDefaultConfig, mergeAjaxConfig } from "./AjaxConfig";
-import { RequestError } from "./ODataRequestErrorModel";
+import { JQueryODataClientError } from "./JQueryODataClientError";
 
 export type ErrorMessageRetriever = (errorResponse: any) => string | undefined;
 
@@ -50,15 +50,13 @@ export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
         },
         error: (jqXHR: JQuery.jqXHR, textStatus: string, thrownError: string) => {
           const message = this.getErrorMessage(jqXHR.responseJSON);
-
-          reject(
-            Object.assign(new Error(), {
-              status: jqXHR.status || 0,
-              code: jqXHR.statusText,
-              data: jqXHR.responseJSON,
-              message,
-            } as RequestError)
-          );
+          if (message) {
+            reject(
+              new JQueryODataClientError("Server responded with error: " + message, jqXHR.status, { cause: jqXHR })
+            );
+          } else {
+            reject(new JQueryODataClientError(textStatus + " " + thrownError, jqXHR.status, { cause: jqXHR }));
+          }
         },
       });
 

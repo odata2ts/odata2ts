@@ -1,2 +1,2 @@
 export * from "./JQueryODataClient";
-export type { RequestError } from "./ODataRequestErrorModel";
+export type { JQueryODataClientError } from "./JQueryODataClientError";
