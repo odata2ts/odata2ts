@@ -1793,7 +1793,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/axios-odata-client@^0.5.3, @odata2ts/axios-odata-client@workspace:packages/axios-odata-client":
+"@odata2ts/axios-odata-client@npm:^0.5.3":
+  version: 0.5.3
+  resolution: "@odata2ts/axios-odata-client@npm:0.5.3"
+  dependencies:
+    "@odata2ts/odata-client-api": ^0.6.3
+    axios: ^0.27.2
+  checksum: dce7f07cabe2eb8f25da88b02efa36b71af28f18eb09a86eeaed94373c947ec4576c027d9ca072ebc14f56f2f0140bbcde2ead8f6d010a03abdab84869498187
+  languageName: node
+  linkType: hard
+
+"@odata2ts/axios-odata-client@workspace:packages/axios-odata-client":
   version: 0.0.0-use.local
   resolution: "@odata2ts/axios-odata-client@workspace:packages/axios-odata-client"
   dependencies:
@@ -1939,7 +1949,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/jquery-odata-client@^0.1.2, @odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client":
+"@odata2ts/jquery-odata-client@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "@odata2ts/jquery-odata-client@npm:0.1.2"
+  dependencies:
+    "@odata2ts/odata-client-api": ^0.6.3
+  peerDependencies:
+    jquery: ">1.0"
+  checksum: 324196ca3e95b8aef2f4d9dcd89e1c8b58677ed184f1bd908064fa9e8ee9582bfeb838ed8824dfb79df555249d16339fb6ca407a5f17d8b62f971f2efccd3611
+  languageName: node
+  linkType: hard
+
+"@odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client":
   version: 0.0.0-use.local
   resolution: "@odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client"
   dependencies:
@@ -2047,7 +2068,39 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2ts@^0.20.2, @odata2ts/odata2ts@workspace:packages/odata2ts":
+"@odata2ts/odata2ts@npm:^0.20.2":
+  version: 0.20.3
+  resolution: "@odata2ts/odata2ts@npm:0.20.3"
+  dependencies:
+    "@odata2ts/converter-api": ^0.1.2
+    "@odata2ts/converter-runtime": ^0.1.5
+    "@odata2ts/odata-core": ^0.3.7
+    camel-case: ^4.1.2
+    commander: ^9.1.0
+    constant-case: ^3.0.4
+    cosmiconfig: ^7.0.1
+    cosmiconfig-typescript-loader: ^4.0.0
+    deepmerge: ^4.2.2
+    fs-extra: ^10.0.1
+    pascal-case: ^3.1.2
+    prettier: ^2.7.1
+    snake-case: ^3.0.4
+    ts-morph: ^14.0.0
+    ts-node: ^10.7.0
+    tsconfig-loader: ^1.1.0
+    upper-case-first: ^2.0.2
+    xml2js: ^0.5.0
+  peerDependencies:
+    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/odata-query-objects": ^0.17.3
+    "@odata2ts/odata-service": ^0.13.9
+  bin:
+    odata2ts: lib/run-cli.js
+  checksum: 44b5bdf2c09f3f047463276459f3f739382e99091ae6a01da1df89b4d151eb52e9b4a0e01de2a6d003f338e0c39f32d3c5b780796ee346a78b90529761967704
+  languageName: node
+  linkType: hard
+
+"@odata2ts/odata2ts@workspace:packages/odata2ts":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2ts@workspace:packages/odata2ts"
   dependencies:

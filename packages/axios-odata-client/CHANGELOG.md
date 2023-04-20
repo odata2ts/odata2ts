@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/axios-odata-client@0.5.3...@odata2ts/axios-odata-client@0.6.0) (2023-04-20)
+
+### Features
+
+* better errors for jquery and axios odata clients ([#139](https://github.com/odata2ts/odata2ts/issues/139)) ([bb74514](https://github.com/odata2ts/odata2ts/commit/bb745144fb37235ad9864ab78eebbecf1d69107c))
+
 ## [0.5.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/axios-odata-client@0.5.2...@odata2ts/axios-odata-client@0.5.3) (2023-04-08)
 
 **Note:** Version bump only for package @odata2ts/axios-odata-client

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.21.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.20.3...@odata2ts/odata2ts@0.21.0) (2023-04-20)
+
+### Features
+
+* option for extra-results-wrapping for V2 services and model generation only ([#155](https://github.com/odata2ts/odata2ts/issues/155)) ([795a04c](https://github.com/odata2ts/odata2ts/commit/795a04c42b9e2485975b85b70bc72772bd4bf25a))
+
 ## [0.20.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.20.2...@odata2ts/odata2ts@0.20.3) (2023-04-18)
 
 ### Bug Fixes
