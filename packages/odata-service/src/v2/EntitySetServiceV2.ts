@@ -8,7 +8,6 @@ import {
   convertV2ModelResponse,
 } from "@odata2ts/odata-query-objects";
 
-import { EntityTypeServiceV2 } from "./EntityTypeServiceV2";
 import { ServiceBaseV2 } from "./ServiceBaseV2";
 
 export abstract class EntitySetServiceV2<
@@ -16,8 +15,7 @@ export abstract class EntitySetServiceV2<
   T,
   EditableT,
   Q extends QueryObject,
-  EIdType,
-  ETS extends EntityTypeServiceV2<ClientType, T, EditableT, Q>
+  EIdType
 > extends ServiceBaseV2<T, Q> {
   /**
    * Overriding the constructor to support creation of EntityTypeService from within this service.
@@ -27,7 +25,6 @@ export abstract class EntitySetServiceV2<
    * @param basePath the base URL path
    * @param name name of the service
    * @param qModel query object
-   * @param entityTypeServiceConstructor the corresponding service for a single entity
    * @param idFunction the id function
    * @protected
    */
@@ -36,7 +33,6 @@ export abstract class EntitySetServiceV2<
     basePath: string,
     name: string,
     qModel: Q,
-    protected entityTypeServiceConstructor: new (client: ODataClient, basePath: string, name: string) => ETS,
     protected idFunction: QFunction<EIdType>
   ) {
     super(client, basePath, name, qModel);
@@ -92,23 +88,12 @@ export abstract class EntitySetServiceV2<
     return convertV2ModelResponse(result, this.qResponseType);
   }
 
-  public get(id: EIdType) {
-    const url = this.idFunction.buildUrl(id);
-    return new this.entityTypeServiceConstructor(this.client, this.basePath, url);
-  }
-
-  public patch(
-    id: EIdType,
-    model: Partial<EditableT>,
-    requestConfig?: ODataClientConfig<ClientType>
-  ): ODataResponse<void> {
-    return this.get(id).patch(model, requestConfig);
-  }
-
-  public delete(id: EIdType, requestConfig?: ODataClientConfig<ClientType>): ODataResponse<void> {
-    return this.get(id).delete(requestConfig);
-  }
-
+  /**
+   * Query the entity set.
+   *
+   * @param queryFn provide the query logic with the help of the builder and the query-object
+   * @param requestConfig any special configurations for this request
+   */
   public async query<ReturnType extends Partial<T> = T>(
     queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void,
     requestConfig?: ODataClientConfig<ClientType>

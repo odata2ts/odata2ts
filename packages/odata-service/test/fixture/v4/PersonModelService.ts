@@ -41,11 +41,10 @@ export class PersonModelCollectionService<ClientType extends ODataClient> extend
   PersonModel,
   EditablePersonModel,
   QPersonV4,
-  PersonId,
-  PersonModelService<ClientType>
+  PersonId
 > {
   constructor(client: ODataClient, basePath: string, name: string) {
-    super(client, basePath, name, qPersonV4, PersonModelService, new QPersonIdFunction(name));
+    super(client, basePath, name, qPersonV4, new QPersonIdFunction(name));
   }
 }
 

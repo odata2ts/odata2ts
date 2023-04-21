@@ -43,13 +43,4 @@ describe("EntityServiceResolver Tests", function () {
     expect(toTest.get()).toBeInstanceOf(PersonModelV2CollectionService);
     expect(toTest.get(undefined)).toBeInstanceOf(PersonModelV2CollectionService);
   });
-
-  test("createKey & parseKey", async () => {
-    const toTest = createPersonModelV2ServiceResolver(CLIENT, BASE_PATH, NAME);
-    expect(toTest.createKey("123")).toBe(`${NAME}('123')`);
-    expect(toTest.createKey({ userName: "456" })).toBe(`${NAME}(UserName='456')`);
-
-    expect(toTest.parseKey(`${NAME}('123')`)).toBe("123");
-    expect(toTest.parseKey(`${NAME}(UserName='456')`)).toStrictEqual({ userName: "456" });
-  });
 });

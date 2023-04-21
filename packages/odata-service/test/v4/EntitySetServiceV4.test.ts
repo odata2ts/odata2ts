@@ -4,9 +4,9 @@ import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 
 import { commonEntitySetTests } from "../EntitySetServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
-import { PersonModelCollectionService, PersonModelService } from "../fixture/v4/PersonModelService";
+import { PersonModelCollectionService } from "../fixture/v4/PersonModelService";
 import { QPersonV4, qPersonV4 } from "../fixture/v4/QPersonV4";
-import { TestCollectionService, TestService } from "../fixture/v4/TypingModelService";
+import { TestCollectionService } from "../fixture/v4/TypingModelService";
 import { MockODataClient } from "../mock/MockODataClient";
 
 describe("V4 EntitySetService Test", () => {
@@ -70,11 +70,6 @@ describe("V4 EntitySetService Test", () => {
     >((builder) => {
       const bResult: ODataQueryBuilderV4<QPersonV4> = builder;
     });
-  });
-
-  test("entitySet: ensure typing of EntityTypeService", async () => {
-    // just a typing test: this only needs to compile
-    const result: PersonModelService<MockODataClient> = testService.get({ userName: "heinz" });
   });
 
   test("entitySet: createKey & parseKey with conversions", async () => {
