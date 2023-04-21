@@ -9,8 +9,8 @@ import { MockODataClient } from "./mock/MockODataClient";
 export function commonEntitySetTests(
   odataClient: MockODataClient,
   serviceConstructor: new (odataClient: ODataClient, baseUrl: string, name: string) =>
-    | EntitySetServiceV4<MockODataClient, PersonModel, EditablePersonModel, QPersonV4, PersonId, any>
-    | EntitySetServiceV2<MockODataClient, PersonModel, EditablePersonModel, QPersonV2, PersonId, any>
+    | EntitySetServiceV4<MockODataClient, PersonModel, EditablePersonModel, QPersonV4, PersonId>
+    | EntitySetServiceV2<MockODataClient, PersonModel, EditablePersonModel, QPersonV2, PersonId>
 ) {
   const BASE_URL = "/base";
   const NAME = "EntityXY";
@@ -18,8 +18,8 @@ export function commonEntitySetTests(
   const REQUEST_CONFIG = { test: "Test" };
 
   let testService:
-    | EntitySetServiceV4<MockODataClient, PersonModel, EditablePersonModel, QPersonV4, PersonId, any>
-    | EntitySetServiceV2<MockODataClient, PersonModel, EditablePersonModel, QPersonV2, PersonId, any>;
+    | EntitySetServiceV4<MockODataClient, PersonModel, EditablePersonModel, QPersonV4, PersonId>
+    | EntitySetServiceV2<MockODataClient, PersonModel, EditablePersonModel, QPersonV2, PersonId>;
 
   beforeEach(() => {
     testService = new serviceConstructor(odataClient, BASE_URL, NAME);
@@ -99,30 +99,5 @@ export function commonEntitySetTests(
     expect(odataClient.lastUrl).toBe(expected);
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");
-  });
-
-  test("entitySet: patch", async () => {
-    const model: Partial<PersonModel> = { Age: "45" };
-    const odataModel = { Age: 45 };
-
-    await testService.patch("tester", model);
-
-    expect(odataClient.lastUrl).toBe(`${EXPECTED_PATH}('tester')`);
-    expect(odataClient.lastOperation).toBe("PATCH");
-    expect(odataClient.lastData).toEqual({ Age: 45 });
-    expect(odataClient.lastRequestConfig).toBeUndefined();
-  });
-
-  test("entitySet: delete", async () => {
-    await testService.delete("tester");
-
-    expect(odataClient.lastUrl).toBe(`${EXPECTED_PATH}('tester')`);
-    expect(odataClient.lastOperation).toBe("DELETE");
-    expect(odataClient.lastData).toBeUndefined();
-    expect(odataClient.lastData).toBeUndefined();
-    expect(odataClient.lastRequestConfig).toBeUndefined();
-
-    await testService.delete("tester", REQUEST_CONFIG);
-    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
 }

@@ -64,10 +64,9 @@ export class TestCollectionService<ClientType extends ODataClient> extends Entit
   TestModel,
   EditableTestModel,
   QTest,
-  TestModelId,
-  TestService<ClientType>
+  TestModelId
 > {
   constructor(client: ODataClient, basePath: string, name: string) {
-    super(client, basePath, name, qTest, TestService, new QTestIdFunction(name));
+    super(client, basePath, name, qTest, new QTestIdFunction(name));
   }
 }
