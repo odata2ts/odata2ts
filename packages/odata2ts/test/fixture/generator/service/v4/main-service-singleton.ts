@@ -5,10 +5,9 @@ import { ODataService } from "@odata2ts/odata-service";
 import { TestEntityService } from "./service/TestEntityService";
 
 export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
-  private _name: string = "Tester";
   private _currentUser?: TestEntityService<ClientType>;
 
-  public navToCurrentUser() {
+  public currentUser() {
     if (!this._currentUser) {
       this._currentUser = new TestEntityService(this.client, this.getPath(), "CURRENT_USER");
     }

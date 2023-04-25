@@ -8,7 +8,6 @@ import { QPing, QVote } from "./QTester";
 import { TestEntity, VoteParams } from "./TesterModel";
 
 export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
-  private _name: string = "Tester";
   private _qPing?: QPing;
   private _qVote?: QVote;
 

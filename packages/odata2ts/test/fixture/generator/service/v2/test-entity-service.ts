@@ -1,5 +1,5 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
-import { EntityServiceResolver, EntitySetServiceV2, EntityTypeServiceV2 } from "@odata2ts/odata-service";
+import { EntitySetServiceV2, EntityTypeServiceV2 } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QTestEntity, QTestEntityId, qTestEntity } from "../QTester";
@@ -22,21 +22,9 @@ export class TestEntityCollectionService<ClientType extends ODataClient> extends
   TestEntity,
   EditableTestEntity,
   QTestEntity,
-  TestEntityId,
-  TestEntityService<ClientType>
+  TestEntityId
 > {
   constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qTestEntity, TestEntityService, new QTestEntityId(name));
+    super(client, basePath, name, qTestEntity, new QTestEntityId(name));
   }
-}
-
-export function createTestEntityServiceResolver(client: ODataClient, basePath: string, entityName: string) {
-  return new EntityServiceResolver(
-    client,
-    basePath,
-    entityName,
-    QTestEntityId,
-    TestEntityService,
-    TestEntityCollectionService
-  );
 }

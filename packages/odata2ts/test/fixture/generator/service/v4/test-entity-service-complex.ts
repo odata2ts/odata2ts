@@ -1,10 +1,5 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
-import {
-  CollectionServiceV4,
-  EntityServiceResolver,
-  EntitySetServiceV4,
-  EntityTypeServiceV4,
-} from "@odata2ts/odata-service";
+import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QBook, QBookId, QReviewer, qBook, qReviewer } from "../QTester";
@@ -26,7 +21,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     super(client, basePath, name, qBook);
   }
 
-  public navToLector(): ReviewerService<ClientType> {
+  public lector(): ReviewerService<ClientType> {
     if (!this._lector) {
       this._lector = new ReviewerService(this.client, this.getPath(), "lector");
     }
@@ -34,7 +29,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     return this._lector;
   }
 
-  public navToReviewers(): CollectionServiceV4<ClientType, Reviewer, QReviewer, EditableReviewer> {
+  public reviewers(): CollectionServiceV4<ClientType, Reviewer, QReviewer, EditableReviewer> {
     if (!this._reviewers) {
       this._reviewers = new CollectionServiceV4(this.client, this.getPath(), "reviewers", qReviewer);
     }
@@ -48,14 +43,9 @@ export class BookCollectionService<ClientType extends ODataClient> extends Entit
   Book,
   EditableBook,
   QBook,
-  BookId,
-  BookService<ClientType>
+  BookId
 > {
   constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qBook, BookService, new QBookId(name));
+    super(client, basePath, name, qBook, new QBookId(name));
   }
-}
-
-export function createBookServiceResolver(client: ODataClient, basePath: string, entityName: string) {
-  return new EntityServiceResolver(client, basePath, entityName, QBookId, BookService, BookCollectionService);
 }

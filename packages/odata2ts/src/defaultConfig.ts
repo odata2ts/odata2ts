@@ -71,26 +71,18 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
         suffix: "Collection",
         applyServiceNaming: true,
       },
-      serviceResolverFunction: {
-        namingStrategy: NamingStrategies.CAMEL_CASE,
-        prefix: "create",
-        suffix: "serviceResolver",
-      },
       operations: {
         namingStrategy: NamingStrategies.CAMEL_CASE,
       },
       relatedServiceGetter: {
         namingStrategy: NamingStrategies.CAMEL_CASE,
-        prefix: "navTo",
+        prefix: "",
         suffix: "",
       },
       privateProps: {
         namingStrategy: NamingStrategies.CAMEL_CASE,
         prefix: "_",
         suffix: "",
-      },
-      publicProps: {
-        namingStrategy: NamingStrategies.PASCAL_CASE,
       },
     },
   },
@@ -151,10 +143,6 @@ const minimalNamingConfig: NameSettings = {
     relatedServiceGetter: {
       prefix: services.relatedServiceGetter.prefix,
       suffix: services.relatedServiceGetter.suffix,
-    },
-    serviceResolverFunction: {
-      prefix: services.serviceResolverFunction.prefix,
-      suffix: services.serviceResolverFunction.suffix,
     },
   },
 };

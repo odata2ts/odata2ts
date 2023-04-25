@@ -8,7 +8,6 @@ import { QFirstBook, QGetBestsellers } from "./QTester";
 import { FirstBookParams, TestEntity } from "./TesterModel";
 
 export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
-  private _name: string = "Tester";
   private _qGetBestsellers?: QGetBestsellers;
   private _qFirstBook?: QFirstBook;
 

@@ -2,10 +2,19 @@ import { ODataClient } from "@odata2ts/odata-client-api";
 import { ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { createTestEntityServiceResolver } from "./service/TestEntityService";
+import { QTestEntityId } from "./QTester";
+// @ts-ignore
+import { TestEntityCollectionService, TestEntityService } from "./service/TestEntityService";
+// @ts-ignore
+import { TestEntityId } from "./TesterModel";
 
 export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
-  private _name: string = "Tester";
-  public Ents = createTestEntityServiceResolver(this.client, this.getPath(), "Ents");
-  public navToEnts = this.Ents.get.bind(this.Ents);
+  public ents(): TestEntityCollectionService<ClientType>;
+  public ents(id: TestEntityId): TestEntityService<ClientType>;
+  public ents(id?: TestEntityId | undefined) {
+    const fieldName = "Ents";
+    return typeof id === "undefined" || id === null
+      ? new TestEntityCollectionService(this.client, this.getPath(), fieldName)
+      : new TestEntityService(this.client, this.getPath(), new QTestEntityId(fieldName).buildUrl(id));
+  }
 }

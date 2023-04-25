@@ -6,7 +6,6 @@ import { ODataService } from "@odata2ts/odata-service";
 import { QPingCollection, QPingNumber, QPingString } from "./QTester";
 
 export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
-  private _name: string = "Tester";
   private _qPingString?: QPingString;
   private _qPingNumber?: QPingNumber;
   private _qPingCollection?: QPingCollection;

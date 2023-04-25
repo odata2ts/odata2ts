@@ -1,5 +1,5 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
-import { EntityServiceResolver, EntitySetServiceV2, EntityTypeServiceV2 } from "@odata2ts/odata-service";
+import { EntitySetServiceV2, EntityTypeServiceV2 } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QGrandParentId, QParent, qParent } from "../QTester";
@@ -22,21 +22,9 @@ export class ParentCollectionService<ClientType extends ODataClient> extends Ent
   Parent,
   EditableParent,
   QParent,
-  GrandParentId,
-  ParentService<ClientType>
+  GrandParentId
 > {
   constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qParent, ParentService, new QGrandParentId(name));
+    super(client, basePath, name, qParent, new QGrandParentId(name));
   }
-}
-
-export function createParentServiceResolver(client: ODataClient, basePath: string, entityName: string) {
-  return new EntityServiceResolver(
-    client,
-    basePath,
-    entityName,
-    QGrandParentId,
-    ParentService,
-    ParentCollectionService
-  );
 }

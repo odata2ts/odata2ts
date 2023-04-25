@@ -187,14 +187,6 @@ describe("Service Generator Tests V4", () => {
           prefix: "",
           suffix: "_",
         },
-        publicProps: {
-          namingStrategy: NamingStrategies.CONSTANT_CASE,
-        },
-        serviceResolverFunction: {
-          namingStrategy: NamingStrategies.CONSTANT_CASE,
-          prefix: "",
-          suffix: "RSLVR",
-        },
         relatedServiceGetter: {
           namingStrategy: NamingStrategies.CONSTANT_CASE,
           prefix: "navigateTo",
