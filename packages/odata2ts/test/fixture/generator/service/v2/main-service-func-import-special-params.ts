@@ -8,7 +8,6 @@ import { QBestBook } from "./QTester";
 import { BestBookParams, TestEntity } from "./TesterModel";
 
 export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
-  private _name: string = "Tester";
   private _qBestBook?: QBestBook;
 
   public async bestBook(

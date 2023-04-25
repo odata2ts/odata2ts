@@ -178,17 +178,9 @@ export interface ServiceNamingOptions extends NamingStrategyOption, RequiredNami
   collection: RequiredNamingOptions & { applyServiceNaming?: boolean };
 
   /**
-   * Naming for factory function for EntityServiceResolvers.
+   * Naming for getter method of another service.
    *
-   * By default, prefix = create, suffix = ServiceResolver
-   * @example createTestEntityServiceResolver
-   */
-  serviceResolverFunction: NamingStrategyOption & RequiredNamingOptions;
-
-  /**
-   * Naming for getter method. Another related service is returned.
-   *
-   * By default, prefix = "navTo" and namingStrategy = camelCase
+   * By default, namingStrategy = camelCase
    */
   relatedServiceGetter: NamingStrategyOption & RequiredNamingOptions;
 
@@ -203,11 +195,8 @@ export interface ServiceNamingOptions extends NamingStrategyOption, RequiredNami
 
   /**
    * Naming options for private properties of service classes.
+   *
+   * By default, prefix = _
    */
   privateProps: NamingStrategyOption & RequiredNamingOptions;
-
-  /**
-   * Naming options for public properties of service classes.
-   */
-  publicProps?: NamingStrategyOption;
 }

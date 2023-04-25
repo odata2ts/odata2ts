@@ -1,11 +1,6 @@
 import { ODataClient } from "@odata2ts/odata-client-api";
 import { EnumCollection, QEnumCollection, qEnumCollection } from "@odata2ts/odata-query-objects";
-import {
-  CollectionServiceV2,
-  EntityServiceResolver,
-  EntitySetServiceV2,
-  EntityTypeServiceV2,
-} from "@odata2ts/odata-service";
+import { CollectionServiceV2, EntitySetServiceV2, EntityTypeServiceV2 } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QBook, QBookId, qBook } from "../QTester";
@@ -24,7 +19,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     super(client, basePath, name, qBook);
   }
 
-  public navToAltChoices() {
+  public altChoices() {
     if (!this._altChoices) {
       this._altChoices = new CollectionServiceV2(this.client, this.getPath(), "altChoices", qEnumCollection);
     }
@@ -38,14 +33,9 @@ export class BookCollectionService<ClientType extends ODataClient> extends Entit
   Book,
   EditableBook,
   QBook,
-  BookId,
-  BookService<ClientType>
+  BookId
 > {
   constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qBook, BookService, new QBookId(name));
+    super(client, basePath, name, qBook, new QBookId(name));
   }
-}
-
-export function createBookServiceResolver(client: ODataClient, basePath: string, entityName: string) {
-  return new EntityServiceResolver(client, basePath, entityName, QBookId, BookService, BookCollectionService);
 }

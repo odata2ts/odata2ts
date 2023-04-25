@@ -221,11 +221,6 @@ export class NamingHelper {
     return opts?.collection?.applyServiceNaming ? this.getName(result, strategy, opts) : result;
   };
 
-  public getServiceResolverName = (name: string) => {
-    const opts = this.options.services?.serviceResolverFunction;
-    return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
-  };
-
   public getFunctionName(name: string) {
     const opts = this.options.services?.operations;
     return this.getName(name, this.getOperationNamingStrategy(), opts?.function || opts);
@@ -239,11 +234,6 @@ export class NamingHelper {
   public getRelatedServiceGetter(name: string) {
     const opts = this.options.services?.relatedServiceGetter;
     return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
-  }
-
-  public getPublicPropNameForService(name: string) {
-    const opts = this.options.services?.publicProps;
-    return this.getName(name, this.namingFunction(opts?.namingStrategy));
   }
 
   public getPrivatePropName = (name: string) => {

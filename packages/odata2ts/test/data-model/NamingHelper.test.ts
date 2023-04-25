@@ -50,12 +50,10 @@ describe("NamingHelper Tests", function () {
 
     expect(toTest.getServiceName("TEST")).toBe("TestService");
     expect(toTest.getCollectionServiceName("TEST")).toBe("TestCollectionService");
-    expect(toTest.getServiceResolverName("TEST")).toBe("createTestServiceResolver");
     expect(toTest.getFunctionName("TEST")).toBe("test");
     expect(toTest.getActionName("TEST")).toBe("test");
-    expect(toTest.getRelatedServiceGetter("TEST")).toBe("navToTest");
+    expect(toTest.getRelatedServiceGetter("TEST")).toBe("test");
     expect(toTest.getPrivatePropName("TEST")).toBe("_test");
-    expect(toTest.getPublicPropNameForService("TEST")).toBe("Test");
   });
 
   test("failure cases", () => {
@@ -344,23 +342,6 @@ describe("NamingHelper Tests", function () {
     expect(toTest.getCollectionServiceName("test")).toBe("COL_TEST");
   });
 
-  test("Service: EntityServiceResolver factory function", () => {
-    options.naming = {
-      services: {
-        prefix: "PRE",
-        suffix: "suf",
-        serviceResolverFunction: {
-          prefix: "get",
-          suffix: "",
-          namingStrategy: NamingStrategies.CONSTANT_CASE,
-        },
-      },
-    };
-    createHelper();
-
-    expect(toTest.getServiceResolverName("test")).toBe("GET_TEST");
-  });
-
   test("Service: Operation base settings", () => {
     options.naming = {
       services: {
@@ -430,18 +411,5 @@ describe("NamingHelper Tests", function () {
     createHelper();
 
     expect(toTest.getPrivatePropName("test")).toBe("PRE_TEST_SUF");
-  });
-
-  test("Service: get public prop name for service", () => {
-    options.naming = {
-      services: {
-        publicProps: {
-          namingStrategy: NamingStrategies.CONSTANT_CASE,
-        },
-      },
-    };
-    createHelper();
-
-    expect(toTest.getPublicPropNameForService("test")).toBe("TEST");
   });
 });
