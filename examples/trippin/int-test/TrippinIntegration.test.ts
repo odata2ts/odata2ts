@@ -55,7 +55,7 @@ describe("Integration Testing of Service Generation", () => {
       // trips: [],
     };
 
-    const result = await testService.navToPeople().get("russellwhyte").query();
+    const result = await testService.navToPeople("russellwhyte").query();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
 
@@ -70,8 +70,7 @@ describe("Integration Testing of Service Generation", () => {
       lastName: "Ketchum",
     };
     const result = await testService
-      .navToPeople()
-      .get("russellwhyte")
+      .navToPeople("russellwhyte")
       .query((qb) => qb.select("bestFriend", "friends").expand("bestFriend", "friends"));
 
     expect(result.status).toBe(200);
@@ -84,13 +83,13 @@ describe("Integration Testing of Service Generation", () => {
     const axiosClientMsgPrefix = "Server responded with error: ";
     const axiosFailMsg = "The request resource is not found.";
 
-    await expect(() => testService.navToPeople().get("XXX").query()).rejects.toThrow(
+    await expect(() => testService.navToPeople("XXX").query()).rejects.toThrow(
       new Error(axiosClientMsgPrefix + axiosFailMsg)
     );
 
     // again, but now inspect error in detail
     try {
-      await testService.navToPeople().get("XXX").query();
+      await testService.navToPeople("XXX").query();
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
@@ -192,7 +191,7 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("collection of strings", async () => {
-    const result = await testService.navToPeople().get("russellwhyte").navToAddressInfo().query();
+    const result = await testService.navToPeople("russellwhyte").navToAddressInfo().query();
 
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();

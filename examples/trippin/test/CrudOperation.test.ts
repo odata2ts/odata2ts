@@ -39,7 +39,7 @@ describe("Testing Generation of TrippinService", () => {
       age: 33,
     };
 
-    await TRIPPIN.navToPeople().get(id).update(model);
+    await TRIPPIN.navToPeople(id).update(model);
 
     expect(ODATA_CLIENT.lastOperation).toBe("PUT");
     expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
@@ -59,7 +59,7 @@ describe("Testing Generation of TrippinService", () => {
       age: 44,
     };
 
-    await TRIPPIN.navToPeople().get(id).patch(model);
+    await TRIPPIN.navToPeople(id).patch(model);
 
     expect(ODATA_CLIENT.lastOperation).toBe("PATCH");
     expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
@@ -70,7 +70,7 @@ describe("Testing Generation of TrippinService", () => {
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
 
-    await TRIPPIN.navToPeople().get(id).delete();
+    await TRIPPIN.navToPeople(id).delete();
 
     expect(ODATA_CLIENT.lastOperation).toBe("DELETE");
     expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
@@ -78,7 +78,7 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("complex type: update", async () => {
-    const complex = TRIPPIN.navToPeople().get("tester").navToHomeAddress();
+    const complex = TRIPPIN.navToPeople("tester").navToHomeAddress();
 
     const model: EditableLocationModel = {
       address: "Test Address",
@@ -96,7 +96,7 @@ describe("Testing Generation of TrippinService", () => {
 
   test("complex collection: create", async () => {
     const model: EditableLocationModel = { address: "TestAdress" };
-    await TRIPPIN.navToPeople().get("tester").navToAddressInfo().add(model);
+    await TRIPPIN.navToPeople("tester").navToAddressInfo().add(model);
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(ODATA_CLIENT.lastOperation).toBe("POST");
@@ -105,7 +105,7 @@ describe("Testing Generation of TrippinService", () => {
 
   test("complex collection: update", async () => {
     const models = [{ address: "TestAddress 1" }, { address: "test 2" }];
-    await TRIPPIN.navToPeople().get("tester").navToAddressInfo().update(models);
+    await TRIPPIN.navToPeople("tester").navToAddressInfo().update(models);
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(ODATA_CLIENT.lastOperation).toBe("PUT");
@@ -113,7 +113,7 @@ describe("Testing Generation of TrippinService", () => {
   });
 
   test("complex collection: delete", async () => {
-    await TRIPPIN.navToPeople().get("tester").navToAddressInfo().delete();
+    await TRIPPIN.navToPeople("tester").navToAddressInfo().delete();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(ODATA_CLIENT.lastOperation).toBe("DELETE");

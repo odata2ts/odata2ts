@@ -64,13 +64,6 @@ const config: ConfigFileOptions = {
             namingStrategy: NamingStrategies.SNAKE_CASE,
             suffix: "_",
           },
-          publicProps: {
-            namingStrategy: NamingStrategies.CONSTANT_CASE,
-          },
-          serviceResolverFunction: {
-            namingStrategy: NamingStrategies.SNAKE_CASE,
-            suffix: "RSLVR",
-          },
           relatedServiceGetter: {
             namingStrategy: NamingStrategies.SNAKE_CASE,
             prefix: "navigateTo",

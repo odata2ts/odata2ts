@@ -43,16 +43,16 @@ describe("Testing Generation with min renaming options", () => {
   test("entitySet", async () => {
     const expected = `${BASE_URL}/People`;
 
-    expect(testService.navToPeople().getPath()).toBe(expected);
-    expect(JSON.stringify(testService.navToPeople().getQObject())).toEqual(JSON.stringify(qPerson));
-    expect(testService.navToPeople().getKeySpec().length).toBe(1);
-    expect(testService.navToPeople().getKeySpec()[0].getName()).toEqual("UserName");
+    expect(testService.People().getPath()).toBe(expected);
+    expect(JSON.stringify(testService.People().getQObject())).toEqual(JSON.stringify(qPerson));
+    expect(testService.People().getKeySpec().length).toBe(1);
+    expect(testService.People().getKeySpec()[0].getName()).toEqual("UserName");
   });
 
   test("entitySet: create", async () => {
     const expectedUrl = `${BASE_URL}/People`;
 
-    await testService.navToPeople().create(editModel);
+    await testService.People().create(editModel);
 
     expect(odataClient.lastOperation).toBe("POST");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -68,7 +68,7 @@ describe("Testing Generation with min renaming options", () => {
     const testId = "test";
     const expected = `${BASE_URL}/People('${testId}')`;
 
-    const etService = testService.navToPeople().get(testId);
+    const etService = testService.People(testId);
 
     expect(etService.getPath()).toBe(expected);
     expect(JSON.stringify(etService.getQObject())).toEqual(JSON.stringify(qPerson));
@@ -78,7 +78,7 @@ describe("Testing Generation with min renaming options", () => {
     const testId: PersonId = { UserName: "williams" };
     const expected = `${BASE_URL}/People(UserName='williams')`;
 
-    expect(testService.navToPeople().get(testId).getPath()).toBe(expected);
+    expect(testService.People(testId).getPath()).toBe(expected);
   });
 
   test("entityType: update", async () => {
@@ -92,7 +92,7 @@ describe("Testing Generation with min renaming options", () => {
       Age: 33,
     };
 
-    await testService.navToPeople().get(id).update(model);
+    await testService.People(id).update(model);
 
     expect(odataClient.lastOperation).toBe("PUT");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -112,7 +112,7 @@ describe("Testing Generation with min renaming options", () => {
       Age: 44,
     };
 
-    await testService.navToPeople().get(id).patch(model);
+    await testService.People(id).patch(model);
 
     expect(odataClient.lastOperation).toBe("PATCH");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -123,7 +123,7 @@ describe("Testing Generation with min renaming options", () => {
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
 
-    await testService.navToPeople().get(id).delete();
+    await testService.People(id).delete();
 
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -131,14 +131,14 @@ describe("Testing Generation with min renaming options", () => {
   });
 
   test("complex type", async () => {
-    const complex = testService.navToPeople().get("tester").navToHomeAddress();
+    const complex = testService.People("tester").HomeAddress();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
     expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
   });
 
   test("complex type: query", async () => {
-    await testService.navToPeople().get("tester").navToHomeAddress().query();
+    await testService.People("tester").HomeAddress().query();
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
     expect(odataClient.lastOperation).toBe("GET");
@@ -146,7 +146,7 @@ describe("Testing Generation with min renaming options", () => {
   });
 
   test("complex type: update", async () => {
-    const complex = testService.navToPeople().get("tester").navToHomeAddress();
+    const complex = testService.People("tester").HomeAddress();
 
     const model: EditableLocation = {
       Address: "Test Address",
@@ -163,14 +163,14 @@ describe("Testing Generation with min renaming options", () => {
   });
 
   test("complex collection", async () => {
-    const complex = testService.navToPeople().get("tester").navToAddressInfo();
+    const complex = testService.People("tester").AddressInfo();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
   });
 
   test("complex collection: query", async () => {
-    await testService.navToPeople().get("tester").navToAddressInfo().query();
+    await testService.People("tester").AddressInfo().query();
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("GET");
@@ -179,7 +179,7 @@ describe("Testing Generation with min renaming options", () => {
 
   test("complex collection: create", async () => {
     const model: EditableLocation = { Address: "TestAdress" };
-    await testService.navToPeople().get("tester").navToAddressInfo().add(model);
+    await testService.People("tester").AddressInfo().add(model);
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("POST");
@@ -188,7 +188,7 @@ describe("Testing Generation with min renaming options", () => {
 
   test("complex collection: update", async () => {
     const models = [{ Address: "TestAddress 1" }, { Address: "test 2" }];
-    await testService.navToPeople().get("tester").navToAddressInfo().update(models);
+    await testService.People("tester").AddressInfo().update(models);
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("PUT");
@@ -196,7 +196,7 @@ describe("Testing Generation with min renaming options", () => {
   });
 
   test("complex collection: delete", async () => {
-    await testService.navToPeople().get("tester").navToAddressInfo().delete();
+    await testService.People("tester").AddressInfo().delete();
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("DELETE");
@@ -204,20 +204,13 @@ describe("Testing Generation with min renaming options", () => {
   });
 
   test("navigation", async () => {
-    const result = testService
-      .navToPeople()
-      .get("tester")
-      .navToBestFriend()
-      .navToBestFriend()
-      .navToBestFriend()
-      .navToHomeAddress()
-      .navToCity();
+    const result = testService.People("tester").BestFriend().BestFriend().BestFriend().HomeAddress().City();
 
     expect(result.getPath()).toBe(`${BASE_URL}/People('tester')/BestFriend/BestFriend/BestFriend/HomeAddress/City`);
   });
 
   test("singleton", async () => {
-    const result = testService.navToMe();
+    const result = testService.Me();
 
     expect(result.getPath()).toBe(`${BASE_URL}/Me`);
     expect(JSON.stringify(result.getQObject())).toEqual(JSON.stringify(qPerson));

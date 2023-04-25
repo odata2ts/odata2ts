@@ -21,7 +21,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
       modifiedBy: "anonymous",
     };
 
-    const result = await testService.navToBooks().get(BOOK_ZERO.id).query();
+    const result = await testService.books(BOOK_ZERO.id).query();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
 
@@ -33,7 +33,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     jest.setTimeout(15000);
 
     // given
-    const bookSrv = testService.navToBooks();
+    const bookSrv = testService.books();
     const book: EditableBooksModel = {
       // @ts-ignore
       id: 999,
@@ -55,11 +55,11 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     expect(id).not.toBeNaN();
 
     // when updating the description, we expect no error
-    await bookSrv.patch(id, { descr: "Updated Desc" });
+    await testService.books(id).patch({ descr: "Updated Desc" });
 
     // when deleting this new book, we expect no error
     await new Promise((res) => setTimeout(res, 1000));
-    await bookSrv.delete(id);
+    await testService.books(id).delete();
   });
 
   test("patch book", async () => {
@@ -68,7 +68,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
       title: "new title!",
     };
 
-    const srv = testService.navToBooks().get(271);
+    const srv = testService.books(271);
     const result = await srv.patch(updated);
 
     expect(result.status).toBe(200);
@@ -85,7 +85,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
       descr: "Updated Description",
     };
 
-    const srv = testService.navToBooks().get(252);
+    const srv = testService.books(252);
     const queried = await srv.query();
     const {
       "@odata.context": ctxt,
@@ -118,7 +118,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
       genreId: undefined,
     };
 
-    const srv = testService.navToBooks().get(251);
+    const srv = testService.books(251);
 
     const result = await srv.update(toUpdate);
 
