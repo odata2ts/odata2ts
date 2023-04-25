@@ -36,14 +36,14 @@ describe("Trippin: Smoke Test", function () {
   });
 
   test("complex type", async () => {
-    const complex = TRIPPIN.navToPeople().get("tester").navToHomeAddress();
+    const complex = TRIPPIN.navToPeople("tester").navToHomeAddress();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
     expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
   });
 
   test("complex collection", async () => {
-    const complex = TRIPPIN.navToPeople().get("tester").navToAddressInfo();
+    const complex = TRIPPIN.navToPeople("tester").navToAddressInfo();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
@@ -57,8 +57,7 @@ describe("Trippin: Smoke Test", function () {
   });
 
   test("navigation", async () => {
-    const result = TRIPPIN.navToPeople()
-      .get("tester")
+    const result = TRIPPIN.navToPeople("tester")
       .navToBestFriend()
       .navToBestFriend()
       .navToBestFriend()

@@ -1,9 +1,10 @@
-import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "@odata2ts/odata2ts";
 
 const config: ConfigFileOptions = {
   debug: true,
   mode: Modes.service,
   emitMode: EmitModes.ts,
+  prettier: true,
   // TrippinService does not generate IDs on the server, but the client side => demo service
   disableAutoManagedKey: true,
   allowRenaming: true,
@@ -25,6 +26,11 @@ const config: ConfigFileOptions = {
             action: {
               suffix: "Action",
             },
+          },
+          relatedServiceGetter: {
+            prefix: "navTo",
+            suffix: "",
+            namingStrategy: NamingStrategies.CAMEL_CASE,
           },
         },
       },

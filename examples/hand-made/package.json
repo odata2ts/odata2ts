@@ -11,7 +11,7 @@
   "author": "texttechne",
   "scripts": {
     "build": "yarn clean && yarn generate",
-    "clean": "rimraf build",
+    "clean": "rimraf build src",
     "compile": "tsc",
     "generate": "odata2ts",
     "test": "yarn compile && jest --passWithNoTests"

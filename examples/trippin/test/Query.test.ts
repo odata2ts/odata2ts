@@ -49,7 +49,7 @@ describe("Trippin: Testing Query Functionality", function () {
   });
 
   test("complex collection: query", async () => {
-    await TRIPPIN.navToPeople().get("tester").navToAddressInfo().query();
+    await TRIPPIN.navToPeople("tester").navToAddressInfo().query();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(ODATA_CLIENT.lastOperation).toBe("GET");

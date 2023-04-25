@@ -12,10 +12,7 @@ describe("Unit Tests for V2 OData Demo Service", function () {
   const ENC = encodeURIComponent;
 
   test("get by id", async () => {
-    const result: HttpResponseModel<ODataModelResponseV2<ProductModel>> = await testService
-      .navToProducts()
-      .get(123)
-      .query();
+    const result: HttpResponseModel<ODataModelResponseV2<ProductModel>> = await testService.products(123).query();
 
     expect(odataClient.lastUrl).toBe("test/Products(123)");
     expect(result.status).toBe(200);
@@ -23,7 +20,7 @@ describe("Unit Tests for V2 OData Demo Service", function () {
 
   test("proper query", async () => {
     const result: HttpResponseModel<ODataCollectionResponseV2<ProductModel>> = await testService
-      .navToProducts()
+      .products()
       .query((builder, qProduct) => builder.select("id", "name").filter(qProduct.price.plus("1").gt("1000")));
 
     expect(odataClient.lastUrl).toBe(

@@ -8,7 +8,8 @@ GET {{server}}/browse
 Authorization: {{me}}
 
 
-### ------------------------------------------------------------------------
+# --- METADATA ---
+###
 # @name CatService Metadata
 GET {{server}}/browse/$metadata
 Authorization: {{me}}
@@ -21,38 +22,114 @@ Authorization: {{me}}
 ###
 # @name AdminService Metadata
 GET {{server}}/admin/$metadata
-Authorization: Basic alice
+Authorization: {{admin}}
 
+
+# --- Queries ---
 ###
 # @name Books
 GET {{server}}/browse/Books
 Authorization: {{me}}
+
 ###
 # @name Books V2
 GET {{server}}/v2/browse/Books
 Authorization: {{me}}
+
+###
+# @name get book
+GET {{server}}/admin/Books(201)
+Authorization: {{admin}}
+
+y
+###
+# @name get simple prop
+GET {{server}}/admin/Books(201)/title
+Authorization: {{admin}}
+
+###
+# @name get simple prop v2
+GET {{server}}/v2/admin/Books(201)/title
+Authorization: {{admin}}
+
+### update of field succeeds, but other fields are null then
+# @name update simple prop
+PUT {{server}}/admin/Books(201)/title
+Authorization: {{admin}}
+Content-Type: application/json
+
+{
+  "value": "wut"
+}
+
+### wrong: should use "title" as key instead of "value"
+# @name update simple prop v2
+PUT {{server}}/v2/admin/Books(201)/title
+Authorization: {{admin}}
+Content-Type: application/json
+
+{
+  "value": "wuthering"
+}
+
+### 501 not implemented
+# @name update raw value of prop
+PUT {{server}}/admin/Books(201)/title/$value
+Authorization: {{admin}}
+Content-Type: text/plain
+
+Wuthering Heights
+
+### 400
+# @name update raw value of prop V2
+PUT {{server}}/v2/admin/Books(201)/title/$value
+Authorization: {{admin}}
+Content-Type: text/plain
+
+Wuthering Heights
+
+###
+# @name update simple prop to null
+PUT {{server}}/admin/Books(201)/title
+Authorization: {{admin}}
+Content-Type: application/json
+
+{
+  "value": null
+}
+
+###
+# @name delete simple prop
+DELETE {{server}}/admin/Books(201)/title
+Authorization: {{admin}}
+
 
 
 ### Function Response Types V4
 # @name primitive type response
 GET {{server}}/browse/hello(to='Heiner')
 Authorization: {{me}}
+
 ###
 # @name primitive collection type response
 GET {{server}}/browse/helloI18n()
 Authorization: {{me}}
+
 ###
 # @name entity type response
 GET {{server}}/browse/getBestBook()
 Authorization: {{me}}
+
 ###
 # @name entity collection type response
 GET {{server}}/browse/getBestBooks()
 Authorization: {{me}}
+
 ###
 # @name complex type response
 GET {{server}}/browse/helloI18n()
 Authorization: {{me}}
+
 ###
 # @name complex collection type response
 GET {{server}}/browse/helloI18n()
@@ -63,22 +140,27 @@ Authorization: {{me}}
 # @name v2 primitive type response
 GET {{server}}/v2/browse/hello?to=Heiner
 Authorization: {{me}}
+
 ###
 # @name v2 primitive collection type response
 GET {{server}}/v2/browse/helloI18n()
 Authorization: {{me}}
+
 ###
 # @name v2 entity type response
 GET {{server}}/v2/browse/getBestBook()
 Authorization: {{me}}
+
 ###
 # @name v2 entity collection type response
 GET {{server}}/v2/browse/getBestBooks()
 Authorization: {{me}}
+
 ###
 # @name v2 complex type response
 GET {{server}}/v2/browse/helloI18n()
 Authorization: {{me}}
+
 ###
 # @name v2 complex collection type response
 GET {{server}}/v2/browse/helloI18n()
@@ -89,6 +171,7 @@ Authorization: {{me}}
 # @name Books filtere by stock => NOT WORKINg
 GET {{server}}/browse/ListOfBooks?$filter=stock ge 12
 Authorization: {{me}}
+
 ###
 # @name Books filtere by price => NOT WORKINg
 GET {{server}}/browse/ListOfBooks?$filter=price eq 150

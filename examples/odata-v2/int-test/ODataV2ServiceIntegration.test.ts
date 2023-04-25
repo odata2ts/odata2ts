@@ -27,7 +27,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   };
 
   test("list products with count", async () => {
-    const result = await testService.navToProducts().query((b) => b.count());
+    const result = await testService.products().query((b) => b.count());
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data.d).toBeDefined();
@@ -39,7 +39,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   });
 
   test("get product zero", async () => {
-    const result = await testService.navToProducts().get(0).query();
+    const result = await testService.products(0).query();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data.d).toBeDefined();
@@ -51,13 +51,13 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   test("get unknown product", async () => {
     const axiosFailMsg = "Resource not found for the segment 'Products'.";
     const axiosClientMsgPrefix = "Server responded with error: ";
-    await expect(() => testService.navToProducts().get(666).query()).rejects.toThrow(
+    await expect(() => testService.products(666).query()).rejects.toThrow(
 			new Error(axiosClientMsgPrefix + axiosFailMsg)
 		);
 
     // again, but now inspect error in detail
     try {
-      await testService.navToProducts().get(666).query();
+      await testService.products(666).query();
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
@@ -95,12 +95,12 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
     };
 
     // when creating the product
-    let result = await editableService.navToProducts().create(product);
+    let result = await editableService.products().create(product);
     // then return object matches our product
     expect(result.data.d).toMatchObject({ ...product, releaseDate: "/Date(1672488959000)/" });
 
     // given a service for the new product
-    const productService = editableService.navToProducts().get(product.id);
+    const productService = editableService.products(product.id);
     // when updating the description, we expect no error
     await productService.patch({ description: "Updated Desc" });
 
@@ -119,7 +119,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   });
 
   test("deep select query", async () => {
-    const result = await testService.navToProducts().query((b, qProduct) => {
+    const result = await testService.products().query((b, qProduct) => {
       b.count()
         .select("id", "name")
         .expanding("category", (expBuilder) => {
@@ -146,13 +146,13 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
     const expectedComplex = { id: expectedSimple };
 
     // simple version
-    let result = testService.navToProducts().createKey(expectedSimple);
+    let result = testService.products().createKey(expectedSimple);
     expect(result).toBe(`Products(${expectedSimple})`);
-    expect(testService.navToProducts().parseKey(result)).toBe(expectedSimple);
+    expect(testService.products().parseKey(result)).toBe(expectedSimple);
 
     // complex version
-    result = testService.navToProducts().createKey(expectedComplex);
+    result = testService.products().createKey(expectedComplex);
     expect(result).toBe(`Products(ID=${expectedSimple})`);
-    expect(testService.navToProducts().parseKey(result)).toStrictEqual(expectedComplex);
+    expect(testService.products().parseKey(result)).toStrictEqual(expectedComplex);
   });
 });

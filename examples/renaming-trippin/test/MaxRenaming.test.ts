@@ -65,7 +65,7 @@ describe("Testing Generation With Max Renaming Options", () => {
     const testId = "test";
     const expected = `${BASE_URL}/People('${testId}')`;
 
-    const etService = testService.navigate_to_people().get(testId);
+    const etService = testService.navigate_to_people(testId);
 
     expect(etService.getPath()).toBe(expected);
     expect(JSON.stringify(etService.getQObject())).toEqual(JSON.stringify(pERSON_QUERY_OBJECT));
@@ -75,7 +75,7 @@ describe("Testing Generation With Max Renaming Options", () => {
     const testId: PERSON_ID = { user_name: "williams" };
     const expected = `${BASE_URL}/People(UserName='williams')`;
 
-    expect(testService.navigate_to_people().get(testId).getPath()).toBe(expected);
+    expect(testService.navigate_to_people(testId).getPath()).toBe(expected);
   });
 
   test("entityType: update", async () => {
@@ -89,7 +89,7 @@ describe("Testing Generation With Max Renaming Options", () => {
       age: 33,
     };
 
-    await testService.navigate_to_people().get(id).update(model);
+    await testService.navigate_to_people(id).update(model);
 
     expect(odataClient.lastOperation).toBe("PUT");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -109,7 +109,7 @@ describe("Testing Generation With Max Renaming Options", () => {
       age: 44,
     };
 
-    await testService.navigate_to_people().get(id).patch(model);
+    await testService.navigate_to_people(id).patch(model);
 
     expect(odataClient.lastOperation).toBe("PATCH");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -120,7 +120,7 @@ describe("Testing Generation With Max Renaming Options", () => {
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
 
-    await testService.navigate_to_people().get(id).delete();
+    await testService.navigate_to_people(id).delete();
 
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastUrl).toBe(expectedUrl);
@@ -128,14 +128,14 @@ describe("Testing Generation With Max Renaming Options", () => {
   });
 
   test("complex type", async () => {
-    const complex = testService.navigate_to_people().get("tester").navigate_to_home_address();
+    const complex = testService.navigate_to_people("tester").navigate_to_home_address();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
     expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(lOCATION_QUERY_OBJECT));
   });
 
   test("complex type: query", async () => {
-    await testService.navigate_to_people().get("tester").navigate_to_home_address().query();
+    await testService.navigate_to_people("tester").navigate_to_home_address().query();
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
     expect(odataClient.lastOperation).toBe("GET");
@@ -143,7 +143,7 @@ describe("Testing Generation With Max Renaming Options", () => {
   });
 
   test("complex type: update", async () => {
-    const complex = testService.navigate_to_people().get("tester").navigate_to_home_address();
+    const complex = testService.navigate_to_people("tester").navigate_to_home_address();
 
     const model: EDITABLE_LOCATION = {
       address: "Test Address",
@@ -160,14 +160,14 @@ describe("Testing Generation With Max Renaming Options", () => {
   });
 
   test("complex collection", async () => {
-    const complex = testService.navigate_to_people().get("tester").navigate_to_address_info();
+    const complex = testService.navigate_to_people("tester").navigate_to_address_info();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(lOCATION_QUERY_OBJECT));
   });
 
   test("complex collection: query", async () => {
-    await testService.navigate_to_people().get("tester").navigate_to_address_info().query();
+    await testService.navigate_to_people("tester").navigate_to_address_info().query();
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("GET");
@@ -176,7 +176,7 @@ describe("Testing Generation With Max Renaming Options", () => {
 
   test("complex collection: create", async () => {
     const model: EDITABLE_LOCATION = { address: "TestAdress" };
-    await testService.navigate_to_people().get("tester").navigate_to_address_info().add(model);
+    await testService.navigate_to_people("tester").navigate_to_address_info().add(model);
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("POST");
@@ -185,7 +185,7 @@ describe("Testing Generation With Max Renaming Options", () => {
 
   test("complex collection: update", async () => {
     const models = [{ address: "TestAddress 1" }, { address: "test 2" }];
-    await testService.navigate_to_people().get("tester").navigate_to_address_info().update(models);
+    await testService.navigate_to_people("tester").navigate_to_address_info().update(models);
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("PUT");
@@ -193,7 +193,7 @@ describe("Testing Generation With Max Renaming Options", () => {
   });
 
   test("complex collection: delete", async () => {
-    await testService.navigate_to_people().get("tester").navigate_to_address_info().delete();
+    await testService.navigate_to_people("tester").navigate_to_address_info().delete();
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("DELETE");
@@ -202,8 +202,7 @@ describe("Testing Generation With Max Renaming Options", () => {
 
   test("navigation", async () => {
     const result = testService
-      .navigate_to_people()
-      .get("tester")
+      .navigate_to_people("tester")
       .navigate_to_best_friend()
       .navigate_to_best_friend()
       .navigate_to_best_friend()

@@ -19,7 +19,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   };
 
   test("list books with count", async () => {
-    const result = await testService.navToBooks().query((b) => b.count());
+    const result = await testService.books().query((b) => b.count());
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data["@odata.count"]).toBe(5);
@@ -30,7 +30,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   });
 
   test("get book zero", async () => {
-    const result = await testService.navToBooks().get(BOOK_ZERO.id).query();
+    const result = await testService.books(BOOK_ZERO.id).query();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
 
@@ -41,13 +41,13 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   test("get unknown book", async () => {
     const axiosClientMsgPrefix = "Server responded with error: ";
     const axiosFailMsg = "Not Found";
-    await expect(() => testService.navToBooks().get(-1).query()).rejects.toThrow(
+    await expect(() => testService.books(-1).query()).rejects.toThrow(
       new Error(axiosClientMsgPrefix + axiosFailMsg)
     );
 
     // again, but now inspect error in detail
     try {
-      await testService.navToBooks().get(-1).query();
+      await testService.books(-1).query();
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
@@ -69,7 +69,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   });
 
   test("deep select query", async () => {
-    const result = await testService.navToBooks().query((b, qBook) => {
+    const result = await testService.books().query((b, qBook) => {
       b.count()
         .select("id", "title", "stock", "price")
         .expanding("genre", (expBuilder) => {
