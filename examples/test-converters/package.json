@@ -19,7 +19,7 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@odata2ts/converter-api": "^0.1.1",
+    "@odata2ts/converter-api": "^0.1.2",
     "@odata2ts/odata-core": "^0.3.7"
   },
   "devDependencies": {
