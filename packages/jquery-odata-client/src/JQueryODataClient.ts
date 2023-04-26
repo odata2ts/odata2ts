@@ -9,8 +9,8 @@ import { JQueryODataClientError } from "./JQueryODataClientError";
 export type ErrorMessageRetriever = (errorResponse: any) => string | undefined;
 
 export interface ClientOptions {
-  // useCsrfProtection?: boolean;
-  // csrfTokenFetchUrl?: string;
+  useCsrfProtection?: boolean;
+  csrfTokenFetchUrl?: string;
 }
 
 export const getV2OrV4ErrorMessage: ErrorMessageRetriever = (errorResponse: any): string | undefined => {
@@ -19,8 +19,9 @@ export const getV2OrV4ErrorMessage: ErrorMessageRetriever = (errorResponse: any)
 };
 
 export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
-  private client: JQueryStatic;
-  private config: JQuery.AjaxSettings;
+  private readonly client: JQueryStatic;
+  private readonly config: JQuery.AjaxSettings;
+  private csrfToken: string | undefined;
   private getErrorMessage: ErrorMessageRetriever = getV2OrV4ErrorMessage;
 
   constructor(jquery: JQueryStatic, config?: AjaxRequestConfig, private clientOptions?: ClientOptions) {
@@ -32,11 +33,42 @@ export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
     this.getErrorMessage = getErrorMsg;
   }
 
-  public sendRequest<ResponseType>(
+  private async setupSecurityToken() {
+    if (this.csrfToken == null) {
+      this.csrfToken = await this.fetchSecurityToken();
+    }
+  }
+
+  private async fetchSecurityToken(): Promise<string | undefined> {
+    const fetchUrl = this.clientOptions?.csrfTokenFetchUrl ?? "/";
+    const response = await this.get(fetchUrl, { headers: { "x-csrf-token": "Fetch" } });
+
+    return response.headers["x-csrf-token"];
+  }
+
+  private async sendRequest<ResponseType>(
     config: JQuery.AjaxSettings,
     requestConfig?: AjaxRequestConfig
   ): Promise<HttpResponseModel<ResponseType>> {
     const mergedConfig = mergeAjaxConfig(mergeAjaxConfig(this.config, requestConfig), config);
+
+    // setup automatic CSRF token handling
+    if (
+      this.clientOptions?.useCsrfProtection &&
+      mergedConfig.method &&
+      ["POST", "PUT", "PATCH", "DELETE"].includes(mergedConfig.method.toUpperCase())
+    ) {
+      await this.setupSecurityToken();
+      if (!mergedConfig.headers) {
+        mergedConfig.headers = {};
+      }
+
+      if (this.csrfToken) {
+        mergedConfig.headers["x-csrf-token"] = this.csrfToken;
+      }
+    }
+
+    // the actual request
     return new Promise((resolve, reject) => {
       this.client.ajax({
         ...mergedConfig,
@@ -49,18 +81,29 @@ export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
           });
         },
         error: (jqXHR: JQuery.jqXHR, textStatus: string, thrownError: string) => {
-          const message = this.getErrorMessage(jqXHR.responseJSON);
-          if (message) {
-            reject(
-              new JQueryODataClientError("Server responded with error: " + message, jqXHR.status, { cause: jqXHR })
-            );
-          } else {
-            reject(new JQueryODataClientError(textStatus + " " + thrownError, jqXHR.status, { cause: jqXHR }));
+          // automatic CSRF token handling
+          if (
+            this.clientOptions?.useCsrfProtection &&
+            jqXHR.status === 403 &&
+            jqXHR.getResponseHeader("x-csrf-token") === "Required"
+          ) {
+            // csrf token expired, let's reset it and perform the original request again
+            this.csrfToken = undefined;
+            this.sendRequest<ResponseType>(config, requestConfig).then(resolve).catch(reject);
+          }
+          // actual error handling
+          else {
+            const message = this.getErrorMessage(jqXHR.responseJSON);
+            if (message) {
+              reject(
+                new JQueryODataClientError("Server responded with error: " + message, jqXHR.status, { cause: jqXHR })
+              );
+            } else {
+              reject(new JQueryODataClientError(textStatus + " " + thrownError, jqXHR.status, { cause: jqXHR }));
+            }
           }
         },
       });
-
-      // return this.handleError();
     });
   }
 
