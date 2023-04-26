@@ -1,7 +1,7 @@
 import { ODataClient, ODataClientConfig } from "@odata2ts/odata-client-api";
 import { QEnumCollection } from "@odata2ts/odata-query-objects";
 
-import { CollectionServiceV2, EntityServiceResolver, EntitySetServiceV2, EntityTypeServiceV2 } from "../../../src";
+import { CollectionServiceV2, EntitySetServiceV2, EntityTypeServiceV2 } from "../../../src";
 import { EditablePersonModel, GetSomethingFunctionParams, PersonId, PersonModel } from "../PersonModel";
 import { QPersonIdFunction } from "../QPerson";
 import { QGetSomethingFunction, QPersonV2, qPersonV2 } from "./QPersonV2";
@@ -46,15 +46,4 @@ export class PersonModelV2CollectionService<ClientType extends ODataClient> exte
   constructor(client: ODataClient, basePath: string, name: string) {
     super(client, basePath, name, qPersonV2, new QPersonIdFunction(name));
   }
-}
-
-export function createPersonModelV2ServiceResolver(client: ODataClient, basePath: string, name: string) {
-  return new EntityServiceResolver(
-    client,
-    basePath,
-    name,
-    QPersonIdFunction,
-    PersonModelV2Service,
-    PersonModelV2CollectionService
-  );
 }
