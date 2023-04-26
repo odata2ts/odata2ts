@@ -23,13 +23,13 @@
     "LICENSE"
   ],
   "keywords": [
-    "odata2ts",
-    "jquery",
     "odata client",
-    "typescript",
+    "http client",
+    "jquery",
+    "ui5",
     "ts",
-    "javascript",
-    "js"
+    "odata2ts",
+    "typescript"
   ],
   "peerDependencies": {
     "jquery": ">1.0"
