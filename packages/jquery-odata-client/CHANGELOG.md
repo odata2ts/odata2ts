@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/jquery-odata-client@0.2.0...@odata2ts/jquery-odata-client@0.3.0) (2023-04-27)
+
+### Features
+
+* **jquery-client:** automatic CSRF token handling ([c86fe0c](https://github.com/odata2ts/odata2ts/commit/c86fe0c96a347afc7a3525de718bf266fd6a4da0))
+
 # [0.2.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/jquery-odata-client@0.1.2...@odata2ts/jquery-odata-client@0.2.0) (2023-04-20)
 
 ### Features

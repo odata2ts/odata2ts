@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.22.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.21.0...@odata2ts/odata2ts@0.22.0) (2023-04-27)
+
+### Code Refactoring
+
+* **odata2ts:** dispense with resolver & directly implement related services as getter ([9b49501](https://github.com/odata2ts/odata2ts/commit/9b49501e279b6c5869cbc5ac2fd246577780b81f))
+
+### BREAKING CHANGES
+
+* **odata2ts:** Changed defaults for properties representing related services: no prefix anymore, just the name of the property as function (previously, prefix `navTo`).
+Removed `get` method of EntitySetServices: use property directly instead.
+Removed the following naming options regarding generated services: `serviceResolverFunction`, `publicProps`
+
 # [0.21.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.20.3...@odata2ts/odata2ts@0.21.0) (2023-04-20)
 
 ### Features
