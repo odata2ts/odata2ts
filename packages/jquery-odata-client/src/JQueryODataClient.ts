@@ -34,9 +34,10 @@ export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
   }
 
   private async setupSecurityToken() {
-    if (this.csrfToken == null) {
+    if (!this.csrfToken) {
       this.csrfToken = await this.fetchSecurityToken();
     }
+    return this.csrfToken;
   }
 
   private async fetchSecurityToken(): Promise<string | undefined> {
@@ -58,13 +59,12 @@ export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
       mergedConfig.method &&
       ["POST", "PUT", "PATCH", "DELETE"].includes(mergedConfig.method.toUpperCase())
     ) {
-      await this.setupSecurityToken();
+      const csrfToken = await this.setupSecurityToken();
       if (!mergedConfig.headers) {
         mergedConfig.headers = {};
       }
-
       if (this.csrfToken) {
-        mergedConfig.headers["x-csrf-token"] = this.csrfToken;
+        mergedConfig.headers["x-csrf-token"] = csrfToken;
       }
     }
 
@@ -73,10 +73,26 @@ export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
       this.client.ajax({
         ...mergedConfig,
         success: (response: any, textStatus: string, jqXHR: JQuery.jqXHR) => {
+          // Convert the header string into an array of individual headers
+          const headers = jqXHR
+            .getAllResponseHeaders()
+            .trim()
+            .split(/[\r\n]+/)
+            .reduce<Record<string, string>>((collector, line) => {
+              const parts = line.split(": ");
+              const header = parts.shift();
+              const value = parts.join(": ");
+
+              if (header) {
+                collector[header.toLowerCase()] = value;
+              }
+              return collector;
+            }, {});
+
           resolve({
             status: jqXHR.status,
             statusText: jqXHR.statusText,
-            headers: jqXHR.getAllResponseHeaders(),
+            headers,
             data: response,
           });
         },
@@ -107,12 +123,16 @@ export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
     });
   }
 
+  private prepareData(data: any): string {
+    return JSON.stringify(data);
+  }
+
   public post<ResponseModel>(
     url: string,
     data: any,
     requestConfig?: AjaxRequestConfig
   ): Promise<HttpResponseModel<ResponseModel>> {
-    return this.sendRequest<ResponseModel>({ url, data, method: "POST" }, requestConfig);
+    return this.sendRequest<ResponseModel>({ url, data: this.prepareData(data), method: "POST" }, requestConfig);
   }
   public get<ResponseModel>(url: string, requestConfig?: AjaxRequestConfig): Promise<HttpResponseModel<ResponseModel>> {
     return this.sendRequest<ResponseModel>({ url, method: "GET" }, requestConfig);
@@ -122,14 +142,14 @@ export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
     data: any,
     requestConfig?: AjaxRequestConfig
   ): Promise<HttpResponseModel<ResponseModel>> {
-    return this.sendRequest<ResponseModel>({ url, data, method: "PUT" }, requestConfig);
+    return this.sendRequest<ResponseModel>({ url, data: this.prepareData(data), method: "PUT" }, requestConfig);
   }
   public patch<ResponseModel>(
     url: string,
     data: any,
     requestConfig?: AjaxRequestConfig
   ): Promise<HttpResponseModel<ResponseModel>> {
-    return this.sendRequest<ResponseModel>({ url, data, method: "PATCH" }, requestConfig);
+    return this.sendRequest<ResponseModel>({ url, data: this.prepareData(data), method: "PATCH" }, requestConfig);
   }
   public merge<ResponseModel>(
     url: string,
@@ -141,7 +161,7 @@ export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
         "X-Http-Method": "MERGE",
       },
     });
-    return this.sendRequest<ResponseModel>({ url, data, method: "POST" }, config);
+    return this.sendRequest<ResponseModel>({ url, data: this.prepareData(data), method: "POST" }, config);
   }
   public delete(url: string, requestConfig?: AjaxRequestConfig): Promise<HttpResponseModel<void>> {
     return this.sendRequest<void>({ url, method: "DELETE" }, requestConfig);
