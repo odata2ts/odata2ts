@@ -78,7 +78,7 @@ export class JQueryODataClient implements ODataClient<AjaxRequestConfig> {
             .getAllResponseHeaders()
             .trim()
             .split(/[\r\n]+/)
-            .reduce<Record<string, string>>((collector, line) => {
+            .reduce((collector: Record<string, string>, line: string) => {
               const parts = line.split(": ");
               const header = parts.shift();
               const value = parts.join(": ");
