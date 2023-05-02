@@ -1,12 +1,18 @@
 import * as crypto from "crypto";
 import AjaxSettings = JQuery.AjaxSettings;
 
-function createMockXhr(status: number, statusText: string, data: any, headers: { [k: string]: string } = {}) {
+function createMockXhr(status: number, statusText: string, data: any, headers: { [k: string]: string } | undefined) {
+  const respHeaders = !headers
+    ? ""
+    : Object.entries(headers)
+        .map(([key, value]) => `${key.toLowerCase()}: ${value}\r\n`)
+        .join("");
+
   return {
     status,
     statusText,
-    getResponseHeader: (name: string) => headers[name],
-    getAllResponseHeaders: () => headers,
+    getResponseHeader: (name: string) => (headers ? headers[name] : undefined),
+    getAllResponseHeaders: () => respHeaders,
     responseJSON: () => data,
   };
 }
@@ -23,9 +29,10 @@ export class JqMock {
   /**
    * Marks the next request as success response
    */
-  public successResponse(data: any = {}) {
+  public successResponse(data: any = {}, headers?: { [k: string]: string }) {
     this.isSuccessResponse = true;
     this.responseData = data;
+    this.responseHeaders = headers;
   }
 
   /**
@@ -67,6 +74,7 @@ export class JqMock {
     if (typeof this.isSuccessResponse === "undefined") {
       throw new Error("JQueryMock expects you to call successResponse() or errorResponse() first!");
     }
+
     if (this.isSuccessResponse) {
       const mockXhr = createMockXhr(200, "OK", this.responseData, this.responseHeaders);
       // @ts-ignore => too powerful typing of jquery here; also allows for arrays of functions
@@ -78,6 +86,8 @@ export class JqMock {
     }
 
     this.isSuccessResponse = undefined;
+    this.responseData = undefined;
+    this.responseHeaders = undefined;
   }
 
   public getRequestConfig() {
