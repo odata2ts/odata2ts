@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.settings.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./lib",
+    "lib": ["WebWorker"],
+    "target": "ES2016"
+  },
+  "include": ["src", ".types"]
+}
