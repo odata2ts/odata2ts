@@ -15,17 +15,32 @@ export const getV2OrV4ErrorMessage: ErrorMessageRetriever = (errorResponse: any)
   return typeof eMsg?.value === "string" ? eMsg.value : eMsg;
 };
 
-export class JQueryODataClient implements ODataClient<FetchRequestConfig> {
+export const DEFAULT_ERROR_MESSAGE = "No error message!";
+const FETCH_FAILURE_MESSAGE = "OData request failed entirely: ";
+const JSON_RETRIEVAL_FAILURE_MESSAGE = "Retrieving JSON body from OData response failed: ";
+const RESPONSE_FAILURE_MESSAGE = "OData server responded with error: ";
+
+function buildErrorMessage(prefix: string, error: any) {
+  const msg = typeof error === "string" ? error : (error as Error)?.message;
+  return prefix + (msg || DEFAULT_ERROR_MESSAGE);
+}
+
+export class FetchODataClient implements ODataClient<FetchRequestConfig> {
   private readonly config: RequestInit;
   private csrfToken: string | undefined;
-  private getErrorMessage: ErrorMessageRetriever = getV2OrV4ErrorMessage;
+  private retrieveErrorMessage: ErrorMessageRetriever = getV2OrV4ErrorMessage;
 
   constructor(config?: FetchRequestConfig, private clientOptions?: ClientOptions) {
     this.config = getDefaultConfig(config);
+    if (clientOptions && clientOptions.useCsrfProtection && !clientOptions.csrfTokenFetchUrl?.trim()) {
+      throw new Error(
+        "When automatic CSRF token fetching is activated, the URL must be supplied with attribute [csrfTokenFetchUrl]!"
+      );
+    }
   }
 
   public setErrorMessageRetriever(getErrorMsg: ErrorMessageRetriever) {
-    this.getErrorMessage = getErrorMsg;
+    this.retrieveErrorMessage = getErrorMsg;
   }
 
   private async setupSecurityToken() {
@@ -36,7 +51,7 @@ export class JQueryODataClient implements ODataClient<FetchRequestConfig> {
   }
 
   private async fetchSecurityToken(): Promise<string | undefined> {
-    const fetchUrl = this.clientOptions?.csrfTokenFetchUrl ?? "/";
+    const fetchUrl = this.clientOptions!.csrfTokenFetchUrl!;
     const response = await this.get(fetchUrl, { headers: { "x-csrf-token": "Fetch" } });
 
     return response.headers["x-csrf-token"];
@@ -45,9 +60,14 @@ export class JQueryODataClient implements ODataClient<FetchRequestConfig> {
   private async sendRequest<ResponseType>(
     url: string,
     config: RequestInit,
-    requestConfig?: RequestInit
+    requestConfig?: FetchRequestConfig
   ): Promise<HttpResponseModel<ResponseType>> {
-    const mergedConfig = mergeFetchConfig(mergeFetchConfig(this.config, requestConfig), config);
+    // noinspection SuspiciousTypeOfGuard
+    if (typeof url !== "string") {
+      throw new Error("Value for URL must be provided!");
+    }
+
+    const mergedConfig = mergeFetchConfig(this.config, requestConfig, config);
 
     // setup automatic CSRF token handling
     if (
@@ -56,12 +76,8 @@ export class JQueryODataClient implements ODataClient<FetchRequestConfig> {
       ["POST", "PUT", "PATCH", "DELETE"].includes(mergedConfig.method.toUpperCase())
     ) {
       const csrfToken = await this.setupSecurityToken();
-      if (!mergedConfig.headers) {
-        mergedConfig.headers = {};
-      }
-      if (this.csrfToken) {
-        // @ts-ignore
-        mergedConfig.headers["x-csrf-token"] = csrfToken;
+      if (typeof csrfToken === "string") {
+        mergedConfig.headers.set("x-csrf-token", csrfToken);
       }
     }
 
@@ -70,7 +86,11 @@ export class JQueryODataClient implements ODataClient<FetchRequestConfig> {
     try {
       response = await fetch(url, mergedConfig);
     } catch (fetchError) {
-      throw new FetchODataClientError("OData request failed entirely!", undefined, fetchError as Error);
+      throw new FetchODataClientError(
+        buildErrorMessage(FETCH_FAILURE_MESSAGE, fetchError),
+        undefined,
+        fetchError as Error
+      );
     }
 
     // error response
@@ -87,12 +107,12 @@ export class JQueryODataClient implements ODataClient<FetchRequestConfig> {
       }
 
       let data = await this.getResponseBody(response, false);
+      const errMsg = this.retrieveErrorMessage(data);
 
-      const errMsg = this.getErrorMessage(data) || "";
       throw new FetchODataClientError(
-        `OData server responded with error: ${errMsg}`,
+        buildErrorMessage(RESPONSE_FAILURE_MESSAGE, errMsg),
         response.status,
-        new Error(errMsg),
+        new Error(errMsg || DEFAULT_ERROR_MESSAGE),
         response
       );
     }
@@ -119,11 +139,11 @@ export class JQueryODataClient implements ODataClient<FetchRequestConfig> {
       return undefined;
     }
     try {
-      return response.json();
+      return await response.json();
     } catch (error) {
       if (isFailedJsonFatal) {
         throw new FetchODataClientError(
-          "Retrieving JSON body from OData response failed!",
+          buildErrorMessage(JSON_RETRIEVAL_FAILURE_MESSAGE, error),
           response.status,
           error as Error
         );
@@ -136,18 +156,18 @@ export class JQueryODataClient implements ODataClient<FetchRequestConfig> {
     return JSON.stringify(data);
   }
 
+  public get<ResponseModel>(
+    url: string,
+    requestConfig?: FetchRequestConfig
+  ): Promise<HttpResponseModel<ResponseModel>> {
+    return this.sendRequest<ResponseModel>(url, { method: "GET" }, requestConfig);
+  }
   public post<ResponseModel>(
     url: string,
     data: any,
     requestConfig?: FetchRequestConfig
   ): Promise<HttpResponseModel<ResponseModel>> {
     return this.sendRequest<ResponseModel>(url, { body: this.prepareData(data), method: "POST" }, requestConfig);
-  }
-  public get<ResponseModel>(
-    url: string,
-    requestConfig?: FetchRequestConfig
-  ): Promise<HttpResponseModel<ResponseModel>> {
-    return this.sendRequest<ResponseModel>(url, { method: "GET" }, requestConfig);
   }
   public put<ResponseModel>(
     url: string,
@@ -168,12 +188,17 @@ export class JQueryODataClient implements ODataClient<FetchRequestConfig> {
     data: any,
     requestConfig?: FetchRequestConfig
   ): Promise<HttpResponseModel<ResponseModel>> {
-    const config = mergeFetchConfig(requestConfig, {
-      headers: {
-        "X-Http-Method": "MERGE",
+    return this.sendRequest<ResponseModel>(
+      url,
+      {
+        body: this.prepareData(data),
+        method: "POST",
+        headers: {
+          "X-Http-Method": "MERGE",
+        },
       },
-    });
-    return this.sendRequest<ResponseModel>(url, { body: this.prepareData(data), method: "POST" }, config);
+      requestConfig
+    );
   }
   public delete(url: string, requestConfig?: FetchRequestConfig): Promise<HttpResponseModel<void>> {
     return this.sendRequest<void>(url, { method: "DELETE" }, requestConfig);

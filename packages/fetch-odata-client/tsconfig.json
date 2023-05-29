@@ -3,7 +3,7 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./lib",
-    "lib": ["WebWorker"],
+    "lib": ["DOM"],
     "target": "ES2016"
   },
   "include": ["src", ".types"]
