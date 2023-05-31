@@ -2,6 +2,9 @@
 
 # OData Client API
 
+> :warning: **DEPRECATION NOTICE** <br/>
+This package has been replaced by `@odata2ts/http-client-api`: [Http Client API](https://www.npmjs.com/package/@odata2ts/http-client-api)<br/>
+
 Defines the contract between [odata2ts](https://github.com/odata2ts/odata2ts) and any HTTP client implementation.
 This API is largely based on how [axios](https://github.com/axios/axios) defines and handles things.
 
