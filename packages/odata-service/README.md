@@ -1,11 +1,11 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@odata2ts/odata-service?style=for-the-badge)](https://www.npmjs.com/package/@odata2ts/odata-service)
 
 # OData Service
-Main runtime dependency of [odata2ts](https://github.com/odata2ts/odata2ts) in case of using
-the generated odata client services.
+Main runtime dependency of [odata2ts](https://github.com/odata2ts/odata2ts) when using
+the generated full-fledged odata client.
 
 This module provides the base classes for the generated services and pulls in all other dependencies
-like `odata-query-builder` or `odata-query-objects`. 
+like `odata-query-builder` and `odata-query-objects`. 
 
 ## Documentation
 [Main Service Documentation](https://odata2ts.github.io/docs/category/main-service)

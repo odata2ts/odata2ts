@@ -5,7 +5,7 @@
 The **OData Query Builder** allows for building type-safe OData queries for V2 and V4 services.
 
 The query builder depends on generated models and q-objects to offer a powerful and easy-to-use API.
-These Models and q-objects are generated via [odata2ts](https://github.com/odata2ts/odata2ts) out of an existing OData service.
+These models and q-objects are generated via [odata2ts](https://github.com/odata2ts/odata2ts) out of an existing OData service.
 
 The query builder offers operations which you probably know from SQL:
 `select`, `filter`, `count`, `skip`, `top`. 
