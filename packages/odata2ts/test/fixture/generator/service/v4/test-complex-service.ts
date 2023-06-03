@@ -1,4 +1,4 @@
-import { ODataClient } from "@odata2ts/odata-client-api";
+import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EntityTypeServiceV4 } from "@odata2ts/odata-service";
 
 // @ts-ignore
@@ -6,7 +6,7 @@ import { QReviewer, qReviewer } from "../QTester";
 // @ts-ignore
 import { EditableReviewer, Reviewer } from "../TesterModel";
 
-export class ReviewerService<ClientType extends ODataClient> extends EntityTypeServiceV4<
+export class ReviewerService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
   ClientType,
   Reviewer,
   EditableReviewer,

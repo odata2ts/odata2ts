@@ -1,4 +1,4 @@
-import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
 
@@ -7,7 +7,7 @@ import { QBook, QBookId, QLike, QRate, QRatings, qBook } from "../QTester";
 // @ts-ignore
 import { Book, BookId, EditableBook, RateParams, Rating, RatingsParams } from "../TesterModel";
 
-export class BookService<ClientType extends ODataClient> extends EntityTypeServiceV4<
+export class BookService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
   ClientType,
   Book,
   EditableBook,
@@ -21,7 +21,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     super(client, basePath, name, qBook);
   }
 
-  public async like(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
+  public async like(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
     if (!this._qLike) {
       this._qLike = new QLike();
     }
@@ -32,7 +32,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
 
   public async rate(
     params: RateParams,
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV4<Rating>> {
     if (!this._qRate) {
       this._qRate = new QRate();
@@ -45,7 +45,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
 
   public async ratings(
     params: RatingsParams,
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<Rating>> {
     if (!this._qRatings) {
       this._qRatings = new QRatings();
@@ -57,7 +57,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
   }
 }
 
-export class BookCollectionService<ClientType extends ODataClient> extends EntitySetServiceV4<
+export class BookCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
   ClientType,
   Book,
   EditableBook,

@@ -1,4 +1,4 @@
-import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataService } from "@odata2ts/odata-service";
 
@@ -7,13 +7,13 @@ import { QBestBook, QMostPop, QPostBestBook } from "./QTester";
 // @ts-ignore
 import { BestBookParams, PostBestBookParams, TestEntity } from "./TesterModel";
 
-export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
+export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   private _qMostPop?: QMostPop;
   private _qBestBook?: QBestBook;
   private _qPostBestBook?: QPostBestBook;
 
   public async mostPop(
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV2<TestEntity>> {
     if (!this._qMostPop) {
       this._qMostPop = new QMostPop();
@@ -26,7 +26,7 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
 
   public async bestBook(
     params: BestBookParams,
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<TestEntity>> {
     if (!this._qBestBook) {
       this._qBestBook = new QBestBook();
@@ -39,7 +39,7 @@ export class TesterService<ClientType extends ODataClient> extends ODataService<
 
   public async postBestBook(
     params: PostBestBookParams,
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<TestEntity>> {
     if (!this._qPostBestBook) {
       this._qPostBestBook = new QPostBestBook();
