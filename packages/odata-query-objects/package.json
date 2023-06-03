@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-query-objects",
-  "version": "0.17.3",
+  "version": "0.18.0",
   "publishConfig": {
     "access": "public"
   },
@@ -33,7 +33,7 @@
   ],
   "dependencies": {
     "@odata2ts/converter-api": "^0.1.2",
-    "@odata2ts/http-client-api": "^0.0.0",
+    "@odata2ts/http-client-api": "^0.1.0",
     "@odata2ts/odata-core": "^0.3.7"
   },
   "devDependencies": {

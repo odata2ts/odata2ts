@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.23.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.22.0...@odata2ts/odata2ts@0.23.0) (2023-06-03)
+
+### Features
+
+* force new minor for new http-client-api ([5628666](https://github.com/odata2ts/odata2ts/commit/56286668abf6fe5f3c0639f07a4a9f99cc549068))
+
 # [0.22.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.21.0...@odata2ts/odata2ts@0.22.0) (2023-04-27)
 
 ### Code Refactoring

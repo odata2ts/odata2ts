@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.16.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder@0.15.10...@odata2ts/odata-query-builder@0.16.0) (2023-06-03)
+
+### Features
+
+* force new minor for new http-client-api ([c29d5bc](https://github.com/odata2ts/odata2ts/commit/c29d5bc009776f1791e64e7f397f14fa6444ff1a))
+
 ## [0.15.10](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder@0.15.9...@odata2ts/odata-query-builder@0.15.10) (2023-04-18)
 
 **Note:** Version bump only for package @odata2ts/odata-query-builder
