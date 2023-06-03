@@ -2140,7 +2140,7 @@ __metadata:
     upper-case-first: ^2.0.2
     xml2js: ^0.5.0
   peerDependencies:
-    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/http-client-api": ^0.0.0
     "@odata2ts/odata-query-objects": ^0.17.3
     "@odata2ts/odata-service": ^0.14.0
   bin:
