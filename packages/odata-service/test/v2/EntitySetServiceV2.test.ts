@@ -1,4 +1,4 @@
-import { HttpResponseModel } from "@odata2ts/odata-client-api";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 
@@ -6,16 +6,16 @@ import { commonEntitySetTests } from "../EntitySetServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { PersonModelV2CollectionService } from "../fixture/v2/PersonModelV2Service";
 import { QPersonV2 } from "../fixture/v2/QPersonV2";
-import { MockODataClient } from "../mock/MockODataClient";
+import { MockClient } from "../mock/MockClient";
 
 describe("V2 EntitySetService Test", () => {
-  const odataClient = new MockODataClient(true);
+  const odataClient = new MockClient(true);
   const BASE_URL = "/base";
   const NAME = "test";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
   const REQUEST_CONFIG = { test: "Test" };
 
-  let testService: PersonModelV2CollectionService<MockODataClient>;
+  let testService: PersonModelV2CollectionService<MockClient>;
 
   commonEntitySetTests(odataClient, PersonModelV2CollectionService);
 

@@ -1,4 +1,4 @@
-import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import {
@@ -13,7 +13,7 @@ import { ServiceBaseV2 } from "./ServiceBaseV2";
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
 
 export class CollectionServiceV2<
-  ClientType extends ODataClient,
+  ClientType extends ODataHttpClient,
   T,
   Q extends QueryObject,
   EditableT = PrimitiveExtractor<T>
@@ -26,7 +26,7 @@ export class CollectionServiceV2<
    */
   public async add(
     model: EditableT,
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<T>> {
     const result = await this.doPost<ODataModelResponseV2<T>>(this.qModel.convertToOData(model), requestConfig);
     return convertV2ModelResponse(result, this.qResponseType);
@@ -38,7 +38,7 @@ export class CollectionServiceV2<
    * @param models set of primitive values
    * @param requestConfig
    */
-  public update(models: Array<EditableT>, requestConfig?: ODataClientConfig<ClientType>): ODataResponse<void> {
+  public update(models: Array<EditableT>, requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
     return this.doPut(this.qModel.convertToOData(models), requestConfig);
   }
 
@@ -52,7 +52,7 @@ export class CollectionServiceV2<
    */
   public async query<ReturnType = T>(
     queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void,
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV2<ReturnType>> {
     const response = await this.doQuery<ODataCollectionResponseV2<any>>(queryFn, requestConfig);
     return convertV2CollectionResponse(response, this.qResponseType);

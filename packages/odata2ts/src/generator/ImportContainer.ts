@@ -19,7 +19,7 @@ export class ImportContainer {
   } = {
     core: { moduleName: "@odata2ts/odata-core", isRelative: false },
     qobjects: { moduleName: "@odata2ts/odata-query-objects", isRelative: false },
-    clientApi: { moduleName: "@odata2ts/odata-client-api", isRelative: false },
+    clientApi: { moduleName: "@odata2ts/http-client-api", isRelative: false },
     service: { moduleName: "@odata2ts/odata-service", isRelative: false },
     genModel: { moduleName: "", isRelative: true },
     genQObjects: { moduleName: "", isRelative: true },

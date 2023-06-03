@@ -1,4 +1,4 @@
-import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import {
@@ -11,7 +11,7 @@ import {
 import { ServiceBaseV4 } from "./ServiceBaseV4";
 
 export abstract class EntitySetServiceV4<
-  ClientType extends ODataClient,
+  ClientType extends ODataHttpClient,
   T,
   EditableT,
   Q extends QueryObject,
@@ -29,7 +29,7 @@ export abstract class EntitySetServiceV4<
    * @protected
    */
   protected constructor(
-    client: ODataClient,
+    client: ODataHttpClient,
     basePath: string,
     name: string,
     qModel: Q,
@@ -82,7 +82,7 @@ export abstract class EntitySetServiceV4<
    */
   public async create<ReturnType extends Partial<T> | void = T>(
     model: EditableT,
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ReturnType> {
     const result = await this.doPost<ODataModelResponseV4<T> | void>(this.qModel.convertToOData(model), requestConfig);
     return convertV4ModelResponse(result, this.qResponseType);
@@ -96,7 +96,7 @@ export abstract class EntitySetServiceV4<
    */
   public async query<ReturnType extends Partial<T> = T>(
     queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<ReturnType>> {
     const response = await this.doQuery<ODataCollectionResponseV4<any>>(queryFn, requestConfig);
     return convertV4CollectionResponse(response, this.qResponseType);

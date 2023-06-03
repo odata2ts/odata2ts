@@ -1,14 +1,14 @@
-import { HttpResponseModel } from "@odata2ts/odata-client-api";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4 } from "@odata2ts/odata-core";
 import { EnumCollection, QEnumCollection, QStringCollection, StringCollection } from "@odata2ts/odata-query-objects";
 
 import { CollectionServiceV4 } from "../../src";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
 import { Feature } from "../fixture/PersonModel";
-import { MockODataClient } from "../mock/MockODataClient";
+import { MockClient } from "../mock/MockClient";
 
 describe("CollectionService V4 Tests", () => {
-  const odataClient = new MockODataClient(false);
+  const odataClient = new MockClient(false);
   const BASE_PATH = "";
   const NAME_STRING = "testString";
   const NAME_ENUM = "testEnum";
@@ -16,13 +16,13 @@ describe("CollectionService V4 Tests", () => {
   const stringConstructor = (
     basePath: string,
     name: string
-  ): CollectionServiceV4<MockODataClient, StringCollection, QStringCollection> => {
+  ): CollectionServiceV4<MockClient, StringCollection, QStringCollection> => {
     return new CollectionServiceV4(odataClient, basePath, name, new QStringCollection());
   };
   const enumConstructor = (
     basePath: string,
     name: string
-  ): CollectionServiceV4<MockODataClient, EnumCollection<Feature>, QEnumCollection> => {
+  ): CollectionServiceV4<MockClient, EnumCollection<Feature>, QEnumCollection> => {
     return new CollectionServiceV4(odataClient, basePath, name, new QEnumCollection());
   };
 

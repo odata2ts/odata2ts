@@ -8,7 +8,7 @@ import {
 import { PrefixModel } from "@odata2ts/test-converters";
 
 import { CollectionServiceV2, CollectionServiceV4 } from "../../src";
-import { MockODataClient } from "../mock/MockODataClient";
+import { MockClient } from "../mock/MockClient";
 import {
   PersonModelV2CollectionService as PMCServiceV2,
   PersonModelV2Service as PMServiceV2,
@@ -42,15 +42,15 @@ export interface GetSomethingFunctionParams {
   testTime: string;
 }
 
-export type PersonModelServiceVersion = PMServiceV2<MockODataClient> | PMServiceV4<MockODataClient>;
-export type PersonCollectionServiceVersion = PMCServiceV2<MockODataClient> | PMCServiceV4<MockODataClient>;
+export type PersonModelServiceVersion = PMServiceV2<MockClient> | PMServiceV4<MockClient>;
+export type PersonCollectionServiceVersion = PMCServiceV2<MockClient> | PMCServiceV4<MockClient>;
 
 export type StringCollectionServiceConstructor = (basePath: string, name: string) => StringCollectionService;
 export type StringCollectionService =
-  | CollectionServiceV4<MockODataClient, StringCollection, QStringCollection>
-  | CollectionServiceV2<MockODataClient, StringCollection, QStringV2Collection>;
+  | CollectionServiceV4<MockClient, StringCollection, QStringCollection>
+  | CollectionServiceV2<MockClient, StringCollection, QStringV2Collection>;
 
 export type EnumCollectionServiceConstructor = (basePath: string, name: string) => EnumCollectionService;
 export type EnumCollectionService =
-  | CollectionServiceV4<MockODataClient, EnumCollection<Feature>, QEnumCollection>
-  | CollectionServiceV2<MockODataClient, EnumCollection<Feature>, QEnumCollection>;
+  | CollectionServiceV4<MockClient, EnumCollection<Feature>, QEnumCollection>
+  | CollectionServiceV2<MockClient, EnumCollection<Feature>, QEnumCollection>;
