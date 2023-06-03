@@ -6,9 +6,9 @@ Defines the contract between [odata2ts](https://github.com/odata2ts/odata2ts) an
 
 The responsibilities of the HTTP Client are:
 - HTTP request execution
-- Mapping responses to conventionalized structures
-- Custom request configuration (optional)
-- Automatic CSRF Token Handling (optional)
+- mapping responses to conventionalized structures
+- custom request configuration (optional)
+- automatic CSRF Token Handling (optional)
 
 Features like **optimistic locking** (via `ETag`) or **batch requests** are currently not in scope
 of the HTTP client and may never be.

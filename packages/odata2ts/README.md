@@ -72,4 +72,3 @@ This project and this module have been created and are maintained in the followi
 
 ## License
 MIT - see [License](./LICENSE).
-
