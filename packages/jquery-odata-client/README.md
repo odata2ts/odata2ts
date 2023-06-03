@@ -1,6 +1,10 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@odata2ts/jquery-odata-client?style=for-the-badge)](https://www.npmjs.com/package/@odata2ts/jquery-odata-client)
 
 # JQuery OData Client
+
+> :warning: **DEPRECATION NOTICE** <br/>
+This package has been replaced by `@odata2ts/http-client-jquery`: [JQuery Client](https://www.npmjs.com/package/@odata2ts/http-client-jquery)<br/>
+
 [odata2ts](https://github.com/odata2ts/odata2ts) compatible odata client based on [JQuery](https://jquery.com/).
 
 The **JQuery OData Client** serves as HTTP client for `odata2ts`.

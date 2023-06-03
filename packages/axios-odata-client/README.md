@@ -1,6 +1,10 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@odata2ts/axios-odata-client?style=for-the-badge)](https://www.npmjs.com/package/@odata2ts/axios-odata-client)
 
 # Axios OData Client
+> :warning: **DEPRECATION NOTICE** <br/>
+This package has been replaced by `@odata2ts/http-client-axios`: [Axios Client](https://www.npmjs.com/package/@odata2ts/http-client-api)<br/>
+
+
 The **Axios OData Client** serves as HTTP client for [odata2ts](https://github.com/odata2ts/odata2ts)
 and uses - as its name suggests - [axios](https://github.com/axios/axios) for realizing the HTTP communication.
 
