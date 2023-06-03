@@ -1,16 +1,16 @@
-import { ODataClient } from "@odata2ts/odata-client-api";
+import { ODataHttpClient } from "@odata2ts/http-client-api";
 
 import { EntitySetServiceV2, EntitySetServiceV4 } from "../src";
 import { EditablePersonModel, Feature, PersonId, PersonModel } from "./fixture/PersonModel";
 import { QPersonV2 } from "./fixture/v2/QPersonV2";
 import { QPersonV4 } from "./fixture/v4/QPersonV4";
-import { MockODataClient } from "./mock/MockODataClient";
+import { MockClient } from "./mock/MockClient";
 
 export function commonEntitySetTests(
-  odataClient: MockODataClient,
-  serviceConstructor: new (odataClient: ODataClient, baseUrl: string, name: string) =>
-    | EntitySetServiceV4<MockODataClient, PersonModel, EditablePersonModel, QPersonV4, PersonId>
-    | EntitySetServiceV2<MockODataClient, PersonModel, EditablePersonModel, QPersonV2, PersonId>
+  odataClient: MockClient,
+  serviceConstructor: new (odataClient: ODataHttpClient, baseUrl: string, name: string) =>
+    | EntitySetServiceV4<MockClient, PersonModel, EditablePersonModel, QPersonV4, PersonId>
+    | EntitySetServiceV2<MockClient, PersonModel, EditablePersonModel, QPersonV2, PersonId>
 ) {
   const BASE_URL = "/base";
   const NAME = "EntityXY";
@@ -18,8 +18,8 @@ export function commonEntitySetTests(
   const REQUEST_CONFIG = { test: "Test" };
 
   let testService:
-    | EntitySetServiceV4<MockODataClient, PersonModel, EditablePersonModel, QPersonV4, PersonId>
-    | EntitySetServiceV2<MockODataClient, PersonModel, EditablePersonModel, QPersonV2, PersonId>;
+    | EntitySetServiceV4<MockClient, PersonModel, EditablePersonModel, QPersonV4, PersonId>
+    | EntitySetServiceV2<MockClient, PersonModel, EditablePersonModel, QPersonV2, PersonId>;
 
   beforeEach(() => {
     testService = new serviceConstructor(odataClient, BASE_URL, NAME);

@@ -5,7 +5,7 @@ import {
   StringCollectionService,
   StringCollectionServiceConstructor,
 } from "./fixture/PersonModel";
-import { MockODataClient } from "./mock/MockODataClient";
+import { MockClient } from "./mock/MockClient";
 
 export function getParams(params: { [key: string]: string }) {
   const ps = Object.entries(params).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
@@ -13,7 +13,7 @@ export function getParams(params: { [key: string]: string }) {
 }
 
 export function commonCollectionTests(
-  odataClient: MockODataClient,
+  odataClient: MockClient,
   stringCollectionServiceConstructor: StringCollectionServiceConstructor,
   enumCollectionServiceConstructor: EnumCollectionServiceConstructor
 ) {

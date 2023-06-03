@@ -67,7 +67,7 @@ class ServiceGenerator {
     await this.generateModelServices();
 
     const importContainer = new ImportContainer(this.namingHelper.getFileNames());
-    importContainer.addFromClientApi("ODataClient");
+    importContainer.addFromClientApi("ODataHttpClient");
     importContainer.addFromService(ROOT_SERVICE);
 
     const { properties, methods }: PropsAndOps = deepmerge(
@@ -78,7 +78,7 @@ class ServiceGenerator {
     sourceFile.addClass({
       isExported: true,
       name: serviceName,
-      typeParameters: ["ClientType extends ODataClient"],
+      typeParameters: ["ClientType extends ODataHttpClient"],
       extends: `${ROOT_SERVICE}<ClientType>`,
       properties /*: [
         {
@@ -137,7 +137,7 @@ class ServiceGenerator {
     const serviceName = this.namingHelper.getServiceName(entityType.name);
     const collectionName = this.namingHelper.getCollectionServiceName(entityType.name);
 
-    importContainer.addFromClientApi("ODataClient");
+    importContainer.addFromClientApi("ODataHttpClient");
     importContainer.addGeneratedModel(idName);
     importContainer.addGeneratedQObject(idFunctionName);
     // make sure to not falsely import self-referential stuff
@@ -241,7 +241,7 @@ class ServiceGenerator {
     const props = [...model.baseProps, ...model.props];
 
     importContainer.addFromService(entityServiceType);
-    importContainer.addFromClientApi("ODataClient");
+    importContainer.addFromClientApi("ODataHttpClient");
     importContainer.addGeneratedModel(model.name, editableModelName);
     importContainer.addGeneratedQObject(model.qName, qObjectName);
 
@@ -254,7 +254,7 @@ class ServiceGenerator {
     serviceFile.addClass({
       isExported: true,
       name: serviceName,
-      typeParameters: ["ClientType extends ODataClient"],
+      typeParameters: ["ClientType extends ODataHttpClient"],
       extends: entityServiceType + `<ClientType, ${model.name}, ${editableModelName}, ${model.qName}>`,
       ctors: [
         {
@@ -444,7 +444,7 @@ class ServiceGenerator {
     serviceFile.addClass({
       isExported: true,
       name: this.namingHelper.getCollectionServiceName(model.name),
-      typeParameters: ["ClientType extends ODataClient"],
+      typeParameters: ["ClientType extends ODataHttpClient"],
       extends:
         entitySetServiceType +
         `<ClientType, ${model.name}, ${editableModelName}, ${model.qName}, ${model.idModelName}>`,
@@ -503,11 +503,15 @@ class ServiceGenerator {
       ? RESPONSE_TYPES.value + this.getVersionSuffix()
       : RESPONSE_TYPES.model + this.getVersionSuffix();
     const returnType = operation.returnType;
-    const requestConfigParam = { name: "requestConfig", hasQuestionToken: true, type: "ODataClientConfig<ClientType>" };
+    const requestConfigParam = {
+      name: "requestConfig",
+      hasQuestionToken: true,
+      type: "ODataHttpClientConfig<ClientType>",
+    };
     const hasParams = operation.parameters.length > 0;
 
     // importing dependencies
-    importContainer.addFromClientApi("ODataClientConfig", "ODataResponse");
+    importContainer.addFromClientApi("ODataHttpClientConfig", "ODataResponse");
     importContainer.addFromCore(odataType);
     if (returnType?.type) {
       if ([DataTypes.EnumType, DataTypes.ModelType, DataTypes.ComplexType].includes(returnType.dataType)) {

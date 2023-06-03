@@ -1,11 +1,11 @@
-import { ODataClient } from "@odata2ts/odata-client-api";
+import { ODataHttpClient } from "@odata2ts/http-client-api";
 
 import { EditablePersonModel, Feature, PersonModel, PersonModelServiceVersion } from "./fixture/PersonModel";
-import { MockODataClient } from "./mock/MockODataClient";
+import { MockClient } from "./mock/MockClient";
 
 export function commonEntityTypeServiceTests(
-  odataClient: MockODataClient,
-  serviceConstructor: new (odataClient: ODataClient, basePath: string, name: string) => PersonModelServiceVersion
+  odataClient: MockClient,
+  serviceConstructor: new (odataClient: ODataHttpClient, basePath: string, name: string) => PersonModelServiceVersion
 ) {
   const BASE_URL = "/test";
   const NAME = "EntityXY('tester')";

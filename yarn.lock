@@ -1979,6 +1979,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@odata2ts/http-client-api@^0.0.0, @odata2ts/http-client-api@workspace:packages/http-client-api":
+  version: 0.0.0-use.local
+  resolution: "@odata2ts/http-client-api@workspace:packages/http-client-api"
+  dependencies:
+    "@types/jest": ^27.4.1
+    "@types/node": ^17.0.23
+    jest: 27.5.1
+    rimraf: ^3.0.2
+    ts-jest: ^27.1.4
+    ts-node: 10.7.0
+    typescript: 4.9.4
+  languageName: unknown
+  linkType: soft
+
 "@odata2ts/jquery-odata-client@^0.3.0, @odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client":
   version: 0.0.0-use.local
   resolution: "@odata2ts/jquery-odata-client@workspace:packages/jquery-odata-client"
@@ -2056,7 +2070,7 @@ __metadata:
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
     "@odata2ts/converter-api": ^0.1.2
-    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/http-client-api": ^0.0.0
     "@odata2ts/odata-core": ^0.3.7
     "@types/jest": ^27.4.1
     "@types/node": ^17.0.23
@@ -2073,7 +2087,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
-    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/http-client-api": ^0.0.0
     "@odata2ts/odata-query-builder": ^0.15.10
     "@odata2ts/odata-query-objects": ^0.17.3
     "@types/jest": ^27.4.1
@@ -2095,7 +2109,7 @@ __metadata:
     "@odata2ts/converter-api": ^0.1.2
     "@odata2ts/converter-runtime": ^0.1.5
     "@odata2ts/converter-v2-to-v4": ^0.1.4
-    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/http-client-api": ^0.0.0
     "@odata2ts/odata-core": ^0.3.7
     "@odata2ts/odata-query-objects": ^0.17.3
     "@odata2ts/odata-service": ^0.14.0
@@ -2126,7 +2140,7 @@ __metadata:
     upper-case-first: ^2.0.2
     xml2js: ^0.5.0
   peerDependencies:
-    "@odata2ts/odata-client-api": ^0.6.3
+    "@odata2ts/http-client-api": ^0.0.0
     "@odata2ts/odata-query-objects": ^0.17.3
     "@odata2ts/odata-service": ^0.14.0
   bin:

@@ -1,4 +1,4 @@
-import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
 
@@ -7,7 +7,7 @@ import { QBestReview, QBook, QBookId, QFilterReviews, qBook } from "../QTester";
 // @ts-ignore
 import { Book, BookId, EditableBook, FilterReviewsParams, Review } from "../TesterModel";
 
-export class BookService<ClientType extends ODataClient> extends EntityTypeServiceV4<
+export class BookService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
   ClientType,
   Book,
   EditableBook,
@@ -20,7 +20,9 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
     super(client, basePath, name, qBook);
   }
 
-  public async bestReview(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<Review>> {
+  public async bestReview(
+    requestConfig?: ODataHttpClientConfig<ClientType>
+  ): ODataResponse<ODataModelResponseV4<Review>> {
     if (!this._qBestReview) {
       this._qBestReview = new QBestReview();
     }
@@ -32,7 +34,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
 
   public async filterReviews(
     params: FilterReviewsParams,
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<Review>> {
     if (!this._qFilterReviews) {
       this._qFilterReviews = new QFilterReviews();
@@ -44,7 +46,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
   }
 }
 
-export class BookCollectionService<ClientType extends ODataClient> extends EntitySetServiceV4<
+export class BookCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
   ClientType,
   Book,
   EditableBook,

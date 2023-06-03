@@ -1,4 +1,4 @@
-import { ODataClient } from "@odata2ts/odata-client-api";
+import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { CollectionServiceV2, EntitySetServiceV2, EntityTypeServiceV2 } from "@odata2ts/odata-service";
 
 // @ts-ignore
@@ -8,7 +8,7 @@ import { Book, BookId, EditableBook, EditableReviewer, Reviewer } from "../Teste
 // @ts-ignore
 import { ReviewerService } from "./ReviewerService";
 
-export class BookService<ClientType extends ODataClient> extends EntityTypeServiceV2<
+export class BookService<ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,
   Book,
   EditableBook,
@@ -38,7 +38,7 @@ export class BookService<ClientType extends ODataClient> extends EntityTypeServi
   }
 }
 
-export class BookCollectionService<ClientType extends ODataClient> extends EntitySetServiceV2<
+export class BookCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV2<
   ClientType,
   Book,
   EditableBook,

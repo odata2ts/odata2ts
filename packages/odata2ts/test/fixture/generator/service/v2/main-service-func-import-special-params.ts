@@ -1,4 +1,4 @@
-import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 import { ODataService } from "@odata2ts/odata-service";
 
@@ -7,12 +7,12 @@ import { QBestBook } from "./QTester";
 // @ts-ignore
 import { BestBookParams, TestEntity } from "./TesterModel";
 
-export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
+export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   private _qBestBook?: QBestBook;
 
   public async bestBook(
     params: BestBookParams,
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV2<TestEntity>> {
     if (!this._qBestBook) {
       this._qBestBook = new QBestBook();

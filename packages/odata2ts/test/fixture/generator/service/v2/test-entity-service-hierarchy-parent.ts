@@ -1,4 +1,4 @@
-import { ODataClient } from "@odata2ts/odata-client-api";
+import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EntitySetServiceV2, EntityTypeServiceV2 } from "@odata2ts/odata-service";
 
 // @ts-ignore
@@ -6,7 +6,7 @@ import { QGrandParentId, QParent, qParent } from "../QTester";
 // @ts-ignore
 import { EditableParent, GrandParentId, Parent } from "../TesterModel";
 
-export class ParentService<ClientType extends ODataClient> extends EntityTypeServiceV2<
+export class ParentService<ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,
   Parent,
   EditableParent,
@@ -17,7 +17,7 @@ export class ParentService<ClientType extends ODataClient> extends EntityTypeSer
   }
 }
 
-export class ParentCollectionService<ClientType extends ODataClient> extends EntitySetServiceV2<
+export class ParentCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV2<
   ClientType,
   Parent,
   EditableParent,

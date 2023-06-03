@@ -1,4 +1,4 @@
-import { ODataClient, ODataClientConfig, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import {
@@ -13,7 +13,7 @@ import { ServiceBaseV4 } from "./ServiceBaseV4";
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
 
 export class CollectionServiceV4<
-  ClientType extends ODataClient,
+  ClientType extends ODataHttpClient,
   T,
   Q extends QueryObject,
   EditableT = PrimitiveExtractor<T>
@@ -26,7 +26,7 @@ export class CollectionServiceV4<
    */
   public async add(
     model: EditableT,
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataModelResponseV4<T>> {
     const result = await this.doPost<void | ODataModelResponseV4<T>>(this.qModel.convertToOData(model), requestConfig);
     return convertV4ModelResponse(result, this.qResponseType);
@@ -40,7 +40,7 @@ export class CollectionServiceV4<
    */
   public async update(
     models: Array<EditableT>,
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataCollectionResponseV4<T>> {
     const result = await this.doPut<void | ODataCollectionResponseV4<T>>(
       this.qModel.convertToOData(models),
@@ -59,7 +59,7 @@ export class CollectionServiceV4<
    */
   public async query<ReturnType = T>(
     queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
-    requestConfig?: ODataClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<ReturnType>> {
     const response = await this.doQuery<ODataCollectionResponseV4<any>>(queryFn, requestConfig);
     return convertV4CollectionResponse(response, this.qResponseType);

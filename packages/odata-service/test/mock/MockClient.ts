@@ -1,14 +1,14 @@
-import { ODataClient, ODataResponse } from "@odata2ts/odata-client-api";
+import { ODataHttpClient, ODataResponse } from "@odata2ts/http-client-api";
 
 export interface MockRequestConfig {
   test: string;
 }
 
 /**
- * Mock for an ODataClient.
+ * Mock for an ODataHttpClient.
  * Use <code>client.lastUrl</code> or <code>client.lastData</code> to acces passed data.
  */
-export class MockODataClient implements ODataClient<MockRequestConfig> {
+export class MockClient implements ODataHttpClient<MockRequestConfig> {
   public lastUrl?: string;
   public lastData?: any;
   public lastOperation?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";

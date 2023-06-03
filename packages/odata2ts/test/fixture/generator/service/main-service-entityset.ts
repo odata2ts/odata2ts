@@ -1,4 +1,4 @@
-import { ODataClient } from "@odata2ts/odata-client-api";
+import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
@@ -8,7 +8,7 @@ import { TestEntityCollectionService, TestEntityService } from "./service/TestEn
 // @ts-ignore
 import { TestEntityId } from "./TesterModel";
 
-export class TesterService<ClientType extends ODataClient> extends ODataService<ClientType> {
+export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   public ents(): TestEntityCollectionService<ClientType>;
   public ents(id: TestEntityId): TestEntityService<ClientType>;
   public ents(id?: TestEntityId | undefined) {

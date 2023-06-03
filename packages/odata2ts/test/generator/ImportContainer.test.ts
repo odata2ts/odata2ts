@@ -2,7 +2,7 @@ import { ImportContainer } from "../../src/generator/ImportContainer";
 
 describe("ImportContainer tests", function () {
   const SERVICE = "@odata2ts/odata-service";
-  const API = "@odata2ts/odata-client-api";
+  const API = "@odata2ts/http-client-api";
   let importContainer: ImportContainer;
 
   beforeEach(() => {
