@@ -1,8 +1,7 @@
-import { HttpResponseModel } from "@odata2ts/odata-client-api";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 
-import { qPerson } from "../build/trippin/QTrippin";
-import { PersonIdModel, PersonModel, TripModel } from "../build/trippin/TrippinModel";
+import { PersonIdModel, PersonModel } from "../build/trippin/TrippinModel";
 import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./infra/TestConstants";
 
 type SelectedPersonShape = Pick<PersonModel, "user" | "lastName" | "addressInfo">;

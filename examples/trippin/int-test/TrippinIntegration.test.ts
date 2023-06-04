@@ -1,4 +1,4 @@
-import { AxiosODataClient, AxiosODataClientError } from "@odata2ts/axios-odata-client";
+import { FetchClient, FetchClientError } from "@odata2ts/http-client-fetch";
 
 import { FeatureModel, PersonGenderModel, PersonModel } from "../build/trippin/TrippinModel";
 import { PersonIdModel } from "../build/trippin/TrippinModel";
@@ -6,7 +6,7 @@ import { TrippinService } from "../build/trippin/TrippinService";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
-  const odataClient = new AxiosODataClient();
+  const odataClient = new FetchClient();
 
   const testService = new TrippinService(odataClient, BASE_URL);
 
@@ -80,11 +80,11 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("fail to get unknown person", async () => {
-    const axiosClientMsgPrefix = "Server responded with error: ";
-    const axiosFailMsg = "The request resource is not found.";
+    const fetchClientMsgPrefix = "Server responded with error: ";
+    const serverFailMsg = "The request resource is not found.";
 
     await expect(() => testService.navToPeople("XXX").query()).rejects.toThrow(
-      new Error(axiosClientMsgPrefix + axiosFailMsg)
+      new Error(fetchClientMsgPrefix + serverFailMsg)
     );
 
     // again, but now inspect error in detail
@@ -93,18 +93,17 @@ describe("Integration Testing of Service Generation", () => {
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
-      const e = error as AxiosODataClientError;
-      expect(e.name).toBe("AxiosODataClientError");
-      expect(e.message).toBe(axiosClientMsgPrefix + axiosFailMsg);
+      const e = error as FetchClientError;
+      expect(e.name).toBe("FetchClientError");
+      expect(e.message).toBe(fetchClientMsgPrefix + serverFailMsg);
       expect(e.cause).toBeDefined();
       expect(e.status).toBe(404);
-      const axiosError = e.cause;
-      expect(axiosError?.response).toBeDefined();
-      expect(axiosError?.response?.status).toBe(404);
-      expect(axiosError?.response?.data).toStrictEqual({
+      expect(e?.response).toBeDefined();
+      expect(e?.response?.status).toBe(404);
+      expect(e?.response?.data).toStrictEqual({
         error: {
           code: "",
-          message: axiosFailMsg,
+          message: serverFailMsg,
         },
       });
     }

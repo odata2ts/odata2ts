@@ -1,4 +1,4 @@
-import { AxiosODataClientError } from "@odata2ts/axios-odata-client";
+import { AxiosClientError } from "@odata2ts/http-client-axios";
 
 import { BooksModel } from "../src/catalog/CatalogModel";
 import { catalogService } from "./services";
@@ -41,9 +41,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   test("get unknown book", async () => {
     const axiosClientMsgPrefix = "Server responded with error: ";
     const axiosFailMsg = "Not Found";
-    await expect(() => testService.books(-1).query()).rejects.toThrow(
-      new Error(axiosClientMsgPrefix + axiosFailMsg)
-    );
+    await expect(() => testService.books(-1).query()).rejects.toThrow(new Error(axiosClientMsgPrefix + axiosFailMsg));
 
     // again, but now inspect error in detail
     try {
@@ -51,8 +49,8 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
-      const e = error as AxiosODataClientError;
-      expect(e.name).toBe("AxiosODataClientError");
+      const e = error as AxiosClientError;
+      expect(e.name).toBe("AxiosClientError");
       expect(e.message).toBe(axiosClientMsgPrefix + axiosFailMsg);
       expect(e.cause).toBeDefined();
       expect(e.status).toBe(404);
