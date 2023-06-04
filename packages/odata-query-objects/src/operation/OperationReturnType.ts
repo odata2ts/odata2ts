@@ -1,4 +1,4 @@
-import { HttpResponseModel } from "@odata2ts/odata-client-api";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 
 import { QParamModel } from "../param/QParamModel";
 import {
