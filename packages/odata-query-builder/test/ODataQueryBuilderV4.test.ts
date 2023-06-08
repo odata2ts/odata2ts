@@ -70,6 +70,19 @@ describe("ODataQueryBuilderV4 Test", () => {
     expect(candidate).toBe(expected);
   });
 
+  test("expanding: error without prop", () => {
+    const expectedMsg = "Expanding prop must be defined!";
+
+    expect(() =>
+      // @ts-ignore
+      toTest.expanding(null, null)
+    ).toThrow(expectedMsg);
+    expect(() =>
+      // @ts-ignore
+      toTest.expanding(undefined, null)
+    ).toThrow(expectedMsg);
+  });
+
   test("expanding: ignore null function", () => {
     const expected = addBase("");
 
@@ -99,7 +112,7 @@ describe("ODataQueryBuilderV4 Test", () => {
     expect(candidate).toBe(expected);
   });
 
-  test("expanding: deeply nested", () => {
+  test("expanding: nested expanding", () => {
     const candidate = toTest
       .select("name", "age")
       .expanding("address", (builder, qAddress) => {
@@ -118,6 +131,17 @@ describe("ODataQueryBuilderV4 Test", () => {
     expect(candidate).toBe(expected);
   });
 
+  test("expanding: nested expand", () => {
+    const candidate = toTest
+      .expanding("address", (builder, qAddress) => {
+        builder.expand("responsible");
+      })
+      .build();
+    const expected = addBase("$expand=Address($expand=responsible)");
+
+    expect(candidate).toBe(expected);
+  });
+
   test("expanding: combining simple & complex expand", () => {
     const candidate = toTest
       .expanding("address", (builder) => {
@@ -126,6 +150,17 @@ describe("ODataQueryBuilderV4 Test", () => {
       .expand("altAdresses")
       .build();
     const expected = addBase("$expand=Address($select=street),AltAdresses");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expanding: orderBy", () => {
+    const candidate = toTest
+      .expanding("altAdresses", (builder, qAddress) => {
+        builder.orderBy(qAddress.street.asc());
+      })
+      .build();
+    const expected = addBase("$expand=AltAdresses($orderby=street asc)");
 
     expect(candidate).toBe(expected);
   });

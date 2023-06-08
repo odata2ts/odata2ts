@@ -68,15 +68,15 @@ export class ODataQueryBuilder<Q extends QueryObject> {
   }
 
   public addSelects = (...paths: NullableParamList<string>) => {
-    const filteredPaths = paths?.filter((p): p is string => !!p);
-    if (filteredPaths?.length) {
+    const filteredPaths = paths.filter((p): p is string => !!p);
+    if (filteredPaths.length) {
       this.getSelects().push(...filteredPaths);
     }
   };
 
   public addExpands = (...paths: NullableParamList<string>) => {
-    const filteredPaths = paths?.filter((p): p is string => !!p);
-    if (filteredPaths?.length) {
+    const filteredPaths = paths.filter((p): p is string => !!p);
+    if (filteredPaths.length) {
       this.getExpands().push(...filteredPaths);
     }
   };
@@ -101,15 +101,15 @@ export class ODataQueryBuilder<Q extends QueryObject> {
   }
 
   public select(props: NullableParamList<keyof Q>) {
-    const filteredPaths = props?.filter((p): p is keyof Q => !!p).map((p) => this.getEntityProp(p).getPath());
-    if (filteredPaths?.length) {
+    const filteredPaths = props.filter((p): p is keyof Q => !!p).map((p) => this.getEntityProp(p).getPath());
+    if (filteredPaths.length) {
       this.getSelects().push(...filteredPaths);
     }
   }
 
   public filter(expressions: NullableParamList<QFilterExpression>) {
-    const filteredExps = expressions?.filter((exp): exp is QFilterExpression => !!exp);
-    if (filteredExps?.length) {
+    const filteredExps = expressions.filter((exp): exp is QFilterExpression => !!exp);
+    if (filteredExps.length) {
       if (!this.filters) {
         this.filters = [];
       }
@@ -124,8 +124,8 @@ export class ODataQueryBuilder<Q extends QueryObject> {
   } */
 
   public expand<Prop extends ExpandType<Q>>(props: NullableParamList<Prop>) {
-    const filteredPaths = props?.filter((p): p is Prop => !!p).map((p) => this.getEntityProp(p).getPath());
-    if (filteredPaths?.length) {
+    const filteredPaths = props.filter((p): p is Prop => !!p).map((p) => this.getEntityProp(p).getPath());
+    if (filteredPaths.length) {
       this.getExpands().push(...filteredPaths);
     }
   }
@@ -143,10 +143,6 @@ export class ODataQueryBuilder<Q extends QueryObject> {
     prop: Prop,
     builderFn: (builder: any, qObject: any) => void
   ) {
-    if (!prop) {
-      throw new Error("Expanding prop must be defined!");
-    }
-
     const entityProp = this.getEntityProp<QEntityPathModel<Q>>(prop);
     const path = entityProp.getPath();
     const entity = entityProp.getEntity();
@@ -190,8 +186,8 @@ export class ODataQueryBuilder<Q extends QueryObject> {
    * @returns this query builder
    */
   public orderBy(expressions: NullableParamList<QOrderByExpression>) {
-    const filteredExps = expressions?.filter((exp): exp is QOrderByExpression => !!exp);
-    if (filteredExps?.length) {
+    const filteredExps = expressions.filter((exp): exp is QOrderByExpression => !!exp);
+    if (filteredExps.length) {
       if (!this.orderBys) {
         this.orderBys = [];
       }
@@ -200,8 +196,8 @@ export class ODataQueryBuilder<Q extends QueryObject> {
   }
 
   public groupBy(props: NullableParamList<keyof Q>) {
-    const filteredPaths = props?.filter((p): p is keyof Q => !!p).map((p) => this.getEntityProp(p).getPath());
-    if (filteredPaths?.length) {
+    const filteredPaths = props.filter((p): p is keyof Q => !!p).map((p) => this.getEntityProp(p).getPath());
+    if (filteredPaths.length) {
       if (!this.groupBys) {
         this.groupBys = [];
       }
@@ -211,8 +207,8 @@ export class ODataQueryBuilder<Q extends QueryObject> {
 
   public search(terms: NullableParamList<string | QSearchTerm>) {
     // single word is a term (literal value), multiple terms are a phrase (quoted value with double quotes)
-    const filteredTerms = terms?.filter((t): t is string => !!t?.toString()?.trim()).map(searchTerm);
-    if (filteredTerms?.length) {
+    const filteredTerms = terms.filter((t): t is string => !!t?.toString()?.trim()).map(searchTerm);
+    if (filteredTerms.length) {
       if (!this.searchTerms) {
         this.searchTerms = [];
       }
@@ -241,7 +237,7 @@ export class ODataQueryBuilder<Q extends QueryObject> {
       add(ODataOperators.EXPAND, this.expands.join(","));
     }
     if (cleanedFilters?.length) {
-      const filterConcat = cleanedFilters.reduce((result, filter) => (result ? result.and(filter) : filter));
+      const filterConcat = cleanedFilters.reduce((result, filter) => result.and(filter));
 
       if (filterConcat) {
         add(ODataOperators.FILTER, filterConcat.toString());

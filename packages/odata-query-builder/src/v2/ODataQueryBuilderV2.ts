@@ -61,6 +61,9 @@ class ODataQueryBuilderV2<Q extends QueryObject> implements ODataQueryBuilderV2M
   }
 
   public expanding<Prop extends ExpandType<Q>>(prop: Prop, builderFn: ExpandingFunctionV2<Q[Prop]>) {
+    if (!prop) {
+      throw new Error("Expanding prop must be defined!");
+    }
     if (!builderFn) {
       return this;
     }
@@ -73,10 +76,10 @@ class ODataQueryBuilderV2<Q extends QueryObject> implements ODataQueryBuilderV2M
     builderFn(expander, entity);
 
     const { selects, expands } = expander.build();
-    if (selects?.length) {
+    if (selects.length) {
       this.builder.addSelects(...selects);
     }
-    if (expands?.length) {
+    if (expands.length) {
       this.builder.addExpands(...expands);
     }
 

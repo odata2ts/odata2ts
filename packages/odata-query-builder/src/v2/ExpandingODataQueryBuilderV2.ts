@@ -39,8 +39,8 @@ class ExpandingODataQueryBuilderV2<Q extends QueryObject> implements ExpandingOD
   };
 
   public select(...props: NullableParamList<keyof Q>) {
-    const filtered = props?.filter((p): p is keyof Q => !!p);
-    if (filtered?.length) {
+    const filtered = props.filter((p): p is keyof Q => !!p);
+    if (filtered.length) {
       filtered.map(this.getPrefixedPathForProp).forEach((path) => {
         this.selects.add(path);
       });
@@ -50,8 +50,8 @@ class ExpandingODataQueryBuilderV2<Q extends QueryObject> implements ExpandingOD
   }
 
   public expand<Prop extends ExpandType<Q>>(...props: NullableParamList<Prop>) {
-    const filtered = props?.filter((p): p is NonNullable<Prop> => !!p);
-    if (filtered?.length) {
+    const filtered = props.filter((p): p is NonNullable<Prop> => !!p);
+    if (filtered.length) {
       filtered.map(this.getPrefixedPathForProp).forEach((path) => {
         this.expands.add(path);
       });
@@ -72,10 +72,10 @@ class ExpandingODataQueryBuilderV2<Q extends QueryObject> implements ExpandingOD
     builderFn(expander, entity);
 
     const { selects, expands } = expander.build();
-    if (selects?.length) {
+    if (selects.length) {
       selects.map(this.getPrefixedPath).forEach((s) => this.selects.add(s));
     }
-    if (expands?.length) {
+    if (expands.length) {
       expands.map(this.getPrefixedPath).forEach((e) => this.expands.add(e));
     }
 

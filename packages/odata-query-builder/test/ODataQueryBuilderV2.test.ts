@@ -45,11 +45,27 @@ describe("ODataQueryBuilderV2 Test", () => {
     expect(candidate).toBe(expected);
   });
 
+  test("expanding: error without prop", () => {
+    const expectedMsg = "Expanding prop must be defined!";
+
+    expect(() =>
+      // @ts-ignore
+      toTest.expanding(null, null)
+    ).toThrow(expectedMsg);
+    expect(() =>
+      // @ts-ignore
+      toTest.expanding(undefined, null)
+    ).toThrow(expectedMsg);
+  });
+
   test("expanding: ignore null function", () => {
     const expected = addBase("");
 
     expect(toTest.expanding("address", null).build()).toBe(expected);
     expect(toTest.expanding("address", undefined).build()).toBe(expected);
+    expect(toTest.expanding("address", (builder) => builder.expanding("responsible", undefined)).build()).toBe(
+      addBase("$expand=Address")
+    );
   });
 
   test("expanding: selecting nested prop", () => {

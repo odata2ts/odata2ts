@@ -1,6 +1,6 @@
-import { QFilterExpression, QueryObject } from "@odata2ts/odata-query-objects";
+import { QueryObject } from "@odata2ts/odata-query-objects";
 
-import { ODataQueryBuilderConfig, ODataQueryBuilderV2 } from "../src";
+import { ODataQueryBuilderConfig, ODataQueryBuilderV2, ODataQueryBuilderV4, QFilterExpression } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 
 /**
@@ -13,14 +13,18 @@ function addBase(urlPart: string) {
   return `/Persons${urlPart ? `?${urlPart}` : ""}`;
 }
 
+type QueryBuilder =
+  | Omit<ODataQueryBuilderV2<QPerson>, "expanding" | "count">
+  | Omit<ODataQueryBuilderV4<QPerson>, "expanding" | "count" | "groupBy">;
+
 export type BuilderFactoryFunction<Q extends QueryObject> = (
   path: string,
   qEntity: Q,
   config?: ODataQueryBuilderConfig
-) => ODataQueryBuilderV2<QPerson>;
+) => QueryBuilder;
 
 export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) {
-  let toTest: Omit<ODataQueryBuilderV2<QPerson>, "expanding" | "count">;
+  let toTest: QueryBuilder;
 
   function refresh() {
     toTest = createBuilder("/Persons", qPerson, { unencoded: true });
@@ -81,6 +85,7 @@ export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) 
     const candidate = toTest.select(null).build();
 
     expect(candidate).toBe("/Persons");
+    expect(toTest.select().build()).toBe("/Persons");
   });
 
   test("skip", () => {
@@ -195,6 +200,14 @@ export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) 
     expect(toTest.filter(undefined).build()).toBe(expectedNull);
     refresh();
     expect(toTest.filter(undefined, qPerson.name.eq("Heinz"), null).build()).toBe(addBase("$filter=name eq 'Heinz'"));
+  });
+
+  test("filter use raw expression", () => {
+    const raw = "name eq 'Heinz'";
+    const candidate = toTest.filter(new QFilterExpression(raw)).build();
+    const expected = addBase(`$filter=${raw}`);
+
+    expect(candidate).toBe(expected);
   });
 
   /*

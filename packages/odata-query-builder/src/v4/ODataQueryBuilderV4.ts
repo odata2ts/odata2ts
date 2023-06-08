@@ -65,6 +65,10 @@ class ODataQueryBuilderV4<Q extends QueryObject> implements ODataQueryBuilderV4M
   }
 
   public expanding<Prop extends ExpandType<Q>>(prop: Prop, builderFn: ExpandingFunction<Q[Prop]>) {
+    if (!prop) {
+      throw new Error("Expanding prop must be defined!");
+    }
+
     if (builderFn) {
       this.builder.expanding(createExpandingQueryBuilderV4, prop, builderFn);
     }

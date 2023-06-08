@@ -230,7 +230,7 @@ type V2Ops = BuilderOp | BaseOps | "count" | PaginationOps; // custom expanding 
 type V4Ops = V2Ops | "expanding" | "groupBy" | "search";
 type V4ExpandingOps = BuilderOp | BaseOps | "expanding" | PaginationOps;
 
-export type V2ExpandResult = { selects?: Array<string>; expands?: Array<string> };
+export type V2ExpandResult = { selects: Array<string>; expands: Array<string> };
 
 /**
  * Contract for ODataQueryBuilder for V2.
