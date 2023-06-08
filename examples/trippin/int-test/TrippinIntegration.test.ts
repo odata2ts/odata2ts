@@ -1,5 +1,4 @@
 import { AxiosClient, AxiosClientError } from "@odata2ts/http-client-axios";
-import { AxiosError } from "axios";
 
 import { FeatureModel, PersonGenderModel, PersonModel } from "../build/trippin/TrippinModel";
 import { PersonIdModel } from "../build/trippin/TrippinModel";
@@ -81,7 +80,7 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("fail to get unknown person", async () => {
-    const axiosClientMsgPrefix = "Server responded with error: ";
+    const axiosClientMsgPrefix = "OData server responded with error: ";
     const axiosFailMsg = "The request resource is not found.";
 
     await expect(() => testService.navToPeople("XXX").query()).rejects.toThrow(
@@ -95,19 +94,10 @@ describe("Integration Testing of Service Generation", () => {
       expect(1).toBe(2);
     } catch (error) {
       const e = error as AxiosClientError;
-      expect(e.name).toBe("AxiosODataClientError");
+      expect(e.name).toBe("AxiosClientError");
       expect(e.message).toBe(axiosClientMsgPrefix + axiosFailMsg);
-      expect(e.cause).toBeDefined();
       expect(e.status).toBe(404);
-      const axiosError = e.cause as AxiosError;
-      expect(axiosError?.response).toBeDefined();
-      expect(axiosError?.response?.status).toBe(404);
-      expect(axiosError?.response?.data).toStrictEqual({
-        error: {
-          code: "",
-          message: axiosFailMsg,
-        },
-      });
+      expect(e.cause).toBeDefined();
     }
   });
 

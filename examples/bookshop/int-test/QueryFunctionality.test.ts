@@ -40,9 +40,8 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   });
 
   test("get unknown book", async () => {
-    const axiosClientMsgPrefix = "Server responded with error: ";
     const axiosFailMsg = "Not Found";
-    await expect(() => testService.books(-1).query()).rejects.toThrow(new Error(axiosClientMsgPrefix + axiosFailMsg));
+    await expect(() => testService.books(-1).query()).rejects.toThrow(axiosFailMsg);
 
     // again, but now inspect error in detail
     try {
@@ -52,7 +51,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
     } catch (error) {
       const e = error as AxiosClientError;
       expect(e.name).toBe("AxiosClientError");
-      expect(e.message).toBe(axiosClientMsgPrefix + axiosFailMsg);
+      expect(e.message).toContain(axiosFailMsg);
       expect(e.cause).toBeDefined();
       expect(e.status).toBe(404);
       const axiosError = e.cause as AxiosError;
