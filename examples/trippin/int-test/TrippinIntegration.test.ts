@@ -1,4 +1,5 @@
-import { AxiosODataClient, AxiosODataClientError } from "@odata2ts/axios-odata-client";
+import { AxiosClient, AxiosClientError } from "@odata2ts/http-client-axios";
+import { AxiosError } from "axios";
 
 import { FeatureModel, PersonGenderModel, PersonModel } from "../build/trippin/TrippinModel";
 import { PersonIdModel } from "../build/trippin/TrippinModel";
@@ -6,7 +7,7 @@ import { TrippinService } from "../build/trippin/TrippinService";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
-  const odataClient = new AxiosODataClient();
+  const odataClient = new AxiosClient();
 
   const testService = new TrippinService(odataClient, BASE_URL);
 
@@ -93,12 +94,12 @@ describe("Integration Testing of Service Generation", () => {
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
-      const e = error as AxiosODataClientError;
+      const e = error as AxiosClientError;
       expect(e.name).toBe("AxiosODataClientError");
       expect(e.message).toBe(axiosClientMsgPrefix + axiosFailMsg);
       expect(e.cause).toBeDefined();
       expect(e.status).toBe(404);
-      const axiosError = e.cause;
+      const axiosError = e.cause as AxiosError;
       expect(axiosError?.response).toBeDefined();
       expect(axiosError?.response?.status).toBe(404);
       expect(axiosError?.response?.data).toStrictEqual({
