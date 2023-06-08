@@ -1,4 +1,4 @@
-import { HttpResponseModel } from "@odata2ts/odata-client-api";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 
 export const createResponse = <T>(value: T): HttpResponseModel<T> => {
   return {
