@@ -16,11 +16,12 @@
     "test": "jest ./test"
   },
   "dependencies": {
-    "@odata2ts/axios-odata-client": "^0.6.0",
-    "@odata2ts/odata-service": "^0.14.0"
+    "@odata2ts/http-client-axios": "^0.7.0",
+    "@odata2ts/odata-service": "^0.15.0",
+    "axios": "^1.4.0"
   },
   "devDependencies": {
-    "@odata2ts/odata2ts": "^0.22.0",
+    "@odata2ts/odata2ts": "^0.23.0",
     "@types/jest": "^27.4.1",
     "@types/node": "^17.0.23",
     "jest": "^27.5.1",
