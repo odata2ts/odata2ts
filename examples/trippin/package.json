@@ -18,7 +18,7 @@
     "type-test": "tsc -p tsconfig.type-test.json"
   },
   "dependencies": {
-    "@odata2ts/http-client-axios": "^0.7.0",
+    "@odata2ts/http-client-axios": "^0.8.0",
     "@odata2ts/odata-service": "^0.15.0",
     "axios": "^0.27.2"
   },
