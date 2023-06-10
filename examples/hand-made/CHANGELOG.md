@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.6](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.3.5...@odata2ts/example-hand-made@0.3.6) (2023-06-10)
+
+### Bug Fixes
+
+* **examples:** use newest versions & http-client packages ([#169](https://github.com/odata2ts/odata2ts/issues/169)) ([e14416d](https://github.com/odata2ts/odata2ts/commit/e14416d5fd98e2ebd14081400a6b8368e01dd623))
+
 ## [0.3.5](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.3.4...@odata2ts/example-hand-made@0.3.5) (2023-04-13)
 
 **Note:** Version bump only for package @odata2ts/example-hand-made

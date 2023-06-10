@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-trippin@0.4.3...@odata2ts/example-trippin@0.5.0) (2023-06-10)
+
+### Bug Fixes
+
+* **examples:** use newest versions & http-client packages ([#169](https://github.com/odata2ts/odata2ts/issues/169)) ([e14416d](https://github.com/odata2ts/odata2ts/commit/e14416d5fd98e2ebd14081400a6b8368e01dd623))
+
+### Features
+
+* better errors for jquery and axios odata clients ([#139](https://github.com/odata2ts/odata2ts/issues/139)) ([bb74514](https://github.com/odata2ts/odata2ts/commit/bb745144fb37235ad9864ab78eebbecf1d69107c))
+
 ## [0.4.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-trippin@0.4.2...@odata2ts/example-trippin@0.4.3) (2023-04-13)
 
 **Note:** Version bump only for package @odata2ts/example-trippin

@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-query-builder",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "publishConfig": {
     "access": "public"
   },
@@ -36,7 +36,7 @@
     "type-safe"
   ],
   "dependencies": {
-    "@odata2ts/odata-query-objects": "^0.18.0"
+    "@odata2ts/odata-query-objects": "^0.18.1"
   },
   "devDependencies": {
     "@types/jest": "^27.4.1",
