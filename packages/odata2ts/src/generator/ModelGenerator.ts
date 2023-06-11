@@ -1,5 +1,5 @@
 import { ODataVersions } from "@odata2ts/odata-core";
-import { SourceFile } from "ts-morph";
+import { JSDocStructure, OptionalKind, SourceFile, StructureKind } from "ts-morph";
 
 import { DataModel } from "../data-model/DataModel";
 import { ComplexType, DataTypes, ModelType, OperationType, PropertyModel } from "../data-model/DataTypeModel";
@@ -68,7 +68,7 @@ class ModelGenerator {
     this.sourceFile.addImportDeclarations(this.importContainer.getImportDeclarations());
   }
 
-  private generateModel(model: ComplexType) {
+  private generateModel(model: ComplexType | ModelType) {
     this.sourceFile.addInterface({
       name: model.name,
       isExported: true,
@@ -79,10 +79,41 @@ class ModelGenerator {
           type: this.getPropType(p),
           // props for entities or entity collections are not added in V4 if not explicitly expanded
           hasQuestionToken: this.dataModel.isV4() && isEntity,
+          docs: this.options.skipComments ? undefined : [this.generatePropDoc(p, model)],
         };
       }),
       extends: model.baseClasses,
     });
+  }
+
+  private generatePropDoc(prop: PropertyModel, model: ComplexType | ModelType): OptionalKind<JSDocStructure> {
+    const isKeyProp = (model as ModelType).keyNames?.includes(prop.odataName);
+    const baseAttribs: Array<string> = [];
+    if (isKeyProp) {
+      baseAttribs.push("**Key Property**: This is a key property used to identify the entity.");
+    }
+    if (prop.managed) {
+      baseAttribs.push("**Managed**: This property is managed on the server side and cannot be edited.");
+    }
+    if (prop.converters?.length) {
+      baseAttribs.push(`**Applied Converters**: ${prop.converters.map((c) => c.converterId).join(",")}.`);
+    }
+
+    const attributeTable: Array<[string, string]> = [
+      ["Name", prop.odataName],
+      ["Type", prop.odataType],
+    ];
+    if (prop.required) {
+      attributeTable.push(["Nullable", "false"]);
+    }
+
+    const description =
+      (baseAttribs ? baseAttribs.join("<br/>") + "\n\n" : "") +
+      "OData Attributes:\n" +
+      "|Attribute Name | Attribute Value |\n| --- | ---|\n" +
+      attributeTable.map((row) => `| ${row[0]} | \`${row[1]}\` |`).join("\n");
+
+    return { kind: StructureKind.JSDoc, description };
   }
 
   private getPropType(prop: PropertyModel): string {

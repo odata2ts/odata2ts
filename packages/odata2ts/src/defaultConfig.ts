@@ -16,6 +16,7 @@ const defaultConfig: Omit<RunOptions, "source" | "output"> = {
   skipEditableModels: false,
   skipIdModels: false,
   skipOperations: false,
+  skipComments: false,
   disableAutoManagedKey: false,
   allowRenaming: false,
   v2ModelsWithExtraResultsWrapping: false,
