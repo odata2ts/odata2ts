@@ -1,3 +1,9 @@
+###
+# Name: OData
+# Type: V2 - Read / Write
+# Address: https://services.odata.org/V2/Northwind/Northwind.svc
+###
+
 # --- METADATA ---
 ### @name metadata
 GET {{baseUrl}}/$metadata
@@ -43,8 +49,8 @@ Accept: {{contentType}}
 GET {{baseUrl}}/Products(666)
 Accept: {{contentType}}
 
-### @name filter by price (decimal)
-GET {{rootUrl}}/Products?$inlinecount=allpages&$filter=Price eq 22.8m
+### @name get primitive property
+GET {{baseUrl}}/Products(0)/Description
 Accept: {{contentType}}
 
 ### @name expanding
@@ -71,6 +77,11 @@ Accept: {{contentType}}
 GET {{baseUrl}}/Products(0)?$select=ID,Name,Category/Name,Category/Products/Name&$expand=Category,Category/Products
 Accept: {{contentType}}
 
+### @name filter by price (decimal)
+GET {{rootUrl}}/Products?$inlinecount=allpages&$filter=Price eq 22.8m
+Accept: {{contentType}}
+
+
 # --- Create Entity ---
 ### @name create new product
 POST {{baseUrl}}/Products
@@ -86,11 +97,15 @@ Content-Type: {{contentType}}
   "ReleaseDate": "2022-01-01T00:00:00"
 }
 
+### @name get new product
+GET {{baseUrl}}/Products(998)
+Accept: {{contentType}}
+
 ### @name merge new product
 POST {{baseUrl}}/Products(998)
+X-Http-Method: MERGE
 Accept: {{contentType}}
 Content-Type: {{contentType}}
-X-Http-Method: MERGE
 
 {
   "Description": "Test Descriptioning!!!"
@@ -103,6 +118,33 @@ Accept: {{contentType}}
 Content-Type: {{contentType}}
 
 
+### @name update prop
+PUT {{baseUrl}}/Products(998)/Description
+Accept: {{contentType}}
+Content-Type: {{contentType}}
+
+{
+  "Description": "Testing PropUpdate"
+}
+
+### @name update prop with raw value
+PUT {{baseUrl}}/Products(998)/Description/$value
+Content-Type: text/plain
+
+Plain Text
+
+### @name update prop with null
+PUT {{baseUrl}}/Products(998)/Description
+Accept: {{contentType}}
+Content-Type: {{contentType}}
+
+{
+  "Description": null
+}
+
+### @name delete prop => 405
+DELETE {{baseUrl}}/Products(998)/Description
+Accept: {{contentType}}
 
 ### @name update category association
 POST {{baseUrl}}/Products(999)
@@ -133,5 +175,4 @@ Content-Type: {{contentType}}
   "Rating": 1,
   "ReleaseDate": "2022-01-01T00:00:00",
   "Category": { ID: 1 }
-}
 }

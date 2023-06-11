@@ -12,7 +12,7 @@ import { ODataDemoService } from "../build/odata/ODataDemoService";
  */
 describe("Integration Testing of generated stuff for Sample V2 OData Service", () => {
   const BASE_URL = "https://services.odata.org/V2/OData/OData.svc";
-  const BASE_URL_WITH_SESSION = "https://services.odata.org/V2/(S(00uijutit22ymzk5avtjixeis))/OData/OData.svc";
+  const BASE_URL_WITH_SESSION = "https://services.odata.org/V2/(S(203ufo12d3orq1ihzhgbtmhp))/OData/OData.svc";
   const odataClient = new AxiosClient();
 
   const testService = new ODataDemoService(odataClient, BASE_URL);
@@ -52,9 +52,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   test("get unknown product", async () => {
     const axiosFailMsg = "Resource not found for the segment 'Products'.";
     const axiosClientMsgPrefix = "OData server responded with error: ";
-    await expect(() => testService.products(666).query()).rejects.toThrow(
-      new Error(axiosClientMsgPrefix + axiosFailMsg)
-    );
+    await expect(() => testService.products(666).query()).rejects.toThrow(axiosClientMsgPrefix + axiosFailMsg);
 
     // again, but now inspect error in detail
     try {

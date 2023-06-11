@@ -6,10 +6,8 @@ const config: Config.InitialOptions = {
   testPathIgnorePatterns: ["/node_modules/"], //, "int-test"],
   coverageDirectory: "coverage",
   collectCoverageFrom: ["src/**/*.ts"],
-  globals: {
-    "ts-jest": {
-      tsconfig: "tsconfig.test.json",
-    },
+  transform: {
+    "^.+\\.tsx?$": ["ts-jest", { tsconfig: "tsconfig.test.json" }],
   },
 };
 

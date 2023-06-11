@@ -1,10 +1,10 @@
-###################################################
-# HTTP Tests against Northwind Service
-# v4
-#
-###################################################
+###
+# Name: Northwind
+# Type: V4 - Read Only
+# Address: https://services.odata.org/V4/Northwind/Northwind.svc
+###
 
-# --- CONFIUGARTION ---
+# --- VsCode Config ---
 
 @rootUrl = https://services.odata.org/V4/Northwind/Northwind.svc
 @contentType = application/json
@@ -13,6 +13,12 @@
 # --- Basics ---
 ### Metadata
 GET {{rootUrl}}/$metadata
+
+# --- Data Types ---
+###
+# @name Binary Example
+GET {{rootUrl}}/Categories(8)/Picture/$value
+#Accept: application/octet-stream
 
 
 # --- Order By ---

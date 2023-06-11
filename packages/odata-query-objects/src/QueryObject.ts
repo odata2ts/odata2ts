@@ -65,7 +65,7 @@ export class QueryObject<T extends object = any> {
     }
 
     const isList = Array.isArray(odataModel);
-    const models = isList ? odataModel : [odataModel];
+    const models = isList ? (odataModel as Array<T>) : [odataModel];
 
     const result = models.map((model) => {
       return Object.entries(model).reduce<any>((collector, [key, value]) => {

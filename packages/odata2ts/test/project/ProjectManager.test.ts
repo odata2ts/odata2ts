@@ -1,8 +1,10 @@
+import { writeFile } from "fs/promises";
 import path from "path";
 
-import { emptyDir, remove, writeFile } from "fs-extra";
-import { ModuleKind, ModuleResolutionKind, Project, ScriptTarget, SourceFile } from "ts-morph";
+import { emptyDir, remove } from "fs-extra";
+import { Project, SourceFile } from "ts-morph";
 import * as TsMorph from "ts-morph";
+import { ModuleKind, ModuleResolutionKind, ScriptTarget } from "typescript";
 
 import { EmitModes } from "../../src";
 import { ProjectFiles } from "../../src/data-model/DataModel";
@@ -11,6 +13,7 @@ import { createProjectManager } from "../../src/project/ProjectManager";
 
 // global mock for file operations
 jest.mock("fs-extra");
+jest.mock("fs/promises");
 // global mock for ts-morph to keep this a unit test
 jest.mock("ts-morph");
 
