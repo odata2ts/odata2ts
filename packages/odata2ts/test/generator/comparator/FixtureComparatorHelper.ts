@@ -26,6 +26,7 @@ const DEFAULT_COMPARE_OPTS: TestOptions = {
   skipIdModels: true,
   skipEditableModels: true,
   skipOperations: false,
+  skipComments: true,
 };
 
 const DEFAULT_RUN_OPTIONS = {

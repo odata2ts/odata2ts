@@ -155,6 +155,11 @@ export interface ConfigFileOptions extends Omit<CliOptions, "source" | "output" 
    * if the generation mode is {@code Mode.model} or {@code Mode.qobject}.
    */
   skipOperations?: boolean;
+  /**
+   * Model properties have explaining comments by default.
+   * With this option you can turn that off.
+   */
+  skipComments?: boolean;
 
   /**
    * The naming options regarding the generated artefacts.

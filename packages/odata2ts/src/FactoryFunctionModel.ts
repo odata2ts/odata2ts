@@ -14,6 +14,7 @@ export type DigestionOptions = Pick<
   | "entitiesByName"
   | "v2ModelsWithExtraResultsWrapping"
   | "skipEditableModels"
+  | "skipComments"
 >;
 
 /**
@@ -27,7 +28,7 @@ export type DigesterFunction<S extends Schema<any, any>> = (
 
 export type GeneratorFunctionOptions = Pick<
   RunOptions,
-  "skipEditableModels" | "skipIdModels" | "skipOperations" | "v2ModelsWithExtraResultsWrapping"
+  "skipEditableModels" | "skipIdModels" | "skipOperations" | "skipComments" | "v2ModelsWithExtraResultsWrapping"
 >;
 
 export type EntityBasedGeneratorFunction = (

@@ -149,4 +149,23 @@ describe("Model Generator Tests V4", () => {
       disableAutoManagedKey: true,
     });
   });
+
+  test(`${TEST_SUITE_NAME}: model with comments`, async () => {
+    // given one max model
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Guid)
+        .addProp("truth", ODataTypesV4.Boolean, false)
+        .addProp("time", ODataTypesV4.TimeOfDay)
+        .addProp("multipleStrings", `Collection(${ODataTypesV4.String})`)
+    );
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("commentedModel", "entity-with-comments.ts", {
+      skipComments: false,
+      converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
+      propertiesByName: [...["id"].map((name) => ({ name, managed: true }))],
+    });
+  });
 });

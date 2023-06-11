@@ -1864,6 +1864,7 @@ __metadata:
     "@odata2ts/odata-core": ^0.3.7
     "@odata2ts/odata-query-objects": ^0.18.1
     "@odata2ts/odata-service": ^0.15.1
+    "@odata2ts/test-converters": ^0.2.5
     "@types/fs-extra": ^11.0.1
     "@types/jest": ^29.5.2
     "@types/node": ^20.3.0
@@ -1897,7 +1898,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/test-converters@workspace:examples/test-converters":
+"@odata2ts/test-converters@^0.2.5, @odata2ts/test-converters@workspace:examples/test-converters":
   version: 0.0.0-use.local
   resolution: "@odata2ts/test-converters@workspace:examples/test-converters"
   dependencies:
