@@ -1,6 +1,6 @@
+import { EmitModes, Modes, RunOptions } from "../src";
 import { runApp } from "../src/app";
 import * as Generator from "../src/generator";
-import { EmitModes, Modes, RunOptions } from "../src/OptionModel";
 import * as ProjectManager from "../src/project/ProjectManager";
 import { ODataModelBuilderV4 } from "./data-model/builder/v4/ODataModelBuilderV4";
 import { getTestConfig } from "./test.config";

@@ -1,6 +1,7 @@
+import { writeFile } from "fs/promises";
 import * as path from "path";
 
-import { emptyDir, remove, writeFile } from "fs-extra";
+import { emptyDir, remove } from "fs-extra";
 import {
   CompilerOptions,
   ModuleKind,
@@ -11,6 +12,7 @@ import {
   SourceFile,
 } from "ts-morph";
 import load from "tsconfig-loader";
+import ts from "typescript";
 
 import { ProjectFiles } from "../data-model/DataModel";
 import { EmitModes } from "../OptionModel";
@@ -24,7 +26,7 @@ export async function createProjectManager(
   usePrettier: boolean,
   tsConfigPath: string = "tsconfig.json"
 ): Promise<ProjectManager> {
-  const generateDeclarations = [EmitModes.js_dts, EmitModes.dts].includes(emitMode);
+  const generateDeclarations = EmitModes.js_dts === emitMode || EmitModes.dts === emitMode;
   const conf = load({ filename: tsConfigPath });
   const formatter = await createFormatter(outputDir, usePrettier);
 
@@ -71,22 +73,22 @@ function getModuleResolutionKind(
         ? "nodejs"
         : moduleResolution.toLowerCase()
       : undefined;
-  const matchedKey = Object.keys(ModuleResolutionKind).find(
+  const matchedKey = Object.keys(ts.ModuleResolutionKind).find(
     (mk): mk is keyof typeof ModuleResolutionKind => mk.toLowerCase() === modRes
   );
-  return matchedKey ? ModuleResolutionKind[matchedKey] : undefined;
+  return matchedKey ? (ts.ModuleResolutionKind[matchedKey] as ModuleResolutionKind) : undefined;
 }
 
 function getModuleKind(module: string | undefined | Record<string, any>): ModuleKind | undefined {
   const mod = typeof module === "string" ? module.toLowerCase() : undefined;
-  const matchedKey = Object.keys(ModuleKind).find((mk): mk is keyof typeof ModuleKind => mk.toLowerCase() === mod);
-  return matchedKey ? ModuleKind[matchedKey] : undefined;
+  const matchedKey = Object.keys(ts.ModuleKind).find((mk): mk is keyof typeof ModuleKind => mk.toLowerCase() === mod);
+  return matchedKey ? (ts.ModuleKind[matchedKey] as ModuleKind) : undefined;
 }
 
 function getTarget(target: string | undefined | Record<string, any>): ScriptTarget | undefined {
   const t = typeof target === "string" ? target.toLowerCase() : undefined;
-  const matchedKey = Object.keys(ScriptTarget).find((st): st is keyof typeof ScriptTarget => st.toLowerCase() === t);
-  return matchedKey ? ScriptTarget[matchedKey] : undefined;
+  const matchedKey = Object.keys(ts.ScriptTarget).find((st): st is keyof typeof ScriptTarget => st.toLowerCase() === t);
+  return matchedKey ? (ts.ScriptTarget[matchedKey] as ScriptTarget) : undefined;
 }
 
 const STATIC_SERVICE_DIR = "service";
@@ -216,7 +218,7 @@ export class ProjectManager {
       }
     } catch (formattingError) {
       console.error("Formatting failed");
-      await writeFile("error.log", formattingError);
+      await writeFile("error.log", formattingError?.toString() || "no error message!");
       process.exit(99);
     }
   };

@@ -5,10 +5,8 @@ const config: Config.InitialOptions = {
   testEnvironment: "node",
   coverageDirectory: "coverage",
   collectCoverageFrom: ["src/**/*.ts"],
-  globals: {
-    "ts-jest": {
-      tsconfig: "tsconfig.test.json",
-    },
+  transform: {
+    "^.+\\.tsx?$": ["ts-jest", { tsconfig: "tsconfig.test.json" }],
   },
 };
 
