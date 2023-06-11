@@ -1,7 +1,7 @@
-# ##################################################
-# HTTP Tests against Trippin Service
-#
-#
+###
+# Name: Trippin
+# Type: V4 - Read & Write
+# Address: https://services.odata.org/TripPinRESTierService
 # ##################################################
 
 # --- CONFIUGARTION FOR VSCode ---
@@ -81,6 +81,7 @@ Content-Type: {{contentType}}
 {
   "MiddleName": "H."
 }
+
 ###
 # @name update new person
 PUT {{baseUrl}}/People('heineritis')
@@ -89,10 +90,32 @@ Content-Type: application/json
 {
   "Age": 33
 }
-### update person
+
+###
+# @name delete person
 DELETE  {{baseUrl}}/People('heineritis')
 
+###
+# @name get prop
+GET {{baseUrl}}/People('heineritis')/FirstName
 
+###
+# @name update prop => 400
+PUT {{baseUrl}}/People('heineritis')/FirstName
+Content-Type: {{contentType}}
+
+{
+  "value": "Horst"
+}
+
+###
+# @name update prop with raw value => 500
+PUT {{baseUrl}}/People('heineritis')/FirstName/$value
+Content-Type: text/plain
+
+Horst
+
+###
 # --- ASSOCIATIONS ---
 
 ###

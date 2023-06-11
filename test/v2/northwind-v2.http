@@ -1,3 +1,9 @@
+###
+# Name: Northwind
+# Type: V2 - Read Only
+# Address: https://services.odata.org/V2/Northwind/Northwind.svc
+###
+
 # --- METADATA ---
 ### @name metadata
 GET {{rootUrl}}/$metadata
@@ -7,12 +13,16 @@ GET {{rootUrl}}
 
 
 # --- Queries ---
-### @name list products
-GET {{rootUrl}}/Products?$inlinecount=allpages
+### @name list categories
+GET {{rootUrl}}/Categories?$inlinecount=allpages
 Accept: {{contentType}}
 
-### @name filter by price (decimal)
-GET {{rootUrl}}/Products?$inlinecount=allpages&$filter=UnitPrice ge 21.2m
+### @name get one category
+GET {{rootUrl}}/Categories(1)
+Accept: {{contentType}}
+
+### @name list products
+GET {{rootUrl}}/Products?$inlinecount=allpages
 Accept: {{contentType}}
 
 ### @name get product zero
@@ -23,8 +33,19 @@ Accept: {{contentType}}
 GET {{rootUrl}}/Products(666)
 Accept: {{contentType}}
 
+### @name get primitive property
+GET {{rootUrl}}/Products(4)/ProductName
+Accept: {{contentType}}
+
+### @name get raw primitive property
+GET {{rootUrl}}/Products(4)/ProductName/$value
+
 ### @name expanding
 GET {{rootUrl}}/Products(4)?$expand=Category
+Accept: {{contentType}}
+
+### @name expanding collection
+GET {{rootUrl}}/Products(4)?$select=Order_Details&$expand=Order_Details
 Accept: {{contentType}}
 
 ### @name deep expanding
@@ -51,60 +72,6 @@ Accept: {{contentType}}
 GET {{rootUrl}}/Products?$inlinecount=allpages&$filter=Discontinued gt null
 Accept: {{contentType}}
 
-
-# --- Create Entity ---
-### @name create new product
-POST {{rootUrl}}/Products
+### @name filter by price (decimal)
+GET {{rootUrl}}/Products?$inlinecount=allpages&$filter=UnitPrice ge 21.2m
 Accept: {{contentType}}
-Content-Type: {{contentType}}
-
-{
-  "ID": 999,
-  "Description": "Test Description",
-  "Name": "TestName",
-  "Price": "12.88",
-  "Rating": 1,
-  "ReleaseDate": "2022-01-01T00:00:00"
-}
-
-### PATCH doesn't work and merge is not supported by HTTPClient
-### @name update new product
-PATCH {{rootUrl}}/Products(999)
-Accept: {{contentType}}
-Content-Type: {{contentType}}
-
-{
-  "Description": "Test Descriptioning!!!",
-  "Rating": 3
-}
-
-### @name update category association
-PATCH {{rootUrl}}/Products(999)
-Accept: {{contentType}}
-Content-Type: {{contentType}}
-
-{
-  "Category": { uri: "{{rootUrl}}/Categories(1)" }
-}
-
-
-### @name delete new product
-DELETE {{rootUrl}}/Products(999)
-Accept: {{contentType}}
-
-# --- Create Entity With Association ---
-### @name create new product with association
-POST {{rootUrl}}/Products
-Accept: {{contentType}}
-Content-Type: {{contentType}}
-
-{
-  "ID": 999,
-  "Description": "Test Description",
-  "Name": "TestName",
-  "Price": "12.88",
-  "Rating": 1,
-  "ReleaseDate": "2022-01-01T00:00:00",
-  "Category": { ID: 1 }
-}
-}
