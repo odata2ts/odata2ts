@@ -83,9 +83,7 @@ describe("Integration Testing of Service Generation", () => {
     const axiosClientMsgPrefix = "OData server responded with error: ";
     const axiosFailMsg = "The request resource is not found.";
 
-    await expect(() => testService.navToPeople("XXX").query()).rejects.toThrow(
-      new Error(axiosClientMsgPrefix + axiosFailMsg)
-    );
+    await expect(() => testService.navToPeople("XXX").query()).rejects.toThrow(axiosClientMsgPrefix + axiosFailMsg);
 
     // again, but now inspect error in detail
     try {
