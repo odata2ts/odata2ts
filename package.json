@@ -22,6 +22,7 @@
   "devDependencies": {
     "@lerna-lite/cli": "^2.4.1",
     "@lerna-lite/run": "^2.4.1",
+    "@lerna-lite/version": "^2.4.1",
     "@prettier/plugin-xml": "^2.2.0",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.0",
