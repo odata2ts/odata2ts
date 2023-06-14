@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/example-hand-made",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "private": true,
   "publishConfig": {
     "access": "public"
@@ -17,10 +17,10 @@
     "test": "yarn compile && jest --passWithNoTests"
   },
   "dependencies": {
-    "@odata2ts/odata-service": "^0.15.1"
+    "@odata2ts/odata-service": "^0.15.2"
   },
   "devDependencies": {
-    "@odata2ts/odata2ts": "^0.23.1",
+    "@odata2ts/odata2ts": "^0.24.0",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.0",
     "jest": "^29.5.0",

@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.15.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.15.1...@odata2ts/odata-service@0.15.2) (2023-06-14)
+
+**Note:** Version bump only for package @odata2ts/odata-service
+
 ## [0.15.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.15.0...@odata2ts/odata-service@0.15.1) (2023-06-10)
 
 **Note:** Version bump only for package @odata2ts/odata-service
@@ -18,11 +22,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Code Refactoring
 
 * **service:** entity resolver without create & parse key; EntitySetService with its corresponding EntityTypeService ([d2090b1](https://github.com/odata2ts/odata2ts/commit/d2090b16b6a2468ce2e0066454856dedd0f741bf))
+
 * **service:** remove EntityServiceResolver ([f46dfb9](https://github.com/odata2ts/odata2ts/commit/f46dfb97570bf3f45e526e4c3fa299ffaa28e5cd))
 
 ### BREAKING CHANGES
 
 * **service:** Exposed class EntityServiceResolver has been removed; no user impact expected, only for internal use
+
 * **service:** Services representing entity sets have lost the following methods: get, patch, delete. They were all delegated to the corresponding EntityTypeService. Now you directly choose in the beginning whether you want the collection service (by providing no ID parameter) or the entity type (by providing the ID parameter).
 
 ## [0.13.9](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.13.8...@odata2ts/odata-service@0.13.9) (2023-04-18)
