@@ -35,7 +35,7 @@ export function createEntityBasedGenerationTests(
   });
 
   async function generateAndCompare(id: string, fixturePath: string, genOptions?: TestOptions) {
-    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), genOptions);
+    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchemas(), genOptions);
   }
 
   test(`${testSuiteName}: one enum type`, async () => {

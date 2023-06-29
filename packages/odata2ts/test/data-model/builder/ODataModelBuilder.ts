@@ -1,6 +1,6 @@
 import { ComplexType, EntityType, ODataEdmxModelBase, Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
-import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase";
 import { ODataComplexTypeBuilderBase } from "./ODataComplexTypeBuilderBase";
+import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase";
 
 export abstract class ODataModelBuilder<
   M extends ODataEdmxModelBase<S>,
@@ -53,6 +53,10 @@ export abstract class ODataModelBuilder<
 
   public getModel() {
     return this.model;
+  }
+
+  public getSchemas() {
+    return [this.schema];
   }
 
   public getSchema() {

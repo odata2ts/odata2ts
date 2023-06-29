@@ -15,7 +15,7 @@ describe("NamingHelper Tests", function () {
 
   function createHelper(overrideServiceName: boolean = false) {
     const config = deepmerge(TEST_CONFIG, options) as Pick<RunOptions, "allowRenaming" | "naming">;
-    toTest = new NamingHelper(config, SERVICE_NAME, overrideServiceName ? OVERRIDING_SERVICE_NAME : undefined);
+    toTest = new NamingHelper(config, overrideServiceName ? OVERRIDING_SERVICE_NAME : SERVICE_NAME, [SERVICE_NAME]);
   }
 
   beforeEach(() => {
@@ -27,7 +27,8 @@ describe("NamingHelper Tests", function () {
     createHelper();
 
     expect(toTest.getODataServiceName()).toBe(SERVICE_NAME);
-    expect(toTest.getServicePrefix()).toBe(SERVICE_NAME + ".");
+    expect(toTest.includesServicePrefix(SERVICE_NAME + ".Test")).toBeTruthy();
+    expect(toTest.includesServicePrefix("xxx.Test")).toBeFalsy();
 
     expect(toTest.getMainServiceName()).toBe("TrippinService");
     expect(toTest.getFileNames()).toStrictEqual({
@@ -68,7 +69,7 @@ describe("NamingHelper Tests", function () {
     createHelper(true);
 
     expect(toTest.getODataServiceName()).toBe(OVERRIDING_SERVICE_NAME);
-    expect(toTest.getServicePrefix()).toBe(SERVICE_NAME + ".");
+    expect(toTest.includesServicePrefix(SERVICE_NAME + ".Test")).toBeTruthy();
 
     expect(toTest.getFileNames()).toStrictEqual({
       model: `${OVERRIDING_SERVICE_NAME}Model`,

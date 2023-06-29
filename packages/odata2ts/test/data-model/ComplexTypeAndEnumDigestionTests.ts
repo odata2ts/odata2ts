@@ -16,7 +16,7 @@ export function createComplexAndEnumTests() {
 
   function doDigest() {
     const namingHelper = new NamingHelper(runOpts, SERVICE_NAME);
-    return digest(odataBuilder.getSchema(), runOpts, namingHelper);
+    return digest(odataBuilder.getSchemas(), runOpts, namingHelper);
   }
 
   beforeEach(() => {

@@ -55,12 +55,17 @@ export class FixtureComparatorHelper {
     private generate: EntityBasedGeneratorFunctionWithoutVersion
   ) {}
 
-  public async generateAndCompare(id: string, fixturePath: string, schema: Schema<any, any>, options?: TestOptions) {
+  public async generateAndCompare(
+    id: string,
+    fixturePath: string,
+    schemas: Array<Schema<any, any>>,
+    options?: TestOptions
+  ) {
     const sourceFile = project.createSourceFile(id);
     const defaultOpts: TestSettings = options?.naming?.minimalDefaults ? DEFAULT_MIN_OPTIONS : DEFAULT_RUN_OPTIONS;
     const mergedOpts: TestSettings = options ? (deepmerge(defaultOpts, options) as RunOptions) : defaultOpts;
-    const namingHelper = new NamingHelper(mergedOpts, schema.$.Namespace, mergedOpts.serviceName);
-    const dataModel = await this.digest(schema, mergedOpts, namingHelper);
+    const namingHelper = new NamingHelper(mergedOpts, mergedOpts.serviceName || schemas[0].$.Namespace);
+    const dataModel = await this.digest(schemas, mergedOpts, namingHelper);
 
     this.generate(dataModel, sourceFile, mergedOpts, namingHelper);
 
@@ -85,8 +90,8 @@ export class ServiceFixtureComparatorHelper {
     private version: ODataVersions
   ) {}
 
-  public async generateService(schema: Schema<any, any>, project: ProjectManager, namingHelper: NamingHelper) {
-    const dataModel = await this.digest(schema, DEFAULT_RUN_OPTIONS, namingHelper);
+  public async generateService(schemas: Array<Schema<any, any>>, project: ProjectManager, namingHelper: NamingHelper) {
+    const dataModel = await this.digest(schemas, DEFAULT_RUN_OPTIONS, namingHelper);
 
     await generateServices(dataModel, project, this.version, namingHelper);
   }

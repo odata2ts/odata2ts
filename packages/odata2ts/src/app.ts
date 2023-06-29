@@ -31,26 +31,27 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   const dataService = metadataJson["edmx:Edmx"]["edmx:DataServices"][0];
 
   // handling multiple schemas => merge them
-  const schemaRaw = dataService.Schema.reduce(
-    (collector, schema) => ({
-      ...schema,
-      ...collector,
-    }),
-    {} as Schema<any, any>
-  );
+  // const schemaRaw = dataService.Schema.reduce(
+  //   (collector, schema) => ({
+  //     ...schema,
+  //     ...collector,
+  //   }),
+  //   {} as Schema<any, any>
+  // );
   const detectedServiceName =
     dataService.Schema.length === 1
       ? dataService.Schema[0].$.Namespace
       : dataService.Schema.find((schema) => !schema.EntityContainer)?.$.Namespace;
+  const serviceNames = dataService.Schema.map((s) => s.$.Namespace);
 
   // encapsulate the whole naming logic
-  const namingHelper = new NamingHelper(options, detectedServiceName, options.serviceName);
+  const namingHelper = new NamingHelper(options, options.serviceName || detectedServiceName, serviceNames);
   // parse model information from edmx into something we can really work with
   // => that stuff is called dataModel!
   const dataModel =
     version === ODataVersions.V2
-      ? await digestV2(schemaRaw as SchemaV3, options, namingHelper)
-      : await digestV4(schemaRaw as SchemaV4, options, namingHelper);
+      ? await digestV2(dataService.Schema as Array<SchemaV3>, options, namingHelper)
+      : await digestV4(dataService.Schema as Array<SchemaV4>, options, namingHelper);
   // handling the overall generation project
   const project = await createProjectManager(
     namingHelper.getFileNames(),
