@@ -1,4 +1,5 @@
-import { ODataVersion } from "../../../../src/data-model/DataTypeModel";
+import { ODataVersions } from "@odata2ts/odata-core";
+
 import {
   ComplexTypeV3,
   EntityTypeV3,
@@ -12,15 +13,7 @@ import { ODataFunctionBuilderV2 } from "./ODataFunctionBuilderV2";
 
 export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, SchemaV3, EntityTypeV3, ComplexTypeV3> {
   constructor(serviceName: string) {
-    super(serviceName);
-  }
-
-  protected createVersionedModel(): ODataEdmxModelV3 {
-    return this.createModel(ODataVersion.V2);
-  }
-
-  protected createVersionedSchema(): SchemaV3 {
-    return this.createSchema();
+    super(serviceName, ODataVersions.V2);
   }
 
   public addEntitySet(name: string, entityType: string) {
@@ -64,27 +57,27 @@ export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, Sch
     baseType: string | undefined,
     builderFn: (builder: ODataEntityTypeBuilderV2) => void
   ) {
-    if (!this.schema.EntityType) {
-      this.schema.EntityType = [];
+    if (!this.currentSchema.EntityType) {
+      this.currentSchema.EntityType = [];
     }
 
     const builder = new ODataEntityTypeBuilderV2(name, baseType);
     builderFn(builder);
-    this.schema.EntityType.push(builder.getEntityType());
+    this.currentSchema.EntityType.push(builder.getEntityType());
 
     // add or update associations
     const assocs = builder.getAssociations();
     if (assocs.length) {
-      if (!this.schema.Association) {
-        this.schema.Association = [];
+      if (!this.currentSchema.Association) {
+        this.currentSchema.Association = [];
       }
 
       assocs.forEach((assoc) => {
-        const existingAssoc = this.schema.Association!.find((a) => a.$.Name === assoc.$.Name);
+        const existingAssoc = this.currentSchema.Association!.find((a) => a.$.Name === assoc.$.Name);
         if (existingAssoc) {
           existingAssoc.End.push(...assoc.End);
         } else {
-          this.schema.Association!.push(assoc);
+          this.currentSchema.Association!.push(assoc);
         }
       });
     }
@@ -97,13 +90,13 @@ export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, Sch
     baseType: string | undefined,
     builderFn: (builder: ODataComplexTypeBuilderV2) => void
   ) {
-    if (!this.schema.ComplexType) {
-      this.schema.ComplexType = [];
+    if (!this.currentSchema.ComplexType) {
+      this.currentSchema.ComplexType = [];
     }
 
     const builder = new ODataComplexTypeBuilderV2(name, baseType);
     builderFn(builder);
-    this.schema.ComplexType.push(builder.getComplexType());
+    this.currentSchema.ComplexType.push(builder.getComplexType());
 
     return this;
   }
