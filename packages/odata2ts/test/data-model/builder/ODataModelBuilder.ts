@@ -22,6 +22,7 @@ export abstract class ODataModelBuilder<
 
   public addSchema(name: string) {
     this.currentSchema = this.createSchema(name);
+    return this;
   }
 
   public abstract addEntityType(

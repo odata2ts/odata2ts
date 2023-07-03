@@ -142,6 +142,29 @@ export function createEntityBasedGenerationTests(
     });
   });
 
+  test(`${testSuiteName}: multiple namespaces`, async () => {
+    // given one minimal model
+    odataBuilder
+      .addEntityType("Author", undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.Int32).addProp("name", ODataTypesV4.Boolean, true)
+      )
+      .addSchema("myNamespace.Test")
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Int32)
+          .addProp("author", `${SERVICE_NAME}.Author`, false)
+          .addProp("altAuthor", `${SERVICE_NAME}.Author`, true)
+          .addProp("relatedAuthors", `Collection(${SERVICE_NAME}.Author)`)
+      );
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("multiple-namespaces", "entity-relationships.ts", {
+      skipEditableModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
   test(`${testSuiteName}: base class`, async () => {
     // given an entity hierarchy
     odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean));
@@ -155,6 +178,25 @@ export function createEntityBasedGenerationTests(
     // when generating model
     // then match fixture text
     await generateAndCompare("baseClass", "entity-hierarchy.ts", {
+      ...USE_ID_AND_EDITABLE_MODEL,
+      disableAutoManagedKey: true,
+    });
+  });
+
+  test(`${testSuiteName}: base class from different namespace`, async () => {
+    // given an entity hierarchy
+    odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean));
+    odataBuilder.addEntityType("Parent", "GrandParent", (builder) =>
+      builder.addProp("parentalAdvice", ODataTypesV4.Boolean)
+    );
+    odataBuilder.addSchema("myTest.test");
+    odataBuilder.addEntityType("Child", `${SERVICE_NAME}.Parent`, (builder) =>
+      builder.addKeyProp("id2", ODataTypesV4.Boolean).addProp("Ch1ld1shF4n", ODataTypesV4.Boolean)
+    );
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("baseClassDifferentNS", "entity-hierarchy.ts", {
       ...USE_ID_AND_EDITABLE_MODEL,
       disableAutoManagedKey: true,
     });

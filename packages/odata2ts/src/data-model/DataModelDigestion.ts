@@ -260,6 +260,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     return model.baseClasses.reduce(
       ([props, keys, idName, qIdName], bc) => {
         const baseModel = this.dataModel.getModel(bc) || this.dataModel.getComplexType(bc);
+        if (!baseModel) {
+          throw new Error(`BaseModel "${bc}" doesn't exist!`);
+        }
+
         let idNameResult = idName;
         let qIdNameResult = qIdName;
 
