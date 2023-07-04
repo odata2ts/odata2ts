@@ -10,7 +10,7 @@ describe("Trippin: Testing Query Functionality", function () {
   test("entitySet", async () => {
     const expected = `${BASE_URL}/People`;
 
-    const response: HttpResponseModel<ODataCollectionResponseV4<PersonModel>> = await TRIPPIN.navToPeople().query();
+    const response: HttpResponseModel<ODataCollectionResponseV4<PersonModel>> = await TRIPPIN.people().query();
 
     expect(ODATA_CLIENT.lastUrl).toBe(expected);
     expect(ODATA_CLIENT.lastOperation).toBe("GET");
@@ -21,7 +21,7 @@ describe("Trippin: Testing Query Functionality", function () {
     const testId: PersonIdModel = { user: "williams" };
     const expected = `${BASE_URL}/People(UserName='williams')`;
 
-    const response: HttpResponseModel<ODataModelResponseV4<PersonModel>> = await TRIPPIN.navToPeople(testId).query();
+    const response: HttpResponseModel<ODataModelResponseV4<PersonModel>> = await TRIPPIN.people(testId).query();
 
     expect(ODATA_CLIENT.lastUrl).toBe(expected);
     expect(ODATA_CLIENT.lastOperation).toBe("GET");
@@ -31,16 +31,16 @@ describe("Trippin: Testing Query Functionality", function () {
   test("entitySet: query with select", async () => {
     const expected = `${BASE_URL}/People?%24select=UserName%2CLastName%2CAddressInfo`;
 
-    // const response = await TRIPPIN.navToPeople().query((builder) => builder.select("user", "lastName", "addressInfo"));
+    // const response = await TRIPPIN.people().query((builder) => builder.select("user", "lastName", "addressInfo"));
 
-    const response = await TRIPPIN.navToPeople().query((builder) => builder.select("user", "lastName", "addressInfo"));
+    const response = await TRIPPIN.people().query((builder) => builder.select("user", "lastName", "addressInfo"));
     const dataType: Array<SelectedPersonShape> = response?.data?.value;
 
     expect(ODATA_CLIENT.lastUrl).toBe(expected);
   });
 
   test("complex type: query", async () => {
-    await TRIPPIN.navToPeople("tester").navToHomeAddress().query();
+    await TRIPPIN.people("tester").homeAddress().query();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
     expect(ODATA_CLIENT.lastOperation).toBe("GET");
@@ -48,7 +48,7 @@ describe("Trippin: Testing Query Functionality", function () {
   });
 
   test("complex collection: query", async () => {
-    await TRIPPIN.navToPeople("tester").navToAddressInfo().query();
+    await TRIPPIN.people("tester").addressInfo().query();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(ODATA_CLIENT.lastOperation).toBe("GET");

@@ -8,23 +8,23 @@ describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
   const odataClient = new AxiosClient();
 
-  const testService = new TrippinService(odataClient, BASE_URL);
+  const trippinService = new TrippinService(odataClient, BASE_URL);
 
   // skipped, because it breaks the session state
   // => new session id must be chosen
   test.skip("unbound action", async () => {
-    const result = await testService.resetDataSourceAction();
+    const result = await trippinService.resetDataSource();
     expect(result.data).toBe("");
   });
 
   test("unbound function", async () => {
-    const result = await testService.getPersonWithMostFriendsFunction();
+    const result = await trippinService.getPersonWithMostFriends();
     expect(result.data.firstName).toBe("Russell");
     expect(result.data.lastName).toBe("Whyte");
   });
 
   test("unbound function with params", async () => {
-    const result = await testService.getNearestAirportFunction({ lat: 123, lon: 345 });
+    const result = await trippinService.getNearestAirport({ lat: 123, lon: 345 });
     expect(result.data.icaoCode).toBe("ZBAA");
   });
 
@@ -55,7 +55,7 @@ describe("Integration Testing of Service Generation", () => {
       // trips: [],
     };
 
-    const result = await testService.navToPeople("russellwhyte").query();
+    const result = await trippinService.people("russellwhyte").query();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
 
@@ -69,8 +69,8 @@ describe("Integration Testing of Service Generation", () => {
       firstName: "Scott",
       lastName: "Ketchum",
     };
-    const result = await testService
-      .navToPeople("russellwhyte")
+    const result = await trippinService
+      .people("russellwhyte")
       .query((qb) => qb.select("bestFriend", "friends").expand("bestFriend", "friends"));
 
     expect(result.status).toBe(200);
@@ -83,11 +83,11 @@ describe("Integration Testing of Service Generation", () => {
     const axiosClientMsgPrefix = "OData server responded with error: ";
     const axiosFailMsg = "The request resource is not found.";
 
-    await expect(() => testService.navToPeople("XXX").query()).rejects.toThrow(axiosClientMsgPrefix + axiosFailMsg);
+    await expect(() => trippinService.people("XXX").query()).rejects.toThrow(axiosClientMsgPrefix + axiosFailMsg);
 
     // again, but now inspect error in detail
     try {
-      await testService.navToPeople("XXX").query();
+      await trippinService.people("XXX").query();
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
@@ -100,14 +100,14 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("entitySet query", async () => {
-    const result = await testService.navToPeople().query();
+    const result = await trippinService.people().query();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data.value.length).toBe(20);
   });
 
   test("entitySet query people with any Feature 1", async () => {
-    const result = await testService.navToPeople().query((builder, qPerson) => {
+    const result = await trippinService.people().query((builder, qPerson) => {
       return builder
         .count()
         .top(10)
@@ -180,7 +180,7 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("collection of strings", async () => {
-    const result = await testService.navToPeople("russellwhyte").navToAddressInfo().query();
+    const result = await trippinService.people("russellwhyte").addressInfo().query();
 
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
@@ -194,13 +194,13 @@ describe("Integration Testing of Service Generation", () => {
     const complexInput: PersonIdModel = { user: simpleInput };
 
     // simple version
-    let result = testService.navToPeople().createKey(simpleInput);
+    let result = trippinService.people().createKey(simpleInput);
     expect(result).toBe(`People('${simpleResult}')`);
-    expect(testService.navToPeople().parseKey(result)).toBe(simpleInput);
+    expect(trippinService.people().parseKey(result)).toBe(simpleInput);
 
     // complex version
-    result = testService.navToPeople().createKey(complexInput);
+    result = trippinService.people().createKey(complexInput);
     expect(result).toBe(`People(UserName='${simpleResult}')`);
-    expect(testService.navToPeople().parseKey(result)).toStrictEqual(complexInput);
+    expect(trippinService.people().parseKey(result)).toStrictEqual(complexInput);
   });
 });

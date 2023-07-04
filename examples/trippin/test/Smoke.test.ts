@@ -10,10 +10,10 @@ describe("Trippin: Smoke Test", function () {
   test("entitySet", async () => {
     const expected = `${BASE_URL}/People`;
 
-    const toTest = TRIPPIN.navToPeople();
+    const toTest = TRIPPIN.people();
 
     expect(toTest.getPath()).toBe(expected);
-    expect(JSON.stringify(TRIPPIN.navToPeople().getQObject())).toEqual(JSON.stringify(qPerson));
+    expect(JSON.stringify(TRIPPIN.people().getQObject())).toEqual(JSON.stringify(qPerson));
     expect(toTest.getKeySpec().length).toBe(1);
     expect(toTest.getKeySpec()[0].getName()).toEqual("UserName");
   });
@@ -22,7 +22,7 @@ describe("Trippin: Smoke Test", function () {
     const testId = "test";
     const expected = `${BASE_URL}/People('${testId}')`;
 
-    const etService = TRIPPIN.navToPeople(testId);
+    const etService = TRIPPIN.people(testId);
 
     expect(etService.getPath()).toBe(expected);
     expect(JSON.stringify(etService.getQObject())).toEqual(JSON.stringify(qPerson));
@@ -32,37 +32,32 @@ describe("Trippin: Smoke Test", function () {
     const testId: PersonIdModel = { user: "williams" };
     const expected = `${BASE_URL}/People(UserName='williams')`;
 
-    expect(TRIPPIN.navToPeople(testId).getPath()).toBe(expected);
+    expect(TRIPPIN.people(testId).getPath()).toBe(expected);
   });
 
   test("complex type", async () => {
-    const complex = TRIPPIN.navToPeople("tester").navToHomeAddress();
+    const complex = TRIPPIN.people("tester").homeAddress();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
     expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
   });
 
   test("complex collection", async () => {
-    const complex = TRIPPIN.navToPeople("tester").navToAddressInfo();
+    const complex = TRIPPIN.people("tester").addressInfo();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
   });
 
   test("singleton", async () => {
-    const result = TRIPPIN.navToMe();
+    const result = TRIPPIN.me();
 
     expect(result.getPath()).toBe(`${BASE_URL}/Me`);
     expect(JSON.stringify(result.getQObject())).toEqual(JSON.stringify(qPerson));
   });
 
   test("navigation", async () => {
-    const result = TRIPPIN.navToPeople("tester")
-      .navToBestFriend()
-      .navToBestFriend()
-      .navToBestFriend()
-      .navToHomeAddress()
-      .navToCity();
+    const result = TRIPPIN.people("tester").bestFriend().bestFriend().bestFriend().homeAddress().city();
 
     expect(result.getPath()).toBe(`${BASE_URL}/People('tester')/BestFriend/BestFriend/BestFriend/HomeAddress/City`);
   });

@@ -17,23 +17,6 @@ const config: ConfigFileOptions = {
     trippin: {
       source: "resource/trippin.xml",
       output: "build/trippin",
-      naming: {
-        services: {
-          operations: {
-            function: {
-              suffix: "Function",
-            },
-            action: {
-              suffix: "Action",
-            },
-          },
-          relatedServiceGetter: {
-            prefix: "navTo",
-            suffix: "",
-            namingStrategy: NamingStrategies.CAMEL_CASE,
-          },
-        },
-      },
       propertiesByName: [
         {
           name: "UserName",
