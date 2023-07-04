@@ -129,14 +129,36 @@ describe("Config Evaluation Tests", () => {
 
   test("with service config: using base config", () => {
     const testService = { source: "source", output: "output", mode: Modes.models };
-    const opts: ConfigFileOptions = { mode: Modes.qobjects, emitMode: EmitModes.ts, services: { test: testService } };
+    const opts: ConfigFileOptions = {
+      mode: Modes.qobjects,
+      emitMode: EmitModes.ts,
+      converters: ["test"],
+      services: { test: testService },
+    };
     const result = evaluateConfigOptions({}, opts);
 
     expect(result.length).toBe(1);
     expect(result[0]).toStrictEqual({
       ...defaultConfig,
       emitMode: EmitModes.ts,
+      converters: ["test"],
       ...testService,
+    });
+  });
+
+  test("with service config: converters", () => {
+    const testService = { source: "source", output: "output", converters: ["serviceConverters"] };
+    const opts: ConfigFileOptions = {
+      converters: ["baseConverters"],
+      services: { test: testService },
+    };
+    const result = evaluateConfigOptions({}, opts);
+
+    expect(result.length).toBe(1);
+    expect(result[0]).toStrictEqual({
+      ...defaultConfig,
+      ...testService,
+      converters: ["baseConverters", "serviceConverters"],
     });
   });
 
@@ -170,7 +192,7 @@ describe("Config Evaluation Tests", () => {
     });
   });
 
-  test("with service config: CLI options with source ignore service config", () => {
+  test("with service config: CLI options with source ignores service config", () => {
     const cliOpts: CliOptions = { source: "testSource", output: "testOutput" };
     const service = { source: "source", output: "output", mode: Modes.models };
     const baseOpts = {
