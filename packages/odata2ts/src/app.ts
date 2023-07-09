@@ -29,23 +29,21 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   const version = edmxVersion === "1.0" ? ODataVersions.V2 : ODataVersions.V4;
 
   const dataService = metadataJson["edmx:Edmx"]["edmx:DataServices"][0];
+  const schemas = dataService.Schema as Array<SchemaV3 | SchemaV4>;
 
-  // handling multiple schemas => merge them
-  // const schemaRaw = dataService.Schema.reduce(
-  //   (collector, schema) => ({
-  //     ...schema,
-  //     ...collector,
-  //   }),
-  //   {} as Schema<any, any>
-  // );
-  const detectedServiceName =
-    dataService.Schema.length === 1
-      ? dataService.Schema[0].$.Namespace
-      : dataService.Schema.find((schema) => !schema.EntityContainer)?.$.Namespace;
-  const serviceNames = dataService.Schema.map((s) => s.$.Namespace);
+  const detectedSchema = schemas.find((schema) => schema.$.Namespace && schema.EntityType?.length) || schemas[0];
+  const serviceName = options.serviceName || detectedSchema.$.Namespace;
+
+  const namespaces: Array<string> = [];
+  schemas.forEach((schema) => {
+    namespaces.push(schema.$.Namespace);
+    if (schema.$.Alias) {
+      namespaces.push(schema.$.Alias);
+    }
+  });
 
   // encapsulate the whole naming logic
-  const namingHelper = new NamingHelper(options, options.serviceName || detectedServiceName, serviceNames);
+  const namingHelper = new NamingHelper(options, serviceName, namespaces);
   // parse model information from edmx into something we can really work with
   // => that stuff is called dataModel!
   const dataModel =

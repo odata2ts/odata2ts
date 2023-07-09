@@ -17,6 +17,7 @@ export interface Schema<ET extends EntityType, CT extends ComplexType> {
   $: {
     Namespace: string;
     xmlns: string;
+    Alias?: string;
   };
   EntityType?: Array<ET>;
   ComplexType?: Array<CT>;
