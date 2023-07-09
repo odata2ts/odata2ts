@@ -21,7 +21,7 @@ export type DigestionOptions = Pick<
  * Takes an EdmxSchema plus the run options and creates a DataModel.
  */
 export type DigesterFunction<S extends Schema<any, any>> = (
-  schema: S,
+  schema: Array<S>,
   options: DigestionOptions,
   namingHelper: NamingHelper
 ) => Promise<DataModel>;

@@ -29,22 +29,28 @@ export interface NamingHelperSettings extends Pick<RunOptions, "allowRenaming" |
 
 export class NamingHelper {
   private readonly allowModelPropRenaming: boolean;
-  private readonly serviceName: string;
-  private readonly servicePrefix: string;
+  private readonly mainServiceName: string;
+  private readonly servicePrefixes: Array<string>;
   private readonly options: NameSettings;
 
-  constructor(options: NamingHelperSettings, serviceName: string, overridingServiceName?: string) {
+  constructor(options: NamingHelperSettings, mainServiceName: string, serviceNames?: Array<string>) {
     if (!options) {
       throw new Error("NamingHelper: Options must be supplied!");
     }
-    if (!serviceName?.trim()) {
-      throw new Error("NamingHelper: ServicePrefix must be supplied!");
+    if (!mainServiceName?.trim()) {
+      throw new Error("NamingHelper: MainServiceName must be supplied!");
+    }
+
+    if (!serviceNames?.length) {
+      serviceNames = [mainServiceName];
     }
 
     this.allowModelPropRenaming = options.allowRenaming ?? false;
-    this.options = options.naming || {};
-    this.servicePrefix = serviceName + ".";
-    this.serviceName = overridingServiceName || serviceName;
+    this.options = options.naming;
+    this.mainServiceName = mainServiceName;
+    this.servicePrefixes = serviceNames
+      .map((sn) => sn + ".")
+      .sort((a, b) => (a.length === b.length ? 0 : a.length > b.length ? -1 : 1));
   }
 
   /**
@@ -52,8 +58,13 @@ export class NamingHelper {
    *
    * @returns service prefix
    */
-  public getServicePrefix() {
-    return this.servicePrefix;
+  public includesServicePrefix(name: string) {
+    for (let prefix of this.servicePrefixes) {
+      if (name.startsWith(prefix)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -62,7 +73,7 @@ export class NamingHelper {
    * @returns
    */
   public getODataServiceName() {
-    return this.serviceName;
+    return this.mainServiceName;
   }
 
   public getFileNames() {
@@ -74,7 +85,7 @@ export class NamingHelper {
   }
 
   private getFileName(opts?: FileNamingStrategyOption & StandardNamingOptions) {
-    return this.getName(this.serviceName, this.namingFunction(opts?.namingStrategy), opts);
+    return this.getName(this.mainServiceName, this.namingFunction(opts?.namingStrategy), opts);
   }
 
   public getFileNameService(name: string) {
@@ -83,7 +94,8 @@ export class NamingHelper {
   }
 
   public stripServicePrefix(token: string) {
-    return token.replace(this.servicePrefix, "");
+    const found = this.servicePrefixes.find((prefix) => token.startsWith(prefix));
+    return found ? token.replace(found, "") : token;
   }
 
   private namingFunction(strategy: NamingStrategies | undefined) {

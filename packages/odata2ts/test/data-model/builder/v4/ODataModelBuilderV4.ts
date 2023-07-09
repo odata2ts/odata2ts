@@ -1,17 +1,18 @@
+import { ODataVersions } from "@odata2ts/odata-core";
+
 import {
-  NavigationPropertyBinding,
-  Singleton,
-  ODataEdmxModelV4,
-  SchemaV4,
+  ComplexTypeV4,
   EntitySetV4,
   EntityTypeV4,
-  ComplexTypeV4,
+  NavigationPropertyBinding,
+  ODataEdmxModelV4,
+  SchemaV4,
+  Singleton,
 } from "../../../../src/data-model/edmx/ODataEdmxModelV4";
-import { ODataVersion } from "../../../../src/data-model/DataTypeModel";
-import { ODataEntityTypeBuilderV4 } from "./ODataEntityTypeBuilderV4";
-import { ODataComplexTypeBuilderV4 } from "./ODataComplexTypeBuilderV4";
-import { ODataOperationBuilderV4 } from "./ODataOperationBuilderV4";
 import { ODataModelBuilder } from "../ODataModelBuilder";
+import { ODataComplexTypeBuilderV4 } from "./ODataComplexTypeBuilderV4";
+import { ODataEntityTypeBuilderV4 } from "./ODataEntityTypeBuilderV4";
+import { ODataOperationBuilderV4 } from "./ODataOperationBuilderV4";
 
 export interface NavProp {
   path: string;
@@ -24,15 +25,7 @@ export interface NavPropsItem {
 
 export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, SchemaV4, EntityTypeV4, ComplexTypeV4> {
   constructor(serviceName: string) {
-    super(serviceName);
-  }
-
-  protected createVersionedModel(): ODataEdmxModelV4 {
-    return this.createModel(ODataVersion.V4);
-  }
-
-  protected createVersionedSchema(): SchemaV4 {
-    return this.createSchema();
+    super(serviceName, ODataVersions.V4);
   }
 
   private addNavProps(navPropsItem: NavPropsItem, navProps: NavProps) {
@@ -120,13 +113,13 @@ export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, Sch
     baseType: string | undefined,
     builderFn: (builder: ODataEntityTypeBuilderV4) => void
   ) {
-    if (!this.schema.EntityType) {
-      this.schema.EntityType = [];
+    if (!this.currentSchema.EntityType) {
+      this.currentSchema.EntityType = [];
     }
 
     const builder = new ODataEntityTypeBuilderV4(name, baseType);
     builderFn(builder);
-    this.schema.EntityType.push(builder.getEntityType());
+    this.currentSchema.EntityType.push(builder.getEntityType());
 
     return this;
   }
@@ -136,13 +129,13 @@ export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, Sch
     baseType: string | undefined,
     builderFn: (builder: ODataComplexTypeBuilderV4) => void
   ) {
-    if (!this.schema.ComplexType) {
-      this.schema.ComplexType = [];
+    if (!this.currentSchema.ComplexType) {
+      this.currentSchema.ComplexType = [];
     }
 
     const builder = new ODataComplexTypeBuilderV4(name, baseType);
     builderFn(builder);
-    this.schema.ComplexType.push(builder.getComplexType());
+    this.currentSchema.ComplexType.push(builder.getComplexType());
 
     return this;
   }
@@ -153,15 +146,15 @@ export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, Sch
     isBound?: boolean,
     paramBuilder?: (builder: ODataOperationBuilderV4) => void
   ) {
-    if (!this.schema.Function) {
-      this.schema.Function = [];
+    if (!this.currentSchema.Function) {
+      this.currentSchema.Function = [];
     }
 
     const builder = new ODataOperationBuilderV4(name, returnType, isBound);
     if (paramBuilder) {
       paramBuilder(builder);
     }
-    this.schema.Function.push(builder.getOperation());
+    this.currentSchema.Function.push(builder.getOperation());
 
     return this;
   }
@@ -172,15 +165,15 @@ export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, Sch
     isBound?: boolean,
     paramBuilder?: (builder: ODataOperationBuilderV4) => void
   ) {
-    if (!this.schema.Action) {
-      this.schema.Action = [];
+    if (!this.currentSchema.Action) {
+      this.currentSchema.Action = [];
     }
 
     const builder = new ODataOperationBuilderV4(name, returnType, isBound);
     if (paramBuilder) {
       paramBuilder(builder);
     }
-    this.schema.Action.push(builder.getOperation());
+    this.currentSchema.Action.push(builder.getOperation());
 
     return this;
   }

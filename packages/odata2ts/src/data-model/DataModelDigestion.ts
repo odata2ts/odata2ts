@@ -4,6 +4,8 @@ import { DigestionOptions } from "../FactoryFunctionModel";
 import { DataModel } from "./DataModel";
 import { ComplexType as ComplexModelType, DataTypes, ModelType, ODataVersion, PropertyModel } from "./DataTypeModel";
 import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModelBase";
+import { SchemaV3 } from "./edmx/ODataEdmxModelV3";
+import { SchemaV4 } from "./edmx/ODataEdmxModelV4";
 import { NamingHelper } from "./NamingHelper";
 import { ServiceConfigHelper } from "./ServiceConfigHelper";
 
@@ -25,19 +27,22 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   protected constructor(
     protected version: ODataVersion,
-    protected schema: S,
+    protected schemas: Array<S>,
     protected options: DigestionOptions,
     protected namingHelper: NamingHelper,
     converters?: MappedConverterChains
   ) {
     this.dataModel = new DataModel(version, converters);
     this.serviceConfigHelper = new ServiceConfigHelper(options);
-    this.collectModelTypes(this.schema);
+
+    this.collectModelTypes(schemas);
   }
 
   protected abstract getNavigationProps(entityType: ET | ComplexType): Array<Property>;
 
-  protected abstract digestEntityContainer(): void;
+  protected abstract digestOperations(schema: SchemaV3 | SchemaV4): void;
+
+  protected abstract digestEntityContainer(schema: SchemaV3 | SchemaV4): void;
 
   /**
    * Get essential infos about a given odata type from the version specific service variants.
@@ -48,45 +53,54 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   protected abstract mapODataType(type: string): TypeModel;
 
   public async digest(): Promise<DataModel> {
-    this.digestSchema(this.schema);
+    this.digestEntityTypesAndOperations();
+
+    // delegate to version specific entity container digestion
+    this.schemas.forEach((schema) => this.digestEntityContainer(schema));
+
     return this.dataModel;
   }
 
-  private collectModelTypes(schema: Schema<ET, CT>) {
-    const servicePrefix = this.namingHelper.getServicePrefix();
-    schema.EnumType?.forEach((et) => {
-      this.model2Type.set(servicePrefix + et.$.Name, DataTypes.EnumType);
-    });
-    schema.ComplexType?.forEach((ct) => {
-      this.model2Type.set(servicePrefix + ct.$.Name, DataTypes.ComplexType);
-    });
-    schema.EntityType?.forEach((et) => {
-      this.model2Type.set(servicePrefix + et.$.Name, DataTypes.ModelType);
+  private collectModelTypes(schemas: Array<S>) {
+    schemas.forEach((schema) => {
+      const servicePrefix = schema.$.Namespace + ".";
+
+      schema.EnumType?.forEach((et) => {
+        this.model2Type.set(servicePrefix + et.$.Name, DataTypes.EnumType);
+      });
+      schema.ComplexType?.forEach((ct) => {
+        this.model2Type.set(servicePrefix + ct.$.Name, DataTypes.ComplexType);
+      });
+      schema.EntityType?.forEach((et) => {
+        this.model2Type.set(servicePrefix + et.$.Name, DataTypes.ModelType);
+      });
     });
   }
 
-  private digestSchema(schema: Schema<ET, CT>) {
-    // enums
-    if (schema.EnumType) {
-      for (const et of schema.EnumType) {
-        const name = et.$.Name;
-        this.dataModel.addEnum(name, {
-          odataName: name,
-          name: this.namingHelper.getEnumName(name),
-          members: et.Member.map((m) => m.$.Name),
-        });
+  private digestEntityTypesAndOperations() {
+    this.schemas.forEach((schema) => {
+      // enums
+      if (schema.EnumType) {
+        for (const et of schema.EnumType) {
+          const name = et.$.Name;
+          this.dataModel.addEnum(name, {
+            odataName: name,
+            name: this.namingHelper.getEnumName(name),
+            members: et.Member.map((m) => m.$.Name),
+          });
+        }
       }
-    }
 
-    // entity types
-    this.addEntityType(schema.EntityType);
-    // complex types
-    this.addComplexType(schema.ComplexType);
+      // entity types
+      this.addEntityType(schema.EntityType);
+      // complex types
+      this.addComplexType(schema.ComplexType);
+
+      // V4 only: function & action types
+      this.digestOperations(schema);
+    });
 
     this.postProcessModel();
-
-    // delegate to concrete entity container digestion
-    this.digestEntityContainer();
   }
 
   private getBaseModel(model: ComplexType) {
@@ -254,6 +268,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     return model.baseClasses.reduce(
       ([props, keys, idName, qIdName], bc) => {
         const baseModel = this.dataModel.getModel(bc) || this.dataModel.getComplexType(bc);
+        if (!baseModel) {
+          throw new Error(`BaseModel "${bc}" doesn't exist!`);
+        }
+
         let idNameResult = idName;
         let qIdNameResult = qIdName;
 
@@ -297,7 +315,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     // domain object known from service:
     // EntityType, ComplexType or EnumType
-    if (dataType.startsWith(this.namingHelper.getServicePrefix())) {
+    if (this.namingHelper.includesServicePrefix(dataType)) {
       const resultDt = this.model2Type.get(dataType);
       if (!resultDt) {
         throw new Error(`Couldn't determine model type for data type with name '${dataType}'`);
@@ -342,7 +360,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       };
     } else {
       throw new Error(
-        `Unknown type [${dataType}]: Not 'Collection(...)', not '${this.namingHelper.getServicePrefix()}*', not OData type 'Edm.*'`
+        `Unknown type [${dataType}]: Not 'Collection(...)', not OData type 'Edm.*', not starting with one of the namespaces!W`
       );
     }
 

@@ -14,7 +14,7 @@ describe("Function Digestion Test", () => {
   let odataBuilder: ODataModelBuilderV4;
 
   function doDigest() {
-    return digest(odataBuilder.getSchema(), CONFIG, NAMING_HELPER);
+    return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
   }
 
   beforeEach(() => {

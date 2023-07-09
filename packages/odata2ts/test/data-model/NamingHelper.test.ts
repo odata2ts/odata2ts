@@ -15,7 +15,7 @@ describe("NamingHelper Tests", function () {
 
   function createHelper(overrideServiceName: boolean = false) {
     const config = deepmerge(TEST_CONFIG, options) as Pick<RunOptions, "allowRenaming" | "naming">;
-    toTest = new NamingHelper(config, SERVICE_NAME, overrideServiceName ? OVERRIDING_SERVICE_NAME : undefined);
+    toTest = new NamingHelper(config, overrideServiceName ? OVERRIDING_SERVICE_NAME : SERVICE_NAME, [SERVICE_NAME]);
   }
 
   beforeEach(() => {
@@ -27,7 +27,8 @@ describe("NamingHelper Tests", function () {
     createHelper();
 
     expect(toTest.getODataServiceName()).toBe(SERVICE_NAME);
-    expect(toTest.getServicePrefix()).toBe(SERVICE_NAME + ".");
+    expect(toTest.includesServicePrefix(SERVICE_NAME + ".Test")).toBeTruthy();
+    expect(toTest.includesServicePrefix("xxx.Test")).toBeFalsy();
 
     expect(toTest.getMainServiceName()).toBe("TrippinService");
     expect(toTest.getFileNames()).toStrictEqual({
@@ -68,7 +69,7 @@ describe("NamingHelper Tests", function () {
     createHelper(true);
 
     expect(toTest.getODataServiceName()).toBe(OVERRIDING_SERVICE_NAME);
-    expect(toTest.getServicePrefix()).toBe(SERVICE_NAME + ".");
+    expect(toTest.includesServicePrefix(SERVICE_NAME + ".Test")).toBeTruthy();
 
     expect(toTest.getFileNames()).toStrictEqual({
       model: `${OVERRIDING_SERVICE_NAME}Model`,
@@ -128,6 +129,18 @@ describe("NamingHelper Tests", function () {
 
     expect(toTest.stripServicePrefix(SERVICE_NAME + ".test")).toBe("test");
     expect(toTest.stripServicePrefix(SERVICE_NAME + ".B.test")).toBe("B.test");
+  });
+
+  test("stripServicePrefix for multiple namespaces", () => {
+    const namespace1 = "test";
+    const namespace2 = "a*b";
+    const namespace3 = "a*b.ddd";
+    toTest = new NamingHelper(TEST_CONFIG, namespace1, [namespace1, namespace2, namespace3]);
+
+    expect(toTest.stripServicePrefix("ddd")).toBe("ddd");
+    expect(toTest.stripServicePrefix("test")).toBe("test");
+    expect(toTest.stripServicePrefix(namespace2 + ".abab")).toBe("abab");
+    expect(toTest.stripServicePrefix(namespace3 + ".abab")).toBe("abab");
   });
 
   test("disable naming strategy", () => {

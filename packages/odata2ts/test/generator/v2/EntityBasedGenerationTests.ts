@@ -21,7 +21,7 @@ export function createEntityBasedGenerationTests(
   let fixtureComparatorHelper: FixtureComparatorHelper;
 
   async function generateAndCompare(id: string, fixturePath: string, options?: TestOptions) {
-    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchema(), options);
+    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchemas(), options);
   }
 
   beforeAll(async () => {

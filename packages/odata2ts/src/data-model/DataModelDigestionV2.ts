@@ -5,7 +5,7 @@ import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel";
 import { Digester, TypeModel } from "./DataModelDigestion";
 import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
-import { ComplexTypeV3, EntityTypeV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
+import { AssociationEnd, ComplexTypeV3, EntityTypeV3, NavigationProperty, SchemaV3 } from "./edmx/ODataEdmxModelV3";
 import { NamingHelper } from "./NamingHelper";
 
 /**
@@ -15,21 +15,35 @@ import { NamingHelper } from "./NamingHelper";
  * @param options
  * @param namingHelper
  */
-export const digest: DigesterFunction<SchemaV3> = async (schema, options, namingHelper) => {
+export const digest: DigesterFunction<SchemaV3> = async (schemas, options, namingHelper) => {
   const converters = await loadConverters(ODataVersions.V2, options.converters);
 
-  const digester = new DigesterV3(schema, options, namingHelper, converters);
+  const digester = new DigesterV3(schemas, options, namingHelper, converters);
   return digester.digest();
 };
 
 class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
   constructor(
-    schema: SchemaV3,
+    schemas: Array<SchemaV3>,
     options: DigestionOptions,
     namingHelper: NamingHelper,
     converters: MappedConverterChains | undefined
   ) {
-    super(ODataVersion.V2, schema, options, namingHelper, converters);
+    super(ODataVersion.V2, schemas, options, namingHelper, converters);
+  }
+
+  private findAssociationEnd(np: NavigationProperty): AssociationEnd {
+    for (let schema of this.schemas) {
+      if (schema.Association) {
+        const relationship = this.namingHelper.stripServicePrefix(np.$.Relationship);
+        const association = schema.Association?.find((a) => a.$.Name === relationship);
+        const result = association?.End.find((e) => e.$.Role === np.$.ToRole);
+        if (result) {
+          return result;
+        }
+      }
+    }
+    throw new Error(`Association end couldn't be determined for NavigationProperty [${np.$.Name}]`);
   }
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV3): Array<Property> {
@@ -37,13 +51,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
     const et = entityType as EntityTypeV3;
     if (et.NavigationProperty) {
       return et.NavigationProperty.map((np) => {
-        const relationship = this.namingHelper.stripServicePrefix(np.$.Relationship);
-        const association = this.schema.Association?.find((a) => a.$.Name === relationship);
-        const end = association?.End.find((e) => e.$.Role === np.$.ToRole);
-        if (!end) {
-          throw new Error(`Association end couldn't be determined for NavigationProperty [${np.$.Name}]`);
-        }
-
+        const end = this.findAssociationEnd(np);
         const isRequired = end.$.Multiplicity !== "*" && !end.$.Multiplicity.startsWith("0..");
         const isCollection = end.$.Multiplicity !== "1" && !end.$.Multiplicity.endsWith("..1");
 
@@ -60,9 +68,12 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
     return [];
   }
 
-  protected digestEntityContainer() {
-    if (this.schema.EntityContainer && this.schema.EntityContainer.length) {
-      const container = this.schema.EntityContainer[0];
+  // in V2 all we have & need is the FunctionImport: Function & Action elements are only known in V4.
+  protected digestOperations(schema: SchemaV3) {}
+
+  protected digestEntityContainer(schema: SchemaV3) {
+    if (schema.EntityContainer && schema.EntityContainer.length) {
+      const container = schema.EntityContainer[0];
 
       container.FunctionImport?.forEach((funcImport) => {
         const name = this.namingHelper.getFunctionName(funcImport.$.Name);

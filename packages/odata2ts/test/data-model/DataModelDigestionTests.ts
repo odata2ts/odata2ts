@@ -23,7 +23,7 @@ export function createDataModelTests(
 
   async function doDigest() {
     const opts = digestionOptions ? (deepmerge(TEST_CONFIG, digestionOptions) as TestSettings) : TEST_CONFIG;
-    return await digest(odataBuilder.getSchema(), opts, new NamingHelper(opts, SERVICE_NAME));
+    return await digest(odataBuilder.getSchemas(), opts, new NamingHelper(opts, SERVICE_NAME));
   }
 
   beforeEach(() => {

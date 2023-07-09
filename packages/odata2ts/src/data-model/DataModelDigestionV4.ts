@@ -8,34 +8,36 @@ import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
 import { ComplexTypeV4, EntityTypeV4, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4";
 import { NamingHelper } from "./NamingHelper";
 
-export const digest: DigesterFunction<SchemaV4> = async (schema, options, namingHelper) => {
+export const digest: DigesterFunction<SchemaV4> = async (schemas, options, namingHelper) => {
   const converters = await loadConverters(ODataVersions.V2, options.converters);
 
-  const digester = new DigesterV4(schema, options, namingHelper, converters);
+  const digester = new DigesterV4(schemas, options, namingHelper, converters);
   return digester.digest();
 };
 
 class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
   constructor(
-    schema: SchemaV4,
+    schemas: Array<SchemaV4>,
     options: DigestionOptions,
     namingHelper: NamingHelper,
     converters?: MappedConverterChains
   ) {
-    super(ODataVersion.V4, schema, options, namingHelper, converters);
+    super(ODataVersion.V4, schemas, options, namingHelper, converters);
   }
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV4): Array<Property> {
     return (entityType as EntityTypeV4).NavigationProperty || [];
   }
 
-  protected digestEntityContainer() {
+  protected digestOperations(schema: SchemaV4) {
     // functions & actions
-    this.addOperations(this.schema.Function, OperationTypes.Function);
-    this.addOperations(this.schema.Action, OperationTypes.Action);
+    this.addOperations(schema.Function, OperationTypes.Function);
+    this.addOperations(schema.Action, OperationTypes.Action);
+  }
 
-    if (this.schema.EntityContainer && this.schema.EntityContainer.length) {
-      const container = this.schema.EntityContainer[0];
+  protected digestEntityContainer(schema: SchemaV4) {
+    if (schema.EntityContainer && schema.EntityContainer.length) {
+      const container = schema.EntityContainer[0];
 
       container.ActionImport?.forEach((actionImport) => {
         const name = this.namingHelper.getActionName(actionImport.$.Name);

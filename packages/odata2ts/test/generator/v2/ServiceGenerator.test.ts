@@ -32,7 +32,7 @@ describe("Service Generator Tests V2", () => {
   async function doGenerate() {
     const namingHelper = new NamingHelper(runOptions, SERVICE_NAME);
     projectManager = await createProjectManager(namingHelper.getFileNames(), "build", EmitModes.ts, true);
-    const dataModel = await digest(odataBuilder.getSchema(), runOptions, namingHelper);
+    const dataModel = await digest(odataBuilder.getSchemas(), runOptions, namingHelper);
 
     await generateServices(dataModel, projectManager, ODataVersions.V2, namingHelper);
   }

@@ -1,6 +1,9 @@
+import { ODataVersions } from "@odata2ts/odata-core";
+
+import { ODataVersion } from "../../../src/data-model/DataTypeModel";
 import { ComplexType, EntityType, ODataEdmxModelBase, Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
-import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase";
 import { ODataComplexTypeBuilderBase } from "./ODataComplexTypeBuilderBase";
+import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase";
 
 export abstract class ODataModelBuilder<
   M extends ODataEdmxModelBase<S>,
@@ -8,13 +11,19 @@ export abstract class ODataModelBuilder<
   ET extends EntityType,
   CT extends ComplexType
 > {
-  protected schema: S = this.createVersionedSchema();
-  protected model: M = this.createVersionedModel();
+  protected schemas: Array<S> = [];
+  protected currentSchema: S;
+  protected model: ODataEdmxModelBase<Schema<ET, CT>>;
 
-  protected constructor(protected serviceName: string) {}
+  protected constructor(protected serviceName: string, protected version: ODataVersions) {
+    this.currentSchema = this.createSchema(serviceName);
+    this.model = this.createModel(version);
+  }
 
-  protected abstract createVersionedSchema(): S;
-  protected abstract createVersionedModel(): M;
+  public addSchema(name: string) {
+    this.currentSchema = this.createSchema(name);
+    return this;
+  }
 
   public abstract addEntityType(
     name: string,
@@ -27,24 +36,28 @@ export abstract class ODataModelBuilder<
     builderFn: <CTB extends ODataComplexTypeBuilderBase<CT>>(builder: CTB) => void
   ): this;
 
-  protected createSchema(): Schema<ET, CT> {
-    return {
+  protected createSchema(name: string) {
+    const result: Schema<ET, CT> = {
       $: {
-        Namespace: this.serviceName,
+        Namespace: name,
         xmlns: "ignore",
       },
     };
+    const casted = result as unknown as S;
+
+    this.schemas.push(casted);
+    return casted;
   }
-  protected createModel(odataVersion: string): ODataEdmxModelBase<S> {
+  protected createModel(odataVersion: ODataVersions): ODataEdmxModelBase<Schema<ET, CT>> {
     return {
       "edmx:Edmx": {
         $: {
-          Version: odataVersion,
+          Version: odataVersion.toString(),
           "xmlns:edmx": "ignore",
         },
         "edmx:DataServices": [
           {
-            Schema: [this.schema],
+            Schema: this.schemas,
           },
         ],
       },
@@ -55,30 +68,30 @@ export abstract class ODataModelBuilder<
     return this.model;
   }
 
-  public getSchema() {
-    return this.schema;
+  public getSchemas() {
+    return this.schemas;
   }
 
   protected getEntityContainer() {
     // @ts-ignore
-    if (!this.schema.EntityContainer) {
+    if (!this.currentSchema.EntityContainer) {
       // @ts-ignore
-      this.schema.EntityContainer = [
+      this.currentSchema.EntityContainer = [
         {
           $: { Name: "ignore" },
         },
       ];
     }
     // @ts-ignore
-    return this.schema.EntityContainer[0];
+    return this.currentSchema.EntityContainer[0];
   }
 
   public addEnumType(name: string, values: Array<{ name: string; value: number }>) {
-    if (!this.schema.EnumType) {
-      this.schema.EnumType = [];
+    if (!this.currentSchema.EnumType) {
+      this.currentSchema.EnumType = [];
     }
 
-    this.schema.EnumType.push({
+    this.currentSchema.EnumType.push({
       $: {
         Name: name,
       },

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:DataServices>
+    <Schema Namespace="CastingTests1.Namespace" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityType Name="Parent">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+      </EntityType>
+      <EntityType Name="Child" BaseType="CastingTests1.Namespace.Parent">
+      </EntityType>
+      <EntityContainer Name="">
+        <EntitySet Name="Parents" EntityType="CastingTests1.Namespace.Parent" />
+        <EntitySet Name="Children" EntityType="CastingTests1.Namespace.Child" />
+      </EntityContainer>
+    </Schema>
+    <Schema Namespace="CastingTests2.Namespace" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityType Name="Child" BaseType="CastingTests1.Namespace.Parent">
+      </EntityType>
+      <EntityContainer Name="">
+        <EntitySet Name="Children" EntityType="CastingTests2.Namespace.Child" />
+      </EntityContainer>
+    </Schema>
+    <Schema Namespace="" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityType Name="Entity1">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+      </EntityType>
+      <Function Name="F1" IsBound="true">
+        <Parameter Name="bindingParameter" Type="NS1*NS2.Entity3" />
+        <ReturnType Type="Edm.Int32" Nullable="false" />
+      </Function>
+      <Function Name="F2" IsBound="true">
+        <Parameter Name="bindingParameter" Type="Collection(NS1*NS2.Entity3)" />
+        <ReturnType Type="Edm.Int32" Nullable="false" />
+      </Function>
+      <Function Name="F3">
+        <ReturnType Type="Edm.Int32" />
+      </Function>
+      <EntityContainer Name="">
+        <EntitySet Name="Entities" EntityType="NS1*NS2.Entity3" />
+        <Singleton Name="Entity" Type="NS1*NS2.Entity3" />
+        <FunctionImport Name="F3" Function="F3" IncludeInServiceDocument="true" />
+      </EntityContainer>
+      <EntityContainer Name="C1^C2">
+        <EntitySet Name="Entities" EntityType="NS1*NS2.Entity3" />
+        <Singleton Name="Entity" Type="NS1*NS2.Entity3" />
+        <FunctionImport Name="F3" Function="NS1*NS2.F3_12" IncludeInServiceDocument="true" />
+      </EntityContainer>
+      <EntityContainer Name="C1^C3">
+        <EntitySet Name="Entities" EntityType="NS1*NS2.Entity3" />
+        <Singleton Name="Entity" Type="NS1*NS2.Entity3" />
+        <FunctionImport Name="F3" Function="NS1*NS2.F3_12" IncludeInServiceDocument="true" />
+      </EntityContainer>
+    </Schema>
+    <Schema Namespace="NS1" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityType Name="Entity2">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+      </EntityType>
+      <Function Name="F1_1" IsBound="true">
+        <Parameter Name="bindingParameter" Type="NS1*NS2.Entity3" />
+        <ReturnType Type="Edm.Int32" Nullable="false" />
+      </Function>
+      <Function Name="F1_2" IsBound="true">
+        <Parameter Name="bindingParameter" Type="Collection(NS1*NS2.Entity3)" />
+        <ReturnType Type="Edm.Int32" Nullable="false" />
+      </Function>
+      <Function Name="F1_3">
+        <ReturnType Type="Edm.Int32" />
+      </Function>
+      <EntityContainer Name="C1^C2">
+        <EntitySet Name="Entities" EntityType="NS1*NS2.Entity3" />
+        <Singleton Name="Entity" Type="NS1*NS2.Entity3" />
+        <FunctionImport Name="F3" Function="NS1*NS2.F3_12" IncludeInServiceDocument="true" />
+      </EntityContainer>
+      <EntityContainer Name="C1^C3">
+        <EntitySet Name="Entities" EntityType="NS1*NS2.Entity3" />
+        <Singleton Name="Entity" Type="NS1*NS2.Entity3" />
+        <FunctionImport Name="F3" Function="NS1*NS2.F3_12" IncludeInServiceDocument="true" />
+      </EntityContainer>
+    </Schema>
+    <Schema Namespace="NS1*NS2" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityType Name="Entity3">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+      </EntityType>
+      <Function Name="F1_12" IsBound="true">
+        <Parameter Name="bindingParameter" Type="NS1*NS2.Entity3" />
+        <ReturnType Type="Edm.Int32" Nullable="false" />
+      </Function>
+      <Function Name="F2_12" IsBound="true">
+        <Parameter Name="bindingParameter" Type="Collection(NS1*NS2.Entity3)" />
+        <ReturnType Type="Edm.Int32" Nullable="false" />
+      </Function>
+      <Function Name="F3_12">
+        <ReturnType Type="Edm.Int32" />
+      </Function>
+      <EntityContainer Name="C1^C2">
+        <EntitySet Name="Entities" EntityType="NS1*NS2.Entity3" />
+        <Singleton Name="Entity" Type="NS1*NS2.Entity3" />
+        <FunctionImport Name="F3" Function="NS1*NS2.F3_12" IncludeInServiceDocument="true" />
+      </EntityContainer>
+      <EntityContainer Name="C1^C3">
+        <EntitySet Name="Entities" EntityType="NS1*NS2.Entity3" />
+        <Singleton Name="Entity" Type="NS1*NS2.Entity3" />
+        <FunctionImport Name="F3" Function="NS1*NS2.F3_12" IncludeInServiceDocument="true" />
+      </EntityContainer>
+    </Schema>
+    <Schema Namespace="NS1*NS3" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityType Name="Entity1">
+        <Key>
+          <PropertyRef Name="Id" />
+        </Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+      </EntityType>
+      <Function Name="F1_13" IsBound="true">
+        <Parameter Name="bindingParameter" Type="NS1*NS3.Entity1" />
+        <ReturnType Type="Edm.Int32" Nullable="false" />
+      </Function>
+      <Function Name="F2_13" IsBound="true">
+        <Parameter Name="bindingParameter" Type="Collection(NS1*NS3.Entity1)" />
+        <ReturnType Type="Edm.Int32" Nullable="false" />
+      </Function>
+      <Function Name="F3_13">
+        <ReturnType Type="Edm.Int32" />
+      </Function>
+      <EntityContainer Name="">
+        <EntitySet Name="Entities" EntityType="NS1*NS3.Entity1" />
+        <Singleton Name="Entity" Type="NS1*NS3.Entity1" />
+        <FunctionImport Name="F3" Function="NS1*NS3.F3_13" IncludeInServiceDocument="true" />
+      </EntityContainer>
+      <EntityContainer Name="C1">
+        <EntitySet Name="Entities" EntityType="NS1*NS3.Entity1" />
+        <Singleton Name="Entity" Type="NS1*NS3.Entity1" />
+        <FunctionImport Name="F3" Function="NS1*NS3.F3_13" IncludeInServiceDocument="true" />
+      </EntityContainer>
+      <EntityContainer Name="C1^C2">
+        <EntitySet Name="Entities" EntityType="NS1*NS3.Entity1" />
+        <Singleton Name="Entity" Type="NS1*NS3.Entity1" />
+        <FunctionImport Name="F3" Function="F3" IncludeInServiceDocument="true" />
+      </EntityContainer>
+      <EntityContainer Name="C1^C3">
+        <EntitySet Name="Entities" EntityType="NS1*NS3.Entity1" />
+        <Singleton Name="Entity" Type="NS1*NS3.Entity1" />
+        <FunctionImport Name="F3" Function="F3" IncludeInServiceDocument="true" />
+      </EntityContainer>
+    </Schema>
+    <Schema Namespace="NS4" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityContainer Name="C1^C2">
+        <FunctionImport Name="F3" Function="NS5.F3_5" IncludeInServiceDocument="true" />
+      </EntityContainer>
+    </Schema>
+    <Schema Namespace="NS5" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <Function Name="F3_5">
+        <Parameter Name="x" Type="Edm.Int32" />
+        <ReturnType Type="Edm.Int32" />
+      </Function>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
