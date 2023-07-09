@@ -68,6 +68,9 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
     return [];
   }
 
+  // in V2 all we have & need is the FunctionImport: Function & Action elements are only known in V4.
+  protected digestOperations(schema: SchemaV3) {}
+
   protected digestEntityContainer(schema: SchemaV3) {
     if (schema.EntityContainer && schema.EntityContainer.length) {
       const container = schema.EntityContainer[0];

@@ -48,7 +48,9 @@ export class NamingHelper {
     this.allowModelPropRenaming = options.allowRenaming ?? false;
     this.options = options.naming;
     this.mainServiceName = mainServiceName;
-    this.servicePrefixes = serviceNames.map((sn) => sn + ".");
+    this.servicePrefixes = serviceNames
+      .map((sn) => sn + ".")
+      .sort((a, b) => (a.length === b.length ? 0 : a.length > b.length ? -1 : 1));
   }
 
   /**
@@ -92,7 +94,8 @@ export class NamingHelper {
   }
 
   public stripServicePrefix(token: string) {
-    return this.servicePrefixes.reduce((result, prefix) => result.replace(prefix, ""), token);
+    const found = this.servicePrefixes.find((prefix) => token.startsWith(prefix));
+    return found ? token.replace(found, "") : token;
   }
 
   private namingFunction(strategy: NamingStrategies | undefined) {

@@ -29,11 +29,13 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     return (entityType as EntityTypeV4).NavigationProperty || [];
   }
 
-  protected digestEntityContainer(schema: SchemaV4) {
+  protected digestOperations(schema: SchemaV4) {
     // functions & actions
     this.addOperations(schema.Function, OperationTypes.Function);
     this.addOperations(schema.Action, OperationTypes.Action);
+  }
 
+  protected digestEntityContainer(schema: SchemaV4) {
     if (schema.EntityContainer && schema.EntityContainer.length) {
       const container = schema.EntityContainer[0];
 

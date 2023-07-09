@@ -40,6 +40,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   protected abstract getNavigationProps(entityType: ET | ComplexType): Array<Property>;
 
+  protected abstract digestOperations(schema: SchemaV3 | SchemaV4): void;
+
   protected abstract digestEntityContainer(schema: SchemaV3 | SchemaV4): void;
 
   /**
@@ -51,7 +53,11 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   protected abstract mapODataType(type: string): TypeModel;
 
   public async digest(): Promise<DataModel> {
-    this.schemas.forEach((schema) => this.digestSchema(schema));
+    this.digestEntityTypesAndOperations();
+
+    // delegate to version specific entity container digestion
+    this.schemas.forEach((schema) => this.digestEntityContainer(schema));
+
     return this.dataModel;
   }
 
@@ -71,28 +77,30 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     });
   }
 
-  private digestSchema(schema: Schema<ET, CT>) {
-    // enums
-    if (schema.EnumType) {
-      for (const et of schema.EnumType) {
-        const name = et.$.Name;
-        this.dataModel.addEnum(name, {
-          odataName: name,
-          name: this.namingHelper.getEnumName(name),
-          members: et.Member.map((m) => m.$.Name),
-        });
+  private digestEntityTypesAndOperations() {
+    this.schemas.forEach((schema) => {
+      // enums
+      if (schema.EnumType) {
+        for (const et of schema.EnumType) {
+          const name = et.$.Name;
+          this.dataModel.addEnum(name, {
+            odataName: name,
+            name: this.namingHelper.getEnumName(name),
+            members: et.Member.map((m) => m.$.Name),
+          });
+        }
       }
-    }
 
-    // entity types
-    this.addEntityType(schema.EntityType);
-    // complex types
-    this.addComplexType(schema.ComplexType);
+      // entity types
+      this.addEntityType(schema.EntityType);
+      // complex types
+      this.addComplexType(schema.ComplexType);
+
+      // V4 only: function & action types
+      this.digestOperations(schema);
+    });
 
     this.postProcessModel();
-
-    // delegate to concrete entity container digestion
-    this.digestEntityContainer(schema);
   }
 
   private getBaseModel(model: ComplexType) {

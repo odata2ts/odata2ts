@@ -131,6 +131,18 @@ describe("NamingHelper Tests", function () {
     expect(toTest.stripServicePrefix(SERVICE_NAME + ".B.test")).toBe("B.test");
   });
 
+  test("stripServicePrefix for multiple namespaces", () => {
+    const namespace1 = "test";
+    const namespace2 = "a*b";
+    const namespace3 = "a*b.ddd";
+    toTest = new NamingHelper(TEST_CONFIG, namespace1, [namespace1, namespace2, namespace3]);
+
+    expect(toTest.stripServicePrefix("ddd")).toBe("ddd");
+    expect(toTest.stripServicePrefix("test")).toBe("test");
+    expect(toTest.stripServicePrefix(namespace2 + ".abab")).toBe("abab");
+    expect(toTest.stripServicePrefix(namespace3 + ".abab")).toBe("abab");
+  });
+
   test("disable naming strategy", () => {
     options.allowRenaming = false;
     createHelper();
