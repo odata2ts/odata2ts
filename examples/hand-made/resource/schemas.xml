@@ -56,7 +56,7 @@
         <FunctionImport Name="F3" Function="NS1*NS2.F3_12" IncludeInServiceDocument="true" />
       </EntityContainer>
     </Schema>
-    <Schema Namespace="NS1" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+    <Schema Namespace="NS1" xmlns="http://docs.oasis-open.org/odata/ns/edm" Alias="MyAlias">
       <EntityType Name="Entity2">
         <Key>
           <PropertyRef Name="Id" />
@@ -164,5 +164,11 @@
         <ReturnType Type="Edm.Int32" />
       </Function>
     </Schema>
+    <Schema Namespace="NS6" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityContainer Name="xyz">
+        <EntitySet Name="Entities" EntityType="MyAlias.Entity2" />
+      </EntityContainer>
+    </Schema>
+
   </edmx:DataServices>
 </edmx:Edmx>
