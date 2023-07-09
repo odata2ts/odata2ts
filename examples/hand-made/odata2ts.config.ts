@@ -19,6 +19,10 @@ const config: ConfigFileOptions = {
       source: "resource/multiple-schemas2.xml",
       output: "src/generated/multiple-schemas2",
     },
+    schemas: {
+      source: "resource/schemas.xml",
+      output: "src/generated/schemas",
+    },
   },
 };
 
