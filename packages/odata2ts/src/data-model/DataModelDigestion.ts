@@ -3,7 +3,7 @@ import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { DigestionOptions } from "../FactoryFunctionModel";
 import { DataModel } from "./DataModel";
 import { ComplexType as ComplexModelType, DataTypes, ModelType, ODataVersion, PropertyModel } from "./DataTypeModel";
-import { ComplexType, EntityType, Property, Schema } from "./edmx/ODataEdmxModelBase";
+import { ComplexType, EntityType, Property, Schema, TypeDefinition } from "./edmx/ODataEdmxModelBase";
 import { SchemaV3 } from "./edmx/ODataEdmxModelV3";
 import { SchemaV4 } from "./edmx/ODataEdmxModelV4";
 import { NamingHelper } from "./NamingHelper";
@@ -79,6 +79,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   private digestEntityTypesAndOperations() {
     this.schemas.forEach((schema) => {
+      // type definitions: alias for primitive types
+      this.addTypeDefinition(schema.TypeDefinition);
+
       // enums
       if (schema.EnumType) {
         for (const et of schema.EnumType) {
@@ -129,6 +132,16 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       props: props.map(this.mapProp),
       baseProps: [], // postprocess required
     };
+  }
+
+  private addTypeDefinition(types: Array<TypeDefinition> | undefined) {
+    if (!types || !types.length) {
+      return;
+    }
+
+    for (const t of types) {
+      this.dataModel.addTypeDefinition(t.$.Name, t.$.UnderlyingType);
+    }
   }
 
   private addComplexType(models: Array<ComplexType> | undefined) {
@@ -306,15 +319,21 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       throw new Error(`No type information given for property [${p.$.Name}]!`);
     }
 
-    const isCollection = !!p.$.Type.match(/^Collection\(/);
-    const dataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
     const configProp = this.serviceConfigHelper.findConfigPropByName(p.$.Name);
     const name = this.namingHelper.getModelPropName(configProp?.mappedName || p.$.Name);
+    const isCollection = !!p.$.Type.match(/^Collection\(/);
+    let dataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
+    if (this.namingHelper.includesServicePrefix(dataType)) {
+      const dtName = this.namingHelper.stripServicePrefix(dataType);
+      if (this.dataModel.getPrimitiveType(dtName) !== undefined) {
+        dataType = this.dataModel.getPrimitiveType(dtName)!;
+      }
+    }
 
     let result: Pick<PropertyModel, "dataType" | "type" | "typeModule" | "qPath" | "qParam" | "qObject" | "converters">;
 
     // domain object known from service:
-    // EntityType, ComplexType or EnumType
+    // EntityType, ComplexType, EnumType or TypeDefinition
     if (this.namingHelper.includesServicePrefix(dataType)) {
       const resultDt = this.model2Type.get(dataType);
       if (!resultDt) {

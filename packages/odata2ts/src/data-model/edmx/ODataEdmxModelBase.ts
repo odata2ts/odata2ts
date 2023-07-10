@@ -23,6 +23,7 @@ export interface Schema<ET extends EntityType, CT extends ComplexType> {
   ComplexType?: Array<CT>;
   EnumType?: Array<EnumType>;
   EntityContainer?: Array<any>;
+  TypeDefinition?: Array<TypeDefinition>;
 }
 
 export interface EntityContainer<ES = EntitySet> {
@@ -58,9 +59,10 @@ export interface Property {
   $: {
     Name: string;
     Type: string;
-    MaxLength?: number;
     Nullable?: "true" | "false";
+    MaxLength?: number;
     Precision?: number;
+    Scale?: number;
   };
 }
 
@@ -85,5 +87,15 @@ export interface Parameter extends Property {
 export interface ReturnType {
   $: {
     Type: string;
+  };
+}
+
+export interface TypeDefinition {
+  $: {
+    Name: string;
+    UnderlyingType: string;
+    MaxLength?: number;
+    Precision?: number;
+    Scale?: number;
   };
 }

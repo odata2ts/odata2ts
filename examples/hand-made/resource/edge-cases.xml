@@ -14,7 +14,7 @@
           <PropertyRef Name="UserId"/>
         </Key>
         <Property Name="UserId" Type="Edm.String" Nullable="false" MaxLength="12"/>
-        <Property Name="Warehouse" Type="Edm.String" Nullable="false" MaxLength="4"/>
+        <Property Name="Warehouse" Type="SRV.StringType" Nullable="false" MaxLength="4"/>
         <Property Name="Plant" Type="Edm.String" Nullable="false" MaxLength="4"/>
       </EntityType>
       <Function Name="GetParam" IsBound="true">
@@ -84,6 +84,7 @@
         <ReturnType Type="SRV.ZCDS_SCM_HU_PRINT_RESULT"
                     Nullable="false"/>
       </Function>
+      <TypeDefinition Name="StringType" UnderlyingType="Edm.String" />
 
       <EntityContainer Name="Container">
         <EntitySet Name="HandlingUnit" EntityType="SRV.HandlingUnitType">
