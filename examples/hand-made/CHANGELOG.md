@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.3.7...@odata2ts/example-hand-made@0.4.0) (2023-07-10)
+
+### Bug Fixes
+
+* **odata2ts:** use qualified name for bound operations ([#182](https://github.com/odata2ts/odata2ts/issues/182)) ([120c9b8](https://github.com/odata2ts/odata2ts/commit/120c9b807ac209a8eb82b389bc7c21d7df7fe876))
+
+### Features
+
+* **odata2ts:** support for multiple namespaces by merging ([#175](https://github.com/odata2ts/odata2ts/issues/175)) ([db8fd61](https://github.com/odata2ts/odata2ts/commit/db8fd6165c57ceb9e04488789a62f2a5467ecc68))
+* **odata2ts:** support schema alias ([#181](https://github.com/odata2ts/odata2ts/issues/181)) ([e0c04a8](https://github.com/odata2ts/odata2ts/commit/e0c04a83e32d99187652966bb9cc32f36ead3df2))
+* **odata2ts:** support TypeDefinition elements ([#183](https://github.com/odata2ts/odata2ts/issues/183)) ([d77d2cb](https://github.com/odata2ts/odata2ts/commit/d77d2cbf17383dab50d35bb7374e08a83d264db2))
+
 ## [0.3.7](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.3.6...@odata2ts/example-hand-made@0.3.7) (2023-06-14)
 
 **Note:** Version bump only for package @odata2ts/example-hand-made
