@@ -42,6 +42,8 @@ export async function createProjectManager(
     module,
     newLine,
     target,
+    rootDir,
+    rootDirs,
     ...passThrough
   } = conf?.tsConfig.compilerOptions || {};
 
