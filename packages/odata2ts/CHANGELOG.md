@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.25.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.25.0...@odata2ts/odata2ts@0.25.1) (2023-07-10)
+
+### Bug Fixes
+
+* **odata2ts:** duplicate output paths ([#184](https://github.com/odata2ts/odata2ts/issues/184)) ([b55366d](https://github.com/odata2ts/odata2ts/commit/b55366dab8d331ace3c766b4279b5b0cc575aa03))
+
 # [0.25.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.24.0...@odata2ts/odata2ts@0.25.0) (2023-07-10)
 
 ### Bug Fixes
@@ -12,7 +18,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 * **odata2ts:** support for multiple namespaces by merging ([#175](https://github.com/odata2ts/odata2ts/issues/175)) ([db8fd61](https://github.com/odata2ts/odata2ts/commit/db8fd6165c57ceb9e04488789a62f2a5467ecc68))
+
 * **odata2ts:** support schema alias ([#181](https://github.com/odata2ts/odata2ts/issues/181)) ([e0c04a8](https://github.com/odata2ts/odata2ts/commit/e0c04a83e32d99187652966bb9cc32f36ead3df2))
+
 * **odata2ts:** support TypeDefinition elements ([#183](https://github.com/odata2ts/odata2ts/issues/183)) ([d77d2cb](https://github.com/odata2ts/odata2ts/commit/d77d2cbf17383dab50d35bb7374e08a83d264db2))
 
 # [0.24.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.23.1...@odata2ts/odata2ts@0.24.0) (2023-06-14)
