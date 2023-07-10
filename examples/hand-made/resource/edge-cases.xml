@@ -76,6 +76,14 @@
         <ReturnType Type="SRV.ZCDS_SCM_HU_PRINT_RESULT"
                     Nullable="false"/>
       </Function>
+      <Function Name="PrintLabel" IsBound="true">
+        <Parameter Name="_it" Type="SRV.WarehouseType"
+                   Nullable="false"/>
+        <Parameter Name="Printer" Type="SRV.PrinterType" Nullable="false" MaxLength="30"/>
+        <Parameter Name="HuType" Type="SRV.HandlingUnitType" Nullable="false"/>
+        <ReturnType Type="SRV.ZCDS_SCM_HU_PRINT_RESULT"
+                    Nullable="false"/>
+      </Function>
 
       <EntityContainer Name="Container">
         <EntitySet Name="HandlingUnit" EntityType="SRV.HandlingUnitType">

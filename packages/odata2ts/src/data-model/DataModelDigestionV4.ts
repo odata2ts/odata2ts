@@ -198,13 +198,13 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
           : this.namingHelper.getActionName(op.$.Name);
       const qName =
         type === OperationTypes.Function
-          ? this.namingHelper.getQFunctionName(op.$.Name)
-          : this.namingHelper.getQActionName(op.$.Name);
+          ? this.namingHelper.getQFunctionName(op.$.Name, bindingProp)
+          : this.namingHelper.getQActionName(op.$.Name, bindingProp);
       this.dataModel.addOperationType(binding, {
         odataName: op.$.Name,
         name,
         qName,
-        paramsModelName: this.namingHelper.getOperationParamsModelName(op.$.Name),
+        paramsModelName: this.namingHelper.getOperationParamsModelName(op.$.Name, bindingProp),
         type: type,
         parameters: params,
         returnType: returnType,
