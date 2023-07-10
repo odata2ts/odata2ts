@@ -6,7 +6,7 @@ const config: ConfigFileOptions = {
   emitMode: EmitModes.ts,
   prettier: true,
   services: {
-    odata: {
+    edgeCases: {
       serviceName: "example",
       source: "resource/edge-cases.xml",
       output: "src/generated/edge-cases",

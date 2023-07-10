@@ -30,6 +30,7 @@ export class DataModel {
   private enumTypes: { [name: string]: EnumType } = {};
   // combines functions & actions
   private operationTypes: { [binding: string]: Array<OperationType> } = {};
+  private typeDefinitions: { [name: string]: string } = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
 
   constructor(private version: ODataVersion, converters: MappedConverterChains = new Map()) {
@@ -50,6 +51,14 @@ export class DataModel {
 
   public isV4() {
     return this.version === ODataVersion.V4;
+  }
+
+  public addTypeDefinition(name: string, type: string) {
+    this.typeDefinitions[name] = type;
+  }
+
+  public getPrimitiveType(name: string): string | undefined {
+    return this.typeDefinitions[name];
   }
 
   public addModel(name: string, model: ModelType) {
