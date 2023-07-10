@@ -153,8 +153,8 @@ describe("Function Digestion Test", () => {
     expect(result.getOperationTypeByBinding("User")).toMatchObject([
       {
         name: "listAttitudes",
-        qName: "QListAttitudes",
-        paramsModelName: "ListAttitudesParams",
+        qName: "User_QListAttitudes",
+        paramsModelName: "User_ListAttitudesParams",
         type: OperationTypes.Function,
         parameters: [],
         returnType: {

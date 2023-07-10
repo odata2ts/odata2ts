@@ -3,9 +3,9 @@ import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata
 import { EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QBestReview, QBook, QBookId, QFilterReviews, qBook } from "../QTester";
+import { Book_QBestReview, Book_QFilterReviews, QBook, QBookId, qBook } from "../QTester";
 // @ts-ignore
-import { Book, BookId, EditableBook, FilterReviewsParams, Review } from "../TesterModel";
+import { Book, BookId, Book_FilterReviewsParams, EditableBook, Review } from "../TesterModel";
 
 export class BookService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
   ClientType,
@@ -13,8 +13,8 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
   EditableBook,
   QBook
 > {
-  private _qBestReview?: QBestReview;
-  private _qFilterReviews?: QFilterReviews;
+  private _bookQBestReview?: Book_QBestReview;
+  private _bookQFilterReviews?: Book_QFilterReviews;
 
   constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qBook);
@@ -23,26 +23,26 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
   public async bestReview(
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV4<Review>> {
-    if (!this._qBestReview) {
-      this._qBestReview = new QBestReview();
+    if (!this._bookQBestReview) {
+      this._bookQBestReview = new Book_QBestReview();
     }
 
-    const url = this.addFullPath(this._qBestReview.buildUrl());
+    const url = this.addFullPath(this._bookQBestReview.buildUrl());
     const response = await this.client.get(url, requestConfig);
-    return this._qBestReview.convertResponse(response);
+    return this._bookQBestReview.convertResponse(response);
   }
 
   public async filterReviews(
-    params: FilterReviewsParams,
+    params: Book_FilterReviewsParams,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<Review>> {
-    if (!this._qFilterReviews) {
-      this._qFilterReviews = new QFilterReviews();
+    if (!this._bookQFilterReviews) {
+      this._bookQFilterReviews = new Book_QFilterReviews();
     }
 
-    const url = this.addFullPath(this._qFilterReviews.buildUrl(params));
+    const url = this.addFullPath(this._bookQFilterReviews.buildUrl(params));
     const response = await this.client.get(url, requestConfig);
-    return this._qFilterReviews.convertResponse(response);
+    return this._bookQFilterReviews.convertResponse(response);
   }
 }
 

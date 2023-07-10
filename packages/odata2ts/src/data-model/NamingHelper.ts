@@ -5,6 +5,7 @@ import { snakeCase } from "snake-case";
 
 import { FileNamingStrategyOption, NameSettings, NamingStrategies, StandardNamingOptions } from "../NamingModel";
 import { RunOptions } from "../OptionModel";
+import { PropertyModel } from "./DataTypeModel";
 
 function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
   switch (strategy) {
@@ -177,12 +178,13 @@ export class NamingHelper {
       : result;
   }
 
-  public getOperationParamsModelName(name: string) {
+  public getOperationParamsModelName(operationName: string, boundEntity?: PropertyModel | undefined) {
     const settings = this.options.models?.operationParamModels;
-    const result = this.getName(name, this.getModelNamingStrategy(), settings);
-    return settings?.applyModelNaming
+    const result = this.getName(operationName, this.getModelNamingStrategy(), settings);
+    const name = settings?.applyModelNaming
       ? this.getName(result, this.getModelNamingStrategy(), this.options.models)
       : result;
+    return this.getPrefixedName(name, boundEntity);
   }
 
   public getQName(name: string) {
@@ -199,16 +201,18 @@ export class NamingHelper {
     return this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
   }
 
-  public getQFunctionName(name: string) {
+  public getQFunctionName(operationName: string, boundEntity?: PropertyModel | undefined) {
     const opts = this.options.queryObjects?.operations;
-    const result = this.getName(name, this.getQObjectNamingStrategy(), opts?.function || opts);
-    return this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
+    const result = this.getName(operationName, this.getQObjectNamingStrategy(), opts?.function || opts);
+    const name = this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
+    return this.getPrefixedName(name, boundEntity);
   }
 
-  public getQActionName(name: string) {
+  public getQActionName(operationName: string, boundEntity?: PropertyModel | undefined) {
     const opts = this.options.queryObjects?.operations;
-    const result = this.getName(name, this.getQObjectNamingStrategy(), opts?.action || opts);
-    return this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
+    const result = this.getName(operationName, this.getQObjectNamingStrategy(), opts?.action || opts);
+    const name = this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
+    return this.getPrefixedName(name, boundEntity);
   }
 
   public getMainServiceName() {
@@ -233,14 +237,18 @@ export class NamingHelper {
     return opts?.collection?.applyServiceNaming ? this.getName(result, strategy, opts) : result;
   };
 
-  public getFunctionName(name: string) {
-    const opts = this.options.services?.operations;
-    return this.getName(name, this.getOperationNamingStrategy(), opts?.function || opts);
+  private getPrefixedName(name: string, boundEntity: PropertyModel | undefined) {
+    return boundEntity?.type ? boundEntity.type + "_" + name : name;
   }
 
-  public getActionName(name: string) {
+  public getFunctionName(operationName: string) {
     const opts = this.options.services?.operations;
-    return this.getName(name, this.getOperationNamingStrategy(), opts?.action || opts);
+    return this.getName(operationName, this.getOperationNamingStrategy(), opts?.function || opts);
+  }
+
+  public getActionName(operationName: string) {
+    const opts = this.options.services?.operations;
+    return this.getName(operationName, this.getOperationNamingStrategy(), opts?.action || opts);
   }
 
   public getRelatedServiceGetter(name: string) {

@@ -2,7 +2,7 @@ import { QBooleanParam, QBooleanPath, QFunction, QStringParam, QueryObject } fro
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
 
 // @ts-ignore
-import { MinFunctionParams } from "./TesterModel";
+import { Book_MinFunctionParams } from "./TesterModel";
 
 export class QBook extends QueryObject {
   public readonly id = new QBooleanPath(this.withPrefix("id"), booleanToNumberConverter);
@@ -10,7 +10,7 @@ export class QBook extends QueryObject {
 
 export const qBook = new QBook();
 
-export class QMinFunction extends QFunction<MinFunctionParams> {
+export class Book_QMinFunction extends QFunction<Book_MinFunctionParams> {
   private readonly params = [
     new QStringParam("test"),
     new QBooleanParam("optTest", undefined, booleanToNumberConverter),
