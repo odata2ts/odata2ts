@@ -221,8 +221,7 @@ GET {{baseUrl}}/People('russellwhyte')/Trips(0)/Trippin.GetInvolvedPeople
 
 ###
 # @name func bound with params
-GET {{baseUrl}}/People('russellwhyte')/Trippin.GetFriendsTrips(userName='scottketchum')
-
+GET {{rootUrl}}/People('russellwhyte')/Trippin.GetFriendsTrips(userName='scottketchum')
 
 # --- ACTIONS ---
 
