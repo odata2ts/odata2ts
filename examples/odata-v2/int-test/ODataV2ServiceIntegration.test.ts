@@ -12,7 +12,7 @@ import { ODataDemoService } from "../build/odata/ODataDemoService";
  */
 describe("Integration Testing of generated stuff for Sample V2 OData Service", () => {
   const BASE_URL = "https://services.odata.org/V2/OData/OData.svc";
-  const BASE_URL_WITH_SESSION = "https://services.odata.org/V2/(S(203ufo12d3orq1ihzhgbtmhp))/OData/OData.svc";
+  const BASE_URL_WITH_SESSION = "https://services.odata.org/V2/(S(rbtb0hnwoj1obdnxkwhnulwz))/OData/OData.svc";
   const odataClient = new AxiosClient();
 
   const testService = new ODataDemoService(odataClient, BASE_URL);
