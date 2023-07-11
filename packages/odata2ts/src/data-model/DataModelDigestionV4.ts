@@ -31,8 +31,8 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
   protected digestOperations(schema: SchemaV4) {
     // functions & actions
-    this.addOperations(schema.Function, OperationTypes.Function);
-    this.addOperations(schema.Action, OperationTypes.Action);
+    this.addOperations(schema.$.Namespace, schema.Function, OperationTypes.Function);
+    this.addOperations(schema.$.Namespace, schema.Action, OperationTypes.Action);
   }
 
   protected digestEntityContainer(schema: SchemaV4) {
@@ -169,7 +169,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     }
   }
 
-  private addOperations(operations: Array<Operation> | undefined, type: OperationTypes) {
+  private addOperations(namespace: string, operations: Array<Operation> | undefined, type: OperationTypes) {
     if (!operations || !operations.length) {
       return;
     }
@@ -201,7 +201,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
           ? this.namingHelper.getQFunctionName(op.$.Name, bindingProp)
           : this.namingHelper.getQActionName(op.$.Name, bindingProp);
       this.dataModel.addOperationType(binding, {
-        odataName: op.$.Name,
+        odataName: isBound ? `${namespace}.${op.$.Name}` : op.$.Name,
         name,
         qName,
         paramsModelName: this.namingHelper.getOperationParamsModelName(op.$.Name, bindingProp),

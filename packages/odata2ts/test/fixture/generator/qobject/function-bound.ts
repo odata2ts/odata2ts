@@ -17,7 +17,7 @@ export class Book_QMinFunction extends QFunction<Book_MinFunctionParams> {
   ];
 
   constructor() {
-    super("MinFunction");
+    super("Tester.MinFunction");
   }
 
   getParams() {

@@ -28,6 +28,11 @@ describe("Integration Testing of Service Generation", () => {
     expect(result.data.icaoCode).toBe("ZBAA");
   });
 
+  test("bound function", async () => {
+    const result = await trippinService.people("russellwhyte").getFriendsTrips({ userName: "scottketchum" });
+    expect(result.data.value.length).toBe(2);
+  });
+
   test("get entity by id", async () => {
     const expected: PersonModel = {
       user: "russellwhyte",
