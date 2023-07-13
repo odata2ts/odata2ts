@@ -280,8 +280,8 @@ describe("Service Generator Tests V4", () => {
       .addEntityType("Book", undefined, (builder) =>
         builder
           .addKeyProp("ID", ODataTypesV4.Guid)
-          .addProp("author", `${SERVICE_NAME}.Author`)
-          .addProp("relatedAuthors", `Collection(${SERVICE_NAME}.Author)`)
+          .addProp("AUTHOR", `${SERVICE_NAME}.Author`)
+          .addProp("RelatedAuthors", `Collection(${SERVICE_NAME}.Author)`)
       );
 
     // when generating

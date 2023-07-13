@@ -17,7 +17,6 @@ import {
   ComplexType,
   DataTypes,
   EntityContainerModel,
-  EntitySetType,
   FunctionImportType,
   ModelType,
   OperationType,
@@ -25,7 +24,6 @@ import {
   PropertyModel,
   SingletonType,
 } from "../data-model/DataTypeModel";
-import { EntityType } from "../data-model/edmx/ODataEdmxModelBase";
 import { NamingHelper } from "../data-model/NamingHelper";
 import { ProjectManager } from "../project/ProjectManager";
 import { ImportContainer } from "./ImportContainer";
@@ -100,8 +98,8 @@ class ServiceGenerator {
   ): PropsAndOps {
     const result: PropsAndOps = { properties: [], methods: [] };
 
-    Object.values(container.entitySets).forEach(({ name, entityType }) => {
-      result.methods.push(this.generateRelatedServiceGetter(name, entityType, importContainer));
+    Object.values(container.entitySets).forEach(({ name, odataName, entityType }) => {
+      result.methods.push(this.generateRelatedServiceGetter(name, odataName, entityType, importContainer));
     });
 
     Object.values(container.singletons).forEach((singleton) => {
@@ -128,6 +126,7 @@ class ServiceGenerator {
 
   private generateRelatedServiceGetter(
     propName: string,
+    odataPropName: string,
     entityType: ModelType,
     importContainer: ImportContainer,
     currentServiceName?: string
@@ -171,7 +170,7 @@ class ServiceGenerator {
         },
       ],
       statements: [
-        `const fieldName = "${propName}";`,
+        `const fieldName = "${odataPropName}";`,
         'return typeof id === "undefined" || id === null',
         `? new ${collectionName}(this.client, this.getPath(), fieldName)`,
         `: new ${serviceName}(this.client, this.getPath(), new ${idFunctionName}(fieldName).buildUrl(id));`,
@@ -287,7 +286,9 @@ class ServiceGenerator {
         // collection of entity types
         if (prop.dataType === DataTypes.ModelType) {
           const entityType = this.dataModel.getModel(prop.type);
-          result.methods.push(this.generateRelatedServiceGetter(prop.name, entityType, importContainer, serviceName));
+          result.methods.push(
+            this.generateRelatedServiceGetter(prop.name, prop.odataName, entityType, importContainer, serviceName)
+          );
         }
         // collection of primitive or complex types
         else {
