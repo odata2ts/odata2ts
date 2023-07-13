@@ -221,7 +221,7 @@ export interface EntityGenerationOptions {
   /**
    * Configuration of individual properties.
    */
-  // properties?: Array<PropertyGenerationOptions>;
+  properties?: Array<PropertyGenerationOptions>;
 
   // converter: string | Array<string>
 

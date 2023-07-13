@@ -78,7 +78,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
       container.FunctionImport?.forEach((funcImport) => {
         const name = this.namingHelper.getFunctionName(funcImport.$.Name);
         const usePost = funcImport.$["m:HttpMethod"]?.toUpperCase() === "POST";
-        const parameters = funcImport.Parameter?.map(this.mapProp) ?? [];
+        const parameters = funcImport.Parameter?.map((p) => this.mapProp(p)) ?? [];
 
         // TODO: the spec allows for multiple ReturnType elements
         // https://docs.microsoft.com/en-us/openspecs/windows_protocols/mc-csdl/f510f36a-36bf-47f4-ac41-4a0ff921fbfa

@@ -1,6 +1,7 @@
 import { MappedConverterChains } from "@odata2ts/converter-runtime";
 
 import { DigestionOptions } from "../FactoryFunctionModel";
+import { PropertyGenerationOptions } from "../OptionModel";
 import { DataModel } from "./DataModel";
 import { ComplexType as ComplexModelType, DataTypes, ModelType, ODataVersion, PropertyModel } from "./DataTypeModel";
 import { ComplexType, EntityType, Property, Schema, TypeDefinition } from "./edmx/ODataEdmxModelBase";
@@ -129,7 +130,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       odataName,
       editableName,
       baseClasses,
-      props: props.map(this.mapProp),
+      props: props.map((p) => {
+        const epConfig = entityConfig?.properties?.find((ep) => ep.name === p.$.Name);
+        return this.mapProp(p, epConfig);
+      }),
       baseProps: [], // postprocess required
     };
   }
@@ -314,13 +318,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     );
   }
 
-  protected mapProp = (p: Property): PropertyModel => {
+  protected mapProp = (p: Property, entityPropConfig?: PropertyGenerationOptions | undefined): PropertyModel => {
     if (!p.$.Type) {
       throw new Error(`No type information given for property [${p.$.Name}]!`);
     }
 
     const configProp = this.serviceConfigHelper.findConfigPropByName(p.$.Name);
-    const name = this.namingHelper.getModelPropName(configProp?.mappedName || p.$.Name);
+    const name = this.namingHelper.getModelPropName(entityPropConfig?.mappedName || configProp?.mappedName || p.$.Name);
     const isCollection = !!p.$.Type.match(/^Collection\(/);
     let dataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
     if (this.namingHelper.includesServicePrefix(dataType)) {
@@ -333,7 +337,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     let result: Pick<PropertyModel, "dataType" | "type" | "typeModule" | "qPath" | "qParam" | "qObject" | "converters">;
 
     // domain object known from service:
-    // EntityType, ComplexType, EnumType or TypeDefinition
+    // EntityType, ComplexType, EnumType
     if (this.namingHelper.includesServicePrefix(dataType)) {
       const resultDt = this.model2Type.get(dataType);
       if (!resultDt) {
@@ -389,7 +393,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       odataType: p.$.Type,
       required: p.$.Nullable === "false",
       isCollection: isCollection,
-      managed: configProp?.managed,
+      managed: typeof entityPropConfig?.managed !== "undefined" ? entityPropConfig.managed : configProp?.managed,
       ...result,
     };
   };
