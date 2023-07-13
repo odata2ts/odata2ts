@@ -357,4 +357,30 @@ export function createEntityBasedGenerationTests(
       },
     });
   });
+
+  test(`${testSuiteName}: entity & prop manipulation`, async () => {
+    // given an entity with enum props
+    odataBuilder
+      .addEntityType("CATEGORY", undefined, (builder) => {
+        return builder.addKeyProp("ID", ODataTypesV4.Boolean).addProp("version", ODataTypesV4.Int32);
+      })
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder.addKeyProp("ID", ODataTypesV4.Boolean).addProp("address", `${SERVICE_NAME}.LOCATION`)
+      )
+      .addComplexType("LOCATION", undefined, (builder) => builder.addProp("TEST", ODataTypesV4.Boolean));
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("entity-prop-manipulation", "entity-prop-manipulation.ts", {
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+      allowRenaming: false,
+      propertiesByName: [{ name: "ID", mappedName: "id" }],
+      entitiesByName: [
+        { name: "CATEGORY", mappedName: "Category", keys: ["ID", "version"] },
+        { name: ENTITY_NAME, properties: [{ name: "ID", managed: true }] },
+      ],
+    });
+  });
 }
