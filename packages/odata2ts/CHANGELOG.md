@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.26.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.26.0...@odata2ts/odata2ts@0.26.1) (2023-07-13)
+
+### Bug Fixes
+
+* **odata2ts:** correct fieldName for nav props ([#189](https://github.com/odata2ts/odata2ts/issues/189)) ([ec198d4](https://github.com/odata2ts/odata2ts/commit/ec198d48f6770d2c203be2f4e640370170d87f6e))
+
 # [0.26.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.25.1...@odata2ts/odata2ts@0.26.0) (2023-07-13)
 
 ### Bug Fixes

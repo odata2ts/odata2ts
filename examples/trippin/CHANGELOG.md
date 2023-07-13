@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.5](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-trippin@0.5.4...@odata2ts/example-trippin@0.5.5) (2023-07-13)
+
+### Bug Fixes
+
+* **odata2ts:** correct fieldName for nav props ([#189](https://github.com/odata2ts/odata2ts/issues/189)) ([ec198d4](https://github.com/odata2ts/odata2ts/commit/ec198d48f6770d2c203be2f4e640370170d87f6e))
+
 ## [0.5.4](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-trippin@0.5.3...@odata2ts/example-trippin@0.5.4) (2023-07-13)
 
 ### Bug Fixes
