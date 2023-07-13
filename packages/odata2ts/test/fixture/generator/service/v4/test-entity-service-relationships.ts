@@ -22,7 +22,7 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
 
   public author(): AuthorService<ClientType> {
     if (!this._author) {
-      this._author = new AuthorService(this.client, this.getPath(), "author");
+      this._author = new AuthorService(this.client, this.getPath(), "AUTHOR");
     }
 
     return this._author;
@@ -31,7 +31,7 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
   public relatedAuthors(): AuthorCollectionService<ClientType>;
   public relatedAuthors(id: AuthorId): AuthorService<ClientType>;
   public relatedAuthors(id?: AuthorId | undefined) {
-    const fieldName = "relatedAuthors";
+    const fieldName = "RelatedAuthors";
     return typeof id === "undefined" || id === null
       ? new AuthorCollectionService(this.client, this.getPath(), fieldName)
       : new AuthorService(this.client, this.getPath(), new QAuthorId(fieldName).buildUrl(id));

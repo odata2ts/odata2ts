@@ -184,6 +184,14 @@ describe("Integration Testing of Service Generation", () => {
     ]);
   });
 
+  test("deep entitySet query", async () => {
+    const result = await trippinService.people("russellwhyte").trips().query();
+    expect(trippinService.people("russellwhyte").trips().getPath()).toBe(BASE_URL + "/People('russellwhyte')/Trips");
+    expect(result.status).toBe(200);
+    expect(result.data).toBeDefined();
+    expect(result.data.value.length).toBe(3);
+  });
+
   test("collection of strings", async () => {
     const result = await trippinService.people("russellwhyte").addressInfo().query();
 
