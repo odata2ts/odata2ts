@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.4](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-odata-v2@0.3.3...@odata2ts/example-odata-v2@0.3.4) (2023-07-13)
+
+### Bug Fixes
+
+* **int-test:** use new session id for V2 service ([82788a5](https://github.com/odata2ts/odata2ts/commit/82788a5a3d88f646c82b37db680bcf76fc243716))
+
 ## [0.3.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-odata-v2@0.3.2...@odata2ts/example-odata-v2@0.3.3) (2023-07-10)
 
 **Note:** Version bump only for package @odata2ts/example-odata-v2

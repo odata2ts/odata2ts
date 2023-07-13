@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.26.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.25.1...@odata2ts/odata2ts@0.26.0) (2023-07-13)
+
+### Bug Fixes
+
+* **odata2ts:** bound operations with namespace as part of the name ([#187](https://github.com/odata2ts/odata2ts/issues/187)) ([68209f2](https://github.com/odata2ts/odata2ts/commit/68209f2bb5bc16fdaa36e5a3ddef21d72ce8f273))
+
+### Features
+
+* **odata2ts:** allow property configuration via entity ([#188](https://github.com/odata2ts/odata2ts/issues/188)) ([bdb5bef](https://github.com/odata2ts/odata2ts/commit/bdb5bef6d70827e4cc06d8a8b73c6a31edb92a2e))
+
 ## [0.25.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.25.0...@odata2ts/odata2ts@0.25.1) (2023-07-10)
 
 ### Bug Fixes

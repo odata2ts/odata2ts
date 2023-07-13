@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.4](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-trippin@0.5.3...@odata2ts/example-trippin@0.5.4) (2023-07-13)
+
+### Bug Fixes
+
+* **odata2ts:** bound operations with namespace as part of the name ([#187](https://github.com/odata2ts/odata2ts/issues/187)) ([68209f2](https://github.com/odata2ts/odata2ts/commit/68209f2bb5bc16fdaa36e5a3ddef21d72ce8f273))
+
 ## [0.5.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-trippin@0.5.2...@odata2ts/example-trippin@0.5.3) (2023-07-10)
 
 **Note:** Version bump only for package @odata2ts/example-trippin
