@@ -1,4 +1,5 @@
 import { TypeConverterConfig } from "@odata2ts/converter-runtime";
+import { AxiosRequestConfig } from "axios";
 
 import { NameSettings, OverridableNamingOptions } from "./NamingModel";
 
@@ -27,7 +28,25 @@ export enum EmitModes {
  */
 export interface CliOptions {
   /**
-   * The source file to use. Must be an EDMX compliant XML file.
+   * The URL to the root of your OData service. The URL might end in a slash or not, it might also end
+   * in $metadata, but we usually add this for you.
+   *
+   * Specifying the URL is a convenience feature to download the metadata file from the given URL.
+   * You can configure this request via `sourceConfig` option.
+   *
+   * The `source` option must still be specified as it is used to store the downloaded file on your disk.
+   * By default, the file is used once it has been downloaded.
+   */
+  sourceUrl?: string;
+  /**
+   * Downloads the metadata file and overwrites the existing one, if any.
+   *
+   * Only takes effect, if option `sourceUrl` is specified.
+   */
+  refreshFile?: boolean;
+  /**
+   * The source is the file to use (must be an EDMX compliant XML file) or the URL to the
+   * metadata (ROOT_SERVICE/$metadata).
    *
    * If not specified, at least one service must be configured in config file.
    */
@@ -107,15 +126,49 @@ export interface CliOptions {
  * Available options for the actual generation run.
  * Every property is required, except the overriding service name.
  */
-export interface RunOptions extends Required<Omit<ServiceGenerationOptions, "serviceName">> {
-  serviceName?: string;
+export interface RunOptions
+  extends Required<Omit<ServiceGenerationOptions, "serviceName" | "sourceUrl" | "sourceUrlConfig" | "refreshFile">>,
+    Pick<ServiceGenerationOptions, "serviceName" | "sourceUrl" | "sourceUrlConfig" | "refreshFile"> {
   naming: NameSettings;
+}
+
+/**
+ * Configuration options of the request to retrieve the metadata.
+ * Only takes effect if `source` is a URL.
+ */
+export interface UrlSourceConfiguration {
+  /**
+   * Basic auth credentials: the username.
+   * Only takes effect if `password` has also been set.
+   */
+  username?: string;
+  /**
+   * Basic auth credentials: the password.
+   * Only takes effect if `username` has also been set.
+   */
+  password?: string;
+  /**
+   * Custom request configuration.
+   * URL and method `GET` are set by default, but can be overwritten.
+   */
+  custom?: AxiosRequestConfig;
 }
 
 /**
  * Available options for configuration files, i.e. odata2ts.config.ts.
  */
-export interface ConfigFileOptions extends Omit<CliOptions, "source" | "output" | "services"> {
+export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "source" | "output" | "services"> {
+  /**
+   * Configuration options of the request to retrieve the metadata.
+   * Only takes effect if `sourceUrl` is a URL.
+   */
+  sourceUrlConfig?: UrlSourceConfiguration;
+
+  /**
+   * Configuration of each service.
+   *
+   * @example { services: { trippin: { source: "...", ... } }}
+   */
   services?: { [serviceName: string]: ServiceGenerationOptions };
 
   /**
@@ -187,6 +240,7 @@ export interface ConfigFileOptions extends Omit<CliOptions, "source" | "output" 
  */
 export interface ServiceGenerationOptions
   extends Required<Pick<CliOptions, "source" | "output">>,
+    Pick<CliOptions, "sourceUrl" | "refreshFile">,
     Omit<ConfigFileOptions, "services"> {
   /**
    * Configure generation process for EntityTypes and ComplexTypes including their keys and properties.

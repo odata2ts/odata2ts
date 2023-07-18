@@ -3,7 +3,7 @@ import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
 const managedProps = ["createdAt", "createdBy", "modifiedAt", "modifiedBy"];
 
 const config: ConfigFileOptions = {
-  debug: false,
+  debug: true,
   mode: Modes.service,
   emitMode: EmitModes.ts,
   prettier: true,
@@ -16,7 +16,11 @@ const config: ConfigFileOptions = {
   services: {
     catalog: {
       serviceName: "catalog",
-      source: "resource/catalog-srv.xml",
+      source: "http://localhost:4004/admin",
+      sourceUrlConfig: {
+        username: "alice",
+        password: "",
+      },
       output: "src/catalog",
     },
     catV2: {
@@ -26,7 +30,7 @@ const config: ConfigFileOptions = {
     },
     admin: {
       serviceName: "admin",
-      source: "resource/admin-srv.xml",
+      source: "",
       output: "src/admin",
       propertiesByName: [
         ...managedProps.map((name) => ({

@@ -6,8 +6,9 @@ import { parseStringPromise } from "xml2js";
 
 import { runApp } from "./app";
 import { ODataEdmxModelBase } from "./data-model/edmx/ODataEdmxModelBase";
+import { downloadMetadata, storeMetadata } from "./download/";
 import { evaluateConfigOptions } from "./evaluateConfig";
-import { CliOptions, ConfigFileOptions, EmitModes, Modes, RunOptions } from "./OptionModel";
+import { CliOptions, ConfigFileOptions, EmitModes, Modes, RunOptions, UrlSourceConfiguration } from "./OptionModel";
 import { logFilePath } from "./project/logger/logFilePath";
 
 function parseMode(value: string, dummyPrevious: Modes | undefined) {
@@ -45,8 +46,13 @@ function processCliArgs() {
     .version("0.3.0")
     .description("CLI to generate Typescript Interfaces for models of a given OData service.")
     .argument("[services...]", "Run the generation process only for certain services specified in config file", [])
-    .option("-s, --source <metadata.xml>", "Metadata file describing the OData service")
+    .option("-s, --source <url or metadata.xml>", "Path to metadata file")
     .option("-o, --output <path>", "Output location for generated files")
+    .option("-u, --source-url <sourceUrl>", "URL to the root of the OData service")
+    .option(
+      "-f, --refresh-file",
+      "Download metadata again and overwrite existing file (only applies if sourceUrl is specified)"
+    )
     .addOption(
       new Option("-m, --mode <mode>", "What kind of stuff gets generated")
         .choices(Object.values(Modes).filter((t): t is string => isNaN(Number(t))))
@@ -67,8 +73,11 @@ function processCliArgs() {
     )
     .option("-d, --debug", "Verbose debug infos")
     .option("-name, --service-name <serviceName>", "Give the service your own name")
-    .option("-n, --disable-auto-managed-key", "Give the service your own name")
-    .option("-r, --allow-renaming ", "Give the service your own name")
+    .option(
+      "-n, --disable-auto-managed-key",
+      "Don't mark single key props as managed by the server side (not editable)"
+    )
+    .option("-r, --allow-renaming", "Allow that property and entity names may be changed by configured casing")
     .parse(process.argv);
 
   const args = cli.args?.length ? { services: cli.args } : {};
@@ -120,7 +129,8 @@ export class Cli {
 }
 
 async function startServiceGenerationRun(options: RunOptions) {
-  const { source, output, debug, mode, emitMode, prettier, serviceName } = options;
+  const { source, output, sourceUrl, refreshFile, sourceUrlConfig, debug, mode, emitMode, prettier, serviceName } =
+    options;
   console.log("---------------------------");
   console.log("Starting generation process");
 
@@ -128,6 +138,8 @@ async function startServiceGenerationRun(options: RunOptions) {
     console.log("Resolved config:", {
       source,
       output,
+      sourceUrl,
+      refreshFile,
       debug,
       mode: Modes[mode],
       emitMode,
@@ -136,15 +148,32 @@ async function startServiceGenerationRun(options: RunOptions) {
     });
   }
 
-  console.log("Reading file:", source);
+  // evaluate source
   const exists = await pathExists(source);
-  if (!exists) {
+  console.log(`${exists ? "Found" : "Didn't find"} metadata file at: `, source);
+
+  let metadataXml;
+  // download metadata and store on disk
+  if (sourceUrl && (!exists || refreshFile)) {
+    try {
+      metadataXml = await downloadMetadata(sourceUrl, sourceUrlConfig, debug);
+    } catch (e) {
+      console.error(`Failed to load metadata! Message: ${(e as Error)?.message}`);
+      process.exit(10);
+    }
+    metadataXml = await storeMetadata(source, metadataXml, prettier);
+  }
+  // otherwise file must exist
+  else if (!exists) {
     console.error(`Input source [${source}] doesn't exist!`);
     process.exit(2);
   }
+  // read the metadata from file
+  else {
+    console.log("Reading metadata from file:", source);
+    metadataXml = await readFile(source);
+  }
 
-  // read metadata file and convert to JSON
-  const metadataXml = await readFile(source);
   const metadataJson = (await parseStringPromise(metadataXml)) as ODataEdmxModelBase<any>;
   // TODO find out if "1.0" and "4.0" are really correct
   // TODO exit here if no version not suitable version was detected

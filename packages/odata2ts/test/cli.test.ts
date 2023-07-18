@@ -1,12 +1,14 @@
+import axios, { AxiosRequestConfig } from "axios";
 import * as cosmiConfig from "cosmiconfig";
 import type { CosmiconfigResult } from "cosmiconfig/dist/types";
-import fsExtra from "fs-extra";
+import * as fsExtra from "fs-extra";
 
 import { getDefaultConfig } from "../src";
 import { CliOptions, ConfigFileOptions, EmitModes, Modes, RunOptions } from "../src";
 import * as app from "../src/app";
 import { Cli } from "../src/cli";
 
+jest.mock("axios");
 jest.mock("fs-extra");
 jest.mock("../src/app");
 jest.mock("cosmiconfig");
@@ -23,7 +25,9 @@ describe("Cli Test", () => {
     debug: false,
   };
   const CONFIG: RunOptions = { ...getDefaultConfig(), source: "./test/fixture/dummy.xml", output: "./test/fixture" };
+  // const DUMMY_XML = fs.readFileSync("./fixture/dummy.xml", { encoding: "utf8" });
 
+  let axiosSpy: jest.SpyInstance;
   let processExitSpy: jest.SpyInstance;
   let logInfoSpy: jest.SpyInstance;
   let logErrorSpy: jest.SpyInstance;
@@ -56,6 +60,9 @@ describe("Cli Test", () => {
     // mock program arguments
     process.argv = STANDARD_ARGS;
 
+    axiosSpy = jest.spyOn(axios, "request").mockImplementation((reqConfig) => {
+      return Promise.resolve({ data: "" });
+    });
     // mock process.exit => would otherwise also exit test run
     processExitSpy = jest.spyOn(process, "exit").mockImplementationOnce(() => {
       throw new Error(EXIT_MSG);
@@ -126,6 +133,39 @@ describe("Cli Test", () => {
     await failBadArgs([...defaultArgs, "--unknown"]);
   });
 
+  test("Test URL source", async () => {
+    const args = ["-s", "http://localhost:3000/api", "-o", CONFIG.output];
+    await expect(runCli(args)).resolves.toBeUndefined();
+
+    expect(process.exit).not.toHaveBeenCalled();
+    expect(axiosSpy).toHaveBeenCalledWith({
+      url: args[1] + "/$metadata",
+      method: "GET",
+    } as AxiosRequestConfig);
+  });
+
+  test("Test URL source with failing request", async () => {
+    // @ts-ignore: simulate failed request
+    axios.request.mockRejectedValueOnce(new Error("Oh No!"));
+
+    const args = ["-s", "http://localhost:3000/api", "-o", CONFIG.output];
+    await expect(runCli(args)).rejects.toThrow();
+
+    expect(logErrorSpy).toHaveBeenCalledWith("Failed to load metadata! Message: Oh No!");
+    expect(process.exit).toHaveBeenCalledWith(10);
+  });
+
+  test("Test URL source with failing request", async () => {
+    // @ts-ignore: simulate failed request
+    axios.request.mockRejectedValueOnce(new Error("Oh No!"));
+
+    const args = ["-s", "http://localhost:3000/api", "-o", CONFIG.output];
+    await expect(runCli(args)).rejects.toThrow();
+
+    expect(logErrorSpy).toHaveBeenCalledWith("Failed to load metadata! Message: Oh No!");
+    expect(process.exit).toHaveBeenCalledWith(10);
+  });
+
   async function testMode(mode: Modes) {
     const args = [...defaultArgs, "-m", Modes[mode]];
     runOptions.mode = mode;
@@ -159,7 +199,7 @@ describe("Cli Test", () => {
     await testEmitMode(EmitModes.ts);
   });
 
-  test("Fail with unknown mode", async () => {
+  test("Fail with unknown emit mode", async () => {
     await failBadArgs([...defaultArgs, "-e", "xxx"]);
   });
 

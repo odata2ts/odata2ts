@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
 
 const config: ConfigFileOptions = {
@@ -16,7 +18,8 @@ const config: ConfigFileOptions = {
       output: "build/v2/odata",
     },
     trippin: {
-      source: "int-test/fixture/v4/trippin.xml",
+      sourceUrl: "https://services.odata.org/TripPinRESTierService/$metadata",
+      source: "tmp/test/v4/trippin-test.xml",
       output: "build/v4/trippin",
       naming: {
         services: {

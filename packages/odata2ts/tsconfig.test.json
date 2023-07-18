@@ -4,6 +4,6 @@
     "types": ["reflect-metadata", "jest"],
     "outDir": "./lib"
   },
-  "include": ["**/*"],
+  "include": ["src", "test"],
   "exclude": ["node_modules", "lib", "build"]
 }

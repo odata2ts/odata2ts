@@ -12,7 +12,6 @@ Authorization: {{me}}
 ###
 # @name CatService Metadata
 GET {{server}}/browse/$metadata
-Authorization: {{me}}
 
 ###
 # @name CatService V2 Metadata
