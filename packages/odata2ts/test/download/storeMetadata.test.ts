@@ -57,6 +57,6 @@ describe("StoreMetadata Test", () => {
   test("prettify first", async () => {
     await storeMetadata(DEFAULT_SOURCE, DEFAULT_INPUT, true);
 
-    expect(prettierSpy).toHaveBeenCalledWith(DEFAULT_INPUT);
+    expect(prettierSpy).toHaveBeenCalledWith(DEFAULT_INPUT, expect.anything());
   });
 });

@@ -3,7 +3,7 @@ import deepmerge from "deepmerge";
 import { NameSettings, NamingStrategies } from "./NamingModel";
 import { EmitModes, Modes, RunOptions } from "./OptionModel";
 
-export type DefaultConfiguration = Omit<RunOptions, "sourceUrl" | "source" | "output">;
+export type DefaultConfiguration = Omit<RunOptions, "sourceUrl" | "source" | "output" | "serviceName">;
 /**
  * The default configuration.
  */
