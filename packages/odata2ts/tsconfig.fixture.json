@@ -1,8 +1,8 @@
 {
-  "extends": "../../tsconfig.settings.json",
+  "extends": "./tsconfig.test.json",
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["test/fixture/generator/**/*"],
+  "include": ["test/**/*"],
   "exclude": ["node_modules", "lib", "build"]
 }

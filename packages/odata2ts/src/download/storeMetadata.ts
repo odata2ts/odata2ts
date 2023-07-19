@@ -18,7 +18,7 @@ export async function storeMetadata(filePath: string, metadataXml: string, prett
     ? prettier.format(
         metadataXml,
         // @ts-ignore: xmlWhitespaceSensitivity is an option of the plugin
-        { xmlWhitespaceSensitivity: "ignore", ...prettierConfig, plugins: ["@prettier/plugin-xml"] }
+        { xmlWhitespaceSensitivity: "ignore", ...prettierConfig, parser: "xml", plugins: ["@prettier/plugin-xml"] }
       )
     : metadataXml;
 
