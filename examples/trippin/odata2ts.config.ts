@@ -15,7 +15,6 @@ const config: ConfigFileOptions = {
   },
   services: {
     trippin: {
-      sourceUrl: "https://services.odata.org/TripPinRESTierService",
       source: "resource/trippin.xml",
       output: "build/trippin",
       propertiesByName: [
@@ -30,18 +29,6 @@ const config: ConfigFileOptions = {
         },
         ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
       ],
-      /*entitiesByName: [
-        {
-          name: "Product",
-          mappedName: "prod666uct",
-          properties: [
-            {
-              name: "ReleaseDate",
-              mappedName: "released",
-            },
-          ],
-        },
-      ],*/
     },
   },
 };
