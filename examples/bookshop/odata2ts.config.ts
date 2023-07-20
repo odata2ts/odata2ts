@@ -16,11 +16,8 @@ const config: ConfigFileOptions = {
   services: {
     catalog: {
       serviceName: "catalog",
-      source: "http://localhost:4004/admin",
-      sourceUrlConfig: {
-        username: "alice",
-        password: "",
-      },
+      sourceUrl: "http://localhost:4004/browse",
+      source: "build/catalog-srv.xml",
       output: "src/catalog",
     },
     catV2: {
@@ -30,7 +27,12 @@ const config: ConfigFileOptions = {
     },
     admin: {
       serviceName: "admin",
-      source: "",
+      sourceUrl: "http://localhost:4004/admin",
+      sourceUrlConfig: {
+        username: "alice",
+        password: "",
+      },
+      source: "build/admin-srv.xml",
       output: "src/admin",
       propertiesByName: [
         ...managedProps.map((name) => ({
