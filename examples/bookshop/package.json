@@ -10,11 +10,11 @@
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
   "scripts": {
-    "build": "yarn clean && yarn generate",
+    "build": "yarn clean",
     "clean": "rimraf build src",
     "compile": "tsc",
     "gen-meta": "cds server/srv/cat-service.cds -2 edmx > resource/catalog-srv.xml && cds server/srv/admin-service.cds -2 edmx > resource/admin-srv.xml ",
-    "generate": "odata2ts",
+    "generate-from-url": "odata2ts",
     "int-test": "jest ./int-test",
     "start": "cds run",
     "type-test": "tsc",

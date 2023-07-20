@@ -1,15 +1,17 @@
 import * as cosmiConfig from "cosmiconfig";
 import type { CosmiconfigResult } from "cosmiconfig/dist/types";
-import fsExtra from "fs-extra";
+import * as fsExtra from "fs-extra";
 
 import { getDefaultConfig } from "../src";
 import { CliOptions, ConfigFileOptions, EmitModes, Modes, RunOptions } from "../src";
 import * as app from "../src/app";
 import { Cli } from "../src/cli";
+import * as downloader from "../src/download";
 
 jest.mock("fs-extra");
-jest.mock("../src/app");
 jest.mock("cosmiconfig");
+jest.mock("../src/app");
+jest.mock("../src/download");
 
 describe("Cli Test", () => {
   const EXIT_MSG = "process.exit was called.";
@@ -23,6 +25,7 @@ describe("Cli Test", () => {
     debug: false,
   };
   const CONFIG: RunOptions = { ...getDefaultConfig(), source: "./test/fixture/dummy.xml", output: "./test/fixture" };
+  // const DUMMY_XML = fs.readFileSync("./fixture/dummy.xml", { encoding: "utf8" });
 
   let processExitSpy: jest.SpyInstance;
   let logInfoSpy: jest.SpyInstance;
@@ -126,6 +129,62 @@ describe("Cli Test", () => {
     await failBadArgs([...defaultArgs, "--unknown"]);
   });
 
+  test("Test URL source", async () => {
+    const url = "http://localhost:3000/api";
+    const args = [...defaultArgs, "-u", url];
+    const testDownload = "test";
+    // @ts-ignore
+    fsExtra.pathExists.mockResolvedValueOnce(false);
+    const downloadSpy = jest.spyOn(downloader, "downloadMetadata").mockResolvedValueOnce(testDownload);
+    const storeSpy = jest.spyOn(downloader, "storeMetadata").mockResolvedValueOnce("");
+
+    await expect(runCli(args)).resolves.toBeUndefined();
+    expect(process.exit).not.toHaveBeenCalled();
+
+    expect(downloadSpy).toHaveBeenCalledWith(url, {}, false);
+    expect(storeSpy).toHaveBeenCalledWith(CONFIG.source, testDownload, false);
+  });
+
+  test("Test URL source with force & debug & prettify", async () => {
+    const url = "http://localhost:3000/api";
+    const args = [...defaultArgs, "-u", url, "-d", "-f", "-p"];
+    const testDownload = "test";
+    const downloadSpy = jest.spyOn(downloader, "downloadMetadata").mockResolvedValueOnce(testDownload);
+    const storeSpy = jest.spyOn(downloader, "storeMetadata").mockResolvedValueOnce("");
+
+    await expect(runCli(args)).resolves.toBeUndefined();
+    expect(process.exit).not.toHaveBeenCalled();
+
+    expect(downloadSpy).toHaveBeenCalledWith(url, {}, true);
+    expect(storeSpy).toHaveBeenCalledWith(CONFIG.source, testDownload, true);
+  });
+
+  test("Test URL source with failing request", async () => {
+    const url = "http://localhost:3000/api";
+    const args = [...defaultArgs, "-u", url, "-f"];
+    const testError = new Error("Oh NO!!!");
+    const downloadSpy = jest.spyOn(downloader, "downloadMetadata").mockRejectedValue(testError);
+    const storeSpy = jest.spyOn(downloader, "storeMetadata").mockResolvedValueOnce("");
+
+    await expect(runCli(args)).rejects.toThrow();
+    expect(logErrorSpy).toHaveBeenCalledWith("Failed to load metadata! Message: " + testError.message);
+    expect(process.exit).toHaveBeenCalledWith(10);
+
+    expect(downloadSpy).toHaveBeenCalledWith(url, {}, false);
+    expect(storeSpy).not.toHaveBeenCalled();
+  });
+
+  // test("Test URL source with failing request", async () => {
+  //   // @ts-ignore: simulate failed request
+  //   axios.request.mockRejectedValueOnce(new Error("Oh No!"));
+  //
+  //   const args = ["-s", "http://localhost:3000/api", "-o", CONFIG.output];
+  //   await expect(runCli(args)).rejects.toThrow();
+  //
+  //   expect(logErrorSpy).toHaveBeenCalledWith("Failed to load metadata! Message: Oh No!");
+  //   expect(process.exit).toHaveBeenCalledWith(10);
+  // });
+
   async function testMode(mode: Modes) {
     const args = [...defaultArgs, "-m", Modes[mode]];
     runOptions.mode = mode;
@@ -159,7 +218,7 @@ describe("Cli Test", () => {
     await testEmitMode(EmitModes.ts);
   });
 
-  test("Fail with unknown mode", async () => {
+  test("Fail with unknown emit mode", async () => {
     await failBadArgs([...defaultArgs, "-e", "xxx"]);
   });
 

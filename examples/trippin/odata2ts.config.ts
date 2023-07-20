@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
 
 const config: ConfigFileOptions = {
   debug: true,
@@ -29,18 +29,6 @@ const config: ConfigFileOptions = {
         },
         ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
       ],
-      /*entitiesByName: [
-        {
-          name: "Product",
-          mappedName: "prod666uct",
-          properties: [
-            {
-              name: "ReleaseDate",
-              mappedName: "released",
-            },
-          ],
-        },
-      ],*/
     },
   },
 };

@@ -5,19 +5,15 @@
 ### ------------------------------------------------------------------------
 # Get service info
 GET {{server}}/browse
-Authorization: {{me}}
-
 
 # --- METADATA ---
 ###
 # @name CatService Metadata
 GET {{server}}/browse/$metadata
-Authorization: {{me}}
 
 ###
 # @name CatService V2 Metadata
 GET {{server}}/v2/browse/$metadata
-Authorization: {{me}}
 
 ###
 # @name AdminService Metadata
@@ -29,19 +25,15 @@ Authorization: {{admin}}
 ###
 # @name Books
 GET {{server}}/browse/Books
-Authorization: {{me}}
 
 ###
 # @name Books V2
 GET {{server}}/v2/browse/Books
-Authorization: {{me}}
 
 ###
 # @name get book
-GET {{server}}/admin/Books(201)
-Authorization: {{admin}}
+GET {{server}}/browse/Books(201)
 
-y
 ###
 # @name get simple prop
 GET {{server}}/admin/Books(201)/title
@@ -51,6 +43,11 @@ Authorization: {{admin}}
 # @name get simple prop v2
 GET {{server}}/v2/admin/Books(201)/title
 Authorization: {{admin}}
+
+###
+# @name get binary
+GET {{server}}/browse/Books(201)/image
+
 
 ### update of field succeeds, but other fields are null then
 # @name update simple prop

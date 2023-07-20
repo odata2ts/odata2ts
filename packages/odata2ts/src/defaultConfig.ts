@@ -3,10 +3,13 @@ import deepmerge from "deepmerge";
 import { NameSettings, NamingStrategies } from "./NamingModel";
 import { EmitModes, Modes, RunOptions } from "./OptionModel";
 
+export type DefaultConfiguration = Omit<RunOptions, "sourceUrl" | "source" | "output" | "serviceName">;
 /**
  * The default configuration.
  */
-const defaultConfig: Omit<RunOptions, "source" | "output"> = {
+const defaultConfig: DefaultConfiguration = {
+  sourceUrlConfig: {},
+  refreshFile: false,
   mode: Modes.all,
   emitMode: EmitModes.js_dts,
   debug: false,
@@ -151,14 +154,14 @@ const minimalNamingConfig: NameSettings = {
 /**
  * Creates a defensive copy of the default config.
  */
-export function getDefaultConfig(): Omit<RunOptions, "source" | "output"> {
+export function getDefaultConfig(): DefaultConfiguration {
   return deepmerge(defaultConfig, {});
 }
 
 /**
  * Creates a defensive copy of the minimal config: minimal in respect to naming.
  */
-export function getMinimalConfig(): Omit<RunOptions, "source" | "output"> {
+export function getMinimalConfig(): DefaultConfiguration {
   const { naming, ...passThrough } = defaultConfig;
   return deepmerge(passThrough, { naming: minimalNamingConfig });
 }

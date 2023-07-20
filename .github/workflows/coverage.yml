@@ -89,4 +89,5 @@ jobs:
         run: |
           yarn start-cap &
           sleep 15
+          yarn generate-from-url &&
           yarn int-test
