@@ -2037,7 +2037,7 @@ __metadata:
   dependencies:
     "@odata2ts/http-client-axios": ^0.8.0
     "@odata2ts/odata-service": ^0.15.2
-    "@odata2ts/odata2ts": ^0.26.1
+    "@odata2ts/odata2ts": ^0.27.0
     "@sap/cds": ">=5.9"
     "@sap/cds-odata-v2-adapter-proxy": ^1.9.21
     "@types/jest": ^29.5.2
@@ -2059,7 +2059,7 @@ __metadata:
   resolution: "@odata2ts/example-hand-made@workspace:examples/hand-made"
   dependencies:
     "@odata2ts/odata-service": ^0.15.2
-    "@odata2ts/odata2ts": ^0.26.1
+    "@odata2ts/odata2ts": ^0.27.0
     "@types/node": ^20.3.0
     rimraf: ^5.0.1
     ts-node: ^10.9.1
@@ -2073,7 +2073,7 @@ __metadata:
   dependencies:
     "@odata2ts/http-client-axios": ^0.8.0
     "@odata2ts/odata-service": ^0.15.2
-    "@odata2ts/odata2ts": ^0.26.1
+    "@odata2ts/odata2ts": ^0.27.0
     "@types/jest": ^29.5.2
     "@types/node": ^20.3.0
     axios: ^0.27.2
@@ -2091,7 +2091,7 @@ __metadata:
   dependencies:
     "@odata2ts/http-client-api": ^0.2.0
     "@odata2ts/odata-service": ^0.15.2
-    "@odata2ts/odata2ts": ^0.26.1
+    "@odata2ts/odata2ts": ^0.27.0
     "@types/jest": ^29.5.2
     "@types/node": ^20.3.0
     jest: ^29.5.0
@@ -2108,7 +2108,7 @@ __metadata:
   dependencies:
     "@odata2ts/http-client-axios": ^0.8.0
     "@odata2ts/odata-service": ^0.15.2
-    "@odata2ts/odata2ts": ^0.26.1
+    "@odata2ts/odata2ts": ^0.27.0
     "@types/jest": ^29.5.2
     "@types/node": ^20.3.0
     axios: ^0.27.2
@@ -2224,7 +2224,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2ts@^0.26.1, @odata2ts/odata2ts@workspace:packages/odata2ts":
+"@odata2ts/odata2ts@^0.27.0, @odata2ts/odata2ts@workspace:packages/odata2ts":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2ts@workspace:packages/odata2ts"
   dependencies:

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-bookshop@0.4.5...@odata2ts/example-bookshop@0.5.0) (2023-07-20)
+
+### Features
+
+* **odata2ts:** metadata download ([#191](https://github.com/odata2ts/odata2ts/issues/191)) ([718058d](https://github.com/odata2ts/odata2ts/commit/718058d4fa93884212ca7e3fe12ac5385a36fecb))
+
 ## [0.4.5](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-bookshop@0.4.4...@odata2ts/example-bookshop@0.4.5) (2023-07-13)
 
 **Note:** Version bump only for package @odata2ts/example-bookshop

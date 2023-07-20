@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.27.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.26.1...@odata2ts/odata2ts@0.27.0) (2023-07-20)
+
+### Features
+
+* **odata2ts:** metadata download ([#191](https://github.com/odata2ts/odata2ts/issues/191)) ([718058d](https://github.com/odata2ts/odata2ts/commit/718058d4fa93884212ca7e3fe12ac5385a36fecb))
+
 ## [0.26.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.26.0...@odata2ts/odata2ts@0.26.1) (2023-07-13)
 
 ### Bug Fixes
