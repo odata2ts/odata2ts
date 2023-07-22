@@ -11,6 +11,7 @@ import { QNumberV2Path } from "./path/v2/QNumberV2Path";
 import { QStringNumberV2Path } from "./path/v2/QStringNumberV2Path";
 import { QStringV2Path } from "./path/v2/QStringV2Path";
 import { QTimeV2Path } from "./path/v2/QTimeV2Path";
+import { QBigNumberPath } from "./path/v4/QBigNumberPath";
 import { QDatePath } from "./path/v4/QDatePath";
 import { QDateTimeOffsetPath } from "./path/v4/QDateTimeOffsetPath";
 import { QGuidPath } from "./path/v4/QGuidPath";
@@ -91,6 +92,13 @@ export class QNumberCollection extends QPrimitiveCollection<number, QNumberPath>
   }
 }
 export const qNumberCollection = new QNumberCollection();
+
+export class QBigNumberCollection extends QPrimitiveCollection<string, QBigNumberPath> {
+  createQPathType(path: string, converter?: ValueConverter<string, any>) {
+    return new QBigNumberPath(path, converter);
+  }
+}
+export const qBigNumberCollection = new QBigNumberCollection();
 
 export class QNumberV2Collection extends QPrimitiveCollection<number, QNumberV2Path> {
   createQPathType(path: string, converter?: ValueConverter<number, any>) {

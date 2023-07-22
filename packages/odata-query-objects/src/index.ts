@@ -21,6 +21,7 @@ export { QNumberParam } from "./param/common/QNumberParam";
 export { QStringParam } from "./param/common/QStringParam";
 export { QEnumParam } from "./param/common/QEnumParam";
 
+export { QBigNumberParam } from "./param/v4/QBigNumberParam";
 export { QGuidParam } from "./param/v4/QGuidParam";
 export { QDateParam } from "./param/v4/QDateParam";
 export { QTimeOfDayParam } from "./param/v4/QTimeOfDayParam";
@@ -46,6 +47,7 @@ export * from "./path/QPathModel";
 
 export { QStringPath } from "./path/v4/QStringPath";
 export { QNumberPath } from "./path/v4/QNumberPath";
+export { QBigNumberPath } from "./path/v4/QBigNumberPath";
 export { QGuidPath } from "./path/v4/QGuidPath";
 export { QDatePath } from "./path/v4/QDatePath";
 export { QDateTimeOffsetPath } from "./path/v4/QDateTimeOffsetPath";
