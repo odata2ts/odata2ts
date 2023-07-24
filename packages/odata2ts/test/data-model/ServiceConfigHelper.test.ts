@@ -12,6 +12,7 @@ describe("ServiceConfigHelper Tests", function () {
       propertiesByName: propsSetting || [],
       skipEditableModels: false,
       v2ModelsWithExtraResultsWrapping: false,
+      v4BigNumberAsString: false,
       skipComments: true,
     });
   }
@@ -24,6 +25,7 @@ describe("ServiceConfigHelper Tests", function () {
       propertiesByName: [],
       skipEditableModels: false,
       v2ModelsWithExtraResultsWrapping: false,
+      v4BigNumberAsString: false,
       skipComments: true,
     });
   }

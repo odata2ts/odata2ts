@@ -383,4 +383,20 @@ export function createEntityBasedGenerationTests(
       ],
     });
   });
+
+  test(`${testSuiteName}: big numbers as string in v4`, async () => {
+    // given one max model
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Guid)
+        .addProp("price", ODataTypesV4.Decimal, false)
+        .addProp("charCount", ODataTypesV4.Int64)
+    );
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("big-number-v4", "entity-big-number-v4.ts", {
+      v4BigNumberAsString: true,
+    });
+  });
 }

@@ -13,6 +13,7 @@ export type DigestionOptions = Pick<
   | "propertiesByName"
   | "entitiesByName"
   | "v2ModelsWithExtraResultsWrapping"
+  | "v4BigNumberAsString"
   | "skipEditableModels"
   | "skipComments"
 >;

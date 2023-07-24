@@ -117,19 +117,22 @@ export interface CliOptions {
    * Model / class names are formatted with PascalCase; property, param, and operation names with camelCase.
    *
    * The naming configuration allows to control this and other naming related settings.
-   * Note: Even if renaming is disabled, model prefixing / suffing still applies.
+   * Note: Even if renaming is disabled, model prefixing / suffixing still applies.
    */
   allowRenaming?: boolean;
-}
-
-/**
- * Available options for the actual generation run.
- * Every property is required, except the overriding service name.
- */
-export interface RunOptions
-  extends Required<Omit<ServiceGenerationOptions, "serviceName" | "sourceUrl" | "sourceUrlConfig" | "refreshFile">>,
-    Pick<ServiceGenerationOptions, "serviceName" | "sourceUrl" | "sourceUrlConfig" | "refreshFile"> {
-  naming: NameSettings;
+  /**
+   * Numbers of type `Edm.Int64` and `Edm.Decimal` are represented as `number` in V4.
+   * However, these numbers might not fit into JS' number type, which might result in precision loss.
+   *
+   * OData offers a special IEEE754 format option to get those types as `string` instead to prevent any
+   * precision loss. So if you're handling very large or very small numbers (JS roughly supports 15 digits),
+   * then you should use this option and, probably, also an appropriate converter (see available converters).
+   *
+   * Activating this option affects the type generation and will use `string` for both mentioned types.
+   * All requests are executed with the "accept" header set to "application/json;IEEE754Compatible=true".
+   * Additionally, when sending data the very same value will be set for the "content-type" header.
+   */
+  v4BigNumberAsString?: boolean;
 }
 
 /**
@@ -250,6 +253,16 @@ export interface ServiceGenerationOptions
    * Configure generation process for individual properties based on their name.
    */
   propertiesByName?: Array<PropertyGenerationOptions>;
+}
+
+/**
+ * Available options for the actual generation run.
+ * Every property is required, except the overriding service name.
+ */
+export interface RunOptions
+  extends Required<Omit<ServiceGenerationOptions, "serviceName" | "sourceUrl" | "sourceUrlConfig" | "refreshFile">>,
+    Pick<ServiceGenerationOptions, "serviceName" | "sourceUrl" | "sourceUrlConfig" | "refreshFile"> {
+  naming: NameSettings;
 }
 
 /**
