@@ -54,10 +54,9 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
       expect(e.message).toContain(axiosFailMsg);
       expect(e.cause).toBeDefined();
       expect(e.status).toBe(404);
-      const axiosError = e.cause as AxiosError;
-      expect(axiosError?.response).toBeDefined();
-      expect(axiosError?.response?.status).toBe(404);
-      expect(axiosError?.response?.data).toStrictEqual({
+      expect(e.axiosError?.response).toBeDefined();
+      expect(e.axiosError?.response?.status).toBe(404);
+      expect(e.axiosError?.response?.data).toStrictEqual({
         error: {
           code: "404",
           message: axiosFailMsg,
