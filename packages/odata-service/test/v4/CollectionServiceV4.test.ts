@@ -28,6 +28,13 @@ describe("CollectionService V4 Tests", () => {
 
   commonCollectionTests(odataClient, stringConstructor, enumConstructor);
 
+  test("collection: big numbers", async () => {
+    new CollectionServiceV4(odataClient, BASE_PATH, NAME_STRING, new QStringCollection());
+    expect(odataClient.bigNumberAsString).toBe(false);
+    new CollectionServiceV4(odataClient, BASE_PATH, NAME_STRING, new QStringCollection(), true);
+    expect(odataClient.bigNumberAsString).toBe(true);
+  });
+
   test("collection: query typing", async () => {
     const stringService = stringConstructor(BASE_PATH, NAME_STRING);
     const enumService = enumConstructor(BASE_PATH, NAME_ENUM);

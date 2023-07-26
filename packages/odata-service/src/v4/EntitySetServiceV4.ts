@@ -33,9 +33,10 @@ export abstract class EntitySetServiceV4<
     basePath: string,
     name: string,
     qModel: Q,
-    protected idFunction: QFunction<EIdType>
+    protected idFunction: QFunction<EIdType>,
+    bigNumbersAsString?: boolean
   ) {
-    super(client, basePath, name, qModel);
+    super(client, basePath, name, qModel, bigNumbersAsString);
   }
 
   /**

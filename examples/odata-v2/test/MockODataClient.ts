@@ -12,6 +12,7 @@ export class MockODataClient implements ODataHttpClient<MockRequestConfig> {
   public lastUrl?: string;
   public lastData?: any;
   public lastOperation?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "MERGE";
+  public bigNumbersAsString?: boolean;
 
   post<ResponseModel>(url: string, data: any, requestConfig?: MockRequestConfig): ODataResponse<ResponseModel> {
     this.lastUrl = url;
@@ -69,5 +70,9 @@ export class MockODataClient implements ODataHttpClient<MockRequestConfig> {
       data: null,
     };
     return Promise.resolve(genericResponse);
+  }
+
+  retrieveBigNumbersAsString(enabled: boolean): void {
+    this.bigNumbersAsString = enabled;
   }
 }

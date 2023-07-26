@@ -11,12 +11,13 @@ describe("ODataService Test", () => {
   const odataClient = new MockClient(false);
   const BASE_URL = "/test";
 
-  test("odataService: simple init", async () => {
+  test("odataService: simple init", () => {
     const subject = new TestODataService(odataClient, BASE_URL);
 
     expect(subject.getPath()).toBe(BASE_URL);
     expect(subject.exposeAddFullPath()).toBe(BASE_URL);
     expect(subject.exposeAddFullPath("test")).toBe(BASE_URL + "/test");
+    expect(odataClient.bigNumberAsString).toBe(false);
   });
 
   test("odataService: fail with insufficient params", async () => {
@@ -27,5 +28,10 @@ describe("ODataService Test", () => {
     // @ts-expect-error
     expect(() => new ODataService(odataClient, null)).toThrowError();
     expect(() => new ODataService(odataClient, "")).toThrowError();
+  });
+
+  test("odataService: init with big number", () => {
+    new TestODataService(odataClient, BASE_URL, true);
+    expect(odataClient.bigNumberAsString).toBe(true);
   });
 });

@@ -55,3 +55,9 @@ GET {{rootUrl}}/Orders
 ### Filter by any on 1:n relationship
 GET {{rootUrl}}/Categories
 ?$select=CategoryName,Description&$filter=Products/any(p:p/ProductName eq 'Aniseed Syrup')
+
+### IEEE754Compatible => should type Edm.Int64 and Edm.Decimal as string
+# @name count is Int64
+GET {{rootUrl}}/Products?$count=true
+Accept: {{contentType}};IEEE754Compatible=true
+

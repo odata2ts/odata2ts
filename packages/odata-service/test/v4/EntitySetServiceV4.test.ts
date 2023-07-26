@@ -24,6 +24,12 @@ describe("V4 EntitySetService Test", () => {
     testService = new PersonModelCollectionService(odataClient, BASE_URL, NAME);
   });
 
+  test("entitySet V2: big number", async () => {
+    expect(odataClient.bigNumberAsString).toBe(false);
+    new PersonModelCollectionService(odataClient, BASE_URL, NAME, true);
+    expect(odataClient.bigNumberAsString).toBe(true);
+  });
+
   test("entitySet V2: QObject", async () => {
     expect(testService.getQObject()).toBe(qPersonV4);
   });
