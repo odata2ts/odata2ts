@@ -2035,7 +2035,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-bookshop@workspace:examples/bookshop"
   dependencies:
-    "@odata2ts/http-client-axios": ^0.8.0
+    "@odata2ts/http-client-axios": ^0.8.1
     "@odata2ts/odata-service": ^0.15.2
     "@odata2ts/odata2ts": ^0.27.0
     "@sap/cds": ">=5.9"
@@ -2071,7 +2071,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-odata-v2@workspace:examples/odata-v2"
   dependencies:
-    "@odata2ts/http-client-axios": ^0.8.0
+    "@odata2ts/http-client-axios": ^0.8.1
     "@odata2ts/odata-service": ^0.15.2
     "@odata2ts/odata2ts": ^0.27.0
     "@types/jest": ^29.5.2
@@ -2089,7 +2089,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-renaming@workspace:examples/renaming-trippin"
   dependencies:
-    "@odata2ts/http-client-api": ^0.2.0
+    "@odata2ts/http-client-api": ^0.3.0
     "@odata2ts/odata-service": ^0.15.2
     "@odata2ts/odata2ts": ^0.27.0
     "@types/jest": ^29.5.2
@@ -2106,7 +2106,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-trippin@workspace:examples/trippin"
   dependencies:
-    "@odata2ts/http-client-axios": ^0.8.0
+    "@odata2ts/http-client-axios": ^0.8.1
     "@odata2ts/odata-service": ^0.15.2
     "@odata2ts/odata2ts": ^0.27.0
     "@types/jest": ^29.5.2
@@ -2127,13 +2127,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/http-client-api@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "@odata2ts/http-client-api@npm:0.2.0"
-  checksum: 61105c376a2fba9d3896a3268617f15da06e00d0a2063a6e5615e338862e55af343abd7c1fdf4f53ff16860259608dea0fc472fe91084d2bad0c2f387bba3612
-  languageName: node
-  linkType: hard
-
 "@odata2ts/http-client-api@npm:^0.3.0":
   version: 0.3.0
   resolution: "@odata2ts/http-client-api@npm:0.3.0"
@@ -2141,23 +2134,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/http-client-axios@npm:^0.8.0":
-  version: 0.8.0
-  resolution: "@odata2ts/http-client-axios@npm:0.8.0"
+"@odata2ts/http-client-axios@npm:^0.8.1":
+  version: 0.8.1
+  resolution: "@odata2ts/http-client-axios@npm:0.8.1"
   dependencies:
-    "@odata2ts/http-client-base": ^0.1.0
+    "@odata2ts/http-client-base": ^0.2.0
   peerDependencies:
     axios: ^0.27.0 || ^1.0.0
-  checksum: fc2f1a4b2dca8572ff07060a62e931bb0a28f205c3dc72730d0154dc9de4ef65407d2c6942aa2a8b814598d0fbe62c25ef3026a785bd6ae67c15c7b12a1bb02b
+  checksum: dd1544d95dfdf51d7a0b996c56aa82d9fc5a2be03804dddfb33d80497e76b897bab82c42d325cb4f92ac263defc68a6a6b4ae2b5becaf32bde44362b11825127
   languageName: node
   linkType: hard
 
-"@odata2ts/http-client-base@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "@odata2ts/http-client-base@npm:0.1.0"
+"@odata2ts/http-client-base@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@odata2ts/http-client-base@npm:0.2.0"
   dependencies:
-    "@odata2ts/http-client-api": ^0.2.0
-  checksum: 9335440b9a0fbf18d85bd46e08aeb2fe4aec1ce7f49b4055bf8ff8050e7287b8be42fc1bd7913430fb3e02eb051a2a3df8fcacf6799daf3f2b73c3adb12c12a0
+    "@odata2ts/http-client-api": ^0.3.0
+  checksum: a3f0526de07e4ad7faa5db8b827f68961e5f9d5070897677a103c2a0f4b2817fa5109140e3102534a4d48319a90aa49ff8d4f44f59af80f059724dbf303ccaa0
   languageName: node
   linkType: hard
 
