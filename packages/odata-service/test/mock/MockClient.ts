@@ -13,6 +13,7 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
   public lastData?: any;
   public lastOperation?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   public lastRequestConfig?: MockRequestConfig;
+  public bigNumberAsString?: boolean;
 
   public responseData?: any;
 
@@ -81,5 +82,9 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
 
     this.responseData = null;
     return result;
+  }
+
+  retrieveBigNumbersAsString(enabled: boolean): void {
+    this.bigNumberAsString = enabled;
   }
 }
