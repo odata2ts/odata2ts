@@ -21,6 +21,12 @@ describe("EntityTypeService V4 Tests", () => {
     testService = new PersonModelService(odataClient, BASE_URL, NAME);
   });
 
+  test("entityType V4: big numbers", async () => {
+    expect(odataClient.bigNumberAsString).toBe(false);
+    new PersonModelService(odataClient, BASE_URL, NAME, true);
+    expect(odataClient.bigNumberAsString).toBe(true);
+  });
+
   // TODO
   test.skip("entityType V4: query object", async () => {
     expect(testService.getQObject()).toMatchObject(qPersonV4);

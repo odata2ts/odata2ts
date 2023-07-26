@@ -65,10 +65,9 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
       expect(e.message).toBe(axiosClientMsgPrefix + axiosFailMsg);
       expect(e.cause).toBeDefined();
       expect(e.status).toBe(404);
-      const axiosError = e.cause as AxiosError;
-      expect(axiosError?.response).toBeDefined();
-      expect(axiosError?.response?.status).toBe(404);
-      expect(axiosError?.response?.data).toStrictEqual({
+      expect(e.axiosError?.response).toBeDefined();
+      expect(e.axiosError?.response?.status).toBe(404);
+      expect(e.axiosError?.response?.data).toStrictEqual({
         error: {
           code: "",
           message: { lang: "en-US", value: axiosFailMsg },

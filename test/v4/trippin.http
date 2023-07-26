@@ -381,6 +381,11 @@ GET {{baseUrl}}/People?$select=Age
 # --- Metadata Control ---
 
 ### IEEE754Compatible => should type Edm.Int64 and Edm.Decimal as string => NOT SUPPORTED
+# @name count is Int64 => no effect
+GET {{baseUrl}}/People?$count=true
+Accept: {{contentType}};IEEE754Compatible=true
+
+###
 # @name get employee cost (EdmInt64) as string => NO EFFECT
 GET {{baseUrl}}/People/Trippin.Employee?$select=cost
 Content-Type: {{contentType}};IEEE754Compatible=true
