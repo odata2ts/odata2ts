@@ -367,7 +367,7 @@ describe("Service Generator Tests V4", () => {
     await compareService(projectManager.getServiceFiles()[0], "test-entity-service-enum.ts", true);
   });
 
-  test("Service Generator: Services with big numbers", async () => {
+  test("Service Generator: Services with big number types", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) =>
