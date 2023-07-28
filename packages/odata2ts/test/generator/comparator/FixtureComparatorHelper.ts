@@ -90,10 +90,15 @@ export class ServiceFixtureComparatorHelper {
     private version: ODataVersions
   ) {}
 
-  public async generateService(schemas: Array<Schema<any, any>>, project: ProjectManager, namingHelper: NamingHelper) {
-    const dataModel = await this.digest(schemas, DEFAULT_RUN_OPTIONS, namingHelper);
+  public async generateService(
+    schemas: Array<Schema<any, any>>,
+    project: ProjectManager,
+    namingHelper: NamingHelper,
+    v4BigNumberAsString: boolean = false
+  ) {
+    const dataModel = await this.digest(schemas, { ...DEFAULT_RUN_OPTIONS, v4BigNumberAsString }, namingHelper);
 
-    await generateServices(dataModel, project, this.version, namingHelper);
+    await generateServices(dataModel, project, this.version, namingHelper, v4BigNumberAsString);
   }
 
   public async compareService(fixturePath: string, service: SourceFile) {

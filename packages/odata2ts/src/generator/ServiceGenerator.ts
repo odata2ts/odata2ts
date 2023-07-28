@@ -42,9 +42,10 @@ export async function generateServices(
   dataModel: DataModel,
   project: ProjectManager,
   version: ODataVersions,
-  namingHelper: NamingHelper
+  namingHelper: NamingHelper,
+  v4BigNumberAsString: boolean = false
 ) {
-  const generator = new ServiceGenerator(dataModel, project, version, namingHelper);
+  const generator = new ServiceGenerator(dataModel, project, version, namingHelper, v4BigNumberAsString);
   return generator.generate();
 }
 
@@ -53,7 +54,8 @@ class ServiceGenerator {
     private dataModel: DataModel,
     private project: ProjectManager,
     private version: ODataVersions,
-    private namingHelper: NamingHelper
+    private namingHelper: NamingHelper,
+    private v4BigNumberAsString: boolean
   ) {}
 
   public async generate(): Promise<void> {
@@ -78,14 +80,18 @@ class ServiceGenerator {
       name: serviceName,
       typeParameters: ["ClientType extends ODataHttpClient"],
       extends: `${ROOT_SERVICE}<ClientType>`,
-      properties /*: [
-        {
-          scope: Scope.Private,
-          name: this.namingHelper.getPrivatePropName("name"),
-          type: "string",
-          initializer: `"${this.namingHelper.getODataServiceName()}"`,
-        },
-      ]*/,
+      ctors: this.v4BigNumberAsString
+        ? [
+            {
+              parameters: [
+                { name: "client", type: "ClientType" },
+                { name: "basePath", type: "string" },
+              ],
+              statements: [`super(client, basePath, true);`],
+            },
+          ]
+        : [],
+      properties,
       methods,
     });
 
@@ -262,7 +268,7 @@ class ServiceGenerator {
             { name: "basePath", type: "string" },
             { name: "name", type: "string" },
           ],
-          statements: [`super(client, basePath, name, ${qObjectName});`],
+          statements: [`super(client, basePath, name, ${qObjectName}${this.v4BigNumberAsString ? ", true" : ""});`],
         },
       ],
       properties,
@@ -352,7 +358,7 @@ class ServiceGenerator {
   ): OptionalKind<PropertyDeclarationStructure> {
     const isEnum = prop.dataType === DataTypes.EnumType;
     const type = isEnum ? `EnumCollection<${prop.type}>` : `${upperCaseFirst(prop.type)}Collection`;
-    const qType = isEnum ? "QEnumCollection" : `Q${type}`;
+    const qType = isEnum ? "QEnumCollection" : prop.qObject;
     const collectionType = `${collectionServiceType}<ClientType, ${type}, ${qType}>`;
 
     if (!prop.qObject) {
@@ -418,7 +424,7 @@ class ServiceGenerator {
       statements: [
         `if(!${propName}) {`,
         // prettier-ignore
-        `  ${propName} = new ${collectionServiceType}(this.client, this.getPath(), "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)})`,
+        `  ${propName} = new ${collectionServiceType}(this.client, this.getPath(), "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)}${this.v4BigNumberAsString ? ", true": ""})`,
         "}",
         `return ${propName}`,
       ],
@@ -456,7 +462,11 @@ class ServiceGenerator {
             { name: "basePath", type: "string" },
             { name: "name", type: "string" },
           ],
-          statements: [`super(client, basePath, name, ${qObjectName}, new ${model.qIdFunctionName}(name));`],
+          statements: [
+            `super(client, basePath, name, ${qObjectName}, new ${model.qIdFunctionName}(name)${
+              this.v4BigNumberAsString ? ", true" : ""
+            });`,
+          ],
         },
       ],
       properties,
