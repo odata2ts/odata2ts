@@ -23,6 +23,7 @@ const defaultConfig: DefaultConfiguration = {
   disableAutoManagedKey: false,
   allowRenaming: false,
   v2ModelsWithExtraResultsWrapping: false,
+  v4BigNumberAsString: false,
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,

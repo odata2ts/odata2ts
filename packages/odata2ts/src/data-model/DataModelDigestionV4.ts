@@ -103,14 +103,23 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
           qCollection: "QBooleanCollection",
           qParam: "QBooleanParam",
         };
+      case ODataTypesV4.Int64:
+      case ODataTypesV4.Decimal:
+        if (this.options.v4BigNumberAsString) {
+          return {
+            outputType: "string",
+            qPath: "QBigNumberPath",
+            qCollection: "QBigNumberCollection",
+            qParam: "QBigNumberParam",
+          };
+        }
+      // yes, intentional fall through!
       case ODataTypesV4.Byte:
       case ODataTypesV4.SByte:
       case ODataTypesV4.Int16:
       case ODataTypesV4.Int32:
-      case ODataTypesV4.Int64:
       case ODataTypesV4.Single:
       case ODataTypesV4.Double:
-      case ODataTypesV4.Decimal:
         return {
           outputType: "number",
           qPath: "QNumberPath",

@@ -35,7 +35,12 @@ describe("Service Generator Tests V4", () => {
     const namingHelper = new NamingHelper(runOptions, SERVICE_NAME);
     projectManager = await createProjectManager(namingHelper.getFileNames(), "build", EmitModes.ts, true);
 
-    await fixtureComparatorHelper.generateService(odataBuilder.getSchemas(), projectManager, namingHelper);
+    await fixtureComparatorHelper.generateService(
+      odataBuilder.getSchemas(),
+      projectManager,
+      namingHelper,
+      options?.v4BigNumberAsString
+    );
   }
 
   function getV4SpecificPath(fixture: string, v4Specific: boolean) {
@@ -62,6 +67,17 @@ describe("Service Generator Tests V4", () => {
     // then main service file has been generated but no individual ones
     await compareMainService("main-service-min.ts", false);
     expect(projectManager.getServiceFiles().length).toEqual(0);
+  });
+
+  test("Service Generator: Main Service V4 Big Number", async () => {
+    // given big numbers setting
+    const options: ConfigFileOptions = { v4BigNumberAsString: true };
+
+    // when generating
+    await doGenerate(options);
+
+    // then main service file has been generated but no individual ones
+    await compareMainService("main-service-big-numbers.ts", true);
   });
 
   test("Service Generator: Main Service one EntitySet", async () => {
@@ -139,7 +155,7 @@ describe("Service Generator Tests V4", () => {
     await compareMainService("main-service-action-unbound.ts", true);
   });
 
-  test("Service Generator: operation with primitives", async () => {
+  test("Service Generator: operation with primitive return types", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
@@ -153,7 +169,24 @@ describe("Service Generator Tests V4", () => {
     // when generating
     await doGenerate();
 
-    await compareMainService("main-service-operation-with-primitives.ts", true);
+    await compareMainService("main-service-operation-with-primitive-return-types.ts", true);
+  });
+
+  test("Service Generator: operation with big number return types", async () => {
+    // given one EntitySet
+    odataBuilder
+      .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addAction("pingBigNumber", ODataTypesV4.Int64, false)
+      .addAction("pingDecimal", ODataTypesV4.Decimal, false)
+      .addActionImport("pingBigNumber", `${SERVICE_NAME}.pingBigNumber`)
+      .addActionImport("pingDecimal", `${SERVICE_NAME}.pingDecimal`)
+      .addAction("pingDecimalCollection", `Collection(${ODataTypesV4.Decimal})`, false)
+      .addActionImport("pingDecimalCollection", `${SERVICE_NAME}.pingDecimalCollection`);
+
+    // when generating
+    await doGenerate({ v4BigNumberAsString: true });
+
+    await compareMainService("main-service-operation-with-big-number-return-types.ts", true);
   });
 
   test("Service Generator: Services with Naming", async () => {
@@ -332,5 +365,24 @@ describe("Service Generator Tests V4", () => {
     // then we get two additional service file
     expect(projectManager.getServiceFiles().length).toEqual(1);
     await compareService(projectManager.getServiceFiles()[0], "test-entity-service-enum.ts", true);
+  });
+
+  test("Service Generator: Services with big number types", async () => {
+    // given one EntitySet
+    odataBuilder
+      .addEntityType("TestEntity", undefined, (builder) =>
+        builder
+          .addKeyProp("decimal", ODataTypesV4.Decimal)
+          .addProp("int64", ODataTypesV4.Int64)
+          .addProp("bigNumberCollection", `Collection(${ODataTypesV4.Decimal})`)
+      )
+      .addEntitySet("Ents", `${SERVICE_NAME}.TestEntity`);
+
+    // when generating
+    await doGenerate({ v4BigNumberAsString: true });
+
+    // then we get one additional service file
+    expect(projectManager.getServiceFiles().length).toEqual(1);
+    await compareService(projectManager.getServiceFiles()[0], "test-entity-service-big-numbers.ts", true);
   });
 });
