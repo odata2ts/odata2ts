@@ -62,7 +62,7 @@ export function evaluateConfigOptions(
       throw new Error(`Specified service "${s}" doesn't exist in configuration!`);
     }
     const serviceDefault =
-      service.naming?.minimalDefaults && !configOpts?.naming?.minimalDefaults ? getMinimalConfig() : defaultConfig;
+      service.naming?.minimalDefaults && !configOpts.naming?.minimalDefaults ? getMinimalConfig() : defaultConfig;
     const merged = deepmerge.all([serviceDefault, confBaseOpts, service, cliBaseOpts]) as RunOptions;
     return safeGuardOptions(merged);
   });
