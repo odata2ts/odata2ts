@@ -2,6 +2,7 @@ import { EmitModes, Modes, RunOptions } from "../src";
 import { runApp } from "../src/app";
 import * as Generator from "../src/generator";
 import * as ProjectManager from "../src/project/ProjectManager";
+import { ODataModelBuilderV2 } from "./data-model/builder/v2/ODataModelBuilderV2";
 import { ODataModelBuilderV4 } from "./data-model/builder/v4/ODataModelBuilderV4";
 import { getTestConfig } from "./test.config";
 
@@ -49,6 +50,34 @@ describe("App Test", () => {
   function doRunApp() {
     return runApp(odataBuilder.getModel(), runOptions);
   }
+
+  test("simple schema detection", async () => {
+    // when multiple schemas exist
+    const newNs = "New";
+    odataBuilder.addSchema(newNs).addEntityType("Test", undefined, (builder) => builder.addKeyProp("id", "Edm.String"));
+
+    await doRunApp();
+
+    // then the schema with entity types is used
+    expect(createPmSpy.mock.calls[0][0]).toMatchObject({
+      service: "NewService",
+    });
+  });
+
+  test("simple schema detection with changed order", async () => {
+    // when multiple schemas exist
+    odataBuilder.addEntityType("Test", undefined, (builder) => builder.addKeyProp("id", "Edm.String"));
+
+    const newNs = "New";
+    odataBuilder.addSchema(newNs);
+
+    await doRunApp();
+
+    // then the schema with entity types is used
+    expect(createPmSpy.mock.calls[0][0]).toMatchObject({
+      service: "TesterService",
+    });
+  });
 
   test("App: generate only models", async () => {
     // given preset runOptions
@@ -104,6 +133,23 @@ describe("App Test", () => {
 
     // when running the app
     await doRunApp();
+
+    // then all generators have been called
+    expect(Generator.generateModels).toHaveBeenCalled();
+    expect(Generator.generateQueryObjects).toHaveBeenCalled();
+    expect(Generator.generateServices).toHaveBeenCalled();
+
+    // then files should have been written
+    expect(pmSpy.writeFiles).toHaveBeenCalled();
+  });
+
+  test("App: generate services for V2", async () => {
+    // given
+    runOptions.mode = Modes.service;
+
+    // when running the app
+    const builder = new ODataModelBuilderV2(SERVICE_NAME);
+    await runApp(builder.getModel(), runOptions);
 
     // then all generators have been called
     expect(Generator.generateModels).toHaveBeenCalled();

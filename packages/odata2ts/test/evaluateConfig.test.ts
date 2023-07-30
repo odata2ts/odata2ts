@@ -127,6 +127,20 @@ describe("Config Evaluation Tests", () => {
     });
   });
 
+  test("with service config: using minimal default naming", () => {
+    const testService = { source: "source", output: "output", naming: { minimalDefaults: true } };
+    const opts: ConfigFileOptions = { services: { test: testService } };
+    let result = evaluateConfigOptions({}, opts);
+
+    expect(result.length).toBe(1);
+    expect(result[0].naming.models.namingStrategy).toBeUndefined();
+    expect(result[0].naming.models.propNamingStrategy).toBeUndefined();
+
+    result = evaluateConfigOptions({}, { naming: { minimalDefaults: true }, services: { test: testService } });
+    expect(result[0].naming.models.namingStrategy).toBeUndefined();
+    expect(result[0].naming.models.propNamingStrategy).toBeUndefined();
+  });
+
   test("with service config: using base config", () => {
     const testService = { source: "source", output: "output", mode: Modes.models };
     const opts: ConfigFileOptions = {
@@ -234,6 +248,15 @@ describe("Config Evaluation Tests", () => {
       ...baseOpts,
       ...service2,
     });
+  });
+
+  test("fail if CLI specifies non existing service", () => {
+    const testService = { source: "source", output: "output" };
+    const cliOpts: CliOptions = { services: ["xxx"] };
+    const opts: ConfigFileOptions = { services: { test: testService } };
+    expect(() => evaluateConfigOptions(cliOpts, opts)).toThrow(
+      `Specified service "xxx" doesn't exist in configuration!`
+    );
   });
 
   test("safeguard skip options", () => {

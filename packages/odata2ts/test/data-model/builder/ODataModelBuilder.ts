@@ -1,6 +1,5 @@
 import { ODataVersions } from "@odata2ts/odata-core";
 
-import { ODataVersion } from "../../../src/data-model/DataTypeModel";
 import { ComplexType, EntityType, ODataEdmxModelBase, Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
 import { ODataComplexTypeBuilderBase } from "./ODataComplexTypeBuilderBase";
 import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase";
@@ -20,8 +19,8 @@ export abstract class ODataModelBuilder<
     this.model = this.createModel(version);
   }
 
-  public addSchema(name: string) {
-    this.currentSchema = this.createSchema(name);
+  public addSchema(name: string, alias?: string) {
+    this.currentSchema = this.createSchema(name, alias);
     return this;
   }
 
@@ -36,13 +35,16 @@ export abstract class ODataModelBuilder<
     builderFn: <CTB extends ODataComplexTypeBuilderBase<CT>>(builder: CTB) => void
   ): this;
 
-  protected createSchema(name: string) {
+  protected createSchema(name: string, alias?: string) {
     const result: Schema<ET, CT> = {
       $: {
         Namespace: name,
         xmlns: "ignore",
       },
     };
+    if (alias) {
+      result.$.Alias = alias;
+    }
     const casted = result as unknown as S;
 
     this.schemas.push(casted);
@@ -52,7 +54,7 @@ export abstract class ODataModelBuilder<
     return {
       "edmx:Edmx": {
         $: {
-          Version: odataVersion.toString(),
+          Version: odataVersion === ODataVersions.V2 ? "1.0" : "4.0",
           "xmlns:edmx": "ignore",
         },
         "edmx:DataServices": [
