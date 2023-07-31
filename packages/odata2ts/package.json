@@ -32,17 +32,16 @@
     "LICENSE"
   ],
   "keywords": [
-    "odata client",
+    "odata2ts",
     "generator",
+    "cli",
+    "odata",
     "ts",
     "model",
-    "interface",
-    "odata",
+    "odata client",
     "typescript",
-    "odata2ts",
     "v2",
-    "v4",
-    "cli"
+    "v4"
   ],
   "peerDependencies": {
     "@odata2ts/odata-query-objects": "^0.18.2",
@@ -58,7 +57,7 @@
     "commander": "^10.0.1",
     "constant-case": "^3.0.4",
     "cosmiconfig": "^8.2.0",
-    "cosmiconfig-typescript-loader": "^4.3.0",
+    "cosmiconfig-typescript-loader": "^5.0.0",
     "deepmerge": "^4.3.1",
     "fs-extra": "^11.1.1",
     "pascal-case": "^3.1.2",
