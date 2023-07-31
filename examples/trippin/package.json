@@ -9,6 +9,7 @@
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
+  "type": "module",
   "scripts": {
     "build": "yarn clean && yarn generate",
     "clean": "rimraf build",
