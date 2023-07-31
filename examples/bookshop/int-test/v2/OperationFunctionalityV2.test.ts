@@ -1,3 +1,5 @@
+import { BigNumber } from "bignumber.js";
+
 import { BooksModel } from "../../src/catV2/CatV2Model";
 import { catalogV2Service } from "./servicesV2";
 
@@ -13,7 +15,7 @@ describe("CAP V2 Integration Testing: Operation Capabilities", () => {
     descr:
       "Wuthering Heights, Emily Brontë's only novel, was published in 1847 under the pseudonym \"Ellis Bell\". It was written between October 1845 and June 1846. Wuthering Heights and Anne Brontë's Agnes Grey were accepted by publisher Thomas Newby before the success of their sister Charlotte's novel Jane Eyre. After Emily's death, Charlotte edited the manuscript of Wuthering Heights and arranged for the edited version to be published as a posthumous second edition in 1850.",
     stock: 12,
-    price: "11.11",
+    price: new BigNumber("11.11"),
     currencyCode: "GBP",
     genreId: 11,
     genre: {
