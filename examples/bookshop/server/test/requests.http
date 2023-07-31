@@ -31,8 +31,13 @@ GET {{server}}/browse/Books
 GET {{server}}/v2/browse/Books
 
 ###
-# @name get book
+# @name get single entity
 GET {{server}}/browse/Books(201)
+
+###
+# @name get single entity with big numbers as string
+GET {{server}}/browse/Books(201)
+Accept: application/json;IEEE754Compatible=true
 
 ###
 # @name get simple prop
@@ -186,6 +191,7 @@ Authorization: {{me}}
 GET {{server}}/browse/ListOfBooks?
   $expand=genre
 Authorization: {{me}}
+Accept: application/json;IEEE754Compatible=true
 
 
 ### ------------------------------------------------------------------------
