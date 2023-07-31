@@ -1,4 +1,5 @@
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { BigNumber } from "bignumber.js";
 
 import { BooksModel, EditableBooksModel } from "../src/admin/AdminModel";
 import { adminService } from "./services";
@@ -7,7 +8,14 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
   const testService = adminService;
 
   test("get book zero", async () => {
-    const BOOK_ZERO: Omit<BooksModel, "image" | "createdAt" | "modifiedAt"> = {
+    const bookZeroId = 201;
+
+    const result = await testService.books(bookZeroId).query();
+    expect(result.status).toBe(200);
+    expect(result.data).toBeDefined();
+
+    const product: ODataModelResponseV4<BooksModel> = result.data;
+    expect(product).toMatchObject({
       id: 201,
       title: "Wuthering Heights",
       descr:
@@ -15,47 +23,57 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
       authorId: 101,
       genreId: 11,
       stock: 12,
-      price: 11.11,
+      price: new BigNumber("11.11"),
       currencyCode: "GBP",
       createdBy: "anonymous",
       modifiedBy: "anonymous",
-    };
-
-    const result = await testService.books(BOOK_ZERO.id).query();
-    expect(result.status).toBe(200);
-    expect(result.data).toBeDefined();
-
-    const product: ODataModelResponseV4<BooksModel> = result.data;
-    expect(product).toMatchObject(BOOK_ZERO);
+    });
   });
 
-  test.skip("create and delete book", async () => {
+  test("create and delete book", async () => {
     jest.setTimeout(15000);
 
     // given
     const bookSrv = testService.books();
+    const id = 999;
     const book: EditableBooksModel = {
       // @ts-ignore
-      id: 999,
+      id,
       title: "Test Title",
       descr: "Test Description",
-      price: 12.88,
+      price: new BigNumber("12.88"),
       stock: 10,
     };
+
+    try {
+      await testService.books(id).delete();
+    } catch (e) {}
 
     // when creating the book
     let result = await bookSrv.create(book);
     // then return object matches our book
-    expect(result.status).toBe(204);
-    expect(result.data).toBe("");
+    expect(result.status).toBe(201);
+    expect(result.data).toMatchObject({
+      id: 999,
+      title: "Test Title",
+      descr: "Test Description",
+      price: new BigNumber("12.88"),
+      stock: 10,
+      createdBy: "alice",
+      modifiedBy: "alice",
+      "image@odata.mediaContentType": "image/png",
+    });
     expect(result.headers?.location).toBeDefined();
-    const id = bookSrv.parseKey(result.headers.location);
+    expect(result.headers?.location).toBe("Books(999)");
+    expect(bookSrv.parseKey(result.headers!.location)).toBe(999);
 
-    expect(id).toBeDefined();
-    expect(id).not.toBeNaN();
+    const location = bookSrv.parseKey(result.headers.location);
+
+    expect(location).toBeDefined();
+    expect(location).toBe(id);
 
     // when updating the description, we expect no error
-    await testService.books(id).patch({ descr: "Updated Desc" });
+    await testService.books(location).patch({ descr: "Updated Desc" });
 
     // when deleting this new book, we expect no error
     await new Promise((res) => setTimeout(res, 1000));

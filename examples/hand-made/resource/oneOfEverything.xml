@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+  <edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0">
+    <Schema Namespace="Test" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2007/05/edm">
+      <EntityType Name="Tester">
+        <Key>
+          <PropertyRef Name="Name" />
+        </Key>
+        <Property Name="Name" Type="Edm.String" Nullable="false" />
+        <Property Name="DateTime" Type="Edm.DateTime" Nullable="false" />
+        <Property Name="DateTimeOffset" Type="Edm.DateTimeOffset" />
+        <Property Name="Time" Type="Edm.Time" />
+        <Property Name="Byte" Type="Edm.Byte" />
+        <Property Name="SByte" Type="Edm.SByte" />
+        <Property Name="Int16" Type="Edm.Int16" />
+        <Property Name="Int32" Type="Edm.Int32" />
+        <Property Name="Int64" Type="Edm.Int64" />
+        <Property Name="Single" Type="Edm.Single" />
+        <Property Name="Double" Type="Edm.Double" />
+        <Property Name="Decimal" Type="Edm.Decimal" />
+      </EntityType>
+      <EntityContainer Name="Container">
+        <EntitySet Name="Testers" EntityType="Test.Tester"/>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

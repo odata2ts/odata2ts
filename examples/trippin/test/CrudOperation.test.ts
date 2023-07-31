@@ -1,4 +1,9 @@
-import { EditableLocationModel, EditablePersonModel, FeatureModel } from "../build/trippin/TrippinModel";
+import {
+  EditableLocationModel,
+  EditablePersonModel,
+  FeatureModel,
+  PersonGenderModel,
+} from "../build/trippin/TrippinModel";
 import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./infra/TestConstants";
 
 describe("Testing Generation of TrippinService", () => {
@@ -6,7 +11,9 @@ describe("Testing Generation of TrippinService", () => {
 
   beforeEach(() => {
     editModel = {
+      traditionalGenderCategories: PersonGenderModel.Unknown,
       user: "williams",
+      age: 66,
       favoriteFeature: FeatureModel.Feature1,
       features: [],
       firstName: "Heinz",
@@ -25,6 +32,8 @@ describe("Testing Generation of TrippinService", () => {
       FavoriteFeature: "Feature1",
       Features: [],
       FirstName: "Heinz",
+      Age: 66,
+      Gender: "Unknown",
     });
   });
 
@@ -33,10 +42,11 @@ describe("Testing Generation of TrippinService", () => {
     const expectedUrl = `${BASE_URL}/People('${id}')`;
     const model: EditablePersonModel = {
       user: "williams",
+      firstName: "Heinz",
+      age: 91,
+      traditionalGenderCategories: PersonGenderModel.Unknown,
       favoriteFeature: FeatureModel.Feature1,
       features: [],
-      firstName: "Heinz",
-      age: 33,
     };
 
     await TRIPPIN.people(id).update(model);
@@ -45,10 +55,11 @@ describe("Testing Generation of TrippinService", () => {
     expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
     expect(ODATA_CLIENT.lastData).toStrictEqual({
       UserName: "williams",
+      FirstName: "Heinz",
+      Age: 91,
+      Gender: "Unknown",
       FavoriteFeature: FeatureModel.Feature1,
       Features: [],
-      FirstName: "Heinz",
-      Age: 33,
     });
   });
 
@@ -56,14 +67,14 @@ describe("Testing Generation of TrippinService", () => {
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
     const model = {
-      age: 44,
+      age: 30,
     };
 
     await TRIPPIN.people(id).patch(model);
 
     expect(ODATA_CLIENT.lastOperation).toBe("PATCH");
     expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
-    expect(ODATA_CLIENT.lastData).toStrictEqual({ Age: 44 });
+    expect(ODATA_CLIENT.lastData).toStrictEqual({ Age: 30 });
   });
 
   test("entityType: delete", async () => {

@@ -58,6 +58,10 @@ class ServiceGenerator {
     private v4BigNumberAsString: boolean
   ) {}
 
+  private isV4BigNumber() {
+    return this.v4BigNumberAsString && this.version === ODataVersions.V4;
+  }
+
   public async generate(): Promise<void> {
     const sourceFile = await this.project.createMainServiceFile();
     const serviceName = this.namingHelper.getMainServiceName();
@@ -80,7 +84,7 @@ class ServiceGenerator {
       name: serviceName,
       typeParameters: ["ClientType extends ODataHttpClient"],
       extends: `${ROOT_SERVICE}<ClientType>`,
-      ctors: this.v4BigNumberAsString
+      ctors: this.isV4BigNumber()
         ? [
             {
               parameters: [
@@ -268,7 +272,7 @@ class ServiceGenerator {
             { name: "basePath", type: "string" },
             { name: "name", type: "string" },
           ],
-          statements: [`super(client, basePath, name, ${qObjectName}${this.v4BigNumberAsString ? ", true" : ""});`],
+          statements: [`super(client, basePath, name, ${qObjectName}${this.isV4BigNumber() ? ", true" : ""});`],
         },
       ],
       properties,
@@ -424,7 +428,7 @@ class ServiceGenerator {
       statements: [
         `if(!${propName}) {`,
         // prettier-ignore
-        `  ${propName} = new ${collectionServiceType}(this.client, this.getPath(), "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)}${this.v4BigNumberAsString ? ", true": ""})`,
+        `  ${propName} = new ${collectionServiceType}(this.client, this.getPath(), "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)}${this.isV4BigNumber() ? ", true": ""})`,
         "}",
         `return ${propName}`,
       ],
@@ -464,7 +468,7 @@ class ServiceGenerator {
           ],
           statements: [
             `super(client, basePath, name, ${qObjectName}, new ${model.qIdFunctionName}(name)${
-              this.v4BigNumberAsString ? ", true" : ""
+              this.isV4BigNumber() ? ", true" : ""
             });`,
           ],
         },

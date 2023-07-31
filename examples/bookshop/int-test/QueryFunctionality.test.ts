@@ -1,5 +1,5 @@
 import { AxiosClientError } from "@odata2ts/http-client-axios";
-import { AxiosError } from "axios";
+import { BigNumber } from "bignumber.js";
 
 import { BooksModel } from "../src/catalog/CatalogModel";
 import { catalogService } from "./services";
@@ -15,7 +15,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
     author: "Emily Brontë",
     genreId: 11,
     stock: 12,
-    price: 11.11,
+    price: new BigNumber("11.11"),
     currencyCode: "GBP",
   };
 
@@ -23,7 +23,8 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
     const result = await testService.books().query((b) => b.count());
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
-    expect(result.data["@odata.count"]).toBe(5);
+    expect(typeof result.data["@odata.count"]).toBe("string");
+    expect(result.data["@odata.count"]).toBe("5");
 
     expect(result.data.value).toBeDefined();
     expect(result.data.value.length).toBe(5);
@@ -72,7 +73,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
         .expanding("genre", (expBuilder) => {
           return expBuilder.select("name").expand("parent");
         })
-        .filter(qBook.stock.gt(3))
+        .filter(qBook.stock.gt(3), qBook.price.gt(new BigNumber(2)))
         .orderBy(qBook.id.asc());
     });
     expect(result.status).toBe(200);
@@ -83,7 +84,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
       id: 201,
       title: "Wuthering Heights",
       stock: 12,
-      price: 11.11,
+      price: new BigNumber("11.11"),
       genre: {
         id: 11,
         name: "Drama",

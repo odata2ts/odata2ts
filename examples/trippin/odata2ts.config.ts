@@ -25,7 +25,6 @@ const config: ConfigFileOptions = {
         {
           name: "Gender",
           mappedName: "TraditionalGenderCategories",
-          managed: true,
         },
         ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
       ],
