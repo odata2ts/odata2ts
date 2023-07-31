@@ -21,6 +21,7 @@ describe("Integration Testing of Service Generation", () => {
     const result = await trippinService.getPersonWithMostFriends();
     expect(result.data.firstName).toBe("Russell");
     expect(result.data.lastName).toBe("Whyte");
+    expect(result.data.age).toBeNull();
   });
 
   test("unbound function with params", async () => {
