@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-bookshop@0.5.0...@odata2ts/example-bookshop@0.6.0) (2023-07-31)
+
+### Features
+
+* **service:** add big number handling for V4 ([#194](https://github.com/odata2ts/odata2ts/issues/194)) ([13db4bb](https://github.com/odata2ts/odata2ts/commit/13db4bbf677c20c65767bbc8342390750c43253b))
+
 # [0.5.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-bookshop@0.4.5...@odata2ts/example-bookshop@0.5.0) (2023-07-20)
 
 ### Features

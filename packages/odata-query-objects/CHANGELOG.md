@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.19.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.18.2...@odata2ts/odata-query-objects@0.19.0) (2023-07-31)
+
+### Features
+
+* **qobjects:** add big number types (numbers as strings in v4) ([#193](https://github.com/odata2ts/odata2ts/issues/193)) ([33dd834](https://github.com/odata2ts/odata2ts/commit/33dd8346b1cacdf7bd3fed24ebb187321c9100f7))
+
 ## [0.18.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.18.1...@odata2ts/odata-query-objects@0.18.2) (2023-06-14)
 
 **Note:** Version bump only for package @odata2ts/odata-query-objects

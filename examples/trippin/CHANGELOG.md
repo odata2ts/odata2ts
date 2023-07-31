@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-trippin@0.6.0...@odata2ts/example-trippin@0.7.0) (2023-07-31)
+
+### Features
+
+* **odata2ts:** ESM support for the generator ([#198](https://github.com/odata2ts/odata2ts/issues/198)) ([6956b9c](https://github.com/odata2ts/odata2ts/commit/6956b9c8321707f04b7109653de50de0b739df3e))
+* **service:** add big number handling for V4 ([#194](https://github.com/odata2ts/odata2ts/issues/194)) ([13db4bb](https://github.com/odata2ts/odata2ts/commit/13db4bbf677c20c65767bbc8342390750c43253b))
+
 # [0.6.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-trippin@0.5.5...@odata2ts/example-trippin@0.6.0) (2023-07-20)
 
 ### Features

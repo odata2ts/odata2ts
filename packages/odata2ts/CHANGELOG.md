@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.28.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.27.0...@odata2ts/odata2ts@0.28.0) (2023-07-31)
+
+### Features
+
+* **odat2ts:** v4 big number generation ([#195](https://github.com/odata2ts/odata2ts/issues/195)) ([3e5fdcd](https://github.com/odata2ts/odata2ts/commit/3e5fdcda42f893ed7d069489faa2ad10da8d7837))
+* **odata2ts:** ESM support for the generator ([#198](https://github.com/odata2ts/odata2ts/issues/198)) ([6956b9c](https://github.com/odata2ts/odata2ts/commit/6956b9c8321707f04b7109653de50de0b739df3e))
+
 # [0.27.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.26.1...@odata2ts/odata2ts@0.27.0) (2023-07-20)
 
 ### Features

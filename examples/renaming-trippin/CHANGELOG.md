@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-renaming@0.1.16...@odata2ts/example-renaming@0.2.0) (2023-07-31)
+
+### Features
+
+* **service:** add big number handling for V4 ([#194](https://github.com/odata2ts/odata2ts/issues/194)) ([13db4bb](https://github.com/odata2ts/odata2ts/commit/13db4bbf677c20c65767bbc8342390750c43253b))
+
 ## [0.1.16](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-renaming@0.1.15...@odata2ts/example-renaming@0.1.16) (2023-07-20)
 
 **Note:** Version bump only for package @odata2ts/example-renaming
