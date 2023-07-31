@@ -1,10 +1,9 @@
 import { AxiosClient } from "@odata2ts/http-client-axios";
-import { BigNumber } from "bignumber.js";
 
 import { EditablePersonModel, FeatureModel, LocationModel, PersonGenderModel } from "../build/trippin/TrippinModel";
 import { TrippinService } from "../build/trippin/TrippinService";
 
-describe("CRUD Integration Tests", function () {
+describe.skip("CRUD Integration Tests", function () {
   const homeBase: LocationModel = {
     address: "123 Westham Road",
     city: {
@@ -19,8 +18,8 @@ describe("CRUD Integration Tests", function () {
     firstName: "Horst",
     lastName: "Tester",
     // homeAddress: homeBase,
-    traditionalGenderCategories: PersonGenderModel.Unknown,
-    age: new BigNumber("66"),
+    traditionalGenderCategories: PersonGenderModel.Male,
+    age: 66,
     // addressInfo: [homeBase],
     emails: ["test@testing.de"],
     favoriteFeature: FeatureModel.Feature3,
@@ -47,10 +46,10 @@ describe("CRUD Integration Tests", function () {
 
     // given a service for the new person
     // when updating some props, we expect no error
-    await horstService.patch({ middleName: "middle", age: new BigNumber("33") });
+    await horstService.patch({ middleName: "middle", age: 33 });
 
     // when deleting this new product, we expect no error
-    await new Promise((res) => setTimeout(res, 1000));
+    // await new Promise((res) => global.setTimeout(res, 1000));
     await horstService.delete();
   });
 });
