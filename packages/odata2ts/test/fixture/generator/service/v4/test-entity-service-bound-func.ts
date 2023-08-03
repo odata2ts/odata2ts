@@ -28,7 +28,7 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
     }
 
     const url = this.addFullPath(this._bookQBestReview.buildUrl());
-    const response = await this.client.get(url, requestConfig);
+    const response = await this.client.get(url, requestConfig, this.getDefaultHeaders());
     return this._bookQBestReview.convertResponse(response);
   }
 
@@ -41,7 +41,7 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
     }
 
     const url = this.addFullPath(this._bookQFilterReviews.buildUrl(params));
-    const response = await this.client.get(url, requestConfig);
+    const response = await this.client.get(url, requestConfig, this.getDefaultHeaders());
     return this._bookQFilterReviews.convertResponse(response);
   }
 }

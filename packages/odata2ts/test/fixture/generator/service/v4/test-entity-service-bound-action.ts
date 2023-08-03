@@ -27,7 +27,7 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
     }
 
     const url = this.addFullPath(this._bookQLike.buildUrl());
-    return this.client.post(url, {}, requestConfig);
+    return this.client.post(url, {}, requestConfig, this.getDefaultHeaders());
   }
 
   public async rate(
@@ -39,7 +39,12 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
     }
 
     const url = this.addFullPath(this._bookQRate.buildUrl());
-    const response = await this.client.post(url, this._bookQRate.convertUserParams(params), requestConfig);
+    const response = await this.client.post(
+      url,
+      this._bookQRate.convertUserParams(params),
+      requestConfig,
+      this.getDefaultHeaders()
+    );
     return this._bookQRate.convertResponse(response);
   }
 
@@ -52,7 +57,12 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
     }
 
     const url = this.addFullPath(this._bookQRatings.buildUrl());
-    const response = await this.client.post(url, this._bookQRatings.convertUserParams(params), requestConfig);
+    const response = await this.client.post(
+      url,
+      this._bookQRatings.convertUserParams(params),
+      requestConfig,
+      this.getDefaultHeaders()
+    );
     return this._bookQRatings.convertResponse(response);
   }
 }

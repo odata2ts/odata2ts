@@ -22,7 +22,7 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
     }
 
     const url = this.addFullPath(this._qPingBigNumber.buildUrl());
-    const response = await this.client.post(url, {}, requestConfig);
+    const response = await this.client.post(url, {}, requestConfig, this.getDefaultHeaders());
     return this._qPingBigNumber.convertResponse(response);
   }
 
@@ -34,7 +34,7 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
     }
 
     const url = this.addFullPath(this._qPingDecimal.buildUrl());
-    const response = await this.client.post(url, {}, requestConfig);
+    const response = await this.client.post(url, {}, requestConfig, this.getDefaultHeaders());
     return this._qPingDecimal.convertResponse(response);
   }
 
@@ -46,7 +46,7 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
     }
 
     const url = this.addFullPath(this._qPingDecimalCollection.buildUrl());
-    const response = await this.client.post(url, {}, requestConfig);
+    const response = await this.client.post(url, {}, requestConfig, this.getDefaultHeaders());
     return this._qPingDecimalCollection.convertResponse(response);
   }
 }
