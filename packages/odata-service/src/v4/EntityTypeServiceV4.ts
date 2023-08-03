@@ -15,7 +15,12 @@ export class EntityTypeServiceV4<
     model: Partial<EditableT>,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataModelResponseV4<T>> {
-    const result = await this.doPatch<void | ODataModelResponseV4<T>>(this.qModel.convertToOData(model), requestConfig);
+    const result = await this.client.patch<void | ODataModelResponseV4<T>>(
+      this.getPath(),
+      this.qModel.convertToOData(model),
+      requestConfig,
+      this.getDefaultHeaders()
+    );
     return convertV4ModelResponse(result, this.qResponseType);
   }
 
@@ -23,11 +28,19 @@ export class EntityTypeServiceV4<
     model: EditableT,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataModelResponseV4<T>> {
-    const result = await this.doPut<void | ODataModelResponseV4<T>>(this.qModel.convertToOData(model), requestConfig);
+    const result = await this.client.put<void | ODataModelResponseV4<T>>(
+      this.getPath(),
+      this.qModel.convertToOData(model),
+      requestConfig,
+      this.getDefaultHeaders()
+    );
+    //await this.doPut<void | ODataModelResponseV4<T>>(this.qModel.convertToOData(model), requestConfig);
     return convertV4ModelResponse(result, this.qResponseType);
   }
 
-  public delete: (requestConfig?: ODataHttpClientConfig<ClientType>) => ODataResponse<void> = this.doDelete;
+  public async delete(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
+    return this.client.delete(this.getPath(), requestConfig);
+  }
 
   public async query<ReturnType extends Partial<T> = T>(
     queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,

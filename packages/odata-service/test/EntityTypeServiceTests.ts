@@ -11,6 +11,7 @@ export function commonEntityTypeServiceTests(
   const NAME = "EntityXY('tester')";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
   const REQUEST_CONFIG = { test: "Test" };
+  const DEFAULT_HEADERS = { Accept: "application/json", "Content-Type": "application/json" };
 
   let testService: PersonModelServiceVersion;
 
@@ -45,6 +46,7 @@ export function commonEntityTypeServiceTests(
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");
     expect(odataClient.lastRequestConfig).toBeUndefined();
+    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
     expect(resultData).toStrictEqual(expectedData);
 
     await testService.query(undefined, REQUEST_CONFIG);
@@ -91,36 +93,15 @@ export function commonEntityTypeServiceTests(
     };
 
     odataClient.setModelResponse(odataModel);
-    let result = await testService.patch(model);
+    let result = await testService.update(model);
     // @ts-ignore
     const resultData = result.data.d || result.data;
 
     expect(odataClient.lastUrl).toBe(EXPECTED_PATH);
-    expect(odataClient.lastOperation).toBe("PATCH");
+    expect(odataClient.lastOperation).toBe("PUT");
     expect(odataClient.lastData).toEqual(odataModel);
     expect(odataClient.lastRequestConfig).toBeUndefined();
-    if (!odataClient.isV2) {
-      expect(resultData).toStrictEqual(model);
-    }
-
-    result = await testService.patch(model, REQUEST_CONFIG);
-    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
-    expect(result.data).toBeNull();
-  });
-
-  test("entityType: patch", async () => {
-    const model: Partial<PersonModel> = { Age: "45" };
-    const odataModel = { Age: 45 };
-
-    odataClient.setModelResponse(odataModel);
-    let result = await testService.patch(model);
-    // @ts-ignore
-    const resultData = result.data.d || result.data;
-
-    expect(odataClient.lastUrl).toBe(EXPECTED_PATH);
-    expect(odataClient.lastOperation).toBe("PATCH");
-    expect(odataClient.lastData).toEqual({ Age: 45 });
-    expect(odataClient.lastRequestConfig).toBeUndefined();
+    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
     if (!odataClient.isV2) {
       expect(resultData).toStrictEqual(model);
     }
@@ -137,6 +118,7 @@ export function commonEntityTypeServiceTests(
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastRequestConfig).toBeUndefined();
+    expect(odataClient.additionalHeaders).toBeUndefined();
 
     await testService.delete(REQUEST_CONFIG);
     expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);

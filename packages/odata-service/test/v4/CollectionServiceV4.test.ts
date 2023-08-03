@@ -5,6 +5,7 @@ import { EnumCollection, QEnumCollection, QStringCollection, StringCollection } 
 import { CollectionServiceV4 } from "../../src";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
 import { Feature } from "../fixture/PersonModel";
+import { PersonModelCollectionService } from "../fixture/v4/PersonModelService";
 import { MockClient } from "../mock/MockClient";
 
 describe("CollectionService V4 Tests", () => {
@@ -28,11 +29,15 @@ describe("CollectionService V4 Tests", () => {
 
   commonCollectionTests(odataClient, stringConstructor, enumConstructor);
 
-  test("collection: big numbers", async () => {
-    new CollectionServiceV4(odataClient, BASE_PATH, NAME_STRING, new QStringCollection());
-    expect(odataClient.bigNumberAsString).toBe(false);
-    new CollectionServiceV4(odataClient, BASE_PATH, NAME_STRING, new QStringCollection(), true);
-    expect(odataClient.bigNumberAsString).toBe(true);
+  test("entitySet: big number", async () => {
+    const testService = new CollectionServiceV4(odataClient, BASE_PATH, NAME_STRING, new QStringCollection(), true);
+
+    await testService.query();
+
+    expect(odataClient.additionalHeaders).toStrictEqual({
+      Accept: "application/json;IEEE754Compatible=true",
+      "Content-Type": "application/json;IEEE754Compatible=true",
+    });
   });
 
   test("collection: query typing", async () => {

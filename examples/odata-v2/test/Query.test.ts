@@ -3,11 +3,11 @@ import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata
 
 import { ProductModel } from "../build/odata/ODataDemoModel";
 import { ODataDemoService } from "../build/odata/ODataDemoService";
-import { MockODataClient } from "./MockODataClient";
+import { MockClient } from "./MockClient";
 
 describe("Unit Tests for V2 OData Demo Service", function () {
   const BASE_URL = "test";
-  const odataClient = new MockODataClient();
+  const odataClient = new MockClient(true);
   const testService = new ODataDemoService(odataClient, BASE_URL);
   const ENC = encodeURIComponent;
 
@@ -16,6 +16,10 @@ describe("Unit Tests for V2 OData Demo Service", function () {
 
     expect(odataClient.lastUrl).toBe("test/Products(123)");
     expect(result.status).toBe(200);
+    expect(odataClient.additionalHeaders).toStrictEqual({
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    });
   });
 
   test("proper query", async () => {
@@ -27,5 +31,9 @@ describe("Unit Tests for V2 OData Demo Service", function () {
       `test/Products?%24select=${ENC("ID,Name")}&%24filter=${ENC("Price add 1 gt 1000")}`
     );
     expect(result.status).toBe(200);
+    expect(odataClient.additionalHeaders).toStrictEqual({
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    });
   });
 });

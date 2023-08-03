@@ -84,7 +84,12 @@ export abstract class EntitySetServiceV2<
     model: EditableT,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<ReturnType>> {
-    const result = await this.doPost<ODataModelResponseV2<T>>(this.qModel.convertToOData(model), requestConfig);
+    const result = await this.client.post<ODataModelResponseV2<T>>(
+      this.getPath(),
+      this.qModel.convertToOData(model),
+      requestConfig,
+      this.getDefaultHeaders()
+    );
     return convertV2ModelResponse(result, this.qResponseType);
   }
 

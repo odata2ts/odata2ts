@@ -17,7 +17,6 @@ describe("ODataService Test", () => {
     expect(subject.getPath()).toBe(BASE_URL);
     expect(subject.exposeAddFullPath()).toBe(BASE_URL);
     expect(subject.exposeAddFullPath("test")).toBe(BASE_URL + "/test");
-    expect(odataClient.bigNumberAsString).toBe(false);
   });
 
   test("odataService: fail with insufficient params", async () => {
@@ -31,7 +30,7 @@ describe("ODataService Test", () => {
   });
 
   test("odataService: init with big number", () => {
-    new TestODataService(odataClient, BASE_URL, true);
-    expect(odataClient.bigNumberAsString).toBe(true);
+    const testService = new TestODataService(odataClient, BASE_URL, true);
+    expect(testService).toBeDefined();
   });
 });

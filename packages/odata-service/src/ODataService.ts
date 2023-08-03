@@ -1,5 +1,7 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
 
+import { BIG_NUMBERS_HEADERS, DEFAULT_HEADERS } from "./RequestHeaders";
+
 export class ODataService<ClientType extends ODataHttpClient> {
   constructor(protected client: ClientType, protected basePath: string, protected bigNumbersAsString: boolean = false) {
     if (!client) {
@@ -8,7 +10,6 @@ export class ODataService<ClientType extends ODataHttpClient> {
     if (!basePath || !basePath.trim()) {
       throw new Error("[basePath] must be supplied to ODataService!");
     }
-    this.client.retrieveBigNumbersAsString(bigNumbersAsString);
   }
 
   public getPath(): string {
@@ -17,5 +18,9 @@ export class ODataService<ClientType extends ODataHttpClient> {
 
   protected addFullPath(path?: string) {
     return `${this.getPath()}${path ? "/" + path : ""}`;
+  }
+
+  protected getDefaultHeaders() {
+    return this.bigNumbersAsString ? BIG_NUMBERS_HEADERS : DEFAULT_HEADERS;
   }
 }

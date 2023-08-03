@@ -3,11 +3,11 @@ import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 
 import { ProductModel } from "../build/odata/ODataDemoModel";
 import { ODataDemoService } from "../build/odata/ODataDemoService";
-import { MockODataClient } from "./MockODataClient";
+import { MockClient } from "./MockClient";
 
 describe("V2 Operation (FunctionImport) Tests", function () {
   const BASE_URL = "test";
-  const odataClient = new MockODataClient();
+  const odataClient = new MockClient(true);
   const testService = new ODataDemoService(odataClient, BASE_URL);
 
   test("productsByRating", async () => {

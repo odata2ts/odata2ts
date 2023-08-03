@@ -2,6 +2,7 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 
+import { DEFAULT_HEADERS } from "../../src/RequestHeaders";
 import { commonEntitySetTests } from "../EntitySetServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { PersonModelV2CollectionService } from "../fixture/v2/PersonModelV2Service";
@@ -46,6 +47,7 @@ describe("V2 EntitySetService Test", () => {
     expect(odataClient.lastOperation).toBe("POST");
     expect(odataClient.lastData).toStrictEqual(odataModel);
     expect(odataClient.lastRequestConfig).toBeUndefined();
+    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
     expect(resultData).toStrictEqual(model);
 
     result = await testService.create(model, REQUEST_CONFIG);

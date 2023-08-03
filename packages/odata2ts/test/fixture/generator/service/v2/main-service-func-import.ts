@@ -20,7 +20,7 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
     }
 
     const url = this.addFullPath(this._qMostPop.buildUrl());
-    const response = await this.client.get(url, requestConfig);
+    const response = await this.client.get(url, requestConfig, this.getDefaultHeaders());
     return this._qMostPop.convertResponse(response);
   }
 
@@ -33,7 +33,7 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
     }
 
     const url = this.addFullPath(this._qBestBook.buildUrl(params));
-    const response = await this.client.get(url, requestConfig);
+    const response = await this.client.get(url, requestConfig, this.getDefaultHeaders());
     return this._qBestBook.convertResponse(response);
   }
 
@@ -46,7 +46,7 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
     }
 
     const url = this.addFullPath(this._qPostBestBook.buildUrl(params));
-    const response = await this.client.post(url, undefined, requestConfig);
+    const response = await this.client.post(url, undefined, requestConfig, this.getDefaultHeaders());
     return this._qPostBestBook.convertResponse(response);
   }
 }

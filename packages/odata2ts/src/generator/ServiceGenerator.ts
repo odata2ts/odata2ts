@@ -557,12 +557,14 @@ class ServiceGenerator {
         `${returnType ? "const response = await " : "return"} this.client.${
           !isFunc
             ? // actions: since V4
-              `post(url, ${hasParams ? `${qOpProp}.convertUserParams(params)` : "{}"}, ${requestConfigParam.name})`
+              `post(url, ${hasParams ? `${qOpProp}.convertUserParams(params)` : "{}"}, ${
+                requestConfigParam.name
+              }, this.getDefaultHeaders())`
             : operation.usePost
             ? // V2 POST => BUT values are still query params, they are not part of the request body
-              `post(url, undefined, ${requestConfigParam.name})`
+              `post(url, undefined, ${requestConfigParam.name}, this.getDefaultHeaders())`
             : // functions: since V2
-              `get(url, ${requestConfigParam.name})`
+              `get(url, ${requestConfigParam.name}, this.getDefaultHeaders())`
         };`,
         returnType ? `return ${qOpProp}.convertResponse(response);` : "",
       ],
