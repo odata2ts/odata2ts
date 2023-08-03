@@ -16,7 +16,7 @@
     "test": "jest ./test"
   },
   "dependencies": {
-    "@odata2ts/http-client-api": "^0.3.0",
+    "@odata2ts/http-client-api": "^0.4.0",
     "@odata2ts/odata-service": "^0.16.0"
   },
   "devDependencies": {
