@@ -2,6 +2,7 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 
+import { DEFAULT_HEADERS, MERGE_HEADERS } from "../../src/RequestHeaders";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { PersonModel } from "../fixture/PersonModel";
 import { PersonModelV2Service } from "../fixture/v2/PersonModelV2Service";
@@ -27,6 +28,27 @@ describe("EntityTypeService V2 Test", () => {
   // TODO
   test.skip("entityType V2: query object", async () => {
     expect(testService.getQObject()).toMatchObject(new QPersonV2());
+  });
+
+  test("entityType: patch = merge", async () => {
+    const model: Partial<PersonModel> = { Age: "45" };
+    const odataModel = { Age: 45 };
+
+    odataClient.setModelResponse(odataModel);
+    let result = await testService.patch(model);
+    // @ts-ignore
+    const resultData = result.data.d;
+
+    expect(odataClient.lastUrl).toBe(EXPECTED_PATH);
+    expect(odataClient.lastOperation).toBe("POST");
+    expect(odataClient.lastData).toEqual({ Age: 45 });
+    expect(odataClient.lastRequestConfig).toBeUndefined();
+    expect(odataClient.additionalHeaders).toStrictEqual({ ...DEFAULT_HEADERS, ...MERGE_HEADERS });
+    expect(resultData).toStrictEqual(odataModel);
+
+    result = await testService.patch(model, REQUEST_CONFIG);
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
+    expect(result.data).toBeNull();
   });
 
   test("entityType V2: typing of query stuff", async () => {

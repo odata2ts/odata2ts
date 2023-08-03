@@ -1,3 +1,4 @@
+import { DEFAULT_HEADERS } from "../src/RequestHeaders";
 import {
   EnumCollectionService,
   EnumCollectionServiceConstructor,
@@ -38,12 +39,14 @@ export function commonCollectionTests(
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");
     expect(odataClient.lastRequestConfig).toBeUndefined();
+    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
 
     await enumService.query(undefined, REQUEST_CONFIG);
     expect(odataClient.lastUrl).toBe(ENUM_URL);
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");
     expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
+    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
   });
 
   test("collection: skip & top, but no select, expand", async () => {
@@ -94,6 +97,7 @@ export function commonCollectionTests(
     expect(odataClient.lastOperation).toBe("POST");
     expect(odataClient.lastData).toEqual(Feature.Feature1);
     expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
+    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
   });
 
   test("collection: no patch", async () => {
@@ -109,6 +113,7 @@ export function commonCollectionTests(
     expect(odataClient.lastOperation).toBe("PUT");
     expect(odataClient.lastData).toEqual(model);
     expect(odataClient.lastRequestConfig).toBeUndefined();
+    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
 
     await stringService.update(model, REQUEST_CONFIG);
     expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
@@ -121,6 +126,7 @@ export function commonCollectionTests(
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastRequestConfig).toBeUndefined();
+    expect(odataClient.additionalHeaders).toBeUndefined();
 
     await stringService.delete(REQUEST_CONFIG);
     expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);

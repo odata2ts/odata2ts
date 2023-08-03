@@ -1,6 +1,7 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
 
 import { EntitySetServiceV2, EntitySetServiceV4 } from "../src";
+import { DEFAULT_HEADERS } from "../src/RequestHeaders";
 import { EditablePersonModel, Feature, PersonId, PersonModel } from "./fixture/PersonModel";
 import { QPersonV2 } from "./fixture/v2/QPersonV2";
 import { QPersonV4 } from "./fixture/v4/QPersonV4";
@@ -75,6 +76,7 @@ export function commonEntitySetTests(
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");
     expect(odataClient.lastRequestConfig).toBeUndefined();
+    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
     expect(resultData).toStrictEqual(expectedData);
 
     await testService.query(undefined, REQUEST_CONFIG);
