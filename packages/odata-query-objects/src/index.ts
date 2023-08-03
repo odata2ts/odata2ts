@@ -4,6 +4,7 @@ export { QOrderByExpression } from "./QOrderByExpression";
 export { QSearchTerm, searchTerm } from "./QSearchTerm";
 export * from "./QSingletons";
 export { QueryObject } from "./QueryObject";
+export { getIdentityConverter } from "./IdentityConverter";
 
 export * from "./operation/ResponseHelper";
 export { QFunction } from "./operation/QFunction";

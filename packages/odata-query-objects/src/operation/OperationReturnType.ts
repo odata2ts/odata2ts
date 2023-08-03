@@ -3,6 +3,7 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { QParamModel } from "../param/QParamModel";
 import {
   ResponseConverter,
+  ResponseConverterV2,
   convertV2CollectionResponse,
   convertV2ModelResponse,
   convertV2ValueResponse,
@@ -33,7 +34,7 @@ function getResponseConverter(returnType: ReturnTypes): ResponseConverter | unde
   }
 }
 
-function getResponseConverterV2(returnType: ReturnTypes): ResponseConverter | undefined {
+function getResponseConverterV2(returnType: ReturnTypes): ResponseConverterV2 | undefined {
   switch (returnType) {
     case ReturnTypes.VALUE:
       return convertV2ValueResponse;
