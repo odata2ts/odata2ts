@@ -79,12 +79,9 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   test("create, update and delete product", async () => {
     jest.setTimeout(15000);
 
-    // we need a session id to modify stuff on the server
-    const editableService = new ODataDemoService(odataClient, BASE_URL_WITH_SESSION);
-
     // given
     const product: EditableProductModel = {
-      id: 887,
+      id: 884,
       description: "Test Description",
       name: "TestName",
       price: "12.88",
@@ -92,13 +89,20 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
       releaseDate: "2022-12-31T12:15:59", //WTF?! => this should be "/Date(...)"
     };
 
+    // we need a session id to modify stuff on the server
+    const editableService = new ODataDemoService(odataClient, BASE_URL_WITH_SESSION);
+    const productService = editableService.products(product.id);
+
+    try {
+      await productService.delete();
+    } catch (e) {}
+
     // when creating the product
     let result = await editableService.products().create(product);
     // then return object matches our product
     expect(result.data.d).toMatchObject({ ...product, releaseDate: "/Date(1672488959000)/" });
 
     // given a service for the new product
-    const productService = editableService.products(product.id);
     // when updating the description, we expect no error
     await productService.patch({ description: "Updated Desc" });
 

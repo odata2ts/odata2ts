@@ -2013,13 +2013,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/converter-big-number@npm:^0.0.1":
-  version: 0.0.1
-  resolution: "@odata2ts/converter-big-number@npm:0.0.1"
+"@odata2ts/converter-big-number@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@odata2ts/converter-big-number@npm:0.1.0"
   dependencies:
     "@odata2ts/converter-api": ^0.1.2
     bignumber.js: ">1"
-  checksum: 85dad33a6fda54c58390452f27c68ca89ca3cd069181435af037e2d66ed7fc1dff152ab4cb99eea81624cd63b9a2f35a32176d0e9b2959d4cc46519ae2351b28
+  checksum: acc4273404bbd0e7d0e14b9989c47bfb9046946b14466b76f875fd0ac7e638a39d5bdb13a3423dc37eff4c0eaee0662519aafe91f4d0543186adffb4091c90c4
   languageName: node
   linkType: hard
 
@@ -2045,8 +2045,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-bookshop@workspace:examples/bookshop"
   dependencies:
-    "@odata2ts/converter-big-number": ^0.0.1
-    "@odata2ts/http-client-axios": ^0.8.1
+    "@odata2ts/converter-big-number": ^0.1.0
+    "@odata2ts/http-client-axios": ^0.9.0
     "@odata2ts/odata-service": ^0.16.0
     "@odata2ts/odata2ts": ^0.28.0
     "@sap/cds": ">=5.9"
@@ -2083,7 +2083,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-odata-v2@workspace:examples/odata-v2"
   dependencies:
-    "@odata2ts/http-client-axios": ^0.8.1
+    "@odata2ts/http-client-axios": ^0.9.0
     "@odata2ts/odata-service": ^0.16.0
     "@odata2ts/odata2ts": ^0.28.0
     "@types/jest": ^29.5.2
@@ -2101,7 +2101,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-renaming@workspace:examples/renaming-trippin"
   dependencies:
-    "@odata2ts/http-client-api": ^0.3.0
+    "@odata2ts/http-client-api": ^0.4.0
     "@odata2ts/odata-service": ^0.16.0
     "@odata2ts/odata2ts": ^0.28.0
     "@types/jest": ^29.5.2
@@ -2118,7 +2118,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-trippin@workspace:examples/trippin"
   dependencies:
-    "@odata2ts/http-client-axios": ^0.8.1
+    "@odata2ts/http-client-axios": ^0.9.0
     "@odata2ts/odata-service": ^0.16.0
     "@odata2ts/odata2ts": ^0.28.0
     "@types/jest": ^29.5.2
@@ -2139,13 +2139,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/http-client-api@npm:^0.3.0":
-  version: 0.3.0
-  resolution: "@odata2ts/http-client-api@npm:0.3.0"
-  checksum: 33449f720d02f964b0f43687d4cab4f82097188f5d0dd19590b8e14c04a2d8f1bb22b12d942e7be03e06f6b454563555b10746dd43e2aabe7111c4562066a171
-  languageName: node
-  linkType: hard
-
 "@odata2ts/http-client-api@npm:^0.4.0":
   version: 0.4.0
   resolution: "@odata2ts/http-client-api@npm:0.4.0"
@@ -2153,23 +2146,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/http-client-axios@npm:^0.8.1":
-  version: 0.8.1
-  resolution: "@odata2ts/http-client-axios@npm:0.8.1"
+"@odata2ts/http-client-axios@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "@odata2ts/http-client-axios@npm:0.9.0"
   dependencies:
-    "@odata2ts/http-client-base": ^0.2.0
+    "@odata2ts/http-client-base": ^0.3.0
   peerDependencies:
     axios: ^0.27.0 || ^1.0.0
-  checksum: dd1544d95dfdf51d7a0b996c56aa82d9fc5a2be03804dddfb33d80497e76b897bab82c42d325cb4f92ac263defc68a6a6b4ae2b5becaf32bde44362b11825127
+  checksum: 57fa81acddb14a3fa7926f99bff0e5cc7a4357f8c32fc1cf2e1463b384df66e8310462c2dbcb2d9c136fae66ec2db7332ce8f8367bdbbea536fbe198a01e095f
   languageName: node
   linkType: hard
 
-"@odata2ts/http-client-base@npm:^0.2.0":
-  version: 0.2.0
-  resolution: "@odata2ts/http-client-base@npm:0.2.0"
+"@odata2ts/http-client-base@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@odata2ts/http-client-base@npm:0.3.0"
   dependencies:
-    "@odata2ts/http-client-api": ^0.3.0
-  checksum: a3f0526de07e4ad7faa5db8b827f68961e5f9d5070897677a103c2a0f4b2817fa5109140e3102534a4d48319a90aa49ff8d4f44f59af80f059724dbf303ccaa0
+    "@odata2ts/http-client-api": ^0.4.0
+  checksum: 4488e8abff20d10d5ed4766e390d6568258cd09b55e1f81513184fe17361241a36d9298e6e36daa9baa3606f4d1b91509a4a62875c3cb799d8ecd4cba0f818c8
   languageName: node
   linkType: hard
 
@@ -2250,7 +2243,7 @@ __metadata:
     "@odata2ts/converter-api": ^0.1.2
     "@odata2ts/converter-runtime": ^0.2.2
     "@odata2ts/converter-v2-to-v4": ^0.1.4
-    "@odata2ts/http-client-api": ^0.1.0
+    "@odata2ts/http-client-api": ^0.4.0
     "@odata2ts/odata-core": ^0.3.8
     "@odata2ts/odata-query-objects": ^0.19.0
     "@odata2ts/odata-service": ^0.16.0

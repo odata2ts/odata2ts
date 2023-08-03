@@ -28,8 +28,8 @@
     "srv"
   ],
   "dependencies": {
-    "@odata2ts/converter-big-number": "^0.0.1",
-    "@odata2ts/http-client-axios": "^0.8.1",
+    "@odata2ts/converter-big-number": "^0.1.0",
+    "@odata2ts/http-client-axios": "^0.9.0",
     "@odata2ts/odata-service": "^0.16.0",
     "@sap/cds": ">=5.9",
     "@sap/cds-odata-v2-adapter-proxy": "^1.9.21",

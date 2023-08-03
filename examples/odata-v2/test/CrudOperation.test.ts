@@ -1,10 +1,10 @@
 import { EditableProductModel } from "../build/odata/ODataDemoModel";
 import { ODataDemoService } from "../build/odata/ODataDemoService";
-import { MockODataClient } from "./MockODataClient";
+import { MockClient } from "./MockClient";
 
 describe("V2 CRUD Functionality Tests", function () {
   const BASE_URL = "test";
-  const odataClient = new MockODataClient();
+  const odataClient = new MockClient(true);
   const testService = new ODataDemoService(odataClient, BASE_URL);
 
   test("create", () => {
@@ -30,6 +30,10 @@ describe("V2 CRUD Functionality Tests", function () {
       Description: "Description",
       DiscontinuedDate: null,
     });
+    expect(odataClient.additionalHeaders).toStrictEqual({
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    });
   });
 
   test("update", () => {
@@ -53,6 +57,10 @@ describe("V2 CRUD Functionality Tests", function () {
       ReleaseDate: "xyz",
       DiscontinuedDate: null,
     });
+    expect(odataClient.additionalHeaders).toStrictEqual({
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    });
   });
 
   test("patch => merge", () => {
@@ -61,10 +69,14 @@ describe("V2 CRUD Functionality Tests", function () {
     };
     testService.products(123).patch(model);
 
-    expect(odataClient.lastOperation).toBe("MERGE");
+    expect(odataClient.lastOperation).toBe("POST");
     expect(odataClient.lastUrl).toBe("test/Products(123)");
     expect(odataClient.lastData).toStrictEqual({
       Description: "test",
+    });
+    expect(odataClient.additionalHeaders).toMatchObject({
+      "X-Http-Method": "MERGE",
+      "Content-Type": "application/json",
     });
   });
 
