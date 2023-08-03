@@ -26,6 +26,7 @@ export abstract class EntitySetServiceV4<
    * @param name name of the service
    * @param qModel query object
    * @param idFunction the id function
+   * @param bigNumbersAsString
    * @protected
    */
   protected constructor(
@@ -85,7 +86,12 @@ export abstract class EntitySetServiceV4<
     model: EditableT,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ReturnType> {
-    const result = await this.doPost<ODataModelResponseV4<T> | void>(this.qModel.convertToOData(model), requestConfig);
+    const result = await this.client.post<ODataModelResponseV4<T> | void>(
+      this.getPath(),
+      this.qModel.convertToOData(model),
+      requestConfig,
+      this.getDefaultHeaders()
+    );
     return convertV4ModelResponse(result, this.qResponseType);
   }
 

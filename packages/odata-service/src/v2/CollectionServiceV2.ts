@@ -28,7 +28,12 @@ export class CollectionServiceV2<
     model: EditableT,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<T>> {
-    const result = await this.doPost<ODataModelResponseV2<T>>(this.qModel.convertToOData(model), requestConfig);
+    const result = await this.client.post<ODataModelResponseV2<T>>(
+      this.getPath(),
+      this.qModel.convertToOData(model),
+      requestConfig,
+      this.getDefaultHeaders()
+    );
     return convertV2ModelResponse(result, this.qResponseType);
   }
 
@@ -39,13 +44,15 @@ export class CollectionServiceV2<
    * @param requestConfig
    */
   public update(models: Array<EditableT>, requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
-    return this.doPut(this.qModel.convertToOData(models), requestConfig);
+    return this.client.put(this.getPath(), this.qModel.convertToOData(models), requestConfig, this.getDefaultHeaders());
   }
 
   /**
    * Delete the whole collection.
    */
-  public delete = this.doDelete;
+  public async delete(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
+    return this.client.delete(this.getPath(), requestConfig);
+  }
 
   /**
    * Query collection.

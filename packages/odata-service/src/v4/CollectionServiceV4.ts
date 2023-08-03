@@ -28,7 +28,12 @@ export class CollectionServiceV4<
     model: EditableT,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataModelResponseV4<T>> {
-    const result = await this.doPost<void | ODataModelResponseV4<T>>(this.qModel.convertToOData(model), requestConfig);
+    const result = await this.client.post<void | ODataModelResponseV4<T>>(
+      this.getPath(),
+      this.qModel.convertToOData(model),
+      requestConfig,
+      this.getDefaultHeaders()
+    );
     return convertV4ModelResponse(result, this.qResponseType);
   }
 
@@ -42,9 +47,11 @@ export class CollectionServiceV4<
     models: Array<EditableT>,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataCollectionResponseV4<T>> {
-    const result = await this.doPut<void | ODataCollectionResponseV4<T>>(
+    const result = await this.client.put<void | ODataCollectionResponseV4<T>>(
+      this.getPath(),
       this.qModel.convertToOData(models),
-      requestConfig
+      requestConfig,
+      this.getDefaultHeaders()
     );
     return convertV4ModelResponse(result, this.qResponseType);
   }
@@ -52,7 +59,9 @@ export class CollectionServiceV4<
   /**
    * Delete the whole collection.
    */
-  public delete = this.doDelete;
+  public async delete(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
+    return this.client.delete(this.getPath(), requestConfig);
+  }
 
   /**
    * Query collection of primitive values.

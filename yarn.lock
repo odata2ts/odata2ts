@@ -2146,6 +2146,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@odata2ts/http-client-api@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "@odata2ts/http-client-api@npm:0.4.0"
+  checksum: 077de729be5ffb3e33b1cdff1eb1d47939f7714c994693e87e2ad147f229dfd96a02488595415b9c546780585de498fd543701ee3740b91cc8e52133c094e5f7
+  languageName: node
+  linkType: hard
+
 "@odata2ts/http-client-axios@npm:^0.8.1":
   version: 0.8.1
   resolution: "@odata2ts/http-client-axios@npm:0.8.1"
@@ -2222,7 +2229,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
-    "@odata2ts/http-client-api": ^0.3.0
+    "@odata2ts/http-client-api": ^0.4.0
     "@odata2ts/odata-query-builder": ^0.16.3
     "@odata2ts/odata-query-objects": ^0.19.0
     "@types/jest": ^29.5.2
