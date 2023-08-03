@@ -1,7 +1,7 @@
 import { ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
 import { QEnumCollection } from "@odata2ts/odata-query-objects";
 
-import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4 } from "../../../src";
+import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4, PrimitiveTypeServiceV4 } from "../../../src";
 import { EditablePersonModel, GetSomethingFunctionParams, PersonId, PersonModel } from "../PersonModel";
 import { QPersonIdFunction } from "../QPerson";
 import { QGetSomethingFunction, QPersonV4, qPersonV4 } from "./QPersonV4";
@@ -16,6 +16,15 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
 
   constructor(client: ODataHttpClient, basePath: string, name: string, bigNumbersAsString?: boolean) {
     super(client, basePath, name, new QPersonV4(), bigNumbersAsString);
+  }
+
+  public userName() {
+    return new PrimitiveTypeServiceV4<ClientType, "string">(
+      this.client,
+      this.getPath(),
+      "UserName",
+      this.qModel.userName.converter
+    );
   }
 
   public get features() {
