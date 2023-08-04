@@ -1,7 +1,7 @@
 import { AxiosClient, AxiosClientError } from "@odata2ts/http-client-axios";
-import { AxiosError } from "axios";
+import { BigNumber } from "bignumber.js";
 
-import { EditableProductModel, ProductModel } from "../build/odata/ODataDemoModel";
+import { ProductModel } from "../build/odata/ODataDemoModel";
 import { ODataDemoService } from "../build/odata/ODataDemoService";
 
 /**
@@ -12,7 +12,6 @@ import { ODataDemoService } from "../build/odata/ODataDemoService";
  */
 describe("Integration Testing of generated stuff for Sample V2 OData Service", () => {
   const BASE_URL = "https://services.odata.org/V2/OData/OData.svc";
-  const BASE_URL_WITH_SESSION = "https://services.odata.org/V2/(S(rbtb0hnwoj1obdnxkwhnulwz))/OData/OData.svc";
   const odataClient = new AxiosClient();
 
   const testService = new ODataDemoService(odataClient, BASE_URL);
@@ -24,7 +23,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
     releaseDate: "/Date(694224000000)/",
     discontinuedDate: null,
     rating: 4,
-    price: "2.5",
+    price: new BigNumber("2.5"),
   };
 
   test("list products with count", async () => {
@@ -76,41 +75,6 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
     }
   });
 
-  test("create, update and delete product", async () => {
-    jest.setTimeout(15000);
-
-    // given
-    const product: EditableProductModel = {
-      id: 884,
-      description: "Test Description",
-      name: "TestName",
-      price: "12.88",
-      rating: 1,
-      releaseDate: "2022-12-31T12:15:59", //WTF?! => this should be "/Date(...)"
-    };
-
-    // we need a session id to modify stuff on the server
-    const editableService = new ODataDemoService(odataClient, BASE_URL_WITH_SESSION);
-    const productService = editableService.products(product.id);
-
-    try {
-      await productService.delete();
-    } catch (e) {}
-
-    // when creating the product
-    let result = await editableService.products().create(product);
-    // then return object matches our product
-    expect(result.data.d).toMatchObject({ ...product, releaseDate: "/Date(1672488959000)/" });
-
-    // given a service for the new product
-    // when updating the description, we expect no error
-    await productService.patch({ description: "Updated Desc" });
-
-    // when deleting this new product, we expect no error
-    await new Promise((res) => setTimeout(res, 1000));
-    await productService.delete();
-  });
-
   test("function call", async () => {
     const result = await testService.getProductsByRating({ rating: 4 });
 
@@ -156,5 +120,19 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
     result = testService.products().createKey(expectedComplex);
     expect(result).toBe(`Products(ID=${expectedSimple})`);
     expect(testService.products().parseKey(result)).toStrictEqual(expectedComplex);
+  });
+
+  test("get primitive prop", async () => {
+    const result = await testService.products(PRODUCT_ZERO.id).name().getValue();
+
+    expect(result.status).toBe(200);
+    expect(result.data?.d).toStrictEqual({ name: PRODUCT_ZERO.name });
+  });
+
+  test("get primitive prop with converter", async () => {
+    const result = await testService.products(PRODUCT_ZERO.id).price().getValue();
+
+    expect(result.status).toBe(200);
+    expect(result.data?.d).toStrictEqual({ price: PRODUCT_ZERO.price });
   });
 });

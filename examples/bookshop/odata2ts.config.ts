@@ -9,6 +9,7 @@ const config: ConfigFileOptions = {
   prettier: true,
   allowRenaming: true,
   v4BigNumberAsString: true,
+  enablePrimitivePropertyServices: true,
   converters: ["@odata2ts/converter-big-number"],
   naming: {
     models: {

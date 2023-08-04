@@ -151,4 +151,20 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     // createdAt is still set
     expect(result.data!.createdAt!.length).toBe(24);
   });
+
+  test("get primitive property", async () => {
+    const response = await testService.books(271).price().getValue();
+
+    expect(response.status).toBe(200);
+    expect(response.data?.value).toBeInstanceOf(BigNumber);
+    expect(response.data?.value).toStrictEqual(new BigNumber(150));
+  });
+
+  test("update primitive property", async () => {
+    const response = await testService.books(271).price().updateValue(new BigNumber(999));
+
+    expect(response.status).toBe(200);
+    expect(response.data?.value).toBeInstanceOf(BigNumber);
+    expect(response.data?.value).toStrictEqual(new BigNumber(999));
+  });
 });

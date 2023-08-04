@@ -70,6 +70,36 @@ describe("Integration Testing of Service Generation", () => {
     expect(result.data).toMatchObject(expected);
   });
 
+  test("get primitive prop value", async () => {
+    const result = await trippinService.people("russellwhyte").firstName().getValue();
+    expect(result.status).toBe(200);
+    expect(result.data).toMatchObject({ value: "Russell" });
+  });
+
+  test("update primitive prop value", async () => {
+    // Trippin Bug: We get 400 => not supported actually
+    try {
+      await trippinService.people("russellwhyte").middleName().updateValue("k2");
+      expect(true).toBe(false);
+    } catch (e) {
+      const error = e as AxiosClientError;
+      expect(error.status).toBe(400);
+      expect(error.message).toMatch("Model state is not valid with message");
+    }
+  });
+
+  test("delete primitive prop value", async () => {
+    // Trippin Bug: We get 500 => not supported actually
+    try {
+      await trippinService.people("russellwhyte").firstName().deleteValue();
+      expect(true).toBe(false);
+    } catch (e) {
+      const error = e as AxiosClientError;
+      expect(error.status).toBe(500);
+      expect(error.message).toMatch("Element type cannot be found for 'Edm.String'");
+    }
+  });
+
   test("get entity with related entities", async () => {
     const expectedBestFriend: Partial<PersonModel> = {
       firstName: "Scott",

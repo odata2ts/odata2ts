@@ -2083,6 +2083,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-odata-v2@workspace:examples/odata-v2"
   dependencies:
+    "@odata2ts/converter-big-number": ^0.1.0
     "@odata2ts/http-client-axios": ^0.9.0
     "@odata2ts/odata-service": ^0.16.0
     "@odata2ts/odata2ts": ^0.28.0
