@@ -8,7 +8,7 @@ import {
   convertV2ModelResponse,
 } from "@odata2ts/odata-query-objects";
 
-import { ServiceBaseV2 } from "./ServiceBaseV2";
+import { ServiceStateHelperV2 } from "./ServiceStateHelperV2";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
 
@@ -17,7 +17,17 @@ export class CollectionServiceV2<
   T,
   Q extends QueryObject,
   EditableT = PrimitiveExtractor<T>
-> extends ServiceBaseV2<T, Q> {
+> {
+  protected readonly __base: ServiceStateHelperV2<T, Q>;
+
+  public constructor(client: ODataHttpClient, basePath: string, name: string, qModel: Q) {
+    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel);
+  }
+
+  public getPath() {
+    return this.__base.path;
+  }
+
   /**
    * Add a new item to the collection.
    *
@@ -28,13 +38,14 @@ export class CollectionServiceV2<
     model: EditableT,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataModelResponseV2<T>> {
-    const result = await this.client.post<ODataModelResponseV2<T>>(
-      this.getPath(),
-      this.qModel.convertToOData(model),
+    const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
+    const result = await client.post<ODataModelResponseV2<T>>(
+      path,
+      qModel.convertToOData(model),
       requestConfig,
-      this.getDefaultHeaders()
+      getDefaultHeaders()
     );
-    return convertV2ModelResponse(result, this.qResponseType);
+    return convertV2ModelResponse(result, qResponseType);
   }
 
   /**
@@ -44,14 +55,17 @@ export class CollectionServiceV2<
    * @param requestConfig
    */
   public update(models: Array<EditableT>, requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
-    return this.client.put(this.getPath(), this.qModel.convertToOData(models), requestConfig, this.getDefaultHeaders());
+    const { client, qModel, path, getDefaultHeaders } = this.__base;
+
+    return client.put(path, qModel.convertToOData(models), requestConfig, getDefaultHeaders());
   }
 
   /**
    * Delete the whole collection.
    */
   public async delete(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
-    return this.client.delete(this.getPath(), requestConfig);
+    const { client, path } = this.__base;
+    return client.delete(path, requestConfig);
   }
 
   /**
@@ -61,7 +75,13 @@ export class CollectionServiceV2<
     queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV2<ReturnType>> {
-    const response = await this.doQuery<ODataCollectionResponseV2<any>>(queryFn, requestConfig);
-    return convertV2CollectionResponse(response, this.qResponseType);
+    const { client, qResponseType, getDefaultHeaders, applyQueryBuilder } = this.__base;
+
+    const response = await client.get<ODataCollectionResponseV2<any>>(
+      applyQueryBuilder(queryFn),
+      requestConfig,
+      getDefaultHeaders()
+    );
+    return convertV2CollectionResponse(response, qResponseType);
   }
 }

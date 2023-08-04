@@ -10,9 +10,17 @@ import {
 
 import { QParamModel } from "../param/QParamModel";
 
+export interface Convertible extends Pick<QParamModel<any, any>, "convertFrom" | "convertTo"> {}
+export type ConvertibleV2 = Convertible & Pick<QParamModel<any, any>, "getName" | "getMappedName">;
+
 export type ResponseConverter = (
   response: HttpResponseModel<any>,
-  qResponseType: QParamModel<any, any>
+  qResponseType: Convertible
+) => HttpResponseModel<any>;
+
+export type ResponseConverterV2 = (
+  response: HttpResponseModel<any>,
+  qResponseType: ConvertibleV2
 ) => HttpResponseModel<any>;
 
 /*
@@ -36,7 +44,7 @@ function getValueForV2OrV1ResponseModels(responseData: ODataValueResponseV2<any>
 }
 */
 
-export const convertV2ValueResponse: ResponseConverter = (response, qResponseType) => {
+export const convertV2ValueResponse: ResponseConverterV2 = (response, qResponseType) => {
   const asV2Model = response.data as ODataValueResponseV2<any>;
   const value = asV2Model?.d;
   if (typeof value === "object") {
@@ -84,7 +92,9 @@ export const convertV2CollectionResponse: ResponseConverter = (response, qRespon
 
 export const convertV4ValueResponse: ResponseConverter = (response, qResponseType) => {
   const asV4Value = response.data?.value as ODataValueResponseV4<any>;
-  if (asV4Value) {
+  if (response.status === 204) {
+    response.data = { value: null };
+  } else if (asV4Value !== undefined && asV4Value !== null) {
     response.data.value = qResponseType.convertFrom(asV4Value);
   }
   return response;

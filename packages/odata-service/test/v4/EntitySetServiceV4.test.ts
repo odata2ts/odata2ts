@@ -36,10 +36,6 @@ describe("V4 EntitySetService Test", () => {
     });
   });
 
-  test("entitySet: QObject", async () => {
-    expect(testService.getQObject()).toBe(qPersonV4);
-  });
-
   test("entitySet: create", async () => {
     const model: EditablePersonModel = {
       userName: "tester",

@@ -25,11 +25,6 @@ describe("EntityTypeService V2 Test", () => {
     testService = new PersonModelV2Service(odataClient, BASE_URL, NAME);
   });
 
-  // TODO
-  test.skip("entityType V2: query object", async () => {
-    expect(testService.getQObject()).toMatchObject(new QPersonV2());
-  });
-
   test("entityType: patch = merge", async () => {
     const model: Partial<PersonModel> = { Age: "45" };
     const odataModel = { Age: 45 };

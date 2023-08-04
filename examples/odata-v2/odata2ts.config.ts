@@ -6,6 +6,8 @@ const config: ConfigFileOptions = {
   // this demo service does not generate IDs, but requires the client to create new IDs
   disableAutoManagedKey: true,
   allowRenaming: true,
+  enablePrimitivePropertyServices: true,
+  converters: ["@odata2ts/converter-big-number"],
   naming: {
     models: {
       suffix: "Model",

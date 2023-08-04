@@ -24,17 +24,14 @@
     "LICENSE"
   ],
   "keywords": [
-    "odatats",
     "odata",
-    "odata types",
-    "odata versions",
-    "odata v2",
-    "odata v4",
-    "typescript",
-    "ts",
     "types",
     "enum",
-    "response model"
+    "v2",
+    "v4",
+    "typescript",
+    "ts",
+    "odatats"
   ],
   "devDependencies": {
     "@types/node": "^20.3.0",

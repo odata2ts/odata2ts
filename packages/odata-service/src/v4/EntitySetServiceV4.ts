@@ -8,7 +8,7 @@ import {
   convertV4ModelResponse,
 } from "@odata2ts/odata-query-objects";
 
-import { ServiceBaseV4 } from "./ServiceBaseV4";
+import { ServiceStateHelperV4 } from "./ServiceStateHelperV4";
 
 export abstract class EntitySetServiceV4<
   ClientType extends ODataHttpClient,
@@ -16,7 +16,10 @@ export abstract class EntitySetServiceV4<
   EditableT,
   Q extends QueryObject,
   EIdType
-> extends ServiceBaseV4<T, Q> {
+> {
+  protected readonly __base: ServiceStateHelperV4<T, Q>;
+  protected readonly __idFunction: QFunction<EIdType>;
+
   /**
    * Overriding the constructor to support creation of EntityTypeService from within this service.
    * Also support key spec.
@@ -25,7 +28,7 @@ export abstract class EntitySetServiceV4<
    * @param basePath the base URL path
    * @param name name of the service
    * @param qModel query object
-   * @param idFunction the id function
+   * @param _idFunction the id function
    * @param bigNumbersAsString
    * @protected
    */
@@ -34,10 +37,15 @@ export abstract class EntitySetServiceV4<
     basePath: string,
     name: string,
     qModel: Q,
-    protected idFunction: QFunction<EIdType>,
-    bigNumbersAsString?: boolean
+    idFunction: QFunction<EIdType>,
+    bigNumbersAsString: boolean = false
   ) {
-    super(client, basePath, name, qModel, bigNumbersAsString);
+    this.__base = new ServiceStateHelperV4<T, Q>(client, basePath, name, qModel, bigNumbersAsString);
+    this.__idFunction = idFunction;
+  }
+
+  public getPath() {
+    return this.__base.path;
   }
 
   /**
@@ -45,7 +53,7 @@ export abstract class EntitySetServiceV4<
    * Supports composite keys.
    */
   public getKeySpec() {
-    return this.idFunction.getParams();
+    return this.__idFunction.getParams();
   }
 
   /**
@@ -58,7 +66,7 @@ export abstract class EntitySetServiceV4<
    * @param notEncoded if set to {@code true}, special chars are not escaped
    */
   public createKey(id: EIdType, notEncoded?: boolean): string {
-    const url = this.idFunction.buildUrl(id, notEncoded);
+    const url = this.__idFunction.buildUrl(id, notEncoded);
     return url.startsWith("/") ? url.substring(1) : url;
   }
 
@@ -72,7 +80,7 @@ export abstract class EntitySetServiceV4<
    * @param notDecoded if set to {@code true}, encoded special chars are not decoded
    */
   public parseKey(keyPath: string, notDecoded?: boolean): EIdType {
-    return this.idFunction.parseUrl(keyPath, notDecoded);
+    return this.__idFunction.parseUrl(keyPath, notDecoded);
   }
 
   /**
@@ -86,13 +94,15 @@ export abstract class EntitySetServiceV4<
     model: EditableT,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ReturnType> {
-    const result = await this.client.post<ODataModelResponseV4<T> | void>(
-      this.getPath(),
-      this.qModel.convertToOData(model),
+    const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
+
+    const result = await client.post<ODataModelResponseV4<T> | void>(
+      path,
+      qModel.convertToOData(model),
       requestConfig,
-      this.getDefaultHeaders()
+      getDefaultHeaders()
     );
-    return convertV4ModelResponse(result, this.qResponseType);
+    return convertV4ModelResponse(result, qResponseType);
   }
 
   /**
@@ -105,7 +115,9 @@ export abstract class EntitySetServiceV4<
     queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<ReturnType>> {
-    const response = await this.doQuery<ODataCollectionResponseV4<any>>(queryFn, requestConfig);
-    return convertV4CollectionResponse(response, this.qResponseType);
+    const { client, qResponseType, applyQueryBuilder, getDefaultHeaders } = this.__base;
+
+    const response = await client.get(applyQueryBuilder(queryFn), requestConfig, getDefaultHeaders());
+    return convertV4CollectionResponse(response, qResponseType);
   }
 }

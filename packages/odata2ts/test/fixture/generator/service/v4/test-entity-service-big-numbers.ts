@@ -21,9 +21,10 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public bigNumberCollection() {
     if (!this._bigNumberCollection) {
+      const { client, path } = this.__base;
       this._bigNumberCollection = new CollectionServiceV4(
-        this.client,
-        this.getPath(),
+        client,
+        path,
         "bigNumberCollection",
         qBigNumberCollection,
         true

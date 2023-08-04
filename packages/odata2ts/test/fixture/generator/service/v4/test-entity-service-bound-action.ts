@@ -26,8 +26,9 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
       this._bookQLike = new Book_QLike();
     }
 
-    const url = this.addFullPath(this._bookQLike.buildUrl());
-    return this.client.post(url, {}, requestConfig, this.getDefaultHeaders());
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const url = addFullPath(this._bookQLike.buildUrl());
+    return client.post(url, {}, requestConfig, getDefaultHeaders());
   }
 
   public async rate(
@@ -38,12 +39,13 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
       this._bookQRate = new Book_QRate();
     }
 
-    const url = this.addFullPath(this._bookQRate.buildUrl());
-    const response = await this.client.post(
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const url = addFullPath(this._bookQRate.buildUrl());
+    const response = await client.post(
       url,
       this._bookQRate.convertUserParams(params),
       requestConfig,
-      this.getDefaultHeaders()
+      getDefaultHeaders()
     );
     return this._bookQRate.convertResponse(response);
   }
@@ -56,12 +58,13 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
       this._bookQRatings = new Book_QRatings();
     }
 
-    const url = this.addFullPath(this._bookQRatings.buildUrl());
-    const response = await this.client.post(
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const url = addFullPath(this._bookQRatings.buildUrl());
+    const response = await client.post(
       url,
       this._bookQRatings.convertUserParams(params),
       requestConfig,
-      this.getDefaultHeaders()
+      getDefaultHeaders()
     );
     return this._bookQRatings.convertResponse(response);
   }

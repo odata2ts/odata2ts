@@ -8,7 +8,7 @@ import {
   convertV4ModelResponse,
 } from "@odata2ts/odata-query-objects";
 
-import { ServiceBaseV4 } from "./ServiceBaseV4";
+import { ServiceStateHelperV4 } from "./ServiceStateHelperV4";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
 
@@ -17,7 +17,23 @@ export class CollectionServiceV4<
   T,
   Q extends QueryObject,
   EditableT = PrimitiveExtractor<T>
-> extends ServiceBaseV4<T, Q> {
+> {
+  protected readonly __base: ServiceStateHelperV4<T, Q>;
+
+  public constructor(
+    client: ODataHttpClient,
+    basePath: string,
+    name: string,
+    qModel: Q,
+    bigNumbersAsString: boolean = false
+  ) {
+    this.__base = new ServiceStateHelperV4<T, Q>(client, basePath, name, qModel, bigNumbersAsString);
+  }
+
+  public getPath() {
+    return this.__base.path;
+  }
+
   /**
    * Add a new item to the collection.
    *
@@ -28,13 +44,15 @@ export class CollectionServiceV4<
     model: EditableT,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataModelResponseV4<T>> {
-    const result = await this.client.post<void | ODataModelResponseV4<T>>(
-      this.getPath(),
-      this.qModel.convertToOData(model),
+    const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
+
+    const result = await client.post<void | ODataModelResponseV4<T>>(
+      path,
+      qModel.convertToOData(model),
       requestConfig,
-      this.getDefaultHeaders()
+      getDefaultHeaders()
     );
-    return convertV4ModelResponse(result, this.qResponseType);
+    return convertV4ModelResponse(result, qResponseType);
   }
 
   /**
@@ -47,20 +65,24 @@ export class CollectionServiceV4<
     models: Array<EditableT>,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataCollectionResponseV4<T>> {
-    const result = await this.client.put<void | ODataCollectionResponseV4<T>>(
-      this.getPath(),
-      this.qModel.convertToOData(models),
+    const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
+
+    const result = await client.put<void | ODataCollectionResponseV4<T>>(
+      path,
+      qModel.convertToOData(models),
       requestConfig,
-      this.getDefaultHeaders()
+      getDefaultHeaders()
     );
-    return convertV4ModelResponse(result, this.qResponseType);
+    return convertV4ModelResponse(result, qResponseType);
   }
 
   /**
    * Delete the whole collection.
    */
   public async delete(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
-    return this.client.delete(this.getPath(), requestConfig);
+    const { client, path } = this.__base;
+
+    return client.delete(path, requestConfig);
   }
 
   /**
@@ -70,7 +92,9 @@ export class CollectionServiceV4<
     queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ODataCollectionResponseV4<ReturnType>> {
-    const response = await this.doQuery<ODataCollectionResponseV4<any>>(queryFn, requestConfig);
-    return convertV4CollectionResponse(response, this.qResponseType);
+    const { client, getDefaultHeaders, applyQueryBuilder, qResponseType } = this.__base;
+
+    const response = await client.get(applyQueryBuilder(queryFn), requestConfig, getDefaultHeaders());
+    return convertV4CollectionResponse(response, qResponseType);
   }
 }

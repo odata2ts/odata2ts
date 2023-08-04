@@ -4,6 +4,7 @@ import {
   QBooleanParam,
   QComplexParam,
   ResponseConverter,
+  ResponseConverterV2,
   convertV2CollectionResponse,
   convertV2ModelResponse,
   convertV2ValueResponse,
@@ -38,7 +39,7 @@ describe("ResponseHelper Tests", function () {
 
   const checkThatNonMatchingInputPassesAsItIs = (
     nonMatchingResponses: Array<any>,
-    responseConverter: ResponseConverter,
+    responseConverter: ResponseConverter | ResponseConverterV2,
     qObject: QParamModel<any, any>
   ) => {
     nonMatchingResponses.forEach((nm) => {

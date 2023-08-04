@@ -117,6 +117,9 @@ PATCH {{baseUrl}}/Products(998)
 Accept: {{contentType}}
 Content-Type: {{contentType}}
 
+{
+  "Description": "Test Descriptioning!!!"
+}
 
 ### @name update prop
 PUT {{baseUrl}}/Products(998)/Description

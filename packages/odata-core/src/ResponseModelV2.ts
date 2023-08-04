@@ -29,7 +29,7 @@ export interface ODataModelResponseV2<T> {
 /**
  * Response to a query for a single property of primitive type.
  */
-export interface ODataValueResponseV2<T extends number | string | boolean | null> {
+export interface ODataValueResponseV2<T> {
   d: { [key: string]: T };
 }
 

@@ -54,4 +54,12 @@ describe("Trippin: Testing Query Functionality", function () {
     expect(ODATA_CLIENT.lastOperation).toBe("GET");
     expect(ODATA_CLIENT.lastData).toBeUndefined();
   });
+
+  test("primitive type: get value", async () => {
+    await TRIPPIN.people("tester").age().getValue();
+
+    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/Age`);
+    expect(ODATA_CLIENT.lastOperation).toBe("GET");
+    expect(ODATA_CLIENT.lastData).toBeUndefined();
+  });
 });

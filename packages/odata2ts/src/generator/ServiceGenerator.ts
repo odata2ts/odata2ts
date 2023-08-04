@@ -25,6 +25,7 @@ import {
   SingletonType,
 } from "../data-model/DataTypeModel";
 import { NamingHelper } from "../data-model/NamingHelper";
+import { ConfigFileOptions } from "../OptionModel";
 import { ProjectManager } from "../project/ProjectManager";
 import { ImportContainer } from "./ImportContainer";
 
@@ -38,14 +39,17 @@ const RESPONSE_TYPES = {
 
 export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "properties" | "methods">> {}
 
+export interface ServiceGeneratorOptions
+  extends Pick<ConfigFileOptions, "enablePrimitivePropertyServices" | "v4BigNumberAsString"> {}
+
 export async function generateServices(
   dataModel: DataModel,
   project: ProjectManager,
   version: ODataVersions,
   namingHelper: NamingHelper,
-  v4BigNumberAsString: boolean = false
+  options?: ServiceGeneratorOptions
 ) {
-  const generator = new ServiceGenerator(dataModel, project, version, namingHelper, v4BigNumberAsString);
+  const generator = new ServiceGenerator(dataModel, project, version, namingHelper, options);
   return generator.generate();
 }
 
@@ -55,11 +59,11 @@ class ServiceGenerator {
     private project: ProjectManager,
     private version: ODataVersions,
     private namingHelper: NamingHelper,
-    private v4BigNumberAsString: boolean
+    private options: ServiceGeneratorOptions = {}
   ) {}
 
   private isV4BigNumber() {
-    return this.v4BigNumberAsString && this.version === ODataVersions.V4;
+    return this.options.v4BigNumberAsString && this.version === ODataVersions.V4;
   }
 
   public async generate(): Promise<void> {
@@ -181,9 +185,10 @@ class ServiceGenerator {
       ],
       statements: [
         `const fieldName = "${odataPropName}";`,
+        `const { client, path } = this.__base;`,
         'return typeof id === "undefined" || id === null',
-        `? new ${collectionName}(this.client, this.getPath(), fieldName)`,
-        `: new ${serviceName}(this.client, this.getPath(), new ${idFunctionName}(fieldName).buildUrl(id));`,
+        `? new ${collectionName}(client, path, fieldName)`,
+        `: new ${serviceName}(client, path, new ${idFunctionName}(fieldName).buildUrl(id));`,
       ],
     };
   }
@@ -224,8 +229,9 @@ class ServiceGenerator {
       name: this.namingHelper.getRelatedServiceGetter(name),
       statements: [
         `if(!${propName}) {`,
+        `  const { client, path } = this.__base;`,
         // prettier-ignore
-        `  ${propName} = new ${serviceType}(this.client, this.getPath(), "${odataName}")`,
+        `  ${propName} = new ${serviceType}(client, path, "${odataName}")`,
         "}",
         `return ${propName}`,
       ],
@@ -280,6 +286,10 @@ class ServiceGenerator {
     });
   }
 
+  private getPrimitiveServiceType() {
+    return "PrimitiveTypeService" + this.getVersionSuffix();
+  }
+
   private generateServiceProperties(
     serviceName: string,
     props: Array<PropertyModel>,
@@ -305,6 +315,9 @@ class ServiceGenerator {
           result.properties.push(this.generatePrimitiveCollectionProp(prop, collectionServiceType, importContainer));
           result.methods.push(this.generatePrimitiveCollectionGetter(prop, collectionServiceType));
         }
+      } else if (this.options.enablePrimitivePropertyServices && prop.dataType === DataTypes.PrimitiveType) {
+        result.properties.push(this.generatePrimitiveTypeProp(prop, importContainer));
+        result.methods.push(this.generatePrimitiveTypeGetter(prop));
       }
     });
 
@@ -386,6 +399,24 @@ class ServiceGenerator {
     };
   }
 
+  private generatePrimitiveTypeProp(
+    prop: PropertyModel,
+    importContainer: ImportContainer
+  ): OptionalKind<PropertyDeclarationStructure> {
+    const serviceType = this.getPrimitiveServiceType();
+    importContainer.addFromService(serviceType);
+    if (prop.typeModule) {
+      importContainer.addCustomType(prop.typeModule, prop.type);
+    }
+
+    return {
+      scope: Scope.Private,
+      name: this.namingHelper.getPrivatePropName(prop.name),
+      type: `${serviceType}<ClientType, ${prop.type}>`,
+      hasQuestionToken: true,
+    };
+  }
+
   private generateModelPropGetter(
     prop: PropertyModel,
     collectionServiceType: string
@@ -409,8 +440,9 @@ class ServiceGenerator {
       returnType: typeWithGenerics,
       statements: [
         `if(!${privateSrvProp}) {`,
+        `  const { client, path } = this.__base;`,
         // prettier-ignore
-        `  ${privateSrvProp} = new ${type}(this.client, this.getPath(), "${prop.odataName}"${isComplexCollection ? `, ${firstCharLowerCase(complexType.qName)}`: ""})`,
+        `  ${privateSrvProp} = new ${type}(client, path, "${prop.odataName}"${isComplexCollection ? `, ${firstCharLowerCase(complexType.qName)}`: ""})`,
         "}",
         `return ${privateSrvProp}`,
       ],
@@ -427,8 +459,31 @@ class ServiceGenerator {
       name: this.namingHelper.getRelatedServiceGetter(prop.name),
       statements: [
         `if(!${propName}) {`,
+        `  const { client, path } = this.__base;`,
         // prettier-ignore
-        `  ${propName} = new ${collectionServiceType}(this.client, this.getPath(), "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)}${this.isV4BigNumber() ? ", true": ""})`,
+        `  ${propName} = new ${collectionServiceType}(client, path, "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)}${this.isV4BigNumber() ? ", true": ""})`,
+        "}",
+        `return ${propName}`,
+      ],
+    };
+  }
+
+  private generatePrimitiveTypeGetter(prop: PropertyModel): OptionalKind<MethodDeclarationStructure> {
+    const serviceType = this.getPrimitiveServiceType();
+    const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
+    // for V2: mapped name must be specified
+    const useMappedName = this.version === ODataVersions.V2 && prop.name !== prop.odataName;
+    // for V4: big number support
+    const useBigNumber = this.isV4BigNumber();
+    const addParamString = useMappedName ? `, "${prop.name}"` : useBigNumber ? ", true" : "";
+
+    return {
+      scope: Scope.Public,
+      name: this.namingHelper.getRelatedServiceGetter(prop.name),
+      statements: [
+        `if(!${propName}) {`,
+        `  const { client, path, qModel } = this.__base;`,
+        `  ${propName} = new ${serviceType}(client, path, "${prop.odataName}", qModel.${prop.name}.converter${addParamString})`,
         "}",
         `return ${propName}`,
       ],
@@ -553,18 +608,19 @@ class ServiceGenerator {
         `  ${qOpProp} = new ${operation.qName}()`,
         "}",
 
-        `const url = this.addFullPath(${qOpProp}.buildUrl(${isFunc && hasParams ? "params" : ""}));`,
-        `${returnType ? "const response = await " : "return"} this.client.${
+        `const { addFullPath, client, getDefaultHeaders } = this.__base;`,
+        `const url = addFullPath(${qOpProp}.buildUrl(${isFunc && hasParams ? "params" : ""}));`,
+        `${returnType ? "const response = await " : "return"} client.${
           !isFunc
             ? // actions: since V4
               `post(url, ${hasParams ? `${qOpProp}.convertUserParams(params)` : "{}"}, ${
                 requestConfigParam.name
-              }, this.getDefaultHeaders())`
+              }, getDefaultHeaders())`
             : operation.usePost
             ? // V2 POST => BUT values are still query params, they are not part of the request body
-              `post(url, undefined, ${requestConfigParam.name}, this.getDefaultHeaders())`
+              `post(url, undefined, ${requestConfigParam.name}, getDefaultHeaders())`
             : // functions: since V2
-              `get(url, ${requestConfigParam.name}, this.getDefaultHeaders())`
+              `get(url, ${requestConfigParam.name}, getDefaultHeaders())`
         };`,
         returnType ? `return ${qOpProp}.convertResponse(response);` : "",
       ],

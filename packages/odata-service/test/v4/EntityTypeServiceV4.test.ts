@@ -55,11 +55,6 @@ describe("EntityTypeService V4 Tests", () => {
     });
   });
 
-  // TODO
-  test.skip("entityType V4: query object", async () => {
-    expect(testService.getQObject()).toMatchObject(qPersonV4);
-  });
-
   test("entityType V4: typing of query stuff", async () => {
     // typing test of result
     const result: HttpResponseModel<ODataModelResponseV4<PersonModel>> = await testService.query((builder) => {

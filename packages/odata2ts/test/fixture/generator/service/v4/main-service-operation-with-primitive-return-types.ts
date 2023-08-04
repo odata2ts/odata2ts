@@ -17,8 +17,9 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
       this._qPingString = new QPingString();
     }
 
-    const url = this.addFullPath(this._qPingString.buildUrl());
-    const response = await this.client.post(url, {}, requestConfig, this.getDefaultHeaders());
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const url = addFullPath(this._qPingString.buildUrl());
+    const response = await client.post(url, {}, requestConfig, getDefaultHeaders());
     return this._qPingString.convertResponse(response);
   }
 
@@ -29,8 +30,9 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
       this._qPingNumber = new QPingNumber();
     }
 
-    const url = this.addFullPath(this._qPingNumber.buildUrl());
-    const response = await this.client.post(url, {}, requestConfig, this.getDefaultHeaders());
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const url = addFullPath(this._qPingNumber.buildUrl());
+    const response = await client.post(url, {}, requestConfig, getDefaultHeaders());
     return this._qPingNumber.convertResponse(response);
   }
 
@@ -41,8 +43,9 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
       this._qPingCollection = new QPingCollection();
     }
 
-    const url = this.addFullPath(this._qPingCollection.buildUrl());
-    const response = await this.client.post(url, {}, requestConfig, this.getDefaultHeaders());
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const url = addFullPath(this._qPingCollection.buildUrl());
+    const response = await client.post(url, {}, requestConfig, getDefaultHeaders());
     return this._qPingCollection.convertResponse(response);
   }
 }

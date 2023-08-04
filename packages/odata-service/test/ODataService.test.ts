@@ -3,7 +3,7 @@ import { MockClient } from "./mock/MockClient";
 
 class TestODataService extends ODataService<MockClient> {
   public exposeAddFullPath(path?: string) {
-    return this.addFullPath(path);
+    return this.__base.addFullPath(path);
   }
 }
 

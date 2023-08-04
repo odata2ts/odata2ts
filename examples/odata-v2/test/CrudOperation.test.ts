@@ -1,3 +1,5 @@
+import { BigNumber } from "bignumber.js";
+
 import { EditableProductModel } from "../build/odata/ODataDemoModel";
 import { ODataDemoService } from "../build/odata/ODataDemoService";
 import { MockClient } from "./MockClient";
@@ -11,7 +13,7 @@ describe("V2 CRUD Functionality Tests", function () {
     const model: EditableProductModel = {
       id: 123,
       name: "test",
-      price: "12.03",
+      price: new BigNumber("12.03"),
       rating: 5,
       releaseDate: "xyz",
       description: "Description",
@@ -40,7 +42,7 @@ describe("V2 CRUD Functionality Tests", function () {
     const model = {
       id: 123,
       name: "test",
-      price: "12.03",
+      price: new BigNumber("12.03"),
       rating: 5,
       releaseDate: "xyz",
       discontinuedDate: null,

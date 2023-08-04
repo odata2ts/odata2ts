@@ -20,6 +20,7 @@ const defaultConfig: DefaultConfiguration = {
   skipIdModels: false,
   skipOperations: false,
   skipComments: false,
+  enablePrimitivePropertyServices: false,
   disableAutoManagedKey: false,
   allowRenaming: false,
   v2ModelsWithExtraResultsWrapping: false,
