@@ -34,7 +34,7 @@ describe("Service Generator Tests V2", () => {
     projectManager = await createProjectManager(namingHelper.getFileNames(), "build", EmitModes.ts, true);
     const dataModel = await digest(odataBuilder.getSchemas(), runOptions, namingHelper);
 
-    await generateServices(dataModel, projectManager, ODataVersions.V2, namingHelper);
+    await generateServices(dataModel, projectManager, ODataVersions.V2, namingHelper, runOptions);
   }
 
   async function compareMainService(fixture: string, v2Specific: boolean) {
@@ -71,11 +71,11 @@ describe("Service Generator Tests V2", () => {
           .addKeyProp("time", ODataTypesV2.Time)
           // simple props don't make a difference
           .addProp("test", ODataTypesV2.String)
-          .addProp("test2", ODataTypesV2.Guid)
       )
       .addEntitySet("Ents", `${SERVICE_NAME}.TestEntity`);
 
     // when generating
+    runOptions.enablePrimitivePropertyServices = true;
     await doGenerate();
 
     // then main service file lists an entity set
@@ -144,6 +144,7 @@ describe("Service Generator Tests V2", () => {
       );
 
     // when generating
+    runOptions.enablePrimitivePropertyServices = true;
     await doGenerate();
 
     // then we get two additional service file

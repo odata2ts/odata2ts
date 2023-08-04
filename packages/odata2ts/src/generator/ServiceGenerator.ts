@@ -25,6 +25,7 @@ import {
   SingletonType,
 } from "../data-model/DataTypeModel";
 import { NamingHelper } from "../data-model/NamingHelper";
+import { ConfigFileOptions } from "../OptionModel";
 import { ProjectManager } from "../project/ProjectManager";
 import { ImportContainer } from "./ImportContainer";
 
@@ -38,14 +39,17 @@ const RESPONSE_TYPES = {
 
 export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "properties" | "methods">> {}
 
+export interface ServiceGeneratorOptions
+  extends Pick<ConfigFileOptions, "enablePrimitivePropertyServices" | "v4BigNumberAsString"> {}
+
 export async function generateServices(
   dataModel: DataModel,
   project: ProjectManager,
   version: ODataVersions,
   namingHelper: NamingHelper,
-  v4BigNumberAsString: boolean = false
+  options?: ServiceGeneratorOptions
 ) {
-  const generator = new ServiceGenerator(dataModel, project, version, namingHelper, v4BigNumberAsString);
+  const generator = new ServiceGenerator(dataModel, project, version, namingHelper, options);
   return generator.generate();
 }
 
@@ -55,11 +59,11 @@ class ServiceGenerator {
     private project: ProjectManager,
     private version: ODataVersions,
     private namingHelper: NamingHelper,
-    private v4BigNumberAsString: boolean
+    private options: ServiceGeneratorOptions = {}
   ) {}
 
   private isV4BigNumber() {
-    return this.v4BigNumberAsString && this.version === ODataVersions.V4;
+    return this.options.v4BigNumberAsString && this.version === ODataVersions.V4;
   }
 
   public async generate(): Promise<void> {
@@ -280,6 +284,10 @@ class ServiceGenerator {
     });
   }
 
+  private getPrimitiveServiceType() {
+    return "PrimitiveTypeService" + this.getVersionSuffix();
+  }
+
   private generateServiceProperties(
     serviceName: string,
     props: Array<PropertyModel>,
@@ -305,6 +313,9 @@ class ServiceGenerator {
           result.properties.push(this.generatePrimitiveCollectionProp(prop, collectionServiceType, importContainer));
           result.methods.push(this.generatePrimitiveCollectionGetter(prop, collectionServiceType));
         }
+      } else if (this.options.enablePrimitivePropertyServices && prop.dataType === DataTypes.PrimitiveType) {
+        result.properties.push(this.generatePrimitiveTypeProp(prop, importContainer));
+        result.methods.push(this.generatePrimitiveTypeGetter(prop));
       }
     });
 
@@ -386,6 +397,21 @@ class ServiceGenerator {
     };
   }
 
+  private generatePrimitiveTypeProp(
+    prop: PropertyModel,
+    importContainer: ImportContainer
+  ): OptionalKind<PropertyDeclarationStructure> {
+    const serviceType = this.getPrimitiveServiceType();
+    importContainer.addFromService(serviceType);
+
+    return {
+      scope: Scope.Private,
+      name: this.namingHelper.getPrivatePropName(prop.name),
+      type: `${serviceType}<ClientType, ${prop.type}>`,
+      hasQuestionToken: true,
+    };
+  }
+
   private generateModelPropGetter(
     prop: PropertyModel,
     collectionServiceType: string
@@ -429,6 +455,32 @@ class ServiceGenerator {
         `if(!${propName}) {`,
         // prettier-ignore
         `  ${propName} = new ${collectionServiceType}(this.client, this.getPath(), "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)}${this.isV4BigNumber() ? ", true": ""})`,
+        "}",
+        `return ${propName}`,
+      ],
+    };
+  }
+
+  private generatePrimitiveTypeGetter(prop: PropertyModel): OptionalKind<MethodDeclarationStructure> {
+    const serviceType = this.getPrimitiveServiceType();
+    const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
+    // extra params
+    const addParamString =
+      // V2: use mapped name if it applies
+      this.version === ODataVersions.V2 && prop.name !== prop.odataName
+        ? `, "${prop.name}"`
+        : // v4: activate big numbers if it applies
+        this.isV4BigNumber()
+        ? ", true"
+        : "";
+
+    return {
+      scope: Scope.Public,
+      name: this.namingHelper.getRelatedServiceGetter(prop.name),
+      statements: [
+        `if(!${propName}) {`,
+        // prettier-ignore
+        `  ${propName} = new ${serviceType}(this.client, this.getPath(), "${prop.odataName}"${addParamString})`,
         "}",
         `return ${propName}`,
       ],

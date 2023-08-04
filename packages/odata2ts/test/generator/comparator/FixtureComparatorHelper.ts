@@ -8,6 +8,7 @@ import { Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { DigesterFunction } from "../../../src/FactoryFunctionModel";
 import { generateServices } from "../../../src/generator";
+import { ServiceGeneratorOptions } from "../../../src/generator/ServiceGenerator";
 import { ProjectManager } from "../../../src/project/ProjectManager";
 import { getTestConfig, getTestConfigMinimal } from "../../test.config";
 import { TestOptions, TestSettings } from "../TestTypes";
@@ -94,11 +95,11 @@ export class ServiceFixtureComparatorHelper {
     schemas: Array<Schema<any, any>>,
     project: ProjectManager,
     namingHelper: NamingHelper,
-    v4BigNumberAsString: boolean = false
+    options?: ServiceGeneratorOptions
   ) {
-    const dataModel = await this.digest(schemas, { ...DEFAULT_RUN_OPTIONS, v4BigNumberAsString }, namingHelper);
+    const dataModel = await this.digest(schemas, { ...DEFAULT_RUN_OPTIONS, ...options }, namingHelper);
 
-    await generateServices(dataModel, project, this.version, namingHelper, v4BigNumberAsString);
+    await generateServices(dataModel, project, this.version, namingHelper, options);
   }
 
   public async compareService(fixturePath: string, service: SourceFile) {

@@ -35,12 +35,7 @@ describe("Service Generator Tests V4", () => {
     const namingHelper = new NamingHelper(runOptions, SERVICE_NAME);
     projectManager = await createProjectManager(namingHelper.getFileNames(), "build", EmitModes.ts, true);
 
-    await fixtureComparatorHelper.generateService(
-      odataBuilder.getSchemas(),
-      projectManager,
-      namingHelper,
-      options?.v4BigNumberAsString
-    );
+    await fixtureComparatorHelper.generateService(odataBuilder.getSchemas(), projectManager, namingHelper, runOptions);
   }
 
   function getV4SpecificPath(fixture: string, v4Specific: boolean) {
@@ -89,14 +84,11 @@ describe("Service Generator Tests V4", () => {
           .addKeyProp("age", ODataTypesV4.Int32)
           .addKeyProp("deceased", ODataTypesV4.Boolean)
           .addKeyProp("desc", ODataTypesV4.String)
-          // simple props don't make a difference
-          .addProp("test", ODataTypesV4.String)
-          .addProp("test2", ODataTypesV4.Guid)
       )
       .addEntitySet("Ents", `${SERVICE_NAME}.TestEntity`);
 
     // when generating
-    await doGenerate();
+    await doGenerate({ enablePrimitivePropertyServices: true });
 
     // then main service file lists an entity set
     await compareMainService("main-service-entityset.ts", false);
@@ -318,7 +310,7 @@ describe("Service Generator Tests V4", () => {
       );
 
     // when generating
-    await doGenerate();
+    await doGenerate({ enablePrimitivePropertyServices: true });
 
     // then we get two additional service file
     expect(projectManager.getServiceFiles().length).toEqual(2);

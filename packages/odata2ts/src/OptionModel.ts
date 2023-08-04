@@ -203,6 +203,14 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * With this option you can turn that off.
    */
   skipComments?: boolean;
+  /**
+   * With OData you can read, update and delete data on a primitive property (`Edm.*`).
+   * Usually, you wouldn't do that, but go for a bigger request, fetching more relevant information in one go.
+   *
+   * There's one exception: Handling `Edm.Stream´ properties and Media entities. Services for stream / media
+   * stuff are generated regardless of this setting.
+   */
+  enablePrimitivePropertyServices?: boolean;
 
   /**
    * The naming options regarding the generated artefacts.

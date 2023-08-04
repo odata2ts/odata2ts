@@ -1,5 +1,5 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
-import { EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
+import { EntitySetServiceV4, EntityTypeServiceV4, PrimitiveTypeServiceV4 } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QAuthorId, QBook, QBookId, qBook } from "../QTester";
@@ -14,10 +14,19 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
   EditableBook,
   QBook
 > {
+  private _id?: PrimitiveTypeServiceV4<ClientType, string>;
   private _author?: AuthorService<ClientType>;
 
   constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qBook);
+  }
+
+  public id() {
+    if (!this._id) {
+      this._id = new PrimitiveTypeServiceV4(this.client, this.getPath(), "ID");
+    }
+
+    return this._id;
   }
 
   public author(): AuthorService<ClientType> {
