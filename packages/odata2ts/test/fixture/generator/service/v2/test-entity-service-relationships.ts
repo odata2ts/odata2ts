@@ -23,7 +23,7 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
 
   public id() {
     if (!this._id) {
-      this._id = new PrimitiveTypeServiceV2(this.client, this.getPath(), "ID", "id");
+      this._id = new PrimitiveTypeServiceV2(this.__base.client, this.__base.path, "ID", "id");
     }
 
     return this._id;
@@ -31,7 +31,7 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
 
   public author(): AuthorService<ClientType> {
     if (!this._author) {
-      this._author = new AuthorService(this.client, this.getPath(), "author");
+      this._author = new AuthorService(this.__base.client, this.__base.path, "author");
     }
 
     return this._author;
@@ -42,8 +42,8 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
   public relatedAuthors(id?: AuthorId | undefined) {
     const fieldName = "relatedAuthors";
     return typeof id === "undefined" || id === null
-      ? new AuthorCollectionService(this.client, this.getPath(), fieldName)
-      : new AuthorService(this.client, this.getPath(), new QAuthorId(fieldName).buildUrl(id));
+      ? new AuthorCollectionService(this.__base.client, this.__base.path, fieldName)
+      : new AuthorService(this.__base.client, this.__base.path, new QAuthorId(fieldName).buildUrl(id));
   }
 }
 

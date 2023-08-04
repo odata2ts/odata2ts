@@ -186,8 +186,8 @@ class ServiceGenerator {
       statements: [
         `const fieldName = "${odataPropName}";`,
         'return typeof id === "undefined" || id === null',
-        `? new ${collectionName}(this.client, this.getPath(), fieldName)`,
-        `: new ${serviceName}(this.client, this.getPath(), new ${idFunctionName}(fieldName).buildUrl(id));`,
+        `? new ${collectionName}(this.__base.client, this.__base.path, fieldName)`,
+        `: new ${serviceName}(this.__base.client, this.__base.path, new ${idFunctionName}(fieldName).buildUrl(id));`,
       ],
     };
   }
@@ -229,7 +229,7 @@ class ServiceGenerator {
       statements: [
         `if(!${propName}) {`,
         // prettier-ignore
-        `  ${propName} = new ${serviceType}(this.client, this.getPath(), "${odataName}")`,
+        `  ${propName} = new ${serviceType}(this.__base.client, this.__base.path, "${odataName}")`,
         "}",
         `return ${propName}`,
       ],
@@ -436,7 +436,7 @@ class ServiceGenerator {
       statements: [
         `if(!${privateSrvProp}) {`,
         // prettier-ignore
-        `  ${privateSrvProp} = new ${type}(this.client, this.getPath(), "${prop.odataName}"${isComplexCollection ? `, ${firstCharLowerCase(complexType.qName)}`: ""})`,
+        `  ${privateSrvProp} = new ${type}(this.__base.client, this.__base.path, "${prop.odataName}"${isComplexCollection ? `, ${firstCharLowerCase(complexType.qName)}`: ""})`,
         "}",
         `return ${privateSrvProp}`,
       ],
@@ -454,7 +454,7 @@ class ServiceGenerator {
       statements: [
         `if(!${propName}) {`,
         // prettier-ignore
-        `  ${propName} = new ${collectionServiceType}(this.client, this.getPath(), "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)}${this.isV4BigNumber() ? ", true": ""})`,
+        `  ${propName} = new ${collectionServiceType}(this.__base.client, this.__base.path, "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)}${this.isV4BigNumber() ? ", true": ""})`,
         "}",
         `return ${propName}`,
       ],
@@ -480,7 +480,7 @@ class ServiceGenerator {
       statements: [
         `if(!${propName}) {`,
         // prettier-ignore
-        `  ${propName} = new ${serviceType}(this.client, this.getPath(), "${prop.odataName}"${addParamString})`,
+        `  ${propName} = new ${serviceType}(this.__base.client, this.__base.path, "${prop.odataName}"${addParamString})`,
         "}",
         `return ${propName}`,
       ],
@@ -605,18 +605,19 @@ class ServiceGenerator {
         `  ${qOpProp} = new ${operation.qName}()`,
         "}",
 
-        `const url = this.addFullPath(${qOpProp}.buildUrl(${isFunc && hasParams ? "params" : ""}));`,
-        `${returnType ? "const response = await " : "return"} this.client.${
+        `const { addFullPath, client, getDefaultHeaders } = this.__base;`,
+        `const url = addFullPath(${qOpProp}.buildUrl(${isFunc && hasParams ? "params" : ""}));`,
+        `${returnType ? "const response = await " : "return"} client.${
           !isFunc
             ? // actions: since V4
               `post(url, ${hasParams ? `${qOpProp}.convertUserParams(params)` : "{}"}, ${
                 requestConfigParam.name
-              }, this.getDefaultHeaders())`
+              }, getDefaultHeaders())`
             : operation.usePost
             ? // V2 POST => BUT values are still query params, they are not part of the request body
-              `post(url, undefined, ${requestConfigParam.name}, this.getDefaultHeaders())`
+              `post(url, undefined, ${requestConfigParam.name}, getDefaultHeaders())`
             : // functions: since V2
-              `get(url, ${requestConfigParam.name}, this.getDefaultHeaders())`
+              `get(url, ${requestConfigParam.name}, getDefaultHeaders())`
         };`,
         returnType ? `return ${qOpProp}.convertResponse(response);` : "",
       ],

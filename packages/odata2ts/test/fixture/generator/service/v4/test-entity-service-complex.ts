@@ -23,7 +23,7 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
 
   public lector(): ReviewerService<ClientType> {
     if (!this._lector) {
-      this._lector = new ReviewerService(this.client, this.getPath(), "lector");
+      this._lector = new ReviewerService(this.__base.client, this.__base.path, "lector");
     }
 
     return this._lector;
@@ -31,7 +31,7 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
 
   public reviewers(): CollectionServiceV4<ClientType, Reviewer, QReviewer, EditableReviewer> {
     if (!this._reviewers) {
-      this._reviewers = new CollectionServiceV4(this.client, this.getPath(), "reviewers", qReviewer);
+      this._reviewers = new CollectionServiceV4(this.__base.client, this.__base.path, "reviewers", qReviewer);
     }
 
     return this._reviewers;

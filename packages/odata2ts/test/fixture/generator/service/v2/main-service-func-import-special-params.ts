@@ -18,8 +18,9 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
       this._qBestBook = new QBestBook();
     }
 
-    const url = this.addFullPath(this._qBestBook.buildUrl(params));
-    const response = await this.client.get(url, requestConfig, this.getDefaultHeaders());
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const url = addFullPath(this._qBestBook.buildUrl(params));
+    const response = await client.get(url, requestConfig, getDefaultHeaders());
     return this._qBestBook.convertResponse(response);
   }
 }

@@ -16,8 +16,9 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
       this._qPing = new QPing();
     }
 
-    const url = this.addFullPath(this._qPing.buildUrl());
-    return this.client.post(url, {}, requestConfig, this.getDefaultHeaders());
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const url = addFullPath(this._qPing.buildUrl());
+    return client.post(url, {}, requestConfig, getDefaultHeaders());
   }
 
   public async doLike(
@@ -28,13 +29,9 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
       this._qVote = new QVote();
     }
 
-    const url = this.addFullPath(this._qVote.buildUrl());
-    const response = await this.client.post(
-      url,
-      this._qVote.convertUserParams(params),
-      requestConfig,
-      this.getDefaultHeaders()
-    );
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const url = addFullPath(this._qVote.buildUrl());
+    const response = await client.post(url, this._qVote.convertUserParams(params), requestConfig, getDefaultHeaders());
     return this._qVote.convertResponse(response);
   }
 }

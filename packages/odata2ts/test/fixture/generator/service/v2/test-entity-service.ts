@@ -27,7 +27,7 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public id() {
     if (!this._id) {
-      this._id = new PrimitiveTypeServiceV2(this.client, this.getPath(), "id");
+      this._id = new PrimitiveTypeServiceV2(this.__base.client, this.__base.path, "id");
     }
 
     return this._id;
@@ -35,7 +35,7 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public age() {
     if (!this._age) {
-      this._age = new PrimitiveTypeServiceV2(this.client, this.getPath(), "age");
+      this._age = new PrimitiveTypeServiceV2(this.__base.client, this.__base.path, "age");
     }
 
     return this._age;
@@ -43,7 +43,7 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public deceased() {
     if (!this._deceased) {
-      this._deceased = new PrimitiveTypeServiceV2(this.client, this.getPath(), "deceased");
+      this._deceased = new PrimitiveTypeServiceV2(this.__base.client, this.__base.path, "deceased");
     }
 
     return this._deceased;
@@ -51,7 +51,7 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public desc() {
     if (!this._desc) {
-      this._desc = new PrimitiveTypeServiceV2(this.client, this.getPath(), "desc");
+      this._desc = new PrimitiveTypeServiceV2(this.__base.client, this.__base.path, "desc");
     }
 
     return this._desc;
@@ -59,7 +59,7 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public dateAndTime() {
     if (!this._dateAndTime) {
-      this._dateAndTime = new PrimitiveTypeServiceV2(this.client, this.getPath(), "dateAndTime");
+      this._dateAndTime = new PrimitiveTypeServiceV2(this.__base.client, this.__base.path, "dateAndTime");
     }
 
     return this._dateAndTime;
@@ -67,7 +67,11 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public dateAndTimeAndOffset() {
     if (!this._dateAndTimeAndOffset) {
-      this._dateAndTimeAndOffset = new PrimitiveTypeServiceV2(this.client, this.getPath(), "dateAndTimeAndOffset");
+      this._dateAndTimeAndOffset = new PrimitiveTypeServiceV2(
+        this.__base.client,
+        this.__base.path,
+        "dateAndTimeAndOffset"
+      );
     }
 
     return this._dateAndTimeAndOffset;
@@ -75,7 +79,7 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public time() {
     if (!this._time) {
-      this._time = new PrimitiveTypeServiceV2(this.client, this.getPath(), "time");
+      this._time = new PrimitiveTypeServiceV2(this.__base.client, this.__base.path, "time");
     }
 
     return this._time;
@@ -83,7 +87,7 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public test() {
     if (!this._test) {
-      this._test = new PrimitiveTypeServiceV2(this.client, this.getPath(), "test");
+      this._test = new PrimitiveTypeServiceV2(this.__base.client, this.__base.path, "test");
     }
 
     return this._test;

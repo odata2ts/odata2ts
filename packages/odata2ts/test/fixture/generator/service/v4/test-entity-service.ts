@@ -23,7 +23,7 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public id() {
     if (!this._id) {
-      this._id = new PrimitiveTypeServiceV4(this.client, this.getPath(), "id");
+      this._id = new PrimitiveTypeServiceV4(this.__base.client, this.__base.path, "id");
     }
 
     return this._id;
@@ -31,7 +31,7 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public age() {
     if (!this._age) {
-      this._age = new PrimitiveTypeServiceV4(this.client, this.getPath(), "age");
+      this._age = new PrimitiveTypeServiceV4(this.__base.client, this.__base.path, "age");
     }
 
     return this._age;
@@ -39,7 +39,7 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public deceased() {
     if (!this._deceased) {
-      this._deceased = new PrimitiveTypeServiceV4(this.client, this.getPath(), "deceased");
+      this._deceased = new PrimitiveTypeServiceV4(this.__base.client, this.__base.path, "deceased");
     }
 
     return this._deceased;
@@ -47,7 +47,7 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public desc() {
     if (!this._desc) {
-      this._desc = new PrimitiveTypeServiceV4(this.client, this.getPath(), "desc");
+      this._desc = new PrimitiveTypeServiceV4(this.__base.client, this.__base.path, "desc");
     }
 
     return this._desc;
