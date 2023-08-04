@@ -9,7 +9,8 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
 
   public currentUser() {
     if (!this._currentUser) {
-      this._currentUser = new TestEntityService(this.__base.client, this.__base.path, "CURRENT_USER");
+      const { client, path } = this.__base;
+      this._currentUser = new TestEntityService(client, path, "CURRENT_USER");
     }
 
     return this._currentUser;

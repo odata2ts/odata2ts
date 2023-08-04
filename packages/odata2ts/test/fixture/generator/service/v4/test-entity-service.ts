@@ -23,7 +23,8 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public id() {
     if (!this._id) {
-      this._id = new PrimitiveTypeServiceV4(this.__base.client, this.__base.path, "id");
+      const { client, path, qModel } = this.__base;
+      this._id = new PrimitiveTypeServiceV4(client, path, "id", qModel.id.converter);
     }
 
     return this._id;
@@ -31,7 +32,8 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public age() {
     if (!this._age) {
-      this._age = new PrimitiveTypeServiceV4(this.__base.client, this.__base.path, "age");
+      const { client, path, qModel } = this.__base;
+      this._age = new PrimitiveTypeServiceV4(client, path, "age", qModel.age.converter);
     }
 
     return this._age;
@@ -39,7 +41,8 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public deceased() {
     if (!this._deceased) {
-      this._deceased = new PrimitiveTypeServiceV4(this.__base.client, this.__base.path, "deceased");
+      const { client, path, qModel } = this.__base;
+      this._deceased = new PrimitiveTypeServiceV4(client, path, "deceased", qModel.deceased.converter);
     }
 
     return this._deceased;
@@ -47,7 +50,8 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
 
   public desc() {
     if (!this._desc) {
-      this._desc = new PrimitiveTypeServiceV4(this.__base.client, this.__base.path, "desc");
+      const { client, path, qModel } = this.__base;
+      this._desc = new PrimitiveTypeServiceV4(client, path, "desc", qModel.desc.converter);
     }
 
     return this._desc;

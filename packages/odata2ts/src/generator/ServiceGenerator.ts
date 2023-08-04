@@ -185,9 +185,10 @@ class ServiceGenerator {
       ],
       statements: [
         `const fieldName = "${odataPropName}";`,
+        `const { client, path } = this.__base;`,
         'return typeof id === "undefined" || id === null',
-        `? new ${collectionName}(this.__base.client, this.__base.path, fieldName)`,
-        `: new ${serviceName}(this.__base.client, this.__base.path, new ${idFunctionName}(fieldName).buildUrl(id));`,
+        `? new ${collectionName}(client, path, fieldName)`,
+        `: new ${serviceName}(client, path, new ${idFunctionName}(fieldName).buildUrl(id));`,
       ],
     };
   }
@@ -228,8 +229,9 @@ class ServiceGenerator {
       name: this.namingHelper.getRelatedServiceGetter(name),
       statements: [
         `if(!${propName}) {`,
+        `  const { client, path } = this.__base;`,
         // prettier-ignore
-        `  ${propName} = new ${serviceType}(this.__base.client, this.__base.path, "${odataName}")`,
+        `  ${propName} = new ${serviceType}(client, path, "${odataName}")`,
         "}",
         `return ${propName}`,
       ],
@@ -403,6 +405,9 @@ class ServiceGenerator {
   ): OptionalKind<PropertyDeclarationStructure> {
     const serviceType = this.getPrimitiveServiceType();
     importContainer.addFromService(serviceType);
+    if (prop.typeModule) {
+      importContainer.addCustomType(prop.typeModule, prop.type);
+    }
 
     return {
       scope: Scope.Private,
@@ -435,8 +440,9 @@ class ServiceGenerator {
       returnType: typeWithGenerics,
       statements: [
         `if(!${privateSrvProp}) {`,
+        `  const { client, path } = this.__base;`,
         // prettier-ignore
-        `  ${privateSrvProp} = new ${type}(this.__base.client, this.__base.path, "${prop.odataName}"${isComplexCollection ? `, ${firstCharLowerCase(complexType.qName)}`: ""})`,
+        `  ${privateSrvProp} = new ${type}(client, path, "${prop.odataName}"${isComplexCollection ? `, ${firstCharLowerCase(complexType.qName)}`: ""})`,
         "}",
         `return ${privateSrvProp}`,
       ],
@@ -453,8 +459,9 @@ class ServiceGenerator {
       name: this.namingHelper.getRelatedServiceGetter(prop.name),
       statements: [
         `if(!${propName}) {`,
+        `  const { client, path } = this.__base;`,
         // prettier-ignore
-        `  ${propName} = new ${collectionServiceType}(this.__base.client, this.__base.path, "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)}${this.isV4BigNumber() ? ", true": ""})`,
+        `  ${propName} = new ${collectionServiceType}(client, path, "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)}${this.isV4BigNumber() ? ", true": ""})`,
         "}",
         `return ${propName}`,
       ],
@@ -464,23 +471,19 @@ class ServiceGenerator {
   private generatePrimitiveTypeGetter(prop: PropertyModel): OptionalKind<MethodDeclarationStructure> {
     const serviceType = this.getPrimitiveServiceType();
     const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
-    // extra params
-    const addParamString =
-      // V2: use mapped name if it applies
-      this.version === ODataVersions.V2 && prop.name !== prop.odataName
-        ? `, "${prop.name}"`
-        : // v4: activate big numbers if it applies
-        this.isV4BigNumber()
-        ? ", true"
-        : "";
+    // for V2: mapped name must be specified
+    const useMappedName = this.version === ODataVersions.V2 && prop.name !== prop.odataName;
+    // for V4: big number support
+    const useBigNumber = this.isV4BigNumber();
+    const addParamString = useMappedName ? `, "${prop.name}"` : useBigNumber ? ", true" : "";
 
     return {
       scope: Scope.Public,
       name: this.namingHelper.getRelatedServiceGetter(prop.name),
       statements: [
         `if(!${propName}) {`,
-        // prettier-ignore
-        `  ${propName} = new ${serviceType}(this.__base.client, this.__base.path, "${prop.odataName}"${addParamString})`,
+        `  const { client, path, qModel } = this.__base;`,
+        `  ${propName} = new ${serviceType}(client, path, "${prop.odataName}", qModel.${prop.name}.converter${addParamString})`,
         "}",
         `return ${propName}`,
       ],

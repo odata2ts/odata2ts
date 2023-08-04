@@ -88,7 +88,10 @@ describe("Service Generator Tests V4", () => {
       .addEntitySet("Ents", `${SERVICE_NAME}.TestEntity`);
 
     // when generating
-    await doGenerate({ enablePrimitivePropertyServices: true });
+    await doGenerate({
+      enablePrimitivePropertyServices: true,
+      converters: [{ module: "@odata2ts/test-converters", use: ["guidToGuidStringConverter"] }],
+    });
 
     // then main service file lists an entity set
     await compareMainService("main-service-entityset.ts", false);

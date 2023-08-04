@@ -21,7 +21,8 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
 
   public altChoices() {
     if (!this._altChoices) {
-      this._altChoices = new CollectionServiceV2(this.__base.client, this.__base.path, "altChoices", qEnumCollection);
+      const { client, path } = this.__base;
+      this._altChoices = new CollectionServiceV2(client, path, "altChoices", qEnumCollection);
     }
 
     return this._altChoices;

@@ -13,8 +13,9 @@ export class tester<ClientType extends ODataHttpClient> extends ODataService<Cli
   public NAVIGATE_TO_LIST(id: TEST_ENTITY_ID): TEST_ENTITY_SRV<ClientType>;
   public NAVIGATE_TO_LIST(id?: TEST_ENTITY_ID | undefined) {
     const fieldName = "list";
+    const { client, path } = this.__base;
     return typeof id === "undefined" || id === null
-      ? new TEST_ENTITY_COLLECTION_SRV(this.__base.client, this.__base.path, fieldName)
-      : new TEST_ENTITY_SRV(this.__base.client, this.__base.path, new Q_TEST_ENTITY_ID(fieldName).buildUrl(id));
+      ? new TEST_ENTITY_COLLECTION_SRV(client, path, fieldName)
+      : new TEST_ENTITY_SRV(client, path, new Q_TEST_ENTITY_ID(fieldName).buildUrl(id));
   }
 }
