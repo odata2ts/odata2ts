@@ -4,6 +4,8 @@ import { ODataValueResponseV2 } from "@odata2ts/odata-core";
 import { ConvertibleV2, convertV2ValueResponse } from "@odata2ts/odata-query-objects";
 import { getIdentityConverter } from "@odata2ts/odata-query-objects/lib/IdentityConverter";
 
+import { DEFAULT_HEADERS } from "../RequestHeaders";
+
 const RAW_VALUE_SUFFIX = "/$value";
 
 const OPEN_ACCEPT_HEADER = { accept: "*/*" };
@@ -16,7 +18,7 @@ export class PrimitiveTypeServiceV2<ClientType extends ODataHttpClient, T> {
     private readonly client: ODataHttpClient,
     private readonly basePath: string,
     private readonly name: string,
-    mappedName: string,
+    mappedName?: string,
     { convertTo, convertFrom }: ValueConverter<any, any> = getIdentityConverter()
   ) {
     this.converter = {
@@ -26,7 +28,7 @@ export class PrimitiveTypeServiceV2<ClientType extends ODataHttpClient, T> {
         return name;
       },
       getMappedName() {
-        return mappedName;
+        return mappedName || name;
       },
     };
   }
@@ -44,7 +46,7 @@ export class PrimitiveTypeServiceV2<ClientType extends ODataHttpClient, T> {
   public async getValue(
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataValueResponseV2<T>> {
-    const result = await this.client.get(this.getPath(), requestConfig);
+    const result = await this.client.get(this.getPath(), requestConfig, this.getDefaultHeaders());
     return convertV2ValueResponse(result, this.converter);
   }
 
@@ -57,7 +59,7 @@ export class PrimitiveTypeServiceV2<ClientType extends ODataHttpClient, T> {
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataValueResponseV2<T>> {
     const convertedValue = this.converter.convertTo(value);
-    const result = await this.client.put(this.getPath(), convertedValue, requestConfig);
+    const result = await this.client.put(this.getPath(), convertedValue, requestConfig, this.getDefaultHeaders());
     return convertV2ValueResponse(result, this.converter);
   }
 
@@ -67,5 +69,9 @@ export class PrimitiveTypeServiceV2<ClientType extends ODataHttpClient, T> {
 
   protected addFullPath(path?: string) {
     return `${this.getPath() ?? ""}${path ? "/" + path : ""}`;
+  }
+
+  protected getDefaultHeaders() {
+    return DEFAULT_HEADERS;
   }
 }

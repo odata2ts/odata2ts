@@ -4,6 +4,8 @@ import { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { convertV4ValueResponse } from "@odata2ts/odata-query-objects";
 import { getIdentityConverter } from "@odata2ts/odata-query-objects/lib/IdentityConverter";
 
+import { BIG_NUMBERS_HEADERS, DEFAULT_HEADERS } from "../RequestHeaders";
+
 const RAW_VALUE_SUFFIX = "/$value";
 
 export class PrimitiveTypeServiceV4<ClientType extends ODataHttpClient, T> {
@@ -11,7 +13,8 @@ export class PrimitiveTypeServiceV4<ClientType extends ODataHttpClient, T> {
     private readonly client: ODataHttpClient,
     private readonly basePath: string,
     private readonly name: string,
-    private readonly converter: ValueConverter<any, any> = getIdentityConverter()
+    private readonly converter: ValueConverter<any, any> = getIdentityConverter(),
+    private bigNumbersAsString: boolean = false
   ) {}
 
   public getPath() {
@@ -50,5 +53,9 @@ export class PrimitiveTypeServiceV4<ClientType extends ODataHttpClient, T> {
 
   protected addFullPath(path?: string) {
     return `${this.getPath() ?? ""}${path ? "/" + path : ""}`;
+  }
+
+  protected getDefaultHeaders() {
+    return this.bigNumbersAsString ? BIG_NUMBERS_HEADERS : DEFAULT_HEADERS;
   }
 }
