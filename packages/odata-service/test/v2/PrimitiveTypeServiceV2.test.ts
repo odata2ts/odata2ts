@@ -39,7 +39,7 @@ describe("PrimitiveTypeService V2 Test", () => {
     const value = await testService.updateValue("test");
 
     expect(odataClient.lastUrl).toBe(EXPECTED_PATH);
-    expect(odataClient.lastData).toBe("test");
+    expect(odataClient.lastData).toStrictEqual({ UserName: "test" });
     expect(odataClient.lastOperation).toBe("PUT");
     expect(odataClient.lastRequestConfig).toBeUndefined();
   });
