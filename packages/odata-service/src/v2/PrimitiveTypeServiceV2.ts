@@ -4,24 +4,26 @@ import { ODataValueResponseV2 } from "@odata2ts/odata-core";
 import { ConvertibleV2, convertV2ValueResponse } from "@odata2ts/odata-query-objects";
 import { getIdentityConverter } from "@odata2ts/odata-query-objects/lib/IdentityConverter";
 
-import { DEFAULT_HEADERS } from "../RequestHeaders";
+import { ServiceStateHelper } from "../ServiceStateHelper";
 
-const RAW_VALUE_SUFFIX = "/$value";
-
-const OPEN_ACCEPT_HEADER = { accept: "*/*" };
-const DEFAULT_STREAM_MIME_TYPE = "application/octet-stream";
+// const RAW_VALUE_SUFFIX = "/$value";
+//
+// const OPEN_ACCEPT_HEADER = { accept: "*/*" };
+// const DEFAULT_STREAM_MIME_TYPE = "application/octet-stream";
 
 export class PrimitiveTypeServiceV2<ClientType extends ODataHttpClient, T> {
-  private readonly converter: ConvertibleV2;
+  protected readonly __base: ServiceStateHelper<T>;
+  protected readonly __converter: ConvertibleV2;
 
   public constructor(
-    private readonly client: ODataHttpClient,
-    private readonly basePath: string,
-    private readonly name: string,
+    client: ODataHttpClient,
+    basePath: string,
+    name: string,
     mappedName?: string,
     { convertTo, convertFrom }: ValueConverter<any, any> = getIdentityConverter()
   ) {
-    this.converter = {
+    this.__base = new ServiceStateHelper(client, basePath, name);
+    this.__converter = {
       convertFrom,
       convertTo,
       getName() {
@@ -34,7 +36,7 @@ export class PrimitiveTypeServiceV2<ClientType extends ODataHttpClient, T> {
   }
 
   public getPath() {
-    return this.basePath && this.name ? this.basePath + "/" + this.name : this.basePath ? this.basePath : this.name;
+    return this.__base.path;
   }
 
   /**
@@ -46,32 +48,28 @@ export class PrimitiveTypeServiceV2<ClientType extends ODataHttpClient, T> {
   public async getValue(
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataValueResponseV2<T>> {
-    const result = await this.client.get(this.getPath(), requestConfig, this.getDefaultHeaders());
-    return convertV2ValueResponse(result, this.converter);
+    const { client, path, getDefaultHeaders } = this.__base;
+
+    const result = await client.get(path, requestConfig, getDefaultHeaders());
+    return convertV2ValueResponse(result, this.__converter);
   }
 
   /*public async getRawValue(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<any> {
     return this.client.get(this.getPath() + RAW_VALUE_SUFFIX, requestConfig, { headers: OPEN_ACCEPT_HEADER });
   }*/
 
-  public async update(
+  public async updateValue(
     value: T,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataValueResponseV2<T>> {
-    const convertedValue = this.converter.convertTo(value);
-    const result = await this.client.put(this.getPath(), convertedValue, requestConfig, this.getDefaultHeaders());
-    return convertV2ValueResponse(result, this.converter);
+    const { client, path, getDefaultHeaders } = this.__base;
+
+    const result = await client.put(path, this.__converter.convertTo(value), requestConfig, getDefaultHeaders());
+    return convertV2ValueResponse(result, this.__converter);
   }
 
-  public delete(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
-    return this.client.delete(this.getPath(), requestConfig);
-  }
-
-  protected addFullPath(path?: string) {
-    return `${this.getPath() ?? ""}${path ? "/" + path : ""}`;
-  }
-
-  protected getDefaultHeaders() {
-    return DEFAULT_HEADERS;
+  public deleteValue(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
+    const { client, path } = this.__base;
+    return client.delete(path, requestConfig);
   }
 }

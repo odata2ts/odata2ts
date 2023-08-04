@@ -12,36 +12,35 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
   EditablePersonModel,
   QPersonV4
 > {
-  private __qGetSomething = new QGetSomethingFunction();
+  private _qGetSomething = new QGetSomethingFunction();
 
   constructor(client: ODataHttpClient, basePath: string, name: string, bigNumbersAsString?: boolean) {
     super(client, basePath, name, new QPersonV4(), bigNumbersAsString);
   }
 
   public userName() {
-    return new PrimitiveTypeServiceV4<ClientType, "string">(
-      this.client,
-      this.getPath(),
-      "UserName",
-      this.qModel.userName.converter
-    );
+    const { client, path, qModel } = this.__base;
+    return new PrimitiveTypeServiceV4<ClientType, "string">(client, path, "UserName", qModel.userName.converter);
   }
 
   public get features() {
-    return new CollectionServiceV4(this.client, this.getPath(), "Features", new QEnumCollection());
+    const { client, path } = this.__base;
+    return new CollectionServiceV4(client, path, "Features", new QEnumCollection());
   }
 
   public get bestFriend() {
-    return new PersonModelService(this.client, this.getPath(), "BestFriend");
+    const { client, path } = this.__base;
+    return new PersonModelService(client, path, "BestFriend");
   }
 
   public get friends() {
-    return new PersonModelCollectionService(this.client, this.getPath(), "Friends");
+    const { client, path } = this.__base;
+    return new PersonModelCollectionService(client, path, "Friends");
   }
 
   public getSomething(params: GetSomethingFunctionParams, requestConfig?: ODataHttpClientConfig<ClientType>) {
-    const url = this.addFullPath(this.__qGetSomething.buildUrl(params));
-    return this.client.get(url, requestConfig);
+    const url = this.__base.addFullPath(this._qGetSomething.buildUrl(params));
+    return this.__base.client.get(url, requestConfig);
   }
 }
 

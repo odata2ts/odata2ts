@@ -28,7 +28,6 @@ export function commonEntitySetTests(
 
   test("entitySet: setup", async () => {
     expect(testService.getPath()).toBe(EXPECTED_PATH);
-    expect(testService.getQObject()).not.toBeNull();
   });
 
   test("entitySet: createKey", async () => {

@@ -36,7 +36,7 @@ describe("PrimitiveTypeService V4 Test", () => {
   });
 
   test("primitiveType V4: update value", async () => {
-    const value = await testService.update("test");
+    const value = await testService.updateValue("test");
 
     expect(odataClient.lastUrl).toBe(EXPECTED_PATH);
     expect(odataClient.lastData).toBe("test");
@@ -45,13 +45,13 @@ describe("PrimitiveTypeService V4 Test", () => {
   });
 
   test("primitiveType V4: update value with request config", async () => {
-    const value = await testService.update("test", REQUEST_CONFIG);
+    const value = await testService.updateValue("test", REQUEST_CONFIG);
 
     expect(odataClient.lastRequestConfig).toStrictEqual(REQUEST_CONFIG);
   });
 
   test("primitiveType V4: delete value", async () => {
-    const value = await testService.delete();
+    const value = await testService.deleteValue();
 
     expect(odataClient.lastUrl).toBe(EXPECTED_PATH);
     expect(odataClient.lastData).toBeUndefined();
@@ -60,7 +60,7 @@ describe("PrimitiveTypeService V4 Test", () => {
   });
 
   test("primitiveType V4: delete value with request config", async () => {
-    const value = await testService.delete(REQUEST_CONFIG);
+    const value = await testService.deleteValue(REQUEST_CONFIG);
 
     expect(odataClient.lastRequestConfig).toStrictEqual(REQUEST_CONFIG);
   });

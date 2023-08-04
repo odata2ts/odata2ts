@@ -12,28 +12,31 @@ export class PersonModelV2Service<ClientType extends ODataHttpClient> extends En
   EditablePersonModel,
   QPersonV2
 > {
-  private __qGetSomething = new QGetSomethingFunction();
+  private _qGetSomething = new QGetSomethingFunction();
 
   public get features() {
-    return new CollectionServiceV2(this.client, this.basePath, "Features", new QEnumCollection());
+    const { client, path } = this.__base;
+    return new CollectionServiceV2(client, path, "Features", new QEnumCollection());
   }
 
   public userName() {
+    const { client, path, qModel } = this.__base;
+
     return new PrimitiveTypeServiceV2<ClientType, "string">(
-      this.client,
-      this.getPath(),
+      client,
+      path,
       "UserName",
       "userName",
-      this.qModel.userName.converter
+      qModel.userName.converter
     );
   }
 
   public get bestFriend() {
-    return new PersonModelV2Service(this.client, this.basePath, "BestFriend");
+    return new PersonModelV2Service(this.__base.client, this.__base.path, "BestFriend");
   }
 
   public get friends() {
-    return new PersonModelV2CollectionService(this.client, this.basePath, "Friends");
+    return new PersonModelV2CollectionService(this.__base.client, this.__base.path, "Friends");
   }
 
   constructor(client: ODataHttpClient, basePath: string, name: string) {
@@ -41,8 +44,8 @@ export class PersonModelV2Service<ClientType extends ODataHttpClient> extends En
   }
 
   public getSomething(params: GetSomethingFunctionParams, requestConfig?: ODataHttpClientConfig<ClientType>) {
-    const url = this.addFullPath(this.__qGetSomething.buildUrl(params));
-    return this.client.get(url, requestConfig);
+    const url = this.__base.addFullPath(this._qGetSomething.buildUrl(params));
+    return this.__base.client.get(url, requestConfig);
   }
 }
 

@@ -4,21 +4,27 @@ import { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { convertV4ValueResponse } from "@odata2ts/odata-query-objects";
 import { getIdentityConverter } from "@odata2ts/odata-query-objects/lib/IdentityConverter";
 
-import { BIG_NUMBERS_HEADERS, DEFAULT_HEADERS } from "../RequestHeaders";
+import { ServiceStateHelper } from "../ServiceStateHelper";
 
-const RAW_VALUE_SUFFIX = "/$value";
+// const RAW_VALUE_SUFFIX = "/$value";
 
 export class PrimitiveTypeServiceV4<ClientType extends ODataHttpClient, T> {
+  protected readonly __base: ServiceStateHelper<T>;
+  protected readonly __converter: ValueConverter<any, any>;
+
   public constructor(
-    private readonly client: ODataHttpClient,
-    private readonly basePath: string,
-    private readonly name: string,
-    private readonly converter: ValueConverter<any, any> = getIdentityConverter(),
-    private bigNumbersAsString: boolean = false
-  ) {}
+    client: ODataHttpClient,
+    basePath: string,
+    name: string,
+    converter: ValueConverter<any, any> = getIdentityConverter(),
+    bigNumbersAsString: boolean = false
+  ) {
+    this.__base = new ServiceStateHelper<T>(client, basePath, name, bigNumbersAsString);
+    this.__converter = converter;
+  }
 
   public getPath() {
-    return this.basePath && this.name ? this.basePath + "/" + this.name : this.basePath ? this.basePath : this.name;
+    return this.__base.path;
   }
 
   /**
@@ -30,32 +36,30 @@ export class PrimitiveTypeServiceV4<ClientType extends ODataHttpClient, T> {
   public async getValue(
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataValueResponseV4<T>> {
-    const result = await this.client.get(this.getPath(), requestConfig);
-    return convertV4ValueResponse(result, this.converter);
+    const { client, path, getDefaultHeaders } = this.__base;
+
+    const result = await client.get(path, requestConfig, getDefaultHeaders());
+    return convertV4ValueResponse(result, this.__converter);
   }
 
   /*public async getRawValue(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<any> {
-    return this.client.get(this.getPath() + RAW_VALUE_SUFFIX, requestConfig);
+    const { client, qModel, path } = this.__base;
+
+    return client.get(path + RAW_VALUE_SUFFIX, requestConfig);
   }*/
 
-  public async update(
+  public async updateValue(
     value: T,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataValueResponseV4<T>> {
-    const convertedValue = this.converter.convertTo(value);
-    const result = await this.client.put(this.getPath(), convertedValue, requestConfig);
-    return convertV4ValueResponse(result, this.converter);
+    const { client, path, getDefaultHeaders } = this.__base;
+
+    const result = await client.put(path, this.__converter.convertTo(value), requestConfig, getDefaultHeaders());
+    return convertV4ValueResponse(result, this.__converter);
   }
 
-  public delete(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
-    return this.client.delete(this.getPath(), requestConfig);
-  }
-
-  protected addFullPath(path?: string) {
-    return `${this.getPath() ?? ""}${path ? "/" + path : ""}`;
-  }
-
-  protected getDefaultHeaders() {
-    return this.bigNumbersAsString ? BIG_NUMBERS_HEADERS : DEFAULT_HEADERS;
+  public deleteValue(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
+    const { client, path } = this.__base;
+    return client.delete(path, requestConfig);
   }
 }
