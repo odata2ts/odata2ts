@@ -26,8 +26,8 @@ export class PersonModelV2Service<ClientType extends ODataHttpClient> extends En
       client,
       path,
       "UserName",
-      "userName",
-      qModel.userName.converter
+      qModel.userName.converter,
+      "userName"
     );
   }
 

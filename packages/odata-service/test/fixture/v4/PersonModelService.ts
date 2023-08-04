@@ -23,6 +23,11 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
     return new PrimitiveTypeServiceV4<ClientType, "string">(client, path, "UserName", qModel.userName.converter);
   }
 
+  public age() {
+    const { client, path, qModel } = this.__base;
+    return new PrimitiveTypeServiceV4<ClientType, "string">(client, path, "Age", qModel.Age.converter);
+  }
+
   public get features() {
     const { client, path } = this.__base;
     return new CollectionServiceV4(client, path, "Features", new QEnumCollection());

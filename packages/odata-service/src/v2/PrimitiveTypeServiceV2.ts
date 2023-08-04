@@ -19,8 +19,8 @@ export class PrimitiveTypeServiceV2<ClientType extends ODataHttpClient, T> {
     client: ODataHttpClient,
     basePath: string,
     name: string,
-    mappedName?: string,
-    { convertTo, convertFrom }: ValueConverter<any, any> = getIdentityConverter()
+    { convertTo, convertFrom }: ValueConverter<any, any> = getIdentityConverter(),
+    mappedName?: string
   ) {
     this.__base = new ServiceStateHelper(client, basePath, name);
     this.__converter = {
@@ -62,9 +62,10 @@ export class PrimitiveTypeServiceV2<ClientType extends ODataHttpClient, T> {
     value: T,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataValueResponseV2<T>> {
-    const { client, path, getDefaultHeaders } = this.__base;
+    const { client, path, getDefaultHeaders, name } = this.__base;
 
-    const result = await client.put(path, this.__converter.convertTo(value), requestConfig, getDefaultHeaders());
+    const requestBody = { [name!]: this.__converter.convertTo(value) };
+    const result = await client.put(path, requestBody, requestConfig, getDefaultHeaders());
     return convertV2ValueResponse(result, this.__converter);
   }
 

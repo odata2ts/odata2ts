@@ -8,7 +8,7 @@ export class ServiceStateHelper<T> {
   public constructor(
     public readonly client: ODataHttpClient,
     basePath: string,
-    name?: string,
+    public name?: string,
     public readonly bigNumbersAsString: boolean = false
   ) {
     this.path = basePath && name ? basePath + "/" + name : basePath ? basePath : name || "";

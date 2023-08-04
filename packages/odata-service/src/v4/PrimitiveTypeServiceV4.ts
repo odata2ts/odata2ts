@@ -54,7 +54,8 @@ export class PrimitiveTypeServiceV4<ClientType extends ODataHttpClient, T> {
   ): ODataResponse<void | ODataValueResponseV4<T>> {
     const { client, path, getDefaultHeaders } = this.__base;
 
-    const result = await client.put(path, this.__converter.convertTo(value), requestConfig, getDefaultHeaders());
+    const requestBody = { value: this.__converter.convertTo(value) };
+    const result = await client.put(path, requestBody, requestConfig, getDefaultHeaders());
     return convertV4ValueResponse(result, this.__converter);
   }
 
