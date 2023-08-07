@@ -2265,7 +2265,7 @@ __metadata:
     fs-extra: ^11.1.1
     jest: ^29.5.0
     pascal-case: ^3.1.2
-    prettier: ^2.8.8
+    prettier: ^3.0.1
     rimraf: ^5.0.1
     snake-case: ^3.0.4
     ts-jest: ^29.1.0
@@ -2303,7 +2303,6 @@ __metadata:
     "@lerna-lite/publish": ^2.4.1
     "@lerna-lite/run": ^2.4.1
     "@lerna-lite/version": ^2.4.1
-    "@prettier/plugin-xml": ^2.2.0
     "@types/jest": ^29.5.2
     "@types/node": ^20.3.0
     env-cmd: ^10.1.0
@@ -2312,9 +2311,9 @@ __metadata:
     jest: ^29.5.0
     lint-staged: ^13.2.2
     madge: ^6.1.0
-    prettier: ^2.8.8
+    prettier: ^3.0.1
     prettier-plugin-import-sort: ^0.0.7
-    prettier-plugin-package: ^1.3.0
+    prettier-plugin-package: ^1.3.1
     prettier-plugin-properties: ^0.2.0
     rimraf: ^5.0.1
     typescript: ^5.1.3
@@ -2325,16 +2324,6 @@ __metadata:
   version: 0.11.0
   resolution: "@pkgjs/parseargs@npm:0.11.0"
   checksum: 6ad6a00fc4f2f2cfc6bff76fb1d88b8ee20bc0601e18ebb01b6d4be583733a860239a521a7fbca73b612e66705078809483549d2b18f370eb346c5155c8e4a0f
-  languageName: node
-  linkType: hard
-
-"@prettier/plugin-xml@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "@prettier/plugin-xml@npm:2.2.0"
-  dependencies:
-    "@xml-tools/parser": ^1.0.11
-    prettier: ">=2.4.0"
-  checksum: 480fb67fe711463ab6b5678ce996486873b4d6440c31338af3f8dd5054c7ae9539dd81621637c85eed904727cfe17b7213e717d451df2fee56c8c50251f6bb69
   languageName: node
   linkType: hard
 
@@ -9108,12 +9097,12 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
-"prettier-plugin-package@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "prettier-plugin-package@npm:1.3.0"
+"prettier-plugin-package@npm:^1.3.1":
+  version: 1.3.1
+  resolution: "prettier-plugin-package@npm:1.3.1"
   peerDependencies:
     prettier: ^2.0.0
-  checksum: 830c105865ab3bde0cdfdce28d410cd8391ee4725e07e90f7570f43f6a3f30a5568b5b7391338b04dd512a4a6ded1670a1dd806cfc141264e79b3444fa629057
+  checksum: d907c80dbabb1d81157697eca537f4e51d57c808dd7b69a5825d730a8be0026ac13372f8b1a0d70b966a278276a5b495d4445d09a30af7f0e3a4331fd05243b9
   languageName: node
   linkType: hard
 
@@ -9126,21 +9115,12 @@ fsevents@^2.3.2:
   languageName: node
   linkType: hard
 
-"prettier@npm:>=2.4.0":
-  version: 2.6.2
-  resolution: "prettier@npm:2.6.2"
+"prettier@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "prettier@npm:3.0.1"
   bin:
-    prettier: bin-prettier.js
-  checksum: 48d08dde8e9fb1f5bccdd205baa7f192e9fc8bc98f86e1b97d919de804e28c806b0e6cc685e4a88211aa7987fa9668f30baae19580d87ced3ed0f2ec6572106f
-  languageName: node
-  linkType: hard
-
-"prettier@npm:^2.8.8":
-  version: 2.8.8
-  resolution: "prettier@npm:2.8.8"
-  bin:
-    prettier: bin-prettier.js
-  checksum: b49e409431bf129dd89238d64299ba80717b57ff5a6d1c1a8b1a28b590d998a34e083fa13573bc732bb8d2305becb4c9a4407f8486c81fa7d55100eb08263cf8
+    prettier: bin/prettier.cjs
+  checksum: e1f3f16c7fe0495de3faa182597871f74927d787cce3c52095a66ff5d7eacc05173371d5f58bf12141a0a1b6bfe739a338531d6cf18b92c7256c1319f2c84e73
   languageName: node
   linkType: hard
 

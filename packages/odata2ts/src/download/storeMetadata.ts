@@ -14,13 +14,13 @@ export async function storeMetadata(filePath: string, metadataXml: string, prett
   const outDir = path.dirname(filePath);
 
   const prettierConfig = await prettier.resolveConfig(outDir);
-  const prettified = prettify
+  const prettified = await (prettify
     ? prettier.format(
         metadataXml,
         // @ts-ignore: xmlWhitespaceSensitivity is an option of the plugin
-        { xmlWhitespaceSensitivity: "ignore", ...prettierConfig, parser: "xml", plugins: ["@prettier/plugin-xml"] }
+        { xmlWhitespaceSensitivity: "ignore", ...prettierConfig, parser: "xml", plugins: ["@prettier/plugin-xml"] },
       )
-    : metadataXml;
+    : Promise.resolve(metadataXml));
 
   await ensureDir(outDir);
   await writeFile(filePath, prettified);
