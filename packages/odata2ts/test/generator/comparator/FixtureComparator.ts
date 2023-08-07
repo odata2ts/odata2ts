@@ -20,13 +20,16 @@ export async function createFixtureComparator(basePath: string) {
 export class FixtureComparator {
   private readonly path: string;
 
-  constructor(basePath: string, private prettierConfig: Options | null) {
+  constructor(
+    basePath: string,
+    private prettierConfig: Options | null,
+  ) {
     this.path = path.join(__dirname, "../../fixture", basePath);
   }
 
   public async compareWithFixture(text: string, fixturePath: string) {
     const config = this.prettierConfig || undefined;
-    const result = prettier.format(text, config);
+    const result = await prettier.format(text, config);
 
     const fullPath = this.path + path.sep + fixturePath;
     if (!pathExistsSync(fullPath)) {

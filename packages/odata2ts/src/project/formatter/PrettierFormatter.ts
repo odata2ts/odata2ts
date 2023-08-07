@@ -30,11 +30,11 @@ export class PrettierFormatter extends BaseFormatter {
           this.options.bracketSpacing !== undefined ? this.options.bracketSpacing : true,
         newLineKind: this.convertNewline(this.options.endOfLine),
         quoteKind: this.options.singleQuote ? QuoteKind.Single : QuoteKind.Double,
-        useTrailingCommas: this.options.trailingComma === "none" ? false : true,
+        useTrailingCommas: this.options.trailingComma !== "none",
       };
     } else {
       this.settings = {};
-    };
+    }
 
     return this;
   }
