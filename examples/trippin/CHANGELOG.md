@@ -3,11 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-trippin@0.7.0...@odata2ts/example-trippin@0.8.0) (2023-08-08)
+
+### Features
+
+* service generation for primitive types ([#201](https://github.com/odata2ts/odata2ts/issues/201)) ([ea9e645](https://github.com/odata2ts/odata2ts/commit/ea9e6452f6b4033c489fbceaf6b75591b550a3f1))
+
+### BREAKING CHANGES
+
+* removed the public method "getQObject"
+
+* refactor(odata2ts): use __base properties of inherited services
+
+* feat(service): introduce PrimitiveTypeService
+
+* feat(odata2ts): allow to generate PrimitiveTypeServices via option enablePrimitivePropertyServices
+
+* feat(example): integration tests for primitive type services
+
 # [0.7.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-trippin@0.6.0...@odata2ts/example-trippin@0.7.0) (2023-07-31)
 
 ### Features
 
 * **odata2ts:** ESM support for the generator ([#198](https://github.com/odata2ts/odata2ts/issues/198)) ([6956b9c](https://github.com/odata2ts/odata2ts/commit/6956b9c8321707f04b7109653de50de0b739df3e))
+
 * **service:** add big number handling for V4 ([#194](https://github.com/odata2ts/odata2ts/issues/194)) ([13db4bb](https://github.com/odata2ts/odata2ts/commit/13db4bbf677c20c65767bbc8342390750c43253b))
 
 # [0.6.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-trippin@0.5.5...@odata2ts/example-trippin@0.6.0) (2023-07-20)

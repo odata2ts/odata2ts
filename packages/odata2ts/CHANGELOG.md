@@ -3,11 +3,34 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.29.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.28.0...@odata2ts/odata2ts@0.29.0) (2023-08-08)
+
+### Bug Fixes
+
+* **odata2ts:** downgrade prettier plugin xml to 2.2.0 ([36525f9](https://github.com/odata2ts/odata2ts/commit/36525f90e03199a0a4cce197df4662e8288493a6))
+
+### Features
+
+* service generation for primitive types ([#201](https://github.com/odata2ts/odata2ts/issues/201)) ([ea9e645](https://github.com/odata2ts/odata2ts/commit/ea9e6452f6b4033c489fbceaf6b75591b550a3f1))
+
+### BREAKING CHANGES
+
+* removed the public method "getQObject"
+
+* refactor(odata2ts): use __base properties of inherited services
+
+* feat(service): introduce PrimitiveTypeService
+
+* feat(odata2ts): allow to generate PrimitiveTypeServices via option enablePrimitivePropertyServices
+
+* feat(example): integration tests for primitive type services
+
 # [0.28.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.27.0...@odata2ts/odata2ts@0.28.0) (2023-07-31)
 
 ### Features
 
 * **odat2ts:** v4 big number generation ([#195](https://github.com/odata2ts/odata2ts/issues/195)) ([3e5fdcd](https://github.com/odata2ts/odata2ts/commit/3e5fdcda42f893ed7d069489faa2ad10da8d7837))
+
 * **odata2ts:** ESM support for the generator ([#198](https://github.com/odata2ts/odata2ts/issues/198)) ([6956b9c](https://github.com/odata2ts/odata2ts/commit/6956b9c8321707f04b7109653de50de0b739df3e))
 
 # [0.27.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.26.1...@odata2ts/odata2ts@0.27.0) (2023-07-20)

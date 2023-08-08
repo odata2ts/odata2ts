@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-odata-v2@0.4.0...@odata2ts/example-odata-v2@0.5.0) (2023-08-08)
+
+### Features
+
+* service generation for primitive types ([#201](https://github.com/odata2ts/odata2ts/issues/201)) ([ea9e645](https://github.com/odata2ts/odata2ts/commit/ea9e6452f6b4033c489fbceaf6b75591b550a3f1))
+
+### BREAKING CHANGES
+
+* removed the public method "getQObject"
+
+* refactor(odata2ts): use __base properties of inherited services
+
+* feat(service): introduce PrimitiveTypeService
+
+* feat(odata2ts): allow to generate PrimitiveTypeServices via option enablePrimitivePropertyServices
+
+* feat(example): integration tests for primitive type services
+
 # [0.4.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-odata-v2@0.3.6...@odata2ts/example-odata-v2@0.4.0) (2023-07-31)
 
 ### Features
