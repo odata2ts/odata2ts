@@ -2249,7 +2249,7 @@ __metadata:
     "@odata2ts/odata-query-objects": ^0.19.0
     "@odata2ts/odata-service": ^0.16.0
     "@odata2ts/test-converters": ^0.2.6
-    "@prettier/plugin-xml": ^3.1.1
+    "@prettier/plugin-xml": ^2.2.0
     "@types/fs-extra": ^11.0.1
     "@types/jest": ^29.5.2
     "@types/node": ^20.3.0
@@ -2303,7 +2303,6 @@ __metadata:
     "@lerna-lite/publish": ^2.4.1
     "@lerna-lite/run": ^2.4.1
     "@lerna-lite/version": ^2.4.1
-    "@prettier/plugin-xml": ^2.2.0
     "@types/jest": ^29.5.2
     "@types/node": ^20.3.0
     env-cmd: ^10.1.0
@@ -2335,17 +2334,6 @@ __metadata:
     "@xml-tools/parser": ^1.0.11
     prettier: ">=2.4.0"
   checksum: 480fb67fe711463ab6b5678ce996486873b4d6440c31338af3f8dd5054c7ae9539dd81621637c85eed904727cfe17b7213e717d451df2fee56c8c50251f6bb69
-  languageName: node
-  linkType: hard
-
-"@prettier/plugin-xml@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "@prettier/plugin-xml@npm:3.1.1"
-  dependencies:
-    "@xml-tools/parser": ^1.0.11
-  peerDependencies:
-    prettier: ^3.0.0
-  checksum: 9449a5aaa62af0fb652142363d4313c3954d7e37ef0227f7788e16d966f4bd3ab6434e3364a9edbf2f044db5b1ddb6d895438837ac92530537bcc5f3d47a9a04
   languageName: node
   linkType: hard
 
