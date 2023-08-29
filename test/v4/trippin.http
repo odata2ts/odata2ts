@@ -211,6 +211,11 @@ GET {{baseUrl}}/GetPersonWithMostFriends
 # @name func with params
 GET {{baseUrl}}/GetNearestAirport(lat=51.918777,lon=8.620930)
 
+### Unbound Function with namespace => 500
+# @name unbound func with namespace
+GET {{baseUrl}}/Trippin.GetPersonWithMostFriends
+
+
 ###
 # @name func bound to trip => params are taken from the path
 GET {{baseUrl}}/People('russellwhyte')/Trips(0)/GetInvolvedPeople

@@ -34,6 +34,12 @@ describe("Integration Testing of Service Generation", () => {
     expect(result.data.value.length).toBe(2);
   });
 
+  test("bound action", async () => {
+    const result = await trippinService.people("scottketchum").updateLastName({ lastName: "Ketchup" });
+    expect(result.status).toBe(200);
+    expect(result.data.value).toBe(true);
+  });
+
   test("get entity by id", async () => {
     const expected: PersonModel = {
       user: "russellwhyte",
