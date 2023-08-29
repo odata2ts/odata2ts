@@ -139,4 +139,19 @@ describe("Query Object Generator Tests V4", () => {
       converters: [{ module: "@odata2ts/test-converters", use: ["stringToPrefixModelConverter"] }],
     });
   });
+
+  test(`bound QAction`, async () => {
+    // given a simple function
+    odataBuilder
+      .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
+      .addAction("BoundAction", ODataTypesV4.Boolean, true, (builder) =>
+        builder
+          .addParam("test", `${SERVICE_NAME}.${ENTITY_NAME}`, false)
+          .addParam("opt_Test", ODataTypesV4.String, true)
+      );
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("boundAction", "action-bound.ts");
+  });
 });
