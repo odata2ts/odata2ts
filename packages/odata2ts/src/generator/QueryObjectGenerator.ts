@@ -237,14 +237,15 @@ class QueryObjectGenerator {
             returnType.isCollection ? "_COLLECTION" : ""
           }, new QComplexParam("NONE", new ${returnType.qObject}))`;
         }
-      } else if (returnType.converters && returnType.qParam) {
+      }
+      // currently, it only makes sense to add the OperationReturnType if a converter is present
+      else if (returnType.converters && returnType.qParam) {
         importContainer.addFromQObject("OperationReturnType", "ReturnTypes", returnType.qParam);
-        returnTypeOpStmt = `new OperationReturnType(ReturnTypes.VALUE${
-          returnType.isCollection ? "_COLLECTION" : ""
-        }, new ${returnType.qParam}("NONE", undefined, ${this.generateConverterStmt(
-          returnType.converters,
-          importContainer
-        )}))`;
+        const rtKind = "ReturnTypes.VALUE" + (returnType.isCollection ? "_COLLECTION" : "");
+        const converterParam = returnType.converters
+          ? ", " + this.generateConverterStmt(returnType.converters, importContainer)
+          : "";
+        returnTypeOpStmt = `new OperationReturnType(${rtKind}, new ${returnType.qParam}("NONE", undefined${converterParam}))`;
       }
     }
 
