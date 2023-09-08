@@ -257,11 +257,18 @@ GET {{baseUrl}}/People('russellwhyte')
 # @name Querying for Complex Prop Only
 GET {{baseUrl}}/Airports('KSFO')/Location
 ###
-# @name Querying for Single Prop Only
+# @name Querying for Primitive Value
 GET {{baseUrl}}/Airports('KSFO')/Location/Address
 ###
-# @name Querying for Single Value Only
-GET {{baseUrl}}/Airports('KSFO')/Location/Address/$value
+# @name Querying for Primitive Raw Value
+GET {{baseUrl}}/Airports('KSFO')/Location/Address/$value?$charset=utf-8
+Accept: */*
+###
+# @name Querying for Primitive Null Value => 204
+GET {{baseUrl}}/People('russellwhyte')/Age/$value
+###
+# @name Querying for Primitive Null Raw Value => 204
+GET {{baseUrl}}/People('russellwhyte')/Age/$value
 
 ###
 # @name Navigatable Collection Prop
