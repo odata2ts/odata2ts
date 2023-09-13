@@ -2147,6 +2147,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@odata2ts/http-client-api@npm:^0.5.1":
+  version: 0.5.1
+  resolution: "@odata2ts/http-client-api@npm:0.5.1"
+  checksum: c3c3269b084da649f84f41b3e514d130e06f8a33c00f7a5ee0a97ecf58cfcd4ebf445b9062909117a4ee0797f888e2901d4c9c3d6b887b717f82e5e7e5c7f30b
+  languageName: node
+  linkType: hard
+
 "@odata2ts/http-client-axios@npm:^0.9.0":
   version: 0.9.0
   resolution: "@odata2ts/http-client-axios@npm:0.9.0"
@@ -2223,7 +2230,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
-    "@odata2ts/http-client-api": ^0.4.0
+    "@odata2ts/http-client-api": ^0.5.1
     "@odata2ts/odata-query-builder": ^0.16.4
     "@odata2ts/odata-query-objects": ^0.20.0
     "@types/jest": ^29.5.2
@@ -2244,7 +2251,7 @@ __metadata:
     "@odata2ts/converter-api": ^0.1.2
     "@odata2ts/converter-runtime": ^0.2.2
     "@odata2ts/converter-v2-to-v4": ^0.1.4
-    "@odata2ts/http-client-api": ^0.4.0
+    "@odata2ts/http-client-api": ^0.5.1
     "@odata2ts/odata-core": ^0.4.0
     "@odata2ts/odata-query-objects": ^0.20.0
     "@odata2ts/odata-service": ^0.17.0

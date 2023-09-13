@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@odata2ts/converter-big-number": "^0.1.0",
-    "@odata2ts/http-client-axios": "^0.9.0",
+    "@odata2ts/http-client-axios": "^0.10.2",
     "@odata2ts/odata-service": "^0.17.0",
     "axios": "^0.27.2"
   },
