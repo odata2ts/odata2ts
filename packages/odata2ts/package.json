@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata2ts",
-  "version": "0.29.0",
+  "version": "0.29.1",
   "publishConfig": {
     "access": "public"
   },
@@ -45,7 +45,7 @@
   ],
   "peerDependencies": {
     "@odata2ts/odata-query-objects": "^0.20.0",
-    "@odata2ts/odata-service": "^0.17.0"
+    "@odata2ts/odata-service": "^0.17.1"
   },
   "dependencies": {
     "@odata2ts/converter-api": "^0.1.2",
@@ -73,7 +73,7 @@
   "devDependencies": {
     "@odata2ts/converter-v2-to-v4": "^0.1.4",
     "@odata2ts/odata-query-objects": "^0.20.0",
-    "@odata2ts/odata-service": "^0.17.0",
+    "@odata2ts/odata-service": "^0.17.1",
     "@odata2ts/test-converters": "^0.3.0",
     "@types/fs-extra": "^11.0.1",
     "@types/jest": "^29.5.2",
