@@ -50,7 +50,7 @@
   "dependencies": {
     "@odata2ts/converter-api": "^0.1.2",
     "@odata2ts/converter-runtime": "^0.2.2",
-    "@odata2ts/http-client-api": "^0.4.0",
+    "@odata2ts/http-client-api": "^0.5.1",
     "@odata2ts/odata-core": "^0.4.0",
     "@prettier/plugin-xml": "^2.2.0",
     "axios": "^1.4.0",
