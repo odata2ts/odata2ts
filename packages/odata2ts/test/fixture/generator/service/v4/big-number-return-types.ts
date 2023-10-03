@@ -1,9 +1,18 @@
 import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataValueResponseV4 } from "@odata2ts/odata-core";
-import { ODataService } from "@odata2ts/odata-service";
+import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QPingBigNumber, QPingDecimal, QPingDecimalCollection } from "./QTester";
+import {
+  QPingBigNumber,
+  QPingDecimal,
+  QPingDecimalCollection,
+  QTestEntity,
+  QTestEntityId,
+  qTestEntity,
+} from "./QTester";
+// @ts-ignore
+import { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel";
 
 export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   private _qPingBigNumber?: QPingBigNumber;
@@ -51,5 +60,28 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
     const url = addFullPath(this._qPingDecimalCollection.buildUrl());
     const response = await client.post(url, {}, requestConfig, getDefaultHeaders());
     return this._qPingDecimalCollection.convertResponse(response);
+  }
+}
+
+export class TestEntityService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
+  ClientType,
+  TestEntity,
+  EditableTestEntity,
+  QTestEntity
+> {
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qTestEntity, true);
+  }
+}
+
+export class TestEntityCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
+  ClientType,
+  TestEntity,
+  EditableTestEntity,
+  QTestEntity,
+  TestEntityId
+> {
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qTestEntity, new QTestEntityId(name), true);
   }
 }

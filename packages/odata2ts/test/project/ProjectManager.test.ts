@@ -1,7 +1,7 @@
 import { writeFile } from "fs/promises";
 import path from "path";
 
-import { emptyDir, remove } from "fs-extra";
+import { remove } from "fs-extra";
 import { Project, SourceFile } from "ts-morph";
 import * as TsMorph from "ts-morph";
 import { ModuleKind, ModuleResolutionKind, ScriptTarget } from "typescript";
@@ -19,7 +19,6 @@ jest.mock("ts-morph");
 
 describe("ProjectManager Test", () => {
   const SERVICE_NAME = "Tester";
-  const SERVICE_PATH = "service";
 
   const MOCK_PROJECT: Project = {
     // @ts-ignore
@@ -254,49 +253,5 @@ describe("ProjectManager Test", () => {
     // then only this file is written
     expect(writeFile).toHaveBeenCalledTimes(1);
     expect(writeFile).toHaveBeenCalledWith(filePath, "");
-  });
-
-  test("ProjectManager: create & get service files", async () => {
-    // given an initialized project manager
-    const servicePath = path.join(outputDir, SERVICE_PATH);
-    const pm = await doCreateProjectManager();
-    expect(pm.getServiceFiles()).toEqual([]);
-    expect(pm.getServiceDir()).toBe(servicePath);
-
-    // when creating file
-    const result = await pm.createServiceFile("TestXyService");
-
-    // then file was created properly
-    const filePath = await testFileCreation(result, `${SERVICE_PATH}/TestXyService`);
-    expect(pm.getServiceFiles().length).toBe(1);
-    expect(pm.getServiceFiles()[0].getFilePath()).toBe(filePath);
-
-    // when adding one more file
-    const result2 = await pm.createServiceFile("Test2Service");
-
-    // then it has been added ot the end of the service files
-    const filePath2 = await testFileCreation(result2, `${SERVICE_PATH}/Test2Service`);
-    expect(pm.getServiceFiles().length).toBe(2);
-    expect(pm.getServiceFiles()[1].getFilePath()).toBe(filePath2);
-
-    // when writing all files
-    await pm.writeFiles();
-
-    // then only the service files are written
-    expect(writeFile).toHaveBeenCalledTimes(2);
-    expect(writeFile).toHaveBeenNthCalledWith(1, filePath, "");
-    expect(writeFile).toHaveBeenNthCalledWith(2, filePath2, "");
-  });
-
-  test("ProjectManager: clean service dir", async () => {
-    // given an initialized project manager
-    const pm = await doCreateProjectManager();
-
-    // when cleaning service dir
-    await pm.cleanServiceDir();
-
-    // then IO operation was called
-    expect(emptyDir).toHaveBeenCalledTimes(1);
-    expect(emptyDir).toHaveBeenCalledWith(path.join(outputDir, SERVICE_PATH));
   });
 });

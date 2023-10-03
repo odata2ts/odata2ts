@@ -72,8 +72,6 @@ class ServiceGenerator {
     const container = this.dataModel.getEntityContainer();
     const unboundOperations = [...Object.values(container.functions), ...Object.values(container.actions)];
 
-    await this.generateModelServices();
-
     const importContainer = new ImportContainer(this.namingHelper.getFileNames());
     importContainer.addFromClientApi("ODataHttpClient");
     importContainer.addFromService(ROOT_SERVICE);
@@ -102,6 +100,8 @@ class ServiceGenerator {
       properties,
       methods,
     });
+
+    await this.generateModelServices(sourceFile, importContainer);
 
     sourceFile.addImportDeclarations(importContainer.getImportDeclarations(false));
   }
@@ -153,10 +153,6 @@ class ServiceGenerator {
     importContainer.addFromClientApi("ODataHttpClient");
     importContainer.addGeneratedModel(idName);
     importContainer.addGeneratedQObject(idFunctionName);
-    // make sure to not falsely import self-referential stuff
-    if (!currentServiceName || currentServiceName !== serviceName) {
-      importContainer.addGeneratedService(serviceName, collectionName, serviceName);
-    }
 
     return {
       scope: Scope.Public,
@@ -199,8 +195,6 @@ class ServiceGenerator {
   ): OptionalKind<PropertyDeclarationStructure> {
     const { name, entityType } = singleton;
     const type = this.namingHelper.getServiceName(entityType.name);
-
-    importContainer.addGeneratedService(this.namingHelper.getServiceName(entityType.name), type);
 
     return {
       scope: Scope.Private,
@@ -352,11 +346,6 @@ class ServiceGenerator {
       importContainer.addGeneratedQObject(complexType.qName, firstCharLowerCase(complexType.qName));
       propModelType = `${collectionServiceType}<ClientType, ${complexType.name}, ${complexType.qName}, ${editableName}>`;
     } else {
-      // don't include imports for this type
-      if (serviceName !== key) {
-        importContainer.addGeneratedService(key, propModelType);
-      }
-
       propModelType = `${propModelType}<ClientType>`;
     }
 
@@ -533,31 +522,24 @@ class ServiceGenerator {
     });
   }
 
-  private async generateModelServices() {
+  private async generateModelServices(serviceFile: SourceFile, importContainer: ImportContainer) {
     // build service file for each entity, consisting of EntityTypeService & EntityCollectionService
     for (const model of this.dataModel.getModels()) {
       const serviceName = this.namingHelper.getServiceName(model.name);
-      const serviceFile = await this.project.createServiceFile(serviceName);
-      const importContainer = new ImportContainer(this.namingHelper.getFileNames());
 
       // entity type service
       await this.generateEntityTypeService(model, serviceName, serviceFile, importContainer);
 
       // entity collection service
       await this.generateEntityCollectionService(model, serviceFile, importContainer);
-
-      serviceFile.addImportDeclarations(importContainer.getImportDeclarations(true));
     }
 
     // build service file for complex types
     for (const model of this.dataModel.getComplexTypes()) {
       const serviceName = this.namingHelper.getServiceName(model.name);
-      const serviceFile = await this.project.createServiceFile(serviceName);
-      const importContainer = new ImportContainer(this.namingHelper.getFileNames());
 
       // entity type service
       await this.generateEntityTypeService(model, serviceName, serviceFile, importContainer);
-      serviceFile.addImportDeclarations(importContainer.getImportDeclarations(true));
     }
   }
 

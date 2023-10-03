@@ -9,7 +9,6 @@ type ImportContainerType = {
   service: Set<string>;
   genModel: Set<string>;
   genQObjects: Set<string>;
-  genServices: { [key: string]: Set<string> };
   customTypes: Map<string, Set<string>>;
 };
 
@@ -32,7 +31,6 @@ export class ImportContainer {
     service: new Set(),
     genModel: new Set(),
     genQObjects: new Set(),
-    genServices: {},
     customTypes: new Map(),
   };
 
@@ -74,17 +72,8 @@ export class ImportContainer {
     importList.add(typeName);
   }
 
-  public addGeneratedService(key: string, ...names: Array<string>) {
-    let serv = this.container.genServices[key];
-    if (!serv) {
-      serv = new Set();
-      this.container.genServices[key] = serv;
-    }
-    names.forEach((n) => serv.add(n));
-  }
-
   public getImportDeclarations(fromSubPath: boolean = false): Array<ImportDeclarationStructure> {
-    const { genServices, customTypes, ...standardImports } = this.container;
+    const { customTypes, ...standardImports } = this.container;
 
     return [
       ...[...customTypes.keys()]
@@ -96,7 +85,7 @@ export class ImportContainer {
           } as ImportDeclarationStructure;
         }),
       ...Object.entries(standardImports)
-        .filter(([key, values]) => !!values.size)
+        .filter(([_, values]) => !!values.size)
         .map(([key, values]) => {
           const mapping = this.mapping[key];
           return {
@@ -104,12 +93,6 @@ export class ImportContainer {
             moduleSpecifier: `${mapping.isRelative ? `${fromSubPath ? ".." : "."}/` : ""}${mapping.moduleName}`,
           } as ImportDeclarationStructure;
         }),
-      ...Object.entries(genServices).map(([key, values]) => {
-        return {
-          namedImports: [...values],
-          moduleSpecifier: (fromSubPath ? "./" : "./service/") + key,
-        } as ImportDeclarationStructure;
-      }),
     ];
   }
 }

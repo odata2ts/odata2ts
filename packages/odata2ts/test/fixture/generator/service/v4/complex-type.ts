@@ -1,12 +1,12 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
-import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
+import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QBook, QBookId, QReviewer, qBook, qReviewer } from "../QTester";
+import { QBook, QBookId, QReviewer, qBook, qReviewer } from "./QTester";
 // @ts-ignore
-import { Book, BookId, EditableBook, EditableReviewer, Reviewer } from "../TesterModel";
-// @ts-ignore
-import { ReviewerService } from "./ReviewerService";
+import { Book, BookId, EditableBook, EditableReviewer, Reviewer } from "./TesterModel";
+
+export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {}
 
 export class BookService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
   ClientType,
@@ -49,5 +49,16 @@ export class BookCollectionService<ClientType extends ODataHttpClient> extends E
 > {
   constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qBook, new QBookId(name));
+  }
+}
+
+export class ReviewerService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
+  ClientType,
+  Reviewer,
+  EditableReviewer,
+  QReviewer
+> {
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qReviewer);
   }
 }

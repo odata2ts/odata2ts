@@ -11,7 +11,6 @@ GET {{rootUrl}}/$metadata
 ### Get Version
 GET {{rootUrl}}
 
-
 # --- Queries ---
 ### @name list categories
 GET {{rootUrl}}/Categories?$inlinecount=allpages
@@ -37,8 +36,15 @@ Accept: {{contentType}}
 GET {{rootUrl}}/Products(4)/ProductName
 Accept: {{contentType}}
 
+### @name get primitive null value
+GET {{rootUrl}}/Orders(10248)/ShipRegion
+Accept: {{contentType}}
+
 ### @name get raw primitive property
 GET {{rootUrl}}/Products(4)/ProductName/$value
+
+### @name get raw primitive null value => 404?!
+GET {{rootUrl}}/Orders(10248)/ShipRegion/$value
 
 ### @name expanding
 GET {{rootUrl}}/Products(4)?$expand=Category

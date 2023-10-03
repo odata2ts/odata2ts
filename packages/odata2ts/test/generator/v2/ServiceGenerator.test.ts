@@ -37,13 +37,13 @@ describe("Service Generator Tests V2", () => {
     await generateServices(dataModel, projectManager, ODataVersions.V2, namingHelper, runOptions);
   }
 
-  async function compareMainService(fixture: string, v2Specific: boolean) {
+  async function compareMainService(fixture: string) {
     const main = projectManager.getMainServiceFile();
 
     expect(main).toBeTruthy();
     expect(main.getFullText()).toBeTruthy();
 
-    await fixtureComparator.compareWithFixture(main.getFullText(), (v2Specific ? "v2" + path.sep : "") + fixture);
+    await fixtureComparator.compareWithFixture(main.getFullText(), "v2" + path.sep + fixture);
   }
 
   test("Service Generator: empty", async () => {
@@ -53,11 +53,10 @@ describe("Service Generator Tests V2", () => {
     await doGenerate();
 
     // then main service file has been generated but no individual ones
-    await compareMainService("main-service-min.ts", false);
-    expect(projectManager.getServiceFiles().length).toEqual(0);
+    await compareMainService("min.ts");
   });
 
-  test("Service Generator: main service with one EntitySet", async () => {
+  test("Service Generator: one EntitySet", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) =>
@@ -79,14 +78,7 @@ describe("Service Generator Tests V2", () => {
     await doGenerate();
 
     // then main service file lists an entity set
-    await compareMainService("main-service-entityset.ts", false);
-
-    // then we get one additional service file
-    expect(projectManager.getServiceFiles().length).toEqual(1);
-    await fixtureComparator.compareWithFixture(
-      projectManager.getServiceFiles()[0].getFullText(),
-      "v2" + path.sep + "test-entity-service.ts"
-    );
+    await compareMainService("one-entityset.ts");
   });
 
   test("Service Generator: one function", async () => {
@@ -108,7 +100,7 @@ describe("Service Generator Tests V2", () => {
     await doGenerate();
 
     // then main service file encompasses unbound functions
-    await compareMainService("main-service-func-import.ts", true);
+    await compareMainService("function-import.ts");
   });
 
   test("Service Generator: Special function params", async () => {
@@ -127,10 +119,10 @@ describe("Service Generator Tests V2", () => {
     await doGenerate();
 
     // then main service file encompasses unbound functions
-    await compareMainService("main-service-func-import-special-params.ts", true);
+    await compareMainService("function-import-special-params.ts");
   });
 
-  test("Service Generator: EntityService with Relationships", async () => {
+  test("Service Generator: Entity Relationships", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("Author", undefined, (builder) =>
@@ -147,15 +139,10 @@ describe("Service Generator Tests V2", () => {
     runOptions.enablePrimitivePropertyServices = true;
     await doGenerate();
 
-    // then we get two additional service file
-    expect(projectManager.getServiceFiles().length).toEqual(2);
-    await fixtureComparator.compareWithFixture(
-      projectManager.getServiceFiles()[1].getFullText(),
-      "v2" + path.sep + "test-entity-service-relationships.ts"
-    );
+    await compareMainService("entity-relationships.ts");
   });
 
-  test("Service Generator: EntityService with Complex Type", async () => {
+  test("Service Generator: Complex Type", async () => {
     // given one EntitySet
     odataBuilder
       .addComplexType("Reviewer", undefined, (builder) => builder.addProp("name", ODataTypesV2.String, false))
@@ -170,15 +157,8 @@ describe("Service Generator Tests V2", () => {
     await doGenerate();
 
     // then we get two additional service file
-    expect(projectManager.getServiceFiles().length).toEqual(2);
-    await fixtureComparator.compareWithFixture(
-      projectManager.getServiceFiles()[0].getFullText(),
-      "v2" + path.sep + "test-entity-service-complex.ts"
-    );
-    await fixtureComparator.compareWithFixture(
-      projectManager.getServiceFiles()[1].getFullText(),
-      "v2" + path.sep + "test-complex-service.ts"
-    );
+    await compareMainService("complex-type.ts");
+    // "v2" + path.sep + "test-complex-service.ts"
   });
 
   test("Service Generator: EntityService with Enum Type", async () => {
@@ -199,14 +179,10 @@ describe("Service Generator Tests V2", () => {
     await doGenerate();
 
     // then we get two additional service file
-    expect(projectManager.getServiceFiles().length).toEqual(1);
-    await fixtureComparator.compareWithFixture(
-      projectManager.getServiceFiles()[0].getFullText(),
-      "v2" + path.sep + "test-entity-service-enum.ts"
-    );
+    await compareMainService("enum-type.ts");
   });
 
-  test("Service Generator: EntityService with Hierarchy", async () => {
+  test("Service Generator: Entity Hierarchy", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Boolean))
@@ -219,14 +195,6 @@ describe("Service Generator Tests V2", () => {
     await doGenerate();
 
     // then we get two additional service file
-    expect(projectManager.getServiceFiles().length).toEqual(3);
-    await fixtureComparator.compareWithFixture(
-      projectManager.getServiceFiles()[1].getFullText(),
-      "v2" + path.sep + "test-entity-service-hierarchy-parent.ts"
-    );
-    await fixtureComparator.compareWithFixture(
-      projectManager.getServiceFiles()[2].getFullText(),
-      "v2" + path.sep + "test-entity-service-hierarchy-child.ts"
-    );
+    await compareMainService("entity-hierarchy.ts");
   });
 });

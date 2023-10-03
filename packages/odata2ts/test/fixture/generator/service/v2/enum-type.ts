@@ -1,11 +1,13 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EnumCollection, QEnumCollection, qEnumCollection } from "@odata2ts/odata-query-objects";
-import { CollectionServiceV2, EntitySetServiceV2, EntityTypeServiceV2 } from "@odata2ts/odata-service";
+import { CollectionServiceV2, EntitySetServiceV2, EntityTypeServiceV2, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QBook, QBookId, qBook } from "../QTester";
+import { QBook, QBookId, qBook } from "./QTester";
 // @ts-ignore
-import { Book, BookId, Choice, EditableBook } from "../TesterModel";
+import { Book, BookId, Choice, EditableBook } from "./TesterModel";
+
+export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {}
 
 export class BookService<ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,
