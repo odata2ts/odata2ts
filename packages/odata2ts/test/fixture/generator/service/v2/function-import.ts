@@ -1,11 +1,11 @@
 import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
-import { ODataService } from "@odata2ts/odata-service";
+import { EntitySetServiceV2, EntityTypeServiceV2, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QBestBook, QMostPop, QPostBestBook } from "./QTester";
+import { QBestBook, QMostPop, QPostBestBook, QTestEntity, QTestEntityId, qTestEntity } from "./QTester";
 // @ts-ignore
-import { BestBookParams, PostBestBookParams, TestEntity } from "./TesterModel";
+import { BestBookParams, EditableTestEntity, PostBestBookParams, TestEntity, TestEntityId } from "./TesterModel";
 
 export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   private _qMostPop?: QMostPop;
@@ -51,5 +51,28 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
     const url = addFullPath(this._qPostBestBook.buildUrl(params));
     const response = await client.post(url, undefined, requestConfig, getDefaultHeaders());
     return this._qPostBestBook.convertResponse(response);
+  }
+}
+
+export class TestEntityService<ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
+  ClientType,
+  TestEntity,
+  EditableTestEntity,
+  QTestEntity
+> {
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qTestEntity);
+  }
+}
+
+export class TestEntityCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV2<
+  ClientType,
+  TestEntity,
+  EditableTestEntity,
+  QTestEntity,
+  TestEntityId
+> {
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qTestEntity, new QTestEntityId(name));
   }
 }

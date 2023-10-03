@@ -1,11 +1,13 @@
 import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { EntitySetServiceV4, EntityTypeServiceV4 } from "@odata2ts/odata-service";
+import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { Book_QLike, Book_QRate, Book_QRatings, QBook, QBookId, qBook } from "../QTester";
+import { Book_QLike, Book_QRate, Book_QRatings, QBook, QBookId, qBook } from "./QTester";
 // @ts-ignore
-import { Book, BookId, Book_RateParams, Book_RatingsParams, EditableBook, Rating } from "../TesterModel";
+import { Book, BookId, Book_RateParams, Book_RatingsParams, EditableBook, Rating } from "./TesterModel";
+
+export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {}
 
 export class BookService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
   ClientType,

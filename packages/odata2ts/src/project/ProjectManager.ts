@@ -1,7 +1,7 @@
 import { writeFile } from "fs/promises";
 import * as path from "path";
 
-import { emptyDir, remove } from "fs-extra";
+import { remove } from "fs-extra";
 import {
   CompilerOptions,
   ModuleKind,
@@ -93,13 +93,10 @@ function getTarget(target: string | undefined | Record<string, any>): ScriptTarg
   return matchedKey ? (ts.ScriptTarget[matchedKey] as ScriptTarget) : undefined;
 }
 
-const STATIC_SERVICE_DIR = "service";
-
 export class ProjectManager {
   private project!: Project;
 
   private files: { [name: string]: SourceFile } = {};
-  private serviceFiles: Array<SourceFile> = [];
 
   constructor(
     private projectFiles: ProjectFiles,
@@ -149,25 +146,6 @@ export class ProjectManager {
     return this.files.mainService;
   }
 
-  public getServiceDir() {
-    return path.join(this.outputDir, STATIC_SERVICE_DIR);
-  }
-
-  public async cleanServiceDir() {
-    return emptyDir(this.getServiceDir());
-  }
-
-  public async createServiceFile(name: string) {
-    const file = await this.createFile(path.join(STATIC_SERVICE_DIR, name));
-    this.serviceFiles.push(file);
-
-    return file;
-  }
-
-  public getServiceFiles() {
-    return this.serviceFiles;
-  }
-
   public async writeFiles() {
     switch (this.emitMode) {
       case EmitModes.js:
@@ -200,7 +178,7 @@ export class ProjectManager {
   }
 
   private async emitTsFiles() {
-    const files = [this.getModelFile(), this.getQObjectFile(), this.getMainServiceFile(), ...this.getServiceFiles()];
+    const files = [this.getModelFile(), this.getQObjectFile(), this.getMainServiceFile()];
     console.log(`Emitting ${files.length} TS files`);
     return Promise.all([...files.filter((file) => !!file).map(this.formatAndWriteFile)]);
   }

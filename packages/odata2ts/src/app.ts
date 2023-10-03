@@ -74,7 +74,6 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
 
   // Generate Individual OData-Service
   if (isServiceGen(options.mode)) {
-    await project.cleanServiceDir();
     await generateServices(dataModel, project, version, namingHelper, options);
   }
 

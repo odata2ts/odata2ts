@@ -23,9 +23,7 @@ describe("App Test", () => {
     pmSpy = {
       createModelFile: jest.fn(),
       createQObjectFile: jest.fn(),
-      cleanServiceDir: jest.fn(),
       createMainServiceFile: jest.fn(),
-      createServiceFile: jest.fn(),
       writeFiles: jest.fn(),
     };
     // @ts-ignore

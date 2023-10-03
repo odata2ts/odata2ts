@@ -38,33 +38,21 @@ describe("Service Generator Tests V4", () => {
     await fixtureComparatorHelper.generateService(odataBuilder.getSchemas(), projectManager, namingHelper, runOptions);
   }
 
-  function getV4SpecificPath(fixture: string, v4Specific: boolean) {
-    return (v4Specific ? "v4" + path.sep : "") + fixture;
+  async function compareMainService(fixture: string) {
+    await fixtureComparatorHelper.compareService("v4" + path.sep + fixture, projectManager.getMainServiceFile());
   }
 
-  async function compareMainService(fixture: string, v4Specific: boolean = false) {
-    await fixtureComparatorHelper.compareService(
-      getV4SpecificPath(fixture, v4Specific),
-      projectManager.getMainServiceFile()
-    );
-  }
-
-  async function compareService(service: SourceFile, fixture: string, v4Specific: boolean = false) {
-    await fixtureComparatorHelper.compareService(getV4SpecificPath(fixture, v4Specific), service);
-  }
-
-  test("Service Generator: Main Service Min Case", async () => {
+  test("Service Generator: Min Case", async () => {
     // given nothing in particular
 
     // when generating
     await doGenerate();
 
     // then main service file has been generated but no individual ones
-    await compareMainService("main-service-min.ts", false);
-    expect(projectManager.getServiceFiles().length).toEqual(0);
+    await compareMainService("min.ts");
   });
 
-  test("Service Generator: Main Service V4 Big Number", async () => {
+  test("Service Generator: Min Big Number", async () => {
     // given big numbers setting
     const options: ConfigFileOptions = { v4BigNumberAsString: true };
 
@@ -72,10 +60,10 @@ describe("Service Generator Tests V4", () => {
     await doGenerate(options);
 
     // then main service file has been generated but no individual ones
-    await compareMainService("main-service-big-numbers.ts", true);
+    await compareMainService("min-big-numbers.ts");
   });
 
-  test("Service Generator: Main Service one EntitySet", async () => {
+  test("Service Generator: One EntitySet", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) =>
@@ -94,11 +82,7 @@ describe("Service Generator Tests V4", () => {
     });
 
     // then main service file lists an entity set
-    await compareMainService("main-service-entityset.ts", false);
-
-    // then we get one additional service file
-    expect(projectManager.getServiceFiles().length).toEqual(1);
-    await compareService(projectManager.getServiceFiles()[0], "test-entity-service.ts", true);
+    await compareMainService("one-entityset.ts");
   });
 
   test("Service Generator: one singleton", async () => {
@@ -111,7 +95,7 @@ describe("Service Generator Tests V4", () => {
     await doGenerate();
 
     // then main service file encompasses a singleton
-    await compareMainService("main-service-singleton.ts", true);
+    await compareMainService("singleton.ts");
   });
 
   test("Service Generator: unbound functions", async () => {
@@ -129,10 +113,10 @@ describe("Service Generator Tests V4", () => {
     await doGenerate();
 
     // then main service file encompasses unbound functions
-    await compareMainService("main-service-func-unbound.ts", true);
+    await compareMainService("function-unbound.ts");
   });
 
-  test("Service Generator: one unbound action", async () => {
+  test("Service Generator: unbound action", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
@@ -147,7 +131,7 @@ describe("Service Generator Tests V4", () => {
     await doGenerate();
 
     // then main service file encompasses an unbound function
-    await compareMainService("main-service-action-unbound.ts", true);
+    await compareMainService("action-unbound.ts");
   });
 
   test("Service Generator: operation with primitive return types", async () => {
@@ -164,10 +148,10 @@ describe("Service Generator Tests V4", () => {
     // when generating
     await doGenerate();
 
-    await compareMainService("main-service-operation-with-primitive-return-types.ts", true);
+    await compareMainService("primitive-return-types.ts");
   });
 
-  test("Service Generator: operation with big number return types", async () => {
+  test("Service Generator: big number return types", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
@@ -181,7 +165,7 @@ describe("Service Generator Tests V4", () => {
     // when generating
     await doGenerate({ v4BigNumberAsString: true });
 
-    await compareMainService("main-service-operation-with-big-number-return-types.ts", true);
+    await compareMainService("big-number-return-types.ts");
   });
 
   test("Service Generator: Services with Naming", async () => {
@@ -238,11 +222,7 @@ describe("Service Generator Tests V4", () => {
     await doGenerate({ naming });
 
     // then main service file lists an entity set
-    await compareMainService("main-service-naming.ts", true);
-
-    // then we get one additional service file
-    expect(projectManager.getServiceFiles().length).toEqual(1);
-    await compareService(projectManager.getServiceFiles()[0], "test-entity-service-naming.ts", true);
+    await compareMainService("naming.ts");
   });
 
   test("Service Generator: one bound function", async () => {
@@ -266,9 +246,7 @@ describe("Service Generator Tests V4", () => {
     await doGenerate();
 
     // then service has those functions
-    const services = projectManager.getServiceFiles();
-    expect(services.length).toEqual(2);
-    await compareService(services[0], "test-entity-service-bound-func.ts", true);
+    await compareMainService("bound-function.ts");
   });
 
   test("Service Generator: one bound action", async () => {
@@ -294,9 +272,7 @@ describe("Service Generator Tests V4", () => {
     await doGenerate();
 
     // then service has actions
-    const services = projectManager.getServiceFiles();
-    expect(services.length).toEqual(1);
-    await compareService(services[0], "test-entity-service-bound-action.ts", true);
+    await compareMainService("bound-action.ts");
   });
 
   test("Service Generator: EntityService with Relationships", async () => {
@@ -316,8 +292,7 @@ describe("Service Generator Tests V4", () => {
     await doGenerate({ enablePrimitivePropertyServices: true });
 
     // then we get two additional service file
-    expect(projectManager.getServiceFiles().length).toEqual(2);
-    await compareService(projectManager.getServiceFiles()[1], "test-entity-service-relationships.ts", true);
+    await compareMainService("entity-relationships.ts");
   });
 
   test("Service Generator: EntityService with Complex Type", async () => {
@@ -335,9 +310,7 @@ describe("Service Generator Tests V4", () => {
     await doGenerate();
 
     // then we get two additional service file
-    expect(projectManager.getServiceFiles().length).toEqual(2);
-    await compareService(projectManager.getServiceFiles()[0], "test-entity-service-complex.ts", true);
-    await compareService(projectManager.getServiceFiles()[1], "test-complex-service.ts", true);
+    await compareMainService("complex-type.ts");
   });
 
   test("Service Generator: EntityService with Enum Type", async () => {
@@ -358,11 +331,10 @@ describe("Service Generator Tests V4", () => {
     await doGenerate();
 
     // then we get two additional service file
-    expect(projectManager.getServiceFiles().length).toEqual(1);
-    await compareService(projectManager.getServiceFiles()[0], "test-entity-service-enum.ts", true);
+    await compareMainService("enum-type.ts");
   });
 
-  test("Service Generator: Services with big number types", async () => {
+  test("Service Generator: big number types", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) =>
@@ -377,7 +349,6 @@ describe("Service Generator Tests V4", () => {
     await doGenerate({ v4BigNumberAsString: true });
 
     // then we get one additional service file
-    expect(projectManager.getServiceFiles().length).toEqual(1);
-    await compareService(projectManager.getServiceFiles()[0], "test-entity-service-big-numbers.ts", true);
+    await compareMainService("big-numbers.ts");
   });
 });

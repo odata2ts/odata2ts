@@ -1,10 +1,22 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
-import { EntitySetServiceV2, EntityTypeServiceV2, PrimitiveTypeServiceV2 } from "@odata2ts/odata-service";
+import { EntitySetServiceV2, EntityTypeServiceV2, ODataService, PrimitiveTypeServiceV2 } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QTestEntity, QTestEntityId, qTestEntity } from "../QTester";
+import { QTestEntity, QTestEntityId, qTestEntity } from "./QTester";
 // @ts-ignore
-import { EditableTestEntity, TestEntity, TestEntityId } from "../TesterModel";
+import { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel";
+
+export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {
+  public ents(): TestEntityCollectionService<ClientType>;
+  public ents(id: TestEntityId): TestEntityService<ClientType>;
+  public ents(id?: TestEntityId | undefined) {
+    const fieldName = "Ents";
+    const { client, path } = this.__base;
+    return typeof id === "undefined" || id === null
+      ? new TestEntityCollectionService(client, path, fieldName)
+      : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id));
+  }
+}
 
 export class TestEntityService<ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,
