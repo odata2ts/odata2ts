@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.30.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.29.1...@odata2ts/odata2ts@0.30.0) (2023-10-05)
+
+### Features
+
+* one file for all services ([#223](https://github.com/odata2ts/odata2ts/issues/223)) ([f48bf5a](https://github.com/odata2ts/odata2ts/commit/f48bf5ab36aa09ddc7760cc078d952c79b7a2185))
+
 ## [0.29.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.29.0...@odata2ts/odata2ts@0.29.1) (2023-09-13)
 
 **Note:** Version bump only for package @odata2ts/odata2ts
