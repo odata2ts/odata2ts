@@ -245,7 +245,8 @@ export function createDataModelTests(
     digestionOptions.allowRenaming = true;
     digestionOptions.entitiesByName = [
       { name: "Test", mappedName: "newTest", keys: ["ID", "Version"] },
-      { name: /Complex.*/, mappedName: "cmplx" },
+      { name: /Tester\.Complex.*/, mappedName: "cmplx" },
+      //  { name: /NS1\.Test/, mappedName: "NS1_Test" },
     ];
 
     odataBuilder
