@@ -1,5 +1,6 @@
 import { DigestionOptions } from "../FactoryFunctionModel";
 import { EntityGenerationOptions, PropertyGenerationOptions } from "../OptionModel";
+import { NamespaceWithAlias } from "./DataModel";
 
 export interface ConfiguredProp extends Omit<PropertyGenerationOptions, "name"> {}
 export interface ConfiguredEntity extends Omit<EntityGenerationOptions, "name"> {}
@@ -96,20 +97,27 @@ export class ServiceConfigHelper {
     });
   }
 
-  private getEntityByName(nameToMap: string): ConfiguredEntity | undefined {
-    const stringProp = this.entityMapping.get(nameToMap);
-    if (!stringProp) {
+  // get entity config by name matching: simple name or fully qualified name (alias also supported)
+  private getEntityByName(namespace: NamespaceWithAlias, nameToMap: string): ConfiguredEntity | undefined {
+    const [ns, alias] = namespace;
+
+    const config =
+      this.entityMapping.get(`${ns}.${nameToMap}`) ||
+      (alias ? this.entityMapping.get(`${alias}.${nameToMap}`) : undefined) ||
+      this.entityMapping.get(nameToMap);
+    if (!config) {
       return;
     }
-    const { name, ...attrs } = stringProp;
+    const { name, ...attrs } = config;
     return { ...attrs };
   }
 
-  private getEntityByRegExp(nameToMap: string): ConfiguredEntity | undefined {
+  private getEntityByRegExp([mainNs, alias]: NamespaceWithAlias, nameToMap: string): ConfiguredEntity | undefined {
+    const fqName = `${mainNs}.${nameToMap}`;
     const resultList = this.entityRegExps
-      .filter(([regExp]) => regExp.test(nameToMap))
+      .filter(([regExp]) => regExp.test(fqName))
       .map(([regExp, { name, mappedName, ...attrs }]) => ({
-        mappedName: mappedName ? nameToMap.replace(regExp, mappedName) : undefined,
+        mappedName: mappedName ? fqName.replace(regExp, mappedName) : undefined,
         ...attrs,
       }));
 
@@ -120,9 +128,9 @@ export class ServiceConfigHelper {
         }, {});
   }
 
-  public findConfigEntityByName = (name: string): ConfiguredEntity | undefined => {
-    const stringEnt = this.getEntityByName(name);
-    const reEnt = this.getEntityByRegExp(name);
+  public findConfigEntityByName = (namespace: NamespaceWithAlias, name: string): ConfiguredEntity | undefined => {
+    const stringEnt = this.getEntityByName(namespace, name);
+    const reEnt = this.getEntityByRegExp(namespace, name);
 
     return stringEnt && reEnt ? { ...reEnt, ...stringEnt } : stringEnt || reEnt;
   };

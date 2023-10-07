@@ -280,13 +280,30 @@ export interface RunOptions
  */
 export interface EntityGenerationOptions {
   /**
-   * Name of the EntityType or ComplexType, e.g. "Person".
-   * Must match exactly or can be a regular expression.
+   * Matches the name of the EntityType or ComplexType as it is stated in the EDMX model, e.g. "Person".
+   * You can also address the fully qualified name including the namespace (annotated at the schema element), e.g.
+   * "Trippin.Person".
+   *
+   * If the name is specified as plain string, it must match either the name or the fully qualified name
+   * exactly (case-sensitive).
+   *
+   * Alternatively, a regular expression can be used which is always applied to the fully qualified name
+   * (e.g. Trippin.Person). The regular expression must match the whole string
+   * (e.g. `/Person/` won't do, `/.*\.Person/` would work).
+   *
+   * To make regular expressions useful, captured groups are also supported. Works in combination with
+   * the `mappedName` attribute.
    */
   name: string | RegExp;
   /**
-   * Use a different name.
-   * If name is a regular expression, mappedName allows to specify captured groups (via $1, $2, ...).
+   * If specified, this attribute value is used as name for the matched entity, complex or enum type as it will
+   * appear in the generated typescript.
+   *
+   * When using a regular expression for matching the name, then captured groups can be referenced
+   * as usual via $1, $2, etc. For example:
+   * - name: /Trippin\.(.+)/
+   * - mappedName: "T_$1"
+   * - result: "T_Person"
    */
   mappedName?: string;
   /**

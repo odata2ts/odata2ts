@@ -2,7 +2,7 @@ import { MappedConverterChains } from "@odata2ts/converter-runtime";
 
 import { DigestionOptions } from "../FactoryFunctionModel";
 import { PropertyGenerationOptions } from "../OptionModel";
-import { DataModel } from "./DataModel";
+import { DataModel, NamespaceWithAlias } from "./DataModel";
 import { ComplexType as ComplexModelType, DataTypes, ModelType, ODataVersion, PropertyModel } from "./DataTypeModel";
 import { ComplexType, EntityType, Property, Schema, TypeDefinition } from "./edmx/ODataEdmxModelBase";
 import { SchemaV3 } from "./edmx/ODataEdmxModelV3";
@@ -80,6 +80,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   private digestEntityTypesAndOperations() {
     this.schemas.forEach((schema) => {
+      const ns: NamespaceWithAlias = [schema.$.Namespace, schema.$.Alias || undefined];
+
       // type definitions: alias for primitive types
       this.addTypeDefinition(schema.TypeDefinition);
 
@@ -96,9 +98,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       }
 
       // entity types
-      this.addEntityType(schema.EntityType);
+      this.addEntityType(ns, schema.EntityType);
       // complex types
-      this.addComplexType(schema.ComplexType);
+      this.addComplexType(ns, schema.ComplexType);
 
       // V4 only: function & action types
       this.digestOperations(schema);
@@ -107,8 +109,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     this.postProcessModel();
   }
 
-  private getBaseModel(model: ComplexType) {
-    const entityConfig = this.serviceConfigHelper.findConfigEntityByName(model.$.Name);
+  private getBaseModel(namespace: NamespaceWithAlias, model: ComplexType) {
+    const entityConfig = this.serviceConfigHelper.findConfigEntityByName(namespace, model.$.Name);
     const entityName = entityConfig?.mappedName || model.$.Name;
 
     const name = this.namingHelper.getModelName(entityName);
@@ -148,25 +150,25 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     }
   }
 
-  private addComplexType(models: Array<ComplexType> | undefined) {
+  private addComplexType(namespace: NamespaceWithAlias, models: Array<ComplexType> | undefined) {
     if (!models || !models.length) {
       return;
     }
 
     for (const model of models) {
-      const baseModel = this.getBaseModel(model);
+      const baseModel = this.getBaseModel(namespace, model);
       this.dataModel.addComplexType(baseModel.name, baseModel);
     }
   }
 
-  private addEntityType(models: Array<ET> | undefined) {
+  private addEntityType(namespace: NamespaceWithAlias, models: Array<ET> | undefined) {
     if (!models || !models.length) {
       return;
     }
 
     for (const model of models) {
-      const baseModel = this.getBaseModel(model);
-      const entityConfig = this.serviceConfigHelper.findConfigEntityByName(model.$.Name);
+      const baseModel = this.getBaseModel(namespace, model);
+      const entityConfig = this.serviceConfigHelper.findConfigEntityByName(namespace, model.$.Name);
       const entityName = entityConfig?.mappedName || model.$.Name;
 
       // key support: we add keys from this entity,

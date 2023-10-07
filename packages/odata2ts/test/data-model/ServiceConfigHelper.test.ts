@@ -1,7 +1,10 @@
 import { EntityGenerationOptions, PropertyGenerationOptions } from "../../src";
+import { NamespaceWithAlias } from "../../src/data-model/DataModel";
 import { ServiceConfigHelper } from "../../src/data-model/ServiceConfigHelper";
 
 describe("ServiceConfigHelper Tests", function () {
+  const DEFAULT_NAMESPACES: NamespaceWithAlias = ["NS1", "self"];
+
   let toTest: ServiceConfigHelper;
 
   function createHelperWithProps(...propsSetting: Array<PropertyGenerationOptions>) {
@@ -130,15 +133,34 @@ describe("ServiceConfigHelper Tests", function () {
   test("entitiesByName: empty options", () => {
     createHelperWithEntities();
 
-    expect(toTest.findConfigEntityByName("test")).toBeUndefined();
+    expect(toTest.findConfigEntityByName(DEFAULT_NAMESPACES, "test")).toBeUndefined();
   });
 
-  test("entitiesByName: matching, but empty config", () => {
+  test("entitiesByName: matching with empty config", () => {
     const name = "test";
     createHelperWithEntities({ name });
 
-    expect(toTest.findConfigEntityByName(name)).toStrictEqual({});
-    expect(toTest.findConfigEntityByName("xxx")).toBeUndefined();
+    expect(toTest.findConfigEntityByName(DEFAULT_NAMESPACES, name)).toStrictEqual({});
+    expect(toTest.findConfigEntityByName(DEFAULT_NAMESPACES, "xxx")).toBeUndefined();
+  });
+
+  test("entitiesByName: matching with namespace", () => {
+    const [ns] = DEFAULT_NAMESPACES;
+    const name = "test";
+
+    // when using a namespace
+    createHelperWithEntities({ name: `${ns}.${name}` });
+
+    // then we find the config
+    expect(toTest.findConfigEntityByName(DEFAULT_NAMESPACES, name)).toStrictEqual({});
+  });
+
+  test("entitiesByName: matching with namespace alias", () => {
+    const [_, alias] = DEFAULT_NAMESPACES;
+    const name = "test";
+    createHelperWithEntities({ name: `${alias}.${name}` });
+
+    expect(toTest.findConfigEntityByName(DEFAULT_NAMESPACES, name)).toStrictEqual({});
   });
 
   test("entitiesByName: simple name mapping", () => {
@@ -147,14 +169,14 @@ describe("ServiceConfigHelper Tests", function () {
 
     // by string
     createHelperWithEntities({ name, mappedName });
-    let result = toTest.findConfigEntityByName(name);
+    let result = toTest.findConfigEntityByName(DEFAULT_NAMESPACES, name);
 
     expect(result).toStrictEqual({ mappedName });
 
     // by RegExp
-    const nameRegExp = /test/;
+    const nameRegExp = /NS1.test/;
     createHelperWithEntities({ name: nameRegExp, mappedName });
-    result = toTest.findConfigEntityByName(name);
+    result = toTest.findConfigEntityByName(DEFAULT_NAMESPACES, name);
 
     expect(result).toStrictEqual({ mappedName });
   });
@@ -173,40 +195,42 @@ describe("ServiceConfigHelper Tests", function () {
   });
 
   test("entitiesByName: case insensitive regexp", () => {
-    const name = /test/i;
+    const [ns, alias] = DEFAULT_NAMESPACES;
+    const name = /NS1\.test/i;
     const mappedName = "xyz";
     const expectedResult = { mappedName };
 
     createHelperWithEntities({ name, mappedName });
 
-    expect(toTest.findConfigEntityByName("test")).toStrictEqual(expectedResult);
-    expect(toTest.findConfigEntityByName("Test")).toStrictEqual(expectedResult);
-    expect(toTest.findConfigEntityByName("TeST")).toStrictEqual(expectedResult);
-    expect(toTest.findConfigEntityByName("xxx")).toBeUndefined();
+    expect(toTest.findConfigEntityByName(DEFAULT_NAMESPACES, "test")).toStrictEqual(expectedResult);
+    expect(toTest.findConfigEntityByName(DEFAULT_NAMESPACES, "Test")).toStrictEqual(expectedResult);
+    expect(toTest.findConfigEntityByName(DEFAULT_NAMESPACES, "TeST")).toStrictEqual(expectedResult);
+    expect(toTest.findConfigEntityByName(DEFAULT_NAMESPACES, "xxx")).toBeUndefined();
+    expect(toTest.findConfigEntityByName(["xyz"], "test")).toBeUndefined();
   });
 
   test("entitiesByName: regexp replacing", () => {
-    const name = /(\d+)test(\d+)/;
-    const mappedName = "xyz$1_$2";
+    const name = /NS1\.(\d+)test(\d+)/;
+    const mappedName = "xyz$1$2";
 
     createHelperWithEntities({ name, mappedName });
 
-    expect(toTest.findConfigEntityByName("test")).toBeUndefined();
-    expect(toTest.findConfigEntityByName("123test456")).toStrictEqual({ mappedName: "xyz123_456" });
+    expect(toTest.findConfigEntityByName(DEFAULT_NAMESPACES, "test")).toBeUndefined();
+    expect(toTest.findConfigEntityByName(DEFAULT_NAMESPACES, "123test456")).toStrictEqual({ mappedName: "xyz123456" });
   });
 
-  test("entitiesByName: multiple matching regexps", () => {
-    const name = /(\d+)test(\d+)/;
+  test("entitiesByName: multiple matching regexps = last one wins", () => {
+    const name = /NS1.(\d+)test(\d+)/;
     const mappedName = "xyz$1_$2";
 
-    const name2 = /(\d+)test.*/i;
+    const name2 = /NS1.(\d+)test.*/i;
     const mappedName2 = "xyz$1";
     const result2 = "xyz123";
 
     createHelperWithEntities({ name, mappedName }, { name: name2, mappedName: mappedName2 });
 
     // only mapping2 applies
-    expect(toTest.findConfigEntityByName("123test")).toStrictEqual({ mappedName: result2 });
-    expect(toTest.findConfigEntityByName("123Test456")).toStrictEqual({ mappedName: result2 });
+    expect(toTest.findConfigEntityByName(DEFAULT_NAMESPACES, "123test")).toStrictEqual({ mappedName: result2 });
+    expect(toTest.findConfigEntityByName(DEFAULT_NAMESPACES, "123Test456")).toStrictEqual({ mappedName: result2 });
   });
 });
