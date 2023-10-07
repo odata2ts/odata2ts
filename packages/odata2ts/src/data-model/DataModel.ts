@@ -20,6 +20,8 @@ export interface ProjectFiles {
   service: string;
 }
 
+export type NamespaceWithAlias = [string, string?];
+
 const ROOT_OPERATION_BINDING = "/";
 
 export class DataModel {
