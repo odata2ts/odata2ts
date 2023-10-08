@@ -20,15 +20,21 @@ export function createDataModelTests(
 
   let odataBuilder: ODataModelBuilder<any, any, any, any>;
   let digestionOptions: Partial<DigestionOptions> & Pick<TestOptions, "naming" | "allowRenaming">;
+  let namespaces: Array<string>;
+
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
 
   async function doDigest() {
     const opts = digestionOptions ? (deepmerge(TEST_CONFIG, digestionOptions) as TestSettings) : TEST_CONFIG;
-    return await digest(odataBuilder.getSchemas(), opts, new NamingHelper(opts, SERVICE_NAME));
+    return await digest(odataBuilder.getSchemas(), opts, new NamingHelper(opts, SERVICE_NAME, namespaces));
   }
 
   beforeEach(() => {
     odataBuilder = new ODataBuilderConstructor(SERVICE_NAME);
     digestionOptions = {};
+    namespaces = [SERVICE_NAME];
   });
 
   test("Smoke Test", async () => {
@@ -54,21 +60,24 @@ export function createDataModelTests(
 
     const result = await doDigest();
 
+    expect(result.getModels()[0].fqName).toBe(withNs("MY_TYPE"));
     expect(result.getModels()[0].name).toBe("MyType");
     expect(result.getModels()[0].props[0].name).toBe("id");
+    expect(result.getComplexTypes()[0].fqName).toBe(withNs("HOME_ADDRESS"));
     expect(result.getComplexTypes()[0].name).toBe("HomeAddress");
     expect(result.getComplexTypes()[0].props[0].name).toBe("abcDef");
+    expect(result.getEnums()[0].fqName).toBe(withNs("fav_FEAT"));
     expect(result.getEnums()[0].name).toBe("FavFeat");
     expect(result.getEnums()[0].members[0]).toBe("HEY");
   });
 
   test("using Id of base class", async () => {
     odataBuilder
-      .addEntityType("Child", "Parent", () => {})
+      .addEntityType("Child", withNs("Parent"), () => {})
       .addEntityType("GrandParent", undefined, (builder) => {
         builder.addKeyProp("ID", "Edm.String");
       })
-      .addEntityType("Parent", "GrandParent", () => {});
+      .addEntityType("Parent", withNs("GrandParent"), () => {});
 
     const result = await doDigest();
 
@@ -84,7 +93,7 @@ export function createDataModelTests(
       .addEntityType("GrandParent", undefined, (builder) => {
         builder.addKeyProp("ID", "Edm.String");
       })
-      .addEntityType("Parent", "GrandParent", (builder) => {
+      .addEntityType("Parent", withNs("GrandParent"), (builder) => {
         builder.addKeyProp("ID2", "Edm.String");
       });
 
@@ -102,23 +111,23 @@ export function createDataModelTests(
   test(`base classes with cyclical dependencies`, async () => {
     expect.assertions(1);
     odataBuilder
-      .addEntityType("Child", "Parent", (builder) => builder)
-      .addEntityType("Parent", "Child", (builder) => builder);
+      .addEntityType("Child", withNs("Parent"), (builder) => builder)
+      .addEntityType("Parent", withNs("Child"), (builder) => builder);
 
-    await expect(doDigest()).rejects.toThrowError("Cyclic inheritance detected for model Child!");
+    await expect(doDigest()).rejects.toThrowError("Cyclic inheritance detected for model Tester.Child!");
   });
 
   test(`reordering of classes by inheritance`, async () => {
     odataBuilder
-      .addEntityType("GrandChild", "Child", (builder) => builder)
-      .addEntityType("Child", "Parent", (builder) => builder)
+      .addEntityType("GrandChild", withNs("Child"), (builder) => builder)
+      .addEntityType("Child", withNs("Parent"), (builder) => builder)
       .addEntityType("StandAlone", undefined, (builder) => {
         builder.addKeyProp("ID", "Edm.String");
       })
       .addEntityType("GrandParent", undefined, (builder) => {
         builder.addKeyProp("ID", "Edm.String");
       })
-      .addEntityType("Parent", "GrandParent", (builder) => builder);
+      .addEntityType("Parent", withNs("GrandParent"), (builder) => builder);
 
     const result = await doDigest();
 
@@ -273,5 +282,42 @@ export function createDataModelTests(
     expect(toTest.editableName).toBe("EditableNewTest");
     expect(toTest.keyNames).toStrictEqual(["ID", "Version"]);
     expect(toTest.keys.length).toBe(2);
+  });
+
+  test("namespace support", async () => {
+    const schema2 = "ALT";
+    const schema3 = "schema3";
+
+    namespaces.push(schema2, schema3);
+    odataBuilder
+      .addEntityType("Test", undefined, (builder) => {
+        builder.addKeyProp("ID", "Edm.String");
+        builder.addProp("Version", "Edm.String");
+        builder.addProp("Complex", `${schema2}.ComplexTest`);
+      })
+      .addSchema(schema2)
+      .addComplexType("ComplexTest", undefined, (builder) => {
+        builder.addProp("Version", "Edm.String");
+      })
+      .addSchema("schema3")
+      .addEntityType("Test", undefined, (builder) => {
+        builder.addKeyProp("ID", "Edm.String");
+        builder.addProp("Version", "Edm.Boolean");
+      });
+
+    const result = await doDigest();
+    const ns1Model = withNs("Test");
+    const ns3Model = `schema3.Test`;
+
+    let toTest = result.getModels()[0];
+    let toTestAlt = result.getModel(ns1Model);
+    expect(toTest).toBeDefined();
+    expect(toTestAlt).toBeDefined();
+    expect(toTest).toStrictEqual(toTestAlt);
+    expect(toTest.fqName).toBe(ns1Model);
+
+    toTest = result.getModel(ns3Model);
+    expect(toTest).toBeDefined();
+    expect(toTest.fqName).toBe(ns3Model);
   });
 }

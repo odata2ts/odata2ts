@@ -12,6 +12,10 @@ describe("Singleton Digestion Test", () => {
 
   let odataBuilder: ODataModelBuilderV4;
 
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
+
   function doDigest() {
     return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
   }
@@ -21,23 +25,28 @@ describe("Singleton Digestion Test", () => {
   });
 
   test("Singleton: min case", async () => {
-    odataBuilder.addSingleton("Me", "User").addEntityType("User", undefined, (builder) => {
+    odataBuilder.addSingleton("Me", withNs("User")).addEntityType("User", undefined, (builder) => {
       builder.addKeyProp("id", ODataTypesV4.String);
     });
 
     const result = await doDigest();
     expect(result.getEntityContainer().singletons).toMatchObject({
-      Me: { odataName: "Me", name: "Me", entityType: { name: "User" } },
+      [withNs("Me")]: {
+        fqName: withNs("Me"),
+        odataName: "Me",
+        name: "Me",
+        entityType: { name: "User" },
+      },
     });
   });
 
   test("Singleton: missing EntityType", async () => {
-    odataBuilder.addSingleton("Me", "User");
+    odataBuilder.addSingleton("Me", withNs("User"));
 
     // TODO: this should throw
     const result = await doDigest();
     expect(result.getEntityContainer().singletons).toMatchObject({
-      Me: { odataName: "Me", name: "Me", entityType: undefined },
+      [withNs("Me")]: { fqName: withNs("Me"), odataName: "Me", name: "Me", entityType: undefined },
     });
   });
 
@@ -46,14 +55,20 @@ describe("Singleton Digestion Test", () => {
       { path: "bestSkill", target: "Me" },
       { path: "attitudes", target: "Me" },
     ];
-    odataBuilder.addSingleton("Me", "User", navProps).addEntityType("User", undefined, (builder) => {
+    odataBuilder.addSingleton("Me", withNs("User"), navProps).addEntityType("User", undefined, (builder) => {
       builder.addKeyProp("id", ODataTypesV4.String);
     });
 
     const result = await doDigest();
 
     expect(result.getEntityContainer().singletons).toMatchObject({
-      Me: { odataName: "Me", name: "Me", entityType: { name: "User" }, navPropBinding: navProps },
+      [withNs("Me")]: {
+        fqName: withNs("Me"),
+        odataName: "Me",
+        name: "Me",
+        entityType: { name: "User" },
+        navPropBinding: navProps,
+      },
     });
   });
 });

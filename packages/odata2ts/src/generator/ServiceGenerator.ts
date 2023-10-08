@@ -299,7 +299,7 @@ class ServiceGenerator {
       } else if (prop.isCollection) {
         // collection of entity types
         if (prop.dataType === DataTypes.ModelType) {
-          const entityType = this.dataModel.getModel(prop.type);
+          const entityType = this.dataModel.getModel(prop.fqType);
           result.methods.push(
             this.generateRelatedServiceGetter(prop.name, prop.odataName, entityType, importContainer, serviceName)
           );
@@ -335,7 +335,7 @@ class ServiceGenerator {
     serviceName: string,
     importContainer: ImportContainer
   ): PropertyDeclarationStructure {
-    const complexType = this.dataModel.getComplexType(prop.type);
+    const complexType = this.dataModel.getComplexType(prop.fqType);
     const key = this.namingHelper.getServiceName(prop.type);
     let propModelType = prop.isCollection ? this.namingHelper.getCollectionServiceName(prop.type) : key;
 
@@ -410,7 +410,7 @@ class ServiceGenerator {
     prop: PropertyModel,
     collectionServiceType: string
   ): OptionalKind<MethodDeclarationStructure> {
-    const complexType = this.dataModel.getComplexType(prop.type);
+    const complexType = this.dataModel.getComplexType(prop.fqType);
     const isComplexCollection = prop.isCollection && complexType;
     const type = isComplexCollection
       ? collectionServiceType

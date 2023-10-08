@@ -13,6 +13,10 @@ describe("Function Digestion Test", () => {
 
   let odataBuilder: ODataModelBuilderV4;
 
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
+
   function doDigest() {
     return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
   }
@@ -27,7 +31,7 @@ describe("Function Digestion Test", () => {
     const result = await doDigest();
 
     expect(result.getOperationTypeByBinding("xyz")).toEqual([]);
-    expect(result.getOperationTypeByBinding("/")).toMatchObject([
+    expect(result.getUnboundOperationTypes()).toMatchObject([
       {
         odataName: "GetBestFriend",
         name: "getBestFriend",
@@ -60,7 +64,7 @@ describe("Function Digestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding("/")).toMatchObject([
+    expect(result.getUnboundOperationTypes()).toMatchObject([
       {
         odataName: "GetBestFriend",
         parameters: [
@@ -102,9 +106,9 @@ describe("Function Digestion Test", () => {
       .addEnumType("TheEnum", [{ name: "One", value: 1 }])
       .addFunction("test", ODataTypesV4.String, false, (builder) => {
         return builder
-          .addParam("complex", `${SERVICE_NAME}.Complex`)
-          .addParam("entity", `${SERVICE_NAME}.TheEntity`)
-          .addParam("enum", `${SERVICE_NAME}.TheEnum`);
+          .addParam("complex", withNs("Complex"))
+          .addParam("entity", withNs("TheEntity"))
+          .addParam("enum", withNs("TheEnum"));
       });
 
     const result = await doDigest();
@@ -142,10 +146,10 @@ describe("Function Digestion Test", () => {
         builder.addKeyProp("id", ODataTypesV4.String);
       })
       .addFunction("listAttitudes", "Collection(Edm.String)", true, (builder) => {
-        builder.addParam("user", `${SERVICE_NAME}.User`);
+        builder.addParam("user", withNs("User"));
       })
       .addFunction("testing", ODataTypesV4.String, true, (builder) => {
-        builder.addParam("user", `${SERVICE_NAME}.User`);
+        builder.addParam("user", withNs("User"));
       });
 
     const result = await doDigest();
@@ -182,7 +186,7 @@ describe("Function Digestion Test", () => {
 
   test("Function Import: min case", async () => {
     odataBuilder
-      .addFunctionImport("GetBestFriend", "GetBestFriend", "Friends")
+      .addFunctionImport("GetBestFriend", withNs("GetBestFriend"), "Friends")
       .addFunction("GetBestFriend", ODataTypesV4.Boolean, false);
     // .addEntityType("User", undefined, (builder) => {
     //   builder.addKeyProp("id", OdataTypes.String);
@@ -190,12 +194,12 @@ describe("Function Digestion Test", () => {
 
     const result = await doDigest();
     expect(result.getEntityContainer().functions).toMatchObject({
-      getBestFriend: { odataName: "GetBestFriend", name: "getBestFriend", entitySet: "Friends" },
+      [withNs("getBestFriend")]: { odataName: "GetBestFriend", name: "getBestFriend", entitySet: "Friends" },
     });
   });
 
   test("Function Import: fail without function", async () => {
-    odataBuilder.addFunctionImport("GetBestFriend", "GetBestFriend", "Friends");
+    odataBuilder.addFunctionImport("GetBestFriend", withNs("GetBestFriend"), "Friends");
 
     await expect(doDigest()).rejects.toThrow("Couldn't find root operation with name [getBestFriend]");
   });

@@ -21,6 +21,7 @@ export interface PropertyModel {
   odataName: string;
   name: string;
   odataType: string;
+  fqType: string;
   type: string;
   typeModule?: string;
   qObject?: string;
@@ -43,6 +44,7 @@ export interface ModelType extends ComplexType {
 }
 
 export interface ComplexType {
+  fqName: string;
   odataName: string;
   name: string;
   editableName: string;
@@ -53,12 +55,14 @@ export interface ComplexType {
 }
 
 export interface EnumType {
+  fqName: string;
   odataName: string;
   name: string;
   members: Array<string>;
 }
 
 export interface OperationType {
+  fqName: string;
   odataName: string;
   name: string;
   paramsModelName: string;
@@ -79,6 +83,7 @@ export type EntityContainerModel = {
 };
 
 export interface SingletonType {
+  fqName: string;
   odataName: string;
   name: string;
   entityType: ModelType;
@@ -86,6 +91,7 @@ export interface SingletonType {
 }
 
 export interface EntitySetType {
+  fqName: string;
   odataName: string;
   name: string;
   entityType: ModelType;
@@ -98,6 +104,7 @@ export interface NavPropBindingType {
 }
 
 export interface ActionImportType {
+  fqName: string;
   odataName: string;
   name: string;
   operation: OperationType;

@@ -14,6 +14,10 @@ describe("Function Digestion Test", () => {
 
   let odataBuilder: ODataModelBuilderV2;
 
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
+
   function doDigest() {
     return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
   }
@@ -28,8 +32,9 @@ describe("Function Digestion Test", () => {
     const result = await doDigest();
 
     expect(result.getOperationTypeByBinding("xyz")).toEqual([]);
-    expect(result.getOperationTypeByBinding("/")).toStrictEqual([
+    expect(result.getUnboundOperationTypes()).toStrictEqual([
       {
+        fqName: withNs("GetBestFriend"),
         odataName: "GetBestFriend",
         name: "getBestFriend",
         qName: "QGetBestFriend",
@@ -47,7 +52,7 @@ describe("Function Digestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding("/")).toMatchObject([
+    expect(result.getUnboundOperationTypes()).toMatchObject([
       {
         odataName: "getBestFriend",
         name: "getBestFriend",
@@ -76,7 +81,7 @@ describe("Function Digestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding("/")).toMatchObject([
+    expect(result.getUnboundOperationTypes()).toMatchObject([
       {
         odataName: "GetBestFriend",
         parameters: [
@@ -113,14 +118,14 @@ describe("Function Digestion Test", () => {
 
   test("Function: returning EntitySet", async () => {
     odataBuilder
-      .addFunctionImport("listProducts", `Collection(${SERVICE_NAME}.Product)`)
+      .addFunctionImport("listProducts", `Collection(${withNs("Product")})`)
       .addEntityType("Product", undefined, (builder) => {
         builder.addKeyProp("id", "Edm.Guid");
       });
 
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding("/")).toMatchObject([
+    expect(result.getUnboundOperationTypes()).toMatchObject([
       {
         name: "listProducts",
         type: OperationTypes.Function,
@@ -130,7 +135,7 @@ describe("Function Digestion Test", () => {
           dataType: DataTypes.ModelType,
           name: "noNameBecauseReturnType",
           odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
-          odataType: `Collection(${SERVICE_NAME}.Product)`,
+          odataType: `Collection(${withNs("Product")})`,
           type: "Product",
           qObject: "QProduct",
         },
@@ -145,6 +150,7 @@ describe("Function Digestion Test", () => {
 
     expect(result.getUnboundOperationTypes()).toStrictEqual([
       {
+        fqName: withNs("GetBestFriend"),
         odataName: "GetBestFriend",
         name: "getBestFriend",
         qName: "QGetBestFriend",
@@ -164,9 +170,9 @@ describe("Function Digestion Test", () => {
       .addEnumType("TheEnum", [{ name: "One", value: 1 }])
       .addFunctionImport("test", ODataTypesV2.String, (builder) => {
         return builder
-          .addParam("complex", `${SERVICE_NAME}.Complex`)
-          .addParam("entity", `${SERVICE_NAME}.TheEntity`)
-          .addParam("enum", `${SERVICE_NAME}.TheEnum`);
+          .addParam("complex", withNs("Complex"))
+          .addParam("entity", withNs("TheEntity"))
+          .addParam("enum", withNs("TheEnum"));
       });
 
     const result = await doDigest();

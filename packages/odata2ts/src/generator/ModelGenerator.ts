@@ -82,7 +82,7 @@ class ModelGenerator {
           docs: this.options.skipComments ? undefined : [this.generatePropDoc(p, model)],
         };
       }),
-      extends: model.baseClasses,
+      extends: model.baseClasses.map((bc) => this.namingHelper.getModelName(bc)),
     });
   }
 
@@ -199,9 +199,9 @@ class ModelGenerator {
   private getEditablePropType(prop: PropertyModel): string {
     const type =
       prop.dataType === DataTypes.ModelType
-        ? this.dataModel.getModel(prop.type).editableName
+        ? this.dataModel.getModel(prop.fqType).editableName
         : prop.dataType === DataTypes.ComplexType
-        ? this.dataModel.getComplexType(prop.type).editableName
+        ? this.dataModel.getComplexType(prop.fqType).editableName
         : prop.type;
 
     // Collections

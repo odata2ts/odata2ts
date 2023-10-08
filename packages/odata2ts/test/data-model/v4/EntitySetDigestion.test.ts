@@ -12,6 +12,10 @@ describe("EntitySet Digestion Test", () => {
 
   let odataBuilder: ODataModelBuilderV4;
 
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
+
   function doDigest() {
     return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
   }
@@ -21,23 +25,23 @@ describe("EntitySet Digestion Test", () => {
   });
 
   test("EntitySet: min case", async () => {
-    odataBuilder.addEntitySet("Products", "Product").addEntityType("Product", undefined, (builder) => {
+    odataBuilder.addEntitySet("Products", withNs("Product")).addEntityType("Product", undefined, (builder) => {
       builder.addKeyProp("id", ODataTypesV4.String);
     });
 
     const result = await doDigest();
     expect(result.getEntityContainer().entitySets).toMatchObject({
-      Products: { odataName: "Products", name: "Products", entityType: { name: "Product" } },
+      [withNs("Products")]: { odataName: "Products", name: "Products", entityType: { name: "Product" } },
     });
   });
 
   test("EntitySet: missing EntityType", async () => {
-    odataBuilder.addEntitySet("Products", "Product");
+    odataBuilder.addEntitySet("Products", withNs("Product"));
 
     // TODO: this should throw
     const result = await doDigest();
     expect(result.getEntityContainer().entitySets).toMatchObject({
-      Products: { odataName: "Products", name: "Products", entityType: undefined },
+      [withNs("Products")]: { odataName: "Products", name: "Products", entityType: undefined },
     });
   });
 
@@ -50,12 +54,17 @@ describe("EntitySet Digestion Test", () => {
       .addEntityType("Product", undefined, (builder) => {
         builder.addKeyProp("id", ODataTypesV4.String);
       })
-      .addEntitySet("Products", "Product", navProps);
+      .addEntitySet("Products", withNs("Product"), navProps);
 
     const result = await doDigest();
 
     expect(result.getEntityContainer().entitySets).toMatchObject({
-      Products: { odataName: "Products", name: "Products", entityType: { name: "Product" }, navPropBinding: navProps },
+      [withNs("Products")]: {
+        odataName: "Products",
+        name: "Products",
+        entityType: { name: "Product" },
+        navPropBinding: navProps,
+      },
     });
   });
 });

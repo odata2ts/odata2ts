@@ -22,7 +22,9 @@ export interface ProjectFiles {
 
 export type NamespaceWithAlias = [string, string?];
 
-const ROOT_OPERATION_BINDING = "/";
+export function withNamespace(ns: string, name: string) {
+  return `${ns}.${name}`;
+}
 
 export class DataModel {
   private readonly converters: MappedConverterChains;
@@ -32,6 +34,7 @@ export class DataModel {
   private enumTypes: { [name: string]: EnumType } = {};
   // combines functions & actions
   private operationTypes: { [binding: string]: Array<OperationType> } = {};
+  private rootOpNamespaces = new Set<string>();
   private typeDefinitions: { [name: string]: string } = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
 
@@ -121,7 +124,7 @@ export class DataModel {
   /**
    * Set all complex types
    *
-   * @param models new complex types
+   * @param complexTypes new complex types
    */
   public setComplexTypes(complexTypes: { [name: string]: ComplexType }) {
     this.complexTypes = complexTypes;
@@ -139,6 +142,11 @@ export class DataModel {
     return Object.values(this.enumTypes);
   }
 
+  public addUnboundOperationType(namespace: string, operationType: OperationType) {
+    this.rootOpNamespaces.add(namespace);
+    this.addOperationType(namespace, operationType);
+  }
+
   public addOperationType(binding: string, operationType: OperationType) {
     if (!this.operationTypes[binding]) {
       this.operationTypes[binding] = [];
@@ -148,8 +156,10 @@ export class DataModel {
   }
 
   public getUnboundOperationTypes(): Array<OperationType> {
-    const operations = this.operationTypes[ROOT_OPERATION_BINDING];
-    return !operations ? [] : [...operations];
+    return [...this.rootOpNamespaces.values()].reduce<Array<OperationType>>((collector, ns) => {
+      collector.push(...this.getOperationTypeByBinding(ns));
+      return collector;
+    }, []);
   }
 
   public getOperationTypeByBinding(binding: string): Array<OperationType> {

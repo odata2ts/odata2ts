@@ -21,6 +21,10 @@ describe("Model Generator Tests V2", () => {
   let odataBuilder: ODataModelBuilderV2;
   let fixtureComparatorHelper: FixtureComparatorHelper;
 
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
+
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, GENERATE);
 
   async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<DigestionOptions>) {
@@ -70,7 +74,7 @@ describe("Model Generator Tests V2", () => {
         builder.addKeyProp("id", ODataTypesV2.Int32).addProp("name", ODataTypesV2.Boolean, true)
       )
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV2.Int32).addProp("relatedAuthors", `Collection(${SERVICE_NAME}.Author)`)
+        builder.addKeyProp("id", ODataTypesV2.Int32).addProp("relatedAuthors", `Collection(${withNs("Author")})`)
       );
 
     // when generating model
