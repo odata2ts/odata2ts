@@ -43,26 +43,24 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       container.ActionImport?.forEach((actionImport) => {
         const name = this.namingHelper.getActionName(actionImport.$.Name);
         const fqName = `${ns}.${name}`;
-        const operationName = this.namingHelper.getActionName(actionImport.$.Action);
 
         this.dataModel.addAction(fqName, {
           fqName,
           name,
           odataName: actionImport.$.Name,
-          operation: this.getRootOperationType(ns, operationName),
+          operation: actionImport.$.Action,
         });
       });
 
       container.FunctionImport?.forEach((funcImport) => {
         const name = this.namingHelper.getFunctionName(funcImport.$.Name);
         const fqName = `${ns}.${name}`;
-        const operationName = this.namingHelper.getFunctionName(funcImport.$.Function);
 
         this.dataModel.addFunction(fqName, {
           fqName,
           name,
           odataName: funcImport.$.Name,
-          operation: this.getRootOperationType(ns, operationName),
+          operation: funcImport.$.Function,
           entitySet: funcImport.$.EntitySet,
         });
       });
@@ -206,11 +204,6 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       }
 
       const bindingProp = isBound ? params.shift() : undefined;
-      const binding = bindingProp
-        ? bindingProp.isCollection
-          ? `Collection(${bindingProp.type})`
-          : bindingProp.type
-        : undefined;
 
       const name =
         type === OperationTypes.Function
@@ -231,20 +224,11 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
         returnType: returnType,
       };
 
-      if (binding) {
-        this.dataModel.addOperationType(binding, opType);
+      if (bindingProp) {
+        this.dataModel.addBoundOperationType(bindingProp, opType);
       } else {
-        this.dataModel.addUnboundOperationType(namespace, opType);
+        this.dataModel.addUnboundOperationType(opType);
       }
     });
-  }
-
-  private getRootOperationType(ns: string, name: string): OperationType {
-    const rootOps = this.dataModel.getOperationTypeByBinding(ns);
-    const rootOp = rootOps.find((op) => op.name === name);
-    if (!rootOp) {
-      throw new Error(`Couldn't find root operation with name [${name}]`);
-    }
-    return rootOp;
   }
 }

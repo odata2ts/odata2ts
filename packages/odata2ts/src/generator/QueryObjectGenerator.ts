@@ -54,7 +54,7 @@ class QueryObjectGenerator {
         this.generateIdFunction(model, importContainer);
       }
       if (!this.options.skipOperations) {
-        this.generateBoundOperations(model.name, importContainer);
+        this.generateBoundOperations(model.fqName, importContainer);
       }
     });
     this.dataModel.getComplexTypes().forEach((model) => {
@@ -213,8 +213,11 @@ class QueryObjectGenerator {
     });
   }
 
-  private generateBoundOperations(bindingName: string, importContainer: ImportContainer) {
-    this.dataModel.getOperationTypeByEntityOrCollectionBinding(bindingName).forEach((operation) => {
+  private generateBoundOperations(fqEntityName: string, importContainer: ImportContainer) {
+    [
+      ...this.dataModel.getEntityTypeOperations(fqEntityName),
+      ...this.dataModel.getEntitySetOperations(fqEntityName),
+    ].forEach((operation) => {
       this.generateOperation(operation, importContainer);
     });
   }

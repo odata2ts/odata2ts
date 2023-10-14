@@ -127,29 +127,26 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     const entityConfig = this.serviceConfigHelper.findConfigEntityByName(namespace, odataName);
     const entityName = entityConfig?.mappedName || model.$.Name;
 
-    const name = this.namingHelper.getModelName(entityName);
-    const qName = this.namingHelper.getQName(entityName);
-    const editableName = this.namingHelper.getEditableModelName(entityName);
-    const bType = model.$.BaseType;
-    const props = [...(model.Property ?? []), ...this.getNavigationProps(model)];
+    // map properties respecting the config
+    const props = [...(model.Property ?? []), ...this.getNavigationProps(model)].map((p) => {
+      const epConfig = entityConfig?.properties?.find((ep) => ep.name === p.$.Name);
+      return this.mapProp(p, epConfig);
+    });
 
     // support for base types, i.e. extends clause of interfaces
     const baseClasses = [];
-    if (bType) {
-      baseClasses.push(bType);
+    if (model.$.BaseType) {
+      baseClasses.push(model.$.BaseType);
     }
 
     return {
       fqName,
       odataName,
-      name,
-      qName,
-      editableName,
+      name: this.namingHelper.getModelName(entityName),
+      qName: this.namingHelper.getQName(entityName),
+      editableName: this.namingHelper.getEditableModelName(entityName),
       baseClasses,
-      props: props.map((p) => {
-        const epConfig = entityConfig?.properties?.find((ep) => ep.name === p.$.Name);
-        return this.mapProp(p, epConfig);
-      }),
+      props,
       baseProps: [], // postprocess required
     };
   }
@@ -341,8 +338,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     const configProp = this.serviceConfigHelper.findConfigPropByName(p.$.Name);
     const name = this.namingHelper.getModelPropName(entityPropConfig?.mappedName || configProp?.mappedName || p.$.Name);
-    const isCollection = !!p.$.Type.match(/^Collection\(/);
-    let dataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
+    const fqType = p.$.Type;
+    const isCollection = !!fqType.match(/^Collection\(/);
+    let dataType = fqType.replace(/^Collection\(([^\)]+)\)/, "$1");
 
     // support for primitive type mapping
     if (this.namingHelper.includesServicePrefix(dataType)) {

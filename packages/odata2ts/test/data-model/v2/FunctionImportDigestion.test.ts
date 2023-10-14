@@ -27,24 +27,26 @@ describe("Function Digestion Test", () => {
   });
 
   test("Function: min case", async () => {
-    odataBuilder.addFunctionImport("GetBestFriend");
+    const name = "GetBestFriend";
+    const fqName = withNs(name);
+    const expected: OperationType = {
+      fqName,
+      odataName: name,
+      name: "getBestFriend",
+      qName: "QGetBestFriend",
+      paramsModelName: "GetBestFriendParams",
+      type: OperationTypes.Function,
+      parameters: [],
+      returnType: undefined,
+      usePost: false,
+    };
+
+    odataBuilder.addFunctionImport(name);
 
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding("xyz")).toEqual([]);
-    expect(result.getUnboundOperationTypes()).toStrictEqual([
-      {
-        fqName: withNs("GetBestFriend"),
-        odataName: "GetBestFriend",
-        name: "getBestFriend",
-        qName: "QGetBestFriend",
-        paramsModelName: "GetBestFriendParams",
-        type: OperationTypes.Function,
-        parameters: [],
-        returnType: undefined,
-        usePost: false,
-      } as OperationType,
-    ]);
+    expect(result.getOperationType(fqName)).toStrictEqual(expected);
+    expect(result.getUnboundOperationTypes()).toStrictEqual([expected]);
   });
 
   test("Function: with returnType", async () => {

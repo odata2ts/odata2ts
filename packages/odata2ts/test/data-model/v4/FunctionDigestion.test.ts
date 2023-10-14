@@ -30,7 +30,7 @@ describe("Function Digestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding("xyz")).toEqual([]);
+    expect(result.getEntityTypeOperations("xyz")).toEqual([]);
     expect(result.getUnboundOperationTypes()).toMatchObject([
       {
         odataName: "GetBestFriend",
@@ -154,8 +154,9 @@ describe("Function Digestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding("User")).toMatchObject([
+    expect(result.getEntityTypeOperations(withNs("User"))).toMatchObject([
       {
+        fqName: withNs("listAttitudes"),
         name: "listAttitudes",
         qName: "User_QListAttitudes",
         paramsModelName: "User_ListAttitudesParams",
@@ -196,11 +197,5 @@ describe("Function Digestion Test", () => {
     expect(result.getEntityContainer().functions).toMatchObject({
       [withNs("getBestFriend")]: { odataName: "GetBestFriend", name: "getBestFriend", entitySet: "Friends" },
     });
-  });
-
-  test("Function Import: fail without function", async () => {
-    odataBuilder.addFunctionImport("GetBestFriend", withNs("GetBestFriend"), "Friends");
-
-    await expect(doDigest()).rejects.toThrow("Couldn't find root operation with name [getBestFriend]");
   });
 });

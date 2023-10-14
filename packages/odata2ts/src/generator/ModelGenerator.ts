@@ -55,7 +55,7 @@ class ModelGenerator {
         this.generateEditableModel(model);
       }
       if (!this.options.skipOperations) {
-        this.generateBoundOperationParams(model.name);
+        this.generateBoundOperationParams(model.fqName);
       }
     });
     this.dataModel.getComplexTypes().forEach((model) => {
@@ -220,7 +220,10 @@ class ModelGenerator {
   }
 
   private generateBoundOperationParams(entityName: string) {
-    this.dataModel.getOperationTypeByEntityOrCollectionBinding(entityName).forEach((operation) => {
+    [
+      ...this.dataModel.getEntityTypeOperations(entityName),
+      ...this.dataModel.getEntitySetOperations(entityName),
+    ].forEach((operation) => {
       this.generateOperationParams(operation);
     });
   }

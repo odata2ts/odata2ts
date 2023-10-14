@@ -11,6 +11,7 @@ import {
   ModelType,
   ODataVersion,
   OperationType,
+  PropertyModel,
   SingletonType,
 } from "./DataTypeModel";
 
@@ -29,13 +30,14 @@ export function withNamespace(ns: string, name: string) {
 export class DataModel {
   private readonly converters: MappedConverterChains;
 
-  private modelTypes: { [name: string]: ModelType } = {};
-  private complexTypes: { [name: string]: ComplexType } = {};
-  private enumTypes: { [name: string]: EnumType } = {};
-  // combines functions & actions
-  private operationTypes: { [binding: string]: Array<OperationType> } = {};
+  private modelTypes: { [fqName: string]: ModelType } = {};
+  private complexTypes: { [fqName: string]: ComplexType } = {};
+  private enumTypes: { [fqName: string]: EnumType } = {};
+  private operationTypes: { [fqName: string]: OperationType } = {};
+  private unboundOperationTypes = new Set<string>();
+  private boundOperationTypes: { [entityFqName: string]: Array<string> } = {};
   private rootOpNamespaces = new Set<string>();
-  private typeDefinitions: { [name: string]: string } = {};
+  private typeDefinitions: { [fqName: string]: string } = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
 
   constructor(private version: ODataVersion, converters: MappedConverterChains = new Map()) {
@@ -142,35 +144,41 @@ export class DataModel {
     return Object.values(this.enumTypes);
   }
 
-  public addUnboundOperationType(namespace: string, operationType: OperationType) {
-    this.rootOpNamespaces.add(namespace);
-    this.addOperationType(namespace, operationType);
+  private addOp(operationType: OperationType) {
+    this.operationTypes[operationType.fqName] = operationType;
   }
 
-  public addOperationType(binding: string, operationType: OperationType) {
-    if (!this.operationTypes[binding]) {
-      this.operationTypes[binding] = [];
-    }
+  public getOperationType(fqOpName: string) {
+    return this.operationTypes[fqOpName];
+  }
 
-    this.operationTypes[binding].push(operationType);
+  public addUnboundOperationType(operationType: OperationType) {
+    this.addOp(operationType);
+    this.unboundOperationTypes.add(operationType.fqName);
   }
 
   public getUnboundOperationTypes(): Array<OperationType> {
-    return [...this.rootOpNamespaces.values()].reduce<Array<OperationType>>((collector, ns) => {
-      collector.push(...this.getOperationTypeByBinding(ns));
-      return collector;
-    }, []);
+    return [...this.unboundOperationTypes].map((fqName) => this.operationTypes[fqName]);
   }
 
-  public getOperationTypeByBinding(binding: string): Array<OperationType> {
-    const operations = this.operationTypes[binding];
-    return !operations ? [] : [...operations];
+  public addBoundOperationType(bindingProp: PropertyModel, operationType: OperationType) {
+    const entityType = bindingProp.fqType;
+    const binding = bindingProp.isCollection ? `Collection(${entityType})` : entityType;
+
+    this.addOp(operationType);
+    if (!this.boundOperationTypes[binding]) {
+      this.boundOperationTypes[binding] = [];
+    }
+    this.boundOperationTypes[binding].push(operationType.fqName);
   }
 
-  public getOperationTypeByEntityOrCollectionBinding(binding: string): Array<OperationType> {
-    const entityOps = this.operationTypes[binding] || [];
-    const collOps = this.operationTypes[`Collection(${binding})`] || [];
-    return [...collOps, ...entityOps];
+  public getEntityTypeOperations(fqEntityName: string): Array<OperationType> {
+    const operations = this.boundOperationTypes[fqEntityName];
+    return !operations ? [] : operations.map((op) => this.operationTypes[op]);
+  }
+
+  public getEntitySetOperations(fqEntityName: string): Array<OperationType> {
+    return this.getEntityTypeOperations(`Collection(${fqEntityName})`);
   }
 
   public addAction(name: string, action: ActionImportType) {

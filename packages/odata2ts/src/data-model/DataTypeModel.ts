@@ -107,7 +107,7 @@ export interface ActionImportType {
   fqName: string;
   odataName: string;
   name: string;
-  operation: OperationType;
+  operation: string;
 }
 
 export interface FunctionImportType extends ActionImportType {

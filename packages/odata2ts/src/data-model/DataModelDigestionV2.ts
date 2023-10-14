@@ -93,7 +93,9 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
           ? this.mapProp({ $: { Name: "NO_NAME_BECAUSE_RETURN_TYPE", Type: returnTypeDef } })
           : undefined;
 
-        const operation: OperationType = {
+        // V2 only knows the FunctionImport element
+        // we generate the data structure for the function here
+        this.dataModel.addUnboundOperationType({
           fqName,
           odataName,
           name,
@@ -103,16 +105,14 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
           parameters,
           returnType,
           usePost,
-        };
-        this.dataModel.addUnboundOperationType(namespace, operation);
+        });
 
         this.dataModel.addFunction(fqName, {
           fqName,
           odataName,
           name,
-          // TODO: does this really match V4 model?!
           entitySet: funcImport.$.EntitySet!,
-          operation,
+          operation: fqName,
         });
       });
 

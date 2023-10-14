@@ -1,7 +1,7 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
+import { DataTypes, OperationType, OperationTypes } from "../../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { getTestConfig } from "../../test.config";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
@@ -26,26 +26,28 @@ describe("Action Digestion Test", () => {
   });
 
   test("Action: min case", async () => {
-    odataBuilder.addAction("AddFriend");
+    const opName = "AddFriend";
+    const expected: OperationType = {
+      fqName: withNs(opName),
+      odataName: opName,
+      name: "addFriend",
+      qName: "QAddFriend",
+      paramsModelName: "AddFriendParams",
+      type: OperationTypes.Action,
+      parameters: [],
+      returnType: undefined,
+    };
 
+    odataBuilder.addAction(opName);
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding("xyz")).toEqual([]);
-    expect(result.getOperationTypeByBinding(SERVICE_NAME)).toMatchObject([
-      {
-        odataName: "AddFriend",
-        name: "addFriend",
-        qName: "QAddFriend",
-        paramsModelName: "AddFriendParams",
-        type: OperationTypes.Action,
-        parameters: [],
-        returnType: undefined,
-      },
-    ]);
+    expect(result.getOperationType(withNs(opName))).toStrictEqual(expected);
+    expect(result.getUnboundOperationTypes()).toStrictEqual([expected]);
   });
 
   test("Action: with params", async () => {
-    odataBuilder.addAction("addFriend", ODataTypesV4.String, false, (builder) => {
+    const opName = "addFriend";
+    odataBuilder.addAction(opName, ODataTypesV4.String, false, (builder) => {
       builder
         .addParam("test", ODataTypesV4.String, false)
         .addParam("testTruth", ODataTypesV4.Boolean)
@@ -55,7 +57,7 @@ describe("Action Digestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding(SERVICE_NAME)).toMatchObject([
+    expect(result.getUnboundOperationTypes()).toMatchObject([
       {
         name: "addFriend",
         parameters: [
@@ -106,7 +108,7 @@ describe("Action Digestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding("User")).toMatchObject([
+    expect(result.getEntityTypeOperations(withNs("User"))).toMatchObject([
       {
         name: "searchWithFilter",
         type: OperationTypes.Action,

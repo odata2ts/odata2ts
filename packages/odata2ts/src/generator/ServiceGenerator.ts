@@ -131,8 +131,9 @@ class ServiceGenerator {
     const result: PropsAndOps = { properties: [], methods: [] };
 
     ops.forEach(({ operation, name }) => {
-      result.properties.push(this.generateQOperationProp(operation));
-      result.methods.push(this.generateMethod(name, operation, importContainer));
+      const op = this.dataModel.getOperationType(operation);
+      result.properties.push(this.generateQOperationProp(op));
+      result.methods.push(this.generateMethod(name, op, importContainer));
     });
 
     return result;
@@ -246,7 +247,7 @@ class ServiceGenerator {
 
     const editableModelName = model.editableName;
     const qObjectName = firstCharLowerCase(model.qName);
-    const operations = this.dataModel.getOperationTypeByBinding(model.name);
+    const operations = this.dataModel.getEntityTypeOperations(model.fqName);
     const props = [...model.baseProps, ...model.props];
 
     importContainer.addFromService(entityServiceType);
@@ -492,7 +493,7 @@ class ServiceGenerator {
     importContainer.addGeneratedModel(model.idModelName);
     importContainer.addGeneratedQObject(model.qIdFunctionName);
 
-    const collectionOperations = this.dataModel.getOperationTypeByBinding(`Collection(${model.name})`);
+    const collectionOperations = this.dataModel.getEntityTypeOperations(`Collection(${model.fqName})`);
 
     const { properties, methods } = this.generateServiceOperations(collectionOperations, importContainer);
 

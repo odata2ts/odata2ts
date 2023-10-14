@@ -234,7 +234,9 @@ describe("Service Generator Tests V4", () => {
       .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       .addComplexType("Review", undefined, (builder) => builder.addProp("content", ODataTypesV4.String))
       // complex return type
-      .addFunction("BestReview", withNs("Review"), true, (builder) => builder.addParam("book", withNs("Book")))
+      .addFunction("BestReview", withNs("Review"), true, (builder) => {
+        builder.addParam("book", withNs("Book"));
+      })
       // collection of complex return type
       .addFunction("filterReviews", `Collection(${withNs("Review")})`, true, (builder) =>
         builder
