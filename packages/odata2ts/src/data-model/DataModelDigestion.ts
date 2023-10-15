@@ -23,7 +23,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   protected readonly dataModel: DataModel;
   protected readonly serviceConfigHelper: ServiceConfigHelper;
 
-  private model2Type: Map<string, DataTypes> = new Map<string, DataTypes>();
+  private model2Type = new Map<string, DataTypes>();
 
   protected constructor(
     protected version: ODataVersion,
@@ -37,6 +37,29 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     this.serviceConfigHelper = new ServiceConfigHelper(options);
 
     this.collectModelTypes(schemas);
+  }
+
+  private collectModelTypes(schemas: Array<S>) {
+    schemas.forEach((schema) => {
+      const { Namespace: ns, Alias: alias } = schema.$;
+
+      schema.EnumType?.forEach((et) => {
+        this.addModel2Type(ns, alias, et.$.Name, DataTypes.EnumType);
+      });
+      schema.ComplexType?.forEach((ct) => {
+        this.addModel2Type(ns, alias, ct.$.Name, DataTypes.ComplexType);
+      });
+      schema.EntityType?.forEach((et) => {
+        this.addModel2Type(ns, alias, et.$.Name, DataTypes.ModelType);
+      });
+    });
+  }
+
+  private addModel2Type(ns: string, alias: string | undefined, name: string, dt: DataTypes) {
+    this.model2Type.set(withNamespace(ns, name), dt);
+    if (alias) {
+      this.model2Type.set(withNamespace(alias, name), dt);
+    }
   }
 
   protected abstract getNavigationProps(entityType: ET | ComplexType): Array<Property>;
@@ -62,32 +85,6 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     return this.dataModel;
   }
 
-  private collectModelTypes(schemas: Array<S>) {
-    schemas.forEach((schema) => {
-      const servicePrefix = schema.$.Namespace + ".";
-      const aliasPrefix = schema.$.Alias ? schema.$.Alias + "." : undefined;
-
-      schema.EnumType?.forEach((et) => {
-        this.model2Type.set(servicePrefix + et.$.Name, DataTypes.EnumType);
-        if (aliasPrefix) {
-          this.model2Type.set(aliasPrefix + et.$.Name, DataTypes.EnumType);
-        }
-      });
-      schema.ComplexType?.forEach((ct) => {
-        this.model2Type.set(servicePrefix + ct.$.Name, DataTypes.ComplexType);
-        if (aliasPrefix) {
-          this.model2Type.set(aliasPrefix + ct.$.Name, DataTypes.ComplexType);
-        }
-      });
-      schema.EntityType?.forEach((et) => {
-        this.model2Type.set(servicePrefix + et.$.Name, DataTypes.ModelType);
-        if (aliasPrefix) {
-          this.model2Type.set(aliasPrefix + et.$.Name, DataTypes.ModelType);
-        }
-      });
-    });
-  }
-
   private digestEntityTypesAndOperations() {
     this.schemas.forEach((schema) => {
       const ns: NamespaceWithAlias = [schema.$.Namespace, schema.$.Alias];
@@ -109,10 +106,11 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         }
       }
 
-      // entity types
-      this.addEntityType(ns, schema.EntityType);
       // complex types
       this.addComplexType(ns, schema.ComplexType);
+
+      // entity types
+      this.addEntityType(ns, schema.EntityType);
 
       // V4 only: function & action types
       this.digestOperations(schema);
@@ -196,7 +194,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         }
       }
 
-      this.dataModel.addModel(namespace[0], baseModel.odataName, {
+      this.dataModel.addEntityType(namespace[0], baseModel.odataName, {
         ...baseModel,
         idModelName: this.namingHelper.getIdModelName(entityName),
         qIdFunctionName: this.namingHelper.getQIdFunctionName(entityName),
@@ -215,8 +213,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       const [baseProps] = this.collectBaseClassPropsAndKeys(model, []);
       model.baseProps = baseProps;
     });
-    const modelTypes = this.dataModel.getModels();
     // entity types
+    const modelTypes = this.dataModel.getEntityTypes();
     modelTypes.forEach((model) => {
       const [baseProps, baseKeys, idName, qIdName] = this.collectBaseClassPropsAndKeys(model, []);
       model.baseProps = baseProps;
@@ -247,45 +245,6 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         return prop;
       });
     });
-
-    const sortedModelTypes = this.sortModelsByInheritance<ModelType>(modelTypes);
-    this.dataModel.setModels(sortedModelTypes);
-
-    const sortedComplexTypes = this.sortModelsByInheritance<ComplexModelType>(complexTypes);
-    this.dataModel.setComplexTypes(sortedComplexTypes);
-  }
-
-  private sortModelsByInheritance<Type extends ComplexModelType>(models: Type[]): { [name: string]: Type } {
-    // recursively visit all models and sort them by inheritance such that base classes
-    // are always before derived classes
-    const sortedModels: { [name: string]: Type } = {};
-    const visitedModels = new Set<Type>();
-    const inProgressModels = new Set<Type>();
-
-    function visit(model: Type) {
-      if (inProgressModels.has(model)) {
-        throw new Error("Cyclic dependencies detected!");
-      }
-
-      if (!visitedModels.has(model)) {
-        inProgressModels.add(model);
-
-        for (const baseClassName of model.baseClasses) {
-          const baseClass = models.find((e) => e.fqName === baseClassName);
-          if (baseClass) {
-            visit(baseClass);
-          }
-        }
-        visitedModels.add(model);
-        inProgressModels.delete(model);
-        sortedModels[model.fqName] = model;
-      }
-    }
-
-    for (const model of models) {
-      visit(model);
-    }
-    return sortedModels;
   }
 
   private collectBaseClassPropsAndKeys(
@@ -298,7 +257,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     visitedModels.push(model.fqName);
     return model.baseClasses.reduce(
       ([props, keys, idName, qIdName], bc) => {
-        const baseModel = this.dataModel.getModel(bc) || this.dataModel.getComplexType(bc);
+        const baseModel = this.dataModel.getEntityType(bc) || this.dataModel.getComplexType(bc);
         if (!baseModel) {
           throw new Error(`BaseModel "${bc}" doesn't exist!`);
         }
@@ -357,9 +316,11 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // domain object known from service:
     // EntityType, ComplexType, EnumType
     if (this.namingHelper.includesServicePrefix(dataType)) {
-      const resultDt = this.model2Type.get(dataType);
+      const resultDt = this.model2Type.get(dataType)!;
       if (!resultDt) {
-        throw new Error(`Couldn't determine model type for data type with name '${dataType}'`);
+        throw new Error(
+          `Couldn't determine model data type for property "${p.$.Name}"! Given data type: "${dataType}".`
+        );
       }
 
       // special handling for enums

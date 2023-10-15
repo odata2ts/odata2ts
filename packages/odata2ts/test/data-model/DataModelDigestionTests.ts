@@ -43,7 +43,7 @@ export function createDataModelTests(
     expect(result).toBeTruthy();
     expect(result.getODataVersion()).toBe(version);
 
-    expect(result.getModels()).toEqual([]);
+    expect(result.getEntityTypes()).toEqual([]);
     expect(result.getEnums()).toEqual([]);
     expect(result.getEntityContainer()).toEqual({ entitySets: {}, singletons: {}, functions: {}, actions: {} });
   });
@@ -60,9 +60,9 @@ export function createDataModelTests(
 
     const result = await doDigest();
 
-    expect(result.getModels()[0].fqName).toBe(withNs("MY_TYPE"));
-    expect(result.getModels()[0].name).toBe("MyType");
-    expect(result.getModels()[0].props[0].name).toBe("id");
+    expect(result.getEntityTypes()[0].fqName).toBe(withNs("MY_TYPE"));
+    expect(result.getEntityTypes()[0].name).toBe("MyType");
+    expect(result.getEntityTypes()[0].props[0].name).toBe("id");
     expect(result.getComplexTypes()[0].fqName).toBe(withNs("HOME_ADDRESS"));
     expect(result.getComplexTypes()[0].name).toBe("HomeAddress");
     expect(result.getComplexTypes()[0].props[0].name).toBe("abcDef");
@@ -81,11 +81,11 @@ export function createDataModelTests(
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(3);
-    expect(result.getModels()[2].name).toBe("Child");
-    expect(result.getModels()[2].idModelName).toBe("GrandParentId");
-    expect(result.getModels()[2].qIdFunctionName).toBe("QGrandParentId");
-    expect(result.getModels()[2].generateId).toBe(false);
+    expect(result.getEntityTypes().length).toBe(3);
+    expect(result.getEntityTypes()[2].name).toBe("Child");
+    expect(result.getEntityTypes()[2].idModelName).toBe("GrandParentId");
+    expect(result.getEntityTypes()[2].qIdFunctionName).toBe("QGrandParentId");
+    expect(result.getEntityTypes()[2].generateId).toBe(false);
   });
 
   test("complex Id with base class", async () => {
@@ -99,13 +99,13 @@ export function createDataModelTests(
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(2);
-    expect(result.getModels()[1].name).toBe("Parent");
-    expect(result.getModels()[1].keys.length).toBe(2);
-    expect(result.getModels()[1].keyNames).toStrictEqual(["ID", "ID2"]);
-    expect(result.getModels()[1].idModelName).toBe("ParentId");
-    expect(result.getModels()[1].qIdFunctionName).toBe("QParentId");
-    expect(result.getModels()[1].generateId).toBe(true);
+    expect(result.getEntityTypes().length).toBe(2);
+    expect(result.getEntityTypes()[1].name).toBe("Parent");
+    expect(result.getEntityTypes()[1].keys.length).toBe(2);
+    expect(result.getEntityTypes()[1].keyNames).toStrictEqual(["ID", "ID2"]);
+    expect(result.getEntityTypes()[1].idModelName).toBe("ParentId");
+    expect(result.getEntityTypes()[1].qIdFunctionName).toBe("QParentId");
+    expect(result.getEntityTypes()[1].generateId).toBe(true);
   });
 
   test(`base classes with cyclical dependencies`, async () => {
@@ -114,7 +114,7 @@ export function createDataModelTests(
       .addEntityType("Child", withNs("Parent"), (builder) => builder)
       .addEntityType("Parent", withNs("Child"), (builder) => builder);
 
-    await expect(doDigest()).rejects.toThrowError("Cyclic inheritance detected for model Tester.Child!");
+    await expect(doDigest()).rejects.toThrowError('Cyclic inheritance detected for model "Tester.Child"!');
   });
 
   test(`reordering of classes by inheritance`, async () => {
@@ -131,12 +131,12 @@ export function createDataModelTests(
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(5);
-    expect(result.getModels()[0].name).toBe("GrandParent");
-    expect(result.getModels()[1].name).toBe("Parent");
-    expect(result.getModels()[2].name).toBe("Child");
-    expect(result.getModels()[3].name).toBe("GrandChild");
-    expect(result.getModels()[4].name).toBe("StandAlone");
+    expect(result.getEntityTypes().length).toBe(5);
+    expect(result.getEntityTypes()[0].name).toBe("GrandParent");
+    expect(result.getEntityTypes()[1].name).toBe("Parent");
+    expect(result.getEntityTypes()[2].name).toBe("Child");
+    expect(result.getEntityTypes()[3].name).toBe("GrandChild");
+    expect(result.getEntityTypes()[4].name).toBe("StandAlone");
   });
 
   test.skip("converter test", async () => {
@@ -150,13 +150,13 @@ export function createDataModelTests(
     // TODO: mock loadConverters method from converter-runtime
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(2);
-    expect(result.getModels()[1].name).toBe("Parent");
-    expect(result.getModels()[1].keys.length).toBe(2);
-    expect(result.getModels()[1].keyNames).toStrictEqual(["ID", "ID2"]);
-    expect(result.getModels()[1].idModelName).toBe("ParentId");
-    expect(result.getModels()[1].qIdFunctionName).toBe("QParentId");
-    expect(result.getModels()[1].generateId).toBe(true);
+    expect(result.getEntityTypes().length).toBe(2);
+    expect(result.getEntityTypes()[1].name).toBe("Parent");
+    expect(result.getEntityTypes()[1].keys.length).toBe(2);
+    expect(result.getEntityTypes()[1].keyNames).toStrictEqual(["ID", "ID2"]);
+    expect(result.getEntityTypes()[1].idModelName).toBe("ParentId");
+    expect(result.getEntityTypes()[1].qIdFunctionName).toBe("QParentId");
+    expect(result.getEntityTypes()[1].generateId).toBe(true);
   });
 
   test("naming", async () => {
@@ -212,9 +212,9 @@ export function createDataModelTests(
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(1);
+    expect(result.getEntityTypes().length).toBe(1);
 
-    let toTest = result.getModels()[0];
+    let toTest = result.getEntityTypes()[0];
     expect(toTest.name).toBe("TEST_MODEL");
     expect(toTest.keyNames).toStrictEqual(["ID"]);
     expect(toTest.idModelName).toBe("TEST_KEY_MODEL");
@@ -239,7 +239,7 @@ export function createDataModelTests(
 
     const result = await doDigest();
 
-    let toTest = result.getModels()[0].props[0];
+    let toTest = result.getEntityTypes()[0].props[0];
     expect(toTest.odataName).toBe("ID");
     expect(toTest.name).toBe("newId");
     expect(toTest.managed).toBe(true);
@@ -274,7 +274,7 @@ export function createDataModelTests(
     expect(toTestCmplx.name).toBe("Cmplx");
     expect(toTestCmplx.editableName).toBe("EditableCmplx");
 
-    let toTest = result.getModels()[0];
+    let toTest = result.getEntityTypes()[0];
     expect(toTest.odataName).toBe("Test");
     expect(toTest.name).toBe("NewTest");
     expect(toTest.idModelName).toBe("NewTestId");
@@ -299,7 +299,7 @@ export function createDataModelTests(
       .addComplexType("ComplexTest", undefined, (builder) => {
         builder.addProp("Version", "Edm.String");
       })
-      .addSchema("schema3")
+      .addSchema(schema3)
       .addEntityType("Test", undefined, (builder) => {
         builder.addKeyProp("ID", "Edm.String");
         builder.addProp("Version", "Edm.Boolean");
@@ -309,14 +309,14 @@ export function createDataModelTests(
     const ns1Model = withNs("Test");
     const ns3Model = `schema3.Test`;
 
-    let toTest = result.getModels()[0];
-    let toTestAlt = result.getModel(ns1Model);
+    let toTest = result.getEntityTypes()[0];
+    let toTestAlt = result.getEntityType(ns1Model);
     expect(toTest).toBeDefined();
     expect(toTestAlt).toBeDefined();
     expect(toTest).toStrictEqual(toTestAlt);
     expect(toTest.fqName).toBe(ns1Model);
 
-    toTest = result.getModel(ns3Model)!;
+    toTest = result.getEntityType(ns3Model)!;
     expect(toTest).toBeDefined();
     expect(toTest.fqName).toBe(ns3Model);
   });

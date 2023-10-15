@@ -46,7 +46,7 @@ class ModelGenerator {
   }
 
   private generateModels() {
-    this.dataModel.getModels().forEach((model) => {
+    this.dataModel.getEntityTypes().forEach((model) => {
       this.generateModel(model);
       if (!this.options.skipIdModels) {
         this.generateIdModel(model);
@@ -199,7 +199,7 @@ class ModelGenerator {
   private getEditablePropType(prop: PropertyModel): string {
     const type =
       prop.dataType === DataTypes.ModelType
-        ? this.dataModel.getModel(prop.fqType)!.editableName
+        ? this.dataModel.getEntityType(prop.fqType)!.editableName
         : prop.dataType === DataTypes.ComplexType
         ? this.dataModel.getComplexType(prop.fqType)!.editableName
         : prop.type;

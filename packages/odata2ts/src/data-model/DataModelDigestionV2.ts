@@ -119,7 +119,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
       container.EntitySet?.forEach((entitySet) => {
         const name = entitySet.$.Name;
         const fqName = withNamespace(namespace, name);
-        const entityType = this.dataModel.getModel(entitySet.$.EntityType);
+        const entityType = this.dataModel.getEntityType(entitySet.$.EntityType);
         if (!entityType) {
           throw new Error(`Entity type "${entitySet.$.EntityType}" not found!`);
         }

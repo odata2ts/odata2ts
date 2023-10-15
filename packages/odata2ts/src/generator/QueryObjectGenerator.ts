@@ -48,7 +48,7 @@ class QueryObjectGenerator {
   }
 
   private generateModels(importContainer: ImportContainer) {
-    this.dataModel.getModels().forEach((model) => {
+    this.dataModel.getEntityTypes().forEach((model) => {
       this.generateModel(model, importContainer);
       if (!this.options.skipIdModels) {
         this.generateIdFunction(model, importContainer);
@@ -61,7 +61,7 @@ class QueryObjectGenerator {
       this.generateModel(model, importContainer);
     });
 
-    if (this.dataModel.getModels().length || this.dataModel.getComplexTypes().length) {
+    if (this.dataModel.getEntityTypes().length || this.dataModel.getComplexTypes().length) {
       importContainer.addFromQObject("QueryObject");
     }
   }
@@ -70,7 +70,7 @@ class QueryObjectGenerator {
     let extendsClause = "QueryObject";
     if (model.baseClasses.length) {
       const baseClass = model.baseClasses[0];
-      const baseModel = this.dataModel.getModel(baseClass) || this.dataModel.getComplexType(baseClass);
+      const baseModel = this.dataModel.getEntityType(baseClass) || this.dataModel.getComplexType(baseClass);
       if (!baseModel) {
         throw new Error(`Entity or complex type "${baseClass}" from baseClass attribute not found!`);
       }

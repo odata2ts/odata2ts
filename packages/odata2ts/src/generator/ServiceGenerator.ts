@@ -304,7 +304,7 @@ class ServiceGenerator {
       } else if (prop.isCollection) {
         // collection of entity types
         if (prop.dataType === DataTypes.ModelType) {
-          const entityType = this.dataModel.getModel(prop.fqType);
+          const entityType = this.dataModel.getEntityType(prop.fqType);
           if (!entityType) {
             throw new Error(`Entity type "${prop.fqType}" specified by property not found!`);
           }
@@ -533,7 +533,7 @@ class ServiceGenerator {
 
   private async generateModelServices(serviceFile: SourceFile, importContainer: ImportContainer) {
     // build service file for each entity, consisting of EntityTypeService & EntityCollectionService
-    for (const model of this.dataModel.getModels()) {
+    for (const model of this.dataModel.getEntityTypes()) {
       const serviceName = this.namingHelper.getServiceName(model.name);
 
       // entity type service

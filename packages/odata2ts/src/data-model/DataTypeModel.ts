@@ -44,6 +44,7 @@ export interface ModelType extends ComplexType {
 }
 
 export interface ComplexType {
+  dataType: DataTypes;
   fqName: string;
   odataName: string;
   name: string;
@@ -55,6 +56,7 @@ export interface ComplexType {
 }
 
 export interface EnumType {
+  dataType: DataTypes;
   fqName: string;
   odataName: string;
   name: string;

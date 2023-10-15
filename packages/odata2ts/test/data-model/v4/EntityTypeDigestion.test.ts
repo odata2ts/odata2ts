@@ -34,8 +34,8 @@ describe("V4: EntityTypeDigestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(1);
-    const model = result.getModels()[0];
+    expect(result.getEntityTypes().length).toBe(1);
+    const model = result.getEntityTypes()[0];
     // expect(model).toEqual({});
     expect(model).toMatchObject({
       name: "Min",
@@ -100,7 +100,7 @@ describe("V4: EntityTypeDigestion Test", () => {
     });
 
     const dataModel = await doDigest();
-    const model = dataModel.getModel(withNs("CompoKey"));
+    const model = dataModel.getEntityType(withNs("CompoKey"));
 
     expect(model).toMatchObject({
       keyNames: ["cat", "subCat", "counter"],
@@ -149,8 +149,8 @@ describe("V4: EntityTypeDigestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(3);
-    expect(result.getModel(withNs("GrandParent"))).toMatchObject({
+    expect(result.getEntityTypes().length).toBe(3);
+    expect(result.getEntityType(withNs("GrandParent"))).toMatchObject({
       name: "GrandParent",
       odataName: "GrandParent",
       keyNames: ["id"],
@@ -158,14 +158,14 @@ describe("V4: EntityTypeDigestion Test", () => {
       baseClasses: [],
       baseProps: [],
     });
-    expect(result.getModel(withNs("Parent"))).toMatchObject({
+    expect(result.getEntityType(withNs("Parent"))).toMatchObject({
       name: "Parent",
       keyNames: ["id"],
       props: [expectedParentProp],
       baseClasses: [withNs("GrandParent")],
       baseProps: [expectedGrandParentProp],
     });
-    expect(result.getModel(withNs("Child"))).toMatchObject({
+    expect(result.getEntityType(withNs("Child"))).toMatchObject({
       name: "Child",
       keyNames: ["id"],
       props: [expectedChildProp],
@@ -204,7 +204,7 @@ describe("V4: EntityTypeDigestion Test", () => {
     const result = await doDigest();
 
     // now check all props regarding their type
-    const model = result.getModel(withNs("max"));
+    const model = result.getEntityType(withNs("max"));
     expect(model!.props).toMatchObject([
       {
         name: "id",
@@ -411,7 +411,7 @@ describe("V4: EntityTypeDigestion Test", () => {
       });
 
     const result = await doDigest();
-    const model = result.getModel(withNs("Category"));
+    const model = result.getEntityType(withNs("Category"));
 
     expect(model!.props[1]).toMatchObject({
       dataType: DataTypes.ModelType,
@@ -450,6 +450,6 @@ describe("V4: EntityTypeDigestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(3);
+    expect(result.getEntityTypes().length).toBe(3);
   });
 });

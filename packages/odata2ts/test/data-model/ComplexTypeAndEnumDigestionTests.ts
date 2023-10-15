@@ -40,7 +40,7 @@ export function createComplexAndEnumTests() {
         { name: "C", value: 4 },
       ]);
     const result = await doDigest();
-    const model = result.getModel(FQ_ENTITY_NAME);
+    const model = result.getEntityType(FQ_ENTITY_NAME);
 
     expect(model).toBeTruthy();
     expect(model!.props[1]).toEqual({
@@ -70,7 +70,7 @@ export function createComplexAndEnumTests() {
         { name: "C", value: 4 },
       ]);
     const result = await doDigest();
-    const model = result.getModel(FQ_ENTITY_NAME);
+    const model = result.getEntityType(FQ_ENTITY_NAME);
 
     expect(model).toBeTruthy();
     expect(model!.props[1]).toEqual({
@@ -97,7 +97,7 @@ export function createComplexAndEnumTests() {
       .addComplexType("Brand", undefined, (builder) => builder.addProp("naming", ODataTypesV4.String));
 
     const result = await doDigest();
-    const model = result.getModel(FQ_ENTITY_NAME);
+    const model = result.getEntityType(FQ_ENTITY_NAME);
 
     expect(model).toBeTruthy();
     expect(model!.props[1]).toEqual({
@@ -167,7 +167,7 @@ export function createComplexAndEnumTests() {
     };
 
     const result = await doDigest();
-    const model = result.getModel(FQ_ENTITY_NAME);
+    const model = result.getEntityType(FQ_ENTITY_NAME);
 
     expect(model!.props[1]).toMatchObject({});
     expect(result.getComplexType(withNs("GrandParent"))).toMatchObject({

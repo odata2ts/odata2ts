@@ -2,7 +2,7 @@ import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { DataModel, NamespaceWithAlias } from "../../src/data-model/DataModel";
-import { EntityContainerModel, ModelType, ODataVersion } from "../../src/data-model/DataTypeModel";
+import { DataTypes, EntityContainerModel, ModelType, ODataVersion } from "../../src/data-model/DataTypeModel";
 
 describe("Data Model Tests", function () {
   let dataModel: DataModel;
@@ -21,7 +21,7 @@ describe("Data Model Tests", function () {
     expect(dataModel.isV4()).toBe(true);
     expect(dataModel.isV2()).toBe(false);
 
-    expect(dataModel.getModels().length).toBe(0);
+    expect(dataModel.getEntityTypes().length).toBe(0);
     expect(dataModel.getComplexTypes().length).toBe(0);
     expect(dataModel.getEnums().length).toBe(0);
   });
@@ -74,37 +74,43 @@ describe("Data Model Tests", function () {
   test("add & get model", () => {
     const modelName = "Xxx";
     const fqName = `${NS1}.${modelName}`;
-    const dummy = { x: "y" };
-    dataModel.addModel(
+    const dummy = { fqName, baseClasses: [] };
+    const expectedDummy = { ...dummy, dataType: DataTypes.ModelType };
+
+    dataModel.addEntityType(
       NS1,
       modelName,
       // @ts-expect-error
       dummy
     );
 
-    expect(dataModel.getModel(fqName)).toBe(dummy);
-    expect(dataModel.getModel("xyz")).toBeUndefined();
-    expect(dataModel.getModels()).toStrictEqual([dummy]);
+    expect(dataModel.getEntityType(fqName)).toStrictEqual(expectedDummy);
+    expect(dataModel.getEntityType("xyz")).toBeUndefined();
+    expect(dataModel.getEntityTypes()).toStrictEqual([expectedDummy]);
   });
 
   test("get model by alias", () => {
     const modelName = "Xxx";
     const aliasName = `${ALIAS_NS2}.${modelName}`;
     const dummy = { x: "y" };
-    dataModel.addModel(
+    const expectedDummy = { ...dummy, dataType: DataTypes.ModelType };
+
+    dataModel.addEntityType(
       NS2,
       modelName,
       // @ts-expect-error
       dummy
     );
 
-    expect(dataModel.getModel(aliasName)).toBe(dummy);
+    expect(dataModel.getEntityType(aliasName)).toStrictEqual(expectedDummy);
   });
 
   test("add & get complex type", () => {
     const modelName = "Xxx";
     const fqName = `${NS1}.${modelName}`;
-    const dummy = { x: "y" };
+    const dummy = { fqName, baseClasses: [] };
+    const expectedDummy = { ...dummy, dataType: DataTypes.ComplexType };
+
     dataModel.addComplexType(
       NS1,
       modelName,
@@ -112,9 +118,9 @@ describe("Data Model Tests", function () {
       dummy
     );
 
-    expect(dataModel.getComplexType(fqName)).toBe(dummy);
+    expect(dataModel.getComplexType(fqName)).toStrictEqual(expectedDummy);
     expect(dataModel.getComplexType("xyz")).toBeUndefined();
-    expect(dataModel.getComplexTypes()).toStrictEqual([dummy]);
+    expect(dataModel.getComplexTypes()).toStrictEqual([expectedDummy]);
   });
 
   test("get complex type by alias", () => {
@@ -128,12 +134,13 @@ describe("Data Model Tests", function () {
       dummy
     );
 
-    expect(dataModel.getComplexType(aliasName)).toBe(dummy);
+    expect(dataModel.getComplexType(aliasName)).toMatchObject(dummy);
   });
 
   test("add & get enum", () => {
     const modelName = "Xxx";
     const dummy = { x: "y" };
+    const expectedDummy = { ...dummy, dataType: DataTypes.EnumType };
     dataModel.addEnum(
       NS1,
       modelName,
@@ -141,13 +148,14 @@ describe("Data Model Tests", function () {
       dummy
     );
 
-    expect(dataModel.getEnums()).toStrictEqual([dummy]);
+    expect(dataModel.getEnums()).toStrictEqual([expectedDummy]);
   });
 
   test("unbound operation", () => {
     const opName = "Xxx";
     const fqName = `${NS1}.${opName}`;
     const dummyOp = { fqName, odataName: opName };
+
     dataModel.addUnboundOperationType(
       NS1,
       // @ts-expect-error
