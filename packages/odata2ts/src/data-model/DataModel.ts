@@ -21,6 +21,9 @@ export interface ProjectFiles {
   service: string;
 }
 
+/**
+ * Each namespace is represented as tuple: 1. the namespace 2. the alias, if any.
+ */
 export type NamespaceWithAlias = [string, string?];
 
 export function withNamespace(ns: string, name: string) {
@@ -33,15 +36,38 @@ export class DataModel {
   private modelTypes: { [fqName: string]: ModelType } = {};
   private complexTypes: { [fqName: string]: ComplexType } = {};
   private enumTypes: { [fqName: string]: EnumType } = {};
+  /**
+   * All operations are stored by their fully qualified name.
+   * @private
+   */
   private operationTypes: { [fqName: string]: OperationType } = {};
+  /**
+   * Stores the fully qualified name of those operations which are unbound.
+   * @private
+   */
   private unboundOperationTypes = new Set<string>();
+  /**
+   * Stores the fully qualified names of operations that are bound to a certain entity or entity collection.
+   * @private
+   */
   private boundOperationTypes: { [entityFqName: string]: Array<string> } = {};
-  private rootOpNamespaces = new Set<string>();
+  private readonly namespace2Alias: { [ns: string]: string };
   private typeDefinitions: { [fqName: string]: string } = {};
+  private aliases: Record<string, string> = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
 
-  constructor(private version: ODataVersion, converters: MappedConverterChains = new Map()) {
+  constructor(
+    namespaces: Array<NamespaceWithAlias>,
+    private version: ODataVersion,
+    converters: MappedConverterChains = new Map()
+  ) {
     this.converters = converters;
+    this.namespace2Alias = namespaces.reduce<Record<string, string>>((col, [ns, alias]) => {
+      if (alias) {
+        col[ns] = alias;
+      }
+      return col;
+    }, {});
   }
 
   /**
@@ -60,26 +86,41 @@ export class DataModel {
     return this.version === ODataVersion.V4;
   }
 
-  public addTypeDefinition(name: string, type: string) {
-    this.typeDefinitions[name] = type;
+  private retrieveType<T>(fqName: string, haystack: Record<string, T>): T | undefined {
+    return haystack[fqName] || (this.aliases[fqName] ? haystack[this.aliases[fqName]] : undefined);
   }
 
-  public getPrimitiveType(name: string): string | undefined {
-    return this.typeDefinitions[name];
+  private addAlias(namespace: string, name: string) {
+    const alias = this.namespace2Alias[namespace];
+    if (alias) {
+      this.aliases[withNamespace(alias, name)] = withNamespace(namespace, name);
+    }
   }
 
-  public addModel(name: string, model: ModelType) {
-    this.modelTypes[name] = model;
+  public addTypeDefinition(namespace: string, name: string, type: string) {
+    const fqName = withNamespace(namespace, name);
+    this.typeDefinitions[fqName] = type;
+    this.addAlias(namespace, name);
+  }
+
+  public getPrimitiveType(fqName: string): string | undefined {
+    return this.retrieveType(fqName, this.typeDefinitions);
+  }
+
+  public addModel(namespace: string, name: string, model: ModelType) {
+    const fqName = withNamespace(namespace, name);
+    this.modelTypes[fqName] = model;
+    this.addAlias(namespace, name);
   }
 
   /**
-   * Get a specific model by its name.
+   * Get a specific model by its fully qualified name.
    *
-   * @param modelName the final model name that is generated
+   * @param fqName the fully qualified name of the entity
    * @returns the model type
    */
-  public getModel(modelName: string) {
-    return this.modelTypes[modelName];
+  public getModel(fqName: string) {
+    return this.retrieveType(fqName, this.modelTypes);
   }
 
   /**
@@ -100,18 +141,20 @@ export class DataModel {
     this.modelTypes = models;
   }
 
-  public addComplexType(name: string, model: ComplexType) {
-    this.complexTypes[name] = model;
+  public addComplexType(namespace: string, name: string, model: ComplexType) {
+    const fqName = withNamespace(namespace, name);
+    this.complexTypes[fqName] = model;
+    this.addAlias(namespace, name);
   }
 
   /**
-   * Get a specific model by its name.
+   * Get a specific model by its fully qualified name.
    *
-   * @param name the final model name that is generated
+   * @param fqName the final model name that is generated
    * @returns the model type
    */
-  public getComplexType(name: string) {
-    return this.complexTypes[name];
+  public getComplexType(fqName: string) {
+    return this.retrieveType(fqName, this.complexTypes);
   }
 
   /**
@@ -132,8 +175,10 @@ export class DataModel {
     this.complexTypes = complexTypes;
   }
 
-  public addEnum(name: string, type: EnumType) {
-    this.enumTypes[name] = type;
+  public addEnum(namespace: string, name: string, type: EnumType) {
+    const fqName = withNamespace(namespace, name);
+    this.enumTypes[fqName] = type;
+    this.addAlias(namespace, name);
   }
 
   /**
@@ -144,16 +189,17 @@ export class DataModel {
     return Object.values(this.enumTypes);
   }
 
-  private addOp(operationType: OperationType) {
+  private addOp(namespace: string, operationType: OperationType) {
     this.operationTypes[operationType.fqName] = operationType;
+    this.addAlias(namespace, operationType.odataName);
   }
 
   public getOperationType(fqOpName: string) {
-    return this.operationTypes[fqOpName];
+    return this.retrieveType(fqOpName, this.operationTypes);
   }
 
-  public addUnboundOperationType(operationType: OperationType) {
-    this.addOp(operationType);
+  public addUnboundOperationType(namespace: string, operationType: OperationType) {
+    this.addOp(namespace, operationType);
     this.unboundOperationTypes.add(operationType.fqName);
   }
 
@@ -161,15 +207,26 @@ export class DataModel {
     return [...this.unboundOperationTypes].map((fqName) => this.operationTypes[fqName]);
   }
 
-  public addBoundOperationType(bindingProp: PropertyModel, operationType: OperationType) {
-    const entityType = bindingProp.fqType;
-    const binding = bindingProp.isCollection ? `Collection(${entityType})` : entityType;
-
-    this.addOp(operationType);
+  private addBoundOp(binding: string, opFqName: string) {
     if (!this.boundOperationTypes[binding]) {
       this.boundOperationTypes[binding] = [];
     }
-    this.boundOperationTypes[binding].push(operationType.fqName);
+    this.boundOperationTypes[binding].push(opFqName);
+  }
+
+  public addBoundOperationType(namespace: string, bindingProp: PropertyModel, operationType: OperationType) {
+    const entityType = bindingProp.fqType;
+    const binding = bindingProp.isCollection ? `Collection(${entityType})` : entityType;
+
+    this.addOp(namespace, operationType);
+    this.addBoundOp(binding, operationType.fqName);
+
+    const ns = Object.keys(this.namespace2Alias).find((ns) => entityType.startsWith(ns + "."));
+    if (ns) {
+      const aliasType = entityType.replace(new RegExp(`^${ns}\.`), this.namespace2Alias[ns] + ".");
+      const aliasBinding = bindingProp.isCollection ? `Collection(${aliasType})` : aliasType;
+      this.addBoundOp(aliasBinding, operationType.fqName);
+    }
   }
 
   public getEntityTypeOperations(fqEntityName: string): Array<OperationType> {

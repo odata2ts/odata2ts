@@ -316,7 +316,7 @@ export function createDataModelTests(
     expect(toTest).toStrictEqual(toTestAlt);
     expect(toTest.fqName).toBe(ns1Model);
 
-    toTest = result.getModel(ns3Model);
+    toTest = result.getModel(ns3Model)!;
     expect(toTest).toBeDefined();
     expect(toTest.fqName).toBe(ns3Model);
   });

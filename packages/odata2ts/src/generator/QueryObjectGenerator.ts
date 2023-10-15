@@ -71,6 +71,10 @@ class QueryObjectGenerator {
     if (model.baseClasses.length) {
       const baseClass = model.baseClasses[0];
       const baseModel = this.dataModel.getModel(baseClass) || this.dataModel.getComplexType(baseClass);
+      if (!baseModel) {
+        throw new Error(`Entity or complex type "${baseClass}" from baseClass attribute not found!`);
+      }
+
       extendsClause = baseModel.qName;
     }
 

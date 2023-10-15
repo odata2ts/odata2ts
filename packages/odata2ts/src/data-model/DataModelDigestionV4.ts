@@ -69,12 +69,16 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
         const name = singleton.$.Name;
         const fqName = `${ns}.${name}`;
         const navPropBindings = singleton.NavigationPropertyBinding || [];
+        const entityType = this.dataModel.getModel(singleton.$.Type);
+        if (!entityType) {
+          throw new Error(`Entity type "${singleton.$.Type}" not found!`);
+        }
 
         this.dataModel.addSingleton(fqName, {
           fqName,
           name,
           odataName: singleton.$.Name,
-          entityType: this.dataModel.getModel(singleton.$.Type),
+          entityType,
           navPropBinding: navPropBindings.map((binding) => ({
             path: this.namingHelper.stripServicePrefix(binding.$.Path),
             target: binding.$.Target,
@@ -86,12 +90,16 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
         const name = entitySet.$.Name;
         const fqName = `${ns}.${name}`;
         const navPropBindings = entitySet.NavigationPropertyBinding || [];
+        const entityType = this.dataModel.getModel(entitySet.$.EntityType);
+        if (!entityType) {
+          throw new Error(`Entity type "${entitySet.$.EntityType}" not found!`);
+        }
 
         this.dataModel.addEntitySet(fqName, {
           fqName,
           name,
           odataName: entitySet.$.Name,
-          entityType: this.dataModel.getModel(entitySet.$.EntityType),
+          entityType,
           navPropBinding: navPropBindings.map((binding) => ({
             path: this.namingHelper.stripServicePrefix(binding.$.Path),
             target: binding.$.Target,
@@ -225,9 +233,9 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       };
 
       if (bindingProp) {
-        this.dataModel.addBoundOperationType(bindingProp, opType);
+        this.dataModel.addBoundOperationType(namespace, bindingProp, opType);
       } else {
-        this.dataModel.addUnboundOperationType(opType);
+        this.dataModel.addUnboundOperationType(namespace, opType);
       }
     });
   }

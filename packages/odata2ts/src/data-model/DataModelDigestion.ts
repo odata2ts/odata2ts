@@ -32,7 +32,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     protected namingHelper: NamingHelper,
     converters?: MappedConverterChains
   ) {
-    this.dataModel = new DataModel(version, converters);
+    const namespaces = schemas.map<NamespaceWithAlias>((s) => [s.$.Namespace, s.$.Alias]);
+    this.dataModel = new DataModel(namespaces, version, converters);
     this.serviceConfigHelper = new ServiceConfigHelper(options);
 
     this.collectModelTypes(schemas);
@@ -92,14 +93,14 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       const ns: NamespaceWithAlias = [schema.$.Namespace, schema.$.Alias];
 
       // type definitions: alias for primitive types
-      this.addTypeDefinition(schema.TypeDefinition);
+      this.addTypeDefinition(schema.$.Namespace, schema.TypeDefinition);
 
       // enums
       if (schema.EnumType) {
         for (const et of schema.EnumType) {
           const odataName = et.$.Name;
           const fqName = withNamespace(ns[0], odataName);
-          this.dataModel.addEnum(fqName, {
+          this.dataModel.addEnum(ns[0], odataName, {
             fqName,
             odataName,
             name: this.namingHelper.getEnumName(odataName),
@@ -151,13 +152,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     };
   }
 
-  private addTypeDefinition(types: Array<TypeDefinition> | undefined) {
+  private addTypeDefinition(ns: string, types: Array<TypeDefinition> | undefined) {
     if (!types || !types.length) {
       return;
     }
 
     for (const t of types) {
-      this.dataModel.addTypeDefinition(t.$.Name, t.$.UnderlyingType);
+      this.dataModel.addTypeDefinition(ns, t.$.Name, t.$.UnderlyingType);
     }
   }
 
@@ -168,7 +169,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     for (const model of models) {
       const baseModel = this.getBaseModel(namespace, model);
-      this.dataModel.addComplexType(baseModel.fqName, baseModel);
+      this.dataModel.addComplexType(namespace[0], baseModel.odataName, baseModel);
     }
   }
 
@@ -195,7 +196,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         }
       }
 
-      this.dataModel.addModel(baseModel.fqName, {
+      this.dataModel.addModel(namespace[0], baseModel.odataName, {
         ...baseModel,
         idModelName: this.namingHelper.getIdModelName(entityName),
         qIdFunctionName: this.namingHelper.getQIdFunctionName(entityName),
@@ -320,10 +321,11 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         }
 
         props.push(...baseModel.props);
-        if (baseModel.keyNames?.length) {
-          keys.push(...baseModel.keyNames.filter((kn) => !keys.includes(kn)));
-          idNameResult = baseModel.idModelName;
-          qIdNameResult = baseModel.qIdFunctionName;
+        const entityModel = baseModel as ModelType;
+        if (entityModel.keyNames?.length) {
+          keys.push(...entityModel.keyNames.filter((kn) => !keys.includes(kn)));
+          idNameResult = entityModel.idModelName;
+          qIdNameResult = entityModel.qIdFunctionName;
         }
         return [props, keys, idNameResult, qIdNameResult];
       },
@@ -344,9 +346,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     // support for primitive type mapping
     if (this.namingHelper.includesServicePrefix(dataType)) {
-      const dtName = this.namingHelper.stripServicePrefix(dataType);
-      if (this.dataModel.getPrimitiveType(dtName) !== undefined) {
-        dataType = this.dataModel.getPrimitiveType(dtName)!;
+      const dt = this.dataModel.getPrimitiveType(dataType);
+      if (dt !== undefined) {
+        dataType = dt;
       }
     }
 

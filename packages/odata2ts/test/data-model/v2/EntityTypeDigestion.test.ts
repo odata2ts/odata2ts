@@ -117,7 +117,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         { name: "counter", type: "number" },
       ],
     });
-    expect(model.props.length).toBe(3);
+    expect(model!.props.length).toBe(3);
   });
 
   test("EntityTypes: base class hierarchy", async () => {
@@ -216,7 +216,7 @@ describe("V2: EntityTypeDigestion Test", () => {
 
     // now check all props regarding their type
     const model = result.getModel(withNs("max"));
-    expect(model.props).toMatchObject([
+    expect(model!.props).toMatchObject([
       {
         name: "id",
         dataType: DataTypes.PrimitiveType,

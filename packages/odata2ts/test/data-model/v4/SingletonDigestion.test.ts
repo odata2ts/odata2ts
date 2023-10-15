@@ -43,11 +43,7 @@ describe("Singleton Digestion Test", () => {
   test("Singleton: missing EntityType", async () => {
     odataBuilder.addSingleton("Me", withNs("User"));
 
-    // TODO: this should throw
-    const result = await doDigest();
-    expect(result.getEntityContainer().singletons).toMatchObject({
-      [withNs("Me")]: { fqName: withNs("Me"), odataName: "Me", name: "Me", entityType: undefined },
-    });
+    await expect(() => doDigest()).rejects.toThrow('Entity type "SingletonTest.User" not found!');
   });
 
   test("Singleton: with navProps", async () => {

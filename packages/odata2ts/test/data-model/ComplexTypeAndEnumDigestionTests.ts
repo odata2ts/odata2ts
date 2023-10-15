@@ -43,7 +43,7 @@ export function createComplexAndEnumTests() {
     const model = result.getModel(FQ_ENTITY_NAME);
 
     expect(model).toBeTruthy();
-    expect(model.props[1]).toEqual({
+    expect(model!.props[1]).toEqual({
       dataType: DataTypes.EnumType,
       isCollection: false,
       managed: undefined,
@@ -73,7 +73,7 @@ export function createComplexAndEnumTests() {
     const model = result.getModel(FQ_ENTITY_NAME);
 
     expect(model).toBeTruthy();
-    expect(model.props[1]).toEqual({
+    expect(model!.props[1]).toEqual({
       dataType: DataTypes.EnumType,
       isCollection: true,
       managed: undefined,
@@ -100,7 +100,7 @@ export function createComplexAndEnumTests() {
     const model = result.getModel(FQ_ENTITY_NAME);
 
     expect(model).toBeTruthy();
-    expect(model.props[1]).toEqual({
+    expect(model!.props[1]).toEqual({
       dataType: DataTypes.ComplexType,
       isCollection: false,
       managed: undefined,
@@ -169,7 +169,7 @@ export function createComplexAndEnumTests() {
     const result = await doDigest();
     const model = result.getModel(FQ_ENTITY_NAME);
 
-    expect(model.props[1]).toMatchObject({});
+    expect(model!.props[1]).toMatchObject({});
     expect(result.getComplexType(withNs("GrandParent"))).toMatchObject({
       name: "GrandParent",
       odataName: "GrandParent",

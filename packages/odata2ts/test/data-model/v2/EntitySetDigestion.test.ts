@@ -38,10 +38,6 @@ describe("EntitySet Digestion Test", () => {
   test("EntitySet: missing EntityType", async () => {
     odataBuilder.addEntitySet("Products", withNs("Product"));
 
-    // TODO: this should throw
-    const result = await doDigest();
-    expect(result.getEntityContainer().entitySets).toMatchObject({
-      [withNs("Products")]: { odataName: "Products", name: "Products", entityType: undefined },
-    });
+    await expect(() => doDigest()).rejects.toThrow('Entity type "EntitySetTest.Product" not found!');
   });
 });

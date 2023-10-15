@@ -132,6 +132,10 @@ class ServiceGenerator {
 
     ops.forEach(({ operation, name }) => {
       const op = this.dataModel.getOperationType(operation);
+      if (!op) {
+        throw new Error(`Operation "${operation}" not found!`);
+      }
+
       result.properties.push(this.generateQOperationProp(op));
       result.methods.push(this.generateMethod(name, op, importContainer));
     });
@@ -301,6 +305,10 @@ class ServiceGenerator {
         // collection of entity types
         if (prop.dataType === DataTypes.ModelType) {
           const entityType = this.dataModel.getModel(prop.fqType);
+          if (!entityType) {
+            throw new Error(`Entity type "${prop.fqType}" specified by property not found!`);
+          }
+
           result.methods.push(
             this.generateRelatedServiceGetter(prop.name, prop.odataName, entityType, importContainer, serviceName)
           );

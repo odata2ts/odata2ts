@@ -2,9 +2,9 @@ import { MappedConverterChains, loadConverters } from "@odata2ts/converter-runti
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 
 import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel";
-import { NamespaceWithAlias, withNamespace } from "./DataModel";
+import { withNamespace } from "./DataModel";
 import { Digester, TypeModel } from "./DataModelDigestion";
-import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
+import { ODataVersion, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
 import { AssociationEnd, ComplexTypeV3, EntityTypeV3, NavigationProperty, SchemaV3 } from "./edmx/ODataEdmxModelV3";
 import { NamingHelper } from "./NamingHelper";
@@ -12,7 +12,7 @@ import { NamingHelper } from "./NamingHelper";
 /**
  * Digests an EDMX schema to produce a DataModel.
  *
- * @param schema
+ * @param schemas
  * @param options
  * @param namingHelper
  */
@@ -95,7 +95,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
 
         // V2 only knows the FunctionImport element
         // we generate the data structure for the function here
-        this.dataModel.addUnboundOperationType({
+        this.dataModel.addUnboundOperationType(namespace, {
           fqName,
           odataName,
           name,
@@ -119,12 +119,16 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
       container.EntitySet?.forEach((entitySet) => {
         const name = entitySet.$.Name;
         const fqName = withNamespace(namespace, name);
+        const entityType = this.dataModel.getModel(entitySet.$.EntityType);
+        if (!entityType) {
+          throw new Error(`Entity type "${entitySet.$.EntityType}" not found!`);
+        }
 
         this.dataModel.addEntitySet(fqName, {
           fqName,
           odataName: name,
           name,
-          entityType: this.dataModel.getModel(entitySet.$.EntityType),
+          entityType,
         });
       });
     }
