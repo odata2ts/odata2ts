@@ -315,4 +315,19 @@ describe("Data Model Tests", function () {
       actions: {},
     });
   });
+
+  test("add model with empty namespace", () => {
+    const modelName = "Xxx";
+    const dummy = { modelName, baseClasses: [] };
+    const expectedDummy = { ...dummy, dataType: DataTypes.ModelType };
+
+    dataModel.addEntityType(
+      "",
+      modelName,
+      // @ts-expect-error
+      dummy
+    );
+
+    expect(dataModel.getEntityType(modelName)).toStrictEqual(expectedDummy);
+  });
 });

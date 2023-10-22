@@ -1,6 +1,7 @@
 import deepmerge from "deepmerge";
 
 import { NamingStrategies } from "../../src";
+import { NamespaceWithAlias, withNamespace } from "../../src/data-model/DataModel";
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
 import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel";
@@ -17,10 +18,11 @@ export function createDataModelTests(
 ) {
   const SERVICE_NAME = "Tester";
   const TEST_CONFIG = getTestConfig();
+  const DEFAULT_NS: Array<NamespaceWithAlias> = [[SERVICE_NAME], ["x", "y"]];
 
   let odataBuilder: ODataModelBuilder<any, any, any, any>;
   let digestionOptions: Partial<DigestionOptions> & Pick<TestOptions, "naming" | "allowRenaming">;
-  let namespaces: Array<string>;
+  let namespaces: Array<NamespaceWithAlias>;
 
   function withNs(name: string) {
     return `${SERVICE_NAME}.${name}`;
@@ -34,7 +36,7 @@ export function createDataModelTests(
   beforeEach(() => {
     odataBuilder = new ODataBuilderConstructor(SERVICE_NAME);
     digestionOptions = {};
-    namespaces = [SERVICE_NAME];
+    namespaces = DEFAULT_NS;
   });
 
   test("Smoke Test", async () => {
@@ -288,7 +290,7 @@ export function createDataModelTests(
     const schema2 = "ALT";
     const schema3 = "schema3";
 
-    namespaces.push(schema2, schema3);
+    namespaces.push([schema2], [schema3]);
     odataBuilder
       .addEntityType("Test", undefined, (builder) => {
         builder.addKeyProp("ID", "Edm.String");
@@ -319,5 +321,66 @@ export function createDataModelTests(
     toTest = result.getEntityType(ns3Model)!;
     expect(toTest).toBeDefined();
     expect(toTest.fqName).toBe(ns3Model);
+  });
+
+  test("namespace alias support", async () => {
+    const ns2 = "ALT";
+    const alias = "Alias";
+    const schema2: NamespaceWithAlias = [ns2, alias];
+
+    namespaces.push(schema2);
+    odataBuilder
+      .addEntityType("Test", undefined, (builder) => {
+        builder.addKeyProp("ID", "Edm.String");
+        builder.addProp("Complex", `${alias}.ComplexTest`);
+      })
+      .addSchema(...schema2)
+      .addEntityType("Test", undefined, (builder) => {
+        builder.addKeyProp("ID", "Edm.Boolean");
+        builder.addProp("Complex", `${alias}.ComplexTest`);
+      })
+      .addComplexType("ComplexTest", undefined, (builder) => {
+        builder.addProp("Version", "Edm.String").addProp("testA", withNs("Test"));
+      });
+
+    const result = await doDigest();
+
+    const testFqName = withNs("Test");
+    const toTest = result.getEntityTypes()[0];
+    const propToTest = toTest.props.find((p) => p.odataName === "Complex");
+    expect(toTest).toBeDefined();
+    expect(toTest).toStrictEqual(result.getEntityType(testFqName));
+    expect(toTest.fqName).toBe(testFqName);
+    expect(propToTest).toBeDefined();
+    expect(propToTest).toMatchObject({
+      type: "ComplexTest",
+      fqType: "Alias.ComplexTest",
+      odataType: "Alias.ComplexTest",
+    });
+    expect(result.getComplexType(propToTest!.fqType)).toMatchObject({
+      name: "ComplexTest",
+      odataName: "ComplexTest",
+      fqName: "ALT.ComplexTest",
+      props: [
+        { odataName: "Version" },
+        {
+          odataName: "testA",
+          type: "Test",
+          odataType: "Tester.Test",
+          fqType: "Tester.Test",
+        },
+      ],
+    });
+
+    const test2FqName = withNamespace(ns2, "Test");
+    const toTest2 = result.getEntityType(withNamespace(ns2, "Test"))!;
+    expect(toTest2).toBeDefined();
+    expect(toTest2.fqName).toBe(test2FqName);
+    expect(result.getEntityType(withNamespace(alias, "Test"))).toStrictEqual(toTest2);
+    expect(toTest2.props.find((p) => p.odataName === "Complex")).toMatchObject({
+      type: "ComplexTest",
+      fqType: "Alias.ComplexTest",
+      odataType: "Alias.ComplexTest",
+    });
   });
 }

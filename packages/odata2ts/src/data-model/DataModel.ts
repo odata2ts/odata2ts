@@ -28,7 +28,8 @@ export interface ProjectFiles {
 export type NamespaceWithAlias = [string, string?];
 
 export function withNamespace(ns: string, name: string) {
-  return `${ns}.${name}`;
+  // this supports the edge case of an empty string as namespace which isn't really valid according to spec (see CSDL)
+  return ns ? `${ns}.${name}` : name;
 }
 
 export class DataModel {

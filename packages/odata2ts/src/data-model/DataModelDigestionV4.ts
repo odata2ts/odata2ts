@@ -2,6 +2,7 @@ import { MappedConverterChains, loadConverters } from "@odata2ts/converter-runti
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
 import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel";
+import { withNamespace } from "./DataModel";
 import { Digester, TypeModel } from "./DataModelDigestion";
 import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
@@ -42,7 +43,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
       container.ActionImport?.forEach((actionImport) => {
         const name = this.namingHelper.getActionName(actionImport.$.Name);
-        const fqName = `${ns}.${name}`;
+        const fqName = withNamespace(ns, name);
 
         this.dataModel.addAction(fqName, {
           fqName,
@@ -67,7 +68,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
       container.Singleton?.forEach((singleton) => {
         const name = singleton.$.Name;
-        const fqName = `${ns}.${name}`;
+        const fqName = withNamespace(ns, name);
         const navPropBindings = singleton.NavigationPropertyBinding || [];
         const entityType = this.dataModel.getEntityType(singleton.$.Type);
         if (!entityType) {
@@ -88,7 +89,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
       container.EntitySet?.forEach((entitySet) => {
         const name = entitySet.$.Name;
-        const fqName = `${ns}.${name}`;
+        const fqName = withNamespace(ns, name);
         const navPropBindings = entitySet.NavigationPropertyBinding || [];
         const entityType = this.dataModel.getEntityType(entitySet.$.EntityType);
         if (!entityType) {
@@ -200,7 +201,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
     operations.forEach((op) => {
       const odataName = op.$.Name;
-      const fqName = `${namespace}.${odataName}`;
+      const fqName = withNamespace(namespace, odataName);
       const params: Array<PropertyModel> = op.Parameter?.map((p) => this.mapProp(p)) ?? [];
       const returnType: PropertyModel | undefined = op.ReturnType?.map((rt) => {
         return this.mapProp({ ...rt, $: { Name: "NO_NAME_BECAUSE_RETURN_TYPE", ...rt.$ } });
