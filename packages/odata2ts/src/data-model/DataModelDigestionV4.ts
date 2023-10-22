@@ -2,6 +2,7 @@ import { MappedConverterChains, loadConverters } from "@odata2ts/converter-runti
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
 import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel";
+import { withNamespace } from "./DataModel";
 import { Digester, TypeModel } from "./DataModelDigestion";
 import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
@@ -38,38 +39,47 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
   protected digestEntityContainer(schema: SchemaV4) {
     if (schema.EntityContainer && schema.EntityContainer.length) {
       const container = schema.EntityContainer[0];
+      const ns = schema.$.Namespace;
 
       container.ActionImport?.forEach((actionImport) => {
         const name = this.namingHelper.getActionName(actionImport.$.Name);
-        const operationName = this.namingHelper.getActionName(actionImport.$.Action);
+        const fqName = withNamespace(ns, name);
 
-        this.dataModel.addAction(name, {
-          name: name,
+        this.dataModel.addAction(fqName, {
+          fqName,
+          name,
           odataName: actionImport.$.Name,
-          operation: this.getRootOperationType(operationName),
+          operation: actionImport.$.Action,
         });
       });
 
       container.FunctionImport?.forEach((funcImport) => {
         const name = this.namingHelper.getFunctionName(funcImport.$.Name);
-        const operationName = this.namingHelper.getFunctionName(funcImport.$.Function);
+        const fqName = `${ns}.${name}`;
 
-        this.dataModel.addFunction(name, {
+        this.dataModel.addFunction(fqName, {
+          fqName,
           name,
           odataName: funcImport.$.Name,
-          operation: this.getRootOperationType(operationName),
+          operation: funcImport.$.Function,
           entitySet: funcImport.$.EntitySet,
         });
       });
 
       container.Singleton?.forEach((singleton) => {
         const name = singleton.$.Name;
+        const fqName = withNamespace(ns, name);
         const navPropBindings = singleton.NavigationPropertyBinding || [];
+        const entityType = this.dataModel.getEntityType(singleton.$.Type);
+        if (!entityType) {
+          throw new Error(`Entity type "${singleton.$.Type}" not found!`);
+        }
 
-        this.dataModel.addSingleton(name, {
+        this.dataModel.addSingleton(fqName, {
+          fqName,
           name,
           odataName: singleton.$.Name,
-          entityType: this.dataModel.getModel(this.namingHelper.getModelName(singleton.$.Type)),
+          entityType,
           navPropBinding: navPropBindings.map((binding) => ({
             path: this.namingHelper.stripServicePrefix(binding.$.Path),
             target: binding.$.Target,
@@ -79,12 +89,18 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
       container.EntitySet?.forEach((entitySet) => {
         const name = entitySet.$.Name;
+        const fqName = withNamespace(ns, name);
         const navPropBindings = entitySet.NavigationPropertyBinding || [];
+        const entityType = this.dataModel.getEntityType(entitySet.$.EntityType);
+        if (!entityType) {
+          throw new Error(`Entity type "${entitySet.$.EntityType}" not found!`);
+        }
 
-        this.dataModel.addEntitySet(name, {
+        this.dataModel.addEntitySet(fqName, {
+          fqName,
           name,
           odataName: entitySet.$.Name,
-          entityType: this.dataModel.getModel(this.namingHelper.getModelName(entitySet.$.EntityType)),
+          entityType,
           navPropBinding: navPropBindings.map((binding) => ({
             path: this.namingHelper.stripServicePrefix(binding.$.Path),
             target: binding.$.Target,
@@ -184,6 +200,8 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     }
 
     operations.forEach((op) => {
+      const odataName = op.$.Name;
+      const fqName = withNamespace(namespace, odataName);
       const params: Array<PropertyModel> = op.Parameter?.map((p) => this.mapProp(p)) ?? [];
       const returnType: PropertyModel | undefined = op.ReturnType?.map((rt) => {
         return this.mapProp({ ...rt, $: { Name: "NO_NAME_BECAUSE_RETURN_TYPE", ...rt.$ } });
@@ -191,42 +209,35 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       const isBound = op.$.IsBound === "true";
 
       if (isBound && !params.length) {
-        throw new Error(`IllegalState: Operation '${op.$.Name}' is bound, but has no parameters!`);
+        throw new Error(`IllegalState: Operation '${odataName}' is bound, but has no parameters!`);
       }
 
       const bindingProp = isBound ? params.shift() : undefined;
-      const binding = bindingProp
-        ? bindingProp.isCollection
-          ? `Collection(${bindingProp.type})`
-          : bindingProp.type
-        : DigesterV4.ROOT_OPERATION;
 
       const name =
         type === OperationTypes.Function
-          ? this.namingHelper.getFunctionName(op.$.Name)
-          : this.namingHelper.getActionName(op.$.Name);
+          ? this.namingHelper.getFunctionName(odataName)
+          : this.namingHelper.getActionName(odataName);
       const qName =
         type === OperationTypes.Function
-          ? this.namingHelper.getQFunctionName(op.$.Name, bindingProp)
-          : this.namingHelper.getQActionName(op.$.Name, bindingProp);
-      this.dataModel.addOperationType(binding, {
-        odataName: isBound ? `${namespace}.${op.$.Name}` : op.$.Name,
+          ? this.namingHelper.getQFunctionName(odataName, bindingProp)
+          : this.namingHelper.getQActionName(odataName, bindingProp);
+      const opType: OperationType = {
+        fqName,
+        odataName: isBound ? fqName : odataName,
         name,
         qName,
-        paramsModelName: this.namingHelper.getOperationParamsModelName(op.$.Name, bindingProp),
+        paramsModelName: this.namingHelper.getOperationParamsModelName(odataName, bindingProp),
         type: type,
         parameters: params,
         returnType: returnType,
-      });
-    });
-  }
+      };
 
-  private getRootOperationType(name: string): OperationType {
-    const rootOps = this.dataModel.getOperationTypeByBinding(DigesterV4.ROOT_OPERATION);
-    const rootOp = rootOps.find((op) => op.name === name);
-    if (!rootOp) {
-      throw new Error(`Couldn't find root operation with name [${name}]`);
-    }
-    return rootOp;
+      if (bindingProp) {
+        this.dataModel.addBoundOperationType(namespace, bindingProp, opType);
+      } else {
+        this.dataModel.addUnboundOperationType(namespace, opType);
+      }
+    });
   }
 }

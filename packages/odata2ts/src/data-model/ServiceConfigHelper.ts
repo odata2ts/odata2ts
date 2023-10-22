@@ -1,6 +1,6 @@
 import { DigestionOptions } from "../FactoryFunctionModel";
 import { EntityGenerationOptions, PropertyGenerationOptions } from "../OptionModel";
-import { NamespaceWithAlias } from "./DataModel";
+import { NamespaceWithAlias, withNamespace } from "./DataModel";
 
 export interface ConfiguredProp extends Omit<PropertyGenerationOptions, "name"> {}
 export interface ConfiguredEntity extends Omit<EntityGenerationOptions, "name"> {}
@@ -102,8 +102,8 @@ export class ServiceConfigHelper {
     const [ns, alias] = namespace;
 
     const config =
-      this.entityMapping.get(`${ns}.${nameToMap}`) ||
-      (alias ? this.entityMapping.get(`${alias}.${nameToMap}`) : undefined) ||
+      this.entityMapping.get(withNamespace(ns, nameToMap)) ||
+      (alias ? this.entityMapping.get(withNamespace(alias, nameToMap)) : undefined) ||
       this.entityMapping.get(nameToMap);
     if (!config) {
       return;

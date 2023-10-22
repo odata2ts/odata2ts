@@ -131,8 +131,13 @@ class ServiceGenerator {
     const result: PropsAndOps = { properties: [], methods: [] };
 
     ops.forEach(({ operation, name }) => {
-      result.properties.push(this.generateQOperationProp(operation));
-      result.methods.push(this.generateMethod(name, operation, importContainer));
+      const op = this.dataModel.getOperationType(operation);
+      if (!op) {
+        throw new Error(`Operation "${operation}" not found!`);
+      }
+
+      result.properties.push(this.generateQOperationProp(op));
+      result.methods.push(this.generateMethod(name, op, importContainer));
     });
 
     return result;
@@ -246,7 +251,7 @@ class ServiceGenerator {
 
     const editableModelName = model.editableName;
     const qObjectName = firstCharLowerCase(model.qName);
-    const operations = this.dataModel.getOperationTypeByBinding(model.name);
+    const operations = this.dataModel.getEntityTypeOperations(model.fqName);
     const props = [...model.baseProps, ...model.props];
 
     importContainer.addFromService(entityServiceType);
@@ -299,7 +304,11 @@ class ServiceGenerator {
       } else if (prop.isCollection) {
         // collection of entity types
         if (prop.dataType === DataTypes.ModelType) {
-          const entityType = this.dataModel.getModel(prop.type);
+          const entityType = this.dataModel.getEntityType(prop.fqType);
+          if (!entityType) {
+            throw new Error(`Entity type "${prop.fqType}" specified by property not found!`);
+          }
+
           result.methods.push(
             this.generateRelatedServiceGetter(prop.name, prop.odataName, entityType, importContainer, serviceName)
           );
@@ -335,7 +344,7 @@ class ServiceGenerator {
     serviceName: string,
     importContainer: ImportContainer
   ): PropertyDeclarationStructure {
-    const complexType = this.dataModel.getComplexType(prop.type);
+    const complexType = this.dataModel.getComplexType(prop.fqType);
     const key = this.namingHelper.getServiceName(prop.type);
     let propModelType = prop.isCollection ? this.namingHelper.getCollectionServiceName(prop.type) : key;
 
@@ -410,7 +419,7 @@ class ServiceGenerator {
     prop: PropertyModel,
     collectionServiceType: string
   ): OptionalKind<MethodDeclarationStructure> {
-    const complexType = this.dataModel.getComplexType(prop.type);
+    const complexType = this.dataModel.getComplexType(prop.fqType);
     const isComplexCollection = prop.isCollection && complexType;
     const type = isComplexCollection
       ? collectionServiceType
@@ -492,7 +501,7 @@ class ServiceGenerator {
     importContainer.addGeneratedModel(model.idModelName);
     importContainer.addGeneratedQObject(model.qIdFunctionName);
 
-    const collectionOperations = this.dataModel.getOperationTypeByBinding(`Collection(${model.name})`);
+    const collectionOperations = this.dataModel.getEntityTypeOperations(`Collection(${model.fqName})`);
 
     const { properties, methods } = this.generateServiceOperations(collectionOperations, importContainer);
 
@@ -524,7 +533,7 @@ class ServiceGenerator {
 
   private async generateModelServices(serviceFile: SourceFile, importContainer: ImportContainer) {
     // build service file for each entity, consisting of EntityTypeService & EntityCollectionService
-    for (const model of this.dataModel.getModels()) {
+    for (const model of this.dataModel.getEntityTypes()) {
       const serviceName = this.namingHelper.getServiceName(model.name);
 
       // entity type service

@@ -20,6 +20,10 @@ describe("Service Generator Tests V2", () => {
   let projectManager: ProjectManager;
   let fixtureComparator: FixtureComparator;
 
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
+
   beforeAll(async () => {
     fixtureComparator = await createFixtureComparator(FIXTURE_PATH);
   });
@@ -71,7 +75,7 @@ describe("Service Generator Tests V2", () => {
           // simple props don't make a difference
           .addProp("test", ODataTypesV2.String)
       )
-      .addEntitySet("Ents", `${SERVICE_NAME}.TestEntity`);
+      .addEntitySet("Ents", withNs("TestEntity"));
 
     // when generating
     runOptions.enablePrimitivePropertyServices = true;
@@ -85,13 +89,13 @@ describe("Service Generator Tests V2", () => {
     // given three functions: one without and one with params and a third which POSTs
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.String))
-      .addFunctionImport("MostPop", `Collection(${SERVICE_NAME}.TestEntity)`)
-      .addFunctionImport("BEST_BOOK", `${SERVICE_NAME}.TestEntity`, (builder) =>
+      .addFunctionImport("MostPop", `Collection(${withNs("TestEntity")})`)
+      .addFunctionImport("BEST_BOOK", withNs("TestEntity"), (builder) =>
         builder.addParam("TestString", ODataTypesV2.String, false).addParam("TEST_NUMBER", ODataTypesV2.Int32)
       )
       .addFunctionImport(
         "postBestBook",
-        `${SERVICE_NAME}.TestEntity`,
+        withNs("TestEntity"),
         (builder) =>
           builder.addParam("TestString", ODataTypesV2.String, false).addParam("TEST_NUMBER", ODataTypesV2.Int32),
         true
@@ -107,7 +111,7 @@ describe("Service Generator Tests V2", () => {
     // given two functions: one without and one with params
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.String))
-      .addFunctionImport("bestBook", `Collection(${SERVICE_NAME}.TestEntity)`, (builder) =>
+      .addFunctionImport("bestBook", `Collection(${withNs("TestEntity")})`, (builder) =>
         builder
           .addParam("testGuid", ODataTypesV2.Guid, false)
           .addParam("testDateTime", ODataTypesV2.DateTime)
@@ -131,8 +135,8 @@ describe("Service Generator Tests V2", () => {
       .addEntityType("Book", undefined, (builder) =>
         builder
           .addKeyProp("ID", ODataTypesV2.Guid)
-          .addProp("author", `${SERVICE_NAME}.Author`)
-          .addProp("relatedAuthors", `Collection(${SERVICE_NAME}.Author)`)
+          .addProp("author", withNs("Author"))
+          .addProp("relatedAuthors", `Collection(${withNs("Author")})`)
       );
 
     // when generating
@@ -149,8 +153,8 @@ describe("Service Generator Tests V2", () => {
       .addEntityType("Book", undefined, (builder) =>
         builder
           .addKeyProp("id", ODataTypesV2.String)
-          .addProp("lector", `${SERVICE_NAME}.Reviewer`)
-          .addProp("reviewers", `Collection(${SERVICE_NAME}.Reviewer)`)
+          .addProp("lector", withNs("Reviewer"))
+          .addProp("reviewers", `Collection(${withNs("Reviewer")})`)
       );
 
     // when generating
@@ -171,8 +175,8 @@ describe("Service Generator Tests V2", () => {
       .addEntityType("Book", undefined, (builder) =>
         builder
           .addKeyProp("id", ODataTypesV2.String)
-          .addProp("myChoice", `${SERVICE_NAME}.Choice`)
-          .addProp("altChoices", `Collection(${SERVICE_NAME}.Choice)`)
+          .addProp("myChoice", withNs("Choice"))
+          .addProp("altChoices", `Collection(${withNs("Choice")})`)
       );
 
     // when generating
@@ -186,8 +190,10 @@ describe("Service Generator Tests V2", () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Boolean))
-      .addEntityType("Parent", "GrandParent", (builder) => builder.addProp("parentalAdvice", ODataTypesV2.Boolean))
-      .addEntityType("Child", "Parent", (builder) =>
+      .addEntityType("Parent", withNs("GrandParent"), (builder) =>
+        builder.addProp("parentalAdvice", ODataTypesV2.Boolean)
+      )
+      .addEntityType("Child", withNs("Parent"), (builder) =>
         builder.addKeyProp("id2", ODataTypesV2.Boolean).addProp("Ch1ld1shF4n", ODataTypesV2.Boolean)
       );
 

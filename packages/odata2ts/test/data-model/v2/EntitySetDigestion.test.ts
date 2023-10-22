@@ -12,6 +12,10 @@ describe("EntitySet Digestion Test", () => {
 
   let odataBuilder: ODataModelBuilderV2;
 
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
+
   function doDigest() {
     return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
   }
@@ -21,23 +25,19 @@ describe("EntitySet Digestion Test", () => {
   });
 
   test("EntitySet: min case", async () => {
-    odataBuilder.addEntitySet("Products", "Product").addEntityType("Product", undefined, (builder) => {
-      builder.addKeyProp("id", ODataTypesV2.String);
+    odataBuilder.addEntitySet("Products", withNs("Product")).addEntityType("Product", undefined, (builder) => {
+      return builder.addKeyProp("id", ODataTypesV2.String);
     });
 
     const result = await doDigest();
     expect(result.getEntityContainer().entitySets).toMatchObject({
-      Products: { odataName: "Products", name: "Products", entityType: { name: "Product" } },
+      [withNs("Products")]: { odataName: "Products", name: "Products", entityType: { name: "Product" } },
     });
   });
 
   test("EntitySet: missing EntityType", async () => {
-    odataBuilder.addEntitySet("Products", "Product");
+    odataBuilder.addEntitySet("Products", withNs("Product"));
 
-    // TODO: this should throw
-    const result = await doDigest();
-    expect(result.getEntityContainer().entitySets).toMatchObject({
-      Products: { odataName: "Products", name: "Products", entityType: undefined },
-    });
+    await expect(() => doDigest()).rejects.toThrow('Entity type "EntitySetTest.Product" not found!');
   });
 });

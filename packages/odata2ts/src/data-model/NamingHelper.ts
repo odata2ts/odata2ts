@@ -5,6 +5,7 @@ import { snakeCase } from "snake-case";
 
 import { FileNamingStrategyOption, NameSettings, NamingStrategies, StandardNamingOptions } from "../NamingModel";
 import { RunOptions } from "../OptionModel";
+import { NamespaceWithAlias } from "./DataModel";
 import { PropertyModel } from "./DataTypeModel";
 
 function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
@@ -34,7 +35,7 @@ export class NamingHelper {
   private readonly servicePrefixes: Array<string>;
   private readonly options: NameSettings;
 
-  constructor(options: NamingHelperSettings, mainServiceName: string, serviceNames?: Array<string>) {
+  constructor(options: NamingHelperSettings, mainServiceName: string, namespaces?: Array<NamespaceWithAlias>) {
     if (!options) {
       throw new Error("NamingHelper: Options must be supplied!");
     }
@@ -42,14 +43,21 @@ export class NamingHelper {
       throw new Error("NamingHelper: MainServiceName must be supplied!");
     }
 
-    if (!serviceNames?.length) {
-      serviceNames = [mainServiceName];
+    if (!namespaces?.length) {
+      namespaces = [[mainServiceName]];
     }
 
     this.allowModelPropRenaming = options.allowRenaming ?? false;
     this.options = options.naming;
     this.mainServiceName = mainServiceName;
-    this.servicePrefixes = serviceNames
+    this.servicePrefixes = namespaces
+      .reduce<Array<string>>((accu, [ns, alias]) => {
+        accu.push(ns);
+        if (alias) {
+          accu.push(alias);
+        }
+        return accu;
+      }, [])
       .map((sn) => sn + ".")
       .sort((a, b) => (a.length === b.length ? 0 : a.length > b.length ? -1 : 1));
   }

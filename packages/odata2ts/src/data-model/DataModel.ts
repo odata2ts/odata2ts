@@ -4,6 +4,7 @@ import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
 import {
   ActionImportType,
   ComplexType,
+  DataTypes,
   EntityContainerModel,
   EntitySetType,
   EnumType,
@@ -11,6 +12,7 @@ import {
   ModelType,
   ODataVersion,
   OperationType,
+  PropertyModel,
   SingletonType,
 } from "./DataTypeModel";
 
@@ -20,23 +22,52 @@ export interface ProjectFiles {
   service: string;
 }
 
+/**
+ * Each namespace is represented as tuple: 1. the namespace 2. the alias, if any.
+ */
 export type NamespaceWithAlias = [string, string?];
 
-const ROOT_OPERATION_BINDING = "/";
+export function withNamespace(ns: string, name: string) {
+  // this supports the edge case of an empty string as namespace which isn't really valid according to spec (see CSDL)
+  return ns ? `${ns}.${name}` : name;
+}
 
 export class DataModel {
   private readonly converters: MappedConverterChains;
 
-  private modelTypes: { [name: string]: ModelType } = {};
-  private complexTypes: { [name: string]: ComplexType } = {};
-  private enumTypes: { [name: string]: EnumType } = {};
-  // combines functions & actions
-  private operationTypes: { [binding: string]: Array<OperationType> } = {};
-  private typeDefinitions: { [name: string]: string } = {};
+  private models = new Map<string, ModelType | ComplexType | EnumType>();
+  /**
+   * All operations are stored by their fully qualified name.
+   * @private
+   */
+  private operationTypes = new Map<string, OperationType>();
+  /**
+   * Stores the fully qualified name of those operations which are unbound.
+   * @private
+   */
+  private unboundOperationTypes = new Set<string>();
+  /**
+   * Stores the fully qualified names of operations that are bound to a certain entity or entity collection.
+   * @private
+   */
+  private boundOperationTypes: { [entityFqName: string]: Array<string> } = {};
+  private readonly namespace2Alias: { [ns: string]: string };
+  private typeDefinitions = new Map<string, string>();
+  private aliases: Record<string, string> = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
 
-  constructor(private version: ODataVersion, converters: MappedConverterChains = new Map()) {
+  constructor(
+    namespaces: Array<NamespaceWithAlias>,
+    private version: ODataVersion,
+    converters: MappedConverterChains = new Map()
+  ) {
     this.converters = converters;
+    this.namespace2Alias = namespaces.reduce<Record<string, string>>((col, [ns, alias]) => {
+      if (alias) {
+        col[ns] = alias;
+      }
+      return col;
+    }, {});
   }
 
   /**
@@ -55,26 +86,45 @@ export class DataModel {
     return this.version === ODataVersion.V4;
   }
 
-  public addTypeDefinition(name: string, type: string) {
-    this.typeDefinitions[name] = type;
+  private retrieveType<T>(fqName: string, haystack: Map<string, T>): T | undefined {
+    return haystack.get(fqName) || (this.aliases[fqName] ? haystack.get(this.aliases[fqName]) : undefined);
   }
 
-  public getPrimitiveType(name: string): string | undefined {
-    return this.typeDefinitions[name];
+  private addAlias(namespace: string, name: string) {
+    const alias = this.namespace2Alias[namespace];
+    if (alias) {
+      this.aliases[withNamespace(alias, name)] = withNamespace(namespace, name);
+    }
   }
 
-  public addModel(name: string, model: ModelType) {
-    this.modelTypes[name] = model;
+  public addTypeDefinition(namespace: string, name: string, type: string) {
+    const fqName = withNamespace(namespace, name);
+    this.typeDefinitions.set(fqName, type);
+    this.addAlias(namespace, name);
+  }
+
+  public getPrimitiveType(fqName: string): string | undefined {
+    return this.retrieveType(fqName, this.typeDefinitions);
+  }
+
+  public getModel(fqName: string) {
+    return this.retrieveType(fqName, this.models);
+  }
+
+  public addEntityType(namespace: string, name: string, model: Omit<ModelType, "dataType">) {
+    const fqName = withNamespace(namespace, name);
+    this.models.set(fqName, { ...model, dataType: DataTypes.ModelType });
+    this.addAlias(namespace, name);
   }
 
   /**
-   * Get a specific model by its name.
+   * Get a specific model by its fully qualified name.
    *
-   * @param modelName the final model name that is generated
+   * @param fqName the fully qualified name of the entity
    * @returns the model type
    */
-  public getModel(modelName: string) {
-    return this.modelTypes[modelName];
+  public getEntityType(fqName: string) {
+    return this.retrieveType(fqName, this.models) as ModelType;
   }
 
   /**
@@ -82,31 +132,25 @@ export class DataModel {
    *
    * @returns list of model types
    */
-  public getModels() {
-    return Object.values(this.modelTypes);
+  public getEntityTypes() {
+    const ets = [...this.models.values()].filter((m): m is ModelType => m.dataType === DataTypes.ModelType);
+    return this.sortModelsByInheritance(ets);
+  }
+
+  public addComplexType(namespace: string, name: string, model: Omit<ComplexType, "dataType">) {
+    const fqName = withNamespace(namespace, name);
+    this.models.set(fqName, { ...model, dataType: DataTypes.ComplexType });
+    this.addAlias(namespace, name);
   }
 
   /**
-   * Set all model entity types
+   * Get a specific model by its fully qualified name.
    *
-   * @param models new model types
-   */
-  public setModels(models: { [name: string]: ModelType }) {
-    this.modelTypes = models;
-  }
-
-  public addComplexType(name: string, model: ComplexType) {
-    this.complexTypes[name] = model;
-  }
-
-  /**
-   * Get a specific model by its name.
-   *
-   * @param name the final model name that is generated
+   * @param fqName the final model name that is generated
    * @returns the model type
    */
-  public getComplexType(name: string) {
-    return this.complexTypes[name];
+  public getComplexType(fqName: string) {
+    return this.retrieveType(fqName, this.models) as ComplexType;
   }
 
   /**
@@ -115,20 +159,14 @@ export class DataModel {
    * @returns list of model types
    */
   public getComplexTypes() {
-    return Object.values(this.complexTypes);
+    const types = [...this.models.values()].filter((m): m is ComplexType => m.dataType === DataTypes.ComplexType);
+    return this.sortModelsByInheritance(types);
   }
 
-  /**
-   * Set all complex types
-   *
-   * @param models new complex types
-   */
-  public setComplexTypes(complexTypes: { [name: string]: ComplexType }) {
-    this.complexTypes = complexTypes;
-  }
-
-  public addEnum(name: string, type: EnumType) {
-    this.enumTypes[name] = type;
+  public addEnum(namespace: string, name: string, type: Omit<EnumType, "dataType">) {
+    const fqName = withNamespace(namespace, name);
+    this.models.set(fqName, { ...type, dataType: DataTypes.EnumType });
+    this.addAlias(namespace, name);
   }
 
   /**
@@ -136,31 +174,56 @@ export class DataModel {
    * @returns list of enum types
    */
   public getEnums() {
-    return Object.values(this.enumTypes);
+    return [...this.models.values()].filter((m): m is EnumType => m.dataType === DataTypes.EnumType);
   }
 
-  public addOperationType(binding: string, operationType: OperationType) {
-    if (!this.operationTypes[binding]) {
-      this.operationTypes[binding] = [];
-    }
+  private addOp(namespace: string, operationType: OperationType) {
+    this.operationTypes.set(operationType.fqName, operationType);
+    this.addAlias(namespace, operationType.odataName);
+  }
 
-    this.operationTypes[binding].push(operationType);
+  public getOperationType(fqOpName: string) {
+    return this.retrieveType(fqOpName, this.operationTypes);
+  }
+
+  public addUnboundOperationType(namespace: string, operationType: OperationType) {
+    this.addOp(namespace, operationType);
+    this.unboundOperationTypes.add(operationType.fqName);
   }
 
   public getUnboundOperationTypes(): Array<OperationType> {
-    const operations = this.operationTypes[ROOT_OPERATION_BINDING];
-    return !operations ? [] : [...operations];
+    return [...this.unboundOperationTypes].map((fqName) => this.operationTypes.get(fqName)!);
   }
 
-  public getOperationTypeByBinding(binding: string): Array<OperationType> {
-    const operations = this.operationTypes[binding];
-    return !operations ? [] : [...operations];
+  private addBoundOp(binding: string, opFqName: string) {
+    if (!this.boundOperationTypes[binding]) {
+      this.boundOperationTypes[binding] = [];
+    }
+    this.boundOperationTypes[binding].push(opFqName);
   }
 
-  public getOperationTypeByEntityOrCollectionBinding(binding: string): Array<OperationType> {
-    const entityOps = this.operationTypes[binding] || [];
-    const collOps = this.operationTypes[`Collection(${binding})`] || [];
-    return [...collOps, ...entityOps];
+  public addBoundOperationType(namespace: string, bindingProp: PropertyModel, operationType: OperationType) {
+    const entityType = bindingProp.fqType;
+    const binding = bindingProp.isCollection ? `Collection(${entityType})` : entityType;
+
+    this.addOp(namespace, operationType);
+    this.addBoundOp(binding, operationType.fqName);
+
+    const ns = Object.keys(this.namespace2Alias).find((ns) => entityType.startsWith(ns + "."));
+    if (ns) {
+      const aliasType = entityType.replace(new RegExp(`^${ns}\.`), this.namespace2Alias[ns] + ".");
+      const aliasBinding = bindingProp.isCollection ? `Collection(${aliasType})` : aliasType;
+      this.addBoundOp(aliasBinding, operationType.fqName);
+    }
+  }
+
+  public getEntityTypeOperations(fqEntityName: string): Array<OperationType> {
+    const operations = this.boundOperationTypes[fqEntityName];
+    return !operations ? [] : operations.map((op) => this.operationTypes.get(op)!);
+  }
+
+  public getEntitySetOperations(fqEntityName: string): Array<OperationType> {
+    return this.getEntityTypeOperations(`Collection(${fqEntityName})`);
   }
 
   public addAction(name: string, action: ActionImportType) {
@@ -185,5 +248,39 @@ export class DataModel {
 
   public getConverter(dataType: ODataTypesV2 | ODataTypesV4 | string) {
     return this.converters.get(dataType);
+  }
+
+  private sortModelsByInheritance<Type extends Omit<ComplexType, "dataType">>(models: Array<Type>): Array<Type> {
+    // recursively visit all models and sort them by inheritance such that base classes
+    // are always before derived classes
+    const sorted: Array<Type> = [];
+    const visitedModels = new Set<string>();
+    const inProgressModels = new Set<string>();
+
+    function visit(model: Type) {
+      const fqName = model.fqName;
+      if (inProgressModels.has(fqName)) {
+        throw new Error(`Cyclic inheritance detected for model "${fqName}"!`);
+      }
+
+      if (!visitedModels.has(fqName)) {
+        inProgressModels.add(fqName);
+
+        for (const baseClassName of model.baseClasses) {
+          const baseClass = models.find((e) => e.fqName === baseClassName);
+          if (baseClass) {
+            visit(baseClass);
+          }
+        }
+        visitedModels.add(fqName);
+        inProgressModels.delete(fqName);
+        sorted.push(model);
+      }
+    }
+
+    for (const model of models) {
+      visit(model);
+    }
+    return sorted;
   }
 }

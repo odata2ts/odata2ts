@@ -1,21 +1,29 @@
 import deepmerge from "deepmerge";
 
 import { NamingStrategies, RunOptions, getDefaultConfig } from "../../src";
+import { NamespaceWithAlias } from "../../src/data-model/DataModel";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
 import { TestOptions } from "../generator/TestTypes";
 import { getTestConfigMinimal } from "../test.config";
 
 describe("NamingHelper Tests", function () {
-  const SERVICE_NAME = "TRIPPIN";
+  const NAMESPACE = "TRIPPIN";
+  const NAMESPACE2 = "test";
+  const ALIAS = "Alias";
+  const NAMESPACES: Array<NamespaceWithAlias> = [[NAMESPACE], [NAMESPACE2, ALIAS]];
   const OVERRIDING_SERVICE_NAME = "my_Trip";
   const TEST_CONFIG = getTestConfigMinimal();
 
   let options: Pick<TestOptions, "serviceName" | "allowRenaming" | "naming">;
   let toTest: NamingHelper;
 
+  function withNs(name: string, ns = NAMESPACE) {
+    return `${ns}.${name}`;
+  }
+
   function createHelper(overrideServiceName: boolean = false) {
     const config = deepmerge(TEST_CONFIG, options) as Pick<RunOptions, "allowRenaming" | "naming">;
-    toTest = new NamingHelper(config, overrideServiceName ? OVERRIDING_SERVICE_NAME : SERVICE_NAME, [SERVICE_NAME]);
+    toTest = new NamingHelper(config, overrideServiceName ? OVERRIDING_SERVICE_NAME : NAMESPACE, NAMESPACES);
   }
 
   beforeEach(() => {
@@ -26,8 +34,8 @@ describe("NamingHelper Tests", function () {
     options.naming = getDefaultConfig().naming;
     createHelper();
 
-    expect(toTest.getODataServiceName()).toBe(SERVICE_NAME);
-    expect(toTest.includesServicePrefix(SERVICE_NAME + ".Test")).toBeTruthy();
+    expect(toTest.getODataServiceName()).toBe(NAMESPACE);
+    expect(toTest.includesServicePrefix(NAMESPACE + ".Test")).toBeTruthy();
     expect(toTest.includesServicePrefix("xxx.Test")).toBeFalsy();
 
     expect(toTest.getMainServiceName()).toBe("TrippinService");
@@ -61,7 +69,7 @@ describe("NamingHelper Tests", function () {
     // @ts-expect-error
     expect(() => new NamingHelper(null, null)).toThrow();
     // @ts-expect-error
-    expect(() => new NamingHelper(null, SERVICE_NAME)).toThrow();
+    expect(() => new NamingHelper(null, NAMESPACE)).toThrow();
     expect(() => new NamingHelper(TEST_CONFIG, " ")).toThrow();
   });
 
@@ -69,7 +77,7 @@ describe("NamingHelper Tests", function () {
     createHelper(true);
 
     expect(toTest.getODataServiceName()).toBe(OVERRIDING_SERVICE_NAME);
-    expect(toTest.includesServicePrefix(SERVICE_NAME + ".Test")).toBeTruthy();
+    expect(toTest.includesServicePrefix(NAMESPACE + ".Test")).toBeTruthy();
 
     expect(toTest.getFileNames()).toStrictEqual({
       model: `${OVERRIDING_SERVICE_NAME}Model`,
@@ -127,20 +135,17 @@ describe("NamingHelper Tests", function () {
     expect(toTest.stripServicePrefix("B.test")).toBe("B.test");
     expect(toTest.stripServicePrefix("Test_test")).toBe("Test_test");
 
-    expect(toTest.stripServicePrefix(SERVICE_NAME + ".test")).toBe("test");
-    expect(toTest.stripServicePrefix(SERVICE_NAME + ".B.test")).toBe("B.test");
+    expect(toTest.stripServicePrefix(NAMESPACE + ".test")).toBe("test");
+    expect(toTest.stripServicePrefix(NAMESPACE + ".B.test")).toBe("B.test");
   });
 
   test("stripServicePrefix for multiple namespaces", () => {
-    const namespace1 = "test";
-    const namespace2 = "a*b";
-    const namespace3 = "a*b.ddd";
-    toTest = new NamingHelper(TEST_CONFIG, namespace1, [namespace1, namespace2, namespace3]);
-
     expect(toTest.stripServicePrefix("ddd")).toBe("ddd");
     expect(toTest.stripServicePrefix("test")).toBe("test");
-    expect(toTest.stripServicePrefix(namespace2 + ".abab")).toBe("abab");
-    expect(toTest.stripServicePrefix(namespace3 + ".abab")).toBe("abab");
+    expect(toTest.stripServicePrefix(withNs("abab"))).toBe("abab");
+    expect(toTest.stripServicePrefix(withNs("AbAb"))).toBe("AbAb");
+    expect(toTest.stripServicePrefix(withNs("ab_Ab", NAMESPACE2))).toBe("ab_Ab");
+    expect(toTest.stripServicePrefix(withNs("AbAb", ALIAS))).toBe("AbAb");
   });
 
   test("disable naming strategy", () => {

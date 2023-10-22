@@ -15,6 +15,10 @@ describe("V2: EntityTypeDigestion Test", () => {
 
   let odataBuilder: ODataModelBuilderV2;
 
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
+
   function doDigest() {
     return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
   }
@@ -30,8 +34,8 @@ describe("V2: EntityTypeDigestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(1);
-    const model = result.getModels()[0];
+    expect(result.getEntityTypes().length).toBe(1);
+    const model = result.getEntityTypes()[0];
     // expect(model).toEqual({});
     expect(model).toMatchObject({
       name: "Min",
@@ -98,7 +102,7 @@ describe("V2: EntityTypeDigestion Test", () => {
     });
 
     const dataModel = await doDigest();
-    const model = dataModel.getModel("CompoKey");
+    const model = dataModel.getEntityType(`${withNs("CompoKey")}`);
 
     expect(model).toMatchObject({
       keyNames: ["cat", "subCat", "counter"],
@@ -113,15 +117,17 @@ describe("V2: EntityTypeDigestion Test", () => {
         { name: "counter", type: "number" },
       ],
     });
-    expect(model.props.length).toBe(3);
+    expect(model!.props.length).toBe(3);
   });
 
   test("EntityTypes: base class hierarchy", async () => {
     odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Guid));
-    odataBuilder.addEntityType("Parent", "GrandParent", (builder) =>
+    odataBuilder.addEntityType("Parent", withNs("GrandParent"), (builder) =>
       builder.addProp("parentalAdvice", ODataTypesV2.Boolean)
     );
-    odataBuilder.addEntityType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", ODataTypesV2.String));
+    odataBuilder.addEntityType("Child", withNs("Parent"), (builder) =>
+      builder.addProp("Ch1ld1shF4n", ODataTypesV2.String)
+    );
 
     const expectedGrandParentProp = {
       dataType: DataTypes.PrimitiveType,
@@ -145,8 +151,8 @@ describe("V2: EntityTypeDigestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(3);
-    expect(result.getModel("GrandParent")).toMatchObject({
+    expect(result.getEntityTypes().length).toBe(3);
+    expect(result.getEntityType(withNs("GrandParent"))).toMatchObject({
       name: "GrandParent",
       odataName: "GrandParent",
       idModelName: "GrandParentId",
@@ -157,24 +163,24 @@ describe("V2: EntityTypeDigestion Test", () => {
       baseClasses: [],
       baseProps: [],
     });
-    expect(result.getModel("Parent")).toMatchObject({
+    expect(result.getEntityType(withNs("Parent"))).toMatchObject({
       name: "Parent",
       idModelName: "GrandParentId",
       qIdFunctionName: "QGrandParentId",
       generateId: false,
       keyNames: ["id"],
       props: [expectedParentProp],
-      baseClasses: ["GrandParent"],
+      baseClasses: [withNs("GrandParent")],
       baseProps: [expectedGrandParentProp],
     });
-    expect(result.getModel("Child")).toMatchObject({
+    expect(result.getEntityType(withNs("Child"))).toMatchObject({
       name: "Child",
       idModelName: "GrandParentId",
       qIdFunctionName: "QGrandParentId",
       generateId: false,
       keyNames: ["id"],
       props: [expectedChildProp],
-      baseClasses: ["Parent"],
+      baseClasses: [withNs("Parent")],
       baseProps: [expectedGrandParentProp, expectedParentProp],
     });
   });
@@ -209,8 +215,8 @@ describe("V2: EntityTypeDigestion Test", () => {
     const result = await doDigest();
 
     // now check all props regarding their type
-    const model = result.getModel("Max");
-    expect(model.props).toMatchObject([
+    const model = result.getEntityType(withNs("max"));
+    expect(model!.props).toMatchObject([
       {
         name: "id",
         dataType: DataTypes.PrimitiveType,
@@ -418,25 +424,21 @@ describe("V2: EntityTypeDigestion Test", () => {
       .addEntityType("Product", undefined, (builder) =>
         builder
           .addKeyProp("ID", ODataTypesV2.Guid)
-          .addNavProp("Category", `${SERVICE_NAME}.Category`, relationshipCat, "1")
-          .addNavProp("supplier", `${SERVICE_NAME}.Supplier`, relationshipSupp, "0..1")
+          .addNavProp("Category", withNs("Category"), relationshipCat, "1")
+          .addNavProp("supplier", withNs("Supplier"), relationshipSupp, "0..1")
       )
       .addEntityType("Category", undefined, (builder) =>
-        builder
-          .addKeyProp("ID", ODataTypesV2.Guid)
-          .addNavProp("products", `${SERVICE_NAME}.Product`, relationshipCat, "*")
+        builder.addKeyProp("ID", ODataTypesV2.Guid).addNavProp("products", withNs("Product"), relationshipCat, "*")
       )
       .addEntityType("Supplier", undefined, (builder) =>
-        builder
-          .addKeyProp("ID", ODataTypesV2.Guid)
-          .addNavProp("products", `${SERVICE_NAME}.Product`, relationshipSupp, "*")
+        builder.addKeyProp("ID", ODataTypesV2.Guid).addNavProp("products", withNs("Product"), relationshipSupp, "*")
       );
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(3);
+    expect(result.getEntityTypes().length).toBe(3);
 
-    const product = result.getModels()[0];
+    const product = result.getEntityTypes()[0];
     expect(product.props.length).toBe(3);
     expect(product.props[1]).toEqual({
       name: "category",
@@ -445,7 +447,8 @@ describe("V2: EntityTypeDigestion Test", () => {
       qPath: "QEntityPath",
       qParam: "QComplexParam",
       type: "Category",
-      odataType: `${SERVICE_NAME}.Category`,
+      fqType: withNs("Category"),
+      odataType: withNs("Category"),
       isCollection: false,
       dataType: DataTypes.ModelType,
       managed: undefined,
@@ -458,14 +461,15 @@ describe("V2: EntityTypeDigestion Test", () => {
       qPath: "QEntityPath",
       qParam: "QComplexParam",
       type: "Supplier",
-      odataType: `${SERVICE_NAME}.Supplier`,
+      fqType: withNs("Supplier"),
+      odataType: withNs("Supplier"),
       isCollection: false,
       dataType: DataTypes.ModelType,
       managed: undefined,
       required: false,
     } as PropertyModel);
 
-    const category = result.getModels()[1];
+    const category = result.getEntityTypes()[1];
     expect(category.props.length).toBe(2);
     expect(category.props[1]).toEqual({
       name: "products",
@@ -474,7 +478,8 @@ describe("V2: EntityTypeDigestion Test", () => {
       qPath: "QEntityPath",
       qParam: "QComplexParam",
       type: "Product",
-      odataType: `Collection(${SERVICE_NAME}.Product)`,
+      fqType: withNs("Product"),
+      odataType: `Collection(${withNs("Product")})`,
       isCollection: true,
       dataType: DataTypes.ModelType,
       managed: undefined,

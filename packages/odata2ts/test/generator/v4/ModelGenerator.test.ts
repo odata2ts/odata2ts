@@ -21,6 +21,10 @@ describe("Model Generator Tests V4", () => {
   let odataBuilder: ODataModelBuilderV4;
   let fixtureComparatorHelper: FixtureComparatorHelper;
 
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
+
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, GENERATE);
 
   async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<DigestionOptions>) {
@@ -100,7 +104,7 @@ describe("Model Generator Tests V4", () => {
       .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
       .addFunction("MinOperation", ODataTypesV4.String, true, (builder) =>
         builder
-          .addParam("book", `${SERVICE_NAME}.Book`)
+          .addParam("book", `${withNs("Book")}`)
           .addParam("test", ODataTypesV4.String, false)
           .addParam("optTest", ODataTypesV4.String, true)
       );
@@ -116,7 +120,7 @@ describe("Model Generator Tests V4", () => {
       .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
       .addFunction("MinOperation", ODataTypesV4.String, true, (builder) =>
         builder
-          .addParam("book", `Collection(${SERVICE_NAME}.Book)`)
+          .addParam("book", `Collection(${withNs("Book")})`)
           .addParam("test", ODataTypesV4.String, false)
           .addParam("optTest", ODataTypesV4.String, true)
       );
@@ -136,9 +140,9 @@ describe("Model Generator Tests V4", () => {
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
         builder
           .addKeyProp("id", ODataTypesV4.Int32)
-          .addProp("author", `${SERVICE_NAME}.Author`, false)
-          .addProp("altAuthor", `${SERVICE_NAME}.Author`, true)
-          .addProp("relatedAuthors", `Collection(${SERVICE_NAME}.Author)`)
+          .addProp("author", `${withNs("Author")}`, false)
+          .addProp("altAuthor", `${withNs("Author")}`, true)
+          .addProp("relatedAuthors", `Collection(${withNs("Author")})`)
       );
 
     // when generating model

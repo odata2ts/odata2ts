@@ -2,8 +2,9 @@ import { MappedConverterChains, loadConverters } from "@odata2ts/converter-runti
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 
 import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel";
+import { withNamespace } from "./DataModel";
 import { Digester, TypeModel } from "./DataModelDigestion";
-import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
+import { ODataVersion, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
 import { AssociationEnd, ComplexTypeV3, EntityTypeV3, NavigationProperty, SchemaV3 } from "./edmx/ODataEdmxModelV3";
 import { NamingHelper } from "./NamingHelper";
@@ -11,7 +12,7 @@ import { NamingHelper } from "./NamingHelper";
 /**
  * Digests an EDMX schema to produce a DataModel.
  *
- * @param schema
+ * @param schemas
  * @param options
  * @param namingHelper
  */
@@ -72,11 +73,14 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
   protected digestOperations(schema: SchemaV3) {}
 
   protected digestEntityContainer(schema: SchemaV3) {
+    const namespace = schema.$.Namespace;
     if (schema.EntityContainer && schema.EntityContainer.length) {
       const container = schema.EntityContainer[0];
 
       container.FunctionImport?.forEach((funcImport) => {
-        const name = this.namingHelper.getFunctionName(funcImport.$.Name);
+        const odataName = funcImport.$.Name;
+        const fqName = withNamespace(namespace, odataName);
+        const name = this.namingHelper.getFunctionName(odataName);
         const usePost = funcImport.$["m:HttpMethod"]?.toUpperCase() === "POST";
         const parameters = funcImport.Parameter?.map((p) => this.mapProp(p)) ?? [];
 
@@ -89,34 +93,42 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
           ? this.mapProp({ $: { Name: "NO_NAME_BECAUSE_RETURN_TYPE", Type: returnTypeDef } })
           : undefined;
 
-        const operation: OperationType = {
+        // V2 only knows the FunctionImport element
+        // we generate the data structure for the function here
+        this.dataModel.addUnboundOperationType(namespace, {
+          fqName,
+          odataName,
           name,
-          odataName: funcImport.$.Name,
-          paramsModelName: this.namingHelper.getOperationParamsModelName(funcImport.$.Name),
-          qName: this.namingHelper.getQFunctionName(funcImport.$.Name),
+          paramsModelName: this.namingHelper.getOperationParamsModelName(odataName),
+          qName: this.namingHelper.getQFunctionName(odataName),
           type: OperationTypes.Function,
           parameters,
           returnType,
           usePost,
-        };
-        this.dataModel.addOperationType("/", operation);
+        });
 
-        this.dataModel.addFunction(name, {
+        this.dataModel.addFunction(fqName, {
+          fqName,
+          odataName,
           name,
-          odataName: funcImport.$.Name,
-          // TODO: does this really match V4 model?!
           entitySet: funcImport.$.EntitySet!,
-          operation: operation,
+          operation: fqName,
         });
       });
 
       container.EntitySet?.forEach((entitySet) => {
         const name = entitySet.$.Name;
+        const fqName = withNamespace(namespace, name);
+        const entityType = this.dataModel.getEntityType(entitySet.$.EntityType);
+        if (!entityType) {
+          throw new Error(`Entity type "${entitySet.$.EntityType}" not found!`);
+        }
 
-        this.dataModel.addEntitySet(name, {
+        this.dataModel.addEntitySet(fqName, {
+          fqName,
+          odataName: name,
           name,
-          odataName: entitySet.$.Name,
-          entityType: this.dataModel.getModel(this.namingHelper.getModelName(entitySet.$.EntityType)),
+          entityType,
         });
       });
     }

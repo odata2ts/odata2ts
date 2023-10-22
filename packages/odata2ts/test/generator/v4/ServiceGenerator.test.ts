@@ -2,7 +2,6 @@ import path from "path";
 
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
-import { SourceFile } from "ts-morph";
 
 import { ConfigFileOptions, EmitModes, NamingStrategies, OverridableNamingOptions, RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
@@ -11,15 +10,19 @@ import { ProjectManager, createProjectManager } from "../../../src/project/Proje
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import { getTestConfig } from "../../test.config";
 import { ServiceFixtureComparatorHelper, createServiceHelper } from "../comparator/FixtureComparatorHelper";
-import { SERVICE_NAME } from "./EntityBasedGenerationTests";
 
 describe("Service Generator Tests V4", () => {
   const FIXTURE_PATH = "generator/service";
+  const SERVICE_NAME = "Tester";
 
   let runOptions: Omit<RunOptions, "source" | "output">;
   let odataBuilder: ODataModelBuilderV4;
   let projectManager: ProjectManager;
   let fixtureComparatorHelper: ServiceFixtureComparatorHelper;
+
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
 
   beforeAll(async () => {
     fixtureComparatorHelper = await createServiceHelper(FIXTURE_PATH, digest, ODataVersions.V4);
@@ -73,7 +76,7 @@ describe("Service Generator Tests V4", () => {
           .addKeyProp("deceased", ODataTypesV4.Boolean)
           .addKeyProp("desc", ODataTypesV4.String)
       )
-      .addEntitySet("Ents", `${SERVICE_NAME}.TestEntity`);
+      .addEntitySet("Ents", withNs("TestEntity"));
 
     // when generating
     await doGenerate({
@@ -89,7 +92,7 @@ describe("Service Generator Tests V4", () => {
     // given one singleton
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
-      .addSingleton("CURRENT_USER", `${SERVICE_NAME}.TestEntity`);
+      .addSingleton("CURRENT_USER", withNs("TestEntity"));
 
     // when generating
     await doGenerate();
@@ -102,12 +105,12 @@ describe("Service Generator Tests V4", () => {
     // given two functions: one without and one with params
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
-      .addFunction("getBestsellers", `Collection(${SERVICE_NAME}.TestEntity)`, false)
-      .addFunctionImport("mostPop", `${SERVICE_NAME}.getBestsellers`, "none")
-      .addFunction("firstBook", `${SERVICE_NAME}.TestEntity`, false, (builder) =>
+      .addFunction("getBestsellers", `Collection(${withNs("TestEntity")})`, false)
+      .addFunctionImport("mostPop", withNs("getBestsellers"), "none")
+      .addFunction("firstBook", withNs("TestEntity"), false, (builder) =>
         builder.addParam("testString", ODataTypesV4.String, false).addParam("testNumber", ODataTypesV4.Double)
       )
-      .addFunctionImport("bestBook", `${SERVICE_NAME}.firstBook`, "none");
+      .addFunctionImport("bestBook", withNs("firstBook"), "none");
 
     // when generating
     await doGenerate();
@@ -121,11 +124,11 @@ describe("Service Generator Tests V4", () => {
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       .addAction("ping", undefined, false)
-      .addActionImport("keepAlive", `${SERVICE_NAME}.ping`)
-      .addAction("vote", `${SERVICE_NAME}.TestEntity`, false, (builder) =>
+      .addActionImport("keepAlive", withNs("ping"))
+      .addAction("vote", withNs("TestEntity"), false, (builder) =>
         builder.addParam("rating", ODataTypesV4.Int16, false).addParam("comment", ODataTypesV4.String)
       )
-      .addActionImport("DoLike", `${SERVICE_NAME}.vote`);
+      .addActionImport("DoLike", withNs("vote"));
 
     // when generating
     await doGenerate();
@@ -140,10 +143,10 @@ describe("Service Generator Tests V4", () => {
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       .addAction("pingString", ODataTypesV4.String, false)
       .addAction("pingNumber", ODataTypesV4.Int16, false)
-      .addActionImport("pingString", `${SERVICE_NAME}.pingString`)
-      .addActionImport("pingNumber", `${SERVICE_NAME}.pingNumber`)
+      .addActionImport("pingString", withNs("pingString"))
+      .addActionImport("pingNumber", withNs("pingNumber"))
       .addAction("pingCollection", `Collection(${ODataTypesV4.DateTimeOffset})`, false)
-      .addActionImport("pingCollection", `${SERVICE_NAME}.pingCollection`);
+      .addActionImport("pingCollection", withNs("pingCollection"));
 
     // when generating
     await doGenerate();
@@ -157,10 +160,10 @@ describe("Service Generator Tests V4", () => {
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       .addAction("pingBigNumber", ODataTypesV4.Int64, false)
       .addAction("pingDecimal", ODataTypesV4.Decimal, false)
-      .addActionImport("pingBigNumber", `${SERVICE_NAME}.pingBigNumber`)
-      .addActionImport("pingDecimal", `${SERVICE_NAME}.pingDecimal`)
+      .addActionImport("pingBigNumber", withNs("pingBigNumber"))
+      .addActionImport("pingDecimal", withNs("pingDecimal"))
       .addAction("pingDecimalCollection", `Collection(${ODataTypesV4.Decimal})`, false)
-      .addActionImport("pingDecimalCollection", `${SERVICE_NAME}.pingDecimalCollection`);
+      .addActionImport("pingDecimalCollection", withNs("pingDecimalCollection"));
 
     // when generating
     await doGenerate({ v4BigNumberAsString: true });
@@ -177,7 +180,7 @@ describe("Service Generator Tests V4", () => {
           // simple props don't make a difference
           .addProp("test", ODataTypesV4.String)
       )
-      .addEntitySet("list", `${SERVICE_NAME}.TestEntity`);
+      .addEntitySet("list", withNs("TestEntity"));
     const naming: OverridableNamingOptions = {
       minimalDefaults: true,
       models: {
@@ -231,13 +234,13 @@ describe("Service Generator Tests V4", () => {
       .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       .addComplexType("Review", undefined, (builder) => builder.addProp("content", ODataTypesV4.String))
       // complex return type
-      .addFunction("BestReview", `${SERVICE_NAME}.Review`, true, (builder) =>
-        builder.addParam("book", `${SERVICE_NAME}.Book`)
-      )
+      .addFunction("BestReview", withNs("Review"), true, (builder) => {
+        builder.addParam("book", withNs("Book"));
+      })
       // collection of complex return type
-      .addFunction("filterReviews", `Collection(${SERVICE_NAME}.Review)`, true, (builder) =>
+      .addFunction("filterReviews", `Collection(${withNs("Review")})`, true, (builder) =>
         builder
-          .addParam("Book", `${SERVICE_NAME}.Book`)
+          .addParam("Book", withNs("Book"))
           .addParam("MIN_RATING", ODataTypesV4.Int16, false)
           .addParam("MinCreated", ODataTypesV4.Date)
       );
@@ -258,14 +261,14 @@ describe("Service Generator Tests V4", () => {
         { name: "9", value: 2 },
       ])
       // no return type
-      .addAction("like", undefined, true, (builder) => builder.addParam("book", `${SERVICE_NAME}.Book`))
+      .addAction("like", undefined, true, (builder) => builder.addParam("book", withNs("Book")))
       // enum return type,
-      .addAction("rate", `${SERVICE_NAME}.Rating`, true, (builder) =>
-        builder.addParam("book", `${SERVICE_NAME}.Book`).addParam("rating", `${SERVICE_NAME}.Rating`)
+      .addAction("rate", withNs("Rating"), true, (builder) =>
+        builder.addParam("book", withNs("Book")).addParam("rating", withNs("Rating"))
       )
       // return type: collection of enums
-      .addAction("ratings", `Collection(${SERVICE_NAME}.Rating)`, true, (builder) =>
-        builder.addParam("book", `${SERVICE_NAME}.Book`).addParam("ratings", `Collection(${SERVICE_NAME}.Rating)`)
+      .addAction("ratings", `Collection(${withNs("Rating")})`, true, (builder) =>
+        builder.addParam("book", withNs("Book")).addParam("ratings", `Collection(${withNs("Rating")})`)
       );
 
     // when generating
@@ -284,8 +287,8 @@ describe("Service Generator Tests V4", () => {
       .addEntityType("Book", undefined, (builder) =>
         builder
           .addKeyProp("ID", ODataTypesV4.Guid)
-          .addProp("AUTHOR", `${SERVICE_NAME}.Author`)
-          .addProp("RelatedAuthors", `Collection(${SERVICE_NAME}.Author)`)
+          .addProp("AUTHOR", withNs("Author"))
+          .addProp("RelatedAuthors", `Collection(${withNs("Author")})`)
       );
 
     // when generating
@@ -302,8 +305,8 @@ describe("Service Generator Tests V4", () => {
       .addEntityType("Book", undefined, (builder) =>
         builder
           .addKeyProp("id", ODataTypesV4.String)
-          .addProp("lector", `${SERVICE_NAME}.Reviewer`)
-          .addProp("reviewers", `Collection(${SERVICE_NAME}.Reviewer)`)
+          .addProp("lector", withNs("Reviewer"))
+          .addProp("reviewers", `Collection(${withNs("Reviewer")})`)
       );
 
     // when generating
@@ -323,8 +326,8 @@ describe("Service Generator Tests V4", () => {
       .addEntityType("Book", undefined, (builder) =>
         builder
           .addKeyProp("id", ODataTypesV4.String)
-          .addProp("myChoice", `${SERVICE_NAME}.Choice`)
-          .addProp("altChoices", `Collection(${SERVICE_NAME}.Choice)`)
+          .addProp("myChoice", withNs("Choice"))
+          .addProp("altChoices", `Collection(${withNs("Choice")})`)
       );
 
     // when generating
@@ -343,7 +346,7 @@ describe("Service Generator Tests V4", () => {
           .addProp("int64", ODataTypesV4.Int64)
           .addProp("bigNumberCollection", `Collection(${ODataTypesV4.Decimal})`)
       )
-      .addEntitySet("Ents", `${SERVICE_NAME}.TestEntity`);
+      .addEntitySet("Ents", withNs("TestEntity"));
 
     // when generating
     await doGenerate({ v4BigNumberAsString: true });

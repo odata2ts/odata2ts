@@ -9,7 +9,7 @@ import {
   FixtureComparatorHelper,
   createHelper,
 } from "../comparator/FixtureComparatorHelper";
-import { SERVICE_NAME } from "../v2/EntityBasedGenerationTests";
+import { SERVICE_NAME } from "./EntityBasedGenerationTests";
 import { ENTITY_NAME, createEntityBasedGenerationTests } from "./EntityBasedGenerationTests";
 
 describe("Query Object Generator Tests V4", () => {
@@ -22,6 +22,10 @@ describe("Query Object Generator Tests V4", () => {
 
   let odataBuilder: ODataModelBuilderV4;
   let fixtureComparatorHelper: FixtureComparatorHelper;
+
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
 
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, GENERATE);
 
@@ -64,9 +68,9 @@ describe("Query Object Generator Tests V4", () => {
           .addParam("testDate", ODataTypesV4.Date, false)
           .addParam("testDateTimeOffset", ODataTypesV4.DateTimeOffset, false)
           .addParam("testDateTimeOffset", ODataTypesV4.DateTimeOffset, false)
-          .addParam("complex", `${SERVICE_NAME}.Complex`)
-          .addParam("ENTITY", `${SERVICE_NAME}.TheEntity`)
-          .addParam("enum", `${SERVICE_NAME}.TheEnum`)
+          .addParam("complex", `${withNs("Complex")}`)
+          .addParam("ENTITY", `${withNs("TheEntity")}`)
+          .addParam("enum", `${withNs("TheEnum")}`)
       );
 
     // when generating model
@@ -82,7 +86,7 @@ describe("Query Object Generator Tests V4", () => {
       .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
       .addFunction("MinFunction", ODataTypesV4.String, true, (builder) =>
         builder
-          .addParam("book", `${SERVICE_NAME}.Book`)
+          .addParam("book", `${withNs("Book")}`)
           .addParam("test", ODataTypesV4.String, false)
           .addParam("optTest", ODataTypesV4.Boolean, true)
       );
@@ -100,7 +104,7 @@ describe("Query Object Generator Tests V4", () => {
       .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
       .addFunction("MinFunction", ODataTypesV4.String, true, (builder) =>
         builder
-          .addParam("_it", `Collection(${SERVICE_NAME}.Book)`)
+          .addParam("_it", `Collection(${withNs("Book")})`)
           .addParam("test", ODataTypesV4.String, false)
           .addParam("optTest", ODataTypesV4.Boolean, true)
       );
@@ -129,7 +133,7 @@ describe("Query Object Generator Tests V4", () => {
     // given a simple function
     odataBuilder
       .addEntityType("Person", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
-      .addAction("ActionWithConverter", `${SERVICE_NAME}.Person`, false, (builder) =>
+      .addAction("ActionWithConverter", `${withNs("Person")}`, false, (builder) =>
         builder.addParam("test", ODataTypesV4.String, false)
       );
 

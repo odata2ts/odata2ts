@@ -11,6 +11,12 @@ export function createComplexAndEnumTests() {
   const SERVICE_NAME = "ComplexAndEnum";
   const ENTITY_NAME = "Product";
 
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
+
+  const FQ_ENTITY_NAME = withNs(ENTITY_NAME);
+
   let odataBuilder: ODataModelBuilderV4;
   let runOpts: Omit<RunOptions, "source" | "output"> = getTestConfig();
 
@@ -26,7 +32,7 @@ export function createComplexAndEnumTests() {
   test("EnumType: enum type", async () => {
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoice", `${SERVICE_NAME}.Choice`)
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoice", withNs("Choice"))
       )
       .addEnumType("Choice", [
         { name: "A", value: 1 },
@@ -34,27 +40,29 @@ export function createComplexAndEnumTests() {
         { name: "C", value: 4 },
       ]);
     const result = await doDigest();
-    const model = result.getModel(ENTITY_NAME);
+    const model = result.getEntityType(FQ_ENTITY_NAME);
 
     expect(model).toBeTruthy();
-    expect(model.props[1]).toEqual({
+    expect(model!.props[1]).toEqual({
       dataType: DataTypes.EnumType,
       isCollection: false,
       managed: undefined,
+      type: "Choice",
+      fqType: withNs("Choice"),
+      required: false,
       name: "myChoice",
       odataName: "myChoice",
-      odataType: `${SERVICE_NAME}.Choice`,
+      odataType: withNs("Choice"),
       qObject: undefined,
       qPath: "QEnumPath",
       qParam: "QEnumParam",
-      required: false,
-      type: "Choice",
     });
   });
+
   test("EnumType: enum collection", async () => {
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoices", `Collection(${SERVICE_NAME}.Choice)`)
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoices", `Collection(${withNs("Choice")})`)
       )
       .addEnumType("Choice", [
         { name: "A", value: 1 },
@@ -62,59 +70,63 @@ export function createComplexAndEnumTests() {
         { name: "C", value: 4 },
       ]);
     const result = await doDigest();
-    const model = result.getModel(ENTITY_NAME);
+    const model = result.getEntityType(FQ_ENTITY_NAME);
 
     expect(model).toBeTruthy();
-    expect(model.props[1]).toEqual({
+    expect(model!.props[1]).toEqual({
       dataType: DataTypes.EnumType,
       isCollection: true,
       managed: undefined,
+      type: "Choice",
+      fqType: withNs("Choice"),
+      required: false,
       name: "myChoices",
       odataName: "myChoices",
-      odataType: `Collection(${SERVICE_NAME}.Choice)`,
+      odataType: `Collection(${withNs("Choice")})`,
       qObject: "QEnumCollection",
       qPath: "QEnumPath",
       qParam: "QEnumParam",
-      required: false,
-      type: "Choice",
     });
   });
 
   test("ComplexType: complex type", async () => {
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV4.String).addProp("branding", `${SERVICE_NAME}.Brand`)
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("branding", withNs("Brand"))
       )
       .addComplexType("Brand", undefined, (builder) => builder.addProp("naming", ODataTypesV4.String));
 
     const result = await doDigest();
-    const model = result.getModel(ENTITY_NAME);
+    const model = result.getEntityType(FQ_ENTITY_NAME);
 
     expect(model).toBeTruthy();
-    expect(model.props[1]).toEqual({
+    expect(model!.props[1]).toEqual({
       dataType: DataTypes.ComplexType,
       isCollection: false,
       managed: undefined,
+      required: false,
+      type: "Brand",
+      fqType: withNs("Brand"),
       name: "branding",
       odataName: "branding",
-      odataType: `${SERVICE_NAME}.Brand`,
+      odataType: withNs("Brand"),
       qObject: "QBrand",
       qPath: "QEntityPath",
       qParam: "QComplexParam",
-      required: false,
-      type: "Brand",
     });
   });
 
   test("ComplexType: base class hierarchy", async () => {
     odataBuilder
       .addComplexType("GrandParent", undefined, (builder) =>
-        builder.addProp("name", ODataTypesV4.String).addProp("myChoice", `${SERVICE_NAME}.Choice`)
+        builder.addProp("name", ODataTypesV4.String).addProp("myChoice", withNs("Choice"))
       )
-      .addComplexType("Parent", "GrandParent", (builder) => builder.addProp("parentalAdvice", ODataTypesV4.Boolean))
-      .addComplexType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", ODataTypesV4.String))
+      .addComplexType("Parent", withNs("GrandParent"), (builder) =>
+        builder.addProp("parentalAdvice", ODataTypesV4.Boolean)
+      )
+      .addComplexType("Child", withNs("Parent"), (builder) => builder.addProp("Ch1ld1shF4n", ODataTypesV4.String))
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV4.String).addProp("kids", `${SERVICE_NAME}.Child`)
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("kids", withNs("Child"))
       )
       .addEnumType("Choice", [
         { name: "A", value: 1 },
@@ -135,7 +147,7 @@ export function createComplexAndEnumTests() {
         isCollection: false,
         name: "myChoice",
         odataName: "myChoice",
-        odataType: `${SERVICE_NAME}.Choice`,
+        odataType: withNs("Choice"),
         qObject: undefined,
         required: false,
         type: "Choice",
@@ -155,26 +167,26 @@ export function createComplexAndEnumTests() {
     };
 
     const result = await doDigest();
-    const model = result.getModel(ENTITY_NAME);
+    const model = result.getEntityType(FQ_ENTITY_NAME);
 
-    expect(model.props[1]).toMatchObject({});
-    expect(result.getComplexType("GrandParent")).toMatchObject({
+    expect(model!.props[1]).toMatchObject({});
+    expect(result.getComplexType(withNs("GrandParent"))).toMatchObject({
       name: "GrandParent",
       odataName: "GrandParent",
       props: expectedGrandParentProps,
       baseClasses: [],
       baseProps: [],
     });
-    expect(result.getComplexType("Parent")).toMatchObject({
+    expect(result.getComplexType(withNs("Parent"))).toMatchObject({
       name: "Parent",
       props: [expectedParentProp],
-      baseClasses: ["GrandParent"],
+      baseClasses: [withNs("GrandParent")],
       baseProps: expectedGrandParentProps,
     });
-    expect(result.getComplexType("Child")).toMatchObject({
+    expect(result.getComplexType(withNs("Child"))).toMatchObject({
       name: "Child",
       props: [expectedChildProp],
-      baseClasses: ["Parent"],
+      baseClasses: [withNs("Parent")],
       baseProps: [...expectedGrandParentProps, expectedParentProp],
     });
   });

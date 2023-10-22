@@ -15,6 +15,10 @@ describe("V4: EntityTypeDigestion Test", () => {
 
   let odataBuilder: ODataModelBuilderV4;
 
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
+
   function doDigest() {
     return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
   }
@@ -30,8 +34,8 @@ describe("V4: EntityTypeDigestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(1);
-    const model = result.getModels()[0];
+    expect(result.getEntityTypes().length).toBe(1);
+    const model = result.getEntityTypes()[0];
     // expect(model).toEqual({});
     expect(model).toMatchObject({
       name: "Min",
@@ -96,7 +100,7 @@ describe("V4: EntityTypeDigestion Test", () => {
     });
 
     const dataModel = await doDigest();
-    const model = dataModel.getModel("CompoKey");
+    const model = dataModel.getEntityType(withNs("CompoKey"));
 
     expect(model).toMatchObject({
       keyNames: ["cat", "subCat", "counter"],
@@ -111,15 +115,17 @@ describe("V4: EntityTypeDigestion Test", () => {
         { name: "counter", type: "number" },
       ],
     });
-    expect(model.props.length).toBe(3);
+    expect(model!.props.length).toBe(3);
   });
 
   test("EntityTypes: base class hierarchy", async () => {
     odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Guid));
-    odataBuilder.addEntityType("Parent", "GrandParent", (builder) =>
+    odataBuilder.addEntityType("Parent", withNs("GrandParent"), (builder) =>
       builder.addProp("parentalAdvice", ODataTypesV4.Boolean)
     );
-    odataBuilder.addEntityType("Child", "Parent", (builder) => builder.addProp("Ch1ld1shF4n", ODataTypesV4.String));
+    odataBuilder.addEntityType("Child", withNs("Parent"), (builder) =>
+      builder.addProp("Ch1ld1shF4n", ODataTypesV4.String)
+    );
 
     const expectedGrandParentProp = {
       dataType: DataTypes.PrimitiveType,
@@ -143,8 +149,8 @@ describe("V4: EntityTypeDigestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(3);
-    expect(result.getModel("GrandParent")).toMatchObject({
+    expect(result.getEntityTypes().length).toBe(3);
+    expect(result.getEntityType(withNs("GrandParent"))).toMatchObject({
       name: "GrandParent",
       odataName: "GrandParent",
       keyNames: ["id"],
@@ -152,18 +158,18 @@ describe("V4: EntityTypeDigestion Test", () => {
       baseClasses: [],
       baseProps: [],
     });
-    expect(result.getModel("Parent")).toMatchObject({
+    expect(result.getEntityType(withNs("Parent"))).toMatchObject({
       name: "Parent",
       keyNames: ["id"],
       props: [expectedParentProp],
-      baseClasses: ["GrandParent"],
+      baseClasses: [withNs("GrandParent")],
       baseProps: [expectedGrandParentProp],
     });
-    expect(result.getModel("Child")).toMatchObject({
+    expect(result.getEntityType(withNs("Child"))).toMatchObject({
       name: "Child",
       keyNames: ["id"],
       props: [expectedChildProp],
-      baseClasses: ["Parent"],
+      baseClasses: [withNs("Parent")],
       baseProps: [expectedGrandParentProp, expectedParentProp],
     });
   });
@@ -198,8 +204,8 @@ describe("V4: EntityTypeDigestion Test", () => {
     const result = await doDigest();
 
     // now check all props regarding their type
-    const model = result.getModel("Max");
-    expect(model.props).toMatchObject([
+    const model = result.getEntityType(withNs("max"));
+    expect(model!.props).toMatchObject([
       {
         name: "id",
         dataType: DataTypes.PrimitiveType,
@@ -397,31 +403,31 @@ describe("V4: EntityTypeDigestion Test", () => {
       .addEntityType("Category", undefined, (builder) => {
         builder
           .addKeyProp("ID", ODataTypesV4.Guid)
-          .addNavProp("bestProduct", `${SERVICE_NAME}.Product`)
-          .addNavProp("featuredProducts", `Collection(${SERVICE_NAME}.Product)`);
+          .addNavProp("bestProduct", withNs("Product"))
+          .addNavProp("featuredProducts", `Collection(${withNs("Product")})`);
       })
       .addEntityType("Product", undefined, (builder) => {
         builder.addKeyProp("ID", ODataTypesV4.Guid);
       });
 
     const result = await doDigest();
-    const model = result.getModel("Category");
+    const model = result.getEntityType(withNs("Category"));
 
-    expect(model.props[1]).toMatchObject({
+    expect(model!.props[1]).toMatchObject({
       dataType: DataTypes.ModelType,
       isCollection: false,
       name: "bestProduct",
       odataName: "bestProduct",
-      odataType: `${SERVICE_NAME}.Product`,
+      odataType: withNs("Product"),
       qObject: "QProduct",
       type: "Product",
     });
-    expect(model.props[2]).toMatchObject({
+    expect(model!.props[2]).toMatchObject({
       dataType: DataTypes.ModelType,
       isCollection: true,
       name: "featuredProducts",
       odataName: "featuredProducts",
-      odataType: `Collection(${SERVICE_NAME}.Product)`,
+      odataType: `Collection(${withNs("Product")})`,
       qObject: "QProduct",
       type: "Product",
     });
@@ -432,8 +438,8 @@ describe("V4: EntityTypeDigestion Test", () => {
       .addEntityType("max", undefined, (builder) =>
         builder
           .addKeyProp("ID", ODataTypesV4.Guid)
-          .addNavProp("products", `${SERVICE_NAME}.Product`)
-          .addNavProp("similarProducts", `${SERVICE_NAME}.Prod.uct`, "test", false)
+          .addNavProp("products", withNs("Product"))
+          .addNavProp("similarProducts", withNs("Prod.uct"), "test", false)
       )
       .addEntityType("Product", undefined, (builder) => {
         builder.addKeyProp("ID", ODataTypesV4.Guid);
@@ -444,6 +450,6 @@ describe("V4: EntityTypeDigestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getModels().length).toBe(3);
+    expect(result.getEntityTypes().length).toBe(3);
   });
 });

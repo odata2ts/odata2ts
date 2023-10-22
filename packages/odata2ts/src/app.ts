@@ -1,5 +1,6 @@
 import { ODataVersions } from "@odata2ts/odata-core";
 
+import { NamespaceWithAlias } from "./data-model/DataModel";
 import { digest as digestV2 } from "./data-model/DataModelDigestionV2";
 import { digest as digestV4 } from "./data-model/DataModelDigestionV4";
 import { ODataEdmxModelBase, Schema } from "./data-model/edmx/ODataEdmxModelBase";
@@ -34,13 +35,7 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   const detectedSchema = schemas.find((schema) => schema.$.Namespace && schema.EntityType?.length) || schemas[0];
   const serviceName = options.serviceName || detectedSchema.$.Namespace;
 
-  const namespaces: Array<string> = [];
-  schemas.forEach((schema) => {
-    namespaces.push(schema.$.Namespace);
-    if (schema.$.Alias) {
-      namespaces.push(schema.$.Alias);
-    }
-  });
+  const namespaces = schemas.map<NamespaceWithAlias>((schema) => [schema.$.Namespace, schema.$.Alias]);
 
   // encapsulate the whole naming logic
   const namingHelper = new NamingHelper(options, serviceName, namespaces);

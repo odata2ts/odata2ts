@@ -1,7 +1,7 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
+import { DataTypes, OperationType, OperationTypes } from "../../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { getTestConfig } from "../../test.config";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
@@ -13,6 +13,10 @@ describe("Action Digestion Test", () => {
 
   let odataBuilder: ODataModelBuilderV4;
 
+  function withNs(name: string) {
+    return `${SERVICE_NAME}.${name}`;
+  }
+
   function doDigest() {
     return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
   }
@@ -22,26 +26,28 @@ describe("Action Digestion Test", () => {
   });
 
   test("Action: min case", async () => {
-    odataBuilder.addAction("AddFriend");
+    const opName = "AddFriend";
+    const expected: OperationType = {
+      fqName: withNs(opName),
+      odataName: opName,
+      name: "addFriend",
+      qName: "QAddFriend",
+      paramsModelName: "AddFriendParams",
+      type: OperationTypes.Action,
+      parameters: [],
+      returnType: undefined,
+    };
 
+    odataBuilder.addAction(opName);
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding("xyz")).toEqual([]);
-    expect(result.getOperationTypeByBinding("/")).toMatchObject([
-      {
-        odataName: "AddFriend",
-        name: "addFriend",
-        qName: "QAddFriend",
-        paramsModelName: "AddFriendParams",
-        type: OperationTypes.Action,
-        parameters: [],
-        returnType: undefined,
-      },
-    ]);
+    expect(result.getOperationType(withNs(opName))).toStrictEqual(expected);
+    expect(result.getUnboundOperationTypes()).toStrictEqual([expected]);
   });
 
   test("Action: with params", async () => {
-    odataBuilder.addAction("addFriend", ODataTypesV4.String, false, (builder) => {
+    const opName = "addFriend";
+    odataBuilder.addAction(opName, ODataTypesV4.String, false, (builder) => {
       builder
         .addParam("test", ODataTypesV4.String, false)
         .addParam("testTruth", ODataTypesV4.Boolean)
@@ -51,7 +57,7 @@ describe("Action Digestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding("/")).toMatchObject([
+    expect(result.getUnboundOperationTypes()).toMatchObject([
       {
         name: "addFriend",
         parameters: [
@@ -88,8 +94,8 @@ describe("Action Digestion Test", () => {
 
   test("Action: bound action returning entity list", async () => {
     odataBuilder
-      .addAction("searchWithFilter", `Collection(${SERVICE_NAME}.User)`, true, (builder) => {
-        builder.addParam("user", `${SERVICE_NAME}.User`).addParam("choice", `${SERVICE_NAME}.Choice`);
+      .addAction("searchWithFilter", `Collection(${withNs("User")})`, true, (builder) => {
+        builder.addParam("user", withNs("User")).addParam("choice", withNs("Choice"));
       })
       .addEntityType("User", undefined, (builder) => {
         builder.addKeyProp("id", ODataTypesV4.String);
@@ -102,7 +108,7 @@ describe("Action Digestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getOperationTypeByBinding("User")).toMatchObject([
+    expect(result.getEntityTypeOperations(withNs("User"))).toMatchObject([
       {
         name: "searchWithFilter",
         type: OperationTypes.Action,
@@ -110,7 +116,7 @@ describe("Action Digestion Test", () => {
           {
             name: "choice",
             dataType: DataTypes.EnumType,
-            odataType: `${SERVICE_NAME}.Choice`,
+            odataType: withNs("Choice"),
             type: "Choice",
             qObject: undefined,
           },
@@ -120,7 +126,7 @@ describe("Action Digestion Test", () => {
           dataType: DataTypes.ModelType,
           name: "noNameBecauseReturnType",
           odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
-          odataType: `Collection(${SERVICE_NAME}.User)`,
+          odataType: `Collection(${withNs("User")})`,
           type: "User",
           qObject: "QUser",
         },
@@ -139,12 +145,12 @@ describe("Action Digestion Test", () => {
       .addEntityType("User", undefined, (builder) => {
         builder.addKeyProp("id", ODataTypesV4.String);
       })
-      .addActionImport("NotifyBestFriend", "messageBestFriend")
+      .addActionImport("NotifyBestFriend", withNs("messageBestFriend"))
       .addAction("messageBestFriend", undefined, false);
 
     const result = await doDigest();
     expect(result.getEntityContainer().actions).toMatchObject({
-      notifyBestFriend: { odataName: "NotifyBestFriend", name: "notifyBestFriend" },
+      [withNs("notifyBestFriend")]: { odataName: "NotifyBestFriend", name: "notifyBestFriend" },
     });
   });
 });
