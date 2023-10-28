@@ -32,7 +32,7 @@ export interface NamingHelperSettings extends Pick<RunOptions, "allowRenaming" |
 export class NamingHelper {
   private readonly allowModelPropRenaming: boolean;
   private readonly mainServiceName: string;
-  private readonly servicePrefixes: Array<string>;
+  private readonly namespacePrefixes: Array<string>;
   private readonly options: NameSettings;
 
   constructor(options: NamingHelperSettings, mainServiceName: string, namespaces?: Array<NamespaceWithAlias>) {
@@ -50,7 +50,7 @@ export class NamingHelper {
     this.allowModelPropRenaming = options.allowRenaming ?? false;
     this.options = options.naming;
     this.mainServiceName = mainServiceName;
-    this.servicePrefixes = namespaces
+    this.namespacePrefixes = namespaces
       .reduce<Array<string>>((accu, [ns, alias]) => {
         accu.push(ns);
         if (alias) {
@@ -68,7 +68,7 @@ export class NamingHelper {
    * @returns service prefix
    */
   public includesServicePrefix(name: string) {
-    for (let prefix of this.servicePrefixes) {
+    for (let prefix of this.namespacePrefixes) {
       if (name.startsWith(prefix)) {
         return true;
       }
@@ -103,7 +103,7 @@ export class NamingHelper {
   }
 
   public stripServicePrefix(token: string) {
-    const found = this.servicePrefixes.find((prefix) => token.startsWith(prefix));
+    const found = this.namespacePrefixes.find((prefix) => token.startsWith(prefix));
     return found ? token.replace(found, "") : token;
   }
 
@@ -186,7 +186,7 @@ export class NamingHelper {
       : result;
   }
 
-  public getOperationParamsModelName(operationName: string, boundEntity?: PropertyModel | undefined) {
+  public getOperationParamsModelName(operationName: string, boundEntity?: string) {
     const settings = this.options.models?.operationParamModels;
     const result = this.getName(operationName, this.getModelNamingStrategy(), settings);
     const name = settings?.applyModelNaming
@@ -209,14 +209,14 @@ export class NamingHelper {
     return this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
   }
 
-  public getQFunctionName(operationName: string, boundEntity?: PropertyModel | undefined) {
+  public getQFunctionName(operationName: string, boundEntity?: string) {
     const opts = this.options.queryObjects?.operations;
     const result = this.getName(operationName, this.getQObjectNamingStrategy(), opts?.function || opts);
     const name = this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
     return this.getPrefixedName(name, boundEntity);
   }
 
-  public getQActionName(operationName: string, boundEntity?: PropertyModel | undefined) {
+  public getQActionName(operationName: string, boundEntity?: string) {
     const opts = this.options.queryObjects?.operations;
     const result = this.getName(operationName, this.getQObjectNamingStrategy(), opts?.action || opts);
     const name = this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
@@ -245,8 +245,8 @@ export class NamingHelper {
     return opts?.collection?.applyServiceNaming ? this.getName(result, strategy, opts) : result;
   };
 
-  private getPrefixedName(name: string, boundEntity: PropertyModel | undefined) {
-    return boundEntity?.type ? boundEntity.type + "_" + name : name;
+  private getPrefixedName(name: string, boundEntity: string | undefined) {
+    return boundEntity ? boundEntity + "_" + name : name;
   }
 
   public getFunctionName(operationName: string) {

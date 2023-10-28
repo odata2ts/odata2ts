@@ -74,13 +74,16 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
 
   protected digestEntityContainer(schema: SchemaV3) {
     const namespace = schema.$.Namespace;
+    const alias = schema.$.Alias;
     if (schema.EntityContainer && schema.EntityContainer.length) {
       const container = schema.EntityContainer[0];
 
       container.FunctionImport?.forEach((funcImport) => {
         const odataName = funcImport.$.Name;
         const fqName = withNamespace(namespace, odataName);
-        const name = this.namingHelper.getFunctionName(odataName);
+        const opConfig = this.serviceConfigHelper.findOperationConfigByName([namespace, alias], odataName);
+        const opName = opConfig?.mappedName || odataName;
+        const name = this.namingHelper.getFunctionName(opName);
         const usePost = funcImport.$["m:HttpMethod"]?.toUpperCase() === "POST";
         const parameters = funcImport.Parameter?.map((p) => this.mapProp(p)) ?? [];
 
@@ -99,8 +102,8 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
           fqName,
           odataName,
           name,
-          paramsModelName: this.namingHelper.getOperationParamsModelName(odataName),
-          qName: this.namingHelper.getQFunctionName(odataName),
+          paramsModelName: this.namingHelper.getOperationParamsModelName(opName),
+          qName: this.namingHelper.getQFunctionName(opName),
           type: OperationTypes.Function,
           parameters,
           returnType,

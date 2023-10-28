@@ -12,6 +12,7 @@ export type DigestionOptions = Pick<
   | "disableAutoManagedKey"
   | "propertiesByName"
   | "entitiesByName"
+  | "operationsByName"
   | "v2ModelsWithExtraResultsWrapping"
   | "v4BigNumberAsString"
   | "skipEditableModels"
