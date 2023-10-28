@@ -186,7 +186,7 @@ export class NamingHelper {
       : result;
   }
 
-  public getOperationParamsModelName(operationName: string, boundEntity?: PropertyModel | undefined) {
+  public getOperationParamsModelName(operationName: string, boundEntity?: string) {
     const settings = this.options.models?.operationParamModels;
     const result = this.getName(operationName, this.getModelNamingStrategy(), settings);
     const name = settings?.applyModelNaming
@@ -209,14 +209,14 @@ export class NamingHelper {
     return this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
   }
 
-  public getQFunctionName(operationName: string, boundEntity?: PropertyModel | undefined) {
+  public getQFunctionName(operationName: string, boundEntity?: string) {
     const opts = this.options.queryObjects?.operations;
     const result = this.getName(operationName, this.getQObjectNamingStrategy(), opts?.function || opts);
     const name = this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
     return this.getPrefixedName(name, boundEntity);
   }
 
-  public getQActionName(operationName: string, boundEntity?: PropertyModel | undefined) {
+  public getQActionName(operationName: string, boundEntity?: string) {
     const opts = this.options.queryObjects?.operations;
     const result = this.getName(operationName, this.getQObjectNamingStrategy(), opts?.action || opts);
     const name = this.getName(result, this.getQObjectNamingStrategy(), this.options.queryObjects);
@@ -245,8 +245,8 @@ export class NamingHelper {
     return opts?.collection?.applyServiceNaming ? this.getName(result, strategy, opts) : result;
   };
 
-  private getPrefixedName(name: string, boundEntity: PropertyModel | undefined) {
-    return boundEntity?.type ? boundEntity.type + "_" + name : name;
+  private getPrefixedName(name: string, boundEntity: string | undefined) {
+    return boundEntity ? boundEntity + "_" + name : name;
   }
 
   public getFunctionName(operationName: string) {

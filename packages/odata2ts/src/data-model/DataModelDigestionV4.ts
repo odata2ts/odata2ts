@@ -222,6 +222,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       }
 
       const bindingProp = isBound ? params.shift() : undefined;
+      const bindingEntityName = isBound ? this.dataModel.getModel(bindingProp!.fqType)?.name : undefined;
 
       const name =
         type === OperationTypes.Function
@@ -229,14 +230,14 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
           : this.namingHelper.getActionName(opName);
       const qName =
         type === OperationTypes.Function
-          ? this.namingHelper.getQFunctionName(opName, bindingProp)
-          : this.namingHelper.getQActionName(opName, bindingProp);
+          ? this.namingHelper.getQFunctionName(opName, bindingEntityName)
+          : this.namingHelper.getQActionName(opName, bindingEntityName);
       const opType: OperationType = {
         fqName,
         odataName: isBound ? fqName : odataName,
         name,
         qName,
-        paramsModelName: this.namingHelper.getOperationParamsModelName(opName, bindingProp),
+        paramsModelName: this.namingHelper.getOperationParamsModelName(opName, bindingEntityName),
         type,
         parameters: params,
         returnType,

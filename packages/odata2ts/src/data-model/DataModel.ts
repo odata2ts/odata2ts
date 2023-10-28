@@ -51,6 +51,7 @@ export class DataModel {
    * @private
    */
   private boundOperationTypes: { [entityFqName: string]: Array<string> } = {};
+  private alias2boundOperationType = new Map<string, string>();
   private readonly namespace2Alias: { [ns: string]: string };
   private typeDefinitions = new Map<string, string>();
   private aliases: Record<string, string> = {};
@@ -211,19 +212,21 @@ export class DataModel {
 
     const ns = Object.keys(this.namespace2Alias).find((ns) => entityType.startsWith(ns + "."));
     if (ns) {
-      const aliasType = entityType.replace(new RegExp(`^${ns}\.`), this.namespace2Alias[ns] + ".");
-      const aliasBinding = bindingProp.isCollection ? `Collection(${aliasType})` : aliasType;
-      this.addBoundOp(aliasBinding, operationType.fqName);
+      const aliasBinding = binding.replace(new RegExp(`(.*)${ns}\.(.+)`), `$1${this.namespace2Alias[ns]}.$2`);
+      this.alias2boundOperationType.set(aliasBinding, binding);
     }
   }
 
   public getEntityTypeOperations(fqEntityName: string): Array<OperationType> {
-    const operations = this.boundOperationTypes[fqEntityName];
+    const aliasBinding = this.alias2boundOperationType.get(fqEntityName);
+    const operations = this.boundOperationTypes[aliasBinding || fqEntityName];
     return !operations ? [] : operations.map((op) => this.operationTypes.get(op)!);
   }
 
   public getEntitySetOperations(fqEntityName: string): Array<OperationType> {
-    return this.getEntityTypeOperations(`Collection(${fqEntityName})`);
+    const binding = `Collection(${fqEntityName})`;
+    const aliasBinding = this.alias2boundOperationType.get(binding);
+    return this.getEntityTypeOperations(aliasBinding || binding);
   }
 
   public addAction(name: string, action: ActionImportType) {
