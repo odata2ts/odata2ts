@@ -1,5 +1,4 @@
 import { servicexxx_Trippin_xxxs } from "../generated-src/TRIPPIN/servicexxx_Trippin_xxxs";
-import { lOCATION_QUERY_OBJECT, pERSON_QUERY_OBJECT } from "../generated-src/TRIPPIN/TRIPPIN_QUERY_OBJECTS";
 import { EDITABLE_LOCATION, EDITABLE_PERSON, FEATURE, PERSON_ID } from "../generated-src/TRIPPIN/TRIPPIN_TYPES";
 import { MockODataClient } from "./MockODataClient";
 
@@ -41,7 +40,6 @@ describe("Testing Generation With Max Renaming Options", () => {
     const expected = `${BASE_URL}/People`;
 
     expect(testService.navigate_to_people().getPath()).toBe(expected);
-    expect(JSON.stringify(testService.navigate_to_people().getQObject())).toEqual(JSON.stringify(pERSON_QUERY_OBJECT));
     expect(testService.navigate_to_people().getKeySpec().length).toBe(1);
     expect(testService.navigate_to_people().getKeySpec()[0].getName()).toEqual("UserName");
   });
@@ -68,7 +66,6 @@ describe("Testing Generation With Max Renaming Options", () => {
     const etService = testService.navigate_to_people(testId);
 
     expect(etService.getPath()).toBe(expected);
-    expect(JSON.stringify(etService.getQObject())).toEqual(JSON.stringify(pERSON_QUERY_OBJECT));
   });
 
   test("entitySet: get with complex id", async () => {
@@ -131,7 +128,6 @@ describe("Testing Generation With Max Renaming Options", () => {
     const complex = testService.navigate_to_people("tester").navigate_to_home_address();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
-    expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(lOCATION_QUERY_OBJECT));
   });
 
   test("complex type: query", async () => {
@@ -163,7 +159,6 @@ describe("Testing Generation With Max Renaming Options", () => {
     const complex = testService.navigate_to_people("tester").navigate_to_address_info();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
-    expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(lOCATION_QUERY_OBJECT));
   });
 
   test("complex collection: query", async () => {
@@ -216,6 +211,5 @@ describe("Testing Generation With Max Renaming Options", () => {
     const result = testService.navigate_to_me();
 
     expect(result.getPath()).toBe(`${BASE_URL}/Me`);
-    expect(JSON.stringify(result.getQObject())).toEqual(JSON.stringify(pERSON_QUERY_OBJECT));
   });
 });

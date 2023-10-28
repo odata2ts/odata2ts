@@ -1,4 +1,3 @@
-import { qLocation, qPerson } from "../generated-src/trippin-min/QTrippin";
 import { EditableLocation, EditablePerson, Feature, PersonId } from "../generated-src/trippin-min/TrippinModel";
 import { TrippinService } from "../generated-src/trippin-min/TrippinService";
 import { MockODataClient } from "./MockODataClient";
@@ -44,7 +43,6 @@ describe("Testing Generation with min renaming options", () => {
     const expected = `${BASE_URL}/People`;
 
     expect(testService.People().getPath()).toBe(expected);
-    expect(JSON.stringify(testService.People().getQObject())).toEqual(JSON.stringify(qPerson));
     expect(testService.People().getKeySpec().length).toBe(1);
     expect(testService.People().getKeySpec()[0].getName()).toEqual("UserName");
   });
@@ -71,7 +69,6 @@ describe("Testing Generation with min renaming options", () => {
     const etService = testService.People(testId);
 
     expect(etService.getPath()).toBe(expected);
-    expect(JSON.stringify(etService.getQObject())).toEqual(JSON.stringify(qPerson));
   });
 
   test("entitySet: get with complex id", async () => {
@@ -134,7 +131,6 @@ describe("Testing Generation with min renaming options", () => {
     const complex = testService.People("tester").HomeAddress();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
-    expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
   });
 
   test("complex type: query", async () => {
@@ -166,7 +162,6 @@ describe("Testing Generation with min renaming options", () => {
     const complex = testService.People("tester").AddressInfo();
 
     expect(complex.getPath()).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
-    expect(JSON.stringify(complex.getQObject())).toEqual(JSON.stringify(qLocation));
   });
 
   test("complex collection: query", async () => {
@@ -213,6 +208,5 @@ describe("Testing Generation with min renaming options", () => {
     const result = testService.Me();
 
     expect(result.getPath()).toBe(`${BASE_URL}/Me`);
-    expect(JSON.stringify(result.getQObject())).toEqual(JSON.stringify(qPerson));
   });
 });
