@@ -123,7 +123,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     const odataName = model.$.Name;
     const fqName = withNamespace(namespace[0], odataName);
 
-    const entityConfig = this.serviceConfigHelper.findConfigEntityByName(namespace, odataName);
+    const entityConfig = this.serviceConfigHelper.findEntityConfigByName(namespace, odataName);
     const entityName = entityConfig?.mappedName || model.$.Name;
 
     // map properties respecting the config
@@ -178,7 +178,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     for (const model of models) {
       const baseModel = this.getBaseModel(namespace, model);
-      const entityConfig = this.serviceConfigHelper.findConfigEntityByName(namespace, model.$.Name);
+      const entityConfig = this.serviceConfigHelper.findEntityConfigByName(namespace, model.$.Name);
       const entityName = entityConfig?.mappedName || model.$.Name;
 
       // key support: we add keys from this entity,
@@ -297,7 +297,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       throw new Error(`No type information given for property [${p.$.Name}]!`);
     }
 
-    const configProp = this.serviceConfigHelper.findConfigPropByName(p.$.Name);
+    const configProp = this.serviceConfigHelper.findPropConfigByName(p.$.Name);
     const name = this.namingHelper.getModelPropName(entityPropConfig?.mappedName || configProp?.mappedName || p.$.Name);
     const fqType = p.$.Type;
     const isCollection = !!fqType.match(/^Collection\(/);

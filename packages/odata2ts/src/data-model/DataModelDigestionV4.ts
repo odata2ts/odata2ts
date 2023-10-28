@@ -2,7 +2,7 @@ import { MappedConverterChains, loadConverters } from "@odata2ts/converter-runti
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
 import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel";
-import { withNamespace } from "./DataModel";
+import { NamespaceWithAlias, withNamespace } from "./DataModel";
 import { Digester, TypeModel } from "./DataModelDigestion";
 import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
@@ -31,36 +31,42 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
   }
 
   protected digestOperations(schema: SchemaV4) {
+    const nsWithAlias: NamespaceWithAlias = [schema.$.Namespace, schema.$.Alias];
     // functions & actions
-    this.addOperations(schema.$.Namespace, schema.Function, OperationTypes.Function);
-    this.addOperations(schema.$.Namespace, schema.Action, OperationTypes.Action);
+    this.addOperations(nsWithAlias, schema.Function, OperationTypes.Function);
+    this.addOperations(nsWithAlias, schema.Action, OperationTypes.Action);
   }
 
   protected digestEntityContainer(schema: SchemaV4) {
     if (schema.EntityContainer && schema.EntityContainer.length) {
       const container = schema.EntityContainer[0];
-      const ns = schema.$.Namespace;
+      const namespace = schema.$.Namespace;
+      const ns: NamespaceWithAlias = [namespace, schema.$.Alias];
 
       container.ActionImport?.forEach((actionImport) => {
-        const name = this.namingHelper.getActionName(actionImport.$.Name);
-        const fqName = withNamespace(ns, name);
+        const odataName = actionImport.$.Name;
+        const fqName = withNamespace(namespace, odataName);
+        const opConfig = this.serviceConfigHelper.findOperationConfigByName(ns, odataName);
+        const opName = opConfig?.mappedName || odataName;
 
         this.dataModel.addAction(fqName, {
           fqName,
-          name,
+          name: this.namingHelper.getActionName(opName),
           odataName: actionImport.$.Name,
           operation: actionImport.$.Action,
         });
       });
 
       container.FunctionImport?.forEach((funcImport) => {
-        const name = this.namingHelper.getFunctionName(funcImport.$.Name);
-        const fqName = `${ns}.${name}`;
+        const odataName = funcImport.$.Name;
+        const fqName = withNamespace(namespace, odataName);
+        const opConfig = this.serviceConfigHelper.findOperationConfigByName(ns, odataName);
+        const opName = opConfig?.mappedName || odataName;
 
         this.dataModel.addFunction(fqName, {
           fqName,
-          name,
-          odataName: funcImport.$.Name,
+          odataName,
+          name: this.namingHelper.getFunctionName(opName),
           operation: funcImport.$.Function,
           entitySet: funcImport.$.EntitySet,
         });
@@ -68,7 +74,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
       container.Singleton?.forEach((singleton) => {
         const name = singleton.$.Name;
-        const fqName = withNamespace(ns, name);
+        const fqName = withNamespace(namespace, name);
         const navPropBindings = singleton.NavigationPropertyBinding || [];
         const entityType = this.dataModel.getEntityType(singleton.$.Type);
         if (!entityType) {
@@ -89,7 +95,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
       container.EntitySet?.forEach((entitySet) => {
         const name = entitySet.$.Name;
-        const fqName = withNamespace(ns, name);
+        const fqName = withNamespace(namespace, name);
         const navPropBindings = entitySet.NavigationPropertyBinding || [];
         const entityType = this.dataModel.getEntityType(entitySet.$.EntityType);
         if (!entityType) {
@@ -194,7 +200,8 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     }
   }
 
-  private addOperations(namespace: string, operations: Array<Operation> | undefined, type: OperationTypes) {
+  private addOperations(ns: NamespaceWithAlias, operations: Array<Operation> | undefined, type: OperationTypes) {
+    const [namespace] = ns;
     if (!operations || !operations.length) {
       return;
     }
@@ -202,6 +209,8 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     operations.forEach((op) => {
       const odataName = op.$.Name;
       const fqName = withNamespace(namespace, odataName);
+      const opConfig = this.serviceConfigHelper.findOperationConfigByName(ns, odataName);
+      const opName = opConfig?.mappedName || odataName;
       const params: Array<PropertyModel> = op.Parameter?.map((p) => this.mapProp(p)) ?? [];
       const returnType: PropertyModel | undefined = op.ReturnType?.map((rt) => {
         return this.mapProp({ ...rt, $: { Name: "NO_NAME_BECAUSE_RETURN_TYPE", ...rt.$ } });
@@ -216,21 +225,21 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
       const name =
         type === OperationTypes.Function
-          ? this.namingHelper.getFunctionName(odataName)
-          : this.namingHelper.getActionName(odataName);
+          ? this.namingHelper.getFunctionName(opName)
+          : this.namingHelper.getActionName(opName);
       const qName =
         type === OperationTypes.Function
-          ? this.namingHelper.getQFunctionName(odataName, bindingProp)
-          : this.namingHelper.getQActionName(odataName, bindingProp);
+          ? this.namingHelper.getQFunctionName(opName, bindingProp)
+          : this.namingHelper.getQActionName(opName, bindingProp);
       const opType: OperationType = {
         fqName,
         odataName: isBound ? fqName : odataName,
         name,
         qName,
-        paramsModelName: this.namingHelper.getOperationParamsModelName(odataName, bindingProp),
-        type: type,
+        paramsModelName: this.namingHelper.getOperationParamsModelName(opName, bindingProp),
+        type,
         parameters: params,
-        returnType: returnType,
+        returnType,
       };
 
       if (bindingProp) {

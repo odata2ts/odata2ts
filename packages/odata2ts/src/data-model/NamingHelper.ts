@@ -32,7 +32,7 @@ export interface NamingHelperSettings extends Pick<RunOptions, "allowRenaming" |
 export class NamingHelper {
   private readonly allowModelPropRenaming: boolean;
   private readonly mainServiceName: string;
-  private readonly servicePrefixes: Array<string>;
+  private readonly namespacePrefixes: Array<string>;
   private readonly options: NameSettings;
 
   constructor(options: NamingHelperSettings, mainServiceName: string, namespaces?: Array<NamespaceWithAlias>) {
@@ -50,7 +50,7 @@ export class NamingHelper {
     this.allowModelPropRenaming = options.allowRenaming ?? false;
     this.options = options.naming;
     this.mainServiceName = mainServiceName;
-    this.servicePrefixes = namespaces
+    this.namespacePrefixes = namespaces
       .reduce<Array<string>>((accu, [ns, alias]) => {
         accu.push(ns);
         if (alias) {
@@ -68,7 +68,7 @@ export class NamingHelper {
    * @returns service prefix
    */
   public includesServicePrefix(name: string) {
-    for (let prefix of this.servicePrefixes) {
+    for (let prefix of this.namespacePrefixes) {
       if (name.startsWith(prefix)) {
         return true;
       }
@@ -103,7 +103,7 @@ export class NamingHelper {
   }
 
   public stripServicePrefix(token: string) {
-    const found = this.servicePrefixes.find((prefix) => token.startsWith(prefix));
+    const found = this.namespacePrefixes.find((prefix) => token.startsWith(prefix));
     return found ? token.replace(found, "") : token;
   }
 

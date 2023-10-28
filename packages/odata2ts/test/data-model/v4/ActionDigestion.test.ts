@@ -141,16 +141,18 @@ describe("Action Digestion Test", () => {
   });
 
   test("Action Import: min case", async () => {
+    const actionName = "messageBestFriend";
+    const exposedName = "NotifyBestFriend";
     odataBuilder
       .addEntityType("User", undefined, (builder) => {
         builder.addKeyProp("id", ODataTypesV4.String);
       })
-      .addActionImport("NotifyBestFriend", withNs("messageBestFriend"))
-      .addAction("messageBestFriend", undefined, false);
+      .addActionImport(exposedName, withNs(actionName))
+      .addAction(actionName, undefined, false);
 
     const result = await doDigest();
     expect(result.getEntityContainer().actions).toMatchObject({
-      [withNs("notifyBestFriend")]: { odataName: "NotifyBestFriend", name: "notifyBestFriend" },
+      [withNs(exposedName)]: { odataName: exposedName, name: "notifyBestFriend", operation: withNs(actionName) },
     });
   });
 });

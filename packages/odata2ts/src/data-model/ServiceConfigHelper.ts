@@ -1,9 +1,10 @@
 import { DigestionOptions } from "../FactoryFunctionModel";
-import { EntityGenerationOptions, PropertyGenerationOptions } from "../OptionModel";
+import { EntityGenerationOptions, OperationGenerationOptions, PropertyGenerationOptions } from "../OptionModel";
 import { NamespaceWithAlias, withNamespace } from "./DataModel";
 
 export interface ConfiguredProp extends Omit<PropertyGenerationOptions, "name"> {}
 export interface ConfiguredEntity extends Omit<EntityGenerationOptions, "name"> {}
+export interface ConfiguredOperation extends Omit<OperationGenerationOptions, "name"> {}
 
 const EXCEPTION_NO_NAME = "No value for required attribute [name] specified!";
 const EXCEPTION_WRONG_NAME_TYPE =
@@ -12,12 +13,15 @@ const EXCEPTION_WRONG_NAME_TYPE =
 export class ServiceConfigHelper {
   private propMapping = new Map<string, PropertyGenerationOptions>();
   private entityMapping = new Map<string, EntityGenerationOptions>();
+  private operationMapping = new Map<string, OperationGenerationOptions>();
   private propRegExps: Array<[RegExp, PropertyGenerationOptions]> = [];
   private entityRegExps: Array<[RegExp, EntityGenerationOptions]> = [];
+  private operationRegExps: Array<[RegExp, OperationGenerationOptions]> = [];
 
   constructor(options: DigestionOptions) {
     this.evaluateProps(options);
     this.evaluateEntities(options);
+    this.evaluateOperations(options);
   }
 
   private evaluateProps(options: DigestionOptions) {
@@ -67,7 +71,7 @@ export class ServiceConfigHelper {
         }, {});
   }
 
-  public findConfigPropByName = (name: string): ConfiguredProp | undefined => {
+  public findPropConfigByName = (name: string): ConfiguredProp | undefined => {
     const stringProp = this.getPropByName(name);
     const reProp = this.getPropByRegExp(name);
 
@@ -128,9 +132,73 @@ export class ServiceConfigHelper {
         }, {});
   }
 
-  public findConfigEntityByName = (namespace: NamespaceWithAlias, name: string): ConfiguredEntity | undefined => {
+  public findEntityConfigByName = (namespace: NamespaceWithAlias, name: string): ConfiguredEntity | undefined => {
     const stringEnt = this.getEntityByName(namespace, name);
     const reEnt = this.getEntityByRegExp(namespace, name);
+
+    return stringEnt && reEnt ? { ...reEnt, ...stringEnt } : stringEnt || reEnt;
+  };
+
+  private evaluateOperations(options: DigestionOptions) {
+    options.operationsByName.forEach((op) => {
+      if (!op.name) {
+        throw new Error(EXCEPTION_NO_NAME);
+      }
+      switch (typeof op.name) {
+        case "string":
+          // TODO: check for existing operation name and throw?
+          this.operationMapping.set(op.name, op);
+          break;
+        case "object":
+          const { source, ignoreCase } = op.name as RegExp;
+          if (!source) {
+            throw new Error(EXCEPTION_WRONG_NAME_TYPE);
+          }
+          this.operationRegExps.push([new RegExp(`^${source}$`, ignoreCase ? "i" : ""), op]);
+          break;
+        default:
+          throw new Error(EXCEPTION_WRONG_NAME_TYPE);
+      }
+    });
+  }
+
+  // get entity config by name matching: simple name or fully qualified name (alias also supported)
+  private getOperationByName(namespace: NamespaceWithAlias, nameToMap: string): ConfiguredOperation | undefined {
+    const [ns, alias] = namespace;
+
+    const config =
+      this.operationMapping.get(withNamespace(ns, nameToMap)) ||
+      (alias ? this.operationMapping.get(withNamespace(alias, nameToMap)) : undefined) ||
+      this.operationMapping.get(nameToMap);
+    if (!config) {
+      return;
+    }
+    const { name, ...attrs } = config;
+    return { ...attrs };
+  }
+
+  private getOperationByRegExp(
+    [mainNs, alias]: NamespaceWithAlias,
+    nameToMap: string
+  ): ConfiguredOperation | undefined {
+    const fqName = `${mainNs}.${nameToMap}`;
+    const resultList = this.operationRegExps
+      .filter(([regExp]) => regExp.test(fqName))
+      .map(([regExp, { name, mappedName, ...attrs }]) => ({
+        mappedName: mappedName ? fqName.replace(regExp, mappedName) : undefined,
+        ...attrs,
+      }));
+
+    return !resultList.length
+      ? undefined
+      : resultList.reduce<ConfiguredEntity>((result, prop) => {
+          return { ...result, ...prop };
+        }, {});
+  }
+
+  public findOperationConfigByName = (namespace: NamespaceWithAlias, name: string): ConfiguredOperation | undefined => {
+    const stringEnt = this.getOperationByName(namespace, name);
+    const reEnt = this.getOperationByRegExp(namespace, name);
 
     return stringEnt && reEnt ? { ...reEnt, ...stringEnt } : stringEnt || reEnt;
   };

@@ -1,28 +1,33 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
+import deepmerge from "deepmerge";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
+import { DigestionOptions } from "../../../src/FactoryFunctionModel";
+import { TestOptions, TestSettings } from "../../generator/TestTypes";
 import { getTestConfig } from "../../test.config";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
 describe("Function Digestion Test", () => {
-  const SERVICE_NAME = "FunctionTest";
+  const NAMESPACE = "FunctionTest";
   const CONFIG = getTestConfig();
-  const NAMING_HELPER = new NamingHelper(CONFIG, SERVICE_NAME);
 
   let odataBuilder: ODataModelBuilderV4;
+  let digestionOptions: Partial<DigestionOptions> & Pick<TestOptions, "naming" | "allowRenaming">;
 
   function withNs(name: string) {
-    return `${SERVICE_NAME}.${name}`;
+    return `${NAMESPACE}.${name}`;
   }
 
   function doDigest() {
-    return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
+    const opts = digestionOptions ? (deepmerge(CONFIG, digestionOptions) as TestSettings) : CONFIG;
+    return digest(odataBuilder.getSchemas(), opts, new NamingHelper(opts, NAMESPACE));
   }
 
   beforeEach(() => {
-    odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
+    odataBuilder = new ODataModelBuilderV4(NAMESPACE);
+    digestionOptions = {};
   });
 
   test("Function: min case", async () => {
@@ -186,16 +191,66 @@ describe("Function Digestion Test", () => {
   });
 
   test("Function Import: min case", async () => {
-    odataBuilder
-      .addFunctionImport("GetBestFriend", withNs("GetBestFriend"), "Friends")
-      .addFunction("GetBestFriend", ODataTypesV4.Boolean, false);
+    const name = "GetBestFriend";
+    odataBuilder.addFunctionImport(name, withNs(name), "Friends").addFunction(name, ODataTypesV4.Boolean, false);
     // .addEntityType("User", undefined, (builder) => {
     //   builder.addKeyProp("id", OdataTypes.String);
     // });
 
     const result = await doDigest();
     expect(result.getEntityContainer().functions).toMatchObject({
-      [withNs("getBestFriend")]: { odataName: "GetBestFriend", name: "getBestFriend", entitySet: "Friends" },
+      [withNs(name)]: { odataName: "GetBestFriend", name: "getBestFriend", entitySet: "Friends" },
     });
+  });
+
+  test("renaming functions", async () => {
+    const funcName = "TestOp";
+    const fqFuncName = withNs(funcName);
+    const altFuncName = "ComplextestFunc";
+    const fqAltFuncName = withNs(altFuncName);
+
+    digestionOptions.operationsByName = [
+      { name: funcName, mappedName: "NewTestOperation" },
+      { name: new RegExp(`${NAMESPACE}\.Complex(.+)`), mappedName: "Cmplx_$1" },
+    ];
+
+    odataBuilder.addFunction(funcName, ODataTypesV4.Boolean, false);
+    odataBuilder.addFunction(altFuncName, ODataTypesV4.Boolean, false);
+
+    const result = await doDigest();
+
+    let toTest = result.getOperationType(fqFuncName)!;
+    expect(toTest).toBeDefined();
+    expect(toTest.odataName).toBe(funcName);
+    expect(toTest.fqName).toBe(fqFuncName);
+    expect(toTest.name).toBe("newTestOperation");
+
+    toTest = result.getOperationType(fqAltFuncName)!;
+    expect(toTest).toBeDefined();
+    expect(toTest.odataName).toBe(altFuncName);
+    expect(toTest.fqName).toBe(fqAltFuncName);
+    expect(toTest.name).toBe("cmplxTestFunc");
+  });
+
+  test("renaming functions without changing case", async () => {
+    const funcName = "TestOp";
+    const altFuncName = "ComplextestFunc";
+
+    digestionOptions.allowRenaming = false;
+    digestionOptions.operationsByName = [
+      { name: funcName, mappedName: "NewTestOperation" },
+      { name: new RegExp(`${NAMESPACE}\.Complex(.+)`), mappedName: "Cmplx_$1" },
+    ];
+
+    odataBuilder.addFunction(funcName, ODataTypesV4.Boolean, false);
+    odataBuilder.addFunction(altFuncName, ODataTypesV4.Boolean, false);
+
+    const result = await doDigest();
+
+    let toTest = result.getOperationType(withNs(funcName))!;
+    expect(toTest.name).toBe("NewTestOperation");
+
+    toTest = result.getOperationType(withNs(altFuncName))!;
+    expect(toTest.name).toBe("Cmplx_testFunc");
   });
 });
