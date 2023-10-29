@@ -2,7 +2,7 @@ import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { DataModel, NamespaceWithAlias } from "../../src/data-model/DataModel";
-import { DataTypes, EntityContainerModel, ModelType, ODataVersion } from "../../src/data-model/DataTypeModel";
+import { DataTypes, ODataVersion } from "../../src/data-model/DataTypeModel";
 
 describe("Data Model Tests", function () {
   let dataModel: DataModel;
@@ -163,7 +163,7 @@ describe("Data Model Tests", function () {
     );
 
     expect(dataModel.getUnboundOperationTypes()).toStrictEqual([dummyOp]);
-    expect(dataModel.getOperationType(fqName)).toStrictEqual(dummyOp);
+    expect(dataModel.getUnboundOperationType(fqName)).toStrictEqual(dummyOp);
   });
 
   test("unbound operation by alias", () => {
@@ -176,7 +176,7 @@ describe("Data Model Tests", function () {
       dummyOp
     );
 
-    expect(dataModel.getOperationType(aliasName)).toStrictEqual(dummyOp);
+    expect(dataModel.getUnboundOperationType(aliasName)).toStrictEqual(dummyOp);
   });
 
   test("operation bound to entity", () => {
@@ -196,7 +196,7 @@ describe("Data Model Tests", function () {
 
     expect(dataModel.getEntityTypeOperations(bindingEntity)).toStrictEqual([dummyOp]);
     expect(dataModel.getEntitySetOperations(bindingEntity)).toStrictEqual([]);
-    expect(dataModel.getOperationType(fqName)).toStrictEqual(dummyOp);
+    expect(dataModel.getUnboundOperationTypes()).toStrictEqual([]);
   });
 
   test("operation bound to entity collection", () => {
@@ -216,7 +216,6 @@ describe("Data Model Tests", function () {
 
     expect(dataModel.getEntityTypeOperations(bindingEntity)).toStrictEqual([]);
     expect(dataModel.getEntitySetOperations(bindingEntity)).toStrictEqual([dummyOp]);
-    expect(dataModel.getOperationType(fqName)).toStrictEqual(dummyOp);
   });
 
   test("bound operation by alias", () => {
@@ -227,6 +226,12 @@ describe("Data Model Tests", function () {
     const bindingEntity = `${NS2}.${entityName}`;
     const aliasName = `${ALIAS_NS2}.${entityName}`;
 
+    dataModel.addEntityType(
+      NS2,
+      entityName,
+      // @ts-expect-error,
+      {}
+    );
     dataModel.addBoundOperationType(
       NS2,
       // @ts-expect-error,

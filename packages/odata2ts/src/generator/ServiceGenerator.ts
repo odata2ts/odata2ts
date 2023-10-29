@@ -131,7 +131,7 @@ class ServiceGenerator {
     const result: PropsAndOps = { properties: [], methods: [] };
 
     ops.forEach(({ operation, name }) => {
-      const op = this.dataModel.getOperationType(operation);
+      const op = this.dataModel.getUnboundOperationType(operation);
       if (!op) {
         throw new Error(`Operation "${operation}" not found!`);
       }
@@ -147,8 +147,7 @@ class ServiceGenerator {
     propName: string,
     odataPropName: string,
     entityType: ModelType,
-    importContainer: ImportContainer,
-    currentServiceName?: string
+    importContainer: ImportContainer
   ): OptionalKind<MethodDeclarationStructure> {
     const idName = entityType.idModelName;
     const idFunctionName = entityType.qIdFunctionName;
@@ -310,7 +309,7 @@ class ServiceGenerator {
           }
 
           result.methods.push(
-            this.generateRelatedServiceGetter(prop.name, prop.odataName, entityType, importContainer, serviceName)
+            this.generateRelatedServiceGetter(prop.name, prop.odataName, entityType, importContainer)
           );
         }
         // collection of primitive or complex types

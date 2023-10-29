@@ -219,13 +219,13 @@ describe("Function Digestion Test", () => {
 
     const result = await doDigest();
 
-    let toTest = result.getOperationType(fqFuncName)!;
+    let toTest = result.getUnboundOperationType(fqFuncName)!;
     expect(toTest).toBeDefined();
     expect(toTest.odataName).toBe(funcName);
     expect(toTest.fqName).toBe(fqFuncName);
     expect(toTest.name).toBe("newTestOperation");
 
-    toTest = result.getOperationType(fqAltFuncName)!;
+    toTest = result.getUnboundOperationType(fqAltFuncName)!;
     expect(toTest).toBeDefined();
     expect(toTest.odataName).toBe(altFuncName);
     expect(toTest.fqName).toBe(fqAltFuncName);
@@ -247,10 +247,10 @@ describe("Function Digestion Test", () => {
 
     const result = await doDigest();
 
-    let toTest = result.getOperationType(withNs(funcName))!;
+    let toTest = result.getUnboundOperationType(withNs(funcName))!;
     expect(toTest.name).toBe("NewTestOperation");
 
-    toTest = result.getOperationType(withNs(altFuncName))!;
+    toTest = result.getUnboundOperationType(withNs(altFuncName))!;
     expect(toTest.name).toBe("Cmplx_testFunc");
   });
 });

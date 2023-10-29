@@ -1,4 +1,4 @@
-import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
+import { ODataTypesV2 } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
@@ -50,7 +50,7 @@ describe("Function Digestion Test", () => {
 
     const result = await doDigest();
 
-    expect(result.getOperationType(fqName)).toStrictEqual(expected);
+    expect(result.getUnboundOperationType(fqName)).toStrictEqual(expected);
     expect(result.getUnboundOperationTypes()).toStrictEqual([expected]);
   });
 
@@ -227,13 +227,13 @@ describe("Function Digestion Test", () => {
 
     const result = await doDigest();
 
-    let toTest = result.getOperationType(fqFuncName)!;
+    let toTest = result.getUnboundOperationType(fqFuncName)!;
     expect(toTest).toBeDefined();
     expect(toTest.odataName).toBe(funcName);
     expect(toTest.fqName).toBe(fqFuncName);
     expect(toTest.name).toBe("newTestOperation");
 
-    toTest = result.getOperationType(fqAltFuncName)!;
+    toTest = result.getUnboundOperationType(fqAltFuncName)!;
     expect(toTest).toBeDefined();
     expect(toTest.odataName).toBe(altFuncName);
     expect(toTest.fqName).toBe(fqAltFuncName);
@@ -255,10 +255,10 @@ describe("Function Digestion Test", () => {
 
     const result = await doDigest();
 
-    let toTest = result.getOperationType(withNs(funcName))!;
+    let toTest = result.getUnboundOperationType(withNs(funcName))!;
     expect(toTest.name).toBe("NewTestOperation");
 
-    toTest = result.getOperationType(withNs(altFuncName))!;
+    toTest = result.getUnboundOperationType(withNs(altFuncName))!;
     expect(toTest.name).toBe("Cmplx_testFunc");
   });
 });

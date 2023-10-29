@@ -37,21 +37,22 @@ export class DataModel {
 
   private models = new Map<string, ModelType | ComplexType | EnumType>();
   /**
-   * All operations are stored by their fully qualified name.
+   * Stores unbound operations by their fully qualified name.
    * @private
    */
-  private operationTypes = new Map<string, OperationType>();
+  private unboundOperationTypes = new Map<string, OperationType>();
   /**
-   * Stores the fully qualified name of those operations which are unbound.
+   * Stores operations bound to an entity type by the fully qualified name of the binding entity, e.g.
+   * "Trippin.Person".
    * @private
    */
-  private unboundOperationTypes = new Set<string>();
+  private entityBoundOperationTypes = new Map<string, Array<OperationType>>();
   /**
-   * Stores the fully qualified names of operations that are bound to a certain entity or entity collection.
+   * Stores operations bound to an entity collection by the fully qualified name of the binding entity, e.g.
+   * "Trippin.Person".
    * @private
    */
-  private boundOperationTypes: { [entityFqName: string]: Array<string> } = {};
-  private alias2boundOperationType = new Map<string, string>();
+  private entityCollectionBoundOperationTypes = new Map<string, Array<OperationType>>();
   private readonly namespace2Alias: { [ns: string]: string };
   private typeDefinitions = new Map<string, string>();
   private aliases: Record<string, string> = {};
@@ -178,55 +179,39 @@ export class DataModel {
     return [...this.models.values()].filter((m): m is EnumType => m.dataType === DataTypes.EnumType);
   }
 
-  private addOp(namespace: string, operationType: OperationType) {
-    this.operationTypes.set(operationType.fqName, operationType);
+  public addUnboundOperationType(namespace: string, operationType: OperationType) {
+    this.unboundOperationTypes.set(operationType.fqName, operationType);
     this.addAlias(namespace, operationType.odataName);
   }
 
-  public getOperationType(fqOpName: string) {
-    return this.retrieveType(fqOpName, this.operationTypes);
-  }
-
-  public addUnboundOperationType(namespace: string, operationType: OperationType) {
-    this.addOp(namespace, operationType);
-    this.unboundOperationTypes.add(operationType.fqName);
-  }
-
   public getUnboundOperationTypes(): Array<OperationType> {
-    return [...this.unboundOperationTypes].map((fqName) => this.operationTypes.get(fqName)!);
+    return [...this.unboundOperationTypes.values()];
   }
 
-  private addBoundOp(binding: string, opFqName: string) {
-    if (!this.boundOperationTypes[binding]) {
-      this.boundOperationTypes[binding] = [];
-    }
-    this.boundOperationTypes[binding].push(opFqName);
+  public getUnboundOperationType(fqOpName: string): OperationType | undefined {
+    return this.retrieveType(fqOpName, this.unboundOperationTypes);
   }
 
   public addBoundOperationType(namespace: string, bindingProp: PropertyModel, operationType: OperationType) {
-    const entityType = bindingProp.fqType;
-    const binding = bindingProp.isCollection ? `Collection(${entityType})` : entityType;
+    const fqEntityType = bindingProp.fqType;
 
-    this.addOp(namespace, operationType);
-    this.addBoundOp(binding, operationType.fqName);
-
-    const ns = Object.keys(this.namespace2Alias).find((ns) => entityType.startsWith(ns + "."));
-    if (ns) {
-      const aliasBinding = binding.replace(new RegExp(`(.*)${ns}\.(.+)`), `$1${this.namespace2Alias[ns]}.$2`);
-      this.alias2boundOperationType.set(aliasBinding, binding);
+    const store = bindingProp.isCollection ? this.entityCollectionBoundOperationTypes : this.entityBoundOperationTypes;
+    const list = store.get(fqEntityType);
+    if (list) {
+      list.push(operationType);
+    } else {
+      store.set(fqEntityType, [operationType]);
     }
   }
 
   public getEntityTypeOperations(fqEntityName: string): Array<OperationType> {
-    const aliasBinding = this.alias2boundOperationType.get(fqEntityName);
-    const operations = this.boundOperationTypes[aliasBinding || fqEntityName];
-    return !operations ? [] : operations.map((op) => this.operationTypes.get(op)!);
+    const operations = this.retrieveType(fqEntityName, this.entityBoundOperationTypes);
+    return operations || [];
   }
 
   public getEntitySetOperations(fqEntityName: string): Array<OperationType> {
-    const binding = `Collection(${fqEntityName})`;
-    const aliasBinding = this.alias2boundOperationType.get(binding);
-    return this.getEntityTypeOperations(aliasBinding || binding);
+    const operations = this.retrieveType(fqEntityName, this.entityCollectionBoundOperationTypes);
+    return operations || [];
   }
 
   public addAction(name: string, action: ActionImportType) {
