@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.30.0...@odata2ts/odata2ts@0.31.0) (2023-10-29)
+
+### Bug Fixes
+
+* **build:** run unit tests of examples ([#232](https://github.com/odata2ts/odata2ts/issues/232)) ([9e70481](https://github.com/odata2ts/odata2ts/commit/9e70481aec5fad29c63b93586ba73b1ea4e9d414))
+
+### Features
+
+* **generator:** allow for renaming of operations ([#231](https://github.com/odata2ts/odata2ts/issues/231)) ([8bff901](https://github.com/odata2ts/odata2ts/commit/8bff901c71522e9b7d48f49908e515e7812766f0))
+* **generator:** entity config supporting namespaces ([#226](https://github.com/odata2ts/odata2ts/issues/226)) ([ff52dc0](https://github.com/odata2ts/odata2ts/commit/ff52dc0f4b9aa0f255d3ec75506657c3f26709bc))
+
+### BREAKING CHANGES
+
+* **generator:** regular expressions must now match against the fully qualified name (e.g. "Trippin.Person") instead of the simple name (e.g. "Person"). 
+
+When matching exactly by name, you can use the simple name as before or the fully qualified name (alias is also supported).
+
 # [0.30.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.29.1...@odata2ts/odata2ts@0.30.0) (2023-10-05)
 
 ### Features

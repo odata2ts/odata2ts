@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.4.8...@odata2ts/example-hand-made@0.5.0) (2023-10-29)
+
+### Bug Fixes
+
+* **build:** run unit tests of examples ([#232](https://github.com/odata2ts/odata2ts/issues/232)) ([9e70481](https://github.com/odata2ts/odata2ts/commit/9e70481aec5fad29c63b93586ba73b1ea4e9d414))
+
+### Features
+
+* **generator:** allow for renaming of operations ([#231](https://github.com/odata2ts/odata2ts/issues/231)) ([8bff901](https://github.com/odata2ts/odata2ts/commit/8bff901c71522e9b7d48f49908e515e7812766f0))
+
 ## [0.4.8](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.4.7...@odata2ts/example-hand-made@0.4.8) (2023-10-05)
 
 **Note:** Version bump only for package @odata2ts/example-hand-made

@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/example-hand-made",
-  "version": "0.4.8",
+  "version": "0.5.0",
   "private": true,
   "publishConfig": {
     "access": "public"
@@ -20,7 +20,7 @@
     "@odata2ts/odata-service": "^0.17.1"
   },
   "devDependencies": {
-    "@odata2ts/odata2ts": "^0.30.0",
+    "@odata2ts/odata2ts": "^0.31.0",
     "@types/node": "^20.3.0",
     "rimraf": "^5.0.1",
     "ts-node": "^10.9.1",
