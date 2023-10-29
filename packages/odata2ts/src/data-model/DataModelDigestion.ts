@@ -299,9 +299,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     const configProp = this.serviceConfigHelper.findPropConfigByName(p.$.Name);
     const name = this.namingHelper.getModelPropName(entityPropConfig?.mappedName || configProp?.mappedName || p.$.Name);
-    const fqType = p.$.Type;
-    const isCollection = !!fqType.match(/^Collection\(/);
-    let dataType = fqType.replace(/^Collection\(([^\)]+)\)/, "$1");
+    const isCollection = !!p.$.Type.match(/^Collection\(/);
+    let dataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
 
     // support for primitive type mapping
     if (this.namingHelper.includesServicePrefix(dataType)) {

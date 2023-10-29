@@ -222,7 +222,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       }
 
       const bindingProp = isBound ? params.shift() : undefined;
-      const bindingEntityName = isBound ? this.dataModel.getModel(bindingProp!.fqType)?.name : undefined;
+      const bindingEntityName = bindingProp ? this.dataModel.getModel(bindingProp!.fqType)?.name : undefined;
 
       const name =
         type === OperationTypes.Function

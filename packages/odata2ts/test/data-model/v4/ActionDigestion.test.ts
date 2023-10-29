@@ -41,7 +41,7 @@ describe("Action Digestion Test", () => {
     odataBuilder.addAction(opName);
     const result = await doDigest();
 
-    expect(result.getOperationType(withNs(opName))).toStrictEqual(expected);
+    expect(result.getUnboundOperationType(withNs(opName))).toStrictEqual(expected);
     expect(result.getUnboundOperationTypes()).toStrictEqual([expected]);
   });
 
