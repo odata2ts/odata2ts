@@ -240,7 +240,7 @@ describe("Service Generator Tests V4", () => {
       // collection of complex return type
       .addFunction("filterReviews", `Collection(${withNs("Review")})`, true, (builder) =>
         builder
-          .addParam("Book", withNs("Book"))
+          .addParam("Book", `Collection(${withNs("Book")})`)
           .addParam("MIN_RATING", ODataTypesV4.Int16, false)
           .addParam("MinCreated", ODataTypesV4.Date)
       );
@@ -268,7 +268,7 @@ describe("Service Generator Tests V4", () => {
       )
       // return type: collection of enums
       .addAction("ratings", `Collection(${withNs("Rating")})`, true, (builder) =>
-        builder.addParam("book", withNs("Book")).addParam("ratings", `Collection(${withNs("Rating")})`)
+        builder.addParam("book", `Collection(${withNs("Book")})`).addParam("ratings", `Collection(${withNs("Rating")})`)
       );
 
     // when generating

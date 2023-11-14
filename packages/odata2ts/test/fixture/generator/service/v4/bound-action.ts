@@ -17,7 +17,6 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
 > {
   private _bookQLike?: Book_QLike;
   private _bookQRate?: Book_QRate;
-  private _bookQRatings?: Book_QRatings;
 
   constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qBook);
@@ -51,6 +50,20 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
     );
     return this._bookQRate.convertResponse(response);
   }
+}
+
+export class BookCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
+  ClientType,
+  Book,
+  EditableBook,
+  QBook,
+  BookId
+> {
+  private _bookQRatings?: Book_QRatings;
+
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qBook, new QBookId(name));
+  }
 
   public async ratings(
     params: Book_RatingsParams,
@@ -69,17 +82,5 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
       getDefaultHeaders()
     );
     return this._bookQRatings.convertResponse(response);
-  }
-}
-
-export class BookCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
-  ClientType,
-  Book,
-  EditableBook,
-  QBook,
-  BookId
-> {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qBook, new QBookId(name));
   }
 }

@@ -500,7 +500,7 @@ class ServiceGenerator {
     importContainer.addGeneratedModel(model.idModelName);
     importContainer.addGeneratedQObject(model.qIdFunctionName);
 
-    const collectionOperations = this.dataModel.getEntityTypeOperations(`Collection(${model.fqName})`);
+    const collectionOperations = this.dataModel.getEntitySetOperations(model.fqName);
 
     const { properties, methods } = this.generateServiceOperations(collectionOperations, importContainer);
 

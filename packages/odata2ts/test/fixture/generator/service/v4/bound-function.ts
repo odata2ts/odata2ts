@@ -16,7 +16,6 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
   QBook
 > {
   private _bookQBestReview?: Book_QBestReview;
-  private _bookQFilterReviews?: Book_QFilterReviews;
 
   constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qBook);
@@ -34,6 +33,20 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
     const response = await client.get(url, requestConfig, getDefaultHeaders());
     return this._bookQBestReview.convertResponse(response);
   }
+}
+
+export class BookCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
+  ClientType,
+  Book,
+  EditableBook,
+  QBook,
+  BookId
+> {
+  private _bookQFilterReviews?: Book_QFilterReviews;
+
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qBook, new QBookId(name));
+  }
 
   public async filterReviews(
     params: Book_FilterReviewsParams,
@@ -47,18 +60,6 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
     const url = addFullPath(this._bookQFilterReviews.buildUrl(params));
     const response = await client.get(url, requestConfig, getDefaultHeaders());
     return this._bookQFilterReviews.convertResponse(response);
-  }
-}
-
-export class BookCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
-  ClientType,
-  Book,
-  EditableBook,
-  QBook,
-  BookId
-> {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qBook, new QBookId(name));
   }
 }
 
