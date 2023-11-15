@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.31.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.31.0...@odata2ts/odata2ts@0.31.1) (2023-11-15)
+
+### Bug Fixes
+
+* **generator:** collection operations are not generated ([#235](https://github.com/odata2ts/odata2ts/issues/235)) ([5157ded](https://github.com/odata2ts/odata2ts/commit/5157dede1438f6551e0762eeaa1b82f1c7e06e7f))
+
 # [0.31.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.30.0...@odata2ts/odata2ts@0.31.0) (2023-10-29)
 
 ### Bug Fixes
@@ -12,6 +18,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 * **generator:** allow for renaming of operations ([#231](https://github.com/odata2ts/odata2ts/issues/231)) ([8bff901](https://github.com/odata2ts/odata2ts/commit/8bff901c71522e9b7d48f49908e515e7812766f0))
+
 * **generator:** entity config supporting namespaces ([#226](https://github.com/odata2ts/odata2ts/issues/226)) ([ff52dc0](https://github.com/odata2ts/odata2ts/commit/ff52dc0f4b9aa0f255d3ec75506657c3f26709bc))
 
 ### BREAKING CHANGES
