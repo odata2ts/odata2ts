@@ -2053,7 +2053,7 @@ __metadata:
     "@sap/cds-odata-v2-adapter-proxy": ^1.9.21
     "@types/jest": ^29.5.2
     "@types/node": ^20.3.0
-    axios: 0.27.2
+    axios: 1.6.0
     bignumber.js: ^9.1.1
     express: ^4.18.2
     jest: ^29.5.0
@@ -2089,7 +2089,7 @@ __metadata:
     "@odata2ts/odata2ts": ^0.31.1
     "@types/jest": ^29.5.2
     "@types/node": ^20.3.0
-    axios: ^0.27.2
+    axios: ^1.6.0
     jest: ^29.5.0
     rimraf: ^5.0.1
     ts-jest: ^29.1.0
@@ -2124,7 +2124,7 @@ __metadata:
     "@odata2ts/odata2ts": ^0.31.1
     "@types/jest": ^29.5.2
     "@types/node": ^20.3.0
-    axios: ^0.27.2
+    axios: ^1.6.0
     jest: ^29.5.0
     rimraf: ^5.0.1
     ts-jest: ^29.1.0
@@ -3161,13 +3161,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:0.27.2, axios@npm:^0.27.2":
-  version: 0.27.2
-  resolution: "axios@npm:0.27.2"
+"axios@npm:1.6.0":
+  version: 1.6.0
+  resolution: "axios@npm:1.6.0"
   dependencies:
-    follow-redirects: ^1.14.9
+    follow-redirects: ^1.15.0
     form-data: ^4.0.0
-  checksum: 38cb7540465fe8c4102850c4368053c21683af85c5fdf0ea619f9628abbcb59415d1e22ebc8a6390d2bbc9b58a9806c874f139767389c862ec9b772235f06854
+    proxy-from-env: ^1.1.0
+  checksum: c7c9f2ae9e0b9bad7d6f9a4dff030930b12ee667dedf54c3c776714f91681feb743c509ac0796ae5c01e12c4ab4a2bee74905068dd200fbc1ab86f9814578fb0
   languageName: node
   linkType: hard
 
@@ -3179,6 +3180,17 @@ __metadata:
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
   checksum: 7fb6a4313bae7f45e89d62c70a800913c303df653f19eafec88e56cea2e3821066b8409bc68be1930ecca80e861c52aa787659df0ffec6ad4d451c7816b9386b
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.6.0":
+  version: 1.6.2
+  resolution: "axios@npm:1.6.2"
+  dependencies:
+    follow-redirects: ^1.15.0
+    form-data: ^4.0.0
+    proxy-from-env: ^1.1.0
+  checksum: 4a7429e2b784be0f2902ca2680964391eae7236faa3967715f30ea45464b98ae3f1c6f631303b13dfe721b17126b01f486c7644b9ef276bfc63112db9fd379f8
   languageName: node
   linkType: hard
 
@@ -5298,7 +5310,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.14.9, follow-redirects@npm:^1.15.0":
+"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.15.0":
   version: 1.15.2
   resolution: "follow-redirects@npm:1.15.2"
   peerDependenciesMeta:

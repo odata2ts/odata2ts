@@ -21,7 +21,7 @@
   "dependencies": {
     "@odata2ts/http-client-axios": "^0.10.2",
     "@odata2ts/odata-service": "^0.17.1",
-    "axios": "^0.27.2"
+    "axios": "^1.6.0"
   },
   "devDependencies": {
     "@odata2ts/odata2ts": "^0.31.1",
