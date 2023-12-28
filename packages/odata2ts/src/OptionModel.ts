@@ -2,6 +2,7 @@ import { TypeConverterConfig } from "@odata2ts/converter-runtime";
 import { AxiosRequestConfig } from "axios";
 
 import { NameSettings, OverridableNamingOptions } from "./NamingModel";
+import { TypeModel } from "./TypeModel";
 
 /**
  * Generation mode, by default "all".
@@ -254,17 +255,20 @@ export interface ServiceGenerationOptions
     Pick<CliOptions, "sourceUrl" | "refreshFile">,
     Omit<ConfigFileOptions, "services"> {
   /**
-   * Configure generation process for EntityTypes and ComplexTypes including their keys and properties.
-   */
-  entitiesByName?: Array<EntityGenerationOptions>;
-  /**
    * Configure generation process for individual properties based on their name.
    */
   propertiesByName?: Array<PropertyGenerationOptions>;
   /**
-   * Configure generation process for individual function or actions by matching their name.
+   * Rename any EntityType, ComplexType, EnumType, Function or Action.
+   *
+   * You must match the simple name (e.g. "Person") or the fully qualified name
+   * (e.g. "Trippin.Person") exactly. Alternatively, you can rename a bunch of types
+   * by using regular expressions.
+   *
+   * By providing additional type information via the "type" attribute you get even more options which only apply
+   * to the given type.
    */
-  operationsByName?: Array<OperationGenerationOptions>;
+  byTypeAndName?: Array<ComplexTypeGenerationOptions | EntityTypeGenerationOptions | GenericTypeGenerationOptions>;
 }
 
 /**
@@ -277,16 +281,12 @@ export interface RunOptions
   naming: NameSettings;
 }
 
-/**
- * Configuration options for EntityTypes and ComplexTypes.
- * This config applies if the name matches the name of an EntityType or ComplexType as it is specified
- * in the metadata (e.g. in EDMX <EntityType name="Test" ...)
- */
-export interface EntityGenerationOptions {
+export interface RenameOptions {
   /**
-   * Matches the name of the EntityType or ComplexType as it is stated in the EDMX model, e.g. "Person".
-   * You can also address the fully qualified name including the namespace (annotated at the schema element), e.g.
-   * "Trippin.Person".
+   * Matcher for the name of any EntityType, ComplexType, EnumType, Function or Action
+   * as it is stated in the EDMX model, e.g. "Person". As OData supports namespaces
+   * you can also use the fully qualified name (including the namespace) to address any model,
+   * e.g. "Trippin.Person". You can also match properties by their name.
    *
    * If the name is specified as plain string, it must match either the name or the fully qualified name
    * exactly (case-sensitive).
@@ -295,31 +295,56 @@ export interface EntityGenerationOptions {
    * (e.g. Trippin.Person). The regular expression must match the whole string
    * (e.g. `/Person/` won't do, `/.*\.Person/` would work).
    *
-   * To make regular expressions useful, captured groups are also supported. Works in combination with
+   * To make regular expressions useful, captured groups are also supported in combination with
    * the `mappedName` attribute.
    */
   name: string | RegExp;
+
   /**
-   * If specified, this attribute value is used as name for the matched entity, complex or enum type as it will
+   * If specified, this attribute value is used as final name for the matched name as it will
    * appear in the generated typescript.
    *
    * When using a regular expression for matching the name, then captured groups can be referenced
    * as usual via $1, $2, etc. For example:
    * - name: /Trippin\.(.+)/
    * - mappedName: "T_$1"
-   * - result: "T_Person"
+   * The result would be "T_Person".
    */
   mappedName?: string;
-  /**
-   * Overwrite the key specification by naming the props by their EDMX name.
-   */
-  keys?: Array<string>;
+}
+
+export type TypeBasedGenerationOptions =
+  | GenericTypeGenerationOptions
+  | ComplexTypeGenerationOptions
+  | EntityTypeGenerationOptions;
+
+export interface GenericTypeGenerationOptions extends RenameOptions {
+  type: TypeModel.Any | TypeModel.OperationType | TypeModel.EnumType;
+}
+
+export interface ComplexTypeGenerationOptions extends RenameOptions {
+  type: TypeModel.ComplexType;
+
   /**
    * Configuration of individual properties.
    */
   properties?: Array<PropertyGenerationOptions>;
 
   // converter: string | Array<string>
+}
+
+/**
+ * Configuration options for EntityTypes and ComplexTypes.
+ * This config applies if the name matches the name of an EntityType or ComplexType as it is specified
+ * in the metadata (e.g. in EDMX <EntityType name="Test" ...)
+ */
+export interface EntityTypeGenerationOptions extends Omit<ComplexTypeGenerationOptions, "type"> {
+  type: TypeModel.EntityType;
+
+  /**
+   * Overwrite the key specification by naming the props by their EDMX name.
+   */
+  keys?: Array<string>;
 
   /**
    * Whether the generated service should allow for querying this model.
@@ -351,17 +376,7 @@ export interface EntityGenerationOptions {
 /**
  * All configuration options for properties of models.
  */
-export interface PropertyGenerationOptions {
-  /**
-   * Name of the property to match.
-   * Must match exactly or can be a regular expression.
-   */
-  name: string | RegExp;
-  /**
-   * Use a different name.
-   * If name is a regular expression, mappedName allows to specify captured groups (via $1, $2, ...).
-   */
-  mappedName?: string;
+export interface PropertyGenerationOptions extends RenameOptions {
   /**
    * Managed attributes - i.e. managed by the server - cannot be created or updated.
    * Hence, they are left out of the editable model versions.
@@ -379,35 +394,4 @@ export interface PropertyGenerationOptions {
    * must be listed by their ids.
    */
   // converters?: Array<Required<TypeConverterConfig>>;
-}
-
-export interface OperationGenerationOptions {
-  /**
-   * Matches the name of the function or action as it is stated in the EDMX model, e.g. "Person".
-   * You can also address the fully qualified name including the namespace (annotated at the schema element), e.g.
-   * "Trippin.Person".
-   *
-   * If the name is specified as plain string, it must match either the name or the fully qualified name
-   * exactly (case-sensitive).
-   *
-   * Alternatively, a regular expression can be used which is always applied to the fully qualified name
-   * (e.g. Trippin.Person). The regular expression must match the whole string
-   * (e.g. `/Person/` won't do, `/.*\.Person/` would work).
-   *
-   * To make regular expressions useful, captured groups are also supported. Works in combination with
-   * the `mappedName` attribute.
-   */
-  name: string | RegExp;
-
-  /**
-   * If specified, this attribute value is used as name for the matched operation as it will
-   * appear in the generated typescript.
-   *
-   * When using a regular expression for matching the name, then captured groups can be referenced
-   * as usual via $1, $2, etc. For example:
-   * - name: /Trippin\.(.+)/
-   * - mappedName: "T_$1"
-   * - result: "T_Person"
-   */
-  mappedName?: string;
 }

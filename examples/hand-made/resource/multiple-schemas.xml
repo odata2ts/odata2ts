@@ -12,12 +12,26 @@
       <EntityType Name="Child" BaseType="MY.org.Parent">
         <Property Name="someProp" Type="Edm.String" />
       </EntityType>
+      <ComplexType Name="Complex">
+        <Property Name="someProp" Type="Edm.String" />
+      </ComplexType>
+      <EnumType Name="Enum">
+        <Member Name="Feature1" Value="0" />
+        <Member Name="Feature2" Value="1" />
+      </EnumType>
     </Schema>
     <!-- same entity type name in different schema  -->
     <Schema Namespace="You.org" xmlns="http://docs.oasis-open.org/odata/ns/edm">
       <EntityType Name="Child" BaseType="MY.org.Parent">
         <Property Name="age" Type="Edm.Int32" />
       </EntityType>
+      <ComplexType Name="Complex">
+        <Property Name="someProp" Type="Edm.Int32" />
+      </ComplexType>
+      <EnumType Name="Enum">
+        <Member Name="Feat1" Value="0" />
+        <Member Name="Feat2" Value="1" />
+      </EnumType>
     </Schema>
     <!-- one entity with functions bound and unbound -->
     <Schema Namespace="NS1" xmlns="http://docs.oasis-open.org/odata/ns/edm">

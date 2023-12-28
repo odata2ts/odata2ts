@@ -5,6 +5,7 @@ import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { DigestionOptions } from "../../../src/FactoryFunctionModel";
+import { TypeModel } from "../../../src/TypeModel";
 import { TestOptions, TestSettings } from "../../generator/TestTypes";
 import { getTestConfig } from "../../test.config";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
@@ -209,9 +210,9 @@ describe("Function Digestion Test", () => {
     const altFuncName = "ComplextestFunc";
     const fqAltFuncName = withNs(altFuncName);
 
-    digestionOptions.operationsByName = [
-      { name: funcName, mappedName: "NewTestOperation" },
-      { name: new RegExp(`${NAMESPACE}\.Complex(.+)`), mappedName: "Cmplx_$1" },
+    digestionOptions.byTypeAndName = [
+      { type: TypeModel.OperationType, name: funcName, mappedName: "NewTestOperation" },
+      { type: TypeModel.Any, name: new RegExp(`${NAMESPACE}\.Complex(.+)`), mappedName: "Cmplx_$1" },
     ];
 
     odataBuilder.addFunction(funcName, ODataTypesV4.Boolean, false);
@@ -237,9 +238,9 @@ describe("Function Digestion Test", () => {
     const altFuncName = "ComplextestFunc";
 
     digestionOptions.allowRenaming = false;
-    digestionOptions.operationsByName = [
-      { name: funcName, mappedName: "NewTestOperation" },
-      { name: new RegExp(`${NAMESPACE}\.Complex(.+)`), mappedName: "Cmplx_$1" },
+    digestionOptions.byTypeAndName = [
+      { type: TypeModel.Any, name: funcName, mappedName: "NewTestOperation" },
+      { type: TypeModel.Any, name: new RegExp(`${NAMESPACE}\.Complex(.+)`), mappedName: "Cmplx_$1" },
     ];
 
     odataBuilder.addFunction(funcName, ODataTypesV4.Boolean, false);

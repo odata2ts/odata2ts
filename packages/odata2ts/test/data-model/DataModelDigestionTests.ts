@@ -5,6 +5,7 @@ import { NamespaceWithAlias, withNamespace } from "../../src/data-model/DataMode
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
 import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel";
+import { TypeModel } from "../../src/TypeModel";
 import { TestOptions, TestSettings } from "../generator/TestTypes";
 import { getTestConfig } from "../test.config";
 import { ODataModelBuilder } from "./builder/ODataModelBuilder";
@@ -254,9 +255,9 @@ export function createDataModelTests(
 
   test("entity configuration", async () => {
     digestionOptions.allowRenaming = true;
-    digestionOptions.entitiesByName = [
-      { name: "Test", mappedName: "newTest", keys: ["ID", "Version"] },
-      { name: /Tester\.Complex.*/, mappedName: "cmplx" },
+    digestionOptions.byTypeAndName = [
+      { type: TypeModel.EntityType, name: "Test", mappedName: "newTest", keys: ["ID", "Version"] },
+      { type: TypeModel.ComplexType, name: /Tester\.Complex.*/, mappedName: "cmplx" },
       //  { name: /NS1\.Test/, mappedName: "NS1_Test" },
     ];
 
@@ -284,6 +285,18 @@ export function createDataModelTests(
     expect(toTest.editableName).toBe("EditableNewTest");
     expect(toTest.keyNames).toStrictEqual(["ID", "Version"]);
     expect(toTest.keys.length).toBe(2);
+  });
+
+  test("enum configuration", async () => {
+    digestionOptions.byTypeAndName = [{ type: TypeModel.EnumType, name: "Test", mappedName: "newTest" }];
+
+    odataBuilder.addEnumType("Test", [{ name: "one", value: 1 }]);
+
+    const result = await doDigest();
+
+    let toTest = result.getEnums()[0];
+    expect(toTest.odataName).toBe("Test");
+    expect(toTest.name).toBe("NewTest");
   });
 
   test("namespace support", async () => {
