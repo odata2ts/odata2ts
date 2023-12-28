@@ -1,10 +1,10 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    "rootDir": ".",
+    "rootDir": "./src",
     "outDir": "./lib",
     "noFallthroughCasesInSwitch": false
   },
-  "include": ["./src", ".types", "./odata2ts.config.ts"],
+  "include": ["./src", ".types"],
   "exclude": ["node_modules", "lib"]
 }
