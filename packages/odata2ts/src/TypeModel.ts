@@ -1,5 +1,3 @@
-import { EntityTypeGenerationOptions, TypeBasedGenerationOptions } from "./OptionModel";
-
 export enum TypeModel {
   Any = "Any",
   EntityType = "EntityType",
