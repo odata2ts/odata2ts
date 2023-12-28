@@ -1,14 +1,14 @@
 import { MappedConverterChains } from "@odata2ts/converter-runtime";
 
 import { DigestionOptions } from "../FactoryFunctionModel";
-import { PropertyGenerationOptions } from "../OptionModel";
+import { ComplexTypeGenerationOptions, EntityTypeGenerationOptions, PropertyGenerationOptions } from "../OptionModel";
 import { DataModel, NamespaceWithAlias, withNamespace } from "./DataModel";
 import { ComplexType as ComplexModelType, DataTypes, ModelType, ODataVersion, PropertyModel } from "./DataTypeModel";
-import { ComplexType, EntityType, Property, Schema, TypeDefinition } from "./edmx/ODataEdmxModelBase";
+import { ComplexType, EntityType, EnumType, Property, Schema, TypeDefinition } from "./edmx/ODataEdmxModelBase";
 import { SchemaV3 } from "./edmx/ODataEdmxModelV3";
 import { SchemaV4 } from "./edmx/ODataEdmxModelV4";
 import { NamingHelper } from "./NamingHelper";
-import { ServiceConfigHelper } from "./ServiceConfigHelper";
+import { ServiceConfigHelper, WithoutName } from "./ServiceConfigHelper";
 
 export interface TypeModel {
   outputType: string;
@@ -93,18 +93,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       this.addTypeDefinition(schema.$.Namespace, schema.TypeDefinition);
 
       // enums
-      if (schema.EnumType) {
-        for (const et of schema.EnumType) {
-          const odataName = et.$.Name;
-          const fqName = withNamespace(ns[0], odataName);
-          this.dataModel.addEnum(ns[0], odataName, {
-            fqName,
-            odataName,
-            name: this.namingHelper.getEnumName(odataName),
-            members: et.Member.map((m) => m.$.Name),
-          });
-        }
-      }
+      this.addEnum(ns, schema.EnumType);
 
       // complex types
       this.addComplexType(ns, schema.ComplexType);
@@ -119,11 +108,14 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     this.postProcessModel();
   }
 
-  private getBaseModel(namespace: NamespaceWithAlias, model: ComplexType) {
+  private getBaseModel(
+    entityConfig: WithoutName<EntityTypeGenerationOptions | ComplexTypeGenerationOptions> | undefined,
+    namespace: NamespaceWithAlias,
+    model: ComplexType
+  ) {
     const odataName = model.$.Name;
     const fqName = withNamespace(namespace[0], odataName);
 
-    const entityConfig = this.serviceConfigHelper.findEntityConfigByName(namespace, odataName);
     const entityName = entityConfig?.mappedName || model.$.Name;
 
     // map properties respecting the config
@@ -160,13 +152,34 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     }
   }
 
+  private addEnum(namespace: NamespaceWithAlias, models: Array<EnumType> | undefined) {
+    if (!models || !models.length) {
+      return;
+    }
+
+    for (const et of models) {
+      const odataName = et.$.Name;
+      const fqName = withNamespace(namespace[0], odataName);
+      const config = this.serviceConfigHelper.findEnumTypeConfig(namespace, odataName);
+      const enumName = config?.mappedName || odataName;
+
+      this.dataModel.addEnum(namespace[0], odataName, {
+        fqName,
+        odataName,
+        name: this.namingHelper.getEnumName(enumName),
+        members: et.Member.map((m) => m.$.Name),
+      });
+    }
+  }
+
   private addComplexType(namespace: NamespaceWithAlias, models: Array<ComplexType> | undefined) {
     if (!models || !models.length) {
       return;
     }
 
     for (const model of models) {
-      const baseModel = this.getBaseModel(namespace, model);
+      const config = this.serviceConfigHelper.findComplexTypeConfig(namespace, model.$.Name);
+      const baseModel = this.getBaseModel(config, namespace, model);
       this.dataModel.addComplexType(namespace[0], baseModel.odataName, baseModel);
     }
   }
@@ -177,8 +190,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     }
 
     for (const model of models) {
-      const baseModel = this.getBaseModel(namespace, model);
-      const entityConfig = this.serviceConfigHelper.findEntityConfigByName(namespace, model.$.Name);
+      const entityConfig = this.serviceConfigHelper.findEntityTypeConfig(namespace, model.$.Name);
+      const baseModel = this.getBaseModel(entityConfig, namespace, model);
       const entityName = entityConfig?.mappedName || model.$.Name;
 
       // key support: we add keys from this entity,

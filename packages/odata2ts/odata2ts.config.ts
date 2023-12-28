@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, Modes, TypeModel } from "./src";
 
 const config: ConfigFileOptions = {
   debug: false,
@@ -44,6 +44,19 @@ const config: ConfigFileOptions = {
           managed: true,
         },
         ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
+      ],
+      byTypeAndName: [
+        {
+          type: TypeModel.Any,
+          name: "Product",
+          mappedName: "theProduct",
+        },
+        {
+          type: TypeModel.EntityType,
+          name: "Trippin.Person",
+          mappedName: "ThePerson",
+          keys: ["UserName"],
+        },
       ],
       /*entitiesByName: [
         {

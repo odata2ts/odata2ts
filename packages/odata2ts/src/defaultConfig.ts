@@ -93,8 +93,7 @@ const defaultConfig: DefaultConfiguration = {
     },
   },
   propertiesByName: [],
-  entitiesByName: [],
-  operationsByName: [],
+  byTypeAndName: [],
 };
 
 const { models, queryObjects, services } = defaultConfig.naming;

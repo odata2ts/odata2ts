@@ -2,6 +2,7 @@ import { ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { ConfigFileOptions, NamingStrategies, RunOptions, ServiceGenerationOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
+import { TypeModel } from "../../../src/TypeModel";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import {
   EntityBasedGeneratorFunctionWithoutVersion,
@@ -381,9 +382,9 @@ export function createEntityBasedGenerationTests(
       disableAutoManagedKey: true,
       allowRenaming: false,
       propertiesByName: [{ name: "ID", mappedName: "id" }],
-      entitiesByName: [
-        { name: "CATEGORY", mappedName: "Category", keys: ["ID", "version"] },
-        { name: ENTITY_NAME, properties: [{ name: "ID", managed: true }] },
+      byTypeAndName: [
+        { type: TypeModel.EntityType, name: "CATEGORY", mappedName: "Category", keys: ["ID", "version"] },
+        { type: TypeModel.EntityType, name: ENTITY_NAME, properties: [{ name: "ID", managed: true }] },
       ],
     });
   });
