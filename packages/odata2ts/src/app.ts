@@ -45,6 +45,24 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
     version === ODataVersions.V2
       ? await digestV2(dataService.Schema as Array<SchemaV3>, options, namingHelper)
       : await digestV4(dataService.Schema as Array<SchemaV4>, options, namingHelper);
+
+  // Validation of entity names: the same name might be used across different namespaces
+  const validationErrors = dataModel.validate();
+  if (validationErrors.size) {
+    console.log("---");
+    validationErrors.forEach((errors, name) => {
+      console.log(
+        `Duplicate name: ${name} - Fully Qualified Names: ${errors
+          .map((error) => error.fqName + (error.renamedTo ? ` (renamed to: ${error.renamedTo})` : ""))
+          .join(", ")}`
+      );
+    });
+
+    if (options.disableAutomaticNameClashResolution) {
+      throw new Error("Name validation failed: Multiple entities have the same name across different namespaces!");
+    }
+  }
+
   // handling the overall generation project
   const project = await createProjectManager(
     namingHelper.getFileNames(),

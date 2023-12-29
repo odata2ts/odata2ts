@@ -245,6 +245,15 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * Additionally, when sending data the very same value will be set for the "content-type" header.
    */
   v4BigNumberAsString?: boolean;
+  /**
+   * OData allows for namespaces so any entity is unique by virtue of it's name within a namespace.
+   * odata2ts works with these fully qualified names internally, but only uses the plain name when generating
+   * stuff. This might lead to name clashes (same name in different namespaces).
+   *
+   * odata2ts employs a simple, automatic resolution strategy: Adding a counter at the end of the name.
+   * Set this property to true in order to disable this automatism.
+   */
+  disableAutomaticNameClashResolution?: boolean;
 }
 
 /**

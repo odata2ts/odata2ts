@@ -15,6 +15,7 @@ import {
   PropertyModel,
   SingletonType,
 } from "./DataTypeModel";
+import { NameValidator, NameValidatorOptions } from "./validation/NameValidator";
 
 export interface ProjectFiles {
   model: string;
@@ -32,7 +33,10 @@ export function withNamespace(ns: string, name: string) {
   return ns ? `${ns}.${name}` : name;
 }
 
+export interface DataModelOptions extends NameValidatorOptions {}
+
 export class DataModel {
+  private readonly nameValidator: NameValidator;
   private readonly converters: MappedConverterChains;
 
   private models = new Map<string, ModelType | ComplexType | EnumType>();
@@ -61,8 +65,10 @@ export class DataModel {
   constructor(
     namespaces: Array<NamespaceWithAlias>,
     private version: ODataVersion,
-    converters: MappedConverterChains = new Map()
+    converters: MappedConverterChains = new Map(),
+    private options: DataModelOptions = {}
   ) {
+    this.nameValidator = new NameValidator(options);
     this.converters = converters;
     this.namespace2Alias = namespaces.reduce<Record<string, string>>((col, [ns, alias]) => {
       if (alias) {
@@ -99,6 +105,10 @@ export class DataModel {
     }
   }
 
+  public validate() {
+    return this.nameValidator.validate();
+  }
+
   public addTypeDefinition(namespace: string, name: string, type: string) {
     const fqName = withNamespace(namespace, name);
     this.typeDefinitions.set(fqName, type);
@@ -115,7 +125,9 @@ export class DataModel {
 
   public addEntityType(namespace: string, name: string, model: Omit<ModelType, "dataType">) {
     const fqName = withNamespace(namespace, name);
-    this.models.set(fqName, { ...model, dataType: DataTypes.ModelType });
+    const safeName = this.nameValidator.addEntityType(fqName, model.name);
+
+    this.models.set(fqName, { ...model, name: safeName, dataType: DataTypes.ModelType });
     this.addAlias(namespace, name);
   }
 
@@ -141,7 +153,9 @@ export class DataModel {
 
   public addComplexType(namespace: string, name: string, model: Omit<ComplexType, "dataType">) {
     const fqName = withNamespace(namespace, name);
-    this.models.set(fqName, { ...model, dataType: DataTypes.ComplexType });
+    const safeName = this.nameValidator.addComplexType(fqName, model.name);
+
+    this.models.set(fqName, { ...model, name: safeName, dataType: DataTypes.ComplexType });
     this.addAlias(namespace, name);
   }
 
@@ -167,7 +181,9 @@ export class DataModel {
 
   public addEnum(namespace: string, name: string, type: Omit<EnumType, "dataType">) {
     const fqName = withNamespace(namespace, name);
-    this.models.set(fqName, { ...type, dataType: DataTypes.EnumType });
+    const safeName = this.nameValidator.addEnumType(fqName, type.name);
+
+    this.models.set(fqName, { ...type, name: safeName, dataType: DataTypes.EnumType });
     this.addAlias(namespace, name);
   }
 
@@ -214,20 +230,24 @@ export class DataModel {
     return operations || [];
   }
 
-  public addAction(name: string, action: ActionImportType) {
-    this.container.actions[name] = action;
+  public addAction(fqName: string, action: ActionImportType) {
+    const safeName = this.nameValidator.addOperationType(fqName, action.name);
+
+    this.container.actions[fqName] = { ...action, name: safeName };
   }
 
-  public addFunction(name: string, func: FunctionImportType) {
-    this.container.functions[name] = func;
+  public addFunction(fqName: string, func: FunctionImportType) {
+    const safeName = this.nameValidator.addOperationType(fqName, func.name);
+
+    this.container.functions[fqName] = { ...func, name: safeName };
   }
 
-  public addSingleton(name: string, singleton: SingletonType) {
-    this.container.singletons[name] = singleton;
+  public addSingleton(fqName: string, singleton: SingletonType) {
+    this.container.singletons[fqName] = singleton;
   }
 
-  public addEntitySet(name: string, entitySet: EntitySetType) {
-    this.container.entitySets[name] = entitySet;
+  public addEntitySet(fqName: string, entitySet: EntitySetType) {
+    this.container.entitySets[fqName] = entitySet;
   }
 
   public getEntityContainer() {

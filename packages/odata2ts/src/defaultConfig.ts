@@ -25,6 +25,7 @@ const defaultConfig: DefaultConfiguration = {
   allowRenaming: false,
   v2ModelsWithExtraResultsWrapping: false,
   v4BigNumberAsString: false,
+  disableAutomaticNameClashResolution: false,
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,

@@ -33,7 +33,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     converters?: MappedConverterChains
   ) {
     const namespaces = schemas.map<NamespaceWithAlias>((s) => [s.$.Namespace, s.$.Alias]);
-    this.dataModel = new DataModel(namespaces, version, converters);
+    this.dataModel = new DataModel(namespaces, version, converters, options);
     this.serviceConfigHelper = new ServiceConfigHelper(options);
 
     this.collectModelTypes(schemas);
