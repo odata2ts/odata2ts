@@ -74,7 +74,7 @@ describe("Data Model Tests", function () {
   test("add & get model", () => {
     const modelName = "Xxx";
     const fqName = `${NS1}.${modelName}`;
-    const dummy = { fqName, baseClasses: [] };
+    const dummy = { name: modelName, fqName, baseClasses: [] };
     const expectedDummy = { ...dummy, dataType: DataTypes.ModelType };
 
     dataModel.addEntityType(
@@ -92,7 +92,7 @@ describe("Data Model Tests", function () {
   test("get model by alias", () => {
     const modelName = "Xxx";
     const aliasName = `${ALIAS_NS2}.${modelName}`;
-    const dummy = { x: "y" };
+    const dummy = { x: "y", name: modelName };
     const expectedDummy = { ...dummy, dataType: DataTypes.ModelType };
 
     dataModel.addEntityType(
@@ -108,7 +108,7 @@ describe("Data Model Tests", function () {
   test("add & get complex type", () => {
     const modelName = "Xxx";
     const fqName = `${NS1}.${modelName}`;
-    const dummy = { fqName, baseClasses: [] };
+    const dummy = { name: modelName, fqName, baseClasses: [] };
     const expectedDummy = { ...dummy, dataType: DataTypes.ComplexType };
 
     dataModel.addComplexType(
@@ -126,7 +126,7 @@ describe("Data Model Tests", function () {
   test("get complex type by alias", () => {
     const modelName = "Xxx";
     const aliasName = `${ALIAS_NS2}.${modelName}`;
-    const dummy = { x: "y" };
+    const dummy = { x: "y", name: modelName };
     dataModel.addComplexType(
       NS2,
       modelName,
@@ -139,7 +139,7 @@ describe("Data Model Tests", function () {
 
   test("add & get enum", () => {
     const modelName = "Xxx";
-    const dummy = { x: "y" };
+    const dummy = { x: "y", name: modelName };
     const expectedDummy = { ...dummy, dataType: DataTypes.EnumType };
     dataModel.addEnum(
       NS1,
@@ -252,7 +252,7 @@ describe("Data Model Tests", function () {
   test("add action", () => {
     const name = "XyZ";
     const fqName = `${NS1}.${name}`;
-    const dummy = { x: "y" };
+    const dummy = { x: "y", name };
     dataModel.addAction(
       fqName,
       // @ts-expect-error
@@ -270,7 +270,7 @@ describe("Data Model Tests", function () {
   test("add function", () => {
     const name = "XyZ";
     const fqName = `${NS1}.${name}`;
-    const dummy = { x: "y" };
+    const dummy = { x: "y", name };
     dataModel.addFunction(
       fqName,
       // @ts-expect-error
@@ -323,7 +323,7 @@ describe("Data Model Tests", function () {
 
   test("add model with empty namespace", () => {
     const modelName = "Xxx";
-    const dummy = { modelName, baseClasses: [] };
+    const dummy = { name: modelName, baseClasses: [] };
     const expectedDummy = { ...dummy, dataType: DataTypes.ModelType };
 
     dataModel.addEntityType(

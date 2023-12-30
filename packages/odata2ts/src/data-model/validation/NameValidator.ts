@@ -25,14 +25,13 @@ export class NameValidator {
           validationObject.renamedTo = `${name}${existingErrors.length + 1}`;
         }
         existingErrors.push(validationObject);
-        return validationObject.renamedTo ?? name;
       } else {
         if (!this.options.disableAutomaticNameClashResolution) {
           validationObject.renamedTo = `${name}2`;
         }
         this.errors.set(name, [hit, validationObject]);
-        return validationObject.renamedTo ?? name;
       }
+      return validationObject.renamedTo ?? name;
     } else {
       this.store.set(name, validationObject);
       return name;
