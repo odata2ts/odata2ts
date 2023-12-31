@@ -15,7 +15,7 @@ import {
   PropertyModel,
   SingletonType,
 } from "./DataTypeModel";
-import { NameValidator, NameValidatorOptions } from "./validation/NameValidator";
+import { ValidationError } from "./validation/NameValidator";
 
 export interface ProjectFiles {
   model: string;
@@ -33,11 +33,9 @@ export function withNamespace(ns: string, name: string) {
   return ns ? `${ns}.${name}` : name;
 }
 
-export interface DataModelOptions extends NameValidatorOptions {}
-
 export class DataModel {
-  private readonly nameValidator: NameValidator;
   private readonly converters: MappedConverterChains;
+  private nameValidation: Map<string, ValidationError[]> | undefined;
 
   private models = new Map<string, ModelType | ComplexType | EnumType>();
   /**
@@ -65,10 +63,8 @@ export class DataModel {
   constructor(
     namespaces: Array<NamespaceWithAlias>,
     private version: ODataVersion,
-    converters: MappedConverterChains = new Map(),
-    private options: DataModelOptions = {}
+    converters: MappedConverterChains = new Map()
   ) {
-    this.nameValidator = new NameValidator(options);
     this.converters = converters;
     this.namespace2Alias = namespaces.reduce<Record<string, string>>((col, [ns, alias]) => {
       if (alias) {
@@ -105,10 +101,6 @@ export class DataModel {
     }
   }
 
-  public validate() {
-    return this.nameValidator.validate();
-  }
-
   public addTypeDefinition(namespace: string, name: string, type: string) {
     const fqName = withNamespace(namespace, name);
     this.typeDefinitions.set(fqName, type);
@@ -125,9 +117,8 @@ export class DataModel {
 
   public addEntityType(namespace: string, name: string, model: Omit<ModelType, "dataType">) {
     const fqName = withNamespace(namespace, name);
-    const safeName = this.nameValidator.addEntityType(fqName, model.name);
 
-    this.models.set(fqName, { ...model, name: safeName, dataType: DataTypes.ModelType });
+    this.models.set(fqName, { ...model, dataType: DataTypes.ModelType });
     this.addAlias(namespace, name);
   }
 
@@ -153,9 +144,8 @@ export class DataModel {
 
   public addComplexType(namespace: string, name: string, model: Omit<ComplexType, "dataType">) {
     const fqName = withNamespace(namespace, name);
-    const safeName = this.nameValidator.addComplexType(fqName, model.name);
 
-    this.models.set(fqName, { ...model, name: safeName, dataType: DataTypes.ComplexType });
+    this.models.set(fqName, { ...model, dataType: DataTypes.ComplexType });
     this.addAlias(namespace, name);
   }
 
@@ -181,9 +171,8 @@ export class DataModel {
 
   public addEnum(namespace: string, name: string, type: Omit<EnumType, "dataType">) {
     const fqName = withNamespace(namespace, name);
-    const safeName = this.nameValidator.addEnumType(fqName, type.name);
 
-    this.models.set(fqName, { ...type, name: safeName, dataType: DataTypes.EnumType });
+    this.models.set(fqName, { ...type, dataType: DataTypes.EnumType });
     this.addAlias(namespace, name);
   }
 
@@ -231,15 +220,11 @@ export class DataModel {
   }
 
   public addAction(fqName: string, action: ActionImportType) {
-    const safeName = this.nameValidator.addOperationType(fqName, action.name);
-
-    this.container.actions[fqName] = { ...action, name: safeName };
+    this.container.actions[fqName] = action;
   }
 
   public addFunction(fqName: string, func: FunctionImportType) {
-    const safeName = this.nameValidator.addOperationType(fqName, func.name);
-
-    this.container.functions[fqName] = { ...func, name: safeName };
+    this.container.functions[fqName] = func;
   }
 
   public addSingleton(fqName: string, singleton: SingletonType) {
@@ -290,5 +275,13 @@ export class DataModel {
       visit(model);
     }
     return sorted;
+  }
+
+  public setNameValidation(map: Map<string, ValidationError[]>) {
+    this.nameValidation = map;
+  }
+
+  public getNameValidation() {
+    return this.nameValidation!;
   }
 }

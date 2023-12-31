@@ -82,7 +82,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
         const odataName = funcImport.$.Name;
         const fqName = withNamespace(namespace, odataName);
         const opConfig = this.serviceConfigHelper.findOperationTypeConfig([namespace, alias], odataName);
-        const opName = opConfig?.mappedName || odataName;
+        const opName = this.nameValidator.addOperationType(fqName, opConfig?.mappedName || odataName);
         const name = this.namingHelper.getFunctionName(opName);
         const usePost = funcImport.$["m:HttpMethod"]?.toUpperCase() === "POST";
         const parameters = funcImport.Parameter?.map((p) => this.mapProp(p)) ?? [];

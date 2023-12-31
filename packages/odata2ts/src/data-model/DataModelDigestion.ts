@@ -9,6 +9,7 @@ import { SchemaV3 } from "./edmx/ODataEdmxModelV3";
 import { SchemaV4 } from "./edmx/ODataEdmxModelV4";
 import { NamingHelper } from "./NamingHelper";
 import { ServiceConfigHelper, WithoutName } from "./ServiceConfigHelper";
+import { NameValidator } from "./validation/NameValidator";
 
 export interface TypeModel {
   outputType: string;
@@ -22,6 +23,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   protected readonly dataModel: DataModel;
   protected readonly serviceConfigHelper: ServiceConfigHelper;
+  protected readonly nameValidator: NameValidator;
 
   private model2Type = new Map<string, DataTypes>();
 
@@ -33,8 +35,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     converters?: MappedConverterChains
   ) {
     const namespaces = schemas.map<NamespaceWithAlias>((s) => [s.$.Namespace, s.$.Alias]);
-    this.dataModel = new DataModel(namespaces, version, converters, options);
+    this.dataModel = new DataModel(namespaces, version, converters);
     this.serviceConfigHelper = new ServiceConfigHelper(options);
+    this.nameValidator = new NameValidator(options);
 
     this.collectModelTypes(schemas);
   }
@@ -82,6 +85,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // delegate to version specific entity container digestion
     this.schemas.forEach((schema) => this.digestEntityContainer(schema));
 
+    this.dataModel.setNameValidation(this.nameValidator.validate());
     return this.dataModel;
   }
 
@@ -111,12 +115,11 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   private getBaseModel(
     entityConfig: WithoutName<EntityTypeGenerationOptions | ComplexTypeGenerationOptions> | undefined,
     namespace: NamespaceWithAlias,
-    model: ComplexType
+    model: ComplexType,
+    name: string,
+    fqName: string
   ) {
     const odataName = model.$.Name;
-    const fqName = withNamespace(namespace[0], odataName);
-
-    const entityName = entityConfig?.mappedName || model.$.Name;
 
     // map properties respecting the config
     const props = [...(model.Property ?? []), ...this.getNavigationProps(model)].map((p) => {
@@ -133,9 +136,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     return {
       fqName,
       odataName,
-      name: this.namingHelper.getModelName(entityName),
-      qName: this.namingHelper.getQName(entityName),
-      editableName: this.namingHelper.getEditableModelName(entityName),
+      name: this.namingHelper.getModelName(name),
+      qName: this.namingHelper.getQName(name),
+      editableName: this.namingHelper.getEditableModelName(name),
       baseClasses,
       props,
       baseProps: [], // postprocess required
@@ -161,7 +164,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       const odataName = et.$.Name;
       const fqName = withNamespace(namespace[0], odataName);
       const config = this.serviceConfigHelper.findEnumTypeConfig(namespace, odataName);
-      const enumName = config?.mappedName || odataName;
+      const enumName = this.nameValidator.addEnumType(fqName, config?.mappedName || odataName);
 
       this.dataModel.addEnum(namespace[0], odataName, {
         fqName,
@@ -179,7 +182,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     for (const model of models) {
       const config = this.serviceConfigHelper.findComplexTypeConfig(namespace, model.$.Name);
-      const baseModel = this.getBaseModel(config, namespace, model);
+      const fqName = withNamespace(namespace[0], model.$.Name);
+      const name = this.nameValidator.addComplexType(fqName, config?.mappedName || model.$.Name);
+      const baseModel = this.getBaseModel(config, namespace, model, name, fqName);
       this.dataModel.addComplexType(namespace[0], baseModel.odataName, baseModel);
     }
   }
@@ -191,8 +196,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     for (const model of models) {
       const entityConfig = this.serviceConfigHelper.findEntityTypeConfig(namespace, model.$.Name);
-      const baseModel = this.getBaseModel(entityConfig, namespace, model);
-      const entityName = entityConfig?.mappedName || model.$.Name;
+      const fqName = withNamespace(namespace[0], model.$.Name);
+      const name = this.nameValidator.addComplexType(fqName, entityConfig?.mappedName || model.$.Name);
+      const baseModel = this.getBaseModel(entityConfig, namespace, model, name, fqName);
 
       // key support: we add keys from this entity,
       // but not keys stemming from base classes (postprocess required)
@@ -209,8 +215,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
       this.dataModel.addEntityType(namespace[0], baseModel.odataName, {
         ...baseModel,
-        idModelName: this.namingHelper.getIdModelName(entityName),
-        qIdFunctionName: this.namingHelper.getQIdFunctionName(entityName),
+        idModelName: this.namingHelper.getIdModelName(name),
+        qIdFunctionName: this.namingHelper.getQIdFunctionName(name),
         generateId: true,
         keyNames: keyNames, // postprocess required to include key specs from base classes
         keys: [], // postprocess required to include props from base classes

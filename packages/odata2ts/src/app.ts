@@ -47,7 +47,7 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
       : await digestV4(dataService.Schema as Array<SchemaV4>, options, namingHelper);
 
   // Validation of entity names: the same name might be used across different namespaces
-  const validationErrors = dataModel.validate();
+  const validationErrors = dataModel.getNameValidation();
   if (validationErrors.size) {
     console.log("---");
     validationErrors.forEach((errors, name) => {
