@@ -16,6 +16,7 @@ export type DigestionOptions = Pick<
   | "v4BigNumberAsString"
   | "skipEditableModels"
   | "skipComments"
+  | "disableAutomaticNameClashResolution"
 >;
 
 /**

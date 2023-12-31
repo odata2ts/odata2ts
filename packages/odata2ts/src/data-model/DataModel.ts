@@ -15,6 +15,7 @@ import {
   PropertyModel,
   SingletonType,
 } from "./DataTypeModel";
+import { ValidationError } from "./validation/NameValidator";
 
 export interface ProjectFiles {
   model: string;
@@ -34,6 +35,7 @@ export function withNamespace(ns: string, name: string) {
 
 export class DataModel {
   private readonly converters: MappedConverterChains;
+  private nameValidation: Map<string, ValidationError[]> | undefined;
 
   private models = new Map<string, ModelType | ComplexType | EnumType>();
   /**
@@ -115,6 +117,7 @@ export class DataModel {
 
   public addEntityType(namespace: string, name: string, model: Omit<ModelType, "dataType">) {
     const fqName = withNamespace(namespace, name);
+
     this.models.set(fqName, { ...model, dataType: DataTypes.ModelType });
     this.addAlias(namespace, name);
   }
@@ -141,6 +144,7 @@ export class DataModel {
 
   public addComplexType(namespace: string, name: string, model: Omit<ComplexType, "dataType">) {
     const fqName = withNamespace(namespace, name);
+
     this.models.set(fqName, { ...model, dataType: DataTypes.ComplexType });
     this.addAlias(namespace, name);
   }
@@ -167,6 +171,7 @@ export class DataModel {
 
   public addEnum(namespace: string, name: string, type: Omit<EnumType, "dataType">) {
     const fqName = withNamespace(namespace, name);
+
     this.models.set(fqName, { ...type, dataType: DataTypes.EnumType });
     this.addAlias(namespace, name);
   }
@@ -214,20 +219,20 @@ export class DataModel {
     return operations || [];
   }
 
-  public addAction(name: string, action: ActionImportType) {
-    this.container.actions[name] = action;
+  public addAction(fqName: string, action: ActionImportType) {
+    this.container.actions[fqName] = action;
   }
 
-  public addFunction(name: string, func: FunctionImportType) {
-    this.container.functions[name] = func;
+  public addFunction(fqName: string, func: FunctionImportType) {
+    this.container.functions[fqName] = func;
   }
 
-  public addSingleton(name: string, singleton: SingletonType) {
-    this.container.singletons[name] = singleton;
+  public addSingleton(fqName: string, singleton: SingletonType) {
+    this.container.singletons[fqName] = singleton;
   }
 
-  public addEntitySet(name: string, entitySet: EntitySetType) {
-    this.container.entitySets[name] = entitySet;
+  public addEntitySet(fqName: string, entitySet: EntitySetType) {
+    this.container.entitySets[fqName] = entitySet;
   }
 
   public getEntityContainer() {
@@ -270,5 +275,13 @@ export class DataModel {
       visit(model);
     }
     return sorted;
+  }
+
+  public setNameValidation(map: Map<string, ValidationError[]>) {
+    this.nameValidation = map;
+  }
+
+  public getNameValidation() {
+    return this.nameValidation!;
   }
 }

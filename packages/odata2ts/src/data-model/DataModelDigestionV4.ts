@@ -47,7 +47,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
         const odataName = actionImport.$.Name;
         const fqName = withNamespace(namespace, odataName);
         const opConfig = this.serviceConfigHelper.findOperationTypeConfig(ns, odataName);
-        const opName = opConfig?.mappedName || odataName;
+        const opName = this.nameValidator.addOperationType(fqName, opConfig?.mappedName || odataName);
 
         this.dataModel.addAction(fqName, {
           fqName,
@@ -61,7 +61,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
         const odataName = funcImport.$.Name;
         const fqName = withNamespace(namespace, odataName);
         const opConfig = this.serviceConfigHelper.findOperationTypeConfig(ns, odataName);
-        const opName = opConfig?.mappedName || odataName;
+        const opName = this.nameValidator.addOperationType(fqName, opConfig?.mappedName || odataName);
 
         this.dataModel.addFunction(fqName, {
           fqName,
@@ -210,6 +210,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       const odataName = op.$.Name;
       const fqName = withNamespace(namespace, odataName);
       const opConfig = this.serviceConfigHelper.findOperationTypeConfig(ns, odataName);
+      // const opName = this.nameValidator.addOperationType(fqName, opConfig?.mappedName || odataName);
       const opName = opConfig?.mappedName || odataName;
       const params: Array<PropertyModel> = op.Parameter?.map((p) => this.mapProp(p)) ?? [];
       const returnType: PropertyModel | undefined = op.ReturnType?.map((rt) => {

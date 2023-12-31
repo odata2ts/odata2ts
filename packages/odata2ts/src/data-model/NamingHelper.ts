@@ -6,7 +6,6 @@ import { snakeCase } from "snake-case";
 import { FileNamingStrategyOption, NameSettings, NamingStrategies, StandardNamingOptions } from "../NamingModel";
 import { RunOptions } from "../OptionModel";
 import { NamespaceWithAlias } from "./DataModel";
-import { PropertyModel } from "./DataTypeModel";
 
 function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
   switch (strategy) {

@@ -17,6 +17,7 @@ describe("App Test", () => {
   let odataBuilder: ODataModelBuilderV4;
   let createPmSpy: jest.SpyInstance;
   let pmSpy: ProjectManager.ProjectManager;
+  let logInfoSpy: jest.SpyInstance;
 
   beforeAll(async () => {
     // @ts-ignore
@@ -28,6 +29,8 @@ describe("App Test", () => {
     };
     // @ts-ignore
     createPmSpy = jest.spyOn(ProjectManager, "createProjectManager").mockResolvedValue(pmSpy);
+
+    logInfoSpy = jest.spyOn(console, "log").mockImplementation(jest.fn);
   });
 
   beforeEach(async () => {
@@ -43,6 +46,10 @@ describe("App Test", () => {
       prettier: false,
       debug: false,
     };
+  });
+
+  afterAll(() => {
+    jest.resetAllMocks();
   });
 
   function doRunApp() {
@@ -75,6 +82,44 @@ describe("App Test", () => {
     expect(createPmSpy.mock.calls[0][0]).toMatchObject({
       service: "TesterService",
     });
+  });
+
+  test("with validation errors", async () => {
+    runOptions.disableAutomaticNameClashResolution = true;
+
+    // same entity name across different namespaces
+    const newNs = "New";
+    odataBuilder
+      .addEntityType("Test", undefined, (builder) => builder.addKeyProp("id", "Edm.String"))
+      .addSchema(newNs)
+      .addEntityType("Test", undefined, (builder) => builder.addKeyProp("id", "Edm.String"));
+
+    try {
+      await doRunApp();
+    } catch (error) {
+      expect(error?.toString()).toContain("same name across different namespaces!");
+    }
+
+    expect(logInfoSpy).toHaveBeenCalledTimes(2);
+    expect(logInfoSpy).toHaveBeenLastCalledWith("Duplicate name: Test - Fully Qualified Names: Tester.Test, New.Test");
+  });
+
+  test("with automatic name clash resolution", async () => {
+    runOptions.disableAutomaticNameClashResolution = false;
+
+    // same entity name across different namespaces
+    const newNs = "New";
+    odataBuilder
+      .addEntityType("Test", undefined, (builder) => builder.addKeyProp("id", "Edm.String"))
+      .addSchema(newNs)
+      .addEntityType("Test", undefined, (builder) => builder.addKeyProp("id", "Edm.String"));
+
+    await doRunApp();
+
+    expect(logInfoSpy).toHaveBeenCalledTimes(2);
+    expect(logInfoSpy).toHaveBeenLastCalledWith(
+      "Duplicate name: Test - Fully Qualified Names: Tester.Test, New.Test (renamed to: Test2)"
+    );
   });
 
   test("App: generate only models", async () => {

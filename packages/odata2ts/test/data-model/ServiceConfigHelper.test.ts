@@ -18,6 +18,7 @@ describe("ServiceConfigHelper Tests", function () {
       v2ModelsWithExtraResultsWrapping: false,
       v4BigNumberAsString: false,
       skipComments: true,
+      disableAutomaticNameClashResolution: false,
     });
   }
 
@@ -31,6 +32,7 @@ describe("ServiceConfigHelper Tests", function () {
       v2ModelsWithExtraResultsWrapping: false,
       v4BigNumberAsString: false,
       skipComments: true,
+      disableAutomaticNameClashResolution: false,
     });
   }
 
