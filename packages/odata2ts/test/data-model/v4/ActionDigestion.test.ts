@@ -16,6 +16,9 @@ describe("Action Digestion Test", () => {
   function withNs(name: string) {
     return `${SERVICE_NAME}.${name}`;
   }
+  function withEc(name: string) {
+    return `ENTITY_CONTAINER.${name}`;
+  }
 
   function doDigest() {
     return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
@@ -152,7 +155,7 @@ describe("Action Digestion Test", () => {
 
     const result = await doDigest();
     expect(result.getEntityContainer().actions).toMatchObject({
-      [withNs(exposedName)]: { odataName: exposedName, name: "notifyBestFriend", operation: withNs(actionName) },
+      [withEc(exposedName)]: { odataName: exposedName, name: "notifyBestFriend", operation: withNs(actionName) },
     });
   });
 });

@@ -21,6 +21,9 @@ describe("Function Digestion Test", () => {
   function withNs(name: string) {
     return `${NAMESPACE}.${name}`;
   }
+  function withEc(name: string) {
+    return `ENTITY_CONTAINER.${name}`;
+  }
 
   function doDigest() {
     const opts = digestionOptions ? (deepmerge(CONFIG, digestionOptions) as TestSettings) : CONFIG;
@@ -34,7 +37,7 @@ describe("Function Digestion Test", () => {
 
   test("Function: min case", async () => {
     const name = "GetBestFriend";
-    const fqName = withNs(name);
+    const fqName = withEc(name);
     const expected: OperationType = {
       fqName,
       odataName: name,
@@ -158,7 +161,7 @@ describe("Function Digestion Test", () => {
 
     expect(result.getUnboundOperationTypes()).toStrictEqual([
       {
-        fqName: withNs("GetBestFriend"),
+        fqName: withEc("GetBestFriend"),
         odataName: "GetBestFriend",
         name: "getBestFriend",
         qName: "QGetBestFriend",
@@ -212,15 +215,15 @@ describe("Function Digestion Test", () => {
     ]);
   });
 
-  test("renaming functions", async () => {
+  test("renaming function imports", async () => {
     const funcName = "TestOp";
-    const fqFuncName = withNs(funcName);
+    const fqFuncName = withEc(funcName);
     const altFuncName = "ComplextestFunc";
-    const fqAltFuncName = withNs(altFuncName);
+    const fqAltFuncName = withEc(altFuncName);
 
     digestionOptions.byTypeAndName = [
-      { type: TypeModel.OperationType, name: funcName, mappedName: "NewTestOperation" },
-      { type: TypeModel.Any, name: new RegExp(`${NAMESPACE}\.Complex(.+)`), mappedName: "Cmplx_$1" },
+      { type: TypeModel.OperationImportType, name: funcName, mappedName: "NewTestOperation" },
+      { type: TypeModel.Any, name: new RegExp(withEc(`Complex(.+)`)), mappedName: "Cmplx_$1" },
     ];
 
     odataBuilder.addFunctionImport(funcName);
@@ -248,7 +251,7 @@ describe("Function Digestion Test", () => {
     digestionOptions.allowRenaming = false;
     digestionOptions.byTypeAndName = [
       { type: TypeModel.Any, name: funcName, mappedName: "NewTestOperation" },
-      { type: TypeModel.Any, name: new RegExp(`${NAMESPACE}\.Complex(.+)`), mappedName: "Cmplx_$1" },
+      { type: TypeModel.Any, name: new RegExp(withEc(`Complex(.+)`)), mappedName: "Cmplx_$1" },
     ];
 
     odataBuilder.addFunctionImport(funcName);
@@ -256,10 +259,10 @@ describe("Function Digestion Test", () => {
 
     const result = await doDigest();
 
-    let toTest = result.getUnboundOperationType(withNs(funcName))!;
+    let toTest = result.getUnboundOperationType(withEc(funcName))!;
     expect(toTest.name).toBe("NewTestOperation");
 
-    toTest = result.getUnboundOperationType(withNs(altFuncName))!;
+    toTest = result.getUnboundOperationType(withEc(altFuncName))!;
     expect(toTest.name).toBe("Cmplx_testFunc");
   });
 });

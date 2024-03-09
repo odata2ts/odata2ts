@@ -328,7 +328,13 @@ export type TypeBasedGenerationOptions =
   | EntityTypeGenerationOptions;
 
 export interface GenericTypeGenerationOptions extends RenameOptions {
-  type: TypeModel.Any | TypeModel.OperationType | TypeModel.EnumType;
+  type:
+    | TypeModel.Any
+    | TypeModel.EnumType
+    | TypeModel.OperationType
+    | TypeModel.OperationImportType
+    | TypeModel.Singleton
+    | TypeModel.EntitySet;
 }
 
 export interface ComplexTypeGenerationOptions extends RenameOptions {

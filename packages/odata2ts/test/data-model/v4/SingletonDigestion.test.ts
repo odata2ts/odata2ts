@@ -15,6 +15,9 @@ describe("Singleton Digestion Test", () => {
   function withNs(name: string) {
     return `${SERVICE_NAME}.${name}`;
   }
+  function withEc(name: string) {
+    return `ENTITY_CONTAINER.${name}`;
+  }
 
   function doDigest() {
     return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
@@ -31,8 +34,8 @@ describe("Singleton Digestion Test", () => {
 
     const result = await doDigest();
     expect(result.getEntityContainer().singletons).toMatchObject({
-      [withNs("Me")]: {
-        fqName: withNs("Me"),
+      [withEc("Me")]: {
+        fqName: withEc("Me"),
         odataName: "Me",
         name: "Me",
         entityType: { name: "User" },
@@ -58,8 +61,8 @@ describe("Singleton Digestion Test", () => {
     const result = await doDigest();
 
     expect(result.getEntityContainer().singletons).toMatchObject({
-      [withNs("Me")]: {
-        fqName: withNs("Me"),
+      [withEc("Me")]: {
+        fqName: withEc("Me"),
         odataName: "Me",
         name: "Me",
         entityType: { name: "User" },

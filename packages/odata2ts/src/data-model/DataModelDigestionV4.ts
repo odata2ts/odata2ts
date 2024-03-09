@@ -40,14 +40,16 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
   protected digestEntityContainer(schema: SchemaV4) {
     if (schema.EntityContainer && schema.EntityContainer.length) {
       const container = schema.EntityContainer[0];
+
+      const ecName = container.$.Name;
       const namespace = schema.$.Namespace;
       const ns: NamespaceWithAlias = [namespace, schema.$.Alias];
 
       container.ActionImport?.forEach((actionImport) => {
         const odataName = actionImport.$.Name;
-        const fqName = withNamespace(namespace, odataName);
-        const opConfig = this.serviceConfigHelper.findOperationTypeConfig(ns, odataName);
-        const opName = this.nameValidator.addOperationType(fqName, opConfig?.mappedName || odataName);
+        const fqName = withNamespace(ecName, odataName);
+        const opConfig = this.serviceConfigHelper.findOperationImportConfig(ecName, odataName);
+        const opName = this.nameValidator.addOperationImportType(fqName, opConfig?.mappedName || odataName);
 
         this.dataModel.addAction(fqName, {
           fqName,
@@ -60,8 +62,8 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       container.FunctionImport?.forEach((funcImport) => {
         const odataName = funcImport.$.Name;
         const fqName = withNamespace(namespace, odataName);
-        const opConfig = this.serviceConfigHelper.findOperationTypeConfig(ns, odataName);
-        const opName = this.nameValidator.addOperationType(fqName, opConfig?.mappedName || odataName);
+        const opConfig = this.serviceConfigHelper.findOperationImportConfig(ecName, odataName);
+        const opName = this.nameValidator.addOperationImportType(fqName, opConfig?.mappedName || odataName);
 
         this.dataModel.addFunction(fqName, {
           fqName,
@@ -73,8 +75,13 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       });
 
       container.Singleton?.forEach((singleton) => {
-        const name = singleton.$.Name;
-        const fqName = withNamespace(namespace, name);
+        const odataName = singleton.$.Name;
+        const fqName = withNamespace(ecName, odataName);
+        const singletonConfig = this.serviceConfigHelper.findOperationImportConfig(ecName, odataName);
+        const name = this.nameValidator.addSingleton(
+          withNamespace(fqName, odataName),
+          singletonConfig?.mappedName || odataName
+        );
         const navPropBindings = singleton.NavigationPropertyBinding || [];
         const entityType = this.dataModel.getEntityType(singleton.$.Type);
         if (!entityType) {
@@ -83,8 +90,8 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
         this.dataModel.addSingleton(fqName, {
           fqName,
+          odataName,
           name,
-          odataName: singleton.$.Name,
           entityType,
           navPropBinding: navPropBindings.map((binding) => ({
             path: this.namingHelper.stripServicePrefix(binding.$.Path),
@@ -94,8 +101,10 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       });
 
       container.EntitySet?.forEach((entitySet) => {
-        const name = entitySet.$.Name;
-        const fqName = withNamespace(namespace, name);
+        const odataName = entitySet.$.Name;
+        const fqName = withNamespace(ecName, odataName);
+        const config = this.serviceConfigHelper.findOperationImportConfig(ecName, odataName);
+        const name = this.nameValidator.addEntitySet(fqName, config?.mappedName || odataName);
         const navPropBindings = entitySet.NavigationPropertyBinding || [];
         const entityType = this.dataModel.getEntityType(entitySet.$.EntityType);
         if (!entityType) {
@@ -104,8 +113,8 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
         this.dataModel.addEntitySet(fqName, {
           fqName,
+          odataName,
           name,
-          odataName: entitySet.$.Name,
           entityType,
           navPropBinding: navPropBindings.map((binding) => ({
             path: this.namingHelper.stripServicePrefix(binding.$.Path),
@@ -208,15 +217,13 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
     operations.forEach((op) => {
       const odataName = op.$.Name;
+      const isBound = op.$.IsBound === "true";
       const fqName = withNamespace(namespace, odataName);
       const opConfig = this.serviceConfigHelper.findOperationTypeConfig(ns, odataName);
-      // const opName = this.nameValidator.addOperationType(fqName, opConfig?.mappedName || odataName);
-      const opName = opConfig?.mappedName || odataName;
       const params: Array<PropertyModel> = op.Parameter?.map((p) => this.mapProp(p)) ?? [];
       const returnType: PropertyModel | undefined = op.ReturnType?.map((rt) => {
         return this.mapProp({ ...rt, $: { Name: "NO_NAME_BECAUSE_RETURN_TYPE", ...rt.$ } });
       })[0];
-      const isBound = op.$.IsBound === "true";
 
       if (isBound && !params.length) {
         throw new Error(`IllegalState: Operation '${odataName}' is bound, but has no parameters!`);
@@ -224,6 +231,10 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
       const bindingProp = isBound ? params.shift() : undefined;
       const bindingEntityName = bindingProp ? this.dataModel.getModel(bindingProp!.fqType)?.name : undefined;
+
+      const opName = bindingEntityName
+        ? this.nameValidator.addBoundOperationType(bindingEntityName, fqName, opConfig?.mappedName || odataName)
+        : this.nameValidator.addUnboundOperationType(fqName, opConfig?.mappedName || odataName);
 
       const name =
         type === OperationTypes.Function

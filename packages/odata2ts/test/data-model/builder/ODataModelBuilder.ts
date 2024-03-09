@@ -80,7 +80,7 @@ export abstract class ODataModelBuilder<
       // @ts-ignore
       this.currentSchema.EntityContainer = [
         {
-          $: { Name: "ignore" },
+          $: { Name: "ENTITY_CONTAINER" },
         },
       ];
     }
