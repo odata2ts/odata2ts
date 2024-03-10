@@ -132,7 +132,9 @@ async function startServiceGenerationRun(options: RunOptions) {
   const { source, output, sourceUrl, refreshFile, sourceUrlConfig, debug, mode, emitMode, prettier, serviceName } =
     options;
   console.log("---------------------------");
-  console.log("Starting generation process");
+  console.log(
+    `Starting generation process. Service name ${serviceName ? `"${serviceName}"` : "will be detected automatically!"}`
+  );
 
   if (debug) {
     console.log("Resolved config:", {

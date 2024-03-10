@@ -21,6 +21,10 @@ describe("Function Digestion Test", () => {
     return `${NAMESPACE}.${name}`;
   }
 
+  function withEc(name: string) {
+    return `ENTITY_CONTAINER.${name}`;
+  }
+
   function doDigest() {
     const opts = digestionOptions ? (deepmerge(CONFIG, digestionOptions) as TestSettings) : CONFIG;
     return digest(odataBuilder.getSchemas(), opts, new NamingHelper(opts, NAMESPACE));
@@ -193,7 +197,7 @@ describe("Function Digestion Test", () => {
 
   test("Function Import: min case", async () => {
     const name = "GetBestFriend";
-    odataBuilder.addFunctionImport(name, withNs(name), "Friends").addFunction(name, ODataTypesV4.Boolean, false);
+    odataBuilder.addFunctionImport(name, withEc(name), "Friends").addFunction(name, ODataTypesV4.Boolean, false);
     // .addEntityType("User", undefined, (builder) => {
     //   builder.addKeyProp("id", OdataTypes.String);
     // });
@@ -201,6 +205,43 @@ describe("Function Digestion Test", () => {
     const result = await doDigest();
     expect(result.getEntityContainer().functions).toMatchObject({
       [withNs(name)]: { odataName: "GetBestFriend", name: "getBestFriend", entitySet: "Friends" },
+    });
+  });
+
+  test("Function Import: renaming", async () => {
+    const importName = "getBestFriend";
+    const importNameNew = "newFuncImportName";
+    const funcName = "getBestFriendFunc";
+    const importName2 = "getWhatever";
+    const importName2New = "evergreen";
+    const funcName2 = "getWhateverFunc";
+    odataBuilder
+      .addFunctionImport(importName, withNs(funcName), "Friends")
+      .addFunction(funcName, ODataTypesV4.Boolean, false)
+      .addFunctionImport(importName2, withNs(funcName2), "Friends")
+      .addFunction(funcName2, ODataTypesV4.Boolean, false);
+
+    digestionOptions.byTypeAndName = [
+      { type: TypeModel.OperationImportType, name: importName, mappedName: importNameNew },
+      { type: TypeModel.Any, name: new RegExp(withEc(`getWhat(.+)`)), mappedName: "$1green" },
+    ];
+
+    const result = await doDigest();
+    expect(result.getEntityContainer().functions).toStrictEqual({
+      [withEc(importName)]: {
+        odataName: importName,
+        fqName: withEc(importName),
+        name: importNameNew,
+        entitySet: "Friends",
+        operation: withNs(funcName),
+      },
+      [withEc(importName2)]: {
+        odataName: importName2,
+        fqName: withEc(importName2),
+        name: importName2New,
+        entitySet: "Friends",
+        operation: withNs(funcName2),
+      },
     });
   });
 

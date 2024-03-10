@@ -73,8 +73,6 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
   protected digestOperations(schema: SchemaV3) {}
 
   protected digestEntityContainer(schema: SchemaV3) {
-    const namespace = schema.$.Namespace;
-    const alias = schema.$.Alias;
     if (schema.EntityContainer && schema.EntityContainer.length) {
       const container = schema.EntityContainer[0];
       const ecName = container.$.Name;

@@ -61,7 +61,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
       container.FunctionImport?.forEach((funcImport) => {
         const odataName = funcImport.$.Name;
-        const fqName = withNamespace(namespace, odataName);
+        const fqName = withNamespace(ecName, odataName);
         const opConfig = this.serviceConfigHelper.findOperationImportConfig(ecName, odataName);
         const opName = this.nameValidator.addOperationImportType(fqName, opConfig?.mappedName || odataName);
 

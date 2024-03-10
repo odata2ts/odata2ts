@@ -86,7 +86,7 @@
     </Schema>
     <!-- own schema for the entity container -->
     <Schema Namespace="Container" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-      <EntityContainer Name="C1^C3">
+      <EntityContainer Name="THE_ONE_ENTITY_CONTAINER">
         <EntitySet Name="Parents" EntityType="MY.org.Parent" />
         <EntitySet Name="Children" EntityType="MY.org.Child" />
         <EntitySet Name="AgedChildren" EntityType="You.org.Child" />
