@@ -28,6 +28,15 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV4): Array<Property> {
     return (entityType as EntityTypeV4).NavigationProperty || [];
+    // .map(p => {
+    //   const entityConfig = this.serviceConfigHelper.findEntityTypeConfig()
+    //   return {
+    //     $: {
+    //       ...p.$,
+    //       Type:
+    //     }
+    //   }
+    // })
   }
 
   protected digestOperations(schema: SchemaV4) {
@@ -42,8 +51,6 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       const container = schema.EntityContainer[0];
 
       const ecName = container.$.Name;
-      const namespace = schema.$.Namespace;
-      const ns: NamespaceWithAlias = [namespace, schema.$.Alias];
 
       container.ActionImport?.forEach((actionImport) => {
         const odataName = actionImport.$.Name;

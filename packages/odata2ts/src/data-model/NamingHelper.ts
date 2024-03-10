@@ -106,6 +106,12 @@ export class NamingHelper {
     return found ? token.replace(found, "") : token;
   }
 
+  public getNameAndServicePrefix(token: string): [string, string | undefined] {
+    const prefix = this.namespacePrefixes.find((prefix) => token.startsWith(prefix));
+    const name = prefix ? token.replace(prefix, "") : token;
+    return [name, prefix];
+  }
+
   private namingFunction(strategy: NamingStrategies | undefined) {
     const strategyFn = getNamingStrategyImpl(strategy);
     if (!strategyFn || !this.allowModelPropRenaming) {

@@ -53,6 +53,7 @@ export interface ComplexType {
   props: Array<PropertyModel>;
   baseProps: Array<PropertyModel>;
   baseClasses: Array<string>;
+  finalBaseClass: string | undefined;
 }
 
 export interface EnumType {

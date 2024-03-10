@@ -114,7 +114,6 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   private getBaseModel(
     entityConfig: WithoutName<EntityTypeGenerationOptions | ComplexTypeGenerationOptions> | undefined,
-    namespace: NamespaceWithAlias,
     model: ComplexType,
     name: string,
     fqName: string
@@ -129,8 +128,14 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     // support for base types, i.e. extends clause of interfaces
     const baseClasses = [];
+    let finalBaseClass: string | undefined = undefined;
     if (model.$.BaseType) {
       baseClasses.push(model.$.BaseType);
+      const [baseName, basePrefix] = this.namingHelper.getNameAndServicePrefix(model.$.BaseType);
+      const baseConfig =
+        this.serviceConfigHelper.findEntityTypeConfig([basePrefix!], baseName) ||
+        this.serviceConfigHelper.findComplexTypeConfig([basePrefix!], baseName);
+      finalBaseClass = baseConfig?.mappedName ?? baseName;
     }
 
     return {
@@ -140,6 +145,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       qName: this.namingHelper.getQName(name),
       editableName: this.namingHelper.getEditableModelName(name),
       baseClasses,
+      finalBaseClass,
       props,
       baseProps: [], // postprocess required
     };
@@ -184,7 +190,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       const config = this.serviceConfigHelper.findComplexTypeConfig(namespace, model.$.Name);
       const fqName = withNamespace(namespace[0], model.$.Name);
       const name = this.nameValidator.addComplexType(fqName, config?.mappedName || model.$.Name);
-      const baseModel = this.getBaseModel(config, namespace, model, name, fqName);
+      const baseModel = this.getBaseModel(config, model, name, fqName);
       this.dataModel.addComplexType(namespace[0], baseModel.odataName, baseModel);
     }
   }
@@ -197,8 +203,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     for (const model of models) {
       const entityConfig = this.serviceConfigHelper.findEntityTypeConfig(namespace, model.$.Name);
       const fqName = withNamespace(namespace[0], model.$.Name);
-      const name = this.nameValidator.addComplexType(fqName, entityConfig?.mappedName || model.$.Name);
-      const baseModel = this.getBaseModel(entityConfig, namespace, model, name, fqName);
+      const name = this.nameValidator.addEntityType(fqName, entityConfig?.mappedName || model.$.Name);
+      const baseModel = this.getBaseModel(entityConfig, model, name, fqName);
 
       // key support: we add keys from this entity,
       // but not keys stemming from base classes (postprocess required)
@@ -228,31 +234,31 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   private postProcessModel() {
     // complex types
     const complexTypes = this.dataModel.getComplexTypes();
-    complexTypes.forEach((model) => {
-      const [baseProps] = this.collectBaseClassPropsAndKeys(model, []);
-      model.baseProps = baseProps;
+    complexTypes.forEach((ct) => {
+      const [baseProps] = this.collectBaseClassPropsAndKeys(ct, []);
+      ct.baseProps = baseProps;
     });
     // entity types
-    const modelTypes = this.dataModel.getEntityTypes();
-    modelTypes.forEach((model) => {
-      const [baseProps, baseKeys, idName, qIdName] = this.collectBaseClassPropsAndKeys(model, []);
-      model.baseProps = baseProps;
+    const entityTypes = this.dataModel.getEntityTypes();
+    entityTypes.forEach((et) => {
+      const [baseProps, baseKeys, idName, qIdName] = this.collectBaseClassPropsAndKeys(et, []);
+      et.baseProps = baseProps;
 
-      if (!model.keyNames.length && idName) {
-        model.idModelName = idName;
-        model.qIdFunctionName = qIdName;
-        model.generateId = false;
+      if (!et.keyNames.length && idName) {
+        et.idModelName = idName;
+        et.qIdFunctionName = qIdName;
+        et.generateId = false;
       }
-      model.keyNames.unshift(...baseKeys);
+      et.keyNames.unshift(...baseKeys);
 
       // sanity check: entity types require key specification
-      if (!model.keyNames.length) {
-        throw new Error(`Key property is missing from Entity "${model.name}" (${model.odataName})!`);
+      if (!et.keyNames.length) {
+        throw new Error(`Key property is missing from Entity "${et.name}" (${et.odataName})!`);
       }
 
-      const isSingleKey = model.keyNames.length === 1;
-      const props = [...model.baseProps, ...model.props];
-      model.keys = model.keyNames.map((keyName) => {
+      const isSingleKey = et.keyNames.length === 1;
+      const props = [...et.baseProps, ...et.props];
+      et.keys = et.keyNames.map((keyName) => {
         const prop = props.find((p) => p.odataName === keyName);
         if (!prop) {
           throw new Error(`Key with name [${keyName}] not found in props!`);
@@ -335,6 +341,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // EntityType, ComplexType, EnumType
     if (this.namingHelper.includesServicePrefix(dataType)) {
       const resultDt = this.model2Type.get(dataType)!;
+      const [dataTypeName, dataTypePrefix] = this.namingHelper.getNameAndServicePrefix(dataType);
+      const dataTypeNamespace: NamespaceWithAlias = [dataTypePrefix!];
       if (!resultDt) {
         throw new Error(
           `Couldn't determine model data type for property "${p.$.Name}"! Given data type: "${dataType}".`
@@ -343,9 +351,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
       // special handling for enums
       if (resultDt === DataTypes.EnumType) {
+        const enumConfig = this.serviceConfigHelper.findEnumTypeConfig(dataTypeNamespace, dataTypeName);
         result = {
           dataType: resultDt,
-          type: this.namingHelper.getEnumName(dataType),
+          type: this.namingHelper.getEnumName(enumConfig?.mappedName ?? dataType),
           qPath: "QEnumPath",
           qObject: isCollection ? "QEnumCollection" : undefined,
           qParam: "QEnumParam",
@@ -353,11 +362,16 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       }
       // handling of complex & entity types
       else {
+        const entityConfig =
+          resultDt === DataTypes.ComplexType
+            ? this.serviceConfigHelper.findComplexTypeConfig(dataTypeNamespace, dataTypeName)
+            : this.serviceConfigHelper.findEntityTypeConfig(dataTypeNamespace, dataTypeName);
+        const resultDataType = entityConfig?.mappedName ?? dataType;
         result = {
           dataType: resultDt,
-          type: this.namingHelper.getModelName(dataType),
+          type: this.namingHelper.getModelName(resultDataType),
           qPath: "QEntityPath",
-          qObject: this.namingHelper.getQName(dataType),
+          qObject: this.namingHelper.getQName(resultDataType),
           qParam: "QComplexParam",
         };
       }
