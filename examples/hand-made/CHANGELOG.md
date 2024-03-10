@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.5.1...@odata2ts/example-hand-made@0.6.0) (2024-03-10)
+
+### Bug Fixes
+
+* fully qualified name for EntitySet, Singleton & FunctionImport by EntityContainer name instead of namespace ([#245](https://github.com/odata2ts/odata2ts/issues/245)) ([6047122](https://github.com/odata2ts/odata2ts/commit/60471223deac8b14b2d3cfc0946acde7d33d2d64))
+
+### Code Refactoring
+
+* byTypeAndName option ([#238](https://github.com/odata2ts/odata2ts/issues/238)) ([e15f7a6](https://github.com/odata2ts/odata2ts/commit/e15f7a615e0cdf3865fbfce4dee08cdae60b46ad))
+
+### BREAKING CHANGES
+
+* Config options `entitiesByName` and `operationsByName` have been dropped. You must use `byTypeAndName` instead and provide the new type property for each configuration.
+
+Renaming now supports EntityType, ComplexType, EnumType and any operation type (FunctionImport, Function, Action).
+
 ## [0.5.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.5.0...@odata2ts/example-hand-made@0.5.1) (2023-11-15)
 
 **Note:** Version bump only for package @odata2ts/example-hand-made

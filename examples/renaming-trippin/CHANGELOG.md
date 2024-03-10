@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.6](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-renaming@0.2.5...@odata2ts/example-renaming@0.2.6) (2024-03-10)
+
+### Bug Fixes
+
+* fully qualified name for EntitySet, Singleton & FunctionImport by EntityContainer name instead of namespace ([#245](https://github.com/odata2ts/odata2ts/issues/245)) ([6047122](https://github.com/odata2ts/odata2ts/commit/60471223deac8b14b2d3cfc0946acde7d33d2d64))
+
 ## [0.2.5](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-renaming@0.2.4...@odata2ts/example-renaming@0.2.5) (2023-11-15)
 
 **Note:** Version bump only for package @odata2ts/example-renaming
