@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, Modes, NamingStrategies } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, Modes, NamingStrategies, TypeModel } from "@odata2ts/odata2ts";
 
 const sharedPropConfig = [
   {
@@ -10,14 +10,13 @@ const sharedPropConfig = [
 ];
 
 const config: ConfigFileOptions = {
-  debug: true,
   mode: Modes.service,
   emitMode: EmitModes.ts,
   // TrippinService does not generate IDs on the server, but the client side => demo service
   disableAutoManagedKey: true,
   allowRenaming: true,
   services: {
-    trippinMin: {
+    minimalDefaults: {
       source: "resource/trippin.xml",
       output: "generated-src/trippin-min",
       propertiesByName: sharedPropConfig,
@@ -25,7 +24,7 @@ const config: ConfigFileOptions = {
         minimalDefaults: true,
       },
     },
-    trippin: {
+    fullRenaming: {
       source: "resource/trippin.xml",
       output: "generated-src/TRIPPIN",
       propertiesByName: sharedPropConfig,
@@ -80,6 +79,17 @@ const config: ConfigFileOptions = {
           },
         },
       },
+      byTypeAndName: [
+        { type: TypeModel.EntityType, name: "Person", mappedName: "ThePerson" },
+        { type: TypeModel.EntitySet, name: "People", mappedName: "ThePeople" },
+        { type: TypeModel.Singleton, name: "Me", mappedName: "MeMyselfAndI" },
+        {
+          type: TypeModel.OperationImportType,
+          name: "GetPersonWithMostFriends",
+          mappedName: "TheOneWithALotOfFriends",
+        },
+        { type: TypeModel.OperationImportType, name: "ResetDataSource", mappedName: "DoReset" },
+      ],
     },
   },
 };

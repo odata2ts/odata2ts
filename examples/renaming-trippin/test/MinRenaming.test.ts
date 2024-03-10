@@ -2,9 +2,6 @@ import { EditableLocation, EditablePerson, Feature, PersonId } from "../generate
 import { TrippinService } from "../generated-src/trippin-min/TrippinService";
 import { MockODataClient } from "./MockODataClient";
 
-// import { qLocation, qPerson } from "../generated-src/trippin-min/QTrippin";
-// import { EditableLocation, EditablePerson, Feature, PersonId } from "../generated-src/trippin-min/TrippinModel";
-
 describe("Testing Generation with min renaming options", () => {
   const BASE_URL = "/test";
   const odataClient = new MockODataClient();

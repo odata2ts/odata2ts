@@ -15,6 +15,9 @@ describe("EntitySet Digestion Test", () => {
   function withNs(name: string) {
     return `${SERVICE_NAME}.${name}`;
   }
+  function withEc(name: string) {
+    return `ENTITY_CONTAINER.${name}`;
+  }
 
   function doDigest() {
     return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
@@ -31,7 +34,7 @@ describe("EntitySet Digestion Test", () => {
 
     const result = await doDigest();
     expect(result.getEntityContainer().entitySets).toMatchObject({
-      [withNs("Products")]: { odataName: "Products", name: "Products", entityType: { name: "Product" } },
+      [withEc("Products")]: { odataName: "Products", name: "Products", entityType: { name: "Product" } },
     });
   });
 

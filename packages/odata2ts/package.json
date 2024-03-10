@@ -17,6 +17,7 @@
     "clean": "rimraf lib build",
     "clean-v2": "rimraf build/v2",
     "clean-v4": "rimraf build/v4",
+    "clear-cache": "jest --clearCache",
     "compile": "tsc",
     "compile-fixtures": "tsc -p ./tsconfig.fixture.json",
     "dev": "yarn generate trippin odata",

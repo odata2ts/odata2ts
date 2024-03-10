@@ -12,16 +12,21 @@ const config: ConfigFileOptions = {
       output: "src/generated/edge-cases",
     },
     schemas: {
-      serviceName: "namespaces",
+      serviceName: "autoNameClashResolution",
       source: "resource/multiple-schemas.xml",
       output: "src/generated/schemas",
+    },
+    manualRenaming: {
+      serviceName: "manualRenaming",
+      source: "resource/multiple-schemas.xml",
+      output: "src/generated/manual-renaming",
       byTypeAndName: [
         // This solves the problem of duplicate names (same name in different namespaces)
         // by renaming one of those entities, which must be addressed by its fully qualified name.
         {
-          type: TypeModel.EntityType,
-          name: "MY.org.Child",
-          mappedName: "MyChild",
+          type: TypeModel.EnumType,
+          name: "MY.org.Enum",
+          mappedName: "MyEnum",
         },
         {
           type: TypeModel.ComplexType,
@@ -29,34 +34,58 @@ const config: ConfigFileOptions = {
           mappedName: "MyComplex",
         },
         {
-          type: TypeModel.EnumType,
-          name: "MY.org.Enum",
-          mappedName: "MyEnum",
+          type: TypeModel.EntityType,
+          name: "MY.org.Child",
+          mappedName: "MyChild",
         },
-        // renaming with regexp
         {
           type: TypeModel.Any,
-          name: /NS\*2\.(.+)/,
-          mappedName: "$1_NS2",
-        },
-        // This solves the problem of duplicate function & action names - which only occurs for
-        // operations with the same name in different namespaces bound to the same entity -
-        // by renaming one of those operations. This bound action or function must be addressed by
-        // its fully qualified name.
-        {
-          type: TypeModel.OperationType,
-          name: "NS*2.unboundFunc",
-          mappedName: "AltUnboundFunc",
+          name: "NS1.Entity",
+          mappedName: "MyEntity",
         },
         {
           type: TypeModel.OperationType,
+          name: "NS*2.BoundFunc",
+          mappedName: "BoundFunc_v2",
+        },
+        {
+          type: TypeModel.Any,
           name: "NS3.BoundFunc",
-          mappedName: "AltBoundFunc",
+          mappedName: "BoundFunc_v3",
+        },
+        {
+          type: TypeModel.OperationType,
+          name: "NS*2.BoundCollectionFunc",
+          mappedName: "BoundCollectionFunc_v2",
         },
         {
           type: TypeModel.Any,
           name: "NS3.BoundCollectionFunc",
-          mappedName: "AltBoundCollectionFunc",
+          mappedName: "BoundCollectionFunc_v3",
+        },
+        {
+          type: TypeModel.OperationType,
+          name: "NS*2.unboundFunc",
+          mappedName: "unboundFunc_v2",
+        },
+      ],
+    },
+    renamingByRegExp: {
+      serviceName: "regexpRenaming",
+      source: "resource/multiple-schemas.xml",
+      output: "src/generated/regexp-renaming",
+      byTypeAndName: [
+        // renaming "MY.org.xyz" to "My_xyz"
+        {
+          type: TypeModel.Any,
+          name: /MY\.org\.(.*)/,
+          mappedName: `My_$1}`,
+        },
+        // renaming with regexp: "NS1.xyz" || "NS*2.xyz" || ... => "xyz_NS1" ||  "xyz_NS2" || ...
+        {
+          type: TypeModel.Any,
+          name: /NS(\*)?(.)\.(.+)/,
+          mappedName: "$3_NS$2",
         },
       ],
     },

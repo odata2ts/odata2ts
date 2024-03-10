@@ -82,7 +82,7 @@ class ModelGenerator {
           docs: this.options.skipComments ? undefined : [this.generatePropDoc(p, model)],
         };
       }),
-      extends: model.baseClasses.map((bc) => this.namingHelper.getModelName(bc)),
+      extends: model.finalBaseClass ? [this.namingHelper.getModelName(model.finalBaseClass)] : undefined,
     });
   }
 

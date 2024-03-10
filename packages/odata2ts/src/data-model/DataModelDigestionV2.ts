@@ -73,16 +73,15 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
   protected digestOperations(schema: SchemaV3) {}
 
   protected digestEntityContainer(schema: SchemaV3) {
-    const namespace = schema.$.Namespace;
-    const alias = schema.$.Alias;
     if (schema.EntityContainer && schema.EntityContainer.length) {
       const container = schema.EntityContainer[0];
+      const ecName = container.$.Name;
 
       container.FunctionImport?.forEach((funcImport) => {
         const odataName = funcImport.$.Name;
-        const fqName = withNamespace(namespace, odataName);
-        const opConfig = this.serviceConfigHelper.findOperationTypeConfig([namespace, alias], odataName);
-        const opName = this.nameValidator.addOperationType(fqName, opConfig?.mappedName || odataName);
+        const fqName = withNamespace(ecName, odataName);
+        const opConfig = this.serviceConfigHelper.findOperationImportConfig(ecName, odataName);
+        const opName = this.nameValidator.addOperationImportType(fqName, opConfig?.mappedName || odataName);
         const name = this.namingHelper.getFunctionName(opName);
         const usePost = funcImport.$["m:HttpMethod"]?.toUpperCase() === "POST";
         const parameters = funcImport.Parameter?.map((p) => this.mapProp(p)) ?? [];
@@ -98,7 +97,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
 
         // V2 only knows the FunctionImport element
         // we generate the data structure for the function here
-        this.dataModel.addUnboundOperationType(namespace, {
+        this.dataModel.addUnboundOperationType(ecName, {
           fqName,
           odataName,
           name,
@@ -120,8 +119,10 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
       });
 
       container.EntitySet?.forEach((entitySet) => {
-        const name = entitySet.$.Name;
-        const fqName = withNamespace(namespace, name);
+        const odataName = entitySet.$.Name;
+        const fqName = withNamespace(ecName, odataName);
+        const config = this.serviceConfigHelper.findEntitySetConfig(ecName, odataName);
+        const name = this.nameValidator.addEntitySet(fqName, config?.mappedName || odataName);
         const entityType = this.dataModel.getEntityType(entitySet.$.EntityType);
         if (!entityType) {
           throw new Error(`Entity type "${entitySet.$.EntityType}" not found!`);
@@ -129,7 +130,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
 
         this.dataModel.addEntitySet(fqName, {
           fqName,
-          odataName: name,
+          odataName,
           name,
           entityType,
         });

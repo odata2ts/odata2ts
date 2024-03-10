@@ -88,7 +88,7 @@
         <NavigationProperty Name="Airline" Type="Trippin.Airline" />
         <NavigationProperty Name="From" Type="Trippin.Airport" />
         <NavigationProperty Name="To" Type="Trippin.Airport" />
-      </EntityType>
+      </EntityType>-
       <EntityType Name="Employee" BaseType="Trippin.Person">
         <Property Name="Cost" Type="Edm.Int64" Nullable="false" />
         <NavigationProperty Name="Peers" Type="Collection(Trippin.Person)" />

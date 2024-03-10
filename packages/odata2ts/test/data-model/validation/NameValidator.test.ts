@@ -78,7 +78,7 @@ describe("NameValidator Tests", function () {
   test("addEnumType and addOperationType", () => {
     const name = "opEr";
     validator.addEnumType(withNs(NS1, name), name);
-    validator.addOperationType(withNs(NS2, name), name);
+    validator.addUnboundOperationType(withNs(NS2, name), name);
 
     let validation = validator.validate();
     expect(validation.size).toBe(1);

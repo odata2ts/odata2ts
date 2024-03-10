@@ -1,5 +1,5 @@
 import { servicexxx_Trippin_xxxs } from "../generated-src/TRIPPIN/servicexxx_Trippin_xxxs";
-import { EDITABLE_LOCATION, EDITABLE_PERSON, FEATURE, PERSON_ID } from "../generated-src/TRIPPIN/TRIPPIN_TYPES";
+import { EDITABLE_LOCATION, EDITABLE_THE_PERSON, FEATURE, THE_PERSON_ID } from "../generated-src/TRIPPIN/TRIPPIN_TYPES";
 import { MockODataClient } from "./MockODataClient";
 
 describe("Testing Generation With Max Renaming Options", () => {
@@ -9,7 +9,7 @@ describe("Testing Generation With Max Renaming Options", () => {
   // noinspection JSPotentiallyInvalidConstructorUsage
   const testService = new servicexxx_Trippin_xxxs(odataClient, BASE_URL);
 
-  let editModel: EDITABLE_PERSON;
+  let editModel: EDITABLE_THE_PERSON;
 
   beforeEach(() => {
     editModel = {
@@ -21,7 +21,7 @@ describe("Testing Generation With Max Renaming Options", () => {
   });
 
   test("unbound function", async () => {
-    await testService.get_person_with_most_friends_func();
+    await testService.the_one_with_a_lot_of_friends_func();
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/GetPersonWithMostFriends()`);
   });
 
@@ -31,7 +31,7 @@ describe("Testing Generation With Max Renaming Options", () => {
   });
 
   test("unbound action", async () => {
-    await testService.reset_data_source_act();
+    await testService.do_reset_act();
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/ResetDataSource`);
     expect(odataClient.lastData).toEqual({});
   });
@@ -69,7 +69,7 @@ describe("Testing Generation With Max Renaming Options", () => {
   });
 
   test("entitySet: get with complex id", async () => {
-    const testId: PERSON_ID = { user_name: "williams" };
+    const testId: THE_PERSON_ID = { user_name: "williams" };
     const expected = `${BASE_URL}/People(UserName='williams')`;
 
     expect(testService.navigate_to_people(testId).getPath()).toBe(expected);
@@ -78,7 +78,7 @@ describe("Testing Generation With Max Renaming Options", () => {
   test("entityType: update", async () => {
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
-    const model: EDITABLE_PERSON = {
+    const model: EDITABLE_THE_PERSON = {
       user_name: "williams",
       favorite_feature: FEATURE.Feature1,
       features: [],

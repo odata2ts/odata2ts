@@ -38,6 +38,9 @@ export class ServiceConfigHelper {
     [TypeModel.ComplexType]: createMapping<ComplexTypeGenerationOptions>(),
     [TypeModel.EnumType]: createMapping<GenericTypeGenerationOptions>(),
     [TypeModel.OperationType]: createMapping<GenericTypeGenerationOptions>(),
+    [TypeModel.OperationImportType]: createMapping<GenericTypeGenerationOptions>(),
+    [TypeModel.EntitySet]: createMapping<GenericTypeGenerationOptions>(),
+    [TypeModel.Singleton]: createMapping<GenericTypeGenerationOptions>(),
   };
 
   constructor(options: DigestionOptions) {
@@ -195,10 +198,26 @@ export class ServiceConfigHelper {
   ): WithoutName<GenericTypeGenerationOptions> | undefined {
     return this.findConfig(this.mapping.EnumType, namespace, name);
   }
+
   public findOperationTypeConfig(
     namespace: NamespaceWithAlias,
     name: string
   ): WithoutName<GenericTypeGenerationOptions> | undefined {
     return this.findConfig(this.mapping.OperationType, namespace, name);
+  }
+
+  public findOperationImportConfig(
+    namespace: string,
+    name: string
+  ): WithoutName<GenericTypeGenerationOptions> | undefined {
+    return this.findConfig(this.mapping.OperationImportType, [namespace], name);
+  }
+
+  public findEntitySetConfig(namespace: string, name: string): WithoutName<GenericTypeGenerationOptions> | undefined {
+    return this.findConfig(this.mapping.EntitySet, [namespace], name);
+  }
+
+  public findSingletonConfig(namespace: string, name: string): WithoutName<GenericTypeGenerationOptions> | undefined {
+    return this.findConfig(this.mapping.Singleton, [namespace], name);
   }
 }
