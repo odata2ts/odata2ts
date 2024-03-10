@@ -12,8 +12,9 @@
   "scripts": {
     "build": "yarn clean && yarn generate",
     "clean": "rimraf build generated-src",
+    "compile": "tsc",
     "generate": "odata2ts",
-    "test": "jest ./test"
+    "test": "yarn compile && jest ./test"
   },
   "dependencies": {
     "@odata2ts/http-client-api": "^0.5.1",
