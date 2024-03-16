@@ -178,9 +178,10 @@ export class ProjectManager {
   }
 
   private async emitTsFiles() {
-    const files = [this.getModelFile(), this.getQObjectFile(), this.getMainServiceFile()];
-    console.log(`Emitting ${files.length} TS files`);
-    return Promise.all([...files.filter((file) => !!file).map(this.formatAndWriteFile)]);
+    const files = [this.getModelFile(), this.getQObjectFile(), this.getMainServiceFile()].filter((file) => !!file);
+    const text = files.length === 1 ? "Emitting 1 TS file" : `Emitting ${files.length} TS files`;
+    console.log(`${text}: ${files.map((f) => path.basename(f.getFilePath())).join(", ")}`);
+    return Promise.all(files.map(this.formatAndWriteFile));
   }
 
   private formatAndWriteFile = async (file: SourceFile) => {
@@ -197,7 +198,7 @@ export class ProjectManager {
         process.exit(3);
       }
     } catch (formattingError) {
-      console.error("Formatting failed");
+      console.error("Formatting failed", formattingError);
       await writeFile("error.log", formattingError?.toString() || "no error message!");
       process.exit(99);
     }
