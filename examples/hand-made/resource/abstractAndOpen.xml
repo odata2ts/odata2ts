@@ -4,6 +4,13 @@
 
             <!-- Abstract Entity Type -->
             <EntityType Name="AbstractBaseEntity" Abstract="true" />
+            <EntityType Name="AbstractUsefulBaseEntity" Abstract="true">
+              <Key>
+                <PropertyRef Name="Id" />
+              </Key>
+              <Property Name="Id" Type="Edm.Int32" />
+
+            </EntityType>
 
             <!-- Open Type -->
             <EntityType Name="OpenBaseEntity" BaseType="ExampleModel.AbstractBaseEntity" OpenType="true" />
@@ -13,22 +20,19 @@
                 <Key>
                     <PropertyRef Name="Id" />
                 </Key>
+                <Property Name="Id" Type="Edm.Int32" />
                 <Property Name="Model" Type="Edm.String" />
-                <Property Name="Year" Type="Edm.Int32" />
             </EntityType>
-            <EntityType Name="Bicycle" BaseType="ExampleModel.AbstractBaseEntity">
-                <Key>
-                    <PropertyRef Name="Id" />
-                </Key>
+
+            <EntityType Name="Bicycle" BaseType="ExampleModel.AbstractUsefulBaseEntity">
                 <Property Name="Model" Type="Edm.String" />
-                <Property Name="Year" Type="Edm.Int32" />
             </EntityType>
+
             <EntityType Name="DynamicObject" BaseType="ExampleModel.OpenBaseEntity">
                 <Key>
                     <PropertyRef Name="Id" />
                 </Key>
-                <Property Name="Model" Type="Edm.String" />
-                <Property Name="Year" Type="Edm.Int32" />
+              <Property Name="Id" Type="Edm.Int32" />
             </EntityType>
         </Schema>
     </edmx:DataServices>
