@@ -6,7 +6,7 @@ import {
   ODataEdmxModelV3,
   SchemaV3,
 } from "../../../../src/data-model/edmx/ODataEdmxModelV3";
-import { ODataModelBuilder } from "../ODataModelBuilder";
+import { ModelBuilderOptions, ODataModelBuilder } from "../ODataModelBuilder";
 import { ODataComplexTypeBuilderV2 } from "./ODataComplexTypeBuilderV2";
 import { ODataEntityTypeBuilderV2 } from "./ODataEntityTypeBuilderV2";
 import { ODataFunctionBuilderV2 } from "./ODataFunctionBuilderV2";
@@ -54,14 +54,14 @@ export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, Sch
 
   public addEntityType(
     name: string,
-    baseType: string | undefined,
+    options: undefined | ModelBuilderOptions,
     builderFn: (builder: ODataEntityTypeBuilderV2) => void
   ) {
     if (!this.currentSchema.EntityType) {
       this.currentSchema.EntityType = [];
     }
 
-    const builder = new ODataEntityTypeBuilderV2(name, baseType);
+    const builder = new ODataEntityTypeBuilderV2(name, options);
     builderFn(builder);
     this.currentSchema.EntityType.push(builder.getEntityType());
 
@@ -87,14 +87,14 @@ export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, Sch
 
   public addComplexType(
     name: string,
-    baseType: string | undefined,
+    options: undefined | ModelBuilderOptions,
     builderFn: (builder: ODataComplexTypeBuilderV2) => void
   ) {
     if (!this.currentSchema.ComplexType) {
       this.currentSchema.ComplexType = [];
     }
 
-    const builder = new ODataComplexTypeBuilderV2(name, baseType);
+    const builder = new ODataComplexTypeBuilderV2(name, options);
     builderFn(builder);
     this.currentSchema.ComplexType.push(builder.getComplexType());
 

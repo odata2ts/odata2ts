@@ -354,4 +354,43 @@ describe("Service Generator Tests V4", () => {
     // then we get one additional service file
     await compareMainService("big-numbers.ts");
   });
+
+  test("Service Generator: abstract and open type", async () => {
+    // given one EntitySet
+    odataBuilder
+      .addEntityType("AbstractEntity", { abstract: true }, () => {})
+      .addEntityType("OpenEntity", { open: true, baseType: withNs("AbstractEntity") }, () => {})
+      .addEntityType("ExtendedFromAbstract", { baseType: withNs("AbstractEntity") }, (builder) => {
+        return builder.addKeyProp("id", ODataTypesV4.String);
+      })
+      .addEntityType("ExtendedFromOpen", { baseType: withNs("OpenEntity") }, (builder) => {
+        return builder.addKeyProp("id", ODataTypesV4.String);
+      })
+      .addEntitySet("FromAbstract", withNs("ExtendedFromAbstract"))
+      .addEntitySet("FromOpen", withNs("ExtendedFromOpen"));
+
+    // when generating
+    await doGenerate();
+
+    // then we get no services for the abstract type but for all the others
+    // NOTE: when the baseType is not used directly its useless => see the generated OpenEntityService
+    // NOTE: it's irrelevant that the OpenEntityService has no keys defined as long as it's not referenced via EntitySet or NavProp
+    await compareMainService("abstract-and-open-types.ts");
+  });
+
+  test("Service Generator: abstract type with inheritance", async () => {
+    // given one EntitySet
+    odataBuilder
+      .addEntityType("AbstractEntity", { abstract: true }, (builder) => {
+        builder.addKeyProp("baseId", ODataTypesV4.Int32).addProp("test", ODataTypesV4.String);
+      })
+      .addEntityType("TestEntity", { baseType: withNs("AbstractEntity") }, () => {})
+      .addEntitySet("Testing", withNs("TestEntity"));
+
+    // when generating
+    await doGenerate();
+
+    // then the generated TestEntityService must use the AbstractEntityId => there's no TestEntityId interface
+    await compareMainService("abstract-with-inheritance.ts");
+  });
 });

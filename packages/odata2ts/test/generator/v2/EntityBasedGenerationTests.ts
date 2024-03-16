@@ -1,4 +1,4 @@
-import { ODataTypesV2 } from "@odata2ts/odata-core";
+import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
 
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
@@ -154,10 +154,10 @@ export function createEntityBasedGenerationTests(
     // given an entity hierarchy
     odataBuilder
       .addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Boolean))
-      .addEntityType("Parent", withNs("GrandParent"), (builder) =>
+      .addEntityType("Parent", { baseType: withNs("GrandParent") }, (builder) =>
         builder.addProp("parentalAdvice", ODataTypesV2.Boolean)
       )
-      .addEntityType("Child", withNs("Parent"), (builder) =>
+      .addEntityType("Child", { baseType: withNs("Parent") }, (builder) =>
         builder.addKeyProp("id2", ODataTypesV2.Boolean).addProp("Ch1ld1shF4n", ODataTypesV2.Boolean)
       );
 
@@ -220,5 +220,39 @@ export function createEntityBasedGenerationTests(
     // when generating model
     // then match fixture text
     await generateAndCompare("entityConverter", "entity-converter.ts", { converters: ["@odata2ts/test-converters"] });
+  });
+
+  test(`${testSuiteName}: abstract entity & complex type`, async () => {
+    odataBuilder
+      .addEntityType(ENTITY_NAME, { abstract: true }, () => {})
+      .addEntityType("ExtendsFromEntity", { baseType: withNs(ENTITY_NAME) }, (builder) => {
+        return builder.addKeyProp("ID", ODataTypesV2.Boolean);
+      })
+      .addComplexType("Complex", { abstract: true }, () => {})
+      .addComplexType("ExtendsFromComplex", { baseType: withNs("Complex") }, (builder) => {
+        return builder.addProp("test", ODataTypesV2.Boolean);
+      });
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("abstract", "abstract.ts", { skipIdModels: false, skipEditableModels: false });
+  });
+
+  test(`${testSuiteName}: abstract entity type with keys`, async () => {
+    odataBuilder
+      .addEntityType(ENTITY_NAME, { abstract: true }, (builder) => {
+        return builder.addKeyProp("ID", ODataTypesV2.Boolean).addProp("test", ODataTypesV2.Boolean);
+      })
+      .addEntityType("NothingToAdd", { baseType: withNs(ENTITY_NAME) }, () => {})
+      .addEntityType("WithOwnStuff", { baseType: withNs(ENTITY_NAME) }, (builder) => {
+        return builder.addKeyProp("ID2", ODataTypesV2.Boolean).addProp("test2", ODataTypesV2.Boolean);
+      });
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("abstract-with-prop-inheritance", "abstract-with-inheritance.ts", {
+      skipIdModels: false,
+      skipEditableModels: false,
+    });
   });
 }

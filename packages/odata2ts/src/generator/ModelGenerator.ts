@@ -48,10 +48,10 @@ class ModelGenerator {
   private generateModels() {
     this.dataModel.getEntityTypes().forEach((model) => {
       this.generateModel(model);
-      if (!this.options.skipIdModels) {
+      if (!this.options.skipIdModels && model.generateId) {
         this.generateIdModel(model);
       }
-      if (!this.options.skipEditableModels) {
+      if (!this.options.skipEditableModels && !model.abstract) {
         this.generateEditableModel(model);
       }
       if (!this.options.skipOperations) {
@@ -60,7 +60,7 @@ class ModelGenerator {
     });
     this.dataModel.getComplexTypes().forEach((model) => {
       this.generateModel(model);
-      if (!this.options.skipEditableModels) {
+      if (!this.options.skipEditableModels && !model.abstract) {
         this.generateEditableModel(model);
       }
     });
@@ -145,9 +145,6 @@ class ModelGenerator {
   }
 
   private generateIdModel(model: ModelType) {
-    if (!model.generateId) {
-      return;
-    }
     const singleType = model.keys.length === 1 ? `${model.keys[0].type} | ` : "";
     const keyTypes = model.keys.map((keyProp) => `${keyProp.name}: ${this.getPropType(keyProp)}`).join(",");
     const type = `${singleType}{${keyTypes}}`;

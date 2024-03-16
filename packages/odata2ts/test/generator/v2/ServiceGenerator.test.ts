@@ -1,6 +1,6 @@
 import path from "path";
 
-import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
+import { ODataTypesV2, ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
 import { EmitModes, RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
@@ -190,10 +190,10 @@ describe("Service Generator Tests V2", () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Boolean))
-      .addEntityType("Parent", withNs("GrandParent"), (builder) =>
+      .addEntityType("Parent", { baseType: withNs("GrandParent") }, (builder) =>
         builder.addProp("parentalAdvice", ODataTypesV2.Boolean)
       )
-      .addEntityType("Child", withNs("Parent"), (builder) =>
+      .addEntityType("Child", { baseType: withNs("Parent") }, (builder) =>
         builder.addKeyProp("id2", ODataTypesV2.Boolean).addProp("Ch1ld1shF4n", ODataTypesV2.Boolean)
       );
 
@@ -202,5 +202,28 @@ describe("Service Generator Tests V2", () => {
 
     // then we get two additional service file
     await compareMainService("entity-hierarchy.ts");
+  });
+
+  test("Service Generator: abstract and open type", async () => {
+    // given one EntitySet
+    odataBuilder
+      .addEntityType("AbstractEntity", { abstract: true }, () => {})
+      .addEntityType("OpenEntity", { open: true, baseType: withNs("AbstractEntity") }, () => {})
+      .addEntityType("ExtendedFromAbstract", { baseType: withNs("AbstractEntity") }, (builder) => {
+        return builder.addKeyProp("id", ODataTypesV4.String);
+      })
+      .addEntityType("ExtendedFromOpen", { baseType: withNs("OpenEntity") }, (builder) => {
+        return builder.addKeyProp("id", ODataTypesV4.String);
+      })
+      .addEntitySet("FromAbstract", withNs("ExtendedFromAbstract"))
+      .addEntitySet("FromOpen", withNs("ExtendedFromOpen"));
+
+    // when generating
+    await doGenerate();
+
+    // then we get no services for the abstract type but for all the others
+    // NOTE: when the baseType is not used directly its useless => see the generated OpenEntityService
+    // NOTE: it's irrelevant that the OpenEntityService has no keys defined as long as it's not referenced via EntitySet or NavProp
+    await compareMainService("abstract-and-open-types.ts");
   });
 });

@@ -11,6 +11,16 @@ import { NamingHelper } from "./NamingHelper";
 import { ServiceConfigHelper, WithoutName } from "./ServiceConfigHelper";
 import { NameValidator } from "./validation/NameValidator";
 
+type CollectorTuple = [Array<PropertyModel>, Array<string>, { idName: string; qIdName: string; open: boolean }];
+
+function ifTrue(value: string | undefined): boolean {
+  return value === "true";
+}
+
+function ifFalse(value: string | undefined): boolean {
+  return value === "false";
+}
+
 export interface TypeModel {
   outputType: string;
   qPath: string;
@@ -110,6 +120,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     });
 
     this.postProcessModel();
+    this.postProcessKeys();
   }
 
   private getBaseModel(
@@ -148,6 +159,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       finalBaseClass,
       props,
       baseProps: [], // postprocess required
+      abstract: ifTrue(model.$.Abstract),
+      open: ifTrue(model.$.OpenType),
     };
   }
 
@@ -223,7 +236,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         ...baseModel,
         idModelName: this.namingHelper.getIdModelName(name),
         qIdFunctionName: this.namingHelper.getQIdFunctionName(name),
-        generateId: true,
+        generateId: !!keyNames.length,
         keyNames: keyNames, // postprocess required to include key specs from base classes
         keys: [], // postprocess required to include props from base classes
         getKeyUnion: () => keyNames.join(" | "),
@@ -235,27 +248,35 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // complex types
     const complexTypes = this.dataModel.getComplexTypes();
     complexTypes.forEach((ct) => {
-      const [baseProps] = this.collectBaseClassPropsAndKeys(ct, []);
-      ct.baseProps = baseProps;
+      const [baseProps, _, baseAttributes] = this.collectBaseClassPropsAndKeys(ct, []);
+      const { open } = baseAttributes;
+      ct.baseProps = baseProps.map((bp) => ({ ...bp }));
+      if (open) {
+        ct.open = true;
+      }
     });
     // entity types
     const entityTypes = this.dataModel.getEntityTypes();
     entityTypes.forEach((et) => {
-      const [baseProps, baseKeys, idName, qIdName] = this.collectBaseClassPropsAndKeys(et, []);
-      et.baseProps = baseProps;
+      const [baseProps, baseKeys, baseAttributes] = this.collectBaseClassPropsAndKeys(et, []);
+      const { idName, qIdName, open } = baseAttributes;
+      et.baseProps = baseProps.map((bp) => ({ ...bp }));
 
       if (!et.keyNames.length && idName) {
         et.idModelName = idName;
         et.qIdFunctionName = qIdName;
         et.generateId = false;
       }
-      et.keyNames.unshift(...baseKeys);
-
-      // sanity check: entity types require key specification
-      if (!et.keyNames.length) {
-        throw new Error(`Key property is missing from Entity "${et.name}" (${et.odataName})!`);
+      if (open) {
+        et.open = open;
       }
+      et.keyNames.unshift(...baseKeys);
+    });
+  }
 
+  private postProcessKeys() {
+    const entityTypes = this.dataModel.getEntityTypes();
+    entityTypes.forEach((et) => {
       const isSingleKey = et.keyNames.length === 1;
       const props = [...et.baseProps, ...et.props];
       et.keys = et.keyNames.map((keyName) => {
@@ -263,44 +284,45 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         if (!prop) {
           throw new Error(`Key with name [${keyName}] not found in props!`);
         }
+
         // automatically set key prop to managed, if this is the only key of the given entity
         if (prop.managed === undefined) {
           prop.managed = !this.options.disableAutoManagedKey && isSingleKey;
         }
+
         return prop;
       });
     });
   }
 
-  private collectBaseClassPropsAndKeys(
-    model: ComplexModelType,
-    visitedModels: string[]
-  ): [Array<PropertyModel>, Array<string>, string, string] {
+  private collectBaseClassPropsAndKeys(model: ComplexModelType, visitedModels: string[]): CollectorTuple {
     if (visitedModels.includes(model.fqName)) {
       throw new Error(`Cyclic inheritance detected for model ${model.fqName}!`);
     }
     visitedModels.push(model.fqName);
     return model.baseClasses.reduce(
-      ([props, keys, idName, qIdName], bc) => {
+      ([props, keys, attributes], bc) => {
         const baseModel = this.dataModel.getEntityType(bc) || this.dataModel.getComplexType(bc);
         if (!baseModel) {
           throw new Error(`BaseModel "${bc}" doesn't exist!`);
         }
 
-        let idNameResult = idName;
-        let qIdNameResult = qIdName;
+        let { idName, qIdName, open } = attributes;
 
         // recursive
         if (baseModel.baseClasses.length) {
-          const [parentProps, parentKeys, parentIdName, parentQIdName] = this.collectBaseClassPropsAndKeys(
+          const [parentProps, parentKeys, parentAttributes] = this.collectBaseClassPropsAndKeys(
             baseModel,
             visitedModels
           );
           props.unshift(...parentProps);
           keys.unshift(...parentKeys);
-          if (parentIdName) {
-            idNameResult = parentIdName;
-            qIdNameResult = parentQIdName;
+          if (parentAttributes?.idName) {
+            idName = parentAttributes.idName;
+            qIdName = parentAttributes.qIdName;
+          }
+          if (parentAttributes?.open) {
+            open = true;
           }
         }
 
@@ -308,12 +330,15 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         const entityModel = baseModel as ModelType;
         if (entityModel.keyNames?.length) {
           keys.push(...entityModel.keyNames.filter((kn) => !keys.includes(kn)));
-          idNameResult = entityModel.idModelName;
-          qIdNameResult = entityModel.qIdFunctionName;
+          idName = entityModel.idModelName;
+          qIdName = entityModel.qIdFunctionName;
         }
-        return [props, keys, idNameResult, qIdNameResult];
+        if (baseModel.open) {
+          open = true;
+        }
+        return [props, keys, { idName, qIdName, open }];
       },
-      [[], [], "", ""] as [Array<PropertyModel>, Array<string>, string, string]
+      [[], [], { idName: "", qIdName: "", open: false }] as CollectorTuple
     );
   }
 
@@ -403,7 +428,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       name,
       odataType: p.$.Type,
       fqType: dataType,
-      required: p.$.Nullable === "false",
+      required: ifFalse(p.$.Nullable),
       isCollection: isCollection,
       managed: typeof entityPropConfig?.managed !== "undefined" ? entityPropConfig.managed : configProp?.managed,
       ...result,

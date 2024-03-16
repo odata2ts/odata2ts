@@ -50,7 +50,7 @@ class QueryObjectGenerator {
   private generateModels(importContainer: ImportContainer) {
     this.dataModel.getEntityTypes().forEach((model) => {
       this.generateModel(model, importContainer);
-      if (!this.options.skipIdModels) {
+      if (!this.options.skipIdModels && model.generateId) {
         this.generateIdFunction(model, importContainer);
       }
       if (!this.options.skipOperations) {
@@ -82,19 +82,22 @@ class QueryObjectGenerator {
       name: model.qName,
       isExported: true,
       extends: extendsClause,
+      isAbstract: model.abstract,
       properties: this.generateQueryObjectProps(model.props, importContainer),
     });
 
-    this.sourceFile.addVariableStatement({
-      declarationKind: VariableDeclarationKind.Const,
-      isExported: true,
-      declarations: [
-        {
-          name: firstCharLowerCase(model.qName),
-          initializer: `new ${model.qName}()`,
-        },
-      ],
-    });
+    if (!model.abstract) {
+      this.sourceFile.addVariableStatement({
+        declarationKind: VariableDeclarationKind.Const,
+        isExported: true,
+        declarations: [
+          {
+            name: firstCharLowerCase(model.qName),
+            initializer: `new ${model.qName}()`,
+          },
+        ],
+      });
+    }
   }
 
   private generateQueryObjectProps(
@@ -164,10 +167,6 @@ class QueryObjectGenerator {
   }
 
   private generateIdFunction(model: ModelType, importContainer: ImportContainer) {
-    if (!model.generateId) {
-      return;
-    }
-
     const qFunc = "QId";
     importContainer.addFromQObject(qFunc);
     importContainer.addGeneratedModel(model.idModelName);

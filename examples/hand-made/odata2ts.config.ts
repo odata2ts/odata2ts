@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, TypeModel } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, Modes, TypeModel } from "@odata2ts/odata2ts";
 
 const config: ConfigFileOptions = {
   debug: false,
@@ -6,12 +6,17 @@ const config: ConfigFileOptions = {
   emitMode: EmitModes.ts,
   prettier: true,
   services: {
+    abstractAndOpen: {
+      serviceName: "abstractAndOpen",
+      source: "resource/abstractAndOpen.xml",
+      output: "src/generated/abstract-and-open",
+    },
     edgeCases: {
-      serviceName: "example",
+      serviceName: "edgeCase",
       source: "resource/edge-cases.xml",
       output: "src/generated/edge-cases",
     },
-    schemas: {
+    autoNameClashResolution: {
       serviceName: "autoNameClashResolution",
       source: "resource/multiple-schemas.xml",
       output: "src/generated/schemas",
