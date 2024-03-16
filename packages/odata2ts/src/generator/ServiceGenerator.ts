@@ -532,7 +532,8 @@ class ServiceGenerator {
 
   private async generateModelServices(serviceFile: SourceFile, importContainer: ImportContainer) {
     // build service file for each entity, consisting of EntityTypeService & EntityCollectionService
-    for (const model of this.dataModel.getEntityTypes()) {
+    const entities = this.dataModel.getEntityTypes().filter((et) => !et.abstract);
+    for (const model of entities) {
       const serviceName = this.namingHelper.getServiceName(model.name);
 
       // entity type service
@@ -543,7 +544,8 @@ class ServiceGenerator {
     }
 
     // build service file for complex types
-    for (const model of this.dataModel.getComplexTypes()) {
+    const complexTypes = this.dataModel.getComplexTypes().filter((ct) => !ct.abstract);
+    for (const model of complexTypes) {
       const serviceName = this.namingHelper.getServiceName(model.name);
 
       // entity type service
