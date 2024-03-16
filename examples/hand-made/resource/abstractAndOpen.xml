@@ -9,11 +9,10 @@
                 <PropertyRef Name="Id" />
               </Key>
               <Property Name="Id" Type="Edm.Int32" />
-
             </EntityType>
 
             <!-- Open Type -->
-            <EntityType Name="OpenBaseEntity" BaseType="ExampleModel.AbstractBaseEntity" OpenType="true" />
+            <EntityType Name="OpenBaseEntity" BaseType="ExampleModel.AbstractBaseEntity" OpenType="true" Abstract="true" />
 
             <!-- Derived Entity Types -->
             <EntityType Name="Car" BaseType="ExampleModel.AbstractBaseEntity">
