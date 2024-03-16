@@ -121,10 +121,12 @@ export function createComplexAndEnumTests() {
       .addComplexType("GrandParent", undefined, (builder) =>
         builder.addProp("name", ODataTypesV4.String).addProp("myChoice", withNs("Choice"))
       )
-      .addComplexType("Parent", withNs("GrandParent"), (builder) =>
+      .addComplexType("Parent", { baseType: withNs("GrandParent") }, (builder) =>
         builder.addProp("parentalAdvice", ODataTypesV4.Boolean)
       )
-      .addComplexType("Child", withNs("Parent"), (builder) => builder.addProp("Ch1ld1shF4n", ODataTypesV4.String))
+      .addComplexType("Child", { baseType: withNs("Parent") }, (builder) =>
+        builder.addProp("Ch1ld1shF4n", ODataTypesV4.String)
+      )
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
         builder.addKeyProp("id", ODataTypesV4.String).addProp("kids", withNs("Child"))
       )

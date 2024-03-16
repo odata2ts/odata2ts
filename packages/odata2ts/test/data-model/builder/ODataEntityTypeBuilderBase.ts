@@ -1,23 +1,11 @@
 import { EntityType } from "../../../src/data-model/edmx/ODataEdmxModelBase";
+import { CommonEntityAndComplexBuilderBase } from "./CommonEntityAndComplexBuilderBase";
 import { createProperty } from "./ODataBuilderHelper";
 
-export abstract class ODataEntityTypeBuilderBase<ET extends EntityType> {
+export abstract class ODataEntityTypeBuilderBase<ET extends EntityType> extends CommonEntityAndComplexBuilderBase {
   protected entityType: ET = this.createVersionedEntityType();
 
-  constructor(private name: string, private baseType?: string) {}
-
   protected abstract createVersionedEntityType(): ET;
-
-  protected createEntityType() {
-    return {
-      $: {
-        Name: this.name,
-        BaseType: this.baseType,
-      },
-      Key: [{ PropertyRef: [] }],
-      Property: [],
-    };
-  }
 
   public getEntityType() {
     return this.entityType;

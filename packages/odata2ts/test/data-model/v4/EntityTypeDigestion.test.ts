@@ -64,12 +64,6 @@ describe("V4: EntityTypeDigestion Test", () => {
     expect(model.props[0]).toMatchObject(expectedProp);
   });
 
-  test("EntityTypes: fail without key prop", async () => {
-    odataBuilder.addEntityType("test", undefined, NOOP_FN);
-
-    await expect(doDigest()).rejects.toThrowError("Key property is missing");
-  });
-
   test("EntityTypes: fail unknown prop type", async () => {
     odataBuilder.addEntityType("test", undefined, (builder) => builder.addKeyProp("id", "PinkPanther"));
 
@@ -120,10 +114,10 @@ describe("V4: EntityTypeDigestion Test", () => {
 
   test("EntityTypes: base class hierarchy", async () => {
     odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Guid));
-    odataBuilder.addEntityType("Parent", withNs("GrandParent"), (builder) =>
+    odataBuilder.addEntityType("Parent", { baseType: withNs("GrandParent") }, (builder) =>
       builder.addProp("parentalAdvice", ODataTypesV4.Boolean)
     );
-    odataBuilder.addEntityType("Child", withNs("Parent"), (builder) =>
+    odataBuilder.addEntityType("Child", { baseType: withNs("Parent") }, (builder) =>
       builder.addProp("Ch1ld1shF4n", ODataTypesV4.String)
     );
 

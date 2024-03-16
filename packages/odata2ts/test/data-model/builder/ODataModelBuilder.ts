@@ -4,6 +4,12 @@ import { ComplexType, EntityType, ODataEdmxModelBase, Schema } from "../../../sr
 import { ODataComplexTypeBuilderBase } from "./ODataComplexTypeBuilderBase";
 import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase";
 
+export interface ModelBuilderOptions {
+  baseType?: string;
+  abstract?: boolean;
+  open?: boolean;
+}
+
 export abstract class ODataModelBuilder<
   M extends ODataEdmxModelBase<S>,
   S extends Schema<ET, CT>,
@@ -26,12 +32,12 @@ export abstract class ODataModelBuilder<
 
   public abstract addEntityType(
     name: string,
-    baseType: string | undefined,
+    options: undefined | ModelBuilderOptions,
     builderFn: <ETB extends ODataEntityTypeBuilderBase<ET>>(builder: ETB) => void
   ): this;
   public abstract addComplexType(
     name: string,
-    baseType: string | undefined,
+    options: undefined | ModelBuilderOptions,
     builderFn: <CTB extends ODataComplexTypeBuilderBase<CT>>(builder: CTB) => void
   ): this;
 

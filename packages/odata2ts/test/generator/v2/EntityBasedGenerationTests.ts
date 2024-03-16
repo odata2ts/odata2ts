@@ -154,10 +154,10 @@ export function createEntityBasedGenerationTests(
     // given an entity hierarchy
     odataBuilder
       .addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Boolean))
-      .addEntityType("Parent", withNs("GrandParent"), (builder) =>
+      .addEntityType("Parent", { baseType: withNs("GrandParent") }, (builder) =>
         builder.addProp("parentalAdvice", ODataTypesV2.Boolean)
       )
-      .addEntityType("Child", withNs("Parent"), (builder) =>
+      .addEntityType("Child", { baseType: withNs("Parent") }, (builder) =>
         builder.addKeyProp("id2", ODataTypesV2.Boolean).addProp("Ch1ld1shF4n", ODataTypesV2.Boolean)
       );
 

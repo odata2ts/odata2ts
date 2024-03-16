@@ -44,6 +44,8 @@ export interface EntityType {
   $: {
     Name: string;
     BaseType?: string;
+    Abstract?: "true" | "false";
+    OpenType?: "true" | "false";
   };
   Key: Array<PropertyRef>;
   Property: Array<Property>;
