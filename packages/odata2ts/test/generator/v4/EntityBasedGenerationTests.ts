@@ -404,4 +404,38 @@ export function createEntityBasedGenerationTests(
       v4BigNumberAsString: true,
     });
   });
+
+  test(`${testSuiteName}: abstract entity & complex type`, async () => {
+    odataBuilder
+      .addEntityType(ENTITY_NAME, { abstract: true }, () => {})
+      .addEntityType("ExtendsFromEntity", { baseType: withNs(ENTITY_NAME) }, (builder) => {
+        return builder.addKeyProp("ID", ODataTypesV4.Boolean);
+      })
+      .addComplexType("Complex", { abstract: true }, () => {})
+      .addComplexType("ExtendsFromComplex", { baseType: withNs("Complex") }, (builder) => {
+        return builder.addProp("test", ODataTypesV4.Boolean);
+      });
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("abstract", "abstract.ts", { skipIdModels: false, skipEditableModels: false });
+  });
+
+  test(`${testSuiteName}: abstract entity type with keys`, async () => {
+    odataBuilder
+      .addEntityType(ENTITY_NAME, { abstract: true }, (builder) => {
+        return builder.addKeyProp("ID", ODataTypesV4.Boolean).addProp("test", ODataTypesV4.Boolean);
+      })
+      .addEntityType("NothingToAdd", { baseType: withNs(ENTITY_NAME) }, () => {})
+      .addEntityType("WithOwnStuff", { baseType: withNs(ENTITY_NAME) }, (builder) => {
+        return builder.addKeyProp("ID2", ODataTypesV4.Boolean).addProp("test2", ODataTypesV4.Boolean);
+      });
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("abstract-with-prop-inheritance", "abstract-with-inheritance.ts", {
+      skipIdModels: false,
+      skipEditableModels: false,
+    });
+  });
 }

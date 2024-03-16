@@ -235,7 +235,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         ...baseModel,
         idModelName: this.namingHelper.getIdModelName(name),
         qIdFunctionName: this.namingHelper.getQIdFunctionName(name),
-        generateId: true,
+        generateId: !!keyNames.length,
         keyNames: keyNames, // postprocess required to include key specs from base classes
         keys: [], // postprocess required to include props from base classes
         getKeyUnion: () => keyNames.join(" | "),
