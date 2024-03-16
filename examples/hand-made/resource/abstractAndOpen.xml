@@ -1,6 +1,6 @@
 <edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
     <edmx:DataServices>
-        <Schema Namespace="ExampleModel" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Schema Namespace="Example" xmlns="http://docs.oasis-open.org/odata/ns/edm">
 
             <!-- Abstract Entity Type -->
             <EntityType Name="AbstractBaseEntity" Abstract="true" />
@@ -12,10 +12,10 @@
             </EntityType>
 
             <!-- Open Type -->
-            <EntityType Name="OpenBaseEntity" BaseType="ExampleModel.AbstractBaseEntity" OpenType="true" Abstract="true" />
+            <EntityType Name="OpenBaseEntity" BaseType="Example.AbstractBaseEntity" OpenType="true" />
 
             <!-- Derived Entity Types -->
-            <EntityType Name="Car" BaseType="ExampleModel.AbstractBaseEntity">
+            <EntityType Name="Car" BaseType="Example.AbstractBaseEntity">
                 <Key>
                     <PropertyRef Name="Id" />
                 </Key>
@@ -23,16 +23,23 @@
                 <Property Name="Model" Type="Edm.String" />
             </EntityType>
 
-            <EntityType Name="Bicycle" BaseType="ExampleModel.AbstractUsefulBaseEntity">
+            <EntityType Name="Bicycle" BaseType="Example.AbstractUsefulBaseEntity">
                 <Property Name="Model" Type="Edm.String" />
             </EntityType>
 
-            <EntityType Name="DynamicObject" BaseType="ExampleModel.OpenBaseEntity">
+            <EntityType Name="DynamicObject" BaseType="Example.OpenBaseEntity">
                 <Key>
                     <PropertyRef Name="Id" />
                 </Key>
               <Property Name="Id" Type="Edm.Int32" />
             </EntityType>
+
+            <EntityContainer Name="THE_ONE_ENTITY_CONTAINER">
+              <EntitySet Name="Cars" EntityType="Example.Car" />
+              <EntitySet Name="Bikes" EntityType="Example.Bicycle"/>
+              <EntitySet Name="Dynamics" EntityType="Example.DynamicObject"/>
+              <Singleton Name="TheKitchenSink" Type="Example.OpenBaseEntity"/>
+            </EntityContainer>
         </Schema>
     </edmx:DataServices>
 </edmx:Edmx>
