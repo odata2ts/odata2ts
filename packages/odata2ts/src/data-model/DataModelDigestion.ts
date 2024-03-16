@@ -120,6 +120,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     });
 
     this.postProcessModel();
+    this.postProcessKeys();
   }
 
   private getBaseModel(
@@ -247,15 +248,19 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // complex types
     const complexTypes = this.dataModel.getComplexTypes();
     complexTypes.forEach((ct) => {
-      const [baseProps] = this.collectBaseClassPropsAndKeys(ct, []);
-      ct.baseProps = baseProps;
+      const [baseProps, _, baseAttributes] = this.collectBaseClassPropsAndKeys(ct, []);
+      const { open } = baseAttributes;
+      ct.baseProps = baseProps.map((bp) => ({ ...bp }));
+      if (open) {
+        ct.open = true;
+      }
     });
     // entity types
     const entityTypes = this.dataModel.getEntityTypes();
     entityTypes.forEach((et) => {
       const [baseProps, baseKeys, baseAttributes] = this.collectBaseClassPropsAndKeys(et, []);
       const { idName, qIdName, open } = baseAttributes;
-      et.baseProps = baseProps;
+      et.baseProps = baseProps.map((bp) => ({ ...bp }));
 
       if (!et.keyNames.length && idName) {
         et.idModelName = idName;
@@ -266,12 +271,12 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         et.open = open;
       }
       et.keyNames.unshift(...baseKeys);
+    });
+  }
 
-      // sanity check: entity types require key specification
-      // if (!et.keyNames.length) {
-      //   throw new Error(`Key property is missing from Entity "${et.name}" (${et.odataName})!`);
-      // }
-
+  private postProcessKeys() {
+    const entityTypes = this.dataModel.getEntityTypes();
+    entityTypes.forEach((et) => {
       const isSingleKey = et.keyNames.length === 1;
       const props = [...et.baseProps, ...et.props];
       et.keys = et.keyNames.map((keyName) => {
@@ -279,10 +284,12 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         if (!prop) {
           throw new Error(`Key with name [${keyName}] not found in props!`);
         }
+
         // automatically set key prop to managed, if this is the only key of the given entity
         if (prop.managed === undefined) {
           prop.managed = !this.options.disableAutoManagedKey && isSingleKey;
         }
+
         return prop;
       });
     });

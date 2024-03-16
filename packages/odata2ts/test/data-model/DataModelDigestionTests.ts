@@ -75,6 +75,22 @@ export function createDataModelTests(
     expect(result.getEnums()[0].members[0]).toBe("HEY");
   });
 
+  test("Entity Type", async () => {
+    odataBuilder.addEntityType("MY_TYPE", undefined, (builder) => {
+      builder.addKeyProp("ID", "Edm.String");
+    });
+
+    const result = await doDigest();
+
+    expect(result).toBeDefined();
+    expect(result.getEntityTypes().length).toBe(1);
+
+    const toTest = result.getEntityTypes()[0];
+    expect(toTest).toBeDefined();
+    expect(toTest.keys.length).toBe(1);
+    expect(toTest.props.length).toBe(1);
+  });
+
   test("using Id of base class", async () => {
     odataBuilder
       .addEntityType("Child", { baseType: withNs("Parent") }, () => {})
@@ -86,10 +102,14 @@ export function createDataModelTests(
     const result = await doDigest();
 
     expect(result.getEntityTypes().length).toBe(3);
-    expect(result.getEntityTypes()[2].name).toBe("Child");
-    expect(result.getEntityTypes()[2].idModelName).toBe("GrandParentId");
-    expect(result.getEntityTypes()[2].qIdFunctionName).toBe("QGrandParentId");
-    expect(result.getEntityTypes()[2].generateId).toBe(false);
+
+    const toTest = result.getEntityTypes()[2];
+    expect(toTest.name).toBe("Child");
+    expect(toTest.idModelName).toBe("GrandParentId");
+    expect(toTest.qIdFunctionName).toBe("QGrandParentId");
+    expect(toTest.generateId).toBe(false);
+    expect(toTest.props.length).toBe(0);
+    expect(toTest.baseProps.length).toBe(1);
   });
 
   test("complex Id with base class", async () => {
@@ -105,6 +125,8 @@ export function createDataModelTests(
 
     expect(result.getEntityTypes().length).toBe(2);
     expect(result.getEntityTypes()[1].name).toBe("Parent");
+    expect(result.getEntityTypes()[1].props.length).toBe(1);
+    expect(result.getEntityTypes()[1].baseProps.length).toBe(1);
     expect(result.getEntityTypes()[1].keys.length).toBe(2);
     expect(result.getEntityTypes()[1].keyNames).toStrictEqual(["ID", "ID2"]);
     expect(result.getEntityTypes()[1].idModelName).toBe("ParentId");
