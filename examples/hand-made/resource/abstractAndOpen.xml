@@ -1,0 +1,35 @@
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:DataServices>
+        <Schema Namespace="ExampleModel" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+
+            <!-- Abstract Entity Type -->
+            <EntityType Name="AbstractBaseEntity" Abstract="true" />
+
+            <!-- Open Type -->
+            <EntityType Name="OpenBaseEntity" BaseType="ExampleModel.AbstractBaseEntity" OpenType="true" />
+
+            <!-- Derived Entity Types -->
+            <EntityType Name="Car" BaseType="ExampleModel.AbstractBaseEntity">
+                <Key>
+                    <PropertyRef Name="Id" />
+                </Key>
+                <Property Name="Model" Type="Edm.String" />
+                <Property Name="Year" Type="Edm.Int32" />
+            </EntityType>
+            <EntityType Name="Bicycle" BaseType="ExampleModel.AbstractBaseEntity">
+                <Key>
+                    <PropertyRef Name="Id" />
+                </Key>
+                <Property Name="Model" Type="Edm.String" />
+                <Property Name="Year" Type="Edm.Int32" />
+            </EntityType>
+            <EntityType Name="DynamicObject" BaseType="ExampleModel.OpenBaseEntity">
+                <Key>
+                    <PropertyRef Name="Id" />
+                </Key>
+                <Property Name="Model" Type="Edm.String" />
+                <Property Name="Year" Type="Edm.Int32" />
+            </EntityType>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>
