@@ -7,7 +7,6 @@ import {
   QExtendedFromOpen,
   QExtendedFromOpenId,
   QOpenEntity,
-  QOpenEntityId,
   qExtendedFromAbstract,
   qExtendedFromOpen,
   qOpenEntity,
@@ -22,7 +21,6 @@ import {
   ExtendedFromOpen,
   ExtendedFromOpenId,
   OpenEntity,
-  OpenEntityId,
   // @ts-ignore
 } from "./TesterModel";
 
@@ -56,18 +54,6 @@ export class OpenEntityService<ClientType extends ODataHttpClient> extends Entit
 > {
   constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qOpenEntity);
-  }
-}
-
-export class OpenEntityCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV2<
-  ClientType,
-  OpenEntity,
-  EditableOpenEntity,
-  QOpenEntity,
-  OpenEntityId
-> {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qOpenEntity, new QOpenEntityId(name));
   }
 }
 

@@ -240,7 +240,7 @@ class ServiceGenerator {
     return this.version === ODataVersions.V2 ? "V2" : "V4";
   }
 
-  private async generateEntityTypeService(
+  private generateEntityTypeService(
     model: ComplexType,
     serviceName: string,
     serviceFile: SourceFile,
@@ -487,11 +487,7 @@ class ServiceGenerator {
     };
   }
 
-  private async generateEntityCollectionService(
-    model: ModelType,
-    serviceFile: SourceFile,
-    importContainer: ImportContainer
-  ) {
+  private generateEntityCollectionService(model: ModelType, serviceFile: SourceFile, importContainer: ImportContainer) {
     const entitySetServiceType = "EntitySetService" + this.getVersionSuffix();
     const editableModelName = model.editableName;
     const qObjectName = firstCharLowerCase(model.qName);
@@ -537,10 +533,11 @@ class ServiceGenerator {
       const serviceName = this.namingHelper.getServiceName(model.name);
 
       // entity type service
-      await this.generateEntityTypeService(model, serviceName, serviceFile, importContainer);
-
-      // entity collection service
-      await this.generateEntityCollectionService(model, serviceFile, importContainer);
+      this.generateEntityTypeService(model, serviceName, serviceFile, importContainer);
+      // entity collection service if this entity specified keys at all
+      if (model.keyNames.length) {
+        this.generateEntityCollectionService(model, serviceFile, importContainer);
+      }
     }
 
     // build service file for complex types
@@ -549,7 +546,7 @@ class ServiceGenerator {
       const serviceName = this.namingHelper.getServiceName(model.name);
 
       // entity type service
-      await this.generateEntityTypeService(model, serviceName, serviceFile, importContainer);
+      this.generateEntityTypeService(model, serviceName, serviceFile, importContainer);
     }
   }
 
