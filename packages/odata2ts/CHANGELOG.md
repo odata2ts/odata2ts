@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.33.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.32.0...@odata2ts/odata2ts@0.33.0) (2024-03-17)
+
+### Bug Fixes
+
+* **generator:** enumerate generated files for emit mode ts ([#249](https://github.com/odata2ts/odata2ts/issues/249)) ([e58e3d5](https://github.com/odata2ts/odata2ts/commit/e58e3d5c6a9f73ec8eb9c011b9b42747d0576fc4))
+
+### Features
+
+* **generator:** auto detected service names are run through pascalCase to ensure valid class names ([#250](https://github.com/odata2ts/odata2ts/issues/250)) ([04fcf49](https://github.com/odata2ts/odata2ts/commit/04fcf490aee43dc1c2bc70af394fe9d1d8ce3249))
+* **generator:** no collection services for entity types without keys ([#248](https://github.com/odata2ts/odata2ts/issues/248)) ([56540b2](https://github.com/odata2ts/odata2ts/commit/56540b22aa92a7a8c929b4088c69d8af30b63364))
+* **generator:** support abstract entities ([#247](https://github.com/odata2ts/odata2ts/issues/247)) ([cbf5121](https://github.com/odata2ts/odata2ts/commit/cbf51214da0fdbccba7fff5a3c0b770f73ed06bd))
+
 # [0.32.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.31.1...@odata2ts/odata2ts@0.32.0) (2024-03-10)
 
 ### Bug Fixes
