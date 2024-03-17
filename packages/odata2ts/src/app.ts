@@ -1,4 +1,5 @@
 import { ODataVersions } from "@odata2ts/odata-core";
+import { pascalCase } from "pascal-case";
 
 import { NamespaceWithAlias } from "./data-model/DataModel";
 import { digest as digestV2 } from "./data-model/DataModelDigestionV2";
@@ -19,6 +20,18 @@ function isServiceGen(mode: Modes) {
   return [Modes.service, Modes.all].includes(mode);
 }
 
+function getServiceName(options: RunOptions, schemas: Array<SchemaV3 | SchemaV4>) {
+  if (options.serviceName) {
+    return options.serviceName;
+  }
+
+  // auto-detection of first namespace with defined EntityTypes
+  // NOTE: we make use of PascalCase here to enforce valid class names
+  const detectedSchema = schemas.find((schema) => schema.$.Namespace && schema.EntityType?.length) || schemas[0];
+  const serviceName = detectedSchema.$.Namespace;
+  return pascalCase(serviceName);
+}
+
 /**
  *
  * @param metadataJson metadata of a given OData service already parsed as JSON
@@ -32,8 +45,7 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   const dataService = metadataJson["edmx:Edmx"]["edmx:DataServices"][0];
   const schemas = dataService.Schema as Array<SchemaV3 | SchemaV4>;
 
-  const detectedSchema = schemas.find((schema) => schema.$.Namespace && schema.EntityType?.length) || schemas[0];
-  const serviceName = options.serviceName || detectedSchema.$.Namespace;
+  const serviceName = getServiceName(options, schemas);
 
   const namespaces = schemas.map<NamespaceWithAlias>((schema) => [schema.$.Namespace, schema.$.Alias]);
 

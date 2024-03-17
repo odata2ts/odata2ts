@@ -65,7 +65,7 @@ describe("App Test", () => {
 
     // then the schema with entity types is used
     expect(createPmSpy.mock.calls[0][0]).toMatchObject({
-      service: "NewService",
+      service: `${newNs}Service`,
     });
   });
 
@@ -80,7 +80,21 @@ describe("App Test", () => {
 
     // then the schema with entity types is used
     expect(createPmSpy.mock.calls[0][0]).toMatchObject({
-      service: "TesterService",
+      service: `${SERVICE_NAME}Service`,
+    });
+  });
+
+  test("simple schema detection with pascal case", async () => {
+    // when multiple schemas exist
+    const newNs = "my.org.Example";
+    const expected = "MyOrgExample";
+    odataBuilder.addSchema(newNs).addEntityType("Test", undefined, (builder) => builder.addKeyProp("id", "Edm.String"));
+
+    await doRunApp();
+
+    // then the schema with entity types is used
+    expect(createPmSpy.mock.calls[0][0]).toMatchObject({
+      service: `${expected}Service`,
     });
   });
 
