@@ -1,6 +1,7 @@
 import { LambdaFunctions } from "../odata/ODataModel";
 import { QFilterExpression } from "../QFilterExpression";
 import { QueryObject } from "../QueryObject";
+import { LambdaOperatorType } from "./base/LambdaOperatorType";
 import { QEntityPathModel } from "./QPathModel";
 
 export class QEntityCollectionPath<Q extends QueryObject> implements QEntityPathModel<Q> {
@@ -25,22 +26,24 @@ export class QEntityCollectionPath<Q extends QueryObject> implements QEntityPath
     return true;
   }
 
-  private lambdaFunction(operationName: string, fn: (qObject: Q) => QFilterExpression, prefix: string) {
+  private lambdaFunction(operationName: string, fn?: LambdaOperatorType<Q>, prefix: string = "a") {
     // create new qObject with given prefix
     const qEntity = new (this.qEntityFn())(prefix);
-    const expression = fn(qEntity);
-    if (!expression.toString()) {
-      return expression;
+    const expression = fn ? fn(qEntity) : undefined;
+
+    // if no expression was provided => function call without args
+    if (!expression || !expression.toString()) {
+      return new QFilterExpression(`${this.path}/${operationName}()`);
     }
 
     return new QFilterExpression(`${this.path}/${operationName}(${prefix}:${expression})`);
   }
 
-  public any(fn: (qObject: Q) => QFilterExpression, prefix: string = "a"): QFilterExpression {
+  public any(fn?: LambdaOperatorType<Q>, prefix?: string): QFilterExpression {
     return this.lambdaFunction(LambdaFunctions.ANY, fn, prefix);
   }
 
-  public all(fn: (qObject: Q) => QFilterExpression, prefix: string = "a"): QFilterExpression {
+  public all(fn?: LambdaOperatorType<Q>, prefix?: string): QFilterExpression {
     return this.lambdaFunction(LambdaFunctions.ALL, fn, prefix);
   }
 }
