@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.20.0...@odata2ts/odata-query-objects@0.20.1) (2024-03-23)
+
+### Bug Fixes
+
+* **qobject:** allow empty lambda operators ([e281160](https://github.com/odata2ts/odata2ts/commit/e281160617dbdac17a7ad9d6c16ddd8144c7ec19))
+
 # [0.20.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.19.0...@odata2ts/odata-query-objects@0.20.0) (2023-08-08)
 
 ### Features

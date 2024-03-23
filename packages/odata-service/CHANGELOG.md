@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.17.1...@odata2ts/odata-service@0.17.2) (2024-03-23)
+
+**Note:** Version bump only for package @odata2ts/odata-service
+
 ## [0.17.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.17.0...@odata2ts/odata-service@0.17.1) (2023-09-13)
 
 **Note:** Version bump only for package @odata2ts/odata-service
