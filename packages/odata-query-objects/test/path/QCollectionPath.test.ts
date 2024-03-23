@@ -49,10 +49,17 @@ describe("QCollectionPath test", () => {
   });
 
   test("empty any filter", () => {
-    const result = createToTest()
-      .any(() => new QFilterExpression())
-      .toString();
-    expect(result).toBe("");
+    expect(createToTest().any().toString()).toBe("test/any()");
+    expect(
+      createToTest()
+        .any(() => {})
+        .toString()
+    ).toBe("test/any()");
+    expect(
+      createToTest()
+        .any(() => new QFilterExpression())
+        .toString()
+    ).toBe("test/any()");
   });
 
   test("multiple any filter", () => {
@@ -75,10 +82,17 @@ describe("QCollectionPath test", () => {
   });
 
   test("empty all filter", () => {
-    const result = createToTest()
-      .all(() => new QFilterExpression())
-      .toString();
-    expect(result).toBe("");
+    expect(createToTest().all().toString()).toBe("test/all()");
+    expect(
+      createToTest()
+        .all(() => {})
+        .toString()
+    ).toBe("test/all()");
+    expect(
+      createToTest()
+        .all(() => new QFilterExpression())
+        .toString()
+    ).toBe("test/all()");
   });
 
   test("multiple all filter", () => {

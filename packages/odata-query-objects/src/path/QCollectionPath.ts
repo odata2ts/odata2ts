@@ -3,6 +3,7 @@ import { ValueConverter } from "@odata2ts/converter-api";
 import { LambdaFunctions } from "../odata/ODataModel";
 import { QFilterExpression } from "../QFilterExpression";
 import { QueryObject } from "../QueryObject";
+import { LambdaOperatorType } from "./base/LambdaOperatorType";
 import { QEntityPathModel } from "./QPathModel";
 
 export class QCollectionPath<CollectionType extends QueryObject> implements QEntityPathModel<CollectionType> {
@@ -31,11 +32,13 @@ export class QCollectionPath<CollectionType extends QueryObject> implements QEnt
     return true;
   }
 
-  private lambdaFunction(operationName: string, fn: (qObject: CollectionType) => QFilterExpression, prefix: string) {
+  private lambdaFunction(operationName: string, fn?: LambdaOperatorType<CollectionType>, prefix: string = "a") {
     // no prefix here => because $it needs to be replaced
-    const expression = fn(new (this.qEntityFn())());
-    if (!expression.toString()) {
-      return expression;
+    const expression = fn ? fn(new (this.qEntityFn())()) : undefined;
+
+    // if no expression was provided => function call without args
+    if (!expression || !expression.toString()) {
+      return new QFilterExpression(`${this.path}/${operationName}()`);
     }
 
     // $it is a constant for any primitive collection => just replace it within the string
@@ -43,11 +46,11 @@ export class QCollectionPath<CollectionType extends QueryObject> implements QEnt
     return new QFilterExpression(`${this.path}/${operationName}(${prefix}:${replacedExpression})`);
   }
 
-  public any(fn: (qObject: CollectionType) => QFilterExpression, prefix: string = "a"): QFilterExpression {
+  public any(fn?: LambdaOperatorType<CollectionType>, prefix?: string): QFilterExpression {
     return this.lambdaFunction(LambdaFunctions.ANY, fn, prefix);
   }
 
-  public all(fn: (qObject: CollectionType) => QFilterExpression, prefix: string = "a"): QFilterExpression {
+  public all(fn?: LambdaOperatorType<CollectionType>, prefix?: string): QFilterExpression {
     return this.lambdaFunction(LambdaFunctions.ALL, fn, prefix);
   }
 }

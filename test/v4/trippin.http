@@ -312,10 +312,14 @@ GET {{baseUrl}}/People('russellwhyte')/Friends/$count
 GET {{baseUrl}}/People$filter=Friends/$count gt 2
 
 ### Lambda Operators
+### any
 GET {{baseUrl}}/People?$filter=Trips/any(a:a/Budget gt 2999)
 &$select=FirstName,LastName
 &$count=true
 &$expand=Trips($select=Description,Budget)
+
+### empty any
+GET {{baseUrl}}/People?$filter=Trips/any()&$count=true
 
 ### complex search
 GET {{baseUrl}}/People?$filter=Trips/any(a:a/Budget gt 2999 and a/Budget lt 5000)
