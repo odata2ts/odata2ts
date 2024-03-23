@@ -62,4 +62,20 @@ describe("Trippin: Testing Query Functionality", function () {
     expect(ODATA_CLIENT.lastOperation).toBe("GET");
     expect(ODATA_CLIENT.lastData).toBeUndefined();
   });
+
+  test("any: without args", async () => {
+    await TRIPPIN.people().query((builder, qPerson) => {
+      return builder.filter(qPerson.trips.any());
+    });
+
+    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People?%24filter=Trips%2Fany()`);
+  });
+
+  test("any: without return type", async () => {
+    await TRIPPIN.people().query((builder, qPerson) => {
+      return builder.filter(qPerson.trips.any(() => {}));
+    });
+
+    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People?%24filter=Trips%2Fany()`);
+  });
 });
