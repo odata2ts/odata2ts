@@ -20,6 +20,7 @@
     "clear-cache": "jest --clearCache",
     "compile": "tsc",
     "compile-fixtures": "tsc -p ./tsconfig.fixture.json",
+    "compile-generated": "tsc -p ./tsconfig.generated.json",
     "dev": "yarn generate trippin odata",
     "generate": "ts-node --cwd-mode src/run-cli.ts ",
     "int-test": "yarn clean && jest ./int-test",
