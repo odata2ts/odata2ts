@@ -26,6 +26,7 @@ const defaultConfig: DefaultConfiguration = {
   v2ModelsWithExtraResultsWrapping: false,
   v4BigNumberAsString: false,
   disableAutomaticNameClashResolution: false,
+  bundledFileGeneration: false,
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,

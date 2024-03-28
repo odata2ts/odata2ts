@@ -5,6 +5,7 @@ import { DataModel } from "./data-model/DataModel";
 import { Schema } from "./data-model/edmx/ODataEdmxModelBase";
 import { NamingHelper } from "./data-model/NamingHelper";
 import { RunOptions } from "./OptionModel";
+import { ProjectManager } from "./project/ProjectManager";
 
 export type DigestionOptions = Pick<
   RunOptions,
@@ -17,6 +18,7 @@ export type DigestionOptions = Pick<
   | "skipEditableModels"
   | "skipComments"
   | "disableAutomaticNameClashResolution"
+  | "bundledFileGeneration"
 >;
 
 /**
@@ -34,9 +36,9 @@ export type GeneratorFunctionOptions = Pick<
 >;
 
 export type EntityBasedGeneratorFunction = (
+  project: ProjectManager,
   dataModel: DataModel,
-  sourceFile: SourceFile,
   version: ODataVersions,
   options: GeneratorFunctionOptions,
   namingHelper: NamingHelper
-) => void;
+) => Promise<void>;

@@ -1,8 +1,8 @@
 import { TypeModel } from "../../../src";
-import { NameValidator } from "../../../src/data-model/validation/NameValidator";
+import { NameClashValidator } from "../../../src/data-model/validation/NameClashValidator";
 
 describe("NameValidator Tests", function () {
-  let validator: NameValidator;
+  let validator: NameClashValidator;
 
   const NS1 = "Test";
   const NS2 = "Test.2";
@@ -12,7 +12,7 @@ describe("NameValidator Tests", function () {
   }
 
   beforeEach(() => {
-    validator = new NameValidator();
+    validator = new NameClashValidator();
   });
 
   test("smoke test", () => {
@@ -41,7 +41,7 @@ describe("NameValidator Tests", function () {
   });
 
   test("without automatic name clash resolution", () => {
-    validator = new NameValidator({ disableAutomaticNameClashResolution: true });
+    validator = new NameClashValidator({ disableAutomaticNameClashResolution: true });
 
     const name = "Test";
 

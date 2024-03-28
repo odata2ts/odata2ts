@@ -105,8 +105,8 @@ export function createDataModelTests(
 
     const toTest = result.getEntityTypes()[2];
     expect(toTest.name).toBe("Child");
-    expect(toTest.idModelName).toBe("GrandParentId");
-    expect(toTest.qIdFunctionName).toBe("QGrandParentId");
+    expect(toTest.id.modelName).toBe("GrandParentId");
+    expect(toTest.id.qName).toBe("QGrandParentId");
     expect(toTest.generateId).toBe(false);
     expect(toTest.props.length).toBe(0);
     expect(toTest.baseProps.length).toBe(1);
@@ -129,8 +129,8 @@ export function createDataModelTests(
     expect(result.getEntityTypes()[1].baseProps.length).toBe(1);
     expect(result.getEntityTypes()[1].keys.length).toBe(2);
     expect(result.getEntityTypes()[1].keyNames).toStrictEqual(["ID", "ID2"]);
-    expect(result.getEntityTypes()[1].idModelName).toBe("ParentId");
-    expect(result.getEntityTypes()[1].qIdFunctionName).toBe("QParentId");
+    expect(result.getEntityTypes()[1].id.modelName).toBe("ParentId");
+    expect(result.getEntityTypes()[1].id.fqName).toBe("QParentId");
     expect(result.getEntityTypes()[1].generateId).toBe(true);
   });
 
@@ -180,8 +180,8 @@ export function createDataModelTests(
     expect(result.getEntityTypes()[1].name).toBe("Parent");
     expect(result.getEntityTypes()[1].keys.length).toBe(2);
     expect(result.getEntityTypes()[1].keyNames).toStrictEqual(["ID", "ID2"]);
-    expect(result.getEntityTypes()[1].idModelName).toBe("ParentId");
-    expect(result.getEntityTypes()[1].qIdFunctionName).toBe("QParentId");
+    expect(result.getEntityTypes()[1].id.modelName).toBe("ParentId");
+    expect(result.getEntityTypes()[1].id.qName).toBe("QParentId");
     expect(result.getEntityTypes()[1].generateId).toBe(true);
   });
 
@@ -243,8 +243,8 @@ export function createDataModelTests(
     let toTest = result.getEntityTypes()[0];
     expect(toTest.name).toBe("TEST_MODEL");
     expect(toTest.keyNames).toStrictEqual(["ID"]);
-    expect(toTest.idModelName).toBe("TEST_KEY_MODEL");
-    expect(toTest.qIdFunctionName).toBe("YYY_TEST_KEY_FUNC");
+    expect(toTest.id.modelName).toBe("TEST_KEY_MODEL");
+    expect(toTest.id.qName).toBe("YYY_TEST_KEY_FUNC");
     expect(toTest.editableName).toBe("TEST_EDIT_DUMMY");
   });
 
@@ -303,8 +303,8 @@ export function createDataModelTests(
     let toTest = result.getEntityTypes()[0];
     expect(toTest.odataName).toBe("Test");
     expect(toTest.name).toBe("NewTest");
-    expect(toTest.idModelName).toBe("NewTestId");
-    expect(toTest.qIdFunctionName).toBe("QNewTestId");
+    expect(toTest.id.modelName).toBe("NewTestId");
+    expect(toTest.id.qName).toBe("QNewTestId");
     expect(toTest.editableName).toBe("EditableNewTest");
     expect(toTest.keyNames).toStrictEqual(["ID", "Version"]);
     expect(toTest.keys.length).toBe(2);

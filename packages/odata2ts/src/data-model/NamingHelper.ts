@@ -273,4 +273,8 @@ export class NamingHelper {
     const opts = this.options.services?.privateProps;
     return this.getName(name, this.namingFunction(opts?.namingStrategy), opts);
   };
+
+  public getFolderPath(namespace: string, name: string) {
+    return `${snakeCase(namespace)}/${snakeCase(name)}`;
+  }
 }

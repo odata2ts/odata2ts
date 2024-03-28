@@ -7,6 +7,7 @@ import {
   DataTypes,
   EntityContainerModel,
   EntitySetType,
+  EntityType,
   EnumType,
   FunctionImportType,
   ModelType,
@@ -37,7 +38,7 @@ export class DataModel {
   private readonly converters: MappedConverterChains;
   private nameValidation: Map<string, ValidationError[]> | undefined;
 
-  private models = new Map<string, ModelType | ComplexType | EnumType>();
+  private models = new Map<string, EntityType | ComplexType | EnumType>();
   /**
    * Stores unbound operations by their fully qualified name.
    * @private
@@ -55,8 +56,12 @@ export class DataModel {
    * @private
    */
   private entityCollectionBoundOperationTypes = new Map<string, Array<OperationType>>();
-  private readonly namespace2Alias: { [ns: string]: string };
+  /**
+   * Stores own type definitions which map to primitive types.
+   * @private
+   */
   private typeDefinitions = new Map<string, string>();
+  private readonly namespace2Alias: { [ns: string]: string };
   private aliases: Record<string, string> = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
 
@@ -115,7 +120,11 @@ export class DataModel {
     return this.retrieveType(fqName, this.models);
   }
 
-  public addEntityType(namespace: string, name: string, model: Omit<ModelType, "dataType">) {
+  public getModelTypes(): Array<ModelType> {
+    return [...this.models.values()];
+  }
+
+  public addEntityType(namespace: string, name: string, model: Omit<EntityType, "dataType">) {
     const fqName = withNamespace(namespace, name);
 
     this.models.set(fqName, { ...model, dataType: DataTypes.ModelType });
@@ -129,7 +138,7 @@ export class DataModel {
    * @returns the model type
    */
   public getEntityType(fqName: string) {
-    return this.retrieveType(fqName, this.models) as ModelType;
+    return this.retrieveType(fqName, this.models) as EntityType;
   }
 
   /**
@@ -138,7 +147,7 @@ export class DataModel {
    * @returns list of model types
    */
   public getEntityTypes() {
-    const ets = [...this.models.values()].filter((m): m is ModelType => m.dataType === DataTypes.ModelType);
+    const ets = [...this.models.values()].filter((m): m is EntityType => m.dataType === DataTypes.ModelType);
     return this.sortModelsByInheritance(ets);
   }
 

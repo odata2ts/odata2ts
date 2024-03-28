@@ -1,31 +1,32 @@
 import { writeFile } from "fs/promises";
 import * as path from "path";
 
-import { remove } from "fs-extra";
-import {
-  CompilerOptions,
-  ModuleKind,
-  ModuleResolutionKind,
-  NewLineKind,
-  Project,
-  ScriptTarget,
-  SourceFile,
-} from "ts-morph";
+import { ensureDir } from "fs-extra";
+import { CompilerOptions, NewLineKind, Project, SourceFile } from "ts-morph";
 import load from "tsconfig-loader";
-import ts from "typescript";
 
-import { ProjectFiles } from "../data-model/DataModel";
+import { DataModel } from "../data-model/DataModel";
+import { NamingHelper } from "../data-model/NamingHelper";
 import { EmitModes } from "../OptionModel";
+import { FileWrapper } from "./FileWrapper";
 import { createFormatter } from "./formatter";
 import { FileFormatter } from "./formatter/FileFormatter";
+import { getModuleKind, getModuleResolutionKind, getTarget } from "./TsMorphHelper";
+
+export interface ProjectManagerOptions {
+  usePrettier?: boolean;
+  tsConfigPath?: string;
+  bundledFileGeneration?: boolean;
+}
 
 export async function createProjectManager(
-  projectFiles: ProjectFiles,
   outputDir: string,
   emitMode: EmitModes,
-  usePrettier: boolean,
-  tsConfigPath: string = "tsconfig.json"
+  namingHelper: NamingHelper,
+  dataModel: DataModel,
+  options: ProjectManagerOptions
 ): Promise<ProjectManager> {
+  const { usePrettier = false, tsConfigPath = "tsconfig.json", bundledFileGeneration = false } = options;
   const generateDeclarations = EmitModes.js_dts === emitMode || EmitModes.dts === emitMode;
   const conf = load({ filename: tsConfigPath });
   const formatter = await createFormatter(outputDir, usePrettier);
@@ -63,47 +64,36 @@ export async function createProjectManager(
         : undefined,
   };
 
-  return new ProjectManager(projectFiles, outputDir, emitMode, formatter, compilerOpts);
-}
-
-function getModuleResolutionKind(
-  moduleResolution: string | undefined | Record<string, any>
-): ModuleResolutionKind | undefined {
-  const modRes =
-    typeof moduleResolution === "string"
-      ? moduleResolution.toLowerCase() === "node"
-        ? "nodejs"
-        : moduleResolution.toLowerCase()
-      : undefined;
-  const matchedKey = Object.keys(ts.ModuleResolutionKind).find(
-    (mk): mk is keyof typeof ModuleResolutionKind => mk.toLowerCase() === modRes
+  const pm = new ProjectManager(
+    outputDir,
+    emitMode,
+    namingHelper,
+    dataModel,
+    formatter,
+    compilerOpts,
+    bundledFileGeneration
   );
-  return matchedKey ? (ts.ModuleResolutionKind[matchedKey] as ModuleResolutionKind) : undefined;
-}
 
-function getModuleKind(module: string | undefined | Record<string, any>): ModuleKind | undefined {
-  const mod = typeof module === "string" ? module.toLowerCase() : undefined;
-  const matchedKey = Object.keys(ts.ModuleKind).find((mk): mk is keyof typeof ModuleKind => mk.toLowerCase() === mod);
-  return matchedKey ? (ts.ModuleKind[matchedKey] as ModuleKind) : undefined;
-}
+  await pm.init();
 
-function getTarget(target: string | undefined | Record<string, any>): ScriptTarget | undefined {
-  const t = typeof target === "string" ? target.toLowerCase() : undefined;
-  const matchedKey = Object.keys(ts.ScriptTarget).find((st): st is keyof typeof ScriptTarget => st.toLowerCase() === t);
-  return matchedKey ? (ts.ScriptTarget[matchedKey] as ScriptTarget) : undefined;
+  return pm;
 }
 
 export class ProjectManager {
   private project!: Project;
 
-  private files: { [name: string]: SourceFile } = {};
+  private mainServiceFile: FileWrapper | undefined;
+  private bundledModelFile: FileWrapper | undefined;
+  private bundledQFile: FileWrapper | undefined;
 
   constructor(
-    private projectFiles: ProjectFiles,
     private outputDir: string,
     private emitMode: EmitModes,
+    private namingHelper: NamingHelper,
+    private dataModel: DataModel,
     private formatter: FileFormatter,
-    compilerOptions: CompilerOptions | undefined
+    compilerOptions: CompilerOptions | undefined,
+    public readonly bundledFileGeneration: boolean
   ) {
     // Create ts-morph project
     this.project = new Project({
@@ -113,78 +103,43 @@ export class ProjectManager {
     });
   }
 
-  private async createFile(name: string) {
-    const fileName = path.join(this.outputDir, `${name}.ts`);
-    await remove(fileName);
-    return this.project.createSourceFile(fileName);
+  private createFile(name: string, additionalPath: string = ""): FileWrapper {
+    const fileName = path.join(this.outputDir, additionalPath, `${name}.ts`);
+
+    return new FileWrapper(
+      additionalPath,
+      name,
+      this.project.createSourceFile(fileName),
+      this.dataModel,
+      this.bundledFileGeneration ? this.namingHelper.getFileNames() : undefined
+    );
   }
 
-  public async createModelFile() {
-    this.files.model = await this.createFile(this.projectFiles.model);
-    return this.getModelFile();
-  }
+  private async writeFile(fileWrapper: FileWrapper) {
+    const file = fileWrapper.getFile();
+    const imports = fileWrapper.getImports();
 
-  public getModelFile() {
-    return this.files.model;
-  }
+    file.addImportDeclarations(imports.getImportDeclarations());
 
-  public async createQObjectFile() {
-    this.files.qobject = await this.createFile(this.projectFiles.qObject);
-    return this.getQObjectFile();
-  }
+    await ensureDir(path.join(this.outputDir, fileWrapper.path));
 
-  public getQObjectFile() {
-    return this.files.qobject;
-  }
-
-  public async createMainServiceFile() {
-    this.files.mainService = await this.createFile(this.projectFiles.service);
-    return this.getMainServiceFile();
-  }
-
-  public getMainServiceFile() {
-    return this.files.mainService;
-  }
-
-  public async writeFiles() {
     switch (this.emitMode) {
       case EmitModes.js:
       case EmitModes.js_dts:
-        await this.emitJsFiles();
+        await file.emit();
         break;
       case EmitModes.dts:
-        await this.emitJsFiles(true);
+        await file.emit({ emitOnlyDtsFiles: true });
         break;
       case EmitModes.ts:
-        await this.emitTsFiles();
+        await this.formatAndWriteFile(file);
         break;
       default:
         throw new Error(`Emit mode "${this.emitMode}" is invalid!`);
     }
   }
 
-  private async emitJsFiles(declarationOnly?: boolean) {
-    console.log(
-      declarationOnly
-        ? "Emitting declaration files"
-        : `Emitting JS files (${this.emitMode === EmitModes.js_dts ? "including" : "without"} declaration files)`
-    );
-
-    await this.project.emit({ emitOnlyDtsFiles: !!declarationOnly });
-
-    /* for (const diagnostic of this.project.getPreEmitDiagnostics()) {
-      console.log(diagnostic.getMessageText());
-    } */
-  }
-
-  private async emitTsFiles() {
-    const files = [this.getModelFile(), this.getQObjectFile(), this.getMainServiceFile()].filter((file) => !!file);
-    const text = files.length === 1 ? "Emitting 1 TS file" : `Emitting ${files.length} TS files`;
-    console.log(`${text}: ${files.map((f) => path.basename(f.getFilePath())).join(", ")}`);
-    return Promise.all(files.map(this.formatAndWriteFile));
-  }
-
-  private formatAndWriteFile = async (file: SourceFile) => {
+  private async formatAndWriteFile(file: SourceFile) {
     const fileName = file.getFilePath();
     const content = file.getFullText();
 
@@ -202,5 +157,85 @@ export class ProjectManager {
       await writeFile("error.log", formattingError?.toString() || "no error message!");
       process.exit(99);
     }
-  };
+  }
+
+  public async init() {
+    if (!this.bundledFileGeneration) {
+      // ensure folder for each model
+      await Promise.all(
+        this.dataModel.getModelTypes().map((mt) => {
+          ensureDir(path.join(this.outputDir, mt.folderPath));
+        })
+      );
+    }
+
+    const typePart = this.emitMode.toUpperCase().replace("_", " & ");
+    console.log(`Prepared to emit ${typePart} files.`);
+  }
+
+  public initModels() {
+    if (this.bundledFileGeneration) {
+      this.bundledModelFile = this.createFile(this.namingHelper.getFileNames().model);
+    }
+  }
+
+  public async finalizeModels() {
+    if (this.bundledModelFile) {
+      return this.writeFile(this.bundledModelFile);
+    }
+  }
+
+  public initQObjects() {
+    if (this.bundledFileGeneration) {
+      this.bundledQFile = this.createFile(this.namingHelper.getFileNames().qObject);
+    }
+  }
+
+  public async finalizeQObjects() {
+    if (this.bundledQFile) {
+      return this.writeFile(this.bundledQFile);
+    }
+  }
+
+  public initServices() {
+    this.mainServiceFile = this.createFile(this.namingHelper.getFileNames().service);
+  }
+
+  public async finalizeServices() {
+    if (this.bundledFileGeneration && this.mainServiceFile) {
+      return this.writeFile(this.mainServiceFile);
+    }
+  }
+
+  public getMainServiceFile() {
+    return this.mainServiceFile!;
+  }
+
+  public createOrGetModelFile(folderPath: string, name: string) {
+    if (this.bundledModelFile) {
+      return this.bundledModelFile;
+    }
+
+    return this.createFile(name, folderPath);
+  }
+  public createOrGetQObjectFile(folderPath: string, name: string) {
+    if (this.bundledQFile) {
+      return this.bundledQFile;
+    }
+
+    return this.createFile(name, folderPath);
+  }
+  public createOrGetServiceFile(folderPath: string, name: string) {
+    if (this.bundledFileGeneration) {
+      return this.mainServiceFile!;
+    }
+
+    return this.createFile(name, folderPath);
+  }
+
+  public async finalizeFile(file: FileWrapper) {
+    if (!this.bundledFileGeneration) {
+      return this.writeFile(file);
+    }
+  }
 }

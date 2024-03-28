@@ -198,14 +198,14 @@ describe("ProjectManager Test", () => {
   test("ProjectManager: create, get and write model file", async () => {
     // given an initialized project manager
     const pm = await doCreateProjectManager();
-    expect(pm.getModelFile()).toBeUndefined();
+    expect(pm.createOrGetModelFile()).toBeUndefined();
 
     // when creating model file
     const result = await pm.createModelFile();
 
     // then file was created properly
     const filePath = await testFileCreation(result, projectFiles.model);
-    expect(pm.getModelFile()).toBe(result);
+    expect(pm.createOrGetModelFile()).toBe(result);
 
     // when writing all files
     await pm.writeFiles();

@@ -17,6 +17,10 @@ const config: ConfigFileOptions = {
       source: "int-test/fixture/v2/odata.xml",
       output: "build/v2/odata",
     },
+    vanilla: {
+      source: "int-test/fixture/v4/trippin.xml",
+      output: "build/v4/vanilla",
+    },
     trippin: {
       sourceUrl: "https://services.odata.org/TripPinRESTierService/$metadata",
       source: "tmp/test/v4/trippin-test.xml",
