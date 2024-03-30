@@ -7,6 +7,7 @@ import { NamingHelper } from "../data-model/NamingHelper";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel";
 import { FileWrapper } from "../project/FileWrapper";
 import { ProjectManager } from "../project/ProjectManager";
+import { CoreImports } from "./import/ImportObjects";
 import { ImportContainer } from "./ImportContainer";
 
 export const generateModels: EntityBasedGeneratorFunction = (
@@ -20,8 +21,6 @@ export const generateModels: EntityBasedGeneratorFunction = (
   return generator.generate();
 };
 
-const DEFERRED_CONTENT = "DeferredContent";
-
 class ModelGenerator {
   constructor(
     private project: ProjectManager,
@@ -34,7 +33,11 @@ class ModelGenerator {
   public async generate(): Promise<void> {
     this.project.initModels();
 
-    const promises: Array<Promise<void>> = [...this.generateEnums(), ...this.generateModels()];
+    const promises: Array<Promise<void>> = [
+      ...this.generateEnums(),
+      ...this.generateEntityTypeModels(),
+      ...this.generateComplexTypeModels(),
+    ];
 
     if (!this.options.skipOperations) {
       promises.push(...this.generateUnboundOperationParams());
@@ -59,35 +62,58 @@ class ModelGenerator {
     });
   }
 
-  private generateModels() {
-    return [
-      ...this.dataModel.getEntityTypes().map((model) => {
-        const file = this.project.createOrGetModelFile(model.folderPath, model.modelName);
+  private generateEntityTypeModels() {
+    return this.dataModel.getEntityTypes().map((model) => {
+      const file = this.project.createOrGetModelFile(model.folderPath, model.modelName, [
+        model.modelName,
+        model.id.modelName,
+        model.editableName,
+      ]);
 
-        this.generateModel(file, model);
-        if (!this.options.skipIdModels && model.generateId) {
-          this.generateIdModel(file, model);
-        }
-        if (!this.options.skipEditableModels && !model.abstract) {
-          this.generateEditableModel(file, model);
-        }
-        if (!this.options.skipOperations) {
-          this.generateBoundOperationParams(file, model.fqName);
-        }
+      // query model
+      this.generateModel(file, model);
 
-        return this.project.finalizeFile(file);
-      }),
-      ...this.dataModel.getComplexTypes().map((model) => {
-        const file = this.project.createOrGetModelFile(model.folderPath, model.modelName);
+      // key model
+      if (!this.options.skipIdModels && model.generateId) {
+        this.generateIdModel(file, model);
+      }
 
-        this.generateModel(file, model);
-        if (!this.options.skipEditableModels && !model.abstract) {
-          this.generateEditableModel(file, model);
-        }
+      // editable model
+      if (!this.options.skipEditableModels) {
+        this.generateEditableModel(file, model);
+      }
 
-        return this.project.finalizeFile(file);
-      }),
-    ];
+      // param models for bound operations
+      if (!this.options.skipOperations) {
+        [
+          ...this.dataModel.getEntityTypeOperations(model.fqName),
+          ...this.dataModel.getEntitySetOperations(model.fqName),
+        ].forEach((operation) => {
+          this.generateOperationParams(file, operation);
+        });
+      }
+
+      return this.project.finalizeFile(file);
+    });
+  }
+
+  private generateComplexTypeModels() {
+    return this.dataModel.getComplexTypes().map((model) => {
+      const file = this.project.createOrGetModelFile(model.folderPath, model.modelName, [
+        model.modelName,
+        model.editableName,
+      ]);
+
+      // query model
+      this.generateModel(file, model);
+
+      // editable model
+      if (!this.options.skipEditableModels) {
+        this.generateEditableModel(file, model);
+      }
+
+      return this.project.finalizeFile(file);
+    });
   }
 
   private generateModel(file: FileWrapper, model: ComplexType | EntityType) {
@@ -149,25 +175,24 @@ class ModelGenerator {
   }
 
   private getPropType(imports: ImportContainer, prop: PropertyModel): string {
-    const isEntity = prop.dataType == DataTypes.ModelType;
-
     // V2 entity special: deferred content
     let suffix = "";
-    if (isEntity && this.dataModel.isV2()) {
-      imports.addFromCore(DEFERRED_CONTENT);
-      suffix = ` | ${DEFERRED_CONTENT}`;
-    }
-    // custom types which require type imports => possible via converters
-    else if (prop.typeModule) {
-      imports.addCustomType(prop.typeModule, prop.type);
+    if (this.dataModel.isV2() && prop.dataType == DataTypes.ModelType) {
+      const [defContent] = imports.addCoreLib(this.version, CoreImports.DeferredContent);
+      suffix = ` | ${defContent}`;
     }
 
-    const safeTypeName =
-      prop.dataType === DataTypes.PrimitiveType ? prop.type : imports.addGeneratedModel(prop.fqType, prop.type);
+    let typeName: string;
+    if (prop.dataType === DataTypes.PrimitiveType) {
+      // custom types which require type imports => possible via converters
+      typeName = prop.typeModule ? imports.addCustomType(prop.typeModule, prop.type) : prop.type;
+    } else {
+      typeName = imports.addGeneratedModel(prop.fqType, prop.type);
+    }
 
     // Collections
     if (prop.isCollection) {
-      const type = `Array<${safeTypeName}>`;
+      const type = `Array<${typeName}>`;
       if (this.dataModel.isV2() && this.options.v2ModelsWithExtraResultsWrapping) {
         return `{ results: ${type} }` + suffix;
       } else {
@@ -176,7 +201,7 @@ class ModelGenerator {
     }
 
     // primitive, enum & complex types
-    return safeTypeName + (prop.required ? "" : " | null") + suffix;
+    return typeName + (prop.required ? "" : " | null") + suffix;
   }
 
   private generateIdModel(file: FileWrapper, model: EntityType) {
@@ -255,15 +280,6 @@ class ModelGenerator {
       this.generateOperationParams(file, operation);
 
       return this.project.finalizeFile(file);
-    });
-  }
-
-  private generateBoundOperationParams(file: FileWrapper, entityName: string) {
-    [
-      ...this.dataModel.getEntityTypeOperations(entityName),
-      ...this.dataModel.getEntitySetOperations(entityName),
-    ].forEach((operation) => {
-      this.generateOperationParams(file, operation);
     });
   }
 

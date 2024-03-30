@@ -295,7 +295,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       if (open) {
         et.open = open;
       }
-      et.keyNames.unshift(...baseKeys);
+      et.keyNames.unshift(...baseKeys.filter((bk) => !et.keyNames.includes(bk)));
     });
   }
 

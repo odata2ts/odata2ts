@@ -1,73 +1,109 @@
 import path from "path";
 
+import { ODataVersions } from "@odata2ts/odata-core";
 import { ImportDeclarationStructure } from "ts-morph";
 
 import { DataModel } from "../data-model/DataModel";
 import { ComplexType, OperationType } from "../data-model/DataTypeModel";
+import {
+  ClientApiImports,
+  CoreImports,
+  LIB_MODULES,
+  QueryObjectImports,
+  ServiceImports,
+  VERSIONED_CORE_IMPORTS,
+  VERSIONED_SERVICE_IMPORTS,
+} from "./import/ImportObjects";
 import { ImportedNameValidator } from "./ImportedNameValidator";
 
-type ImportContainerType = {
-  core: Set<string>;
-  qobjects: Set<string>;
-  clientApi: Set<string>;
-  service: Set<string>;
-  customTypes: Map<string, Set<string>>;
-};
+type ImportContainerType = Record<keyof typeof LIB_MODULES, Map<string, string>>;
 
+/**
+ * Handles all the import statements for a given file.
+ *
+ * Features a renaming mechanism, so that when the import name conflicts with an existing import a new
+ * name is generated and returned.
+ *
+ * Map<string,string>
+ */
 export class ImportContainer {
-  private mapping: {
-    [K in keyof ImportContainerType as string]: { moduleName: string; isRelative: boolean; addName?: boolean };
-  } = {
-    core: { moduleName: "@odata2ts/odata-core", isRelative: false },
-    qobjects: { moduleName: "@odata2ts/odata-query-objects", isRelative: false },
-    clientApi: { moduleName: "@odata2ts/http-client-api", isRelative: false },
-    service: { moduleName: "@odata2ts/odata-service", isRelative: false },
-  };
+  private readonly bundledFileGeneration: boolean;
+  private readonly importedNameValidator: ImportedNameValidator;
+  // mapping of a custom defined type to a primitive type
+  private customTypes = new Map<string, Map<string, string>>();
+  // imports to generated artefacts
+  private internalImports = new Map<string, Map<string, string>>();
 
-  private container: ImportContainerType = {
-    core: new Set(),
-    qobjects: new Set(),
-    clientApi: new Set(),
-    service: new Set(),
-    customTypes: new Map(),
+  private libs: ImportContainerType = {
+    core: new Map(),
+    qObject: new Map(),
+    clientApi: new Map(),
+    service: new Map(),
   };
-
-  private internalImports = new Map<string, Set<string>>();
-  private bundledFileGeneration: boolean;
-  private importedNameValidator = new ImportedNameValidator();
 
   constructor(
     protected path: string,
     protected fileName: string,
     protected dataModel: DataModel,
-    private readonly bundledFileNames: { model: string; qObject: string; service: string } | undefined
+    protected reservedNames: Array<string> | undefined,
+    protected readonly bundledFileNames: { model: string; qObject: string; service: string } | undefined
   ) {
     this.bundledFileGeneration = this.bundledFileNames !== undefined;
+    this.importedNameValidator = new ImportedNameValidator(reservedNames);
   }
 
-  public addFromCore(...names: Array<string>) {
-    names.forEach((n) => this.container.core.add(n));
+  public addCoreLib(odataVersion: ODataVersions, ...coreLibs: Array<CoreImports>) {
+    return coreLibs.map((coreLib) => {
+      const name = CoreImports[coreLib] + (VERSIONED_CORE_IMPORTS.includes(coreLib) ? ODataVersions[odataVersion] : "");
+      const importName = this.importedNameValidator.validateName(LIB_MODULES.core, name);
+      this.libs.core.set(name, importName);
+      return importName;
+    });
   }
 
   public addFromQObject(...names: Array<string>) {
-    names.forEach((n) => this.container.qobjects.add(n));
+    return names.map((n) => {
+      const importName = this.importedNameValidator.validateName(LIB_MODULES.qObject, n);
+      this.libs.qObject.set(n, importName);
+      return importName;
+    });
   }
 
-  public addFromClientApi(...names: Array<string>) {
-    names.forEach((n) => this.container.clientApi.add(n));
+  public addQObject(...qObjects: Array<QueryObjectImports>) {
+    return this.addFromQObject(...qObjects.map((qObject) => QueryObjectImports[qObject]));
   }
 
-  public addFromService(...names: Array<string>) {
-    names.forEach((n) => this.container.service.add(n));
+  public addClientApi(...clientApis: Array<ClientApiImports>) {
+    return clientApis.map((clientApi) => {
+      const name = ClientApiImports[clientApi];
+      const importName = this.importedNameValidator.validateName(LIB_MODULES.clientApi, name);
+      this.libs.clientApi.set(name, importName);
+      return importName;
+    });
+  }
+
+  public addServiceObject(odataVersion: ODataVersions, ...serviceObjects: Array<ServiceImports>) {
+    return serviceObjects
+      .map((so) => {
+        return ServiceImports[so] + (VERSIONED_SERVICE_IMPORTS.includes(so) ? ODataVersions[odataVersion] : "");
+      })
+      .map((so) => {
+        const importName = this.importedNameValidator.validateName(LIB_MODULES.service, so);
+        this.libs.service.set(so, importName);
+        return importName;
+      });
   }
 
   public addCustomType(moduleName: string, typeName: string) {
-    let importList = this.container.customTypes.get(moduleName);
+    let importList = this.customTypes.get(moduleName);
     if (!importList) {
-      importList = new Set();
-      this.container.customTypes.set(moduleName, importList);
+      importList = new Map();
+      this.customTypes.set(moduleName, importList);
     }
-    importList.add(typeName);
+
+    const importName = this.importedNameValidator.validateName(moduleName, typeName);
+    importList.set(typeName, importName);
+    return importName;
   }
 
   private pathAndFile(filePath: string, fileName: string) {
@@ -79,17 +115,19 @@ export class ImportContainer {
   }
 
   private addGeneratedImport(folderPath: string, fileName: string, name: string): string {
-    if (this.isDifferentFile(folderPath, fileName)) {
-      const moduleName = this.pathAndFile(folderPath, fileName);
-      const importName = this.importedNameValidator.validateName(moduleName, name);
-      const imports = this.internalImports.get(moduleName) || new Set<string>();
-
-      imports.add(importName);
-
-      this.internalImports.set(moduleName, imports);
-      return importName;
+    // imports are only relevant for different files
+    if (!this.isDifferentFile(folderPath, fileName)) {
+      return name;
     }
-    return name;
+
+    const moduleName = this.pathAndFile(folderPath, fileName);
+    const importName = this.importedNameValidator.validateName(moduleName, name);
+
+    const imports = this.internalImports.get(moduleName) || new Map<string, string>();
+    imports.set(name, importName);
+    this.internalImports.set(moduleName, imports);
+
+    return importName;
   }
 
   public addGeneratedModel(fqName: string, name: string): string {
@@ -130,35 +168,40 @@ export class ImportContainer {
   }
 
   public getImportDeclarations(fromSubPath: boolean = false): Array<ImportDeclarationStructure> {
-    const { customTypes, ...standardImports } = this.container;
-
     return [
-      ...[...customTypes.keys()]
-        .filter((key) => !!customTypes.get(key)?.size)
-        .map((key) => {
+      ...Object.entries(this.libs)
+        .filter(([_, values]) => !!values.size)
+        .map(([moduleName, toImport]) => {
           return {
-            namedImports: [...customTypes.get(key)!],
-            moduleSpecifier: key,
+            namedImports: this.getNamedImports(toImport),
+            moduleSpecifier: LIB_MODULES[moduleName],
           } as ImportDeclarationStructure;
         }),
-      ...Object.entries(standardImports)
-        .filter(([_, values]) => !!values.size)
-        .map(([key, values]) => {
-          const mapping = this.mapping[key];
+      ...[...this.customTypes.keys()]
+        .filter((moduleName) => !!this.customTypes.get(moduleName)?.size)
+        .map((moduleName) => {
+          const toImport = this.customTypes.get(moduleName)!;
           return {
-            namedImports: [...values],
-            moduleSpecifier: `${mapping.isRelative ? `${fromSubPath ? ".." : "."}/` : ""}${mapping.moduleName}`,
+            namedImports: this.getNamedImports(toImport),
+            moduleSpecifier: moduleName,
           } as ImportDeclarationStructure;
         }),
       ...[...this.internalImports.entries()]
-        .filter(([_, values]) => values.size > 0)
-        .map(([key, values]) => {
+        .filter(([_, toImport]) => toImport.size > 0)
+        .map(([key, toImport]) => {
           return {
-            namedImports: [...values],
+            namedImports: this.getNamedImports(toImport),
             moduleSpecifier: this.getModuleSpecifier(key),
           } as ImportDeclarationStructure;
         }),
     ];
+  }
+
+  private getNamedImports(toImport: Map<string, string>): Array<{ name: string; alias: string | undefined }> {
+    return [...toImport.entries()].map(([name, alias]) => ({
+      name,
+      alias: alias !== name ? alias : undefined,
+    }));
   }
 
   private getModuleSpecifier(filePath: string): string {

@@ -103,7 +103,11 @@ export class ProjectManager {
     });
   }
 
-  private createFile(name: string, additionalPath: string = ""): FileWrapper {
+  private createFile(
+    name: string,
+    reservedNames?: Array<string> | undefined,
+    additionalPath: string = ""
+  ): FileWrapper {
     const fileName = path.join(this.outputDir, additionalPath, `${name}.ts`);
 
     return new FileWrapper(
@@ -111,6 +115,7 @@ export class ProjectManager {
       name,
       this.project.createSourceFile(fileName),
       this.dataModel,
+      reservedNames,
       this.bundledFileGeneration ? this.namingHelper.getFileNames() : undefined
     );
   }
@@ -197,8 +202,8 @@ export class ProjectManager {
     }
   }
 
-  public initServices() {
-    this.mainServiceFile = this.createFile(this.namingHelper.getFileNames().service);
+  public initServices(reservedNames?: Array<string>) {
+    this.mainServiceFile = this.createFile(this.namingHelper.getFileNames().service, reservedNames);
   }
 
   public async finalizeServices() {
@@ -211,26 +216,26 @@ export class ProjectManager {
     return this.mainServiceFile!;
   }
 
-  public createOrGetModelFile(folderPath: string, name: string) {
+  public createOrGetModelFile(folderPath: string, name: string, reservedNames?: Array<string> | undefined) {
     if (this.bundledModelFile) {
       return this.bundledModelFile;
     }
 
-    return this.createFile(name, folderPath);
+    return this.createFile(name, reservedNames, folderPath);
   }
-  public createOrGetQObjectFile(folderPath: string, name: string) {
+  public createOrGetQObjectFile(folderPath: string, name: string, reservedNames?: Array<string> | undefined) {
     if (this.bundledQFile) {
       return this.bundledQFile;
     }
 
-    return this.createFile(name, folderPath);
+    return this.createFile(name, reservedNames, folderPath);
   }
-  public createOrGetServiceFile(folderPath: string, name: string) {
+  public createOrGetServiceFile(folderPath: string, name: string, reservedNames?: Array<string> | undefined) {
     if (this.bundledFileGeneration) {
       return this.mainServiceFile!;
     }
 
-    return this.createFile(name, folderPath);
+    return this.createFile(name, reservedNames, folderPath);
   }
 
   public async finalizeFile(file: FileWrapper) {

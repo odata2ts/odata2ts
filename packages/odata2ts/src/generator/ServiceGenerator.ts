@@ -21,21 +21,15 @@ import {
   OperationType,
   OperationTypes,
   PropertyModel,
+  ReturnTypeModel,
   SingletonType,
 } from "../data-model/DataTypeModel";
 import { NamingHelper } from "../data-model/NamingHelper";
 import { ConfigFileOptions } from "../OptionModel";
 import { FileWrapper } from "../project/FileWrapper";
 import { ProjectManager } from "../project/ProjectManager";
+import { ClientApiImports, CoreImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects";
 import { ImportContainer } from "./ImportContainer";
-
-const ROOT_SERVICE = "ODataService";
-
-const RESPONSE_TYPES = {
-  collection: "ODataCollectionResponse",
-  model: "ODataModelResponse",
-  value: "ODataValueResponse",
-};
 
 export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "properties" | "methods">> {}
 
@@ -67,10 +61,11 @@ class ServiceGenerator {
   }
 
   public async generate(): Promise<void> {
-    this.project.initServices();
+    const mainServiceName = this.namingHelper.getMainServiceName();
+    this.project.initServices([mainServiceName]);
 
     await Promise.all([
-      this.generateMainService(),
+      this.generateMainService(mainServiceName),
       ...this.generateEntityTypeServices(),
       ...this.generateComplexTypeServices(),
     ]);
@@ -78,15 +73,14 @@ class ServiceGenerator {
     return this.project.finalizeServices();
   }
 
-  private generateMainService() {
+  private generateMainService(mainServiceName: string) {
     const mainServiceFile = this.project.getMainServiceFile();
     const importContainer = mainServiceFile.getImports();
-    const serviceName = this.namingHelper.getMainServiceName();
     const container = this.dataModel.getEntityContainer();
     const unboundOperations = [...Object.values(container.functions), ...Object.values(container.actions)];
 
-    importContainer.addFromClientApi("ODataHttpClient");
-    importContainer.addFromService(ROOT_SERVICE);
+    const [httpClient] = importContainer.addClientApi(ClientApiImports.ODataHttpClient);
+    const [rootService] = importContainer.addServiceObject(this.version, ServiceImports.ODataService);
 
     const { properties, methods }: PropsAndOps = deepmerge(
       this.generateMainServiceProperties(container, importContainer),
@@ -95,9 +89,9 @@ class ServiceGenerator {
 
     mainServiceFile.getFile().addClass({
       isExported: true,
-      name: serviceName,
-      typeParameters: ["ClientType extends ODataHttpClient"],
-      extends: `${ROOT_SERVICE}<ClientType>`,
+      name: mainServiceName,
+      typeParameters: [`ClientType extends ${httpClient}`],
+      extends: `${rootService}<ClientType>`,
       ctors: this.isV4BigNumber()
         ? [
             {
@@ -157,13 +151,12 @@ class ServiceGenerator {
     propName: string,
     odataPropName: string,
     entityType: EntityType,
-    importContainer: ImportContainer
+    imports: ImportContainer
   ): OptionalKind<MethodDeclarationStructure> {
-    importContainer.addFromClientApi("ODataHttpClient");
-    const idName = importContainer.addGeneratedModel(entityType.id.fqName, entityType.id.modelName);
-    const idFunctionName = importContainer.addGeneratedQObject(entityType.id.fqName, entityType.id.qName);
-    const serviceName = importContainer.addGeneratedService(entityType.fqName, entityType.serviceName);
-    const collectionName = importContainer.addGeneratedService(entityType.fqName, entityType.serviceCollectionName);
+    const idName = imports.addGeneratedModel(entityType.id.fqName, entityType.id.modelName);
+    const idFunctionName = imports.addGeneratedQObject(entityType.id.fqName, entityType.id.qName);
+    const serviceName = imports.addGeneratedService(entityType.fqName, entityType.serviceName);
+    const collectionName = imports.addGeneratedService(entityType.fqName, entityType.serviceCollectionName);
 
     return {
       scope: Scope.Public,
@@ -243,27 +236,20 @@ class ServiceGenerator {
     };
   }
 
-  private getVersionSuffix() {
-    return this.version === ODataVersions.V2 ? "V2" : "V4";
-  }
-
   private generateEntityTypeService(file: FileWrapper, model: ComplexType) {
     const importContainer = file.getImports();
-    const entityServiceType = "EntityTypeService" + this.getVersionSuffix();
 
-    const editableModelName = model.editableName;
-    const qObjectName = firstCharLowerCase(model.qName);
     const operations = this.dataModel.getEntityTypeOperations(model.fqName);
     const props = [...model.baseProps, ...model.props];
 
-    importContainer.addFromService(entityServiceType);
-    importContainer.addFromClientApi("ODataHttpClient");
+    const [entityServiceType] = importContainer.addServiceObject(this.version, ServiceImports.EntityTypeService);
+    const [httpClient] = importContainer.addClientApi(ClientApiImports.ODataHttpClient);
 
     // note: predictable first imports => no need to take renaming into account
-    importContainer.addGeneratedModel(model.fqName, model.modelName);
-    importContainer.addGeneratedModel(model.fqName, model.editableName);
-    importContainer.addGeneratedQObject(model.fqName, model.qName);
-    importContainer.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName));
+    const modelName = importContainer.addGeneratedModel(model.fqName, model.modelName);
+    const editableModelName = importContainer.addGeneratedModel(model.fqName, model.editableName);
+    const qName = importContainer.addGeneratedQObject(model.fqName, model.qName);
+    const qObjectName = importContainer.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName));
 
     const { properties, methods }: PropsAndOps = deepmerge(
       this.generateServiceProperties(importContainer, model.serviceName, props),
@@ -274,8 +260,8 @@ class ServiceGenerator {
     file.getFile().addClass({
       isExported: true,
       name: model.serviceName,
-      typeParameters: ["ClientType extends ODataHttpClient"],
-      extends: entityServiceType + `<ClientType, ${model.modelName}, ${editableModelName}, ${model.qName}>`,
+      typeParameters: [`ClientType extends ${httpClient}`],
+      extends: entityServiceType + `<ClientType, ${modelName}, ${editableModelName}, ${qName}>`,
       ctors: [
         {
           parameters: [
@@ -291,23 +277,18 @@ class ServiceGenerator {
     });
   }
 
-  private getPrimitiveServiceType() {
-    return "PrimitiveTypeService" + this.getVersionSuffix();
-  }
-
   private generateServiceProperties(
     importContainer: ImportContainer,
     serviceName: string,
     props: Array<PropertyModel>
   ): PropsAndOps {
-    const collectionServiceType = "CollectionService" + this.getVersionSuffix();
     const result: PropsAndOps = { properties: [], methods: [] };
 
     props.forEach((prop) => {
       // complex types, collection of complex types or entityTypes
       if ((prop.dataType === DataTypes.ModelType && !prop.isCollection) || prop.dataType === DataTypes.ComplexType) {
-        // result.properties.push(this.generateModelProp(importContainer, prop, collectionServiceType));
-        // result.methods.push(this.generateModelPropGetter(prop, collectionServiceType));
+        result.properties.push(this.generateModelProp(importContainer, prop));
+        result.methods.push(this.generateModelPropGetter(importContainer, prop));
       } else if (prop.isCollection) {
         // collection of entity types
         if (prop.dataType === DataTypes.ModelType) {
@@ -316,20 +297,20 @@ class ServiceGenerator {
             throw new Error(`Entity type "${prop.fqType}" specified by property not found!`);
           }
 
-          // result.methods.push(
-          //   this.generateRelatedServiceGetter(prop.name, prop.odataName, entityType, importContainer)
-          // );
+          result.methods.push(
+            this.generateRelatedServiceGetter(prop.name, prop.odataName, entityType, importContainer)
+          );
         }
         // collection of primitive or enum types
         else {
-          result.properties.push(this.generatePrimitiveCollectionProp(importContainer, prop, collectionServiceType));
-          result.methods.push(this.generatePrimitiveCollectionGetter(prop, collectionServiceType));
+          result.properties.push(this.generatePrimitiveCollectionProp(importContainer, prop));
+          result.methods.push(this.generatePrimitiveCollectionGetter(importContainer, prop));
         }
       }
       // generation of services for each primitive property: turned off by default
       else if (this.options.enablePrimitivePropertyServices && prop.dataType === DataTypes.PrimitiveType) {
         result.properties.push(this.generatePrimitiveTypeProp(importContainer, prop));
-        result.methods.push(this.generatePrimitiveTypeGetter(prop));
+        result.methods.push(this.generatePrimitiveTypeGetter(importContainer, prop));
       }
     });
 
@@ -351,22 +332,19 @@ class ServiceGenerator {
     return result;
   }
 
-  private generateModelProp(
-    importContainer: ImportContainer,
-    prop: PropertyModel,
-    collectionServiceType: string
-  ): PropertyDeclarationStructure {
+  private generateModelProp(imports: ImportContainer, prop: PropertyModel): PropertyDeclarationStructure {
     const propModel = this.dataModel.getModel(prop.fqType) as ComplexType;
     let propModelType: string;
 
     if (prop.isCollection) {
-      const modelName = importContainer.addGeneratedModel(propModel.fqName, propModel.modelName);
-      const editableModelName = importContainer.addGeneratedModel(propModel.fqName, propModel.editableName);
-      const qModelName = importContainer.addGeneratedQObject(propModel.fqName, propModel.qName);
-      importContainer.addFromService(collectionServiceType);
+      const modelName = imports.addGeneratedModel(propModel.fqName, propModel.modelName);
+      const editableModelName = imports.addGeneratedModel(propModel.fqName, propModel.editableName);
+      const qModelName = imports.addGeneratedQObject(propModel.fqName, propModel.qName);
+      const [collectionServiceType] = imports.addServiceObject(this.version, ServiceImports.CollectionService);
+
       propModelType = `${collectionServiceType}<ClientType, ${modelName}, ${qModelName}, ${editableModelName}>`;
     } else {
-      const serviceName = importContainer.addGeneratedService(propModel.fqName, propModel.serviceName);
+      const serviceName = imports.addGeneratedService(propModel.fqName, propModel.serviceName);
       propModelType = `${serviceName}<ClientType>`;
     }
 
@@ -379,30 +357,26 @@ class ServiceGenerator {
   }
 
   private generatePrimitiveCollectionProp(
-    importContainer: ImportContainer,
-    prop: PropertyModel,
-    collectionServiceType: string
+    imports: ImportContainer,
+    prop: PropertyModel
   ): OptionalKind<PropertyDeclarationStructure> {
     if (!prop.qObject) {
       throw new Error("Illegal State: [qObject] must be provided for Collection types!");
     }
-    importContainer.addFromService(collectionServiceType);
-    importContainer.addFromQObject(prop.qObject, firstCharLowerCase(prop.qObject));
 
+    const [collectionServiceType] = imports.addServiceObject(this.version, ServiceImports.CollectionService);
     const isEnum = prop.dataType === DataTypes.EnumType;
     let qType: string;
     let type: string;
 
     if (!isEnum) {
-      qType = prop.qObject;
-      type = `${upperCaseFirst(prop.type)}Collection`;
-      importContainer.addFromQObject(type);
+      // TODO move string concat (StringCollection, GuidCollection...) to better place
+      [type, qType] = imports.addFromQObject(`${upperCaseFirst(prop.type)}Collection`, prop.qObject);
     } else {
       const propEnum = this.dataModel.getModel(prop.fqType)!;
-      const propTypeModel = importContainer.addGeneratedModel(propEnum.fqName, propEnum.modelName);
-      importContainer.addFromQObject("EnumCollection");
-      qType = "QEnumCollection";
-      type = `EnumCollection<${propTypeModel}>`;
+      const propTypeModel = imports.addGeneratedModel(propEnum.fqName, propEnum.modelName);
+      [type, qType] = imports.addQObject(QueryObjectImports.EnumCollection, QueryObjectImports.QEnumCollection);
+      type = `${type}<${propTypeModel}>`;
     }
 
     const collectionType = `${collectionServiceType}<ClientType, ${type}, ${qType}>`;
@@ -416,35 +390,32 @@ class ServiceGenerator {
   }
 
   private generatePrimitiveTypeProp(
-    importContainer: ImportContainer,
+    imports: ImportContainer,
     prop: PropertyModel
   ): OptionalKind<PropertyDeclarationStructure> {
-    const serviceType = this.getPrimitiveServiceType();
-    importContainer.addFromService(serviceType);
-    if (prop.typeModule) {
-      importContainer.addCustomType(prop.typeModule, prop.type);
-    }
+    const [serviceType] = imports.addServiceObject(this.version, ServiceImports.PrimitiveTypeService);
+    const type = prop.typeModule ? imports.addCustomType(prop.typeModule, prop.type) : prop.type;
 
     return {
       scope: Scope.Private,
       name: this.namingHelper.getPrivatePropName(prop.name),
-      type: `${serviceType}<ClientType, ${prop.type}>`,
+      type: `${serviceType}<ClientType, ${type}>`,
       hasQuestionToken: true,
     };
   }
 
   private generateModelPropGetter(
-    importContainer: ImportContainer,
-    prop: PropertyModel,
-    collectionServiceType: string
+    imports: ImportContainer,
+    prop: PropertyModel
   ): OptionalKind<MethodDeclarationStructure> {
     const model = this.dataModel.getModel(prop.fqType) as ComplexType;
     const isComplexCollection = prop.isCollection && model.dataType === DataTypes.ComplexType;
 
-    const modelName = importContainer.addGeneratedModel(model.fqName, model.modelName);
-    const editableModelName = importContainer.addGeneratedModel(model.fqName, model.editableName);
-    const qModelName = importContainer.addGeneratedQObject(model.fqName, model.qName);
-    const qInstanceName = importContainer.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName));
+    const modelName = imports.addGeneratedModel(model.fqName, model.modelName);
+    const editableModelName = imports.addGeneratedModel(model.fqName, model.editableName);
+    const qModelName = imports.addGeneratedQObject(model.fqName, model.qName);
+    const qInstanceName = imports.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName));
+    const [collectionServiceType] = imports.addServiceObject(this.version, ServiceImports.CollectionService);
 
     const type = isComplexCollection
       ? collectionServiceType
@@ -473,9 +444,13 @@ class ServiceGenerator {
   }
 
   private generatePrimitiveCollectionGetter(
-    prop: PropertyModel,
-    collectionServiceType: string
+    imports: ImportContainer,
+    prop: PropertyModel
   ): OptionalKind<MethodDeclarationStructure> {
+    const [collectionServiceType] = imports.addServiceObject(this.version, ServiceImports.CollectionService);
+    const instanceName = firstCharLowerCase(prop.qObject);
+    const [qInstanceName] = imports.addFromQObject(instanceName);
+
     const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
     return {
       scope: Scope.Public,
@@ -484,15 +459,18 @@ class ServiceGenerator {
         `if(!${propName}) {`,
         `  const { client, path } = this.__base;`,
         // prettier-ignore
-        `  ${propName} = new ${collectionServiceType}(client, path, "${prop.odataName}", ${firstCharLowerCase(prop.qObject!)}${this.isV4BigNumber() ? ", true": ""})`,
+        `  ${propName} = new ${collectionServiceType}(client, path, "${prop.odataName}", ${qInstanceName}${this.isV4BigNumber() ? ", true": ""})`,
         "}",
         `return ${propName}`,
       ],
     };
   }
 
-  private generatePrimitiveTypeGetter(prop: PropertyModel): OptionalKind<MethodDeclarationStructure> {
-    const serviceType = this.getPrimitiveServiceType();
+  private generatePrimitiveTypeGetter(
+    imports: ImportContainer,
+    prop: PropertyModel
+  ): OptionalKind<MethodDeclarationStructure> {
+    const [serviceType] = imports.addServiceObject(this.version, ServiceImports.PrimitiveTypeService);
     const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
     // for V2: mapped name must be specified
     const useMappedName = this.version === ODataVersions.V2 && prop.name !== prop.odataName;
@@ -515,11 +493,10 @@ class ServiceGenerator {
 
   private generateEntityCollectionService(file: FileWrapper, model: EntityType) {
     const importContainer = file.getImports();
-    const entitySetServiceType = "EntitySetService" + this.getVersionSuffix();
     const editableModelName = model.editableName;
     const qObjectName = firstCharLowerCase(model.qName);
 
-    importContainer.addFromService(entitySetServiceType);
+    const [entitySetServiceType] = importContainer.addServiceObject(this.version, ServiceImports.EntitySetService);
     const paramsModelName = importContainer.addGeneratedModel(model.id.fqName, model.id.modelName);
     const qIdFunctionName = importContainer.addGeneratedQObject(model.id.fqName, model.id.qName);
 
@@ -556,7 +533,10 @@ class ServiceGenerator {
   private generateEntityTypeServices(): Array<Promise<void>> {
     // build service file for each entity, consisting of EntityTypeService & EntityCollectionService
     return this.dataModel.getEntityTypes().map((model) => {
-      const file = this.project.createOrGetServiceFile(model.folderPath, model.serviceName);
+      const file = this.project.createOrGetServiceFile(model.folderPath, model.serviceName, [
+        model.serviceName,
+        model.serviceCollectionName,
+      ]);
 
       // entity type service
       this.generateEntityTypeService(file, model);
@@ -572,7 +552,7 @@ class ServiceGenerator {
   private generateComplexTypeServices(): Array<Promise<void>> {
     // build service file for complex types
     return this.dataModel.getComplexTypes().map((model) => {
-      const file = this.project.createOrGetServiceFile(model.folderPath, model.serviceName);
+      const file = this.project.createOrGetServiceFile(model.folderPath, model.serviceName, [model.serviceName]);
 
       // entity type service
       this.generateEntityTypeService(file, model);
@@ -588,23 +568,16 @@ class ServiceGenerator {
     baseFqName: string
   ): OptionalKind<MethodDeclarationStructure> {
     const isFunc = operation.type === OperationTypes.Function;
-    const odataType = operation.returnType?.isCollection
-      ? RESPONSE_TYPES.collection + this.getVersionSuffix()
-      : operation.returnType?.dataType === DataTypes.PrimitiveType
-      ? RESPONSE_TYPES.value + this.getVersionSuffix()
-      : RESPONSE_TYPES.model + this.getVersionSuffix();
     const returnType = operation.returnType;
-    const requestConfigParam = {
-      name: "requestConfig",
-      hasQuestionToken: true,
-      type: "ODataHttpClientConfig<ClientType>",
-    };
     const hasParams = operation.parameters.length > 0;
 
     // importing dependencies
-    importContainer.addFromClientApi("ODataHttpClientConfig", "ODataResponse");
-    importContainer.addFromCore(odataType);
-
+    const [httpClientConfigModel, odataResponse] = importContainer.addClientApi(
+      ClientApiImports.ODataHttpClientConfig,
+      ClientApiImports.ODataResponse
+    );
+    const responseStructure = this.importReturnType(importContainer, returnType);
+    const qOperationName = importContainer.addGeneratedQObject(baseFqName, operation.qName);
     const rtType =
       returnType?.type && returnType.dataType !== DataTypes.PrimitiveType
         ? importContainer.addGeneratedModel(returnType.fqType, returnType.type)
@@ -612,8 +585,12 @@ class ServiceGenerator {
     const paramsModelName = hasParams
       ? importContainer.addGeneratedModel(baseFqName, operation.paramsModelName)
       : undefined;
-    const qOperationName = importContainer.addGeneratedQObject(baseFqName, operation.qName);
 
+    const requestConfigParam = {
+      name: "requestConfig",
+      hasQuestionToken: true,
+      type: `${httpClientConfigModel}<ClientType>`,
+    };
     const qOpProp = "this." + this.namingHelper.getPrivatePropName(operation.qName);
 
     return {
@@ -621,7 +598,7 @@ class ServiceGenerator {
       isAsync: true,
       name,
       parameters: hasParams ? [{ name: "params", type: paramsModelName }, requestConfigParam] : [requestConfigParam],
-      returnType: `ODataResponse<${odataType}<${rtType || "void"}>>`,
+      returnType: `${odataResponse}<${responseStructure}<${rtType || "void"}>>`,
       statements: [
         `if(!${qOpProp}) {`,
         `  ${qOpProp} = new ${qOperationName}()`,
@@ -644,5 +621,15 @@ class ServiceGenerator {
         returnType ? `return ${qOpProp}.convertResponse(response);` : "",
       ],
     };
+  }
+
+  private importReturnType(imports: ImportContainer, returnType: ReturnTypeModel | undefined): string {
+    const typeToImport: CoreImports = returnType?.isCollection
+      ? CoreImports.ODataCollectionResponse
+      : returnType?.dataType === DataTypes.PrimitiveType
+      ? CoreImports.ODataValueResponse
+      : CoreImports.ODataModelResponse;
+
+    return imports.addCoreLib(this.version, typeToImport)[0];
   }
 }

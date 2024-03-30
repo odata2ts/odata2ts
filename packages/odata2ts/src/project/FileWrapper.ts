@@ -11,9 +11,10 @@ export class FileWrapper {
     protected fileName: string,
     protected file: SourceFile,
     protected dataModel: DataModel,
+    reservedNames: Array<string> | undefined,
     protected bundleFileNames: { model: string; qObject: string; service: string } | undefined
   ) {
-    this.importContainer = new ImportContainer(_path, fileName, dataModel, bundleFileNames);
+    this.importContainer = new ImportContainer(_path, fileName, dataModel, reservedNames, bundleFileNames);
   }
 
   public get path() {

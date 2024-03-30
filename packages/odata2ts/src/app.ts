@@ -82,27 +82,30 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
     bundledFileGeneration: options.bundledFileGeneration,
   });
 
-  const promises: Array<Promise<void>> = [
-    // Generate Model Interfaces
-    generateModels(project, dataModel, version, options, namingHelper),
-  ];
+  // const promises: Array<Promise<void>> = [
+  // Generate Model Interfaces
+  // generateModels(project, dataModel, version, options, namingHelper),
+  // ];
 
-  // await generateModels(project, dataModel, version, options, namingHelper);
+  await generateModels(project, dataModel, version, options, namingHelper);
+  console.log("Successfully generated models!");
 
   // Generate Query Objects
   // supported edmx types: EntityType, ComplexType
   // supported edmx prop types: primitive types, enum types, primitive collection (incl enum types), entity collection, entity object, complex object
   if (isQObjectGen(options.mode)) {
-    promises.push(generateQueryObjects(project, dataModel, version, options, namingHelper));
-    // await generateQueryObjects(project, dataModel, version, options, namingHelper);
+    // promises.push(generateQueryObjects(project, dataModel, version, options, namingHelper));
+    await generateQueryObjects(project, dataModel, version, options, namingHelper);
+    console.log("Successfully generated q-objects!");
   }
 
   // Generate Individual OData-Service
   if (isServiceGen(options.mode)) {
-    promises.push(generateServices(project, dataModel, version, namingHelper, options));
-    // await generateServices(project, dataModel, version, namingHelper, options);
+    // promises.push(generateServices(project, dataModel, version, namingHelper, options));
+    await generateServices(project, dataModel, version, namingHelper, options);
+    console.log("Successfully generated services!");
   }
 
-  await Promise.all(promises);
+  // await Promise.all(promises);
   console.log("Successfully finished!");
 }
