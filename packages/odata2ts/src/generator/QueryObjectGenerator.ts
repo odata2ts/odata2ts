@@ -81,6 +81,7 @@ class QueryObjectGenerator {
 
   private generateModel(file: FileWrapper, model: ComplexType) {
     const imports = file.getImports();
+
     let extendsClause: string;
     if (model.baseClasses.length) {
       const baseClass = model.baseClasses[0];
@@ -88,8 +89,7 @@ class QueryObjectGenerator {
       if (!baseModel) {
         throw new Error(`Entity or complex type "${baseClass}" from baseClass attribute not found!`);
       }
-      imports.addGeneratedQObject(baseClass, baseModel.qName);
-      extendsClause = baseModel.qName;
+      extendsClause = imports.addGeneratedQObject(baseClass, baseModel.qName);
     } else {
       imports.addFromQObject("QueryObject");
       extendsClause = "QueryObject";
@@ -99,22 +99,20 @@ class QueryObjectGenerator {
       name: model.qName,
       isExported: true,
       extends: extendsClause,
-      isAbstract: model.abstract,
+      // isAbstract: model.abstract,
       properties: this.generateQueryObjectProps(file.getImports(), model.props),
     });
 
-    if (!model.abstract) {
-      file.getFile().addVariableStatement({
-        declarationKind: VariableDeclarationKind.Const,
-        isExported: true,
-        declarations: [
-          {
-            name: firstCharLowerCase(model.qName),
-            initializer: `new ${model.qName}()`,
-          },
-        ],
-      });
-    }
+    file.getFile().addVariableStatement({
+      declarationKind: VariableDeclarationKind.Const,
+      isExported: true,
+      declarations: [
+        {
+          name: firstCharLowerCase(model.qName),
+          initializer: `new ${model.qName}()`,
+        },
+      ],
+    });
   }
 
   private generateQueryObjectProps(
@@ -130,18 +128,16 @@ class QueryObjectGenerator {
       // factor in collections
       if (prop.isCollection) {
         const cType = `Q${isModelType ? "Entity" : ""}CollectionPath`;
-        if (!prop.qObject) {
-          throw new Error("QObject for collection is missing!");
-        }
-
-        qPathInit = `new ${cType}(this.withPrefix("${odataName}"), () => ${prop.qObject})`;
-
         importContainer.addFromQObject(cType);
+        let qObject: string;
         if (isModelType) {
-          importContainer.addGeneratedQObject(prop.fqType, prop.qObject);
+          qObject = importContainer.addGeneratedQObject(prop.fqType, prop.qObject);
         } else {
-          importContainer.addFromQObject(prop.qObject);
+          qObject = prop.qObject;
+          importContainer.addFromQObject(qObject);
         }
+
+        qPathInit = `new ${cType}(this.withPrefix("${odataName}"), () => ${qObject})`;
       } else {
         if (isModelType) {
           importContainer.addGeneratedQObject(prop.fqType, prop.qObject!);
@@ -165,7 +161,7 @@ class QueryObjectGenerator {
 
   private generateConverterStmt(importContainer: ImportContainer, converters: Array<ValueConverterImport> | undefined) {
     if (!converters?.length) {
-      return;
+      return undefined;
     }
     converters.forEach((converter) => {
       importContainer.addCustomType(converter.package, converter.converterId);
@@ -188,12 +184,12 @@ class QueryObjectGenerator {
     const qFunc = "QId";
     const importContainer = file.getImports();
     importContainer.addFromQObject(qFunc);
-    importContainer.addGeneratedModel(model.fqName, model.id.modelName);
+    const idModelName = importContainer.addGeneratedModel(model.fqName, model.id.modelName);
 
     file.getFile().addClass({
       name: model.id.qName,
       isExported: true,
-      extends: `${qFunc}<${model.id.modelName}>`,
+      extends: `${qFunc}<${idModelName}>`,
       properties: [
         {
           name: "params",
@@ -232,13 +228,8 @@ class QueryObjectGenerator {
   private generateUnboundOperations() {
     return this.dataModel.getUnboundOperationTypes().map((operation) => {
       const file = this.project.createOrGetQObjectFile(operation.folderPath, operation.qName);
-      const imports = file.getImports();
 
-      if (operation.parameters.length) {
-        imports.addGeneratedModel(operation.fqName, operation.paramsModelName);
-        imports.addGeneratedQObject(operation.fqName, operation.qName);
-      }
-      this.generateOperation(file, operation);
+      this.generateOperation(file, operation, operation.fqName);
 
       return this.project.finalizeFile(file);
     });
@@ -249,15 +240,11 @@ class QueryObjectGenerator {
       ...this.dataModel.getEntityTypeOperations(model.fqName),
       ...this.dataModel.getEntitySetOperations(model.fqName),
     ].map((operation) => {
-      if (operation.parameters.length) {
-        file.getImports().addGeneratedModel(model.fqName, operation.paramsModelName);
-        file.getImports().addGeneratedQObject(model.fqName, operation.qName);
-      }
-      this.generateOperation(file, operation);
+      this.generateOperation(file, operation, model.fqName);
     });
   }
 
-  private generateOperation(file: FileWrapper, operation: OperationType) {
+  private generateOperation(file: FileWrapper, operation: OperationType, baseFqName: string) {
     const imports = file.getImports();
     const isV2 = this.version === ODataVersions.V2;
     const qOperation = operation.type === OperationTypes.Action ? "QAction" : "QFunction";
@@ -266,15 +253,19 @@ class QueryObjectGenerator {
     const hasParams = operation.parameters.length > 0;
 
     // imports
+    const paramModelName = operation.parameters.length
+      ? imports.addGeneratedModel(baseFqName, operation.paramsModelName)
+      : undefined;
+
     imports.addFromQObject(qOperation);
     if (returnType) {
       if (returnType.dataType === DataTypes.ComplexType || returnType.dataType === DataTypes.ModelType) {
         if (returnType.qObject) {
           imports.addFromQObject("OperationReturnType", "ReturnTypes", "QComplexParam");
-          imports.addGeneratedQObject(returnType.fqType, returnType.qObject);
+          const returnQName = imports.addGeneratedQObject(returnType.fqType, returnType.qObject);
           returnTypeOpStmt = `new OperationReturnType(ReturnTypes.COMPLEX${
             returnType.isCollection ? "_COLLECTION" : ""
-          }, new QComplexParam("NONE", new ${returnType.qObject}))`;
+          }, new QComplexParam("NONE", new ${returnQName}))`;
         }
       }
       // currently, it only makes sense to add the OperationReturnType if a converter is present
@@ -291,7 +282,7 @@ class QueryObjectGenerator {
     file.getFile().addClass({
       name: operation.qName,
       isExported: true,
-      extends: qOperation + (hasParams ? `<${operation.paramsModelName}>` : ""),
+      extends: qOperation + (hasParams ? `<${paramModelName}>` : ""),
       properties: [
         {
           name: "params",

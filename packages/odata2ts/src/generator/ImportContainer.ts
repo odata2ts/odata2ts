@@ -4,6 +4,7 @@ import { ImportDeclarationStructure } from "ts-morph";
 
 import { DataModel } from "../data-model/DataModel";
 import { ComplexType, OperationType } from "../data-model/DataTypeModel";
+import { ImportedNameValidator } from "./ImportedNameValidator";
 
 type ImportContainerType = {
   core: Set<string>;
@@ -33,6 +34,7 @@ export class ImportContainer {
 
   private internalImports = new Map<string, Set<string>>();
   private bundledFileGeneration: boolean;
+  private importedNameValidator = new ImportedNameValidator();
 
   constructor(
     protected path: string,
@@ -76,51 +78,54 @@ export class ImportContainer {
     return this.pathAndFile(this.path, this.fileName) !== this.pathAndFile(filePath, fileName);
   }
 
-  private addGeneratedImport(folderPath: string, fileName: string, names: Array<string>) {
+  private addGeneratedImport(folderPath: string, fileName: string, name: string): string {
     if (this.isDifferentFile(folderPath, fileName)) {
       const moduleName = this.pathAndFile(folderPath, fileName);
+      const importName = this.importedNameValidator.validateName(moduleName, name);
       const imports = this.internalImports.get(moduleName) || new Set<string>();
 
-      names.forEach((n) => imports.add(n));
+      imports.add(importName);
 
       this.internalImports.set(moduleName, imports);
+      return importName;
     }
+    return name;
   }
 
-  public addGeneratedModel(fqName: string, ...names: Array<string>) {
+  public addGeneratedModel(fqName: string, name: string): string {
     if (this.bundledFileNames) {
-      this.addGeneratedImport("", this.bundledFileNames.model, names);
+      return this.addGeneratedImport("", this.bundledFileNames.model, name);
     } else {
       const model = this.dataModel.getModel(fqName) || this.dataModel.getUnboundOperationType(fqName);
       if (!model) {
         throw new Error(`Cannot find model by its fully qualified name: ${fqName}!`);
       }
-      this.addGeneratedImport(
+      return this.addGeneratedImport(
         model.folderPath,
         (model as ComplexType).modelName || (model as OperationType).paramsModelName,
-        names
+        name
       );
     }
   }
 
-  public addGeneratedQObject(fqName: string, ...names: Array<string>) {
+  public addGeneratedQObject(fqName: string, name: string) {
     if (this.bundledFileNames) {
-      this.addGeneratedImport("", this.bundledFileNames.qObject, names);
+      return this.addGeneratedImport("", this.bundledFileNames.qObject, name);
     } else {
       const model = this.dataModel.getModel(fqName) || this.dataModel.getUnboundOperationType(fqName);
       if (!model) {
         throw new Error(`Cannot find q-object by its fully qualified name: ${fqName}!`);
       }
-      this.addGeneratedImport(model.folderPath, (model as ComplexType).qName, names);
+      return this.addGeneratedImport(model.folderPath, (model as ComplexType).qName, name);
     }
   }
 
-  public addGeneratedService(fqName: string, ...names: Array<string>) {
+  public addGeneratedService(fqName: string, name: string) {
     if (this.bundledFileNames) {
-      this.addGeneratedImport("", this.bundledFileNames.service, names);
+      return this.addGeneratedImport("", this.bundledFileNames.service, name);
     } else {
       const model = this.dataModel.getModel(fqName) as ComplexType;
-      this.addGeneratedImport(model.folderPath, model.serviceName, names);
+      return this.addGeneratedImport(model.folderPath, model.serviceName, name);
     }
   }
 

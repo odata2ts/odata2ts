@@ -74,7 +74,7 @@ export class ServiceConfigHelper {
   private getPropByName(nameToMap: string): ConfiguredProp | undefined {
     const stringProp = this.propMapping.get(nameToMap);
     if (!stringProp) {
-      return;
+      return undefined;
     }
     const { name, ...attrs } = stringProp;
     return { ...attrs };
@@ -145,7 +145,7 @@ export class ServiceConfigHelper {
       (alias ? hayStack[withNamespace(alias, nameToMap)] : undefined) ||
       hayStack[nameToMap];
     if (!config) {
-      return;
+      return undefined;
     }
     const { name, type, ...attrs } = config;
     return { ...attrs };

@@ -94,8 +94,10 @@ class ModelGenerator {
     const imports = file.getImports();
     let extendsClause = undefined;
     if (model.finalBaseClass) {
-      const modelName = this.namingHelper.getModelName(model.finalBaseClass);
-      imports.addGeneratedModel(model.baseClasses[0], modelName);
+      const modelName = imports.addGeneratedModel(
+        model.baseClasses[0],
+        this.namingHelper.getModelName(model.finalBaseClass)
+      );
       extendsClause = [modelName];
     }
 
@@ -104,9 +106,6 @@ class ModelGenerator {
       isExported: true,
       properties: model.props.map((p) => {
         const isEntity = p.dataType == DataTypes.ModelType;
-        if (p.dataType !== DataTypes.PrimitiveType) {
-          imports.addGeneratedModel(p.fqType, p.type);
-        }
         return {
           name: p.name,
           type: this.getPropType(file.getImports(), p),
@@ -163,9 +162,12 @@ class ModelGenerator {
       imports.addCustomType(prop.typeModule, prop.type);
     }
 
+    const safeTypeName =
+      prop.dataType === DataTypes.PrimitiveType ? prop.type : imports.addGeneratedModel(prop.fqType, prop.type);
+
     // Collections
     if (prop.isCollection) {
-      const type = `Array<${prop.type}>`;
+      const type = `Array<${safeTypeName}>`;
       if (this.dataModel.isV2() && this.options.v2ModelsWithExtraResultsWrapping) {
         return `{ results: ${type} }` + suffix;
       } else {
@@ -174,7 +176,7 @@ class ModelGenerator {
     }
 
     // primitive, enum & complex types
-    return prop.type + (prop.required ? "" : " | null") + suffix;
+    return safeTypeName + (prop.required ? "" : " | null") + suffix;
   }
 
   private generateIdModel(file: FileWrapper, model: EntityType) {
@@ -217,11 +219,9 @@ class ModelGenerator {
       properties: !complexProps
         ? undefined
         : complexProps.map((p) => {
-            const editableName = this.dataModel.getComplexType(p.fqType)!.editableName;
-            file.getImports().addGeneratedModel(p.fqType, editableName);
             return {
               name: p.name,
-              type: this.getEditablePropType(p),
+              type: this.getEditablePropType(file.getImports(), p),
               // optional props don't need to be specified in editable model
               // also, entities would require deep insert func => we make it optional for now
               hasQuestionToken: !p.required || p.dataType === DataTypes.ModelType,
@@ -230,21 +230,22 @@ class ModelGenerator {
     });
   }
 
-  private getEditablePropType(prop: PropertyModel): string {
-    const type =
-      prop.dataType === DataTypes.ModelType
-        ? this.dataModel.getEntityType(prop.fqType)!.editableName
-        : prop.dataType === DataTypes.ComplexType
-        ? this.dataModel.getComplexType(prop.fqType)!.editableName
-        : prop.type;
+  private getEditablePropType(imports: ImportContainer, prop: PropertyModel): string {
+    const isModelType = [DataTypes.ModelType, DataTypes.ComplexType].includes(prop.dataType);
+
+    let editableType = prop.type;
+    if (isModelType) {
+      const editName = this.dataModel.getComplexType(prop.fqType)!.editableName;
+      editableType = imports.addGeneratedModel(prop.fqType, editName);
+    }
 
     // Collections
     if (prop.isCollection) {
-      return `Array<${type}>`;
+      return `Array<${editableType}>`;
     }
 
     // primitive, enum & complex types
-    return type + (prop.required ? "" : " | null");
+    return editableType + (prop.required ? "" : " | null");
   }
 
   private generateUnboundOperationParams() {
