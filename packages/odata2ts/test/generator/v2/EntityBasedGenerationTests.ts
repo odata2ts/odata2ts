@@ -15,13 +15,19 @@ export const ENTITY_NAME = "Book";
 export function createEntityBasedGenerationTests(
   testSuiteName: string,
   fixtureBasePath: string,
+  generatedFileName: string,
   generate: EntityBasedGeneratorFunctionWithoutVersion
 ) {
   let odataBuilder: ODataModelBuilderV2;
   let fixtureComparatorHelper: FixtureComparatorHelper;
 
   async function generateAndCompare(id: string, fixturePath: string, options?: TestOptions) {
-    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchemas(), options);
+    await fixtureComparatorHelper.generateAndCompare(
+      generatedFileName,
+      fixturePath,
+      odataBuilder.getSchemas(),
+      options
+    );
   }
 
   function withNs(name: string) {

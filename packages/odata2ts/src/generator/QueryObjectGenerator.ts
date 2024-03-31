@@ -147,8 +147,8 @@ class QueryObjectGenerator {
         const cType = isModelType ? QueryObjectImports.QEntityCollectionPath : QueryObjectImports.QCollectionPath;
         const collectionType = importContainer.addQObject(cType);
         const qObject = isModelType
-          ? importContainer.addGeneratedQObject(prop.fqType, prop.qObject)
-          : importContainer.addFromQObject(prop.qObject)[0];
+          ? importContainer.addGeneratedQObject(prop.fqType, prop.qObject!)
+          : importContainer.addFromQObject(prop.qObject!)[0];
 
         qPathInit = `new ${collectionType}(this.withPrefix("${odataName}"), () => ${qObject})`;
       } else {
@@ -221,11 +221,11 @@ class QueryObjectGenerator {
       .map((prop) => {
         let complexQParam = "";
         if (prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType) {
-          const importedQObject = importContainer.addGeneratedQObject(prop.fqType, prop.qObject);
+          const importedQObject = importContainer.addGeneratedQObject(prop.fqType, prop.qObject!);
           complexQParam = `, new ${importedQObject}()`;
         }
 
-        const qParam = importContainer.addFromQObject(prop.qParam);
+        const qParam = importContainer.addFromQObject(prop.qParam!);
         const isMappedNameNecessary = prop.odataName !== prop.name;
         const mappedName = isMappedNameNecessary ? `"${prop.name}"` : prop.converters?.length ? "undefined" : undefined;
         const converterStmt = this.generateConverterStmt(importContainer, prop.converters);

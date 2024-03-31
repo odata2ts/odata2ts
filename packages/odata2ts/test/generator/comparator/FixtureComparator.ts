@@ -1,4 +1,5 @@
 import path from "path";
+
 import { pathExistsSync, readFileSync } from "fs-extra";
 import prettier, { Options } from "prettier";
 
@@ -39,7 +40,13 @@ export class FixtureComparator {
       .replace(new RegExp("^//( )*@ts-nocheck( )*\n"), "")
       .replace(/[ ]*\/\/[ ]*@ts-ignore[ ]*\n/g, "")
       .trim();
-    expect(result.trim()).toEqual(cleanedFixture);
+    try {
+      expect(result.trim()).toEqual(cleanedFixture);
+    } catch (error) {
+      const e = error as Error;
+      e.message = `Comparison failed for fixture file "${fixturePath}"!\n` + e.message;
+      throw error;
+    }
   }
 
   public loadFixture(path: string) {

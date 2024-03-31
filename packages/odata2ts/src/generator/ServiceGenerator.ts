@@ -415,15 +415,14 @@ class ServiceGenerator {
     const editableModelName = imports.addGeneratedModel(model.fqName, model.editableName);
     const qModelName = imports.addGeneratedQObject(model.fqName, model.qName);
     const qInstanceName = imports.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName));
-    const [collectionServiceType] = imports.addServiceObject(this.version, ServiceImports.CollectionService);
 
     const type = isComplexCollection
-      ? collectionServiceType
+      ? imports.addServiceObject(this.version, ServiceImports.CollectionService)[0]
       : prop.isCollection
       ? model.serviceCollectionName
       : model.serviceName;
     const typeWithGenerics = isComplexCollection
-      ? `${collectionServiceType}<ClientType, ${modelName}, ${qModelName}, ${editableModelName}>`
+      ? `${type}<ClientType, ${modelName}, ${qModelName}, ${editableModelName}>`
       : `${type}<ClientType>`;
 
     const privateSrvProp = "this." + this.namingHelper.getPrivatePropName(prop.name);
@@ -448,7 +447,7 @@ class ServiceGenerator {
     prop: PropertyModel
   ): OptionalKind<MethodDeclarationStructure> {
     const [collectionServiceType] = imports.addServiceObject(this.version, ServiceImports.CollectionService);
-    const instanceName = firstCharLowerCase(prop.qObject);
+    const instanceName = firstCharLowerCase(prop.qObject!);
     const [qInstanceName] = imports.addFromQObject(instanceName);
 
     const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);

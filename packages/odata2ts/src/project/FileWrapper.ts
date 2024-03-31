@@ -7,10 +7,10 @@ export class FileWrapper {
   private readonly importContainer: ImportContainer;
 
   constructor(
-    protected _path: string,
-    protected fileName: string,
-    protected file: SourceFile,
-    protected dataModel: DataModel,
+    protected readonly _path: string,
+    public readonly fileName: string,
+    protected readonly file: SourceFile,
+    protected readonly dataModel: DataModel,
     reservedNames: Array<string> | undefined,
     protected bundleFileNames: { model: string; qObject: string; service: string } | undefined
   ) {
@@ -19,6 +19,10 @@ export class FileWrapper {
 
   public get path() {
     return this._path;
+  }
+
+  public getFullFilePath() {
+    return this.path ? `${this.path}/${this.fileName}` : this.fileName;
   }
 
   public getFile() {

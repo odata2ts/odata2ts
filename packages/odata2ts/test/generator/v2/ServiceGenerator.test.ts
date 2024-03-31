@@ -35,14 +35,17 @@ describe("Service Generator Tests V2", () => {
 
   async function doGenerate() {
     const namingHelper = new NamingHelper(runOptions, SERVICE_NAME);
-    projectManager = await createProjectManager(namingHelper.getFileNames(), "build", EmitModes.ts, true);
     const dataModel = await digest(odataBuilder.getSchemas(), runOptions, namingHelper);
+    projectManager = await createProjectManager("build/unitTest", EmitModes.ts, namingHelper, dataModel, {
+      noOutput: true,
+      bundledFileGeneration: true,
+    });
 
-    await generateServices(dataModel, projectManager, ODataVersions.V2, namingHelper, runOptions);
+    await generateServices(projectManager, dataModel, ODataVersions.V2, namingHelper, runOptions);
   }
 
   async function compareMainService(fixture: string) {
-    const main = projectManager.getMainServiceFile();
+    const main = projectManager.getMainServiceFile().getFile();
 
     expect(main).toBeTruthy();
     expect(main.getFullText()).toBeTruthy();

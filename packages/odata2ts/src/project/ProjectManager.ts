@@ -4,8 +4,10 @@ import * as path from "path";
 import { ensureDir } from "fs-extra";
 import { CompilerOptions, NewLineKind, Project, SourceFile } from "ts-morph";
 import load from "tsconfig-loader";
+import { firstCharLowerCase } from "xml2js/lib/processors";
 
 import { DataModel } from "../data-model/DataModel";
+import { EntityType } from "../data-model/DataTypeModel";
 import { NamingHelper } from "../data-model/NamingHelper";
 import { EmitModes } from "../OptionModel";
 import { FileWrapper } from "./FileWrapper";
@@ -17,6 +19,7 @@ export interface ProjectManagerOptions {
   usePrettier?: boolean;
   tsConfigPath?: string;
   bundledFileGeneration?: boolean;
+  noOutput?: boolean;
 }
 
 export async function createProjectManager(
@@ -26,7 +29,12 @@ export async function createProjectManager(
   dataModel: DataModel,
   options: ProjectManagerOptions
 ): Promise<ProjectManager> {
-  const { usePrettier = false, tsConfigPath = "tsconfig.json", bundledFileGeneration = false } = options;
+  const {
+    usePrettier = false,
+    tsConfigPath = "tsconfig.json",
+    bundledFileGeneration = false,
+    noOutput = false,
+  } = options;
   const generateDeclarations = EmitModes.js_dts === emitMode || EmitModes.dts === emitMode;
   const conf = load({ filename: tsConfigPath });
   const formatter = await createFormatter(outputDir, usePrettier);
@@ -71,7 +79,8 @@ export async function createProjectManager(
     dataModel,
     formatter,
     compilerOpts,
-    bundledFileGeneration
+    bundledFileGeneration,
+    noOutput
   );
 
   await pm.init();
@@ -86,6 +95,8 @@ export class ProjectManager {
   private bundledModelFile: FileWrapper | undefined;
   private bundledQFile: FileWrapper | undefined;
 
+  private cachedFiles: Map<string, SourceFile> | undefined;
+
   constructor(
     private outputDir: string,
     private emitMode: EmitModes,
@@ -93,7 +104,8 @@ export class ProjectManager {
     private dataModel: DataModel,
     private formatter: FileFormatter,
     compilerOptions: CompilerOptions | undefined,
-    public readonly bundledFileGeneration: boolean
+    public readonly bundledFileGeneration: boolean,
+    public readonly noOutput: boolean
   ) {
     // Create ts-morph project
     this.project = new Project({
@@ -101,6 +113,18 @@ export class ProjectManager {
       skipAddingFilesFromTsConfig: true,
       compilerOptions,
     });
+
+    if (noOutput) {
+      this.cachedFiles = new Map();
+    }
+  }
+
+  public getDataModel() {
+    return this.dataModel;
+  }
+
+  public getCachedFiles() {
+    return this.cachedFiles!;
   }
 
   private createFile(
@@ -125,6 +149,11 @@ export class ProjectManager {
     const imports = fileWrapper.getImports();
 
     file.addImportDeclarations(imports.getImportDeclarations());
+
+    if (this.noOutput) {
+      this.cachedFiles!.set(fileWrapper.getFullFilePath(), file);
+      return;
+    }
 
     await ensureDir(path.join(this.outputDir, fileWrapper.path));
 
@@ -180,7 +209,19 @@ export class ProjectManager {
 
   public initModels() {
     if (this.bundledFileGeneration) {
-      this.bundledModelFile = this.createFile(this.namingHelper.getFileNames().model);
+      const reservedWords = this.dataModel.getModelTypes().reduce<Array<string>>((collector, model) => {
+        const asEntityType = model as EntityType;
+        collector.push(model.modelName);
+        if (asEntityType.editableName) {
+          collector.push(asEntityType.editableName);
+        }
+        if (asEntityType.id?.modelName) {
+          collector.push(asEntityType.id.modelName);
+        }
+
+        return collector;
+      }, []);
+      this.bundledModelFile = this.createFile(this.namingHelper.getFileNames().model, reservedWords);
     }
   }
 
@@ -192,7 +233,19 @@ export class ProjectManager {
 
   public initQObjects() {
     if (this.bundledFileGeneration) {
-      this.bundledQFile = this.createFile(this.namingHelper.getFileNames().qObject);
+      const reservedWords = this.dataModel.getModelTypes().reduce<Array<string>>((collector, model) => {
+        const asEntityType = model as EntityType;
+        if (asEntityType.qName) {
+          collector.push(asEntityType.qName, firstCharLowerCase(asEntityType.qName));
+        }
+        if (asEntityType.id?.qName) {
+          collector.push(asEntityType.id.qName);
+        }
+
+        return collector;
+      }, []);
+
+      this.bundledQFile = this.createFile(this.namingHelper.getFileNames().qObject, reservedWords);
     }
   }
 

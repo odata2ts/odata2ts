@@ -174,7 +174,7 @@ export class ImportContainer {
         .map(([moduleName, toImport]) => {
           return {
             namedImports: this.getNamedImports(toImport),
-            moduleSpecifier: LIB_MODULES[moduleName],
+            moduleSpecifier: LIB_MODULES[moduleName as keyof typeof LIB_MODULES],
           } as ImportDeclarationStructure;
         }),
       ...[...this.customTypes.keys()]
