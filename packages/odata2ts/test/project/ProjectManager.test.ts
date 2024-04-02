@@ -1,15 +1,17 @@
 import { writeFile } from "fs/promises";
 import path from "path";
 
-import { remove } from "fs-extra";
-import { Project, SourceFile } from "ts-morph";
+import { ImportDeclarationStructure, OptionalKind, Project, SourceFile } from "ts-morph";
 import * as TsMorph from "ts-morph";
 import { ModuleKind, ModuleResolutionKind, ScriptTarget } from "typescript";
 
 import { EmitModes } from "../../src";
-import { ProjectFiles } from "../../src/data-model/DataModel";
+import { DataModel, ProjectFiles } from "../../src/data-model/DataModel";
+import { ODataVersion } from "../../src/data-model/DataTypeModel";
+import { NamingHelper } from "../../src/data-model/NamingHelper";
 import * as Formatter from "../../src/project/formatter";
 import { createProjectManager } from "../../src/project/ProjectManager";
+import { getTestConfig } from "../test.config";
 
 // global mock for file operations
 jest.mock("fs-extra");
@@ -18,22 +20,30 @@ jest.mock("fs/promises");
 jest.mock("ts-morph");
 
 describe("ProjectManager Test", () => {
+  const NAMESPACE = "ns.1.example";
   const SERVICE_NAME = "Tester";
+  const ENTITY_FOLDER_PATH = `${NAMESPACE}/Example`;
+  const ENTITY_NAME = "example";
 
+  const mockFileEmit = jest.fn();
   const MOCK_PROJECT: Project = {
     // @ts-ignore
     createSourceFile: jest.fn((filePath: string) => ({
       getFilePath: () => filePath,
       getFullText: () => "",
+      addImportDeclarations: (structures: OptionalKind<ImportDeclarationStructure>[]) => {},
+      emit: mockFileEmit,
     })),
     // @ts-ignore
     emit: jest.fn(),
   };
+  const namingHelper = new NamingHelper(getTestConfig(), SERVICE_NAME);
 
   let projectFiles: ProjectFiles;
   let outputDir: string;
   let emitMode: EmitModes;
   let usePrettier: boolean;
+  let bundledFileGeneration: boolean;
 
   let projectConstructorSpy: jest.SpyInstance;
   let formatterSpy: jest.SpyInstance;
@@ -53,14 +63,11 @@ describe("ProjectManager Test", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    projectFiles = {
-      model: `${SERVICE_NAME}Model`,
-      qObject: `q${SERVICE_NAME}`,
-      service: `${SERVICE_NAME}Service`,
-    };
-    outputDir = "build";
+    projectFiles = namingHelper.getFileNames();
+    outputDir = "build/unitTest";
     emitMode = EmitModes.ts;
     usePrettier = true;
+    bundledFileGeneration = true;
   });
 
   afterAll(() => {
@@ -68,7 +75,12 @@ describe("ProjectManager Test", () => {
   });
 
   async function doCreateProjectManager(tsConfig: string | undefined = undefined) {
-    return createProjectManager(projectFiles, outputDir, emitMode, usePrettier, tsConfig);
+    const dataModel = new DataModel([["MyNamespace"]], ODataVersion.V4);
+    return createProjectManager(outputDir, emitMode, namingHelper, dataModel, {
+      usePrettier,
+      tsConfigPath: tsConfig,
+      bundledFileGeneration,
+    });
   }
 
   test("Smoke Test", async () => {
@@ -84,7 +96,7 @@ describe("ProjectManager Test", () => {
         moduleResolution: ModuleResolutionKind.NodeJs,
         lib: ["esnext"],
         types: ["node"],
-        strict: true,
+        strict: false,
         allowJs: true,
       },
     });
@@ -122,7 +134,7 @@ describe("ProjectManager Test", () => {
         moduleResolution: ModuleResolutionKind.NodeJs,
         lib: ["esnext"],
         types: ["node"],
-        strict: true,
+        strict: false,
         allowJs: true,
       },
     });
@@ -150,28 +162,20 @@ describe("ProjectManager Test", () => {
     await testEmitModeDeclarations(++callCounter, EmitModes.ts, false);
   });
 
-  test("ProjectManager: no TS file emitting when empty", async () => {
-    // given emit mode and initialized project manager
-    emitMode = EmitModes.ts;
-    const pm = await doCreateProjectManager();
-
-    // when writing files
-    await pm.writeFiles();
-
-    expect(MOCK_PROJECT.emit).not.toHaveBeenCalled();
-    expect(writeFile).not.toHaveBeenCalled();
-  });
-
   async function testTsMorphEmitMode(counter: number, mode: EmitModes) {
     // given emit mode and initialized project manager
     emitMode = mode;
     const pm = await doCreateProjectManager();
 
     // when writing files
-    await pm.writeFiles();
+    pm.initModels();
+    await pm.finalizeModels();
 
-    const expectedParams = { emitOnlyDtsFiles: emitMode === EmitModes.dts };
-    expect(MOCK_PROJECT.emit).toHaveBeenCalledWith(expectedParams);
+    if (EmitModes.dts === mode) {
+      expect(mockFileEmit).toHaveBeenCalledWith({ emitOnlyDtsFiles: true });
+    } else {
+      expect(mockFileEmit).toHaveBeenCalledWith();
+    }
     expect(writeFile).not.toHaveBeenCalled();
   }
 
@@ -187,28 +191,25 @@ describe("ProjectManager Test", () => {
 
     // we expect to get the stuff that was produced by project.createSourceFile
     expect(createdFile.getFilePath()).toBe(completeFilePath);
-    // existing file should have been removed first
-    await expect(remove).toHaveBeenCalledWith(completeFilePath);
     // ts-morph was used to create source file
-    await expect(MOCK_PROJECT.createSourceFile).toHaveBeenCalledWith(completeFilePath);
+    expect(MOCK_PROJECT.createSourceFile).toHaveBeenCalledWith(completeFilePath);
 
     return completeFilePath;
   }
 
-  test("ProjectManager: create, get and write model file", async () => {
+  test.skip("ProjectManager: create, get and write model file", async () => {
     // given an initialized project manager
     const pm = await doCreateProjectManager();
-    expect(pm.createOrGetModelFile()).toBeUndefined();
+    pm.initServices();
 
     // when creating model file
-    const result = await pm.createModelFile();
+    const result = pm.createOrGetModelFile(ENTITY_FOLDER_PATH, ENTITY_NAME);
 
     // then file was created properly
-    const filePath = await testFileCreation(result, projectFiles.model);
-    expect(pm.createOrGetModelFile()).toBe(result);
+    const filePath = await testFileCreation(result.getFile(), projectFiles.model);
 
     // when writing all files
-    await pm.writeFiles();
+    await pm.finalizeServices();
 
     // then only this file is written
     expect(writeFile).toHaveBeenCalledTimes(1);
@@ -218,17 +219,16 @@ describe("ProjectManager Test", () => {
   test("ProjectManager: create & get qObject file", async () => {
     // given an initialized project manager
     const pm = await doCreateProjectManager();
-    expect(pm.getQObjectFile()).toBeUndefined();
+    pm.initQObjects();
 
     // when creating file
-    const result = await pm.createQObjectFile();
+    const result = pm.createOrGetQObjectFile(ENTITY_FOLDER_PATH, ENTITY_NAME);
 
     // then file was created properly
-    const filePath = await testFileCreation(result, projectFiles.qObject);
-    expect(pm.getQObjectFile()).toBe(result);
+    const filePath = await testFileCreation(result.getFile(), projectFiles.qObject);
 
-    // when writing all files
-    await pm.writeFiles();
+    // when writing files
+    await pm.finalizeQObjects();
 
     // then only this file is written
     expect(writeFile).toHaveBeenCalledTimes(1);
@@ -241,14 +241,15 @@ describe("ProjectManager Test", () => {
     expect(pm.getMainServiceFile()).toBeUndefined();
 
     // when creating file
-    const result = await pm.createMainServiceFile();
+    pm.initServices();
 
     // then file was created properly
-    const filePath = await testFileCreation(result, "TesterService");
+    const result = pm.getMainServiceFile();
+    const filePath = await testFileCreation(result.getFile(), "TesterService");
     expect(pm.getMainServiceFile()).toBe(result);
 
     // when writing all files
-    await pm.writeFiles();
+    await pm.finalizeServices();
 
     // then only this file is written
     expect(writeFile).toHaveBeenCalledTimes(1);

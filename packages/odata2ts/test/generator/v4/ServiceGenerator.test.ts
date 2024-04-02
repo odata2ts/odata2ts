@@ -384,9 +384,7 @@ describe("Service Generator Tests V4", () => {
     // when generating
     await doGenerate();
 
-    // then we get no services for the abstract type but for all the others
-    // NOTE: when the baseType is not used directly its useless => see the generated OpenEntityService
-    // NOTE: it's irrelevant that the OpenEntityService has no keys defined as long as it's not referenced via EntitySet or NavProp
+    // then we get services for all types including abstract and open
     await compareMainService("abstract-and-open-types.ts");
   });
 

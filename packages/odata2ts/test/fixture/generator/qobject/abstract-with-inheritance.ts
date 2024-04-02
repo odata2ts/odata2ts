@@ -3,10 +3,12 @@ import { QBooleanParam, QBooleanPath, QId, QueryObject } from "@odata2ts/odata-q
 // @ts-ignore
 import { BookId, WithOwnStuffId } from "./TesterModel";
 
-export abstract class QBook extends QueryObject {
+export class QBook extends QueryObject {
   public readonly id = new QBooleanPath(this.withPrefix("ID"));
   public readonly test = new QBooleanPath(this.withPrefix("test"));
 }
+
+export const qBook = new QBook();
 
 export class QBookId extends QId<BookId> {
   private readonly params = [new QBooleanParam("ID", "id")];

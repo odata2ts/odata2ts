@@ -1,12 +1,12 @@
 import { ODataTypesV2 } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
 
+import { TypeModel } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
 import { OperationType } from "../../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { DigestionOptions } from "../../../src/FactoryFunctionModel";
-import { TypeModel } from "../../../src/TypeModel";
 import { TestOptions, TestSettings } from "../../generator/TestTypes";
 import { getTestConfig } from "../../test.config";
 import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
@@ -40,6 +40,7 @@ describe("Function Digestion Test", () => {
     const fqName = withEc(name);
     const expected: OperationType = {
       fqName,
+      folderPath: `ENTITY_CONTAINER/${name}`,
       odataName: name,
       name: "getBestFriend",
       qName: "QGetBestFriend",
@@ -162,6 +163,7 @@ describe("Function Digestion Test", () => {
     expect(result.getUnboundOperationTypes()).toStrictEqual([
       {
         fqName: withEc("GetBestFriend"),
+        folderPath: "ENTITY_CONTAINER/GetBestFriend",
         odataName: "GetBestFriend",
         name: "getBestFriend",
         qName: "QGetBestFriend",

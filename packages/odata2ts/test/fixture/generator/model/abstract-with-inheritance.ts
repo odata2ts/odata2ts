@@ -5,6 +5,8 @@ export interface Book {
 
 export type BookId = boolean | { id: boolean };
 
+export interface EditableBook extends Partial<Pick<Book, "test">> {}
+
 export interface NothingToAdd extends Book {}
 
 export interface EditableNothingToAdd extends Partial<Pick<NothingToAdd, "test">> {}

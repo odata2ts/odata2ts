@@ -86,7 +86,6 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   // Generate Model Interfaces
   // generateModels(project, dataModel, version, options, namingHelper),
   // ];
-
   await generateModels(project, dataModel, version, options, namingHelper);
   console.log("Successfully generated models!");
 

@@ -38,11 +38,16 @@ describe("V2: EntityTypeDigestion Test", () => {
     const model = result.getEntityTypes()[0];
     // expect(model).toEqual({});
     expect(model).toMatchObject({
-      name: "Min",
+      name: "min",
       odataName: "min",
+      modelName: "Min",
       qName: "QMin",
-      idModelName: "MinId",
-      qIdFunctionName: "QMinId",
+      serviceName: "MinService",
+      serviceCollectionName: "MinCollectionService",
+      id: {
+        modelName: "MinId",
+        qName: "QMinId",
+      },
       baseClasses: [],
       baseProps: [],
       keyNames: ["id"],
@@ -149,8 +154,10 @@ describe("V2: EntityTypeDigestion Test", () => {
     expect(result.getEntityType(withNs("GrandParent"))).toMatchObject({
       name: "GrandParent",
       odataName: "GrandParent",
-      idModelName: "GrandParentId",
-      qIdFunctionName: "QGrandParentId",
+      id: {
+        modelName: "GrandParentId",
+        qName: "QGrandParentId",
+      },
       generateId: true,
       keyNames: ["id"],
       props: [expectedGrandParentProp],
@@ -159,8 +166,10 @@ describe("V2: EntityTypeDigestion Test", () => {
     });
     expect(result.getEntityType(withNs("Parent"))).toMatchObject({
       name: "Parent",
-      idModelName: "GrandParentId",
-      qIdFunctionName: "QGrandParentId",
+      id: {
+        modelName: "GrandParentId",
+        qName: "QGrandParentId",
+      },
       generateId: false,
       keyNames: ["id"],
       props: [expectedParentProp],
@@ -169,8 +178,10 @@ describe("V2: EntityTypeDigestion Test", () => {
     });
     expect(result.getEntityType(withNs("Child"))).toMatchObject({
       name: "Child",
-      idModelName: "GrandParentId",
-      qIdFunctionName: "QGrandParentId",
+      id: {
+        modelName: "GrandParentId",
+        qName: "QGrandParentId",
+      },
       generateId: false,
       keyNames: ["id"],
       props: [expectedChildProp],
