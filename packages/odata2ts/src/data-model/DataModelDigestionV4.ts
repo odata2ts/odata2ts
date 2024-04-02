@@ -257,7 +257,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
         name,
         qName,
         paramsModelName: this.namingHelper.getOperationParamsModelName(opName, bindingEntityName),
-        folderPath: this.namingHelper.getFolderPath(namespace[0], name),
+        folderPath: this.namingHelper.getFolderPath(namespace, name),
         type,
         parameters: params,
         returnType,
