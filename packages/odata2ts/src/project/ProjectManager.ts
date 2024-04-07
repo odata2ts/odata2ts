@@ -1,24 +1,25 @@
-import { writeFile } from "fs/promises";
 import * as path from "path";
 
 import { ensureDir } from "fs-extra";
-import { CompilerOptions, NewLineKind, Project, SourceFile } from "ts-morph";
-import load from "tsconfig-loader";
+import { CompilerOptions, Project, SourceFile } from "ts-morph";
 import { firstCharLowerCase } from "xml2js/lib/processors";
 
 import { DataModel } from "../data-model/DataModel";
 import { EntityType } from "../data-model/DataTypeModel";
 import { NamingHelper } from "../data-model/NamingHelper";
 import { EmitModes } from "../OptionModel";
-import { FileWrapper } from "./FileWrapper";
+import { FileHandler } from "./FileHandler";
 import { createFormatter } from "./formatter";
 import { FileFormatter } from "./formatter/FileFormatter";
-import { getModuleKind, getModuleResolutionKind, getTarget } from "./TsMorphHelper";
+import { loadTsMorphCompilerOptions } from "./TsMorphHelper";
 
 export interface ProjectManagerOptions {
   usePrettier?: boolean;
   tsConfigPath?: string;
   bundledFileGeneration?: boolean;
+  /**
+   * for testing purposes, turn this on and retrieve all generated files via getCachedFiles
+   */
   noOutput?: boolean;
 }
 
@@ -29,59 +30,16 @@ export async function createProjectManager(
   dataModel: DataModel,
   options: ProjectManagerOptions
 ): Promise<ProjectManager> {
-  const {
-    usePrettier = false,
-    tsConfigPath = "tsconfig.json",
-    bundledFileGeneration = false,
-    noOutput = false,
-  } = options;
-  const generateDeclarations = EmitModes.js_dts === emitMode || EmitModes.dts === emitMode;
-  const conf = load({ filename: tsConfigPath });
+  const { usePrettier = false, tsConfigPath = "tsconfig.json" } = options;
   const formatter = await createFormatter(outputDir, usePrettier);
 
-  const {
-    // ignored props
-    noEmit, // we always want to emit
-    importsNotUsedAsValues, // type is missing
-    jsx,
-    plugins,
-    // mapped props
-    moduleResolution,
-    lib,
-    module,
-    newLine,
-    target,
-    rootDir,
-    rootDirs,
-    ...passThrough
-  } = conf?.tsConfig.compilerOptions || {};
+  const compilerOpts: CompilerOptions = await loadTsMorphCompilerOptions(tsConfigPath, emitMode, outputDir);
 
-  const compilerOpts: CompilerOptions = {
-    ...passThrough,
-    outDir: outputDir,
-    declaration: generateDeclarations,
-    moduleResolution: getModuleResolutionKind(moduleResolution),
-    module: getModuleKind(module),
-    target: getTarget(target),
-    lib: lib as string[],
-    newLine:
-      newLine?.toLowerCase() === "crlf"
-        ? NewLineKind.CarriageReturnLineFeed
-        : newLine?.toLowerCase() === "lf"
-        ? NewLineKind.LineFeed
-        : undefined,
-  };
-
-  const pm = new ProjectManager(
-    outputDir,
-    emitMode,
-    namingHelper,
-    dataModel,
-    formatter,
-    compilerOpts,
-    bundledFileGeneration,
-    noOutput
-  );
+  const pm = new ProjectManager(outputDir, emitMode, namingHelper, dataModel, formatter, compilerOpts, {
+    usePrettier,
+    tsConfigPath,
+    ...options,
+  });
 
   await pm.init();
 
@@ -91,21 +49,20 @@ export async function createProjectManager(
 export class ProjectManager {
   private project!: Project;
 
-  private mainServiceFile: FileWrapper | undefined;
-  private bundledModelFile: FileWrapper | undefined;
-  private bundledQFile: FileWrapper | undefined;
+  private mainServiceFile: FileHandler | undefined;
+  private bundledModelFile: FileHandler | undefined;
+  private bundledQFile: FileHandler | undefined;
 
-  private cachedFiles: Map<string, SourceFile> | undefined;
+  private readonly cachedFiles: Map<string, SourceFile> | undefined;
 
   constructor(
-    private outputDir: string,
-    private emitMode: EmitModes,
-    private namingHelper: NamingHelper,
-    private dataModel: DataModel,
-    private formatter: FileFormatter,
+    protected outputDir: string,
+    protected emitMode: EmitModes,
+    protected namingHelper: NamingHelper,
+    protected dataModel: DataModel,
+    protected formatter: FileFormatter,
     compilerOptions: CompilerOptions | undefined,
-    public readonly bundledFileGeneration: boolean,
-    public readonly noOutput: boolean
+    protected options: ProjectManagerOptions
   ) {
     // Create ts-morph project
     this.project = new Project({
@@ -114,7 +71,7 @@ export class ProjectManager {
       compilerOptions,
     });
 
-    if (noOutput) {
+    if (options.noOutput) {
       this.cachedFiles = new Map();
     }
   }
@@ -123,78 +80,42 @@ export class ProjectManager {
     return this.dataModel;
   }
 
+  /**
+   * Only filled when noOutput=true
+   */
   public getCachedFiles() {
     return this.cachedFiles!;
+  }
+
+  private async writeFile(fileWrapper: FileHandler) {
+    if (this.options.noOutput) {
+      this.cachedFiles!.set(fileWrapper.getFullFilePath(), fileWrapper.getFile());
+      return;
+    }
+
+    return fileWrapper.write(this.emitMode);
   }
 
   private createFile(
     name: string,
     reservedNames?: Array<string> | undefined,
     additionalPath: string = ""
-  ): FileWrapper {
+  ): FileHandler {
     const fileName = path.join(this.outputDir, additionalPath, `${name}.ts`);
 
-    return new FileWrapper(
+    return new FileHandler(
       additionalPath,
       name,
       this.project.createSourceFile(fileName),
       this.dataModel,
+      this.formatter,
       reservedNames,
-      this.bundledFileGeneration ? this.namingHelper.getFileNames() : undefined
+      this.options.bundledFileGeneration ? this.namingHelper.getFileNames() : undefined
     );
   }
 
-  private async writeFile(fileWrapper: FileWrapper) {
-    const file = fileWrapper.getFile();
-    const imports = fileWrapper.getImports();
-
-    file.addImportDeclarations(imports.getImportDeclarations());
-
-    if (this.noOutput) {
-      this.cachedFiles!.set(fileWrapper.getFullFilePath(), file);
-      return;
-    }
-
-    await ensureDir(path.join(this.outputDir, fileWrapper.path));
-
-    switch (this.emitMode) {
-      case EmitModes.js:
-      case EmitModes.js_dts:
-        await file.emit();
-        break;
-      case EmitModes.dts:
-        await file.emit({ emitOnlyDtsFiles: true });
-        break;
-      case EmitModes.ts:
-        await this.formatAndWriteFile(file);
-        break;
-      default:
-        throw new Error(`Emit mode "${this.emitMode}" is invalid!`);
-    }
-  }
-
-  private async formatAndWriteFile(file: SourceFile) {
-    const fileName = file.getFilePath();
-    const content = file.getFullText();
-
-    try {
-      const formatted = await this.formatter.format(content);
-
-      try {
-        return writeFile(fileName, formatted);
-      } catch (writeError) {
-        console.error(`Failed to write file [/${fileName}]`, writeError);
-        process.exit(3);
-      }
-    } catch (formattingError) {
-      console.error("Formatting failed", formattingError);
-      await writeFile("error.log", formattingError?.toString() || "no error message!");
-      process.exit(99);
-    }
-  }
-
   public async init() {
-    if (!this.bundledFileGeneration) {
+    if (!this.options.bundledFileGeneration) {
       // ensure folder for each model
       await Promise.all(
         this.dataModel.getModelTypes().map((mt) => {
@@ -208,7 +129,7 @@ export class ProjectManager {
   }
 
   public initModels() {
-    if (this.bundledFileGeneration) {
+    if (this.options.bundledFileGeneration) {
       const reservedWords = this.dataModel.getModelTypes().reduce<Array<string>>((collector, model) => {
         const asEntityType = model as EntityType;
         collector.push(model.modelName);
@@ -232,7 +153,7 @@ export class ProjectManager {
   }
 
   public initQObjects() {
-    if (this.bundledFileGeneration) {
+    if (this.options.bundledFileGeneration) {
       const reservedWords = this.dataModel.getModelTypes().reduce<Array<string>>((collector, model) => {
         const asEntityType = model as EntityType;
         if (asEntityType.qName) {
@@ -260,7 +181,7 @@ export class ProjectManager {
   }
 
   public async finalizeServices() {
-    if (this.bundledFileGeneration && this.mainServiceFile) {
+    if (this.options.bundledFileGeneration && this.mainServiceFile) {
       return this.writeFile(this.mainServiceFile);
     }
   }
@@ -284,15 +205,15 @@ export class ProjectManager {
     return this.createFile(name, reservedNames, folderPath);
   }
   public createOrGetServiceFile(folderPath: string, name: string, reservedNames?: Array<string> | undefined) {
-    if (this.bundledFileGeneration) {
+    if (this.options.bundledFileGeneration) {
       return this.mainServiceFile!;
     }
 
     return this.createFile(name, reservedNames, folderPath);
   }
 
-  public async finalizeFile(file: FileWrapper) {
-    if (!this.bundledFileGeneration) {
+  public async finalizeFile(file: FileHandler) {
+    if (!this.options.bundledFileGeneration) {
       return this.writeFile(file);
     }
   }

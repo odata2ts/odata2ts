@@ -27,7 +27,6 @@ type ImportContainerType = Record<keyof typeof LIB_MODULES, Map<string, string>>
  * Map<string,string>
  */
 export class ImportContainer {
-  private readonly bundledFileGeneration: boolean;
   private readonly importedNameValidator: ImportedNameValidator;
   // mapping of a custom defined type to a primitive type
   private customTypes = new Map<string, Map<string, string>>();
@@ -48,7 +47,6 @@ export class ImportContainer {
     protected reservedNames: Array<string> | undefined,
     protected readonly bundledFileNames: { model: string; qObject: string; service: string } | undefined
   ) {
-    this.bundledFileGeneration = this.bundledFileNames !== undefined;
     this.importedNameValidator = new ImportedNameValidator(reservedNames);
   }
 
