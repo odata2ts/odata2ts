@@ -26,7 +26,7 @@ import {
 } from "../data-model/DataTypeModel";
 import { NamingHelper } from "../data-model/NamingHelper";
 import { ConfigFileOptions } from "../OptionModel";
-import { FileWrapper } from "../project/FileWrapper";
+import { FileHandler } from "../project/FileHandler";
 import { ProjectManager } from "../project/ProjectManager";
 import { ClientApiImports, CoreImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects";
 import { ImportContainer } from "./ImportContainer";
@@ -236,7 +236,7 @@ class ServiceGenerator {
     };
   }
 
-  private generateEntityTypeService(file: FileWrapper, model: ComplexType) {
+  private generateEntityTypeService(file: FileHandler, model: ComplexType) {
     const importContainer = file.getImports();
 
     const operations = this.dataModel.getEntityTypeOperations(model.fqName);
@@ -490,7 +490,7 @@ class ServiceGenerator {
     };
   }
 
-  private generateEntityCollectionService(file: FileWrapper, model: EntityType) {
+  private generateEntityCollectionService(file: FileHandler, model: EntityType) {
     const importContainer = file.getImports();
     const editableModelName = model.editableName;
     const qObjectName = firstCharLowerCase(model.qName);

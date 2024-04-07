@@ -14,7 +14,7 @@ import {
 } from "../data-model/DataTypeModel";
 import { NamingHelper } from "../data-model/NamingHelper";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel";
-import { FileWrapper } from "../project/FileWrapper";
+import { FileHandler } from "../project/FileHandler";
 import { ProjectManager } from "../project/ProjectManager";
 import { QueryObjectImports } from "./import/ImportObjects";
 import { ImportContainer } from "./ImportContainer";
@@ -97,7 +97,7 @@ class QueryObjectGenerator {
     });
   }
 
-  private generateModel(file: FileWrapper, model: ComplexType) {
+  private generateModel(file: FileHandler, model: ComplexType) {
     const imports = file.getImports();
 
     let extendsClause: string;
@@ -190,7 +190,7 @@ class QueryObjectGenerator {
     }
   }
 
-  private generateIdFunction(file: FileWrapper, model: EntityType) {
+  private generateIdFunction(file: FileHandler, model: EntityType) {
     const importContainer = file.getImports();
     const qFunc = importContainer.addQObject(QueryObjectImports.QId);
     const idModelName = importContainer.addGeneratedModel(model.fqName, model.id.modelName);
@@ -246,7 +246,7 @@ class QueryObjectGenerator {
     });
   }
 
-  private generateOperation(file: FileWrapper, operation: OperationType, baseFqName: string) {
+  private generateOperation(file: FileHandler, operation: OperationType, baseFqName: string) {
     const imports = file.getImports();
     const isV2 = this.version === ODataVersions.V2;
     const returnType = operation.returnType;

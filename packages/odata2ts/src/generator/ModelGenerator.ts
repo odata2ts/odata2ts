@@ -5,7 +5,7 @@ import { DataModel } from "../data-model/DataModel";
 import { ComplexType, DataTypes, EntityType, OperationType, PropertyModel } from "../data-model/DataTypeModel";
 import { NamingHelper } from "../data-model/NamingHelper";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel";
-import { FileWrapper } from "../project/FileWrapper";
+import { FileHandler } from "../project/FileHandler";
 import { ProjectManager } from "../project/ProjectManager";
 import { CoreImports } from "./import/ImportObjects";
 import { ImportContainer } from "./ImportContainer";
@@ -116,7 +116,7 @@ class ModelGenerator {
     });
   }
 
-  private generateModel(file: FileWrapper, model: ComplexType | EntityType) {
+  private generateModel(file: FileHandler, model: ComplexType | EntityType) {
     const imports = file.getImports();
     let extendsClause = undefined;
     if (model.finalBaseClass) {
@@ -204,7 +204,7 @@ class ModelGenerator {
     return typeName + (prop.required ? "" : " | null") + suffix;
   }
 
-  private generateIdModel(file: FileWrapper, model: EntityType) {
+  private generateIdModel(file: FileHandler, model: EntityType) {
     const singleType = model.keys.length === 1 ? `${model.keys[0].type} | ` : "";
     const keyTypes = model.keys
       .map((keyProp) => `${keyProp.name}: ${this.getPropType(file.getImports(), keyProp)}`)
@@ -218,7 +218,7 @@ class ModelGenerator {
     });
   }
 
-  private generateEditableModel(file: FileWrapper, model: ComplexType) {
+  private generateEditableModel(file: FileHandler, model: ComplexType) {
     const entityTypes = [DataTypes.ModelType, DataTypes.ComplexType];
     const allProps = [...model.baseProps, ...model.props].filter((p) => !p.managed);
 
@@ -283,7 +283,7 @@ class ModelGenerator {
     });
   }
 
-  private generateOperationParams(file: FileWrapper, operation: OperationType) {
+  private generateOperationParams(file: FileHandler, operation: OperationType) {
     if (!operation.parameters.length) {
       return;
     }
