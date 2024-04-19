@@ -20,7 +20,6 @@ describe("App Test", () => {
   let runOptions: RunOptions;
   let odataBuilder: ODataModelBuilderV4;
   let createPmSpy: jest.SpyInstance;
-  let pmSpy: ProjectManager.ProjectManager;
   let logInfoSpy: jest.SpyInstance;
 
   beforeAll(async () => {

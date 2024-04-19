@@ -228,6 +228,10 @@ export class DataModel {
     return operations || [];
   }
 
+  public getAllEntityOperations(fqEntityName: string): Array<OperationType> {
+    return [...this.getEntityTypeOperations(fqEntityName), ...this.getEntitySetOperations(fqEntityName)];
+  }
+
   public addAction(fqName: string, action: ActionImportType) {
     this.container.actions[fqName] = action;
   }

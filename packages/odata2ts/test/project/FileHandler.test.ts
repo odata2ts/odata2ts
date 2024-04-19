@@ -34,9 +34,6 @@ describe("FileHandler Test", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // @ts-ignore
-    // mockFile = ;
   });
 
   function createFileHandler(options: { path?: string; fileName?: string; reservedNames?: Array<string> } = {}) {
@@ -130,13 +127,4 @@ describe("FileHandler Test", () => {
     expect(formatter.format).not.toHaveBeenCalled();
     expect(writeFile).not.toHaveBeenCalled();
   });
-
-  // async function testTsMorphEmitMode(counter: number, mode: EmitModes) {
-  //   if (EmitModes.dts === mode) {
-  //     expect(mockFileEmit).toHaveBeenCalledWith({ emitOnlyDtsFiles: true });
-  //   } else {
-  //     expect(mockFileEmit).toHaveBeenCalledWith();
-  //   }
-  //   expect(writeFile).not.toHaveBeenCalled();
-  // }
 });

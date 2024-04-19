@@ -15,7 +15,7 @@ export class FileHandler {
     public readonly fileName: string,
     protected readonly file: SourceFile,
     dataModel: DataModel,
-    protected formatter: FileFormatter,
+    protected formatter: FileFormatter | undefined,
     reservedNames: Array<string> | undefined,
     protected bundleFileNames: { model: string; qObject: string; service: string } | undefined
   ) {
@@ -40,14 +40,11 @@ export class FileHandler {
     switch (emitMode) {
       case EmitModes.js:
       case EmitModes.js_dts:
-        await this.file.emit();
-        break;
+        return this.file.emit();
       case EmitModes.dts:
-        await this.file.emit({ emitOnlyDtsFiles: true });
-        break;
+        return this.file.emit({ emitOnlyDtsFiles: true });
       case EmitModes.ts:
-        await this.formatAndWriteFile();
-        break;
+        return this.formatAndWriteFile();
       default:
         throw new Error(`Emit mode "${emitMode}" is invalid!`);
     }
@@ -58,7 +55,7 @@ export class FileHandler {
     const content = this.file.getFullText();
 
     try {
-      const formatted = await this.formatter.format(content);
+      const formatted = this.formatter ? await this.formatter.format(content) : content;
 
       try {
         return writeFile(fileName, formatted);

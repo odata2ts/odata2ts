@@ -1,4 +1,4 @@
-export function MockConstructorSpy(module: string, className: string, isDefault: boolean) {
+export function MockConstructorSpy(module: string, className: string, isDefault = false) {
   const spyMethod = jest.fn();
   jest.mock(module, () => {
     let mockClass = null;
