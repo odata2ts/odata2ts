@@ -1,258 +1,497 @@
-import { writeFile } from "fs/promises";
 import path from "path";
 
-import { ImportDeclarationStructure, OptionalKind, Project, SourceFile } from "ts-morph";
-import * as TsMorph from "ts-morph";
-import { ModuleKind, ModuleResolutionKind, ScriptTarget } from "typescript";
+import { ODataTypesV4 } from "@odata2ts/odata-core";
+import { ensureDir } from "fs-extra";
+import { EmitResult } from "ts-morph";
 
 import { EmitModes } from "../../src";
-import { DataModel, ProjectFiles } from "../../src/data-model/DataModel";
-import { ODataVersion } from "../../src/data-model/DataTypeModel";
+import { DataModel } from "../../src/data-model/DataModel";
+import { digest } from "../../src/data-model/DataModelDigestionV4";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
-import * as Formatter from "../../src/project/formatter";
 import { createProjectManager } from "../../src/project/ProjectManager";
+import { ODataModelBuilderV4 } from "../data-model/builder/v4/ODataModelBuilderV4";
 import { getTestConfig } from "../test.config";
 
 // global mock for file operations
 jest.mock("fs-extra");
-jest.mock("fs/promises");
-// global mock for ts-morph to keep this a unit test
-jest.mock("ts-morph");
+
+const fileHandlerSpy = jest.fn();
+const writeMock = jest.fn();
+
+jest.mock("../../src/project/FileHandler", () => {
+  const { FileHandler: mockedModuleClass } = jest.requireActual("../../src/project/FileHandler");
+
+  class MockFileHandler extends mockedModuleClass {
+    constructor(...args: any) {
+      // @ts-ignore
+      super(...args);
+      fileHandlerSpy(...args);
+    }
+
+    public async write(emitMode: EmitModes): Promise<EmitResult | void> {
+      writeMock(emitMode);
+    }
+  }
+
+  return { FileHandler: MockFileHandler };
+});
 
 describe("ProjectManager Test", () => {
   const NAMESPACE = "ns.1.example";
   const SERVICE_NAME = "Tester";
-  const ENTITY_FOLDER_PATH = `${NAMESPACE}/Example`;
-  const ENTITY_NAME = "example";
+  const ENTITY_FOLDER_PATH = "ns_1_example/my_entity";
+  const DEFAULT_NAMING_HELPER = new NamingHelper(getTestConfig(), SERVICE_NAME, [[NAMESPACE]]);
+  const BUNDLED_FILE_NAMES = { model: "TesterModel", qObject: "QTester", service: "TesterService" };
 
-  const mockFileEmit = jest.fn();
-  const MOCK_PROJECT: Project = {
-    // @ts-ignore
-    createSourceFile: jest.fn((filePath: string) => ({
-      getFilePath: () => filePath,
-      getFullText: () => "",
-      addImportDeclarations: (structures: OptionalKind<ImportDeclarationStructure>[]) => {},
-      emit: mockFileEmit,
-    })),
-    // @ts-ignore
-    emit: jest.fn(),
-  };
-  const namingHelper = new NamingHelper(getTestConfig(), SERVICE_NAME);
+  const ENTITY_NAME = "MyEntity";
+  const COMPLEX_NAME = "MyComplex";
+  const ENUM_NAME = "MyEnum";
+  const UNBOUND_OPERATION_NAME = "MyUnboundOp";
+  const UNBOUND_OPERATION_NAME_NO_PARAMS = "MyUnboundParamlessOp";
+  const BOUND_OPERATION_NAME = "MyBoundOp";
+  const BOUND_OPERATION_NAME_NO_PARAMS = "MyBoundParamlessOp";
 
-  let projectFiles: ProjectFiles;
+  let modelBuilder: ODataModelBuilderV4;
+
   let outputDir: string;
   let emitMode: EmitModes;
   let usePrettier: boolean;
   let bundledFileGeneration: boolean;
+  let noOutput: boolean;
 
-  let projectConstructorSpy: jest.SpyInstance;
-  let formatterSpy: jest.SpyInstance;
   let consoleSpy: jest.SpyInstance;
-  let processExitSpy: jest.SpyInstance;
+
+  let usedDataModel: DataModel | undefined;
+
+  function withNs(name: string) {
+    return `${NAMESPACE}.${name}`;
+  }
 
   beforeAll(() => {
-    projectConstructorSpy = jest.spyOn(TsMorph, "Project").mockImplementation(() => MOCK_PROJECT);
-    formatterSpy = jest.spyOn(Formatter, "createFormatter").mockResolvedValue({
-      format: () => Promise.resolve(""),
-      getSettings: () => ({}),
-    });
     consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
-    processExitSpy = jest.spyOn(process, "exit");
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    projectFiles = namingHelper.getFileNames();
+    modelBuilder = new ODataModelBuilderV4(NAMESPACE);
     outputDir = "build/unitTest";
     emitMode = EmitModes.ts;
     usePrettier = true;
     bundledFileGeneration = true;
+    noOutput = false;
+
+    usedDataModel = undefined;
   });
 
   afterAll(() => {
     jest.resetAllMocks();
   });
 
+  function useExhaustiveDataModel(mb: ODataModelBuilderV4) {
+    modelBuilder
+      .addEntityType(ENTITY_NAME, undefined, () => {})
+      .addComplexType(COMPLEX_NAME, undefined, () => {})
+      .addEnumType(ENUM_NAME, [])
+      .addFunction(UNBOUND_OPERATION_NAME, ODataTypesV4.String, false, (builder) =>
+        builder.addParam("test", ODataTypesV4.String)
+      )
+      .addFunction(UNBOUND_OPERATION_NAME_NO_PARAMS, ODataTypesV4.String, false)
+      .addFunction(BOUND_OPERATION_NAME, ODataTypesV4.String, true, (builder) =>
+        builder.addParam("binding", withNs(ENTITY_NAME)).addParam("test", ODataTypesV4.String)
+      )
+      .addFunction(BOUND_OPERATION_NAME_NO_PARAMS, ODataTypesV4.String, true, (builder) =>
+        builder.addParam("bindingParam", withNs(ENTITY_NAME))
+      );
+  }
+
   async function doCreateProjectManager(tsConfig: string | undefined = undefined) {
-    const dataModel = new DataModel([["MyNamespace"]], ODataVersion.V4);
-    return createProjectManager(outputDir, emitMode, namingHelper, dataModel, {
+    const testConfig = getTestConfig();
+    usedDataModel = await digest(modelBuilder.getSchemas(), testConfig, DEFAULT_NAMING_HELPER);
+    return createProjectManager(outputDir, emitMode, DEFAULT_NAMING_HELPER, usedDataModel, {
       usePrettier,
       tsConfigPath: tsConfig,
       bundledFileGeneration,
+      noOutput,
     });
+  }
+
+  function checkFileHandlerCreation(filePath: string, fileName: string, reservedNames?: Array<string>) {
+    expect(fileHandlerSpy).toHaveBeenCalledWith(
+      filePath,
+      fileName,
+      // we don't check the SourceFile from ts-morph
+      expect.anything(),
+      usedDataModel,
+      // we don't want to check the formatter
+      expect.anything(),
+      reservedNames,
+      // no bundled file names
+      undefined
+    );
+  }
+
+  function checkFileHandlerCreationForBundledFiles(fileName: string, reservedNames: Array<string> = []) {
+    expect(fileHandlerSpy).toHaveBeenCalledWith(
+      // no path for bundled files
+      "",
+      fileName,
+      // we don't check the SourceFile from ts-morph
+      expect.anything(),
+      usedDataModel,
+      // we don't want to check the formatter
+      expect.anything(),
+      reservedNames,
+      // bundled file names must have been passed
+      BUNDLED_FILE_NAMES
+    );
   }
 
   test("Smoke Test", async () => {
-    await doCreateProjectManager();
-
-    expect(projectConstructorSpy.mock.calls[0][0]).toMatchObject({
-      skipAddingFilesFromTsConfig: true,
-      compilerOptions: {
-        declaration: false,
-        outDir: outputDir,
-        target: ScriptTarget.ES2016,
-        module: ModuleKind.CommonJS,
-        moduleResolution: ModuleResolutionKind.NodeJs,
-        lib: ["esnext"],
-        types: ["node"],
-        strict: false,
-        allowJs: true,
-      },
-    });
-  });
-
-  // does work locally, but not in the cloud
-  test.skip("Use tsconfig.example.json", async () => {
-    await doCreateProjectManager("tsconfig.example.json");
-
-    expect(projectConstructorSpy.mock.calls[0][0]).toStrictEqual({
-      skipAddingFilesFromTsConfig: true,
-      manipulationSettings: {},
-      compilerOptions: {
-        declaration: false,
-        outDir: outputDir,
-        target: ScriptTarget.ESNext,
-        module: ModuleKind.UMD,
-        moduleResolution: ModuleResolutionKind.NodeNext,
-        lib: undefined,
-        newLine: undefined,
-      },
-    });
-  });
-
-  test("Different Config Test", async () => {
-    await doCreateProjectManager();
-
-    expect(projectConstructorSpy.mock.calls[0][0]).toMatchObject({
-      skipAddingFilesFromTsConfig: true,
-      compilerOptions: {
-        declaration: false,
-        outDir: outputDir,
-        target: ScriptTarget.ES2016,
-        module: ModuleKind.CommonJS,
-        moduleResolution: ModuleResolutionKind.NodeJs,
-        lib: ["esnext"],
-        types: ["node"],
-        strict: false,
-        allowJs: true,
-      },
-    });
-  });
-
-  async function testEmitModeDeclarations(counter: number, mode: EmitModes, declarationsShouldBeSet: boolean) {
-    // given emit mode and initialized project manager
-    emitMode = mode;
-
-    // when project manager has been created
-    await doCreateProjectManager();
-
-    // then compiler options have been set correctly
-    expect(projectConstructorSpy.mock.calls[counter][0].compilerOptions).toMatchObject({
-      declaration: declarationsShouldBeSet,
-      outDir: outputDir,
-    });
-  }
-
-  test("ProjectManager: compiler options for DTS generation", async () => {
-    let callCounter = -1;
-    await testEmitModeDeclarations(++callCounter, EmitModes.js_dts, true);
-    await testEmitModeDeclarations(++callCounter, EmitModes.dts, true);
-    await testEmitModeDeclarations(++callCounter, EmitModes.js, false);
-    await testEmitModeDeclarations(++callCounter, EmitModes.ts, false);
-  });
-
-  async function testTsMorphEmitMode(counter: number, mode: EmitModes) {
-    // given emit mode and initialized project manager
-    emitMode = mode;
     const pm = await doCreateProjectManager();
 
-    // when writing files
+    expect(pm.getCachedFiles()).toBeUndefined();
+    expect(pm.getMainServiceFile()).toBeUndefined();
+    expect(pm.getDataModel()).toBeDefined();
+
+    await pm.init();
+    expect(ensureDir).not.toHaveBeenCalled();
+  });
+
+  test("Ensure Directories for Unbundled File Generation", async () => {
+    // when unbundled file generation is active
+    bundledFileGeneration = false;
+    // and whe have entity models
+    useExhaustiveDataModel(modelBuilder);
+
+    // then on creating the PM
+    await doCreateProjectManager();
+
+    // one folder has been created for each entity: entityType, complexType and enumType
+    expect(ensureDir).toHaveBeenCalledTimes(3);
+    expect(ensureDir).toHaveBeenNthCalledWith(3, `${outputDir}/${ENTITY_FOLDER_PATH}`.replaceAll("/", path.sep));
+  });
+
+  test("Init & finalize bundled models file", async () => {
+    const pm = await doCreateProjectManager();
+
+    // when initializing models
     pm.initModels();
+
+    // then bundled model file has been created
+    checkFileHandlerCreationForBundledFiles(BUNDLED_FILE_NAMES.model);
+
+    // when retrieving a model (with any parameters whatsoever)
+    const file = pm.createOrGetModelFile("any", "any");
+    expect(file).toBeDefined();
+
+    // then we get the same file
+    expect(file).toBe(pm.createOrGetModelFile("x", "y", ["z"]));
+
+    // and created exactly one file
+    expect(fileHandlerSpy).toHaveBeenCalledTimes(1);
+
+    // nothing happens here
+    await pm.finalizeFile(file);
+    expect(writeMock).not.toHaveBeenCalled();
+
+    // when finalizing
     await pm.finalizeModels();
 
-    if (EmitModes.dts === mode) {
-      expect(mockFileEmit).toHaveBeenCalledWith({ emitOnlyDtsFiles: true });
-    } else {
-      expect(mockFileEmit).toHaveBeenCalledWith();
-    }
-    expect(writeFile).not.toHaveBeenCalled();
-  }
-
-  test("ProjectManager: JS emit modes", async () => {
-    let callCounter = -1;
-    await testTsMorphEmitMode(++callCounter, EmitModes.js_dts);
-    await testTsMorphEmitMode(++callCounter, EmitModes.js);
-    await testTsMorphEmitMode(++callCounter, EmitModes.dts);
+    // then file is written
+    expect(writeMock).toHaveBeenCalled();
   });
 
-  async function testFileCreation(createdFile: SourceFile, expectedFilePath: string) {
-    const completeFilePath = path.join(outputDir, expectedFilePath + ".ts");
-
-    // we expect to get the stuff that was produced by project.createSourceFile
-    expect(createdFile.getFilePath()).toBe(completeFilePath);
-    // ts-morph was used to create source file
-    expect(MOCK_PROJECT.createSourceFile).toHaveBeenCalledWith(completeFilePath);
-
-    return completeFilePath;
-  }
-
-  test.skip("ProjectManager: create, get and write model file", async () => {
-    // given an initialized project manager
+  test("Init bundled models file with reserved names", async () => {
+    // when using an actual data model
+    useExhaustiveDataModel(modelBuilder);
     const pm = await doCreateProjectManager();
-    pm.initServices();
 
-    // when creating model file
-    const result = pm.createOrGetModelFile(ENTITY_FOLDER_PATH, ENTITY_NAME);
+    pm.initModels();
 
-    // then file was created properly
-    const filePath = await testFileCreation(result.getFile(), projectFiles.model);
-
-    // when writing all files
-    await pm.finalizeServices();
-
-    // then only this file is written
-    expect(writeFile).toHaveBeenCalledTimes(1);
-    expect(writeFile).toHaveBeenCalledWith(filePath, "");
+    // then all sorts of interfaces will be created, these are the reservedNames
+    checkFileHandlerCreationForBundledFiles(BUNDLED_FILE_NAMES.model, [
+      ENUM_NAME,
+      COMPLEX_NAME,
+      `Editable${COMPLEX_NAME}`,
+      ENTITY_NAME,
+      `Editable${ENTITY_NAME}`,
+      `${ENTITY_NAME}Id`,
+      `${ENTITY_NAME}_${BOUND_OPERATION_NAME}Params`,
+      `${UNBOUND_OPERATION_NAME}Params`,
+    ]);
   });
 
-  test("ProjectManager: create & get qObject file", async () => {
-    // given an initialized project manager
+  test("Init & finalize unbundled models", async () => {
+    // given filepath and name & unbundled mode
+    const folderPath = "my-path";
+    const fileName = "MyModel";
+    bundledFileGeneration = false;
+
+    // when initializing models
+    const pm = await doCreateProjectManager();
+    pm.initModels();
+
+    // then no file is created
+    expect(fileHandlerSpy).not.toHaveBeenCalled();
+
+    // when requesting the file
+    const file = pm.createOrGetModelFile(folderPath, fileName);
+
+    // then file is created
+    checkFileHandlerCreation(folderPath, fileName);
+
+    // when finalizing
+    await pm.finalizeFile(file);
+
+    // then file is written
+    expect(writeMock).toHaveBeenCalled();
+
+    // nothing happens here
+    await pm.finalizeModels();
+    expect(writeMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("Init & finalize bundled q-objects file", async () => {
+    const pm = await doCreateProjectManager();
+
+    // when initializing models
+    pm.initQObjects();
+
+    // then bundled model file has been created
+    checkFileHandlerCreationForBundledFiles(BUNDLED_FILE_NAMES.qObject);
+
+    // when retrieving a model (with any parameters whatsoever)
+    const file = pm.createOrGetQObjectFile("any", "any");
+    expect(file).toBeDefined();
+
+    // then we get the same file
+    expect(file).toBe(pm.createOrGetQObjectFile("x", "y", ["z"]));
+
+    // and created exactly one file
+    expect(fileHandlerSpy).toHaveBeenCalledTimes(1);
+
+    // nothing happens here
+    await pm.finalizeFile(file);
+    expect(writeMock).not.toHaveBeenCalled();
+
+    // when finalizing
+    await pm.finalizeQObjects();
+
+    // then file is written
+    expect(writeMock).toHaveBeenCalled();
+  });
+
+  test("Init bundled q-objects file with reserved names", async () => {
+    // when using an actual data model
+    useExhaustiveDataModel(modelBuilder);
+    const pm = await doCreateProjectManager();
+
+    pm.initQObjects();
+
+    // then all sorts of interfaces will be created, these are the reservedNames
+    checkFileHandlerCreationForBundledFiles(BUNDLED_FILE_NAMES.qObject, [
+      `Q${COMPLEX_NAME}`,
+      `q${COMPLEX_NAME}`,
+      `Q${ENTITY_NAME}`,
+      `q${ENTITY_NAME}`,
+      `Q${ENTITY_NAME}Id`,
+      `${ENTITY_NAME}_Q${BOUND_OPERATION_NAME}`,
+      `${ENTITY_NAME}_Q${BOUND_OPERATION_NAME_NO_PARAMS}`,
+      `Q${UNBOUND_OPERATION_NAME}`,
+      `Q${UNBOUND_OPERATION_NAME_NO_PARAMS}`,
+    ]);
+  });
+
+  test("Init & finalize unbundled q-objects", async () => {
+    // given filepath and name & unbundled mode
+    const folderPath = "my-path";
+    const fileName = "MyModel";
+    bundledFileGeneration = false;
+
+    // when initializing models
     const pm = await doCreateProjectManager();
     pm.initQObjects();
 
-    // when creating file
-    const result = pm.createOrGetQObjectFile(ENTITY_FOLDER_PATH, ENTITY_NAME);
+    // then no file is created
+    expect(fileHandlerSpy).not.toHaveBeenCalled();
 
-    // then file was created properly
-    const filePath = await testFileCreation(result.getFile(), projectFiles.qObject);
+    // when requesting the file
+    const file = pm.createOrGetQObjectFile(folderPath, fileName);
 
-    // when writing files
-    await pm.finalizeQObjects();
+    // then file is created
+    checkFileHandlerCreation(folderPath, fileName);
 
-    // then only this file is written
-    expect(writeFile).toHaveBeenCalledTimes(1);
-    expect(writeFile).toHaveBeenCalledWith(filePath, "");
+    // when finalizing
+    await pm.finalizeFile(file);
+
+    // then file is written
+    expect(writeMock).toHaveBeenCalled();
+
+    // nothing happens here
+    await pm.finalizeModels();
+    expect(writeMock).toHaveBeenCalledTimes(1);
   });
 
-  test("ProjectManager: create & get main service file", async () => {
-    // given an initialized project manager
+  test("Init & finalize bundled service file", async () => {
     const pm = await doCreateProjectManager();
-    expect(pm.getMainServiceFile()).toBeUndefined();
 
-    // when creating file
+    // when initializing models
     pm.initServices();
 
-    // then file was created properly
-    const result = pm.getMainServiceFile();
-    const filePath = await testFileCreation(result.getFile(), "TesterService");
-    expect(pm.getMainServiceFile()).toBe(result);
+    // then main service file has been created
+    checkFileHandlerCreationForBundledFiles(BUNDLED_FILE_NAMES.service, [BUNDLED_FILE_NAMES.service]);
 
-    // when writing all files
+    // when retrieving a service file (with any parameters whatsoever)
+    const file = pm.createOrGetServiceFile("any", "any");
+    expect(file).toBeDefined();
+
+    // then we get the same file
+    expect(file).toBe(pm.createOrGetServiceFile("x", "y", ["z"]));
+
+    // and created exactly one file
+    expect(fileHandlerSpy).toHaveBeenCalledTimes(1);
+
+    // nothing happens here
+    await pm.finalizeFile(file);
+    expect(writeMock).not.toHaveBeenCalled();
+
+    // when finalizing
     await pm.finalizeServices();
 
-    // then only this file is written
-    expect(writeFile).toHaveBeenCalledTimes(1);
-    expect(writeFile).toHaveBeenCalledWith(filePath, "");
+    // then file is written
+    expect(writeMock).toHaveBeenCalledTimes(1);
   });
+
+  test("Init bundled service file with reserved names", async () => {
+    // when using an actual data model
+    useExhaustiveDataModel(modelBuilder);
+    const pm = await doCreateProjectManager();
+
+    pm.initServices();
+
+    // then all sorts of interfaces will be created, these are the reservedNames
+    checkFileHandlerCreationForBundledFiles(BUNDLED_FILE_NAMES.service, [
+      BUNDLED_FILE_NAMES.service,
+      `${ENTITY_NAME}Service`,
+      `${ENTITY_NAME}CollectionService`,
+      `${COMPLEX_NAME}Service`,
+      `${COMPLEX_NAME}CollectionService`,
+    ]);
+  });
+
+  test("Init & finalize unbundled services", async () => {
+    // given filepath and name & unbundled mode
+    const folderPath = "my-path";
+    const fileName = "MyModel";
+    bundledFileGeneration = false;
+
+    // when initializing models
+    const pm = await doCreateProjectManager();
+    pm.initServices();
+
+    // then main service file is created
+    checkFileHandlerCreation("", BUNDLED_FILE_NAMES.service, [BUNDLED_FILE_NAMES.service]);
+
+    // when requesting a new file
+    const file = pm.createOrGetServiceFile(folderPath, fileName);
+
+    // then a new one has been created
+    checkFileHandlerCreation(folderPath, fileName);
+
+    // when finalizing file
+    await pm.finalizeFile(file);
+
+    // then file is written
+    expect(writeMock).toHaveBeenCalled();
+
+    // when finalizing services
+    await pm.finalizeServices();
+
+    // then mainService file is written
+    expect(writeMock).toHaveBeenCalledTimes(2);
+  });
+
+  test("Test no output", async () => {
+    noOutput = true;
+    const pm = await doCreateProjectManager();
+
+    expect(pm.getCachedFiles()).toBeDefined();
+    expect(pm.getCachedFiles().size).toBe(0);
+
+    pm.initServices();
+    await pm.finalizeServices();
+
+    expect(pm.getCachedFiles().size).toBe(1);
+  });
+
+  // test("ProjectManager: create and write model file", async () => {
+  //   // given an initialized project manager
+  //   const pm = await doCreateProjectManager();
+  //   pm.initModels();
+  //
+  //   // when creating model file
+  //   const result = pm.createOrGetModelFile(ENTITY_FOLDER_PATH, ENTITY_NAME);
+  //
+  //   // then file was created properly
+  //   const filePath = await testFileCreation(result.getFile(), projectFiles.model);
+  //
+  //   // when writing all files
+  //   await pm.finalizeModels();
+  //
+  //   // then only this file is written
+  //   expect(writeFile).toHaveBeenCalledTimes(1);
+  //   expect(writeFile).toHaveBeenCalledWith(filePath, "");
+  // });
+  //
+  // async function testFileCreation(createdFile: SourceFile, expectedFilePath: string) {
+  //   const completeFilePath = path.join(outputDir, expectedFilePath + ".ts");
+  //
+  //   // we expect to get the stuff that was produced by project.createSourceFile
+  //   expect(createdFile.getFilePath()).toBe(completeFilePath);
+  //   // ts-morph was used to create source file
+  //   expect(MOCK_PROJECT.createSourceFile).toHaveBeenCalledWith(completeFilePath);
+  //
+  //   return completeFilePath;
+  // }
+  //
+  // test("ProjectManager: create & get qObject file", async () => {
+  //   // given an initialized project manager
+  //   const pm = await doCreateProjectManager();
+  //   pm.initQObjects();
+  //
+  //   // when creating file
+  //   const result = pm.createOrGetQObjectFile(ENTITY_FOLDER_PATH, ENTITY_NAME);
+  //
+  //   // then file was created properly
+  //   const filePath = await testFileCreation(result.getFile(), projectFiles.qObject);
+  //
+  //   // when writing files
+  //   await pm.finalizeQObjects();
+  //
+  //   // then only this file is written
+  //   expect(writeFile).toHaveBeenCalledTimes(1);
+  //   expect(writeFile).toHaveBeenCalledWith(filePath, "");
+  // });
+  //
+  // test("ProjectManager: create & get main service file", async () => {
+  //   // given an initialized project manager
+  //   const pm = await doCreateProjectManager();
+  //   expect(pm.getMainServiceFile()).toBeUndefined();
+  //
+  //   // when creating file
+  //   pm.initServices();
+  //
+  //   // then file was created properly
+  //   const result = pm.getMainServiceFile();
+  //   const filePath = await testFileCreation(result.getFile(), "TesterService");
+  //   expect(pm.getMainServiceFile()).toBe(result);
+  //
+  //   // when writing all files
+  //   await pm.finalizeServices();
+  //
+  //   // then only this file is written
+  //   expect(writeFile).toHaveBeenCalledTimes(1);
+  //   expect(writeFile).toHaveBeenCalledWith(filePath, "");
+  // });
 });

@@ -62,7 +62,7 @@ class ServiceGenerator {
 
   public async generate(): Promise<void> {
     const mainServiceName = this.namingHelper.getMainServiceName();
-    this.project.initServices([mainServiceName]);
+    this.project.initServices();
 
     await Promise.all([
       this.generateMainService(mainServiceName),

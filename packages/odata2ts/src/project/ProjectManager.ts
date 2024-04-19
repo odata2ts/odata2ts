@@ -31,7 +31,7 @@ export async function createProjectManager(
   options: ProjectManagerOptions
 ): Promise<ProjectManager> {
   const { usePrettier = false, tsConfigPath = "tsconfig.json" } = options;
-  const formatter = await createFormatter(outputDir, usePrettier);
+  const formatter = usePrettier ? await createFormatter(outputDir, usePrettier) : undefined;
 
   const compilerOpts: CompilerOptions = await loadTsMorphCompilerOptions(tsConfigPath, emitMode, outputDir);
 
@@ -60,13 +60,13 @@ export class ProjectManager {
     protected emitMode: EmitModes,
     protected namingHelper: NamingHelper,
     protected dataModel: DataModel,
-    protected formatter: FileFormatter,
+    protected formatter: FileFormatter | undefined,
     compilerOptions: CompilerOptions | undefined,
     protected options: ProjectManagerOptions
   ) {
     // Create ts-morph project
     this.project = new Project({
-      manipulationSettings: this.formatter.getSettings(),
+      // manipulationSettings: this.formatter.getSettings(),
       skipAddingFilesFromTsConfig: true,
       compilerOptions,
     });
@@ -87,13 +87,13 @@ export class ProjectManager {
     return this.cachedFiles!;
   }
 
-  private async writeFile(fileWrapper: FileHandler) {
+  private async writeFile(fileHandler: FileHandler) {
     if (this.options.noOutput) {
-      this.cachedFiles!.set(fileWrapper.getFullFilePath(), fileWrapper.getFile());
+      this.cachedFiles!.set(fileHandler.getFullFilePath(), fileHandler.getFile());
       return;
     }
 
-    return fileWrapper.write(this.emitMode);
+    return fileHandler.write(this.emitMode);
   }
 
   private createFile(
@@ -116,7 +116,7 @@ export class ProjectManager {
 
   public async init() {
     if (!this.options.bundledFileGeneration) {
-      // ensure folder for each model
+      // ensure folder for each model: we do this at this point for performance reasons
       await Promise.all(
         this.dataModel.getModelTypes().map((mt) => {
           ensureDir(path.join(this.outputDir, mt.folderPath));
@@ -130,6 +130,7 @@ export class ProjectManager {
 
   public initModels() {
     if (this.options.bundledFileGeneration) {
+      // collect reserved names, that is names of classes we're going to create => imports must take them into account
       const reservedWords = this.dataModel.getModelTypes().reduce<Array<string>>((collector, model) => {
         const asEntityType = model as EntityType;
         collector.push(model.modelName);
@@ -139,21 +140,33 @@ export class ProjectManager {
         if (asEntityType.id?.modelName) {
           collector.push(asEntityType.id.modelName);
         }
+        this.dataModel.getAllEntityOperations(model.fqName).forEach((op) => {
+          if (op.parameters.length) {
+            collector.push(op.paramsModelName);
+          }
+        });
 
         return collector;
       }, []);
+      this.dataModel.getUnboundOperationTypes().forEach((op) => {
+        if (op.parameters.length) {
+          reservedWords.push(op.paramsModelName);
+        }
+      });
+
       this.bundledModelFile = this.createFile(this.namingHelper.getFileNames().model, reservedWords);
     }
   }
 
   public async finalizeModels() {
     if (this.bundledModelFile) {
-      return this.writeFile(this.bundledModelFile);
+      await this.writeFile(this.bundledModelFile);
     }
   }
 
   public initQObjects() {
     if (this.options.bundledFileGeneration) {
+      // collect reserved names, that is names of classes we're going to create => imports must take them into account
       const reservedWords = this.dataModel.getModelTypes().reduce<Array<string>>((collector, model) => {
         const asEntityType = model as EntityType;
         if (asEntityType.qName) {
@@ -162,9 +175,15 @@ export class ProjectManager {
         if (asEntityType.id?.qName) {
           collector.push(asEntityType.id.qName);
         }
+        this.dataModel.getAllEntityOperations(model.fqName).forEach((op) => {
+          collector.push(op.qName);
+        });
 
         return collector;
       }, []);
+      this.dataModel.getUnboundOperationTypes().forEach((op) => {
+        reservedWords.push(op.qName);
+      });
 
       this.bundledQFile = this.createFile(this.namingHelper.getFileNames().qObject, reservedWords);
     }
@@ -172,17 +191,27 @@ export class ProjectManager {
 
   public async finalizeQObjects() {
     if (this.bundledQFile) {
-      return this.writeFile(this.bundledQFile);
+      await this.writeFile(this.bundledQFile);
     }
   }
 
-  public initServices(reservedNames?: Array<string>) {
-    this.mainServiceFile = this.createFile(this.namingHelper.getFileNames().service, reservedNames);
+  public initServices() {
+    const mainServiceName = this.namingHelper.getMainServiceName();
+    const reservedNames = [mainServiceName];
+
+    if (this.options.bundledFileGeneration) {
+      [...this.dataModel.getEntityTypes(), ...this.dataModel.getComplexTypes()].reduce((collector, model) => {
+        collector.push(model.serviceName, model.serviceCollectionName);
+        return collector;
+      }, reservedNames);
+    }
+
+    this.mainServiceFile = this.createFile(mainServiceName, reservedNames);
   }
 
   public async finalizeServices() {
-    if (this.options.bundledFileGeneration && this.mainServiceFile) {
-      return this.writeFile(this.mainServiceFile);
+    if (this.mainServiceFile) {
+      await this.writeFile(this.mainServiceFile);
     }
   }
 
@@ -214,7 +243,7 @@ export class ProjectManager {
 
   public async finalizeFile(file: FileHandler) {
     if (!this.options.bundledFileGeneration) {
-      return this.writeFile(file);
+      await this.writeFile(file);
     }
   }
 }
