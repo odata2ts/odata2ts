@@ -1,8 +1,6 @@
 import { TypeModel } from "../../TypeModel";
 
 export interface NameValidator {
-  addToTypes(fqName: string, name: string, type: TypeModel): string;
-
   addEntityType(fqName: string, name: string): string;
 
   addComplexType(fqName: string, name: string): string;
@@ -12,8 +10,6 @@ export interface NameValidator {
   addUnboundOperationType(fqName: string, name: string): string;
 
   addBoundOperationType(bindingName: string, fqName: string, name: string): string;
-
-  addToEntityContainer(fqName: string, name: string, type: TypeModel): string;
 
   addOperationImportType(fqName: string, name: string): string;
 

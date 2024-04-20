@@ -30,14 +30,6 @@ export class NoopValidator implements NameValidator {
     return name;
   }
 
-  addToEntityContainer(fqName: string, name: string, type: TypeModel): string {
-    return name;
-  }
-
-  addToTypes(fqName: string, name: string, type: TypeModel): string {
-    return name;
-  }
-
   addUnboundOperationType(fqName: string, name: string): string {
     return name;
   }

@@ -89,6 +89,7 @@ export class ProjectManager {
 
   private async writeFile(fileHandler: FileHandler) {
     if (this.options.noOutput) {
+      fileHandler.getFile().addImportDeclarations(fileHandler.getImports().getImportDeclarations());
       this.cachedFiles!.set(fileHandler.getFullFilePath(), fileHandler.getFile());
       return;
     }

@@ -1,7 +1,7 @@
 import { TypeModel } from "../../../src";
 import { NameClashValidator } from "../../../src/data-model/validation/NameClashValidator";
 
-describe("NameValidator Tests", function () {
+describe("NameClashValidator Tests", function () {
   let validator: NameClashValidator;
 
   const NS1 = "Test";
@@ -38,6 +38,17 @@ describe("NameValidator Tests", function () {
 
     result = validator.addEntityType(withNs(NS2, name), name);
     expect(result).toBe(`${name}3`);
+  });
+
+  test("use different name", () => {
+    const name = "Test";
+    const diffName = "TheTest";
+
+    let result = validator.addEntityType(withNs(NS1, name), diffName);
+    expect(result).toBe(diffName);
+
+    result = validator.addEntityType(withNs(NS2, name), diffName);
+    expect(result).toBe(diffName + "2");
   });
 
   test("without automatic name clash resolution", () => {
@@ -88,14 +99,24 @@ describe("NameValidator Tests", function () {
     ]);
   });
 
-  test("use different name", () => {
-    const name = "Test";
-    const diffName = "TheTest";
+  test("addEntitySet and addSingleton and addOperationImport", () => {
+    const name = "MyService";
+    const NS3 = "xyz";
 
-    let result = validator.addEntityType(withNs(NS1, name), diffName);
-    expect(result).toBe(diffName);
+    const entitySetName = validator.addEntitySet(withNs(NS1, name), name);
+    const singletonName = validator.addSingleton(withNs(NS2, name), name);
+    const opImportName = validator.addOperationImportType(withNs(NS3, name), name);
 
-    result = validator.addEntityType(withNs(NS2, name), diffName);
-    expect(result).toBe(diffName + "2");
+    expect(entitySetName).toBe(name);
+    expect(singletonName).toBe(name + "2");
+    expect(opImportName).toBe(name + "3");
+
+    let validation = validator.validate();
+    expect(validation.size).toBe(1);
+    expect(validation.get(name)).toStrictEqual([
+      { fqName: withNs(NS1, name), type: TypeModel.EntitySet },
+      { fqName: withNs(NS2, name), type: TypeModel.Singleton, renamedTo: name + "2" },
+      { fqName: withNs(NS3, name), type: TypeModel.OperationImportType, renamedTo: name + "3" },
+    ]);
   });
 });

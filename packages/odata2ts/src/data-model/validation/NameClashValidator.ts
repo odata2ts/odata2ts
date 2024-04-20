@@ -28,7 +28,7 @@ export class NameClashValidator implements NameValidator {
     return validationObject.renamedTo ?? name;
   }
 
-  addToTypes(fqName: string, name: string, type: TypeModel): string {
+  private addToTypes(fqName: string, name: string, type: TypeModel): string {
     const validationObject: ValidationError = { type, fqName };
     const hit = this.store.get(name);
     if (hit) {
@@ -39,7 +39,7 @@ export class NameClashValidator implements NameValidator {
     }
   }
 
-  addToEntityContainer(fqName: string, name: string, type: TypeModel): string {
+  private addToEntityContainer(fqName: string, name: string, type: TypeModel): string {
     const validationObject: ValidationError = { type, fqName };
     const hit = this.entityContainer.get(name);
     if (hit) {
