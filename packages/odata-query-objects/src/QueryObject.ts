@@ -118,20 +118,20 @@ export class QueryObject<T extends object = any> {
    * - null & undefined are not converted, they're just passed back
    * - primitive values will raise an error
    * - it's allowed to pass a single model or a collection of these
-   * - passing unknown properties results in errors
-   * - with the option allowUnknownProps=true unknown properties are passed as they are
+   * - passing unknown properties is fine
+   * - with the option failForUnknownProps=true passing unknown props results in errors
    *
    * @param userModel the data model the user is facing
-   * @param allowUnknownProps (false by default) passes unknown values as they are instead of raising an error
+   * @param failForUnknownProps (false by default) raise an error for unknown props
    * @retuns the data model that is consumable by the OData service
    */
-  public convertToOData(userModel: null, allowUnknownProps?: boolean): null;
-  public convertToOData(userModel: undefined, allowUnknownProps?: boolean): undefined;
-  public convertToOData(userModel: PartialDeep<T>, allowUnknownProps?: boolean): object;
-  public convertToOData(userModel: Array<PartialDeep<T>>, allowUnknownProps?: boolean): Array<object>;
+  public convertToOData(userModel: null, failForUnknownProps?: boolean): null;
+  public convertToOData(userModel: undefined, failForUnknownProps?: boolean): undefined;
+  public convertToOData(userModel: PartialDeep<T>, failForUnknownProps?: boolean): object;
+  public convertToOData(userModel: Array<PartialDeep<T>>, failForUnknownProps?: boolean): Array<object>;
   public convertToOData(
     userModel: PartialDeep<T> | Array<PartialDeep<T>> | null | undefined,
-    allowUnknownProps = false
+    failForUnknownProps = false
   ) {
     if (userModel === null || userModel === undefined) {
       return userModel;
@@ -153,7 +153,11 @@ export class QueryObject<T extends object = any> {
           collector[prop.getPath()] = entity.convertToOData(value);
         } else if (prop) {
           collector[prop.getPath()] = prop.converter ? prop.converter.convertTo(value) : value;
-        } else if (!allowUnknownProps) {
+        }
+        // control information is passed as is
+        else if (key.startsWith("@")) {
+          collector[key] = value;
+        } else if (failForUnknownProps) {
           const knownProps = [...this.__getPropMapping().values()].join(",");
           throw new Error(`Property [${key}] not found (in strict mode)! Known user model props: ${knownProps}`);
         } else {

@@ -152,24 +152,38 @@ describe("QueryObject tests", () => {
     expect(() => qToTest.convertToOData("2")).toThrow("must be an object");
   });
 
-  test("convertToOData: strict => no wrong or extra props allowed", () => {
-    expect(() => {
-      // @ts-expect-error
-      return qToTest.convertToOData({ ID: 123 });
-    }).toThrow("Property [ID] not found");
-    expect(() => {
-      // @ts-expect-error
-      return qToTest.convertToOData({ unknownProp: "hi!" });
-    }).toThrow("Known user model props: id,truth,age");
-  });
-
   test("convertToOData: permissiveness", () => {
-    // @ts-ignore: on purpose in order to pass an unknown property
-    const result = qToTest.convertToOData({ id: 123, unknownProp: "hi!" }, true);
+    const result = qToTest.convertToOData({
+      // @ts-ignore: in order to pass unknown properties
+      id: 123,
+      unknownProp: "hi!",
+    });
     expect(result).toStrictEqual({
       ID: 123,
       unknownProp: "hi!",
     });
+  });
+
+  test("convertToOData: strict => no wrong or extra props allowed", () => {
+    expect(() => {
+      // @ts-expect-error
+      return qToTest.convertToOData({ ID: 123 }, true);
+    }).toThrow("Property [ID] not found");
+    expect(() => {
+      // @ts-expect-error
+      return qToTest.convertToOData({ unknownProp: "hi!" }, true);
+    }).toThrow("Known user model props: id,truth,age");
+  });
+
+  test("convertToOData: strict, but control info allowed", () => {
+    return;
+    expect(
+      qToTest.convertToOData(
+        // @ts-ignore
+        { "@odata.type": "123" },
+        true
+      )
+    ).toStrictEqual({ "@odata.type": "123" });
   });
 
   test("convertToOData: nesting", () => {
