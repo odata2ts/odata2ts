@@ -75,6 +75,14 @@ export function createDataModelTests(
     expect(result.getEnums()[0].members[0]).toBe("HEY");
   });
 
+  test("Type Definition", async () => {
+    odataBuilder.addTypeDefinition("MY_TYPE", ODataTypesV4.String);
+
+    const result = await doDigest();
+    expect(result).toBeDefined();
+    expect(result.getPrimitiveType(withNs("MY_TYPE"))).toBe(ODataTypesV4.String);
+  });
+
   test("Entity Type", async () => {
     odataBuilder.addEntityType("MY_TYPE", undefined, (builder) => {
       builder.addKeyProp("ID", "Edm.String");
