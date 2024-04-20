@@ -99,6 +99,31 @@ describe("NameClashValidator Tests", function () {
     ]);
   });
 
+  test("special logic for addBoundOperationType", () => {
+    const entityName = "Test";
+    const entity2Name = "Test2";
+    const name = "boundOp";
+
+    // when binding operation with same fqName to different entities
+    const result1 = validator.addBoundOperationType(withNs(NS1, entityName), withNs(NS1, name), name);
+    const result2 = validator.addBoundOperationType(withNs(NS1, entity2Name), withNs(NS1, name), name);
+
+    // then all is fine, no name clash => gets finally prefixed with entity
+    expect(result1).toBe(name);
+    expect(result2).toBe(name);
+    expect(validator.validate().size).toBe(0);
+
+    // when adding bound operation to same entity with same op name (from different namespace)
+    const result3 = validator.addBoundOperationType(withNs(NS1, entityName), withNs(NS2, name), name);
+
+    // then we have a name clash
+    expect(result3).toBe(name + "2");
+    expect(validator.validate().get(name)).toStrictEqual([
+      { fqName: withNs(NS1, name), type: TypeModel.OperationType },
+      { fqName: withNs(NS2, name), type: TypeModel.OperationType, renamedTo: name + "2" },
+    ]);
+  });
+
   test("addEntitySet and addSingleton and addOperationImport", () => {
     const name = "MyService";
     const NS3 = "xyz";
