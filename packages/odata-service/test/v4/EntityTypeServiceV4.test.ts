@@ -5,7 +5,7 @@ import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { DEFAULT_HEADERS } from "../../src/RequestHeaders";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { PersonModel } from "../fixture/PersonModel";
-import { PersonModelCollectionService, PersonModelService } from "../fixture/v4/PersonModelService";
+import { PersonModelService } from "../fixture/v4/PersonModelService";
 import { QPersonV4, qPersonV4 } from "../fixture/v4/QPersonV4";
 import { MockClient } from "../mock/MockClient";
 
@@ -26,22 +26,18 @@ describe("EntityTypeService V4 Tests", () => {
 
   test("entityType V4: patch", async () => {
     const model: Partial<PersonModel> = { Age: "45" };
-    const odataModel = { Age: 45 };
+    const requestModel = { Age: 45, "@odata.type": `#Trippin.Person` };
 
-    odataClient.setModelResponse(odataModel);
-    let result = await testService.patch(model);
-    // @ts-ignore
-    const resultData = result.data.d || result.data;
+    await testService.patch({ ...model, "@odata.type": `#Trippin.Person` });
 
     expect(odataClient.lastUrl).toBe(EXPECTED_PATH);
     expect(odataClient.lastOperation).toBe("PATCH");
-    expect(odataClient.lastData).toEqual({ Age: 45 });
+    expect(odataClient.lastData).toEqual(requestModel);
     expect(odataClient.lastRequestConfig).toBeUndefined();
     expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
 
-    result = await testService.patch(model, REQUEST_CONFIG);
+    await testService.patch(model, REQUEST_CONFIG);
     expect(odataClient.lastRequestConfig).toStrictEqual(REQUEST_CONFIG);
-    expect(result.data).toBeNull();
   });
 
   test("entityType V4: big number", async () => {

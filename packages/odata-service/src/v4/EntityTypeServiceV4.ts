@@ -1,5 +1,5 @@
 import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
-import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { QueryObject, convertV4ModelResponse } from "@odata2ts/odata-query-objects";
 
@@ -23,7 +23,7 @@ export class EntityTypeServiceV4<ClientType extends ODataHttpClient, T, Editable
   }
 
   public async patch(
-    model: Partial<EditableT>,
+    model: ODataModelPayloadV4<Partial<EditableT>>,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataModelResponseV4<T>> {
     const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
@@ -38,7 +38,7 @@ export class EntityTypeServiceV4<ClientType extends ODataHttpClient, T, Editable
   }
 
   public async update(
-    model: EditableT,
+    model: ODataModelPayloadV4<EditableT>,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<void | ODataModelResponseV4<T>> {
     const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
