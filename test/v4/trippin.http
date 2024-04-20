@@ -26,6 +26,7 @@ GET {{baseUrl}}/$metadata
 ### List entities
 # @name list people
 GET {{baseUrl}}/People?$count=true
+Accept: application/json;odata.metadata=full
 ###
 # @name list airlines
 GET {{baseUrl}}/Airlines?$count=true

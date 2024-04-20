@@ -1,5 +1,5 @@
 import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
-import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataCollectionResponseV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import {
   QFunction,
@@ -91,7 +91,7 @@ export abstract class EntitySetServiceV4<
    * @return
    */
   public async create<ReturnType extends Partial<T> | void = T>(
-    model: EditableT,
+    model: ODataModelPayloadV4<EditableT>,
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): ODataResponse<ReturnType> {
     const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
