@@ -43,6 +43,7 @@
       </EntityType>
       <Function Name="BoundFunc" IsBound="true">
         <Parameter Name="bindingParameter" Type="NS1.Entity" />
+        <Parameter Name="testParameter" Type="Edm.String" Nullable="false" />
         <ReturnType Type="Edm.Int32" Nullable="false" />
       </Function>
       <Function Name="BoundCollectionFunc" IsBound="true">
@@ -63,6 +64,7 @@
       </EntityType>
       <Function Name="BoundFunc" IsBound="true">
         <Parameter Name="bindingParameter" Type="NS*2.Entity" />
+        <Parameter Name="testParameter" Type="Edm.String" Nullable="false" />
         <ReturnType Type="Edm.Int32" Nullable="false" />
       </Function>
       <Function Name="BoundCollectionFunc" IsBound="true">
@@ -77,10 +79,11 @@
     <Schema Namespace="NS3" xmlns="http://docs.oasis-open.org/odata/ns/edm" Alias="MyAlias">
       <Function Name="BoundFunc" IsBound="true">
         <Parameter Name="bindingParameter" Type="NS*2.Entity" />
+        <Parameter Name="testParameter" Type="Edm.String" Nullable="false" />
         <ReturnType Type="Edm.Int32" Nullable="false" />
       </Function>
       <Function Name="BoundCollectionFunc" IsBound="true">
-        <Parameter Name="bindingParameter" Type="Collection(NS*2.Entity)" />
+        <Parameter Name="bindingParameter" Type="Collection(NS*2.Entity)"  />
         <ReturnType Type="Edm.Int32" Nullable="false" />
       </Function>
     </Schema>
