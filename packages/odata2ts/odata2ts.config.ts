@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { ConfigFileOptions, EmitModes, Modes, TypeModel } from "./src";
+import { ConfigFileOptions, EmitModes, Modes, TypeModel } from "./lib";
 
 const config: ConfigFileOptions = {
   debug: false,
