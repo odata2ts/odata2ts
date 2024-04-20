@@ -1,8 +1,9 @@
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 
-import { RunOptions } from "../../../src";
+import { EmitModes, RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { generateQueryObjects } from "../../../src/generator";
+import { createProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
 import {
   EntityBasedGeneratorFunctionWithoutVersion,
@@ -14,18 +15,24 @@ import { SERVICE_NAME, createEntityBasedGenerationTests } from "./EntityBasedGen
 describe("Query Object Generator Tests V2", () => {
   const TEST_SUITE_NAME = "Query Object Generator";
   const FIXTURE_BASE_PATH = "generator/qobject";
+  const MODEL_FILE = "QTester";
 
-  const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = (dataModel, sourceFile, genOptions, namingHelper) => {
-    return generateQueryObjects(dataModel, sourceFile, ODataVersions.V2, genOptions, namingHelper);
+  const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = async (dataModel, genOptions, namingHelper) => {
+    const projectManager = await createProjectManager("build/unitTest", EmitModes.ts, namingHelper, dataModel, {
+      bundledFileGeneration: true,
+      noOutput: true,
+    });
+    await generateQueryObjects(projectManager, dataModel, ODataVersions.V2, genOptions, namingHelper);
+    return projectManager;
   };
 
   let odataBuilder: ODataModelBuilderV2;
   let fixtureComparatorHelper: FixtureComparatorHelper;
 
-  createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, GENERATE);
+  createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, MODEL_FILE, GENERATE);
 
   async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<RunOptions>) {
-    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchemas(), genOptions);
+    await fixtureComparatorHelper.generateAndCompare(MODEL_FILE, fixturePath, odataBuilder.getSchemas(), genOptions);
   }
 
   beforeAll(async () => {

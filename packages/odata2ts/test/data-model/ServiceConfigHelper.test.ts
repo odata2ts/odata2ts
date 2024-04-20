@@ -1,7 +1,6 @@
-import { PropertyGenerationOptions, TypeBasedGenerationOptions } from "../../src";
+import { PropertyGenerationOptions, TypeBasedGenerationOptions, TypeModel } from "../../src";
 import { NamespaceWithAlias } from "../../src/data-model/DataModel";
 import { ServiceConfigHelper } from "../../src/data-model/ServiceConfigHelper";
-import { TypeModel } from "../../src/TypeModel";
 
 describe("ServiceConfigHelper Tests", function () {
   const DEFAULT_NAMESPACES: NamespaceWithAlias = ["NS1", "self"];
@@ -19,6 +18,7 @@ describe("ServiceConfigHelper Tests", function () {
       v4BigNumberAsString: false,
       skipComments: true,
       disableAutomaticNameClashResolution: false,
+      bundledFileGeneration: false,
     });
   }
 
@@ -33,6 +33,7 @@ describe("ServiceConfigHelper Tests", function () {
       v4BigNumberAsString: false,
       skipComments: true,
       disableAutomaticNameClashResolution: false,
+      bundledFileGeneration: false,
     });
   }
 

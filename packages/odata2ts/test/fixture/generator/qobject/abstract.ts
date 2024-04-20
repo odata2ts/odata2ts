@@ -3,7 +3,9 @@ import { QBooleanParam, QBooleanPath, QId, QueryObject } from "@odata2ts/odata-q
 // @ts-ignore
 import { ExtendsFromEntityId } from "./TesterModel";
 
-export abstract class QBook extends QueryObject {}
+export class QBook extends QueryObject {}
+
+export const qBook = new QBook();
 
 export class QExtendsFromEntity extends QBook {
   public readonly id = new QBooleanPath(this.withPrefix("ID"));
@@ -19,7 +21,9 @@ export class QExtendsFromEntityId extends QId<ExtendsFromEntityId> {
   }
 }
 
-export abstract class QComplex extends QueryObject {}
+export class QComplex extends QueryObject {}
+
+export const qComplex = new QComplex();
 
 export class QExtendsFromComplex extends QComplex {
   public readonly test = new QBooleanPath(this.withPrefix("test"));

@@ -1,8 +1,10 @@
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
+import { EmitModes } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { DigestionOptions } from "../../../src/FactoryFunctionModel";
 import { generateQueryObjects } from "../../../src/generator";
+import { createProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import {
   EntityBasedGeneratorFunctionWithoutVersion,
@@ -15,9 +17,15 @@ import { ENTITY_NAME, createEntityBasedGenerationTests } from "./EntityBasedGene
 describe("Query Object Generator Tests V4", () => {
   const TEST_SUITE_NAME = "Query Object Generator";
   const FIXTURE_BASE_PATH = "generator/qobject";
+  const MODEL_FILE = "QTester";
 
-  const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = (dataModel, sourceFile, options, namingHelper) => {
-    return generateQueryObjects(dataModel, sourceFile, ODataVersions.V4, options, namingHelper);
+  const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = async (dataModel, options, namingHelper) => {
+    const projectManager = await createProjectManager("build/unitTest", EmitModes.ts, namingHelper, dataModel, {
+      noOutput: true,
+      bundledFileGeneration: true,
+    });
+    await generateQueryObjects(projectManager, dataModel, ODataVersions.V4, options, namingHelper);
+    return projectManager;
   };
 
   let odataBuilder: ODataModelBuilderV4;
@@ -27,10 +35,10 @@ describe("Query Object Generator Tests V4", () => {
     return `${SERVICE_NAME}.${name}`;
   }
 
-  createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, GENERATE);
+  createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, MODEL_FILE, GENERATE);
 
   async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<DigestionOptions>) {
-    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchemas(), genOptions);
+    await fixtureComparatorHelper.generateAndCompare(MODEL_FILE, fixturePath, odataBuilder.getSchemas(), genOptions);
   }
 
   beforeAll(async () => {

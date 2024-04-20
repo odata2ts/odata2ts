@@ -38,8 +38,9 @@ describe("V4: EntityTypeDigestion Test", () => {
     const model = result.getEntityTypes()[0];
     // expect(model).toEqual({});
     expect(model).toMatchObject({
-      name: "Min",
+      name: "min",
       odataName: "min",
+      modelName: "Min",
       qName: "QMin",
       baseClasses: [],
       baseProps: [],

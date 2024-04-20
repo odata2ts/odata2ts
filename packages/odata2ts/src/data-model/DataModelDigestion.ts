@@ -3,15 +3,27 @@ import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { DigestionOptions } from "../FactoryFunctionModel";
 import { ComplexTypeGenerationOptions, EntityTypeGenerationOptions, PropertyGenerationOptions } from "../OptionModel";
 import { DataModel, NamespaceWithAlias, withNamespace } from "./DataModel";
-import { ComplexType as ComplexModelType, DataTypes, ModelType, ODataVersion, PropertyModel } from "./DataTypeModel";
+import {
+  ComplexType as ComplexModelType,
+  DataTypes,
+  EntityType as EntityModelType,
+  ODataVersion,
+  PropertyModel,
+} from "./DataTypeModel";
 import { ComplexType, EntityType, EnumType, Property, Schema, TypeDefinition } from "./edmx/ODataEdmxModelBase";
 import { SchemaV3 } from "./edmx/ODataEdmxModelV3";
 import { SchemaV4 } from "./edmx/ODataEdmxModelV4";
 import { NamingHelper } from "./NamingHelper";
 import { ServiceConfigHelper, WithoutName } from "./ServiceConfigHelper";
+import { NameClashValidator } from "./validation/NameClashValidator";
 import { NameValidator } from "./validation/NameValidator";
+import { NoopValidator } from "./validation/NoopValidator";
 
-type CollectorTuple = [Array<PropertyModel>, Array<string>, { idName: string; qIdName: string; open: boolean }];
+type CollectorTuple = [
+  Array<PropertyModel>,
+  Array<string>,
+  { fqIdName: string; idName: string; qIdName: string; open: boolean }
+];
 
 function ifTrue(value: string | undefined): boolean {
   return value === "true";
@@ -47,7 +59,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     const namespaces = schemas.map<NamespaceWithAlias>((s) => [s.$.Namespace, s.$.Alias]);
     this.dataModel = new DataModel(namespaces, version, converters);
     this.serviceConfigHelper = new ServiceConfigHelper(options);
-    this.nameValidator = new NameValidator(options);
+    this.nameValidator = this.options.bundledFileGeneration ? new NameClashValidator(options) : new NoopValidator();
 
     this.collectModelTypes(schemas);
   }
@@ -126,6 +138,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   private getBaseModel(
     entityConfig: WithoutName<EntityTypeGenerationOptions | ComplexTypeGenerationOptions> | undefined,
     model: ComplexType,
+    namespace: string,
     name: string,
     fqName: string
   ) {
@@ -152,9 +165,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     return {
       fqName,
       odataName,
-      name: this.namingHelper.getModelName(name),
+      name,
+      modelName: this.namingHelper.getModelName(name),
       qName: this.namingHelper.getQName(name),
       editableName: this.namingHelper.getEditableModelName(name),
+      serviceName: this.namingHelper.getServiceName(name),
+      serviceCollectionName: this.namingHelper.getCollectionServiceName(name),
+      folderPath: this.namingHelper.getFolderPath(namespace, name),
       baseClasses,
       finalBaseClass,
       props,
@@ -184,11 +201,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       const fqName = withNamespace(namespace[0], odataName);
       const config = this.serviceConfigHelper.findEnumTypeConfig(namespace, odataName);
       const enumName = this.nameValidator.addEnumType(fqName, config?.mappedName || odataName);
-
+      const filePath = this.namingHelper.getFolderPath(namespace[0], enumName);
       this.dataModel.addEnum(namespace[0], odataName, {
         fqName,
         odataName,
-        name: this.namingHelper.getEnumName(enumName),
+        name: enumName,
+        modelName: this.namingHelper.getEnumName(enumName),
+        folderPath: filePath,
         members: et.Member.map((m) => m.$.Name),
       });
     }
@@ -203,7 +222,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       const config = this.serviceConfigHelper.findComplexTypeConfig(namespace, model.$.Name);
       const fqName = withNamespace(namespace[0], model.$.Name);
       const name = this.nameValidator.addComplexType(fqName, config?.mappedName || model.$.Name);
-      const baseModel = this.getBaseModel(config, model, name, fqName);
+      const baseModel = this.getBaseModel(config, model, namespace[0], name, fqName);
       this.dataModel.addComplexType(namespace[0], baseModel.odataName, baseModel);
     }
   }
@@ -217,7 +236,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       const entityConfig = this.serviceConfigHelper.findEntityTypeConfig(namespace, model.$.Name);
       const fqName = withNamespace(namespace[0], model.$.Name);
       const name = this.nameValidator.addEntityType(fqName, entityConfig?.mappedName || model.$.Name);
-      const baseModel = this.getBaseModel(entityConfig, model, name, fqName);
+      const baseModel = this.getBaseModel(entityConfig, model, namespace[0], name, fqName);
 
       // key support: we add keys from this entity,
       // but not keys stemming from base classes (postprocess required)
@@ -234,8 +253,11 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
       this.dataModel.addEntityType(namespace[0], baseModel.odataName, {
         ...baseModel,
-        idModelName: this.namingHelper.getIdModelName(name),
-        qIdFunctionName: this.namingHelper.getQIdFunctionName(name),
+        id: {
+          fqName: baseModel.fqName,
+          modelName: this.namingHelper.getIdModelName(name),
+          qName: this.namingHelper.getQIdFunctionName(name),
+        },
         generateId: !!keyNames.length,
         keyNames: keyNames, // postprocess required to include key specs from base classes
         keys: [], // postprocess required to include props from base classes
@@ -259,18 +281,21 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     const entityTypes = this.dataModel.getEntityTypes();
     entityTypes.forEach((et) => {
       const [baseProps, baseKeys, baseAttributes] = this.collectBaseClassPropsAndKeys(et, []);
-      const { idName, qIdName, open } = baseAttributes;
+      const { fqIdName, idName, qIdName, open } = baseAttributes;
       et.baseProps = baseProps.map((bp) => ({ ...bp }));
 
       if (!et.keyNames.length && idName) {
-        et.idModelName = idName;
-        et.qIdFunctionName = qIdName;
+        et.id = {
+          fqName: fqIdName,
+          modelName: idName,
+          qName: qIdName,
+        };
         et.generateId = false;
       }
       if (open) {
         et.open = open;
       }
-      et.keyNames.unshift(...baseKeys);
+      et.keyNames.unshift(...baseKeys.filter((bk) => !et.keyNames.includes(bk)));
     });
   }
 
@@ -307,7 +332,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
           throw new Error(`BaseModel "${bc}" doesn't exist!`);
         }
 
-        let { idName, qIdName, open } = attributes;
+        let { fqIdName, idName, qIdName, open } = attributes;
 
         // recursive
         if (baseModel.baseClasses.length) {
@@ -318,6 +343,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
           props.unshift(...parentProps);
           keys.unshift(...parentKeys);
           if (parentAttributes?.idName) {
+            fqIdName = parentAttributes.fqIdName;
             idName = parentAttributes.idName;
             qIdName = parentAttributes.qIdName;
           }
@@ -327,18 +353,19 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         }
 
         props.push(...baseModel.props);
-        const entityModel = baseModel as ModelType;
+        const entityModel = baseModel as EntityModelType;
         if (entityModel.keyNames?.length) {
           keys.push(...entityModel.keyNames.filter((kn) => !keys.includes(kn)));
-          idName = entityModel.idModelName;
-          qIdName = entityModel.qIdFunctionName;
+          fqIdName = entityModel.id.fqName;
+          idName = entityModel.id.modelName;
+          qIdName = entityModel.id.qName;
         }
         if (baseModel.open) {
           open = true;
         }
-        return [props, keys, { idName, qIdName, open }];
+        return [props, keys, { fqIdName, idName, qIdName, open }];
       },
-      [[], [], { idName: "", qIdName: "", open: false }] as CollectorTuple
+      [[], [], { fqIdName: "", idName: "", qIdName: "", open: false }] as CollectorTuple
     );
   }
 
@@ -419,7 +446,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       };
     } else {
       throw new Error(
-        `Unknown type [${dataType}]: Not 'Collection(...)', not OData type 'Edm.*', not starting with one of the namespaces!W`
+        `Unknown type [${dataType}]: Not 'Collection(...)', not OData type 'Edm.*', not starting with one of the namespaces!`
       );
     }
 

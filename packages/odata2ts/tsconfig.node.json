@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": ".",
+    "outDir": "./build",
+    "noFallthroughCasesInSwitch": false,
+    "strict": false
+  },
+  "include": ["odata2ts.config.ts"]
+}

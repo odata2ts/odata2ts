@@ -1,93 +1,151 @@
 import { ODataVersions } from "@odata2ts/odata-core";
-import { JSDocStructure, OptionalKind, SourceFile, StructureKind } from "ts-morph";
+import { JSDocStructure, OptionalKind, StructureKind } from "ts-morph";
 
 import { DataModel } from "../data-model/DataModel";
-import { ComplexType, DataTypes, ModelType, OperationType, PropertyModel } from "../data-model/DataTypeModel";
+import { ComplexType, DataTypes, EntityType, OperationType, PropertyModel } from "../data-model/DataTypeModel";
 import { NamingHelper } from "../data-model/NamingHelper";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel";
+import { FileHandler } from "../project/FileHandler";
+import { ProjectManager } from "../project/ProjectManager";
+import { CoreImports } from "./import/ImportObjects";
 import { ImportContainer } from "./ImportContainer";
 
-export const generateModels: EntityBasedGeneratorFunction = (dataModel, sourceFile, version, options, namingHelper) => {
-  const generator = new ModelGenerator(dataModel, sourceFile, version, options, namingHelper);
+export const generateModels: EntityBasedGeneratorFunction = (
+  project: ProjectManager,
+  dataModel,
+  version,
+  options,
+  namingHelper
+) => {
+  const generator = new ModelGenerator(project, dataModel, version, options, namingHelper);
   return generator.generate();
 };
 
-const DEFERRED_CONTENT = "DeferredContent";
-
 class ModelGenerator {
-  private importContainer!: ImportContainer;
-
   constructor(
+    private project: ProjectManager,
     private dataModel: DataModel,
-    private sourceFile: SourceFile,
     private version: ODataVersions,
     private options: GeneratorFunctionOptions,
     private namingHelper: NamingHelper
   ) {}
 
-  public generate(): void {
-    this.importContainer = new ImportContainer(this.namingHelper.getFileNames());
+  public async generate(): Promise<void> {
+    this.project.initModels();
 
-    this.generateEnums();
-    this.generateModels();
+    const promises: Array<Promise<void>> = [
+      ...this.generateEnums(),
+      ...this.generateEntityTypeModels(),
+      ...this.generateComplexTypeModels(),
+    ];
+
     if (!this.options.skipOperations) {
-      this.generateUnboundOperationParams();
+      promises.push(...this.generateUnboundOperationParams());
     }
+
+    await Promise.all(promises);
+
+    return this.project.finalizeModels();
   }
 
   private generateEnums() {
-    this.dataModel.getEnums().forEach((et) => {
-      this.sourceFile.addEnum({
-        name: et.name,
+    return this.dataModel.getEnums().map((et) => {
+      const file = this.project.createOrGetModelFile(et.folderPath, et.modelName);
+
+      file.getFile().addEnum({
+        name: et.modelName,
         isExported: true,
         members: et.members.map((mem) => ({ name: mem, initializer: `"${mem}"` })),
       });
+
+      return this.project.finalizeFile(file);
     });
   }
 
-  private generateModels() {
-    this.dataModel.getEntityTypes().forEach((model) => {
-      this.generateModel(model);
+  private generateEntityTypeModels() {
+    return this.dataModel.getEntityTypes().map((model) => {
+      const file = this.project.createOrGetModelFile(model.folderPath, model.modelName, [
+        model.modelName,
+        model.id.modelName,
+        model.editableName,
+      ]);
+
+      // query model
+      this.generateModel(file, model);
+
+      // key model
       if (!this.options.skipIdModels && model.generateId) {
-        this.generateIdModel(model);
+        this.generateIdModel(file, model);
       }
-      if (!this.options.skipEditableModels && !model.abstract) {
-        this.generateEditableModel(model);
-      }
-      if (!this.options.skipOperations) {
-        this.generateBoundOperationParams(model.fqName);
-      }
-    });
-    this.dataModel.getComplexTypes().forEach((model) => {
-      this.generateModel(model);
-      if (!this.options.skipEditableModels && !model.abstract) {
-        this.generateEditableModel(model);
-      }
-    });
 
-    this.sourceFile.addImportDeclarations(this.importContainer.getImportDeclarations());
+      // editable model
+      if (!this.options.skipEditableModels) {
+        this.generateEditableModel(file, model);
+      }
+
+      // param models for bound operations
+      if (!this.options.skipOperations) {
+        [
+          ...this.dataModel.getEntityTypeOperations(model.fqName),
+          ...this.dataModel.getEntitySetOperations(model.fqName),
+        ].forEach((operation) => {
+          this.generateOperationParams(file, operation);
+        });
+      }
+
+      return this.project.finalizeFile(file);
+    });
   }
 
-  private generateModel(model: ComplexType | ModelType) {
-    this.sourceFile.addInterface({
-      name: model.name,
+  private generateComplexTypeModels() {
+    return this.dataModel.getComplexTypes().map((model) => {
+      const file = this.project.createOrGetModelFile(model.folderPath, model.modelName, [
+        model.modelName,
+        model.editableName,
+      ]);
+
+      // query model
+      this.generateModel(file, model);
+
+      // editable model
+      if (!this.options.skipEditableModels) {
+        this.generateEditableModel(file, model);
+      }
+
+      return this.project.finalizeFile(file);
+    });
+  }
+
+  private generateModel(file: FileHandler, model: ComplexType | EntityType) {
+    const imports = file.getImports();
+    let extendsClause = undefined;
+    if (model.finalBaseClass) {
+      const modelName = imports.addGeneratedModel(
+        model.baseClasses[0],
+        this.namingHelper.getModelName(model.finalBaseClass)
+      );
+      extendsClause = [modelName];
+    }
+
+    file.getFile().addInterface({
+      name: model.modelName,
       isExported: true,
       properties: model.props.map((p) => {
         const isEntity = p.dataType == DataTypes.ModelType;
         return {
           name: p.name,
-          type: this.getPropType(p),
+          type: this.getPropType(file.getImports(), p),
           // props for entities or entity collections are not added in V4 if not explicitly expanded
           hasQuestionToken: this.dataModel.isV4() && isEntity,
           docs: this.options.skipComments ? undefined : [this.generatePropDoc(p, model)],
         };
       }),
-      extends: model.finalBaseClass ? [this.namingHelper.getModelName(model.finalBaseClass)] : undefined,
+      extends: extendsClause,
     });
   }
 
-  private generatePropDoc(prop: PropertyModel, model: ComplexType | ModelType): OptionalKind<JSDocStructure> {
-    const isKeyProp = (model as ModelType).keyNames?.includes(prop.odataName);
+  private generatePropDoc(prop: PropertyModel, model: ComplexType | EntityType): OptionalKind<JSDocStructure> {
+    const isKeyProp = (model as EntityType).keyNames?.includes(prop.odataName);
     const baseAttribs: Array<string> = [];
     if (isKeyProp) {
       baseAttribs.push("**Key Property**: This is a key property used to identify the entity.");
@@ -116,23 +174,25 @@ class ModelGenerator {
     return { kind: StructureKind.JSDoc, description };
   }
 
-  private getPropType(prop: PropertyModel): string {
-    const isEntity = prop.dataType == DataTypes.ModelType;
-
+  private getPropType(imports: ImportContainer, prop: PropertyModel): string {
     // V2 entity special: deferred content
     let suffix = "";
-    if (isEntity && this.dataModel.isV2()) {
-      this.importContainer.addFromCore(DEFERRED_CONTENT);
-      suffix = ` | ${DEFERRED_CONTENT}`;
+    if (this.dataModel.isV2() && prop.dataType == DataTypes.ModelType) {
+      const [defContent] = imports.addCoreLib(this.version, CoreImports.DeferredContent);
+      suffix = ` | ${defContent}`;
     }
-    // custom types which require type imports => possible via converters
-    else if (prop.typeModule) {
-      this.importContainer.addCustomType(prop.typeModule, prop.type);
+
+    let typeName: string;
+    if (prop.dataType === DataTypes.PrimitiveType) {
+      // custom types which require type imports => possible via converters
+      typeName = prop.typeModule ? imports.addCustomType(prop.typeModule, prop.type) : prop.type;
+    } else {
+      typeName = imports.addGeneratedModel(prop.fqType, prop.type);
     }
 
     // Collections
     if (prop.isCollection) {
-      const type = `Array<${prop.type}>`;
+      const type = `Array<${typeName}>`;
       if (this.dataModel.isV2() && this.options.v2ModelsWithExtraResultsWrapping) {
         return `{ results: ${type} }` + suffix;
       } else {
@@ -141,22 +201,24 @@ class ModelGenerator {
     }
 
     // primitive, enum & complex types
-    return prop.type + (prop.required ? "" : " | null") + suffix;
+    return typeName + (prop.required ? "" : " | null") + suffix;
   }
 
-  private generateIdModel(model: ModelType) {
+  private generateIdModel(file: FileHandler, model: EntityType) {
     const singleType = model.keys.length === 1 ? `${model.keys[0].type} | ` : "";
-    const keyTypes = model.keys.map((keyProp) => `${keyProp.name}: ${this.getPropType(keyProp)}`).join(",");
+    const keyTypes = model.keys
+      .map((keyProp) => `${keyProp.name}: ${this.getPropType(file.getImports(), keyProp)}`)
+      .join(",");
     const type = `${singleType}{${keyTypes}}`;
 
-    this.sourceFile.addTypeAlias({
-      name: model.idModelName,
+    file.getFile().addTypeAlias({
+      name: model.id.modelName,
       isExported: true,
       type,
     });
   }
 
-  private generateEditableModel(model: ComplexType) {
+  private generateEditableModel(file: FileHandler, model: ComplexType) {
     const entityTypes = [DataTypes.ModelType, DataTypes.ComplexType];
     const allProps = [...model.baseProps, ...model.props].filter((p) => !p.managed);
 
@@ -171,11 +233,11 @@ class ModelGenerator {
     const complexProps = allProps.filter((p) => p.dataType === DataTypes.ComplexType);
 
     const extendsClause = [
-      requiredProps ? `Pick<${model.name}, ${requiredProps}>` : null,
-      optionalProps ? `Partial<Pick<${model.name}, ${optionalProps}>>` : null,
+      requiredProps ? `Pick<${model.modelName}, ${requiredProps}>` : null,
+      optionalProps ? `Partial<Pick<${model.modelName}, ${optionalProps}>>` : null,
     ].filter((e): e is string => !!e);
 
-    this.sourceFile.addInterface({
+    file.getFile().addInterface({
       name: model.editableName,
       isExported: true,
       extends: extendsClause,
@@ -184,7 +246,7 @@ class ModelGenerator {
         : complexProps.map((p) => {
             return {
               name: p.name,
-              type: this.getEditablePropType(p),
+              type: this.getEditablePropType(file.getImports(), p),
               // optional props don't need to be specified in editable model
               // also, entities would require deep insert func => we make it optional for now
               hasQuestionToken: !p.required || p.dataType === DataTypes.ModelType,
@@ -193,49 +255,45 @@ class ModelGenerator {
     });
   }
 
-  private getEditablePropType(prop: PropertyModel): string {
-    const type =
-      prop.dataType === DataTypes.ModelType
-        ? this.dataModel.getEntityType(prop.fqType)!.editableName
-        : prop.dataType === DataTypes.ComplexType
-        ? this.dataModel.getComplexType(prop.fqType)!.editableName
-        : prop.type;
+  private getEditablePropType(imports: ImportContainer, prop: PropertyModel): string {
+    const isModelType = [DataTypes.ModelType, DataTypes.ComplexType].includes(prop.dataType);
+
+    let editableType = prop.type;
+    if (isModelType) {
+      const editName = this.dataModel.getComplexType(prop.fqType)!.editableName;
+      editableType = imports.addGeneratedModel(prop.fqType, editName);
+    }
 
     // Collections
     if (prop.isCollection) {
-      return `Array<${type}>`;
+      return `Array<${editableType}>`;
     }
 
     // primitive, enum & complex types
-    return type + (prop.required ? "" : " | null");
+    return editableType + (prop.required ? "" : " | null");
   }
 
   private generateUnboundOperationParams() {
-    this.dataModel.getUnboundOperationTypes().forEach((operation) => {
-      this.generateOperationParams(operation);
+    return this.dataModel.getUnboundOperationTypes().map((operation) => {
+      const file = this.project.createOrGetModelFile(operation.folderPath, operation.paramsModelName);
+
+      this.generateOperationParams(file, operation);
+
+      return this.project.finalizeFile(file);
     });
   }
 
-  private generateBoundOperationParams(entityName: string) {
-    [
-      ...this.dataModel.getEntityTypeOperations(entityName),
-      ...this.dataModel.getEntitySetOperations(entityName),
-    ].forEach((operation) => {
-      this.generateOperationParams(operation);
-    });
-  }
-
-  private generateOperationParams(operation: OperationType) {
+  private generateOperationParams(file: FileHandler, operation: OperationType) {
     if (!operation.parameters.length) {
       return;
     }
-    this.sourceFile.addInterface({
+    file.getFile().addInterface({
       name: operation.paramsModelName,
       isExported: true,
       properties: operation.parameters.map((p) => {
         return {
           name: p.name,
-          type: this.getPropType(p),
+          type: this.getPropType(file.getImports(), p),
           hasQuestionToken: !p.required,
         };
       }),

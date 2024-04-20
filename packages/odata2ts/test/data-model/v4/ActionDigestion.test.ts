@@ -31,6 +31,7 @@ describe("Action Digestion Test", () => {
   test("Action: min case", async () => {
     const opName = "AddFriend";
     const expected: OperationType = {
+      folderPath: "action_test/add_friend",
       fqName: withNs(opName),
       odataName: opName,
       name: "addFriend",

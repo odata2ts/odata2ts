@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "classic",
+    "noEmit": true,
+    "rootDir": "XYZ",
+    "outDir": "./xyz",
+    "strict": false,
+    "noFallthroughCasesInSwitch": false,
+    "newLine": "crlf"
+  },
+  "exclude": ["node_modules"]
+}

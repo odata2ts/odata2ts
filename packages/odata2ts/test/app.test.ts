@@ -1,3 +1,6 @@
+const { MockConstructorSpy } = require("./MockConstructorSpy");
+const namingHelperSpy = MockConstructorSpy("../src/data-model/NamingHelper", "NamingHelper", false);
+
 import { EmitModes, Modes, RunOptions } from "../src";
 import { runApp } from "../src/app";
 import * as Generator from "../src/generator";
@@ -6,6 +9,7 @@ import { ODataModelBuilderV2 } from "./data-model/builder/v2/ODataModelBuilderV2
 import { ODataModelBuilderV4 } from "./data-model/builder/v4/ODataModelBuilderV4";
 import { getTestConfig } from "./test.config";
 
+// import {NamingHelper} from "../src/data-model/NamingHelper";
 jest.mock("fs-extra");
 jest.mock("ts-morph");
 jest.mock("../src/generator");
@@ -16,19 +20,11 @@ describe("App Test", () => {
   let runOptions: RunOptions;
   let odataBuilder: ODataModelBuilderV4;
   let createPmSpy: jest.SpyInstance;
-  let pmSpy: ProjectManager.ProjectManager;
   let logInfoSpy: jest.SpyInstance;
 
   beforeAll(async () => {
     // @ts-ignore
-    pmSpy = {
-      createModelFile: jest.fn(),
-      createQObjectFile: jest.fn(),
-      createMainServiceFile: jest.fn(),
-      writeFiles: jest.fn(),
-    };
-    // @ts-ignore
-    createPmSpy = jest.spyOn(ProjectManager, "createProjectManager").mockResolvedValue(pmSpy);
+    createPmSpy = jest.spyOn(ProjectManager, "createProjectManager").mockResolvedValue(jest.fn());
 
     logInfoSpy = jest.spyOn(console, "log").mockImplementation(jest.fn);
   });
@@ -64,9 +60,10 @@ describe("App Test", () => {
     await doRunApp();
 
     // then the schema with entity types is used
-    expect(createPmSpy.mock.calls[0][0]).toMatchObject({
-      service: `${newNs}Service`,
-    });
+    expect(namingHelperSpy).toHaveBeenCalledWith(runOptions, newNs, [
+      [SERVICE_NAME, undefined],
+      [newNs, undefined],
+    ]);
   });
 
   test("simple schema detection with changed order", async () => {
@@ -79,9 +76,10 @@ describe("App Test", () => {
     await doRunApp();
 
     // then the schema with entity types is used
-    expect(createPmSpy.mock.calls[0][0]).toMatchObject({
-      service: `${SERVICE_NAME}Service`,
-    });
+    expect(namingHelperSpy).toHaveBeenCalledWith(runOptions, SERVICE_NAME, [
+      [SERVICE_NAME, undefined],
+      [newNs, undefined],
+    ]);
   });
 
   test("simple schema detection with pascal case", async () => {
@@ -93,9 +91,10 @@ describe("App Test", () => {
     await doRunApp();
 
     // then the schema with entity types is used
-    expect(createPmSpy.mock.calls[0][0]).toMatchObject({
-      service: `${expected}Service`,
-    });
+    expect(namingHelperSpy).toHaveBeenCalledWith(runOptions, expected, [
+      [SERVICE_NAME, undefined],
+      [newNs, undefined],
+    ]);
   });
 
   test("with validation errors", async () => {
@@ -119,7 +118,23 @@ describe("App Test", () => {
   });
 
   test("with automatic name clash resolution", async () => {
-    runOptions.disableAutomaticNameClashResolution = false;
+    // same entity name across different namespaces
+    const newNs = "New";
+    odataBuilder
+      .addEntityType("Test", undefined, (builder) => builder.addKeyProp("id", "Edm.String"))
+      .addSchema(newNs)
+      .addEntityType("Test", undefined, (builder) => builder.addKeyProp("id", "Edm.String"));
+
+    await doRunApp();
+
+    expect(logInfoSpy).toHaveBeenNthCalledWith(
+      2,
+      "Duplicate name: Test - Fully Qualified Names: Tester.Test, New.Test (renamed to: Test2)"
+    );
+  });
+
+  test("App: no name clash resolution if not bundled", async () => {
+    runOptions.bundledFileGeneration = false;
 
     // same entity name across different namespaces
     const newNs = "New";
@@ -130,10 +145,8 @@ describe("App Test", () => {
 
     await doRunApp();
 
-    expect(logInfoSpy).toHaveBeenCalledTimes(2);
-    expect(logInfoSpy).toHaveBeenLastCalledWith(
-      "Duplicate name: Test - Fully Qualified Names: Tester.Test, New.Test (renamed to: Test2)"
-    );
+    expect(logInfoSpy).toHaveBeenNthCalledWith(1, "Successfully generated models!");
+    expect(logInfoSpy).toHaveBeenNthCalledWith(2, "Successfully finished!");
   });
 
   test("App: generate only models", async () => {
@@ -142,22 +155,18 @@ describe("App Test", () => {
     await doRunApp();
 
     // then project manager was called with our arguments
-    expect(createPmSpy.mock.calls[0][0]).toMatchObject({
-      model: "TesterModel",
-      qObject: "QTester",
-      service: "TesterService",
+    expect(createPmSpy.mock.calls[0][0]).toBe(runOptions.output);
+    expect(createPmSpy.mock.calls[0][1]).toBe(runOptions.emitMode);
+    expect(createPmSpy.mock.calls[0][4]).toStrictEqual({
+      usePrettier: false,
+      bundledFileGeneration: true,
+      tsConfigPath: "tsconfig.json",
     });
-    expect(createPmSpy.mock.calls[0][1]).toBe(runOptions.output);
-    expect(createPmSpy.mock.calls[0][2]).toBe(runOptions.emitMode);
-    expect(createPmSpy.mock.calls[0][3]).toBe(runOptions.prettier);
 
     // then only generateModels was called
     expect(Generator.generateModels).toHaveBeenCalled();
     expect(Generator.generateQueryObjects).not.toHaveBeenCalled();
     expect(Generator.generateServices).not.toHaveBeenCalled();
-
-    // then files should have been written
-    expect(pmSpy.writeFiles).toHaveBeenCalled();
   });
 
   test("App: generate also QObjects", async () => {
@@ -166,22 +175,25 @@ describe("App Test", () => {
     runOptions.output = "testing";
     runOptions.emitMode = EmitModes.js_dts;
     runOptions.prettier = true;
+    runOptions.bundledFileGeneration = false;
+    runOptions.tsconfig = "test.json";
 
     // when running the app
     await doRunApp();
 
     // then project manager was called with our arguments
-    expect(createPmSpy.mock.calls[0][1]).toBe("testing");
-    expect(createPmSpy.mock.calls[0][2]).toBe(EmitModes.js_dts);
-    expect(createPmSpy.mock.calls[0][3]).toBe(true);
+    expect(createPmSpy.mock.calls[0][0]).toBe("testing");
+    expect(createPmSpy.mock.calls[0][1]).toBe(EmitModes.js_dts);
+    expect(createPmSpy.mock.calls[0][4]).toStrictEqual({
+      usePrettier: true,
+      bundledFileGeneration: false,
+      tsConfigPath: "test.json",
+    });
 
     // then generateModels & generateQObjects was called
     expect(Generator.generateModels).toHaveBeenCalled();
     expect(Generator.generateQueryObjects).toHaveBeenCalled();
     expect(Generator.generateServices).not.toHaveBeenCalled();
-
-    // then files should have been written
-    expect(pmSpy.writeFiles).toHaveBeenCalled();
   });
 
   test("App: generate also services", async () => {
@@ -195,9 +207,6 @@ describe("App Test", () => {
     expect(Generator.generateModels).toHaveBeenCalled();
     expect(Generator.generateQueryObjects).toHaveBeenCalled();
     expect(Generator.generateServices).toHaveBeenCalled();
-
-    // then files should have been written
-    expect(pmSpy.writeFiles).toHaveBeenCalled();
   });
 
   test("App: generate services for V2", async () => {
@@ -212,9 +221,6 @@ describe("App Test", () => {
     expect(Generator.generateModels).toHaveBeenCalled();
     expect(Generator.generateQueryObjects).toHaveBeenCalled();
     expect(Generator.generateServices).toHaveBeenCalled();
-
-    // then files should have been written
-    expect(pmSpy.writeFiles).toHaveBeenCalled();
   });
 
   test("App: generate all", async () => {
@@ -228,8 +234,5 @@ describe("App Test", () => {
     expect(Generator.generateModels).toHaveBeenCalled();
     expect(Generator.generateQueryObjects).toHaveBeenCalled();
     expect(Generator.generateServices).toHaveBeenCalled();
-
-    // then files should have been written
-    expect(pmSpy.writeFiles).toHaveBeenCalled();
   });
 });

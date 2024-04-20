@@ -2,17 +2,21 @@ import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
 import {
+  QAbstractEntity,
   QExtendedFromAbstract,
   QExtendedFromAbstractId,
   QExtendedFromOpen,
   QExtendedFromOpenId,
   QOpenEntity,
+  qAbstractEntity,
   qExtendedFromAbstract,
   qExtendedFromOpen,
   qOpenEntity,
   // @ts-ignore
 } from "./QTester";
 import {
+  AbstractEntity,
+  EditableAbstractEntity,
   EditableExtendedFromAbstract,
   EditableExtendedFromOpen,
   EditableOpenEntity,
@@ -43,6 +47,17 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
     return typeof id === "undefined" || id === null
       ? new ExtendedFromOpenCollectionService(client, path, fieldName)
       : new ExtendedFromOpenService(client, path, new QExtendedFromOpenId(fieldName).buildUrl(id));
+  }
+}
+
+export class AbstractEntityService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
+  ClientType,
+  AbstractEntity,
+  EditableAbstractEntity,
+  QAbstractEntity
+> {
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qAbstractEntity);
   }
 }
 

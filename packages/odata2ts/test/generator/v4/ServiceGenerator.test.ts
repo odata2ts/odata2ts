@@ -9,7 +9,8 @@ import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { ProjectManager, createProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import { getTestConfig } from "../../test.config";
-import { ServiceFixtureComparatorHelper, createServiceHelper } from "../comparator/FixtureComparatorHelper";
+import { createServiceHelper } from "../comparator/FixtureComparatorHelper";
+import { ServiceFixtureComparatorHelper } from "../comparator/ServiceFixtureComparatorHelper";
 
 describe("Service Generator Tests V4", () => {
   const FIXTURE_PATH = "generator/service";
@@ -36,13 +37,24 @@ describe("Service Generator Tests V4", () => {
   async function doGenerate(options?: ConfigFileOptions) {
     runOptions = options ? deepmerge(runOptions, options) : runOptions;
     const namingHelper = new NamingHelper(runOptions, SERVICE_NAME);
-    projectManager = await createProjectManager(namingHelper.getFileNames(), "build", EmitModes.ts, true);
+    const dataModel = await fixtureComparatorHelper.createDataModel(
+      odataBuilder.getSchemas(),
+      namingHelper,
+      runOptions
+    );
+    projectManager = await createProjectManager("build", EmitModes.ts, namingHelper, dataModel, {
+      bundledFileGeneration: true,
+      noOutput: true,
+    });
 
-    await fixtureComparatorHelper.generateService(odataBuilder.getSchemas(), projectManager, namingHelper, runOptions);
+    await fixtureComparatorHelper.generateService(projectManager, namingHelper, runOptions);
   }
 
   async function compareMainService(fixture: string) {
-    await fixtureComparatorHelper.compareService("v4" + path.sep + fixture, projectManager.getMainServiceFile());
+    await fixtureComparatorHelper.compareService(
+      "v4" + path.sep + fixture,
+      projectManager.getMainServiceFile().getFile()
+    );
   }
 
   test("Service Generator: Min Case", async () => {
@@ -372,9 +384,7 @@ describe("Service Generator Tests V4", () => {
     // when generating
     await doGenerate();
 
-    // then we get no services for the abstract type but for all the others
-    // NOTE: when the baseType is not used directly its useless => see the generated OpenEntityService
-    // NOTE: it's irrelevant that the OpenEntityService has no keys defined as long as it's not referenced via EntitySet or NavProp
+    // then we get services for all types including abstract and open
     await compareMainService("abstract-and-open-types.ts");
   });
 

@@ -34,9 +34,17 @@ export interface PropertyModel {
   managed?: boolean;
 }
 
-export interface ModelType extends ComplexType {
-  idModelName: string;
-  qIdFunctionName: string;
+export type ModelType = EntityType | ComplexType | EnumType;
+
+export interface EntityType extends ComplexType {
+  id: {
+    // fully qualified name of entity to which this id belongs (might have been inherited)
+    fqName: string;
+    // that's the name of the param model for the id function
+    modelName: string;
+    // that's the name of the id function which is a q-object
+    qName: string;
+  };
   generateId: boolean;
   keyNames: Array<string>;
   keys: Array<PropertyModel>;
@@ -48,8 +56,12 @@ export interface ComplexType {
   fqName: string;
   odataName: string;
   name: string;
+  modelName: string;
   editableName: string;
   qName: string;
+  serviceName: string;
+  serviceCollectionName: string;
+  folderPath: string;
   props: Array<PropertyModel>;
   baseProps: Array<PropertyModel>;
   baseClasses: Array<string>;
@@ -60,9 +72,11 @@ export interface ComplexType {
 
 export interface EnumType {
   dataType: DataTypes;
-  fqName: string;
   odataName: string;
+  fqName: string;
   name: string;
+  modelName: string;
+  folderPath: string;
   members: Array<string>;
 }
 
@@ -70,8 +84,9 @@ export interface OperationType {
   fqName: string;
   odataName: string;
   name: string;
-  paramsModelName: string;
   qName: string;
+  paramsModelName: string;
+  folderPath: string;
   type: OperationTypes;
   parameters: Array<PropertyModel>;
   returnType?: ReturnTypeModel;
@@ -91,7 +106,7 @@ export interface SingletonType {
   fqName: string;
   odataName: string;
   name: string;
-  entityType: ModelType;
+  entityType: EntityType;
   navPropBinding?: Array<NavPropBindingType>;
 }
 
@@ -99,7 +114,7 @@ export interface EntitySetType {
   fqName: string;
   odataName: string;
   name: string;
-  entityType: ModelType;
+  entityType: EntityType;
   navPropBinding?: Array<NavPropBindingType>;
 }
 

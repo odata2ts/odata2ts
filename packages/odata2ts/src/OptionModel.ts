@@ -254,6 +254,15 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * Set this property to true in order to disable this automatism.
    */
   disableAutomaticNameClashResolution?: boolean;
+  /**
+   * By default, odata2ts generates a folder structure with individual files per entity.
+   * This allows for handling and scaling the generation process for large data structures.
+   *
+   * However, especially UI5 has problems with recursive structures, which are absolutely valid within
+   * OData. Here the solution is to generate only one file per type to circumvent cyclic imports.
+   * To enable this behaviour set this option to true.
+   */
+  bundledFileGeneration?: boolean;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { ODataVersions } from "@odata2ts/odata-core";
+import { ODataTypesV2, ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
 import { ComplexType, EntityType, ODataEdmxModelBase, Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
 import { ODataComplexTypeBuilderBase } from "./ODataComplexTypeBuilderBase";
@@ -92,6 +92,21 @@ export abstract class ODataModelBuilder<
     }
     // @ts-ignore
     return this.currentSchema.EntityContainer[0];
+  }
+
+  public addTypeDefinition(typeName: string, odataType: ODataTypesV4 | ODataTypesV2) {
+    if (!this.currentSchema.TypeDefinition) {
+      this.currentSchema.TypeDefinition = [];
+    }
+
+    this.currentSchema.TypeDefinition.push({
+      $: {
+        Name: typeName,
+        UnderlyingType: odataType,
+      },
+    });
+
+    return this;
   }
 
   public addEnumType(name: string, values: Array<{ name: string; value: number }>) {

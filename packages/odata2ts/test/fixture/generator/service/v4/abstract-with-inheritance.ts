@@ -2,9 +2,15 @@ import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QAbstractEntityId, QTestEntity, qTestEntity } from "./QTester";
-// @ts-ignore
-import { AbstractEntityId, EditableTestEntity, TestEntity } from "./TesterModel";
+import { QAbstractEntity, QAbstractEntityId, QTestEntity, qAbstractEntity, qTestEntity } from "./QTester";
+import {
+  AbstractEntity,
+  AbstractEntityId,
+  EditableAbstractEntity,
+  EditableTestEntity,
+  TestEntity,
+  // @ts-ignore
+} from "./TesterModel";
 
 export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   public testing(): TestEntityCollectionService<ClientType>;
@@ -15,6 +21,29 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
     return typeof id === "undefined" || id === null
       ? new TestEntityCollectionService(client, path, fieldName)
       : new TestEntityService(client, path, new QAbstractEntityId(fieldName).buildUrl(id));
+  }
+}
+
+export class AbstractEntityService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
+  ClientType,
+  AbstractEntity,
+  EditableAbstractEntity,
+  QAbstractEntity
+> {
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qAbstractEntity);
+  }
+}
+
+export class AbstractEntityCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
+  ClientType,
+  AbstractEntity,
+  EditableAbstractEntity,
+  QAbstractEntity,
+  AbstractEntityId
+> {
+  constructor(client: ClientType, basePath: string, name: string) {
+    super(client, basePath, name, qAbstractEntity, new QAbstractEntityId(name));
   }
 }
 

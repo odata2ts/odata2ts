@@ -4,7 +4,7 @@ import { pascalCase } from "pascal-case";
 import { NamespaceWithAlias } from "./data-model/DataModel";
 import { digest as digestV2 } from "./data-model/DataModelDigestionV2";
 import { digest as digestV4 } from "./data-model/DataModelDigestionV4";
-import { ODataEdmxModelBase, Schema } from "./data-model/edmx/ODataEdmxModelBase";
+import { ODataEdmxModelBase } from "./data-model/edmx/ODataEdmxModelBase";
 import { SchemaV3 } from "./data-model/edmx/ODataEdmxModelV3";
 import { SchemaV4 } from "./data-model/edmx/ODataEdmxModelV4";
 import { NamingHelper } from "./data-model/NamingHelper";
@@ -76,31 +76,35 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   }
 
   // handling the overall generation project
-  const project = await createProjectManager(
-    namingHelper.getFileNames(),
-    options.output,
-    options.emitMode,
-    options.prettier,
-    options.tsconfig
-  );
+  const project = await createProjectManager(options.output, options.emitMode, namingHelper, dataModel, {
+    usePrettier: options.prettier,
+    tsConfigPath: options.tsconfig,
+    bundledFileGeneration: options.bundledFileGeneration,
+  });
 
+  // const promises: Array<Promise<void>> = [
   // Generate Model Interfaces
-  // supported edmx types: EntityType, ComplexType, EnumType
-  const modelsFile = await project.createModelFile();
-  generateModels(dataModel, modelsFile, version, options, namingHelper);
+  // generateModels(project, dataModel, version, options, namingHelper),
+  // ];
+  await generateModels(project, dataModel, version, options, namingHelper);
+  console.log("Successfully generated models!");
 
   // Generate Query Objects
   // supported edmx types: EntityType, ComplexType
   // supported edmx prop types: primitive types, enum types, primitive collection (incl enum types), entity collection, entity object, complex object
   if (isQObjectGen(options.mode)) {
-    const qFile = await project.createQObjectFile();
-    generateQueryObjects(dataModel, qFile, version, options, namingHelper);
+    // promises.push(generateQueryObjects(project, dataModel, version, options, namingHelper));
+    await generateQueryObjects(project, dataModel, version, options, namingHelper);
+    console.log("Successfully generated q-objects!");
   }
 
   // Generate Individual OData-Service
   if (isServiceGen(options.mode)) {
-    await generateServices(dataModel, project, version, namingHelper, options);
+    // promises.push(generateServices(project, dataModel, version, namingHelper, options));
+    await generateServices(project, dataModel, version, namingHelper, options);
+    console.log("Successfully generated services!");
   }
 
-  await project.writeFiles();
+  // await Promise.all(promises);
+  console.log("Successfully finished!");
 }

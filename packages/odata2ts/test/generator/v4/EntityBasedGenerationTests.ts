@@ -22,6 +22,7 @@ const USE_ID_AND_EDITABLE_MODEL: ConfigFileOptions = {
 export function createEntityBasedGenerationTests(
   testSuiteName: string,
   fixtureBasePath: string,
+  generatedFileName: string,
   generate: EntityBasedGeneratorFunctionWithoutVersion
 ) {
   let odataBuilder: ODataModelBuilderV4;
@@ -40,7 +41,12 @@ export function createEntityBasedGenerationTests(
   });
 
   async function generateAndCompare(id: string, fixturePath: string, genOptions?: TestOptions) {
-    await fixtureComparatorHelper.generateAndCompare(id, fixturePath, odataBuilder.getSchemas(), genOptions);
+    await fixtureComparatorHelper.generateAndCompare(
+      generatedFileName,
+      fixturePath,
+      odataBuilder.getSchemas(),
+      genOptions
+    );
   }
 
   test(`${testSuiteName}: one enum type`, async () => {

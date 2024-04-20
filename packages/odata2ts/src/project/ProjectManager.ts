@@ -1,206 +1,250 @@
-import { writeFile } from "fs/promises";
 import * as path from "path";
 
-import { remove } from "fs-extra";
-import {
-  CompilerOptions,
-  ModuleKind,
-  ModuleResolutionKind,
-  NewLineKind,
-  Project,
-  ScriptTarget,
-  SourceFile,
-} from "ts-morph";
-import load from "tsconfig-loader";
-import ts from "typescript";
+import { ensureDir } from "fs-extra";
+import { CompilerOptions, Project, SourceFile } from "ts-morph";
+import { firstCharLowerCase } from "xml2js/lib/processors";
 
-import { ProjectFiles } from "../data-model/DataModel";
+import { DataModel } from "../data-model/DataModel";
+import { EntityType } from "../data-model/DataTypeModel";
+import { NamingHelper } from "../data-model/NamingHelper";
 import { EmitModes } from "../OptionModel";
+import { FileHandler } from "./FileHandler";
 import { createFormatter } from "./formatter";
 import { FileFormatter } from "./formatter/FileFormatter";
+import { loadTsMorphCompilerOptions } from "./TsMorphHelper";
+
+export interface ProjectManagerOptions {
+  usePrettier?: boolean;
+  tsConfigPath?: string;
+  bundledFileGeneration?: boolean;
+  /**
+   * for testing purposes, turn this on and retrieve all generated files via getCachedFiles
+   */
+  noOutput?: boolean;
+}
 
 export async function createProjectManager(
-  projectFiles: ProjectFiles,
   outputDir: string,
   emitMode: EmitModes,
-  usePrettier: boolean,
-  tsConfigPath: string = "tsconfig.json"
+  namingHelper: NamingHelper,
+  dataModel: DataModel,
+  options: ProjectManagerOptions
 ): Promise<ProjectManager> {
-  const generateDeclarations = EmitModes.js_dts === emitMode || EmitModes.dts === emitMode;
-  const conf = load({ filename: tsConfigPath });
-  const formatter = await createFormatter(outputDir, usePrettier);
+  const { usePrettier = false, tsConfigPath = "tsconfig.json" } = options;
+  const formatter = usePrettier ? await createFormatter(outputDir, usePrettier) : undefined;
 
-  const {
-    // ignored props
-    noEmit, // we always want to emit
-    importsNotUsedAsValues, // type is missing
-    jsx,
-    plugins,
-    // mapped props
-    moduleResolution,
-    lib,
-    module,
-    newLine,
-    target,
-    rootDir,
-    rootDirs,
-    ...passThrough
-  } = conf?.tsConfig.compilerOptions || {};
+  const compilerOpts: CompilerOptions = await loadTsMorphCompilerOptions(tsConfigPath, emitMode, outputDir);
 
-  const compilerOpts: CompilerOptions = {
-    ...passThrough,
-    outDir: outputDir,
-    declaration: generateDeclarations,
-    moduleResolution: getModuleResolutionKind(moduleResolution),
-    module: getModuleKind(module),
-    target: getTarget(target),
-    lib: lib as string[],
-    newLine:
-      newLine?.toLowerCase() === "crlf"
-        ? NewLineKind.CarriageReturnLineFeed
-        : newLine?.toLowerCase() === "lf"
-        ? NewLineKind.LineFeed
-        : undefined,
-  };
+  const pm = new ProjectManager(outputDir, emitMode, namingHelper, dataModel, formatter, compilerOpts, {
+    usePrettier,
+    tsConfigPath,
+    ...options,
+  });
 
-  return new ProjectManager(projectFiles, outputDir, emitMode, formatter, compilerOpts);
-}
+  await pm.init();
 
-function getModuleResolutionKind(
-  moduleResolution: string | undefined | Record<string, any>
-): ModuleResolutionKind | undefined {
-  const modRes =
-    typeof moduleResolution === "string"
-      ? moduleResolution.toLowerCase() === "node"
-        ? "nodejs"
-        : moduleResolution.toLowerCase()
-      : undefined;
-  const matchedKey = Object.keys(ts.ModuleResolutionKind).find(
-    (mk): mk is keyof typeof ModuleResolutionKind => mk.toLowerCase() === modRes
-  );
-  return matchedKey ? (ts.ModuleResolutionKind[matchedKey] as ModuleResolutionKind) : undefined;
-}
-
-function getModuleKind(module: string | undefined | Record<string, any>): ModuleKind | undefined {
-  const mod = typeof module === "string" ? module.toLowerCase() : undefined;
-  const matchedKey = Object.keys(ts.ModuleKind).find((mk): mk is keyof typeof ModuleKind => mk.toLowerCase() === mod);
-  return matchedKey ? (ts.ModuleKind[matchedKey] as ModuleKind) : undefined;
-}
-
-function getTarget(target: string | undefined | Record<string, any>): ScriptTarget | undefined {
-  const t = typeof target === "string" ? target.toLowerCase() : undefined;
-  const matchedKey = Object.keys(ts.ScriptTarget).find((st): st is keyof typeof ScriptTarget => st.toLowerCase() === t);
-  return matchedKey ? (ts.ScriptTarget[matchedKey] as ScriptTarget) : undefined;
+  return pm;
 }
 
 export class ProjectManager {
   private project!: Project;
 
-  private files: { [name: string]: SourceFile } = {};
+  private mainServiceFile: FileHandler | undefined;
+  private bundledModelFile: FileHandler | undefined;
+  private bundledQFile: FileHandler | undefined;
+
+  private readonly cachedFiles: Map<string, SourceFile> | undefined;
 
   constructor(
-    private projectFiles: ProjectFiles,
-    private outputDir: string,
-    private emitMode: EmitModes,
-    private formatter: FileFormatter,
-    compilerOptions: CompilerOptions | undefined
+    protected outputDir: string,
+    protected emitMode: EmitModes,
+    protected namingHelper: NamingHelper,
+    protected dataModel: DataModel,
+    protected formatter: FileFormatter | undefined,
+    compilerOptions: CompilerOptions | undefined,
+    protected options: ProjectManagerOptions
   ) {
     // Create ts-morph project
     this.project = new Project({
-      manipulationSettings: this.formatter.getSettings(),
+      // manipulationSettings: this.formatter.getSettings(),
       skipAddingFilesFromTsConfig: true,
       compilerOptions,
     });
+
+    if (options.noOutput) {
+      this.cachedFiles = new Map();
+    }
   }
 
-  private async createFile(name: string) {
-    const fileName = path.join(this.outputDir, `${name}.ts`);
-    await remove(fileName);
-    return this.project.createSourceFile(fileName);
+  public getDataModel() {
+    return this.dataModel;
   }
 
-  public async createModelFile() {
-    this.files.model = await this.createFile(this.projectFiles.model);
-    return this.getModelFile();
+  /**
+   * Only filled when noOutput=true
+   */
+  public getCachedFiles() {
+    return this.cachedFiles!;
   }
 
-  public getModelFile() {
-    return this.files.model;
+  private async writeFile(fileHandler: FileHandler) {
+    if (this.options.noOutput) {
+      fileHandler.getFile().addImportDeclarations(fileHandler.getImports().getImportDeclarations());
+      this.cachedFiles!.set(fileHandler.getFullFilePath(), fileHandler.getFile());
+      return;
+    }
+
+    return fileHandler.write(this.emitMode);
   }
 
-  public async createQObjectFile() {
-    this.files.qobject = await this.createFile(this.projectFiles.qObject);
-    return this.getQObjectFile();
+  private createFile(
+    name: string,
+    reservedNames?: Array<string> | undefined,
+    additionalPath: string = ""
+  ): FileHandler {
+    const fileName = path.join(this.outputDir, additionalPath, `${name}.ts`);
+
+    return new FileHandler(
+      additionalPath,
+      name,
+      this.project.createSourceFile(fileName),
+      this.dataModel,
+      this.formatter,
+      reservedNames,
+      this.options.bundledFileGeneration ? this.namingHelper.getFileNames() : undefined
+    );
   }
 
-  public getQObjectFile() {
-    return this.files.qobject;
+  public async init() {
+    if (!this.options.bundledFileGeneration) {
+      // ensure folder for each model: we do this at this point for performance reasons
+      await Promise.all(
+        this.dataModel.getModelTypes().map((mt) => {
+          ensureDir(path.join(this.outputDir, mt.folderPath));
+        })
+      );
+    }
+
+    const typePart = this.emitMode.toUpperCase().replace("_", " & ");
+    console.log(`Prepared to emit ${typePart} files.`);
   }
 
-  public async createMainServiceFile() {
-    this.files.mainService = await this.createFile(this.projectFiles.service);
-    return this.getMainServiceFile();
+  public initModels() {
+    if (this.options.bundledFileGeneration) {
+      // collect reserved names, that is names of classes we're going to create => imports must take them into account
+      const reservedWords = this.dataModel.getModelTypes().reduce<Array<string>>((collector, model) => {
+        const asEntityType = model as EntityType;
+        collector.push(model.modelName);
+        if (asEntityType.editableName) {
+          collector.push(asEntityType.editableName);
+        }
+        if (asEntityType.id?.modelName) {
+          collector.push(asEntityType.id.modelName);
+        }
+        this.dataModel.getAllEntityOperations(model.fqName).forEach((op) => {
+          if (op.parameters.length) {
+            collector.push(op.paramsModelName);
+          }
+        });
+
+        return collector;
+      }, []);
+      this.dataModel.getUnboundOperationTypes().forEach((op) => {
+        if (op.parameters.length) {
+          reservedWords.push(op.paramsModelName);
+        }
+      });
+
+      this.bundledModelFile = this.createFile(this.namingHelper.getFileNames().model, reservedWords);
+    }
+  }
+
+  public async finalizeModels() {
+    if (this.bundledModelFile) {
+      await this.writeFile(this.bundledModelFile);
+    }
+  }
+
+  public initQObjects() {
+    if (this.options.bundledFileGeneration) {
+      // collect reserved names, that is names of classes we're going to create => imports must take them into account
+      const reservedWords = this.dataModel.getModelTypes().reduce<Array<string>>((collector, model) => {
+        const asEntityType = model as EntityType;
+        if (asEntityType.qName) {
+          collector.push(asEntityType.qName, firstCharLowerCase(asEntityType.qName));
+        }
+        if (asEntityType.id?.qName) {
+          collector.push(asEntityType.id.qName);
+        }
+        this.dataModel.getAllEntityOperations(model.fqName).forEach((op) => {
+          collector.push(op.qName);
+        });
+
+        return collector;
+      }, []);
+      this.dataModel.getUnboundOperationTypes().forEach((op) => {
+        reservedWords.push(op.qName);
+      });
+
+      this.bundledQFile = this.createFile(this.namingHelper.getFileNames().qObject, reservedWords);
+    }
+  }
+
+  public async finalizeQObjects() {
+    if (this.bundledQFile) {
+      await this.writeFile(this.bundledQFile);
+    }
+  }
+
+  public initServices() {
+    const mainServiceName = this.namingHelper.getMainServiceName();
+    const reservedNames = [mainServiceName];
+
+    if (this.options.bundledFileGeneration) {
+      [...this.dataModel.getEntityTypes(), ...this.dataModel.getComplexTypes()].reduce((collector, model) => {
+        collector.push(model.serviceName, model.serviceCollectionName);
+        return collector;
+      }, reservedNames);
+    }
+
+    this.mainServiceFile = this.createFile(mainServiceName, reservedNames);
+  }
+
+  public async finalizeServices() {
+    if (this.mainServiceFile) {
+      await this.writeFile(this.mainServiceFile);
+    }
   }
 
   public getMainServiceFile() {
-    return this.files.mainService;
+    return this.mainServiceFile!;
   }
 
-  public async writeFiles() {
-    switch (this.emitMode) {
-      case EmitModes.js:
-      case EmitModes.js_dts:
-        await this.emitJsFiles();
-        break;
-      case EmitModes.dts:
-        await this.emitJsFiles(true);
-        break;
-      case EmitModes.ts:
-        await this.emitTsFiles();
-        break;
-      default:
-        throw new Error(`Emit mode "${this.emitMode}" is invalid!`);
+  public createOrGetModelFile(folderPath: string, name: string, reservedNames?: Array<string> | undefined) {
+    if (this.bundledModelFile) {
+      return this.bundledModelFile;
+    }
+
+    return this.createFile(name, reservedNames, folderPath);
+  }
+  public createOrGetQObjectFile(folderPath: string, name: string, reservedNames?: Array<string> | undefined) {
+    if (this.bundledQFile) {
+      return this.bundledQFile;
+    }
+
+    return this.createFile(name, reservedNames, folderPath);
+  }
+  public createOrGetServiceFile(folderPath: string, name: string, reservedNames?: Array<string> | undefined) {
+    if (this.options.bundledFileGeneration) {
+      return this.mainServiceFile!;
+    }
+
+    return this.createFile(name, reservedNames, folderPath);
+  }
+
+  public async finalizeFile(file: FileHandler) {
+    if (!this.options.bundledFileGeneration) {
+      await this.writeFile(file);
     }
   }
-
-  private async emitJsFiles(declarationOnly?: boolean) {
-    console.log(
-      declarationOnly
-        ? "Emitting declaration files"
-        : `Emitting JS files (${this.emitMode === EmitModes.js_dts ? "including" : "without"} declaration files)`
-    );
-
-    await this.project.emit({ emitOnlyDtsFiles: !!declarationOnly });
-
-    /* for (const diagnostic of this.project.getPreEmitDiagnostics()) {
-      console.log(diagnostic.getMessageText());
-    } */
-  }
-
-  private async emitTsFiles() {
-    const files = [this.getModelFile(), this.getQObjectFile(), this.getMainServiceFile()].filter((file) => !!file);
-    const text = files.length === 1 ? "Emitting 1 TS file" : `Emitting ${files.length} TS files`;
-    console.log(`${text}: ${files.map((f) => path.basename(f.getFilePath())).join(", ")}`);
-    return Promise.all(files.map(this.formatAndWriteFile));
-  }
-
-  private formatAndWriteFile = async (file: SourceFile) => {
-    const fileName = file.getFilePath();
-    const content = file.getFullText();
-
-    try {
-      const formatted = await this.formatter.format(content);
-
-      try {
-        return writeFile(fileName, formatted);
-      } catch (writeError) {
-        console.error(`Failed to write file [/${fileName}]`, writeError);
-        process.exit(3);
-      }
-    } catch (formattingError) {
-      console.error("Formatting failed", formattingError);
-      await writeFile("error.log", formattingError?.toString() || "no error message!");
-      process.exit(99);
-    }
-  };
 }
