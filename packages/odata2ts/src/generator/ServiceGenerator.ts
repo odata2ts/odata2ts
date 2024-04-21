@@ -106,8 +106,6 @@ class ServiceGenerator {
       properties,
       methods,
     });
-
-    return this.project.finalizeFile(mainServiceFile);
   }
 
   private generateMainServiceProperties(
