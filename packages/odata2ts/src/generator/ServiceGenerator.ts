@@ -73,7 +73,7 @@ class ServiceGenerator {
     return this.project.finalizeServices();
   }
 
-  private generateMainService(mainServiceName: string) {
+  private async generateMainService(mainServiceName: string) {
     const mainServiceFile = this.project.getMainServiceFile();
     const importContainer = mainServiceFile.getImports();
     const container = this.dataModel.getEntityContainer();
@@ -409,18 +409,16 @@ class ServiceGenerator {
     const model = this.dataModel.getModel(prop.fqType) as ComplexType;
     const isComplexCollection = prop.isCollection && model.dataType === DataTypes.ComplexType;
 
-    const modelName = imports.addGeneratedModel(model.fqName, model.modelName);
-    const editableModelName = imports.addGeneratedModel(model.fqName, model.editableName);
-    const qModelName = imports.addGeneratedQObject(model.fqName, model.qName);
-    const qInstanceName = imports.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName));
-
     const type = isComplexCollection
       ? imports.addServiceObject(this.version, ServiceImports.CollectionService)[0]
       : prop.isCollection
       ? model.serviceCollectionName
       : model.serviceName;
     const typeWithGenerics = isComplexCollection
-      ? `${type}<ClientType, ${modelName}, ${qModelName}, ${editableModelName}>`
+      ? `${type}<ClientType, ${imports.addGeneratedModel(model.fqName, model.modelName)}, ${imports.addGeneratedQObject(
+          model.fqName,
+          model.qName
+        )}, ${imports.addGeneratedModel(model.fqName, model.editableName)}>`
       : `${type}<ClientType>`;
 
     const privateSrvProp = "this." + this.namingHelper.getPrivatePropName(prop.name);
@@ -433,7 +431,7 @@ class ServiceGenerator {
         `if(!${privateSrvProp}) {`,
         `  const { client, path } = this.__base;`,
         // prettier-ignore
-        `  ${privateSrvProp} = new ${type}(client, path, "${prop.odataName}"${isComplexCollection ? `, ${qInstanceName}`: ""})`,
+        `  ${privateSrvProp} = new ${type}(client, path, "${prop.odataName}"${isComplexCollection ? `, ${imports.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName))}`: ""})`,
         "}",
         `return ${privateSrvProp}`,
       ],
