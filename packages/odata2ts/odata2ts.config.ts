@@ -20,6 +20,7 @@ const config: ConfigFileOptions = {
     vanilla: {
       source: "int-test/fixture/v4/trippin.xml",
       output: "build/v4/vanilla",
+      bundledFileGeneration: false,
     },
     trippin: {
       sourceUrl: "https://services.odata.org/TripPinRESTierService/$metadata",
@@ -62,18 +63,6 @@ const config: ConfigFileOptions = {
           keys: ["UserName"],
         },
       ],
-      /*entitiesByName: [
-        {
-          name: "Product",
-          mappedName: "prod666uct",
-          properties: [
-            {
-              name: "ReleaseDate",
-              mappedName: "released",
-            },
-          ],
-        },
-      ],*/
     },
     nw2: {
       source: "int-test/fixture/v2/northwind.xml",

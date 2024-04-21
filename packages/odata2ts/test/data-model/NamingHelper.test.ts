@@ -430,4 +430,17 @@ describe("NamingHelper Tests", function () {
 
     expect(toTest.getPrivatePropName("test")).toBe("PRE_TEST_SUF");
   });
+
+  test("getNameAndServicePrefix", () => {
+    const name = "XyZ";
+    const fqName = `${NAMESPACE}.${name}`;
+    createHelper();
+
+    // with namespace
+    expect(toTest.getNameAndServicePrefix(fqName)).toStrictEqual([name, NAMESPACE]);
+    // without namespace
+    expect(toTest.getNameAndServicePrefix(name)).toStrictEqual([name, undefined]);
+    // unknown namespace
+    expect(toTest.getNameAndServicePrefix(`ABC.${name}`)).toStrictEqual([`ABC.${name}`, undefined]);
+  });
 });
