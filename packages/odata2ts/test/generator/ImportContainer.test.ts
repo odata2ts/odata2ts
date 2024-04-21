@@ -72,7 +72,7 @@ describe("ImportContainer tests", function () {
     await createImportContainer();
 
     const importedNames = importContainer.addClientApi(
-      ClientApiImports.ODataResponse,
+      ClientApiImports.HttpResponseModel,
       ClientApiImports.ODataHttpClient
     );
 
@@ -82,7 +82,7 @@ describe("ImportContainer tests", function () {
     expect(importDecls[0]).toStrictEqual({
       moduleSpecifier: API,
       namedImports: [
-        { name: "ODataResponse", alias: undefined },
+        { name: "HttpResponseModel", alias: undefined },
         { name: "ODataHttpClient", alias: undefined },
       ],
     });

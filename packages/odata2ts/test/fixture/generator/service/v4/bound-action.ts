@@ -1,4 +1,4 @@
-import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
+import { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
@@ -22,7 +22,9 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
     super(client, basePath, name, qBook);
   }
 
-  public async like(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<ODataModelResponseV4<void>> {
+  public async like(
+    requestConfig?: ODataHttpClientConfig<ClientType>
+  ): Promise<HttpResponseModel<ODataModelResponseV4<void>>> {
     if (!this._bookQLike) {
       this._bookQLike = new Book_QLike();
     }
@@ -35,7 +37,7 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
   public async rate(
     params: Book_RateParams,
     requestConfig?: ODataHttpClientConfig<ClientType>
-  ): ODataResponse<ODataModelResponseV4<Rating>> {
+  ): Promise<HttpResponseModel<ODataModelResponseV4<Rating>>> {
     if (!this._bookQRate) {
       this._bookQRate = new Book_QRate();
     }
@@ -68,7 +70,7 @@ export class BookCollectionService<ClientType extends ODataHttpClient> extends E
   public async ratings(
     params: Book_RatingsParams,
     requestConfig?: ODataHttpClientConfig<ClientType>
-  ): ODataResponse<ODataCollectionResponseV4<Rating>> {
+  ): Promise<HttpResponseModel<ODataCollectionResponseV4<Rating>>> {
     if (!this._bookQRatings) {
       this._bookQRatings = new Book_QRatings();
     }
