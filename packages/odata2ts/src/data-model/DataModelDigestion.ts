@@ -375,7 +375,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     }
 
     const configProp = this.serviceConfigHelper.findPropConfigByName(p.$.Name);
-    const name = this.namingHelper.getModelPropName(entityPropConfig?.mappedName || configProp?.mappedName || p.$.Name);
+    const modelName = this.namingHelper.getModelPropName(
+      entityPropConfig?.mappedName || configProp?.mappedName || p.$.Name
+    );
     const isCollection = !!p.$.Type.match(/^Collection\(/);
     let dataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
 
@@ -452,7 +454,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     return {
       odataName: p.$.Name,
-      name,
+      name: modelName,
       odataType: p.$.Type,
       fqType: dataType,
       required: ifFalse(p.$.Nullable),

@@ -109,7 +109,7 @@ export class NamingHelper {
   public getNameAndServicePrefix(token: string): [string, string | undefined] {
     const prefix = this.namespacePrefixes.find((prefix) => token.startsWith(prefix));
     const name = prefix ? token.replace(prefix, "") : token;
-    return [name, prefix];
+    return [name, prefix?.substring(0, prefix?.length - 1)];
   }
 
   private namingFunction(strategy: NamingStrategies | undefined) {
