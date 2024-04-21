@@ -15,11 +15,19 @@ export class FileHandler {
     public readonly fileName: string,
     protected readonly file: SourceFile,
     dataModel: DataModel,
+    protected mainFileNames: { model: string; qObject: string; service: string },
+    protected bundledFileGeneration: boolean,
     protected formatter: FileFormatter | undefined,
-    reservedNames: Array<string> | undefined,
-    protected bundleFileNames: { model: string; qObject: string; service: string } | undefined
+    reservedNames: Array<string> | undefined
   ) {
-    this.importContainer = new ImportContainer(path, fileName, dataModel, reservedNames, bundleFileNames);
+    this.importContainer = new ImportContainer(
+      path,
+      fileName,
+      dataModel,
+      mainFileNames,
+      bundledFileGeneration,
+      reservedNames
+    );
   }
 
   public getFullFilePath() {

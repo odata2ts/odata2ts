@@ -86,7 +86,6 @@ export interface OperationType {
   name: string;
   qName: string;
   paramsModelName: string;
-  folderPath: string;
   type: OperationTypes;
   parameters: Array<PropertyModel>;
   returnType?: ReturnTypeModel;

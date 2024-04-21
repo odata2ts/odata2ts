@@ -40,7 +40,6 @@ describe("Function Digestion Test", () => {
     const fqName = withEc(name);
     const expected: OperationType = {
       fqName,
-      folderPath: `ENTITY_CONTAINER/${name}`,
       odataName: name,
       name: "getBestFriend",
       qName: "QGetBestFriend",
@@ -163,7 +162,6 @@ describe("Function Digestion Test", () => {
     expect(result.getUnboundOperationTypes()).toStrictEqual([
       {
         fqName: withEc("GetBestFriend"),
-        folderPath: "ENTITY_CONTAINER/GetBestFriend",
         odataName: "GetBestFriend",
         name: "getBestFriend",
         qName: "QGetBestFriend",
