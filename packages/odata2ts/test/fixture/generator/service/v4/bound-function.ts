@@ -1,4 +1,4 @@
-import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
+import { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
@@ -23,7 +23,7 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
 
   public async bestReview(
     requestConfig?: ODataHttpClientConfig<ClientType>
-  ): ODataResponse<ODataModelResponseV4<Review>> {
+  ): Promise<HttpResponseModel<ODataModelResponseV4<Review>>> {
     if (!this._bookQBestReview) {
       this._bookQBestReview = new Book_QBestReview();
     }
@@ -51,7 +51,7 @@ export class BookCollectionService<ClientType extends ODataHttpClient> extends E
   public async filterReviews(
     params: Book_FilterReviewsParams,
     requestConfig?: ODataHttpClientConfig<ClientType>
-  ): ODataResponse<ODataCollectionResponseV4<Review>> {
+  ): Promise<HttpResponseModel<ODataCollectionResponseV4<Review>>> {
     if (!this._bookQFilterReviews) {
       this._bookQFilterReviews = new Book_QFilterReviews();
     }

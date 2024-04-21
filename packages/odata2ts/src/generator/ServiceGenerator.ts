@@ -571,7 +571,7 @@ class ServiceGenerator {
     // importing dependencies
     const [httpClientConfigModel, odataResponse] = importContainer.addClientApi(
       ClientApiImports.ODataHttpClientConfig,
-      ClientApiImports.ODataResponse
+      ClientApiImports.HttpResponseModel
     );
     const responseStructure = this.importReturnType(importContainer, returnType);
     const qOperationName = importContainer.addGeneratedQObject(baseFqName, operation.qName);
@@ -595,7 +595,7 @@ class ServiceGenerator {
       isAsync: true,
       name,
       parameters: hasParams ? [{ name: "params", type: paramsModelName }, requestConfigParam] : [requestConfigParam],
-      returnType: `${odataResponse}<${responseStructure}<${rtType || "void"}>>`,
+      returnType: `Promise<${odataResponse}<${responseStructure}<${rtType || "void"}>>>`,
       statements: [
         `if(!${qOpProp}) {`,
         `  ${qOpProp} = new ${qOperationName}()`,
