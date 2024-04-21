@@ -100,7 +100,6 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
         this.dataModel.addUnboundOperationType(ecName, {
           fqName,
           odataName,
-          folderPath: `${ecName}/${opName}`,
           name,
           paramsModelName: this.namingHelper.getOperationParamsModelName(opName),
           qName: this.namingHelper.getQFunctionName(opName),

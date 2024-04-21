@@ -139,7 +139,7 @@ class ServiceGenerator {
       }
 
       result.properties.push(this.generateQOperationProp(op));
-      result.methods.push(this.generateMethod(name, op, importContainer, op.fqName));
+      result.methods.push(this.generateMethod(name, op, importContainer, ""));
     });
 
     return result;

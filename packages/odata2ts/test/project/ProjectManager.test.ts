@@ -41,7 +41,7 @@ describe("ProjectManager Test", () => {
   const SERVICE_NAME = "Tester";
   const ENTITY_FOLDER_PATH = "ns_1_example/my_entity";
   const DEFAULT_NAMING_HELPER = new NamingHelper(getTestConfig(), SERVICE_NAME, [[NAMESPACE]]);
-  const BUNDLED_FILE_NAMES = { model: "TesterModel", qObject: "QTester", service: "TesterService" };
+  const MAIN_FILE_NAMES = { model: "TesterModel", qObject: "QTester", service: "TesterService" };
 
   const ENTITY_NAME = "MyEntity";
   const COMPLEX_NAME = "MyComplex";
@@ -123,11 +123,13 @@ describe("ProjectManager Test", () => {
       // we don't check the SourceFile from ts-morph
       expect.anything(),
       usedDataModel,
+      // main file names must have been passed
+      MAIN_FILE_NAMES,
+      // bundled file generation
+      false,
       // we don't want to check the formatter
       expect.anything(),
-      reservedNames,
-      // no bundled file names
-      undefined
+      reservedNames
     );
   }
 
@@ -139,11 +141,13 @@ describe("ProjectManager Test", () => {
       // we don't check the SourceFile from ts-morph
       expect.anything(),
       usedDataModel,
+      // main file names must have been passed
+      MAIN_FILE_NAMES,
+      // bundled file generation
+      true,
       // we don't want to check the formatter
       expect.anything(),
-      reservedNames,
-      // bundled file names must have been passed
-      BUNDLED_FILE_NAMES
+      reservedNames
     );
   }
 
@@ -179,7 +183,7 @@ describe("ProjectManager Test", () => {
     pm.initModels();
 
     // then bundled model file has been created
-    checkFileHandlerCreationForBundledFiles(BUNDLED_FILE_NAMES.model);
+    checkFileHandlerCreationForBundledFiles(MAIN_FILE_NAMES.model);
 
     // when retrieving a model (with any parameters whatsoever)
     const file = pm.createOrGetModelFile("any", "any");
@@ -210,7 +214,7 @@ describe("ProjectManager Test", () => {
     pm.initModels();
 
     // then all sorts of interfaces will be created, these are the reservedNames
-    checkFileHandlerCreationForBundledFiles(BUNDLED_FILE_NAMES.model, [
+    checkFileHandlerCreationForBundledFiles(MAIN_FILE_NAMES.model, [
       ENUM_NAME,
       COMPLEX_NAME,
       `Editable${COMPLEX_NAME}`,
@@ -259,7 +263,7 @@ describe("ProjectManager Test", () => {
     pm.initQObjects();
 
     // then bundled model file has been created
-    checkFileHandlerCreationForBundledFiles(BUNDLED_FILE_NAMES.qObject);
+    checkFileHandlerCreationForBundledFiles(MAIN_FILE_NAMES.qObject);
 
     // when retrieving a model (with any parameters whatsoever)
     const file = pm.createOrGetQObjectFile("any", "any");
@@ -290,7 +294,7 @@ describe("ProjectManager Test", () => {
     pm.initQObjects();
 
     // then all sorts of interfaces will be created, these are the reservedNames
-    checkFileHandlerCreationForBundledFiles(BUNDLED_FILE_NAMES.qObject, [
+    checkFileHandlerCreationForBundledFiles(MAIN_FILE_NAMES.qObject, [
       `Q${COMPLEX_NAME}`,
       `q${COMPLEX_NAME}`,
       `Q${ENTITY_NAME}`,
@@ -340,7 +344,7 @@ describe("ProjectManager Test", () => {
     pm.initServices();
 
     // then main service file has been created
-    checkFileHandlerCreationForBundledFiles(BUNDLED_FILE_NAMES.service, [BUNDLED_FILE_NAMES.service]);
+    checkFileHandlerCreationForBundledFiles(MAIN_FILE_NAMES.service, [MAIN_FILE_NAMES.service]);
 
     // when retrieving a service file (with any parameters whatsoever)
     const file = pm.createOrGetServiceFile("any", "any");
@@ -371,8 +375,8 @@ describe("ProjectManager Test", () => {
     pm.initServices();
 
     // then all sorts of interfaces will be created, these are the reservedNames
-    checkFileHandlerCreationForBundledFiles(BUNDLED_FILE_NAMES.service, [
-      BUNDLED_FILE_NAMES.service,
+    checkFileHandlerCreationForBundledFiles(MAIN_FILE_NAMES.service, [
+      MAIN_FILE_NAMES.service,
       `${ENTITY_NAME}Service`,
       `${ENTITY_NAME}CollectionService`,
       `${COMPLEX_NAME}Service`,
@@ -391,7 +395,7 @@ describe("ProjectManager Test", () => {
     pm.initServices();
 
     // then main service file is created
-    checkFileHandlerCreation("", BUNDLED_FILE_NAMES.service, [BUNDLED_FILE_NAMES.service]);
+    checkFileHandlerCreation("", MAIN_FILE_NAMES.service, [MAIN_FILE_NAMES.service]);
 
     // when requesting a new file
     const file = pm.createOrGetServiceFile(folderPath, fileName);

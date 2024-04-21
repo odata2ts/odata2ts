@@ -50,8 +50,8 @@ export class ProjectManager {
   private project!: Project;
 
   private mainServiceFile: FileHandler | undefined;
-  private bundledModelFile: FileHandler | undefined;
-  private bundledQFile: FileHandler | undefined;
+  private mainModelFile: FileHandler | undefined;
+  private mainQFile: FileHandler | undefined;
 
   private readonly cachedFiles: Map<string, SourceFile> | undefined;
 
@@ -109,9 +109,10 @@ export class ProjectManager {
       name,
       this.project.createSourceFile(fileName),
       this.dataModel,
+      this.namingHelper.getFileNames(),
+      !!this.options.bundledFileGeneration,
       this.formatter,
-      reservedNames,
-      this.options.bundledFileGeneration ? this.namingHelper.getFileNames() : undefined
+      reservedNames
     );
   }
 
@@ -153,13 +154,13 @@ export class ProjectManager {
         }
       });
 
-      this.bundledModelFile = this.createFile(this.namingHelper.getFileNames().model, reservedWords);
+      this.mainModelFile = this.createFile(this.namingHelper.getFileNames().model, reservedWords);
     }
   }
 
   public async finalizeModels() {
-    if (this.bundledModelFile) {
-      await this.writeFile(this.bundledModelFile);
+    if (this.mainModelFile) {
+      await this.writeFile(this.mainModelFile);
     }
   }
 
@@ -184,13 +185,13 @@ export class ProjectManager {
         reservedWords.push(op.qName);
       });
 
-      this.bundledQFile = this.createFile(this.namingHelper.getFileNames().qObject, reservedWords);
+      this.mainQFile = this.createFile(this.namingHelper.getFileNames().qObject, reservedWords);
     }
   }
 
   public async finalizeQObjects() {
-    if (this.bundledQFile) {
-      await this.writeFile(this.bundledQFile);
+    if (this.mainQFile) {
+      await this.writeFile(this.mainQFile);
     }
   }
 
@@ -218,16 +219,30 @@ export class ProjectManager {
     return this.mainServiceFile!;
   }
 
+  public createOrGetMainModelFile(reservedNames?: Array<string>) {
+    if (!this.mainModelFile) {
+      this.mainModelFile = this.createFile(this.namingHelper.getFileNames().model, reservedNames);
+    }
+    return this.mainModelFile;
+  }
+
+  public createOrGetMainQObjectFile(reservedNames?: Array<string>) {
+    if (!this.mainQFile) {
+      this.mainQFile = this.createFile(this.namingHelper.getFileNames().qObject, reservedNames);
+    }
+    return this.mainQFile;
+  }
+
   public createOrGetModelFile(folderPath: string, name: string, reservedNames?: Array<string> | undefined) {
-    if (this.bundledModelFile) {
-      return this.bundledModelFile;
+    if (this.mainModelFile) {
+      return this.mainModelFile;
     }
 
     return this.createFile(name, reservedNames, folderPath);
   }
   public createOrGetQObjectFile(folderPath: string, name: string, reservedNames?: Array<string> | undefined) {
-    if (this.bundledQFile) {
-      return this.bundledQFile;
+    if (this.mainQFile) {
+      return this.mainQFile;
     }
 
     return this.createFile(name, reservedNames, folderPath);
@@ -241,7 +256,12 @@ export class ProjectManager {
   }
 
   public async finalizeFile(file: FileHandler) {
-    if (!this.options.bundledFileGeneration) {
+    // write individual files in unbundled mode & if this is not one of the main files on root level
+    if (
+      !this.options.bundledFileGeneration &&
+      file.path !== "" &&
+      !Object.values(this.namingHelper.getFileNames()).includes(file.fileName)
+    ) {
       await this.writeFile(file);
     }
   }

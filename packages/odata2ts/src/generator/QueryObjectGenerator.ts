@@ -46,7 +46,7 @@ class QueryObjectGenerator {
     const promises: Array<Promise<void>> = [...this.generateEntityTypes(), ...this.generateComplexTypes()];
     if (!this.options.skipOperations) {
       // process unbound operations
-      promises.push(...this.generateUnboundOperations());
+      promises.push(this.generateUnboundOperations());
     }
 
     await Promise.all(promises);
@@ -236,13 +236,13 @@ class QueryObjectGenerator {
       .join(",")}]`;
   }
 
-  private generateUnboundOperations() {
-    return this.dataModel.getUnboundOperationTypes().map((operation) => {
-      const file = this.project.createOrGetQObjectFile(operation.folderPath, operation.qName, [operation.qName]);
+  private async generateUnboundOperations() {
+    const unboundOps = this.dataModel.getUnboundOperationTypes();
+    const reservedNames = unboundOps.map((op) => op.qName);
+    const file = this.project.createOrGetMainQObjectFile(reservedNames);
 
-      this.generateOperation(file, operation, operation.fqName);
-
-      return this.project.finalizeFile(file);
+    unboundOps.forEach((operation) => {
+      this.generateOperation(file, operation, "");
     });
   }
 

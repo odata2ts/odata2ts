@@ -33,14 +33,13 @@ describe("ImportContainer tests", function () {
       path,
       fileName,
       dataModel,
-      reservedNames,
-      bundledFileGenreation
-        ? {
-            model: "TestModel",
-            qObject: "QTest",
-            service: "TestService",
-          }
-        : undefined
+      {
+        model: "TestModel",
+        qObject: "QTest",
+        service: "TestService",
+      },
+      bundledFileGenreation,
+      reservedNames
     );
   }
 

@@ -12,6 +12,7 @@ import { FileFormatter } from "../../src/project/formatter/FileFormatter";
 jest.mock("fs/promises");
 
 describe("FileHandler Test", () => {
+  const MAIN_FILE_NAMES = { model: "TestModel", qObject: "QTest", service: "TestService" };
   const DEFAULT_PATH = "build/unit/fileHandler";
   const DEFAULT_FILENAME = "TestModel";
   const DEFAULT_DATA_MODEL = new DataModel([["MyNamespace"]], ODataVersion.V4);
@@ -44,10 +45,10 @@ describe("FileHandler Test", () => {
       fileName,
       mockFile,
       DEFAULT_DATA_MODEL,
-      // @ts-ignore
+      MAIN_FILE_NAMES,
+      true,
       formatter,
-      reservedNames,
-      undefined
+      reservedNames
     );
   }
 

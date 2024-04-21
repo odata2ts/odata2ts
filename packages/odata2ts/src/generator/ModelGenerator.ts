@@ -40,7 +40,7 @@ class ModelGenerator {
     ];
 
     if (!this.options.skipOperations) {
-      promises.push(...this.generateUnboundOperationParams());
+      promises.push(this.generateUnboundOperationParams());
     }
 
     await Promise.all(promises);
@@ -273,13 +273,13 @@ class ModelGenerator {
     return editableType + (prop.required ? "" : " | null");
   }
 
-  private generateUnboundOperationParams() {
-    return this.dataModel.getUnboundOperationTypes().map((operation) => {
-      const file = this.project.createOrGetModelFile(operation.folderPath, operation.paramsModelName);
+  private async generateUnboundOperationParams() {
+    const unboundOps = this.dataModel.getUnboundOperationTypes();
+    const reservedNames = unboundOps.map((op) => op.paramsModelName);
+    const file = this.project.createOrGetMainModelFile(reservedNames);
 
+    unboundOps.forEach((operation) => {
       this.generateOperationParams(file, operation);
-
-      return this.project.finalizeFile(file);
     });
   }
 

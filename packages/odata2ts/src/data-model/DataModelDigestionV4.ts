@@ -28,15 +28,6 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV4): Array<Property> {
     return (entityType as EntityTypeV4).NavigationProperty || [];
-    // .map(p => {
-    //   const entityConfig = this.serviceConfigHelper.findEntityTypeConfig()
-    //   return {
-    //     $: {
-    //       ...p.$,
-    //       Type:
-    //     }
-    //   }
-    // })
   }
 
   protected digestOperations(schema: SchemaV4) {
@@ -257,7 +248,6 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
         name,
         qName,
         paramsModelName: this.namingHelper.getOperationParamsModelName(opName, bindingEntityName),
-        folderPath: this.namingHelper.getFolderPath(namespace, name),
         type,
         parameters: params,
         returnType,
