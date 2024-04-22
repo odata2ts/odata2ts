@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/test-converters@0.3.0...@odata2ts/test-converters@0.3.1) (2024-04-22)
+
+**Note:** Version bump only for package @odata2ts/test-converters
+
 # [0.3.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/test-converters@0.2.6...@odata2ts/test-converters@0.3.0) (2023-08-08)
 
 ### Features

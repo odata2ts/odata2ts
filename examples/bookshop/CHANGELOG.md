@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.8](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-bookshop@0.7.7...@odata2ts/example-bookshop@0.7.8) (2024-04-22)
+
+### Bug Fixes
+
+* **int-test:** stabilize int tests ([d2c86c3](https://github.com/odata2ts/odata2ts/commit/d2c86c34173f6dc2c13f021d13a9c188f289b9ef))
+
 ## [0.7.7](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-bookshop@0.7.6...@odata2ts/example-bookshop@0.7.7) (2024-03-23)
 
 **Note:** Version bump only for package @odata2ts/example-bookshop

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.7.1...@odata2ts/example-hand-made@0.7.2) (2024-04-22)
+
+### Bug Fixes
+
+* **generator:** add special logic for bound operation name clas resolution (gets prefixed by bound entity) ([#259](https://github.com/odata2ts/odata2ts/issues/259)) ([2a0f9ff](https://github.com/odata2ts/odata2ts/commit/2a0f9ff4cf7222db86af396e00859ae47d426eac))
+
 ## [0.7.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.7.0...@odata2ts/example-hand-made@0.7.1) (2024-03-23)
 
 **Note:** Version bump only for package @odata2ts/example-hand-made

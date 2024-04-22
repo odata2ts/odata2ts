@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-core@0.4.0...@odata2ts/odata-core@0.5.0) (2024-04-22)
+
+### Features
+
+* **odata-core:** improved control information modelling ([#261](https://github.com/odata2ts/odata2ts/issues/261)) ([f9d62a5](https://github.com/odata2ts/odata2ts/commit/f9d62a5849aa8ce06e522d1c81c40efb75aae5cc))
+
 # [0.4.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-core@0.3.8...@odata2ts/odata-core@0.4.0) (2023-08-08)
 
 ### Features

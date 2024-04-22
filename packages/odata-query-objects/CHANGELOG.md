@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.20.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.20.1...@odata2ts/odata-query-objects@0.20.2) (2024-04-22)
+
+### Bug Fixes
+
+* **query-objects:** convertTo shouldn't throw for unknown props by default ([#260](https://github.com/odata2ts/odata2ts/issues/260)) ([9c59a60](https://github.com/odata2ts/odata2ts/commit/9c59a60c03ada27d57bf14ff31258a6fb80add82))
+
 ## [0.20.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.20.0...@odata2ts/odata-query-objects@0.20.1) (2024-03-23)
 
 ### Bug Fixes

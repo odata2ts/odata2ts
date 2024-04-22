@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.18.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.17.2...@odata2ts/odata-service@0.18.0) (2024-04-22)
+
+### Features
+
+* **odata-service:** allow "[@odata](https://github.com/odata).type" and "[@odata](https://github.com/odata).context" to request payloads ([#262](https://github.com/odata2ts/odata2ts/issues/262)) ([7596bd2](https://github.com/odata2ts/odata2ts/commit/7596bd2051c5b9d0d73f5a2e614224ac42ccb052))
+
 ## [0.17.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.17.1...@odata2ts/odata-service@0.17.2) (2024-03-23)
 
 **Note:** Version bump only for package @odata2ts/odata-service
