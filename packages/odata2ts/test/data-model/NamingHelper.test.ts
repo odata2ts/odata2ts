@@ -59,6 +59,8 @@ describe("NamingHelper Tests", function () {
 
     expect(toTest.getServiceName("TEST")).toBe("TestService");
     expect(toTest.getCollectionServiceName("TEST")).toBe("TestCollectionService");
+    expect(toTest.getServiceApiName("TEST")).toBe("TestServiceApi");
+    expect(toTest.getServiceCollectionApiName("TEST")).toBe("TestCollectionServiceApi");
     expect(toTest.getFunctionName("TEST")).toBe("test");
     expect(toTest.getActionName("TEST")).toBe("test");
     expect(toTest.getRelatedServiceGetter("TEST")).toBe("test");
@@ -340,9 +342,11 @@ describe("NamingHelper Tests", function () {
 
     expect(toTest.getServiceName("test")).toBe("PRE_TEST_SUF");
     expect(toTest.getCollectionServiceName("test")).toBe("PRE_TEST_COLLECTION_SUF");
+    expect(toTest.getServiceApiName("Test")).toBe("PRE_TEST_SUF_API");
+    expect(toTest.getServiceCollectionApiName("Test")).toBe("PRE_TEST_COLLECTION_SUF_API");
   });
 
-  test("Service: Collection Settings", () => {
+  test("Service: Collection & Api Settings", () => {
     options.naming = {
       services: {
         prefix: "PRE",
@@ -353,11 +357,19 @@ describe("NamingHelper Tests", function () {
           suffix: "",
           applyServiceNaming: false,
         },
+        api: {
+          prefix: "Ipa",
+          suffix: "Ipa",
+          namingStrategy: NamingStrategies.CAMEL_CASE,
+          applyServiceNaming: false,
+        },
       },
     };
     createHelper();
 
     expect(toTest.getCollectionServiceName("test")).toBe("COL_TEST");
+    expect(toTest.getServiceApiName("test")).toBe("ipaTestIpa");
+    expect(toTest.getServiceCollectionApiName("test")).toBe("ipaColTestIpa");
   });
 
   test("Service: Operation base settings", () => {

@@ -61,6 +61,8 @@ export interface ComplexType {
   qName: string;
   serviceName: string;
   serviceCollectionName: string;
+  serviceApiName: string;
+  serviceCollectionApiName: string;
   folderPath: string;
   props: Array<PropertyModel>;
   baseProps: Array<PropertyModel>;

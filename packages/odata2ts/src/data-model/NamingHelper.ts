@@ -250,6 +250,22 @@ export class NamingHelper {
     return opts?.collection?.applyServiceNaming ? this.getName(result, strategy, opts) : result;
   };
 
+  public getServiceApiName(name: string) {
+    const opts = this.options.services.api;
+    const serviceName = opts.applyServiceNaming ? this.getServiceName(name) : name;
+    const namingStrategy = opts?.namingStrategy || this.options.services.namingStrategy;
+    return this.getName(serviceName, this.namingFunction(namingStrategy), opts);
+  }
+
+  public getServiceCollectionApiName(name: string) {
+    const opts = this.options.services.api;
+    const serviceName = opts.applyServiceNaming
+      ? this.getCollectionServiceName(name)
+      : this.getName(name, this.namingFunction(this.options.services.namingStrategy), this.options.services.collection);
+    const namingStrategy = opts?.namingStrategy || this.options.services.namingStrategy;
+    return this.getName(serviceName, this.namingFunction(namingStrategy), opts);
+  }
+
   private getPrefixedName(name: string, boundEntity: string | undefined) {
     return boundEntity ? boundEntity + "_" + name : name;
   }

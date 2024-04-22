@@ -178,6 +178,13 @@ export interface ServiceNamingOptions extends NamingStrategyOption, RequiredNami
   collection: RequiredNamingOptions & { applyServiceNaming?: boolean };
 
   /**
+   * Naming for API model.
+   *
+   * By default, suffix = Api and applyServiceNaming = true
+   */
+  api: NamingStrategyOption & RequiredNamingOptions & { applyServiceNaming?: boolean };
+
+  /**
    * Naming for getter method of another service.
    *
    * By default, namingStrategy = camelCase

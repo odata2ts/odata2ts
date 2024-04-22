@@ -79,6 +79,11 @@ const defaultConfig: DefaultConfiguration = {
         suffix: "Collection",
         applyServiceNaming: true,
       },
+      api: {
+        prefix: "",
+        suffix: "Api",
+        applyServiceNaming: true,
+      },
       operations: {
         namingStrategy: NamingStrategies.CAMEL_CASE,
       },
@@ -143,6 +148,11 @@ const minimalNamingConfig: NameSettings = {
       applyServiceNaming: true,
       prefix: services.collection.prefix,
       suffix: services.collection.suffix,
+    },
+    api: {
+      applyServiceNaming: true,
+      prefix: services.api.prefix,
+      suffix: services.api.suffix,
     },
     privateProps: {
       prefix: services.privateProps.prefix,
