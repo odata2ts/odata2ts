@@ -182,7 +182,7 @@ export interface ServiceNamingOptions extends NamingStrategyOption, RequiredNami
    *
    * By default, suffix = Api and applyServiceNaming = true
    */
-  api: NamingStrategyOption & RequiredNamingOptions & { applyServiceNaming?: boolean };
+  api: ServiceApiNamingOptions;
 
   /**
    * Naming for getter method of another service.
@@ -206,4 +206,9 @@ export interface ServiceNamingOptions extends NamingStrategyOption, RequiredNami
    * By default, prefix = _
    */
   privateProps: NamingStrategyOption & RequiredNamingOptions;
+}
+
+export interface ServiceApiNamingOptions extends NamingStrategyOption, RequiredNamingOptions {
+  fileName: FileNamingStrategyOption & RequiredNamingOptions;
+  applyServiceNaming?: boolean;
 }

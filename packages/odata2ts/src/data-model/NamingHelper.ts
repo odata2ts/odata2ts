@@ -5,6 +5,7 @@ import { snakeCase } from "snake-case";
 
 import { FileNamingStrategyOption, NameSettings, NamingStrategies, StandardNamingOptions } from "../NamingModel";
 import { RunOptions } from "../OptionModel";
+import { FileConfigModel } from "../project/FileConfigModel";
 import { NamespaceWithAlias } from "./DataModel";
 
 function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
@@ -84,11 +85,12 @@ export class NamingHelper {
     return this.mainServiceName;
   }
 
-  public getFileNames() {
+  public getFileNames(): FileConfigModel {
     return {
-      model: this.getFileName(this.options.models?.fileName),
-      qObject: this.getFileName(this.options.queryObjects?.fileName),
+      model: this.getFileName(this.options.models.fileName),
+      qObject: this.getFileName(this.options.queryObjects.fileName),
       service: this.getMainServiceName(),
+      serviceApi: this.getFileName(this.options.services.api.fileName),
     };
   }
 

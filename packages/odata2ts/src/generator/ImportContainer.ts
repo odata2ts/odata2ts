@@ -5,6 +5,7 @@ import { ImportDeclarationStructure } from "ts-morph";
 
 import { DataModel } from "../data-model/DataModel";
 import { ComplexType, OperationType } from "../data-model/DataTypeModel";
+import { FileConfigModel } from "../project/FileConfigModel";
 import {
   ClientApiImports,
   CoreImports,
@@ -44,7 +45,7 @@ export class ImportContainer {
     protected path: string,
     protected fileName: string,
     protected dataModel: DataModel,
-    protected mainFileNames: { model: string; qObject: string; service: string },
+    protected mainFileNames: FileConfigModel,
     protected readonly bundledFileGeneration: boolean,
     protected reservedNames: Array<string> | undefined
   ) {
@@ -166,6 +167,10 @@ export class ImportContainer {
       const model = this.dataModel.getModel(fqName) as ComplexType;
       return this.addGeneratedImport(model.folderPath, model.serviceName, name);
     }
+  }
+
+  public addGeneratedServiceApi(name: string) {
+    return this.addGeneratedImport("", this.mainFileNames.serviceApi, name);
   }
 
   public getImportDeclarations(fromSubPath: boolean = false): Array<ImportDeclarationStructure> {

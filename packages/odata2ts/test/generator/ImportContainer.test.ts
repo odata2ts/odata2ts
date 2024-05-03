@@ -37,6 +37,7 @@ describe("ImportContainer tests", function () {
         model: "TestModel",
         qObject: "QTest",
         service: "TestService",
+        serviceApi: "TestServiceApi",
       },
       bundledFileGenreation,
       reservedNames

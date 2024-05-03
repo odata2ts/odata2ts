@@ -455,7 +455,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       fqType: withNs("Category"),
       odataType: withNs("Category"),
       isCollection: false,
-      dataType: DataTypes.ModelType,
+      dataType: DataTypes.EntityType,
       managed: undefined,
       required: true,
     } as PropertyModel);
@@ -469,7 +469,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       fqType: withNs("Supplier"),
       odataType: withNs("Supplier"),
       isCollection: false,
-      dataType: DataTypes.ModelType,
+      dataType: DataTypes.EntityType,
       managed: undefined,
       required: false,
     } as PropertyModel);
@@ -486,7 +486,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       fqType: withNs("Product"),
       odataType: `Collection(${withNs("Product")})`,
       isCollection: true,
-      dataType: DataTypes.ModelType,
+      dataType: DataTypes.EntityType,
       managed: undefined,
       required: false,
     } as PropertyModel);

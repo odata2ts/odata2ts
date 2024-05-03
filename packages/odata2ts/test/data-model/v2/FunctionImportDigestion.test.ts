@@ -143,7 +143,7 @@ describe("Function Digestion Test", () => {
         parameters: [],
         returnType: {
           isCollection: true,
-          dataType: DataTypes.ModelType,
+          dataType: DataTypes.EntityType,
           name: "noNameBecauseReturnType",
           odataName: "NO_NAME_BECAUSE_RETURN_TYPE",
           odataType: `Collection(${withNs("Product")})`,

@@ -409,7 +409,7 @@ describe("V4: EntityTypeDigestion Test", () => {
     const model = result.getEntityType(withNs("Category"));
 
     expect(model!.props[1]).toMatchObject({
-      dataType: DataTypes.ModelType,
+      dataType: DataTypes.EntityType,
       isCollection: false,
       name: "bestProduct",
       odataName: "bestProduct",
@@ -418,7 +418,7 @@ describe("V4: EntityTypeDigestion Test", () => {
       type: "Product",
     });
     expect(model!.props[2]).toMatchObject({
-      dataType: DataTypes.ModelType,
+      dataType: DataTypes.EntityType,
       isCollection: true,
       name: "featuredProducts",
       odataName: "featuredProducts",

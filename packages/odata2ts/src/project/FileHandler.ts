@@ -5,6 +5,7 @@ import { SourceFile } from "ts-morph";
 import { DataModel } from "../data-model/DataModel";
 import { ImportContainer } from "../generator/ImportContainer";
 import { EmitModes } from "../OptionModel";
+import { FileConfigModel } from "./FileConfigModel";
 import { FileFormatter } from "./formatter/FileFormatter";
 
 export class FileHandler {
@@ -15,7 +16,7 @@ export class FileHandler {
     public readonly fileName: string,
     protected readonly file: SourceFile,
     dataModel: DataModel,
-    protected mainFileNames: { model: string; qObject: string; service: string },
+    protected mainFileNames: FileConfigModel,
     protected bundledFileGeneration: boolean,
     protected formatter: FileFormatter | undefined,
     reservedNames: Array<string> | undefined

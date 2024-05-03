@@ -127,7 +127,7 @@ export class DataModel {
   public addEntityType(namespace: string, name: string, model: Omit<EntityType, "dataType">) {
     const fqName = withNamespace(namespace, name);
 
-    this.models.set(fqName, { ...model, dataType: DataTypes.ModelType });
+    this.models.set(fqName, { ...model, dataType: DataTypes.EntityType });
     this.addAlias(namespace, name);
   }
 
@@ -147,7 +147,7 @@ export class DataModel {
    * @returns list of model types
    */
   public getEntityTypes() {
-    const ets = [...this.models.values()].filter((m): m is EntityType => m.dataType === DataTypes.ModelType);
+    const ets = [...this.models.values()].filter((m): m is EntityType => m.dataType === DataTypes.EntityType);
     return this.sortModelsByInheritance(ets);
   }
 

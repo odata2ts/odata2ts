@@ -139,7 +139,7 @@ class QueryObjectGenerator {
     return props.map((prop) => {
       const { odataName } = prop;
       const name = this.namingHelper.getQPropName(prop.name);
-      const isModelType = prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
+      const isModelType = prop.dataType === DataTypes.EntityType || prop.dataType === DataTypes.ComplexType;
       let qPathInit: string;
 
       // factor in collections
@@ -220,7 +220,7 @@ class QueryObjectGenerator {
     return `[${props
       .map((prop) => {
         let complexQParam = "";
-        if (prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType) {
+        if (prop.dataType === DataTypes.EntityType || prop.dataType === DataTypes.ComplexType) {
           const importedQObject = importContainer.addGeneratedQObject(prop.fqType, prop.qObject!);
           complexQParam = `, new ${importedQObject}()`;
         }
@@ -262,7 +262,7 @@ class QueryObjectGenerator {
     let returnTypeOpStmt: string = "";
     if (returnType) {
       const collectionSuffix = returnType.isCollection ? "_COLLECTION" : "";
-      if (returnType.dataType === DataTypes.ComplexType || returnType.dataType === DataTypes.ModelType) {
+      if (returnType.dataType === DataTypes.ComplexType || returnType.dataType === DataTypes.EntityType) {
         if (returnType.qObject) {
           const [opRt, rts, qComplexParam] = imports.addQObject(
             QueryObjectImports.OperationReturnType,

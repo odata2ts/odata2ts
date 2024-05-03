@@ -9,7 +9,7 @@ export const enum DataTypes {
   PrimitiveType = "PrimitiveType",
   EnumType = "EnumType",
   ComplexType = "ComplexType",
-  ModelType = "ModelType",
+  EntityType = "EntityType",
 }
 
 export const enum OperationTypes {

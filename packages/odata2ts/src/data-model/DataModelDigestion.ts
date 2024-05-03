@@ -75,7 +75,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         this.addModel2Type(ns, alias, ct.$.Name, DataTypes.ComplexType);
       });
       schema.EntityType?.forEach((et) => {
-        this.addModel2Type(ns, alias, et.$.Name, DataTypes.ModelType);
+        this.addModel2Type(ns, alias, et.$.Name, DataTypes.EntityType);
       });
     });
   }

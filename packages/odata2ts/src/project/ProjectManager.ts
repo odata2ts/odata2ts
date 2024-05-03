@@ -50,6 +50,7 @@ export class ProjectManager {
   private project!: Project;
 
   private mainServiceFile: FileHandler | undefined;
+  private mainServiceApiFile: FileHandler | undefined;
   private mainModelFile: FileHandler | undefined;
   private mainQFile: FileHandler | undefined;
 
@@ -118,10 +119,9 @@ export class ProjectManager {
 
   public async init() {
     if (!this.options.bundledFileGeneration) {
+      const folderPaths = this.dataModel.getModelTypes().map((mt) => path.join(this.outputDir, mt.folderPath));
       // ensure folder for each model: we do this at this point for performance reasons
-      await Promise.all(
-        this.dataModel.getModelTypes().map((mt) => ensureDir(path.join(this.outputDir, mt.folderPath)))
-      );
+      await Promise.all(folderPaths.map((fp) => ensureDir(fp)));
     }
 
     const typePart = this.emitMode.toUpperCase().replace("_", " & ");
@@ -197,6 +197,7 @@ export class ProjectManager {
 
   public initServices() {
     const mainServiceName = this.namingHelper.getMainServiceName();
+    const serviceApiName = this.namingHelper.getFileNames().serviceApi;
     const reservedNames = [mainServiceName];
 
     if (this.options.bundledFileGeneration) {
@@ -207,16 +208,31 @@ export class ProjectManager {
     }
 
     this.mainServiceFile = this.createFile(mainServiceName, reservedNames);
+    // TODO: reserved names
+    this.mainServiceApiFile = this.createFile(serviceApiName, []);
   }
 
   public async finalizeServices() {
-    if (this.mainServiceFile) {
-      await this.writeFile(this.mainServiceFile);
+    if (!this.mainServiceFile || !this.mainServiceApiFile) {
+      throw new Error("ProjectManager: initServices() must be called before calling finalizeServices()");
     }
+
+    await this.writeFile(this.mainServiceFile);
+    await this.writeFile(this.mainServiceApiFile);
   }
 
   public getMainServiceFile() {
-    return this.mainServiceFile!;
+    if (!this.mainServiceFile) {
+      throw new Error("ProjectManager: initServices() must be called before getMainServiceFile");
+    }
+    return this.mainServiceFile;
+  }
+
+  public getMainServiceApiFile() {
+    if (!this.mainServiceApiFile) {
+      throw new Error("ProjectManager: initServices() must be called before getMainServiceApiFile()");
+    }
+    return this.mainServiceApiFile;
   }
 
   public createOrGetMainModelFile(reservedNames?: Array<string>) {

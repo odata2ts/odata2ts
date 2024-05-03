@@ -83,6 +83,10 @@ const defaultConfig: DefaultConfiguration = {
         prefix: "",
         suffix: "Api",
         applyServiceNaming: true,
+        fileName: {
+          prefix: "",
+          suffix: "Api",
+        },
       },
       operations: {
         namingStrategy: NamingStrategies.CAMEL_CASE,
@@ -153,6 +157,10 @@ const minimalNamingConfig: NameSettings = {
       applyServiceNaming: true,
       prefix: services.api.prefix,
       suffix: services.api.suffix,
+      fileName: {
+        prefix: services.api.fileName.prefix,
+        suffix: services.api.fileName.suffix,
+      },
     },
     privateProps: {
       prefix: services.privateProps.prefix,

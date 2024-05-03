@@ -75,7 +75,7 @@ describe("Data Model Tests", function () {
     const modelName = "Xxx";
     const fqName = `${NS1}.${modelName}`;
     const dummy = { name: modelName, fqName, baseClasses: [] };
-    const expectedDummy = { ...dummy, dataType: DataTypes.ModelType };
+    const expectedDummy = { ...dummy, dataType: DataTypes.EntityType };
 
     dataModel.addEntityType(
       NS1,
@@ -93,7 +93,7 @@ describe("Data Model Tests", function () {
     const modelName = "Xxx";
     const aliasName = `${ALIAS_NS2}.${modelName}`;
     const dummy = { x: "y", name: modelName };
-    const expectedDummy = { ...dummy, dataType: DataTypes.ModelType };
+    const expectedDummy = { ...dummy, dataType: DataTypes.EntityType };
 
     dataModel.addEntityType(
       NS2,
@@ -324,7 +324,7 @@ describe("Data Model Tests", function () {
   test("add model with empty namespace", () => {
     const modelName = "Xxx";
     const dummy = { name: modelName, baseClasses: [] };
-    const expectedDummy = { ...dummy, dataType: DataTypes.ModelType };
+    const expectedDummy = { ...dummy, dataType: DataTypes.EntityType };
 
     dataModel.addEntityType(
       "",

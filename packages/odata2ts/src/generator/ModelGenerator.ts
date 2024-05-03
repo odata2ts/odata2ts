@@ -131,7 +131,7 @@ class ModelGenerator {
       name: model.modelName,
       isExported: true,
       properties: model.props.map((p) => {
-        const isEntity = p.dataType == DataTypes.ModelType;
+        const isEntity = p.dataType == DataTypes.EntityType;
         return {
           name: p.name,
           type: this.getPropType(file.getImports(), p),
@@ -177,7 +177,7 @@ class ModelGenerator {
   private getPropType(imports: ImportContainer, prop: PropertyModel): string {
     // V2 entity special: deferred content
     let suffix = "";
-    if (this.dataModel.isV2() && prop.dataType == DataTypes.ModelType) {
+    if (this.dataModel.isV2() && prop.dataType == DataTypes.EntityType) {
       const [defContent] = imports.addCoreLib(this.version, CoreImports.DeferredContent);
       suffix = ` | ${defContent}`;
     }
@@ -219,7 +219,7 @@ class ModelGenerator {
   }
 
   private generateEditableModel(file: FileHandler, model: ComplexType) {
-    const entityTypes = [DataTypes.ModelType, DataTypes.ComplexType];
+    const entityTypes = [DataTypes.EntityType, DataTypes.ComplexType];
     const allProps = [...model.baseProps, ...model.props].filter((p) => !p.managed);
 
     const requiredProps = allProps
@@ -249,14 +249,14 @@ class ModelGenerator {
               type: this.getEditablePropType(file.getImports(), p),
               // optional props don't need to be specified in editable model
               // also, entities would require deep insert func => we make it optional for now
-              hasQuestionToken: !p.required || p.dataType === DataTypes.ModelType,
+              hasQuestionToken: !p.required || p.dataType === DataTypes.EntityType,
             };
           }),
     });
   }
 
   private getEditablePropType(imports: ImportContainer, prop: PropertyModel): string {
-    const isModelType = [DataTypes.ModelType, DataTypes.ComplexType].includes(prop.dataType);
+    const isModelType = [DataTypes.EntityType, DataTypes.ComplexType].includes(prop.dataType);
 
     let editableType = prop.type;
     if (isModelType) {
