@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-query-objects",
-  "version": "0.20.2",
+  "version": "0.21.0",
   "publishConfig": {
     "access": "public"
   },

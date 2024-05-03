@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.7.2...@odata2ts/example-hand-made@0.7.3) (2024-05-03)
+
+**Note:** Version bump only for package @odata2ts/example-hand-made
+
 ## [0.7.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.7.1...@odata2ts/example-hand-made@0.7.2) (2024-04-22)
 
 ### Bug Fixes
@@ -18,6 +22,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 * **generator:** no collection services for entity types without keys ([#248](https://github.com/odata2ts/odata2ts/issues/248)) ([56540b2](https://github.com/odata2ts/odata2ts/commit/56540b22aa92a7a8c929b4088c69d8af30b63364))
+
 * **generator:** support abstract entities ([#247](https://github.com/odata2ts/odata2ts/issues/247)) ([cbf5121](https://github.com/odata2ts/odata2ts/commit/cbf51214da0fdbccba7fff5a3c0b770f73ed06bd))
 
 # [0.6.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.5.1...@odata2ts/example-hand-made@0.6.0) (2024-03-10)

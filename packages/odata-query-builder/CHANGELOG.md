@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.16.7](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder@0.16.6...@odata2ts/odata-query-builder@0.16.7) (2024-05-03)
+
+**Note:** Version bump only for package @odata2ts/odata-query-builder
+
 ## [0.16.6](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder@0.16.5...@odata2ts/odata-query-builder@0.16.6) (2024-04-22)
 
 **Note:** Version bump only for package @odata2ts/odata-query-builder

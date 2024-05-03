@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.21.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.20.2...@odata2ts/odata-query-objects@0.21.0) (2024-05-03)
+
+### Features
+
+* **q-objects:** binary param ([#266](https://github.com/odata2ts/odata2ts/issues/266)) ([c81c056](https://github.com/odata2ts/odata2ts/commit/c81c0568172100f139aebb39d64ee9cf6e42074f))
+
 ## [0.20.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.20.1...@odata2ts/odata-query-objects@0.20.2) (2024-04-22)
 
 ### Bug Fixes

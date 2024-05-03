@@ -3,15 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.34.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.33.2...@odata2ts/odata2ts@0.34.0) (2024-05-03)
+
+### Bug Fixes
+
+* **odata2ts:** don't generate main model & q-object file in unbundled mode if empty ([#268](https://github.com/odata2ts/odata2ts/issues/268)) ([e5e69a5](https://github.com/odata2ts/odata2ts/commit/e5e69a5826814d3848f9eba0c4e808cd61dae580))
+
+### Features
+
+* **odata2ts:** support binary params ([#267](https://github.com/odata2ts/odata2ts/issues/267)) ([483603f](https://github.com/odata2ts/odata2ts/commit/483603f267618c07a1ec3d39433ad2157a1854bd))
+
 ## [0.33.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.33.1...@odata2ts/odata2ts@0.33.2) (2024-04-22)
 
 ### Bug Fixes
 
 * **generator:** add special logic for bound operation name clas resolution (gets prefixed by bound entity) ([#259](https://github.com/odata2ts/odata2ts/issues/259)) ([2a0f9ff](https://github.com/odata2ts/odata2ts/commit/2a0f9ff4cf7222db86af396e00859ae47d426eac))
+
 * **generator:** await ensureDir calls ([99c679d](https://github.com/odata2ts/odata2ts/commit/99c679d8ad989dae65e9366b3018d86a867ecae8))
+
 * **generator:** in unbundled mode unbound action models should go into main files ([#264](https://github.com/odata2ts/odata2ts/issues/264)) ([5dd52ec](https://github.com/odata2ts/odata2ts/commit/5dd52eceae1982f5e48a57ea08649ada5e11d190))
+
 * **generator:** too many imports for services with entity nav props ([1cae569](https://github.com/odata2ts/odata2ts/commit/1cae5694a2794173d8ec31698dc1601f29322382))
+
 * **generator:** write main service file only once ([74e39a0](https://github.com/odata2ts/odata2ts/commit/74e39a0cafa584b06f1fdace41d6636fbbc59942))
+
 * **generator:** wrong namespace prefix calculated ([2ad5a56](https://github.com/odata2ts/odata2ts/commit/2ad5a568c8fa64bc5f3db0bf07f28c3cb25b815c))
 
 ## [0.33.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.33.0...@odata2ts/odata2ts@0.33.1) (2024-03-23)
@@ -27,7 +42,9 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 * **generator:** auto detected service names are run through pascalCase to ensure valid class names ([#250](https://github.com/odata2ts/odata2ts/issues/250)) ([04fcf49](https://github.com/odata2ts/odata2ts/commit/04fcf490aee43dc1c2bc70af394fe9d1d8ce3249))
+
 * **generator:** no collection services for entity types without keys ([#248](https://github.com/odata2ts/odata2ts/issues/248)) ([56540b2](https://github.com/odata2ts/odata2ts/commit/56540b22aa92a7a8c929b4088c69d8af30b63364))
+
 * **generator:** support abstract entities ([#247](https://github.com/odata2ts/odata2ts/issues/247)) ([cbf5121](https://github.com/odata2ts/odata2ts/commit/cbf51214da0fdbccba7fff5a3c0b770f73ed06bd))
 
 # [0.32.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.31.1...@odata2ts/odata2ts@0.32.0) (2024-03-10)
