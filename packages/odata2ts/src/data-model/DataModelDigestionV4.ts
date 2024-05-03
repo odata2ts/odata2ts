@@ -188,7 +188,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
           outputType: "string",
           qPath: "QBinaryPath",
           qCollection: "QBinaryCollection",
-          qParam: undefined,
+          qParam: "QBinaryParam",
         };
       case ODataTypesV4.Guid:
         return {
