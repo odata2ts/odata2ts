@@ -159,7 +159,10 @@ export class ProjectManager {
   }
 
   public async finalizeModels() {
-    if (this.mainModelFile) {
+    if (
+      this.mainModelFile &&
+      (this.options.bundledFileGeneration || this.mainModelFile.getFile().getFullText().length)
+    ) {
       await this.writeFile(this.mainModelFile);
     }
   }
@@ -190,7 +193,7 @@ export class ProjectManager {
   }
 
   public async finalizeQObjects() {
-    if (this.mainQFile) {
+    if (this.mainQFile && (this.options.bundledFileGeneration || this.mainQFile.getFile().getFullText().length)) {
       await this.writeFile(this.mainQFile);
     }
   }
