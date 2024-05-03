@@ -24,11 +24,13 @@ export { QEnumParam } from "./param/common/QEnumParam";
 
 export { QBigNumberParam } from "./param/v4/QBigNumberParam";
 export { QGuidParam } from "./param/v4/QGuidParam";
+export { QBinaryParam } from "./param/v4/QBinaryParam";
 export { QDateParam } from "./param/v4/QDateParam";
 export { QTimeOfDayParam } from "./param/v4/QTimeOfDayParam";
 export { QDateTimeOffsetParam } from "./param/v4/QDateTimeOffsetParam";
 
 export { QGuidV2Param } from "./param/v2/QGuidV2Param";
+export { QBinaryV2Param } from "./param/v2/QBinaryV2Param";
 export { QDateTimeV2Param } from "./param/v2/QDateTimeV2Param";
 export { QDateTimeOffsetV2Param } from "./param/v2/QDateTimeOffsetV2Param";
 export { QStringNumberV2Param } from "./param/v2/QStringNumberV2Param";
