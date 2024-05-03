@@ -89,8 +89,7 @@ describe("ProjectManager Test", () => {
   });
 
   function useExhaustiveDataModel(mb: ODataModelBuilderV4) {
-    modelBuilder
-      .addEntityType(ENTITY_NAME, undefined, () => {})
+    mb.addEntityType(ENTITY_NAME, undefined, () => {})
       .addComplexType(COMPLEX_NAME, undefined, () => {})
       .addEnumType(ENUM_NAME, [])
       .addFunction(UNBOUND_OPERATION_NAME, ODataTypesV4.String, false, (builder) =>
@@ -191,6 +190,7 @@ describe("ProjectManager Test", () => {
 
     // then we get the same file
     expect(file).toBe(pm.createOrGetModelFile("x", "y", ["z"]));
+    expect(file).toBe(pm.createOrGetMainModelFile());
 
     // and created exactly one file
     expect(fileHandlerSpy).toHaveBeenCalledTimes(1);
@@ -249,9 +249,31 @@ describe("ProjectManager Test", () => {
     await pm.finalizeFile(file);
 
     // then file is written
-    expect(writeMock).toHaveBeenCalled();
+    expect(writeMock).toHaveBeenCalledTimes(1);
 
     // nothing happens here
+    await pm.finalizeModels();
+    expect(writeMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("Unbundled models with main model file", async () => {
+    // given unbundled mode
+    bundledFileGeneration = false;
+
+    const pm = await doCreateProjectManager();
+
+    // when requesting the main model file
+    const file = pm.createOrGetMainModelFile();
+
+    // then file is created
+    checkFileHandlerCreation("", "TesterModel");
+
+    // when finalizing models, then main file is not written => empty
+    await pm.finalizeModels();
+    expect(writeMock).not.toHaveBeenCalled();
+
+    // when adding stuff and finalizing models, then file is written
+    file.getFile().addInterface({ name: "xyz" });
     await pm.finalizeModels();
     expect(writeMock).toHaveBeenCalledTimes(1);
   });
@@ -271,6 +293,7 @@ describe("ProjectManager Test", () => {
 
     // then we get the same file
     expect(file).toBe(pm.createOrGetQObjectFile("x", "y", ["z"]));
+    expect(file).toBe(pm.createOrGetMainQObjectFile());
 
     // and created exactly one file
     expect(fileHandlerSpy).toHaveBeenCalledTimes(1);
@@ -333,7 +356,28 @@ describe("ProjectManager Test", () => {
     expect(writeMock).toHaveBeenCalled();
 
     // nothing happens here
-    await pm.finalizeModels();
+    await pm.finalizeQObjects();
+    expect(writeMock).toHaveBeenCalledTimes(1);
+  });
+
+  test("Unbundled q-objects with main q-object file", async () => {
+    // given unbundled mode
+    bundledFileGeneration = false;
+    const pm = await doCreateProjectManager();
+
+    // when requesting the main q-object file
+    const file = pm.createOrGetMainQObjectFile();
+
+    // then file is created
+    checkFileHandlerCreation("", "QTester");
+
+    // when finalizing models, then main file is not written => empty
+    await pm.finalizeQObjects();
+    expect(writeMock).not.toHaveBeenCalled();
+
+    // when adding stuff and finalizing models, then file is written
+    file.getFile().addInterface({ name: "xyz" });
+    await pm.finalizeQObjects();
     expect(writeMock).toHaveBeenCalledTimes(1);
   });
 
