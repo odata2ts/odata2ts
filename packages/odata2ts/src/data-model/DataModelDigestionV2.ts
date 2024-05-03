@@ -224,7 +224,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
           outputType: "string",
           qPath: "QBinaryPath",
           qCollection: "QBinaryCollection",
-          qParam: undefined,
+          qParam: "QBinaryV2Param",
         };
       case ODataTypesV2.Guid:
         return {
