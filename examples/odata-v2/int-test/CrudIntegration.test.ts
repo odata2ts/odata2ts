@@ -13,7 +13,7 @@ import { ODataDemoService } from "../build/odata/ODataDemoService";
  */
 describe("CRUD Integration Tests for OData Demo V2", () => {
   // we need a session id to modify stuff on the server
-  const BASE_URL_WITH_SESSION = "https://services.odata.org/(S(rbtb0hnwoj1obdnxkwhnulwz))/V2/OData/OData.svc";
+  const BASE_URL_WITH_SESSION = "https://services.odata.org/(S(rbtb0hnwoj1obdnxkwhnulwz))/V2/odata/OData.svc";
   const odataClient = new AxiosClient();
 
   const testService = new ODataDemoService(odataClient, BASE_URL_WITH_SESSION);
