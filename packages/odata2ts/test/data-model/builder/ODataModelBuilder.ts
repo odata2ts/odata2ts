@@ -1,6 +1,12 @@
 import { ODataTypesV2, ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
-import { ComplexType, EntityType, ODataEdmxModelBase, Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
+import {
+  ComplexType,
+  EntityType,
+  EnumType,
+  ODataEdmxModelBase,
+  Schema,
+} from "../../../src/data-model/edmx/ODataEdmxModelBase";
 import { ODataComplexTypeBuilderBase } from "./ODataComplexTypeBuilderBase";
 import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase";
 
@@ -109,22 +115,26 @@ export abstract class ODataModelBuilder<
     return this;
   }
 
-  public addEnumType(name: string, values: Array<{ name: string; value: number }>) {
+  public addEnumType(name: string, values?: Array<{ name: string; value: number }>) {
     if (!this.currentSchema.EnumType) {
       this.currentSchema.EnumType = [];
     }
 
-    this.currentSchema.EnumType.push({
+    const theEnum: EnumType = {
       $: {
         Name: name,
       },
-      Member: values.map((v) => ({
+    };
+    if (values?.length) {
+      theEnum.Member = values.map((v) => ({
         $: {
           Name: v.name,
           Value: v.value,
         },
-      })),
-    });
+      }));
+    }
+
+    this.currentSchema.EnumType.push(theEnum);
 
     return this;
   }

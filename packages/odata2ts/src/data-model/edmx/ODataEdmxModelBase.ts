@@ -72,7 +72,7 @@ export interface EnumType {
   $: {
     Name: string;
   };
-  Member: Array<Member>;
+  Member?: Array<Member>;
 }
 
 export interface Member {
