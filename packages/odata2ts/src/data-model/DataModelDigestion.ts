@@ -208,7 +208,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         name: enumName,
         modelName: this.namingHelper.getEnumName(enumName),
         folderPath: filePath,
-        members: et.Member.map((m) => m.$.Name),
+        members: et.Member?.length ? et.Member.map((m) => m.$.Name) : [],
       });
     }
   }

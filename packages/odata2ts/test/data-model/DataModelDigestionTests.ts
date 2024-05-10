@@ -486,4 +486,10 @@ export function createDataModelTests(
     expect(toTest.keys.length).toBe(1);
     expect(toTest.props.length).toBe(1);
   });
+
+  test("support empty enums", async () => {
+    odataBuilder.addEnumType("Test");
+
+    await doDigest();
+  });
 }

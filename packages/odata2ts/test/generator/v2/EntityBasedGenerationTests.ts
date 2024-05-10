@@ -44,10 +44,12 @@ export function createEntityBasedGenerationTests(
 
   test(`${testSuiteName}: one enum type`, async () => {
     // given only a single enum type
-    odataBuilder.addEnumType("Choice", [
-      { name: "A", value: 1 },
-      { name: "B", value: 2 },
-    ]);
+    odataBuilder
+      .addEnumType("Choice", [
+        { name: "A", value: 1 },
+        { name: "B", value: 2 },
+      ])
+      .addEnumType("EmptyEnum");
 
     // when generating model
     // then match fixture text

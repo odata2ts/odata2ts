@@ -161,7 +161,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
   });
 
   test("update primitive property", async () => {
-    const response = await testService.books(271).price().updateValue(new BigNumber(999));
+    const response = await testService.books(251).price().updateValue(new BigNumber(999));
 
     expect(response.status).toBe(200);
     expect(response.data?.value).toBeInstanceOf(BigNumber);

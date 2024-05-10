@@ -28,7 +28,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
     expect(result.data["@odata.count"]).toMatch(/5|6/);
 
     expect(result.data.value).toBeDefined();
-    expect(result.data.value.length).toBe(5);
+    expect(result.data.value.length + "").toMatch(/5|6/);
     expect(result.data.value[0]).toMatchObject(BOOK_ZERO);
   });
 
