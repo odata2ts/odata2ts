@@ -6,7 +6,7 @@ import { Q_TEST_ENTITY, Q_TEST_ENTITY_ID, q_TEST_ENTITY } from "./QTester";
 // @ts-ignore
 import { EDITABLE_TEST_ENTITY, TEST_ENTITY, TEST_ENTITY_ID } from "./TesterModel";
 
-export class tester<ClientType extends ODataHttpClient> extends ODataService<ClientType> {
+export class tester<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   public NAVIGATE_TO_LIST(): TEST_ENTITY_COLLECTION_SRV<ClientType>;
   public NAVIGATE_TO_LIST(id: TEST_ENTITY_ID): TEST_ENTITY_SRV<ClientType>;
   public NAVIGATE_TO_LIST(id?: TEST_ENTITY_ID | undefined) {
@@ -18,7 +18,7 @@ export class tester<ClientType extends ODataHttpClient> extends ODataService<Cli
   }
 }
 
-export class TEST_ENTITY_SRV<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
+export class TEST_ENTITY_SRV<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
   ClientType,
   TEST_ENTITY,
   EDITABLE_TEST_ENTITY,
@@ -29,7 +29,7 @@ export class TEST_ENTITY_SRV<ClientType extends ODataHttpClient> extends EntityT
   }
 }
 
-export class TEST_ENTITY_COLLECTION_SRV<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
+export class TEST_ENTITY_COLLECTION_SRV<in out ClientType extends ODataHttpClient> extends EntitySetServiceV4<
   ClientType,
   TEST_ENTITY,
   EDITABLE_TEST_ENTITY,

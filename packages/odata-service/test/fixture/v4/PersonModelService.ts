@@ -14,7 +14,7 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
 > {
   private _qGetSomething = new QGetSomethingFunction();
 
-  constructor(client: ODataHttpClient, basePath: string, name: string, bigNumbersAsString?: boolean) {
+  constructor(client: ClientType, basePath: string, name: string, bigNumbersAsString?: boolean) {
     super(client, basePath, name, new QPersonV4(), bigNumbersAsString);
   }
 
@@ -56,7 +56,7 @@ export class PersonModelCollectionService<ClientType extends ODataHttpClient> ex
   QPersonV4,
   PersonId
 > {
-  constructor(client: ODataHttpClient, basePath: string, name: string, bigNumbersAsString?: boolean) {
+  constructor(client: ClientType, basePath: string, name: string, bigNumbersAsString?: boolean) {
     super(client, basePath, name, qPersonV4, new QPersonIdFunction(name), bigNumbersAsString);
   }
 }

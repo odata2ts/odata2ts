@@ -15,9 +15,9 @@ import {
   Parent,
 } from "./TesterModel";
 
-export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {}
+export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {}
 
-export class GrandParentService<ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
+export class GrandParentService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,
   GrandParent,
   EditableGrandParent,
@@ -28,7 +28,7 @@ export class GrandParentService<ClientType extends ODataHttpClient> extends Enti
   }
 }
 
-export class GrandParentCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV2<
+export class GrandParentCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV2<
   ClientType,
   GrandParent,
   EditableGrandParent,
@@ -40,7 +40,7 @@ export class GrandParentCollectionService<ClientType extends ODataHttpClient> ex
   }
 }
 
-export class ParentService<ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
+export class ParentService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,
   Parent,
   EditableParent,
@@ -51,7 +51,7 @@ export class ParentService<ClientType extends ODataHttpClient> extends EntityTyp
   }
 }
 
-export class ParentCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV2<
+export class ParentCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV2<
   ClientType,
   Parent,
   EditableParent,
@@ -63,7 +63,7 @@ export class ParentCollectionService<ClientType extends ODataHttpClient> extends
   }
 }
 
-export class ChildService<ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
+export class ChildService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,
   Child,
   EditableChild,
@@ -74,7 +74,7 @@ export class ChildService<ClientType extends ODataHttpClient> extends EntityType
   }
 }
 
-export class ChildCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV2<
+export class ChildCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV2<
   ClientType,
   Child,
   EditableChild,

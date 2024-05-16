@@ -90,7 +90,7 @@ class ServiceGenerator {
     mainServiceFile.getFile().addClass({
       isExported: true,
       name: mainServiceName,
-      typeParameters: [`ClientType extends ${httpClient}`],
+      typeParameters: [`in out ClientType extends ${httpClient}`],
       extends: `${rootService}<ClientType>`,
       ctors: this.isV4BigNumber()
         ? [

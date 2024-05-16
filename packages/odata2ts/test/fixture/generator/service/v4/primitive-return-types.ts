@@ -7,7 +7,7 @@ import { QPingCollection, QPingNumber, QPingString, QTestEntity, QTestEntityId, 
 // @ts-ignore
 import { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel";
 
-export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {
+export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   private _qPingString?: QPingString;
   private _qPingNumber?: QPingNumber;
   private _qPingCollection?: QPingCollection;
@@ -52,7 +52,7 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
   }
 }
 
-export class TestEntityService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
+export class TestEntityService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
   ClientType,
   TestEntity,
   EditableTestEntity,
@@ -63,7 +63,7 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
   }
 }
 
-export class TestEntityCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
+export class TestEntityCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV4<
   ClientType,
   TestEntity,
   EditableTestEntity,

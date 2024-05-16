@@ -54,7 +54,7 @@ export class TestService<ClientType extends ODataHttpClient> extends EntityTypeS
   EditableTestModel,
   QTest
 > {
-  constructor(client: ODataHttpClient, basePath: string, name: string) {
+  constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qTest);
   }
 }
@@ -66,7 +66,7 @@ export class TestCollectionService<ClientType extends ODataHttpClient> extends E
   QTest,
   TestModelId
 > {
-  constructor(client: ODataHttpClient, basePath: string, name: string) {
+  constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qTest, new QTestIdFunction(name));
   }
 }
