@@ -11,12 +11,12 @@ import { ServiceStateHelper } from "../ServiceStateHelper";
 // const OPEN_ACCEPT_HEADER = { accept: "*/*" };
 // const DEFAULT_STREAM_MIME_TYPE = "application/octet-stream";
 
-export class PrimitiveTypeServiceV2<ClientType extends ODataHttpClient, T> {
-  protected readonly __base: ServiceStateHelper<T>;
+export class PrimitiveTypeServiceV2<in out ClientType extends ODataHttpClient, T> {
+  protected readonly __base: ServiceStateHelper<ClientType>;
   protected readonly __converter: ConvertibleV2;
 
   public constructor(
-    client: ODataHttpClient,
+    client: ClientType,
     basePath: string,
     name: string,
     { convertTo, convertFrom }: ValueConverter<any, any> = getIdentityConverter(),

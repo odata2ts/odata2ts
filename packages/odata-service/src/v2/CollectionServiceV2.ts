@@ -13,14 +13,14 @@ import { ServiceStateHelperV2 } from "./ServiceStateHelperV2";
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
 
 export class CollectionServiceV2<
-  ClientType extends ODataHttpClient,
+  in out ClientType extends ODataHttpClient,
   T,
   Q extends QueryObject,
   EditableT = PrimitiveExtractor<T>
 > {
-  protected readonly __base: ServiceStateHelperV2<T, Q>;
+  protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
 
-  public constructor(client: ODataHttpClient, basePath: string, name: string, qModel: Q) {
+  public constructor(client: ClientType, basePath: string, name: string, qModel: Q) {
     this.__base = new ServiceStateHelperV2(client, basePath, name, qModel);
   }
 

@@ -258,7 +258,7 @@ class ServiceGenerator {
     file.getFile().addClass({
       isExported: true,
       name: model.serviceName,
-      typeParameters: [`ClientType extends ${httpClient}`],
+      typeParameters: [`in out ClientType extends ${httpClient}`],
       extends: entityServiceType + `<ClientType, ${modelName}, ${editableModelName}, ${qName}>`,
       ctors: [
         {
@@ -502,7 +502,7 @@ class ServiceGenerator {
     file.getFile().addClass({
       isExported: true,
       name: model.serviceCollectionName,
-      typeParameters: ["ClientType extends ODataHttpClient"],
+      typeParameters: ["in out ClientType extends ODataHttpClient"],
       extends:
         entitySetServiceType +
         `<ClientType, ${model.modelName}, ${editableModelName}, ${model.qName}, ${paramsModelName}>`,

@@ -4,10 +4,13 @@ import { QComplexParam, QueryObject } from "@odata2ts/odata-query-objects";
 
 import { ServiceStateHelper } from "../ServiceStateHelper";
 
-export class ServiceStateHelperV2<T, Q extends QueryObject> extends ServiceStateHelper<T> {
+export class ServiceStateHelperV2<
+  in out ClientType extends ODataHttpClient,
+  Q extends QueryObject
+> extends ServiceStateHelper<ClientType> {
   public readonly qResponseType: QComplexParam<any, Q>;
 
-  public constructor(client: ODataHttpClient, basePath: string, name: string, public qModel: Q) {
+  public constructor(client: ClientType, basePath: string, name: string, public qModel: Q) {
     super(client, basePath, name);
     this.qResponseType = new QComplexParam("NONE", qModel);
   }

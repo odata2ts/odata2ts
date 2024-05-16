@@ -11,23 +11,17 @@ import {
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2";
 
 export abstract class EntitySetServiceV2<
-  ClientType extends ODataHttpClient,
+  in out ClientType extends ODataHttpClient,
   T,
   EditableT,
   Q extends QueryObject,
   EIdType
 > {
-  protected readonly __base: ServiceStateHelperV2<T, Q>;
+  protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
   protected readonly __idFunction: QFunction<EIdType>;
 
-  protected constructor(
-    client: ODataHttpClient,
-    basePath: string,
-    name: string,
-    qModel: Q,
-    idFunction: QFunction<EIdType>
-  ) {
-    this.__base = new ServiceStateHelperV2<T, Q>(client, basePath, name, qModel);
+  protected constructor(client: ClientType, basePath: string, name: string, qModel: Q, idFunction: QFunction<EIdType>) {
+    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel);
     this.__idFunction = idFunction;
   }
 

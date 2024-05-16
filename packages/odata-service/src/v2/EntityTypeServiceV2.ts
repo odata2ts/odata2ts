@@ -6,11 +6,11 @@ import { QueryObject, convertV2ModelResponse } from "@odata2ts/odata-query-objec
 import { MERGE_HEADERS } from "../RequestHeaders";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2";
 
-export class EntityTypeServiceV2<ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObject> {
-  protected readonly __base: ServiceStateHelperV2<T, Q>;
+export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObject> {
+  protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
 
-  protected constructor(client: ODataHttpClient, basePath: string, name: string, qModel: Q) {
-    this.__base = new ServiceStateHelperV2<T, Q>(client, basePath, name, qModel);
+  protected constructor(client: ClientType, basePath: string, name: string, qModel: Q) {
+    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel);
   }
 
   public getPath() {
