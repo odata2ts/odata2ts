@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.34.0...@odata2ts/odata2ts@0.35.0) (2024-05-16)
+
+### Bug Fixes
+
+* empty enum ([#270](https://github.com/odata2ts/odata2ts/issues/270)) ([32eeb1e](https://github.com/odata2ts/odata2ts/commit/32eeb1e587f507a138ca96d81c7ab3da4c0bdba8))
+
+### Features
+
+* invariant client type ([#272](https://github.com/odata2ts/odata2ts/issues/272)) ([0ee3c94](https://github.com/odata2ts/odata2ts/commit/0ee3c94d3bf34e7774e1be8dad657ed5e64e597e))
+
 # [0.34.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.33.2...@odata2ts/odata2ts@0.34.0) (2024-05-03)
 
 ### Bug Fixes

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.19.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.18.1...@odata2ts/odata-service@0.19.0) (2024-05-16)
+
+### Features
+
+* invariant client type ([#272](https://github.com/odata2ts/odata2ts/issues/272)) ([0ee3c94](https://github.com/odata2ts/odata2ts/commit/0ee3c94d3bf34e7774e1be8dad657ed5e64e597e))
+
 ## [0.18.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.18.0...@odata2ts/odata-service@0.18.1) (2024-05-03)
 
 **Note:** Version bump only for package @odata2ts/odata-service

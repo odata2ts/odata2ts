@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.10](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-odata-v2@0.5.9...@odata2ts/example-odata-v2@0.5.10) (2024-05-16)
+
+### Bug Fixes
+
+* empty enum ([#270](https://github.com/odata2ts/odata2ts/issues/270)) ([32eeb1e](https://github.com/odata2ts/odata2ts/commit/32eeb1e587f507a138ca96d81c7ab3da4c0bdba8))
+
 ## [0.5.9](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-odata-v2@0.5.8...@odata2ts/example-odata-v2@0.5.9) (2024-05-03)
 
 **Note:** Version bump only for package @odata2ts/example-odata-v2

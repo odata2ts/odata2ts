@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.10](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-trippin@0.8.9...@odata2ts/example-trippin@0.8.10) (2024-05-16)
+
+**Note:** Version bump only for package @odata2ts/example-trippin
+
 ## [0.8.9](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-trippin@0.8.8...@odata2ts/example-trippin@0.8.9) (2024-05-03)
 
 **Note:** Version bump only for package @odata2ts/example-trippin
