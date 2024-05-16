@@ -39,7 +39,7 @@ export class PersonModelV2Service<ClientType extends ODataHttpClient> extends En
     return new PersonModelV2CollectionService(this.__base.client, this.__base.path, "Friends");
   }
 
-  constructor(client: ODataHttpClient, basePath: string, name: string) {
+  constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, new QPersonV2());
   }
 
@@ -56,7 +56,7 @@ export class PersonModelV2CollectionService<ClientType extends ODataHttpClient> 
   QPersonV2,
   PersonId
 > {
-  constructor(client: ODataHttpClient, basePath: string, name: string) {
+  constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qPersonV2, new QPersonIdFunction(name));
   }
 }

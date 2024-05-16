@@ -28,7 +28,7 @@ import {
   // @ts-ignore
 } from "./TesterModel";
 
-export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {
+export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   public fromAbstract(): ExtendedFromAbstractCollectionService<ClientType>;
   public fromAbstract(id: ExtendedFromAbstractId): ExtendedFromAbstractService<ClientType>;
   public fromAbstract(id?: ExtendedFromAbstractId | undefined) {
@@ -50,7 +50,7 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
   }
 }
 
-export class AbstractEntityService<ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
+export class AbstractEntityService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,
   AbstractEntity,
   EditableAbstractEntity,
@@ -61,7 +61,7 @@ export class AbstractEntityService<ClientType extends ODataHttpClient> extends E
   }
 }
 
-export class OpenEntityService<ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
+export class OpenEntityService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,
   OpenEntity,
   EditableOpenEntity,
@@ -72,7 +72,7 @@ export class OpenEntityService<ClientType extends ODataHttpClient> extends Entit
   }
 }
 
-export class ExtendedFromAbstractService<ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
+export class ExtendedFromAbstractService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,
   ExtendedFromAbstract,
   EditableExtendedFromAbstract,
@@ -83,7 +83,9 @@ export class ExtendedFromAbstractService<ClientType extends ODataHttpClient> ext
   }
 }
 
-export class ExtendedFromAbstractCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV2<
+export class ExtendedFromAbstractCollectionService<
+  in out ClientType extends ODataHttpClient
+> extends EntitySetServiceV2<
   ClientType,
   ExtendedFromAbstract,
   EditableExtendedFromAbstract,
@@ -95,7 +97,7 @@ export class ExtendedFromAbstractCollectionService<ClientType extends ODataHttpC
   }
 }
 
-export class ExtendedFromOpenService<ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
+export class ExtendedFromOpenService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,
   ExtendedFromOpen,
   EditableExtendedFromOpen,
@@ -106,7 +108,7 @@ export class ExtendedFromOpenService<ClientType extends ODataHttpClient> extends
   }
 }
 
-export class ExtendedFromOpenCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV2<
+export class ExtendedFromOpenCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV2<
   ClientType,
   ExtendedFromOpen,
   EditableExtendedFromOpen,

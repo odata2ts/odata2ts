@@ -5,17 +5,17 @@ import { QueryObject, convertV4ModelResponse } from "@odata2ts/odata-query-objec
 
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4";
 
-export class EntityTypeServiceV4<ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObject> {
-  protected readonly __base: ServiceStateHelperV4<T, Q>;
+export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObject> {
+  protected readonly __base: ServiceStateHelperV4<ClientType, Q>;
 
   public constructor(
-    client: ODataHttpClient,
+    client: ClientType,
     basePath: string,
     name: string,
     qModel: Q,
     bigNumbersAsString: boolean = false
   ) {
-    this.__base = new ServiceStateHelperV4<T, Q>(client, basePath, name, qModel, bigNumbersAsString);
+    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, bigNumbersAsString);
   }
 
   public getPath() {

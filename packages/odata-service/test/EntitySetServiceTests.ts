@@ -9,7 +9,7 @@ import { MockClient } from "./mock/MockClient";
 
 export function commonEntitySetTests(
   odataClient: MockClient,
-  serviceConstructor: new (odataClient: ODataHttpClient, baseUrl: string, name: string) =>
+  serviceConstructor: new (odataClient: MockClient, baseUrl: string, name: string) =>
     | EntitySetServiceV4<MockClient, PersonModel, EditablePersonModel, QPersonV4, PersonId>
     | EntitySetServiceV2<MockClient, PersonModel, EditablePersonModel, QPersonV2, PersonId>
 ) {

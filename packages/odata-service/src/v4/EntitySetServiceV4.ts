@@ -11,13 +11,13 @@ import {
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4";
 
 export abstract class EntitySetServiceV4<
-  ClientType extends ODataHttpClient,
+  in out ClientType extends ODataHttpClient,
   T,
   EditableT,
   Q extends QueryObject,
   EIdType
 > {
-  protected readonly __base: ServiceStateHelperV4<T, Q>;
+  protected readonly __base: ServiceStateHelperV4<ClientType, Q>;
   protected readonly __idFunction: QFunction<EIdType>;
 
   /**
@@ -33,14 +33,14 @@ export abstract class EntitySetServiceV4<
    * @protected
    */
   protected constructor(
-    client: ODataHttpClient,
+    client: ClientType,
     basePath: string,
     name: string,
     qModel: Q,
     idFunction: QFunction<EIdType>,
     bigNumbersAsString: boolean = false
   ) {
-    this.__base = new ServiceStateHelperV4<T, Q>(client, basePath, name, qModel, bigNumbersAsString);
+    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, bigNumbersAsString);
     this.__idFunction = idFunction;
   }
 

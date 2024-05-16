@@ -5,7 +5,7 @@ import { MockClient } from "./mock/MockClient";
 
 export function commonEntityTypeServiceTests(
   odataClient: MockClient,
-  serviceConstructor: new (odataClient: ODataHttpClient, basePath: string, name: string) => PersonModelServiceVersion
+  serviceConstructor: new (odataClient: MockClient, basePath: string, name: string) => PersonModelServiceVersion
 ) {
   const BASE_URL = "/test";
   const NAME = "EntityXY('tester')";

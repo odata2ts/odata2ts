@@ -7,9 +7,9 @@ import { QBook, QBookId, qBook } from "./QTester";
 // @ts-ignore
 import { Book, BookId, Choice, EditableBook } from "./TesterModel";
 
-export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {}
+export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {}
 
-export class BookService<ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
+export class BookService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,
   Book,
   EditableBook,
@@ -31,7 +31,7 @@ export class BookService<ClientType extends ODataHttpClient> extends EntityTypeS
   }
 }
 
-export class BookCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV2<
+export class BookCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV2<
   ClientType,
   Book,
   EditableBook,

@@ -9,10 +9,9 @@ import {
   EditableAbstractEntity,
   EditableTestEntity,
   TestEntity,
-  // @ts-ignore
 } from "./TesterModel";
 
-export class TesterService<ClientType extends ODataHttpClient> extends ODataService<ClientType> {
+export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   public testing(): TestEntityCollectionService<ClientType>;
   public testing(id: AbstractEntityId): TestEntityService<ClientType>;
   public testing(id?: AbstractEntityId | undefined) {
@@ -24,7 +23,7 @@ export class TesterService<ClientType extends ODataHttpClient> extends ODataServ
   }
 }
 
-export class AbstractEntityService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
+export class AbstractEntityService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
   ClientType,
   AbstractEntity,
   EditableAbstractEntity,
@@ -35,7 +34,7 @@ export class AbstractEntityService<ClientType extends ODataHttpClient> extends E
   }
 }
 
-export class AbstractEntityCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
+export class AbstractEntityCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV4<
   ClientType,
   AbstractEntity,
   EditableAbstractEntity,
@@ -47,7 +46,7 @@ export class AbstractEntityCollectionService<ClientType extends ODataHttpClient>
   }
 }
 
-export class TestEntityService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
+export class TestEntityService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
   ClientType,
   TestEntity,
   EditableTestEntity,
@@ -58,7 +57,7 @@ export class TestEntityService<ClientType extends ODataHttpClient> extends Entit
   }
 }
 
-export class TestEntityCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
+export class TestEntityCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV4<
   ClientType,
   TestEntity,
   EditableTestEntity,

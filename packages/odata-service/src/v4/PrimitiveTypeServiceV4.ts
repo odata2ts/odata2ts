@@ -8,18 +8,18 @@ import { ServiceStateHelper } from "../ServiceStateHelper";
 
 // const RAW_VALUE_SUFFIX = "/$value";
 
-export class PrimitiveTypeServiceV4<ClientType extends ODataHttpClient, T> {
-  protected readonly __base: ServiceStateHelper<T>;
+export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
+  protected readonly __base: ServiceStateHelper<ClientType>;
   protected readonly __converter: ValueConverter<any, any>;
 
   public constructor(
-    client: ODataHttpClient,
+    client: ClientType,
     basePath: string,
     name: string,
     converter: ValueConverter<any, any> = getIdentityConverter(),
     bigNumbersAsString: boolean = false
   ) {
-    this.__base = new ServiceStateHelper<T>(client, basePath, name, bigNumbersAsString);
+    this.__base = new ServiceStateHelper(client, basePath, name, bigNumbersAsString);
     this.__converter = converter;
   }
 

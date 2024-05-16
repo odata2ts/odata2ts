@@ -2,7 +2,7 @@ import { ODataHttpClient } from "@odata2ts/http-client-api";
 
 import { ServiceStateHelper } from "./ServiceStateHelper";
 
-export class ODataService<ClientType extends ODataHttpClient> {
+export class ODataService<in out ClientType extends ODataHttpClient> {
   protected readonly __base: ServiceStateHelper<any>;
 
   constructor(client: ClientType, basePath: string, bigNumbersAsString: boolean = false) {
