@@ -158,7 +158,8 @@ describe("Service Generator Tests V2", () => {
           .addKeyProp("id", ODataTypesV2.String)
           .addProp("lector", withNs("Reviewer"))
           .addProp("reviewers", `Collection(${withNs("Reviewer")})`)
-      );
+      )
+      .addEntitySet("Books", withNs("Book"));
 
     // when generating
     await doGenerate();

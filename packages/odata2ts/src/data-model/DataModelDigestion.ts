@@ -1,7 +1,12 @@
 import { MappedConverterChains } from "@odata2ts/converter-runtime";
 
 import { DigestionOptions } from "../FactoryFunctionModel";
-import { ComplexTypeGenerationOptions, EntityTypeGenerationOptions, PropertyGenerationOptions } from "../OptionModel";
+import {
+  ComplexTypeGenerationOptions,
+  EntityTypeGenerationOptions,
+  Modes,
+  PropertyGenerationOptions,
+} from "../OptionModel";
 import { DataModel, NamespaceWithAlias, withNamespace } from "./DataModel";
 import {
   ComplexType as ComplexModelType,
@@ -11,8 +16,8 @@ import {
   PropertyModel,
 } from "./DataTypeModel";
 import { ComplexType, EntityType, EnumType, Property, Schema, TypeDefinition } from "./edmx/ODataEdmxModelBase";
-import { SchemaV3 } from "./edmx/ODataEdmxModelV3";
-import { SchemaV4 } from "./edmx/ODataEdmxModelV4";
+import { EntityContainerV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
+import { EntityContainerV4, SchemaV4 } from "./edmx/ODataEdmxModelV4";
 import { NamingHelper } from "./NamingHelper";
 import { ServiceConfigHelper, WithoutName } from "./ServiceConfigHelper";
 import { NameClashValidator } from "./validation/NameClashValidator";
@@ -47,7 +52,20 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   protected readonly serviceConfigHelper: ServiceConfigHelper;
   protected readonly nameValidator: NameValidator;
 
+  /**
+   * Reverse mapping from fqName to data type: EntityType, ComplexType, EnumType, or Primitive Type.
+   */
   private model2Type = new Map<string, DataTypes>();
+  /**
+   * Stores models (ComplexType or EntityType) by fqName that have been referenced in the API
+   * as entry point or via navProp.
+   * For these models one or two services are generated.
+   *
+   * In this way unnecessary service generation is prevented. For example, complex types that
+   * are only referenced as response of an operation do not need a generated service.
+   * @private
+   */
+  private serviceModels = new Set<string>();
 
   protected constructor(
     protected version: ODataVersion,
@@ -129,6 +147,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
       // V4 only: function & action types
       this.digestOperations(schema);
+
+      this.analyzeModelUsage(schema.EntityContainer?.length ? schema.EntityContainer[0] : undefined);
     });
 
     this.postProcessModel();
@@ -178,7 +198,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       baseProps: [], // postprocess required
       abstract: ifTrue(model.$.Abstract),
       open: ifTrue(model.$.OpenType),
-    };
+      genMode: Modes.service,
+    } satisfies Partial<ComplexModelType>;
   }
 
   private addTypeDefinition(ns: string, types: Array<TypeDefinition> | undefined) {
@@ -266,6 +287,31 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     }
   }
 
+  private analyzeModelUsage(ec: EntityContainerV3 | EntityContainerV4 | undefined) {
+    if (ec?.EntitySet?.length) {
+      ec.EntitySet.forEach((et) => this.analyze(et.$.EntityType));
+    }
+    const ec4 = ec as EntityContainerV4;
+    if (ec4?.Singleton?.length) {
+      ec4.Singleton.forEach((singleton) => this.analyze(singleton.$.Type));
+    }
+  }
+
+  private analyze(fqModelName: string) {
+    if (this.serviceModels.has(fqModelName)) {
+      return;
+    }
+
+    this.serviceModels.add(fqModelName);
+    const model = this.dataModel.getEntityType(fqModelName) ?? this.dataModel.getComplexType(fqModelName);
+
+    model?.props.forEach((p) => {
+      if (p.dataType === DataTypes.ComplexType || p.dataType === DataTypes.ModelType) {
+        this.analyze(p.fqType);
+      }
+    });
+  }
+
   private postProcessModel() {
     // complex types
     const complexTypes = this.dataModel.getComplexTypes();
@@ -275,6 +321,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       ct.baseProps = baseProps.map((bp) => ({ ...bp }));
       if (open) {
         ct.open = true;
+      }
+      if (!this.serviceModels.has(ct.fqName)) {
+        ct.genMode = Modes.qobjects;
       }
     });
     // entity types
@@ -379,13 +428,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       entityPropConfig?.mappedName || configProp?.mappedName || p.$.Name
     );
     const isCollection = !!p.$.Type.match(/^Collection\(/);
-    let dataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
+    let odataDataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
 
     // support for primitive type mapping
-    if (this.namingHelper.includesServicePrefix(dataType)) {
-      const dt = this.dataModel.getPrimitiveType(dataType);
+    if (this.namingHelper.includesServicePrefix(odataDataType)) {
+      const dt = this.dataModel.getPrimitiveType(odataDataType);
       if (dt !== undefined) {
-        dataType = dt;
+        odataDataType = dt;
       }
     }
 
@@ -393,22 +442,22 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     // domain object known from service:
     // EntityType, ComplexType, EnumType
-    if (this.namingHelper.includesServicePrefix(dataType)) {
-      const resultDt = this.model2Type.get(dataType)!;
-      const [dataTypeName, dataTypePrefix] = this.namingHelper.getNameAndServicePrefix(dataType);
+    if (this.namingHelper.includesServicePrefix(odataDataType)) {
+      const modelType = this.model2Type.get(odataDataType)!;
+      const [dataTypeName, dataTypePrefix] = this.namingHelper.getNameAndServicePrefix(odataDataType);
       const dataTypeNamespace: NamespaceWithAlias = [dataTypePrefix!];
-      if (!resultDt) {
+      if (!modelType) {
         throw new Error(
-          `Couldn't determine model data type for property "${p.$.Name}"! Given data type: "${dataType}".`
+          `Couldn't determine model type (EntityType, ComplexType, etc) for property "${p.$.Name}"! Given data type: "${odataDataType}".`
         );
       }
 
       // special handling for enums
-      if (resultDt === DataTypes.EnumType) {
+      if (modelType === DataTypes.EnumType) {
         const enumConfig = this.serviceConfigHelper.findEnumTypeConfig(dataTypeNamespace, dataTypeName);
         result = {
-          dataType: resultDt,
-          type: this.namingHelper.getEnumName(enumConfig?.mappedName ?? dataType),
+          dataType: modelType,
+          type: this.namingHelper.getEnumName(enumConfig?.mappedName ?? odataDataType),
           qPath: "QEnumPath",
           qObject: isCollection ? "QEnumCollection" : undefined,
           qParam: "QEnumParam",
@@ -417,23 +466,24 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       // handling of complex & entity types
       else {
         const entityConfig =
-          resultDt === DataTypes.ComplexType
+          modelType === DataTypes.ComplexType
             ? this.serviceConfigHelper.findComplexTypeConfig(dataTypeNamespace, dataTypeName)
             : this.serviceConfigHelper.findEntityTypeConfig(dataTypeNamespace, dataTypeName);
-        const resultDataType = entityConfig?.mappedName ?? dataType;
+        const typeName = entityConfig?.mappedName ?? odataDataType;
+
         result = {
-          dataType: resultDt,
-          type: this.namingHelper.getModelName(resultDataType),
+          dataType: modelType,
+          type: this.namingHelper.getModelName(typeName),
           qPath: "QEntityPath",
-          qObject: this.namingHelper.getQName(resultDataType),
+          qObject: this.namingHelper.getQName(typeName),
           qParam: "QComplexParam",
         };
       }
     }
     // OData built-in data types
-    else if (dataType.startsWith(Digester.EDM_PREFIX)) {
-      const { outputType, qPath, qParam, qCollection } = this.mapODataType(dataType);
-      const { to, toModule: typeModule, converters } = this.dataModel.getConverter(dataType) || {};
+    else if (odataDataType.startsWith(Digester.EDM_PREFIX)) {
+      const { outputType, qPath, qParam, qCollection } = this.mapODataType(odataDataType);
+      const { to, toModule: typeModule, converters } = this.dataModel.getConverter(odataDataType) || {};
 
       const type = !to ? outputType : to.startsWith(Digester.EDM_PREFIX) ? this.mapODataType(to).outputType : to;
 
@@ -448,7 +498,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       };
     } else {
       throw new Error(
-        `Unknown type [${dataType}]: Not 'Collection(...)', not OData type 'Edm.*', not starting with one of the namespaces!`
+        `Unknown type [${odataDataType}]: Not 'Collection(...)', not OData type 'Edm.*', not starting with one of the namespaces!`
       );
     }
 
@@ -456,7 +506,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       odataName: p.$.Name,
       name: modelName,
       odataType: p.$.Type,
-      fqType: dataType,
+      fqType: odataDataType,
       required: ifFalse(p.$.Nullable),
       isCollection: isCollection,
       managed: typeof entityPropConfig?.managed !== "undefined" ? entityPropConfig.managed : configProp?.managed,

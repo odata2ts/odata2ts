@@ -1,5 +1,7 @@
 import { ValueConverterImport } from "@odata2ts/converter-runtime";
 
+import { Modes } from "../OptionModel";
+
 export enum ODataVersion {
   V2 = "2.0",
   V4 = "4.0",
@@ -68,6 +70,7 @@ export interface ComplexType {
   finalBaseClass: string | undefined;
   abstract: boolean;
   open: boolean;
+  genMode: Modes;
 }
 
 export interface EnumType {

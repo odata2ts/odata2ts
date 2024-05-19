@@ -113,7 +113,7 @@ describe("Service Generator Tests V4", () => {
     await compareMainService("singleton.ts");
   });
 
-  test("Service Generator: unbound functions", async () => {
+  test("Service Generator: bound & unbound functions", async () => {
     // given two functions: one without and one with params
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
@@ -131,7 +131,7 @@ describe("Service Generator Tests V4", () => {
     await compareMainService("function-unbound.ts");
   });
 
-  test("Service Generator: unbound action", async () => {
+  test("Service Generator: bound & unbound action", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
@@ -244,8 +244,8 @@ describe("Service Generator Tests V4", () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
-      .addComplexType("Review", undefined, (builder) => builder.addProp("content", ODataTypesV4.String))
       // complex return type
+      .addComplexType("Review", undefined, (builder) => builder.addProp("content", ODataTypesV4.String))
       .addFunction("BestReview", withNs("Review"), true, (builder) => {
         builder.addParam("book", withNs("Book"));
       })
@@ -264,7 +264,7 @@ describe("Service Generator Tests V4", () => {
     await compareMainService("bound-function.ts");
   });
 
-  test("Service Generator: one bound action", async () => {
+  test("Service Generator: binding and return type variants", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
@@ -319,7 +319,8 @@ describe("Service Generator Tests V4", () => {
           .addKeyProp("id", ODataTypesV4.String)
           .addProp("lector", withNs("Reviewer"))
           .addProp("reviewers", `Collection(${withNs("Reviewer")})`)
-      );
+      )
+      .addEntitySet("Books", withNs("Book"));
 
     // when generating
     await doGenerate();

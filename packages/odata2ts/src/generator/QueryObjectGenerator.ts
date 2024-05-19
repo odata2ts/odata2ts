@@ -14,6 +14,7 @@ import {
 } from "../data-model/DataTypeModel";
 import { NamingHelper } from "../data-model/NamingHelper";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel";
+import { Modes } from "../OptionModel";
 import { FileHandler } from "../project/FileHandler";
 import { ProjectManager } from "../project/ProjectManager";
 import { QueryObjectImports } from "./import/ImportObjects";
