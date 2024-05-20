@@ -92,6 +92,7 @@ describe("Service Generator Tests V2", () => {
     // given three functions: one without and one with params and a third which POSTs
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.String))
+      .addEntitySet("tests", withNs("TestEntity"))
       .addFunctionImport("MostPop", `Collection(${withNs("TestEntity")})`)
       .addFunctionImport("BEST_BOOK", withNs("TestEntity"), (builder) =>
         builder.addParam("TestString", ODataTypesV2.String, false).addParam("TEST_NUMBER", ODataTypesV2.Int32)
@@ -114,6 +115,7 @@ describe("Service Generator Tests V2", () => {
     // given two functions: one without and one with params
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.String))
+      .addEntitySet("tests", withNs("TestEntity"))
       .addFunctionImport("bestBook", `Collection(${withNs("TestEntity")})`, (builder) =>
         builder
           .addParam("testGuid", ODataTypesV2.Guid, false)
@@ -140,7 +142,8 @@ describe("Service Generator Tests V2", () => {
           .addKeyProp("ID", ODataTypesV2.Guid)
           .addProp("author", withNs("Author"))
           .addProp("relatedAuthors", `Collection(${withNs("Author")})`)
-      );
+      )
+      .addEntitySet("books", withNs("Book"));
 
     // when generating
     runOptions.enablePrimitivePropertyServices = true;
@@ -181,7 +184,8 @@ describe("Service Generator Tests V2", () => {
           .addKeyProp("id", ODataTypesV2.String)
           .addProp("myChoice", withNs("Choice"))
           .addProp("altChoices", `Collection(${withNs("Choice")})`)
-      );
+      )
+      .addEntitySet("books", withNs("Book"));
 
     // when generating
     await doGenerate();
@@ -199,7 +203,8 @@ describe("Service Generator Tests V2", () => {
       )
       .addEntityType("Child", { baseType: withNs("Parent") }, (builder) =>
         builder.addKeyProp("id2", ODataTypesV2.Boolean).addProp("Ch1ld1shF4n", ODataTypesV2.Boolean)
-      );
+      )
+      .addEntitySet("tests", withNs("Child"));
 
     // when generating
     await doGenerate();

@@ -6,7 +6,17 @@ import { QAuthor, QAuthorId, QBook, QBookId, qAuthor, qBook } from "./QTester";
 // @ts-ignore
 import { Author, AuthorId, Book, BookId, EditableAuthor, EditableBook } from "./TesterModel";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {}
+export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
+  public books(): BookCollectionService<ClientType>;
+  public books(id: BookId): BookService<ClientType>;
+  public books(id?: BookId | undefined) {
+    const fieldName = "books";
+    const { client, path } = this.__base;
+    return typeof id === "undefined" || id === null
+      ? new BookCollectionService(client, path, fieldName)
+      : new BookService(client, path, new QBookId(fieldName).buildUrl(id));
+  }
+}
 
 export class AuthorService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,

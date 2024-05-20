@@ -305,11 +305,16 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     this.serviceModels.add(fqModelName);
     const model = this.dataModel.getEntityType(fqModelName) ?? this.dataModel.getComplexType(fqModelName);
 
-    model?.props.forEach((p) => {
-      if (p.dataType === DataTypes.ComplexType || p.dataType === DataTypes.ModelType) {
-        this.analyze(p.fqType);
+    if (model) {
+      if (model.baseClasses.length) {
+        this.analyze(model.baseClasses[0]);
       }
-    });
+      model?.props.forEach((p) => {
+        if (p.dataType === DataTypes.ComplexType || p.dataType === DataTypes.ModelType) {
+          this.analyze(p.fqType);
+        }
+      });
+    }
   }
 
   private postProcessModel() {
@@ -343,6 +348,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       }
       if (open) {
         et.open = open;
+      }
+      if (!this.serviceModels.has(et.fqName)) {
+        et.genMode = Modes.qobjects;
       }
       et.keyNames.unshift(...baseKeys.filter((bk) => !et.keyNames.includes(bk)));
     });

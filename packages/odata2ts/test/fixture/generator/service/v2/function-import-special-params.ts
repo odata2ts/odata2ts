@@ -10,6 +10,16 @@ import { BestBookParams, EditableTestEntity, TestEntity, TestEntityId } from "./
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   private _qBestBook?: QBestBook;
 
+  public tests(): TestEntityCollectionService<ClientType>;
+  public tests(id: TestEntityId): TestEntityService<ClientType>;
+  public tests(id?: TestEntityId | undefined) {
+    const fieldName = "tests";
+    const { client, path } = this.__base;
+    return typeof id === "undefined" || id === null
+      ? new TestEntityCollectionService(client, path, fieldName)
+      : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id));
+  }
+
   public async bestBook(
     params: BestBookParams,
     requestConfig?: ODataHttpClientConfig<ClientType>

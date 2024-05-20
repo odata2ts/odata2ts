@@ -117,6 +117,7 @@ describe("Service Generator Tests V4", () => {
     // given two functions: one without and one with params
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addEntitySet("tests", withNs("TestEntity"))
       .addFunction("getBestsellers", `Collection(${withNs("TestEntity")})`, false)
       .addFunctionImport("mostPop", withNs("getBestsellers"), "none")
       .addFunction("firstBook", withNs("TestEntity"), false, (builder) =>
@@ -128,13 +129,14 @@ describe("Service Generator Tests V4", () => {
     await doGenerate();
 
     // then main service file encompasses unbound functions
-    await compareMainService("function-unbound.ts");
+    await compareMainService("function-bound-unbound.ts");
   });
 
   test("Service Generator: bound & unbound action", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addEntitySet("tests", withNs("TestEntity"))
       .addAction("ping", undefined, false)
       .addActionImport("keepAlive", withNs("ping"))
       .addAction("vote", withNs("TestEntity"), false, (builder) =>
@@ -146,13 +148,14 @@ describe("Service Generator Tests V4", () => {
     await doGenerate();
 
     // then main service file encompasses an unbound function
-    await compareMainService("action-unbound.ts");
+    await compareMainService("action-bound-unbound.ts");
   });
 
   test("Service Generator: operation with primitive return types", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addEntitySet("tests", withNs("TestEntity"))
       .addAction("pingString", ODataTypesV4.String, false)
       .addAction("pingNumber", ODataTypesV4.Int16, false)
       .addActionImport("pingString", withNs("pingString"))
@@ -163,13 +166,66 @@ describe("Service Generator Tests V4", () => {
     // when generating
     await doGenerate();
 
-    await compareMainService("primitive-return-types.ts");
+    await compareMainService("action-rt-primitive.ts");
+  });
+
+  test("Service Generator: function with complex return type", async () => {
+    // given one EntitySet
+    odataBuilder
+      .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addEntitySet("books", withNs("Book"))
+      // complex return type
+      .addComplexType("Review", undefined, (builder) => builder.addProp("content", ODataTypesV4.String))
+      .addFunction("BestReview", withNs("Review"), true, (builder) => {
+        builder.addParam("book", withNs("Book"));
+      })
+      // collection of complex return type
+      .addFunction("filterReviews", `Collection(${withNs("Review")})`, true, (builder) =>
+        builder
+          .addParam("Book", `Collection(${withNs("Book")})`)
+          .addParam("MIN_RATING", ODataTypesV4.Int16, false)
+          .addParam("MinCreated", ODataTypesV4.Date)
+      );
+
+    // when generating
+    await doGenerate();
+
+    // then service has those functions
+    await compareMainService("function-rt-complex.ts");
+  });
+
+  test("Service Generator: action with enum return type", async () => {
+    // given one EntitySet
+    odataBuilder
+      .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addEntitySet("books", withNs("Book"))
+      .addEnumType("Rating", [
+        { name: "1", value: 1 },
+        { name: "9", value: 2 },
+      ])
+      // no return type
+      .addAction("like", undefined, true, (builder) => builder.addParam("book", withNs("Book")))
+      // enum return type,
+      .addAction("rate", withNs("Rating"), true, (builder) =>
+        builder.addParam("book", withNs("Book")).addParam("rating", withNs("Rating"))
+      )
+      // return type: collection of enums
+      .addAction("ratings", `Collection(${withNs("Rating")})`, true, (builder) =>
+        builder.addParam("book", `Collection(${withNs("Book")})`).addParam("ratings", `Collection(${withNs("Rating")})`)
+      );
+
+    // when generating
+    await doGenerate();
+
+    // then service has actions
+    await compareMainService("action-rt-enum.ts");
   });
 
   test("Service Generator: big number return types", async () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addEntitySet("tests", withNs("TestEntity"))
       .addAction("pingBigNumber", ODataTypesV4.Int64, false)
       .addAction("pingDecimal", ODataTypesV4.Decimal, false)
       .addActionImport("pingBigNumber", withNs("pingBigNumber"))
@@ -240,56 +296,6 @@ describe("Service Generator Tests V4", () => {
     await compareMainService("naming.ts");
   });
 
-  test("Service Generator: one bound function", async () => {
-    // given one EntitySet
-    odataBuilder
-      .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
-      // complex return type
-      .addComplexType("Review", undefined, (builder) => builder.addProp("content", ODataTypesV4.String))
-      .addFunction("BestReview", withNs("Review"), true, (builder) => {
-        builder.addParam("book", withNs("Book"));
-      })
-      // collection of complex return type
-      .addFunction("filterReviews", `Collection(${withNs("Review")})`, true, (builder) =>
-        builder
-          .addParam("Book", `Collection(${withNs("Book")})`)
-          .addParam("MIN_RATING", ODataTypesV4.Int16, false)
-          .addParam("MinCreated", ODataTypesV4.Date)
-      );
-
-    // when generating
-    await doGenerate();
-
-    // then service has those functions
-    await compareMainService("bound-function.ts");
-  });
-
-  test("Service Generator: binding and return type variants", async () => {
-    // given one EntitySet
-    odataBuilder
-      .addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
-      .addEnumType("Rating", [
-        { name: "1", value: 1 },
-        { name: "9", value: 2 },
-      ])
-      // no return type
-      .addAction("like", undefined, true, (builder) => builder.addParam("book", withNs("Book")))
-      // enum return type,
-      .addAction("rate", withNs("Rating"), true, (builder) =>
-        builder.addParam("book", withNs("Book")).addParam("rating", withNs("Rating"))
-      )
-      // return type: collection of enums
-      .addAction("ratings", `Collection(${withNs("Rating")})`, true, (builder) =>
-        builder.addParam("book", `Collection(${withNs("Book")})`).addParam("ratings", `Collection(${withNs("Rating")})`)
-      );
-
-    // when generating
-    await doGenerate();
-
-    // then service has actions
-    await compareMainService("bound-action.ts");
-  });
-
   test("Service Generator: EntityService with Relationships", async () => {
     // given one EntitySet
     odataBuilder
@@ -301,7 +307,8 @@ describe("Service Generator Tests V4", () => {
           .addKeyProp("ID", ODataTypesV4.Guid)
           .addProp("AUTHOR", withNs("Author"))
           .addProp("RelatedAuthors", `Collection(${withNs("Author")})`)
-      );
+      )
+      .addEntitySet("books", withNs("Book"));
 
     // when generating
     await doGenerate({ enablePrimitivePropertyServices: true });
@@ -341,7 +348,8 @@ describe("Service Generator Tests V4", () => {
           .addKeyProp("id", ODataTypesV4.String)
           .addProp("myChoice", withNs("Choice"))
           .addProp("altChoices", `Collection(${withNs("Choice")})`)
-      );
+      )
+      .addEntitySet("books", withNs("Book"));
 
     // when generating
     await doGenerate();
