@@ -3,11 +3,21 @@ import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { Book_QBestReview, Book_QFilterReviews, QBook, QBookId, QReview, qBook, qReview } from "./QTester";
+import { Book_QBestReview, Book_QFilterReviews, QBook, QBookId, qBook } from "./QTester";
 // @ts-ignore
-import { Book, BookId, Book_FilterReviewsParams, EditableBook, EditableReview, Review } from "./TesterModel";
+import { Book, BookId, Book_FilterReviewsParams, EditableBook, Review } from "./TesterModel";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {}
+export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
+  public books(): BookCollectionService<ClientType>;
+  public books(id: BookId): BookService<ClientType>;
+  public books(id?: BookId | undefined) {
+    const fieldName = "books";
+    const { client, path } = this.__base;
+    return typeof id === "undefined" || id === null
+      ? new BookCollectionService(client, path, fieldName)
+      : new BookService(client, path, new QBookId(fieldName).buildUrl(id));
+  }
+}
 
 export class BookService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
   ClientType,
@@ -60,16 +70,5 @@ export class BookCollectionService<in out ClientType extends ODataHttpClient> ex
     const url = addFullPath(this._bookQFilterReviews.buildUrl(params));
     const response = await client.get(url, requestConfig, getDefaultHeaders());
     return this._bookQFilterReviews.convertResponse(response);
-  }
-}
-
-export class ReviewService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
-  ClientType,
-  Review,
-  EditableReview,
-  QReview
-> {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qReview);
   }
 }

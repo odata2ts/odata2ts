@@ -15,7 +15,17 @@ import {
   Parent,
 } from "./TesterModel";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {}
+export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
+  public tests(): ChildCollectionService<ClientType>;
+  public tests(id: ChildId): ChildService<ClientType>;
+  public tests(id?: ChildId | undefined) {
+    const fieldName = "tests";
+    const { client, path } = this.__base;
+    return typeof id === "undefined" || id === null
+      ? new ChildCollectionService(client, path, fieldName)
+      : new ChildService(client, path, new QChildId(fieldName).buildUrl(id));
+  }
+}
 
 export class GrandParentService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
   ClientType,

@@ -12,6 +12,16 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   private _qPingNumber?: QPingNumber;
   private _qPingCollection?: QPingCollection;
 
+  public tests(): TestEntityCollectionService<ClientType>;
+  public tests(id: TestEntityId): TestEntityService<ClientType>;
+  public tests(id?: TestEntityId | undefined) {
+    const fieldName = "tests";
+    const { client, path } = this.__base;
+    return typeof id === "undefined" || id === null
+      ? new TestEntityCollectionService(client, path, fieldName)
+      : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id));
+  }
+
   public async pingString(
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): Promise<HttpResponseModel<ODataValueResponseV4<string>>> {

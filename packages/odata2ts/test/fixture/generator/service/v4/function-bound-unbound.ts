@@ -11,6 +11,16 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   private _qGetBestsellers?: QGetBestsellers;
   private _qFirstBook?: QFirstBook;
 
+  public tests(): TestEntityCollectionService<ClientType>;
+  public tests(id: TestEntityId): TestEntityService<ClientType>;
+  public tests(id?: TestEntityId | undefined) {
+    const fieldName = "tests";
+    const { client, path } = this.__base;
+    return typeof id === "undefined" || id === null
+      ? new TestEntityCollectionService(client, path, fieldName)
+      : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id));
+  }
+
   public async mostPop(
     requestConfig?: ODataHttpClientConfig<ClientType>
   ): Promise<HttpResponseModel<ODataCollectionResponseV4<TestEntity>>> {

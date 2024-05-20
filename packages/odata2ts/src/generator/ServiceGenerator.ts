@@ -25,7 +25,7 @@ import {
   SingletonType,
 } from "../data-model/DataTypeModel";
 import { NamingHelper } from "../data-model/NamingHelper";
-import { ConfigFileOptions } from "../OptionModel";
+import { ConfigFileOptions, Modes } from "../OptionModel";
 import { FileHandler } from "../project/FileHandler";
 import { ProjectManager } from "../project/ProjectManager";
 import { ClientApiImports, CoreImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects";
@@ -527,33 +527,39 @@ class ServiceGenerator {
 
   private generateEntityTypeServices(): Array<Promise<void>> {
     // build service file for each entity, consisting of EntityTypeService & EntityCollectionService
-    return this.dataModel.getEntityTypes().map((model) => {
-      const file = this.project.createOrGetServiceFile(model.folderPath, model.serviceName, [
-        model.serviceName,
-        model.serviceCollectionName,
-      ]);
+    return this.dataModel
+      .getEntityTypes()
+      .filter((model) => model.genMode === Modes.service || model.genMode === Modes.all)
+      .map((model) => {
+        const file = this.project.createOrGetServiceFile(model.folderPath, model.serviceName, [
+          model.serviceName,
+          model.serviceCollectionName,
+        ]);
 
-      // entity type service
-      this.generateEntityTypeService(file, model);
-      // entity collection service if this entity specified keys at all
-      if (model.keyNames.length) {
-        this.generateEntityCollectionService(file, model);
-      }
+        // entity type service
+        this.generateEntityTypeService(file, model);
+        // entity collection service if this entity specified keys at all
+        if (model.keyNames.length) {
+          this.generateEntityCollectionService(file, model);
+        }
 
-      return this.project.finalizeFile(file);
-    });
+        return this.project.finalizeFile(file);
+      });
   }
 
   private generateComplexTypeServices(): Array<Promise<void>> {
     // build service file for complex types
-    return this.dataModel.getComplexTypes().map((model) => {
-      const file = this.project.createOrGetServiceFile(model.folderPath, model.serviceName, [model.serviceName]);
+    return this.dataModel
+      .getComplexTypes()
+      .filter((model) => model.genMode === Modes.service || model.genMode === Modes.all)
+      .map((model) => {
+        const file = this.project.createOrGetServiceFile(model.folderPath, model.serviceName, [model.serviceName]);
 
-      // entity type service
-      this.generateEntityTypeService(file, model);
+        // entity type service
+        this.generateEntityTypeService(file, model);
 
-      return this.project.finalizeFile(file);
-    });
+        return this.project.finalizeFile(file);
+      });
   }
 
   private generateMethod(
