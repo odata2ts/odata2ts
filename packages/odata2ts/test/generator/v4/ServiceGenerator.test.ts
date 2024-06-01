@@ -412,4 +412,42 @@ describe("Service Generator Tests V4", () => {
     // then the generated TestEntityService must use the AbstractEntityId => there's no TestEntityId interface
     await compareMainService("abstract-with-inheritance.ts");
   });
+
+  test("Service Generator: function overloads", async () => {
+    // given function overloads
+    odataBuilder
+      // given one function definition without params
+      .addFunction("BestReview", ODataTypesV4.String, false, (builder) =>
+        builder.addParam("myParam", ODataTypesV4.Boolean, false)
+      )
+      // same function with different params
+      .addFunction("BestReview", ODataTypesV4.String, false, (builder) =>
+        builder.addParam("minRating", ODataTypesV4.Int16, false)
+      )
+      .addFunctionImport("BestReview", withNs("BestReview"));
+
+    // when generating
+    await doGenerate();
+
+    // then service has one function with multiple parameter types
+    await compareMainService("function-overload.ts");
+  });
+
+  test("Service Generator: function overloads optional params", async () => {
+    // given function overloads
+    odataBuilder
+      // given one function definition without params
+      .addFunction("BestReview", ODataTypesV4.String, false)
+      // same function with different params
+      .addFunction("BestReview", ODataTypesV4.String, false, (builder) =>
+        builder.addParam("minRating", ODataTypesV4.Int16, false)
+      )
+      .addFunctionImport("BestReview", withNs("BestReview"));
+
+    // when generating
+    await doGenerate();
+
+    // then service has one function with multiple parameter types
+    await compareMainService("function-overload-optional.ts");
+  });
 });
