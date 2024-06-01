@@ -93,6 +93,7 @@ export interface OperationType {
   parameters: Array<PropertyModel>;
   returnType?: ReturnTypeModel;
   usePost?: boolean;
+  overrides?: Array<Array<PropertyModel>>;
 }
 
 export interface ReturnTypeModel extends PropertyModel {}

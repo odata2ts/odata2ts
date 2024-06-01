@@ -181,4 +181,54 @@ describe("Model Generator Tests V4", () => {
       propertiesByName: [...["id"].map((name) => ({ name, managed: true }))],
     });
   });
+
+  test(`${TEST_SUITE_NAME}: overloaded function params`, async () => {
+    const testFunc = "testFunc";
+
+    // given two functions with same name but different set of parameters
+    odataBuilder
+      .addFunction(testFunc, ODataTypesV4.String, false, (pBuilder) =>
+        pBuilder.addParam("anyParam", ODataTypesV4.Boolean, false)
+      )
+      .addFunction(testFunc, ODataTypesV4.String, false);
+
+    // when generating parameter model
+    // then match fixture text
+    await generateAndCompare("funcOverload", "function-overload.ts");
+  });
+
+  test(`${TEST_SUITE_NAME}: overloaded function params (changed order)`, async () => {
+    const testFunc = "testFunc";
+
+    // given two functions with same name but different set of parameters
+    odataBuilder
+      .addFunction(testFunc, ODataTypesV4.String, false)
+      .addFunction(testFunc, ODataTypesV4.String, false, (pBuilder) =>
+        pBuilder.addParam("anyParam", ODataTypesV4.Boolean, false)
+      );
+
+    // when generating parameter model
+    // then match fixture text
+    await generateAndCompare("funcOverload2", "function-overload.ts");
+  });
+
+  test(`${TEST_SUITE_NAME}: overloaded function params (multiple sets)`, async () => {
+    const testFunc = "testFunc";
+
+    // given two functions with same name but different set of parameters
+    odataBuilder
+      .addFunction(testFunc, ODataTypesV4.String, false, (pBuilder) => {
+        pBuilder.addParam("myParam", ODataTypesV4.String, false);
+      })
+      .addFunction(testFunc, ODataTypesV4.String, false, (pBuilder) =>
+        pBuilder.addParam("anyParam", ODataTypesV4.Boolean, false)
+      )
+      .addFunction(testFunc, ODataTypesV4.String, false, (pBuilder) =>
+        pBuilder.addParam("x", ODataTypesV4.Int32, false).addParam("y", ODataTypesV4.Int32, true)
+      );
+
+    // when generating parameter model
+    // then match fixture text
+    await generateAndCompare("funcOverload3", "function-overload-multiple.ts", {});
+  });
 });

@@ -570,7 +570,7 @@ class ServiceGenerator {
   ): OptionalKind<MethodDeclarationStructure> {
     const isFunc = operation.type === OperationTypes.Function;
     const returnType = operation.returnType;
-    const hasParams = operation.parameters.length > 0;
+    const hasParams = operation.parameters.length > 0 || operation.overrides?.length;
 
     // importing dependencies
     const [httpClientConfigModel, odataResponse] = importContainer.addClientApi(

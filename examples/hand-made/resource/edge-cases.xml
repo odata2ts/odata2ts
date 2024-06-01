@@ -84,7 +84,27 @@
         <ReturnType Type="SRV.ZCDS_SCM_HU_PRINT_RESULT"
                     Nullable="false"/>
       </Function>
+
+      <!-- Type Definition: Mapping primitive types to alias -->
       <TypeDefinition Name="StringType" UnderlyingType="Edm.String" />
+
+      <!-- Function Overloads -->
+      <Function Name="GetX">
+        <ReturnType Type="Edm.Boolean"/>
+      </Function>
+      <Function Name="GetX">                          <!-- same name -->
+        <Parameter Name="anyProp" Type="Edm.Int32"/>  <!-- different param set -->
+        <ReturnType Type="Edm.Boolean"/>              <!-- same return type -->
+      </Function>
+
+      <Function Name="GetY">
+        <Parameter Name="myProp" Type="Edm.Int32"/>
+        <ReturnType Type="Edm.Boolean"/>
+      </Function>
+      <Function Name="GetY">                          <!-- same name -->
+        <Parameter Name="anyProp" Type="Edm.Int32"/>  <!-- different param set -->
+        <ReturnType Type="Edm.Boolean"/>              <!-- same return type -->
+      </Function>
 
       <EntityContainer Name="Container">
         <EntitySet Name="HandlingUnit" EntityType="SRV.HandlingUnitType">
@@ -93,6 +113,10 @@
         <EntitySet Name="HuItem" EntityType="SRV.HuItemType"/>
         <EntitySet Name="UserParam" EntityType="SRV.UserParamType"/>
         <EntitySet Name="Warehouse" EntityType="SRV.WarehouseType"/>
+        <FunctionImport
+          Name="GetX"
+          Function="SRV.GetX"
+        />
       </EntityContainer>
     </Schema>
   </edmx:DataServices>
