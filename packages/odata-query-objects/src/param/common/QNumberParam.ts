@@ -8,6 +8,6 @@ export const parseValueFromUrl: UrlParamValueParser<number> = (urlConformValue) 
 };
 
 export class QNumberParam<ConvertedType = number> extends QParam<number, ConvertedType> {
-  getUrlConformValue = formatLiteralParam;
-  parseValueFromUrl = parseValueFromUrl;
+  protected getUrlConformValue = formatLiteralParam;
+  protected parseValueFromUrl = parseValueFromUrl;
 }

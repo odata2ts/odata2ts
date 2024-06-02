@@ -1,12 +1,7 @@
 import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
-import {
-  QFunction,
-  QueryObject,
-  convertV4CollectionResponse,
-  convertV4ModelResponse,
-} from "@odata2ts/odata-query-objects";
+import { QId, QueryObject, convertV4CollectionResponse, convertV4ModelResponse } from "@odata2ts/odata-query-objects";
 
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4";
 
@@ -18,7 +13,7 @@ export abstract class EntitySetServiceV4<
   EIdType
 > {
   protected readonly __base: ServiceStateHelperV4<ClientType, Q>;
-  protected readonly __idFunction: QFunction<EIdType>;
+  protected readonly __idFunction: QId<EIdType>;
 
   /**
    * Overriding the constructor to support creation of EntityTypeService from within this service.
@@ -28,7 +23,7 @@ export abstract class EntitySetServiceV4<
    * @param basePath the base URL path
    * @param name name of the service
    * @param qModel query object
-   * @param _idFunction the id function
+   * @param idFunction the id function
    * @param bigNumbersAsString
    * @protected
    */
@@ -37,7 +32,7 @@ export abstract class EntitySetServiceV4<
     basePath: string,
     name: string,
     qModel: Q,
-    idFunction: QFunction<EIdType>,
+    idFunction: QId<EIdType>,
     bigNumbersAsString: boolean = false
   ) {
     this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, bigNumbersAsString);
