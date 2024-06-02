@@ -1,12 +1,7 @@
 import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
-import {
-  QFunction,
-  QueryObject,
-  convertV2CollectionResponse,
-  convertV2ModelResponse,
-} from "@odata2ts/odata-query-objects";
+import { QId, QueryObject, convertV2CollectionResponse, convertV2ModelResponse } from "@odata2ts/odata-query-objects";
 
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2";
 
@@ -18,9 +13,9 @@ export abstract class EntitySetServiceV2<
   EIdType
 > {
   protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
-  protected readonly __idFunction: QFunction<EIdType>;
+  protected readonly __idFunction: QId<EIdType>;
 
-  protected constructor(client: ClientType, basePath: string, name: string, qModel: Q, idFunction: QFunction<EIdType>) {
+  protected constructor(client: ClientType, basePath: string, name: string, qModel: Q, idFunction: QId<EIdType>) {
     this.__base = new ServiceStateHelperV2(client, basePath, name, qModel);
     this.__idFunction = idFunction;
   }
