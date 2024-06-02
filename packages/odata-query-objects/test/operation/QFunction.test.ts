@@ -1,10 +1,5 @@
 import { QGetSomethingFunction, QGetSomethingFunctionV2 } from "../fixture/operation/EmptyFunction";
-import {
-  BookIdFunction,
-  BookIdFunctionWithConversion,
-  BookIdV2Function,
-  ComplexBookIdFunction,
-} from "../fixture/operation/IdFunction";
+import { OverloadedFunctionParamModel, QOverloadedFunction } from "../fixture/operation/OverloadedFunction";
 import {
   BestBookParamModel,
   BestBookParamModelV2,
@@ -90,5 +85,37 @@ describe("QFunction Tests", () => {
     const exampleFunction = new QPrimitiveReturningFunctionV2();
 
     expect(exampleFunction.convertResponse(createResponse({ d: { any: true } })).data).toStrictEqual({ d: { any: 1 } });
+  });
+
+  test("QFunction: overloaded params", () => {
+    const exampleFunction = new QOverloadedFunction();
+    const params: OverloadedFunctionParamModel = {
+      testNumber: 3,
+      testBoolean: 0,
+    };
+    const altParams: OverloadedFunctionParamModel = {
+      id: "123",
+    };
+
+    let expectedResult = "OverloadedFunction(TestNumber=3,test_Boolean=false)";
+    expect(exampleFunction.buildUrl(params)).toBe(expectedResult);
+    expect(exampleFunction.parseUrl(expectedResult)).toStrictEqual(params);
+
+    expectedResult = "OverloadedFunction(ID='123')";
+    expect(exampleFunction.buildUrl(altParams, true)).toBe(expectedResult);
+    expect(exampleFunction.parseUrl(expectedResult)).toStrictEqual(altParams);
+
+    expectedResult = "OverloadedFunction('123')";
+    expect(exampleFunction.buildUrl(altParams.id, true)).toBe(expectedResult);
+    expect(exampleFunction.parseUrl(expectedResult)).toBe(altParams.id);
+  });
+
+  test("QFunction: fail overloaded params matching", () => {
+    const exampleFunction = new QOverloadedFunction();
+
+    // @ts-ignore
+    expect(exampleFunction.buildUrl({ notExistent: "ay" })).toBe(exampleFunction.getName() + "()");
+    // @ts-ignore
+    expect(exampleFunction.buildUrl()).toBe(exampleFunction.getName() + "()");
   });
 });

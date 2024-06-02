@@ -1,3 +1,4 @@
+import { QParamModel } from "../param/QParamModel";
 import { QFunction } from "./QFunction";
 
 /**
@@ -8,4 +9,6 @@ export abstract class QId<ParamModel> extends QFunction<ParamModel> {
   public constructor(name: string) {
     super(name, undefined, { v2Mode: false });
   }
+
+  public abstract getParams(): Array<QParamModel<any, any>>;
 }
