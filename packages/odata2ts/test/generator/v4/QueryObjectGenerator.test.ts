@@ -166,4 +166,34 @@ describe("Query Object Generator Tests V4", () => {
     // then match fixture text
     await generateAndCompare("boundAction", "action-bound.ts");
   });
+
+  test(`QFunction with overloaded params`, async () => {
+    const funcName = "OverloadedFunction";
+    // given an overloaded function
+    odataBuilder
+      .addFunction(funcName, ODataTypesV4.String, false, (builder) =>
+        builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true)
+      )
+      .addFunction(funcName, ODataTypesV4.String, false, (builder) => {
+        builder.addParam("id", ODataTypesV4.Guid);
+      });
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("overloadedFunction", "function-overloaded.ts");
+  });
+
+  test(`QFunction with overloaded params 2`, async () => {
+    const funcName = "OverloadedFunction";
+    // given an overloaded function
+    odataBuilder
+      .addFunction(funcName, ODataTypesV4.String, false)
+      .addFunction(funcName, ODataTypesV4.String, false, (builder) => {
+        builder.addParam("test", ODataTypesV4.String, false);
+      });
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("overloadedFunction2", "function-overloaded-2.ts");
+  });
 });
