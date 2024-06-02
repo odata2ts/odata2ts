@@ -570,7 +570,8 @@ class ServiceGenerator {
   ): OptionalKind<MethodDeclarationStructure> {
     const isFunc = operation.type === OperationTypes.Function;
     const returnType = operation.returnType;
-    const hasParams = operation.parameters.length > 0;
+    const hasParams = operation.parameters.length > 0 || operation.overrides?.length;
+    const isParamsOptional = !![operation.parameters, ...(operation.overrides ?? [])].find((pSet) => pSet.length === 0);
 
     // importing dependencies
     const [httpClientConfigModel, odataResponse] = importContainer.addClientApi(
@@ -598,7 +599,9 @@ class ServiceGenerator {
       scope: Scope.Public,
       isAsync: true,
       name,
-      parameters: hasParams ? [{ name: "params", type: paramsModelName }, requestConfigParam] : [requestConfigParam],
+      parameters: hasParams
+        ? [{ name: "params", type: paramsModelName, hasQuestionToken: isParamsOptional }, requestConfigParam]
+        : [requestConfigParam],
       returnType: `Promise<${odataResponse}<${responseStructure}<${rtType || "void"}>>>`,
       statements: [
         `if(!${qOpProp}) {`,

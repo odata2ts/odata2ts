@@ -63,14 +63,24 @@ export class NameClashValidator implements NameValidator {
   }
 
   addUnboundOperationType(fqName: string, name: string) {
-    return this.addToTypes(fqName, name, TypeModel.OperationType);
+    const validationObject: ValidationError = { type: TypeModel.OperationType, fqName };
+
+    const hit = this.store.get(name);
+    // to support function overloads: allow multiple operation definitions with same fully qualified name
+    if (hit && hit.fqName !== fqName) {
+      return this.addToError(name, hit, validationObject);
+    } else {
+      this.store.set(name, validationObject);
+      return name;
+    }
   }
 
   addBoundOperationType(bindingName: string, fqName: string, name: string) {
     const nameWithBinding = `${bindingName}_${name}`;
     const validationObject: ValidationError = { type: TypeModel.OperationType, fqName };
     const hit = this.store.get(nameWithBinding);
-    if (hit) {
+    // to support function overloads: allow multiple operation definitions with same fully qualified name
+    if (hit && hit.fqName !== fqName) {
       return this.addToError(name, hit, validationObject);
     } else {
       this.store.set(nameWithBinding, validationObject);

@@ -13,6 +13,7 @@ import {
   ModelType,
   ODataVersion,
   OperationType,
+  OperationTypes,
   PropertyModel,
   SingletonType,
 } from "./DataTypeModel";
@@ -194,6 +195,15 @@ export class DataModel {
   }
 
   public addUnboundOperationType(namespace: string, operationType: OperationType) {
+    // supporting function overrides
+    const isFunction = operationType.type === OperationTypes.Function;
+    const existingFn = isFunction ? this.unboundOperationTypes.get(operationType.fqName) : undefined;
+    if (existingFn) {
+      const params = operationType.parameters;
+      existingFn.overrides ? existingFn.overrides.push(params) : (existingFn.overrides = [params]);
+      return;
+    }
+
     this.unboundOperationTypes.set(operationType.fqName, operationType);
     this.addAlias(namespace, operationType.odataName);
   }
@@ -208,11 +218,19 @@ export class DataModel {
 
   public addBoundOperationType(namespace: string, bindingProp: PropertyModel, operationType: OperationType) {
     const fqEntityType = bindingProp.fqType;
-
     const store = bindingProp.isCollection ? this.entityCollectionBoundOperationTypes : this.entityBoundOperationTypes;
-    const list = store.get(fqEntityType);
-    if (list) {
-      list.push(operationType);
+    const boundOps = store.get(fqEntityType);
+
+    if (boundOps) {
+      // supporting function overrides
+      const isFunction = operationType.type === OperationTypes.Function;
+      const existingFn = isFunction ? boundOps.find((bo) => bo.fqName === operationType.fqName) : undefined;
+      if (existingFn) {
+        const params = operationType.parameters;
+        existingFn.overrides ? existingFn.overrides.push(params) : (existingFn.overrides = [params]);
+      } else {
+        boundOps.push(operationType);
+      }
     } else {
       store.set(fqEntityType, [operationType]);
     }

@@ -217,24 +217,37 @@ class QueryObjectGenerator {
     });
   }
 
-  private getParamInitString(importContainer: ImportContainer, props: Array<PropertyModel>) {
-    return `[${props
-      .map((prop) => {
-        let complexQParam = "";
-        if (prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType) {
-          const importedQObject = importContainer.addGeneratedQObject(prop.fqType, prop.qObject!);
-          complexQParam = `, new ${importedQObject}()`;
-        }
+  private getParamInitString(
+    importContainer: ImportContainer,
+    props: Array<PropertyModel>,
+    overloads?: Array<Array<PropertyModel>>
+  ) {
+    const allParams = [props, ...(overloads ?? [])].map((paramSet) => {
+      const pString = paramSet
+        .map((prop) => {
+          let complexQParam = "";
+          if (prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType) {
+            const importedQObject = importContainer.addGeneratedQObject(prop.fqType, prop.qObject!);
+            complexQParam = `, new ${importedQObject}()`;
+          }
 
-        const qParam = importContainer.addFromQObject(prop.qParam!);
-        const isMappedNameNecessary = prop.odataName !== prop.name;
-        const mappedName = isMappedNameNecessary ? `"${prop.name}"` : prop.converters?.length ? "undefined" : undefined;
-        const converterStmt = this.generateConverterStmt(importContainer, prop.converters);
-        const mappedNameParam = mappedName ? `, ${mappedName}` : "";
-        const converterParam = converterStmt ? `, ${converterStmt}` : "";
-        return `new ${qParam}("${prop.odataName}"${complexQParam}${mappedNameParam}${converterParam})`;
-      })
-      .join(",")}]`;
+          const qParam = importContainer.addFromQObject(prop.qParam!);
+          const isMappedNameNecessary = prop.odataName !== prop.name;
+          const mappedName = isMappedNameNecessary
+            ? `"${prop.name}"`
+            : prop.converters?.length
+            ? "undefined"
+            : undefined;
+          const converterStmt = this.generateConverterStmt(importContainer, prop.converters);
+          const mappedNameParam = mappedName ? `, ${mappedName}` : "";
+          const converterParam = converterStmt ? `, ${converterStmt}` : "";
+          return `new ${qParam}("${prop.odataName}"${complexQParam}${mappedNameParam}${converterParam})`;
+        })
+        .join(",");
+      return `[${pString}]`;
+    });
+
+    return allParams.length === 1 ? allParams[0] : `[${allParams.join(",")}]`;
   }
 
   private async generateUnboundOperations() {
@@ -251,14 +264,13 @@ class QueryObjectGenerator {
     const imports = file.getImports();
     const isV2 = this.version === ODataVersions.V2;
     const returnType = operation.returnType;
-    const hasParams = operation.parameters.length > 0;
+    const hasParams = operation.parameters.length > 0 || operation.overrides?.length;
+    const isParamsOptional = !![operation.parameters, ...(operation.overrides ?? [])].find((pSet) => pSet.length === 0);
 
     // imports
     const qOp = operation.type === OperationTypes.Action ? QueryObjectImports.QAction : QueryObjectImports.QFunction;
     const qOperation = imports.addQObject(qOp);
-    const paramModelName = operation.parameters.length
-      ? imports.addGeneratedModel(baseFqName, operation.paramsModelName)
-      : undefined;
+    const paramModelName = hasParams ? imports.addGeneratedModel(baseFqName, operation.paramsModelName) : undefined;
 
     let returnTypeOpStmt: string = "";
     if (returnType) {
@@ -302,8 +314,8 @@ class QueryObjectGenerator {
           name: "params",
           scope: Scope.Private,
           isReadonly: true,
-          type: operation.parameters?.length ? undefined : "[]",
-          initializer: this.getParamInitString(imports, operation.parameters),
+          type: hasParams ? undefined : "[]",
+          initializer: this.getParamInitString(imports, operation.parameters, operation.overrides),
         },
       ],
       ctors: [

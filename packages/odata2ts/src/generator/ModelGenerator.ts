@@ -284,19 +284,44 @@ class ModelGenerator {
   }
 
   private generateOperationParams(file: FileHandler, operation: OperationType) {
-    if (!operation.parameters.length) {
-      return;
+    const paramSets = [operation.parameters, ...(operation.overrides ?? [])].filter((pSet) => !!pSet.length);
+
+    // standard: one interface for parameters
+    if (paramSets.length === 1) {
+      file.getFile().addInterface({
+        name: operation.paramsModelName,
+        isExported: true,
+        properties: paramSets[0].map((p) => {
+          return {
+            name: p.name,
+            type: this.getPropType(file.getImports(), p),
+            hasQuestionToken: !p.required,
+          };
+        }),
+      });
     }
-    file.getFile().addInterface({
-      name: operation.paramsModelName,
-      isExported: true,
-      properties: operation.parameters.map((p) => {
-        return {
-          name: p.name,
-          type: this.getPropType(file.getImports(), p),
-          hasQuestionToken: !p.required,
-        };
-      }),
-    });
+    // function overload: one type with intersections of different param models
+    else if (paramSets.length > 1) {
+      file.getFile().addTypeAlias({
+        name: operation.paramsModelName,
+        isExported: true,
+        type: (writer) => {
+          paramSets.forEach((pSet, index) => {
+            writer.block(() => {
+              pSet.forEach((param, index) => {
+                const paramType = this.getPropType(file.getImports(), param);
+                writer.write(`${param.name}${param.required ? "" : "?"}: ${paramType}`);
+                if (index < pSet.length - 1) {
+                  writer.write(",");
+                }
+              });
+            });
+            if (index < paramSets.length - 1) {
+              writer.write(" | ");
+            }
+          });
+        },
+      });
+    }
   }
 }

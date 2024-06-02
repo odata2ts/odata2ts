@@ -1,7 +1,5 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 
-import { QBooleanParam } from "../param/common/QBooleanParam";
-import { QNumberParam } from "../param/common/QNumberParam";
 import { QParamModel } from "../param/QParamModel";
 import { OperationReturnType, emptyOperationReturnType } from "./OperationReturnType";
 
@@ -71,7 +69,7 @@ export abstract class QFunction<ParamModel = undefined> {
     return !!this.config.v2Mode;
   }
 
-  public buildUrl(params: ParamModel, notEncoded = false): string {
+  public buildUrl(params?: ParamModel, notEncoded = false): string {
     let paramsString: string;
 
     // short form of id: just primitive value for single key entities
@@ -92,7 +90,7 @@ export abstract class QFunction<ParamModel = undefined> {
     return this.name + paramsString;
   }
 
-  private formatParams(params: ParamModel): FunctionParams | undefined {
+  private formatParams(params?: ParamModel): FunctionParams | undefined {
     if (!params) {
       return undefined;
     }

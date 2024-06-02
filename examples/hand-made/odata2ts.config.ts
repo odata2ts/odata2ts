@@ -12,6 +12,8 @@ const config: ConfigFileOptions = {
       output: "src/generated/abstract-and-open",
     },
     edgeCases: {
+      disableAutomaticNameClashResolution: true,
+      bundledFileGeneration: true,
       serviceName: "edgeCase",
       source: "resource/edge-cases.xml",
       output: "src/generated/edge-cases",

@@ -75,7 +75,7 @@ export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, Sch
     return this;
   }
 
-  public addFunctionImport(name: string, func: string, entitySet: string) {
+  public addFunctionImport(name: string, func: string, entitySet?: string) {
     const container = this.getEntityContainer();
     if (!container.FunctionImport) {
       container.FunctionImport = [];
@@ -85,7 +85,7 @@ export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, Sch
       $: {
         Name: name,
         Function: func,
-        EntitySet: entitySet,
+        ...(entitySet ? { EntitySet: entitySet } : undefined),
       },
     });
 

@@ -295,4 +295,47 @@ describe("Function Digestion Test", () => {
     toTest = result.getUnboundOperationType(withNs(altFuncName))!;
     expect(toTest.name).toBe("Cmplx_testFunc");
   });
+
+  test("unbound function overload", async () => {
+    const funcName = "TestOp";
+
+    odataBuilder.addFunction(funcName, ODataTypesV4.Boolean, false);
+    odataBuilder.addFunction(funcName, ODataTypesV4.Boolean, false, (builder) =>
+      builder.addParam("anyParam", ODataTypesV4.Boolean)
+    );
+
+    const result = await doDigest();
+
+    expect(result.getUnboundOperationTypes().length).toBe(1);
+
+    let toTest = result.getUnboundOperationType(withNs(funcName))!;
+    expect(toTest.parameters.length).toBe(0);
+    expect(toTest.overrides?.length).toBe(1);
+    expect(toTest.overrides![0].length).toBe(1);
+    expect(toTest.overrides![0][0]).toMatchObject({ name: "anyParam", type: "boolean" });
+  });
+
+  test("bound function overload", async () => {
+    const entName = "TestEnt";
+    const funcName = "TestOp";
+
+    odataBuilder
+      .addEntityType(entName, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addEntitySet("tests", withNs(entName))
+      .addFunction(funcName, ODataTypesV4.Boolean, true, (builder) => builder.addParam("_it", withNs(entName)))
+      .addFunction(funcName, ODataTypesV4.Boolean, true, (builder) =>
+        builder.addParam("_it", withNs(entName)).addParam("anyParam", ODataTypesV4.Boolean)
+      );
+
+    const result = await doDigest();
+
+    const boundOps = result.getEntityTypeOperations(withNs(entName));
+    expect(boundOps.length).toBe(1);
+
+    let toTest = boundOps[0];
+    expect(toTest.parameters.length).toBe(0);
+    expect(toTest.overrides?.length).toBe(1);
+    expect(toTest.overrides![0].length).toBe(1);
+    expect(toTest.overrides![0][0]).toMatchObject({ name: "anyParam", type: "boolean" });
+  });
 });
