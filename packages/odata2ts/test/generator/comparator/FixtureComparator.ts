@@ -1,6 +1,6 @@
 import path from "path";
 
-import { pathExistsSync, readFileSync } from "fs-extra";
+import { pathExistsSync, readFile } from "fs-extra";
 import prettier, { Options } from "prettier";
 
 /**
@@ -34,7 +34,7 @@ export class FixtureComparator {
       throw new Error("Unable to load fixture: " + fullPath);
     }
 
-    const fixture = this.loadFixture(fullPath);
+    const fixture = await this.loadFixture(fullPath);
     const cleanedFixture = fixture
       .replace(/\r\n/g, "\n")
       .replace(new RegExp("^//( )*@ts-nocheck( )*\n"), "")
@@ -50,6 +50,6 @@ export class FixtureComparator {
   }
 
   public loadFixture(path: string) {
-    return readFileSync(path, "utf-8");
+    return readFile(path, "utf-8");
   }
 }

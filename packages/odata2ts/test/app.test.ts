@@ -161,6 +161,7 @@ describe("App Test", () => {
       usePrettier: false,
       bundledFileGeneration: true,
       tsConfigPath: "tsconfig.json",
+      allowTypeChecking: false,
     });
 
     // then only generateModels was called
@@ -188,6 +189,7 @@ describe("App Test", () => {
       usePrettier: true,
       bundledFileGeneration: false,
       tsConfigPath: "test.json",
+      allowTypeChecking: false,
     });
 
     // then generateModels & generateQObjects was called

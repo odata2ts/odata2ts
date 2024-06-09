@@ -45,6 +45,7 @@ describe("Service Generator Tests V4", () => {
     projectManager = await createProjectManager("build", EmitModes.ts, namingHelper, dataModel, {
       bundledFileGeneration: true,
       noOutput: true,
+      allowTypeChecking: true,
     });
 
     await fixtureComparatorHelper.generateService(projectManager, namingHelper, runOptions);

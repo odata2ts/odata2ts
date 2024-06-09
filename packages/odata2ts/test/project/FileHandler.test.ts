@@ -5,6 +5,7 @@ import { SourceFile } from "ts-morph";
 import { EmitModes } from "../../src";
 import { DataModel } from "../../src/data-model/DataModel";
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
+import { ImportContainer } from "../../src/generator/ImportContainer";
 import { FileHandler } from "../../src/project/FileHandler";
 import { FileFormatter } from "../../src/project/formatter/FileFormatter";
 
@@ -23,6 +24,7 @@ describe("FileHandler Test", () => {
 
   const mockFile: SourceFile = {
     addImportDeclarations: jest.fn(),
+    addStatements: jest.fn(),
     emit: jest.fn(),
     // @ts-ignore
     getFilePath: () => MOCKED_FILE_PATH,
@@ -40,16 +42,9 @@ describe("FileHandler Test", () => {
   function createFileHandler(options: { path?: string; fileName?: string; reservedNames?: Array<string> } = {}) {
     const { path = DEFAULT_PATH, fileName = DEFAULT_FILENAME, reservedNames = [] } = options;
 
-    return new FileHandler(
-      path,
-      fileName,
-      mockFile,
-      DEFAULT_DATA_MODEL,
-      MAIN_FILE_NAMES,
-      true,
-      formatter,
-      reservedNames
-    );
+    const imports = new ImportContainer(path, fileName, DEFAULT_DATA_MODEL, MAIN_FILE_NAMES, true, reservedNames);
+
+    return new FileHandler(path, fileName, mockFile, imports, formatter, true);
   }
 
   test("Smoke Test", () => {
@@ -74,14 +69,6 @@ describe("FileHandler Test", () => {
   });
 
   test("without path", () => {
-    const pm = createFileHandler({ path: "" });
-
-    expect(pm.path).toBe("");
-    expect(pm.getFullFilePath()).toBe(DEFAULT_FILENAME);
-  });
-
-  // todo
-  test.skip("other props are passed along to ImportHandler", () => {
     const pm = createFileHandler({ path: "" });
 
     expect(pm.path).toBe("");
@@ -127,5 +114,19 @@ describe("FileHandler Test", () => {
     expect(mockFile.emit).toHaveBeenCalledWith({ emitOnlyDtsFiles: true });
     expect(formatter.format).not.toHaveBeenCalled();
     expect(writeFile).not.toHaveBeenCalled();
+  });
+
+  test("write no output", async () => {
+    const pm = createFileHandler();
+
+    await pm.write(EmitModes.ts, true);
+
+    // nothing was written or formatted
+    expect(mockFile.emit).not.toHaveBeenCalled();
+    expect(formatter.format).not.toHaveBeenCalled();
+    expect(writeFile).not.toHaveBeenCalled();
+
+    // imports should have been added, but we don't test that here
+    // => other tests rely on this fact
   });
 });

@@ -80,6 +80,7 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
     usePrettier: options.prettier,
     tsConfigPath: options.tsconfig,
     bundledFileGeneration: options.bundledFileGeneration,
+    allowTypeChecking: options.debug,
   });
 
   // const promises: Array<Promise<void>> = [

@@ -39,6 +39,7 @@ describe("Service Generator Tests V2", () => {
     projectManager = await createProjectManager("build/unitTest", EmitModes.ts, namingHelper, dataModel, {
       noOutput: true,
       bundledFileGeneration: true,
+      allowTypeChecking: true,
     });
 
     await generateServices(projectManager, dataModel, ODataVersions.V2, namingHelper, runOptions);

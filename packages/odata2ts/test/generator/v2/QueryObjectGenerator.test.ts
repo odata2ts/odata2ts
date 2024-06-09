@@ -21,6 +21,7 @@ describe("Query Object Generator Tests V2", () => {
     const projectManager = await createProjectManager("build/unitTest", EmitModes.ts, namingHelper, dataModel, {
       bundledFileGeneration: true,
       noOutput: true,
+      allowTypeChecking: true,
     });
     await generateQueryObjects(projectManager, dataModel, ODataVersions.V2, genOptions, namingHelper);
     return projectManager;
