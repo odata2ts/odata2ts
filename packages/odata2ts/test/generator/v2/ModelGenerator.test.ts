@@ -22,6 +22,7 @@ describe("Model Generator Tests V2", () => {
     const projectManager = await createProjectManager("build/unitTest", EmitModes.ts, namingHelper, dataModel, {
       noOutput: true,
       bundledFileGeneration: true,
+      allowTypeChecking: true,
     });
     await generateModels(projectManager, dataModel, ODataVersions.V2, genOptions, namingHelper);
     return projectManager;

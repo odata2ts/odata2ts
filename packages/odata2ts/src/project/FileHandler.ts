@@ -2,33 +2,19 @@ import { writeFile } from "fs/promises";
 
 import { SourceFile } from "ts-morph";
 
-import { DataModel } from "../data-model/DataModel";
 import { ImportContainer } from "../generator/ImportContainer";
 import { EmitModes } from "../OptionModel";
 import { FileFormatter } from "./formatter/FileFormatter";
 
 export class FileHandler {
-  private readonly importContainer: ImportContainer;
-
   constructor(
     public readonly path: string,
     public readonly fileName: string,
     protected readonly file: SourceFile,
-    dataModel: DataModel,
-    protected mainFileNames: { model: string; qObject: string; service: string },
-    protected bundledFileGeneration: boolean,
+    protected readonly importContainer: ImportContainer,
     protected formatter: FileFormatter | undefined,
-    reservedNames: Array<string> | undefined
-  ) {
-    this.importContainer = new ImportContainer(
-      path,
-      fileName,
-      dataModel,
-      mainFileNames,
-      bundledFileGeneration,
-      reservedNames
-    );
-  }
+    public readonly allowTypeChecking: boolean
+  ) {}
 
   public getFullFilePath() {
     return this.path ? `${this.path}/${this.fileName}` : this.fileName;
@@ -42,8 +28,19 @@ export class FileHandler {
     return this.importContainer;
   }
 
-  public async write(emitMode: EmitModes) {
+  public async write(emitMode: EmitModes, noOutput = false) {
     this.file.addImportDeclarations(this.importContainer.getImportDeclarations());
+    // add ts-nocheck to beginning of each file
+    if (!this.allowTypeChecking) {
+      const stmts = this.file.addStatements((writer) => {
+        writer.writeLine("// @ts-nocheck");
+      });
+      stmts[0].setOrder(0);
+    }
+
+    if (noOutput) {
+      return;
+    }
 
     switch (emitMode) {
       case EmitModes.js:

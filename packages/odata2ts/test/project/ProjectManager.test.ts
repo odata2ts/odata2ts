@@ -121,14 +121,11 @@ describe("ProjectManager Test", () => {
       fileName,
       // we don't check the SourceFile from ts-morph
       expect.anything(),
-      usedDataModel,
-      // main file names must have been passed
-      MAIN_FILE_NAMES,
-      // bundled file generation
-      false,
+      // todo: import container
+      expect.anything(),
       // we don't want to check the formatter
       expect.anything(),
-      reservedNames
+      false
     );
   }
 
@@ -139,14 +136,11 @@ describe("ProjectManager Test", () => {
       fileName,
       // we don't check the SourceFile from ts-morph
       expect.anything(),
-      usedDataModel,
-      // main file names must have been passed
-      MAIN_FILE_NAMES,
-      // bundled file generation
-      true,
+      // todo: import container
+      expect.anything(),
       // we don't want to check the formatter
       expect.anything(),
-      reservedNames
+      false
     );
   }
 

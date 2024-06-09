@@ -7,6 +7,7 @@ import { firstCharLowerCase } from "xml2js/lib/processors";
 import { DataModel } from "../data-model/DataModel";
 import { EntityType } from "../data-model/DataTypeModel";
 import { NamingHelper } from "../data-model/NamingHelper";
+import { ImportContainer } from "../generator/ImportContainer";
 import { EmitModes } from "../OptionModel";
 import { FileHandler } from "./FileHandler";
 import { createFormatter } from "./formatter";
@@ -21,6 +22,7 @@ export interface ProjectManagerOptions {
    * for testing purposes, turn this on and retrieve all generated files via getCachedFiles
    */
   noOutput?: boolean;
+  allowTypeChecking?: boolean;
 }
 
 export async function createProjectManager(
@@ -89,8 +91,9 @@ export class ProjectManager {
 
   private async writeFile(fileHandler: FileHandler) {
     if (this.options.noOutput) {
-      fileHandler.getFile().addImportDeclarations(fileHandler.getImports().getImportDeclarations());
+      await fileHandler.write(this.emitMode, true);
       this.cachedFiles!.set(fileHandler.getFullFilePath(), fileHandler.getFile());
+
       return;
     }
 
@@ -103,16 +106,22 @@ export class ProjectManager {
     additionalPath: string = ""
   ): FileHandler {
     const fileName = path.join(this.outputDir, additionalPath, `${name}.ts`);
+    const imports = new ImportContainer(
+      additionalPath,
+      name,
+      this.dataModel,
+      this.namingHelper.getFileNames(),
+      !!this.options.bundledFileGeneration,
+      reservedNames
+    );
 
     return new FileHandler(
       additionalPath,
       name,
       this.project.createSourceFile(fileName),
-      this.dataModel,
-      this.namingHelper.getFileNames(),
-      !!this.options.bundledFileGeneration,
+      imports,
       this.formatter,
-      reservedNames
+      !!this.options.allowTypeChecking
     );
   }
 
