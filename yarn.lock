@@ -2133,13 +2133,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/http-client-api@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "@odata2ts/http-client-api@npm:0.1.0"
-  checksum: 32e55d09acdab69d25db2feca5563c6ab713c014e6d745cb1487609cbe7fd71b840d18b5ffb72ca5c573663d0412fa809a37f8f7274a86fc936e3d370fb78a3b
-  languageName: node
-  linkType: hard
-
 "@odata2ts/http-client-api@npm:^0.5.1":
   version: 0.5.1
   resolution: "@odata2ts/http-client-api@npm:0.5.1"
@@ -2206,7 +2199,7 @@ __metadata:
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
     "@odata2ts/converter-api": ^0.1.2
-    "@odata2ts/http-client-api": ^0.1.0
+    "@odata2ts/http-client-api": ^0.5.1
     "@odata2ts/odata-core": ^0.5.0
     "@types/jest": ^29.5.2
     "@types/node": ^20.3.0
