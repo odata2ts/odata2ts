@@ -115,7 +115,7 @@ describe("ProjectManager Test", () => {
     });
   }
 
-  function checkFileHandlerCreation(filePath: string, fileName: string, reservedNames?: Array<string>) {
+  function checkFileHandlerCreation(filePath: string, fileName: string, allowTypeChecking = false) {
     expect(fileHandlerSpy).toHaveBeenCalledWith(
       filePath,
       fileName,
@@ -125,7 +125,7 @@ describe("ProjectManager Test", () => {
       expect.anything(),
       // we don't want to check the formatter
       expect.anything(),
-      false
+      allowTypeChecking
     );
   }
 
@@ -237,7 +237,7 @@ describe("ProjectManager Test", () => {
     const file = pm.createOrGetModelFile(folderPath, fileName);
 
     // then file is created
-    checkFileHandlerCreation(folderPath, fileName);
+    checkFileHandlerCreation(folderPath, fileName, true);
 
     // when finalizing
     await pm.finalizeFile(file);
@@ -260,7 +260,7 @@ describe("ProjectManager Test", () => {
     const file = pm.createOrGetMainModelFile();
 
     // then file is created
-    checkFileHandlerCreation("", "TesterModel");
+    checkFileHandlerCreation("", "TesterModel", true);
 
     // when finalizing models, then main file is not written => empty
     await pm.finalizeModels();
@@ -433,7 +433,7 @@ describe("ProjectManager Test", () => {
     pm.initServices();
 
     // then main service file is created
-    checkFileHandlerCreation("", MAIN_FILE_NAMES.service, [MAIN_FILE_NAMES.service]);
+    checkFileHandlerCreation("", MAIN_FILE_NAMES.service); //[MAIN_FILE_NAMES.service]
 
     // when requesting a new file
     const file = pm.createOrGetServiceFile(folderPath, fileName);
