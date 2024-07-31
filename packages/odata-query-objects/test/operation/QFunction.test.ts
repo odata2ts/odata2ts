@@ -49,9 +49,11 @@ describe("QFunction Tests", () => {
     expect(exampleFunction.buildUrl(allParams, true)).toBe(
       "BestBook(" +
         "TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb,testDate=null,testDateTimeOffset=dateTime" +
-        ',testCollection=["a","b"]' +
-        ',TEST_ENTITY={"title":"testBook","AUTHOR":{"name":"testAuthor"}}' +
-        ")"
+        ",testCollection=@testCollection" +
+        ",TEST_ENTITY=@TEST_ENTITY" +
+        ")" +
+        '?@testCollection=["a","b"]' +
+        '&@TEST_ENTITY={"title":"testBook","AUTHOR":{"name":"testAuthor"}}'
     );
   });
 
