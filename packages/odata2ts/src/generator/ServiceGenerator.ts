@@ -79,8 +79,8 @@ class ServiceGenerator {
     const container = this.dataModel.getEntityContainer();
     const unboundOperations = [...Object.values(container.functions), ...Object.values(container.actions)];
 
-    const [httpClient] = importContainer.addClientApi(ClientApiImports.ODataHttpClient);
-    const [rootService] = importContainer.addServiceObject(this.version, ServiceImports.ODataService);
+    const httpClient = importContainer.addClientApi(ClientApiImports.ODataHttpClient);
+    const rootService = importContainer.addServiceObject(this.version, ServiceImports.ODataService);
 
     const { properties, methods }: PropsAndOps = deepmerge(
       this.generateMainServiceProperties(container, importContainer),
@@ -240,8 +240,8 @@ class ServiceGenerator {
     const operations = this.dataModel.getEntityTypeOperations(model.fqName);
     const props = [...model.baseProps, ...model.props];
 
-    const [entityServiceType] = importContainer.addServiceObject(this.version, ServiceImports.EntityTypeService);
-    const [httpClient] = importContainer.addClientApi(ClientApiImports.ODataHttpClient);
+    const entityServiceType = importContainer.addServiceObject(this.version, ServiceImports.EntityTypeService);
+    const httpClient = importContainer.addClientApi(ClientApiImports.ODataHttpClient);
 
     // note: predictable first imports => no need to take renaming into account
     const modelName = importContainer.addGeneratedModel(model.fqName, model.modelName);
@@ -338,7 +338,7 @@ class ServiceGenerator {
       const modelName = imports.addGeneratedModel(propModel.fqName, propModel.modelName);
       const editableModelName = imports.addGeneratedModel(propModel.fqName, propModel.editableName);
       const qModelName = imports.addGeneratedQObject(propModel.fqName, propModel.qName);
-      const [collectionServiceType] = imports.addServiceObject(this.version, ServiceImports.CollectionService);
+      const collectionServiceType = imports.addServiceObject(this.version, ServiceImports.CollectionService);
 
       propModelType = `${collectionServiceType}<ClientType, ${modelName}, ${qModelName}, ${editableModelName}>`;
     } else {
@@ -362,19 +362,20 @@ class ServiceGenerator {
       throw new Error("Illegal State: [qObject] must be provided for Collection types!");
     }
 
-    const [collectionServiceType] = imports.addServiceObject(this.version, ServiceImports.CollectionService);
+    const collectionServiceType = imports.addServiceObject(this.version, ServiceImports.CollectionService);
     const isEnum = prop.dataType === DataTypes.EnumType;
     let qType: string;
     let type: string;
 
     if (!isEnum) {
       // TODO move string concat (StringCollection, GuidCollection...) to better place
-      [type, qType] = imports.addFromQObject(`${upperCaseFirst(prop.type)}Collection`, prop.qObject);
+      qType = imports.addQObject(prop.qObject);
+      type = imports.addQObjectType(`${upperCaseFirst(prop.type)}Collection`);
     } else {
       const propEnum = this.dataModel.getModel(prop.fqType)!;
       const propTypeModel = imports.addGeneratedModel(propEnum.fqName, propEnum.modelName);
-      [type, qType] = imports.addQObject(QueryObjectImports.EnumCollection, QueryObjectImports.QEnumCollection);
-      type = `${type}<${propTypeModel}>`;
+      qType = imports.addQObject(QueryObjectImports.QEnumCollection);
+      type = `${imports.addQObjectType(QueryObjectImports.EnumCollection)}<${propTypeModel}>`;
     }
 
     const collectionType = `${collectionServiceType}<ClientType, ${type}, ${qType}>`;
@@ -391,8 +392,8 @@ class ServiceGenerator {
     imports: ImportContainer,
     prop: PropertyModel
   ): OptionalKind<PropertyDeclarationStructure> {
-    const [serviceType] = imports.addServiceObject(this.version, ServiceImports.PrimitiveTypeService);
-    const type = prop.typeModule ? imports.addCustomType(prop.typeModule, prop.type) : prop.type;
+    const serviceType = imports.addServiceObject(this.version, ServiceImports.PrimitiveTypeService);
+    const type = prop.typeModule ? imports.addCustomType(prop.typeModule, prop.type, true) : prop.type;
 
     return {
       scope: Scope.Private,
@@ -410,7 +411,7 @@ class ServiceGenerator {
     const isComplexCollection = prop.isCollection && model.dataType === DataTypes.ComplexType;
 
     const type = isComplexCollection
-      ? imports.addServiceObject(this.version, ServiceImports.CollectionService)[0]
+      ? imports.addServiceObject(this.version, ServiceImports.CollectionService)
       : prop.isCollection
       ? model.serviceCollectionName
       : model.serviceName;
@@ -442,9 +443,9 @@ class ServiceGenerator {
     imports: ImportContainer,
     prop: PropertyModel
   ): OptionalKind<MethodDeclarationStructure> {
-    const [collectionServiceType] = imports.addServiceObject(this.version, ServiceImports.CollectionService);
+    const collectionServiceType = imports.addServiceObject(this.version, ServiceImports.CollectionService);
     const instanceName = firstCharLowerCase(prop.qObject!);
-    const [qInstanceName] = imports.addFromQObject(instanceName);
+    const qInstanceName = imports.addQObject(instanceName);
 
     const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
     return {
@@ -465,7 +466,7 @@ class ServiceGenerator {
     imports: ImportContainer,
     prop: PropertyModel
   ): OptionalKind<MethodDeclarationStructure> {
-    const [serviceType] = imports.addServiceObject(this.version, ServiceImports.PrimitiveTypeService);
+    const serviceType = imports.addServiceObject(this.version, ServiceImports.PrimitiveTypeService);
     const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
     // for V2: mapped name must be specified
     const useMappedName = this.version === ODataVersions.V2 && prop.name !== prop.odataName;
@@ -491,7 +492,7 @@ class ServiceGenerator {
     const editableModelName = model.editableName;
     const qObjectName = firstCharLowerCase(model.qName);
 
-    const [entitySetServiceType] = importContainer.addServiceObject(this.version, ServiceImports.EntitySetService);
+    const entitySetServiceType = importContainer.addServiceObject(this.version, ServiceImports.EntitySetService);
     const paramsModelName = importContainer.addGeneratedModel(model.id.fqName, model.id.modelName);
     const qIdFunctionName = importContainer.addGeneratedQObject(model.id.fqName, model.id.qName);
 
@@ -574,10 +575,8 @@ class ServiceGenerator {
     const isParamsOptional = !![operation.parameters, ...(operation.overrides ?? [])].find((pSet) => pSet.length === 0);
 
     // importing dependencies
-    const [httpClientConfigModel, odataResponse] = importContainer.addClientApi(
-      ClientApiImports.ODataHttpClientConfig,
-      ClientApiImports.HttpResponseModel
-    );
+    const httpClientConfigModel = importContainer.addClientApi(ClientApiImports.ODataHttpClientConfig);
+    const odataResponse = importContainer.addClientApi(ClientApiImports.HttpResponseModel);
     const responseStructure = this.importReturnType(importContainer, returnType);
     const qOperationName = importContainer.addGeneratedQObject(baseFqName, operation.qName);
     const rtType =
@@ -634,6 +633,6 @@ class ServiceGenerator {
       ? CoreImports.ODataValueResponse
       : CoreImports.ODataModelResponse;
 
-    return imports.addCoreLib(this.version, typeToImport)[0];
+    return imports.addCoreLib(this.version, typeToImport);
   }
 }

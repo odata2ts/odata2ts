@@ -2,7 +2,7 @@ import { OperationReturnType, QAction, QBooleanParam, QStringParam, ReturnTypes 
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
 
 // @ts-ignore
-import { MinActionParams } from "./TesterModel";
+import type { MinActionParams } from "./TesterModel";
 
 export class QMinAction extends QAction<MinActionParams> {
   private readonly params = [new QStringParam("test"), new QStringParam("opt_Test", "optTest")];

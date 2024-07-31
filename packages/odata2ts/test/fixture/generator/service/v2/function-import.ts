@@ -1,11 +1,11 @@
-import { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
-import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
+import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
+import type { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
 import { EntitySetServiceV2, EntityTypeServiceV2, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QBestBook, QMostPop, QPostBestBook, QTestEntity, QTestEntityId, qTestEntity } from "./QTester";
 // @ts-ignore
-import { BestBookParams, EditableTestEntity, PostBestBookParams, TestEntity, TestEntityId } from "./TesterModel";
+import type { BestBookParams, EditableTestEntity, PostBestBookParams, TestEntity, TestEntityId } from "./TesterModel";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   private _qMostPop?: QMostPop;

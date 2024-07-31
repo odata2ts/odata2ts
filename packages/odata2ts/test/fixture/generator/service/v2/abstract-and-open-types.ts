@@ -1,4 +1,4 @@
-import { ODataHttpClient } from "@odata2ts/http-client-api";
+import type { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EntitySetServiceV2, EntityTypeServiceV2, ODataService } from "@odata2ts/odata-service";
 
 import {
@@ -14,7 +14,7 @@ import {
   qOpenEntity,
   // @ts-ignore
 } from "./QTester";
-import {
+import type {
   AbstractEntity,
   EditableAbstractEntity,
   EditableExtendedFromAbstract,

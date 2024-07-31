@@ -1,11 +1,11 @@
-import { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
-import { ODataValueResponseV4 } from "@odata2ts/odata-core";
+import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
+import type { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QBestReview } from "./QTester";
 // @ts-ignore
-import { BestReviewParams } from "./TesterModel";
+import type { BestReviewParams } from "./TesterModel";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   private _qBestReview?: QBestReview;

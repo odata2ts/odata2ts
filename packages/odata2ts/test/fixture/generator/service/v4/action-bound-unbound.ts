@@ -1,11 +1,11 @@
-import { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
-import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
+import type { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QPing, QTestEntity, QTestEntityId, QVote, qTestEntity } from "./QTester";
 // @ts-ignore
-import { EditableTestEntity, TestEntity, TestEntityId, VoteParams } from "./TesterModel";
+import type { EditableTestEntity, TestEntity, TestEntityId, VoteParams } from "./TesterModel";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   private _qPing?: QPing;
