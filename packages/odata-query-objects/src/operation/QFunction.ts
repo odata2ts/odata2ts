@@ -13,16 +13,18 @@ const REGEXP_V2_PARAMS = /.*\?(.+)/;
 const SINGLE_VALUE_TYPES = ["string", "number", "boolean"];
 
 function compileUrlParams(params: FunctionParams | undefined, notEncoded: boolean = false) {
-  if (!params || !Object.keys(params).length) return "()";
+  if (!params || !Object.keys(params).length) {
+    return "()";
+  }
   const queryParams: string[] = [];
   const pathParams = Object.entries(params).map(([key, value]) => {
     [key, value] = notEncoded ? [key, value] : [encodeURIComponent(key), encodeURIComponent(value)];
     const isComplex = value.startsWith("{") || value.startsWith("[");
     if (isComplex) {
-      queryParams.push("@" + key + "=" + value);
-      return key + "=" + "@" + key;
+      queryParams.push(`@${key}=${value}`);
+      return `${key}=@${key}`;
     }
-    return key + "=" + value;
+    return `${key}=${value}`;
   });
 
   return `(${pathParams.join(",")})` + (queryParams.length > 0 ? `?${queryParams.join("&")}` : "");
