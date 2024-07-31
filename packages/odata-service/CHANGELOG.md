@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.19.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.19.0...@odata2ts/odata-service@0.19.1) (2024-07-31)
+
+### Bug Fixes
+
+* **service:** use QId instead of QFunction for entity id ([230bc3f](https://github.com/odata2ts/odata2ts/commit/230bc3fba7a0be4727229336122e87c1eeb68ffd))
+
 # [0.19.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.18.1...@odata2ts/odata-service@0.19.0) (2024-05-16)
 
 ### Features

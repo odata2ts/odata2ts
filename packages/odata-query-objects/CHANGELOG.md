@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.22.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.21.0...@odata2ts/odata-query-objects@0.22.0) (2024-07-31)
+
+### Bug Fixes
+
+* **qobjects:** outdated http-client-api version ([#289](https://github.com/odata2ts/odata2ts/issues/289)) ([d8a81cb](https://github.com/odata2ts/odata2ts/commit/d8a81cbd5a208f1df8b6ad0f2fc8ff3b731645d7))
+
+### Features
+
+* **generator:** support function overloads for different parameter sets ([#282](https://github.com/odata2ts/odata2ts/issues/282)) ([0b53271](https://github.com/odata2ts/odata2ts/commit/0b532710499d975155c21984a62707ecf4789439))
+* **q-objects:** support functions with multiple parameter sets ([22720b0](https://github.com/odata2ts/odata2ts/commit/22720b0d3cff6dd447290c0f64921f8f969c2890))
+
 # [0.21.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.20.2...@odata2ts/odata-query-objects@0.21.0) (2024-05-03)
 
 ### Features

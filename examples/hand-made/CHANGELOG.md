@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.7.4...@odata2ts/example-hand-made@0.8.0) (2024-07-31)
+
+### Features
+
+* **generator:** support function overloads for different parameter sets ([#282](https://github.com/odata2ts/odata2ts/issues/282)) ([0b53271](https://github.com/odata2ts/odata2ts/commit/0b532710499d975155c21984a62707ecf4789439))
+
 ## [0.7.4](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-hand-made@0.7.3...@odata2ts/example-hand-made@0.7.4) (2024-05-16)
 
 **Note:** Version bump only for package @odata2ts/example-hand-made
