@@ -62,6 +62,7 @@ describe("ImportContainer tests", function () {
 
     expect(importDecls.length).toBe(1);
     expect(importDecls[0]).toStrictEqual({
+      isTypeOnly: false,
       moduleSpecifier: SERVICE,
       namedImports: [{ name: "ODataService", alias: undefined }],
     });
@@ -70,15 +71,14 @@ describe("ImportContainer tests", function () {
   test("test adding from client API", async () => {
     await createImportContainer();
 
-    const importedNames = importContainer.addClientApi(
-      ClientApiImports.HttpResponseModel,
-      ClientApiImports.ODataHttpClient
-    );
+    importContainer.addClientApi(ClientApiImports.HttpResponseModel);
+    importContainer.addClientApi(ClientApiImports.ODataHttpClient);
 
     const importDecls = importContainer.getImportDeclarations();
 
     expect(importDecls.length).toBe(1);
     expect(importDecls[0]).toStrictEqual({
+      isTypeOnly: true,
       moduleSpecifier: API,
       namedImports: [
         { name: "HttpResponseModel", alias: undefined },

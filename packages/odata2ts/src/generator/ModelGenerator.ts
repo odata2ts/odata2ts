@@ -178,14 +178,14 @@ class ModelGenerator {
     // V2 entity special: deferred content
     let suffix = "";
     if (this.dataModel.isV2() && prop.dataType == DataTypes.ModelType) {
-      const [defContent] = imports.addCoreLib(this.version, CoreImports.DeferredContent);
+      const defContent = imports.addCoreLib(this.version, CoreImports.DeferredContent);
       suffix = ` | ${defContent}`;
     }
 
     let typeName: string;
     if (prop.dataType === DataTypes.PrimitiveType) {
       // custom types which require type imports => possible via converters
-      typeName = prop.typeModule ? imports.addCustomType(prop.typeModule, prop.type) : prop.type;
+      typeName = prop.typeModule ? imports.addCustomType(prop.typeModule, prop.type, true) : prop.type;
     } else {
       typeName = imports.addGeneratedModel(prop.fqType, prop.type);
     }

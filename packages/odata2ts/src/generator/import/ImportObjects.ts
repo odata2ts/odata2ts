@@ -34,18 +34,18 @@ export const VERSIONED_CORE_IMPORTS = [
  * Most relevant, but not all imports from query objects library
  */
 export enum QueryObjectImports {
-  QueryObject,
-  QId,
-  QFunction,
-  QAction,
-  EnumCollection,
-  QEnumCollection,
-  qEnumCollection,
-  QCollectionPath,
-  QEntityCollectionPath,
-  OperationReturnType,
-  ReturnTypes,
-  QComplexParam,
+  QueryObject = "QueryObject",
+  QId = "QId",
+  QFunction = "QFunction",
+  QAction = "QAction",
+  EnumCollection = "EnumCollection",
+  QEnumCollection = "QEnumCollection",
+  qEnumCollection = "qEnumCollection",
+  QCollectionPath = "QCollectionPath",
+  QEntityCollectionPath = "QEntityCollectionPath",
+  OperationReturnType = "OperationReturnType",
+  ReturnTypes = "ReturnTypes",
+  QComplexParam = "QComplexParam",
 }
 
 /**

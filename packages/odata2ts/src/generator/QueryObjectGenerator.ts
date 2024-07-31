@@ -110,7 +110,7 @@ class QueryObjectGenerator {
       }
       extendsClause = imports.addGeneratedQObject(baseClass, baseModel.qName);
     } else {
-      [extendsClause] = imports.addQObject(QueryObjectImports.QueryObject);
+      extendsClause = imports.addQObject(QueryObjectImports.QueryObject);
     }
 
     file.getFile().addClass({
@@ -145,16 +145,17 @@ class QueryObjectGenerator {
 
       // factor in collections
       if (prop.isCollection) {
-        const cType = isModelType ? QueryObjectImports.QEntityCollectionPath : QueryObjectImports.QCollectionPath;
-        const collectionType = importContainer.addQObject(cType);
+        const collectionType = importContainer.addQObject(
+          isModelType ? QueryObjectImports.QEntityCollectionPath : QueryObjectImports.QCollectionPath
+        );
         const qObject = isModelType
           ? importContainer.addGeneratedQObject(prop.fqType, prop.qObject!)
-          : importContainer.addFromQObject(prop.qObject!)[0];
+          : importContainer.addQObject(prop.qObject!);
 
         qPathInit = `new ${collectionType}(this.withPrefix("${odataName}"), () => ${qObject})`;
       } else {
         // add import for data type
-        const qPath = importContainer.addFromQObject(prop.qPath);
+        const qPath = importContainer.addQObject(prop.qPath);
         if (isModelType) {
           const qObject = importContainer.addGeneratedQObject(prop.fqType, prop.qObject!);
           qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), () => ${qObject})`;
@@ -231,7 +232,7 @@ class QueryObjectGenerator {
             complexQParam = `, new ${importedQObject}()`;
           }
 
-          const qParam = importContainer.addFromQObject(prop.qParam!);
+          const qParam = importContainer.addQObject(prop.qParam!);
           const isMappedNameNecessary = prop.odataName !== prop.name;
           const mappedName = isMappedNameNecessary
             ? `"${prop.name}"`
@@ -277,11 +278,9 @@ class QueryObjectGenerator {
       const collectionSuffix = returnType.isCollection ? "_COLLECTION" : "";
       if (returnType.dataType === DataTypes.ComplexType || returnType.dataType === DataTypes.ModelType) {
         if (returnType.qObject) {
-          const [opRt, rts, qComplexParam] = imports.addQObject(
-            QueryObjectImports.OperationReturnType,
-            QueryObjectImports.ReturnTypes,
-            QueryObjectImports.QComplexParam
-          );
+          const opRt = imports.addQObject(QueryObjectImports.OperationReturnType);
+          const rts = imports.addQObject(QueryObjectImports.ReturnTypes);
+          const qComplexParam = imports.addQObject(QueryObjectImports.QComplexParam);
           const returnQName = imports.addGeneratedQObject(returnType.fqType, returnType.qObject);
 
           returnTypeOpStmt = `new ${opRt}(${rts}.COMPLEX${collectionSuffix}, new ${qComplexParam}("NONE", new ${returnQName}))`;
@@ -289,11 +288,9 @@ class QueryObjectGenerator {
       }
       // currently, it only makes sense to add the OperationReturnType if a converter is present
       else if (returnType.converters && returnType.qParam) {
-        const [rtClass, rtTypes] = imports.addQObject(
-          QueryObjectImports.OperationReturnType,
-          QueryObjectImports.ReturnTypes
-        );
-        const [qParam] = imports.addFromQObject(returnType.qParam);
+        const rtClass = imports.addQObject(QueryObjectImports.OperationReturnType);
+        const rtTypes = imports.addQObject(QueryObjectImports.ReturnTypes);
+        const qParam = imports.addQObject(returnType.qParam);
 
         // TODO: some constants with string concat
         const rtKind = `${rtTypes}.VALUE${collectionSuffix}`;

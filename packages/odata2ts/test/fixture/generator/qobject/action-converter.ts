@@ -10,7 +10,7 @@ import {
 import { stringToPrefixModelConverter } from "@odata2ts/test-converters";
 
 // @ts-ignore
-import { ActionWithConverterParams } from "./TesterModel";
+import type { ActionWithConverterParams } from "./TesterModel";
 
 export class QPerson extends QueryObject {
   public readonly id = new QStringPath(this.withPrefix("id"), stringToPrefixModelConverter);

@@ -1,7 +1,7 @@
 import { QBooleanParam, QBooleanPath, QId, QueryObject } from "@odata2ts/odata-query-objects";
 
 // @ts-ignore
-import { ExtendsFromEntityId } from "./TesterModel";
+import type { ExtendsFromEntityId } from "./TesterModel";
 
 export class QBook extends QueryObject {}
 

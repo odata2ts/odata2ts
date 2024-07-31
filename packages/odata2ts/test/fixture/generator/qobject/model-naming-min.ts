@@ -1,7 +1,7 @@
 import { QBooleanParam, QBooleanPath, QEntityPath, QEnumPath, QId, QueryObject } from "@odata2ts/odata-query-objects";
 
 // @ts-ignore
-import { BookId, parentId } from "./TesterModel";
+import type { BookId, parentId } from "./TesterModel";
 
 export class Qparent extends QueryObject {
   public readonly parentId = new QBooleanPath(this.withPrefix("parentId"));

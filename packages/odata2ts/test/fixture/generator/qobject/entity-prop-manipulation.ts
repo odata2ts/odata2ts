@@ -9,7 +9,7 @@ import {
 } from "@odata2ts/odata-query-objects";
 
 // @ts-ignore
-import { BookId, CategoryId } from "./TesterModel";
+import type { BookId, CategoryId } from "./TesterModel";
 
 export class QCategory extends QueryObject {
   public readonly id = new QBooleanPath(this.withPrefix("ID"));

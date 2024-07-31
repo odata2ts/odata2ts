@@ -1,10 +1,10 @@
-import { ODataHttpClient } from "@odata2ts/http-client-api";
+import type { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService, PrimitiveTypeServiceV4 } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QTestEntity, QTestEntityId, qTestEntity } from "./QTester";
 // @ts-ignore
-import { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel";
+import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   public ents(): TestEntityCollectionService<ClientType>;
