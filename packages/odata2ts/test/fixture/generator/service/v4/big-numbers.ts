@@ -1,6 +1,6 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
-import type { StringCollection } from "@odata2ts/odata-query-objects";
-import { QBigNumberCollection, qBigNumberCollection } from "@odata2ts/odata-query-objects";
+import type { QBigNumberCollection, StringCollection } from "@odata2ts/odata-query-objects";
+import { qBigNumberCollection } from "@odata2ts/odata-query-objects";
 import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore

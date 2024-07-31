@@ -162,7 +162,7 @@ export class ImportContainer {
     }
   }
 
-  public addGeneratedQObject(fqName: string, name: string) {
+  public addGeneratedQObject(fqName: string, name: string, isTypeOnly = false) {
     if (this.bundledFileGeneration) {
       return this.addGeneratedImport("", this.mainFileNames.qObject, name);
     } else {
@@ -173,7 +173,7 @@ export class ImportContainer {
 
       const folderPath = model ? model.folderPath : "";
       const qName = model ? model.qName : this.mainFileNames!.qObject;
-      return this.addGeneratedImport(folderPath, qName, name);
+      return this.addGeneratedImport(folderPath, qName, name, isTypeOnly);
     }
   }
 
@@ -198,7 +198,7 @@ export class ImportContainer {
     };
   }
 
-  public getImportDeclarations(fromSubPath: boolean = false): Array<OptionalKind<ImportDeclarationStructure>> {
+  public getImportDeclarations(): Array<OptionalKind<ImportDeclarationStructure>> {
     return [
       ...Object.entries(this.libs).reduce<Array<OptionalKind<ImportDeclarationStructure>>>(
         (result, [moduleName, toImport]) => {

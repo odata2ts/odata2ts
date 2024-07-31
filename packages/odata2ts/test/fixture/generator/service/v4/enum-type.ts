@@ -1,6 +1,6 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
-import type { EnumCollection } from "@odata2ts/odata-query-objects";
-import { QEnumCollection, qEnumCollection } from "@odata2ts/odata-query-objects";
+import type { EnumCollection, QEnumCollection } from "@odata2ts/odata-query-objects";
+import { qEnumCollection } from "@odata2ts/odata-query-objects";
 import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore

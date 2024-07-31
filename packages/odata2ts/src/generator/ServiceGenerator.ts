@@ -246,7 +246,7 @@ class ServiceGenerator {
     // note: predictable first imports => no need to take renaming into account
     const modelName = importContainer.addGeneratedModel(model.fqName, model.modelName);
     const editableModelName = importContainer.addGeneratedModel(model.fqName, model.editableName);
-    const qName = importContainer.addGeneratedQObject(model.fqName, model.qName);
+    const qName = importContainer.addGeneratedQObject(model.fqName, model.qName, true);
     const qObjectName = importContainer.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName));
 
     const { properties, methods }: PropsAndOps = deepmerge(
@@ -337,7 +337,7 @@ class ServiceGenerator {
     if (prop.isCollection) {
       const modelName = imports.addGeneratedModel(propModel.fqName, propModel.modelName);
       const editableModelName = imports.addGeneratedModel(propModel.fqName, propModel.editableName);
-      const qModelName = imports.addGeneratedQObject(propModel.fqName, propModel.qName);
+      const qModelName = imports.addGeneratedQObject(propModel.fqName, propModel.qName, true);
       const collectionServiceType = imports.addServiceObject(this.version, ServiceImports.CollectionService);
 
       propModelType = `${collectionServiceType}<ClientType, ${modelName}, ${qModelName}, ${editableModelName}>`;
@@ -368,14 +368,14 @@ class ServiceGenerator {
     let type: string;
 
     if (!isEnum) {
-      // TODO move string concat (StringCollection, GuidCollection...) to better place
-      qType = imports.addQObject(prop.qObject);
+      // TODO refactor string concat
       type = imports.addQObjectType(`${upperCaseFirst(prop.type)}Collection`);
+      qType = imports.addQObjectType(prop.qObject);
     } else {
       const propEnum = this.dataModel.getModel(prop.fqType)!;
       const propTypeModel = imports.addGeneratedModel(propEnum.fqName, propEnum.modelName);
-      qType = imports.addQObject(QueryObjectImports.QEnumCollection);
       type = `${imports.addQObjectType(QueryObjectImports.EnumCollection)}<${propTypeModel}>`;
+      qType = imports.addQObjectType(QueryObjectImports.QEnumCollection);
     }
 
     const collectionType = `${collectionServiceType}<ClientType, ${type}, ${qType}>`;
@@ -418,7 +418,8 @@ class ServiceGenerator {
     const typeWithGenerics = isComplexCollection
       ? `${type}<ClientType, ${imports.addGeneratedModel(model.fqName, model.modelName)}, ${imports.addGeneratedQObject(
           model.fqName,
-          model.qName
+          model.qName,
+          true
         )}, ${imports.addGeneratedModel(model.fqName, model.editableName)}>`
       : `${type}<ClientType>`;
 
@@ -432,7 +433,7 @@ class ServiceGenerator {
         `if(!${privateSrvProp}) {`,
         `  const { client, path } = this.__base;`,
         // prettier-ignore
-        `  ${privateSrvProp} = new ${type}(client, path, "${prop.odataName}"${isComplexCollection ? `, ${imports.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName))}`: ""})`,
+        `  ${privateSrvProp} = new ${type}(client, path, "${prop.odataName}"${isComplexCollection ? `, ${imports.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName), true)}`: ""})`,
         "}",
         `return ${privateSrvProp}`,
       ],

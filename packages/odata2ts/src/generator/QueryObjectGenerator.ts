@@ -145,14 +145,14 @@ class QueryObjectGenerator {
 
       // factor in collections
       if (prop.isCollection) {
-        const collectionType = importContainer.addQObject(
+        const qPath = importContainer.addQObject(
           isModelType ? QueryObjectImports.QEntityCollectionPath : QueryObjectImports.QCollectionPath
         );
         const qObject = isModelType
           ? importContainer.addGeneratedQObject(prop.fqType, prop.qObject!)
           : importContainer.addQObject(prop.qObject!);
 
-        qPathInit = `new ${collectionType}(this.withPrefix("${odataName}"), () => ${qObject})`;
+        qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), () => ${qObject})`;
       } else {
         // add import for data type
         const qPath = importContainer.addQObject(prop.qPath);
