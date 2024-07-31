@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.23.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.22.0...@odata2ts/odata-query-objects@0.23.0) (2024-07-31)
+
+### Features
+
+* use path alias for complex function params ([#291](https://github.com/odata2ts/odata2ts/issues/291)) ([b4383c6](https://github.com/odata2ts/odata2ts/commit/b4383c68bf28bcd70c3505d3cdd76e07124057db))
+
 # [0.22.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.21.0...@odata2ts/odata-query-objects@0.22.0) (2024-07-31)
 
 ### Bug Fixes

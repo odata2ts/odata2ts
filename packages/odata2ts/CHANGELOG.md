@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.36.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.36.0...@odata2ts/odata2ts@0.36.1) (2024-07-31)
+
+### Bug Fixes
+
+* **generator:** more type-only imports depending on usage ([#292](https://github.com/odata2ts/odata2ts/issues/292)) ([c0b06f9](https://github.com/odata2ts/odata2ts/commit/c0b06f9bf86cb9060612a36f122ee0f41dccdcdb))
+
 # [0.36.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.35.0...@odata2ts/odata2ts@0.36.0) (2024-07-31)
 
 ### Features
