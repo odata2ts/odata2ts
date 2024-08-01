@@ -18,13 +18,13 @@ function compileUrlParams(params: FunctionParams | undefined, notEncoded: boolea
   }
   const queryParams: string[] = [];
   const pathParams = Object.entries(params).map(([key, value]) => {
-    [key, value] = notEncoded ? [key, value] : [encodeURIComponent(key), encodeURIComponent(value)];
     const isComplex = value.startsWith("{") || value.startsWith("[");
+    const [safeKey, safeValue] = notEncoded ? [key, value] : [encodeURIComponent(key), encodeURIComponent(value)];
     if (isComplex) {
-      queryParams.push(`@${key}=${value}`);
-      return `${key}=@${key}`;
+      queryParams.push(`@${safeKey}=${safeValue}`);
+      return `${safeKey}=@${safeKey}`;
     }
-    return `${key}=${value}`;
+    return `${safeKey}=${safeValue}`;
   });
 
   return `(${pathParams.join(",")})` + (queryParams.length > 0 ? `?${queryParams.join("&")}` : "");
