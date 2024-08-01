@@ -1,4 +1,4 @@
-import { PrefixModel } from "@odata2ts/test-converters";
+import type { PrefixModel } from "@odata2ts/test-converters";
 
 export interface Book {
   id: boolean;

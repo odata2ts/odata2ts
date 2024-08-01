@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/example-hand-made",
-  "version": "0.7.4",
+  "version": "0.8.1",
   "private": true,
   "publishConfig": {
     "access": "public"
@@ -17,10 +17,10 @@
     "test": "yarn compile"
   },
   "dependencies": {
-    "@odata2ts/odata-service": "^0.19.0"
+    "@odata2ts/odata-service": "^0.19.2"
   },
   "devDependencies": {
-    "@odata2ts/odata2ts": "^0.35.0",
+    "@odata2ts/odata2ts": "^0.36.1",
     "@types/node": "^20.3.0",
     "rimraf": "^5.0.1",
     "ts-node": "^10.9.1",

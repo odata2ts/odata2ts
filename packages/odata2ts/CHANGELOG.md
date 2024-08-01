@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.36.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.36.0...@odata2ts/odata2ts@0.36.1) (2024-07-31)
+
+### Bug Fixes
+
+* **generator:** more type-only imports depending on usage ([#292](https://github.com/odata2ts/odata2ts/issues/292)) ([c0b06f9](https://github.com/odata2ts/odata2ts/commit/c0b06f9bf86cb9060612a36f122ee0f41dccdcdb))
+
+# [0.36.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.35.0...@odata2ts/odata2ts@0.36.0) (2024-07-31)
+
+### Features
+
+* **generator:** add ts-nocheck to each generated file by default ([#284](https://github.com/odata2ts/odata2ts/issues/284)) ([655a3ab](https://github.com/odata2ts/odata2ts/commit/655a3ab801c79e34841f35b1a72cf7d02064f3b8))
+* **generator:** generate services based on API reference chain ([#275](https://github.com/odata2ts/odata2ts/issues/275)) ([8fd415b](https://github.com/odata2ts/odata2ts/commit/8fd415bd0a49144e14da08cd5e32d44e947c7f23))
+* **generator:** support function overloads for different parameter sets ([#282](https://github.com/odata2ts/odata2ts/issues/282)) ([0b53271](https://github.com/odata2ts/odata2ts/commit/0b532710499d975155c21984a62707ecf4789439))
+* **generator:** support type-only imports ([#290](https://github.com/odata2ts/odata2ts/issues/290)) ([dea381e](https://github.com/odata2ts/odata2ts/commit/dea381e7c31f84e03acbaafc15ede58aa9041c13))
+* model files always get type checked (no [@ts-nocheck](https://github.com/ts-nocheck)) ([#288](https://github.com/odata2ts/odata2ts/issues/288)) ([43ca58b](https://github.com/odata2ts/odata2ts/commit/43ca58bf72bb8e783b80798eaa73d5fd19676627))
+
+### BREAKING CHANGES
+
+* **generator:** generated code won't be type checked anymore. Use `debug: true` to get type checking back.
+
 # [0.35.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.34.0...@odata2ts/odata2ts@0.35.0) (2024-05-16)
 
 ### Bug Fixes

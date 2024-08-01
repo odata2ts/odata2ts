@@ -24,7 +24,7 @@ import {
 } from "@odata2ts/odata-query-objects";
 
 // @ts-ignore
-import { BookId } from "./TesterModel";
+import type { BookId } from "./TesterModel";
 
 export class QBook extends QueryObject {
   public readonly id = new QGuidPath(this.withPrefix("id"));

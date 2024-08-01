@@ -1,10 +1,10 @@
-import { ODataHttpClient } from "@odata2ts/http-client-api";
+import type { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EntitySetServiceV2, EntityTypeServiceV2, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
 import { QChild, QChildId, QGrandParent, QGrandParentId, QParent, qChild, qGrandParent, qParent } from "./QTester";
 // @ts-ignore
-import {
+import type {
   Child,
   ChildId,
   EditableChild,

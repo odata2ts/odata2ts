@@ -103,7 +103,8 @@ export class ProjectManager {
   private createFile(
     name: string,
     reservedNames?: Array<string> | undefined,
-    additionalPath: string = ""
+    additionalPath: string = "",
+    forceTypeChecking = false
   ): FileHandler {
     const fileName = path.join(this.outputDir, additionalPath, `${name}.ts`);
     const imports = new ImportContainer(
@@ -121,7 +122,7 @@ export class ProjectManager {
       this.project.createSourceFile(fileName),
       imports,
       this.formatter,
-      !!this.options.allowTypeChecking
+      forceTypeChecking || !!this.options.allowTypeChecking
     );
   }
 
@@ -233,7 +234,7 @@ export class ProjectManager {
 
   public createOrGetMainModelFile(reservedNames?: Array<string>) {
     if (!this.mainModelFile) {
-      this.mainModelFile = this.createFile(this.namingHelper.getFileNames().model, reservedNames);
+      this.mainModelFile = this.createFile(this.namingHelper.getFileNames().model, reservedNames, "", true);
     }
     return this.mainModelFile;
   }
@@ -250,7 +251,8 @@ export class ProjectManager {
       return this.mainModelFile;
     }
 
-    return this.createFile(name, reservedNames, folderPath);
+    // model files always allow for type checking
+    return this.createFile(name, reservedNames, folderPath, true);
   }
   public createOrGetQObjectFile(folderPath: string, name: string, reservedNames?: Array<string> | undefined) {
     if (this.mainQFile) {

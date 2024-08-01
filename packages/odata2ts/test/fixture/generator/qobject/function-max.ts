@@ -15,7 +15,7 @@ import {
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
 
 // @ts-ignore
-import { MaxFunctionParams } from "./TesterModel";
+import type { MaxFunctionParams } from "./TesterModel";
 
 export class QTheEntity extends QueryObject {
   public readonly id = new QStringPath(this.withPrefix("id"));
