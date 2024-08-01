@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.13](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-odata-v2@0.5.12...@odata2ts/example-odata-v2@0.5.13) (2024-08-01)
+
+**Note:** Version bump only for package @odata2ts/example-odata-v2
+
 ## [0.5.12](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-odata-v2@0.5.11...@odata2ts/example-odata-v2@0.5.12) (2024-07-31)
 
 **Note:** Version bump only for package @odata2ts/example-odata-v2

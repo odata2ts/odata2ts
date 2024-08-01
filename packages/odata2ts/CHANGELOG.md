@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.36.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.36.1...@odata2ts/odata2ts@0.36.2) (2024-08-01)
+
+### Bug Fixes
+
+* **generator:** apply type-only imports for q-objects in bundled mode ([#294](https://github.com/odata2ts/odata2ts/issues/294)) ([a439d0a](https://github.com/odata2ts/odata2ts/commit/a439d0a16dabc772287aa5f50ee7cd1b722df724))
+
 ## [0.36.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.36.0...@odata2ts/odata2ts@0.36.1) (2024-07-31)
 
 ### Bug Fixes

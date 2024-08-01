@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.14](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-renaming@0.2.13...@odata2ts/example-renaming@0.2.14) (2024-08-01)
+
+**Note:** Version bump only for package @odata2ts/example-renaming
+
 ## [0.2.13](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-renaming@0.2.12...@odata2ts/example-renaming@0.2.13) (2024-07-31)
 
 **Note:** Version bump only for package @odata2ts/example-renaming
