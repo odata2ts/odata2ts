@@ -3,14 +3,9 @@ import type { ODataCollectionResponseV4, ODataValueResponseV4 } from "@odata2ts/
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import {
-  QPingBigNumber,
-  QPingDecimal,
-  QPingDecimalCollection,
-  QTestEntity,
-  QTestEntityId,
-  qTestEntity,
-} from "./QTester";
+import type { QTestEntity } from "./QTester";
+// @ts-ignore
+import { QPingBigNumber, QPingDecimal, QPingDecimalCollection, QTestEntityId, qTestEntity } from "./QTester";
 // @ts-ignore
 import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel";
 

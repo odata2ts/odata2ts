@@ -4,7 +4,7 @@ import { ODataVersions } from "@odata2ts/odata-core";
 import { ImportDeclarationStructure, OptionalKind } from "ts-morph";
 
 import { DataModel } from "../data-model/DataModel";
-import { ComplexType, OperationType } from "../data-model/DataTypeModel";
+import { ComplexType } from "../data-model/DataTypeModel";
 import {
   ClientApiImports,
   CoreImports,
@@ -20,8 +20,6 @@ type ImportContainerType = Record<
   keyof typeof LIB_MODULES,
   { regular: Map<string, string>; typeOnly: Map<string, string> }
 >;
-
-function generateImportId() {}
 
 /**
  * Handles all the import statements for a given file.
@@ -164,7 +162,7 @@ export class ImportContainer {
 
   public addGeneratedQObject(fqName: string, name: string, isTypeOnly = false) {
     if (this.bundledFileGeneration) {
-      return this.addGeneratedImport("", this.mainFileNames.qObject, name);
+      return this.addGeneratedImport("", this.mainFileNames.qObject, name, isTypeOnly);
     } else {
       const model = this.dataModel.getModel(fqName) as ComplexType | undefined;
       if (!model && fqName !== "") {

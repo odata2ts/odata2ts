@@ -1,13 +1,11 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
+// @ts-ignore
+import type { QAbstractEntity, QExtendedFromAbstract, QExtendedFromOpen, QOpenEntity } from "./QTester";
 import {
-  QAbstractEntity,
-  QExtendedFromAbstract,
   QExtendedFromAbstractId,
-  QExtendedFromOpen,
   QExtendedFromOpenId,
-  QOpenEntity,
   qAbstractEntity,
   qExtendedFromAbstract,
   qExtendedFromOpen,

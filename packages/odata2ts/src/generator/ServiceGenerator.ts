@@ -433,7 +433,7 @@ class ServiceGenerator {
         `if(!${privateSrvProp}) {`,
         `  const { client, path } = this.__base;`,
         // prettier-ignore
-        `  ${privateSrvProp} = new ${type}(client, path, "${prop.odataName}"${isComplexCollection ? `, ${imports.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName), true)}`: ""})`,
+        `  ${privateSrvProp} = new ${type}(client, path, "${prop.odataName}"${isComplexCollection ? `, ${imports.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName))}`: ""})`,
         "}",
         `return ${privateSrvProp}`,
       ],
