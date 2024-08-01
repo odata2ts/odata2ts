@@ -3,7 +3,9 @@ import type { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 import { EntitySetServiceV2, EntityTypeServiceV2, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QBestBook, QTestEntity, QTestEntityId, qTestEntity } from "./QTester";
+import type { QTestEntity } from "./QTester";
+// @ts-ignore
+import { QBestBook, QTestEntityId, qTestEntity } from "./QTester";
 // @ts-ignore
 import type { BestBookParams, EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel";
 

@@ -4,7 +4,9 @@ import { qBigNumberCollection } from "@odata2ts/odata-query-objects";
 import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QTestEntity, QTestEntityId, qTestEntity } from "./QTester";
+import type { QTestEntity } from "./QTester";
+// @ts-ignore
+import { QTestEntityId, qTestEntity } from "./QTester";
 // @ts-ignore
 import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel";
 

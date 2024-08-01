@@ -2,7 +2,9 @@ import type { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EntitySetServiceV2, EntityTypeServiceV2, ODataService, PrimitiveTypeServiceV2 } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QTestEntity, QTestEntityId, qTestEntity } from "./QTester";
+import type { QTestEntity } from "./QTester";
+// @ts-ignore
+import { QTestEntityId, qTestEntity } from "./QTester";
 // @ts-ignore
 import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel";
 

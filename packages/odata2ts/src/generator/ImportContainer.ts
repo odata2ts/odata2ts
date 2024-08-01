@@ -4,7 +4,7 @@ import { ODataVersions } from "@odata2ts/odata-core";
 import { ImportDeclarationStructure, OptionalKind } from "ts-morph";
 
 import { DataModel } from "../data-model/DataModel";
-import { ComplexType, OperationType } from "../data-model/DataTypeModel";
+import { ComplexType } from "../data-model/DataTypeModel";
 import {
   ClientApiImports,
   CoreImports,
@@ -20,8 +20,6 @@ type ImportContainerType = Record<
   keyof typeof LIB_MODULES,
   { regular: Map<string, string>; typeOnly: Map<string, string> }
 >;
-
-function generateImportId() {}
 
 /**
  * Handles all the import statements for a given file.

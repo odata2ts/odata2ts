@@ -2,8 +2,9 @@ import type { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EntitySetServiceV2, EntityTypeServiceV2, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QChild, QChildId, QGrandParent, QGrandParentId, QParent, qChild, qGrandParent, qParent } from "./QTester";
+import type { QChild, QGrandParent, QParent } from "./QTester";
 // @ts-ignore
+import { QChildId, QGrandParentId, qChild, qGrandParent, qParent } from "./QTester";
 import type {
   Child,
   ChildId,
@@ -13,6 +14,7 @@ import type {
   GrandParent,
   GrandParentId,
   Parent,
+  // @ts-ignore
 } from "./TesterModel";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {

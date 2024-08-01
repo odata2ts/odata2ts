@@ -4,7 +4,9 @@ import { qEnumCollection } from "@odata2ts/odata-query-objects";
 import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 
 // @ts-ignore
-import { QBook, QBookId, qBook } from "./QTester";
+import type { QBook } from "./QTester";
+// @ts-ignore
+import { QBookId, qBook } from "./QTester";
 // @ts-ignore
 import type { Book, BookId, Choice, EditableBook } from "./TesterModel";
 
