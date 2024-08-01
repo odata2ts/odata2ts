@@ -164,7 +164,7 @@ export class ImportContainer {
 
   public addGeneratedQObject(fqName: string, name: string, isTypeOnly = false) {
     if (this.bundledFileGeneration) {
-      return this.addGeneratedImport("", this.mainFileNames.qObject, name);
+      return this.addGeneratedImport("", this.mainFileNames.qObject, name, isTypeOnly);
     } else {
       const model = this.dataModel.getModel(fqName) as ComplexType | undefined;
       if (!model && fqName !== "") {
