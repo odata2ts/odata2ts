@@ -55,6 +55,15 @@ describe("QFunction Tests", () => {
         '?@testCollection=["a","b"]' +
         '&@TEST_ENTITY={"title":"testBook","AUTHOR":{"name":"testAuthor"}}'
     );
+    expect(exampleFunction.buildUrl(allParams)).toBe(
+      "BestBook(" +
+        "TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb,testDate=null,testDateTimeOffset=dateTime" +
+        ",testCollection=@testCollection" +
+        ",TEST_ENTITY=@TEST_ENTITY" +
+        ")" +
+        "?@testCollection=%5B%22a%22%2C%22b%22%5D" +
+        "&@TEST_ENTITY=%7B%22title%22%3A%22testBook%22%2C%22AUTHOR%22%3A%7B%22name%22%3A%22testAuthor%22%7D%7D"
+    );
   });
 
   test("QFunction: V2 multiple params", () => {

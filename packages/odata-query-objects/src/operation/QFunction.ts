@@ -9,6 +9,7 @@ type FilteredParamModel = [string, string];
 // const REGEXP_PATH = /(^[^(]+)\(.*/;
 const REGEXP_PARAMS = /.*\(([^)]+)\)/;
 const REGEXP_V2_PARAMS = /.*\?(.+)/;
+const REGEXP_COMPLEX_PARAM = /^(?:\[|\{|%5B|%7B)/;
 
 const SINGLE_VALUE_TYPES = ["string", "number", "boolean"];
 
@@ -19,7 +20,7 @@ function compileUrlParams(params: FunctionParams | undefined, notEncoded: boolea
   const queryParams: string[] = [];
   const pathParams = Object.entries(params).map(([key, value]) => {
     [key, value] = notEncoded ? [key, value] : [encodeURIComponent(key), encodeURIComponent(value)];
-    const isComplex = value.startsWith("{") || value.startsWith("[");
+    const isComplex = REGEXP_COMPLEX_PARAM.test(value);
     if (isComplex) {
       queryParams.push(`@${key}=${value}`);
       return `${key}=@${key}`;
