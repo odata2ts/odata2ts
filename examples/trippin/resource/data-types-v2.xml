@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+  <edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0">
+    <Schema Namespace="DataTypeExample" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2007/05/edm">
+    <EntityType Name="OneOfEverything">
+        <Key>
+          <PropertyRef Name="StringType" />
+        </Key>
+        <Property Name="StringType" Type="Edm.String" Nullable="false" />
+        <Property Name="BooleanType" Type="Edm.Boolean" Nullable="false" />
+        <Property Name="ByteType" Type="Edm.Byte" />
+        <Property Name="SByteType" Type="Edm.SByte" />
+        <Property Name="Int16Type" Type="Edm.Int16" />
+        <Property Name="Int32Type" Type="Edm.Int32" />
+        <Property Name="Int64Type" Type="Edm.Int64" />
+        <Property Name="SingleType" Type="Edm.Single" />
+        <Property Name="DoubleType" Type="Edm.Double" />
+        <Property Name="DecimalType" Type="Edm.Decimal" />
+        <Property Name="TimeType" Type="Edm.Time" />
+        <Property Name="DateTimeType" Type="Edm.DateTime" />
+        <Property Name="DateTimeOffsetType" Type="Edm.DateTimeOffset" />
+<!--        <Property Name="Binary" Type="Edm.Binary" />-->
+      </EntityType>
+      <EntityContainer Name="Container">
+        <EntitySet Name="OneOfEverything" EntityType="DataTypeExample.OneOfEverything" />
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
