@@ -10,7 +10,7 @@ import { ComplexTypeV4, EntityTypeV4, Operation, SchemaV4 } from "./edmx/ODataEd
 import { NamingHelper } from "./NamingHelper";
 
 export const digest: DigesterFunction<SchemaV4> = async (schemas, options, namingHelper) => {
-  const converters = await loadConverters(ODataVersions.V2, options.converters);
+  const converters = await loadConverters(ODataVersions.V4, options.converters);
 
   const digester = new DigesterV4(schemas, options, namingHelper, converters);
   return digester.digest();
@@ -183,6 +183,13 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
           qCollection: "QDateTimeOffsetCollection",
           qParam: "QDateTimeOffsetParam",
         };
+      // case ODataTypesV4.Duration:
+      //   return {
+      //     outputType: "string",
+      //     qPath: "QDurationPath",
+      //     qCollection: "QDurationCollection",
+      //     qParam: "QDurationParam",
+      //   };
       case ODataTypesV4.Binary:
         return {
           outputType: "string",
