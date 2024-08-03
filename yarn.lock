@@ -2023,6 +2023,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@odata2ts/converter-common@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@odata2ts/converter-common@npm:0.2.0"
+  dependencies:
+    "@odata2ts/converter-api": ^0.1.2
+  checksum: 3598bffe81c6b93575d911d813e37fbaaec9d09cf9e874543a2905f1808d31cdd85c3f9eb1c56440383a1f1e26c62bb810f1c62b6c5da7c8547a8aca7ec3140b
+  languageName: node
+  linkType: hard
+
+"@odata2ts/converter-luxon@npm:^0.1.5":
+  version: 0.1.5
+  resolution: "@odata2ts/converter-luxon@npm:0.1.5"
+  dependencies:
+    "@odata2ts/converter-api": ^0.1.2
+  peerDependencies:
+    luxon: ^3.0.4
+  checksum: 3be1799805d2c762a0a48ce933e5eb7ae9aaefb661040f055bdad651dd22aa697e7b5a411d09dd87963b4d423a65149bb23c7512d86fa454ccf9f7a54d3cc58b
+  languageName: node
+  linkType: hard
+
 "@odata2ts/converter-runtime@npm:^0.2.2":
   version: 0.2.2
   resolution: "@odata2ts/converter-runtime@npm:0.2.2"
@@ -2119,13 +2139,19 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-trippin@workspace:examples/trippin"
   dependencies:
+    "@odata2ts/converter-big-number": ^0.1.0
+    "@odata2ts/converter-common": ^0.2.0
+    "@odata2ts/converter-luxon": ^0.1.5
     "@odata2ts/http-client-axios": ^0.10.2
     "@odata2ts/odata-service": ^0.19.3
     "@odata2ts/odata2ts": ^0.36.2
     "@types/jest": ^29.5.2
+    "@types/luxon": ^3.4.2
     "@types/node": ^20.3.0
     axios: ^0.27.2
+    bignumber.js: ^9.1.2
     jest: ^29.5.0
+    luxon: ^3.4.4
     rimraf: ^5.0.1
     ts-jest: ^29.1.0
     ts-node: ^10.9.1
@@ -2614,6 +2640,13 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 0f8fe0a9221a00e8413cffba723dfe16553868724b830237256fb0052ecd5cac96498189d1235a001cfa815f352008261c9ceb373f0aa58227f891e0c7a12c4d
+  languageName: node
+  linkType: hard
+
+"@types/luxon@npm:^3.4.2":
+  version: 3.4.2
+  resolution: "@types/luxon@npm:3.4.2"
+  checksum: 6f92d5bd02e89f310395753506bcd9cef3a56f5940f7a50db2a2b9822bce753553ac767d143cb5b4f9ed5ddd4a84e64f89ff538082ceb4d18739af7781b56925
   languageName: node
   linkType: hard
 
@@ -3283,6 +3316,13 @@ __metadata:
   version: 9.1.1
   resolution: "bignumber.js@npm:9.1.1"
   checksum: ad243b7e2f9120b112d670bb3d674128f0bd2ca1745b0a6c9df0433bd2c0252c43e6315d944c2ac07b4c639e7496b425e46842773cf89c6a2dcd4f31e5c4b11e
+  languageName: node
+  linkType: hard
+
+"bignumber.js@npm:^9.1.2":
+  version: 9.1.2
+  resolution: "bignumber.js@npm:9.1.2"
+  checksum: 582c03af77ec9cb0ebd682a373ee6c66475db94a4325f92299621d544aa4bd45cb45fd60001610e94aef8ae98a0905fa538241d9638d4422d57abbeeac6fadaf
   languageName: node
   linkType: hard
 
@@ -7416,6 +7456,13 @@ fsevents@^2.3.2:
   version: 9.1.2
   resolution: "lru-cache@npm:9.1.2"
   checksum: d3415634be3908909081fc4c56371a8d562d9081eba70543d86871b978702fffd0e9e362b83921b27a29ae2b37b90f55675aad770a54ac83bb3e4de5049d4b15
+  languageName: node
+  linkType: hard
+
+"luxon@npm:^3.4.4":
+  version: 3.4.4
+  resolution: "luxon@npm:3.4.4"
+  checksum: 36c1f99c4796ee4bfddf7dc94fa87815add43ebc44c8934c924946260a58512f0fd2743a629302885df7f35ccbd2d13f178c15df046d0e3b6eb71db178f1c60c
   languageName: node
   linkType: hard
 

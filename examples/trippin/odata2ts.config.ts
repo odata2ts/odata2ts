@@ -31,6 +31,32 @@ const config: ConfigFileOptions = {
         ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
       ],
     },
+    converterV2: {
+      source: "resource/data-types-v2.xml",
+      output: "build/converter-v2",
+      converters: [
+        "@odata2ts/converter-v2-to-v4",
+        "@odata2ts/converter-luxon",
+        "@odata2ts/converter-big-number",
+        {
+          module: "@odata2ts/converter-common",
+          use: ["int64ToBigIntConverter"],
+        },
+      ],
+    },
+    converterV4: {
+      source: "resource/data-types-v4.xml",
+      output: "build/converter-v4",
+      v4BigNumberAsString: true,
+      converters: [
+        "@odata2ts/converter-luxon",
+        "@odata2ts/converter-big-number",
+        {
+          module: "@odata2ts/converter-common",
+          use: ["dateTimeOffsetToDateConverter", "simpleDurationConverter", "int64ToBigIntConverter"],
+        },
+      ],
+    },
   },
 };
 
