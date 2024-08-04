@@ -15,8 +15,7 @@
     "clean": "rimraf build",
     "generate": "odata2ts",
     "int-test": "jest ./int-test",
-    "test": "jest ./test",
-    "type-test": "tsc -p tsconfig.type-test.json"
+    "test": "tsc && jest ./test"
   },
   "dependencies": {
     "@odata2ts/converter-big-number": "^0.1.0",

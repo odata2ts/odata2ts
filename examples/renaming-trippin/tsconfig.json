@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.settings.json",
-  "compilerOptions": {
-    "rootDir": "./generated-src",
-    "outDir": "./build",
-    "noEmit": true
-  },
-  "include": ["generated-src", ".types"]
-}
