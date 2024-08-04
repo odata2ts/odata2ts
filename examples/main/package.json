@@ -1,11 +1,11 @@
 {
-  "name": "@odata2ts/example-trippin",
+  "name": "@odata2ts/example-main",
   "version": "0.8.13",
   "private": true,
   "publishConfig": {
     "access": "public"
   },
-  "description": "Example using the publicly available Trippin service",
+  "description": "Main odata2ts configuration examples also serving for integration tests",
   "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
   "author": "texttechne",
