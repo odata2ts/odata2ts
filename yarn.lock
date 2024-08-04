@@ -2086,9 +2086,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/example-trippin@workspace:examples/trippin":
+"@odata2ts/example-main@workspace:examples/main":
   version: 0.0.0-use.local
-  resolution: "@odata2ts/example-trippin@workspace:examples/trippin"
+  resolution: "@odata2ts/example-main@workspace:examples/main"
   dependencies:
     "@odata2ts/converter-big-number": ^0.1.0
     "@odata2ts/converter-common": ^0.2.0
