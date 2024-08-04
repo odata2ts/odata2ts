@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.settings.json",
-  "compilerOptions": {
-    "rootDir": ".",
-    "outDir": "./build",
-    "noEmit": true
-  },
-  "include": ["src", ".types", "odata2ts.config.ts", "build"]
-}
