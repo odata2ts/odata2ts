@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    "types": ["reflect-metadata", "jest"],
+    "types": ["jest"],
     "rootDir": ".",
     "noEmit": true
   },
