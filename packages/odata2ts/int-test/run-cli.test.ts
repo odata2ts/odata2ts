@@ -1,9 +1,10 @@
-import path from "path";
 import { exec } from "child_process";
+import path from "path";
+
 import { pathExistsSync, removeSync } from "fs-extra";
 
 // This test suite needs a longer timeout, since node process is started
-jest.setTimeout(10 * 1000); // 10 secs
+// vi.setTimeout(10 * 1000); // 10 secs
 
 const OUTPUT_PATH = "./int-test/generated";
 const DUMMY_SOURCE = "./int-test/fixture/v4/dummy.xml";

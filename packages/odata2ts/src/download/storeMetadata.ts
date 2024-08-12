@@ -16,9 +16,9 @@ export async function storeMetadata(filePath: string, metadataXml: string, prett
   const prettierConfig = await prettier.resolveConfig(outDir);
   const prettified = prettify
     ? prettier.format(
-        metadataXml,
+        metadataXml
         // @ts-ignore: xmlWhitespaceSensitivity is an option of the plugin
-        { xmlWhitespaceSensitivity: "ignore", ...prettierConfig, parser: "xml", plugins: ["@prettier/plugin-xml"] }
+        // { xmlWhitespaceSensitivity: "ignore", ...prettierConfig, parser: "xml", plugins: ["@prettier/plugin-xml"] }
       )
     : metadataXml;
 

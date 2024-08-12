@@ -1,6 +1,7 @@
 import { writeFile } from "fs/promises";
 
 import { SourceFile } from "ts-morph";
+import { vi } from "vitest";
 
 import { EmitModes } from "../../src";
 import { DataModel } from "../../src/data-model/DataModel";
@@ -10,7 +11,7 @@ import { FileHandler } from "../../src/project/FileHandler";
 import { FileFormatter } from "../../src/project/formatter/FileFormatter";
 
 // global mock for file operations
-jest.mock("fs/promises");
+vi.mock("fs/promises");
 
 describe("FileHandler Test", () => {
   const MAIN_FILE_NAMES = { model: "TestModel", qObject: "QTest", service: "TestService" };
@@ -23,20 +24,20 @@ describe("FileHandler Test", () => {
   const MOCKED_FORMATTED_CONTENT = "--- FORMATTED ---";
 
   const mockFile: SourceFile = {
-    addImportDeclarations: jest.fn(),
-    addStatements: jest.fn(),
-    emit: jest.fn(),
+    addImportDeclarations: vi.fn(),
+    addStatements: vi.fn(),
+    emit: vi.fn(),
     // @ts-ignore
     getFilePath: () => MOCKED_FILE_PATH,
     getFullText: () => MOCKED_FILE_CONTENT,
   };
   const formatter: FileFormatter = {
     getSettings: () => ({}),
-    format: jest.fn(async () => MOCKED_FORMATTED_CONTENT),
+    format: vi.fn(async () => MOCKED_FORMATTED_CONTENT),
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function createFileHandler(options: { path?: string; fileName?: string; reservedNames?: Array<string> } = {}) {

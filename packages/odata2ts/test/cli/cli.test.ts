@@ -1,17 +1,31 @@
-import * as cosmiConfig from "cosmiconfig";
 import type { CosmiconfigResult } from "cosmiconfig/dist/types";
 import * as fsExtra from "fs-extra";
+import type { MockInstance } from "vitest";
+import { vi } from "vitest";
 
-import { getDefaultConfig } from "../src";
-import { CliOptions, ConfigFileOptions, EmitModes, Modes, RunOptions } from "../src";
-import * as app from "../src/app";
-import { Cli } from "../src/cli";
-import * as downloader from "../src/download";
+import { getDefaultConfig } from "../../src";
+import { CliOptions, ConfigFileOptions, EmitModes, Modes, RunOptions } from "../../src";
+import * as app from "../../src/app";
+import { run } from "../../src/cli";
+import * as downloader from "../../src/download";
 
-jest.mock("fs-extra");
-jest.mock("cosmiconfig");
-jest.mock("../src/app");
-jest.mock("../src/download");
+vi.mock("fs-extra");
+vi.mock("../src/download");
+
+const { mockCosmi, searchSpy } = vi.hoisted(() => {
+  const spy = vi.fn();
+  return {
+    mockCosmi: {
+      search: async () => spy,
+    },
+    searchSpy: spy,
+  };
+});
+vi.mock("cosmiconfig", () => {
+  return {
+    cosmiconfig: () => mockCosmi,
+  };
+});
 
 describe("Cli Test", () => {
   const EXIT_MSG = "process.exit was called.";
@@ -27,40 +41,31 @@ describe("Cli Test", () => {
   const CONFIG: RunOptions = { ...getDefaultConfig(), source: "./test/fixture/dummy.xml", output: "./test/fixture" };
   // const DUMMY_XML = fs.readFileSync("./fixture/dummy.xml", { encoding: "utf8" });
 
-  let processExitSpy: jest.SpyInstance;
-  let logInfoSpy: jest.SpyInstance;
-  let logErrorSpy: jest.SpyInstance;
+  let processExitSpy: MockInstance;
+  let logErrorSpy: MockInstance;
   let defaultArgs = ["-s", CONFIG.source, "-o", CONFIG.output];
   let runOptions: CliOptions;
-  let mockCosmi = {
-    search: jest.fn().mockResolvedValue({}),
-  };
   let mockConfig: CosmiconfigResult;
 
   beforeAll(() => {
     // mock the real app, we're only testing the CLI here
     // => provide Promise implementation to make things work
-    // @ts-ignore
-    app.runApp.mockResolvedValue();
-
-    // mock loading of config file via IO
-    // @ts-ignore
-    jest.spyOn(cosmiConfig, "cosmiconfig").mockImplementation(() => mockCosmi);
+    vi.spyOn(app, "runApp").mockImplementation(() => Promise.resolve());
 
     // mock console to keep a clean test output
-    logInfoSpy = jest.spyOn(console, "log").mockImplementation(jest.fn);
-    logErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn);
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    logErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   beforeEach(() => {
     // clear mock state before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // mock program arguments
     process.argv = STANDARD_ARGS;
 
     // mock process.exit => would otherwise also exit test run
-    processExitSpy = jest.spyOn(process, "exit").mockImplementationOnce(() => {
+    processExitSpy = vi.spyOn(process, "exit").mockImplementationOnce(() => {
       throw new Error(EXIT_MSG);
     });
 
@@ -74,15 +79,15 @@ describe("Cli Test", () => {
     };
 
     // @ts-ignore
-    fsExtra.pathExists.mockResolvedValue(true);
+    vi.mocked(fsExtra.pathExists).mockResolvedValue(true);
     // @ts-ignore
-    fsExtra.readFile.mockResolvedValue("");
+    vi.mocked(fsExtra.readFile).mockResolvedValue("");
   });
 
   afterAll(() => {
     process.argv = ORIGINAL_ARGS;
 
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   /**
@@ -92,7 +97,7 @@ describe("Cli Test", () => {
    */
   async function runCli(args: Array<string> = []): Promise<void> {
     process.argv = [...STANDARD_ARGS, ...args];
-    return new Cli().run();
+    return run();
   }
 
   /**
@@ -115,7 +120,6 @@ describe("Cli Test", () => {
     await expect(runCli(args)).rejects.toThrow();
 
     expect(process.exit).toHaveBeenCalledWith(1);
-    // expect(process.exit).toHaveBeenCalledWith(1);
     expect(app.runApp).not.toHaveBeenCalled();
   }
 
@@ -135,8 +139,8 @@ describe("Cli Test", () => {
     const testDownload = "test";
     // @ts-ignore
     fsExtra.pathExists.mockResolvedValueOnce(false);
-    const downloadSpy = jest.spyOn(downloader, "downloadMetadata").mockResolvedValueOnce(testDownload);
-    const storeSpy = jest.spyOn(downloader, "storeMetadata").mockResolvedValueOnce("");
+    const downloadSpy = vi.spyOn(downloader, "downloadMetadata").mockResolvedValueOnce(testDownload);
+    const storeSpy = vi.spyOn(downloader, "storeMetadata").mockResolvedValueOnce("");
 
     await expect(runCli(args)).resolves.toBeUndefined();
     expect(process.exit).not.toHaveBeenCalled();
@@ -149,8 +153,8 @@ describe("Cli Test", () => {
     const url = "http://localhost:3000/api";
     const args = [...defaultArgs, "-u", url, "-d", "-f", "-p"];
     const testDownload = "test";
-    const downloadSpy = jest.spyOn(downloader, "downloadMetadata").mockResolvedValueOnce(testDownload);
-    const storeSpy = jest.spyOn(downloader, "storeMetadata").mockResolvedValueOnce("");
+    const downloadSpy = vi.spyOn(downloader, "downloadMetadata").mockResolvedValueOnce(testDownload);
+    const storeSpy = vi.spyOn(downloader, "storeMetadata").mockResolvedValueOnce("");
 
     await expect(runCli(args)).resolves.toBeUndefined();
     expect(process.exit).not.toHaveBeenCalled();
@@ -163,8 +167,8 @@ describe("Cli Test", () => {
     const url = "http://localhost:3000/api";
     const args = [...defaultArgs, "-u", url, "-f"];
     const testError = new Error("Oh NO!!!");
-    const downloadSpy = jest.spyOn(downloader, "downloadMetadata").mockRejectedValue(testError);
-    const storeSpy = jest.spyOn(downloader, "storeMetadata").mockResolvedValueOnce("");
+    const downloadSpy = vi.spyOn(downloader, "downloadMetadata").mockRejectedValue(testError);
+    const storeSpy = vi.spyOn(downloader, "storeMetadata").mockResolvedValueOnce("");
 
     await expect(runCli(args)).rejects.toThrow();
     expect(logErrorSpy).toHaveBeenCalledWith("Failed to load metadata! Message: " + testError.message);
@@ -314,8 +318,7 @@ describe("Cli Test", () => {
   });
 
   test("Fail emptyDir", async () => {
-    // @ts-ignore
-    fsExtra.emptyDir.mockRejectedValueOnce(new Error("Oh No!"));
+    vi.mocked(fsExtra.emptyDir).mockRejectedValueOnce(new Error("Oh No!"));
 
     await expect(runCli(defaultArgs)).rejects.toThrow(EXIT_MSG);
 
@@ -325,8 +328,7 @@ describe("Cli Test", () => {
   });
 
   test("Fail runApp", async () => {
-    // @ts-ignore
-    app.runApp.mockRejectedValueOnce(new Error("Oh No!"));
+    vi.mocked(app.runApp).mockRejectedValueOnce(new Error("Oh No!"));
 
     await expect(runCli(defaultArgs)).rejects.toThrow(EXIT_MSG);
 
@@ -337,7 +339,7 @@ describe("Cli Test", () => {
   test("Config loaded but empty", async () => {
     // given are the defaults
     // when returning empty config
-    mockCosmi.search = jest.fn().mockResolvedValue(mockConfig);
+    mockCosmi.search = vi.fn().mockResolvedValue(mockConfig);
 
     // then defaults should work
     await testCli();
@@ -357,7 +359,8 @@ describe("Cli Test", () => {
     } as ConfigFileOptions;
 
     // when returning empty config
-    mockCosmi.search = jest.fn().mockResolvedValue(mockConfig);
+    mockCosmi.search = vi.fn().mockResolvedValue(mockConfig);
+    // searchSpy.mockResolvedValue(mockConfig);
     await runCli(defaultArgs);
 
     // then config should have been used to determine runOptions

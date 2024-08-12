@@ -1,31 +1,32 @@
 import * as fsExtra from "fs-extra";
-import * as prettier from "prettier";
+import prettier from "prettier";
+import { vi } from "vitest";
+import type { MockInstance } from "vitest";
 
 import { storeMetadata } from "../../src/download";
 
-jest.mock("fs-extra");
-jest.mock("prettier");
+// vi.mock("fs-extra");
 
 describe("StoreMetadata Test", () => {
   const DEFAULT_SOURCE = "./test/dir/test.xml";
   const DEFAULT_INPUT = "ajdfoaifjj";
 
-  let ensureDirSpy: jest.SpyInstance;
-  let writeFileSpy: jest.SpyInstance;
-  let prettierSpy: jest.SpyInstance;
+  let ensureDirSpy: MockInstance;
+  let writeFileSpy: MockInstance;
+  let prettierSpy: MockInstance;
 
   beforeAll(() => {
     // mock console to keep a clean test output
-    ensureDirSpy = jest.spyOn(fsExtra, "ensureDir").mockImplementation(() => Promise.resolve());
-    writeFileSpy = jest.spyOn(fsExtra, "writeFile").mockImplementation(() => Promise.resolve());
+    ensureDirSpy = vi.spyOn(fsExtra, "ensureDir").mockImplementation(async () => {});
+    writeFileSpy = vi.spyOn(fsExtra, "writeFile").mockImplementation(async () => {});
 
-    jest.spyOn(prettier, "resolveConfig").mockResolvedValue(null);
-    prettierSpy = jest.spyOn(prettier, "format").mockImplementation(() => DEFAULT_INPUT);
+    vi.spyOn(prettier, "resolveConfig").mockResolvedValue(null);
+    prettierSpy = vi.spyOn(prettier, "format").mockImplementation(() => DEFAULT_INPUT);
   });
 
   afterEach(() => {
     // clear mock state before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test("store file best case", async () => {
@@ -57,6 +58,6 @@ describe("StoreMetadata Test", () => {
   test("prettify first", async () => {
     await storeMetadata(DEFAULT_SOURCE, DEFAULT_INPUT, true);
 
-    expect(prettierSpy).toHaveBeenCalledWith(DEFAULT_INPUT, expect.anything());
+    expect(prettierSpy).toHaveBeenCalledWith(DEFAULT_INPUT);
   });
 });

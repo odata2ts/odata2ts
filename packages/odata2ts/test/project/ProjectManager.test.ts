@@ -3,6 +3,8 @@ import path from "path";
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import { ensureDir } from "fs-extra";
 import { EmitResult } from "ts-morph";
+import { vi } from "vitest";
+import type { MockInstance } from "vitest";
 
 import { EmitModes } from "../../src";
 import { DataModel } from "../../src/data-model/DataModel";
@@ -13,15 +15,16 @@ import { ODataModelBuilderV4 } from "../data-model/builder/v4/ODataModelBuilderV
 import { getTestConfig } from "../test.config";
 
 // global mock for file operations
-jest.mock("fs-extra");
+vi.mock("fs-extra");
 
-const fileHandlerSpy = jest.fn();
-const writeMock = jest.fn();
+const fileHandlerSpy = vi.fn();
+const writeMock = vi.fn();
 
-jest.mock("../../src/project/FileHandler", () => {
-  const { FileHandler: mockedModuleClass } = jest.requireActual("../../src/project/FileHandler");
+vi.mock("../../src/project/FileHandler", async () => {
+  const { FileHandler } = await vi.importActual("../../src/project/FileHandler");
 
-  class MockFileHandler extends mockedModuleClass {
+  // @ts-ignore
+  class MockFileHandler extends FileHandler {
     constructor(...args: any) {
       // @ts-ignore
       super(...args);
@@ -59,7 +62,7 @@ describe("ProjectManager Test", () => {
   let bundledFileGeneration: boolean;
   let noOutput: boolean;
 
-  let consoleSpy: jest.SpyInstance;
+  let consoleSpy: MockInstance;
 
   let usedDataModel: DataModel | undefined;
 
@@ -68,11 +71,11 @@ describe("ProjectManager Test", () => {
   }
 
   beforeAll(() => {
-    consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     modelBuilder = new ODataModelBuilderV4(NAMESPACE);
     outputDir = "build/unitTest";
@@ -85,7 +88,7 @@ describe("ProjectManager Test", () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   function useExhaustiveDataModel(mb: ODataModelBuilderV4) {

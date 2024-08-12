@@ -11,7 +11,7 @@
     "check-circular-deps": "lerna run check-circular-deps",
     "clean": "rimraf coverage",
     "clear-cache": "lerna run --parallel clear-cache",
-    "coverage": "jest --coverage",
+    "coverage": "vitest --coverage",
     "generate-from-url": "yarn workspace @odata2ts/example-bookshop generate-from-url",
     "int-test": "lerna run --parallel int-test",
     "postversion": "lerna publish from-git",

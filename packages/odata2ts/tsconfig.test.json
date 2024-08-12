@@ -1,10 +1,11 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    "types": ["jest"],
+    "types": ["vitest/globals"],
     "outDir": "./lib",
+    "module": "NodeNext",
     "noFallthroughCasesInSwitch": false
   },
-  "include": ["src", "test"],
+  "include": ["src", "test", "int-test"],
   "exclude": ["node_modules", "lib", "build"]
 }
