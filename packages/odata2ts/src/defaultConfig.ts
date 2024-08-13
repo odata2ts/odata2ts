@@ -1,7 +1,7 @@
 import deepmerge from "deepmerge";
 
-import { NameSettings, NamingStrategies } from "./NamingModel";
-import { EmitModes, Modes, RunOptions } from "./OptionModel";
+import { NameSettings, NamingStrategies } from "./NamingModel.js";
+import { EmitModes, Modes, RunOptions } from "./OptionModel.js";
 
 export type DefaultConfiguration = Omit<RunOptions, "sourceUrl" | "source" | "output" | "serviceName">;
 /**

@@ -1,6 +1,6 @@
-import { ConfigFileOptions } from "../../OptionModel";
-import { TypeModel } from "../../TypeModel";
-import { NameValidator, ValidationError } from "./NameValidator";
+import { ConfigFileOptions } from "../../OptionModel.js";
+import { TypeModel } from "../../TypeModel.js";
+import { NameValidator, ValidationError } from "./NameValidator.js";
 
 export interface NameValidatorOptions
   extends Pick<ConfigFileOptions, "disableAutomaticNameClashResolution" | "bundledFileGeneration"> {}

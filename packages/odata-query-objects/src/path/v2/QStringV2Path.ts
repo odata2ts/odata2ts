@@ -2,7 +2,7 @@ import { StringFilterFunctions } from "../../odata/ODataModel";
 import { QFilterExpression } from "../../QFilterExpression";
 import { InputModel } from "../base/QBasePath";
 import { QStringBasePath } from "../base/QStringBasePath";
-import { QNumberV2Path } from "./QNumberV2Path";
+import { QNumberV2Path } from "./QNumberV2Path.js";
 
 export class QStringV2Path<ConvertedType = string> extends QStringBasePath<
   QStringV2Path<ConvertedType>,

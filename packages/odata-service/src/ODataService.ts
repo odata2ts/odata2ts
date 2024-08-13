@@ -1,6 +1,6 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
 
-import { ServiceStateHelper } from "./ServiceStateHelper";
+import { ServiceStateHelper } from "./ServiceStateHelper.js";
 
 export class ODataService<in out ClientType extends ODataHttpClient> {
   protected readonly __base: ServiceStateHelper<any>;

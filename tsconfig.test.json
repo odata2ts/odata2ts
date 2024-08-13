@@ -3,6 +3,6 @@
   "compilerOptions": {
     "types": ["reflect-metadata", "jest"]
   },
-  "include": ["**/*"],
+  "include": ["test", "int-test"],
   "exclude": ["node_modules", "lib"]
 }

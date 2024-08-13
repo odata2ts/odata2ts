@@ -1,4 +1,4 @@
-import {
+import type {
   ComplexType,
   EntityContainer,
   EntitySet,
@@ -7,7 +7,7 @@ import {
   Property,
   ReturnType,
   Schema,
-} from "./ODataEdmxModelBase";
+} from "./ODataEdmxModelBase.js";
 
 export interface ODataEdmxModelV4 extends ODataEdmxModelBase<SchemaV4> {}
 

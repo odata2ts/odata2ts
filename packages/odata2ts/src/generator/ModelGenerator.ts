@@ -1,14 +1,14 @@
 import { ODataVersions } from "@odata2ts/odata-core";
 import { JSDocStructure, OptionalKind, StructureKind } from "ts-morph";
 
-import { DataModel } from "../data-model/DataModel";
-import { ComplexType, DataTypes, EntityType, OperationType, PropertyModel } from "../data-model/DataTypeModel";
-import { NamingHelper } from "../data-model/NamingHelper";
-import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel";
-import { FileHandler } from "../project/FileHandler";
-import { ProjectManager } from "../project/ProjectManager";
-import { CoreImports } from "./import/ImportObjects";
-import { ImportContainer } from "./ImportContainer";
+import { DataModel } from "../data-model/DataModel.js";
+import { ComplexType, DataTypes, EntityType, OperationType, PropertyModel } from "../data-model/DataTypeModel.js";
+import { NamingHelper } from "../data-model/NamingHelper.js";
+import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel.js";
+import { FileHandler } from "../project/FileHandler.js";
+import { ProjectManager } from "../project/ProjectManager.js";
+import { CoreImports } from "./import/ImportObjects.js";
+import { ImportContainer } from "./ImportContainer.js";
 
 export const generateModels: EntityBasedGeneratorFunction = (
   project: ProjectManager,

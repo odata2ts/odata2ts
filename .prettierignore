@@ -1,0 +1,15 @@
+node_modules/
+build
+dist
+lib
+coverage
+
+.idea
+*.iml
+.vscode
+
+.yarn
+.yarnrc.yml
+
+CHANGELOG.md
+.gitignore

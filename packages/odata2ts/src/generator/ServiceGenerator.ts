@@ -8,9 +8,9 @@ import {
   Scope,
 } from "ts-morph";
 import { upperCaseFirst } from "upper-case-first";
-import { firstCharLowerCase } from "xml2js/lib/processors";
+import { firstCharLowerCase } from "xml2js/lib/processors.js";
 
-import { DataModel } from "../data-model/DataModel";
+import { DataModel } from "../data-model/DataModel.js";
 import {
   ActionImportType,
   ComplexType,
@@ -23,13 +23,13 @@ import {
   PropertyModel,
   ReturnTypeModel,
   SingletonType,
-} from "../data-model/DataTypeModel";
-import { NamingHelper } from "../data-model/NamingHelper";
-import { ConfigFileOptions, Modes } from "../OptionModel";
-import { FileHandler } from "../project/FileHandler";
-import { ProjectManager } from "../project/ProjectManager";
-import { ClientApiImports, CoreImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects";
-import { ImportContainer } from "./ImportContainer";
+} from "../data-model/DataTypeModel.js";
+import { NamingHelper } from "../data-model/NamingHelper.js";
+import { ConfigFileOptions, Modes } from "../OptionModel.js";
+import { FileHandler } from "../project/FileHandler.js";
+import { ProjectManager } from "../project/ProjectManager.js";
+import { ClientApiImports, CoreImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects.js";
+import { ImportContainer } from "./ImportContainer.js";
 
 export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "properties" | "methods">> {}
 

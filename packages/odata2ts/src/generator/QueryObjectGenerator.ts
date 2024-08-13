@@ -1,9 +1,9 @@
 import { ValueConverterImport } from "@odata2ts/converter-runtime";
 import { ODataVersions } from "@odata2ts/odata-core";
 import { OptionalKind, PropertyDeclarationStructure, Scope, VariableDeclarationKind } from "ts-morph";
-import { firstCharLowerCase } from "xml2js/lib/processors";
+import { firstCharLowerCase } from "xml2js/lib/processors.js";
 
-import { DataModel } from "../data-model/DataModel";
+import { DataModel } from "../data-model/DataModel.js";
 import {
   ComplexType,
   DataTypes,
@@ -11,14 +11,13 @@ import {
   OperationType,
   OperationTypes,
   PropertyModel,
-} from "../data-model/DataTypeModel";
-import { NamingHelper } from "../data-model/NamingHelper";
-import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel";
-import { Modes } from "../OptionModel";
-import { FileHandler } from "../project/FileHandler";
-import { ProjectManager } from "../project/ProjectManager";
-import { QueryObjectImports } from "./import/ImportObjects";
-import { ImportContainer } from "./ImportContainer";
+} from "../data-model/DataTypeModel.js";
+import { NamingHelper } from "../data-model/NamingHelper.js";
+import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel.js";
+import { FileHandler } from "../project/FileHandler.js";
+import { ProjectManager } from "../project/ProjectManager.js";
+import { QueryObjectImports } from "./import/ImportObjects.js";
+import { ImportContainer } from "./ImportContainer.js";
 
 export const generateQueryObjects: EntityBasedGeneratorFunction = (
   project,

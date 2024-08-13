@@ -16,10 +16,7 @@ export abstract class QBasePath<ValueType extends UrlExpressionValueModel, Conve
 
   public constructor(
     protected path: string,
-    public readonly converter: ValueConverter<ValueType, ConvertedType> = getIdentityConverter<
-      ValueType,
-      ConvertedType
-    >()
+    public readonly converter: ValueConverter<ValueType, ValueType | ConvertedType> = getIdentityConverter<ValueType>()
   ) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");

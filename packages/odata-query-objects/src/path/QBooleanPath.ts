@@ -1,6 +1,6 @@
 import { StandardFilterOperators } from "../odata/ODataModel";
 import { buildQFilterOperation } from "../param/UrlParamHelper";
-import { QBasePath } from "./base/QBasePath";
+import { QBasePath } from "./base/QBasePath.js";
 
 export class QBooleanPath<ConvertedType = boolean> extends QBasePath<boolean, ConvertedType> {
   protected formatValue(value: boolean): string {

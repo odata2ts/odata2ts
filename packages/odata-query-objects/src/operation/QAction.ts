@@ -1,7 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 
 import { QParamModel } from "../param/QParamModel";
-import { OperationReturnType, emptyOperationReturnType } from "./OperationReturnType";
+import { OperationReturnType, emptyOperationReturnType } from "./OperationReturnType.js";
 
 type ActionParams = Record<string, any>;
 type FilteredParamModel = [string, any];

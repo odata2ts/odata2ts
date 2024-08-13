@@ -3,7 +3,7 @@ import { CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget } from 
 import load from "tsconfig-loader";
 import ts from "typescript";
 
-import { EmitModes } from "../OptionModel";
+import { EmitModes } from "../OptionModel.js";
 
 /**
  * Loads the TS configuration from the specified path.
@@ -18,7 +18,8 @@ export async function loadTsMorphCompilerOptions(tsConfigPath: string, emitMode:
 
   // load config file
   // NOTE: not async...
-  const conf = load({ filename: tsConfigPath });
+  // @ts-ignore
+  const conf = load.default({ filename: tsConfigPath });
 
   const {
     // ignored props
@@ -62,7 +63,7 @@ export async function loadTsMorphCompilerOptions(tsConfigPath: string, emitMode:
  * @param moduleResolution
  */
 function getModuleResolutionKind(
-  moduleResolution: string | undefined | Record<string, any>
+  moduleResolution: string | undefined | Record<string, any>,
 ): ModuleResolutionKind | undefined {
   const modRes =
     typeof moduleResolution === "string"
@@ -71,7 +72,7 @@ function getModuleResolutionKind(
         : moduleResolution.toLowerCase()
       : undefined;
   const matchedKey = Object.keys(ts.ModuleResolutionKind).find(
-    (mk): mk is keyof typeof ModuleResolutionKind => mk.toLowerCase() === modRes
+    (mk): mk is keyof typeof ModuleResolutionKind => mk.toLowerCase() === modRes,
   );
   return matchedKey ? (ts.ModuleResolutionKind[matchedKey] as ModuleResolutionKind) : undefined;
 }

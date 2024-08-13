@@ -1,8 +1,8 @@
 import { cosmiconfig } from "cosmiconfig";
 import { TypeScriptLoader } from "cosmiconfig-typescript-loader";
 
-import { ConfigFileOptions } from "../OptionModel";
-import { logFilePath } from "../project/logger/logFilePath";
+import { ConfigFileOptions } from "../OptionModel.js";
+import { logFilePath } from "../project/logger/logFilePath.js";
 
 export async function processConfigFile() {
   const moduleName = "odata2ts";

@@ -3,7 +3,7 @@ import { ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core"
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { QueryObject, convertV4ModelResponse } from "@odata2ts/odata-query-objects";
 
-import { ServiceStateHelperV4 } from "./ServiceStateHelperV4";
+import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
 
 export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObject> {
   protected readonly __base: ServiceStateHelperV4<ClientType, Q>;

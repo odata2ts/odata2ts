@@ -1,5 +1,4 @@
-import { TypeModel } from "../../TypeModel";
-import { NameValidator, ValidationError } from "./NameValidator";
+import { NameValidator, ValidationError } from "./NameValidator.js";
 
 export class NoopValidator implements NameValidator {
   addBoundOperationType(bindingName: string, fqName: string, name: string): string {

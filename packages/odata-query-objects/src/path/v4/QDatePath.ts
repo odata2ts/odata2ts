@@ -1,6 +1,6 @@
 import { QBasePath } from "../base/QBasePath";
-import { dayFn, monthFn, yearFn } from "./DateTimeFunctions";
-import { identityFormatter } from "./IdentityFormatter";
+import { dayFn, monthFn, yearFn } from "./DateTimeFunctions.js";
+import { identityFormatter } from "./IdentityFormatter.js";
 
 export class QDatePath<ConvertedType = string> extends QBasePath<string, ConvertedType> {
   protected formatValue = identityFormatter;

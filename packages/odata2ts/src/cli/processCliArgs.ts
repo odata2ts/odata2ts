@@ -1,6 +1,6 @@
 import { Command, Option } from "commander";
 
-import { CliOptions, EmitModes, Modes } from "../OptionModel";
+import { CliOptions, EmitModes, Modes } from "../OptionModel.js";
 
 function parseMode(value: string, dummyPrevious: Modes | undefined) {
   switch (value) {

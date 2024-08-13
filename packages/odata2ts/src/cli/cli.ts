@@ -1,7 +1,7 @@
-import { evaluateConfigOptions } from "../evaluateConfig";
-import { processCliArgs } from "./processCliArgs";
-import { processConfigFile } from "./processConfigFile";
-import { startServiceGenerationRun } from "./serviceGenerationRun";
+import { evaluateConfigOptions } from "../evaluateConfig.js";
+import { processCliArgs } from "./processCliArgs.js";
+import { processConfigFile } from "./processConfigFile.js";
+import { startServiceGenerationRun } from "./serviceGenerationRun.js";
 
 export async function run(): Promise<void> {
   let runs;

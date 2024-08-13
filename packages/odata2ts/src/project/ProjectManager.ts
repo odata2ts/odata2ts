@@ -1,18 +1,19 @@
 import * as path from "path";
 
-import { ensureDir } from "fs-extra";
+// @ts-ignore: typings not up-to-date
+import { ensureDir } from "fs-extra/esm";
 import { CompilerOptions, Project, SourceFile } from "ts-morph";
-import { firstCharLowerCase } from "xml2js/lib/processors";
+import { firstCharLowerCase } from "xml2js/lib/processors.js";
 
-import { DataModel } from "../data-model/DataModel";
-import { EntityType } from "../data-model/DataTypeModel";
-import { NamingHelper } from "../data-model/NamingHelper";
-import { ImportContainer } from "../generator/ImportContainer";
-import { EmitModes } from "../OptionModel";
-import { FileHandler } from "./FileHandler";
-import { createFormatter } from "./formatter";
-import { FileFormatter } from "./formatter/FileFormatter";
-import { loadTsMorphCompilerOptions } from "./TsMorphHelper";
+import { DataModel } from "../data-model/DataModel.js";
+import { EntityType } from "../data-model/DataTypeModel.js";
+import { NamingHelper } from "../data-model/NamingHelper.js";
+import { ImportContainer } from "../generator/ImportContainer.js";
+import { EmitModes } from "../OptionModel.js";
+import { FileHandler } from "./FileHandler.js";
+import { FileFormatter } from "./formatter/FileFormatter.js";
+import { createFormatter } from "./formatter/index.js";
+import { loadTsMorphCompilerOptions } from "./TsMorphHelper.js";
 
 export interface ProjectManagerOptions {
   usePrettier?: boolean;

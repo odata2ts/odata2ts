@@ -1,11 +1,10 @@
 import { ODataVersions } from "@odata2ts/odata-core";
-import { SourceFile } from "ts-morph";
 
-import { DataModel } from "./data-model/DataModel";
-import { Schema } from "./data-model/edmx/ODataEdmxModelBase";
-import { NamingHelper } from "./data-model/NamingHelper";
-import { RunOptions } from "./OptionModel";
-import { ProjectManager } from "./project/ProjectManager";
+import { DataModel } from "./data-model/DataModel.js";
+import { Schema } from "./data-model/edmx/ODataEdmxModelBase.js";
+import { NamingHelper } from "./data-model/NamingHelper.js";
+import { RunOptions } from "./OptionModel.js";
+import { ProjectManager } from "./project/ProjectManager.js";
 
 export type DigestionOptions = Pick<
   RunOptions,

@@ -8,14 +8,14 @@ import {
   searchTerm,
 } from "@odata2ts/odata-query-objects";
 
-import { ODataOperators } from "./ODataModel";
+import { ODataOperators } from "./ODataModel.js";
 import {
   ExpandType,
   ExpandingODataQueryBuilderV4,
   NullableParam,
   NullableParamList,
   ODataQueryBuilderConfig,
-} from "./ODataQueryBuilderModel";
+} from "./ODataQueryBuilderModel.js";
 
 /**
  * Bundles all the logic about handling system query params for OData (V2 and V4).

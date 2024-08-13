@@ -1,5 +1,5 @@
 import { QBasePath } from "../base/QBasePath";
-import { identityFormatter } from "./IdentityFormatter";
+import { identityFormatter } from "./IdentityFormatter.js";
 
 export class QGuidPath<ConvertedType = string> extends QBasePath<string, ConvertedType> {
   protected formatValue = identityFormatter;

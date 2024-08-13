@@ -1,4 +1,4 @@
-import { TypeModel } from "../../TypeModel";
+import { TypeModel } from "../../TypeModel.js";
 
 export interface NameValidator {
   addEntityType(fqName: string, name: string): string;

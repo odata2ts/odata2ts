@@ -9,7 +9,7 @@ import {
   ODataQueryBuilderConfig,
   ODataQueryBuilderV4 as ODataQueryBuilderV4Model,
 } from "../ODataQueryBuilderModel";
-import { createExpandingQueryBuilderV4 } from "./ExpandingODataQueryBuilderV4";
+import { createExpandingQueryBuilderV4 } from "./ExpandingODataQueryBuilderV4.js";
 
 /**
  * Create an QueryBuilder by passing in a path and a query object.

@@ -1,6 +1,6 @@
 import { PartialDeep } from "type-fest";
 
-import { QEntityPathModel, QPathModel, QValuePathModel } from "./path/QPathModel";
+import { QEntityPathModel, QPathModel, QValuePathModel } from "./path/QPathModel.js";
 
 function getMapping(q: QueryObject) {
   return Object.entries(q)

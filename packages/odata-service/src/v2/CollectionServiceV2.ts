@@ -8,7 +8,7 @@ import {
   convertV2ModelResponse,
 } from "@odata2ts/odata-query-objects";
 
-import { ServiceStateHelperV2 } from "./ServiceStateHelperV2";
+import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
 

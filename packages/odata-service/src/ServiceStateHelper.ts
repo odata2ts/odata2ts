@@ -1,6 +1,6 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
 
-import { BIG_NUMBERS_HEADERS, DEFAULT_HEADERS } from "./RequestHeaders";
+import { BIG_NUMBERS_HEADERS, DEFAULT_HEADERS } from "./RequestHeaders.js";
 
 export class ServiceStateHelper<out ClientType extends ODataHttpClient> {
   public readonly path: string;

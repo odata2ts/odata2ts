@@ -27,7 +27,7 @@ export class FixtureComparator {
 
   public async compareWithFixture(text: string, fixturePath: string) {
     const config = this.prettierConfig || undefined;
-    const result = prettier.format(text, config);
+    const result = await prettier.format(text, config);
 
     const fullPath = this.path + path.sep + fixturePath;
     if (!pathExistsSync(fullPath)) {

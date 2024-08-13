@@ -32,7 +32,7 @@ describe.skip("Trippin: CRUD Integration Tests", function () {
   const trippinService = new TrippinService(new AxiosClient(), BASE_URL);
 
   test("create, update and delete person", async () => {
-    jest.setTimeout(15000);
+    // jest.setTimeout(15000);
 
     const horstService = trippinService.people(horst.user);
 

@@ -10,7 +10,7 @@ import {
 } from "../odata/ODataModel";
 import { QPathModel } from "../path/QPathModel";
 import { QFilterExpression } from "../QFilterExpression";
-import { UrlExpressionValueModel, UrlValueModel } from "./UrlParamModel";
+import { UrlExpressionValueModel, UrlValueModel } from "./UrlParamModel.js";
 
 function parseNullValue(value: string | undefined): string | null | undefined {
   return value === "null" ? null : value;
@@ -36,7 +36,7 @@ export function parseLiteral(value: UrlValueModel): ParamValueModel<string> {
 
 export function formatParamWithTypePrefix(typePrefix: string, value: ParamValueModel<UrlExpressionValueModel>) {
   if (value === null) {
-    return "null";
+    return "null.js";
   }
   if (value === undefined) {
     return undefined;

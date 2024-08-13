@@ -1,13 +1,13 @@
-import { DigestionOptions } from "../FactoryFunctionModel";
+import { DigestionOptions } from "../FactoryFunctionModel.js";
 import {
   ComplexTypeGenerationOptions,
   EntityTypeGenerationOptions,
   GenericTypeGenerationOptions,
   PropertyGenerationOptions,
   TypeBasedGenerationOptions,
-} from "../OptionModel";
-import { TypeModel } from "../TypeModel";
-import { NamespaceWithAlias, withNamespace } from "./DataModel";
+} from "../OptionModel.js";
+import { TypeModel } from "../TypeModel.js";
+import { NamespaceWithAlias, withNamespace } from "./DataModel.js";
 
 export type WithoutName<T> = Omit<T, "name">;
 

@@ -1,5 +1,6 @@
 import { ManipulationSettings } from "ts-morph";
-import { FileFormatter } from "./FileFormatter";
+
+import { FileFormatter } from "./FileFormatter.js";
 
 /**
  * Abstract formatter.

@@ -1,10 +1,13 @@
-import { emptyDir, pathExists, readFile } from "fs-extra";
+import { readFile } from "fs/promises";
+
+// @ts-ignore: typings not up-to-date
+import { emptyDir, pathExists } from "fs-extra/esm";
 import { parseStringPromise } from "xml2js";
 
-import { runApp } from "../app";
-import { ODataEdmxModelBase } from "../data-model/edmx/ODataEdmxModelBase";
-import { downloadMetadata, storeMetadata } from "../download";
-import { Modes, RunOptions } from "../OptionModel";
+import { runApp } from "../app.js";
+import { ODataEdmxModelBase } from "../data-model/edmx/ODataEdmxModelBase.js";
+import { downloadMetadata, storeMetadata } from "../download/index.js";
+import { Modes, RunOptions } from "../OptionModel.js";
 
 export async function startServiceGenerationRun(options: RunOptions) {
   const { source, output, sourceUrl, refreshFile, sourceUrlConfig, debug, mode, emitMode, prettier, serviceName } =

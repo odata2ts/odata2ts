@@ -1,8 +1,8 @@
 import { ParamValueModel, ValueConverter } from "@odata2ts/converter-api";
 
 import { getIdentityConverter } from "../IdentityConverter";
-import { QParamModel } from "./QParamModel";
-import { UrlParamValueFormatter, UrlParamValueParser } from "./UrlParamModel";
+import { QParamModel } from "./QParamModel.js";
+import { UrlParamValueFormatter, UrlParamValueParser } from "./UrlParamModel.js";
 
 export type PrimitiveParamType = string | number | boolean;
 
@@ -12,7 +12,7 @@ export abstract class QParam<Type extends PrimitiveParamType, ConvertedType>
   constructor(
     protected name: string,
     protected mappedName?: string,
-    protected readonly converter: ValueConverter<Type, ConvertedType> = getIdentityConverter<Type, ConvertedType>()
+    protected readonly converter: ValueConverter<Type, Type | ConvertedType> = getIdentityConverter<Type>()
   ) {
     if (!name) {
       throw new Error("Name is required for QParam objects!");

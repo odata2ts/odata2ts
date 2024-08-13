@@ -10,7 +10,7 @@ import {
   convertV4CollectionResponse,
   convertV4ModelResponse,
   convertV4ValueResponse,
-} from "./ResponseHelper";
+} from "./ResponseHelper.js";
 
 export enum ReturnTypes {
   VOID,

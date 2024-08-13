@@ -2,7 +2,7 @@ import { NumberFilterFunctions, NumberFilterOperators } from "../../odata/ODataM
 import { buildFunctionExpression, buildOperatorExpression } from "../../param/UrlParamHelper";
 import { UrlExpressionValueModel } from "../../param/UrlParamModel";
 import { InputModel, QBasePath } from "../base/QBasePath";
-import { QNumberV2Base } from "./QNumberV2Base";
+import { QNumberV2Base } from "./QNumberV2Base.js";
 
 export class QStringNumberV2Path<ConvertedType = string> extends QNumberV2Base<
   string,

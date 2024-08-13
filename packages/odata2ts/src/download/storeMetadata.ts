@@ -1,6 +1,8 @@
+import { writeFile } from "fs/promises";
 import path from "path";
 
-import { ensureDir, writeFile } from "fs-extra";
+// @ts-ignore
+import { ensureDir } from "fs-extra/esm";
 import prettier from "prettier";
 
 /**
@@ -15,10 +17,10 @@ export async function storeMetadata(filePath: string, metadataXml: string, prett
 
   const prettierConfig = await prettier.resolveConfig(outDir);
   const prettified = prettify
-    ? prettier.format(
-        metadataXml
+    ? await prettier.format(
+        metadataXml,
         // @ts-ignore: xmlWhitespaceSensitivity is an option of the plugin
-        // { xmlWhitespaceSensitivity: "ignore", ...prettierConfig, parser: "xml", plugins: ["@prettier/plugin-xml"] }
+        { ...prettierConfig, parser: "xml", plugins: ["@prettier/plugin-xml"] },
       )
     : metadataXml;
 

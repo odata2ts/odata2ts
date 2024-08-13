@@ -1,7 +1,7 @@
 import { ParamValueModel } from "@odata2ts/converter-api";
 
 import { QueryObject } from "../QueryObject";
-import { QParamModel } from "./QParamModel";
+import { QParamModel } from "./QParamModel.js";
 
 export class QComplexParam<Type extends object, Q extends QueryObject> implements QParamModel<any, Type> {
   constructor(protected name: string, protected qObject: Q, protected mappedName?: string) {
