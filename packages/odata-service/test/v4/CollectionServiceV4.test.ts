@@ -1,11 +1,10 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4 } from "@odata2ts/odata-core";
 import { EnumCollection, QEnumCollection, QStringCollection, StringCollection } from "@odata2ts/odata-query-objects";
-
-import { CollectionServiceV4 } from "../../src";
+import { describe, expect, test } from "vitest";
+import { CollectionServiceV4 } from "../../src/index.js";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
 import { Feature } from "../fixture/PersonModel";
-import { PersonModelCollectionService } from "../fixture/v4/PersonModelService";
 import { MockClient } from "../mock/MockClient";
 
 describe("CollectionService V4 Tests", () => {
@@ -16,13 +15,13 @@ describe("CollectionService V4 Tests", () => {
 
   const stringConstructor = (
     basePath: string,
-    name: string
+    name: string,
   ): CollectionServiceV4<MockClient, StringCollection, QStringCollection> => {
     return new CollectionServiceV4(odataClient, basePath, name, new QStringCollection());
   };
   const enumConstructor = (
     basePath: string,
-    name: string
+    name: string,
   ): CollectionServiceV4<MockClient, EnumCollection<Feature>, QEnumCollection> => {
     return new CollectionServiceV4(odataClient, basePath, name, new QEnumCollection());
   };

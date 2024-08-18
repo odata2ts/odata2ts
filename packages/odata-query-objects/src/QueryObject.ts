@@ -1,11 +1,10 @@
 import { PartialDeep } from "type-fest";
-
 import { QEntityPathModel, QPathModel, QValuePathModel } from "./path/QPathModel.js";
 
 function getMapping(q: QueryObject) {
   return Object.entries(q)
     .filter(
-      (prop): prop is [string, QPathModel] => typeof prop[1] === "object" && typeof prop[1].getPath === "function"
+      (prop): prop is [string, QPathModel] => typeof prop[1] === "object" && typeof prop[1].getPath === "function",
     )
     .reduce<Map<string, string>>((collector, [key, value]) => {
       collector.set(value.getPath(), key);
@@ -68,7 +67,7 @@ export class QueryObject<T extends object = any> {
     const models = isList ? (odataModel as Array<T>) : [odataModel];
 
     const result = models.map((model) => {
-      return Object.entries(model).reduce<any>((collector, [key, value]) => {
+      return Object.entries(model).reduce((collector, [key, value]) => {
         const propKey = this.__getPropMapping().get(key);
         const prop = propKey ? (this[propKey] as unknown as QValuePathModel) : undefined;
         if (prop && propKey) {
@@ -131,7 +130,7 @@ export class QueryObject<T extends object = any> {
   public convertToOData(userModel: Array<PartialDeep<T>>, failForUnknownProps?: boolean): Array<object>;
   public convertToOData(
     userModel: PartialDeep<T> | Array<PartialDeep<T>> | null | undefined,
-    failForUnknownProps = false
+    failForUnknownProps = false,
   ) {
     if (userModel === null || userModel === undefined) {
       return userModel;

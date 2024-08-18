@@ -1,6 +1,5 @@
 import { TypeConverterConfig } from "@odata2ts/converter-runtime";
 import { AxiosRequestConfig } from "axios";
-
 import { NameSettings, OverridableNamingOptions } from "./NamingModel.js";
 import { TypeModel } from "./TypeModel.js";
 

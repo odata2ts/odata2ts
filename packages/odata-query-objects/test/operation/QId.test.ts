@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import {
   BookIdFunction,
   BookIdFunctionWithConversion,
@@ -79,7 +80,7 @@ describe("QId Tests", () => {
     expect(() => exampleFunction.parseUrl("EntityXy('123')")).toThrow("the function requires multiple parameters!");
     expect(() => exampleFunction.parseUrl("EntityXy(title,author=xxx)")).toThrow("Key and value must be specified");
     expect(() => exampleFunction.parseUrl("EntityXy(tiger=xxx)")).toThrow(
-      "not part of this function's method signature"
+      "not part of this function's method signature",
     );
   });
 });

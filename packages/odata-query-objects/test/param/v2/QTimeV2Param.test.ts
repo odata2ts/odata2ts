@@ -1,5 +1,5 @@
 import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "@odata2ts/test-converters";
-
+import { describe, expect, test } from "vitest";
 import { QTimeV2Param } from "../../../src";
 
 describe("QTimeV2Param Tests", () => {

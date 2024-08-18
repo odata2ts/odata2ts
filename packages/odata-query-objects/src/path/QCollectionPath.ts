@@ -1,8 +1,7 @@
 import { ValueConverter } from "@odata2ts/converter-api";
-
-import { LambdaFunctions } from "../odata/ODataModel";
-import { QFilterExpression } from "../QFilterExpression";
-import { QueryObject } from "../QueryObject";
+import { LambdaFunctions } from "../odata/ODataModel.js";
+import { QFilterExpression } from "../QFilterExpression.js";
+import { QueryObject } from "../QueryObject.js";
 import { LambdaOperatorType } from "./base/LambdaOperatorType.js";
 import { QEntityPathModel } from "./QPathModel.js";
 
@@ -10,7 +9,7 @@ export class QCollectionPath<CollectionType extends QueryObject> implements QEnt
   constructor(
     private path: string,
     private qEntityFn: () => new (prefix?: string, converter?: ValueConverter<any, any>) => CollectionType,
-    private __converter?: ValueConverter<any, any>
+    private __converter?: ValueConverter<any, any>,
   ) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");

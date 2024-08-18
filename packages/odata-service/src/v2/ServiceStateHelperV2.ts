@@ -1,16 +1,20 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
-import { ODataQueryBuilderV2, createQueryBuilderV2 } from "@odata2ts/odata-query-builder";
+import { createQueryBuilderV2, ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { QComplexParam, QueryObject } from "@odata2ts/odata-query-objects";
-
-import { ServiceStateHelper } from "../ServiceStateHelper";
+import { ServiceStateHelper } from "../ServiceStateHelper.js";
 
 export class ServiceStateHelperV2<
   in out ClientType extends ODataHttpClient,
-  Q extends QueryObject
+  Q extends QueryObject,
 > extends ServiceStateHelper<ClientType> {
   public readonly qResponseType: QComplexParam<any, Q>;
 
-  public constructor(client: ClientType, basePath: string, name: string, public qModel: Q) {
+  public constructor(
+    client: ClientType,
+    basePath: string,
+    name: string,
+    public qModel: Q,
+  ) {
     super(client, basePath, name);
     this.qResponseType = new QComplexParam("NONE", qModel);
   }

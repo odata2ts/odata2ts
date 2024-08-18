@@ -1,8 +1,11 @@
-import { QueryObject } from "../QueryObject";
+import { QueryObject } from "../QueryObject.js";
 import { QEntityPathModel, QPathModel } from "./QPathModel.js";
 
 export class QEntityPath<Q extends QueryObject> implements QEntityPathModel<Q> {
-  constructor(private path: string, private qEntityFn: () => new (prefix?: string) => Q) {
+  constructor(
+    private path: string,
+    private qEntityFn: () => new (prefix?: string) => Q,
+  ) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
     }

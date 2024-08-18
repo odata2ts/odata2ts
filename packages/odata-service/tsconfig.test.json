@@ -1,9 +1,9 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    "types": ["vitest/globals"],
-    "outDir": "./lib"
+    "composite": true,
+    "outDir": "build",
+    "lib": ["DOM"]
   },
-  "include": ["**/*"],
-  "exclude": ["node_modules", "lib", "build"]
+  "include": ["test", "src"]
 }

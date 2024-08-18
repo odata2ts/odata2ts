@@ -1,5 +1,5 @@
 import { AxiosClient } from "@odata2ts/http-client-axios";
-
+import { describe, expect, test } from "vitest";
 import type { EditablePersonModel, LocationModel } from "../../build/trippin/TrippinModel";
 import { FeatureModel, PersonGenderModel } from "../../build/trippin/TrippinModel";
 import { TrippinService } from "../../build/trippin/TrippinService";

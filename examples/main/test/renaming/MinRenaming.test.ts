@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, test } from "vitest";
 import type { EditableLocation, EditablePerson, PersonId } from "../../build/trippin-min-naming/TrippinModel";
 import { Feature, PersonGender } from "../../build/trippin-min-naming/TrippinModel";
 import { TrippinService } from "../../build/trippin-min-naming/TrippinService";

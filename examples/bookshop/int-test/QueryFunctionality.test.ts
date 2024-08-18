@@ -1,6 +1,6 @@
 import { AxiosClientError } from "@odata2ts/http-client-axios";
 import { BigNumber } from "bignumber.js";
-
+import { describe, expect, test } from "vitest";
 import { BooksModel } from "../src/catalog/CatalogModel";
 import { catalogService } from "./services";
 

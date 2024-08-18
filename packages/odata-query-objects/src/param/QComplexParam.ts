@@ -1,10 +1,13 @@
 import { ParamValueModel } from "@odata2ts/converter-api";
-
-import { QueryObject } from "../QueryObject";
+import { QueryObject } from "../QueryObject.js";
 import { QParamModel } from "./QParamModel.js";
 
 export class QComplexParam<Type extends object, Q extends QueryObject> implements QParamModel<any, Type> {
-  constructor(protected name: string, protected qObject: Q, protected mappedName?: string) {
+  constructor(
+    protected name: string,
+    protected qObject: Q,
+    protected mappedName?: string,
+  ) {
     if (!name?.trim()) {
       throw new Error("QComplexParam: Name is required!");
     }

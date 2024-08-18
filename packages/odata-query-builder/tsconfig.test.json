@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.settings.json",
-  "compilerOptions": {
-    "types": ["vitest/globals"],
-    "outDir": "./lib"
-  },
-  "include": ["**/*"],
-  "exclude": ["node_modules", "lib", "build"]
-}

@@ -1,12 +1,11 @@
 import { ValueConverter } from "@odata2ts/converter-api";
-
 import { getIdentityConverter } from "../../IdentityConverter";
 import { StandardFilterOperators } from "../../odata/ODataModel";
 import { buildQFilterOperation, isPathValue } from "../../param/UrlParamHelper";
 import { UrlExpressionValueModel } from "../../param/UrlParamModel";
 import { QFilterExpression } from "../../QFilterExpression";
 import { QOrderByExpression } from "../../QOrderByExpression";
-import { QValuePathModel } from "../QPathModel";
+import { QValuePathModel } from "../QPathModel.js";
 
 export type ExtractConverted<T> = T extends ValueConverter<any, infer Converted> ? Converted : never;
 export type InputModel<T> = QValuePathModel | ExtractConverted<T>;
@@ -16,7 +15,7 @@ export abstract class QBasePath<ValueType extends UrlExpressionValueModel, Conve
 
   public constructor(
     protected path: string,
-    public readonly converter: ValueConverter<ValueType, ValueType | ConvertedType> = getIdentityConverter<ValueType>()
+    public readonly converter: ValueConverter<ValueType, ValueType | ConvertedType> = getIdentityConverter<ValueType>(),
   ) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
@@ -106,9 +105,12 @@ export abstract class QBasePath<ValueType extends UrlExpressionValueModel, Conve
   public ge = this.greaterEquals;
 
   public in = (...values: Array<InputModel<this["converter"]>>) => {
-    return values.reduce((expression, value) => {
-      const expr = buildQFilterOperation(this.path, StandardFilterOperators.EQUALS, this.convertInput(value));
-      return expression ? expression.or(expr) : expr;
-    }, null as unknown as QFilterExpression);
+    return values.reduce(
+      (expression, value) => {
+        const expr = buildQFilterOperation(this.path, StandardFilterOperators.EQUALS, this.convertInput(value));
+        return expression ? expression.or(expr) : expr;
+      },
+      null as unknown as QFilterExpression,
+    );
   };
 }

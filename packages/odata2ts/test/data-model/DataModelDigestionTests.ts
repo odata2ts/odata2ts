@@ -1,13 +1,12 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
-
 import { NamingStrategies } from "../../src";
 import { NamespaceWithAlias, withNamespace } from "../../src/data-model/DataModel";
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
 import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel";
 import { TypeModel } from "../../src/TypeModel";
-import { TestOptions, TestSettings } from "../generator/TestTypes";
+import { TestOptions, TestSettings } from "../fixture/generator/TestTypes";
 import { getTestConfig } from "../test.config";
 import { ODataModelBuilder } from "./builder/ODataModelBuilder";
 
@@ -16,7 +15,7 @@ export type ModelBuilderConstructor<MB extends ODataModelBuilder<any, any, any, 
 export function createDataModelTests(
   version: ODataVersion,
   ODataBuilderConstructor: ModelBuilderConstructor<any>,
-  digest: DigesterFunction<any>
+  digest: DigesterFunction<any>,
 ) {
   const SERVICE_NAME = "Tester";
   const TEST_CONFIG = getTestConfig();

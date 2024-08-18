@@ -1,5 +1,4 @@
 import { ParamValueModel } from "@odata2ts/converter-api";
-
 import {
   CollectionFilterFunctions,
   DateTimeFilterFunctions,
@@ -7,9 +6,9 @@ import {
   NumberFilterOperators,
   StandardFilterOperators,
   StringFilterFunctions,
-} from "../odata/ODataModel";
-import { QPathModel } from "../path/QPathModel";
-import { QFilterExpression } from "../QFilterExpression";
+} from "../odata/ODataModel.js";
+import { QPathModel } from "../path/QPathModel.js";
+import { QFilterExpression } from "../QFilterExpression.js";
 import { UrlExpressionValueModel, UrlValueModel } from "./UrlParamModel.js";
 
 function parseNullValue(value: string | undefined): string | null | undefined {
@@ -36,7 +35,7 @@ export function parseLiteral(value: UrlValueModel): ParamValueModel<string> {
 
 export function formatParamWithTypePrefix(typePrefix: string, value: ParamValueModel<UrlExpressionValueModel>) {
   if (value === null) {
-    return "null.js";
+    return "null";
   }
   if (value === undefined) {
     return undefined;
@@ -117,7 +116,7 @@ export function isPathValue(value: QPathModel | any): value is QPathModel {
 export function buildOperatorExpression(
   path: string,
   operator: StandardFilterOperators | NumberFilterOperators,
-  value: string
+  value: string,
 ) {
   return `${path} ${operator} ${value}`;
 }
@@ -125,7 +124,7 @@ export function buildOperatorExpression(
 export function buildFunctionExpression(
   functionName: CollectionFilterFunctions | StringFilterFunctions | NumberFilterFunctions | DateTimeFilterFunctions,
   param1: string,
-  param2?: string
+  param2?: string,
 ) {
   return `${functionName}(${param1}${param2 ? `,${param2}` : ""})`;
 }
@@ -133,7 +132,7 @@ export function buildFunctionExpression(
 export function buildQFilterOperation(
   path: string,
   operator: StandardFilterOperators | NumberFilterOperators,
-  value: string
+  value: string,
 ) {
   return new QFilterExpression(buildOperatorExpression(path, operator, value));
 }

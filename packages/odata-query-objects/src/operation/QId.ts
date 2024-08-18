@@ -1,4 +1,4 @@
-import { QParamModel } from "../param/QParamModel";
+import { QParamModel } from "../param/QParamModel.js";
 import { QFunction } from "./QFunction.js";
 
 /**

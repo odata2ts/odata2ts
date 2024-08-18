@@ -1,6 +1,6 @@
 import { formatWithTypePrefix } from "../../param/UrlParamHelper";
 import { TIME_V2_TYPE_PREFIX } from "../../param/v2/QTimeV2Param";
-import { QBasePath } from "../base/QBasePath";
+import { QBasePath } from "../base/QBasePath.js";
 import { hourFn, minuteFn, secondFn } from "./DateTimeFunctions.js";
 
 export class QTimeV2Path<ConvertedType = string> extends QBasePath<string, ConvertedType> {

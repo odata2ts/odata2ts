@@ -1,17 +1,16 @@
 import { QEntityPath, QueryObject } from "@odata2ts/odata-query-objects";
-
-import { ODataQueryBuilder } from "../ODataQueryBuilder";
+import { ODataQueryBuilder } from "../ODataQueryBuilder.js";
 import {
   EntityExtractor,
-  ExpandType,
   ExpandingFunctionV2,
   ExpandingODataQueryBuilderV2 as ExpandingODataQueryBuilderV2Model,
+  ExpandType,
   NullableParamList,
-} from "../ODataQueryBuilderModel";
+} from "../ODataQueryBuilderModel.js";
 
 export function createExpandingQueryBuilderV2<Q extends QueryObject>(
   property: string,
-  qEntity: Q
+  qEntity: Q,
 ): ExpandingODataQueryBuilderV2Model<Q> {
   // must never be encoded, since it is part of $expand
   return new ExpandingODataQueryBuilderV2<Q>(property, qEntity);

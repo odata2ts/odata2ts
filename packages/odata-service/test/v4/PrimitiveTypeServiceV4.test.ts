@@ -1,4 +1,5 @@
-import { PrimitiveTypeServiceV4 } from "../../src";
+import { beforeEach, describe, expect, test } from "vitest";
+import { PrimitiveTypeServiceV4 } from "../../src/index.js";
 import { PersonModelService } from "../fixture/v4/PersonModelService";
 import { MockClient } from "../mock/MockClient";
 

@@ -6,7 +6,7 @@ export default defineConfig({
     globals: true,
     server: {
       deps: {
-        inline: ["fs-extra", "prettier", "cosmiconfig"],
+        inline: ["prettier", "cosmiconfig"],
       },
     },
   },

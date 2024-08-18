@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    "types": ["vitest/globals"],
     "outDir": "./lib"
   },
   "include": ["**/*"],

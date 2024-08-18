@@ -1,4 +1,5 @@
-import { ODataQueryBuilderV2, createQueryBuilderV2 } from "../src/";
+import { beforeEach, describe, expect, test } from "vitest";
+import { createQueryBuilderV2, ODataQueryBuilderV2 } from "../src/index.js";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 import { createBaseTests } from "./ODataQueryBuilderBaseTests";
 
@@ -50,11 +51,11 @@ describe("ODataQueryBuilderV2 Test", () => {
 
     expect(() =>
       // @ts-ignore
-      toTest.expanding(null, null)
+      toTest.expanding(null, null),
     ).toThrow(expectedMsg);
     expect(() =>
       // @ts-ignore
-      toTest.expanding(undefined, null)
+      toTest.expanding(undefined, null),
     ).toThrow(expectedMsg);
   });
 
@@ -64,7 +65,7 @@ describe("ODataQueryBuilderV2 Test", () => {
     expect(toTest.expanding("address", null).build()).toBe(expected);
     expect(toTest.expanding("address", undefined).build()).toBe(expected);
     expect(toTest.expanding("address", (builder) => builder.expanding("responsible", undefined)).build()).toBe(
-      addBase("$expand=Address")
+      addBase("$expand=Address"),
     );
   });
 
@@ -96,7 +97,7 @@ describe("ODataQueryBuilderV2 Test", () => {
       .build();
 
     const expected = addBase(
-      "$select=Address/responsible/name&$expand=Address,Address/responsible,Address/responsible/Address"
+      "$select=Address/responsible/name&$expand=Address,Address/responsible,Address/responsible/Address",
     );
 
     expect(candidate).toBe(expected);

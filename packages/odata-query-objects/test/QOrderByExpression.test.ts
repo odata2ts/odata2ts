@@ -1,4 +1,5 @@
-import { QOrderByExpression, QNumberPath, QStringPath } from "../src";
+import { describe, expect, test } from "vitest";
+import { QOrderByExpression } from "../src";
 
 describe("QOrderByExpression test", () => {
   test("fails with null, undefined, empty string", () => {

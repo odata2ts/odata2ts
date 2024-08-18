@@ -1,17 +1,16 @@
 import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
-
-import { ODataQueryBuilder } from "../ODataQueryBuilder";
+import { ODataQueryBuilder } from "../ODataQueryBuilder.js";
 import {
-  ExpandType,
   ExpandingFunction,
   ExpandingODataQueryBuilderV4 as ExpandingODataQueryBuilderV4Model,
+  ExpandType,
   NullableParam,
   NullableParamList,
-} from "../ODataQueryBuilderModel";
+} from "../ODataQueryBuilderModel.js";
 
 export function createExpandingQueryBuilderV4<Q extends QueryObject>(
   property: string,
-  qEntity: Q
+  qEntity: Q,
 ): ExpandingODataQueryBuilderV4Model<Q> {
   return new ExpandingODataQueryBuilderV4<Q>(property, qEntity);
 }

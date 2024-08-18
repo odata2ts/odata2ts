@@ -1,12 +1,11 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
-
 import { TypeModel } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { DigestionOptions } from "../../../src/FactoryFunctionModel";
-import { TestOptions, TestSettings } from "../../generator/TestTypes";
+import { TestOptions, TestSettings } from "../../fixture/generator/TestTypes";
 import { getTestConfig } from "../../test.config";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
 
@@ -301,7 +300,7 @@ describe("Function Digestion Test", () => {
 
     odataBuilder.addFunction(funcName, ODataTypesV4.Boolean, false);
     odataBuilder.addFunction(funcName, ODataTypesV4.Boolean, false, (builder) =>
-      builder.addParam("anyParam", ODataTypesV4.Boolean)
+      builder.addParam("anyParam", ODataTypesV4.Boolean),
     );
 
     const result = await doDigest();
@@ -324,7 +323,7 @@ describe("Function Digestion Test", () => {
       .addEntitySet("tests", withNs(entName))
       .addFunction(funcName, ODataTypesV4.Boolean, true, (builder) => builder.addParam("_it", withNs(entName)))
       .addFunction(funcName, ODataTypesV4.Boolean, true, (builder) =>
-        builder.addParam("_it", withNs(entName)).addParam("anyParam", ODataTypesV4.Boolean)
+        builder.addParam("_it", withNs(entName)).addParam("anyParam", ODataTypesV4.Boolean),
       );
 
     const result = await doDigest();

@@ -1,5 +1,6 @@
 import { ODataService } from "../src";
 import { MockClient } from "./mock/MockClient";
+import { describe, test, expect } from "vitest";
 
 class TestODataService extends ODataService<MockClient> {
   public exposeAddFullPath(path?: string) {

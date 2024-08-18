@@ -1,15 +1,16 @@
+import { access, readFile } from "node:fs/promises";
 import type { CosmiconfigResult } from "cosmiconfig/dist/types";
-import * as fsExtra from "fs-extra";
-import type { MockInstance } from "vitest";
-import { vi } from "vitest";
-
-import { getDefaultConfig } from "../../src";
-import { CliOptions, ConfigFileOptions, EmitModes, Modes, RunOptions } from "../../src";
+import { mkdirp } from "mkdirp";
+import { rimraf } from "rimraf";
+import { afterAll, beforeAll, beforeEach, describe, expect, MockInstance, test, vi } from "vitest";
+import { CliOptions, ConfigFileOptions, EmitModes, getDefaultConfig, Modes, RunOptions } from "../../src";
 import * as app from "../../src/app";
 import { run } from "../../src/cli";
 import * as downloader from "../../src/download";
 
-vi.mock("fs-extra");
+vi.mock("rimraf");
+vi.mock("mkdirp");
+vi.mock("node:fs/promises");
 vi.mock("../src/download");
 
 const { mockCosmi, searchSpy } = vi.hoisted(() => {
@@ -52,8 +53,13 @@ describe("Cli Test", () => {
     // => provide Promise implementation to make things work
     vi.spyOn(app, "runApp").mockImplementation(() => Promise.resolve());
 
+    // mock process.exit => would otherwise also exit test run
+    processExitSpy = vi.spyOn(process, "exit").mockImplementation((): any => {
+      throw new Error(EXIT_MSG);
+    });
+
     // mock console to keep a clean test output
-    vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "log").mockImplementation(() => vi.fn());
     logErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
@@ -64,11 +70,6 @@ describe("Cli Test", () => {
     // mock program arguments
     process.argv = STANDARD_ARGS;
 
-    // mock process.exit => would otherwise also exit test run
-    processExitSpy = vi.spyOn(process, "exit").mockImplementationOnce(() => {
-      throw new Error(EXIT_MSG);
-    });
-
     // default run options
     runOptions = { ...DEFAULT_OPTS };
 
@@ -78,10 +79,8 @@ describe("Cli Test", () => {
       filepath: `${process.cwd}/.testrc`,
     };
 
-    // @ts-ignore
-    vi.mocked(fsExtra.pathExists).mockResolvedValue(true);
-    // @ts-ignore
-    vi.mocked(fsExtra.readFile).mockResolvedValue("");
+    vi.mocked(readFile).mockResolvedValue("");
+    vi.mocked(access).mockResolvedValue(true);
   });
 
   afterAll(() => {
@@ -137,8 +136,7 @@ describe("Cli Test", () => {
     const url = "http://localhost:3000/api";
     const args = [...defaultArgs, "-u", url];
     const testDownload = "test";
-    // @ts-ignore
-    fsExtra.pathExists.mockResolvedValueOnce(false);
+    vi.mocked(access).mockRejectedValue(undefined);
     const downloadSpy = vi.spyOn(downloader, "downloadMetadata").mockResolvedValueOnce(testDownload);
     const storeSpy = vi.spyOn(downloader, "storeMetadata").mockResolvedValueOnce("");
 
@@ -307,8 +305,7 @@ describe("Cli Test", () => {
   });
 
   test("Fail pathExists", async () => {
-    // @ts-ignore
-    fsExtra.pathExists.mockResolvedValue(false);
+    vi.mocked(access).mockRejectedValue(undefined);
 
     await expect(runCli(defaultArgs)).rejects.toThrow(EXIT_MSG);
 
@@ -317,8 +314,18 @@ describe("Cli Test", () => {
     expect(logErrorSpy).toHaveBeenCalledTimes(1);
   });
 
-  test("Fail emptyDir", async () => {
-    vi.mocked(fsExtra.emptyDir).mockRejectedValueOnce(new Error("Oh No!"));
+  test("Fail clean dir", async () => {
+    vi.mocked(rimraf).mockRejectedValueOnce(new Error("Oh No!"));
+
+    await expect(runCli(defaultArgs)).rejects.toThrow(EXIT_MSG);
+
+    expect(processExitSpy).toHaveBeenCalledWith(3);
+    expect(app.runApp).not.toHaveBeenCalled();
+    expect(logErrorSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test("Fail clean dir", async () => {
+    vi.mocked(mkdirp).mockRejectedValueOnce(new Error("Oh No!"));
 
     await expect(runCli(defaultArgs)).rejects.toThrow(EXIT_MSG);
 

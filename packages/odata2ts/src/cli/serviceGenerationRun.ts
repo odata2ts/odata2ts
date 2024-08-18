@@ -1,9 +1,7 @@
-import { readFile } from "fs/promises";
-
-// @ts-ignore: typings not up-to-date
-import { emptyDir, pathExists } from "fs-extra/esm";
+import { access, readFile } from "node:fs/promises";
+import { mkdirp } from "mkdirp";
+import { rimraf } from "rimraf";
 import { parseStringPromise } from "xml2js";
-
 import { runApp } from "../app.js";
 import { ODataEdmxModelBase } from "../data-model/edmx/ODataEdmxModelBase.js";
 import { downloadMetadata, storeMetadata } from "../download/index.js";
@@ -14,7 +12,7 @@ export async function startServiceGenerationRun(options: RunOptions) {
     options;
   console.log("---------------------------");
   console.log(
-    `Starting generation process. Service name ${serviceName ? `"${serviceName}"` : "will be detected automatically!"}`
+    `Starting generation process. Service name ${serviceName ? `"${serviceName}"` : "will be detected automatically!"}`,
   );
 
   if (debug) {
@@ -32,7 +30,9 @@ export async function startServiceGenerationRun(options: RunOptions) {
   }
 
   // evaluate source
-  const exists = await pathExists(source);
+  const exists = await access(source)
+    .then(() => true)
+    .catch(() => false);
   console.log(`${exists ? "Found" : "Didn't find"} metadata file at: `, source);
 
   let metadataXml;
@@ -64,7 +64,8 @@ export async function startServiceGenerationRun(options: RunOptions) {
 
   // ensure that output directory exists
   try {
-    await emptyDir(output);
+    await rimraf(output);
+    await mkdirp(output);
   } catch (error) {
     console.error(`Output path [${output}] couldn't be created!`, error);
     process.exit(3);

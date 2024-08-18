@@ -1,5 +1,5 @@
-import { StandardFilterOperators } from "../odata/ODataModel";
-import { buildQFilterOperation } from "../param/UrlParamHelper";
+import { StandardFilterOperators } from "../odata/ODataModel.js";
+import { buildQFilterOperation } from "../param/UrlParamHelper.js";
 import { QBasePath } from "./base/QBasePath.js";
 
 export class QBooleanPath<ConvertedType = boolean> extends QBasePath<boolean, ConvertedType> {

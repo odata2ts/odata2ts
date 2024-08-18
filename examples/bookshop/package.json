@@ -2,13 +2,17 @@
   "name": "@odata2ts/example-bookshop",
   "version": "0.7.13",
   "private": true,
-  "publishConfig": {
-    "access": "public"
-  },
   "description": "Example using CAP",
-  "license": "MIT",
   "repository": "git@github.com:odata2ts/odata2ts.git",
+  "license": "MIT",
   "author": "texttechne",
+  "files": [
+    "app",
+    "db",
+    "server/index.cds",
+    "server/index.js",
+    "srv"
+  ],
   "scripts": {
     "build": "yarn clean",
     "clean": "rimraf build src",
@@ -20,16 +24,9 @@
     "type-test": "tsc",
     "watch": "cds watch"
   },
-  "files": [
-    "app",
-    "db",
-    "server/index.cds",
-    "server/index.js",
-    "srv"
-  ],
   "dependencies": {
-    "@odata2ts/converter-big-number": "^0.2.0",
-    "@odata2ts/http-client-axios": "^0.11.0",
+    "@odata2ts/converter-big-number": "^0.2.1",
+    "@odata2ts/http-client-axios": "^0.11.1",
     "@odata2ts/odata-service": "^0.19.3",
     "@sap/cds": ">=5.9",
     "@sap/cds-odata-v2-adapter-proxy": "^1.9.21",
@@ -43,6 +40,9 @@
     "rimraf": "^5.0.1",
     "sqlite3": "^5",
     "typescript": "^5.1.3"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "readme": "README.md"
 }

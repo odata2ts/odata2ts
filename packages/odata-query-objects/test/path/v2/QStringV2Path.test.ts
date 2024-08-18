@@ -1,5 +1,5 @@
 import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "@odata2ts/test-converters";
-
+import { describe, expect, test } from "vitest";
 import { QStringV2Path } from "../../../src";
 import { getIdentityConverter } from "../../../src/IdentityConverter";
 import { createStringTests } from "../StringBaseTests";

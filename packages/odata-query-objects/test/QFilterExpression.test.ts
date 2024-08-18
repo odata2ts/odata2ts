@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { QFilterExpression, QNumberPath, QStringPath } from "../src";
 
 describe("QFilterExpression test", () => {
@@ -74,7 +75,7 @@ describe("QFilterExpression test", () => {
     const toTest = exampleExpression.or(exampleNumberExpr).or(exampleNumberExpr).or(exampleExpression).toString();
 
     expect(toTest).toBe(
-      `(((${exampleResult} or ${exampleNumberResult}) or ${exampleNumberResult}) or ${exampleResult})`
+      `(((${exampleResult} or ${exampleNumberResult}) or ${exampleNumberResult}) or ${exampleResult})`,
     );
   });
 
@@ -88,7 +89,7 @@ describe("QFilterExpression test", () => {
     const toTest = exampleExpression.or(exampleNumberExpr).and(exampleExpression.or(exampleNumberExpr)).toString();
 
     expect(toTest).toBe(
-      `(${exampleResult} or ${exampleNumberResult}) and (${exampleResult} or ${exampleNumberResult})`
+      `(${exampleResult} or ${exampleNumberResult}) and (${exampleResult} or ${exampleNumberResult})`,
     );
   });
 });

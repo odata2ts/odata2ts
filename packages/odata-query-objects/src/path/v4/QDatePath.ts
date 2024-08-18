@@ -1,4 +1,4 @@
-import { QBasePath } from "../base/QBasePath";
+import { QBasePath } from "../base/QBasePath.js";
 import { dayFn, monthFn, yearFn } from "./DateTimeFunctions.js";
 import { identityFormatter } from "./IdentityFormatter.js";
 

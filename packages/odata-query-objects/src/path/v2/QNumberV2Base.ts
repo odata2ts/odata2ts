@@ -1,10 +1,10 @@
 import { NumberFilterFunctions, NumberFilterOperators } from "../../odata/ODataModel";
-import { InputModel, QBasePath } from "../base/QBasePath";
+import { InputModel, QBasePath } from "../base/QBasePath.js";
 
 export abstract class QNumberV2Base<
   BaseType extends number | string,
   ConvertedType,
-  SubClass extends QNumberV2Base<BaseType, ConvertedType, any>
+  SubClass extends QNumberV2Base<BaseType, ConvertedType, any>,
 > extends QBasePath<BaseType, ConvertedType> {
   protected formatValue(value: BaseType): string {
     return String(value);
@@ -14,7 +14,7 @@ export abstract class QNumberV2Base<
 
   protected abstract createNewOperationPath(
     operator: NumberFilterOperators,
-    value: InputModel<this["converter"]>
+    value: InputModel<this["converter"]>,
   ): SubClass;
 
   public plus(value: InputModel<this["converter"]>) {

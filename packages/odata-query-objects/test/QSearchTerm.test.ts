@@ -1,4 +1,5 @@
-import { QSearchTerm, searchTerm } from "../src";
+import { describe, expect, test } from "vitest";
+import { searchTerm } from "../src";
 
 describe("QFilterExpression test", () => {
   const exampleTerm = "example";

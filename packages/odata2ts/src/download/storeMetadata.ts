@@ -1,9 +1,7 @@
-import { writeFile } from "fs/promises";
-import path from "path";
-
-// @ts-ignore
-import { ensureDir } from "fs-extra/esm";
-import prettier from "prettier";
+import { writeFile } from "node:fs/promises";
+import path from "node:path";
+import { mkdirp } from "mkdirp";
+import { format, resolveConfig } from "prettier";
 
 /**
  * Write (prettified) data to disk.
@@ -15,16 +13,17 @@ import prettier from "prettier";
 export async function storeMetadata(filePath: string, metadataXml: string, prettify: boolean) {
   const outDir = path.dirname(filePath);
 
-  const prettierConfig = await prettier.resolveConfig(outDir);
-  const prettified = prettify
-    ? await prettier.format(
-        metadataXml,
-        // @ts-ignore: xmlWhitespaceSensitivity is an option of the plugin
-        { ...prettierConfig, parser: "xml", plugins: ["@prettier/plugin-xml"] },
-      )
-    : metadataXml;
+  let prettified = metadataXml;
+  if (prettify) {
+    const prettierConfig = await resolveConfig(outDir);
+    prettified = await format(
+      metadataXml,
+      // @ts-ignore: xmlWhitespaceSensitivity is an option of the plugin
+      { ...prettierConfig, parser: "xml", plugins: ["@prettier/plugin-xml"] },
+    );
+  }
 
-  await ensureDir(outDir);
+  await mkdirp(outDir);
   await writeFile(filePath, prettified);
 
   return prettified;

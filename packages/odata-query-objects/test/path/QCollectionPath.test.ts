@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { QCollectionPath, QFilterExpression, QStringCollection, QStringPath } from "../../src";
 
 describe("QCollectionPath test", () => {
@@ -53,12 +54,12 @@ describe("QCollectionPath test", () => {
     expect(
       createToTest()
         .any(() => {})
-        .toString()
+        .toString(),
     ).toBe("test/any()");
     expect(
       createToTest()
         .any(() => new QFilterExpression())
-        .toString()
+        .toString(),
     ).toBe("test/any()");
   });
 
@@ -86,12 +87,12 @@ describe("QCollectionPath test", () => {
     expect(
       createToTest()
         .all(() => {})
-        .toString()
+        .toString(),
     ).toBe("test/all()");
     expect(
       createToTest()
         .all(() => new QFilterExpression())
-        .toString()
+        .toString(),
     ).toBe("test/all()");
   });
 

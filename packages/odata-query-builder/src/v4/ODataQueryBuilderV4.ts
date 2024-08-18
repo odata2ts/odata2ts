@@ -1,14 +1,13 @@
 import { QFilterExpression, QOrderByExpression, QSearchTerm, QueryObject } from "@odata2ts/odata-query-objects";
-
-import { ODataQueryBuilder } from "../ODataQueryBuilder";
+import { ODataQueryBuilder } from "../ODataQueryBuilder.js";
 import {
-  ExpandType,
   ExpandingFunction,
+  ExpandType,
   NullableParam,
   NullableParamList,
   ODataQueryBuilderConfig,
   ODataQueryBuilderV4 as ODataQueryBuilderV4Model,
-} from "../ODataQueryBuilderModel";
+} from "../ODataQueryBuilderModel.js";
 import { createExpandingQueryBuilderV4 } from "./ExpandingODataQueryBuilderV4.js";
 
 /**
@@ -29,7 +28,7 @@ import { createExpandingQueryBuilderV4 } from "./ExpandingODataQueryBuilderV4.js
 export function createQueryBuilderV4<Q extends QueryObject>(
   path: string,
   qEntity: Q,
-  config?: ODataQueryBuilderConfig
+  config?: ODataQueryBuilderConfig,
 ): ODataQueryBuilderV4Model<Q> {
   return new ODataQueryBuilderV4<Q>(path, qEntity, config);
 }

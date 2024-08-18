@@ -1,8 +1,7 @@
 import { NewLineKind } from "@ts-morph/common";
 import { CompilerOptions, ModuleKind, ModuleResolutionKind, ScriptTarget } from "ts-morph";
-import load from "tsconfig-loader";
+import load, { TsConfigLoaderParams, TsConfigLoaderResult } from "tsconfig-loader";
 import ts from "typescript";
-
 import { EmitModes } from "../OptionModel.js";
 
 /**
@@ -19,7 +18,8 @@ export async function loadTsMorphCompilerOptions(tsConfigPath: string, emitMode:
   // load config file
   // NOTE: not async...
   // @ts-ignore
-  const conf = load.default({ filename: tsConfigPath });
+  const doLoad: ({ filename, cwd }?: TsConfigLoaderParams) => TsConfigLoaderResult | undefined = load?.default ?? load;
+  const conf = doLoad({ filename: tsConfigPath });
 
   const {
     // ignored props

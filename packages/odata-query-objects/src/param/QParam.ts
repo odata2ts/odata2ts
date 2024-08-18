@@ -1,6 +1,5 @@
 import { ParamValueModel, ValueConverter } from "@odata2ts/converter-api";
-
-import { getIdentityConverter } from "../IdentityConverter";
+import { getIdentityConverter } from "../IdentityConverter.js";
 import { QParamModel } from "./QParamModel.js";
 import { UrlParamValueFormatter, UrlParamValueParser } from "./UrlParamModel.js";
 
@@ -12,7 +11,7 @@ export abstract class QParam<Type extends PrimitiveParamType, ConvertedType>
   constructor(
     protected name: string,
     protected mappedName?: string,
-    protected readonly converter: ValueConverter<Type, Type | ConvertedType> = getIdentityConverter<Type>()
+    protected readonly converter: ValueConverter<Type, Type | ConvertedType> = getIdentityConverter<Type>(),
   ) {
     if (!name) {
       throw new Error("Name is required for QParam objects!");
@@ -47,7 +46,7 @@ export abstract class QParam<Type extends PrimitiveParamType, ConvertedType>
   }
 
   public formatUrlValue(
-    value: ParamValueModel<ConvertedType> | Array<ParamValueModel<ConvertedType>>
+    value: ParamValueModel<ConvertedType> | Array<ParamValueModel<ConvertedType>>,
   ): string | undefined {
     return Array.isArray(value)
       ? JSON.stringify(this.convertTo(value))
@@ -55,7 +54,7 @@ export abstract class QParam<Type extends PrimitiveParamType, ConvertedType>
   }
 
   public parseUrlValue(
-    value: string | undefined
+    value: string | undefined,
   ): ParamValueModel<ConvertedType> | Array<ParamValueModel<ConvertedType>> {
     const parsed = this.parseValueFromUrl(value);
     if (value && parsed === undefined) {

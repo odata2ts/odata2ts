@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { QBinaryPath } from "../../src";
 
 describe("QBinaryPath test", () => {

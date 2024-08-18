@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "composite": true,
-    "rootDir": ".",
-    "noFallthroughCasesInSwitch": false,
-    "strict": false
-  },
-  "include": ["odata2ts.config.ts", "vite.config.ts", "build"]
-}

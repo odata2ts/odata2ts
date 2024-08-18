@@ -1,5 +1,5 @@
 import { BigNumber } from "bignumber.js";
-
+import { describe, expect, test } from "vitest";
 import { BooksModel } from "../../src/catV2/CatV2Model";
 import { catalogV2Service } from "./servicesV2";
 

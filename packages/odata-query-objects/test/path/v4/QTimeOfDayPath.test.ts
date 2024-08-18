@@ -1,7 +1,7 @@
 import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "@odata2ts/test-converters";
-
+import { describe, expect, test } from "vitest";
 import { QTimeOfDayPath } from "../../../src";
-import { EXAMPLE_PATH_NAME, EXAMPLE_TIME, createBaseDateTimeTests, createTimeFunctionTests } from "./DateTimeBaseTests";
+import { createBaseDateTimeTests, createTimeFunctionTests, EXAMPLE_PATH_NAME, EXAMPLE_TIME } from "./DateTimeBaseTests";
 
 describe("QTimeOfDayPath test", () => {
   const toTest = new QTimeOfDayPath(EXAMPLE_PATH_NAME);

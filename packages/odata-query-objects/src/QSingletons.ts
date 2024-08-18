@@ -1,5 +1,4 @@
 import { ValueConverter } from "@odata2ts/converter-api";
-
 import { QBinaryPath } from "./path/QBinaryPath.js";
 import { QBooleanPath } from "./path/QBooleanPath.js";
 import { QEnumPath } from "./path/QEnumPath.js";
@@ -21,7 +20,7 @@ import { QTimeOfDayPath } from "./path/v4/QTimeOfDayPath.js";
 import { QueryObject } from "./QueryObject.js";
 
 const ATTRIBUTE_NAME = "it";
-const PRIMITIVE_VALUE_REFERENCE = "$it.js";
+const PRIMITIVE_VALUE_REFERENCE = "$it";
 
 export interface PrimitiveCollectionType<T> {
   [ATTRIBUTE_NAME]: T;
@@ -54,8 +53,8 @@ export abstract class QPrimitiveCollection<Type, QType extends QValuePathModel> 
     return !converter
       ? odataModel
       : Array.isArray(odataModel)
-      ? odataModel.map((om) => converter.convertFrom(om))
-      : converter.convertFrom(odataModel);
+        ? odataModel.map((om) => converter.convertFrom(om))
+        : converter.convertFrom(odataModel);
   }
 
   public convertToOData(userModel: Type | Array<Type> | null | undefined) {
@@ -67,8 +66,8 @@ export abstract class QPrimitiveCollection<Type, QType extends QValuePathModel> 
     return !converter
       ? userModel
       : Array.isArray(userModel)
-      ? userModel.map((um) => converter.convertTo(um))
-      : converter.convertTo(userModel);
+        ? userModel.map((um) => converter.convertTo(um))
+        : converter.convertTo(userModel);
   }
 }
 

@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { QEntityPath } from "../../src";
 import { QSimpleEntity } from "../fixture/SimpleComplexModel";
 

@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { QStringCollection } from "../src";
 import { qComplex, qSimple } from "./fixture/SimpleComplexModel";
 

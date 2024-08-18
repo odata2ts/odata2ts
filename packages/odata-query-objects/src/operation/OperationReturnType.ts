@@ -1,15 +1,14 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
-
-import { QParamModel } from "../param/QParamModel";
+import { QParamModel } from "../param/QParamModel.js";
 import {
-  ResponseConverter,
-  ResponseConverterV2,
   convertV2CollectionResponse,
   convertV2ModelResponse,
   convertV2ValueResponse,
   convertV4CollectionResponse,
   convertV4ModelResponse,
   convertV4ValueResponse,
+  ResponseConverter,
+  ResponseConverterV2,
 } from "./ResponseHelper.js";
 
 export enum ReturnTypes {
@@ -49,7 +48,10 @@ function getResponseConverterV2(returnType: ReturnTypes): ResponseConverterV2 | 
 }
 
 export class OperationReturnType<QObject extends QParamModel<any, any> | void> {
-  constructor(public readonly returnType: ReturnTypes, public readonly type: QObject | undefined = undefined) {}
+  constructor(
+    public readonly returnType: ReturnTypes,
+    public readonly type: QObject | undefined = undefined,
+  ) {}
 
   private doConvert(response: HttpResponseModel<any>, isV2: boolean = false) {
     const responseConverter = isV2 ? getResponseConverterV2(this.returnType) : getResponseConverter(this.returnType);

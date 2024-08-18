@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "../TestConstants";
 
 describe("Trippin: Operation Test", function () {

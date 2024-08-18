@@ -1,5 +1,6 @@
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { BigNumber } from "bignumber.js";
+import { describe, test, expect } from "vitest";
 
 import { BooksModel, EditableBooksModel } from "../src/admin/AdminModel";
 import { adminService } from "./services";

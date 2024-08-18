@@ -1,10 +1,7 @@
 import * as path from "path";
-
-// @ts-ignore: typings not up-to-date
-import { ensureDir } from "fs-extra/esm";
+import { mkdirp } from "mkdirp";
 import { CompilerOptions, Project, SourceFile } from "ts-morph";
 import { firstCharLowerCase } from "xml2js/lib/processors.js";
-
 import { DataModel } from "../data-model/DataModel.js";
 import { EntityType } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
@@ -31,7 +28,7 @@ export async function createProjectManager(
   emitMode: EmitModes,
   namingHelper: NamingHelper,
   dataModel: DataModel,
-  options: ProjectManagerOptions
+  options: ProjectManagerOptions,
 ): Promise<ProjectManager> {
   const { usePrettier = false, tsConfigPath = "tsconfig.json" } = options;
   const formatter = usePrettier ? await createFormatter(outputDir, usePrettier) : undefined;
@@ -65,7 +62,7 @@ export class ProjectManager {
     protected dataModel: DataModel,
     protected formatter: FileFormatter | undefined,
     compilerOptions: CompilerOptions | undefined,
-    protected options: ProjectManagerOptions
+    protected options: ProjectManagerOptions,
   ) {
     // Create ts-morph project
     this.project = new Project({
@@ -105,7 +102,7 @@ export class ProjectManager {
     name: string,
     reservedNames?: Array<string> | undefined,
     additionalPath: string = "",
-    forceTypeChecking = false
+    forceTypeChecking = false,
   ): FileHandler {
     const fileName = path.join(this.outputDir, additionalPath, `${name}.ts`);
     const imports = new ImportContainer(
@@ -114,7 +111,7 @@ export class ProjectManager {
       this.dataModel,
       this.namingHelper.getFileNames(),
       !!this.options.bundledFileGeneration,
-      reservedNames
+      reservedNames,
     );
 
     return new FileHandler(
@@ -123,16 +120,14 @@ export class ProjectManager {
       this.project.createSourceFile(fileName),
       imports,
       this.formatter,
-      forceTypeChecking || !!this.options.allowTypeChecking
+      forceTypeChecking || !!this.options.allowTypeChecking,
     );
   }
 
   public async init() {
     if (!this.options.bundledFileGeneration) {
       // ensure folder for each model: we do this at this point for performance reasons
-      await Promise.all(
-        this.dataModel.getModelTypes().map((mt) => ensureDir(path.join(this.outputDir, mt.folderPath)))
-      );
+      await Promise.all(this.dataModel.getModelTypes().map((mt) => mkdirp(path.join(this.outputDir, mt.folderPath))));
     }
 
     const typePart = this.emitMode.toUpperCase().replace("_", " & ");

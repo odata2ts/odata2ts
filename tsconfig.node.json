@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "strict": true
+  },
+  "include": ["**/odata2ts.config.ts", "**/vite.config.ts", "**/build"]
+}
