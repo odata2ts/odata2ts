@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/example-bookshop",
-  "version": "0.7.13",
+  "version": "0.7.14",
   "private": true,
   "description": "Example using CAP",
   "repository": "git@github.com:odata2ts/odata2ts.git",
@@ -36,7 +36,7 @@
     "passport": ">=0.6.0"
   },
   "devDependencies": {
-    "@odata2ts/odata2ts": "^0.36.2",
+    "@odata2ts/odata2ts": "^0.36.3",
     "rimraf": "^5.0.1",
     "sqlite3": "^5",
     "typescript": "^5.1.3"

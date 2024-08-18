@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.36.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.36.2...@odata2ts/odata2ts@0.36.3) (2024-08-12)
+
+### Bug Fixes
+
+* **generator:** v4 types like Edm.Date, Edm.TimeOfDay and Emd.Duration are not recognized ([#295](https://github.com/odata2ts/odata2ts/issues/295)) ([3b63969](https://github.com/odata2ts/odata2ts/commit/3b639699217ba234cf9e5508f24a64c4d6f3d3dd))
+
 ## [0.36.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.36.1...@odata2ts/odata2ts@0.36.2) (2024-08-01)
 
 ### Bug Fixes

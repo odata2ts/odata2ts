@@ -1,6 +1,9 @@
 {
   "name": "@odata2ts/odata2ts",
-  "version": "0.36.2",
+  "version": "0.36.3",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Flexible generator to produce various TypeScript artefacts (from simple model interfaces to complete odata clients) from OData metadata files",
   "keywords": [
     "odata2ts",
@@ -35,7 +38,7 @@
     "clean": "rimraf lib build",
     "clean-v2": "rimraf build/v2",
     "clean-v4": "rimraf build/v4",
-    "compile": "ytsc -p tsconfig.compile.json",
+    "compile": "tsc -p tsconfig.compile.json",
     "dev": "yarn generate trippin odata",
     "generate": "ts-node --esm --cwd-mode src/run-cli.ts",
     "int-test": "yarn clean && vitest run int-test/**",

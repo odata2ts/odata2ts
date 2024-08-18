@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.14](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-bookshop@0.7.13...@odata2ts/example-bookshop@0.7.14) (2024-08-12)
+
+**Note:** Version bump only for package @odata2ts/example-bookshop
+
 ## [0.7.13](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-bookshop@0.7.12...@odata2ts/example-bookshop@0.7.13) (2024-08-01)
 
 **Note:** Version bump only for package @odata2ts/example-bookshop
