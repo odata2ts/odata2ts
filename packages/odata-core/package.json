@@ -1,28 +1,7 @@
 {
   "name": "@odata2ts/odata-core",
   "version": "0.5.0",
-  "publishConfig": {
-    "access": "public"
-  },
   "description": "Enums and interfaces for OData V2 and V4 data types and response models",
-  "license": "MIT",
-  "repository": "git@github.com:odata2ts/odata2ts.git",
-  "author": "texttechne",
-  "homepage": "https://odata2ts.github.io/",
-  "main": "./lib/index.js",
-  "type": "module",
-  "scripts": {
-    "build": "yarn clean && yarn compile",
-    "check-circular-deps": "madge ./src --extensions ts --circular",
-    "clean": "rimraf lib coverage",
-    "compile": "tsc",
-    "prepublish": "yarn build"
-  },
-  "files": [
-    "*.md",
-    "lib",
-    "LICENSE"
-  ],
   "keywords": [
     "odata",
     "types",
@@ -33,9 +12,26 @@
     "ts",
     "odatats"
   ],
-  "devDependencies": {
-    "rimraf": "^5.0.1",
-    "typescript": "5.1.3"
+  "homepage": "https://odata2ts.github.io/",
+  "repository": "git@github.com:odata2ts/odata2ts.git",
+  "license": "MIT",
+  "author": "texttechne",
+  "type": "module",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "files": [
+    "*.md",
+    "lib",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn compile",
+    "check-circular-deps": "madge ./src --extensions ts --circular",
+    "clean": "rimraf lib coverage",
+    "compile": "tsc",
+    "prepublish": "yarn build"
   },
-  "types": "./lib/index.d.ts"
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.settings.json",
-  "compilerOptions": {
-    "composite": true,
-    "outDir": "build",
-    "lib": ["DOM"]
-  },
-  "include": ["test", "src"]
-}

@@ -100,7 +100,7 @@ export class QueryObject<T extends object = any> {
         }
 
         return collector;
-      }, {}) as PartialDeep<T>;
+      }, {} as any) as PartialDeep<T>;
     });
 
     return isList ? result : result[0];

@@ -1,6 +1,5 @@
+import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import type { MockInstance } from "vitest";
-import { vi } from "vitest";
-
 import { EmitModes, Modes, RunOptions } from "../src";
 import { runApp } from "../src/app";
 import * as Generator from "../src/generator";
@@ -21,6 +20,7 @@ vi.mock("../src/data-model/NamingHelper", async (importOriginal) => {
   // @ts-ignore
   const { NamingHelper: TheNamingHelper } = original;
 
+  // @ts-ignore
   class Mock extends TheNamingHelper {
     constructor(...args: any) {
       super(...args);
@@ -145,7 +145,7 @@ describe("App Test", () => {
 
     expect(logInfoSpy).toHaveBeenNthCalledWith(
       2,
-      "Duplicate name: Test - Fully Qualified Names: Tester.Test, New.Test (renamed to: Test2)"
+      "Duplicate name: Test - Fully Qualified Names: Tester.Test, New.Test (renamed to: Test2)",
     );
   });
 

@@ -1,11 +1,12 @@
+import { describe, expect, test } from "vitest";
 import {
   CliOptions,
   ConfigFileOptions,
   EmitModes,
-  Modes,
-  NamingStrategies,
   getDefaultConfig,
   getMinimalConfig,
+  Modes,
+  NamingStrategies,
 } from "../src";
 import { evaluateConfigOptions } from "../src/evaluateConfig";
 
@@ -26,13 +27,13 @@ describe("Config Evaluation Tests", () => {
 
   test("fail without source or output", () => {
     expect(() => evaluateConfigOptions({}, undefined)).toThrow(
-      "Without any configuration file options --source and --output must be specified!"
+      "Without any configuration file options --source and --output must be specified!",
     );
     expect(() => evaluateConfigOptions({ source: "source" }, undefined)).toThrow(
-      "Without any configuration file options --source and --output must be specified!"
+      "Without any configuration file options --source and --output must be specified!",
     );
     expect(() => evaluateConfigOptions({ output: "output" }, undefined)).toThrow(
-      "Without any configuration file options --source and --output must be specified!"
+      "Without any configuration file options --source and --output must be specified!",
     );
   });
 
@@ -92,13 +93,13 @@ describe("Config Evaluation Tests", () => {
   test("fail with config but without source or output", () => {
     const opts: ConfigFileOptions = { debug: true, mode: Modes.qobjects };
     expect(() => evaluateConfigOptions({}, opts)).toThrow(
-      "No services were configured in config file, so options --source and --output must be specified!"
+      "No services were configured in config file, so options --source and --output must be specified!",
     );
     expect(() => evaluateConfigOptions({ source: "source" }, opts)).toThrow(
-      "No services were configured in config file, so options --source and --output must be specified!"
+      "No services were configured in config file, so options --source and --output must be specified!",
     );
     expect(() => evaluateConfigOptions({ output: "output" }, opts)).toThrow(
-      "No services were configured in config file, so options --source and --output must be specified!"
+      "No services were configured in config file, so options --source and --output must be specified!",
     );
   });
 
@@ -255,7 +256,7 @@ describe("Config Evaluation Tests", () => {
     const cliOpts: CliOptions = { services: ["xxx"] };
     const opts: ConfigFileOptions = { services: { test: testService } };
     expect(() => evaluateConfigOptions(cliOpts, opts)).toThrow(
-      `Specified service "xxx" doesn't exist in configuration!`
+      `Specified service "xxx" doesn't exist in configuration!`,
     );
   });
 
