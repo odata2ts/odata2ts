@@ -19,7 +19,7 @@
     "compile": "tsc",
     "gen-meta": "cds server/srv/cat-service.cds -2 edmx > resource/catalog-srv.xml && cds server/srv/admin-service.cds -2 edmx > resource/admin-srv.xml ",
     "generate-from-url": "odata2ts",
-    "int-test": "vitest run int-test/**",
+    "int-test": "vitest run --dir int-test",
     "start": "cds run",
     "type-test": "tsc",
     "watch": "cds watch"

@@ -1,5 +1,5 @@
 import { stringToPrefixModelConverter } from "@odata2ts/test-converters";
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { QStringNumberV2Path } from "../../../src/";
 
 describe("QStringNumberV2Path test", () => {

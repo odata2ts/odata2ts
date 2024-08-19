@@ -38,10 +38,10 @@
     "compile": "tsc -p tsconfig.compile.json",
     "dev": "yarn generate trippin odata",
     "generate": "ts-node --esm --cwd-mode src/run-cli.ts",
-    "int-test": "yarn clean && vitest run int-test/**",
+    "int-test": "yarn clean && vitest run --dir int-test",
     "prepublish": "yarn build",
-    "test": "vitest run ./test/**",
-    "testing": "vitest test/**"
+    "test": "vitest run --dir test",
+    "testing": "vitest --dir test"
   },
   "dependencies": {
     "@odata2ts/converter-api": "^0.2.0",

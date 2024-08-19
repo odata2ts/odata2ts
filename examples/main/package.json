@@ -11,8 +11,8 @@
     "build": "yarn clean && yarn generate",
     "clean": "rimraf build",
     "generate": "odata2ts",
-    "int-test": "vitest run int-test/**",
-    "test": "tsc && vitest run test/**"
+    "int-test": "vitest run --dir int-test",
+    "test": "tsc && vitest run --dir test"
   },
   "dependencies": {
     "@odata2ts/converter-big-number": "^0.2.1",

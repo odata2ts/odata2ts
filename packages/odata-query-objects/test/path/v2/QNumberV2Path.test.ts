@@ -1,5 +1,5 @@
 import { numberToStringConverter } from "@odata2ts/test-converters";
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { QNumberV2Path } from "../../../src/";
 
 describe("QNumberV2Path test", () => {
