@@ -1,5 +1,5 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
-
+import { beforeEach, expect, test } from "vitest";
 import { RunOptions } from "../../src";
 import { digest } from "../../src/data-model/DataModelDigestionV4";
 import { DataTypes } from "../../src/data-model/DataTypeModel";
@@ -32,7 +32,7 @@ export function createComplexAndEnumTests() {
   test("EnumType: enum type", async () => {
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoice", withNs("Choice"))
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoice", withNs("Choice")),
       )
       .addEnumType("Choice", [
         { name: "A", value: 1 },
@@ -62,7 +62,7 @@ export function createComplexAndEnumTests() {
   test("EnumType: enum collection", async () => {
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoices", `Collection(${withNs("Choice")})`)
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoices", `Collection(${withNs("Choice")})`),
       )
       .addEnumType("Choice", [
         { name: "A", value: 1 },
@@ -92,7 +92,7 @@ export function createComplexAndEnumTests() {
   test("ComplexType: complex type", async () => {
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV4.String).addProp("branding", withNs("Brand"))
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("branding", withNs("Brand")),
       )
       .addComplexType("Brand", undefined, (builder) => builder.addProp("naming", ODataTypesV4.String));
 
@@ -119,16 +119,16 @@ export function createComplexAndEnumTests() {
   test("ComplexType: base class hierarchy", async () => {
     odataBuilder
       .addComplexType("GrandParent", undefined, (builder) =>
-        builder.addProp("name", ODataTypesV4.String).addProp("myChoice", withNs("Choice"))
+        builder.addProp("name", ODataTypesV4.String).addProp("myChoice", withNs("Choice")),
       )
       .addComplexType("Parent", { baseType: withNs("GrandParent") }, (builder) =>
-        builder.addProp("parentalAdvice", ODataTypesV4.Boolean)
+        builder.addProp("parentalAdvice", ODataTypesV4.Boolean),
       )
       .addComplexType("Child", { baseType: withNs("Parent") }, (builder) =>
-        builder.addProp("Ch1ld1shF4n", ODataTypesV4.String)
+        builder.addProp("Ch1ld1shF4n", ODataTypesV4.String),
       )
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV4.String).addProp("kids", withNs("Child"))
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("kids", withNs("Child")),
       )
       .addEnumType("Choice", [
         { name: "A", value: 1 },

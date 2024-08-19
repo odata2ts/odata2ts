@@ -1,7 +1,6 @@
 import { NewLineKind } from "@ts-morph/common";
 import { ModuleKind, ModuleResolutionKind, ScriptTarget } from "typescript";
-import { vi } from "vitest";
-
+import { describe, expect, test, vi } from "vitest";
 import { EmitModes } from "../../src";
 import { loadTsMorphCompilerOptions } from "../../src/project/TsMorphHelper";
 

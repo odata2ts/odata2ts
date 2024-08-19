@@ -1,5 +1,5 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
-
+import { beforeEach, describe, expect, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { DataTypes } from "../../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
@@ -116,10 +116,10 @@ describe("V4: EntityTypeDigestion Test", () => {
   test("EntityTypes: base class hierarchy", async () => {
     odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Guid));
     odataBuilder.addEntityType("Parent", { baseType: withNs("GrandParent") }, (builder) =>
-      builder.addProp("parentalAdvice", ODataTypesV4.Boolean)
+      builder.addProp("parentalAdvice", ODataTypesV4.Boolean),
     );
     odataBuilder.addEntityType("Child", { baseType: withNs("Parent") }, (builder) =>
-      builder.addProp("Ch1ld1shF4n", ODataTypesV4.String)
+      builder.addProp("Ch1ld1shF4n", ODataTypesV4.String),
     );
 
     const expectedGrandParentProp = {
@@ -194,7 +194,7 @@ describe("V4: EntityTypeDigestion Test", () => {
         .addProp("multipleTimes", `Collection(${ODataTypesV4.TimeOfDay})`)
         .addProp("multipleDates", `Collection(${ODataTypesV4.Date})`)
         .addProp("multipleDateTimes", `Collection(${ODataTypesV4.DateTimeOffset})`)
-        .addProp("multipleBinaries", `Collection(${ODataTypesV4.Binary})`)
+        .addProp("multipleBinaries", `Collection(${ODataTypesV4.Binary})`),
     );
     const result = await doDigest();
 
@@ -434,7 +434,7 @@ describe("V4: EntityTypeDigestion Test", () => {
         builder
           .addKeyProp("ID", ODataTypesV4.Guid)
           .addNavProp("products", withNs("Product"))
-          .addNavProp("similarProducts", withNs("Prod.uct"), "test", false)
+          .addNavProp("similarProducts", withNs("Prod.uct"), "test", false),
       )
       .addEntityType("Product", undefined, (builder) => {
         builder.addKeyProp("ID", ODataTypesV4.Guid);

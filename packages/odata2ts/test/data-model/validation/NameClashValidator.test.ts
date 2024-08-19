@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, test } from "vitest";
 import { TypeModel } from "../../../src";
 import { NameClashValidator } from "../../../src/data-model/validation/NameClashValidator";
 

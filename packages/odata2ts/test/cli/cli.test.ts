@@ -54,7 +54,7 @@ describe("Cli Test", () => {
     vi.spyOn(app, "runApp").mockImplementation(() => Promise.resolve());
 
     // mock process.exit => would otherwise also exit test run
-    processExitSpy = vi.spyOn(process, "exit").mockImplementation((): any => {
+    processExitSpy = vi.spyOn(process, "exit").mockImplementation(() => {
       throw new Error(EXIT_MSG);
     });
 
@@ -80,7 +80,7 @@ describe("Cli Test", () => {
     };
 
     vi.mocked(readFile).mockResolvedValue("");
-    vi.mocked(access).mockResolvedValue(true);
+    vi.mocked(access).mockResolvedValue();
   });
 
   afterAll(() => {
