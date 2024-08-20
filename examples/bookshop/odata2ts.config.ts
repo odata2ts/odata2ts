@@ -31,7 +31,7 @@ const config: ConfigFileOptions = {
     },
     admin: {
       serviceName: "admin",
-      sourceUrl: "http://localhost:4004/admin",
+      sourceUrl: "http://localhost:4004/odata/v4/admin",
       sourceUrlConfig: {
         username: "alice",
         password: "",
