@@ -1,11 +1,10 @@
 import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
 import type { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
-
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
 // @ts-ignore
-import { QPing, QTestEntityId, QVote, qTestEntity } from "./QTester";
+import { QPing, qTestEntity, QTestEntityId, QVote } from "./QTester";
 // @ts-ignore
 import type { EditableTestEntity, TestEntity, TestEntityId, VoteParams } from "./TesterModel";
 
@@ -24,7 +23,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 
   public async keepAlive(
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataModelResponseV4<void>>> {
     if (!this._qPing) {
       this._qPing = new QPing();
@@ -37,7 +36,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
 
   public async doLike(
     params: VoteParams,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataModelResponseV4<TestEntity>>> {
     if (!this._qVote) {
       this._qVote = new QVote();

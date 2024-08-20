@@ -8,7 +8,6 @@ import {
   ReturnTypes,
 } from "@odata2ts/odata-query-objects";
 import { stringToPrefixModelConverter } from "@odata2ts/test-converters";
-
 // @ts-ignore
 import type { ActionWithConverterParams } from "./TesterModel";
 
@@ -24,7 +23,7 @@ export class QActionWithConverter extends QAction<ActionWithConverterParams> {
   constructor() {
     super(
       "ActionWithConverter",
-      new OperationReturnType(ReturnTypes.COMPLEX, new QComplexParam("NONE", new QPerson()))
+      new OperationReturnType(ReturnTypes.COMPLEX, new QComplexParam("NONE", new QPerson())),
     );
   }
 

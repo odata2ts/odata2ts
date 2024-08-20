@@ -1,10 +1,9 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
 import { CollectionServiceV2, EntitySetServiceV2, EntityTypeServiceV2, ODataService } from "@odata2ts/odata-service";
-
 // @ts-ignore
 import type { QBook, QReviewer } from "./QTester";
 // @ts-ignore
-import { QBookId, qBook, qReviewer } from "./QTester";
+import { qBook, QBookId, qReviewer } from "./QTester";
 // @ts-ignore
 import type { Book, BookId, EditableBook, EditableReviewer, Reviewer } from "./TesterModel";
 

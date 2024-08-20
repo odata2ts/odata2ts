@@ -1,11 +1,10 @@
 import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 import { EntitySetServiceV2, EntityTypeServiceV2, ODataService } from "@odata2ts/odata-service";
-
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
 // @ts-ignore
-import { QBestBook, QTestEntityId, qTestEntity } from "./QTester";
+import { QBestBook, qTestEntity, QTestEntityId } from "./QTester";
 // @ts-ignore
 import type { BestBookParams, EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel";
 
@@ -24,7 +23,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
 
   public async bestBook(
     params: BestBookParams,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataCollectionResponseV2<TestEntity>>> {
     if (!this._qBestBook) {
       this._qBestBook = new QBestBook();

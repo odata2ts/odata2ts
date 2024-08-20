@@ -22,7 +22,6 @@ import {
   QTimeOfDayPath,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
-
 // @ts-ignore
 import type { BookId } from "./TesterModel";
 
@@ -45,7 +44,7 @@ export class QBook extends QueryObject {
   public readonly multipleDates = new QCollectionPath(this.withPrefix("multipleDates"), () => QDateCollection);
   public readonly multipleDateTimeOffsets = new QCollectionPath(
     this.withPrefix("multipleDateTimeOffsets"),
-    () => QDateTimeOffsetCollection
+    () => QDateTimeOffsetCollection,
   );
   public readonly multipleBinaries = new QCollectionPath(this.withPrefix("multipleBinaries"), () => QBinaryCollection);
 }

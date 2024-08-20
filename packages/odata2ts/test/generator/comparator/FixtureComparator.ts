@@ -1,7 +1,7 @@
+import { access, readFile } from "node:fs/promises";
 import path from "path";
-
-import { pathExistsSync, readFile } from "fs-extra";
 import prettier, { Options } from "prettier";
+import { expect } from "vitest";
 
 /**
  * Create a new fixture comparator for a whole test suite.
@@ -21,7 +21,10 @@ export async function createFixtureComparator(basePath: string) {
 export class FixtureComparator {
   private readonly path: string;
 
-  constructor(basePath: string, private prettierConfig: Options | null) {
+  constructor(
+    basePath: string,
+    private prettierConfig: Options | null,
+  ) {
     this.path = path.join(__dirname, "../../fixture", basePath);
   }
 
@@ -30,7 +33,9 @@ export class FixtureComparator {
     const result = await prettier.format(text, config);
 
     const fullPath = this.path + path.sep + fixturePath;
-    if (!pathExistsSync(fullPath)) {
+    try {
+      await access(fullPath);
+    } catch (error) {
       throw new Error("Unable to load fixture: " + fullPath);
     }
 
@@ -49,7 +54,7 @@ export class FixtureComparator {
     }
   }
 
-  public loadFixture(path: string) {
+  private async loadFixture(path: string) {
     return readFile(path, "utf-8");
   }
 }

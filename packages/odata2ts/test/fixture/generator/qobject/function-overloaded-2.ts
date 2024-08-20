@@ -1,5 +1,4 @@
 import { QFunction, QStringParam } from "@odata2ts/odata-query-objects";
-
 // @ts-ignore
 import type { OverloadedFunctionParams } from "./TesterModel";
 

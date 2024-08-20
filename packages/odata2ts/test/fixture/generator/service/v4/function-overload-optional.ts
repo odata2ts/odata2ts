@@ -1,7 +1,6 @@
 import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
 import type { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { ODataService } from "@odata2ts/odata-service";
-
 // @ts-ignore
 import { QBestReview } from "./QTester";
 // @ts-ignore
@@ -12,7 +11,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
 
   public async bestReview(
     params?: BestReviewParams,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataValueResponseV4<string>>> {
     if (!this._qBestReview) {
       this._qBestReview = new QBestReview();

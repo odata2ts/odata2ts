@@ -1,11 +1,10 @@
 import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV4, ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
-
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
 // @ts-ignore
-import { QPingBigNumber, QPingDecimal, QPingDecimalCollection, QTestEntityId, qTestEntity } from "./QTester";
+import { QPingBigNumber, QPingDecimal, QPingDecimalCollection, qTestEntity, QTestEntityId } from "./QTester";
 // @ts-ignore
 import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel";
 
@@ -29,7 +28,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 
   public async pingBigNumber(
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataValueResponseV4<string>>> {
     if (!this._qPingBigNumber) {
       this._qPingBigNumber = new QPingBigNumber();
@@ -42,7 +41,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 
   public async pingDecimal(
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataValueResponseV4<string>>> {
     if (!this._qPingDecimal) {
       this._qPingDecimal = new QPingDecimal();
@@ -55,7 +54,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 
   public async pingDecimalCollection(
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataCollectionResponseV4<string>>> {
     if (!this._qPingDecimalCollection) {
       this._qPingDecimalCollection = new QPingDecimalCollection();

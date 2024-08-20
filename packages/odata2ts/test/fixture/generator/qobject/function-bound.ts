@@ -1,6 +1,5 @@
 import { QBooleanParam, QBooleanPath, QFunction, QStringParam, QueryObject } from "@odata2ts/odata-query-objects";
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
-
 // @ts-ignore
 import type { Book_MinFunctionParams } from "./TesterModel";
 
