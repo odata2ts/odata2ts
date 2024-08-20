@@ -1,7 +1,6 @@
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { BigNumber } from "bignumber.js";
-import { describe, test, expect } from "vitest";
-
+import { describe, expect, test, vi } from "vitest";
 import { BooksModel, EditableBooksModel } from "../src/admin/AdminModel";
 import { adminService } from "./services";
 
@@ -32,7 +31,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
   });
 
   test("create and delete book", async () => {
-    jest.setTimeout(15000);
+    vi.setConfig({ testTimeout: 15000 });
 
     // given
     const bookSrv = testService.books();

@@ -21,8 +21,7 @@
     "int-test": "lerna run --parallel int-test",
     "release": "env-cmd -f .env.local --no-override lerna version",
     "start-cap": "yarn workspace @odata2ts/example-bookshop start",
-    "test": "lerna run --parallel test -- --no-cache",
-    "test-examples": "lerna run --scope '*/example-*' --parallel test",
+    "test": "lerna run --parallel test",
     "type-test": "lerna run --parallel type-test",
     "version": "yarn install && git add yarn.lock",
     "postversion": "lerna publish from-git"

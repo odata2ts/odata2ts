@@ -81,12 +81,12 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
+      - name: Install cds globally
+        run: npm i -g @sap/cds-dk
       - name: Install packages
         run: yarn --immutable
       - name: Build packages
         run: yarn build
-      - name: Run unit tests of example packages
-        run: yarn test-examples
       - name: Start CAP server & run integration tests
         run: |
           yarn start-cap &
