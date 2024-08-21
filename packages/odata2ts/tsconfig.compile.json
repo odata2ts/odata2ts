@@ -3,6 +3,6 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["build/**/*"],
+  "include": ["src", "test", "build"],
   "exclude": ["node_modules", "lib"]
 }

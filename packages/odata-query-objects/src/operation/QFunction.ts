@@ -1,7 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
-
-import { QParamModel } from "../param/QParamModel";
-import { OperationReturnType, emptyOperationReturnType } from "./OperationReturnType";
+import { QParamModel } from "../param/QParamModel.js";
+import { emptyOperationReturnType, OperationReturnType } from "./OperationReturnType.js";
 
 type FunctionParams = Record<string, string>;
 type FilteredParamModel = [string, string];
@@ -50,7 +49,7 @@ export abstract class QFunction<ParamModel = undefined> {
   public constructor(
     protected name: string,
     protected qReturnType: OperationReturnType<any> = emptyOperationReturnType,
-    protected config: { v2Mode?: boolean } = {}
+    protected config: { v2Mode?: boolean } = {},
   ) {}
 
   public abstract getParams(): Array<QParamModel<any, any>> | Array<Array<QParamModel<any, any>>>;
@@ -145,18 +144,21 @@ export abstract class QFunction<ParamModel = undefined> {
     }
 
     // regular form
-    const params = rawParams.reduce((model, param) => {
-      const keyAndValue = param.split("=");
-      if (keyAndValue.length !== 2) {
-        throw new Error(`Failed to parse function params: Key and value must be specified!`);
-      }
+    const params = rawParams.reduce(
+      (model, param) => {
+        const keyAndValue = param.split("=");
+        if (keyAndValue.length !== 2) {
+          throw new Error(`Failed to parse function params: Key and value must be specified!`);
+        }
 
-      const key = notDecoded ? keyAndValue[0] : decodeURIComponent(keyAndValue[0]);
-      const value = notDecoded ? keyAndValue[1] : decodeURIComponent(keyAndValue[1]);
+        const key = notDecoded ? keyAndValue[0] : decodeURIComponent(keyAndValue[0]);
+        const value = notDecoded ? keyAndValue[1] : decodeURIComponent(keyAndValue[1]);
 
-      model[key] = value;
-      return model;
-    }, {} as Record<string, string>);
+        model[key] = value;
+        return model;
+      },
+      {} as Record<string, string>,
+    );
 
     const qParams = this.findBestMatchingParamSet(Object.keys(params), false);
     return Object.entries(params).reduce((model, [key, value]) => {
@@ -164,7 +166,7 @@ export abstract class QFunction<ParamModel = undefined> {
 
       if (!qParam) {
         throw new Error(
-          `Failed to parse function params: Param "${key}" is not part of this function's method signature!`
+          `Failed to parse function params: Param "${key}" is not part of this function's method signature!`,
         );
       }
 

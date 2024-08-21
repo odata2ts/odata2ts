@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { PersonIdModel } from "../../build/trippin/TrippinModel";
 import { BASE_URL, TRIPPIN } from "../TestConstants";
 

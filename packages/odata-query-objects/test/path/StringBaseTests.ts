@@ -1,3 +1,4 @@
+import { expect, test } from "vitest";
 import { QStringPath, QStringV2Path } from "../../src";
 
 export function createStringTests<T extends QStringPath | QStringV2Path>(toTest: T, otherProp: T) {

@@ -24,7 +24,6 @@ import {
   QTimeV2Path,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
-
 // @ts-ignore
 import type { BookId } from "./TesterModel";
 
@@ -52,16 +51,16 @@ export class QBook extends QueryObject {
   public readonly multipleTimes = new QCollectionPath(this.withPrefix("multipleTimes"), () => QTimeV2Collection);
   public readonly multipleDateTimes = new QCollectionPath(
     this.withPrefix("multipleDateTimes"),
-    () => QDateTimeV2Collection
+    () => QDateTimeV2Collection,
   );
   public readonly multipleDateTimeOffsets = new QCollectionPath(
     this.withPrefix("multipleDateTimeOffsets"),
-    () => QDateTimeOffsetV2Collection
+    () => QDateTimeOffsetV2Collection,
   );
   public readonly multipleInt16 = new QCollectionPath(this.withPrefix("multipleInt16"), () => QNumberV2Collection);
   public readonly multipleDecimals = new QCollectionPath(
     this.withPrefix("multipleDecimals"),
-    () => QStringNumberV2Collection
+    () => QStringNumberV2Collection,
   );
   public readonly multipleBinaries = new QCollectionPath(this.withPrefix("multipleBinaries"), () => QBinaryCollection);
 }

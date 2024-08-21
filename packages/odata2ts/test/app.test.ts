@@ -1,6 +1,5 @@
-const { MockConstructorSpy } = require("./MockConstructorSpy");
-const namingHelperSpy = MockConstructorSpy("../src/data-model/NamingHelper", "NamingHelper", false);
-
+import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
+import type { MockInstance } from "vitest";
 import { EmitModes, Modes, RunOptions } from "../src";
 import { runApp } from "../src/app";
 import * as Generator from "../src/generator";
@@ -9,28 +8,45 @@ import { ODataModelBuilderV2 } from "./data-model/builder/v2/ODataModelBuilderV2
 import { ODataModelBuilderV4 } from "./data-model/builder/v4/ODataModelBuilderV4";
 import { getTestConfig } from "./test.config";
 
-// import {NamingHelper} from "../src/data-model/NamingHelper";
-jest.mock("fs-extra");
-jest.mock("ts-morph");
-jest.mock("../src/generator");
+vi.mock("fs-extra");
+vi.mock("ts-morph");
+vi.mock("../src/generator");
+const { namingHelperSpy } = vi.hoisted(() => {
+  const spy = vi.fn();
+  return { namingHelperSpy: spy };
+});
+vi.mock("../src/data-model/NamingHelper", async (importOriginal) => {
+  const original = await importOriginal();
+  // @ts-ignore
+  const { NamingHelper: TheNamingHelper } = original;
 
-const SERVICE_NAME = "Tester";
+  // @ts-ignore
+  class Mock extends TheNamingHelper {
+    constructor(...args: any) {
+      super(...args);
+      namingHelperSpy(...args);
+    }
+  }
+
+  return { NamingHelper: Mock };
+});
 
 describe("App Test", () => {
+  const SERVICE_NAME = "Tester";
   let runOptions: RunOptions;
   let odataBuilder: ODataModelBuilderV4;
-  let createPmSpy: jest.SpyInstance;
-  let logInfoSpy: jest.SpyInstance;
+  let createPmSpy: MockInstance;
+  let logInfoSpy: MockInstance;
 
   beforeAll(async () => {
     // @ts-ignore
-    createPmSpy = jest.spyOn(ProjectManager, "createProjectManager").mockResolvedValue(jest.fn());
+    createPmSpy = vi.spyOn(ProjectManager, "createProjectManager").mockResolvedValue(vi.fn());
 
-    logInfoSpy = jest.spyOn(console, "log").mockImplementation(jest.fn);
+    logInfoSpy = vi.spyOn(console, "log").mockImplementation(() => vi.fn());
   });
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
     runOptions = {
@@ -45,7 +61,7 @@ describe("App Test", () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   function doRunApp() {
@@ -129,7 +145,7 @@ describe("App Test", () => {
 
     expect(logInfoSpy).toHaveBeenNthCalledWith(
       2,
-      "Duplicate name: Test - Fully Qualified Names: Tester.Test, New.Test (renamed to: Test2)"
+      "Duplicate name: Test - Fully Qualified Names: Tester.Test, New.Test (renamed to: Test2)",
     );
   });
 

@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { QGetSomethingFunction, QGetSomethingFunctionV2 } from "../fixture/operation/EmptyFunction";
 import { OverloadedFunctionParamModel, QOverloadedFunction } from "../fixture/operation/OverloadedFunction";
 import {
@@ -53,7 +54,7 @@ describe("QFunction Tests", () => {
         ",TEST_ENTITY=@TEST_ENTITY" +
         ")" +
         '?@testCollection=["a","b"]' +
-        '&@TEST_ENTITY={"title":"testBook","AUTHOR":{"name":"testAuthor"}}'
+        '&@TEST_ENTITY={"title":"testBook","AUTHOR":{"name":"testAuthor"}}',
     );
     expect(exampleFunction.buildUrl(allParams)).toBe(
       "BestBook(" +
@@ -62,7 +63,7 @@ describe("QFunction Tests", () => {
         ",TEST_ENTITY=@TEST_ENTITY" +
         ")" +
         "?@testCollection=%5B%22a%22%2C%22b%22%5D" +
-        "&@TEST_ENTITY=%7B%22title%22%3A%22testBook%22%2C%22AUTHOR%22%3A%7B%22name%22%3A%22testAuthor%22%7D%7D"
+        "&@TEST_ENTITY=%7B%22title%22%3A%22testBook%22%2C%22AUTHOR%22%3A%7B%22name%22%3A%22testAuthor%22%7D%7D",
     );
   });
 

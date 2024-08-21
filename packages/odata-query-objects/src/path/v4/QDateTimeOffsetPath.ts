@@ -1,10 +1,10 @@
 import { DateTimeFilterFunctions } from "../../odata/ODataModel";
 import { buildFunctionExpression } from "../../param/UrlParamHelper";
-import { QBasePath } from "../base/QBasePath";
-import { dayFn, hourFn, minuteFn, monthFn, secondFn, yearFn } from "./DateTimeFunctions";
-import { identityFormatter } from "./IdentityFormatter";
-import { QDatePath } from "./QDatePath";
-import { QTimeOfDayPath } from "./QTimeOfDayPath";
+import { QBasePath } from "../base/QBasePath.js";
+import { dayFn, hourFn, minuteFn, monthFn, secondFn, yearFn } from "./DateTimeFunctions.js";
+import { identityFormatter } from "./IdentityFormatter.js";
+import { QDatePath } from "./QDatePath.js";
+import { QTimeOfDayPath } from "./QTimeOfDayPath.js";
 
 export class QDateTimeOffsetPath<ConvertedType = string> extends QBasePath<string, ConvertedType> {
   protected formatValue = identityFormatter;

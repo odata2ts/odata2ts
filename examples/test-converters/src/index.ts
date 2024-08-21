@@ -1,10 +1,9 @@
 import { ConverterPackage } from "@odata2ts/converter-api";
-
-import { booleanToNumberConverter } from "./BooleanToNumberConverter";
-import { converterWithWrongId } from "./ConverterWithWrongId";
-import { guidToGuidStringConverter } from "./GuidToGuidStringConverter";
-import { numberToStringConverter } from "./NumberToStringConverter";
-import { stringToPrefixModelConverter } from "./StringToPrefixModelConverter";
+import { booleanToNumberConverter } from "./BooleanToNumberConverter.js";
+import { converterWithWrongId } from "./ConverterWithWrongId.js";
+import { guidToGuidStringConverter } from "./GuidToGuidStringConverter.js";
+import { numberToStringConverter } from "./NumberToStringConverter.js";
+import { stringToPrefixModelConverter } from "./StringToPrefixModelConverter.js";
 
 const pkg: ConverterPackage = {
   id: "test-converters",
@@ -12,8 +11,8 @@ const pkg: ConverterPackage = {
 };
 
 export default pkg;
-export * from "./FixedDateConverter";
-export * from "./StringToPrefixModelConverter";
+export * from "./FixedDateConverter.js";
+export * from "./StringToPrefixModelConverter.js";
 export {
   booleanToNumberConverter,
   stringToPrefixModelConverter,

@@ -1,5 +1,5 @@
 import { AxiosClient } from "@odata2ts/http-client-axios";
-
+import { describe, expect, test, vi } from "vitest";
 import type { EditablePersonModel, LocationModel } from "../../build/trippin/TrippinModel";
 import { FeatureModel, PersonGenderModel } from "../../build/trippin/TrippinModel";
 import { TrippinService } from "../../build/trippin/TrippinService";
@@ -32,7 +32,7 @@ describe.skip("Trippin: CRUD Integration Tests", function () {
   const trippinService = new TrippinService(new AxiosClient(), BASE_URL);
 
   test("create, update and delete person", async () => {
-    jest.setTimeout(15000);
+    vi.setConfig({ testTimeout: 15000 });
 
     const horstService = trippinService.people(horst.user);
 

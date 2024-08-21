@@ -1,5 +1,5 @@
 import { QueryObject } from "@odata2ts/odata-query-objects";
-
+import { beforeEach, expect, test } from "vitest";
 import { ODataQueryBuilderConfig, ODataQueryBuilderV2, ODataQueryBuilderV4, QFilterExpression } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 
@@ -20,7 +20,7 @@ type QueryBuilder =
 export type BuilderFactoryFunction<Q extends QueryObject> = (
   path: string,
   qEntity: Q,
-  config?: ODataQueryBuilderConfig
+  config?: ODataQueryBuilderConfig,
 ) => QueryBuilder;
 
 export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) {

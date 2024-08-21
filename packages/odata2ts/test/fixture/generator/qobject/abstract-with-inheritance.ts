@@ -1,5 +1,4 @@
 import { QBooleanParam, QBooleanPath, QId, QueryObject } from "@odata2ts/odata-query-objects";
-
 // @ts-ignore
 import type { BookId, WithOwnStuffId } from "./TesterModel";
 

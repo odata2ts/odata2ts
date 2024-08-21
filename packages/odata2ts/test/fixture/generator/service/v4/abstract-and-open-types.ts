@@ -1,14 +1,13 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
-
 // @ts-ignore
 import type { QAbstractEntity, QExtendedFromAbstract, QExtendedFromOpen, QOpenEntity } from "./QTester";
 import {
-  QExtendedFromAbstractId,
-  QExtendedFromOpenId,
   qAbstractEntity,
   qExtendedFromAbstract,
+  QExtendedFromAbstractId,
   qExtendedFromOpen,
+  QExtendedFromOpenId,
   qOpenEntity,
   // @ts-ignore
 } from "./QTester";
@@ -82,7 +81,7 @@ export class ExtendedFromAbstractService<in out ClientType extends ODataHttpClie
 }
 
 export class ExtendedFromAbstractCollectionService<
-  in out ClientType extends ODataHttpClient
+  in out ClientType extends ODataHttpClient,
 > extends EntitySetServiceV4<
   ClientType,
   ExtendedFromAbstract,

@@ -1,3 +1,3 @@
-export { generateModels } from "./ModelGenerator";
-export { generateQueryObjects } from "./QueryObjectGenerator";
-export { generateServices } from "./ServiceGenerator";
+export { generateModels } from "./ModelGenerator.js";
+export { generateQueryObjects } from "./QueryObjectGenerator.js";
+export { generateServices } from "./ServiceGenerator.js";

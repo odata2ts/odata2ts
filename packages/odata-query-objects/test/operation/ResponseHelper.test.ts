@@ -1,16 +1,16 @@
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
-
+import { describe, expect, test } from "vitest";
 import {
-  QBooleanParam,
-  QComplexParam,
-  ResponseConverter,
-  ResponseConverterV2,
   convertV2CollectionResponse,
   convertV2ModelResponse,
   convertV2ValueResponse,
   convertV4CollectionResponse,
   convertV4ModelResponse,
   convertV4ValueResponse,
+  QBooleanParam,
+  QComplexParam,
+  ResponseConverter,
+  ResponseConverterV2,
 } from "../../src";
 import { QParamModel } from "../../src/param/QParamModel";
 import {
@@ -40,7 +40,7 @@ describe("ResponseHelper Tests", function () {
   const checkThatNonMatchingInputPassesAsItIs = (
     nonMatchingResponses: Array<any>,
     responseConverter: ResponseConverter | ResponseConverterV2,
-    qObject: QParamModel<any, any>
+    qObject: QParamModel<any, any>,
   ) => {
     nonMatchingResponses.forEach((nm) => {
       const result = responseConverter(createResponse(nm), qObject);

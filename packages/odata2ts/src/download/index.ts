@@ -1,2 +1,2 @@
-export { downloadMetadata } from "./downloadMetadata";
-export { storeMetadata } from "./storeMetadata";
+export { downloadMetadata } from "./downloadMetadata.js";
+export { storeMetadata } from "./storeMetadata.js";

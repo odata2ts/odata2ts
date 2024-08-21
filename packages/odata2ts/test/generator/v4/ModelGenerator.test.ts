@@ -1,5 +1,5 @@
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
-
+import { beforeAll, beforeEach, describe, test } from "vitest";
 import { EmitModes } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { DigestionOptions } from "../../../src/FactoryFunctionModel";
@@ -7,11 +7,11 @@ import { generateModels } from "../../../src/generator";
 import { createProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import {
+  createHelper,
   EntityBasedGeneratorFunctionWithoutVersion,
   FixtureComparatorHelper,
-  createHelper,
 } from "../comparator/FixtureComparatorHelper";
-import { ENTITY_NAME, SERVICE_NAME, createEntityBasedGenerationTests } from "./EntityBasedGenerationTests";
+import { createEntityBasedGenerationTests, ENTITY_NAME, SERVICE_NAME } from "./EntityBasedGenerationTests";
 
 describe("Model Generator Tests V4", () => {
   const TEST_SUITE_NAME = "Model Generator";
@@ -52,7 +52,7 @@ describe("Model Generator Tests V4", () => {
   test(`${TEST_SUITE_NAME}: min function param model`, async () => {
     // given a simple function
     odataBuilder.addFunction("MinOperation", ODataTypesV4.String, false, (builder) =>
-      builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true)
+      builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true),
     );
 
     // when generating model
@@ -64,7 +64,7 @@ describe("Model Generator Tests V4", () => {
     // given a simple action
     // @note: return type doesn't affect param model
     odataBuilder.addAction("MinOperation", ODataTypesV4.Guid, false, (builder) =>
-      builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true)
+      builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true),
     );
 
     // when generating model
@@ -82,7 +82,7 @@ describe("Model Generator Tests V4", () => {
         .addParam("testGuid", ODataTypesV4.Guid, false)
         .addParam("testTime", ODataTypesV4.TimeOfDay, false)
         .addParam("testDateOrDateTime", ODataTypesV4.Date, false)
-        .addParam("testDateTimeOffset", ODataTypesV4.DateTimeOffset, false)
+        .addParam("testDateTimeOffset", ODataTypesV4.DateTimeOffset, false),
     );
 
     // when generating model
@@ -100,7 +100,7 @@ describe("Model Generator Tests V4", () => {
         .addParam("testGuid", ODataTypesV4.Guid, false)
         .addParam("testTime", ODataTypesV4.TimeOfDay, false)
         .addParam("testDateOrDateTime", ODataTypesV4.Date, false)
-        .addParam("testDateTimeOffset", ODataTypesV4.DateTimeOffset, false)
+        .addParam("testDateTimeOffset", ODataTypesV4.DateTimeOffset, false),
     );
 
     // when generating model
@@ -116,7 +116,7 @@ describe("Model Generator Tests V4", () => {
         builder
           .addParam("book", `${withNs("Book")}`)
           .addParam("test", ODataTypesV4.String, false)
-          .addParam("optTest", ODataTypesV4.String, true)
+          .addParam("optTest", ODataTypesV4.String, true),
       );
 
     // when generating model
@@ -132,7 +132,7 @@ describe("Model Generator Tests V4", () => {
         builder
           .addParam("book", `Collection(${withNs("Book")})`)
           .addParam("test", ODataTypesV4.String, false)
-          .addParam("optTest", ODataTypesV4.String, true)
+          .addParam("optTest", ODataTypesV4.String, true),
       );
 
     // when generating model
@@ -145,14 +145,14 @@ describe("Model Generator Tests V4", () => {
     // given one minimal model
     odataBuilder
       .addEntityType("Author", undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV4.Int32).addProp("name", ODataTypesV4.Boolean, true)
+        builder.addKeyProp("id", ODataTypesV4.Int32).addProp("name", ODataTypesV4.Boolean, true),
       )
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
         builder
           .addKeyProp("id", ODataTypesV4.Int32)
           .addProp("author", `${withNs("Author")}`, false)
           .addProp("altAuthor", `${withNs("Author")}`, true)
-          .addProp("relatedAuthors", `Collection(${withNs("Author")})`)
+          .addProp("relatedAuthors", `Collection(${withNs("Author")})`),
       );
 
     // when generating model
@@ -171,7 +171,7 @@ describe("Model Generator Tests V4", () => {
         .addKeyProp("id", ODataTypesV4.Guid)
         .addProp("truth", ODataTypesV4.Boolean, false)
         .addProp("time", ODataTypesV4.TimeOfDay)
-        .addProp("multipleStrings", `Collection(${ODataTypesV4.String})`)
+        .addProp("multipleStrings", `Collection(${ODataTypesV4.String})`),
     );
 
     // when generating model
@@ -189,7 +189,7 @@ describe("Model Generator Tests V4", () => {
     // given two functions with same name but different set of parameters
     odataBuilder
       .addFunction(testFunc, ODataTypesV4.String, false, (pBuilder) =>
-        pBuilder.addParam("anyParam", ODataTypesV4.Boolean, false)
+        pBuilder.addParam("anyParam", ODataTypesV4.Boolean, false),
       )
       .addFunction(testFunc, ODataTypesV4.String, false);
 
@@ -205,7 +205,7 @@ describe("Model Generator Tests V4", () => {
     odataBuilder
       .addFunction(testFunc, ODataTypesV4.String, false)
       .addFunction(testFunc, ODataTypesV4.String, false, (pBuilder) =>
-        pBuilder.addParam("anyParam", ODataTypesV4.Boolean, false)
+        pBuilder.addParam("anyParam", ODataTypesV4.Boolean, false),
       );
 
     // when generating parameter model
@@ -222,10 +222,10 @@ describe("Model Generator Tests V4", () => {
         pBuilder.addParam("myParam", ODataTypesV4.String, false);
       })
       .addFunction(testFunc, ODataTypesV4.String, false, (pBuilder) =>
-        pBuilder.addParam("anyParam", ODataTypesV4.Boolean, false)
+        pBuilder.addParam("anyParam", ODataTypesV4.Boolean, false),
       )
       .addFunction(testFunc, ODataTypesV4.String, false, (pBuilder) =>
-        pBuilder.addParam("x", ODataTypesV4.Int32, false).addParam("y", ODataTypesV4.Int32, true)
+        pBuilder.addParam("x", ODataTypesV4.Int32, false).addParam("y", ODataTypesV4.Int32, true),
       );
 
     // when generating parameter model

@@ -1,4 +1,4 @@
-import { QPathModel } from "../QPathModel";
+import { QPathModel } from "../QPathModel.js";
 
 export abstract class QNoopPath implements QPathModel {
   public constructor(private path: string) {

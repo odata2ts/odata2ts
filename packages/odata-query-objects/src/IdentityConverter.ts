@@ -1,21 +1,21 @@
-import { IdentityConverter, ParamValueModel } from "@odata2ts/converter-api";
+import { IdentityConverter, ParamValueModel, ValueConverter } from "@odata2ts/converter-api";
 
-export class IdentityConverterImpl implements IdentityConverter<any, any> {
+export class IdentityConverterImpl<T> implements IdentityConverter<T> {
   id = "Identity";
   from = "any";
   to = "any";
 
-  convertFrom<ValueType>(value: ParamValueModel<ValueType>) {
+  convertFrom(value: ParamValueModel<T>) {
     return value;
   }
 
-  convertTo<ValueType>(value: ParamValueModel<ValueType>) {
+  convertTo(value: ParamValueModel<T>) {
     return value;
   }
 }
 
 const identityConverter = new IdentityConverterImpl();
 
-export function getIdentityConverter<T, CT>() {
-  return identityConverter as IdentityConverter<T, CT>;
+export function getIdentityConverter<T>() {
+  return identityConverter as IdentityConverter<T>;
 }

@@ -1,6 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
-
+import { describe, expect, test } from "vitest";
 import { PersonIdModel, PersonModel } from "../../build/trippin/TrippinModel";
 import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "../TestConstants";
 

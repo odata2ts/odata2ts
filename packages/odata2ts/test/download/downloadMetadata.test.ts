@@ -1,10 +1,11 @@
 import axios, { AxiosRequestConfig } from "axios";
-
+import { afterEach, beforeAll, describe, expect, test, vi } from "vitest";
+import type { MockInstance } from "vitest";
 import { UrlSourceConfiguration } from "../../src";
 import { downloadMetadata } from "../../src/download/downloadMetadata";
 
-jest.mock("axios");
-jest.mock("fs-extra");
+vi.mock("axios");
+vi.mock("fs-extra");
 
 describe("Download Test", () => {
   const DEFAULT_URL = "http://localhost:3000/api";
@@ -14,22 +15,22 @@ describe("Download Test", () => {
   };
   const AJAX_RESULT = "ajdfoaifjj";
 
-  let axiosSpy: jest.SpyInstance<any>;
-  let logInfoSpy: jest.SpyInstance;
-  let logErrorSpy: jest.SpyInstance;
+  let axiosSpy: MockInstance<any>;
+  let logInfoSpy: MockInstance;
+  let logErrorSpy: MockInstance;
 
   beforeAll(() => {
-    axiosSpy = jest.spyOn(axios, "request").mockImplementation(() => {
+    axiosSpy = vi.spyOn(axios, "request").mockImplementation(() => {
       return Promise.resolve({ data: AJAX_RESULT });
     });
     // mock console to keep a clean test output
-    logInfoSpy = jest.spyOn(console, "log").mockImplementation(jest.fn);
-    logErrorSpy = jest.spyOn(console, "error").mockImplementation(jest.fn);
+    logInfoSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    logErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {
     // clear mock state before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test("download best case", async () => {

@@ -1,10 +1,9 @@
 import { ODataTypesV2 } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
-
+import { beforeEach, describe, expect, test } from "vitest";
 import { TypeModel } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { DataTypes, OperationTypes } from "../../../src/data-model/DataTypeModel";
-import { OperationType } from "../../../src/data-model/DataTypeModel";
+import { DataTypes, OperationType, OperationTypes } from "../../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { DigestionOptions } from "../../../src/FactoryFunctionModel";
 import { TestOptions, TestSettings } from "../../generator/TestTypes";

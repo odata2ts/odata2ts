@@ -1,8 +1,8 @@
 import { AxiosClientError } from "@odata2ts/http-client-axios";
 import { BigNumber } from "bignumber.js";
-
-import { BooksModel } from "../src/catalog/CatalogModel";
-import { catalogService } from "./services";
+import { describe, expect, test } from "vitest";
+import { BooksModel } from "../src/catalog/CatalogModel.js";
+import { catalogService } from "./services.js";
 
 describe("CAP V4 Integration Testing: Query Capabilities", () => {
   const testService = catalogService;

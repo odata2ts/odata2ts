@@ -1,13 +1,13 @@
 import { MappedConverterChains, loadConverters } from "@odata2ts/converter-runtime";
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 
-import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel";
-import { withNamespace } from "./DataModel";
-import { Digester, TypeModel } from "./DataModelDigestion";
-import { ODataVersion, OperationTypes, PropertyModel } from "./DataTypeModel";
-import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
-import { AssociationEnd, ComplexTypeV3, EntityTypeV3, NavigationProperty, SchemaV3 } from "./edmx/ODataEdmxModelV3";
-import { NamingHelper } from "./NamingHelper";
+import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel.js";
+import { withNamespace } from "./DataModel.js";
+import { Digester, TypeModel } from "./DataModelDigestion.js";
+import { ODataVersion, OperationTypes, PropertyModel } from "./DataTypeModel.js";
+import { ComplexType, Property } from "./edmx/ODataEdmxModelBase.js";
+import { AssociationEnd, ComplexTypeV3, EntityTypeV3, NavigationProperty, SchemaV3 } from "./edmx/ODataEdmxModelV3.js";
+import { NamingHelper } from "./NamingHelper.js";
 
 /**
  * Digests an EDMX schema to produce a DataModel.

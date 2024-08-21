@@ -1,5 +1,5 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
-
+import { beforeEach, describe, expect, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { getTestConfig } from "../../test.config";

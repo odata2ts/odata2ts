@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-
-import { Cli } from "./cli";
+import { run } from "./cli/cli.js";
 
 // noinspection JSIgnoredPromiseFromCall
-new Cli().run();
+run();

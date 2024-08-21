@@ -1,9 +1,9 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    "types": ["jest"],
     "rootDir": ".",
-    "noEmit": true
+    "noEmit": true,
+    "lib": ["DOM"]
   },
   "include": ["build", "test", "int-test"]
 }

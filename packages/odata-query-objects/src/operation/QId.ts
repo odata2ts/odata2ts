@@ -1,5 +1,5 @@
-import { QParamModel } from "../param/QParamModel";
-import { QFunction } from "./QFunction";
+import { QParamModel } from "../param/QParamModel.js";
+import { QFunction } from "./QFunction.js";
 
 /**
  * Represents a function to produce the id path of an entity, e.g. MyEntity(number=123,name='Test').

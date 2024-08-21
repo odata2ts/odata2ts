@@ -3,8 +3,7 @@ import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts
 import { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { convertV4ValueResponse } from "@odata2ts/odata-query-objects";
 import { getIdentityConverter } from "@odata2ts/odata-query-objects/lib/IdentityConverter";
-
-import { ServiceStateHelper } from "../ServiceStateHelper";
+import { ServiceStateHelper } from "../ServiceStateHelper.js";
 
 // const RAW_VALUE_SUFFIX = "/$value";
 
@@ -17,7 +16,7 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
     basePath: string,
     name: string,
     converter: ValueConverter<any, any> = getIdentityConverter(),
-    bigNumbersAsString: boolean = false
+    bigNumbersAsString: boolean = false,
   ) {
     this.__base = new ServiceStateHelper(client, basePath, name, bigNumbersAsString);
     this.__converter = converter;
@@ -34,7 +33,7 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
    * @param requestConfig
    */
   public async getValue(
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): ODataResponse<void | ODataValueResponseV4<T>> {
     const { client, path, getDefaultHeaders } = this.__base;
 
@@ -50,7 +49,7 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
 
   public async updateValue(
     value: T,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): ODataResponse<void | ODataValueResponseV4<T>> {
     const { client, path, getDefaultHeaders } = this.__base;
 

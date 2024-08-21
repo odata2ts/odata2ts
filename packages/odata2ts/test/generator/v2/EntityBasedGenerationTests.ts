@@ -1,11 +1,11 @@
-import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
-
+import { ODataTypesV2 } from "@odata2ts/odata-core";
+import { beforeAll, beforeEach, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
 import {
+  createHelper,
   EntityBasedGeneratorFunctionWithoutVersion,
   FixtureComparatorHelper,
-  createHelper,
 } from "../comparator/FixtureComparatorHelper";
 import { TestOptions } from "../TestTypes";
 
@@ -16,7 +16,7 @@ export function createEntityBasedGenerationTests(
   testSuiteName: string,
   fixtureBasePath: string,
   generatedFileName: string,
-  generate: EntityBasedGeneratorFunctionWithoutVersion
+  generate: EntityBasedGeneratorFunctionWithoutVersion,
 ) {
   let odataBuilder: ODataModelBuilderV2;
   let fixtureComparatorHelper: FixtureComparatorHelper;
@@ -26,7 +26,7 @@ export function createEntityBasedGenerationTests(
       generatedFileName,
       fixturePath,
       odataBuilder.getSchemas(),
-      options
+      options,
     );
   }
 
@@ -69,7 +69,7 @@ export function createEntityBasedGenerationTests(
     // given one minimal model
     odataBuilder
       .addComplexType("Brand", undefined, (builder) =>
-        builder.addProp("naming", ODataTypesV2.Boolean).addProp("complex", SERVICE_NAME + ".Test")
+        builder.addProp("naming", ODataTypesV2.Boolean).addProp("complex", SERVICE_NAME + ".Test"),
       )
       .addComplexType("Test", undefined, (builder) => builder.addProp("test", ODataTypesV2.Boolean));
 
@@ -119,7 +119,7 @@ export function createEntityBasedGenerationTests(
         .addProp("multipleDateTimeOffsets", `Collection(${ODataTypesV2.DateTimeOffset})`)
         .addProp("multipleInt16", `Collection(${ODataTypesV2.Int16})`)
         .addProp("multipleDecimals", `Collection(${ODataTypesV2.Decimal})`)
-        .addProp("multipleBinaries", `Collection(${ODataTypesV2.Binary})`)
+        .addProp("multipleBinaries", `Collection(${ODataTypesV2.Binary})`),
     );
 
     // when generating model
@@ -143,14 +143,14 @@ export function createEntityBasedGenerationTests(
     // given one minimal model
     odataBuilder
       .addEntityType("Author", undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV2.Int32).addProp("name", ODataTypesV2.Boolean, true)
+        builder.addKeyProp("id", ODataTypesV2.Int32).addProp("name", ODataTypesV2.Boolean, true),
       )
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
         builder
           .addKeyProp("id", ODataTypesV2.Int32)
           .addProp("author", withNs("Author"), false)
           .addProp("altAuthor", withNs("Author"), true)
-          .addProp("relatedAuthors", `Collection(${withNs("Author")})`)
+          .addProp("relatedAuthors", `Collection(${withNs("Author")})`),
       );
 
     // when generating model
@@ -163,10 +163,10 @@ export function createEntityBasedGenerationTests(
     odataBuilder
       .addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Boolean))
       .addEntityType("Parent", { baseType: withNs("GrandParent") }, (builder) =>
-        builder.addProp("parentalAdvice", ODataTypesV2.Boolean)
+        builder.addProp("parentalAdvice", ODataTypesV2.Boolean),
       )
       .addEntityType("Child", { baseType: withNs("Parent") }, (builder) =>
-        builder.addKeyProp("id2", ODataTypesV2.Boolean).addProp("Ch1ld1shF4n", ODataTypesV2.Boolean)
+        builder.addKeyProp("id2", ODataTypesV2.Boolean).addProp("Ch1ld1shF4n", ODataTypesV2.Boolean),
       );
 
     // when generating model
@@ -185,7 +185,7 @@ export function createEntityBasedGenerationTests(
         builder
           .addKeyProp("id", ODataTypesV2.Boolean)
           .addProp("myChoice", withNs("Choice"), false)
-          .addProp("otherChoices", `Collection(${withNs("Choice")})`)
+          .addProp("otherChoices", `Collection(${withNs("Choice")})`),
       )
       .addEnumType("Choice", [
         { name: "A", value: 1 },
@@ -205,10 +205,10 @@ export function createEntityBasedGenerationTests(
           .addKeyProp("id", ODataTypesV2.Boolean)
           .addProp("method", withNs("PublishingMethod"), false)
           .addProp("altMethod", withNs("PublishingMethod"), true)
-          .addProp("altMethods", `Collection(${withNs("PublishingMethod")})`)
+          .addProp("altMethods", `Collection(${withNs("PublishingMethod")})`),
       )
       .addComplexType("PublishingMethod", undefined, (builder) =>
-        builder.addProp("name", ODataTypesV2.Boolean).addProp("city", withNs("City"))
+        builder.addProp("name", ODataTypesV2.Boolean).addProp("city", withNs("City")),
       )
       .addComplexType("City", undefined, (builder) => {
         builder.addProp("choice", ODataTypesV2.Boolean, false).addProp("optChoice", ODataTypesV2.Boolean);
@@ -222,7 +222,7 @@ export function createEntityBasedGenerationTests(
   test(`${testSuiteName}: convert boolean to string`, async () => {
     // given a simple function
     odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
-      builder.addKeyProp("id", ODataTypesV2.Boolean).addProp("optional", ODataTypesV2.Boolean, true)
+      builder.addKeyProp("id", ODataTypesV2.Boolean).addProp("optional", ODataTypesV2.Boolean, true),
     );
 
     // when generating model

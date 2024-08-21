@@ -1,6 +1,6 @@
 import { AxiosClient, AxiosClientError } from "@odata2ts/http-client-axios";
 import { BigNumber } from "bignumber.js";
-
+import { describe, expect, test } from "vitest";
 import { ProductModel } from "../../build/odataV2/ODataDemoModel";
 import { ODataDemoService } from "../../build/odataV2/ODataDemoService";
 

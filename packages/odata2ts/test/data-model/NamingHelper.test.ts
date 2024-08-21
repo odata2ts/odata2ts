@@ -1,6 +1,6 @@
 import deepmerge from "deepmerge";
-
-import { NamingStrategies, RunOptions, getDefaultConfig } from "../../src";
+import { beforeEach, describe, expect, test } from "vitest";
+import { getDefaultConfig, NamingStrategies, RunOptions } from "../../src";
 import { NamespaceWithAlias } from "../../src/data-model/DataModel";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
 import { TestOptions } from "../generator/TestTypes";

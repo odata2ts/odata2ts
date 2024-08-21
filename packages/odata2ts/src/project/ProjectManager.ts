@@ -1,18 +1,16 @@
 import * as path from "path";
-
-import { ensureDir } from "fs-extra";
+import { mkdirp } from "mkdirp";
 import { CompilerOptions, Project, SourceFile } from "ts-morph";
-import { firstCharLowerCase } from "xml2js/lib/processors";
-
-import { DataModel } from "../data-model/DataModel";
-import { EntityType } from "../data-model/DataTypeModel";
-import { NamingHelper } from "../data-model/NamingHelper";
-import { ImportContainer } from "../generator/ImportContainer";
-import { EmitModes } from "../OptionModel";
-import { FileHandler } from "./FileHandler";
-import { createFormatter } from "./formatter";
-import { FileFormatter } from "./formatter/FileFormatter";
-import { loadTsMorphCompilerOptions } from "./TsMorphHelper";
+import { firstCharLowerCase } from "xml2js/lib/processors.js";
+import { DataModel } from "../data-model/DataModel.js";
+import { EntityType } from "../data-model/DataTypeModel.js";
+import { NamingHelper } from "../data-model/NamingHelper.js";
+import { ImportContainer } from "../generator/ImportContainer.js";
+import { EmitModes } from "../OptionModel.js";
+import { FileHandler } from "./FileHandler.js";
+import { FileFormatter } from "./formatter/FileFormatter.js";
+import { createFormatter } from "./formatter/index.js";
+import { loadTsMorphCompilerOptions } from "./TsMorphHelper.js";
 
 export interface ProjectManagerOptions {
   usePrettier?: boolean;
@@ -30,7 +28,7 @@ export async function createProjectManager(
   emitMode: EmitModes,
   namingHelper: NamingHelper,
   dataModel: DataModel,
-  options: ProjectManagerOptions
+  options: ProjectManagerOptions,
 ): Promise<ProjectManager> {
   const { usePrettier = false, tsConfigPath = "tsconfig.json" } = options;
   const formatter = usePrettier ? await createFormatter(outputDir, usePrettier) : undefined;
@@ -64,7 +62,7 @@ export class ProjectManager {
     protected dataModel: DataModel,
     protected formatter: FileFormatter | undefined,
     compilerOptions: CompilerOptions | undefined,
-    protected options: ProjectManagerOptions
+    protected options: ProjectManagerOptions,
   ) {
     // Create ts-morph project
     this.project = new Project({
@@ -104,7 +102,7 @@ export class ProjectManager {
     name: string,
     reservedNames?: Array<string> | undefined,
     additionalPath: string = "",
-    forceTypeChecking = false
+    forceTypeChecking = false,
   ): FileHandler {
     const fileName = path.join(this.outputDir, additionalPath, `${name}.ts`);
     const imports = new ImportContainer(
@@ -113,7 +111,7 @@ export class ProjectManager {
       this.dataModel,
       this.namingHelper.getFileNames(),
       !!this.options.bundledFileGeneration,
-      reservedNames
+      reservedNames,
     );
 
     return new FileHandler(
@@ -122,16 +120,14 @@ export class ProjectManager {
       this.project.createSourceFile(fileName),
       imports,
       this.formatter,
-      forceTypeChecking || !!this.options.allowTypeChecking
+      forceTypeChecking || !!this.options.allowTypeChecking,
     );
   }
 
   public async init() {
     if (!this.options.bundledFileGeneration) {
       // ensure folder for each model: we do this at this point for performance reasons
-      await Promise.all(
-        this.dataModel.getModelTypes().map((mt) => ensureDir(path.join(this.outputDir, mt.folderPath)))
-      );
+      await Promise.all(this.dataModel.getModelTypes().map((mt) => mkdirp(path.join(this.outputDir, mt.folderPath))));
     }
 
     const typePart = this.emitMode.toUpperCase().replace("_", " & ");

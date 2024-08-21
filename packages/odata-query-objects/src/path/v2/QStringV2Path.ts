@@ -1,8 +1,8 @@
 import { StringFilterFunctions } from "../../odata/ODataModel";
 import { QFilterExpression } from "../../QFilterExpression";
-import { InputModel } from "../base/QBasePath";
-import { QStringBasePath } from "../base/QStringBasePath";
-import { QNumberV2Path } from "./QNumberV2Path";
+import { InputModel } from "../base/QBasePath.js";
+import { QStringBasePath } from "../base/QStringBasePath.js";
+import { QNumberV2Path } from "./QNumberV2Path.js";
 
 export class QStringV2Path<ConvertedType = string> extends QStringBasePath<
   QStringV2Path<ConvertedType>,
@@ -23,7 +23,7 @@ export class QStringV2Path<ConvertedType = string> extends QStringBasePath<
 
   public contains(value: InputModel<this["converter"]>) {
     return new QFilterExpression(
-      `${StringFilterFunctions.SUBSTRING_OF}(${this.convertInput(value)},${this.getPath()})`
+      `${StringFilterFunctions.SUBSTRING_OF}(${this.convertInput(value)},${this.getPath()})`,
     );
   }
 }

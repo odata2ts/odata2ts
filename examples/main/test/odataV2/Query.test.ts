@@ -1,6 +1,6 @@
 import type { HttpResponseModel } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
-
+import { describe, expect, test } from "vitest";
 import { ProductModel } from "../../build/odataV2/ODataDemoModel";
 import { ODataDemoService } from "../../build/odataV2/ODataDemoService";
 import { MockODataClient } from "../MockODataClient";
@@ -28,7 +28,7 @@ describe("Unit Tests for V2 OData Demo Service", function () {
       .query((builder, qProduct) => builder.select("id", "name").filter(qProduct.price.plus("1").gt("1000")));
 
     expect(odataClient.lastUrl).toBe(
-      `test/Products?%24select=${ENC("ID,Name")}&%24filter=${ENC("Price add 1 gt 1000")}`
+      `test/Products?%24select=${ENC("ID,Name")}&%24filter=${ENC("Price add 1 gt 1000")}`,
     );
     expect(result.status).toBe(200);
     expect(odataClient.additionalHeaders).toStrictEqual({

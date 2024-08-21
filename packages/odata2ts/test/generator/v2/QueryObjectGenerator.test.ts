@@ -1,16 +1,16 @@
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
-
+import { beforeAll, beforeEach, describe, test } from "vitest";
 import { EmitModes, RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { generateQueryObjects } from "../../../src/generator";
 import { createProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
 import {
+  createHelper,
   EntityBasedGeneratorFunctionWithoutVersion,
   FixtureComparatorHelper,
-  createHelper,
 } from "../comparator/FixtureComparatorHelper";
-import { SERVICE_NAME, createEntityBasedGenerationTests } from "./EntityBasedGenerationTests";
+import { createEntityBasedGenerationTests, SERVICE_NAME } from "./EntityBasedGenerationTests";
 
 describe("Query Object Generator Tests V2", () => {
   const TEST_SUITE_NAME = "Query Object Generator";
@@ -47,7 +47,7 @@ describe("Query Object Generator Tests V2", () => {
   test(`${TEST_SUITE_NAME}: min function param model`, async () => {
     // given a simple function
     odataBuilder.addFunctionImport("MinFunction", ODataTypesV2.String, (builder) =>
-      builder.addParam("test", ODataTypesV2.String, false).addParam("optTest", ODataTypesV2.String, true)
+      builder.addParam("test", ODataTypesV2.String, false).addParam("optTest", ODataTypesV2.String, true),
     );
 
     // when generating model
@@ -72,7 +72,7 @@ describe("Query Object Generator Tests V2", () => {
         .addParam("testGuid", ODataTypesV2.Guid, false)
         .addParam("testTime", ODataTypesV2.Time, false)
         .addParam("testDate", ODataTypesV2.DateTime, false)
-        .addParam("testDateTimeOffset", ODataTypesV2.DateTimeOffset, false)
+        .addParam("testDateTimeOffset", ODataTypesV2.DateTimeOffset, false),
     );
 
     // when generating model

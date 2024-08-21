@@ -1,5 +1,5 @@
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
-
+import { describe, expect, test } from "vitest";
 import { QBooleanPath } from "../../src";
 
 describe("QBooleanPath test", () => {

@@ -1,6 +1,6 @@
 import { ValueConverterImport } from "@odata2ts/converter-runtime";
 
-import { Modes } from "../OptionModel";
+import { Modes } from "../OptionModel.js";
 
 export enum ODataVersion {
   V2 = "2.0",

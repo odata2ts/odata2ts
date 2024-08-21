@@ -3,9 +3,9 @@ import { constantCase } from "constant-case";
 import { pascalCase } from "pascal-case";
 import { snakeCase } from "snake-case";
 
-import { FileNamingStrategyOption, NameSettings, NamingStrategies, StandardNamingOptions } from "../NamingModel";
-import { RunOptions } from "../OptionModel";
-import { NamespaceWithAlias } from "./DataModel";
+import { FileNamingStrategyOption, NameSettings, NamingStrategies, StandardNamingOptions } from "../NamingModel.js";
+import { RunOptions } from "../OptionModel.js";
+import { NamespaceWithAlias } from "./DataModel.js";
 
 function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
   switch (strategy) {

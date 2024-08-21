@@ -1,5 +1,4 @@
-import { ODataHttpClient } from "@odata2ts/http-client-api";
-
+import { beforeEach, expect, test } from "vitest";
 import { EntitySetServiceV2, EntitySetServiceV4 } from "../src";
 import { DEFAULT_HEADERS } from "../src/RequestHeaders";
 import { EditablePersonModel, Feature, PersonId, PersonModel } from "./fixture/PersonModel";
@@ -9,9 +8,13 @@ import { MockClient } from "./mock/MockClient";
 
 export function commonEntitySetTests(
   odataClient: MockClient,
-  serviceConstructor: new (odataClient: MockClient, baseUrl: string, name: string) =>
+  serviceConstructor: new (
+    odataClient: MockClient,
+    baseUrl: string,
+    name: string,
+  ) =>
     | EntitySetServiceV4<MockClient, PersonModel, EditablePersonModel, QPersonV4, PersonId>
-    | EntitySetServiceV2<MockClient, PersonModel, EditablePersonModel, QPersonV2, PersonId>
+    | EntitySetServiceV2<MockClient, PersonModel, EditablePersonModel, QPersonV2, PersonId>,
 ) {
   const BASE_URL = "/base";
   const NAME = "EntityXY";

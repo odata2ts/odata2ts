@@ -5,11 +5,11 @@ import { booleanToNumberConverter, numberToStringConverter } from "@odata2ts/tes
 export class QBook extends QueryObject {
   public readonly id = new QBooleanPath(
     this.withPrefix("id"),
-    createChain(booleanToNumberConverter, numberToStringConverter)
+    createChain(booleanToNumberConverter, numberToStringConverter),
   );
   public readonly optional = new QBooleanPath(
     this.withPrefix("optional"),
-    createChain(booleanToNumberConverter, numberToStringConverter)
+    createChain(booleanToNumberConverter, numberToStringConverter),
   );
 }
 

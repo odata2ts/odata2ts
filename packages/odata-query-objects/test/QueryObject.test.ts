@@ -1,5 +1,5 @@
 import { FIXED_DATE, FIXED_STRING } from "@odata2ts/test-converters";
-
+import { describe, expect, test } from "vitest";
 import { QEntityCollectionPath, QEntityPath, QStringV2Path, QueryObject } from "../src";
 import { QSimpleEntityWithConverter, QTestEntity } from "./fixture/SimpleEntityWithConverter";
 
@@ -181,8 +181,8 @@ describe("QueryObject tests", () => {
       qToTest.convertToOData(
         // @ts-ignore
         { "@odata.type": "123" },
-        true
-      )
+        true,
+      ),
     ).toStrictEqual({ "@odata.type": "123" });
   });
 

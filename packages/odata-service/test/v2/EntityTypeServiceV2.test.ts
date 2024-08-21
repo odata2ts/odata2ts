@@ -1,7 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
-
+import { beforeEach, describe, expect, test } from "vitest";
 import { DEFAULT_HEADERS, MERGE_HEADERS } from "../../src/RequestHeaders";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { PersonModel } from "../fixture/PersonModel";
@@ -71,7 +71,7 @@ describe("EntityTypeService V2 Test", () => {
     });
     expect(odataClient.lastUrl).toBe(
       EXPECTED_PATH +
-        "/GET_SOMETHING?TEST_GUID=guid'123'&testDateTime=datetime'1'&testDateTimeO=datetimeoffset'2'&testTime=time'3'"
+        "/GET_SOMETHING?TEST_GUID=guid'123'&testDateTime=datetime'1'&testDateTimeO=datetimeoffset'2'&testTime=time'3'",
     );
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");
@@ -79,7 +79,7 @@ describe("EntityTypeService V2 Test", () => {
 
     await testService.getSomething(
       { testGuid: { prefix: "xxx", value: "123" }, testDateTime: "1", testDateTimeO: "2", testTime: "3" },
-      REQUEST_CONFIG
+      REQUEST_CONFIG,
     );
     expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });

@@ -1,7 +1,7 @@
 import deepmerge from "deepmerge";
 
-import { getDefaultConfig, getMinimalConfig } from "./defaultConfig";
-import { CliOptions, ConfigFileOptions, Modes, RunOptions } from "./OptionModel";
+import { getDefaultConfig, getMinimalConfig } from "./defaultConfig.js";
+import { CliOptions, ConfigFileOptions, Modes, RunOptions } from "./OptionModel.js";
 
 /**
  * Provides default values and evaluates the various config file and CLI options.

@@ -3,7 +3,7 @@ import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { QId, QueryObject, convertV2CollectionResponse, convertV2ModelResponse } from "@odata2ts/odata-query-objects";
 
-import { ServiceStateHelperV2 } from "./ServiceStateHelperV2";
+import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
 export abstract class EntitySetServiceV2<
   in out ClientType extends ODataHttpClient,

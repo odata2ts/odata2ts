@@ -8,8 +8,8 @@ const config: ConfigFileOptions = {
   emitMode: EmitModes.ts,
   prettier: true,
   allowRenaming: true,
-  v4BigNumberAsString: true,
   enablePrimitivePropertyServices: true,
+  v4BigNumberAsString: true,
   converters: ["@odata2ts/converter-big-number"],
   naming: {
     models: {
@@ -18,7 +18,6 @@ const config: ConfigFileOptions = {
   },
   services: {
     catalog: {
-      v4BigNumberAsString: true,
       serviceName: "catalog",
       sourceUrl: "http://localhost:4004/browse",
       source: "build/catalog-srv.xml",
@@ -31,7 +30,7 @@ const config: ConfigFileOptions = {
     },
     admin: {
       serviceName: "admin",
-      sourceUrl: "http://localhost:4004/admin",
+      sourceUrl: "http://localhost:4004/odata/v4/admin",
       sourceUrlConfig: {
         username: "alice",
         password: "",

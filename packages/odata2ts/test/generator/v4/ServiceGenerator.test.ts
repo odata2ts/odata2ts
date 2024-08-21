@@ -1,12 +1,11 @@
 import path from "path";
-
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
-
+import { beforeAll, beforeEach, describe, test } from "vitest";
 import { ConfigFileOptions, EmitModes, NamingStrategies, OverridableNamingOptions, RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
-import { ProjectManager, createProjectManager } from "../../../src/project/ProjectManager";
+import { createProjectManager, ProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import { getTestConfig } from "../../test.config";
 import { createServiceHelper } from "../comparator/FixtureComparatorHelper";
@@ -40,7 +39,7 @@ describe("Service Generator Tests V4", () => {
     const dataModel = await fixtureComparatorHelper.createDataModel(
       odataBuilder.getSchemas(),
       namingHelper,
-      runOptions
+      runOptions,
     );
     projectManager = await createProjectManager("build", EmitModes.ts, namingHelper, dataModel, {
       bundledFileGeneration: true,
@@ -54,7 +53,7 @@ describe("Service Generator Tests V4", () => {
   async function compareMainService(fixture: string) {
     await fixtureComparatorHelper.compareService(
       "v4" + path.sep + fixture,
-      projectManager.getMainServiceFile().getFile()
+      projectManager.getMainServiceFile().getFile(),
     );
   }
 
@@ -87,7 +86,7 @@ describe("Service Generator Tests V4", () => {
           .addKeyProp("id", ODataTypesV4.Guid)
           .addKeyProp("age", ODataTypesV4.Int32)
           .addKeyProp("deceased", ODataTypesV4.Boolean)
-          .addKeyProp("desc", ODataTypesV4.String)
+          .addKeyProp("desc", ODataTypesV4.String),
       )
       .addEntitySet("Ents", withNs("TestEntity"));
 
@@ -122,7 +121,7 @@ describe("Service Generator Tests V4", () => {
       .addFunction("getBestsellers", `Collection(${withNs("TestEntity")})`, false)
       .addFunctionImport("mostPop", withNs("getBestsellers"), "none")
       .addFunction("firstBook", withNs("TestEntity"), false, (builder) =>
-        builder.addParam("testString", ODataTypesV4.String, false).addParam("testNumber", ODataTypesV4.Double)
+        builder.addParam("testString", ODataTypesV4.String, false).addParam("testNumber", ODataTypesV4.Double),
       )
       .addFunctionImport("bestBook", withNs("firstBook"), "none");
 
@@ -141,7 +140,7 @@ describe("Service Generator Tests V4", () => {
       .addAction("ping", undefined, false)
       .addActionImport("keepAlive", withNs("ping"))
       .addAction("vote", withNs("TestEntity"), false, (builder) =>
-        builder.addParam("rating", ODataTypesV4.Int16, false).addParam("comment", ODataTypesV4.String)
+        builder.addParam("rating", ODataTypesV4.Int16, false).addParam("comment", ODataTypesV4.String),
       )
       .addActionImport("DoLike", withNs("vote"));
 
@@ -185,7 +184,7 @@ describe("Service Generator Tests V4", () => {
         builder
           .addParam("Book", `Collection(${withNs("Book")})`)
           .addParam("MIN_RATING", ODataTypesV4.Int16, false)
-          .addParam("MinCreated", ODataTypesV4.Date)
+          .addParam("MinCreated", ODataTypesV4.Date),
       );
 
     // when generating
@@ -208,11 +207,13 @@ describe("Service Generator Tests V4", () => {
       .addAction("like", undefined, true, (builder) => builder.addParam("book", withNs("Book")))
       // enum return type,
       .addAction("rate", withNs("Rating"), true, (builder) =>
-        builder.addParam("book", withNs("Book")).addParam("rating", withNs("Rating"))
+        builder.addParam("book", withNs("Book")).addParam("rating", withNs("Rating")),
       )
       // return type: collection of enums
       .addAction("ratings", `Collection(${withNs("Rating")})`, true, (builder) =>
-        builder.addParam("book", `Collection(${withNs("Book")})`).addParam("ratings", `Collection(${withNs("Rating")})`)
+        builder
+          .addParam("book", `Collection(${withNs("Book")})`)
+          .addParam("ratings", `Collection(${withNs("Rating")})`),
       );
 
     // when generating
@@ -247,7 +248,7 @@ describe("Service Generator Tests V4", () => {
         builder
           .addKeyProp("id", ODataTypesV4.Guid)
           // simple props don't make a difference
-          .addProp("test", ODataTypesV4.String)
+          .addProp("test", ODataTypesV4.String),
       )
       .addEntitySet("list", withNs("TestEntity"));
     const naming: OverridableNamingOptions = {
@@ -301,13 +302,13 @@ describe("Service Generator Tests V4", () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("Author", undefined, (builder) =>
-        builder.addKeyProp("ID", ODataTypesV4.Guid).addProp("name", ODataTypesV4.String, false)
+        builder.addKeyProp("ID", ODataTypesV4.Guid).addProp("name", ODataTypesV4.String, false),
       )
       .addEntityType("Book", undefined, (builder) =>
         builder
           .addKeyProp("ID", ODataTypesV4.Guid)
           .addProp("AUTHOR", withNs("Author"))
-          .addProp("RelatedAuthors", `Collection(${withNs("Author")})`)
+          .addProp("RelatedAuthors", `Collection(${withNs("Author")})`),
       )
       .addEntitySet("books", withNs("Book"));
 
@@ -326,7 +327,7 @@ describe("Service Generator Tests V4", () => {
         builder
           .addKeyProp("id", ODataTypesV4.String)
           .addProp("lector", withNs("Reviewer"))
-          .addProp("reviewers", `Collection(${withNs("Reviewer")})`)
+          .addProp("reviewers", `Collection(${withNs("Reviewer")})`),
       )
       .addEntitySet("Books", withNs("Book"));
 
@@ -348,7 +349,7 @@ describe("Service Generator Tests V4", () => {
         builder
           .addKeyProp("id", ODataTypesV4.String)
           .addProp("myChoice", withNs("Choice"))
-          .addProp("altChoices", `Collection(${withNs("Choice")})`)
+          .addProp("altChoices", `Collection(${withNs("Choice")})`),
       )
       .addEntitySet("books", withNs("Book"));
 
@@ -366,7 +367,7 @@ describe("Service Generator Tests V4", () => {
         builder
           .addKeyProp("decimal", ODataTypesV4.Decimal)
           .addProp("int64", ODataTypesV4.Int64)
-          .addProp("bigNumberCollection", `Collection(${ODataTypesV4.Decimal})`)
+          .addProp("bigNumberCollection", `Collection(${ODataTypesV4.Decimal})`),
       )
       .addEntitySet("Ents", withNs("TestEntity"));
 
@@ -419,11 +420,11 @@ describe("Service Generator Tests V4", () => {
     odataBuilder
       // given one function definition without params
       .addFunction("BestReview", ODataTypesV4.String, false, (builder) =>
-        builder.addParam("myParam", ODataTypesV4.Boolean, false)
+        builder.addParam("myParam", ODataTypesV4.Boolean, false),
       )
       // same function with different params
       .addFunction("BestReview", ODataTypesV4.String, false, (builder) =>
-        builder.addParam("minRating", ODataTypesV4.Int16, false)
+        builder.addParam("minRating", ODataTypesV4.Int16, false),
       )
       .addFunctionImport("BestReview", withNs("BestReview"));
 
@@ -441,7 +442,7 @@ describe("Service Generator Tests V4", () => {
       .addFunction("BestReview", ODataTypesV4.String, false)
       // same function with different params
       .addFunction("BestReview", ODataTypesV4.String, false, (builder) =>
-        builder.addParam("minRating", ODataTypesV4.Int16, false)
+        builder.addParam("minRating", ODataTypesV4.Int16, false),
       )
       .addFunctionImport("BestReview", withNs("BestReview"));
 

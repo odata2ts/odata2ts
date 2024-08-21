@@ -1,11 +1,11 @@
 import { NewLineKind } from "@ts-morph/common";
 import { ModuleKind, ModuleResolutionKind, ScriptTarget } from "typescript";
-
+import { describe, expect, test, vi } from "vitest";
 import { EmitModes } from "../../src";
 import { loadTsMorphCompilerOptions } from "../../src/project/TsMorphHelper";
 
 // global mock for ts-morph to keep this a unit test
-jest.mock("ts-morph");
+vi.mock("ts-morph");
 
 describe("TsMorphHelper Test", () => {
   const DEFAULT_TS_CONFIG = "tsconfig.json";
@@ -23,8 +23,8 @@ describe("TsMorphHelper Test", () => {
       declaration: false,
       // mapped props
       target: ScriptTarget.ES2016,
-      module: ModuleKind.CommonJS,
-      moduleResolution: ModuleResolutionKind.NodeJs,
+      module: ModuleKind.ESNext,
+      moduleResolution: ModuleResolutionKind.Node10,
       // passed props
       lib: ["esnext"],
       types: ["node"],

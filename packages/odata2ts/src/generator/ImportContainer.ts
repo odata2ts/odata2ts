@@ -3,8 +3,8 @@ import path from "path";
 import { ODataVersions } from "@odata2ts/odata-core";
 import { ImportDeclarationStructure, OptionalKind } from "ts-morph";
 
-import { DataModel } from "../data-model/DataModel";
-import { ComplexType } from "../data-model/DataTypeModel";
+import { DataModel } from "../data-model/DataModel.js";
+import { ComplexType } from "../data-model/DataTypeModel.js";
 import {
   ClientApiImports,
   CoreImports,
@@ -13,8 +13,8 @@ import {
   ServiceImports,
   VERSIONED_CORE_IMPORTS,
   VERSIONED_SERVICE_IMPORTS,
-} from "./import/ImportObjects";
-import { ImportedNameValidator } from "./ImportedNameValidator";
+} from "./import/ImportObjects.js";
+import { ImportedNameValidator } from "./ImportedNameValidator.js";
 
 type ImportContainerType = Record<
   keyof typeof LIB_MODULES,

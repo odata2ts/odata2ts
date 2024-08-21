@@ -1,15 +1,14 @@
 import path from "path";
-
 import { ODataTypesV2, ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
-
+import { beforeAll, beforeEach, describe, expect, test } from "vitest";
 import { EmitModes, RunOptions } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { generateServices } from "../../../src/generator";
-import { ProjectManager, createProjectManager } from "../../../src/project/ProjectManager";
+import { createProjectManager, ProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
 import { getTestConfig } from "../../test.config";
-import { FixtureComparator, createFixtureComparator } from "../comparator/FixtureComparator";
+import { createFixtureComparator, FixtureComparator } from "../comparator/FixtureComparator";
 import { SERVICE_NAME } from "./EntityBasedGenerationTests";
 
 describe("Service Generator Tests V2", () => {
@@ -77,7 +76,7 @@ describe("Service Generator Tests V2", () => {
           .addKeyProp("dateAndTimeAndOffset", ODataTypesV2.DateTimeOffset)
           .addKeyProp("time", ODataTypesV2.Time)
           // simple props don't make a difference
-          .addProp("test", ODataTypesV2.String)
+          .addProp("test", ODataTypesV2.String),
       )
       .addEntitySet("Ents", withNs("TestEntity"));
 
@@ -96,14 +95,14 @@ describe("Service Generator Tests V2", () => {
       .addEntitySet("tests", withNs("TestEntity"))
       .addFunctionImport("MostPop", `Collection(${withNs("TestEntity")})`)
       .addFunctionImport("BEST_BOOK", withNs("TestEntity"), (builder) =>
-        builder.addParam("TestString", ODataTypesV2.String, false).addParam("TEST_NUMBER", ODataTypesV2.Int32)
+        builder.addParam("TestString", ODataTypesV2.String, false).addParam("TEST_NUMBER", ODataTypesV2.Int32),
       )
       .addFunctionImport(
         "postBestBook",
         withNs("TestEntity"),
         (builder) =>
           builder.addParam("TestString", ODataTypesV2.String, false).addParam("TEST_NUMBER", ODataTypesV2.Int32),
-        true
+        true,
       );
     // when generating
     await doGenerate();
@@ -122,7 +121,7 @@ describe("Service Generator Tests V2", () => {
           .addParam("testGuid", ODataTypesV2.Guid, false)
           .addParam("testDateTime", ODataTypesV2.DateTime)
           .addParam("testDateTimeOffset", ODataTypesV2.DateTimeOffset)
-          .addParam("testTime", ODataTypesV2.Time)
+          .addParam("testTime", ODataTypesV2.Time),
       );
 
     // when generating
@@ -136,13 +135,13 @@ describe("Service Generator Tests V2", () => {
     // given one EntitySet
     odataBuilder
       .addEntityType("Author", undefined, (builder) =>
-        builder.addKeyProp("ID", ODataTypesV2.Guid).addProp("name", ODataTypesV2.String, false)
+        builder.addKeyProp("ID", ODataTypesV2.Guid).addProp("name", ODataTypesV2.String, false),
       )
       .addEntityType("Book", undefined, (builder) =>
         builder
           .addKeyProp("ID", ODataTypesV2.Guid)
           .addProp("author", withNs("Author"))
-          .addProp("relatedAuthors", `Collection(${withNs("Author")})`)
+          .addProp("relatedAuthors", `Collection(${withNs("Author")})`),
       )
       .addEntitySet("books", withNs("Book"));
 
@@ -161,7 +160,7 @@ describe("Service Generator Tests V2", () => {
         builder
           .addKeyProp("id", ODataTypesV2.String)
           .addProp("lector", withNs("Reviewer"))
-          .addProp("reviewers", `Collection(${withNs("Reviewer")})`)
+          .addProp("reviewers", `Collection(${withNs("Reviewer")})`),
       )
       .addEntitySet("Books", withNs("Book"));
 
@@ -184,7 +183,7 @@ describe("Service Generator Tests V2", () => {
         builder
           .addKeyProp("id", ODataTypesV2.String)
           .addProp("myChoice", withNs("Choice"))
-          .addProp("altChoices", `Collection(${withNs("Choice")})`)
+          .addProp("altChoices", `Collection(${withNs("Choice")})`),
       )
       .addEntitySet("books", withNs("Book"));
 
@@ -200,10 +199,10 @@ describe("Service Generator Tests V2", () => {
     odataBuilder
       .addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Boolean))
       .addEntityType("Parent", { baseType: withNs("GrandParent") }, (builder) =>
-        builder.addProp("parentalAdvice", ODataTypesV2.Boolean)
+        builder.addProp("parentalAdvice", ODataTypesV2.Boolean),
       )
       .addEntityType("Child", { baseType: withNs("Parent") }, (builder) =>
-        builder.addKeyProp("id2", ODataTypesV2.Boolean).addProp("Ch1ld1shF4n", ODataTypesV2.Boolean)
+        builder.addKeyProp("id2", ODataTypesV2.Boolean).addProp("Ch1ld1shF4n", ODataTypesV2.Boolean),
       )
       .addEntitySet("tests", withNs("Child"));
 

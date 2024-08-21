@@ -1,13 +1,12 @@
 import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
-
 // @ts-ignore
 import type { QBook } from "./QTester";
 // @ts-ignore
-import { Book_QLike, Book_QRate, Book_QRatings, QBookId, qBook } from "./QTester";
+import { Book_QLike, Book_QRate, Book_QRatings, qBook, QBookId } from "./QTester";
 // @ts-ignore
-import type { Book, BookId, Book_RateParams, Book_RatingsParams, EditableBook, Rating } from "./TesterModel";
+import type { Book, Book_RateParams, Book_RatingsParams, BookId, EditableBook, Rating } from "./TesterModel";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   public books(): BookCollectionService<ClientType>;
@@ -35,7 +34,7 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
   }
 
   public async like(
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataModelResponseV4<void>>> {
     if (!this._bookQLike) {
       this._bookQLike = new Book_QLike();
@@ -48,7 +47,7 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
 
   public async rate(
     params: Book_RateParams,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataModelResponseV4<Rating>>> {
     if (!this._bookQRate) {
       this._bookQRate = new Book_QRate();
@@ -60,7 +59,7 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
       url,
       this._bookQRate.convertUserParams(params),
       requestConfig,
-      getDefaultHeaders()
+      getDefaultHeaders(),
     );
     return this._bookQRate.convertResponse(response);
   }
@@ -81,7 +80,7 @@ export class BookCollectionService<in out ClientType extends ODataHttpClient> ex
 
   public async ratings(
     params: Book_RatingsParams,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataCollectionResponseV4<Rating>>> {
     if (!this._bookQRatings) {
       this._bookQRatings = new Book_QRatings();
@@ -93,7 +92,7 @@ export class BookCollectionService<in out ClientType extends ODataHttpClient> ex
       url,
       this._bookQRatings.convertUserParams(params),
       requestConfig,
-      getDefaultHeaders()
+      getDefaultHeaders(),
     );
     return this._bookQRatings.convertResponse(response);
   }

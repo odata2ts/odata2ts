@@ -2,9 +2,9 @@ import { writeFile } from "fs/promises";
 
 import { SourceFile } from "ts-morph";
 
-import { ImportContainer } from "../generator/ImportContainer";
-import { EmitModes } from "../OptionModel";
-import { FileFormatter } from "./formatter/FileFormatter";
+import { ImportContainer } from "../generator/ImportContainer.js";
+import { EmitModes } from "../OptionModel.js";
+import { FileFormatter } from "./formatter/FileFormatter.js";
 
 export class FileHandler {
   constructor(

@@ -1,5 +1,4 @@
 import { QAction, QBooleanPath, QStringParam, QueryObject } from "@odata2ts/odata-query-objects";
-
 // @ts-ignore
 import type { Book_BoundActionParams } from "./TesterModel";
 

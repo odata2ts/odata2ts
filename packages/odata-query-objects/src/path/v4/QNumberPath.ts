@@ -1,6 +1,6 @@
 import { NumberFilterFunctions, NumberFilterOperators } from "../../odata/ODataModel";
 import { buildFunctionExpression, buildOperatorExpression } from "../../param/UrlParamHelper";
-import { InputModel, QBasePath } from "../base/QBasePath";
+import { InputModel, QBasePath } from "../base/QBasePath.js";
 
 export class QNumberPath<ConvertedType = number> extends QBasePath<number, ConvertedType> {
   protected formatValue(value: number): string {

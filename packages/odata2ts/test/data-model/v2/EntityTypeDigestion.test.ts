@@ -1,5 +1,5 @@
 import { ODataTypesV2 } from "@odata2ts/odata-core";
-
+import { beforeEach, describe, expect, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { DataTypes, PropertyModel } from "../../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../../src/data-model/NamingHelper";
@@ -122,10 +122,10 @@ describe("V2: EntityTypeDigestion Test", () => {
   test("EntityTypes: base class hierarchy", async () => {
     odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Guid));
     odataBuilder.addEntityType("Parent", { baseType: withNs("GrandParent") }, (builder) =>
-      builder.addProp("parentalAdvice", ODataTypesV2.Boolean)
+      builder.addProp("parentalAdvice", ODataTypesV2.Boolean),
     );
     odataBuilder.addEntityType("Child", { baseType: withNs("Parent") }, (builder) =>
-      builder.addProp("Ch1ld1shF4n", ODataTypesV2.String)
+      builder.addProp("Ch1ld1shF4n", ODataTypesV2.String),
     );
 
     const expectedGrandParentProp = {
@@ -215,7 +215,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         .addProp("multipleTimes", `Collection(${ODataTypesV2.Time})`)
         .addProp("multipleDateTimes", `Collection(${ODataTypesV2.DateTime})`)
         .addProp("multipleDateTimeOffsets", `Collection(${ODataTypesV2.DateTimeOffset})`)
-        .addProp("multipleBinaries", `Collection(${ODataTypesV2.Binary})`)
+        .addProp("multipleBinaries", `Collection(${ODataTypesV2.Binary})`),
     );
     const result = await doDigest();
 
@@ -430,13 +430,13 @@ describe("V2: EntityTypeDigestion Test", () => {
         builder
           .addKeyProp("ID", ODataTypesV2.Guid)
           .addNavProp("Category", withNs("Category"), relationshipCat, "1")
-          .addNavProp("supplier", withNs("Supplier"), relationshipSupp, "0..1")
+          .addNavProp("supplier", withNs("Supplier"), relationshipSupp, "0..1"),
       )
       .addEntityType("Category", undefined, (builder) =>
-        builder.addKeyProp("ID", ODataTypesV2.Guid).addNavProp("products", withNs("Product"), relationshipCat, "*")
+        builder.addKeyProp("ID", ODataTypesV2.Guid).addNavProp("products", withNs("Product"), relationshipCat, "*"),
       )
       .addEntityType("Supplier", undefined, (builder) =>
-        builder.addKeyProp("ID", ODataTypesV2.Guid).addNavProp("products", withNs("Product"), relationshipSupp, "*")
+        builder.addKeyProp("ID", ODataTypesV2.Guid).addNavProp("products", withNs("Product"), relationshipSupp, "*"),
       );
 
     const result = await doDigest();

@@ -1,9 +1,9 @@
 import path from "path";
-
 import { ODataTypesV4 } from "@odata2ts/odata-core";
-import { ensureDir } from "fs-extra";
+import { mkdirp } from "mkdirp";
 import { EmitResult } from "ts-morph";
-
+import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
+import type { MockInstance } from "vitest";
 import { EmitModes } from "../../src";
 import { DataModel } from "../../src/data-model/DataModel";
 import { digest } from "../../src/data-model/DataModelDigestionV4";
@@ -12,16 +12,16 @@ import { createProjectManager } from "../../src/project/ProjectManager";
 import { ODataModelBuilderV4 } from "../data-model/builder/v4/ODataModelBuilderV4";
 import { getTestConfig } from "../test.config";
 
-// global mock for file operations
-jest.mock("fs-extra");
+vi.mock("mkdirp");
 
-const fileHandlerSpy = jest.fn();
-const writeMock = jest.fn();
+const fileHandlerSpy = vi.fn();
+const writeMock = vi.fn();
 
-jest.mock("../../src/project/FileHandler", () => {
-  const { FileHandler: mockedModuleClass } = jest.requireActual("../../src/project/FileHandler");
+vi.mock("../../src/project/FileHandler", async () => {
+  const { FileHandler } = await vi.importActual("../../src/project/FileHandler");
 
-  class MockFileHandler extends mockedModuleClass {
+  // @ts-ignore
+  class MockFileHandler extends FileHandler {
     constructor(...args: any) {
       // @ts-ignore
       super(...args);
@@ -29,6 +29,7 @@ jest.mock("../../src/project/FileHandler", () => {
     }
 
     public async write(emitMode: EmitModes): Promise<EmitResult | void> {
+      // @ts-ignore
       writeMock(emitMode);
     }
   }
@@ -59,7 +60,7 @@ describe("ProjectManager Test", () => {
   let bundledFileGeneration: boolean;
   let noOutput: boolean;
 
-  let consoleSpy: jest.SpyInstance;
+  let consoleSpy: MockInstance;
 
   let usedDataModel: DataModel | undefined;
 
@@ -68,11 +69,11 @@ describe("ProjectManager Test", () => {
   }
 
   beforeAll(() => {
-    consoleSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     modelBuilder = new ODataModelBuilderV4(NAMESPACE);
     outputDir = "build/unitTest";
@@ -85,7 +86,7 @@ describe("ProjectManager Test", () => {
   });
 
   afterAll(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   function useExhaustiveDataModel(mb: ODataModelBuilderV4) {
@@ -93,14 +94,14 @@ describe("ProjectManager Test", () => {
       .addComplexType(COMPLEX_NAME, undefined, () => {})
       .addEnumType(ENUM_NAME, [])
       .addFunction(UNBOUND_OPERATION_NAME, ODataTypesV4.String, false, (builder) =>
-        builder.addParam("test", ODataTypesV4.String)
+        builder.addParam("test", ODataTypesV4.String),
       )
       .addFunction(UNBOUND_OPERATION_NAME_NO_PARAMS, ODataTypesV4.String, false)
       .addFunction(BOUND_OPERATION_NAME, ODataTypesV4.String, true, (builder) =>
-        builder.addParam("binding", withNs(ENTITY_NAME)).addParam("test", ODataTypesV4.String)
+        builder.addParam("binding", withNs(ENTITY_NAME)).addParam("test", ODataTypesV4.String),
       )
       .addFunction(BOUND_OPERATION_NAME_NO_PARAMS, ODataTypesV4.String, true, (builder) =>
-        builder.addParam("bindingParam", withNs(ENTITY_NAME))
+        builder.addParam("bindingParam", withNs(ENTITY_NAME)),
       );
   }
 
@@ -125,7 +126,7 @@ describe("ProjectManager Test", () => {
       expect.anything(),
       // we don't want to check the formatter
       expect.anything(),
-      allowTypeChecking
+      allowTypeChecking,
     );
   }
 
@@ -140,7 +141,7 @@ describe("ProjectManager Test", () => {
       expect.anything(),
       // we don't want to check the formatter
       expect.anything(),
-      false
+      false,
     );
   }
 
@@ -152,7 +153,7 @@ describe("ProjectManager Test", () => {
     expect(pm.getDataModel()).toBeDefined();
 
     await pm.init();
-    expect(ensureDir).not.toHaveBeenCalled();
+    expect(mkdirp).not.toHaveBeenCalled();
   });
 
   test("Ensure Directories for Unbundled File Generation", async () => {
@@ -165,8 +166,8 @@ describe("ProjectManager Test", () => {
     await doCreateProjectManager();
 
     // one folder has been created for each entity: entityType, complexType and enumType
-    expect(ensureDir).toHaveBeenCalledTimes(3);
-    expect(ensureDir).toHaveBeenNthCalledWith(3, `${outputDir}/${ENTITY_FOLDER_PATH}`.replaceAll("/", path.sep));
+    expect(mkdirp).toHaveBeenCalledTimes(3);
+    expect(mkdirp).toHaveBeenNthCalledWith(3, `${outputDir}/${ENTITY_FOLDER_PATH}`.replaceAll("/", path.sep));
   });
 
   test("Init & finalize bundled models file", async () => {

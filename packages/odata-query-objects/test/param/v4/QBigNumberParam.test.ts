@@ -1,5 +1,5 @@
 import { stringToPrefixModelConverter } from "@odata2ts/test-converters";
-
+import { describe, expect, test } from "vitest";
 import { QBigNumberParam, QNumberParam } from "../../../src";
 
 describe("QBigNumberParam Tests", () => {

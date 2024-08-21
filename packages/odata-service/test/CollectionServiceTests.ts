@@ -1,3 +1,4 @@
+import { beforeEach, expect, test } from "vitest";
 import { DEFAULT_HEADERS } from "../src/RequestHeaders";
 import {
   EnumCollectionService,
@@ -16,7 +17,7 @@ export function getParams(params: { [key: string]: string }) {
 export function commonCollectionTests(
   odataClient: MockClient,
   stringCollectionServiceConstructor: StringCollectionServiceConstructor,
-  enumCollectionServiceConstructor: EnumCollectionServiceConstructor
+  enumCollectionServiceConstructor: EnumCollectionServiceConstructor,
 ) {
   const BASE_URL = "/test";
   const NAME_STRING = "Name";

@@ -1,7 +1,7 @@
 import prettier from "prettier";
 import { IndentationText, NewLineKind, QuoteKind } from "ts-morph";
 
-import { BaseFormatter } from "./BaseFormatter";
+import { BaseFormatter } from "./BaseFormatter.js";
 
 export class PrettierFormatter extends BaseFormatter {
   /**
@@ -34,7 +34,7 @@ export class PrettierFormatter extends BaseFormatter {
       };
     } else {
       this.settings = {};
-    };
+    }
 
     return this;
   }

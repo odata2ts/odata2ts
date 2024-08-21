@@ -1,5 +1,5 @@
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
-
+import { beforeAll, beforeEach, describe, test } from "vitest";
 import { EmitModes } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
 import { DigestionOptions } from "../../../src/FactoryFunctionModel";
@@ -7,12 +7,11 @@ import { generateQueryObjects } from "../../../src/generator";
 import { createProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
 import {
+  createHelper,
   EntityBasedGeneratorFunctionWithoutVersion,
   FixtureComparatorHelper,
-  createHelper,
 } from "../comparator/FixtureComparatorHelper";
-import { SERVICE_NAME } from "./EntityBasedGenerationTests";
-import { ENTITY_NAME, createEntityBasedGenerationTests } from "./EntityBasedGenerationTests";
+import { createEntityBasedGenerationTests, ENTITY_NAME, SERVICE_NAME } from "./EntityBasedGenerationTests";
 
 describe("Query Object Generator Tests V4", () => {
   const TEST_SUITE_NAME = "Query Object Generator";
@@ -53,7 +52,7 @@ describe("Query Object Generator Tests V4", () => {
   test(`min QFunction`, async () => {
     // given a simple function
     odataBuilder.addFunction("MinFunction", ODataTypesV4.String, false, (builder) =>
-      builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true)
+      builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true),
     );
 
     // when generating model
@@ -79,7 +78,7 @@ describe("Query Object Generator Tests V4", () => {
           .addParam("testDateTimeOffset", ODataTypesV4.DateTimeOffset, false)
           .addParam("complex", `${withNs("Complex")}`)
           .addParam("ENTITY", `${withNs("TheEntity")}`)
-          .addParam("enum", `${withNs("TheEnum")}`)
+          .addParam("enum", `${withNs("TheEnum")}`),
       );
 
     // when generating model
@@ -97,7 +96,7 @@ describe("Query Object Generator Tests V4", () => {
         builder
           .addParam("book", `${withNs("Book")}`)
           .addParam("test", ODataTypesV4.String, false)
-          .addParam("optTest", ODataTypesV4.Boolean, true)
+          .addParam("optTest", ODataTypesV4.Boolean, true),
       );
 
     // when generating model
@@ -115,7 +114,7 @@ describe("Query Object Generator Tests V4", () => {
         builder
           .addParam("_it", `Collection(${withNs("Book")})`)
           .addParam("test", ODataTypesV4.String, false)
-          .addParam("optTest", ODataTypesV4.Boolean, true)
+          .addParam("optTest", ODataTypesV4.Boolean, true),
       );
 
     // when generating model
@@ -128,7 +127,7 @@ describe("Query Object Generator Tests V4", () => {
   test(`min QAction`, async () => {
     // given a simple function
     odataBuilder.addAction("MinAction", ODataTypesV4.Boolean, false, (builder) =>
-      builder.addParam("test", ODataTypesV4.String, false).addParam("opt_Test", ODataTypesV4.String, true)
+      builder.addParam("test", ODataTypesV4.String, false).addParam("opt_Test", ODataTypesV4.String, true),
     );
 
     // when generating model
@@ -143,7 +142,7 @@ describe("Query Object Generator Tests V4", () => {
     odataBuilder
       .addEntityType("Person", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       .addAction("ActionWithConverter", `${withNs("Person")}`, false, (builder) =>
-        builder.addParam("test", ODataTypesV4.String, false)
+        builder.addParam("test", ODataTypesV4.String, false),
       );
 
     // when generating model
@@ -160,7 +159,7 @@ describe("Query Object Generator Tests V4", () => {
       .addAction("BoundAction", ODataTypesV4.Boolean, true, (builder) =>
         builder
           .addParam("test", `${SERVICE_NAME}.${ENTITY_NAME}`, false)
-          .addParam("opt_Test", ODataTypesV4.String, true)
+          .addParam("opt_Test", ODataTypesV4.String, true),
       );
 
     // when generating model
@@ -173,7 +172,7 @@ describe("Query Object Generator Tests V4", () => {
     // given an overloaded function
     odataBuilder
       .addFunction(funcName, ODataTypesV4.String, false, (builder) =>
-        builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true)
+        builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true),
       )
       .addFunction(funcName, ODataTypesV4.String, false, (builder) => {
         builder.addParam("id", ODataTypesV4.Guid);

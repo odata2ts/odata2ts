@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { PropertyGenerationOptions, TypeBasedGenerationOptions, TypeModel } from "../../src";
 import { NamespaceWithAlias } from "../../src/data-model/DataModel";
 import { ServiceConfigHelper } from "../../src/data-model/ServiceConfigHelper";
@@ -278,7 +279,7 @@ describe("ServiceConfigHelper Tests", function () {
 
     createHelperWithEntities(
       { type: TypeModel.Any, name, mappedName },
-      { type: TypeModel.Any, name: name2, mappedName: mappedName2 }
+      { type: TypeModel.Any, name: name2, mappedName: mappedName2 },
     );
 
     // only mapping2 applies

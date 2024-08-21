@@ -1,7 +1,7 @@
 import { BigNumber } from "bignumber.js";
-
-import { BooksModel } from "../src/catalog/CatalogModel";
-import { catalogService } from "./services";
+import { describe, expect, test } from "vitest";
+import { BooksModel } from "../src/catalog/CatalogModel.js";
+import { catalogService } from "./services.js";
 
 describe("CAP V4 Integration Testing: Operation Capabilities", () => {
   const testService = catalogService;

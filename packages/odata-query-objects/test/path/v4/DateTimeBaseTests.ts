@@ -1,3 +1,4 @@
+import { expect, test } from "vitest";
 import { QDatePath, QDateTimeOffsetPath, QTimeOfDayPath } from "../../../src";
 
 export const EXAMPLE_PATH_NAME = "createdAt";
@@ -7,7 +8,7 @@ export const EXAMPLE_DATE_TIME_OFFSET = `${EXAMPLE_DATE}T${EXAMPLE_TIME}Z`;
 
 export function createBaseDateTimeTests<T extends QDateTimeOffsetPath | QDatePath | QTimeOfDayPath>(
   toTest: T,
-  example: string
+  example: string,
 ) {
   test("get path", () => {
     expect(toTest.getPath()).toBe(EXAMPLE_PATH_NAME);

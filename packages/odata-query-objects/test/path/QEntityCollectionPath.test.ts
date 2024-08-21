@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { QEntityCollectionPath, QFilterExpression } from "../../src";
 import { QSimpleEntity } from "../fixture/SimpleComplexModel";
 
@@ -45,12 +46,12 @@ describe("QEntityCollectionPath test", () => {
     expect(
       createToTest()
         .any(() => {})
-        .toString()
+        .toString(),
     ).toBe("test/any()");
     expect(
       createToTest()
         .any(() => new QFilterExpression())
-        .toString()
+        .toString(),
     ).toBe("test/any()");
   });
 
@@ -90,12 +91,12 @@ describe("QEntityCollectionPath test", () => {
     expect(
       createToTest()
         .all(() => {})
-        .toString()
+        .toString(),
     ).toBe("test/all()");
     expect(
       createToTest()
         .all(() => new QFilterExpression())
-        .toString()
+        .toString(),
     ).toBe("test/all()");
   });
 

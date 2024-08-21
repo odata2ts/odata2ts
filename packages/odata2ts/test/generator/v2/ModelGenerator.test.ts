@@ -1,5 +1,5 @@
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
-
+import { beforeAll, beforeEach, describe, test } from "vitest";
 import { EmitModes } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV2";
 import { DigestionOptions } from "../../../src/FactoryFunctionModel";
@@ -7,11 +7,11 @@ import { generateModels } from "../../../src/generator";
 import { createProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
 import {
+  createHelper,
   EntityBasedGeneratorFunctionWithoutVersion,
   FixtureComparatorHelper,
-  createHelper,
 } from "../comparator/FixtureComparatorHelper";
-import { ENTITY_NAME, SERVICE_NAME, createEntityBasedGenerationTests } from "./EntityBasedGenerationTests";
+import { createEntityBasedGenerationTests, ENTITY_NAME, SERVICE_NAME } from "./EntityBasedGenerationTests";
 
 describe("Model Generator Tests V2", () => {
   const TEST_SUITE_NAME = "Model Generator";
@@ -52,7 +52,7 @@ describe("Model Generator Tests V2", () => {
   test(`${TEST_SUITE_NAME}: min function param model`, async () => {
     // given a simple function
     odataBuilder.addFunctionImport("MinOperation", ODataTypesV2.String, (builder) =>
-      builder.addParam("test", ODataTypesV2.String, false).addParam("optTest", ODataTypesV2.String, true)
+      builder.addParam("test", ODataTypesV2.String, false).addParam("optTest", ODataTypesV2.String, true),
     );
 
     // when generating model
@@ -69,7 +69,7 @@ describe("Model Generator Tests V2", () => {
         .addParam("testGuid", ODataTypesV2.Guid, false)
         .addParam("testTime", ODataTypesV2.Time, false)
         .addParam("testDateOrDateTime", ODataTypesV2.DateTime, false)
-        .addParam("testDateTimeOffset", ODataTypesV2.DateTimeOffset, false)
+        .addParam("testDateTimeOffset", ODataTypesV2.DateTimeOffset, false),
     );
 
     // when generating model
@@ -81,10 +81,10 @@ describe("Model Generator Tests V2", () => {
     // given one minimal model
     odataBuilder
       .addEntityType("Author", undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV2.Int32).addProp("name", ODataTypesV2.Boolean, true)
+        builder.addKeyProp("id", ODataTypesV2.Int32).addProp("name", ODataTypesV2.Boolean, true),
       )
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
-        builder.addKeyProp("id", ODataTypesV2.Int32).addProp("relatedAuthors", `Collection(${withNs("Author")})`)
+        builder.addKeyProp("id", ODataTypesV2.Int32).addProp("relatedAuthors", `Collection(${withNs("Author")})`),
       );
 
     // when generating model

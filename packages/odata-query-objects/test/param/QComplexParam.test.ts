@@ -1,5 +1,5 @@
 import { PartialDeep } from "type-fest";
-
+import { describe, expect, test } from "vitest";
 import { QComplexParam } from "../../src";
 import { QSimpleEntityWithConverter, SimpleEntityWithConverter } from "../fixture/SimpleEntityWithConverter";
 

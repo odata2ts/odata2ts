@@ -1,7 +1,7 @@
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
-
+import { describe, expect, test } from "vitest";
 import { OperationReturnType, QBooleanParam, QComplexParam } from "../../src";
-import { ReturnTypes, emptyOperationReturnType } from "../../src/operation/OperationReturnType";
+import { emptyOperationReturnType, ReturnTypes } from "../../src/operation/OperationReturnType";
 import {
   QSimpleEntityWithConverter,
   SimpleEntityUnconverted,
@@ -12,11 +12,11 @@ import { createResponse } from "../test-infra/TestResponseHelper";
 describe("OperationReturnType Tests", function () {
   const VALUE_RETURN_TYPE = new OperationReturnType(
     ReturnTypes.VALUE,
-    new QBooleanParam("TEST", "test", booleanToNumberConverter)
+    new QBooleanParam("TEST", "test", booleanToNumberConverter),
   );
   const VALUE_COLLECTION_RETURN_TYPE = new OperationReturnType(
     ReturnTypes.VALUE_COLLECTION,
-    new QBooleanParam("NONE", undefined, booleanToNumberConverter)
+    new QBooleanParam("NONE", undefined, booleanToNumberConverter),
   );
 
   const qModelParam = new QComplexParam("XXX", new QSimpleEntityWithConverter());
@@ -72,7 +72,7 @@ describe("OperationReturnType Tests", function () {
     expect(VALUE_COLLECTION_RETURN_TYPE.returnType).toBe(ReturnTypes.VALUE_COLLECTION);
 
     expect(
-      VALUE_COLLECTION_RETURN_TYPE.convertResponse(createV4ValueOrCollectionResponse([true, false])).data
+      VALUE_COLLECTION_RETURN_TYPE.convertResponse(createV4ValueOrCollectionResponse([true, false])).data,
     ).toStrictEqual({
       value: [1, 0],
     });
@@ -90,7 +90,7 @@ describe("OperationReturnType Tests", function () {
     expect(MODEL_COLLECTION_RETURN_TYPE.returnType).toBe(ReturnTypes.COMPLEX_COLLECTION);
 
     expect(
-      MODEL_COLLECTION_RETURN_TYPE.convertResponse(createV4ValueOrCollectionResponse([MODEL_INPUT])).data
+      MODEL_COLLECTION_RETURN_TYPE.convertResponse(createV4ValueOrCollectionResponse([MODEL_INPUT])).data,
     ).toStrictEqual({
       value: [MODEL_CONVERTED],
     });
@@ -104,7 +104,7 @@ describe("OperationReturnType Tests", function () {
 
   test("primitive collection conversion V2", () => {
     expect(
-      VALUE_COLLECTION_RETURN_TYPE.convertResponseV2(createV2CollectionResponse([true, false])).data.d
+      VALUE_COLLECTION_RETURN_TYPE.convertResponseV2(createV2CollectionResponse([true, false])).data.d,
     ).toStrictEqual({
       results: [1, 0],
     });
@@ -118,7 +118,7 @@ describe("OperationReturnType Tests", function () {
 
   test("model collection conversion V2", () => {
     expect(
-      MODEL_COLLECTION_RETURN_TYPE.convertResponseV2(createV2CollectionResponse([MODEL_INPUT])).data
+      MODEL_COLLECTION_RETURN_TYPE.convertResponseV2(createV2CollectionResponse([MODEL_INPUT])).data,
     ).toStrictEqual({
       d: { results: [MODEL_CONVERTED] },
     });

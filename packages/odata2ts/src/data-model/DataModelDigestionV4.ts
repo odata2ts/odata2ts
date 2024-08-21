@@ -1,13 +1,13 @@
 import { MappedConverterChains, loadConverters } from "@odata2ts/converter-runtime";
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 
-import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel";
-import { NamespaceWithAlias, withNamespace } from "./DataModel";
-import { Digester, TypeModel } from "./DataModelDigestion";
-import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel";
-import { ComplexType, Property } from "./edmx/ODataEdmxModelBase";
-import { ComplexTypeV4, EntityTypeV4, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4";
-import { NamingHelper } from "./NamingHelper";
+import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel.js";
+import { NamespaceWithAlias, withNamespace } from "./DataModel.js";
+import { Digester, TypeModel } from "./DataModelDigestion.js";
+import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel.js";
+import { ComplexType, Property } from "./edmx/ODataEdmxModelBase.js";
+import { ComplexTypeV4, EntityTypeV4, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4.js";
+import { NamingHelper } from "./NamingHelper.js";
 
 export const digest: DigesterFunction<SchemaV4> = async (schemas, options, namingHelper) => {
   const converters = await loadConverters(ODataVersions.V4, options.converters);

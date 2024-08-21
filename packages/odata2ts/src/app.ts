@@ -1,16 +1,16 @@
 import { ODataVersions } from "@odata2ts/odata-core";
 import { pascalCase } from "pascal-case";
 
-import { NamespaceWithAlias } from "./data-model/DataModel";
-import { digest as digestV2 } from "./data-model/DataModelDigestionV2";
-import { digest as digestV4 } from "./data-model/DataModelDigestionV4";
-import { ODataEdmxModelBase } from "./data-model/edmx/ODataEdmxModelBase";
-import { SchemaV3 } from "./data-model/edmx/ODataEdmxModelV3";
-import { SchemaV4 } from "./data-model/edmx/ODataEdmxModelV4";
-import { NamingHelper } from "./data-model/NamingHelper";
-import { generateModels, generateQueryObjects, generateServices } from "./generator";
-import { Modes, RunOptions } from "./OptionModel";
-import { createProjectManager } from "./project/ProjectManager";
+import { NamespaceWithAlias } from "./data-model/DataModel.js";
+import { digest as digestV2 } from "./data-model/DataModelDigestionV2.js";
+import { digest as digestV4 } from "./data-model/DataModelDigestionV4.js";
+import { ODataEdmxModelBase } from "./data-model/edmx/ODataEdmxModelBase.js";
+import { SchemaV3 } from "./data-model/edmx/ODataEdmxModelV3.js";
+import { SchemaV4 } from "./data-model/edmx/ODataEdmxModelV4.js";
+import { NamingHelper } from "./data-model/NamingHelper.js";
+import { generateModels, generateQueryObjects, generateServices } from "./generator/index.js";
+import { Modes, RunOptions } from "./OptionModel.js";
+import { createProjectManager } from "./project/ProjectManager.js";
 
 function isQObjectGen(mode: Modes) {
   return [Modes.qobjects, Modes.service, Modes.all].includes(mode);

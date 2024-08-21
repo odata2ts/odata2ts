@@ -1,5 +1,5 @@
 import { stringToPrefixModelConverter } from "@odata2ts/test-converters";
-
+import { describe, expect, test } from "vitest";
 import { QDecimalV2Param } from "../../../src/";
 
 describe("QDecimalV2Param Tests", () => {

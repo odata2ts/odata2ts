@@ -7,7 +7,6 @@ import {
   QNumberPath,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
-
 // @ts-ignore
 import type { BookId, CategoryId } from "./TesterModel";
 

@@ -1,8 +1,8 @@
 import { searchTerm } from "@odata2ts/odata-query-objects";
-
-import { ODataQueryBuilderV4, createQueryBuilderV4 } from "../src/";
-import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
-import { createBaseTests } from "./ODataQueryBuilderBaseTests";
+import { beforeEach, describe, expect, test } from "vitest";
+import { createQueryBuilderV4, ODataQueryBuilderV4 } from "../src/index.js";
+import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel.js";
+import { createBaseTests } from "./ODataQueryBuilderBaseTests.js";
 
 /**
  * Helper function which adds the base path.
@@ -42,7 +42,7 @@ describe("ODataQueryBuilderV4 Test", () => {
       })
       .build();
     const expected = addBase(
-      "%24select=name%2Cage&%24expand=AltAdresses(%24filter%3Dstreet%20eq%20'AC%2FDC%20%26%20Brothers')"
+      "%24select=name%2Cage&%24expand=AltAdresses(%24filter%3Dstreet%20eq%20'AC%2FDC%20%26%20Brothers')",
     );
 
     expect(candidate).toBe(expected);
@@ -75,11 +75,11 @@ describe("ODataQueryBuilderV4 Test", () => {
 
     expect(() =>
       // @ts-ignore
-      toTest.expanding(null, null)
+      toTest.expanding(null, null),
     ).toThrow(expectedMsg);
     expect(() =>
       // @ts-ignore
-      toTest.expanding(undefined, null)
+      toTest.expanding(undefined, null),
     ).toThrow(expectedMsg);
   });
 
@@ -125,7 +125,7 @@ describe("ODataQueryBuilderV4 Test", () => {
       })
       .build();
     const expected = addBase(
-      "$select=name,age&$expand=Address($select=street;$expand=responsible($select=name);$filter=startswith(street,'Kam'))"
+      "$select=name,age&$expand=Address($select=street;$expand=responsible($select=name);$filter=startswith(street,'Kam'))",
     );
 
     expect(candidate).toBe(expected);

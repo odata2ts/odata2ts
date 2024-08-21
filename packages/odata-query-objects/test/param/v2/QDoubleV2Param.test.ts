@@ -1,5 +1,5 @@
 import { stringToPrefixModelConverter } from "@odata2ts/test-converters";
-
+import { describe, expect, test } from "vitest";
 import { QDoubleV2Param } from "../../../src/";
 
 describe("QDoubleV2Param Tests", () => {

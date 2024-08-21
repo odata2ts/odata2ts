@@ -1,9 +1,11 @@
-import path from "path";
 import { exec } from "child_process";
-import { pathExistsSync, removeSync } from "fs-extra";
+import { access } from "node:fs/promises";
+import path from "path";
+import { rimraf } from "rimraf";
+import { describe, expect, test } from "vitest";
 
 // This test suite needs a longer timeout, since node process is started
-jest.setTimeout(10 * 1000); // 10 secs
+// vi.setTimeout(10 * 1000); // 10 secs
 
 const OUTPUT_PATH = "./int-test/generated";
 const DUMMY_SOURCE = "./int-test/fixture/v4/dummy.xml";
@@ -60,13 +62,14 @@ describe.skip("Run-Cli Test", () => {
     const genDirBase = OUTPUT_PATH;
     const genDir = `${genDirBase}/xyz`;
     const args = ["-s", DUMMY_SOURCE, "-o", genDir];
-    removeSync(genDirBase);
+    await rimraf(genDirBase);
 
     await runCli(args);
 
-    expect(pathExistsSync(genDir)).toBeTruthy();
+    await access(genDir);
+    expect(() => access(genDir)).resolves.toBe(true);
 
-    removeSync(genDirBase);
+    await rimraf(genDirBase);
   });
 });
 
@@ -88,7 +91,7 @@ function runCli(args?: Array<string>): Promise<CliResult> {
           stdout,
           stderr,
         });
-      }
+      },
     );
   });
 }

@@ -1,6 +1,6 @@
 import axios, { AxiosRequestConfig } from "axios";
 
-import { UrlSourceConfiguration } from "../OptionModel";
+import { UrlSourceConfiguration } from "../OptionModel.js";
 
 const METADATA_PATH = "$metadata";
 const PWD_BLIND_TEXT = { password: "xxx hidden xxx" };

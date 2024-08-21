@@ -1,10 +1,9 @@
 import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
-import { QueryObject, convertV2ModelResponse } from "@odata2ts/odata-query-objects";
-
-import { MERGE_HEADERS } from "../RequestHeaders";
-import { ServiceStateHelperV2 } from "./ServiceStateHelperV2";
+import { convertV2ModelResponse, QueryObject } from "@odata2ts/odata-query-objects";
+import { MERGE_HEADERS } from "../RequestHeaders.js";
+import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
 export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObject> {
   protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
@@ -35,7 +34,7 @@ export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, E
 
   public async query<ReturnType extends Partial<T> = T>(
     queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): ODataResponse<ODataModelResponseV2<ReturnType>> {
     const { client, qResponseType, getDefaultHeaders, applyQueryBuilder } = this.__base;
 

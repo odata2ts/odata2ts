@@ -1,11 +1,10 @@
 import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
-
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
 // @ts-ignore
-import { QFirstBook, QGetBestsellers, QTestEntityId, qTestEntity } from "./QTester";
+import { QFirstBook, QGetBestsellers, qTestEntity, QTestEntityId } from "./QTester";
 // @ts-ignore
 import type { EditableTestEntity, FirstBookParams, TestEntity, TestEntityId } from "./TesterModel";
 
@@ -24,7 +23,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 
   public async mostPop(
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataCollectionResponseV4<TestEntity>>> {
     if (!this._qGetBestsellers) {
       this._qGetBestsellers = new QGetBestsellers();
@@ -38,7 +37,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
 
   public async bestBook(
     params: FirstBookParams,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataModelResponseV4<TestEntity>>> {
     if (!this._qFirstBook) {
       this._qFirstBook = new QFirstBook();

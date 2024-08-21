@@ -1,6 +1,6 @@
 import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
-
+import { beforeEach, describe, expect, test } from "vitest";
 import { DataModel, NamespaceWithAlias } from "../../src/data-model/DataModel";
 import { DataTypes, ODataVersion } from "../../src/data-model/DataTypeModel";
 
@@ -81,7 +81,7 @@ describe("Data Model Tests", function () {
       NS1,
       modelName,
       // @ts-expect-error
-      dummy
+      dummy,
     );
 
     expect(dataModel.getEntityType(fqName)).toStrictEqual(expectedDummy);
@@ -99,7 +99,7 @@ describe("Data Model Tests", function () {
       NS2,
       modelName,
       // @ts-expect-error
-      dummy
+      dummy,
     );
 
     expect(dataModel.getEntityType(aliasName)).toStrictEqual(expectedDummy);
@@ -115,7 +115,7 @@ describe("Data Model Tests", function () {
       NS1,
       modelName,
       // @ts-expect-error
-      dummy
+      dummy,
     );
 
     expect(dataModel.getComplexType(fqName)).toStrictEqual(expectedDummy);
@@ -131,7 +131,7 @@ describe("Data Model Tests", function () {
       NS2,
       modelName,
       // @ts-expect-error
-      dummy
+      dummy,
     );
 
     expect(dataModel.getComplexType(aliasName)).toMatchObject(dummy);
@@ -145,7 +145,7 @@ describe("Data Model Tests", function () {
       NS1,
       modelName,
       // @ts-expect-error
-      dummy
+      dummy,
     );
 
     expect(dataModel.getEnums()).toStrictEqual([expectedDummy]);
@@ -159,7 +159,7 @@ describe("Data Model Tests", function () {
     dataModel.addUnboundOperationType(
       NS1,
       // @ts-expect-error
-      dummyOp
+      dummyOp,
     );
 
     expect(dataModel.getUnboundOperationTypes()).toStrictEqual([dummyOp]);
@@ -173,7 +173,7 @@ describe("Data Model Tests", function () {
     dataModel.addUnboundOperationType(
       NS2,
       // @ts-expect-error
-      dummyOp
+      dummyOp,
     );
 
     expect(dataModel.getUnboundOperationType(aliasName)).toStrictEqual(dummyOp);
@@ -191,7 +191,7 @@ describe("Data Model Tests", function () {
       NS1,
       // @ts-expect-error
       dummyBinding,
-      dummyOp
+      dummyOp,
     );
 
     expect(dataModel.getEntityTypeOperations(bindingEntity)).toStrictEqual([dummyOp]);
@@ -211,7 +211,7 @@ describe("Data Model Tests", function () {
       NS1,
       // @ts-expect-error
       dummyBinding,
-      dummyOp
+      dummyOp,
     );
 
     expect(dataModel.getEntityTypeOperations(bindingEntity)).toStrictEqual([]);
@@ -230,19 +230,19 @@ describe("Data Model Tests", function () {
       NS2,
       entityName,
       // @ts-expect-error,
-      {}
+      {},
     );
     dataModel.addBoundOperationType(
       NS2,
       // @ts-expect-error,
       { fqType: bindingEntity, isCollection: false },
-      dummyOp
+      dummyOp,
     );
     dataModel.addBoundOperationType(
       NS2,
       // @ts-expect-error,
       { fqType: bindingEntity, isCollection: true },
-      dummyOp
+      dummyOp,
     );
 
     expect(dataModel.getEntityTypeOperations(aliasName)).toStrictEqual([dummyOp]);
@@ -256,7 +256,7 @@ describe("Data Model Tests", function () {
     dataModel.addAction(
       fqName,
       // @ts-expect-error
-      dummy
+      dummy,
     );
 
     expect(dataModel.getEntityContainer()).toStrictEqual({
@@ -274,7 +274,7 @@ describe("Data Model Tests", function () {
     dataModel.addFunction(
       fqName,
       // @ts-expect-error
-      dummy
+      dummy,
     );
 
     expect(dataModel.getEntityContainer()).toStrictEqual({
@@ -292,7 +292,7 @@ describe("Data Model Tests", function () {
     dataModel.addEntitySet(
       fqName,
       // @ts-expect-error
-      dummy
+      dummy,
     );
 
     expect(dataModel.getEntityContainer()).toStrictEqual({
@@ -310,7 +310,7 @@ describe("Data Model Tests", function () {
     dataModel.addSingleton(
       fqName,
       // @ts-expect-error
-      dummy
+      dummy,
     );
 
     expect(dataModel.getEntityContainer()).toStrictEqual({
@@ -330,7 +330,7 @@ describe("Data Model Tests", function () {
       "",
       modelName,
       // @ts-expect-error
-      dummy
+      dummy,
     );
 
     expect(dataModel.getEntityType(modelName)).toStrictEqual(expectedDummy);

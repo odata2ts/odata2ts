@@ -1,5 +1,5 @@
 import { ODataVersions } from "@odata2ts/odata-core";
-
+import { beforeEach, describe, expect, test } from "vitest";
 import { getDefaultConfig } from "../../src";
 import { NamespaceWithAlias } from "../../src/data-model/DataModel";
 import { digest } from "../../src/data-model/DataModelDigestionV4";
@@ -21,13 +21,13 @@ describe("ImportContainer tests", function () {
     fileName: string = DEFAULT_FILE_NAME,
     path: string = "",
     reservedNames: Array<string> = [],
-    bundledFileGenreation = true
+    bundledFileGenreation = true,
   ) {
     const defaultConfig = getDefaultConfig();
     const dataModel = await digest(
       odataBuilder.getSchemas(),
       defaultConfig,
-      new NamingHelper(defaultConfig, SERVICE_NAME, [NAMESPACE])
+      new NamingHelper(defaultConfig, SERVICE_NAME, [NAMESPACE]),
     );
     importContainer = new ImportContainer(
       path,
@@ -39,7 +39,7 @@ describe("ImportContainer tests", function () {
         service: "TestService",
       },
       bundledFileGenreation,
-      reservedNames
+      reservedNames,
     );
   }
 

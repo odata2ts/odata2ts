@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2016",
     "lib": ["esnext"],
-    "module": "commonjs",
+    "module": "ESNext",
     "moduleResolution": "node",
     "types": ["node"],
     "strict": true,
@@ -16,6 +16,7 @@
     "skipLibCheck": true,
     "importHelpers": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noImplicitReturns": true,

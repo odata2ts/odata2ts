@@ -1,6 +1,6 @@
 import { NumberFilterFunctions, NumberFilterOperators } from "../../odata/ODataModel";
 import { buildFunctionExpression, buildOperatorExpression } from "../../param/UrlParamHelper";
-import { InputModel, QBasePath } from "../base/QBasePath";
+import { InputModel, QBasePath } from "../base/QBasePath.js";
 
 export class QBigNumberPath<ConvertedType = string> extends QBasePath<string, ConvertedType> {
   protected formatValue(value: string): string {

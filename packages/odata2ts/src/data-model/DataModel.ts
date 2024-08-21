@@ -16,8 +16,8 @@ import {
   OperationTypes,
   PropertyModel,
   SingletonType,
-} from "./DataTypeModel";
-import { ValidationError } from "./validation/NameValidator";
+} from "./DataTypeModel.js";
+import { ValidationError } from "./validation/NameValidator.js";
 
 export interface ProjectFiles {
   model: string;

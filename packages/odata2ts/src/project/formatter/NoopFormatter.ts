@@ -1,4 +1,4 @@
-import { BaseFormatter } from "./BaseFormatter";
+import { BaseFormatter } from "./BaseFormatter.js";
 
 /**
  * Prettier formatter.

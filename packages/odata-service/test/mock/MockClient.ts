@@ -23,7 +23,7 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
     url: string,
     data: any,
     requestConfig?: MockRequestConfig,
-    additionalHeaders?: Record<string, string>
+    additionalHeaders?: Record<string, string>,
   ): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = data;
@@ -37,7 +37,7 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
   get<ResponseModel>(
     url: string,
     requestConfig?: MockRequestConfig,
-    additionalHeaders?: Record<string, string>
+    additionalHeaders?: Record<string, string>,
   ): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = undefined;
@@ -52,7 +52,7 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
     url: string,
     data: any,
     requestConfig?: MockRequestConfig,
-    additionalHeaders?: Record<string, string>
+    additionalHeaders?: Record<string, string>,
   ): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = data;
@@ -67,7 +67,7 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
     url: string,
     data: any,
     requestConfig?: MockRequestConfig,
-    additionalHeaders?: Record<string, string>
+    additionalHeaders?: Record<string, string>,
   ): ODataResponse<ResponseModel> {
     this.lastUrl = url;
     this.lastData = data;
@@ -81,7 +81,7 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
   delete(
     url: string,
     requestConfig?: MockRequestConfig,
-    additionalHeaders?: Record<string, string>
+    additionalHeaders?: Record<string, string>,
   ): ODataResponse<void> {
     this.lastUrl = url;
     this.lastData = undefined;
@@ -91,6 +91,32 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
 
     // @ts-ignore
     return this.respond();
+  }
+
+  getBlob(
+    url: string,
+    requestConfig?: MockRequestConfig,
+    additionalHeaders?: Record<string, string>,
+  ): ODataResponse<Blob> {
+    throw new Error("Operation getBlob not supported!");
+  }
+
+  getStream(
+    url: string,
+    requestConfig?: MockRequestConfig,
+    additionalHeaders?: Record<string, string>,
+  ): ODataResponse<ReadableStream> {
+    throw new Error("Operation getBlob not supported!");
+  }
+
+  updateBlob(
+    url: string,
+    data: Blob,
+    mimeType: string,
+    requestConfig?: MockRequestConfig,
+    additionalHeaders?: Record<string, string>,
+  ): ODataResponse<void | Blob> {
+    throw new Error("Operation updateBlob not supported!");
   }
 
   setModelResponse(data: any) {

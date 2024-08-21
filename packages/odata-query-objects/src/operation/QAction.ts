@@ -1,7 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
-
-import { QParamModel } from "../param/QParamModel";
-import { OperationReturnType, emptyOperationReturnType } from "./OperationReturnType";
+import { QParamModel } from "../param/QParamModel.js";
+import { emptyOperationReturnType, OperationReturnType } from "./OperationReturnType.js";
 
 type ActionParams = Record<string, any>;
 type FilteredParamModel = [string, any];
@@ -9,7 +8,7 @@ type FilteredParamModel = [string, any];
 export abstract class QAction<ParamModel = undefined> {
   public constructor(
     protected name: string,
-    protected qReturnType: OperationReturnType<any> = emptyOperationReturnType
+    protected qReturnType: OperationReturnType<any> = emptyOperationReturnType,
   ) {}
 
   public abstract getParams(): Array<QParamModel<any, any>> | undefined;

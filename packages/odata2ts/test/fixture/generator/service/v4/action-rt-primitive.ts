@@ -1,11 +1,10 @@
 import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV4, ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
-
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
 // @ts-ignore
-import { QPingCollection, QPingNumber, QPingString, QTestEntityId, qTestEntity } from "./QTester";
+import { QPingCollection, QPingNumber, QPingString, qTestEntity, QTestEntityId } from "./QTester";
 // @ts-ignore
 import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel";
 
@@ -25,7 +24,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 
   public async pingString(
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataValueResponseV4<string>>> {
     if (!this._qPingString) {
       this._qPingString = new QPingString();
@@ -38,7 +37,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 
   public async pingNumber(
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataValueResponseV4<number>>> {
     if (!this._qPingNumber) {
       this._qPingNumber = new QPingNumber();
@@ -51,7 +50,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 
   public async pingCollection(
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): Promise<HttpResponseModel<ODataCollectionResponseV4<string>>> {
     if (!this._qPingCollection) {
       this._qPingCollection = new QPingCollection();

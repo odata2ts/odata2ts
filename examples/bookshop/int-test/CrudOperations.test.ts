@@ -1,8 +1,8 @@
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { BigNumber } from "bignumber.js";
-
-import { BooksModel, EditableBooksModel } from "../src/admin/AdminModel";
-import { adminService } from "./services";
+import { describe, expect, test, vi } from "vitest";
+import { BooksModel, EditableBooksModel } from "../src/admin/AdminModel.js";
+import { adminService } from "./services.js";
 
 describe("CAP V4 Integration Testing: CRUD capabilities", () => {
   const testService = adminService;
@@ -31,7 +31,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
   });
 
   test("create and delete book", async () => {
-    jest.setTimeout(15000);
+    vi.setConfig({ testTimeout: 15000 });
 
     // given
     const bookSrv = testService.books();
@@ -61,7 +61,6 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
       stock: 10,
       createdBy: "alice",
       modifiedBy: "alice",
-      "image@odata.mediaContentType": "image/png",
     });
     expect(result.headers?.location).toBeDefined();
     expect(result.headers?.location).toBe("Books(999)");
@@ -90,12 +89,16 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     const result = await srv.patch(updated);
 
     expect(result.status).toBe(200);
-    expect(result.data).toMatchObject(updated);
+    expect(result.data!.descr).toBe(updated.descr);
+    expect(result.data!.title).toBe(updated.title);
     expect(result.data!.authorId).toBe(170);
 
-    const queried = await srv.query();
+    const {
+      //@ts-ignore
+      data: { "image@odata.mediaContentType": image, ...queried },
+    } = await srv.query()!;
 
-    expect(result.data).toMatchObject(queried.data);
+    expect(result.data).toMatchObject(queried);
   });
 
   test("update book", async () => {

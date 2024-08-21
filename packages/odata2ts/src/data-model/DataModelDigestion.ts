@@ -1,28 +1,28 @@
 import { MappedConverterChains } from "@odata2ts/converter-runtime";
 
-import { DigestionOptions } from "../FactoryFunctionModel";
+import type { DigestionOptions } from "../FactoryFunctionModel.js";
 import {
   ComplexTypeGenerationOptions,
   EntityTypeGenerationOptions,
   Modes,
   PropertyGenerationOptions,
-} from "../OptionModel";
-import { DataModel, NamespaceWithAlias, withNamespace } from "./DataModel";
+} from "../OptionModel.js";
+import { DataModel, NamespaceWithAlias, withNamespace } from "./DataModel.js";
 import {
   ComplexType as ComplexModelType,
   DataTypes,
   EntityType as EntityModelType,
   ODataVersion,
   PropertyModel,
-} from "./DataTypeModel";
-import { ComplexType, EntityType, EnumType, Property, Schema, TypeDefinition } from "./edmx/ODataEdmxModelBase";
-import { EntityContainerV3, SchemaV3 } from "./edmx/ODataEdmxModelV3";
-import { EntityContainerV4, SchemaV4 } from "./edmx/ODataEdmxModelV4";
-import { NamingHelper } from "./NamingHelper";
-import { ServiceConfigHelper, WithoutName } from "./ServiceConfigHelper";
-import { NameClashValidator } from "./validation/NameClashValidator";
-import { NameValidator } from "./validation/NameValidator";
-import { NoopValidator } from "./validation/NoopValidator";
+} from "./DataTypeModel.js";
+import { ComplexType, EntityType, EnumType, Property, Schema, TypeDefinition } from "./edmx/ODataEdmxModelBase.js";
+import { EntityContainerV3, SchemaV3 } from "./edmx/ODataEdmxModelV3.js";
+import { EntityContainerV4, SchemaV4 } from "./edmx/ODataEdmxModelV4.js";
+import { NamingHelper } from "./NamingHelper.js";
+import { ServiceConfigHelper, WithoutName } from "./ServiceConfigHelper.js";
+import { NameClashValidator } from "./validation/NameClashValidator.js";
+import { NameValidator } from "./validation/NameValidator.js";
+import { NoopValidator } from "./validation/NoopValidator.js";
 
 type CollectorTuple = [
   Array<PropertyModel>,

@@ -1,40 +1,31 @@
-import * as fsExtra from "fs-extra";
-import * as prettier from "prettier";
-
+import { writeFile } from "node:fs/promises";
+import { mkdirp } from "mkdirp";
+import { format, resolveConfig } from "prettier";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { storeMetadata } from "../../src/download";
 
-jest.mock("fs-extra");
-jest.mock("prettier");
+vi.mock("mkdirp");
+vi.mock("rimraf");
+vi.mock("node:fs/promises");
+vi.mock("prettier");
 
 describe("StoreMetadata Test", () => {
   const DEFAULT_SOURCE = "./test/dir/test.xml";
   const DEFAULT_INPUT = "ajdfoaifjj";
 
-  let ensureDirSpy: jest.SpyInstance;
-  let writeFileSpy: jest.SpyInstance;
-  let prettierSpy: jest.SpyInstance;
-
-  beforeAll(() => {
-    // mock console to keep a clean test output
-    ensureDirSpy = jest.spyOn(fsExtra, "ensureDir").mockImplementation(() => Promise.resolve());
-    writeFileSpy = jest.spyOn(fsExtra, "writeFile").mockImplementation(() => Promise.resolve());
-
-    jest.spyOn(prettier, "resolveConfig").mockResolvedValue(null);
-    prettierSpy = jest.spyOn(prettier, "format").mockImplementation(() => DEFAULT_INPUT);
-  });
-
   afterEach(() => {
     // clear mock state before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test("store file best case", async () => {
     const result = await storeMetadata(DEFAULT_SOURCE, DEFAULT_INPUT, false);
 
     expect(result).toBe(DEFAULT_INPUT);
-    expect(prettierSpy).not.toHaveBeenCalled();
-    expect(ensureDirSpy).toHaveBeenCalledWith("./test/dir");
-    expect(writeFileSpy).toHaveBeenCalledWith(DEFAULT_SOURCE, DEFAULT_INPUT);
+    expect(resolveConfig).not.toHaveBeenCalled();
+    expect(format).not.toHaveBeenCalled();
+    expect(mkdirp).toHaveBeenCalledWith("./test/dir");
+    expect(writeFile).toHaveBeenCalledWith(DEFAULT_SOURCE, DEFAULT_INPUT);
   });
 
   /*
@@ -50,13 +41,14 @@ describe("StoreMetadata Test", () => {
   test("store file with name only", async () => {
     await storeMetadata("justAName", DEFAULT_INPUT, false);
 
-    expect(ensureDirSpy).toHaveBeenCalledWith(".");
-    expect(writeFileSpy).toHaveBeenCalledWith("justAName", DEFAULT_INPUT);
+    expect(mkdirp).toHaveBeenCalledWith(".");
+    expect(writeFile).toHaveBeenCalledWith("justAName", DEFAULT_INPUT);
   });
 
   test("prettify first", async () => {
     await storeMetadata(DEFAULT_SOURCE, DEFAULT_INPUT, true);
 
-    expect(prettierSpy).toHaveBeenCalledWith(DEFAULT_INPUT, expect.anything());
+    expect(resolveConfig).toHaveBeenCalled();
+    expect(format).toHaveBeenCalledWith(DEFAULT_INPUT, { parser: "xml", plugins: ["@prettier/plugin-xml"] });
   });
 });

@@ -1,5 +1,4 @@
 import { QBooleanParam, QBooleanPath, QEntityPath, QEnumPath, QId, QueryObject } from "@odata2ts/odata-query-objects";
-
 // @ts-ignore
 import type { BOOK_KEY, PARENT_KEY } from "./TesterModel";
 

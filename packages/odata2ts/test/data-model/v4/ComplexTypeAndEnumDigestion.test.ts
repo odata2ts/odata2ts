@@ -1,3 +1,4 @@
+import { describe } from "vitest";
 import { createComplexAndEnumTests } from "../ComplexTypeAndEnumDigestionTests";
 
 describe("V4: ComplexType And Enum Digestion Test", () => {
