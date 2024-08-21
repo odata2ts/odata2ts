@@ -50,46 +50,21 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-      - name: Install packages
-        run: yarn --immutable
-      - name: Build packages
-        run: yarn build
-      - name: Type Test
-        run: yarn type-test
-      - name: Test with coverage
-        run: yarn coverage
-      - name: Coveralls
-        uses: coverallsapp/github-action@v1.1.2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-  int_tests:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 18
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
-      - name: Restore yarn cache
-        uses: actions/cache@v2
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
       - name: Install cds globally
         run: npm i -g @sap/cds-dk
       - name: Install packages
         run: yarn --immutable
       - name: Build packages
         run: yarn build
-      - name: Start CAP server & run integration tests
+      - name: Type Test
+        run: yarn type-test
+      - name: Start CAP server & run tests
         run: |
           yarn start-cap &
           sleep 15
           yarn generate-from-url &&
-          yarn int-test
+          yarn coverage
+      - name: Coveralls
+        uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
