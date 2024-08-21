@@ -205,6 +205,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cap-js/cds-types@npm:<=0.2.0":
+  version: 0.2.0
+  resolution: "@cap-js/cds-types@npm:0.2.0"
+  peerDependencies:
+    "@sap/cds": ">=7"
+  checksum: ec6c5e68ffddc6c31219de8d3b31b0170b6788eb26e3f6afa2776ab393337454a2a2a9d2c4d1083dbb8de358b0d7333511318bc3bc9f5a628ea373be3d4e2361
+  languageName: node
+  linkType: hard
+
 "@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
   resolution: "@cspotcode/source-map-support@npm:0.8.1"
@@ -1169,7 +1178,7 @@ __metadata:
     "@odata2ts/http-client-axios": ^0.11.1
     "@odata2ts/odata-service": ^0.19.3
     "@odata2ts/odata2ts": ^0.36.3
-    "@sap/cds": ">=5.9"
+    "@sap/cds": 7.9.4
     "@sap/cds-odata-v2-adapter-proxy": ^1.9.21
     axios: 0.27.2
     bignumber.js: ^9.1.1
@@ -1474,16 +1483,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sap/cds-compiler@npm:>=5":
-  version: 5.1.2
-  resolution: "@sap/cds-compiler@npm:5.1.2"
+"@sap/cds-compiler@npm:^4":
+  version: 4.9.8
+  resolution: "@sap/cds-compiler@npm:4.9.8"
   dependencies:
     antlr4: 4.9.3
   bin:
     cdsc: bin/cdsc.js
     cdshi: bin/cdshi.js
     cdsse: bin/cdsse.js
-  checksum: 8e04b6145fa26993d0124272498dcbfa0cee57ad7b8cba5c6d08e3f281f56ffbf24dbda9e6c19de9c966456a833ae03b09a54a9c5825cf8e1eacfc66bcdb1557
+  checksum: cb0c9e804572a05a83580fc3e7bb119af55ab3cdcc1d6a056e627f63dc5983df97a7c9d57b15a74c4eeb8c1f622624d4fa11e20da39a206747d26c44b3ffc196
   languageName: node
   linkType: hard
 
@@ -1524,24 +1533,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sap/cds@npm:>=5.9":
-  version: 8.1.1
-  resolution: "@sap/cds@npm:8.1.1"
+"@sap/cds@npm:7.9.4":
+  version: 7.9.4
+  resolution: "@sap/cds@npm:7.9.4"
   dependencies:
-    "@sap/cds-compiler": ">=5"
+    "@cap-js/cds-types": <=0.2.0
+    "@sap/cds-compiler": ^4
     "@sap/cds-fiori": ^1
     "@sap/cds-foss": ^5.0.0
-  peerDependencies:
-    express: ">=4"
-  peerDependenciesMeta:
-    express:
-      optional: true
   bin:
     cds-deploy: lib/dbs/cds-deploy.js
-    cds-serve: bin/serve.js
-    cds-test: bin/test.js
-    chest: bin/test.js
-  checksum: d6e10daec646988e59556f787c46510656cee159bdaaf10173133b5b785f911cedd32ddba6d4fec93d147c5daca4e3525973993e04543a35aa041ad4cfb301ee
+    cds-serve: bin/cds-serve.js
+  checksum: e692054e0b113db8fcc3c5013fa40680039dce0d1c5669783915feef1913f773327b8507e544c0de10a556d1178b8501c63e12227abc1e1d78c34d9ea67efaa0
   languageName: node
   linkType: hard
 
