@@ -1,5 +1,5 @@
-import { QParam } from "../QParam.js";
-import { formatLiteralParam, parseLiteral } from "../UrlParamHelper.js";
+import { QParam } from "../QParam";
+import { formatLiteralParam, parseLiteral } from "../UrlParamHelper";
 
 export class QBinaryParam<ConvertedType = string> extends QParam<string, ConvertedType> {
   getUrlConformValue = formatLiteralParam;

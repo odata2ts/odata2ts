@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { createQueryBuilderV2, ODataQueryBuilderV2 } from "../src/index.js";
+import { createQueryBuilderV2, ODataQueryBuilderV2 } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 import { createBaseTests } from "./ODataQueryBuilderBaseTests";
 

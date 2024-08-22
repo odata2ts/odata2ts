@@ -1,6 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
-import { QParamModel } from "../param/QParamModel.js";
-import { emptyOperationReturnType, OperationReturnType } from "./OperationReturnType.js";
+import { QParamModel } from "../param/QParamModel";
+import { emptyOperationReturnType, OperationReturnType } from "./OperationReturnType";
 
 type FunctionParams = Record<string, string>;
 type FilteredParamModel = [string, string];

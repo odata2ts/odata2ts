@@ -7,9 +7,9 @@ import {
   StandardFilterOperators,
   StringFilterFunctions,
 } from "../odata/ODataModel.js";
-import { QPathModel } from "../path/QPathModel.js";
-import { QFilterExpression } from "../QFilterExpression.js";
-import { UrlExpressionValueModel, UrlValueModel } from "./UrlParamModel.js";
+import { QPathModel } from "../path/QPathModel";
+import { QFilterExpression } from "../QFilterExpression";
+import { UrlExpressionValueModel, UrlValueModel } from "./UrlParamModel";
 
 function parseNullValue(value: string | undefined): string | null | undefined {
   return value === "null" ? null : value;

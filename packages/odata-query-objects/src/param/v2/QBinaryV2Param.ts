@@ -1,6 +1,6 @@
-import { QParam } from "../QParam.js";
-import { formatParamWithTypePrefix, parseWithTypePrefix } from "../UrlParamHelper.js";
-import { UrlParamValueFormatter, UrlParamValueParser } from "../UrlParamModel.js";
+import { QParam } from "../QParam";
+import { formatParamWithTypePrefix, parseWithTypePrefix } from "../UrlParamHelper";
+import { UrlParamValueFormatter, UrlParamValueParser } from "../UrlParamModel";
 
 export const BINARY_V2_TYPE_PREFIX = "binary";
 

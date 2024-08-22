@@ -1,12 +1,12 @@
 import { QEntityPath, QueryObject } from "@odata2ts/odata-query-objects";
-import { ODataQueryBuilder } from "../ODataQueryBuilder.js";
+import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
   EntityExtractor,
   ExpandingFunctionV2,
   ExpandingODataQueryBuilderV2 as ExpandingODataQueryBuilderV2Model,
   ExpandType,
   NullableParamList,
-} from "../ODataQueryBuilderModel.js";
+} from "../ODataQueryBuilderModel";
 
 export function createExpandingQueryBuilderV2<Q extends QueryObject>(
   property: string,

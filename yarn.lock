@@ -1289,6 +1289,7 @@ __metadata:
     "@odata2ts/odata-service": ^0.19.3
     "@odata2ts/test-converters": ^0.3.1
     "@prettier/plugin-xml": ^3.4.1
+    "@types/node": ^22.4.0
     "@types/xml2js": ^0.4.11
     axios: ^1.4.0
     camel-case: ^4.1.2
@@ -1305,6 +1306,7 @@ __metadata:
     ts-node: ^10.9.1
     tsconfig-loader: ^1.1.0
     type-fest: 2.12.2
+    typescript: 5.1.3
     upper-case-first: ^2.0.2
     xml2js: ^0.6.0
   peerDependencies:

@@ -1,5 +1,5 @@
-import { QueryObject } from "../QueryObject.js";
-import { QEntityPathModel, QPathModel } from "./QPathModel.js";
+import { QueryObject } from "../QueryObject";
+import { QEntityPathModel, QPathModel } from "./QPathModel";
 
 export class QEntityPath<Q extends QueryObject> implements QEntityPathModel<Q> {
   constructor(

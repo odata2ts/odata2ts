@@ -1,8 +1,8 @@
 import { searchTerm } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, test } from "vitest";
-import { createQueryBuilderV4, ODataQueryBuilderV4 } from "../src/index.js";
-import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel.js";
-import { createBaseTests } from "./ODataQueryBuilderBaseTests.js";
+import { createQueryBuilderV4, ODataQueryBuilderV4 } from "../src";
+import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
+import { createBaseTests } from "./ODataQueryBuilderBaseTests";
 
 /**
  * Helper function which adds the base path.

@@ -1,5 +1,5 @@
 import { NumberFilterFunctions, NumberFilterOperators } from "../../odata/ODataModel";
-import { InputModel, QBasePath } from "../base/QBasePath.js";
+import { InputModel, QBasePath } from "../base/QBasePath";
 
 export abstract class QNumberV2Base<
   BaseType extends number | string,

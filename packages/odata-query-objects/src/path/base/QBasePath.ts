@@ -5,7 +5,7 @@ import { buildQFilterOperation, isPathValue } from "../../param/UrlParamHelper";
 import { UrlExpressionValueModel } from "../../param/UrlParamModel";
 import { QFilterExpression } from "../../QFilterExpression";
 import { QOrderByExpression } from "../../QOrderByExpression";
-import { QValuePathModel } from "../QPathModel.js";
+import { QValuePathModel } from "../QPathModel";
 
 export type ExtractConverted<T> = T extends ValueConverter<any, infer Converted> ? Converted : never;
 export type InputModel<T> = QValuePathModel | ExtractConverted<T>;

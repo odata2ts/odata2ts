@@ -7,11 +7,10 @@ import {
   QueryObject,
   searchTerm,
 } from "@odata2ts/odata-query-objects";
-
-import { ODataOperators } from "./ODataModel.js";
+import { ODataOperators } from "./ODataModel";
 import {
-  ExpandType,
   ExpandingODataQueryBuilderV4,
+  ExpandType,
   NullableParam,
   NullableParamList,
   ODataQueryBuilderConfig,
@@ -141,7 +140,7 @@ export class ODataQueryBuilder<Q extends QueryObject> {
   public expanding<Prop extends ExpandType<Q>>(
     creator: (property: string, qEntity: Q) => ExpandingODataQueryBuilderV4<Q>,
     prop: Prop,
-    builderFn: (builder: any, qObject: any) => void
+    builderFn: (builder: any, qObject: any) => void,
   ) {
     const entityProp = this.getEntityProp<QEntityPathModel<Q>>(prop);
     const path = entityProp.getPath();

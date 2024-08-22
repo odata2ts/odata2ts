@@ -1,5 +1,5 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
-import { QParamModel } from "../param/QParamModel.js";
+import { QParamModel } from "../param/QParamModel";
 import {
   convertV2CollectionResponse,
   convertV2ModelResponse,
