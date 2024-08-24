@@ -40,7 +40,7 @@ vi.mock("../../src/project/FileHandler", async () => {
 describe("ProjectManager Test", () => {
   const NAMESPACE = "ns.1.example";
   const SERVICE_NAME = "Tester";
-  const ENTITY_FOLDER_PATH = "ns_1_example/my_entity";
+  const ENTITY_FOLDER_PATH = "ns-1-example/my-entity";
   const DEFAULT_NAMING_HELPER = new NamingHelper(getTestConfig(), SERVICE_NAME, [[NAMESPACE]]);
   const MAIN_FILE_NAMES = { model: "TesterModel", qObject: "QTester", service: "TesterService" };
 
