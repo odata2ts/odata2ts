@@ -1,8 +1,8 @@
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { BigNumber } from "bignumber.js";
 import { describe, expect, test, vi } from "vitest";
-import { BooksModel, EditableBooksModel } from "../src/admin/AdminModel.js";
-import { adminService } from "./services.js";
+import { BooksModel, EditableBooksModel } from "../src/admin/AdminModel";
+import { adminService } from "./services";
 
 describe("CAP V4 Integration Testing: CRUD capabilities", () => {
   const testService = adminService;
