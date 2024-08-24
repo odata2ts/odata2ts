@@ -29,7 +29,7 @@ jobs:
       - name: Install cds globally
         run: npm i -g @sap/cds-dk
       - name: Install packages
-        run: corepack enable && yarn set version 3.5.0 && yarn install --immutable
+        run: corepack enable && yarn set version 3.5.0 && yarn install --immutable --refresh-lockfile
       - name: Build packages
         run: yarn build
       - name: Type Test
