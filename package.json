@@ -13,9 +13,8 @@
   ],
   "scripts": {
     "build": "yarn clean && lerna run build",
-    "check-circular-deps": "lerna run check-circular-deps",
+    "check-circular-deps": "npx madge --extensions ts --circular packages/odata2ts/src packages/odata-core/src packages/odata-query-builder/src packages/odata-query-objects/src packages/odata-service/src",
     "clean": "rimraf coverage",
-    "clear-cache": "lerna run --parallel clear-cache",
     "coverage": "vitest run --coverage",
     "generate-from-url": "yarn workspace @odata2ts/example-bookshop generate-from-url",
     "int-test": "lerna run --parallel int-test",
