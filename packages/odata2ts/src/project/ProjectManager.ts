@@ -129,9 +129,6 @@ export class ProjectManager {
       // ensure folder for each model: we do this at this point for performance reasons
       await Promise.all(this.dataModel.getModelTypes().map((mt) => mkdirp(path.join(this.outputDir, mt.folderPath))));
     }
-
-    const typePart = this.emitMode.toUpperCase().replace("_", " & ");
-    console.log(`Prepared to emit ${typePart} files.`);
   }
 
   public initModels() {

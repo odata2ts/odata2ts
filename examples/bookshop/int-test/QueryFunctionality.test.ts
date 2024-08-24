@@ -1,8 +1,8 @@
 import { AxiosClientError } from "@odata2ts/http-client-axios";
 import { BigNumber } from "bignumber.js";
 import { describe, expect, test } from "vitest";
-import { BooksModel } from "../src/catalog/CatalogModel.js";
-import { catalogService } from "./services.js";
+import { BooksModel } from "../src/catalog/CatalogModel";
+import { catalogService } from "./services";
 
 describe("CAP V4 Integration Testing: Query Capabilities", () => {
   const testService = catalogService;
@@ -81,11 +81,11 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
     expect(result.data.value).toBeDefined();
 
     const products: Array<Partial<BooksModel>> = result.data.value;
-    expect(products[0]).toStrictEqual({
+    expect(new BigNumber("11.11").isEqualTo(products[0].price!)).toBeTruthy();
+    expect(products[0]).toMatchObject({
       id: 201,
       title: "Wuthering Heights",
       stock: 12,
-      price: new BigNumber("11.11"),
       genre: {
         id: 11,
         name: "Drama",

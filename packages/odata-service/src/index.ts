@@ -1,4 +1,4 @@
-export { ODataService } from "./ODataService.js";
+export { ODataService } from "./ODataService";
 
-export * from "./v2/index.js";
-export * from "./v4/index.js";
+export * from "./v2/index";
+export * from "./v4/index";

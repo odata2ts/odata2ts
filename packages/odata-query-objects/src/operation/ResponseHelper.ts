@@ -7,7 +7,7 @@ import {
   ODataValueResponseV2,
   ODataValueResponseV4,
 } from "@odata2ts/odata-core";
-import { QParamModel } from "../param/QParamModel.js";
+import { QParamModel } from "../param/QParamModel";
 
 export interface Convertible extends Pick<QParamModel<any, any>, "convertFrom" | "convertTo"> {}
 export type ConvertibleV2 = Convertible & Pick<QParamModel<any, any>, "getName" | "getMappedName">;

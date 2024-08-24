@@ -1,6 +1,6 @@
 import { DateTimeFilterFunctions } from "../../odata/ODataModel";
 import { buildFunctionExpression } from "../../param/UrlParamHelper";
-import { QNumberV2Path } from "./QNumberV2Path.js";
+import { QNumberV2Path } from "./QNumberV2Path";
 
 function buildNumberReturningFunction(func: DateTimeFilterFunctions, path: string) {
   return () => new QNumberV2Path(buildFunctionExpression(func, path));

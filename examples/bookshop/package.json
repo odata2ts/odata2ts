@@ -25,8 +25,8 @@
     "watch": "cds watch"
   },
   "dependencies": {
-    "@odata2ts/converter-big-number": "^0.2.1",
-    "@odata2ts/http-client-axios": "^0.11.1",
+    "@odata2ts/converter-big-number": "^0.2.2",
+    "@odata2ts/http-client-axios": "^0.11.2",
     "@odata2ts/odata-service": "^0.19.3",
     "@sap/cds": "7.9.4",
     "@sap/cds-odata-v2-adapter-proxy": "^1.9.21",
@@ -36,6 +36,7 @@
     "passport": ">=0.6.0"
   },
   "devDependencies": {
+    "@cap-js/sqlite": "^1",
     "@odata2ts/odata2ts": "^0.36.3",
     "sqlite3": "^5"
   },

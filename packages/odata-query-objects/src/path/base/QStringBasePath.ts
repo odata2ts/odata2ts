@@ -1,7 +1,7 @@
 import { StringFilterFunctions } from "../../odata/ODataModel";
 import { buildFunctionExpression, formatWithQuotes } from "../../param/UrlParamHelper";
 import { QFilterExpression } from "../../QFilterExpression";
-import { InputModel, QBasePath } from "./QBasePath.js";
+import { InputModel, QBasePath } from "./QBasePath";
 
 export abstract class QStringBasePath<SubClass extends QStringBasePath<any, any>, ConvertedType> extends QBasePath<
   string,

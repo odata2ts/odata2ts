@@ -1,8 +1,8 @@
-import { LambdaFunctions } from "../odata/ODataModel.js";
-import { QFilterExpression } from "../QFilterExpression.js";
-import { QueryObject } from "../QueryObject.js";
-import { LambdaOperatorType } from "./base/LambdaOperatorType.js";
-import { QEntityPathModel } from "./QPathModel.js";
+import { LambdaFunctions } from "../odata/ODataModel";
+import { QFilterExpression } from "../QFilterExpression";
+import { QueryObject } from "../QueryObject";
+import { LambdaOperatorType } from "./base/LambdaOperatorType";
+import { QEntityPathModel } from "./QPathModel";
 
 export class QEntityCollectionPath<Q extends QueryObject> implements QEntityPathModel<Q> {
   constructor(

@@ -1,7 +1,7 @@
 import { formatWithTypePrefix } from "../../param/UrlParamHelper";
 import { DATE_TIME_OFFSET_V2_TYPE_PREFIX } from "../../param/v2/QDateTimeOffsetV2Param";
-import { QBasePath } from "../base/QBasePath.js";
-import { dayFn, hourFn, minuteFn, monthFn, secondFn, yearFn } from "./DateTimeFunctions.js";
+import { QBasePath } from "../base/QBasePath";
+import { dayFn, hourFn, minuteFn, monthFn, secondFn, yearFn } from "./DateTimeFunctions";
 
 export class QDateTimeOffsetV2Path<ConvertedType = string> extends QBasePath<string, ConvertedType> {
   protected formatValue(value: string): string {

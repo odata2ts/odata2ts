@@ -1,7 +1,7 @@
 import { ParamValueModel, ValueConverter } from "@odata2ts/converter-api";
-import { getIdentityConverter } from "../IdentityConverter.js";
-import { QParamModel } from "./QParamModel.js";
-import { UrlParamValueFormatter, UrlParamValueParser } from "./UrlParamModel.js";
+import { getIdentityConverter } from "../IdentityConverter";
+import { QParamModel } from "./QParamModel";
+import { UrlParamValueFormatter, UrlParamValueParser } from "./UrlParamModel";
 
 export type PrimitiveParamType = string | number | boolean;
 
