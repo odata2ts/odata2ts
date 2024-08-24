@@ -81,7 +81,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
     expect(result.data.value).toBeDefined();
 
     const products: Array<Partial<BooksModel>> = result.data.value;
-    expect(new BigNumber("11.11").isEqualTo(products[0].price)).toBeTruthy();
+    expect(new BigNumber("11.11").isEqualTo(products[0].price!)).toBeTruthy();
     expect(products[0]).toMatchObject({
       id: 201,
       title: "Wuthering Heights",
