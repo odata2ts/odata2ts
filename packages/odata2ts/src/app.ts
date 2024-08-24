@@ -1,6 +1,5 @@
 import { ODataVersions } from "@odata2ts/odata-core";
-import { pascalCase } from "pascal-case";
-
+import { pascalCase } from "change-case";
 import { NamespaceWithAlias } from "./data-model/DataModel.js";
 import { digest as digestV2 } from "./data-model/DataModelDigestionV2.js";
 import { digest as digestV4 } from "./data-model/DataModelDigestionV4.js";
@@ -66,7 +65,7 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
       console.log(
         `Duplicate name: ${name} - Fully Qualified Names: ${errors
           .map((error) => error.fqName + (error.renamedTo ? ` (renamed to: ${error.renamedTo})` : ""))
-          .join(", ")}`
+          .join(", ")}`,
       );
     });
 

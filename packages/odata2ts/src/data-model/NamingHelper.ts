@@ -1,8 +1,4 @@
-import { camelCase } from "camel-case";
-import { constantCase } from "constant-case";
-import { pascalCase } from "pascal-case";
-import { snakeCase } from "snake-case";
-
+import { camelCase, constantCase, kebabCase, pascalCase, snakeCase } from "change-case";
 import { FileNamingStrategyOption, NameSettings, NamingStrategies, StandardNamingOptions } from "../NamingModel.js";
 import { RunOptions } from "../OptionModel.js";
 import { NamespaceWithAlias } from "./DataModel.js";
@@ -138,7 +134,7 @@ export class NamingHelper {
   private getName(
     name: string,
     strategy: (value: string, options?: StandardNamingOptions) => string,
-    options?: StandardNamingOptions
+    options?: StandardNamingOptions,
   ) {
     return strategy(this.stripServicePrefix(name), options);
   }
@@ -232,7 +228,7 @@ export class NamingHelper {
     const name = this.getODataServiceName();
     const opts = this.options.services;
     const strategy = this.namingFunction(
-      opts?.main?.namingStrategy ?? (opts?.main?.applyServiceNaming ? opts.namingStrategy : undefined)
+      opts?.main?.namingStrategy ?? (opts?.main?.applyServiceNaming ? opts.namingStrategy : undefined),
     );
     const result = this.getName(name, strategy, opts?.main);
     return opts?.main?.applyServiceNaming ? this.getName(result, strategy, opts) : result;
