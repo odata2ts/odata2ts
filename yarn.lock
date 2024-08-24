@@ -214,6 +214,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cap-js/db-service@npm:^1.9.0":
+  version: 1.12.0
+  resolution: "@cap-js/db-service@npm:1.12.0"
+  dependencies:
+    generic-pool: ^3.9.0
+  peerDependencies:
+    "@sap/cds": ">=7.9"
+  checksum: 0486ab8bb8b3c946503a6ae5ac3a1e712f3a3fefbe133b3bfd0d824891508c06c30605ec10dcb2e872f57c645bb46278644ee979dd9d5658a3fba61d4c529c3a
+  languageName: node
+  linkType: hard
+
+"@cap-js/sqlite@npm:^1":
+  version: 1.7.3
+  resolution: "@cap-js/sqlite@npm:1.7.3"
+  dependencies:
+    "@cap-js/db-service": ^1.9.0
+    better-sqlite3: ^11.0.0
+  peerDependencies:
+    "@sap/cds": ">=7.6"
+  checksum: a3db3360b594df8d87f3f16b2e472b544c6cd265d9e5e87ac5eeea448af9147f28c1b7c13055877931774ef0cfbdd3eeb3a1197bd05ce12f9455818ec708b9c6
+  languageName: node
+  linkType: hard
+
 "@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
   resolution: "@cspotcode/source-map-support@npm:0.8.1"
@@ -1174,6 +1197,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-bookshop@workspace:examples/bookshop"
   dependencies:
+    "@cap-js/sqlite": ^1
     "@odata2ts/converter-big-number": ^0.2.2
     "@odata2ts/http-client-axios": ^0.11.2
     "@odata2ts/odata-service": ^0.19.3
@@ -2224,6 +2248,17 @@ __metadata:
   version: 2.2.3
   resolution: "before-after-hook@npm:2.2.3"
   checksum: a1a2430976d9bdab4cd89cb50d27fa86b19e2b41812bf1315923b0cba03371ebca99449809226425dd3bcef20e010db61abdaff549278e111d6480034bebae87
+  languageName: node
+  linkType: hard
+
+"better-sqlite3@npm:^11.0.0":
+  version: 11.2.1
+  resolution: "better-sqlite3@npm:11.2.1"
+  dependencies:
+    bindings: ^1.5.0
+    node-gyp: latest
+    prebuild-install: ^7.1.1
+  checksum: 22259c298e76d4bc2bd993dfc9392bb80ecef948f48342804a7bd38a43ff7693089a9ea0ac0c14ebc195453aa94fce588755f6eea234d7550383b9f6ac7150a9
   languageName: node
   linkType: hard
 
@@ -4140,7 +4175,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"generic-pool@npm:^3.8.2":
+"generic-pool@npm:^3.8.2, generic-pool@npm:^3.9.0":
   version: 3.9.0
   resolution: "generic-pool@npm:3.9.0"
   checksum: 3d89e9b2018d2e3bbf44fec78c76b2b7d56d6a484237aa9daf6ff6eedb14b0899dadd703b5d810219baab2eb28e5128fb18b29e91e602deb2eccac14492d8ca8
