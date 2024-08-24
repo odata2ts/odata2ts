@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: 20
       - name: Check for circular dependencies
-        run: yarn check-circular-deps
+        run: npx madge --extensions ts --circular packages/odata2ts/src packages/odata-core/src packages/odata-query-builder/src packages/odata-query-objects/src packages/odata-service/src
   tests_with_coverage:
     name: Testing With Coverage
     runs-on: ubuntu-latest
