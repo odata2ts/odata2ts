@@ -271,6 +271,6 @@ export class NamingHelper {
   };
 
   public getFolderPath(namespace: string, name: string) {
-    return `${snakeCase(namespace)}/${snakeCase(name)}`;
+    return `${kebabCase(namespace)}/${kebabCase(name)}`;
   }
 }
