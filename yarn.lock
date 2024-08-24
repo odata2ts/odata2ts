@@ -1122,42 +1122,51 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/converter-big-number@npm:^0.2.1":
+"@odata2ts/converter-api@npm:^0.2.1":
   version: 0.2.1
-  resolution: "@odata2ts/converter-big-number@npm:0.2.1"
+  resolution: "@odata2ts/converter-api@npm:0.2.1"
   dependencies:
-    "@odata2ts/converter-api": ^0.2.0
+    "@odata2ts/odata-core": ^0.1.0
+  checksum: c624195bf2a21b1a576aa6e78f5fa27e62491a446a318956d581e98ab4cf2a42e88bbecb85d1401845a0cd1418d903f3ba502adfd715a50418ebfb4ef88fa4e3
+  languageName: node
+  linkType: hard
+
+"@odata2ts/converter-big-number@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "@odata2ts/converter-big-number@npm:0.2.2"
+  dependencies:
+    "@odata2ts/converter-api": ^0.2.1
     bignumber.js: ">1"
-  checksum: bd33b27e735bffde5a3aadf76f435e6d5f0fbd60cfc9f9d45ece6422b728302af24f561d90ae84c441fb00aa43e559f4620ac116c19db58f58b4794a230d5c14
+  checksum: 9e43b0ccf55d66c2a3542e8c121f5dbf355f3bc6768dd4f612e8f144dcb8953498bb9614e50284ea5f7d14ba93a88258ddbae67cd2ead1e9497278171374b2b1
   languageName: node
   linkType: hard
 
-"@odata2ts/converter-common@npm:^0.3.1":
-  version: 0.3.1
-  resolution: "@odata2ts/converter-common@npm:0.3.1"
+"@odata2ts/converter-common@npm:^0.3.2":
+  version: 0.3.2
+  resolution: "@odata2ts/converter-common@npm:0.3.2"
   dependencies:
-    "@odata2ts/converter-api": ^0.2.0
-  checksum: 08228baae0d1b4f4c0a24cd5d5f2a7595cc65587b373a95fb113a0fb97ab37bddbd9a0ddc5a71d4897c3c2ab7fddc827f614a61c9389f2c634d2677bc8154bbd
+    "@odata2ts/converter-api": ^0.2.1
+  checksum: eee7785277e215c482e7d1660f8193a4b970b273c574ff169ede65c64b6ad5e10f7a72ccdae2295c01b45ed76827173c14475ade7014afdae52ffad7f57e346f
   languageName: node
   linkType: hard
 
-"@odata2ts/converter-luxon@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "@odata2ts/converter-luxon@npm:0.2.1"
+"@odata2ts/converter-luxon@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "@odata2ts/converter-luxon@npm:0.2.2"
   dependencies:
-    "@odata2ts/converter-api": ^0.2.0
+    "@odata2ts/converter-api": ^0.2.1
   peerDependencies:
     luxon: ^3.0.4
-  checksum: e31576e2b1de4958379481f76ee098b71b1807cf6c713d2a57ee570e06d312c59dbad86bb8443257ebd5a71c8d81937e33bc1117461b820a6200f77efeff89a8
+  checksum: bce7bbaf9c93cc52d8c0cb1ccafc03fcbb6a8b73810adc55bfab7d6edde1bfe65f35403c3795b7b27afe5765e8204cfadf5c59b9c9bc3157e882126b1a5b1afe
   languageName: node
   linkType: hard
 
-"@odata2ts/converter-runtime@npm:^0.4.1":
-  version: 0.4.1
-  resolution: "@odata2ts/converter-runtime@npm:0.4.1"
+"@odata2ts/converter-runtime@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "@odata2ts/converter-runtime@npm:0.4.2"
   dependencies:
-    "@odata2ts/converter-api": ^0.2.0
-  checksum: 58fdc69328210379c9586d0d51fecafb18d7c6a236fcfef58e3ca034ccdea96f91897754e5bbfdcd416dd12326d2ad9acbef513a7b1ec629ab42f9182fb53881
+    "@odata2ts/converter-api": ^0.2.1
+  checksum: ea4f07d1362d6cf51a70fa57f4082ae2ea4a70a39c7e60831f25e0b539e12220798dab87861e709ded606d2a0b7e26cd1a046c38e7d7169bb6c3c0773c2f5dce
   languageName: node
   linkType: hard
 
@@ -1170,12 +1179,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@odata2ts/converter-v2-to-v4@npm:^0.5.2":
+  version: 0.5.2
+  resolution: "@odata2ts/converter-v2-to-v4@npm:0.5.2"
+  dependencies:
+    "@odata2ts/converter-api": ^0.2.1
+  checksum: cb50ca9ce51a7d53dbab396ea3ebfc5070e06d9caa64a80cdf5ae0098c7ae2a6885b52839f846f7fa446428a2c8b01b31e4ec490128465722e72fc8fe082fe9b
+  languageName: node
+  linkType: hard
+
 "@odata2ts/example-bookshop@workspace:examples/bookshop":
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-bookshop@workspace:examples/bookshop"
   dependencies:
-    "@odata2ts/converter-big-number": ^0.2.1
-    "@odata2ts/http-client-axios": ^0.11.1
+    "@odata2ts/converter-big-number": ^0.2.2
+    "@odata2ts/http-client-axios": ^0.11.2
     "@odata2ts/odata-service": ^0.19.3
     "@odata2ts/odata2ts": ^0.36.3
     "@sap/cds": 7.9.4
@@ -1192,11 +1210,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-main@workspace:examples/main"
   dependencies:
-    "@odata2ts/converter-big-number": ^0.2.1
-    "@odata2ts/converter-common": ^0.3.1
-    "@odata2ts/converter-luxon": ^0.2.1
-    "@odata2ts/converter-v2-to-v4": ^0.5.1
-    "@odata2ts/http-client-axios": ^0.11.1
+    "@odata2ts/converter-big-number": ^0.2.2
+    "@odata2ts/converter-common": ^0.3.2
+    "@odata2ts/converter-luxon": ^0.2.2
+    "@odata2ts/converter-v2-to-v4": ^0.5.2
+    "@odata2ts/http-client-axios": ^0.11.2
     "@odata2ts/odata-service": ^0.19.3
     "@odata2ts/odata2ts": ^0.36.3
     "@types/luxon": ^3.4.2
@@ -1206,30 +1224,30 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/http-client-api@npm:^0.6.1":
-  version: 0.6.1
-  resolution: "@odata2ts/http-client-api@npm:0.6.1"
-  checksum: 2755689ab773d13edc0d05102cf3a600e2a0d383b0a9fa0111e070a4743d6abc01e1973bc78b0e9cc69967d4c07662462dc2f886050ab129c1adbb4c85766014
+"@odata2ts/http-client-api@npm:^0.6.2":
+  version: 0.6.2
+  resolution: "@odata2ts/http-client-api@npm:0.6.2"
+  checksum: 14c1b37858424c0062744c6c6cf55f93e0b0da0cfe81223e3ff952145cc575c5c0a2493ab282e865245e9280a39bec6ec0842266b1607b3cd4c5da747d010024
   languageName: node
   linkType: hard
 
-"@odata2ts/http-client-axios@npm:^0.11.1":
-  version: 0.11.1
-  resolution: "@odata2ts/http-client-axios@npm:0.11.1"
+"@odata2ts/http-client-axios@npm:^0.11.2":
+  version: 0.11.2
+  resolution: "@odata2ts/http-client-axios@npm:0.11.2"
   dependencies:
-    "@odata2ts/http-client-base": ^0.5.1
+    "@odata2ts/http-client-base": ^0.5.2
   peerDependencies:
     axios: ^0.27.0 || ^1.0.0
-  checksum: bcc0d2f80ad394a9d613877980ab28562f1340a62975868ec93477d336c3e3e3d8dbb8070fe29191843c692d1d519e08e21590610436e86d661f53436cfda53e
+  checksum: 3b0c06f1d820dd01145dc3f51afafa4a405f200bc998d927390c97e05c989fc4ff6ea21f0b8e2f018ba55d3e831784367cbacb5125afad113fb4a8a08d80edb1
   languageName: node
   linkType: hard
 
-"@odata2ts/http-client-base@npm:^0.5.1":
-  version: 0.5.1
-  resolution: "@odata2ts/http-client-base@npm:0.5.1"
+"@odata2ts/http-client-base@npm:^0.5.2":
+  version: 0.5.2
+  resolution: "@odata2ts/http-client-base@npm:0.5.2"
   dependencies:
-    "@odata2ts/http-client-api": ^0.6.1
-  checksum: da0ef50a235e56dd2fa3bcfe43a0656d7dc0d5ce7cecd5f2680da8242d4da751e0f8c3e6a86019a3dbc5bae88255dd9da8581ecab8e57f76b128110fad42bc62
+    "@odata2ts/http-client-api": ^0.6.2
+  checksum: dc566e637610a9cf17242682d99387b4e53ea0b5ef602097066750badf7aed7f6e7c3b7b90acaba50c9248d31d825c54ff1dcd31bd13c2c027915d487a2e0bd7
   languageName: node
   linkType: hard
 
@@ -1258,8 +1276,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
-    "@odata2ts/converter-api": ^0.2.0
-    "@odata2ts/http-client-api": ^0.6.1
+    "@odata2ts/converter-api": ^0.2.1
+    "@odata2ts/http-client-api": ^0.6.2
     "@odata2ts/odata-core": ^0.5.0
     type-fest: ^2.19.0
   languageName: unknown
@@ -1269,7 +1287,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
-    "@odata2ts/http-client-api": ^0.6.1
+    "@odata2ts/http-client-api": ^0.6.2
     "@odata2ts/odata-query-builder": ^0.16.10
     "@odata2ts/odata-query-objects": ^0.23.1
     ts-expect: ^1.3.0
@@ -1280,10 +1298,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2ts@workspace:packages/odata2ts"
   dependencies:
-    "@odata2ts/converter-api": ^0.2.0
-    "@odata2ts/converter-runtime": ^0.4.1
+    "@odata2ts/converter-api": ^0.2.1
+    "@odata2ts/converter-runtime": ^0.4.2
     "@odata2ts/converter-v2-to-v4": ^0.5.1
-    "@odata2ts/http-client-api": ^0.6.1
+    "@odata2ts/http-client-api": ^0.6.2
     "@odata2ts/odata-core": ^0.5.0
     "@odata2ts/odata-query-objects": ^0.23.1
     "@odata2ts/odata-service": ^0.19.3
@@ -1321,7 +1339,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/test-converters@workspace:examples/test-converters"
   dependencies:
-    "@odata2ts/converter-api": ^0.2.0
+    "@odata2ts/converter-api": ^0.2.1
     "@odata2ts/odata-core": ^0.5.0
   languageName: unknown
   linkType: soft
