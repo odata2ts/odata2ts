@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.20.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.19.3...@odata2ts/odata-service@0.20.0) (2024-08-25)
+
+### Code Refactoring
+
+* vitest instead of jest & switch to ESM ([#300](https://github.com/odata2ts/odata2ts/issues/300)) ([7bc8888](https://github.com/odata2ts/odata2ts/commit/7bc88884317b6fc269729cf4eb08602571b69a2d))
+
+### BREAKING CHANGES
+
+* ESM tends to break stuff
+
 ## [0.19.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.19.2...@odata2ts/odata-service@0.19.3) (2024-08-01)
 
 **Note:** Version bump only for package @odata2ts/odata-service

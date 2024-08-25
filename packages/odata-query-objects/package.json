@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-query-objects",
-  "version": "0.23.1",
+  "version": "0.24.0",
   "description": "Q-Objects are the magic sauce for the odata-query-builder and allow for renaming and type conversion",
   "keywords": [
     "query object",
@@ -33,7 +33,7 @@
   "dependencies": {
     "@odata2ts/converter-api": "^0.2.2",
     "@odata2ts/http-client-api": "^0.6.2",
-    "@odata2ts/odata-core": "^0.5.0"
+    "@odata2ts/odata-core": "^0.6.0"
   },
   "devDependencies": {
     "type-fest": "^2.19.0"
