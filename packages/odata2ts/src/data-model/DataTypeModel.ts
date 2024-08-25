@@ -1,5 +1,4 @@
 import { ValueConverterImport } from "@odata2ts/converter-runtime";
-
 import { Modes } from "../OptionModel.js";
 
 export enum ODataVersion {
@@ -80,7 +79,7 @@ export interface EnumType {
   name: string;
   modelName: string;
   folderPath: string;
-  members: Array<string>;
+  members: Array<{ name: string; value: number }>;
 }
 
 export interface OperationType {

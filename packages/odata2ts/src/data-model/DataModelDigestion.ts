@@ -1,5 +1,4 @@
 import { MappedConverterChains } from "@odata2ts/converter-runtime";
-
 import type { DigestionOptions } from "../FactoryFunctionModel.js";
 import {
   ComplexTypeGenerationOptions,
@@ -27,7 +26,7 @@ import { NoopValidator } from "./validation/NoopValidator.js";
 type CollectorTuple = [
   Array<PropertyModel>,
   Array<string>,
-  { fqIdName: string; idName: string; qIdName: string; open: boolean }
+  { fqIdName: string; idName: string; qIdName: string; open: boolean },
 ];
 
 function ifTrue(value: string | undefined): boolean {
@@ -72,7 +71,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     protected schemas: Array<S>,
     protected options: DigestionOptions,
     protected namingHelper: NamingHelper,
-    converters?: MappedConverterChains
+    converters?: MappedConverterChains,
   ) {
     const namespaces = schemas.map<NamespaceWithAlias>((s) => [s.$.Namespace, s.$.Alias]);
     this.dataModel = new DataModel(namespaces, version, converters);
@@ -160,7 +159,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     model: ComplexType,
     namespace: string,
     name: string,
-    fqName: string
+    fqName: string,
   ) {
     const odataName = model.$.Name;
 
@@ -229,7 +228,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         name: enumName,
         modelName: this.namingHelper.getEnumName(enumName),
         folderPath: filePath,
-        members: et.Member?.length ? et.Member.map((m) => m.$.Name) : [],
+        members: et.Member?.length ? et.Member.map((m) => ({ name: m.$.Name, value: m.$.Value })) : [],
       });
     }
   }
@@ -395,7 +394,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         if (baseModel.baseClasses.length) {
           const [parentProps, parentKeys, parentAttributes] = this.collectBaseClassPropsAndKeys(
             baseModel,
-            visitedModels
+            visitedModels,
           );
           props.unshift(...parentProps);
           keys.unshift(...parentKeys);
@@ -422,7 +421,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         }
         return [props, keys, { fqIdName, idName, qIdName, open }];
       },
-      [[], [], { fqIdName: "", idName: "", qIdName: "", open: false }] as CollectorTuple
+      [[], [], { fqIdName: "", idName: "", qIdName: "", open: false }] as CollectorTuple,
     );
   }
 
@@ -433,7 +432,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     const configProp = this.serviceConfigHelper.findPropConfigByName(p.$.Name);
     const modelName = this.namingHelper.getModelPropName(
-      entityPropConfig?.mappedName || configProp?.mappedName || p.$.Name
+      entityPropConfig?.mappedName || configProp?.mappedName || p.$.Name,
     );
     const isCollection = !!p.$.Type.match(/^Collection\(/);
     let odataDataType = p.$.Type.replace(/^Collection\(([^\)]+)\)/, "$1");
@@ -456,7 +455,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       const dataTypeNamespace: NamespaceWithAlias = [dataTypePrefix!];
       if (!modelType) {
         throw new Error(
-          `Couldn't determine model type (EntityType, ComplexType, etc) for property "${p.$.Name}"! Given data type: "${odataDataType}".`
+          `Couldn't determine model type (EntityType, ComplexType, etc) for property "${p.$.Name}"! Given data type: "${odataDataType}".`,
         );
       }
 
@@ -506,7 +505,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       };
     } else {
       throw new Error(
-        `Unknown type [${odataDataType}]: Not 'Collection(...)', not OData type 'Edm.*', not starting with one of the namespaces!`
+        `Unknown type [${odataDataType}]: Not 'Collection(...)', not OData type 'Edm.*', not starting with one of the namespaces!`,
       );
     }
 

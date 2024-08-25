@@ -72,7 +72,7 @@ export function createDataModelTests(
     expect(result.getComplexTypes()[0].props[0].name).toBe("abcDef");
     expect(result.getEnums()[0].fqName).toBe(withNs("fav_FEAT"));
     expect(result.getEnums()[0].modelName).toBe("FavFeat");
-    expect(result.getEnums()[0].members[0]).toBe("HEY");
+    expect(result.getEnums()[0].members[0]).toStrictEqual({ name: "HEY", value: 0 });
   });
 
   test("Type Definition", async () => {

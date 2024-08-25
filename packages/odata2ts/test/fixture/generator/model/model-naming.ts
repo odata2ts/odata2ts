@@ -1,6 +1,6 @@
 export enum CHOICE_MODEL {
-  A = "A",
-  B = "B",
+  A = 1,
+  B = 2,
 }
 
 export interface PARENT_MODEL {
