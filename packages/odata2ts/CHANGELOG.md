@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.36.3...@odata2ts/odata2ts@0.37.0) (2024-08-25)
+
+### Code Refactoring
+
+* vitest instead of jest & switch to ESM ([#300](https://github.com/odata2ts/odata2ts/issues/300)) ([7bc8888](https://github.com/odata2ts/odata2ts/commit/7bc88884317b6fc269729cf4eb08602571b69a2d))
+
+### Features
+
+* use kebap-case for folder names (unbundledFileGeneration) ([9f26e1f](https://github.com/odata2ts/odata2ts/commit/9f26e1f2e49fbe32a61a43ba2dd29be85a3561c3))
+
+### BREAKING CHANGES
+
+* as there is no generated index file all file paths must be fixed.
+* ESM tends to break stuff
+
 ## [0.36.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.36.2...@odata2ts/odata2ts@0.36.3) (2024-08-12)
 
 ### Bug Fixes

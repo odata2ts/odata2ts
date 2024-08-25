@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-core@0.5.0...@odata2ts/odata-core@0.6.0) (2024-08-25)
+
+### Code Refactoring
+
+* vitest instead of jest & switch to ESM ([#300](https://github.com/odata2ts/odata2ts/issues/300)) ([7bc8888](https://github.com/odata2ts/odata2ts/commit/7bc88884317b6fc269729cf4eb08602571b69a2d))
+
+### BREAKING CHANGES
+
+* ESM tends to break stuff
+
 # [0.5.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-core@0.4.0...@odata2ts/odata-core@0.5.0) (2024-04-22)
 
 ### Features
