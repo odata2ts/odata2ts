@@ -18,6 +18,7 @@ export type DigestionOptions = Pick<
   | "skipComments"
   | "disableAutomaticNameClashResolution"
   | "bundledFileGeneration"
+  | "retainEnumValues"
 >;
 
 /**

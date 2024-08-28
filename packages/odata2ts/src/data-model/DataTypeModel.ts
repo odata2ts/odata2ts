@@ -80,7 +80,7 @@ export interface EnumType {
   name: string;
   modelName: string;
   folderPath: string;
-  members: Array<string>;
+  members: Array<string> | Array<{ name: string, value: number | string }>;
 }
 
 export interface OperationType {

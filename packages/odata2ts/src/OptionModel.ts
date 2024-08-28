@@ -262,6 +262,12 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * To enable this behaviour set this option to true.
    */
   bundledFileGeneration?: boolean;
+
+  /**
+   * By default, odata2ts generates enums with a string value, matching the enum name.
+   * This option retains the value specified in the metadata file.
+   */
+  retainEnumValues?: boolean;
 }
 
 /**

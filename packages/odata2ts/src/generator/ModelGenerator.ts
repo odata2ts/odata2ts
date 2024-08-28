@@ -55,7 +55,15 @@ class ModelGenerator {
       file.getFile().addEnum({
         name: et.modelName,
         isExported: true,
-        members: et.members.map((mem) => ({ name: mem, initializer: `"${mem}"` })),
+        members: et.members.map((mem) => {
+          if (typeof mem === 'string') {
+            return ({ name: mem, initializer: `"${mem}"` })
+          }
+          return {
+            name: mem.name,
+            initializer: typeof mem.value === 'number' ? `${mem.value}` : `"${mem.value}"`
+          };
+        }),
       });
 
       return this.project.finalizeFile(file);
@@ -244,14 +252,14 @@ class ModelGenerator {
       properties: !complexProps
         ? undefined
         : complexProps.map((p) => {
-            return {
-              name: p.name,
-              type: this.getEditablePropType(file.getImports(), p),
-              // optional props don't need to be specified in editable model
-              // also, entities would require deep insert func => we make it optional for now
-              hasQuestionToken: !p.required || p.dataType === DataTypes.ModelType,
-            };
-          }),
+          return {
+            name: p.name,
+            type: this.getEditablePropType(file.getImports(), p),
+            // optional props don't need to be specified in editable model
+            // also, entities would require deep insert func => we make it optional for now
+            hasQuestionToken: !p.required || p.dataType === DataTypes.ModelType,
+          };
+        }),
     });
   }
 
