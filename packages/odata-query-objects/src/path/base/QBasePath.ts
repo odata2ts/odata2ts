@@ -1,11 +1,22 @@
 import { ValueConverter } from "@odata2ts/converter-api";
 import { getIdentityConverter } from "../../IdentityConverter";
-import { StandardFilterOperators } from "../../odata/ODataModel";
-import { buildQFilterOperation, isPathValue } from "../../param/UrlParamHelper";
+import { isPathValue } from "../../param/UrlParamHelper";
 import { UrlExpressionValueModel } from "../../param/UrlParamModel";
-import { QFilterExpression } from "../../QFilterExpression";
-import { QOrderByExpression } from "../../QOrderByExpression";
 import { QValuePathModel } from "../QPathModel";
+import {
+  filterEquals,
+  filterGreaterEquals,
+  filterGreaterThan,
+  filterIn,
+  filterInEmulated,
+  filterIsNotNull,
+  filterIsNull,
+  filterLowerEquals,
+  filterLowerThan,
+  filterNotEquals,
+  orderAscending,
+  orderDescending,
+} from "./BaseFunctions";
 
 export type ExtractConverted<T> = T extends ValueConverter<any, infer Converted> ? Converted : never;
 export type InputModel<T> = QValuePathModel | ExtractConverted<T>;
@@ -16,13 +27,14 @@ export abstract class QBasePath<ValueType extends UrlExpressionValueModel, Conve
   public constructor(
     protected path: string,
     public readonly converter: ValueConverter<ValueType, ValueType | ConvertedType> = getIdentityConverter<ValueType>(),
+    public readonly options: { nativeIn: boolean } = { nativeIn: false },
   ) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
     }
   }
 
-  protected convertInput(value: InputModel<this["converter"]>): string {
+  protected convertInput = (value: InputModel<this["converter"]>): string => {
     if (isPathValue(value)) {
       return value.getPath();
     }
@@ -33,7 +45,7 @@ export abstract class QBasePath<ValueType extends UrlExpressionValueModel, Conve
     }
 
     return this.formatValue(converted);
-  }
+  };
 
   /**
    * Get the path to this property.
@@ -44,73 +56,27 @@ export abstract class QBasePath<ValueType extends UrlExpressionValueModel, Conve
     return this.path;
   }
 
-  /**
-   * Order by this property in ascending order.
-   *
-   * @returns orderby expression
-   */
-  public ascending() {
-    return new QOrderByExpression(`${this.path} asc`);
-  }
+  public ascending = orderAscending(this.path);
   public asc = this.ascending;
-
-  /**
-   * Order by this property in descending order.
-   *
-   * @returns orderby expression
-   */
-  public descending() {
-    return new QOrderByExpression(`${this.path} desc`);
-  }
+  public descending = orderDescending(this.path);
   public desc = this.descending;
 
-  public isNull() {
-    return new QFilterExpression(`${this.path} eq null`);
-  }
-
-  public isNotNull() {
-    return new QFilterExpression(`${this.path} ne null`);
-  }
-
-  public equals = (value: InputModel<this["converter"]> | null) => {
-    const result = value === null ? "null" : this.convertInput(value);
-    return buildQFilterOperation(this.path, StandardFilterOperators.EQUALS, result);
-  };
+  public isNull = filterIsNull(this.path);
+  public isNotNull = filterIsNotNull(this.path);
+  public equals = filterEquals<InputModel<this["converter"]>>(this.path, this.convertInput);
   public eq = this.equals;
-
-  public notEquals = (value: InputModel<this["converter"]> | null) => {
-    const result = value === null ? "null" : this.convertInput(value);
-    return buildQFilterOperation(this.path, StandardFilterOperators.NOT_EQUALS, result);
-  };
+  public notEquals = filterNotEquals<InputModel<this["converter"]>>(this.path, this.convertInput);
   public ne = this.notEquals;
 
-  public lowerThan = (value: InputModel<this["converter"]>) => {
-    return buildQFilterOperation(this.path, StandardFilterOperators.LOWER_THAN, this.convertInput(value));
-  };
+  public lowerThan = filterLowerThan<InputModel<this["converter"]>>(this.path, this.convertInput);
   public lt = this.lowerThan;
-
-  public lowerEquals = (value: InputModel<this["converter"]>) => {
-    return buildQFilterOperation(this.path, StandardFilterOperators.LOWER_EQUALS, this.convertInput(value));
-  };
+  public lowerEquals = filterLowerEquals<InputModel<this["converter"]>>(this.path, this.convertInput);
   public le = this.lowerEquals;
-
-  public greaterThan = (value: InputModel<this["converter"]>) => {
-    return buildQFilterOperation(this.path, StandardFilterOperators.GREATER_THAN, this.convertInput(value));
-  };
+  public greaterThan = filterGreaterThan<InputModel<this["converter"]>>(this.path, this.convertInput);
   public gt = this.greaterThan;
-
-  public greaterEquals = (value: InputModel<this["converter"]>) => {
-    return buildQFilterOperation(this.path, StandardFilterOperators.GREATER_EQUALS, this.convertInput(value));
-  };
+  public greaterEquals = filterGreaterEquals<InputModel<this["converter"]>>(this.path, this.convertInput);
   public ge = this.greaterEquals;
-
-  public in = (...values: Array<InputModel<this["converter"]>>) => {
-    return values.reduce(
-      (expression, value) => {
-        const expr = buildQFilterOperation(this.path, StandardFilterOperators.EQUALS, this.convertInput(value));
-        return expression ? expression.or(expr) : expr;
-      },
-      null as unknown as QFilterExpression,
-    );
-  };
+  public in = this.options.nativeIn
+    ? filterIn<InputModel<this["converter"]>>(this.path, this.convertInput)
+    : filterInEmulated<InputModel<this["converter"]>>(this.path, this.convertInput);
 }
