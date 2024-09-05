@@ -1,5 +1,4 @@
 import deepmerge from "deepmerge";
-
 import { NameSettings, NamingStrategies } from "./NamingModel.js";
 import { EmitModes, Modes, RunOptions } from "./OptionModel.js";
 
@@ -27,6 +26,7 @@ const defaultConfig: DefaultConfiguration = {
   v4BigNumberAsString: false,
   disableAutomaticNameClashResolution: false,
   bundledFileGeneration: true,
+  numericEnums: false,
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,
