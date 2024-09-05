@@ -1,17 +1,13 @@
-import { beforeEach, describe, expect, test } from "vitest";
-import { QEnumPath } from "../../src";
+import { describe, expect, test } from "vitest";
+import { QEnumPath, QNumericEnumPath } from "../../src";
 
 describe("QEnumPath test", () => {
-  let toTest: QEnumPath;
-  const enum FeatureEnum {
+  enum FeatureEnum {
     Feature1 = "Feature1",
     Feature2 = "Feature2",
     Feature3 = "Feature3",
   }
-
-  beforeEach(() => {
-    toTest = new QEnumPath("feature");
-  });
+  const toTest = new QEnumPath("feature", FeatureEnum);
 
   test("get path", () => {
     expect(toTest.getPath()).toBe("feature");
@@ -19,13 +15,20 @@ describe("QEnumPath test", () => {
 
   test("fails with null, undefined, empty string", () => {
     // @ts-expect-error
-    expect(() => new QEnumPath(null)).toThrow();
+    expect(() => new QEnumPath(null, FeatureEnum)).toThrow();
     // @ts-expect-error
-    expect(() => new QEnumPath()).toThrow();
+    expect(() => new QEnumPath(undefined, FeatureEnum)).toThrow();
+    expect(() => new QEnumPath("", FeatureEnum)).toThrow();
+    expect(() => new QEnumPath(" ", FeatureEnum)).toThrow();
+  });
+
+  test("fails without enum", () => {
     // @ts-expect-error
-    expect(() => new QEnumPath(undefined)).toThrow();
-    expect(() => new QEnumPath("")).toThrow();
-    expect(() => new QEnumPath(" ")).toThrow();
+    expect(() => new QNumericEnumPath("feature")).toThrow();
+    // @ts-expect-error
+    expect(() => new QNumericEnumPath("feature", null)).toThrow();
+    // @ts-expect-error
+    expect(() => new QNumericEnumPath("feature", undefined)).toThrow();
   });
 
   test("orderBy asc", () => {
@@ -44,7 +47,8 @@ describe("QEnumPath test", () => {
 
   test("equals", () => {
     const value = "Feature1";
-    const result = toTest.equals(value);
+    const result = toTest.equals(FeatureEnum.Feature1);
+    const result2 = toTest.equals("Feature1");
 
     expect(result.toString()).toBe("feature eq 'Feature1'");
     expect(result.toString()).toBe(toTest.eq(value).toString());
@@ -59,14 +63,14 @@ describe("QEnumPath test", () => {
   });
 
   test("in", () => {
-    const result = toTest.in("X").toString();
+    const result = toTest.in(FeatureEnum.Feature3).toString();
 
-    expect(result).toBe("feature eq 'X'");
+    expect(result).toBe("feature eq 'Feature3'");
   });
 
   test("in with multiple", () => {
-    const result = toTest.in("X", "y").toString();
+    const result = toTest.in("Feature2", FeatureEnum.Feature3).toString();
 
-    expect(result).toBe(`(feature eq 'X' or feature eq 'y')`);
+    expect(result).toBe(`(feature eq 'Feature2' or feature eq 'Feature3')`);
   });
 });

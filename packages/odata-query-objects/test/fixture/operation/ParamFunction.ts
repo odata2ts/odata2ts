@@ -1,5 +1,4 @@
-import { PrefixModel, booleanToNumberConverter, stringToPrefixModelConverter } from "@odata2ts/test-converters";
-
+import { booleanToNumberConverter, PrefixModel, stringToPrefixModelConverter } from "@odata2ts/test-converters";
 import {
   OperationReturnType,
   QBooleanParam,
@@ -12,11 +11,11 @@ import {
   QGuidParam,
   QGuidV2Param,
   QNumberParam,
+  QStringCollection,
   QStringParam,
   QTimeOfDayParam,
   QTimeV2Param,
   ReturnTypes,
-  qStringCollection,
 } from "../../../src";
 import { BookModel, QBook } from "./BookModel";
 
@@ -41,7 +40,7 @@ export class QBestBookFunction extends QFunction<BestBookParamModel> {
     new QDateParam("testDate"),
     new QTimeOfDayParam("testTime"),
     new QDateTimeOffsetParam("testDateTimeOffset"),
-    new QComplexParam("testCollection", qStringCollection),
+    new QComplexParam("testCollection", new QStringCollection()),
     new QComplexParam("TEST_ENTITY", new QBook(), "testEntity"),
   ];
 

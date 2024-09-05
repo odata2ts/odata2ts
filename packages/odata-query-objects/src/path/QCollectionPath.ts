@@ -1,15 +1,15 @@
 import { ValueConverter } from "@odata2ts/converter-api";
 import { LambdaFunctions } from "../odata/ODataModel";
+import { PrimitiveCollection } from "../primitve-collection/PrimitiveCollectionModel";
 import { QFilterExpression } from "../QFilterExpression";
-import { QueryObject } from "../QueryObject";
 import { LambdaOperatorType } from "./base/LambdaOperatorType";
 import { QEntityPathModel } from "./QPathModel";
 
-export class QCollectionPath<CollectionType extends QueryObject> implements QEntityPathModel<CollectionType> {
-  constructor(
-    private path: string,
-    private qEntityFn: () => new (prefix?: string, converter?: ValueConverter<any, any>) => CollectionType,
-    private __converter?: ValueConverter<any, any>,
+export class QCollectionPath<CollectionType extends PrimitiveCollection> implements QEntityPathModel<CollectionType> {
+  public constructor(
+    protected path: string,
+    protected qEntityFn: () => new (prefix?: string, converter?: ValueConverter<any, any>) => CollectionType,
+    protected __converter?: ValueConverter<any, any>,
   ) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");

@@ -3,15 +3,18 @@ import { describe, expect, test } from "vitest";
 import { QEnumParam } from "../../../src";
 
 describe("QEnumParam Tests", () => {
+  enum TestEnum {
+    A = "A",
+    B = "B",
+    ZEBRA = "ZEBRA",
+  }
+
   const NAME = "T3st_bbb";
-  const toTest = new QEnumParam(NAME);
-  const toTestWithConverter = new QEnumParam(NAME, undefined, stringToPrefixModelConverter);
-  const convertedInputModel = { prefix: "PREFIX_", value: "Tester" };
+  const toTest = new QEnumParam<typeof TestEnum>(NAME);
 
   test("base attributes", () => {
     expect(toTest.getName()).toBe(NAME);
     expect(toTest.getMappedName()).toBe(NAME);
-    expect(toTest.getConverter()).toBeDefined();
   });
 
   test("fail creation", () => {
@@ -22,38 +25,37 @@ describe("QEnumParam Tests", () => {
   });
 
   test("mapped name", () => {
-    const mappedName = "t3stBbb";
+    const mappedName = "TestB";
     const toTest = new QEnumParam(NAME, mappedName);
 
     expect(toTest.getName()).toBe(NAME);
     expect(toTest.getMappedName()).toBe(mappedName);
-    expect(toTest.getConverter()).toBeDefined();
   });
 
-  test("converter", () => {
-    expect(toTestWithConverter.convertFrom("Tester")).toStrictEqual(convertedInputModel);
-    expect(toTestWithConverter.convertTo(convertedInputModel)).toBe("Tester");
+  test("convertFrom", () => {
+    expect(toTest.convertFrom("B")).toBe(TestEnum.B);
+    expect(toTest.convertFrom(["B", null, "ZEBRA"])).toStrictEqual([TestEnum.B, null, TestEnum.ZEBRA]);
+    expect(toTest.convertFrom(null)).toBe(null);
+    expect(toTest.convertFrom(undefined)).toBeUndefined();
   });
 
-  test("converter to different type", () => {
-    const toTest = new QEnumParam<Date>(NAME, undefined, fixedDateConverter);
-    expect(toTest.convertFrom("Tester")).toBe(FIXED_DATE);
-    expect(toTest.convertTo(new Date())).toBe(FIXED_STRING);
+  test("convertTo", () => {
+    expect(toTest.convertTo(TestEnum.ZEBRA)).toBe("ZEBRA");
+    expect(toTest.convertTo("ZEBRA")).toBe("ZEBRA");
+    expect(toTest.convertTo([TestEnum.ZEBRA, "B", undefined])).toStrictEqual(["ZEBRA", "B", undefined]);
+    expect(toTest.convertTo(null)).toBe(null);
+    expect(toTest.convertTo(undefined)).toBeUndefined;
   });
 
   test("formatUrlValue", () => {
-    expect(toTest.formatUrlValue("Te3st")).toBe("'Te3st'");
+    expect(toTest.formatUrlValue(TestEnum.B)).toBe("'B'");
     expect(toTest.formatUrlValue(null)).toBe("null");
     expect(toTest.formatUrlValue(undefined)).toBe(undefined);
-
-    expect(toTestWithConverter.formatUrlValue(convertedInputModel)).toBe("'Tester'");
   });
 
   test("parseUrlValue", () => {
-    expect(toTest.parseUrlValue("'Te3st'")).toBe("Te3st");
+    expect(toTest.parseUrlValue("'ZEBRA'")).toBe(TestEnum.ZEBRA);
     expect(toTest.parseUrlValue("null")).toBe(null);
     expect(toTest.parseUrlValue(undefined)).toBe(undefined);
-
-    expect(toTestWithConverter.parseUrlValue("'Tester'")).toStrictEqual(convertedInputModel);
   });
 });

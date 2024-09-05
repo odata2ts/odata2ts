@@ -1,8 +1,14 @@
 import { ParamValueModel } from "@odata2ts/converter-api";
+import { QEnumCollectionPath } from "../path/enum/QEnumCollectionPath";
+import { QCollectionPath } from "../path/QCollectionPath";
+import { PrimitiveCollection } from "../primitve-collection/PrimitiveCollectionModel";
+import { QPrimitiveCollection } from "../primitve-collection/QPrimitiveCollection";
 import { QueryObject } from "../QueryObject";
 import { QParamModel } from "./QParamModel";
 
-export class QComplexParam<Type extends object, Q extends QueryObject> implements QParamModel<any, Type> {
+type CalculatedQ<Type> = Type extends object ? QueryObject<Type> : QPrimitiveCollection<any, Type, any>;
+
+export class QComplexParam<Type, Q extends QueryObject> {
   constructor(
     protected name: string,
     protected qObject: Q,

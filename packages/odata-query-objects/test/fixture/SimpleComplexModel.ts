@@ -6,6 +6,7 @@ import {
   QEntityCollectionPath,
   QEntityPath,
   QEnumCollection,
+  QEnumCollectionPath,
   QEnumPath,
   QGuidCollection,
   QGuidParam,
@@ -56,7 +57,7 @@ export type ComplexEntityId = Pick<ComplexEntity, "ID" | "ID2">;
 export class QSimpleEntity extends QueryObject<SimpleEntity> {
   public readonly id = new QNumberPath(this.withPrefix("id"));
   public readonly name = new QStringPath(this.withPrefix("name"));
-  public readonly feat = new QEnumPath(this.withPrefix("feat"));
+  public readonly feat = new QEnumPath(this.withPrefix("feat"), FeaturesEnum);
   public readonly complexton = new QEntityPath(this.withPrefix("complexton"), () => QComplexEntity);
 }
 
@@ -80,14 +81,14 @@ export class QComplexEntity extends QueryObject<ComplexEntity> {
   public readonly xx = new QEntityCollectionPath(this.withPrefix("xx"), () => QSimpleEntity);
   public readonly primitiveCollection = new QCollectionPath(
     this.withPrefix("PrimitiveCollection"),
-    () => QStringCollection
+    () => QStringCollection,
   );
   public readonly nominalizedCollection = new QCollectionPath(
     this.withPrefix("NominalizedCollection"),
-    () => QGuidCollection
+    () => QGuidCollection,
   );
-  public readonly features = new QCollectionPath("features", () => QEnumCollection);
-  public readonly favFeature = new QEnumPath("favFeature");
+  public readonly features = new QEnumCollectionPath("features", FeaturesEnum, () => QEnumCollection);
+  public readonly favFeature = new QEnumPath("favFeature", FeaturesEnum);
 }
 
 export class QComplexEntityId extends QId<ComplexEntityId> {

@@ -26,7 +26,10 @@ export abstract class QBasePath<ValueType extends UrlExpressionValueModel, Conve
 
   public constructor(
     protected path: string,
-    public readonly converter: ValueConverter<ValueType, ValueType | ConvertedType> = getIdentityConverter<ValueType>(),
+    public readonly converter: ValueConverter<
+      ValueType,
+      ConvertedType
+    > = getIdentityConverter<ValueType>() as ValueConverter<ValueType, ConvertedType>,
     public readonly options: { nativeIn: boolean } = { nativeIn: false },
   ) {
     if (!path || !path.trim()) {
