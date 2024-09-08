@@ -6,6 +6,8 @@ import {
   BestBookParamModelV2,
   QBestBookFunction,
   QBestBookFunctionV2,
+  TestFeatures,
+  TestRatings,
 } from "../fixture/operation/ParamFunction";
 import { QPrimitiveReturningFunction, QPrimitiveReturningFunctionV2 } from "../fixture/operation/ReturningFunctions";
 import { createResponse } from "../test-infra/TestResponseHelper";
@@ -37,11 +39,13 @@ describe("QFunction Tests", () => {
     };
     const allParams: BestBookParamModel = {
       ...requiredParams,
-      testDate: null,
+      "test/Date": null,
       testTime: undefined,
-      testDateTimeOffset: "dateTime",
+      testDateTimeOffset: "date/Time",
       testCollection: ["a", "b"],
       testEntity: { title: "testBook", author: { name: { prefix: "___", value: "testAuthor" } } },
+      testEnum: TestFeatures.A,
+      testNumericEnum: [TestRatings.TOP, TestRatings.BAD],
     };
 
     const resultRequired = "BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb)";
@@ -49,21 +53,37 @@ describe("QFunction Tests", () => {
     expect(exampleFunction.parseUrl(resultRequired)).toStrictEqual(requiredParams);
     expect(exampleFunction.buildUrl(allParams, true)).toBe(
       "BestBook(" +
-        "TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb,testDate=null,testDateTimeOffset=dateTime" +
+        "TestNumber=3" +
+        ",test_Boolean=false" +
+        ",testString='testing'" +
+        ",testGuid=aaa-bbb" +
+        ",test/Date=null" +
+        ",testDateTimeOffset=date/Time" +
         ",testCollection=@testCollection" +
         ",TEST_ENTITY=@TEST_ENTITY" +
+        ",testEnum='A'" +
+        ",testNumericEnum=@testNumericEnum" +
         ")" +
         '?@testCollection=["a","b"]' +
-        '&@TEST_ENTITY={"title":"testBook","AUTHOR":{"name":"testAuthor"}}',
+        '&@TEST_ENTITY={"title":"testBook","AUTHOR":{"name":"testAuthor"}}' +
+        '&@testNumericEnum=["TOP","BAD"]',
     );
     expect(exampleFunction.buildUrl(allParams)).toBe(
       "BestBook(" +
-        "TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb,testDate=null,testDateTimeOffset=dateTime" +
+        "TestNumber=3" +
+        ",test_Boolean=false" +
+        ",testString='testing'" +
+        ",testGuid=aaa-bbb" +
+        ",test%2FDate=null" +
+        ",testDateTimeOffset=date%2FTime" +
         ",testCollection=@testCollection" +
         ",TEST_ENTITY=@TEST_ENTITY" +
+        ",testEnum='A'" +
+        ",testNumericEnum=@testNumericEnum" +
         ")" +
         "?@testCollection=%5B%22a%22%2C%22b%22%5D" +
-        "&@TEST_ENTITY=%7B%22title%22%3A%22testBook%22%2C%22AUTHOR%22%3A%7B%22name%22%3A%22testAuthor%22%7D%7D",
+        "&@TEST_ENTITY=%7B%22title%22%3A%22testBook%22%2C%22AUTHOR%22%3A%7B%22name%22%3A%22testAuthor%22%7D%7D" +
+        "&@testNumericEnum=%5B%22TOP%22%2C%22BAD%22%5D",
     );
   });
 

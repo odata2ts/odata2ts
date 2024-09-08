@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { QEnumPath, QNumericEnumPath } from "../../src";
+import { QEnumPath } from "../../../src";
 
 describe("QEnumPath test", () => {
   enum FeatureEnum {

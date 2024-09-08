@@ -1,5 +1,5 @@
 import { ParamValueModel } from "@odata2ts/converter-api";
-import { QParamModel } from "../QParamModel";
+import { FlexibleConversionModel, QParamModel } from "../QParamModel";
 import { formatParamWithQuotes, parseWithQuotes } from "../UrlParamHelper";
 
 export abstract class BaseEnumParam<EnumParam> implements QParamModel<string, EnumParam> {
@@ -23,9 +23,7 @@ export abstract class BaseEnumParam<EnumParam> implements QParamModel<string, En
     return this.mappedName ?? this.getName();
   }
 
-  public convertFrom(value: ParamValueModel<string>): ParamValueModel<EnumParam>;
-  public convertFrom(value: Array<ParamValueModel<string>>): Array<ParamValueModel<EnumParam>>;
-  public convertFrom(value: ParamValueModel<string> | Array<ParamValueModel<string>>) {
+  public convertFrom(value: FlexibleConversionModel<string>): FlexibleConversionModel<EnumParam> {
     return Array.isArray(value)
       ? value.map((v) => (v === null || v === undefined ? v : this.mapValue(v)))
       : value === null || value === undefined
@@ -33,21 +31,26 @@ export abstract class BaseEnumParam<EnumParam> implements QParamModel<string, En
         : this.mapValue(value);
   }
 
-  public convertTo(value: ParamValueModel<EnumParam>): ParamValueModel<string>;
-  public convertTo(value: Array<ParamValueModel<EnumParam>>): Array<ParamValueModel<string>>;
-  public convertTo(value: ParamValueModel<EnumParam> | Array<ParamValueModel<EnumParam>>) {
+  public convertTo(value: FlexibleConversionModel<EnumParam>): FlexibleConversionModel<string> {
+    if (value === null) {
+      return null;
+    }
+    if (value === undefined) {
+      return undefined;
+    }
+
     return Array.isArray(value)
-      ? value.map((v) => (v === null || v === undefined ? v : this.mapValueBack(v)))
-      : value === null || value === undefined
-        ? value
-        : this.mapValueBack(value);
+      ? value.map((v) => (v === null || v === undefined ? undefined : this.mapValueBack(v)))
+      : this.mapValueBack(value);
   }
 
-  public formatUrlValue(value: ParamValueModel<EnumParam> | Array<ParamValueModel<EnumParam>>): string | undefined {
-    return Array.isArray(value) ? JSON.stringify(this.convertTo(value)) : formatParamWithQuotes(this.convertTo(value));
+  public formatUrlValue(value: FlexibleConversionModel<EnumParam>): string | undefined {
+    return Array.isArray(value)
+      ? JSON.stringify(this.convertTo(value))
+      : formatParamWithQuotes(this.convertTo(value) as ParamValueModel<any>);
   }
 
-  public parseUrlValue(value: string | undefined): ParamValueModel<EnumParam> | Array<ParamValueModel<EnumParam>> {
+  public parseUrlValue(value: string | undefined): FlexibleConversionModel<EnumParam> {
     const parsed = parseWithQuotes(value);
     if (value && parsed === undefined) {
       try {

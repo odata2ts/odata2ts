@@ -18,6 +18,7 @@ export { OperationReturnType, ReturnTypes } from "./operation/OperationReturnTyp
 
 export * from "./param/UrlParamModel";
 export * from "./param/UrlParamHelper";
+export * from "./param/QParamModel";
 export { QParam } from "./param/QParam";
 export { QComplexParam } from "./param/QComplexParam";
 export { QBooleanParam } from "./param/common/QBooleanParam";
@@ -54,6 +55,7 @@ export * from "./path/QPathModel";
 export { QEnumPath } from "./path/enum/QEnumPath";
 export { QNumericEnumPath } from "./path/enum/QNumericEnumPath";
 export { QEnumCollectionPath } from "./path/enum/QEnumCollectionPath";
+export { QNumericEnumCollectionPath } from "./path/enum/QNumericEnumCollectionPath";
 
 export { QStringPath } from "./path/v4/QStringPath";
 export { QNumberPath } from "./path/v4/QNumberPath";

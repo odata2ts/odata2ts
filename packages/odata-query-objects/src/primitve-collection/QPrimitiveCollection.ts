@@ -17,7 +17,10 @@ export abstract class QPrimitiveCollection<Type, ConvertedType, QType extends QV
 
   protected abstract createQPathType(path: string, converter?: ValueConverter<Type, ConvertedType>): QType;
 
-  public convertFromOData(odataModel: Array<Type> | null | undefined): Array<ConvertedType> | null | undefined {
+  public convertFromOData(odataModel: null): null;
+  public convertFromOData(odataModel: undefined): undefined;
+  public convertFromOData(odataModel: Array<Type>): Array<ConvertedType>;
+  public convertFromOData(odataModel: Array<Type> | null | undefined) {
     if (odataModel === null || odataModel === undefined) {
       return odataModel;
     }
@@ -26,7 +29,10 @@ export abstract class QPrimitiveCollection<Type, ConvertedType, QType extends QV
     return !converter ? odataModel : odataModel.map((om) => converter.convertFrom(om));
   }
 
-  public convertToOData(userModel: Array<ConvertedType> | null | undefined): Array<Type> | null | undefined {
+  public convertToOData(userModel: null): null;
+  public convertToOData(userModel: undefined): undefined;
+  public convertToOData(userModel: Array<ConvertedType>): Array<Type>;
+  public convertToOData(userModel: Array<ConvertedType> | null | undefined) {
     if (userModel === null || userModel === undefined) {
       return userModel;
     }

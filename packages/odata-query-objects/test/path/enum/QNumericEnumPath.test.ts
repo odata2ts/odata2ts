@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { QNumericEnumPath } from "../../src";
+import { QNumericEnumPath } from "../../../src";
 
 describe.only("QNumericEnumPath test", () => {
   enum FeatureEnum {

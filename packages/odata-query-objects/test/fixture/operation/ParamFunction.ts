@@ -7,11 +7,12 @@ import {
   QDateTimeOffsetParam,
   QDateTimeOffsetV2Param,
   QDateTimeV2Param,
+  QEnumParam,
   QFunction,
   QGuidParam,
   QGuidV2Param,
   QNumberParam,
-  QStringCollection,
+  QNumericEnumParam,
   QStringParam,
   QTimeOfDayParam,
   QTimeV2Param,
@@ -19,16 +20,31 @@ import {
 } from "../../../src";
 import { BookModel, QBook } from "./BookModel";
 
+export enum TestFeatures {
+  A = "A",
+  B = "B",
+  C = "C",
+}
+
+export enum TestRatings {
+  NONE,
+  TOP,
+  BAD = 50,
+  WORSt = 99,
+}
+
 export interface BestBookParamModel {
   testNumber: number;
   testBoolean: number;
   testString: PrefixModel;
   testGuid: string;
-  testDate?: string | null;
+  "test/Date"?: string | null;
   testTime?: string | null;
   testDateTimeOffset?: string | null;
   testCollection?: Array<string>;
   testEntity?: BookModel | null;
+  testEnum?: TestFeatures;
+  testNumericEnum?: Array<TestRatings>;
 }
 
 export class QBestBookFunction extends QFunction<BestBookParamModel> {
@@ -37,11 +53,13 @@ export class QBestBookFunction extends QFunction<BestBookParamModel> {
     new QBooleanParam("test_Boolean", "testBoolean", booleanToNumberConverter),
     new QStringParam("testString", undefined, stringToPrefixModelConverter),
     new QGuidParam("testGuid"),
-    new QDateParam("testDate"),
+    new QDateParam("test/Date"),
     new QTimeOfDayParam("testTime"),
     new QDateTimeOffsetParam("testDateTimeOffset"),
-    new QComplexParam("testCollection", new QStringCollection()),
+    new QStringParam("testCollection"),
     new QComplexParam("TEST_ENTITY", new QBook(), "testEntity"),
+    new QEnumParam("testEnum"),
+    new QNumericEnumParam(TestRatings, "testNumericEnum"),
   ];
 
   constructor() {

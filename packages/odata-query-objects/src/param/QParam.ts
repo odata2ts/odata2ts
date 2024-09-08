@@ -1,6 +1,6 @@
 import { ParamValueModel, ValueConverter } from "@odata2ts/converter-api";
 import { getIdentityConverter } from "../IdentityConverter";
-import { QParamModel } from "./QParamModel";
+import { FlexibleConversionModel, QParamModel } from "./QParamModel";
 import { UrlParamValueFormatter, UrlParamValueParser } from "./UrlParamModel";
 
 export type PrimitiveParamType = string | number | boolean;
@@ -11,7 +11,10 @@ export abstract class QParam<Type extends PrimitiveParamType, ConvertedType>
   constructor(
     protected name: string,
     protected mappedName?: string,
-    protected readonly converter: ValueConverter<Type, Type | ConvertedType> = getIdentityConverter<Type>(),
+    protected readonly converter: ValueConverter<Type, ConvertedType> = getIdentityConverter<Type>() as ValueConverter<
+      Type,
+      ConvertedType
+    >,
   ) {
     if (!name) {
       throw new Error("Name is required for QParam objects!");
@@ -33,29 +36,22 @@ export abstract class QParam<Type extends PrimitiveParamType, ConvertedType>
   protected abstract getUrlConformValue: UrlParamValueFormatter<Type>;
   protected abstract parseValueFromUrl: UrlParamValueParser<Type>;
 
-  public convertFrom(value: ParamValueModel<Type>): ParamValueModel<ConvertedType>;
-  public convertFrom(value: Array<ParamValueModel<Type>>): Array<ParamValueModel<ConvertedType>>;
-  public convertFrom(value: ParamValueModel<Type> | Array<ParamValueModel<Type>>) {
+  public convertFrom(value: FlexibleConversionModel<Type>): FlexibleConversionModel<ConvertedType> {
     return Array.isArray(value) ? value.map(this.converter.convertFrom) : this.converter.convertFrom(value);
   }
 
-  public convertTo(value: ParamValueModel<ConvertedType>): ParamValueModel<Type>;
-  public convertTo(value: Array<ParamValueModel<ConvertedType>>): Array<ParamValueModel<Type>>;
-  public convertTo(value: ParamValueModel<ConvertedType> | Array<ParamValueModel<ConvertedType>>) {
+  public convertTo(value: FlexibleConversionModel<ConvertedType>): FlexibleConversionModel<Type> {
     return Array.isArray(value) ? value.map(this.converter.convertTo) : this.converter.convertTo(value);
   }
 
-  public formatUrlValue(
-    value: ParamValueModel<ConvertedType> | Array<ParamValueModel<ConvertedType>>,
-  ): string | undefined {
+  public formatUrlValue(value: FlexibleConversionModel<ConvertedType>): string | undefined {
+    const converted = this.convertTo(value);
     return Array.isArray(value)
-      ? JSON.stringify(this.convertTo(value))
-      : this.getUrlConformValue(this.convertTo(value));
+      ? JSON.stringify(converted)
+      : this.getUrlConformValue(converted as ParamValueModel<Type>);
   }
 
-  public parseUrlValue(
-    value: string | undefined,
-  ): ParamValueModel<ConvertedType> | Array<ParamValueModel<ConvertedType>> {
+  public parseUrlValue(value: string | undefined): FlexibleConversionModel<ConvertedType> {
     const parsed = this.parseValueFromUrl(value);
     if (value && parsed === undefined) {
       try {

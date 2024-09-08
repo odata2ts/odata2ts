@@ -46,7 +46,7 @@ export class QNumberCollection<ConvertedType = number> extends QPrimitiveCollect
   QNumberPath<ConvertedType>
 > {
   protected createQPathType(path: string, converter?: ValueConverter<number, ConvertedType>) {
-    return new QNumberPath(path, this.converter);
+    return new QNumberPath(path, converter);
   }
 }
 
@@ -55,8 +55,8 @@ export class QBigNumberCollection<ConvertedType = string> extends QPrimitiveColl
   ConvertedType,
   QBigNumberPath<ConvertedType>
 > {
-  protected createQPathType(path: string) {
-    return new QBigNumberPath(path, this.converter);
+  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
+    return new QBigNumberPath(path, converter);
   }
 }
 
@@ -66,7 +66,7 @@ export class QNumberV2Collection<ConvertedType = number> extends QPrimitiveColle
   QNumberV2Path<ConvertedType>
 > {
   protected createQPathType(path: string, converter?: ValueConverter<number, ConvertedType>) {
-    return new QNumberV2Path(path, this.converter);
+    return new QNumberV2Path(path, converter);
   }
 }
 
@@ -76,7 +76,7 @@ export class QStringNumberV2Collection<ConvertedType = string> extends QPrimitiv
   QStringNumberV2Path<ConvertedType>
 > {
   protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QStringNumberV2Path(path, this.converter);
+    return new QStringNumberV2Path(path, converter);
   }
 }
 
@@ -85,8 +85,8 @@ export class QBooleanCollection<ConvertedType = boolean> extends QPrimitiveColle
   ConvertedType,
   QBooleanPath<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<boolean, unknown>) {
-    return new QBooleanPath(path, this.converter);
+  protected createQPathType(path: string, converter?: ValueConverter<boolean, ConvertedType>) {
+    return new QBooleanPath(path, converter);
   }
 }
 
@@ -96,7 +96,7 @@ export class QGuidCollection<ConvertedType = string> extends QPrimitiveCollectio
   QGuidPath<ConvertedType>
 > {
   protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QGuidPath(path, this.converter);
+    return new QGuidPath(path, converter);
   }
 }
 
@@ -106,7 +106,7 @@ export class QGuidV2Collection<ConvertedType = string> extends QPrimitiveCollect
   QGuidV2Path<ConvertedType>
 > {
   protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QGuidV2Path(path, this.converter);
+    return new QGuidV2Path(path, converter);
   }
 }
 
@@ -126,7 +126,7 @@ export class QDateTimeOffsetCollection<ConvertedType = string> extends QPrimitiv
   QDateTimeOffsetPath<ConvertedType>
 > {
   protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QDateTimeOffsetPath(path, this.converter);
+    return new QDateTimeOffsetPath(path, converter);
   }
 }
 
@@ -136,7 +136,7 @@ export class QTimeOfDayCollection<ConvertedType = string> extends QPrimitiveColl
   QTimeOfDayPath<ConvertedType>
 > {
   protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QTimeOfDayPath(path, this.converter);
+    return new QTimeOfDayPath(path, converter);
   }
 }
 
@@ -146,7 +146,7 @@ export class QDateCollection<ConvertedType = string> extends QPrimitiveCollectio
   QDatePath<ConvertedType>
 > {
   protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QDatePath(path, this.converter);
+    return new QDatePath(path, converter);
   }
 }
 
@@ -156,7 +156,7 @@ export class QTimeV2Collection<ConvertedType = string> extends QPrimitiveCollect
   QTimeV2Path<ConvertedType>
 > {
   protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QTimeV2Path(path, this.converter);
+    return new QTimeV2Path(path, converter);
   }
 }
 
@@ -166,7 +166,7 @@ export class QDateTimeV2Collection<ConvertedType = string> extends QPrimitiveCol
   QDateTimeV2Path<ConvertedType>
 > {
   protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QDateTimeV2Path(path, this.converter);
+    return new QDateTimeV2Path(path, converter);
   }
 }
 
@@ -176,7 +176,7 @@ export class QDateTimeOffsetV2Collection<ConvertedType = string> extends QPrimit
   QDateTimeOffsetV2Path<ConvertedType>
 > {
   protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QDateTimeOffsetV2Path(path, this.converter);
+    return new QDateTimeOffsetV2Path(path, converter);
   }
 }
 

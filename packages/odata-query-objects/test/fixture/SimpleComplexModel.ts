@@ -5,7 +5,6 @@ import {
   QDateTimeOffsetPath,
   QEntityCollectionPath,
   QEntityPath,
-  QEnumCollection,
   QEnumCollectionPath,
   QEnumPath,
   QGuidCollection,
@@ -14,6 +13,8 @@ import {
   QId,
   QNumberParam,
   QNumberPath,
+  QNumericEnumCollectionPath,
+  QNumericEnumPath,
   QStringCollection,
   QStringPath,
   QTimeOfDayPath,
@@ -24,6 +25,12 @@ import { QParamModel } from "../../src/param/QParamModel";
 export enum FeaturesEnum {
   Feature1 = "Feature1",
   Feature2 = "Feature2",
+}
+
+export enum Ratings {
+  EXCELLENT,
+  OK,
+  POOR,
 }
 
 export interface SimpleEntity {
@@ -87,8 +94,10 @@ export class QComplexEntity extends QueryObject<ComplexEntity> {
     this.withPrefix("NominalizedCollection"),
     () => QGuidCollection,
   );
-  public readonly features = new QEnumCollectionPath("features", FeaturesEnum, () => QEnumCollection);
+  public readonly features = new QEnumCollectionPath("features", FeaturesEnum);
   public readonly favFeature = new QEnumPath("favFeature", FeaturesEnum);
+  public readonly ratings = new QNumericEnumCollectionPath("ratings", Ratings);
+  public readonly topRating = new QNumericEnumPath("topRating", Ratings);
 }
 
 export class QComplexEntityId extends QId<ComplexEntityId> {

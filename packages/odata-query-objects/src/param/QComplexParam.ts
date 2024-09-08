@@ -1,14 +1,8 @@
 import { ParamValueModel } from "@odata2ts/converter-api";
-import { QEnumCollectionPath } from "../path/enum/QEnumCollectionPath";
-import { QCollectionPath } from "../path/QCollectionPath";
-import { PrimitiveCollection } from "../primitve-collection/PrimitiveCollectionModel";
-import { QPrimitiveCollection } from "../primitve-collection/QPrimitiveCollection";
 import { QueryObject } from "../QueryObject";
-import { QParamModel } from "./QParamModel";
+import { FlexibleConversionModel, QParamModel } from "./QParamModel";
 
-type CalculatedQ<Type> = Type extends object ? QueryObject<Type> : QPrimitiveCollection<any, Type, any>;
-
-export class QComplexParam<Type, Q extends QueryObject> {
+export class QComplexParam<Type, Q extends QueryObject> implements QParamModel<any, Type> {
   constructor(
     protected name: string,
     protected qObject: Q,
@@ -30,16 +24,12 @@ export class QComplexParam<Type, Q extends QueryObject> {
     return this.mappedName ?? this.getName();
   }
 
-  public convertFrom(value: ParamValueModel<any>): ParamValueModel<Type>;
-  public convertFrom(value: Array<ParamValueModel<any>>): Array<ParamValueModel<Type>>;
-  public convertFrom(value: ParamValueModel<any> | Array<ParamValueModel<any>>) {
+  public convertFrom(value: FlexibleConversionModel<any>): FlexibleConversionModel<Type> {
     const result = this.qObject.convertFromOData(value);
     return Array.isArray(result) ? (result as Array<ParamValueModel<Type>>) : (result as ParamValueModel<Type>);
   }
 
-  public convertTo(value: ParamValueModel<Type>): ParamValueModel<any>;
-  public convertTo(value: Array<ParamValueModel<Type>>): Array<ParamValueModel<any>>;
-  public convertTo(value: ParamValueModel<Type> | Array<ParamValueModel<Type>>) {
+  public convertTo(value: FlexibleConversionModel<Type>): FlexibleConversionModel<any> {
     return this.qObject.convertToOData(value);
   }
 

@@ -33,7 +33,7 @@ export class QCollectionPath<CollectionType extends PrimitiveCollection> impleme
 
   private lambdaFunction(operationName: string, fn?: LambdaOperatorType<CollectionType>, prefix: string = "a") {
     // no prefix here => because $it needs to be replaced
-    const expression = fn ? fn(new (this.qEntityFn())()) : undefined;
+    const expression = fn ? fn(this.getEntity()) : undefined;
 
     // if no expression was provided => function call without args
     if (!expression || !expression.toString()) {

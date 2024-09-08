@@ -1,26 +1,22 @@
 import { NumericEnumLike, StringEnumLike } from "../../enum/EnumModel";
-import { QEnumCollection, QNumericEnumCollection } from "../../primitve-collection/PrimitveCollections";
+import { QEnumCollection } from "../../primitve-collection/PrimitveCollections";
 import { QCollectionPath } from "../QCollectionPath";
 
-type CalculatedCollection<EnumType> = EnumType extends StringEnumLike
-  ? QEnumCollection<EnumType>
-  : EnumType extends NumericEnumLike
-    ? QNumericEnumCollection<EnumType>
-    : never;
-
 export class QEnumCollectionPath<EnumType extends StringEnumLike | NumericEnumLike> extends QCollectionPath<
-  CalculatedCollection<EnumType>
+  QEnumCollection<EnumType>
 > {
   public constructor(
     path: string,
     protected theEnum: EnumType,
-    protected qEnumFn: () => new (theEnum: EnumType, prefix?: string) => CalculatedCollection<EnumType>,
   ) {
     // @ts-ignore: not the correct function
     super(path, () => {});
+    if (!theEnum) {
+      throw new Error("Enum must be supplied!");
+    }
   }
 
-  public getEntity(withPrefix: boolean = false): CalculatedCollection<EnumType> {
-    return new (this.qEnumFn())(this.theEnum, withPrefix ? this.path : undefined);
+  public getEntity(withPrefix: boolean = false): QEnumCollection<EnumType> {
+    return new QEnumCollection<EnumType>(this.theEnum, withPrefix ? this.path : undefined);
   }
 }

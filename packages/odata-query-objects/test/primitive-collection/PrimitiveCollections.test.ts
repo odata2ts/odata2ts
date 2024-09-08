@@ -1,7 +1,5 @@
 import {
   booleanToNumberConverter,
-  FIXED_DATE,
-  FIXED_STRING,
   numberToStringConverter,
   stringToPrefixModelConverter,
 } from "@odata2ts/test-converters";
