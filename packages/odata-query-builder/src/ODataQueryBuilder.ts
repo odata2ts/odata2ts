@@ -4,7 +4,7 @@ import {
   QOrderByExpression,
   QPathModel,
   QSearchTerm,
-  QueryObject,
+  QueryObjectModel,
   searchTerm,
 } from "@odata2ts/odata-query-objects";
 import { ODataOperators } from "./ODataModel";
@@ -19,7 +19,7 @@ import {
 /**
  * Bundles all the logic about handling system query params for OData (V2 and V4).
  */
-export class ODataQueryBuilder<Q extends QueryObject> {
+export class ODataQueryBuilder<Q extends QueryObjectModel> {
   private readonly path: string;
   private readonly entity: Q;
 

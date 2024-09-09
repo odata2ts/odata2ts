@@ -4,9 +4,13 @@ import {
   QEntityCollectionPath,
   QEntityPath,
   QNumberPath,
+  QNumericEnumCollection,
+  QNumericEnumCollectionPath,
+  QNumericEnumPath,
   QStringPath,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
+import { Features } from "./SimplePersonModel";
 
 export class QPerson extends QueryObject {
   public readonly age = new QNumberPath(this.withPrefix("age"));
@@ -15,6 +19,8 @@ export class QPerson extends QueryObject {
   public readonly createdAt = new QDateTimeOffsetPath(this.withPrefix("createdAt"));
   public readonly address = new QEntityPath<QAddress>(this.withPrefix("Address"), () => QAddress);
   public readonly altAdresses = new QEntityCollectionPath<QAddress>(this.withPrefix("AltAdresses"), () => QAddress);
+  public readonly feature = new QNumericEnumPath(this.withPrefix("feature"), Features);
+  public readonly likedFeatures = new QNumericEnumCollectionPath(this.withPrefix("likedFeatures"), Features);
 
   constructor(path?: string) {
     super(path);

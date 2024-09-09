@@ -1,4 +1,4 @@
-import { QEntityPath, QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
+import { QEntityPath, QFilterExpression, QOrderByExpression, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
   ExpandingFunctionV2,
@@ -26,7 +26,7 @@ import { createExpandingQueryBuilderV2 } from "./ExpandingODataQueryBuilderV2";
  * @param config optionally pass a configuration
  * @returns a QueryBuilder
  */
-export function createQueryBuilderV2<Q extends QueryObject>(
+export function createQueryBuilderV2<Q extends QueryObjectModel>(
   path: string,
   qEntity: Q,
   config?: ODataQueryBuilderConfig,
@@ -37,7 +37,7 @@ export function createQueryBuilderV2<Q extends QueryObject>(
 /**
  * Create an OData URI string in a typesafe way by facilitating generated query objects.
  */
-class ODataQueryBuilderV2<Q extends QueryObject> implements ODataQueryBuilderV2Model<Q> {
+class ODataQueryBuilderV2<Q extends QueryObjectModel> implements ODataQueryBuilderV2Model<Q> {
   private builder: ODataQueryBuilder<Q>;
 
   constructor(path: string, qEntity: Q, config?: ODataQueryBuilderConfig) {
