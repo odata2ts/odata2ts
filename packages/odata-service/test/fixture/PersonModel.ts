@@ -1,14 +1,17 @@
 import {
   EnumCollection,
+  NumericEnumCollection,
   QEnumCollection,
+  QNumericEnumCollection,
   QStringCollection,
   QStringV2Collection,
   StringCollection,
 } from "@odata2ts/odata-query-objects";
 import { PrefixModel } from "@odata2ts/test-converters";
-
 import { CollectionServiceV2, CollectionServiceV4 } from "../../src";
 import { MockClient } from "../mock/MockClient";
+import { NumericTestEnum } from "../v2/CollectionServiceV2.test";
+import { StringTestEnum } from "../v4/CollectionServiceV4.test";
 import {
   PersonModelV2CollectionService as PMCServiceV2,
   PersonModelV2Service as PMServiceV2,
@@ -18,8 +21,9 @@ import {
   PersonModelService as PMServiceV4,
 } from "./v4/PersonModelService";
 
-export const enum Feature {
+export enum Feature {
   Feature1 = "Feature1",
+  Feature2 = "Feature2",
 }
 
 export interface PersonModel {
@@ -52,5 +56,5 @@ export type StringCollectionService =
 
 export type EnumCollectionServiceConstructor = (basePath: string, name: string) => EnumCollectionService;
 export type EnumCollectionService =
-  | CollectionServiceV4<MockClient, EnumCollection<Feature>, QEnumCollection>
-  | CollectionServiceV2<MockClient, EnumCollection<Feature>, QEnumCollection>;
+  | CollectionServiceV4<MockClient, EnumCollection<StringTestEnum>, QEnumCollection<any>>
+  | CollectionServiceV2<MockClient, NumericEnumCollection<NumericTestEnum>, QNumericEnumCollection<any>>;

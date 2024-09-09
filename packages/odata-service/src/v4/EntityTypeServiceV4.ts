@@ -1,11 +1,10 @@
 import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
-import { QueryObject, convertV4ModelResponse } from "@odata2ts/odata-query-objects";
-
+import { convertV4ModelResponse, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
 
-export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObject> {
+export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObjectModel> {
   protected readonly __base: ServiceStateHelperV4<ClientType, Q>;
 
   public constructor(
@@ -13,7 +12,7 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
     basePath: string,
     name: string,
     qModel: Q,
-    bigNumbersAsString: boolean = false
+    bigNumbersAsString: boolean = false,
   ) {
     this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, bigNumbersAsString);
   }
@@ -24,7 +23,7 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
 
   public async patch(
     model: ODataModelPayloadV4<Partial<EditableT>>,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): ODataResponse<void | ODataModelResponseV4<T>> {
     const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
 
@@ -32,14 +31,14 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
       path,
       qModel.convertToOData(model),
       requestConfig,
-      getDefaultHeaders()
+      getDefaultHeaders(),
     );
     return convertV4ModelResponse(result, qResponseType);
   }
 
   public async update(
     model: ODataModelPayloadV4<EditableT>,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): ODataResponse<void | ODataModelResponseV4<T>> {
     const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
 
@@ -47,7 +46,7 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
       path,
       qModel.convertToOData(model),
       requestConfig,
-      getDefaultHeaders()
+      getDefaultHeaders(),
     );
     return convertV4ModelResponse(result, qResponseType);
   }
@@ -59,7 +58,7 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
 
   public async query<ReturnType extends Partial<T> = T>(
     queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): ODataResponse<ODataModelResponseV4<ReturnType>> {
     const { client, applyQueryBuilder, getDefaultHeaders, qResponseType } = this.__base;
 

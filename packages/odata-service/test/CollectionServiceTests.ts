@@ -3,7 +3,6 @@ import { DEFAULT_HEADERS } from "../src/RequestHeaders";
 import {
   EnumCollectionService,
   EnumCollectionServiceConstructor,
-  Feature,
   StringCollectionService,
   StringCollectionServiceConstructor,
 } from "./fixture/PersonModel";
@@ -79,9 +78,6 @@ export function commonCollectionTests(
 
     await stringService.query((queryBuilder, qObj) => queryBuilder.filter(qObj.it.eq("hi")));
     expect(odataClient.lastUrl).toBe(expectedString);
-
-    await enumService.query((queryBuilder, qObj) => queryBuilder.filter(qObj.it.eq("hi")));
-    expect(odataClient.lastUrl).toBe(expectedEnum);
   });
 
   test("collection: add", async () => {
@@ -91,14 +87,6 @@ export function commonCollectionTests(
     expect(odataClient.lastOperation).toBe("POST");
     expect(odataClient.lastData).toEqual("test");
     expect(odataClient.lastRequestConfig).toBeUndefined();
-
-    await enumService.add(Feature.Feature1, REQUEST_CONFIG);
-
-    expect(odataClient.lastUrl).toBe(ENUM_URL);
-    expect(odataClient.lastOperation).toBe("POST");
-    expect(odataClient.lastData).toEqual(Feature.Feature1);
-    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
-    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
   });
 
   test("collection: no patch", async () => {

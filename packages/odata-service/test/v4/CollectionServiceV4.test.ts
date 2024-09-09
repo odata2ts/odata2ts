@@ -2,10 +2,16 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4 } from "@odata2ts/odata-core";
 import { EnumCollection, QEnumCollection, QStringCollection, StringCollection } from "@odata2ts/odata-query-objects";
 import { describe, expect, test } from "vitest";
-import { CollectionServiceV4 } from "../../src/index.js";
+import { CollectionServiceV4 } from "../../src";
+import { DEFAULT_HEADERS } from "../../src/RequestHeaders";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
-import { Feature } from "../fixture/PersonModel";
 import { MockClient } from "../mock/MockClient";
+
+export enum StringTestEnum {
+  A = "A",
+  B = "B",
+  ZEBRA = "ZEBRA",
+}
 
 describe("CollectionService V4 Tests", () => {
   const odataClient = new MockClient(false);
@@ -22,13 +28,38 @@ describe("CollectionService V4 Tests", () => {
   const enumConstructor = (
     basePath: string,
     name: string,
-  ): CollectionServiceV4<MockClient, EnumCollection<Feature>, QEnumCollection> => {
-    return new CollectionServiceV4(odataClient, basePath, name, new QEnumCollection());
+  ): CollectionServiceV4<MockClient, EnumCollection<StringTestEnum>, QEnumCollection<typeof StringTestEnum>> => {
+    return new CollectionServiceV4(odataClient, basePath, name, new QEnumCollection(StringTestEnum));
   };
 
   commonCollectionTests(odataClient, stringConstructor, enumConstructor);
 
-  test("entitySet: big number", async () => {
+  test("string enum collection: add", async () => {
+    const REQUEST_CONFIG = { test: "Test" };
+
+    const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
+
+    await enumService.add(StringTestEnum.A, REQUEST_CONFIG);
+
+    expect(odataClient.lastUrl).toBe(NAME_ENUM);
+    expect(odataClient.lastOperation).toBe("POST");
+    expect(odataClient.lastData).toEqual(StringTestEnum.A);
+    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
+    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
+  });
+
+  test("string enum collection: filter", async () => {
+    const params = getParams({ $filter: "($it eq 'A' or $it eq 'B')" });
+
+    const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
+
+    await enumService.query((queryBuilder, qObj) =>
+      queryBuilder.filter(qObj.it.eq(StringTestEnum.A).or(qObj.it.eq("B"))),
+    );
+    expect(odataClient.lastUrl).toBe(NAME_ENUM + params);
+  });
+
+  test("colleciton: big number", async () => {
     const testService = new CollectionServiceV4(odataClient, BASE_PATH, NAME_STRING, new QStringCollection(), true);
 
     await testService.query();
