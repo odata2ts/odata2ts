@@ -9,10 +9,10 @@ export class QEnumCollectionPath<EnumType extends StringEnumLike | NumericEnumLi
     path: string,
     protected theEnum: EnumType,
   ) {
-    // @ts-ignore: not the correct function
+    // @ts-ignore
     super(path, () => {});
     if (!theEnum) {
-      throw new Error("Enum must be supplied!");
+      throw new Error("QEnumCollectionPath: Enum must be supplied!");
     }
   }
 

@@ -1,4 +1,3 @@
-import { ValueConverter } from "@odata2ts/converter-api";
 import { NumericEnumLike, NumericEnumMember, StringEnumLike, StringEnumMember } from "../enum/EnumModel";
 import { QEnumPath } from "../path/enum/QEnumPath";
 import { QNumericEnumPath } from "../path/enum/QNumericEnumPath";
@@ -25,9 +24,7 @@ export class QStringCollection<ConvertedType = string> extends QPrimitiveCollect
   ConvertedType,
   QStringPath<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QStringPath(path, converter);
-  }
+  public readonly it = new QStringPath<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QStringV2Collection<ConvertedType = string> extends QPrimitiveCollection<
@@ -35,9 +32,7 @@ export class QStringV2Collection<ConvertedType = string> extends QPrimitiveColle
   ConvertedType,
   QStringV2Path<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QStringV2Path(path, converter);
-  }
+  public readonly it = new QStringV2Path<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QNumberCollection<ConvertedType = number> extends QPrimitiveCollection<
@@ -45,9 +40,7 @@ export class QNumberCollection<ConvertedType = number> extends QPrimitiveCollect
   ConvertedType,
   QNumberPath<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<number, ConvertedType>) {
-    return new QNumberPath(path, converter);
-  }
+  public readonly it = new QNumberPath<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QBigNumberCollection<ConvertedType = string> extends QPrimitiveCollection<
@@ -55,9 +48,7 @@ export class QBigNumberCollection<ConvertedType = string> extends QPrimitiveColl
   ConvertedType,
   QBigNumberPath<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QBigNumberPath(path, converter);
-  }
+  public readonly it = new QBigNumberPath<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QNumberV2Collection<ConvertedType = number> extends QPrimitiveCollection<
@@ -65,9 +56,7 @@ export class QNumberV2Collection<ConvertedType = number> extends QPrimitiveColle
   ConvertedType,
   QNumberV2Path<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<number, ConvertedType>) {
-    return new QNumberV2Path(path, converter);
-  }
+  public readonly it = new QNumberV2Path<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QStringNumberV2Collection<ConvertedType = string> extends QPrimitiveCollection<
@@ -75,9 +64,7 @@ export class QStringNumberV2Collection<ConvertedType = string> extends QPrimitiv
   ConvertedType,
   QStringNumberV2Path<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QStringNumberV2Path(path, converter);
-  }
+  public readonly it = new QStringNumberV2Path<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QBooleanCollection<ConvertedType = boolean> extends QPrimitiveCollection<
@@ -85,9 +72,7 @@ export class QBooleanCollection<ConvertedType = boolean> extends QPrimitiveColle
   ConvertedType,
   QBooleanPath<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<boolean, ConvertedType>) {
-    return new QBooleanPath(path, converter);
-  }
+  public readonly it = new QBooleanPath<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QGuidCollection<ConvertedType = string> extends QPrimitiveCollection<
@@ -95,9 +80,7 @@ export class QGuidCollection<ConvertedType = string> extends QPrimitiveCollectio
   ConvertedType,
   QGuidPath<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QGuidPath(path, converter);
-  }
+  public readonly it = new QGuidPath<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QGuidV2Collection<ConvertedType = string> extends QPrimitiveCollection<
@@ -105,9 +88,7 @@ export class QGuidV2Collection<ConvertedType = string> extends QPrimitiveCollect
   ConvertedType,
   QGuidV2Path<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QGuidV2Path(path, converter);
-  }
+  public readonly it = new QGuidV2Path<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QBinaryCollection<ConvertedType = string> extends QPrimitiveCollection<
@@ -115,9 +96,7 @@ export class QBinaryCollection<ConvertedType = string> extends QPrimitiveCollect
   ConvertedType,
   QBinaryPath
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QBinaryPath(path);
-  }
+  public readonly it = new QBinaryPath(this.withPrefix());
 }
 
 export class QDateTimeOffsetCollection<ConvertedType = string> extends QPrimitiveCollection<
@@ -125,9 +104,7 @@ export class QDateTimeOffsetCollection<ConvertedType = string> extends QPrimitiv
   ConvertedType,
   QDateTimeOffsetPath<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QDateTimeOffsetPath(path, converter);
-  }
+  public readonly it = new QDateTimeOffsetPath<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QTimeOfDayCollection<ConvertedType = string> extends QPrimitiveCollection<
@@ -135,9 +112,7 @@ export class QTimeOfDayCollection<ConvertedType = string> extends QPrimitiveColl
   ConvertedType,
   QTimeOfDayPath<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QTimeOfDayPath(path, converter);
-  }
+  public readonly it = new QTimeOfDayPath<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QDateCollection<ConvertedType = string> extends QPrimitiveCollection<
@@ -145,9 +120,7 @@ export class QDateCollection<ConvertedType = string> extends QPrimitiveCollectio
   ConvertedType,
   QDatePath<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QDatePath(path, converter);
-  }
+  public readonly it = new QDatePath<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QTimeV2Collection<ConvertedType = string> extends QPrimitiveCollection<
@@ -155,9 +128,7 @@ export class QTimeV2Collection<ConvertedType = string> extends QPrimitiveCollect
   ConvertedType,
   QTimeV2Path<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QTimeV2Path(path, converter);
-  }
+  public readonly it = new QTimeV2Path<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QDateTimeV2Collection<ConvertedType = string> extends QPrimitiveCollection<
@@ -165,9 +136,7 @@ export class QDateTimeV2Collection<ConvertedType = string> extends QPrimitiveCol
   ConvertedType,
   QDateTimeV2Path<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QDateTimeV2Path(path, converter);
-  }
+  public readonly it = new QDateTimeV2Path<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QDateTimeOffsetV2Collection<ConvertedType = string> extends QPrimitiveCollection<
@@ -175,9 +144,7 @@ export class QDateTimeOffsetV2Collection<ConvertedType = string> extends QPrimit
   ConvertedType,
   QDateTimeOffsetV2Path<ConvertedType>
 > {
-  protected createQPathType(path: string, converter?: ValueConverter<string, ConvertedType>) {
-    return new QDateTimeOffsetV2Path(path, converter);
-  }
+  public readonly it = new QDateTimeOffsetV2Path<ConvertedType>(this.withPrefix(), this.converter);
 }
 
 export class QEnumCollection<EnumType extends StringEnumLike> extends QPrimitiveCollection<
@@ -185,15 +152,11 @@ export class QEnumCollection<EnumType extends StringEnumLike> extends QPrimitive
   StringEnumMember<EnumType>,
   QEnumPath<EnumType>
 > {
-  constructor(
-    protected theEnum: EnumType,
-    prefix?: string,
-  ) {
-    super(prefix, undefined, theEnum);
-  }
+  readonly it: QEnumPath<EnumType>;
 
-  protected createQPathType(path: string) {
-    return new QEnumPath<EnumType>(path, this.extraData);
+  constructor(theEnum: EnumType, prefix?: string) {
+    super(prefix, undefined);
+    this.it = new QEnumPath<EnumType>(this.withPrefix(), theEnum);
   }
 }
 
@@ -202,11 +165,9 @@ export class QNumericEnumCollection<EnumType extends NumericEnumLike> extends QP
   NumericEnumMember<EnumType>,
   QNumericEnumPath<EnumType>
 > {
+  readonly it: QNumericEnumPath<EnumType>;
   public constructor(theEnum: EnumType, prefix?: string) {
-    super(prefix, undefined, theEnum);
-  }
-
-  protected createQPathType(path: string): QNumericEnumPath<EnumType> {
-    return new QNumericEnumPath(path, this.extraData);
+    super(prefix, undefined);
+    this.it = new QNumericEnumPath(this.withPrefix(), theEnum);
   }
 }

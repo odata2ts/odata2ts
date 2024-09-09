@@ -1,5 +1,6 @@
 import { PartialDeep } from "type-fest";
 import { QEntityPathModel, QPathModel, QValuePathModel } from "./path/QPathModel";
+import { FlexibleConversionModel, QueryObjectModel } from "./QueryObjectModel";
 
 function getMapping(q: QueryObject) {
   return Object.entries(q)
@@ -12,7 +13,7 @@ function getMapping(q: QueryObject) {
     }, new Map());
 }
 
-export class QueryObject<T extends object = any> {
+export class QueryObject<T extends object = any> implements QueryObjectModel<T, PartialDeep<T>> {
   private __propMapping?: Map<string, keyof this>;
 
   constructor(private __prefix?: string) {}
@@ -55,7 +56,7 @@ export class QueryObject<T extends object = any> {
   public convertFromOData(odataModel: undefined): undefined;
   public convertFromOData(odataModel: object): PartialDeep<T> | Array<PartialDeep<T>>;
   // public convertFromOData(odataModel: Array<object>): Array<PartialDeep<T>>;
-  public convertFromOData(odataModel: object | Array<object> | null | undefined) {
+  public convertFromOData(odataModel: FlexibleConversionModel<any>): FlexibleConversionModel<PartialDeep<T>> {
     if (odataModel === null || odataModel === undefined) {
       return odataModel;
     }

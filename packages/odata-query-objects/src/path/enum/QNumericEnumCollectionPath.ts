@@ -12,7 +12,7 @@ export class QNumericEnumCollectionPath<EnumType extends NumericEnumLike> extend
     // @ts-ignore
     super(path, () => {});
     if (!theEnum) {
-      throw new Error("Enum must be supplied!");
+      throw new Error("QNumericEnumCollectionPath: Enum must be supplied!");
     }
   }
 

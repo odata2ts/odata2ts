@@ -1,43 +1,52 @@
 import { ValueConverter } from "@odata2ts/converter-api";
 import { QValuePathModel } from "../path/QPathModel";
+import { FlexibleConversionModel, QueryObjectModel } from "../QueryObjectModel";
 
 const PRIMITIVE_VALUE_REFERENCE = "$it";
 
-export abstract class QPrimitiveCollection<Type, ConvertedType, QType extends QValuePathModel> {
-  public readonly it;
+export abstract class QPrimitiveCollection<Type, ConvertedType, QType extends QValuePathModel>
+  implements QueryObjectModel<ConvertedType>
+{
+  public abstract readonly it: QType;
 
   constructor(
-    prefix?: string,
+    protected prefix?: string,
     protected converter?: ValueConverter<Type, ConvertedType>,
-    protected extraData?: any,
-  ) {
-    const withPrefix = prefix ? `${prefix}/${PRIMITIVE_VALUE_REFERENCE}` : PRIMITIVE_VALUE_REFERENCE;
-    this.it = this.createQPathType(withPrefix, converter);
+  ) {}
+
+  protected withPrefix() {
+    return this.prefix ? `${this.prefix}/${PRIMITIVE_VALUE_REFERENCE}` : PRIMITIVE_VALUE_REFERENCE;
   }
 
-  protected abstract createQPathType(path: string, converter?: ValueConverter<Type, ConvertedType>): QType;
-
-  public convertFromOData(odataModel: null): null;
-  public convertFromOData(odataModel: undefined): undefined;
-  public convertFromOData(odataModel: Array<Type>): Array<ConvertedType>;
-  public convertFromOData(odataModel: Array<Type> | null | undefined) {
-    if (odataModel === null || odataModel === undefined) {
-      return odataModel;
+  public convertFromOData(odataModel: FlexibleConversionModel<Type>): FlexibleConversionModel<ConvertedType> {
+    if (odataModel === null) {
+      return null;
+    }
+    if (odataModel === undefined) {
+      return undefined;
     }
 
     const converter = this.it.converter;
-    return !converter ? odataModel : odataModel.map((om) => converter.convertFrom(om));
+    return !converter
+      ? odataModel
+      : Array.isArray(odataModel)
+        ? odataModel.map((om) => converter.convertFrom(om))
+        : converter.convertFrom(odataModel);
   }
 
-  public convertToOData(userModel: null): null;
-  public convertToOData(userModel: undefined): undefined;
-  public convertToOData(userModel: Array<ConvertedType>): Array<Type>;
-  public convertToOData(userModel: Array<ConvertedType> | null | undefined) {
-    if (userModel === null || userModel === undefined) {
+  public convertToOData(userModel: FlexibleConversionModel<ConvertedType>): FlexibleConversionModel<Type> {
+    if (userModel === null) {
+      return null;
+    }
+    if (typeof userModel === "undefined") {
       return userModel;
     }
 
     const converter = this.it.converter;
-    return !converter ? userModel : userModel.map((um) => converter.convertTo(um));
+    return !converter
+      ? userModel
+      : Array.isArray(userModel)
+        ? userModel.map((um) => converter.convertTo(um))
+        : converter.convertTo(userModel);
   }
 }

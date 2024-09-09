@@ -1,6 +1,4 @@
-import { ParamValueModel } from "@odata2ts/converter-api";
-
-export type FlexibleConversionModel<T> = ParamValueModel<T> | Array<ParamValueModel<T>>;
+import { FlexibleConversionModel } from "../QueryObjectModel";
 
 export interface QParamModel<OriginalType, ConvertedType> {
   getName(): string;

@@ -14,7 +14,7 @@ import {
 import { QPathModel } from "../QPathModel";
 
 export abstract class BaseEnumPath<EnumMemberType> implements QPathModel {
-  public constructor(protected path: string) {
+  protected constructor(protected path: string) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
     }

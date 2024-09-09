@@ -12,7 +12,7 @@ export class QNumericEnumPath<EnumType extends NumericEnumLike> extends BaseEnum
   ) {
     super(path);
     if (!theEnum) {
-      throw new Error("Enum must be supplied!");
+      throw new Error("QNumericEnumPath: Enum must be supplied!");
     }
     this.converter = new NumericEnumConverter<EnumType>(theEnum);
   }

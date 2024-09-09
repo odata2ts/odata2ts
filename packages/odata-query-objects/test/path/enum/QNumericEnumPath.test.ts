@@ -17,8 +17,6 @@ describe.only("QNumericEnumPath test", () => {
     // @ts-expect-error
     expect(() => new QNumericEnumPath(null, FeatureEnum)).toThrow();
     // @ts-expect-error
-    expect(() => new QNumericEnumPath()).toThrow();
-    // @ts-expect-error
     expect(() => new QNumericEnumPath(undefined, FeatureEnum)).toThrow();
     expect(() => new QNumericEnumPath("", FeatureEnum)).toThrow();
     expect(() => new QNumericEnumPath(" ", FeatureEnum)).toThrow();

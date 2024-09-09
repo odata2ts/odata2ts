@@ -9,7 +9,7 @@ export class QEnumPath<EnumType extends StringEnumLike> extends BaseEnumPath<Str
   ) {
     super(path);
     if (!theEnum) {
-      throw new Error("Enum must be supplied!");
+      throw new Error("QEnumPath: Enum must be supplied! ");
     }
   }
 
