@@ -154,7 +154,7 @@ describe("PrimitiveCollections tests", () => {
     expect(toTest.convertToOData([StringTestEnum.B, "Zebra"])).toStrictEqual(ENUM_INPUT);
   });
 
-  test.only("QNumericEnumCollection", () => {
+  test("QNumericEnumCollection", () => {
     const toTest = new QNumericEnumCollection(NumericTestEnum);
 
     expect(toTest.convertFromOData(ENUM_INPUT)).toStrictEqual([NumericTestEnum.B, NumericTestEnum.Zebra]);
