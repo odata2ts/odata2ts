@@ -77,7 +77,7 @@ describe("QNumericEnumPath test", () => {
     expect(result).toBe(`(feature eq 'Feature1' or feature eq 'Feature2')`);
   });
 
-  test.only("fails with non enum values", () => {
+  test("fails with non enum values", () => {
     // @ts-expect-error
     toTest.eq(99);
   });
