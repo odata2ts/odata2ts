@@ -192,6 +192,10 @@ describe("Service Generator Tests V2", () => {
 
     // then we get two additional service file
     await compareMainService("enum-type.ts");
+
+    runOptions.numericEnums = true;
+    await doGenerate();
+    await compareMainService("enum-numeric-type.ts");
   });
 
   test("Service Generator: Entity Hierarchy", async () => {

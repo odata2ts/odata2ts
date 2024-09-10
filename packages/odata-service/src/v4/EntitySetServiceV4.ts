@@ -1,16 +1,20 @@
 import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
-import { QId, QueryObject, convertV4CollectionResponse, convertV4ModelResponse } from "@odata2ts/odata-query-objects";
-
+import {
+  convertV4CollectionResponse,
+  convertV4ModelResponse,
+  QId,
+  QueryObjectModel,
+} from "@odata2ts/odata-query-objects";
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
 
 export abstract class EntitySetServiceV4<
   in out ClientType extends ODataHttpClient,
   T,
   EditableT,
-  Q extends QueryObject,
-  EIdType
+  Q extends QueryObjectModel,
+  EIdType,
 > {
   protected readonly __base: ServiceStateHelperV4<ClientType, Q>;
   protected readonly __idFunction: QId<EIdType>;
@@ -33,7 +37,7 @@ export abstract class EntitySetServiceV4<
     name: string,
     qModel: Q,
     idFunction: QId<EIdType>,
-    bigNumbersAsString: boolean = false
+    bigNumbersAsString: boolean = false,
   ) {
     this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, bigNumbersAsString);
     this.__idFunction = idFunction;
@@ -87,7 +91,7 @@ export abstract class EntitySetServiceV4<
    */
   public async create<ReturnType extends Partial<T> | void = T>(
     model: ODataModelPayloadV4<EditableT>,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): ODataResponse<ReturnType> {
     const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
 
@@ -95,7 +99,7 @@ export abstract class EntitySetServiceV4<
       path,
       qModel.convertToOData(model),
       requestConfig,
-      getDefaultHeaders()
+      getDefaultHeaders(),
     );
     return convertV4ModelResponse(result, qResponseType);
   }
@@ -108,7 +112,7 @@ export abstract class EntitySetServiceV4<
    */
   public async query<ReturnType extends Partial<T> = T>(
     queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): ODataResponse<ODataCollectionResponseV4<ReturnType>> {
     const { client, qResponseType, applyQueryBuilder, getDefaultHeaders } = this.__base;
 

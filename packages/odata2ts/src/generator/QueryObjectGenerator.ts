@@ -2,7 +2,6 @@ import { ValueConverterImport } from "@odata2ts/converter-runtime";
 import { ODataVersions } from "@odata2ts/odata-core";
 import { OptionalKind, PropertyDeclarationStructure, Scope, VariableDeclarationKind } from "ts-morph";
 import { firstCharLowerCase } from "xml2js/lib/processors.js";
-
 import { DataModel } from "../data-model/DataModel.js";
 import {
   ComplexType,
@@ -24,7 +23,7 @@ export const generateQueryObjects: EntityBasedGeneratorFunction = (
   dataModel,
   version,
   options,
-  namingHelper
+  namingHelper,
 ) => {
   const generator = new QueryObjectGenerator(project, dataModel, version, options, namingHelper);
   return generator.generate();
@@ -36,7 +35,7 @@ class QueryObjectGenerator {
     private dataModel: DataModel,
     private version: ODataVersions,
     private options: GeneratorFunctionOptions,
-    private namingHelper: NamingHelper
+    private namingHelper: NamingHelper,
   ) {}
 
   public async generate(): Promise<void> {
@@ -134,30 +133,44 @@ class QueryObjectGenerator {
 
   private generateQueryObjectProps(
     importContainer: ImportContainer,
-    props: Array<PropertyModel>
+    props: Array<PropertyModel>,
   ): Array<OptionalKind<PropertyDeclarationStructure>> {
     return props.map((prop) => {
       const { odataName } = prop;
       const name = this.namingHelper.getQPropName(prop.name);
       const isModelType = prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
+      const isEnumType = prop.dataType === DataTypes.EnumType;
+      const isNumericEnum = this.options.numericEnums;
+
       let qPathInit: string;
 
       // factor in collections
       if (prop.isCollection) {
         const qPath = importContainer.addQObject(
-          isModelType ? QueryObjectImports.QEntityCollectionPath : QueryObjectImports.QCollectionPath
+          isModelType
+            ? QueryObjectImports.QEntityCollectionPath
+            : isEnumType
+              ? isNumericEnum
+                ? QueryObjectImports.QNumericEnumCollectionPath
+                : QueryObjectImports.QEnumCollectionPath
+              : QueryObjectImports.QCollectionPath,
         );
         const qObject = isModelType
           ? importContainer.addGeneratedQObject(prop.fqType, prop.qObject!)
-          : importContainer.addQObject(prop.qObject!);
+          : isEnumType
+            ? importContainer.addGeneratedModel(prop.fqType, prop.type, false)
+            : importContainer.addQObject(prop.qObject!);
 
-        qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), () => ${qObject})`;
+        qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${isEnumType ? qObject : `() => ${qObject}`})`;
       } else {
         // add import for data type
         const qPath = importContainer.addQObject(prop.qPath);
         if (isModelType) {
           const qObject = importContainer.addGeneratedQObject(prop.fqType, prop.qObject!);
           qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), () => ${qObject})`;
+        } else if (isEnumType) {
+          const qObject = importContainer.addGeneratedModel(prop.fqType, prop.type, false);
+          qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${qObject})`;
         } else {
           let converterStmt = this.generateConverterStmt(importContainer, prop.converters);
           qPathInit = `new ${qPath}(this.withPrefix("${odataName}")${converterStmt ? `, ${converterStmt}` : ""})`;
@@ -220,7 +233,7 @@ class QueryObjectGenerator {
   private getParamInitString(
     importContainer: ImportContainer,
     props: Array<PropertyModel>,
-    overloads?: Array<Array<PropertyModel>>
+    overloads?: Array<Array<PropertyModel>>,
   ) {
     const allParams = [props, ...(overloads ?? [])].map((paramSet) => {
       const pString = paramSet
@@ -236,8 +249,8 @@ class QueryObjectGenerator {
           const mappedName = isMappedNameNecessary
             ? `"${prop.name}"`
             : prop.converters?.length
-            ? "undefined"
-            : undefined;
+              ? "undefined"
+              : undefined;
           const converterStmt = this.generateConverterStmt(importContainer, prop.converters);
           const mappedNameParam = mappedName ? `, ${mappedName}` : "";
           const converterParam = converterStmt ? `, ${converterStmt}` : "";

@@ -48,12 +48,13 @@ export function createEntityBasedGenerationTests(
       .addEnumType("Choice", [
         { name: "A", value: 1 },
         { name: "B", value: 2 },
+        { name: "Z", value: 99 },
       ])
       .addEnumType("EmptyEnum");
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("oneEnumType", "enum-min.ts");
+    await generateAndCompare("oneEnumType", "enum-numeric-min.ts", { numericEnums: true });
   });
 
   test(`${testSuiteName}: complex type`, async () => {
@@ -190,11 +191,13 @@ export function createEntityBasedGenerationTests(
       .addEnumType("Choice", [
         { name: "A", value: 1 },
         { name: "B", value: 2 },
+        { name: "Z", value: 99 },
       ]);
 
     // when generating model
     // then match fixture text
     await generateAndCompare("entityEnum", "entity-enum.ts");
+    await generateAndCompare("entityEnum", "entity-enum-numeric.ts", { numericEnums: true });
   });
 
   test(`${testSuiteName}: entity & complex type`, async () => {

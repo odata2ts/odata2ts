@@ -1,6 +1,5 @@
 import { ODataVersions } from "@odata2ts/odata-core";
 import { JSDocStructure, OptionalKind, StructureKind } from "ts-morph";
-
 import { DataModel } from "../data-model/DataModel.js";
 import { ComplexType, DataTypes, EntityType, OperationType, PropertyModel } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
@@ -15,7 +14,7 @@ export const generateModels: EntityBasedGeneratorFunction = (
   dataModel,
   version,
   options,
-  namingHelper
+  namingHelper,
 ) => {
   const generator = new ModelGenerator(project, dataModel, version, options, namingHelper);
   return generator.generate();
@@ -27,7 +26,7 @@ class ModelGenerator {
     private dataModel: DataModel,
     private version: ODataVersions,
     private options: GeneratorFunctionOptions,
-    private namingHelper: NamingHelper
+    private namingHelper: NamingHelper,
   ) {}
 
   public async generate(): Promise<void> {
@@ -52,10 +51,14 @@ class ModelGenerator {
     return this.dataModel.getEnums().map((et) => {
       const file = this.project.createOrGetModelFile(et.folderPath, et.modelName);
 
+      const isNumeric = this.options.numericEnums;
       file.getFile().addEnum({
         name: et.modelName,
         isExported: true,
-        members: et.members.map((mem) => ({ name: mem, initializer: `"${mem}"` })),
+        members: et.members.map((mem) => ({
+          name: mem.name,
+          initializer: isNumeric ? String(mem.value) : `"${mem.name}"`,
+        })),
       });
 
       return this.project.finalizeFile(file);
@@ -122,7 +125,7 @@ class ModelGenerator {
     if (model.finalBaseClass) {
       const modelName = imports.addGeneratedModel(
         model.baseClasses[0],
-        this.namingHelper.getModelName(model.finalBaseClass)
+        this.namingHelper.getModelName(model.finalBaseClass),
       );
       extendsClause = [modelName];
     }

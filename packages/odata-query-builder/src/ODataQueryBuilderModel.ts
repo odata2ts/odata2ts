@@ -5,17 +5,14 @@ import {
   QFilterExpression,
   QOrderByExpression,
   QSearchTerm,
-  QueryObject,
+  QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
 
 /**
  * Extracts the wrapped entity from QEntityPath or QEntityCollectionPath
  */
-export type EntityExtractor<QProp> = QProp extends QEntityPath<infer ET>
-  ? ET
-  : QProp extends QEntityCollectionPath<infer ET>
-  ? ET
-  : never;
+export type EntityExtractor<QProp> =
+  QProp extends QEntityPath<infer ET> ? ET : QProp extends QEntityCollectionPath<infer ET> ? ET : never;
 
 /**
  * Extracts all keys from a property (Q*Path), but only for the given types
@@ -28,7 +25,7 @@ export type ExtractPropertyNamesOfType<QPath, QPathTypes> = {
  * Retrieves all property names which are expandable,
  * i.e. props of type QEntityPath, QEntityCollectionPath and QCollectionPath
  */
-export type ExpandType<Q extends QueryObject> = ExtractPropertyNamesOfType<
+export type ExpandType<Q extends QueryObjectModel> = ExtractPropertyNamesOfType<
   Q,
   QEntityPath<any> | QEntityCollectionPath<any> | QCollectionPath<any>
 >;
@@ -56,7 +53,7 @@ export interface ODataQueryBuilderConfig {
  * Represents all possible builder operations.
  * However, any builder will only be composed of a subset of these operations.
  */
-export interface ODataQueryBuilderModel<Q extends QueryObject, ReturnType> {
+export interface ODataQueryBuilderModel<Q extends QueryObjectModel, ReturnType> {
   /**
    * Name the properties of the entity you want to select (as they are specified on the query object).
    * Null or undefined are allowed and will be ignored.
@@ -200,7 +197,7 @@ export interface ODataQueryBuilderModel<Q extends QueryObject, ReturnType> {
   build: () => string;
 }
 
-export interface V2ExpandingFunction<Q extends QueryObject, ReturnType> {
+export interface V2ExpandingFunction<Q extends QueryObjectModel, ReturnType> {
   /**
    * Expand one property, which is an entity or entity collection.
    * The second parameter is a callback function which receives a specialized URI builder and the proper query object
@@ -235,11 +232,11 @@ export type V2ExpandResult = { selects: Array<string>; expands: Array<string> };
 /**
  * Contract for ODataQueryBuilder for V2.
  */
-export interface ODataQueryBuilderV2<Q extends QueryObject>
+export interface ODataQueryBuilderV2<Q extends QueryObjectModel>
   extends Pick<ODataQueryBuilderModel<Q, ODataQueryBuilderV2<Q>>, V2Ops>,
     V2ExpandingFunction<Q, ODataQueryBuilderV2<Q>> {}
 
-export interface ExpandingODataQueryBuilderV2<Q extends QueryObject>
+export interface ExpandingODataQueryBuilderV2<Q extends QueryObjectModel>
   extends Pick<ODataQueryBuilderModel<Q, ExpandingODataQueryBuilderV2<Q>>, V2ExpandingOps>,
     V2ExpandingFunction<Q, ExpandingODataQueryBuilderV2<Q>> {
   /**
@@ -249,8 +246,8 @@ export interface ExpandingODataQueryBuilderV2<Q extends QueryObject>
   build: () => V2ExpandResult;
 }
 
-export interface ODataQueryBuilderV4<Q extends QueryObject>
+export interface ODataQueryBuilderV4<Q extends QueryObjectModel>
   extends Pick<ODataQueryBuilderModel<Q, ODataQueryBuilderV4<Q>>, V4Ops> {}
 
-export interface ExpandingODataQueryBuilderV4<Q extends QueryObject>
+export interface ExpandingODataQueryBuilderV4<Q extends QueryObjectModel>
   extends Pick<ODataQueryBuilderModel<Q, ExpandingODataQueryBuilderV4<Q>>, V4ExpandingOps> {}

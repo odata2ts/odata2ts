@@ -20,6 +20,7 @@ describe("ServiceConfigHelper Tests", function () {
       skipComments: true,
       disableAutomaticNameClashResolution: false,
       bundledFileGeneration: false,
+      numericEnums: false,
     });
   }
 
@@ -35,6 +36,7 @@ describe("ServiceConfigHelper Tests", function () {
       skipComments: true,
       disableAutomaticNameClashResolution: false,
       bundledFileGeneration: false,
+      numericEnums: false,
     });
   }
 

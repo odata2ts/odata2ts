@@ -1,4 +1,4 @@
-import { QFilterExpression, QOrderByExpression, QueryObject } from "@odata2ts/odata-query-objects";
+import { QFilterExpression, QOrderByExpression, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
   ExpandingFunction,
@@ -8,7 +8,7 @@ import {
   NullableParamList,
 } from "../ODataQueryBuilderModel";
 
-export function createExpandingQueryBuilderV4<Q extends QueryObject>(
+export function createExpandingQueryBuilderV4<Q extends QueryObjectModel>(
   property: string,
   qEntity: Q,
 ): ExpandingODataQueryBuilderV4Model<Q> {
@@ -18,7 +18,7 @@ export function createExpandingQueryBuilderV4<Q extends QueryObject>(
 /**
  * Builder for expanded entities or entity collections.
  */
-class ExpandingODataQueryBuilderV4<Q extends QueryObject> implements ExpandingODataQueryBuilderV4Model<Q> {
+class ExpandingODataQueryBuilderV4<Q extends QueryObjectModel> implements ExpandingODataQueryBuilderV4Model<Q> {
   private builder: ODataQueryBuilder<Q>;
 
   public constructor(property: string, qEntity: Q) {

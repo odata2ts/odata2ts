@@ -1,10 +1,15 @@
 export * from "./odata/ODataModel";
+export * from "./QueryObjectModel";
 export { QFilterExpression } from "./QFilterExpression";
 export { QOrderByExpression } from "./QOrderByExpression";
 export { QSearchTerm, searchTerm } from "./QSearchTerm";
-export * from "./QSingletons";
 export { QueryObject } from "./QueryObject";
 export { getIdentityConverter } from "./IdentityConverter";
+
+export * from "./enum/EnumModel";
+export * from "./primitve-collection/PrimitveCollections";
+export { QPrimitiveCollection } from "./primitve-collection/QPrimitiveCollection";
+export * from "./primitve-collection/PrimitiveCollectionModel";
 
 export * from "./operation/ResponseHelper";
 export { QFunction } from "./operation/QFunction";
@@ -14,13 +19,14 @@ export { OperationReturnType, ReturnTypes } from "./operation/OperationReturnTyp
 
 export * from "./param/UrlParamModel";
 export * from "./param/UrlParamHelper";
+export * from "./param/QParamModel";
 export { QParam } from "./param/QParam";
-
 export { QComplexParam } from "./param/QComplexParam";
 export { QBooleanParam } from "./param/common/QBooleanParam";
 export { QNumberParam } from "./param/common/QNumberParam";
 export { QStringParam } from "./param/common/QStringParam";
-export { QEnumParam } from "./param/common/QEnumParam";
+export { QEnumParam } from "./param/enum/QEnumParam";
+export { QNumericEnumParam } from "./param/enum/QNumericEnumParam";
 
 export { QBigNumberParam } from "./param/v4/QBigNumberParam";
 export { QGuidParam } from "./param/v4/QGuidParam";
@@ -43,10 +49,14 @@ export { QTimeV2Param } from "./param/v2/QTimeV2Param";
 export { QBooleanPath } from "./path/QBooleanPath";
 export { QBinaryPath } from "./path/QBinaryPath";
 export { QCollectionPath } from "./path/QCollectionPath";
-export { QEnumPath } from "./path/QEnumPath";
 export { QEntityPath } from "./path/QEntityPath";
 export { QEntityCollectionPath } from "./path/QEntityCollectionPath";
 export * from "./path/QPathModel";
+
+export { QEnumPath } from "./path/enum/QEnumPath";
+export { QNumericEnumPath } from "./path/enum/QNumericEnumPath";
+export { QEnumCollectionPath } from "./path/enum/QEnumCollectionPath";
+export { QNumericEnumCollectionPath } from "./path/enum/QNumericEnumCollectionPath";
 
 export { QStringPath } from "./path/v4/QStringPath";
 export { QNumberPath } from "./path/v4/QNumberPath";

@@ -1,14 +1,12 @@
-import { ParamValueModel } from "@odata2ts/converter-api";
+import { FlexibleConversionModel } from "../QueryObjectModel";
 
 export interface QParamModel<OriginalType, ConvertedType> {
   getName(): string;
   getMappedName(): string;
 
-  convertFrom(value: ParamValueModel<OriginalType>): ParamValueModel<ConvertedType>;
-  convertFrom(value: Array<ParamValueModel<OriginalType>>): Array<ParamValueModel<ConvertedType>>;
-  convertTo(value: ParamValueModel<ConvertedType>): ParamValueModel<OriginalType>;
-  convertTo(value: Array<ParamValueModel<ConvertedType>>): Array<ParamValueModel<OriginalType>>;
+  convertFrom(value: FlexibleConversionModel<OriginalType>): FlexibleConversionModel<ConvertedType>;
+  convertTo(value: FlexibleConversionModel<ConvertedType>): FlexibleConversionModel<OriginalType>;
 
-  formatUrlValue(value: ParamValueModel<ConvertedType> | Array<ParamValueModel<ConvertedType>>): string | undefined;
-  parseUrlValue(value: string | undefined): ParamValueModel<ConvertedType> | Array<ParamValueModel<ConvertedType>>;
+  formatUrlValue(value: FlexibleConversionModel<ConvertedType>): string | undefined;
+  parseUrlValue(value: string | undefined): FlexibleConversionModel<ConvertedType>;
 }

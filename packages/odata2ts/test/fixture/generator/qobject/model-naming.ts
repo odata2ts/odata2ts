@@ -1,6 +1,8 @@
 import { QBooleanParam, QBooleanPath, QEntityPath, QEnumPath, QId, QueryObject } from "@odata2ts/odata-query-objects";
 // @ts-ignore
 import type { BOOK_KEY, PARENT_KEY } from "./TesterModel";
+// @ts-ignore
+import { CHOICE_MODEL } from "./TesterModel";
 
 export class PARENT_Q_OBJ extends QueryObject {
   public readonly parentId = new QBooleanPath(this.withPrefix("parentId"));
@@ -18,7 +20,7 @@ export class PARENT_ID_Q_OBJ extends QId<PARENT_KEY> {
 
 export class BOOK_Q_OBJ extends PARENT_Q_OBJ {
   public readonly id = new QBooleanPath(this.withPrefix("id"));
-  public readonly myChoice = new QEnumPath(this.withPrefix("my_Choice"));
+  public readonly myChoice = new QEnumPath(this.withPrefix("my_Choice"), CHOICE_MODEL);
   public readonly address = new QEntityPath(this.withPrefix("Address"), () => LOCATION_Q_OBJ);
 }
 

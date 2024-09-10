@@ -2,12 +2,11 @@ import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts
 import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import {
-  PrimitiveCollectionType,
-  QueryObject,
   convertV2CollectionResponse,
   convertV2ModelResponse,
+  PrimitiveCollectionType,
+  QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
@@ -15,8 +14,8 @@ type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
 export class CollectionServiceV2<
   in out ClientType extends ODataHttpClient,
   T,
-  Q extends QueryObject,
-  EditableT = PrimitiveExtractor<T>
+  Q extends QueryObjectModel,
+  EditableT = PrimitiveExtractor<T>,
 > {
   protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
 
@@ -36,14 +35,14 @@ export class CollectionServiceV2<
    */
   public async add(
     model: EditableT,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): ODataResponse<ODataModelResponseV2<T>> {
     const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
     const result = await client.post<ODataModelResponseV2<T>>(
       path,
       qModel.convertToOData(model),
       requestConfig,
-      getDefaultHeaders()
+      getDefaultHeaders(),
     );
     return convertV2ModelResponse(result, qResponseType);
   }
@@ -73,14 +72,14 @@ export class CollectionServiceV2<
    */
   public async query<ReturnType = T>(
     queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void,
-    requestConfig?: ODataHttpClientConfig<ClientType>
+    requestConfig?: ODataHttpClientConfig<ClientType>,
   ): ODataResponse<ODataCollectionResponseV2<ReturnType>> {
     const { client, qResponseType, getDefaultHeaders, applyQueryBuilder } = this.__base;
 
     const response = await client.get<ODataCollectionResponseV2<any>>(
       applyQueryBuilder(queryFn),
       requestConfig,
-      getDefaultHeaders()
+      getDefaultHeaders(),
     );
     return convertV2CollectionResponse(response, qResponseType);
   }

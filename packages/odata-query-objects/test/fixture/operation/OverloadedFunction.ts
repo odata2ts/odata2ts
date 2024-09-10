@@ -1,24 +1,5 @@
-import { PrefixModel, booleanToNumberConverter, stringToPrefixModelConverter } from "@odata2ts/test-converters";
-
-import {
-  OperationReturnType,
-  QBooleanParam,
-  QComplexParam,
-  QDateParam,
-  QDateTimeOffsetParam,
-  QDateTimeOffsetV2Param,
-  QDateTimeV2Param,
-  QFunction,
-  QGuidParam,
-  QGuidV2Param,
-  QNumberParam,
-  QStringParam,
-  QTimeOfDayParam,
-  QTimeV2Param,
-  ReturnTypes,
-  qStringCollection,
-} from "../../../src";
-import { BookModel, QBook } from "./BookModel";
+import { booleanToNumberConverter } from "@odata2ts/test-converters";
+import { OperationReturnType, QBooleanParam, QFunction, QNumberParam, QStringParam, ReturnTypes } from "../../../src";
 
 export type OverloadedFunctionParamModel =
   | {

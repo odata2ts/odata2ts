@@ -1,8 +1,7 @@
 import { ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
 import { QEnumCollection } from "@odata2ts/odata-query-objects";
-
 import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4, PrimitiveTypeServiceV4 } from "../../../src";
-import { EditablePersonModel, GetSomethingFunctionParams, PersonId, PersonModel } from "../PersonModel";
+import { EditablePersonModel, Feature, GetSomethingFunctionParams, PersonId, PersonModel } from "../PersonModel";
 import { QPersonIdFunction } from "../QPerson";
 import { QGetSomethingFunction, QPersonV4, qPersonV4 } from "./QPersonV4";
 
@@ -30,7 +29,7 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
 
   public get features() {
     const { client, path } = this.__base;
-    return new CollectionServiceV4(client, path, "Features", new QEnumCollection());
+    return new CollectionServiceV4(client, path, "Features", new QEnumCollection(Feature));
   }
 
   public get bestFriend() {

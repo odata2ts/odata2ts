@@ -15,11 +15,9 @@ describe("QCollectionPath test", () => {
     expect(entity).toBeInstanceOf(QStringCollection);
     expect(entity.it).toBeInstanceOf(QStringPath);
     expect(entity.it.getPath()).toBe("$it");
-    expect(entity.createQPathType("myPath").getPath()).toBe("myPath");
 
     const prefixedEntity = toTest.getEntity(true);
     expect(prefixedEntity.it.getPath()).toBe("test/$it");
-    expect(prefixedEntity.createQPathType("myPath").getPath()).toBe("myPath");
   });
 
   test("fails with null, undefined, empty string", () => {

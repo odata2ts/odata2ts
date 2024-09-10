@@ -5,7 +5,7 @@ import {
   QDateTimeOffsetPath,
   QEntityCollectionPath,
   QEntityPath,
-  QEnumCollection,
+  QEnumCollectionPath,
   QEnumPath,
   QGuidCollection,
   QGuidParam,
@@ -13,6 +13,8 @@ import {
   QId,
   QNumberParam,
   QNumberPath,
+  QNumericEnumCollectionPath,
+  QNumericEnumPath,
   QStringCollection,
   QStringPath,
   QTimeOfDayPath,
@@ -23,6 +25,12 @@ import { QParamModel } from "../../src/param/QParamModel";
 export enum FeaturesEnum {
   Feature1 = "Feature1",
   Feature2 = "Feature2",
+}
+
+export enum Ratings {
+  EXCELLENT,
+  OK,
+  POOR,
 }
 
 export interface SimpleEntity {
@@ -56,7 +64,7 @@ export type ComplexEntityId = Pick<ComplexEntity, "ID" | "ID2">;
 export class QSimpleEntity extends QueryObject<SimpleEntity> {
   public readonly id = new QNumberPath(this.withPrefix("id"));
   public readonly name = new QStringPath(this.withPrefix("name"));
-  public readonly feat = new QEnumPath(this.withPrefix("feat"));
+  public readonly feat = new QEnumPath(this.withPrefix("feat"), FeaturesEnum);
   public readonly complexton = new QEntityPath(this.withPrefix("complexton"), () => QComplexEntity);
 }
 
@@ -80,14 +88,16 @@ export class QComplexEntity extends QueryObject<ComplexEntity> {
   public readonly xx = new QEntityCollectionPath(this.withPrefix("xx"), () => QSimpleEntity);
   public readonly primitiveCollection = new QCollectionPath(
     this.withPrefix("PrimitiveCollection"),
-    () => QStringCollection
+    () => QStringCollection,
   );
   public readonly nominalizedCollection = new QCollectionPath(
     this.withPrefix("NominalizedCollection"),
-    () => QGuidCollection
+    () => QGuidCollection,
   );
-  public readonly features = new QCollectionPath("features", () => QEnumCollection);
-  public readonly favFeature = new QEnumPath("favFeature");
+  public readonly features = new QEnumCollectionPath("features", FeaturesEnum);
+  public readonly favFeature = new QEnumPath("favFeature", FeaturesEnum);
+  public readonly ratings = new QNumericEnumCollectionPath("ratings", Ratings);
+  public readonly topRating = new QNumericEnumPath("topRating", Ratings);
 }
 
 export class QComplexEntityId extends QId<ComplexEntityId> {

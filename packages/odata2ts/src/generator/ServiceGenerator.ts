@@ -9,7 +9,6 @@ import {
 } from "ts-morph";
 import { upperCaseFirst } from "upper-case-first";
 import { firstCharLowerCase } from "xml2js/lib/processors.js";
-
 import { DataModel } from "../data-model/DataModel.js";
 import {
   ActionImportType,
@@ -34,14 +33,14 @@ import { ImportContainer } from "./ImportContainer.js";
 export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "properties" | "methods">> {}
 
 export interface ServiceGeneratorOptions
-  extends Pick<ConfigFileOptions, "enablePrimitivePropertyServices" | "v4BigNumberAsString"> {}
+  extends Pick<ConfigFileOptions, "enablePrimitivePropertyServices" | "v4BigNumberAsString" | "numericEnums"> {}
 
 export async function generateServices(
   project: ProjectManager,
   dataModel: DataModel,
   version: ODataVersions,
   namingHelper: NamingHelper,
-  options?: ServiceGeneratorOptions
+  options?: ServiceGeneratorOptions,
 ) {
   const generator = new ServiceGenerator(project, dataModel, version, namingHelper, options);
   return generator.generate();
@@ -53,7 +52,7 @@ class ServiceGenerator {
     private dataModel: DataModel,
     private version: ODataVersions,
     private namingHelper: NamingHelper,
-    private options: ServiceGeneratorOptions = {}
+    private options: ServiceGeneratorOptions = {},
   ) {}
 
   private isV4BigNumber() {
@@ -84,7 +83,7 @@ class ServiceGenerator {
 
     const { properties, methods }: PropsAndOps = deepmerge(
       this.generateMainServiceProperties(container, importContainer),
-      this.generateMainServiceOperations(unboundOperations, importContainer)
+      this.generateMainServiceOperations(unboundOperations, importContainer),
     );
 
     mainServiceFile.getFile().addClass({
@@ -110,7 +109,7 @@ class ServiceGenerator {
 
   private generateMainServiceProperties(
     container: EntityContainerModel,
-    importContainer: ImportContainer
+    importContainer: ImportContainer,
   ): PropsAndOps {
     const result: PropsAndOps = { properties: [], methods: [] };
 
@@ -128,7 +127,7 @@ class ServiceGenerator {
 
   private generateMainServiceOperations(
     ops: Array<FunctionImportType | ActionImportType>,
-    importContainer: ImportContainer
+    importContainer: ImportContainer,
   ): PropsAndOps {
     const result: PropsAndOps = { properties: [], methods: [] };
 
@@ -149,7 +148,7 @@ class ServiceGenerator {
     propName: string,
     odataPropName: string,
     entityType: EntityType,
-    imports: ImportContainer
+    imports: ImportContainer,
   ): OptionalKind<MethodDeclarationStructure> {
     const idName = imports.addGeneratedModel(entityType.id.fqName, entityType.id.modelName);
     const idFunctionName = imports.addGeneratedQObject(entityType.id.fqName, entityType.id.qName);
@@ -193,7 +192,7 @@ class ServiceGenerator {
 
   private generateSingletonProp(
     importContainer: ImportContainer,
-    singleton: SingletonType
+    singleton: SingletonType,
   ): OptionalKind<PropertyDeclarationStructure> {
     const { name, entityType } = singleton;
     const type = entityType.serviceName;
@@ -251,7 +250,7 @@ class ServiceGenerator {
 
     const { properties, methods }: PropsAndOps = deepmerge(
       this.generateServiceProperties(importContainer, model.serviceName, props),
-      this.generateServiceOperations(importContainer, model, operations)
+      this.generateServiceOperations(importContainer, model, operations),
     );
 
     // generate EntityTypeService
@@ -278,17 +277,17 @@ class ServiceGenerator {
   private generateServiceProperties(
     importContainer: ImportContainer,
     serviceName: string,
-    props: Array<PropertyModel>
+    props: Array<PropertyModel>,
   ): PropsAndOps {
     const result: PropsAndOps = { properties: [], methods: [] };
 
     props.forEach((prop) => {
-      // complex types, collection of complex types or entityTypes
+      // collection of ComplexTypes, ComplexTypes, or EntityTypes
       if ((prop.dataType === DataTypes.ModelType && !prop.isCollection) || prop.dataType === DataTypes.ComplexType) {
         result.properties.push(this.generateModelProp(importContainer, prop));
         result.methods.push(this.generateModelPropGetter(importContainer, prop));
       } else if (prop.isCollection) {
-        // collection of entity types
+        // collection of EntityTypes
         if (prop.dataType === DataTypes.ModelType) {
           const entityType = this.dataModel.getEntityType(prop.fqType);
           if (!entityType) {
@@ -296,7 +295,7 @@ class ServiceGenerator {
           }
 
           result.methods.push(
-            this.generateRelatedServiceGetter(prop.name, prop.odataName, entityType, importContainer)
+            this.generateRelatedServiceGetter(prop.name, prop.odataName, entityType, importContainer),
           );
         }
         // collection of primitive or enum types
@@ -318,7 +317,7 @@ class ServiceGenerator {
   private generateServiceOperations(
     importContainer: ImportContainer,
     model: ComplexType,
-    operations: Array<OperationType>
+    operations: Array<OperationType>,
   ): PropsAndOps {
     const result: PropsAndOps = { properties: [], methods: [] };
 
@@ -356,7 +355,7 @@ class ServiceGenerator {
 
   private generatePrimitiveCollectionProp(
     imports: ImportContainer,
-    prop: PropertyModel
+    prop: PropertyModel,
   ): OptionalKind<PropertyDeclarationStructure> {
     if (!prop.qObject) {
       throw new Error("Illegal State: [qObject] must be provided for Collection types!");
@@ -364,6 +363,7 @@ class ServiceGenerator {
 
     const collectionServiceType = imports.addServiceObject(this.version, ServiceImports.CollectionService);
     const isEnum = prop.dataType === DataTypes.EnumType;
+    const isNumericEnum = this.options.numericEnums;
     let qType: string;
     let type: string;
 
@@ -373,9 +373,11 @@ class ServiceGenerator {
       qType = imports.addQObjectType(prop.qObject);
     } else {
       const propEnum = this.dataModel.getModel(prop.fqType)!;
-      const propTypeModel = imports.addGeneratedModel(propEnum.fqName, propEnum.modelName);
+      const propTypeModel = imports.addGeneratedModel(propEnum.fqName, propEnum.modelName, false);
       type = `${imports.addQObjectType(QueryObjectImports.EnumCollection)}<${propTypeModel}>`;
-      qType = imports.addQObjectType(QueryObjectImports.QEnumCollection);
+      qType = `${imports.addQObjectType(
+        isNumericEnum ? QueryObjectImports.QNumericEnumCollection : QueryObjectImports.QEnumCollection,
+      )}<${propTypeModel}>`;
     }
 
     const collectionType = `${collectionServiceType}<ClientType, ${type}, ${qType}>`;
@@ -390,7 +392,7 @@ class ServiceGenerator {
 
   private generatePrimitiveTypeProp(
     imports: ImportContainer,
-    prop: PropertyModel
+    prop: PropertyModel,
   ): OptionalKind<PropertyDeclarationStructure> {
     const serviceType = imports.addServiceObject(this.version, ServiceImports.PrimitiveTypeService);
     const type = prop.typeModule ? imports.addCustomType(prop.typeModule, prop.type, true) : prop.type;
@@ -405,7 +407,7 @@ class ServiceGenerator {
 
   private generateModelPropGetter(
     imports: ImportContainer,
-    prop: PropertyModel
+    prop: PropertyModel,
   ): OptionalKind<MethodDeclarationStructure> {
     const model = this.dataModel.getModel(prop.fqType) as ComplexType;
     const isComplexCollection = prop.isCollection && model.dataType === DataTypes.ComplexType;
@@ -413,13 +415,13 @@ class ServiceGenerator {
     const type = isComplexCollection
       ? imports.addServiceObject(this.version, ServiceImports.CollectionService)
       : prop.isCollection
-      ? model.serviceCollectionName
-      : model.serviceName;
+        ? model.serviceCollectionName
+        : model.serviceName;
     const typeWithGenerics = isComplexCollection
       ? `${type}<ClientType, ${imports.addGeneratedModel(model.fqName, model.modelName)}, ${imports.addGeneratedQObject(
           model.fqName,
           model.qName,
-          true
+          true,
         )}, ${imports.addGeneratedModel(model.fqName, model.editableName)}>`
       : `${type}<ClientType>`;
 
@@ -442,11 +444,12 @@ class ServiceGenerator {
 
   private generatePrimitiveCollectionGetter(
     imports: ImportContainer,
-    prop: PropertyModel
+    prop: PropertyModel,
   ): OptionalKind<MethodDeclarationStructure> {
     const collectionServiceType = imports.addServiceObject(this.version, ServiceImports.CollectionService);
-    const instanceName = firstCharLowerCase(prop.qObject!);
-    const qInstanceName = imports.addQObject(instanceName);
+    const qCollectionName = imports.addQObject(prop.qObject!);
+    const enumName =
+      prop.dataType === DataTypes.EnumType ? imports.addGeneratedModel(prop.fqType, prop.type) : undefined;
 
     const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
     return {
@@ -456,7 +459,7 @@ class ServiceGenerator {
         `if(!${propName}) {`,
         `  const { client, path } = this.__base;`,
         // prettier-ignore
-        `  ${propName} = new ${collectionServiceType}(client, path, "${prop.odataName}", ${qInstanceName}${this.isV4BigNumber() ? ", true": ""})`,
+        `  ${propName} = new ${collectionServiceType}(client, path, "${prop.odataName}", new ${qCollectionName}(${enumName ?? ""})${this.isV4BigNumber() ? ", true": ""})`,
         "}",
         `return ${propName}`,
       ],
@@ -465,7 +468,7 @@ class ServiceGenerator {
 
   private generatePrimitiveTypeGetter(
     imports: ImportContainer,
-    prop: PropertyModel
+    prop: PropertyModel,
   ): OptionalKind<MethodDeclarationStructure> {
     const serviceType = imports.addServiceObject(this.version, ServiceImports.PrimitiveTypeService);
     const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
@@ -568,7 +571,7 @@ class ServiceGenerator {
     name: string,
     operation: OperationType,
     importContainer: ImportContainer,
-    baseFqName: string
+    baseFqName: string,
   ): OptionalKind<MethodDeclarationStructure> {
     const isFunc = operation.type === OperationTypes.Function;
     const returnType = operation.returnType;
@@ -617,10 +620,10 @@ class ServiceGenerator {
                 requestConfigParam.name
               }, getDefaultHeaders())`
             : operation.usePost
-            ? // V2 POST => BUT values are still query params, they are not part of the request body
-              `post(url, undefined, ${requestConfigParam.name}, getDefaultHeaders())`
-            : // functions: since V2
-              `get(url, ${requestConfigParam.name}, getDefaultHeaders())`
+              ? // V2 POST => BUT values are still query params, they are not part of the request body
+                `post(url, undefined, ${requestConfigParam.name}, getDefaultHeaders())`
+              : // functions: since V2
+                `get(url, ${requestConfigParam.name}, getDefaultHeaders())`
         };`,
         returnType ? `return ${qOpProp}.convertResponse(response);` : "",
       ],
@@ -631,8 +634,8 @@ class ServiceGenerator {
     const typeToImport: CoreImports = returnType?.isCollection
       ? CoreImports.ODataCollectionResponse
       : returnType?.dataType === DataTypes.PrimitiveType
-      ? CoreImports.ODataValueResponse
-      : CoreImports.ODataModelResponse;
+        ? CoreImports.ODataValueResponse
+        : CoreImports.ODataModelResponse;
 
     return imports.addCoreLib(this.version, typeToImport);
   }

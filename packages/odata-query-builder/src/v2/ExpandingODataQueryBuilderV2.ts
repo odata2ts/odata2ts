@@ -1,4 +1,4 @@
-import { QEntityPath, QueryObject } from "@odata2ts/odata-query-objects";
+import { QEntityPath, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
   EntityExtractor,
@@ -8,7 +8,7 @@ import {
   NullableParamList,
 } from "../ODataQueryBuilderModel";
 
-export function createExpandingQueryBuilderV2<Q extends QueryObject>(
+export function createExpandingQueryBuilderV2<Q extends QueryObjectModel>(
   property: string,
   qEntity: Q,
 ): ExpandingODataQueryBuilderV2Model<Q> {
@@ -19,7 +19,7 @@ export function createExpandingQueryBuilderV2<Q extends QueryObject>(
 /**
  * Builder for expanded entities or entity collections.
  */
-class ExpandingODataQueryBuilderV2<Q extends QueryObject> implements ExpandingODataQueryBuilderV2Model<Q> {
+class ExpandingODataQueryBuilderV2<Q extends QueryObjectModel> implements ExpandingODataQueryBuilderV2Model<Q> {
   private selects = new Set<string>();
   private expands = new Set<string>();
 

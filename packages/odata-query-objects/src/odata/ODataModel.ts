@@ -6,7 +6,7 @@ export const enum StandardFilterOperators {
   GREATER_THAN = "gt",
   GREATER_EQUALS = "ge",
   // HAS = "has",
-  // IN = "in",
+  IN = "in",
 }
 
 export const enum StringFilterFunctions {
