@@ -358,6 +358,10 @@ describe("Service Generator Tests V4", () => {
 
     // then we get two additional service file
     await compareMainService("enum-type.ts");
+
+    runOptions.numericEnums = true;
+    await doGenerate();
+    await compareMainService("enum-numeric-type.ts");
   });
 
   test("Service Generator: big number types", async () => {

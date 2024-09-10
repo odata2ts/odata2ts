@@ -1,6 +1,6 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
-import type { QBigNumberCollection, StringCollection } from "@odata2ts/odata-query-objects";
-import { qBigNumberCollection } from "@odata2ts/odata-query-objects";
+import type { StringCollection } from "@odata2ts/odata-query-objects";
+import { QBigNumberCollection } from "@odata2ts/odata-query-objects";
 import { CollectionServiceV4, EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
@@ -44,7 +44,7 @@ export class TestEntityService<in out ClientType extends ODataHttpClient> extend
         client,
         path,
         "bigNumberCollection",
-        qBigNumberCollection,
+        new QBigNumberCollection(),
         true,
       );
     }

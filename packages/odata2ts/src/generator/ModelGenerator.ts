@@ -51,10 +51,14 @@ class ModelGenerator {
     return this.dataModel.getEnums().map((et) => {
       const file = this.project.createOrGetModelFile(et.folderPath, et.modelName);
 
+      const isNumeric = this.options.numericEnums;
       file.getFile().addEnum({
         name: et.modelName,
         isExported: true,
-        members: et.members.map((mem) => ({ name: mem.name, initializer: `${mem.value}` })),
+        members: et.members.map((mem) => ({
+          name: mem.name,
+          initializer: isNumeric ? String(mem.value) : `"${mem.name}"`,
+        })),
       });
 
       return this.project.finalizeFile(file);

@@ -1,7 +1,7 @@
 export enum Choice {
-  A = "A",
-  B = "B",
-  Z = "Z",
+  A = 1,
+  B = 2,
+  Z = 99,
 }
 
 export interface Book {

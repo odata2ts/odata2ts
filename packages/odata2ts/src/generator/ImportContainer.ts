@@ -1,8 +1,6 @@
 import path from "path";
-
 import { ODataVersions } from "@odata2ts/odata-core";
 import { ImportDeclarationStructure, OptionalKind } from "ts-morph";
-
 import { DataModel } from "../data-model/DataModel.js";
 import { ComplexType } from "../data-model/DataTypeModel.js";
 import {
@@ -55,7 +53,7 @@ export class ImportContainer {
     protected dataModel: DataModel,
     protected mainFileNames: { model: string; qObject: string; service: string },
     protected readonly bundledFileGeneration: boolean,
-    protected reservedNames: Array<string> | undefined
+    protected reservedNames: Array<string> | undefined,
   ) {
     this.importedNameValidator = new ImportedNameValidator(reservedNames);
   }
@@ -74,8 +72,17 @@ export class ImportContainer {
   private addFromQObject(name: string, typeOnlyImport = false) {
     const importName = this.importedNameValidator.validateName(LIB_MODULES.qObject, name);
 
-    const imports = typeOnlyImport ? this.libs.qObject.typeOnly : this.libs.qObject.regular;
-    imports.set(name, importName);
+    const imports = this.libs.qObject;
+    if (typeOnlyImport) {
+      if (!imports.regular.has(name)) {
+        imports.typeOnly.set(name, importName);
+      }
+    } else {
+      if (imports.typeOnly.has(name)) {
+        imports.typeOnly.delete(name);
+      }
+      imports.regular.set(name, importName);
+    }
 
     return importName;
   }
@@ -107,6 +114,7 @@ export class ImportContainer {
     return importName;
   }
 
+  // TODO: make sure that regular imports win over additional typeOnly imports
   public addCustomType(moduleName: string, typeName: string, isTypeOnly: boolean = false) {
     const importName = this.importedNameValidator.validateName(moduleName, typeName);
     const imports = isTypeOnly ? this.customTypes.typeOnly : this.customTypes.regular;
@@ -138,6 +146,13 @@ export class ImportContainer {
     const importName = this.importedNameValidator.validateName(moduleName, name);
     const imports = isTypeOnly ? this.internalImports.typeOnly : this.internalImports.regular;
 
+    if (isTypeOnly && this.internalImports.regular.get(moduleName)?.has(name)) {
+      return importName;
+    }
+    if (!isTypeOnly && this.internalImports.typeOnly.get(moduleName)?.has(name)) {
+      this.internalImports.typeOnly.get(moduleName)?.delete(name);
+    }
+
     const importList = imports.get(moduleName) || new Map<string, string>();
     importList.set(name, importName);
     imports.set(moduleName, importList);
@@ -145,9 +160,9 @@ export class ImportContainer {
     return importName;
   }
 
-  public addGeneratedModel(fqName: string, name: string): string {
+  public addGeneratedModel(fqName: string, name: string, isTypeOnly = true): string {
     if (this.bundledFileGeneration) {
-      return this.addGeneratedImport("", this.mainFileNames.model, name, true);
+      return this.addGeneratedImport("", this.mainFileNames.model, name, isTypeOnly);
     } else {
       const model = this.dataModel.getModel(fqName) as ComplexType | undefined;
       if (!model && fqName !== "") {
@@ -156,7 +171,7 @@ export class ImportContainer {
 
       const folderPath = model ? model.folderPath : "";
       const modelName = model ? model.modelName : this.mainFileNames.model;
-      return this.addGeneratedImport(folderPath, modelName, name, true);
+      return this.addGeneratedImport(folderPath, modelName, name, isTypeOnly);
     }
   }
 
@@ -187,7 +202,7 @@ export class ImportContainer {
   private createImportDecl(
     module: string,
     toImport: Map<string, string>,
-    isTypeOnly = false
+    isTypeOnly = false,
   ): OptionalKind<ImportDeclarationStructure> {
     return {
       namedImports: this.getNamedImports(toImport),
@@ -209,7 +224,7 @@ export class ImportContainer {
           }
           return result;
         },
-        []
+        [],
       ),
       ...[...this.customTypes.typeOnly]
         .filter(([moduleName, toImport]) => toImport.size > 0)

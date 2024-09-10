@@ -465,9 +465,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         result = {
           dataType: modelType,
           type: this.namingHelper.getEnumName(enumConfig?.mappedName ?? odataDataType),
-          qPath: "QEnumPath",
-          qObject: isCollection ? "QEnumCollection" : undefined,
-          qParam: "QEnumParam",
+          qPath: this.options.numericEnums ? "QNumericEnumPath" : "QEnumPath",
+          qObject: isCollection
+            ? this.options.numericEnums
+              ? "QNumericEnumCollection"
+              : "QEnumCollection"
+            : undefined,
+          qParam: this.options.numericEnums ? "QNumericEnumParam" : "QEnumParam",
         };
       }
       // handling of complex & entity types

@@ -1,5 +1,4 @@
 import { ODataVersions } from "@odata2ts/odata-core";
-
 import { DataModel } from "./data-model/DataModel.js";
 import { Schema } from "./data-model/edmx/ODataEdmxModelBase.js";
 import { NamingHelper } from "./data-model/NamingHelper.js";
@@ -18,6 +17,7 @@ export type DigestionOptions = Pick<
   | "skipComments"
   | "disableAutomaticNameClashResolution"
   | "bundledFileGeneration"
+  | "numericEnums"
 >;
 
 /**
@@ -26,12 +26,17 @@ export type DigestionOptions = Pick<
 export type DigesterFunction<S extends Schema<any, any>> = (
   schema: Array<S>,
   options: DigestionOptions,
-  namingHelper: NamingHelper
+  namingHelper: NamingHelper,
 ) => Promise<DataModel>;
 
 export type GeneratorFunctionOptions = Pick<
   RunOptions,
-  "skipEditableModels" | "skipIdModels" | "skipOperations" | "skipComments" | "v2ModelsWithExtraResultsWrapping"
+  | "skipEditableModels"
+  | "skipIdModels"
+  | "skipOperations"
+  | "skipComments"
+  | "v2ModelsWithExtraResultsWrapping"
+  | "numericEnums"
 >;
 
 export type EntityBasedGeneratorFunction = (
@@ -39,5 +44,5 @@ export type EntityBasedGeneratorFunction = (
   dataModel: DataModel,
   version: ODataVersions,
   options: GeneratorFunctionOptions,
-  namingHelper: NamingHelper
+  namingHelper: NamingHelper,
 ) => Promise<void>;

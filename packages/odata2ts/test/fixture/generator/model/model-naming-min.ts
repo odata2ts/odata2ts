@@ -1,6 +1,6 @@
 export enum Choice {
-  A = 1,
-  B = 2,
+  A = "A",
+  B = "B",
 }
 
 export interface parent {

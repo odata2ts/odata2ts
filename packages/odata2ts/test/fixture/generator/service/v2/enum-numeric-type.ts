@@ -1,6 +1,6 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
 import type { EnumCollection } from "@odata2ts/odata-query-objects";
-import { QEnumCollection } from "@odata2ts/odata-query-objects";
+import { QNumericEnumCollection } from "@odata2ts/odata-query-objects";
 import { CollectionServiceV2, EntitySetServiceV2, EntityTypeServiceV2, ODataService } from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QBook } from "./QTester";
@@ -29,7 +29,7 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
   EditableBook,
   QBook
 > {
-  private _altChoices?: CollectionServiceV2<ClientType, EnumCollection<Choice>, QEnumCollection<Choice>>;
+  private _altChoices?: CollectionServiceV2<ClientType, EnumCollection<Choice>, QNumericEnumCollection<Choice>>;
 
   constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qBook);
@@ -38,7 +38,7 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
   public altChoices() {
     if (!this._altChoices) {
       const { client, path } = this.__base;
-      this._altChoices = new CollectionServiceV2(client, path, "altChoices", new QEnumCollection(Choice));
+      this._altChoices = new CollectionServiceV2(client, path, "altChoices", new QNumericEnumCollection(Choice));
     }
 
     return this._altChoices;
