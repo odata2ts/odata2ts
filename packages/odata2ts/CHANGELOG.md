@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.38.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.37.0...@odata2ts/odata2ts@0.38.0) (2024-09-11)
+
+### Bug Fixes
+
+* auto name clash resolution for v4 actions ([#315](https://github.com/odata2ts/odata2ts/issues/315)) ([3366843](https://github.com/odata2ts/odata2ts/commit/3366843dc227f9c8edd5b4660d63c564cc82f121))
+* **generator:** add rimraf as dependency ([9f08ccd](https://github.com/odata2ts/odata2ts/commit/9f08ccd5fc68b1de381ea1cb711c6e667ca5be98))
+* **generator:** use typeof when using enums as types ([baf784f](https://github.com/odata2ts/odata2ts/commit/baf784f76f119c2394ba4f1c3cd93359dc31171e))
+
+### Features
+
+* compile src & test folders as sanity check ([12607f0](https://github.com/odata2ts/odata2ts/commit/12607f04a4ec1142d750318cab5964f3d9a513c4))
+* **generator:** allow for numeric enums ([#308](https://github.com/odata2ts/odata2ts/issues/308)) ([a5c36e6](https://github.com/odata2ts/odata2ts/commit/a5c36e6433bb5d793d5f970b12d6ebb8a4c5270d))
+
 # [0.37.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.36.3...@odata2ts/odata2ts@0.37.0) (2024-08-25)
 
 ### Code Refactoring

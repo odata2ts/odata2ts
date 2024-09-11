@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-main@0.9.0...@odata2ts/example-main@0.10.0) (2024-09-11)
+
+### Bug Fixes
+
+* auto name clash resolution for v4 actions ([#315](https://github.com/odata2ts/odata2ts/issues/315)) ([3366843](https://github.com/odata2ts/odata2ts/commit/3366843dc227f9c8edd5b4660d63c564cc82f121))
+
+### Features
+
+* compile src & test folders as sanity check ([12607f0](https://github.com/odata2ts/odata2ts/commit/12607f04a4ec1142d750318cab5964f3d9a513c4))
+
 # [0.9.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-main@0.8.14...@odata2ts/example-main@0.9.0) (2024-08-25)
 
 ### Code Refactoring
