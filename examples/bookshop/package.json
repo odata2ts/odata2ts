@@ -18,10 +18,9 @@
     "clean": "rimraf build src",
     "compile": "tsc",
     "gen-meta": "cds server/srv/cat-service.cds -2 edmx > resource/catalog-srv.xml && cds server/srv/admin-service.cds -2 edmx > resource/admin-srv.xml ",
-    "generate-from-url": "odata2ts",
+    "generate-from-url": "odata2ts && tsc -p tsconfig.compile.json",
     "int-test": "vitest run --dir int-test",
     "start": "cds run",
-    "type-test": "tsc",
     "watch": "cds watch"
   },
   "dependencies": {

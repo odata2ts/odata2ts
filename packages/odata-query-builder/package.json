@@ -29,7 +29,8 @@
     "clean": "rimraf lib coverage",
     "compile": "tsc",
     "prepublish": "yarn build",
-    "test": "vitest run"
+    "test": "yarn test-compile && vitest run",
+    "test-compile": "tsc -p tsconfig.compile.json"
   },
   "dependencies": {
     "@odata2ts/odata-query-objects": "^0.24.0"

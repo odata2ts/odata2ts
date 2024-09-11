@@ -367,19 +367,18 @@ class ServiceGenerator {
     let qType: string;
     let type: string;
 
-    if (!isEnum) {
+    if (isEnum) {
+      const propEnum = this.dataModel.getModel(prop.fqType)!;
+      const propTypeModel = imports.addGeneratedModel(propEnum.fqName, propEnum.modelName, false);
+      type = `${imports.addQObjectType(QueryObjectImports.EnumCollection)}<typeof ${propTypeModel}>`;
+      qType = `${imports.addQObjectType(
+        isNumericEnum ? QueryObjectImports.QNumericEnumCollection : QueryObjectImports.QEnumCollection,
+      )}<typeof ${propTypeModel}>`;
+    } else {
       // TODO refactor string concat
       type = imports.addQObjectType(`${upperCaseFirst(prop.type)}Collection`);
       qType = imports.addQObjectType(prop.qObject);
-    } else {
-      const propEnum = this.dataModel.getModel(prop.fqType)!;
-      const propTypeModel = imports.addGeneratedModel(propEnum.fqName, propEnum.modelName, false);
-      type = `${imports.addQObjectType(QueryObjectImports.EnumCollection)}<${propTypeModel}>`;
-      qType = `${imports.addQObjectType(
-        isNumericEnum ? QueryObjectImports.QNumericEnumCollection : QueryObjectImports.QEnumCollection,
-      )}<${propTypeModel}>`;
     }
-
     const collectionType = `${collectionServiceType}<ClientType, ${type}, ${qType}>`;
 
     return {

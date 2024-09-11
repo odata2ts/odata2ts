@@ -1,9 +1,8 @@
 {
   "extends": "../../tsconfig.settings.json",
   "compilerOptions": {
-    "rootDirs": ["src", "test", "build", "int-test"],
-    "noEmit": true,
-    "lib": ["DOM", "esnext"]
+    "rootDirs": ["int-test"],
+    "noEmit": true
   },
   "exclude": ["node_modules", "lib"]
 }
