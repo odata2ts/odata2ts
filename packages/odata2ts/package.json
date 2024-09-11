@@ -76,7 +76,7 @@
   "peerDependencies": {
     "@odata2ts/odata-query-objects": "^0.25.0",
     "@odata2ts/odata-service": "^0.21.0",
-    "typescript": ">= 4"
+    "typescript": ">= 4.7"
   },
   "publishConfig": {
     "access": "public"
