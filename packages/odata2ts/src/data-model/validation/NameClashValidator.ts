@@ -1,5 +1,6 @@
 import { ConfigFileOptions } from "../../OptionModel.js";
 import { TypeModel } from "../../TypeModel.js";
+import { OperationTypes } from "../DataTypeModel.js";
 import { NameValidator, ValidationError } from "./NameValidator.js";
 
 export interface NameValidatorOptions
@@ -62,12 +63,13 @@ export class NameClashValidator implements NameValidator {
     return this.addToTypes(fqName, name, TypeModel.EnumType);
   }
 
-  addUnboundOperationType(fqName: string, name: string) {
+  addUnboundOperationType(fqName: string, name: string, operationType: OperationTypes) {
     const validationObject: ValidationError = { type: TypeModel.OperationType, fqName };
+    const isAction = operationType === OperationTypes.Action;
 
     const hit = this.store.get(name);
     // to support function overloads: allow multiple operation definitions with same fully qualified name
-    if (hit && hit.fqName !== fqName) {
+    if (hit && (isAction || hit.fqName !== fqName)) {
       return this.addToError(name, hit, validationObject);
     } else {
       this.store.set(name, validationObject);
@@ -75,12 +77,14 @@ export class NameClashValidator implements NameValidator {
     }
   }
 
-  addBoundOperationType(bindingName: string, fqName: string, name: string) {
+  addBoundOperationType(bindingName: string, fqName: string, name: string, operationType: OperationTypes) {
     const nameWithBinding = `${bindingName}_${name}`;
     const validationObject: ValidationError = { type: TypeModel.OperationType, fqName };
+    const isAction = operationType === OperationTypes.Action;
+
     const hit = this.store.get(nameWithBinding);
     // to support function overloads: allow multiple operation definitions with same fully qualified name
-    if (hit && hit.fqName !== fqName) {
+    if (hit && (isAction || hit.fqName !== fqName)) {
       return this.addToError(name, hit, validationObject);
     } else {
       this.store.set(nameWithBinding, validationObject);

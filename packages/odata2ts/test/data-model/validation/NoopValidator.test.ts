@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, test } from "vitest";
+import { OperationTypes } from "../../../src/data-model/DataTypeModel";
 import { NoopValidator } from "../../../src/data-model/validation/NoopValidator";
 
 describe("NoopValidator Tests", function () {
@@ -31,8 +32,8 @@ describe("NoopValidator Tests", function () {
     expect(validator.addEntitySet("xy", name)).toBe(name);
     expect(validator.addComplexType("xy", name)).toBe(name);
     expect(validator.addEnumType("xy", name)).toBe(name);
-    expect(validator.addBoundOperationType("test", "xy", name)).toBe(name);
-    expect(validator.addUnboundOperationType("xy", name)).toBe(name);
+    expect(validator.addBoundOperationType("test", "xy", name, OperationTypes.Function)).toBe(name);
+    expect(validator.addUnboundOperationType("xy", name, OperationTypes.Action)).toBe(name);
     expect(validator.addOperationImportType("xy", name)).toBe(name);
     expect(validator.addSingleton("xy", name)).toBe(name);
   });

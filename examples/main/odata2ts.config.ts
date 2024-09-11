@@ -175,13 +175,13 @@ const config: ConfigFileOptions = {
       source: srcFolder("abstractAndOpen.xml", true),
       output: outputFolder("abstractAndOpen", true),
     },
-    // edgeCases: {
-    //   disableAutomaticNameClashResolution: true,
-    //   bundledFileGeneration: true,
-    //   serviceName: "edgeCase",
-    //   source: srcFolder("edge-cases.xml", true),
-    //   output: outputFolder("edge-cases", true),
-    // },
+    edgeCases: {
+      disableAutomaticNameClashResolution: true,
+      bundledFileGeneration: true,
+      serviceName: "edgeCase",
+      source: srcFolder("edge-cases.xml", true),
+      output: outputFolder("edge-cases", true),
+    },
     // Example of auto name clash resolution
     autoNameClashResolution: {
       serviceName: "autoNameClashResolution",

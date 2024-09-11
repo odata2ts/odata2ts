@@ -1,6 +1,5 @@
-import { MappedConverterChains, loadConverters } from "@odata2ts/converter-runtime";
+import { loadConverters, MappedConverterChains } from "@odata2ts/converter-runtime";
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
-
 import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel.js";
 import { NamespaceWithAlias, withNamespace } from "./DataModel.js";
 import { Digester, TypeModel } from "./DataModelDigestion.js";
@@ -21,7 +20,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     schemas: Array<SchemaV4>,
     options: DigestionOptions,
     namingHelper: NamingHelper,
-    converters?: MappedConverterChains
+    converters?: MappedConverterChains,
   ) {
     super(ODataVersion.V4, schemas, options, namingHelper, converters);
   }
@@ -78,7 +77,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
         const singletonConfig = this.serviceConfigHelper.findOperationImportConfig(ecName, odataName);
         const name = this.nameValidator.addSingleton(
           withNamespace(fqName, odataName),
-          singletonConfig?.mappedName || odataName
+          singletonConfig?.mappedName || odataName,
         );
         const navPropBindings = singleton.NavigationPropertyBinding || [];
         const entityType = this.dataModel.getEntityType(singleton.$.Type);
@@ -238,8 +237,8 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       const bindingEntityName = bindingProp ? this.dataModel.getModel(bindingProp!.fqType)?.name : undefined;
 
       const opName = bindingEntityName
-        ? this.nameValidator.addBoundOperationType(bindingEntityName, fqName, opConfig?.mappedName || odataName)
-        : this.nameValidator.addUnboundOperationType(fqName, opConfig?.mappedName || odataName);
+        ? this.nameValidator.addBoundOperationType(bindingEntityName, fqName, opConfig?.mappedName || odataName, type)
+        : this.nameValidator.addUnboundOperationType(fqName, opConfig?.mappedName || odataName, type);
 
       const name =
         type === OperationTypes.Function
