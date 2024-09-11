@@ -84,24 +84,6 @@
         <ReturnType Type="SRV.ZCDS_SCM_HU_PRINT_RESULT"
                     Nullable="false"/>
       </Function>
-      <Action Name="DoStuff" IsBound="true">
-        <Parameter Name="_it" Type="SRV.WarehouseType"
-                   Nullable="false"/>
-        <Parameter Name="Printer" Type="SRV.PrinterType" MaxLength="30"/>
-        <Parameter Name="Warehouse" Type="SRV.WarehouseType" />
-        <ReturnType Type="SRV.ZCDS_SCM_HU_PRINT_RESULT"
-                    Nullable="false"/>
-      </Action>
-      <!-- Name Clash -->
-      <Action Name="DoStuff" IsBound="true">
-        <Parameter Name="_it" Type="SRV.WarehouseType"
-                   Nullable="false"/>
-        <Parameter Name="Printer" Type="SRV.PrinterType" MaxLength="30"/>
-        <Parameter Name="HuType" Type="SRV.HandlingUnitType"/>
-        <ReturnType Type="SRV.ZCDS_SCM_HU_PRINT_RESULT"
-                    Nullable="false"/>
-      </Action>
-
 
       <!-- Type Definition: Mapping primitive types to alias -->
       <TypeDefinition Name="StringType" UnderlyingType="Edm.String" />
