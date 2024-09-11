@@ -28,7 +28,8 @@
     "clean": "rimraf lib coverage",
     "compile": "tsc",
     "prepublish": "yarn build",
-    "test": "vitest run"
+    "test": "yarn test-compile && vitest run",
+    "test-compile": "tsc -p tsconfig.compile.json"
   },
   "dependencies": {
     "@odata2ts/converter-api": "^0.2.2",

@@ -17,7 +17,8 @@
     "build": "yarn clean && yarn compile",
     "clean": "rimraf lib coverage",
     "compile": "tsc",
-    "prepublish": "yarn build"
+    "prepublish": "yarn build",
+    "test-compile": "tsc"
   },
   "dependencies": {
     "@odata2ts/converter-api": "^0.2.1",

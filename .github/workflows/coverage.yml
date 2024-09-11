@@ -33,7 +33,7 @@ jobs:
       - name: Build packages
         run: yarn build
       - name: Type Test
-        run: yarn type-test
+        run: yarn test-compile
       - name: Start CAP server & run tests
         run: |
           yarn start-cap &

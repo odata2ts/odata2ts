@@ -21,7 +21,7 @@
     "release": "env-cmd -f .env.local --no-override lerna version",
     "start-cap": "yarn workspace @odata2ts/example-bookshop start",
     "test": "lerna run --parallel test",
-    "type-test": "lerna run --parallel type-test",
+    "test-compile": "lerna run --parallel test-compile",
     "version": "yarn install && git add yarn.lock",
     "postversion": "lerna publish from-git"
   },
