@@ -29,7 +29,11 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
   EditableBook,
   QBook
 > {
-  private _altChoices?: CollectionServiceV2<ClientType, EnumCollection<Choice>, QNumericEnumCollection<Choice>>;
+  private _altChoices?: CollectionServiceV2<
+    ClientType,
+    EnumCollection<typeof Choice>,
+    QNumericEnumCollection<typeof Choice>
+  >;
 
   constructor(client: ClientType, basePath: string, name: string) {
     super(client, basePath, name, qBook);
