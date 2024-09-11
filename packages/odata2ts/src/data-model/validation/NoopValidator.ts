@@ -1,10 +1,7 @@
+import { OperationTypes } from "../DataTypeModel";
 import { NameValidator, ValidationError } from "./NameValidator.js";
 
 export class NoopValidator implements NameValidator {
-  addBoundOperationType(bindingName: string, fqName: string, name: string): string {
-    return name;
-  }
-
   addComplexType(fqName: string, name: string): string {
     return name;
   }
@@ -29,7 +26,11 @@ export class NoopValidator implements NameValidator {
     return name;
   }
 
-  addUnboundOperationType(fqName: string, name: string): string {
+  addBoundOperationType(bindingName: string, fqName: string, name: string, operationType: OperationTypes): string {
+    return name;
+  }
+
+  addUnboundOperationType(fqName: string, name: string, operationType: OperationTypes): string {
     return name;
   }
 

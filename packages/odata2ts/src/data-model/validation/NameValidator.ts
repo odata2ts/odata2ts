@@ -1,4 +1,5 @@
-import { TypeModel } from "../../TypeModel.js";
+import { TypeModel } from "../../TypeModel";
+import { OperationTypes } from "../DataTypeModel";
 
 export interface NameValidator {
   addEntityType(fqName: string, name: string): string;
@@ -7,9 +8,9 @@ export interface NameValidator {
 
   addEnumType(fqName: string, name: string): string;
 
-  addUnboundOperationType(fqName: string, name: string): string;
+  addUnboundOperationType(fqName: string, name: string, operationType: OperationTypes): string;
 
-  addBoundOperationType(bindingName: string, fqName: string, name: string): string;
+  addBoundOperationType(bindingName: string, fqName: string, name: string, operationType: OperationTypes): string;
 
   addOperationImportType(fqName: string, name: string): string;
 

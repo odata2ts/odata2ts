@@ -76,7 +76,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     const namespaces = schemas.map<NamespaceWithAlias>((s) => [s.$.Namespace, s.$.Alias]);
     this.dataModel = new DataModel(namespaces, version, converters);
     this.serviceConfigHelper = new ServiceConfigHelper(options);
-    this.nameValidator = this.options.bundledFileGeneration ? new NameClashValidator(options) : new NoopValidator();
+    this.nameValidator = options.bundledFileGeneration ? new NameClashValidator(options) : new NoopValidator();
 
     this.collectModelTypes(schemas);
   }

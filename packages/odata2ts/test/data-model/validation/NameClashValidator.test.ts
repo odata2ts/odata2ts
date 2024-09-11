@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { TypeModel } from "../../../src";
+import { OperationTypes } from "../../../src/data-model/DataTypeModel";
 import { NameClashValidator } from "../../../src/data-model/validation/NameClashValidator";
 
 describe("NameClashValidator Tests", function () {
@@ -90,7 +91,7 @@ describe("NameClashValidator Tests", function () {
   test("addEnumType and addOperationType", () => {
     const name = "opEr";
     validator.addEnumType(withNs(NS1, name), name);
-    validator.addUnboundOperationType(withNs(NS2, name), name);
+    validator.addUnboundOperationType(withNs(NS2, name), name, OperationTypes.Function);
 
     let validation = validator.validate();
     expect(validation.size).toBe(1);
@@ -106,8 +107,18 @@ describe("NameClashValidator Tests", function () {
     const name = "boundOp";
 
     // when binding operation with same fqName to different entities
-    const result1 = validator.addBoundOperationType(withNs(NS1, entityName), withNs(NS1, name), name);
-    const result2 = validator.addBoundOperationType(withNs(NS1, entity2Name), withNs(NS1, name), name);
+    const result1 = validator.addBoundOperationType(
+      withNs(NS1, entityName),
+      withNs(NS1, name),
+      name,
+      OperationTypes.Function,
+    );
+    const result2 = validator.addBoundOperationType(
+      withNs(NS1, entity2Name),
+      withNs(NS1, name),
+      name,
+      OperationTypes.Function,
+    );
 
     // then all is fine, no name clash => gets finally prefixed with entity
     expect(result1).toBe(name);
@@ -115,7 +126,12 @@ describe("NameClashValidator Tests", function () {
     expect(validator.validate().size).toBe(0);
 
     // when adding bound operation to same entity with same op name (from different namespace)
-    const result3 = validator.addBoundOperationType(withNs(NS1, entityName), withNs(NS2, name), name);
+    const result3 = validator.addBoundOperationType(
+      withNs(NS1, entityName),
+      withNs(NS2, name),
+      name,
+      OperationTypes.Function,
+    );
 
     // then we have a name clash
     expect(result3).toBe(name + "2");
@@ -123,6 +139,54 @@ describe("NameClashValidator Tests", function () {
       { fqName: withNs(NS1, name), type: TypeModel.OperationType },
       { fqName: withNs(NS2, name), type: TypeModel.OperationType, renamedTo: name + "2" },
     ]);
+  });
+
+  test("V4: function overloads", () => {
+    const entityName = "Test";
+    const name = "boundOp";
+
+    // when binding functions with same fqName to same entity, then we get function overloads
+    const result1 = validator.addBoundOperationType(
+      withNs(NS1, entityName),
+      withNs(NS1, name),
+      name,
+      OperationTypes.Function,
+    );
+    const result2 = validator.addBoundOperationType(
+      withNs(NS1, entityName),
+      withNs(NS1, name),
+      name,
+      OperationTypes.Function,
+    );
+
+    // then all is fine, no name clash => gets finally prefixed with entity
+    expect(result1).toBe(name);
+    expect(result2).toBe(name);
+    expect(validator.validate().size).toBe(0);
+  });
+
+  test("V4: action name clash resolution", () => {
+    const entityName = "Test";
+    const name = "boundOp";
+
+    // when binding actions with same fqName to same entity, then we get a name clash
+    const result1 = validator.addBoundOperationType(
+      withNs(NS1, entityName),
+      withNs(NS1, name),
+      name,
+      OperationTypes.Action,
+    );
+    const result2 = validator.addBoundOperationType(
+      withNs(NS1, entityName),
+      withNs(NS1, name),
+      name,
+      OperationTypes.Action,
+    );
+
+    // then all is fine, no name clash => gets finally prefixed with entity
+    expect(result1).toBe(name);
+    expect(result2).toBe(name + "2");
+    expect(validator.validate().size).toBe(1);
   });
 
   test("addEntitySet and addSingleton and addOperationImport", () => {
