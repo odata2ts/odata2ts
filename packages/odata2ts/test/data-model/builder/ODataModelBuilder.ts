@@ -1,5 +1,4 @@
 import { ODataTypesV2, ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
-
 import {
   ComplexType,
   EntityType,
@@ -9,6 +8,7 @@ import {
 } from "../../../src/data-model/edmx/ODataEdmxModelBase";
 import { ODataComplexTypeBuilderBase } from "./ODataComplexTypeBuilderBase";
 import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase";
+import { NavProps } from "./v4/ODataModelBuilderV4";
 
 export interface ModelBuilderOptions {
   baseType?: string;
@@ -20,13 +20,16 @@ export abstract class ODataModelBuilder<
   M extends ODataEdmxModelBase<S>,
   S extends Schema<ET, CT>,
   ET extends EntityType,
-  CT extends ComplexType
+  CT extends ComplexType,
 > {
   protected schemas: Array<S> = [];
   protected currentSchema: S;
   protected model: ODataEdmxModelBase<Schema<ET, CT>>;
 
-  protected constructor(protected serviceName: string, protected version: ODataVersions) {
+  protected constructor(
+    protected serviceName: string,
+    protected version: ODataVersions,
+  ) {
     this.currentSchema = this.createSchema(serviceName);
     this.model = this.createModel(version);
   }
@@ -39,12 +42,18 @@ export abstract class ODataModelBuilder<
   public abstract addEntityType(
     name: string,
     options: undefined | ModelBuilderOptions,
-    builderFn: <ETB extends ODataEntityTypeBuilderBase<ET>>(builder: ETB) => void
+    builderFn: <ETB extends ODataEntityTypeBuilderBase<ET>>(builder: ETB) => void,
   ): this;
   public abstract addComplexType(
     name: string,
     options: undefined | ModelBuilderOptions,
-    builderFn: <CTB extends ODataComplexTypeBuilderBase<CT>>(builder: CTB) => void
+    builderFn: <CTB extends ODataComplexTypeBuilderBase<CT>>(builder: CTB) => void,
+  ): this;
+
+  public abstract addEntitySet(
+    name: string,
+    entityType: string,
+    navProps?: Array<{ path: string; target: string }>,
   ): this;
 
   protected createSchema(name: string, alias?: string) {

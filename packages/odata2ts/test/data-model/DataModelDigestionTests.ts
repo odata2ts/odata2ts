@@ -1,7 +1,7 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
 import { beforeEach, expect, test } from "vitest";
-import { NamingStrategies } from "../../src";
+import { Modes, NamingStrategies } from "../../src";
 import { NamespaceWithAlias, withNamespace } from "../../src/data-model/DataModel";
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
@@ -491,5 +491,39 @@ export function createDataModelTests(
     odataBuilder.addEnumType("Test");
 
     await doDigest();
+  });
+
+  test("generate only services for EntityTypes and ComplexTypes used in API", async () => {
+    const ns2 = "ALT";
+    const alias = "Alias";
+    const entityEmpty = "AbstractAndEmpty";
+    const entityNavProp = "AbstractNavProp";
+    const entityRegular = "RegularEntity";
+
+    namespaces.push([ns2, alias]);
+    odataBuilder
+      .addSchema(ns2, alias)
+      // not referenced at all
+      .addEntityType("Unused", { abstract: true }, () => {})
+      // used as base type
+      .addEntityType(entityEmpty, { abstract: true }, () => {})
+      // used as nav prop
+      .addEntityType(entityNavProp, { abstract: true }, (builder) => {
+        return builder.addKeyProp("id", "Edm.Guid");
+      })
+      // the regular entity extending and
+      .addEntityType(entityRegular, { baseType: withNamespace(alias, entityEmpty) }, (builder) => {
+        return builder.addProp("test", withNamespace(alias, entityNavProp));
+      })
+      .addEntitySet("Regulars", withNamespace(alias, entityRegular));
+
+    const result = await doDigest();
+
+    let toTest = result.getEntityTypes()[0];
+    expect(toTest.name).toBe("Unused");
+    expect(toTest.genMode).toBe(Modes.qobjects);
+    expect(result.getEntityTypes()[1].genMode).toBe(Modes.service);
+    expect(result.getEntityTypes()[2].genMode).toBe(Modes.service);
+    expect(result.getEntityTypes()[3].genMode).toBe(Modes.service);
   });
 }
