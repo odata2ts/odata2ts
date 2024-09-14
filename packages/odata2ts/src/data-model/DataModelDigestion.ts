@@ -147,6 +147,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       // V4 only: function & action types
       this.digestOperations(schema);
 
+      // mark each EntityType & ComplexType which is referencable from API
       this.analyzeModelUsage(schema.EntityContainer?.length ? schema.EntityContainer[0] : undefined);
     });
 
@@ -296,13 +297,19 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     }
   }
 
+  /**
+   * Check
+   * @param fqModelName
+   * @private
+   */
   private analyze(fqModelName: string) {
-    if (this.serviceModels.has(fqModelName)) {
+    // to also resolve aliases the data model needs to be used
+    const model = this.dataModel.getEntityType(fqModelName) ?? this.dataModel.getComplexType(fqModelName);
+    if (!model?.fqName || this.serviceModels.has(model.fqName)) {
       return;
     }
 
-    this.serviceModels.add(fqModelName);
-    const model = this.dataModel.getEntityType(fqModelName) ?? this.dataModel.getComplexType(fqModelName);
+    this.serviceModels.add(model.fqName);
 
     if (model) {
       if (model.baseClasses.length) {
