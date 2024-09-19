@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata2ts",
-  "version": "0.38.0",
+  "version": "0.38.1",
   "description": "Flexible generator to produce various TypeScript artefacts (from simple model interfaces to complete odata clients) from OData metadata files",
   "keywords": [
     "odata2ts",

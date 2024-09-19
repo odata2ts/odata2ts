@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.38.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.38.0...@odata2ts/odata2ts@0.38.1) (2024-09-19)
+
+### Bug Fixes
+
+* **generator:** api usage analysis must respect alias ([#317](https://github.com/odata2ts/odata2ts/issues/317)) ([5877161](https://github.com/odata2ts/odata2ts/commit/5877161317d09c5ded9b44ce4a7ecd0f65e65235))
+* **generator:** set peer dependency of TS to >= 4.7 ([949d874](https://github.com/odata2ts/odata2ts/commit/949d8749828dda06a2072d4153556c53d0adb3cf))
+
 # [0.38.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.37.0...@odata2ts/odata2ts@0.38.0) (2024-09-11)
 
 ### Bug Fixes

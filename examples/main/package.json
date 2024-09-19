@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/example-main",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "private": true,
   "description": "Main odata2ts configuration examples also serving for integration tests",
   "repository": "git@github.com:odata2ts/odata2ts.git",
@@ -27,7 +27,7 @@
     "luxon": "^3.5.0"
   },
   "devDependencies": {
-    "@odata2ts/odata2ts": "^0.38.0",
+    "@odata2ts/odata2ts": "^0.38.1",
     "@types/luxon": "^3.4.2"
   },
   "publishConfig": {

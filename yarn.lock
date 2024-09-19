@@ -1200,7 +1200,7 @@ __metadata:
     "@odata2ts/converter-big-number": ^0.2.3
     "@odata2ts/http-client-axios": ^0.11.3
     "@odata2ts/odata-service": ^0.21.0
-    "@odata2ts/odata2ts": ^0.38.0
+    "@odata2ts/odata2ts": ^0.38.1
     "@sap/cds": 7.9.4
     "@sap/cds-odata-v2-adapter-proxy": ^1.9.21
     axios: 0.27.2
@@ -1221,7 +1221,7 @@ __metadata:
     "@odata2ts/converter-v2-to-v4": ^0.5.3
     "@odata2ts/http-client-axios": ^0.11.3
     "@odata2ts/odata-service": ^0.21.0
-    "@odata2ts/odata2ts": ^0.38.0
+    "@odata2ts/odata2ts": ^0.38.1
     "@types/luxon": ^3.4.2
     axios: ^1.7.3
     bignumber.js: ^9.1.2
@@ -1299,7 +1299,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2ts@^0.38.0, @odata2ts/odata2ts@workspace:packages/odata2ts":
+"@odata2ts/odata2ts@^0.38.1, @odata2ts/odata2ts@workspace:packages/odata2ts":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2ts@workspace:packages/odata2ts"
   dependencies:
