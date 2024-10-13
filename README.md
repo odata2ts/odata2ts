@@ -2,6 +2,7 @@
 [![Coveralls](https://img.shields.io/coveralls/github/odata2ts/odata2ts?style=for-the-badge)](https://coveralls.io/github/odata2ts/odata2ts?branch=main)
 
 # odata2ts
+Just Testing
 
 If you use TypeScript and need to interact with an OData service, then `odata2ts` might
 be for you. It centers around the generation of TypeScript artefacts
