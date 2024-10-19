@@ -1,7 +1,8 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { createQueryBuilderV2, ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { QComplexParam, QueryObjectModel } from "@odata2ts/odata-query-objects";
-import { ServiceStateHelper } from "../ServiceStateHelper.js";
+import { ODataServiceOptions } from "../ODataServiceOptions";
+import { ServiceStateHelper } from "../ServiceStateHelper";
 
 export class ServiceStateHelperV2<
   in out ClientType extends ODataHttpClient,
@@ -14,14 +15,15 @@ export class ServiceStateHelperV2<
     basePath: string,
     name: string,
     public qModel: Q,
+    options?: ODataServiceOptions,
   ) {
-    super(client, basePath, name);
+    super(client, basePath, name, options);
     this.qResponseType = new QComplexParam("NONE", qModel);
   }
 
   public applyQueryBuilder = (queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void): string => {
     if (queryFn) {
-      const builder = createQueryBuilderV2(this.path, this.qModel);
+      const builder = createQueryBuilderV2(this.path, this.qModel, { unencoded: this.isUrlNotEncoded() });
       queryFn(builder, this.qModel);
       return builder.build();
     }

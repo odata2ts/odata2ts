@@ -1,5 +1,5 @@
 import { beforeEach, expect, test } from "vitest";
-import { EntitySetServiceV2, EntitySetServiceV4 } from "../src";
+import { EntitySetServiceV2, EntitySetServiceV4, ODataServiceOptions } from "../src";
 import { DEFAULT_HEADERS } from "../src/RequestHeaders";
 import { EditablePersonModel, Feature, PersonId, PersonModel } from "./fixture/PersonModel";
 import { QPersonV2 } from "./fixture/v2/QPersonV2";
@@ -12,6 +12,7 @@ export function commonEntitySetTests(
     odataClient: MockClient,
     baseUrl: string,
     name: string,
+    options?: ODataServiceOptions,
   ) =>
     | EntitySetServiceV4<MockClient, PersonModel, EditablePersonModel, QPersonV4, PersonId>
     | EntitySetServiceV2<MockClient, PersonModel, EditablePersonModel, QPersonV2, PersonId>,
@@ -103,5 +104,13 @@ export function commonEntitySetTests(
     expect(odataClient.lastUrl).toBe(expected);
     expect(odataClient.lastData).toBeUndefined();
     expect(odataClient.lastOperation).toBe("GET");
+  });
+
+  test("entitySet: no url encoding", async () => {
+    const toTest = new serviceConstructor(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+
+    await toTest.query((qb, q) => qb.filter(q.userName.eq("2")));
+
+    expect(odataClient.lastUrl).toBe(EXPECTED_PATH + "?$filter=UserName eq '2'");
   });
 }

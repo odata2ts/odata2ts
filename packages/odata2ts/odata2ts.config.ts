@@ -1,7 +1,7 @@
 import { ConfigFileOptions, EmitModes, Modes, TypeModel } from "./lib";
 
 const config: ConfigFileOptions = {
-  debug: false,
+  debug: true,
   mode: Modes.service,
   emitMode: EmitModes.ts,
   prettier: true,

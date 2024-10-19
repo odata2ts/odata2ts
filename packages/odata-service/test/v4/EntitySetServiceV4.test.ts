@@ -26,7 +26,7 @@ describe("V4 EntitySetService Test", () => {
   });
 
   test("entitySet: big number", async () => {
-    testService = new PersonModelCollectionService(odataClient, BASE_URL, NAME, true);
+    testService = new PersonModelCollectionService(odataClient, BASE_URL, NAME, { bigNumbersAsString: true });
 
     await testService.query();
 

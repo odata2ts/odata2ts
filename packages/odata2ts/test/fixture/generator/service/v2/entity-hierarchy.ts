@@ -1,5 +1,5 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
-import { EntitySetServiceV2, EntityTypeServiceV2, ODataService } from "@odata2ts/odata-service";
+import { EntitySetServiceV2, EntityTypeServiceV2, ODataService, ODataServiceOptions } from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QChild, QGrandParent, QParent } from "./QTester";
 // @ts-ignore
@@ -21,10 +21,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   public tests(id: ChildId): ChildService<ClientType>;
   public tests(id?: ChildId | undefined) {
     const fieldName = "tests";
-    const { client, path } = this.__base;
+    const { client, path, options, isUrlNotEncoded } = this.__base;
     return typeof id === "undefined" || id === null
-      ? new ChildCollectionService(client, path, fieldName)
-      : new ChildService(client, path, new QChildId(fieldName).buildUrl(id));
+      ? new ChildCollectionService(client, path, fieldName, options)
+      : new ChildService(client, path, new QChildId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
   }
 }
 
@@ -34,8 +34,8 @@ export class GrandParentService<in out ClientType extends ODataHttpClient> exten
   EditableGrandParent,
   QGrandParent
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qGrandParent);
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+    super(client, basePath, name, qGrandParent, options);
   }
 }
 
@@ -46,8 +46,8 @@ export class GrandParentCollectionService<in out ClientType extends ODataHttpCli
   QGrandParent,
   GrandParentId
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qGrandParent, new QGrandParentId(name));
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+    super(client, basePath, name, qGrandParent, new QGrandParentId(name), options);
   }
 }
 
@@ -57,8 +57,8 @@ export class ParentService<in out ClientType extends ODataHttpClient> extends En
   EditableParent,
   QParent
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qParent);
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+    super(client, basePath, name, qParent, options);
   }
 }
 
@@ -69,8 +69,8 @@ export class ParentCollectionService<in out ClientType extends ODataHttpClient> 
   QParent,
   GrandParentId
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qParent, new QGrandParentId(name));
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+    super(client, basePath, name, qParent, new QGrandParentId(name), options);
   }
 }
 
@@ -80,8 +80,8 @@ export class ChildService<in out ClientType extends ODataHttpClient> extends Ent
   EditableChild,
   QChild
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qChild);
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+    super(client, basePath, name, qChild, options);
   }
 }
 
@@ -92,7 +92,7 @@ export class ChildCollectionService<in out ClientType extends ODataHttpClient> e
   QChild,
   ChildId
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qChild, new QChildId(name));
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+    super(client, basePath, name, qChild, new QChildId(name), options);
   }
 }

@@ -11,8 +11,7 @@ import {
   QueryObject,
 } from "@odata2ts/odata-query-objects";
 import { numberToStringConverter } from "@odata2ts/test-converters";
-
-import { EntitySetServiceV4, EntityTypeServiceV4 } from "../../../src";
+import { EntitySetServiceV4, EntityTypeServiceV4, ODataServiceOptionsInternal } from "../../../src";
 
 export interface TestModel {
   id: string;
@@ -54,8 +53,8 @@ export class TestService<ClientType extends ODataHttpClient> extends EntityTypeS
   EditableTestModel,
   QTest
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qTest);
+  constructor(client: ClientType, basePath: string, name: string, options: ODataServiceOptionsInternal) {
+    super(client, basePath, name, qTest, options);
   }
 }
 
@@ -66,7 +65,7 @@ export class TestCollectionService<ClientType extends ODataHttpClient> extends E
   QTest,
   TestModelId
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qTest, new QTestIdFunction(name));
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+    super(client, basePath, name, qTest, new QTestIdFunction(name), options);
   }
 }

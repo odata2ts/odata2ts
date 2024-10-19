@@ -7,6 +7,7 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
+import { ODataServiceOptions } from "../ODataServiceOptions";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
 export abstract class EntitySetServiceV2<
@@ -19,8 +20,15 @@ export abstract class EntitySetServiceV2<
   protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
   protected readonly __idFunction: QId<EIdType>;
 
-  protected constructor(client: ClientType, basePath: string, name: string, qModel: Q, idFunction: QId<EIdType>) {
-    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel);
+  protected constructor(
+    client: ClientType,
+    basePath: string,
+    name: string,
+    qModel: Q,
+    idFunction: QId<EIdType>,
+    options?: ODataServiceOptions,
+  ) {
+    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel, options);
     this.__idFunction = idFunction;
   }
 
@@ -46,7 +54,7 @@ export abstract class EntitySetServiceV2<
    * @param notEncoded if set to {@code true}, special chars are not escaped
    */
   public createKey(id: EIdType, notEncoded?: boolean): string {
-    const url = this.__idFunction.buildUrl(id, notEncoded);
+    const url = this.__idFunction.buildUrl(id, notEncoded ?? this.__base.isUrlNotEncoded());
     return url.startsWith("/") ? url.substring(1) : url;
   }
 
@@ -60,7 +68,7 @@ export abstract class EntitySetServiceV2<
    * @param notDecoded if set to {@code true}, encoded special chars are not decoded
    */
   public parseKey(keyPath: string, notDecoded?: boolean): EIdType {
-    return this.__idFunction.parseUrl(keyPath, notDecoded);
+    return this.__idFunction.parseUrl(keyPath, notDecoded ?? this.__base.isUrlNotEncoded());
   }
 
   /**

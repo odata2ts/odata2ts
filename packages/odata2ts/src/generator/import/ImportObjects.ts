@@ -65,6 +65,8 @@ export enum ClientApiImports {
  */
 export enum ServiceImports {
   ODataService,
+  ODataServiceOptions,
+  ODataServiceOptionsInternal,
   EntityTypeService,
   PrimitiveTypeService,
   CollectionService,

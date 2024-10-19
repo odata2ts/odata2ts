@@ -1,6 +1,11 @@
 import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV4, ODataValueResponseV4 } from "@odata2ts/odata-core";
-import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
+import {
+  EntitySetServiceV4,
+  EntityTypeServiceV4,
+  ODataService,
+  ODataServiceOptionsInternal,
+} from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
 // @ts-ignore
@@ -17,10 +22,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   public tests(id: TestEntityId): TestEntityService<ClientType>;
   public tests(id?: TestEntityId | undefined) {
     const fieldName = "tests";
-    const { client, path } = this.__base;
+    const { client, path, options, isUrlNotEncoded } = this.__base;
     return typeof id === "undefined" || id === null
-      ? new TestEntityCollectionService(client, path, fieldName)
-      : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id));
+      ? new TestEntityCollectionService(client, path, fieldName, options)
+      : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
   }
 
   public async pingString(
@@ -30,7 +35,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
       this._qPingString = new QPingString();
     }
 
-    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qPingString.buildUrl());
     const response = await client.post(url, {}, requestConfig, getDefaultHeaders());
     return this._qPingString.convertResponse(response);
@@ -43,7 +48,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
       this._qPingNumber = new QPingNumber();
     }
 
-    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qPingNumber.buildUrl());
     const response = await client.post(url, {}, requestConfig, getDefaultHeaders());
     return this._qPingNumber.convertResponse(response);
@@ -56,7 +61,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
       this._qPingCollection = new QPingCollection();
     }
 
-    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qPingCollection.buildUrl());
     const response = await client.post(url, {}, requestConfig, getDefaultHeaders());
     return this._qPingCollection.convertResponse(response);
@@ -69,8 +74,8 @@ export class TestEntityService<in out ClientType extends ODataHttpClient> extend
   EditableTestEntity,
   QTestEntity
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qTestEntity);
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+    super(client, basePath, name, qTestEntity, options);
   }
 }
 
@@ -81,7 +86,7 @@ export class TestEntityCollectionService<in out ClientType extends ODataHttpClie
   QTestEntity,
   TestEntityId
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qTestEntity, new QTestEntityId(name));
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+    super(client, basePath, name, qTestEntity, new QTestEntityId(name), options);
   }
 }

@@ -2,7 +2,7 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { beforeEach, describe, expect, test } from "vitest";
-import { DEFAULT_HEADERS } from "../../src/RequestHeaders";
+import { DEFAULT_HEADERS } from "../../src";
 import { commonEntitySetTests } from "../EntitySetServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { PersonModelV2CollectionService } from "../fixture/v2/PersonModelV2Service";

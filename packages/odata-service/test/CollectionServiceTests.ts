@@ -120,4 +120,12 @@ export function commonCollectionTests(
     await stringService.delete(REQUEST_CONFIG);
     expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
   });
+
+  test("collection: no url encoding", async () => {
+    const toTest = stringCollectionServiceConstructor(BASE_URL, NAME_STRING, { noUrlEncoding: true });
+
+    await toTest.query((qb, q) => qb.filter(q.it.eq("2")));
+
+    expect(odataClient.lastUrl).toBe(STRING_URL + "?$filter=$it eq '2'");
+  });
 }

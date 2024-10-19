@@ -7,7 +7,7 @@ import {
   StringCollection,
 } from "@odata2ts/odata-query-objects";
 import { describe, expect, test } from "vitest";
-import { CollectionServiceV2 } from "../../src";
+import { CollectionServiceV2, ODataServiceOptions } from "../../src";
 import { DEFAULT_HEADERS } from "../../src/RequestHeaders";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
 import { MockClient } from "../mock/MockClient";
@@ -28,8 +28,9 @@ describe("CollectionService V2 Tests", () => {
   const stringConstructor = (
     basePath: string,
     name: string,
+    options?: ODataServiceOptions,
   ): CollectionServiceV2<MockClient, StringCollection, QStringV2Collection> => {
-    return new CollectionServiceV2(odataClient, basePath, name, new QStringV2Collection());
+    return new CollectionServiceV2(odataClient, basePath, name, new QStringV2Collection(), options);
   };
   const enumConstructor = (
     basePath: string,

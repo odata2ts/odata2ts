@@ -3,6 +3,7 @@ import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts
 import { ODataValueResponseV2 } from "@odata2ts/odata-core";
 import { ConvertibleV2, convertV2ValueResponse } from "@odata2ts/odata-query-objects";
 import { getIdentityConverter } from "@odata2ts/odata-query-objects/lib/IdentityConverter";
+import { ODataServiceOptions } from "../ODataServiceOptions";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
 
 // const RAW_VALUE_SUFFIX = "/$value";
@@ -20,8 +21,9 @@ export class PrimitiveTypeServiceV2<in out ClientType extends ODataHttpClient, T
     name: string,
     { convertTo, convertFrom }: ValueConverter<any, any> = getIdentityConverter(),
     mappedName?: string,
+    options?: ODataServiceOptions,
   ) {
-    this.__base = new ServiceStateHelper(client, basePath, name);
+    this.__base = new ServiceStateHelper(client, basePath, name, options);
     this.__converter = {
       convertFrom,
       convertTo,

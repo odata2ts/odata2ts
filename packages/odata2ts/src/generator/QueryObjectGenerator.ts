@@ -1,6 +1,12 @@
 import { ValueConverterImport } from "@odata2ts/converter-runtime";
 import { ODataVersions } from "@odata2ts/odata-core";
-import { OptionalKind, PropertyDeclarationStructure, Scope, VariableDeclarationKind } from "ts-morph";
+import {
+  MethodDeclarationStructure,
+  OptionalKind,
+  PropertyDeclarationStructure,
+  Scope,
+  VariableDeclarationKind,
+} from "ts-morph";
 import { firstCharLowerCase } from "xml2js/lib/processors.js";
 import { DataModel } from "../data-model/DataModel.js";
 import {
@@ -346,8 +352,14 @@ class QueryObjectGenerator {
           ? [
               {
                 name: "buildUrl",
-                statements: ["return super.buildUrl(undefined)"],
-              },
+                parameters: [
+                  {
+                    name: "notEncoded",
+                    initializer: "false",
+                  },
+                ],
+                statements: ["return super.buildUrl(undefined, notEncoded)"],
+              } as OptionalKind<MethodDeclarationStructure>,
             ]
           : []),
       ],

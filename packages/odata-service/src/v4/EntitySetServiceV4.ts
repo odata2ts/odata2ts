@@ -7,6 +7,7 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
+import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
 
 export abstract class EntitySetServiceV4<
@@ -28,7 +29,7 @@ export abstract class EntitySetServiceV4<
    * @param name name of the service
    * @param qModel query object
    * @param idFunction the id function
-   * @param bigNumbersAsString
+   * @param options
    * @protected
    */
   protected constructor(
@@ -37,9 +38,9 @@ export abstract class EntitySetServiceV4<
     name: string,
     qModel: Q,
     idFunction: QId<EIdType>,
-    bigNumbersAsString: boolean = false,
+    options?: ODataServiceOptionsInternal,
   ) {
-    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, bigNumbersAsString);
+    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, options);
     this.__idFunction = idFunction;
   }
 
@@ -65,7 +66,7 @@ export abstract class EntitySetServiceV4<
    * @param notEncoded if set to {@code true}, special chars are not escaped
    */
   public createKey(id: EIdType, notEncoded?: boolean): string {
-    const url = this.__idFunction.buildUrl(id, notEncoded);
+    const url = this.__idFunction.buildUrl(id, notEncoded ?? this.__base.isUrlNotEncoded());
     return url.startsWith("/") ? url.substring(1) : url;
   }
 
@@ -79,7 +80,7 @@ export abstract class EntitySetServiceV4<
    * @param notDecoded if set to {@code true}, encoded special chars are not decoded
    */
   public parseKey(keyPath: string, notDecoded?: boolean): EIdType {
-    return this.__idFunction.parseUrl(keyPath, notDecoded);
+    return this.__idFunction.parseUrl(keyPath, notDecoded ?? this.__base.isUrlNotEncoded());
   }
 
   /**

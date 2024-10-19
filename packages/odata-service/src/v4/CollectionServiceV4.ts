@@ -7,6 +7,7 @@ import {
   PrimitiveCollectionType,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
+import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
@@ -24,9 +25,9 @@ export class CollectionServiceV4<
     basePath: string,
     name: string,
     qModel: Q,
-    bigNumbersAsString: boolean = false,
+    options?: ODataServiceOptionsInternal,
   ) {
-    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, bigNumbersAsString);
+    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, options);
   }
 
   public getPath() {

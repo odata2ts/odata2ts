@@ -8,7 +8,7 @@ import {
   StringCollection,
 } from "@odata2ts/odata-query-objects";
 import { PrefixModel } from "@odata2ts/test-converters";
-import { CollectionServiceV2, CollectionServiceV4 } from "../../src";
+import { CollectionServiceV2, CollectionServiceV4, ODataServiceOptions } from "../../src";
 import { MockClient } from "../mock/MockClient";
 import { NumericTestEnum } from "../v2/CollectionServiceV2.test";
 import { StringTestEnum } from "../v4/CollectionServiceV4.test";
@@ -49,7 +49,11 @@ export interface GetSomethingFunctionParams {
 export type PersonModelServiceVersion = PMServiceV2<MockClient> | PMServiceV4<MockClient>;
 export type PersonCollectionServiceVersion = PMCServiceV2<MockClient> | PMCServiceV4<MockClient>;
 
-export type StringCollectionServiceConstructor = (basePath: string, name: string) => StringCollectionService;
+export type StringCollectionServiceConstructor = (
+  basePath: string,
+  name: string,
+  options?: ODataServiceOptions,
+) => StringCollectionService;
 export type StringCollectionService =
   | CollectionServiceV4<MockClient, StringCollection, QStringCollection>
   | CollectionServiceV2<MockClient, StringCollection, QStringV2Collection>;

@@ -1,5 +1,5 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
-
+import { ODataServiceOptionsInternal } from "./ODataServiceOptions";
 import { BIG_NUMBERS_HEADERS, DEFAULT_HEADERS } from "./RequestHeaders.js";
 
 export class ServiceStateHelper<out ClientType extends ODataHttpClient> {
@@ -9,7 +9,7 @@ export class ServiceStateHelper<out ClientType extends ODataHttpClient> {
     public readonly client: ClientType,
     basePath: string,
     public name?: string,
-    public readonly bigNumbersAsString: boolean = false
+    public options: ODataServiceOptionsInternal = {},
   ) {
     this.path = basePath && name ? basePath + "/" + name : basePath ? basePath : name || "";
   }
@@ -19,6 +19,10 @@ export class ServiceStateHelper<out ClientType extends ODataHttpClient> {
   };
 
   public getDefaultHeaders = () => {
-    return this.bigNumbersAsString ? BIG_NUMBERS_HEADERS : DEFAULT_HEADERS;
+    return this.options.bigNumbersAsString ? BIG_NUMBERS_HEADERS : DEFAULT_HEADERS;
+  };
+
+  public isUrlNotEncoded = () => {
+    return !!this.options.noUrlEncoding;
   };
 }
