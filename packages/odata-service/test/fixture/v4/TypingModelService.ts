@@ -11,8 +11,7 @@ import {
   QueryObject,
 } from "@odata2ts/odata-query-objects";
 import { numberToStringConverter } from "@odata2ts/test-converters";
-import { EntitySetServiceV4, EntityTypeServiceV4 } from "../../../src";
-import { ODataServiceOptionsInternal } from "../../../src/ODataService";
+import { EntitySetServiceV4, EntityTypeServiceV4, ODataServiceOptionsInternal } from "../../../src";
 
 export interface TestModel {
   id: string;

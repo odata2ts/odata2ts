@@ -4,10 +4,9 @@ import {
   CollectionServiceV4,
   EntitySetServiceV4,
   EntityTypeServiceV4,
-  ODataServiceOptions,
+  ODataServiceOptionsInternal,
   PrimitiveTypeServiceV4,
 } from "../../../src";
-import { ODataServiceOptionsInternal } from "../../../src/ODataService";
 import { EditablePersonModel, Feature, GetSomethingFunctionParams, PersonId, PersonModel } from "../PersonModel";
 import { QPersonIdFunction } from "../QPerson";
 import { QGetSomethingFunction, QPersonV4, qPersonV4 } from "./QPersonV4";
