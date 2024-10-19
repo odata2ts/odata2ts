@@ -1,5 +1,10 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
-import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
+import {
+  EntitySetServiceV4,
+  EntityTypeServiceV4,
+  ODataService,
+  ODataServiceOptionsInternal,
+} from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QAbstractEntity, QTestEntity } from "./QTester";
 // @ts-ignore
@@ -18,10 +23,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   public testing(id: AbstractEntityId): TestEntityService<ClientType>;
   public testing(id?: AbstractEntityId | undefined) {
     const fieldName = "Testing";
-    const { client, path } = this.__base;
+    const { client, path, options } = this.__base;
     return typeof id === "undefined" || id === null
-      ? new TestEntityCollectionService(client, path, fieldName)
-      : new TestEntityService(client, path, new QAbstractEntityId(fieldName).buildUrl(id));
+      ? new TestEntityCollectionService(client, path, fieldName, options)
+      : new TestEntityService(client, path, new QAbstractEntityId(fieldName).buildUrl(id), options);
   }
 }
 
@@ -31,8 +36,8 @@ export class AbstractEntityService<in out ClientType extends ODataHttpClient> ex
   EditableAbstractEntity,
   QAbstractEntity
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qAbstractEntity);
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+    super(client, basePath, name, qAbstractEntity, options);
   }
 }
 
@@ -43,8 +48,8 @@ export class AbstractEntityCollectionService<in out ClientType extends ODataHttp
   QAbstractEntity,
   AbstractEntityId
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qAbstractEntity, new QAbstractEntityId(name));
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+    super(client, basePath, name, qAbstractEntity, new QAbstractEntityId(name), options);
   }
 }
 
@@ -54,8 +59,8 @@ export class TestEntityService<in out ClientType extends ODataHttpClient> extend
   EditableTestEntity,
   QTestEntity
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qTestEntity);
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+    super(client, basePath, name, qTestEntity, options);
   }
 }
 
@@ -66,7 +71,7 @@ export class TestEntityCollectionService<in out ClientType extends ODataHttpClie
   QTestEntity,
   AbstractEntityId
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qTestEntity, new QAbstractEntityId(name));
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+    super(client, basePath, name, qTestEntity, new QAbstractEntityId(name), options);
   }
 }

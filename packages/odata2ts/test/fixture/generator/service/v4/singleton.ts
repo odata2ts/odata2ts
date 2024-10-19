@@ -1,5 +1,10 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
-import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
+import {
+  EntitySetServiceV4,
+  EntityTypeServiceV4,
+  ODataService,
+  ODataServiceOptionsInternal,
+} from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
 // @ts-ignore
@@ -12,8 +17,8 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
 
   public currentUser() {
     if (!this._currentUser) {
-      const { client, path } = this.__base;
-      this._currentUser = new TestEntityService(client, path, "CURRENT_USER");
+      const { client, path, options } = this.__base;
+      this._currentUser = new TestEntityService(client, path, "CURRENT_USER", options);
     }
 
     return this._currentUser;
@@ -26,8 +31,8 @@ export class TestEntityService<in out ClientType extends ODataHttpClient> extend
   EditableTestEntity,
   QTestEntity
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qTestEntity);
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+    super(client, basePath, name, qTestEntity, options);
   }
 }
 
@@ -38,7 +43,7 @@ export class TestEntityCollectionService<in out ClientType extends ODataHttpClie
   QTestEntity,
   TestEntityId
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qTestEntity, new QTestEntityId(name));
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+    super(client, basePath, name, qTestEntity, new QTestEntityId(name), options);
   }
 }

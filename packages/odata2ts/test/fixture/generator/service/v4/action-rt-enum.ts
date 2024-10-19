@@ -1,6 +1,11 @@
 import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
+import {
+  EntitySetServiceV4,
+  EntityTypeServiceV4,
+  ODataService,
+  ODataServiceOptionsInternal,
+} from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QBook } from "./QTester";
 // @ts-ignore
@@ -13,10 +18,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   public books(id: BookId): BookService<ClientType>;
   public books(id?: BookId | undefined) {
     const fieldName = "books";
-    const { client, path } = this.__base;
+    const { client, path, options } = this.__base;
     return typeof id === "undefined" || id === null
-      ? new BookCollectionService(client, path, fieldName)
-      : new BookService(client, path, new QBookId(fieldName).buildUrl(id));
+      ? new BookCollectionService(client, path, fieldName, options)
+      : new BookService(client, path, new QBookId(fieldName).buildUrl(id), options);
   }
 }
 
@@ -29,8 +34,8 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
   private _bookQLike?: Book_QLike;
   private _bookQRate?: Book_QRate;
 
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qBook);
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+    super(client, basePath, name, qBook, options);
   }
 
   public async like(
@@ -40,7 +45,7 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
       this._bookQLike = new Book_QLike();
     }
 
-    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._bookQLike.buildUrl());
     return client.post(url, {}, requestConfig, getDefaultHeaders());
   }
@@ -53,7 +58,7 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
       this._bookQRate = new Book_QRate();
     }
 
-    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._bookQRate.buildUrl());
     const response = await client.post(
       url,
@@ -74,8 +79,8 @@ export class BookCollectionService<in out ClientType extends ODataHttpClient> ex
 > {
   private _bookQRatings?: Book_QRatings;
 
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, qBook, new QBookId(name));
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+    super(client, basePath, name, qBook, new QBookId(name), options);
   }
 
   public async ratings(
@@ -86,7 +91,7 @@ export class BookCollectionService<in out ClientType extends ODataHttpClient> ex
       this._bookQRatings = new Book_QRatings();
     }
 
-    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._bookQRatings.buildUrl());
     const response = await client.post(
       url,

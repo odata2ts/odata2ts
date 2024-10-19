@@ -97,8 +97,13 @@ class ServiceGenerator {
               parameters: [
                 { name: "client", type: "ClientType" },
                 { name: "basePath", type: "string" },
+                {
+                  name: "options",
+                  type: importContainer.addServiceObject(this.version, ServiceImports.ODataServiceOptions),
+                  hasQuestionToken: true,
+                },
               ],
-              statements: [`super(client, basePath, true);`],
+              statements: [`super(client, basePath, options);`, "this.__base.options.bigNumbersAsString = true;"],
             },
           ]
         : [],
@@ -182,10 +187,10 @@ class ServiceGenerator {
       ],
       statements: [
         `const fieldName = "${odataPropName}";`,
-        `const { client, path } = this.__base;`,
+        `const { client, path, options } = this.__base;`,
         'return typeof id === "undefined" || id === null',
-        `? new ${collectionName}(client, path, fieldName)`,
-        `: new ${serviceName}(client, path, new ${idFunctionName}(fieldName).buildUrl(id));`,
+        `? new ${collectionName}(client, path, fieldName, options)`,
+        `: new ${serviceName}(client, path, new ${idFunctionName}(fieldName).buildUrl(id), options);`,
       ],
     };
   }
@@ -224,9 +229,9 @@ class ServiceGenerator {
       name: this.namingHelper.getRelatedServiceGetter(name),
       statements: [
         `if(!${propName}) {`,
-        `  const { client, path } = this.__base;`,
+        `  const { client, path, options } = this.__base;`,
         // prettier-ignore
-        `  ${propName} = new ${serviceType}(client, path, "${odataName}")`,
+        `  ${propName} = new ${serviceType}(client, path, "${odataName}", options)`,
         "}",
         `return ${propName}`,
       ],
@@ -247,6 +252,12 @@ class ServiceGenerator {
     const editableModelName = importContainer.addGeneratedModel(model.fqName, model.editableName);
     const qName = importContainer.addGeneratedQObject(model.fqName, model.qName, true);
     const qObjectName = importContainer.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName));
+    const serviceOptions = importContainer.addServiceObject(
+      this.version,
+      this.version === ODataVersions.V4
+        ? ServiceImports.ODataServiceOptionsInternal
+        : ServiceImports.ODataServiceOptions,
+    );
 
     const { properties, methods }: PropsAndOps = deepmerge(
       this.generateServiceProperties(importContainer, model.serviceName, props),
@@ -265,8 +276,9 @@ class ServiceGenerator {
             { name: "client", type: "ClientType" },
             { name: "basePath", type: "string" },
             { name: "name", type: "string" },
+            { name: "options", type: serviceOptions, hasQuestionToken: true },
           ],
-          statements: [`super(client, basePath, name, ${qObjectName}${this.isV4BigNumber() ? ", true" : ""});`],
+          statements: [`super(client, basePath, name, ${qObjectName}, options);`],
         },
       ],
       properties,
@@ -432,9 +444,9 @@ class ServiceGenerator {
       returnType: typeWithGenerics,
       statements: [
         `if(!${privateSrvProp}) {`,
-        `  const { client, path } = this.__base;`,
+        `  const { client, path, options } = this.__base;`,
         // prettier-ignore
-        `  ${privateSrvProp} = new ${type}(client, path, "${prop.odataName}"${isComplexCollection ? `, ${imports.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName))}`: ""})`,
+        `  ${privateSrvProp} = new ${type}(client, path, "${prop.odataName}"${isComplexCollection ? `, ${imports.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName))}`: ""}, options)`,
         "}",
         `return ${privateSrvProp}`,
       ],
@@ -456,9 +468,9 @@ class ServiceGenerator {
       name: this.namingHelper.getRelatedServiceGetter(prop.name),
       statements: [
         `if(!${propName}) {`,
-        `  const { client, path } = this.__base;`,
+        `  const { client, path, options } = this.__base;`,
         // prettier-ignore
-        `  ${propName} = new ${collectionServiceType}(client, path, "${prop.odataName}", new ${qCollectionName}(${enumName ?? ""})${this.isV4BigNumber() ? ", true": ""})`,
+        `  ${propName} = new ${collectionServiceType}(client, path, "${prop.odataName}", new ${qCollectionName}(${enumName ?? ""}), options)`,
         "}",
         `return ${propName}`,
       ],
@@ -472,18 +484,16 @@ class ServiceGenerator {
     const serviceType = imports.addServiceObject(this.version, ServiceImports.PrimitiveTypeService);
     const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
     // for V2: mapped name must be specified
-    const useMappedName = this.version === ODataVersions.V2 && prop.name !== prop.odataName;
-    // for V4: big number support
-    const useBigNumber = this.isV4BigNumber();
-    const addParamString = useMappedName ? `, "${prop.name}"` : useBigNumber ? ", true" : "";
+    const v2MappedName =
+      this.version === ODataVersions.V4 ? "" : prop.name !== prop.odataName ? `, "${prop.name}"` : ", undefined";
 
     return {
       scope: Scope.Public,
       name: this.namingHelper.getRelatedServiceGetter(prop.name),
       statements: [
         `if(!${propName}) {`,
-        `  const { client, path, qModel } = this.__base;`,
-        `  ${propName} = new ${serviceType}(client, path, "${prop.odataName}", qModel.${prop.name}.converter${addParamString})`,
+        `  const { client, path, qModel, options } = this.__base;`,
+        `  ${propName} = new ${serviceType}(client, path, "${prop.odataName}", qModel.${prop.name}.converter${v2MappedName}, options)`,
         "}",
         `return ${propName}`,
       ],
@@ -498,6 +508,12 @@ class ServiceGenerator {
     const entitySetServiceType = importContainer.addServiceObject(this.version, ServiceImports.EntitySetService);
     const paramsModelName = importContainer.addGeneratedModel(model.id.fqName, model.id.modelName);
     const qIdFunctionName = importContainer.addGeneratedQObject(model.id.fqName, model.id.qName);
+    const serviceOptions = importContainer.addServiceObject(
+      this.version,
+      this.version === ODataVersions.V4
+        ? ServiceImports.ODataServiceOptionsInternal
+        : ServiceImports.ODataServiceOptions,
+    );
 
     const collectionOperations = this.dataModel.getEntitySetOperations(model.fqName);
 
@@ -516,12 +532,9 @@ class ServiceGenerator {
             { name: "client", type: "ClientType" },
             { name: "basePath", type: "string" },
             { name: "name", type: "string" },
+            { name: "options", type: serviceOptions, hasQuestionToken: true },
           ],
-          statements: [
-            `super(client, basePath, name, ${qObjectName}, new ${qIdFunctionName}(name)${
-              this.isV4BigNumber() ? ", true" : ""
-            });`,
-          ],
+          statements: [`super(client, basePath, name, ${qObjectName}, new ${qIdFunctionName}(name), options);`],
         },
       ],
       properties,
@@ -610,8 +623,8 @@ class ServiceGenerator {
         `  ${qOpProp} = new ${qOperationName}()`,
         "}",
 
-        `const { addFullPath, client, getDefaultHeaders } = this.__base;`,
-        `const url = addFullPath(${qOpProp}.buildUrl(${isFunc && hasParams ? "params" : ""}));`,
+        `const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;`,
+        `const url = addFullPath(${qOpProp}.buildUrl(${isFunc && hasParams ? "params, " : ""}${isFunc ? "isUrlNotEncoded()" : ""}));`,
         `${returnType ? "const response = await " : "return"} client.${
           !isFunc
             ? // actions: since V4

@@ -11,7 +11,7 @@ export class QEmptyFunction extends QFunction {
     return this.params;
   }
 
-  buildUrl() {
-    return super.buildUrl(undefined);
+  buildUrl(notEncoded = false) {
+    return super.buildUrl(undefined, notEncoded);
   }
 }

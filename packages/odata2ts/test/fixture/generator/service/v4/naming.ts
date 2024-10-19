@@ -1,5 +1,10 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
-import { EntitySetServiceV4, EntityTypeServiceV4, ODataService } from "@odata2ts/odata-service";
+import {
+  EntitySetServiceV4,
+  EntityTypeServiceV4,
+  ODataService,
+  ODataServiceOptionsInternal,
+} from "@odata2ts/odata-service";
 // @ts-ignore
 import type { Q_TEST_ENTITY } from "./QTester";
 // @ts-ignore
@@ -12,10 +17,10 @@ export class tester<in out ClientType extends ODataHttpClient> extends ODataServ
   public NAVIGATE_TO_LIST(id: TEST_ENTITY_ID): TEST_ENTITY_SRV<ClientType>;
   public NAVIGATE_TO_LIST(id?: TEST_ENTITY_ID | undefined) {
     const fieldName = "list";
-    const { client, path } = this.__base;
+    const { client, path, options } = this.__base;
     return typeof id === "undefined" || id === null
-      ? new TEST_ENTITY_COLLECTION_SRV(client, path, fieldName)
-      : new TEST_ENTITY_SRV(client, path, new Q_TEST_ENTITY_ID(fieldName).buildUrl(id));
+      ? new TEST_ENTITY_COLLECTION_SRV(client, path, fieldName, options)
+      : new TEST_ENTITY_SRV(client, path, new Q_TEST_ENTITY_ID(fieldName).buildUrl(id), options);
   }
 }
 
@@ -25,8 +30,8 @@ export class TEST_ENTITY_SRV<in out ClientType extends ODataHttpClient> extends 
   EDITABLE_TEST_ENTITY,
   Q_TEST_ENTITY
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, q_TEST_ENTITY);
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+    super(client, basePath, name, q_TEST_ENTITY, options);
   }
 }
 
@@ -37,7 +42,7 @@ export class TEST_ENTITY_COLLECTION_SRV<in out ClientType extends ODataHttpClien
   Q_TEST_ENTITY,
   TEST_ENTITY_ID
 > {
-  constructor(client: ClientType, basePath: string, name: string) {
-    super(client, basePath, name, q_TEST_ENTITY, new Q_TEST_ENTITY_ID(name));
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+    super(client, basePath, name, q_TEST_ENTITY, new Q_TEST_ENTITY_ID(name), options);
   }
 }

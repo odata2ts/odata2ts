@@ -17,8 +17,8 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
       this._qBestReview = new QBestReview();
     }
 
-    const { addFullPath, client, getDefaultHeaders } = this.__base;
-    const url = addFullPath(this._qBestReview.buildUrl(params));
+    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
+    const url = addFullPath(this._qBestReview.buildUrl(params, isUrlNotEncoded()));
     const response = await client.get(url, requestConfig, getDefaultHeaders());
     return this._qBestReview.convertResponse(response);
   }
