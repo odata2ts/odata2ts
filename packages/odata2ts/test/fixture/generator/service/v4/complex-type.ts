@@ -18,10 +18,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   public books(id: BookId): BookService<ClientType>;
   public books(id?: BookId | undefined) {
     const fieldName = "Books";
-    const { client, path, options } = this.__base;
+    const { client, path, options, isUrlNotEncoded } = this.__base;
     return typeof id === "undefined" || id === null
       ? new BookCollectionService(client, path, fieldName, options)
-      : new BookService(client, path, new QBookId(fieldName).buildUrl(id), options);
+      : new BookService(client, path, new QBookId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
   }
 }
 

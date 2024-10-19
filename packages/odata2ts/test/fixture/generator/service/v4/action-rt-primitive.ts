@@ -22,10 +22,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   public tests(id: TestEntityId): TestEntityService<ClientType>;
   public tests(id?: TestEntityId | undefined) {
     const fieldName = "tests";
-    const { client, path, options } = this.__base;
+    const { client, path, options, isUrlNotEncoded } = this.__base;
     return typeof id === "undefined" || id === null
       ? new TestEntityCollectionService(client, path, fieldName, options)
-      : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id), options);
+      : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
   }
 
   public async pingString(

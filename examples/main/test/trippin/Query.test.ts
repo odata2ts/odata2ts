@@ -2,6 +2,7 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { describe, expect, test } from "vitest";
 import { PersonIdModel, PersonModel } from "../../build/trippin/TrippinModel";
+import { TrippinService } from "../../build/trippin/TrippinService";
 import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "../TestConstants";
 
 type SelectedPersonShape = Pick<PersonModel, "user" | "lastName" | "addressInfo">;
@@ -77,5 +78,21 @@ describe("Trippin: Testing Query Functionality", function () {
     });
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People?%24filter=Trips%2Fany()`);
+  });
+
+  test("no url encoding", async () => {
+    await new TrippinService(ODATA_CLIENT, BASE_URL, { noUrlEncoding: true })
+      .people("hei/ner")
+      .query((b, q) => b.filter(q.age.gt(18)));
+
+    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('hei/ner')?$filter=Age gt 18`);
+  });
+
+  test("fucntion without url encoding", async () => {
+    await new TrippinService(ODATA_CLIENT, BASE_URL, { noUrlEncoding: true })
+      .people("heiner")
+      .getFriendsTrips({ userName: "hei/ner" });
+
+    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('heiner')/Trippin.GetFriendsTrips(userName='hei/ner')`);
   });
 });

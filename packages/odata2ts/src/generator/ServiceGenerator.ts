@@ -187,10 +187,10 @@ class ServiceGenerator {
       ],
       statements: [
         `const fieldName = "${odataPropName}";`,
-        `const { client, path, options } = this.__base;`,
+        `const { client, path, options, isUrlNotEncoded } = this.__base;`,
         'return typeof id === "undefined" || id === null',
         `? new ${collectionName}(client, path, fieldName, options)`,
-        `: new ${serviceName}(client, path, new ${idFunctionName}(fieldName).buildUrl(id), options);`,
+        `: new ${serviceName}(client, path, new ${idFunctionName}(fieldName).buildUrl(id, isUrlNotEncoded()), options);`,
       ],
     };
   }

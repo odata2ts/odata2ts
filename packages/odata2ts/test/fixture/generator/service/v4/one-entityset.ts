@@ -18,10 +18,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   public ents(id: TestEntityId): TestEntityService<ClientType>;
   public ents(id?: TestEntityId | undefined) {
     const fieldName = "Ents";
-    const { client, path, options } = this.__base;
+    const { client, path, options, isUrlNotEncoded } = this.__base;
     return typeof id === "undefined" || id === null
       ? new TestEntityCollectionService(client, path, fieldName, options)
-      : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id), options);
+      : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
   }
 }
 

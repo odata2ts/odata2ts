@@ -35,20 +35,30 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   public fromAbstract(id: ExtendedFromAbstractId): ExtendedFromAbstractService<ClientType>;
   public fromAbstract(id?: ExtendedFromAbstractId | undefined) {
     const fieldName = "FromAbstract";
-    const { client, path, options } = this.__base;
+    const { client, path, options, isUrlNotEncoded } = this.__base;
     return typeof id === "undefined" || id === null
       ? new ExtendedFromAbstractCollectionService(client, path, fieldName, options)
-      : new ExtendedFromAbstractService(client, path, new QExtendedFromAbstractId(fieldName).buildUrl(id), options);
+      : new ExtendedFromAbstractService(
+          client,
+          path,
+          new QExtendedFromAbstractId(fieldName).buildUrl(id, isUrlNotEncoded()),
+          options,
+        );
   }
 
   public fromOpen(): ExtendedFromOpenCollectionService<ClientType>;
   public fromOpen(id: ExtendedFromOpenId): ExtendedFromOpenService<ClientType>;
   public fromOpen(id?: ExtendedFromOpenId | undefined) {
     const fieldName = "FromOpen";
-    const { client, path, options } = this.__base;
+    const { client, path, options, isUrlNotEncoded } = this.__base;
     return typeof id === "undefined" || id === null
       ? new ExtendedFromOpenCollectionService(client, path, fieldName, options)
-      : new ExtendedFromOpenService(client, path, new QExtendedFromOpenId(fieldName).buildUrl(id), options);
+      : new ExtendedFromOpenService(
+          client,
+          path,
+          new QExtendedFromOpenId(fieldName).buildUrl(id, isUrlNotEncoded()),
+          options,
+        );
   }
 }
 

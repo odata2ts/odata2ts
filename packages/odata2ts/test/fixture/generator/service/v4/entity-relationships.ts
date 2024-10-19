@@ -18,10 +18,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   public books(id: BookId): BookService<ClientType>;
   public books(id?: BookId | undefined) {
     const fieldName = "books";
-    const { client, path, options } = this.__base;
+    const { client, path, options, isUrlNotEncoded } = this.__base;
     return typeof id === "undefined" || id === null
       ? new BookCollectionService(client, path, fieldName, options)
-      : new BookService(client, path, new QBookId(fieldName).buildUrl(id), options);
+      : new BookService(client, path, new QBookId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
   }
 }
 
@@ -104,10 +104,10 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
   public relatedAuthors(id: AuthorId): AuthorService<ClientType>;
   public relatedAuthors(id?: AuthorId | undefined) {
     const fieldName = "RelatedAuthors";
-    const { client, path, options } = this.__base;
+    const { client, path, options, isUrlNotEncoded } = this.__base;
     return typeof id === "undefined" || id === null
       ? new AuthorCollectionService(client, path, fieldName, options)
-      : new AuthorService(client, path, new QAuthorId(fieldName).buildUrl(id), options);
+      : new AuthorService(client, path, new QAuthorId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
   }
 }
 

@@ -21,10 +21,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   public tests(id: ChildId): ChildService<ClientType>;
   public tests(id?: ChildId | undefined) {
     const fieldName = "tests";
-    const { client, path, options } = this.__base;
+    const { client, path, options, isUrlNotEncoded } = this.__base;
     return typeof id === "undefined" || id === null
       ? new ChildCollectionService(client, path, fieldName, options)
-      : new ChildService(client, path, new QChildId(fieldName).buildUrl(id), options);
+      : new ChildService(client, path, new QChildId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
   }
 }
 

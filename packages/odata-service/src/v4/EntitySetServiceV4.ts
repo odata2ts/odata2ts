@@ -66,7 +66,7 @@ export abstract class EntitySetServiceV4<
    * @param notEncoded if set to {@code true}, special chars are not escaped
    */
   public createKey(id: EIdType, notEncoded?: boolean): string {
-    const url = this.__idFunction.buildUrl(id, notEncoded);
+    const url = this.__idFunction.buildUrl(id, notEncoded ?? this.__base.isUrlNotEncoded());
     return url.startsWith("/") ? url.substring(1) : url;
   }
 
@@ -80,7 +80,7 @@ export abstract class EntitySetServiceV4<
    * @param notDecoded if set to {@code true}, encoded special chars are not decoded
    */
   public parseKey(keyPath: string, notDecoded?: boolean): EIdType {
-    return this.__idFunction.parseUrl(keyPath, notDecoded);
+    return this.__idFunction.parseUrl(keyPath, notDecoded ?? this.__base.isUrlNotEncoded());
   }
 
   /**
