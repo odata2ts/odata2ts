@@ -7,7 +7,7 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { ODataServiceOptions, ODataServiceOptionsInternal } from "../ODataService";
+import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
 
 export abstract class EntitySetServiceV4<

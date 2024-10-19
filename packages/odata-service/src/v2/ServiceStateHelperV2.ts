@@ -1,7 +1,7 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { createQueryBuilderV2, ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { QComplexParam, QueryObjectModel } from "@odata2ts/odata-query-objects";
-import { ODataServiceOptions } from "../ODataService";
+import { ODataServiceOptions } from "../ODataServiceOptions";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
 
 export class ServiceStateHelperV2<

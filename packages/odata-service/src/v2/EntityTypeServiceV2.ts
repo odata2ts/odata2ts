@@ -2,7 +2,7 @@ import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts
 import { ODataModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { convertV2ModelResponse, QueryObjectModel } from "@odata2ts/odata-query-objects";
-import { ODataServiceOptions } from "../ODataService";
+import { ODataServiceOptions } from "../ODataServiceOptions";
 import { MERGE_HEADERS } from "../RequestHeaders.js";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 

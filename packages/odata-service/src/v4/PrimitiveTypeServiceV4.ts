@@ -3,7 +3,7 @@ import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts
 import { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { convertV4ValueResponse } from "@odata2ts/odata-query-objects";
 import { getIdentityConverter } from "@odata2ts/odata-query-objects/lib/IdentityConverter";
-import { ODataServiceOptionsInternal } from "../ODataService";
+import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
 
 // const RAW_VALUE_SUFFIX = "/$value";

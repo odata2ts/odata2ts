@@ -2,7 +2,7 @@ import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts
 import { ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { convertV4ModelResponse, QueryObjectModel } from "@odata2ts/odata-query-objects";
-import { ODataServiceOptionsInternal } from "../ODataService";
+import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
 
 export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObjectModel> {

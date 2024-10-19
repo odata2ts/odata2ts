@@ -1,5 +1,5 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
-import { ODataServiceOptionsInternal } from "./ODataService";
+import { ODataServiceOptionsInternal } from "../lib/ODataService";
 import { BIG_NUMBERS_HEADERS, DEFAULT_HEADERS } from "./RequestHeaders.js";
 
 export class ServiceStateHelper<out ClientType extends ODataHttpClient> {

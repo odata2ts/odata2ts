@@ -7,7 +7,7 @@ import {
   PrimitiveCollectionType,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { ODataServiceOptions } from "../ODataService";
+import { ODataServiceOptions } from "../ODataServiceOptions";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
