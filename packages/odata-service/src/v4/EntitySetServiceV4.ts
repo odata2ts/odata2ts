@@ -7,6 +7,7 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
+import { ODataServiceOptions, ODataServiceOptionsInternal } from "../ODataService";
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
 
 export abstract class EntitySetServiceV4<
@@ -28,7 +29,7 @@ export abstract class EntitySetServiceV4<
    * @param name name of the service
    * @param qModel query object
    * @param idFunction the id function
-   * @param bigNumbersAsString
+   * @param options
    * @protected
    */
   protected constructor(
@@ -37,9 +38,9 @@ export abstract class EntitySetServiceV4<
     name: string,
     qModel: Q,
     idFunction: QId<EIdType>,
-    bigNumbersAsString: boolean = false,
+    options?: ODataServiceOptionsInternal,
   ) {
-    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, bigNumbersAsString);
+    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, options);
     this.__idFunction = idFunction;
   }
 

@@ -2,7 +2,7 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4 } from "@odata2ts/odata-core";
 import { EnumCollection, QEnumCollection, QStringCollection, StringCollection } from "@odata2ts/odata-query-objects";
 import { describe, expect, test } from "vitest";
-import { CollectionServiceV4 } from "../../src";
+import { CollectionServiceV4, ODataServiceOptions } from "../../src";
 import { DEFAULT_HEADERS } from "../../src/RequestHeaders";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
 import { MockClient } from "../mock/MockClient";
@@ -22,8 +22,9 @@ describe("CollectionService V4 Tests", () => {
   const stringConstructor = (
     basePath: string,
     name: string,
+    options?: ODataServiceOptions,
   ): CollectionServiceV4<MockClient, StringCollection, QStringCollection> => {
-    return new CollectionServiceV4(odataClient, basePath, name, new QStringCollection());
+    return new CollectionServiceV4(odataClient, basePath, name, new QStringCollection(), options);
   };
   const enumConstructor = (
     basePath: string,
@@ -59,8 +60,10 @@ describe("CollectionService V4 Tests", () => {
     expect(odataClient.lastUrl).toBe(NAME_ENUM + params);
   });
 
-  test("colleciton: big number", async () => {
-    const testService = new CollectionServiceV4(odataClient, BASE_PATH, NAME_STRING, new QStringCollection(), true);
+  test("collection: big number", async () => {
+    const testService = new CollectionServiceV4(odataClient, BASE_PATH, NAME_STRING, new QStringCollection(), {
+      bigNumbersAsString: true,
+    });
 
     await testService.query();
 

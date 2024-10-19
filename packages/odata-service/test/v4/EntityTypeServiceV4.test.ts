@@ -2,7 +2,7 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { beforeEach, describe, expect, test } from "vitest";
-import { DEFAULT_HEADERS } from "../../src/RequestHeaders";
+import { DEFAULT_HEADERS } from "../../src";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { PersonModel } from "../fixture/PersonModel";
 import { PersonModelService } from "../fixture/v4/PersonModelService";
@@ -41,7 +41,7 @@ describe("EntityTypeService V4 Tests", () => {
   });
 
   test("entityType V4: big number", async () => {
-    testService = new PersonModelService(odataClient, BASE_URL, NAME, true);
+    testService = new PersonModelService(odataClient, BASE_URL, NAME, { bigNumbersAsString: true });
 
     await testService.query();
 

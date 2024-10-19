@@ -1,11 +1,16 @@
-import { beforeEach, test, expect } from "vitest";
-
+import { beforeEach, expect, test } from "vitest";
+import { ODataServiceOptions } from "../src";
 import { EditablePersonModel, Feature, PersonModelServiceVersion } from "./fixture/PersonModel";
 import { MockClient } from "./mock/MockClient";
 
 export function commonEntityTypeServiceTests(
   odataClient: MockClient,
-  serviceConstructor: new (odataClient: MockClient, basePath: string, name: string) => PersonModelServiceVersion,
+  serviceConstructor: new (
+    odataClient: MockClient,
+    basePath: string,
+    name: string,
+    options?: ODataServiceOptions,
+  ) => PersonModelServiceVersion,
 ) {
   const BASE_URL = "/test";
   const NAME = "EntityXY('tester')";
@@ -122,5 +127,13 @@ export function commonEntityTypeServiceTests(
 
     await testService.delete(REQUEST_CONFIG);
     expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
+  });
+
+  test("entityType: no url encoding", async () => {
+    const toTest = new serviceConstructor(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+
+    await toTest.query((qb, q) => qb.filter(q.userName.eq("2")));
+
+    expect(odataClient.lastUrl).toBe(EXPECTED_PATH + "?$filter=UserName eq '2'");
   });
 }

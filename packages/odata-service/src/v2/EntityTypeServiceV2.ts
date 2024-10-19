@@ -2,14 +2,15 @@ import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts
 import { ODataModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { convertV2ModelResponse, QueryObjectModel } from "@odata2ts/odata-query-objects";
+import { ODataServiceOptions } from "../ODataService";
 import { MERGE_HEADERS } from "../RequestHeaders.js";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
 export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObjectModel> {
   protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
 
-  protected constructor(client: ClientType, basePath: string, name: string, qModel: Q) {
-    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel);
+  protected constructor(client: ClientType, basePath: string, name: string, qModel: Q, options?: ODataServiceOptions) {
+    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel, options);
   }
 
   public getPath() {

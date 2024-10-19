@@ -7,6 +7,7 @@ import {
   PrimitiveCollectionType,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
+import { ODataServiceOptions } from "../ODataService";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
@@ -19,8 +20,8 @@ export class CollectionServiceV2<
 > {
   protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
 
-  public constructor(client: ClientType, basePath: string, name: string, qModel: Q) {
-    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel);
+  public constructor(client: ClientType, basePath: string, name: string, qModel: Q, options?: ODataServiceOptions) {
+    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel, options);
   }
 
   public getPath() {

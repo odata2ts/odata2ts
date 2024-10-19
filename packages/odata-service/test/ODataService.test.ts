@@ -1,6 +1,6 @@
+import { describe, expect, test } from "vitest";
 import { ODataService } from "../src";
 import { MockClient } from "./mock/MockClient";
-import { describe, test, expect } from "vitest";
 
 class TestODataService extends ODataService<MockClient> {
   public exposeAddFullPath(path?: string) {
@@ -28,10 +28,5 @@ describe("ODataService Test", () => {
     // @ts-expect-error
     expect(() => new ODataService(odataClient, null)).toThrowError();
     expect(() => new ODataService(odataClient, "")).toThrowError();
-  });
-
-  test("odataService: init with big number", () => {
-    const testService = new TestODataService(odataClient, BASE_URL, true);
-    expect(testService).toBeDefined();
   });
 });
