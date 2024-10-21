@@ -39,6 +39,11 @@ export class AbstractEntityService<in out ClientType extends ODataHttpClient> ex
   constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
     super(client, basePath, name, qAbstractEntity, options);
   }
+
+  public asTestEntityService() {
+    const { client, path, options } = this.__base;
+    return new TestEntityService(client, path, "Tester.TestEntity", options);
+  }
 }
 
 export class AbstractEntityCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV4<
@@ -50,6 +55,11 @@ export class AbstractEntityCollectionService<in out ClientType extends ODataHttp
 > {
   constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
     super(client, basePath, name, qAbstractEntity, new QAbstractEntityId(name), options);
+  }
+
+  public asTestEntityCollectionService() {
+    const { client, path, options } = this.__base;
+    return new TestEntityCollectionService(client, path, "Tester.TestEntity", options);
   }
 }
 

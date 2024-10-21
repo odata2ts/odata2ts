@@ -55,16 +55,6 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    * Reverse mapping from fqName to data type: EntityType, ComplexType, EnumType, or Primitive Type.
    */
   private model2Type = new Map<string, DataTypes>();
-  /**
-   * Stores models (ComplexType or EntityType) by fqName that have been referenced in the API
-   * as entry point or via navProp.
-   * For these models one or two services are generated.
-   *
-   * In this way unnecessary service generation is prevented. For example, complex types that
-   * are only referenced as response of an operation do not need a generated service.
-   * @private
-   */
-  private serviceModels = new Set<string>();
 
   protected constructor(
     protected version: ODataVersion,
@@ -146,13 +136,14 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
       // V4 only: function & action types
       this.digestOperations(schema);
-
-      // mark each EntityType & ComplexType which is referencable from API
-      this.analyzeModelUsage(schema.EntityContainer?.length ? schema.EntityContainer[0] : undefined);
     });
 
     this.postProcessModel();
     this.postProcessKeys();
+
+    this.schemas.forEach((schema) => {
+      this.analyzeModelUsage(schema.EntityContainer?.length ? schema.EntityContainer[0] : undefined);
+    });
   }
 
   private getBaseModel(
@@ -198,7 +189,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       baseProps: [], // postprocess required
       abstract: ifTrue(model.$.Abstract),
       open: ifTrue(model.$.OpenType),
-      genMode: Modes.service,
+      genMode: Modes.qobjects,
+      subtypes: new Set(),
     } satisfies Partial<ComplexModelType>;
   }
 
@@ -283,10 +275,22 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         keyNames: keyNames, // postprocess required to include key specs from base classes
         keys: [], // postprocess required to include props from base classes
         getKeyUnion: () => keyNames.join(" | "),
+        subtypes: new Set(),
       });
     }
   }
 
+  /**
+   * Check that models (ComplexType or EntityType) have been referenced in the API
+   * as entry point or via navProp or by virtue of being a base type or subtype of those.
+   * For these models one or two services are generated.
+   *
+   * In this way unnecessary service generation is prevented. For example, complex types that
+   * are only referenced as response of an operation do not need a generated service.
+   *
+   * @param ec
+   * @private
+   */
   private analyzeModelUsage(ec: EntityContainerV3 | EntityContainerV4 | undefined) {
     if (ec?.EntitySet?.length) {
       ec.EntitySet.forEach((et) => this.analyze(et.$.EntityType));
@@ -298,23 +302,29 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   }
 
   /**
-   * Check
+   * Check usage of model types within API.
+   *
    * @param fqModelName
    * @private
    */
   private analyze(fqModelName: string) {
     // to also resolve aliases the data model needs to be used
     const model = this.dataModel.getEntityType(fqModelName) ?? this.dataModel.getComplexType(fqModelName);
-    if (!model?.fqName || this.serviceModels.has(model.fqName)) {
+    if (!model?.fqName || model.genMode === Modes.service) {
       return;
     }
 
-    this.serviceModels.add(model.fqName);
+    model.genMode = Modes.service;
 
     if (model) {
+      // respect base classes
       if (model.baseClasses.length) {
         this.analyze(model.baseClasses[0]);
       }
+      // include subtypes since each base class can be cast to its subtypes
+      model.subtypes.forEach((subtype) => {
+        this.analyze(subtype);
+      });
       model?.props.forEach((p) => {
         if (p.dataType === DataTypes.ComplexType || p.dataType === DataTypes.ModelType) {
           this.analyze(p.fqType);
@@ -327,19 +337,24 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // complex types
     const complexTypes = this.dataModel.getComplexTypes();
     complexTypes.forEach((ct) => {
+      // build up set of subtypes for each complex type
+      this.addSubtypes(ct);
+
+      // get props & keys from base types
       const [baseProps, _, baseAttributes] = this.collectBaseClassPropsAndKeys(ct, []);
       const { open } = baseAttributes;
       ct.baseProps = baseProps.map((bp) => ({ ...bp }));
       if (open) {
         ct.open = true;
       }
-      if (!this.serviceModels.has(ct.fqName)) {
-        ct.genMode = Modes.qobjects;
-      }
     });
     // entity types
     const entityTypes = this.dataModel.getEntityTypes();
     entityTypes.forEach((et) => {
+      // build up set of subtypes for each complex type
+      this.addSubtypes(et);
+
+      // get props & keys from base types
       const [baseProps, baseKeys, baseAttributes] = this.collectBaseClassPropsAndKeys(et, []);
       const { fqIdName, idName, qIdName, open } = baseAttributes;
       et.baseProps = baseProps.map((bp) => ({ ...bp }));
@@ -354,9 +369,6 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       }
       if (open) {
         et.open = open;
-      }
-      if (!this.serviceModels.has(et.fqName)) {
-        et.genMode = Modes.qobjects;
       }
       et.keyNames.unshift(...baseKeys.filter((bk) => !et.keyNames.includes(bk)));
     });
@@ -531,4 +543,22 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       ...result,
     };
   };
+
+  private addSubtypes(model: ComplexModelType, grandChildren = new Set<string>()) {
+    if (!model.baseClasses.length) {
+      return;
+    }
+
+    model.baseClasses.forEach((baseClass) => {
+      const baseType = this.dataModel.getModel(baseClass) as ComplexModelType;
+
+      // add subtypes
+      baseType.subtypes.add(model.fqName);
+      grandChildren.forEach((gc) => baseType.subtypes.add(gc));
+
+      // recursive
+      grandChildren.add(model.fqName);
+      this.addSubtypes(baseType, grandChildren);
+    });
+  }
 }
