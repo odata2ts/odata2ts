@@ -1,12 +1,11 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
 import { beforeEach, expect, test } from "vitest";
-import { Modes, NamingStrategies } from "../../src";
+import { Modes, NamingStrategies, TypeModel } from "../../src";
 import { NamespaceWithAlias, withNamespace } from "../../src/data-model/DataModel";
 import { ODataVersion } from "../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
 import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel";
-import { TypeModel } from "../../src/TypeModel";
 import { TestOptions, TestSettings } from "../generator/TestTypes";
 import { getTestConfig } from "../test.config";
 import { ODataModelBuilder } from "./builder/ODataModelBuilder";
@@ -99,7 +98,7 @@ export function createDataModelTests(
     expect(toTest.props.length).toBe(1);
   });
 
-  test("using Id of base class", async () => {
+  test("using Id of base class & subtypes", async () => {
     odataBuilder
       .addEntityType("Child", { baseType: withNs("Parent") }, () => {})
       .addEntityType("GrandParent", undefined, (builder) => {
@@ -118,6 +117,13 @@ export function createDataModelTests(
     expect(toTest.generateId).toBe(false);
     expect(toTest.props.length).toBe(0);
     expect(toTest.baseProps.length).toBe(1);
+
+    const expectedSubtypes = new Set();
+    expectedSubtypes.add(toTest.fqName);
+    expect(result.getEntityTypes()[1].subtypes).toStrictEqual(expectedSubtypes);
+
+    expectedSubtypes.add(withNs("Parent"));
+    expect(result.getEntityTypes()[0].subtypes).toStrictEqual(expectedSubtypes);
   });
 
   test("complex Id with base class", async () => {

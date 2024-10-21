@@ -199,6 +199,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       abstract: ifTrue(model.$.Abstract),
       open: ifTrue(model.$.OpenType),
       genMode: Modes.service,
+      subtypes: new Set(),
     } satisfies Partial<ComplexModelType>;
   }
 
@@ -283,6 +284,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         keyNames: keyNames, // postprocess required to include key specs from base classes
         keys: [], // postprocess required to include props from base classes
         getKeyUnion: () => keyNames.join(" | "),
+        subtypes: new Set(),
       });
     }
   }
@@ -327,6 +329,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // complex types
     const complexTypes = this.dataModel.getComplexTypes();
     complexTypes.forEach((ct) => {
+      // build up set of subtypes for each complex type
+      this.addSubtypes(ct);
+
+      // get props & keys from base types
       const [baseProps, _, baseAttributes] = this.collectBaseClassPropsAndKeys(ct, []);
       const { open } = baseAttributes;
       ct.baseProps = baseProps.map((bp) => ({ ...bp }));
@@ -340,6 +346,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // entity types
     const entityTypes = this.dataModel.getEntityTypes();
     entityTypes.forEach((et) => {
+      // build up set of subtypes for each complex type
+      this.addSubtypes(et);
+
+      // get props & keys from base types
       const [baseProps, baseKeys, baseAttributes] = this.collectBaseClassPropsAndKeys(et, []);
       const { fqIdName, idName, qIdName, open } = baseAttributes;
       et.baseProps = baseProps.map((bp) => ({ ...bp }));
@@ -531,4 +541,22 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       ...result,
     };
   };
+
+  private addSubtypes(model: ComplexModelType, grandChildren = new Set<string>()) {
+    if (!model.baseClasses.length) {
+      return;
+    }
+
+    model.baseClasses.forEach((baseClass) => {
+      const baseType = this.dataModel.getModel(baseClass) as ComplexModelType;
+
+      // add subtypes
+      baseType.subtypes.add(model.fqName);
+      grandChildren.forEach((gc) => baseType.subtypes.add(gc));
+
+      // recursive
+      grandChildren.add(model.fqName);
+      this.addSubtypes(baseType, grandChildren);
+    });
+  }
 }

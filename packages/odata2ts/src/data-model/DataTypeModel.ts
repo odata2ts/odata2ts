@@ -70,6 +70,7 @@ export interface ComplexType {
   abstract: boolean;
   open: boolean;
   genMode: Modes;
+  subtypes: Set<string>;
 }
 
 export interface EnumType {
