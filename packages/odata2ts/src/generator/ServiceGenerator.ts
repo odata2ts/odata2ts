@@ -260,8 +260,11 @@ class ServiceGenerator {
     );
 
     const { properties, methods }: PropsAndOps = deepmerge(
-      this.generateServiceProperties(importContainer, model.serviceName, props),
-      this.generateServiceOperations(importContainer, model, operations),
+      deepmerge(
+        this.generateServiceProperties(importContainer, model.serviceName, props),
+        this.generateServiceOperations(importContainer, model, operations),
+      ),
+      this.generateCastOperations(importContainer, model, false),
     );
 
     // generate EntityTypeService
@@ -517,7 +520,10 @@ class ServiceGenerator {
 
     const collectionOperations = this.dataModel.getEntitySetOperations(model.fqName);
 
-    const { properties, methods } = this.generateServiceOperations(importContainer, model, collectionOperations);
+    const { properties, methods } = deepmerge(
+      this.generateServiceOperations(importContainer, model, collectionOperations),
+      this.generateCastOperations(importContainer, model, true),
+    );
 
     file.getFile().addClass({
       isExported: true,
@@ -650,5 +656,29 @@ class ServiceGenerator {
         : CoreImports.ODataModelResponse;
 
     return imports.addCoreLib(this.version, typeToImport);
+  }
+
+  private generateCastOperations(
+    importContainer: ImportContainer,
+    model: ComplexType,
+    isCollection: boolean,
+  ): PropsAndOps {
+    const result: PropsAndOps = { properties: [], methods: [] };
+
+    model.subtypes.forEach((subtype) => {
+      const subClass = this.dataModel.getModel(subtype) as ComplexType;
+      const serviceName = isCollection ? subClass.serviceCollectionName : subClass.serviceName;
+      const serviceType = importContainer.addGeneratedService(subClass.fqName, serviceName);
+      result.methods.push({
+        name: `as${upperCaseFirst(serviceName)}`,
+        scope: Scope.Public,
+        statements: [
+          "const { client, path, options } = this.__base;",
+          `return new ${serviceType}(client, path, "${subClass.fqName}", options);`,
+        ],
+      });
+    });
+
+    return result;
   }
 }
