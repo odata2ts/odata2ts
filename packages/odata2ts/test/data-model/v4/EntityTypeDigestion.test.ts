@@ -36,7 +36,6 @@ describe("V4: EntityTypeDigestion Test", () => {
 
     expect(result.getEntityTypes().length).toBe(1);
     const model = result.getEntityTypes()[0];
-    // expect(model).toEqual({});
     expect(model).toMatchObject({
       name: "min",
       odataName: "min",
@@ -148,6 +147,8 @@ describe("V4: EntityTypeDigestion Test", () => {
     expect(result.getEntityType(withNs("GrandParent"))).toMatchObject({
       name: "GrandParent",
       odataName: "GrandParent",
+      qName: "QGrandParent",
+      qBaseName: "QGrandParentBaseType",
       keyNames: ["id"],
       props: [expectedGrandParentProp],
       baseClasses: [],
@@ -155,18 +156,23 @@ describe("V4: EntityTypeDigestion Test", () => {
     });
     expect(result.getEntityType(withNs("Parent"))).toMatchObject({
       name: "Parent",
+      qName: "QParent",
+      qBaseName: "QParentBaseType",
       keyNames: ["id"],
       props: [expectedParentProp],
       baseClasses: [withNs("GrandParent")],
       baseProps: [expectedGrandParentProp],
     });
-    expect(result.getEntityType(withNs("Child"))).toMatchObject({
+    const resultChild = result.getEntityType(withNs("Child"));
+    expect(resultChild).toMatchObject({
       name: "Child",
+      qName: "QChild",
       keyNames: ["id"],
       props: [expectedChildProp],
       baseClasses: [withNs("Parent")],
       baseProps: [expectedGrandParentProp, expectedParentProp],
     });
+    expect(resultChild.qBaseName).toBeUndefined();
   });
 
   test("EntityTypes: max prop types", async () => {

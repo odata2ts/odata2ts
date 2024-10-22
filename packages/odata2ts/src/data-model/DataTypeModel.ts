@@ -60,6 +60,7 @@ export interface ComplexType {
   modelName: string;
   editableName: string;
   qName: string;
+  qBaseName?: string;
   serviceName: string;
   serviceCollectionName: string;
   folderPath: string;
