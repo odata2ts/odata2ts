@@ -9,7 +9,9 @@ export class parentBaseType extends QueryObject {
 }
 
 export class Qparent extends parentBaseType {
-  public readonly asQBook = new QBook(this.withPrefix("Tester.Book"));
+  public asQBook() {
+    return new QBook(this.withPrefix("Tester.Book"));
+  }
 }
 
 export const qparent = new Qparent();

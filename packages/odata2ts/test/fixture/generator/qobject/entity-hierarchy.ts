@@ -7,8 +7,13 @@ export class QGrandParentBaseType extends QueryObject {
 }
 
 export class QGrandParent extends QGrandParentBaseType {
-  public readonly asQParent = new QParent(this.withPrefix("Tester.Parent"));
-  public readonly asQChild = new QChild(this.withPrefix("Tester.Child"));
+  public asQParent() {
+    return new QParent(this.withPrefix("Tester.Parent"));
+  }
+
+  public asQChild() {
+    return new QChild(this.withPrefix("Tester.Child"));
+  }
 }
 
 export const qGrandParent = new QGrandParent();
@@ -26,7 +31,9 @@ export class QParentBaseType extends QGrandParentBaseType {
 }
 
 export class QParent extends QParentBaseType {
-  public readonly asQChild = new QChild(this.withPrefix("Tester.Child"));
+  public asQChild() {
+    return new QChild(this.withPrefix("Tester.Child"));
+  }
 }
 
 export const qParent = new QParent();

@@ -9,7 +9,9 @@ export class PARENT_BASE_TYPE_Q_OBJ extends QueryObject {
 }
 
 export class PARENT_Q_OBJ extends PARENT_BASE_TYPE_Q_OBJ {
-  public readonly asBOOK_Q_OBJ = new BOOK_Q_OBJ(this.withPrefix("Tester.Book"));
+  public asBOOK_Q_OBJ() {
+    return new BOOK_Q_OBJ(this.withPrefix("Tester.Book"));
+  }
 }
 
 export const pARENT_Q_OBJ = new PARENT_Q_OBJ();

@@ -130,14 +130,13 @@ class QueryObjectGenerator {
         name: model.qName,
         isExported: true,
         extends: model.qBaseName,
-        properties: Array.from(model.subtypes).map((subtype) => {
+        methods: Array.from(model.subtypes).map((subtype) => {
           const subClass = this.dataModel.getModel(subtype) as ComplexType;
           return {
             name: `as${subClass.qName}`,
             scope: Scope.Public,
-            isReadonly: true,
-            initializer: `new ${subClass.qName}(this.withPrefix("${subClass.fqName}"))`,
-          } as OptionalKind<PropertyDeclarationStructure>;
+            statements: `return new ${subClass.qName}(this.withPrefix("${subClass.fqName}"))`,
+          } as OptionalKind<MethodDeclarationStructure>;
         }),
       });
     } else {

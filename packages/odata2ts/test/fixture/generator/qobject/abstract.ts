@@ -5,7 +5,9 @@ import type { ExtendsFromEntityId } from "./TesterModel";
 export class QBookBaseType extends QueryObject {}
 
 export class QBook extends QBookBaseType {
-  public readonly asQExtendsFromEntity = new QExtendsFromEntity(this.withPrefix("Tester.ExtendsFromEntity"));
+  public asQExtendsFromEntity() {
+    return new QExtendsFromEntity(this.withPrefix("Tester.ExtendsFromEntity"));
+  }
 }
 
 export const qBook = new QBook();
@@ -27,7 +29,9 @@ export class QExtendsFromEntityId extends QId<ExtendsFromEntityId> {
 export class QComplexBaseType extends QueryObject {}
 
 export class QComplex extends QComplexBaseType {
-  public readonly asQExtendsFromComplex = new QExtendsFromComplex(this.withPrefix("Tester.ExtendsFromComplex"));
+  public asQExtendsFromComplex() {
+    return new QExtendsFromComplex(this.withPrefix("Tester.ExtendsFromComplex"));
+  }
 }
 
 export const qComplex = new QComplex();

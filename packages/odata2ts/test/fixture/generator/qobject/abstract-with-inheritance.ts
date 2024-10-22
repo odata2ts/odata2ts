@@ -8,8 +8,13 @@ export class QBookBaseType extends QueryObject {
 }
 
 export class QBook extends QBookBaseType {
-  public readonly asQNothingToAdd = new QNothingToAdd(this.withPrefix("Tester.NothingToAdd"));
-  public readonly asQWithOwnStuff = new QWithOwnStuff(this.withPrefix("Tester.WithOwnStuff"));
+  public asQNothingToAdd() {
+    return new QNothingToAdd(this.withPrefix("Tester.NothingToAdd"));
+  }
+
+  public asQWithOwnStuff() {
+    return new QWithOwnStuff(this.withPrefix("Tester.WithOwnStuff"));
+  }
 }
 
 export const qBook = new QBook();
