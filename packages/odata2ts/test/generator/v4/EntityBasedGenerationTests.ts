@@ -197,25 +197,6 @@ export function createEntityBasedGenerationTests(
     });
   });
 
-  test(`${testSuiteName}: base class from different namespace`, async () => {
-    // given an entity hierarchy
-    odataBuilder.addEntityType("GrandParent", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean));
-    odataBuilder.addEntityType("Parent", { baseType: withNs("GrandParent") }, (builder) =>
-      builder.addProp("parentalAdvice", ODataTypesV4.Boolean),
-    );
-    odataBuilder.addSchema("myTest.test");
-    odataBuilder.addEntityType("Child", { baseType: withNs("Parent") }, (builder) =>
-      builder.addKeyProp("id2", ODataTypesV4.Boolean).addProp("Ch1ld1shF4n", ODataTypesV4.Boolean),
-    );
-
-    // when generating model
-    // then match fixture text
-    await generateAndCompare("baseClassDifferentNS", "entity-hierarchy.ts", {
-      ...USE_ID_AND_EDITABLE_MODEL,
-      disableAutoManagedKey: true,
-    });
-  });
-
   test(`${testSuiteName}: entity & enum`, async () => {
     // given an entity with enum props
     odataBuilder

@@ -104,6 +104,7 @@ class QueryObjectGenerator {
 
   private generateModel(file: FileHandler, model: ComplexType) {
     const imports = file.getImports();
+    const properties = this.generateQueryObjectProps(file.getImports(), model.props);
 
     let extendsClause: string;
     if (model.baseClasses.length) {
@@ -112,18 +113,41 @@ class QueryObjectGenerator {
       if (!baseModel) {
         throw new Error(`Entity or complex type "${baseClass}" from baseClass attribute not found!`);
       }
-      extendsClause = imports.addGeneratedQObject(baseClass, baseModel.qName);
+      extendsClause = imports.addGeneratedQObject(baseClass, baseModel.qBaseName!);
     } else {
       extendsClause = imports.addQObject(QueryObjectImports.QueryObject);
     }
 
-    file.getFile().addClass({
-      name: model.qName,
-      isExported: true,
-      extends: extendsClause,
-      // isAbstract: model.abstract,
-      properties: this.generateQueryObjectProps(file.getImports(), model.props),
-    });
+    if (model.qBaseName) {
+      file.getFile().addClass({
+        name: model.qBaseName,
+        isExported: true,
+        extends: extendsClause,
+        properties,
+      });
+
+      file.getFile().addClass({
+        name: model.qName,
+        isExported: true,
+        extends: model.qBaseName,
+        properties: Array.from(model.subtypes).map((subtype) => {
+          const subClass = this.dataModel.getModel(subtype) as ComplexType;
+          return {
+            name: `as${subClass.qName}`,
+            scope: Scope.Public,
+            isReadonly: true,
+            initializer: `new ${subClass.qName}(this.withPrefix("${subClass.fqName}"))`,
+          } as OptionalKind<PropertyDeclarationStructure>;
+        }),
+      });
+    } else {
+      file.getFile().addClass({
+        name: model.qName,
+        isExported: true,
+        extends: extendsClause,
+        properties: properties,
+      });
+    }
 
     file.getFile().addVariableStatement({
       declarationKind: VariableDeclarationKind.Const,

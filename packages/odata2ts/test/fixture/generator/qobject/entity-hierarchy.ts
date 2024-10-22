@@ -2,8 +2,13 @@ import { QBooleanParam, QBooleanPath, QId, QueryObject } from "@odata2ts/odata-q
 // @ts-ignore
 import type { ChildId, GrandParentId } from "./TesterModel";
 
-export class QGrandParent extends QueryObject {
+export class QGrandParentBaseType extends QueryObject {
   public readonly id = new QBooleanPath(this.withPrefix("id"));
+}
+
+export class QGrandParent extends QGrandParentBaseType {
+  public readonly asQParent = new QParent(this.withPrefix("Tester.Parent"));
+  public readonly asQChild = new QChild(this.withPrefix("Tester.Child"));
 }
 
 export const qGrandParent = new QGrandParent();
@@ -16,13 +21,17 @@ export class QGrandParentId extends QId<GrandParentId> {
   }
 }
 
-export class QParent extends QGrandParent {
+export class QParentBaseType extends QGrandParentBaseType {
   public readonly parentalAdvice = new QBooleanPath(this.withPrefix("parentalAdvice"));
+}
+
+export class QParent extends QParentBaseType {
+  public readonly asQChild = new QChild(this.withPrefix("Tester.Child"));
 }
 
 export const qParent = new QParent();
 
-export class QChild extends QParent {
+export class QChild extends QParentBaseType {
   public readonly id2 = new QBooleanPath(this.withPrefix("id2"));
   public readonly ch1ld1shF4n = new QBooleanPath(this.withPrefix("Ch1ld1shF4n"));
 }
