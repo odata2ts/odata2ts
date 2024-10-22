@@ -106,6 +106,8 @@ export interface QueryObjectNamingOptions extends NamingStrategyOption, Required
   idFunctions: RequiredNamingOptions;
 
   operations?: OperationNamingOptions;
+
+  baseType: RequiredNamingOptions & { applyQNaming?: boolean };
 }
 
 export interface OperationNamingOptions extends StandardNamingOptions {
