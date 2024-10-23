@@ -9,7 +9,19 @@ export class parentBaseType extends QueryObject {
 }
 
 export class Qparent extends parentBaseType {
-  public asQBook() {
+  public get QBook_id() {
+    return this.__asQBook().id;
+  }
+
+  public get QBook_my_Choice() {
+    return this.__asQBook().my_Choice;
+  }
+
+  public get QBook_Address() {
+    return this.__asQBook().Address;
+  }
+
+  private __asQBook() {
     return new QBook(this.withPrefix("Tester.Book"));
   }
 }

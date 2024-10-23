@@ -1,0 +1,24 @@
+###
+# Name: Trippin
+# Type: V4 - Read & Write
+# Address: https://services.odata.org/V4/(sessionId)/TripPinServiceRW
+# ###################################################################
+
+# --- METADATA ---
+
+###
+# @name metadata
+GET {{baseUrl}}/$metadata
+
+# --- DERIVED ENTITY TYPES ---
+### see different subtypes with @odata.type control information
+GET {{baseUrl}}/People('russellwhyte')/Trips(0)/PlanItems
+
+### cast to subtype and filter thereby
+GET {{baseUrl}}/People('russellwhyte')/Trips(0)/PlanItems/Microsoft.OData.SampleService.Models.TripPin.Flight
+
+### select & expand prop of derived type
+GET {{baseUrl}}/People('russellwhyte')/Trips(0)?$expand=PlanItems($expand=Microsoft.OData.SampleService.Models.TripPin.Flight/Airline;$select=Microsoft.OData.SampleService.Models.TripPin.Flight/Airline)
+
+### filter on casted prop of subtype
+GET {{baseUrl}}/People('russellwhyte')/Trips(0)/PlanItems?$filter=Microsoft.OData.SampleService.Models.TripPin.Flight/FlightNumber eq 'AA26'

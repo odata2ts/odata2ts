@@ -320,7 +320,12 @@ export function createEntityBasedGenerationTests(
             prefix: "Edit",
           },
         },
-        queryObjects: { prefix: "", suffix: "QObj", namingStrategy: NamingStrategies.CONSTANT_CASE },
+        queryObjects: {
+          prefix: "",
+          suffix: "QObj",
+          namingStrategy: NamingStrategies.CONSTANT_CASE,
+          propNamingStrategy: NamingStrategies.CONSTANT_CASE,
+        },
       },
     });
   });

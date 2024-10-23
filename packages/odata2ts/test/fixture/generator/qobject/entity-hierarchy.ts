@@ -7,11 +7,23 @@ export class QGrandParentBaseType extends QueryObject {
 }
 
 export class QGrandParent extends QGrandParentBaseType {
-  public asQParent() {
+  public get QParent_parentalAdvice() {
+    return this.__asQParent().parentalAdvice;
+  }
+
+  public get QChild_id2() {
+    return this.__asQChild().id2;
+  }
+
+  public get QChild_ch1ld1shF4n() {
+    return this.__asQChild().ch1ld1shF4n;
+  }
+
+  private __asQParent() {
     return new QParent(this.withPrefix("Tester.Parent"));
   }
 
-  public asQChild() {
+  private __asQChild() {
     return new QChild(this.withPrefix("Tester.Child"));
   }
 }
@@ -31,7 +43,15 @@ export class QParentBaseType extends QGrandParentBaseType {
 }
 
 export class QParent extends QParentBaseType {
-  public asQChild() {
+  public get QChild_id2() {
+    return this.__asQChild().id2;
+  }
+
+  public get QChild_ch1ld1shF4n() {
+    return this.__asQChild().ch1ld1shF4n;
+  }
+
+  private __asQChild() {
     return new QChild(this.withPrefix("Tester.Child"));
   }
 }
