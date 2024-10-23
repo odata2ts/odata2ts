@@ -1,6 +1,7 @@
 import { ValueConverterImport } from "@odata2ts/converter-runtime";
 import { ODataVersions } from "@odata2ts/odata-core";
 import {
+  GetAccessorDeclarationStructure,
   MethodDeclarationStructure,
   OptionalKind,
   PropertyDeclarationStructure,
@@ -104,6 +105,7 @@ class QueryObjectGenerator {
 
   private generateModel(file: FileHandler, model: ComplexType) {
     const imports = file.getImports();
+    const properties = this.generateQueryObjectProps(file.getImports(), model.props);
 
     let extendsClause: string;
     if (model.baseClasses.length) {
@@ -112,18 +114,59 @@ class QueryObjectGenerator {
       if (!baseModel) {
         throw new Error(`Entity or complex type "${baseClass}" from baseClass attribute not found!`);
       }
-      extendsClause = imports.addGeneratedQObject(baseClass, baseModel.qName);
+      extendsClause = imports.addGeneratedQObject(baseClass, baseModel.qBaseName!);
     } else {
       extendsClause = imports.addQObject(QueryObjectImports.QueryObject);
     }
 
-    file.getFile().addClass({
-      name: model.qName,
-      isExported: true,
-      extends: extendsClause,
-      // isAbstract: model.abstract,
-      properties: this.generateQueryObjectProps(file.getImports(), model.props),
-    });
+    if (model.qBaseName) {
+      file.getFile().addClass({
+        name: model.qBaseName,
+        isExported: true,
+        extends: extendsClause,
+        properties,
+      });
+
+      const [methods, getAccessors] = Array.from(model.subtypes).reduce<
+        [OptionalKind<MethodDeclarationStructure>[], OptionalKind<GetAccessorDeclarationStructure>[]]
+      >(
+        (collector, subtype) => {
+          const subClass = this.dataModel.getModel(subtype) as ComplexType;
+          const methodName = `__as${subClass.qName}`;
+          collector[0].push({
+            name: methodName,
+            scope: Scope.Private,
+            statements: `return new ${subClass.qName}(this.withPrefix("${subClass.fqName}"))`,
+          });
+          subClass.props.forEach((prop) => {
+            const propName = this.namingHelper.getQPropName(prop.name);
+            collector[1].push({
+              name: `${subClass.qName}_${propName}`,
+              scope: Scope.Public,
+              statements: `return this.${methodName}().${propName};`,
+            });
+          });
+
+          return collector;
+        },
+        [[], []],
+      );
+
+      file.getFile().addClass({
+        name: model.qName,
+        isExported: true,
+        extends: model.qBaseName,
+        methods,
+        getAccessors,
+      });
+    } else {
+      file.getFile().addClass({
+        name: model.qName,
+        isExported: true,
+        extends: extendsClause,
+        properties: properties,
+      });
+    }
 
     file.getFile().addVariableStatement({
       declarationKind: VariableDeclarationKind.Const,

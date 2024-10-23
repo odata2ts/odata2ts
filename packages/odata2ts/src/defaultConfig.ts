@@ -66,6 +66,11 @@ const defaultConfig: DefaultConfiguration = {
         prefix: "Q",
         suffix: "",
       },
+      baseType: {
+        applyQNaming: true,
+        prefix: "",
+        suffix: "BaseType",
+      },
     },
     services: {
       prefix: "",
@@ -131,6 +136,10 @@ const minimalNamingConfig: NameSettings = {
     idFunctions: {
       prefix: queryObjects.idFunctions.prefix,
       suffix: queryObjects.idFunctions.suffix,
+    },
+    baseType: {
+      prefix: queryObjects.baseType.prefix,
+      suffix: queryObjects.baseType.suffix,
     },
   },
   services: {

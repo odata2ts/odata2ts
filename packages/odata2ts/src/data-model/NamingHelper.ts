@@ -200,6 +200,13 @@ export class NamingHelper {
     return this.getName(name, this.getQObjectNamingStrategy(), this.options.queryObjects);
   }
 
+  public getQBaseName(name: string) {
+    const opts = this.options.queryObjects;
+    const strategy = this.getQObjectNamingStrategy();
+    const result = this.getName(name, strategy, opts.baseType);
+    return opts.baseType.applyQNaming ? this.getName(result, strategy, opts) : result;
+  }
+
   public getQPropName(name: string): string {
     return this.getName(name, this.getQObjectPropNamingStrategy());
   }

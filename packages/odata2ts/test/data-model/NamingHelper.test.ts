@@ -53,6 +53,7 @@ describe("NamingHelper Tests", function () {
     expect(toTest.getIdModelName("test")).toBe("TestId");
     expect(toTest.getOperationParamsModelName("TEST")).toBe("TestParams");
     expect(toTest.getQName("test")).toBe("QTest");
+    expect(toTest.getQBaseName("test")).toBe("QTestBaseType");
     expect(toTest.getQPropName("TEST")).toBe("test");
     expect(toTest.getQFunctionName("TEST")).toBe("QTest");
     expect(toTest.getQActionName("TEST")).toBe("QTest");
@@ -303,6 +304,30 @@ describe("NamingHelper Tests", function () {
     options.naming!.queryObjects!.namingStrategy = NamingStrategies.SNAKE_CASE;
     createHelper();
     expect(toTest.getQFunctionName("test")).toBe("q_pref_test_suf");
+  });
+
+  test("QBaseType settings", () => {
+    options.naming = {
+      queryObjects: {
+        prefix: "Q",
+        suffix: "",
+        baseType: {
+          applyQNaming: true,
+          prefix: "PREF",
+          suffix: "suf",
+        },
+      },
+    };
+    createHelper();
+
+    // queryObject naming is applied and own prefix and suffix is added
+    expect(toTest.getQBaseName("tESt")).toBe("QPREFtEStsuf");
+
+    // naming strategy is always applied, but only own prefix and suffix counts
+    options.naming!.queryObjects!.namingStrategy = NamingStrategies.PASCAL_CASE;
+    options.naming!.queryObjects!.baseType!.applyQNaming = false;
+    createHelper();
+    expect(toTest.getQBaseName("test")).toBe("PrefTestSuf");
   });
 
   test("QFunction & QAction settings", () => {

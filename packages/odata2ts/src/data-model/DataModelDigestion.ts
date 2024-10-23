@@ -351,7 +351,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // entity types
     const entityTypes = this.dataModel.getEntityTypes();
     entityTypes.forEach((et) => {
-      // build up set of subtypes for each complex type
+      // build up set of subtypes for each entity type
       this.addSubtypes(et);
 
       // get props & keys from base types
@@ -552,8 +552,11 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     model.baseClasses.forEach((baseClass) => {
       const baseType = this.dataModel.getModel(baseClass) as ComplexModelType;
 
-      // add subtypes
+      // add subtypes & base name for q-objects
       baseType.subtypes.add(model.fqName);
+      if (!baseType.qBaseName) {
+        baseType.qBaseName = this.namingHelper.getQBaseName(baseType.name);
+      }
       grandChildren.forEach((gc) => baseType.subtypes.add(gc));
 
       // recursive
