@@ -1,4 +1,10 @@
-import { QBooleanParam, QBooleanPath, QId, QueryObject } from "@odata2ts/odata-query-objects";
+import {
+  ENUMERABLE_PROP_DEFINITION,
+  QBooleanParam,
+  QBooleanPath,
+  QId,
+  QueryObject,
+} from "@odata2ts/odata-query-objects";
 // @ts-ignore
 import type { BookId, WithOwnStuffId } from "./TesterModel";
 
@@ -8,6 +14,11 @@ export class QBookBaseType extends QueryObject {
 }
 
 export class QBook extends QBookBaseType {
+  protected readonly __subtypeMapping = {
+    "Tester.NothingToAdd": "QNothingToAdd",
+    "Tester.WithOwnStuff": "QWithOwnStuff",
+  };
+
   public get QWithOwnStuff_id2() {
     return this.__asQWithOwnStuff().id2;
   }
@@ -24,6 +35,10 @@ export class QBook extends QBookBaseType {
     return new QWithOwnStuff(this.withPrefix("Tester.WithOwnStuff"));
   }
 }
+Object.defineProperties(QBook.prototype, {
+  QWithOwnStuff_id2: ENUMERABLE_PROP_DEFINITION,
+  QWithOwnStuff_test2: ENUMERABLE_PROP_DEFINITION,
+});
 
 export const qBook = new QBook();
 

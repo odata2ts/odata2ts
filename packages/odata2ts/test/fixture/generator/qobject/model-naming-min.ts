@@ -1,4 +1,12 @@
-import { QBooleanParam, QBooleanPath, QEntityPath, QEnumPath, QId, QueryObject } from "@odata2ts/odata-query-objects";
+import {
+  ENUMERABLE_PROP_DEFINITION,
+  QBooleanParam,
+  QBooleanPath,
+  QEntityPath,
+  QEnumPath,
+  QId,
+  QueryObject,
+} from "@odata2ts/odata-query-objects";
 // @ts-ignore
 import type { BookId, parentId } from "./TesterModel";
 // @ts-ignore
@@ -9,6 +17,8 @@ export class parentBaseType extends QueryObject {
 }
 
 export class Qparent extends parentBaseType {
+  protected readonly __subtypeMapping = { "Tester.Book": "QBook" };
+
   public get QBook_id() {
     return this.__asQBook().id;
   }
@@ -25,6 +35,11 @@ export class Qparent extends parentBaseType {
     return new QBook(this.withPrefix("Tester.Book"));
   }
 }
+Object.defineProperties(Qparent.prototype, {
+  QBook_id: ENUMERABLE_PROP_DEFINITION,
+  QBook_my_Choice: ENUMERABLE_PROP_DEFINITION,
+  QBook_Address: ENUMERABLE_PROP_DEFINITION,
+});
 
 export const qparent = new Qparent();
 

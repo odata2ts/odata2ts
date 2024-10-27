@@ -120,6 +120,7 @@ class QueryObjectGenerator {
     }
 
     if (model.qBaseName) {
+      // base class which used for extension
       file.getFile().addClass({
         name: model.qBaseName,
         isExported: true,
@@ -127,38 +128,60 @@ class QueryObjectGenerator {
         properties,
       });
 
-      const [methods, getAccessors] = Array.from(model.subtypes).reduce<
-        [OptionalKind<MethodDeclarationStructure>[], OptionalKind<GetAccessorDeclarationStructure>[]]
+      const [props, getAccessors, methods, statements] = Array.from(model.subtypes).reduce<
+        [
+          Array<string>,
+          OptionalKind<GetAccessorDeclarationStructure>[],
+          OptionalKind<MethodDeclarationStructure>[],
+          Array<string>,
+        ]
       >(
         (collector, subtype) => {
           const subClass = this.dataModel.getModel(subtype) as ComplexType;
           const methodName = `__as${subClass.qName}`;
-          collector[0].push({
+          const enumerablePropDef = imports.addQObject(QueryObjectImports.ENUMERABLE_PROP_DEFINITION);
+
+          collector[0].push(`"${subClass.fqName}": "${subClass.qName}"`);
+
+          subClass.props.forEach((prop) => {
+            const propName = this.namingHelper.getQPropName(prop.name);
+            const fqPropName = `${subClass.qName}_${propName}`;
+            collector[1].push({
+              name: fqPropName,
+              scope: Scope.Public,
+              statements: `return this.${methodName}().${propName};`,
+            });
+            collector[3].push(`${fqPropName}: ${enumerablePropDef}`);
+          });
+
+          collector[2].push({
             name: methodName,
             scope: Scope.Private,
             statements: `return new ${subClass.qName}(this.withPrefix("${subClass.fqName}"))`,
           });
-          subClass.props.forEach((prop) => {
-            const propName = this.namingHelper.getQPropName(prop.name);
-            collector[1].push({
-              name: `${subClass.qName}_${propName}`,
-              scope: Scope.Public,
-              statements: `return this.${methodName}().${propName};`,
-            });
-          });
 
           return collector;
         },
-        [[], []],
+        [[], [], [], []],
       );
 
       file.getFile().addClass({
         name: model.qName,
         isExported: true,
         extends: model.qBaseName,
-        methods,
+        properties: [
+          {
+            name: "__subtypeMapping",
+            scope: Scope.Protected,
+            isReadonly: true,
+            initializer: `{ ${props.join(",")} }`,
+          },
+        ],
         getAccessors,
+        methods,
       });
+
+      file.getFile().addStatements(`Object.defineProperties(${model.qName}.prototype, { ${statements.join(",")} });`);
     } else {
       file.getFile().addClass({
         name: model.qName,

@@ -3,7 +3,7 @@ export * from "./QueryObjectModel";
 export { QFilterExpression } from "./QFilterExpression";
 export { QOrderByExpression } from "./QOrderByExpression";
 export { QSearchTerm, searchTerm } from "./QSearchTerm";
-export { QueryObject } from "./QueryObject";
+export { QueryObject, ENUMERABLE_PROP_DEFINITION } from "./QueryObject";
 export { getIdentityConverter } from "./IdentityConverter";
 
 export * from "./enum/EnumModel";

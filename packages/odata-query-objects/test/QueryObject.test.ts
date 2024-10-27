@@ -1,6 +1,7 @@
 import { FIXED_DATE, FIXED_STRING } from "@odata2ts/test-converters";
 import { describe, expect, test } from "vitest";
 import { QEntityCollectionPath, QEntityPath, QStringV2Path, QueryObject } from "../src";
+import { EventModel, PlanItemModel, QPlanItem } from "./fixture/BaseTypeModel";
 import { QSimpleEntityWithConverter, QTestEntity } from "./fixture/SimpleEntityWithConverter";
 
 describe("QueryObject tests", () => {
@@ -221,5 +222,27 @@ describe("QueryObject tests", () => {
     // @ts-expect-error
     expect(qToTestWithAssoc.convertToOData({ options: null })).toStrictEqual({ options: null });
     expect(qToTestWithAssoc.convertToOData({ options: undefined })).toStrictEqual({ options: undefined });
+  });
+
+  test("subtype casting", () => {
+    const qBaseType = new QPlanItem();
+    const rawModel = {
+      "@odata.type": "Tester.Event",
+      Id: 123,
+      Name: "Test",
+      Description: "Desc",
+    };
+    const finalModel: EventModel = {
+      "@odata.type": "Tester.Event",
+      id: 123,
+      name: "Test",
+      description: "Desc",
+    };
+
+    const result = qBaseType.convertFromOData(rawModel);
+    expect(result).toStrictEqual(finalModel);
+
+    const result2 = qBaseType.convertToOData(finalModel);
+    expect(result2).toStrictEqual(rawModel);
   });
 });

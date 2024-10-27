@@ -247,4 +247,15 @@ describe("Integration Testing of Service Generation", () => {
     expect(result).toBe(`People(UserName='${simpleResult}')`);
     expect(trippinService.people().parseKey(result)).toStrictEqual(complexInput);
   });
+
+  test("casting derived entity type", async () => {
+    const response = await trippinService
+      .people("russellwhyte")
+      .trips(0)
+      .planItems()
+      .asFlightCollectionService()
+      .query();
+
+    expect(response.data).toMatchObject({});
+  });
 });

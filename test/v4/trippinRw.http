@@ -22,3 +22,27 @@ GET {{baseUrl}}/People('russellwhyte')/Trips(0)?$expand=PlanItems($expand=Micros
 
 ### filter on casted prop of subtype
 GET {{baseUrl}}/People('russellwhyte')/Trips(0)/PlanItems?$filter=Microsoft.OData.SampleService.Models.TripPin.Flight/FlightNumber eq 'AA26'
+
+### create derived entity type
+POST {{baseUrl}}/People('russellwhyte')/Trips(0)/PlanItems
+Content-Type: application/json
+Accept: application/json
+
+{
+  "@odata.type": "#Microsoft.OData.SampleService.Models.TripPin.Event",
+  "PlanItemId": 33,
+  "ConfirmationCode": "4372899DD",
+  "Description": "Client Meeting",
+  "Duration": "PT3H",
+  "StartsAt": "2014-05-25T23:11:17.5459178-07:00",
+  "EndsAt": "2014-06-01T23:11:17.5479185-07:00",
+  "OccursAt": {
+    "Address": "100 Church Street, 8th Floor, Manhattan, 10007",
+    "BuildingInfo": "Regus Business Center",
+    "City": {
+      "CountryRegion": "United States",
+      "Name": "New York City",
+      "Region": "New York"
+    }
+  }
+}
