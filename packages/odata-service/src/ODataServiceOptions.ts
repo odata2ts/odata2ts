@@ -14,4 +14,5 @@ export interface ODataServiceOptions {
  */
 export interface ODataServiceOptionsInternal extends ODataServiceOptions {
   bigNumbersAsString?: boolean;
+  subtype?: boolean;
 }

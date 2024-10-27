@@ -41,6 +41,22 @@ const config: ConfigFileOptions = {
         ...["createdAt", "createdBy", "modifiedAt", "modifiedBy"].map((prop) => ({ name: prop, managed: true })),
       ],
     },
+    // Just the Trippin service with a bit of mapping
+    trippinRw: {
+      serviceName: "TrippinRw",
+      source: srcFolder("trippin-rw.xml"),
+      output: outputFolder("trippin-rw"),
+      // TrippinService does not generate IDs on the server, but the client side => demo service
+      disableAutoManagedKey: true,
+      allowRenaming: true,
+      // for the fun of it
+      enablePrimitivePropertyServices: true,
+      naming: {
+        models: {
+          suffix: "Model",
+        },
+      },
+    },
     // Starting renaming from scratch: minimal defaults
     minimalDefaults: {
       source: srcFolder("trippin.xml"),

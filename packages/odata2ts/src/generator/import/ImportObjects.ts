@@ -35,6 +35,7 @@ export const VERSIONED_CORE_IMPORTS = [
  */
 export enum QueryObjectImports {
   QueryObject = "QueryObject",
+  ENUMERABLE_PROP_DEFINITION = "ENUMERABLE_PROP_DEFINITION",
   QId = "QId",
   QFunction = "QFunction",
   QAction = "QAction",

@@ -1,20 +1,26 @@
 import { PartialDeep } from "type-fest";
-import { QEntityPathModel, QPathModel, QValuePathModel } from "./path/QPathModel";
+import { QEntityPathModel, QValuePathModel } from "./path/QPathModel";
 import { FlexibleConversionModel, QueryObjectModel } from "./QueryObjectModel";
 
 function getMapping(q: QueryObject) {
-  return Object.entries(q)
-    .filter(
-      (prop): prop is [string, QPathModel] => typeof prop[1] === "object" && typeof prop[1].getPath === "function",
-    )
-    .reduce<Map<string, string>>((collector, [key, value]) => {
-      collector.set(value.getPath(), key);
-      return collector;
-    }, new Map());
+  // need to use a for-in loop, because of getters which are located at the prototype level
+  const result = new Map<string, string>();
+  for (let key in q) {
+    // @ts-ignore
+    const value = q[key];
+    if (typeof value === "object" && typeof value.getPath === "function") {
+      const odataName = value.getPath();
+      result.set(odataName, key);
+    }
+  }
+  return result;
 }
+
+export const ENUMERABLE_PROP_DEFINITION = { enumerable: true };
 
 export class QueryObject<T extends object = any> implements QueryObjectModel<T, PartialDeep<T>> {
   private __propMapping?: Map<string, keyof this>;
+  protected readonly __subtypeMapping?: Record<string, string>;
 
   constructor(private __prefix?: string) {}
 
@@ -68,10 +74,20 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T, 
     const models = isList ? (odataModel as Array<T>) : [odataModel];
 
     const result = models.map((model) => {
+      const typeByCi = model["@odata.type"]?.replace(/^#/, "");
       return Object.entries(model).reduce((collector, [key, value]) => {
-        const propKey = this.__getPropMapping().get(key);
+        let propKey = this.__getPropMapping().get(key);
+        let finalKey: string = propKey as string;
+
+        if (typeByCi) {
+          const newPropKey = this.__getPropMapping().get(`${typeByCi}/${key}`);
+          if (newPropKey && typeof this.__subtypeMapping !== "undefined") {
+            propKey = newPropKey;
+            finalKey = (newPropKey as string).replace(new RegExp(`^${this.__subtypeMapping[typeByCi]}_`), "");
+          }
+        }
         const prop = propKey ? (this[propKey] as unknown as QValuePathModel) : undefined;
-        if (prop && propKey) {
+        if (prop && finalKey) {
           // complex props
           const asComplexType = prop as QEntityPathModel<any>;
           if (typeof asComplexType.getEntity === "function") {
@@ -88,11 +104,11 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T, 
                 : value;
 
             const entity = asComplexType.getEntity();
-            collector[propKey] = entity.convertFromOData(sanitizedValue);
+            collector[finalKey] = entity.convertFromOData(sanitizedValue);
           }
           // primitive props
           else {
-            collector[propKey] = prop.converter ? prop.converter.convertFrom(value) : value;
+            collector[finalKey] = prop.converter ? prop.converter.convertFrom(value) : value;
           }
         }
         // be permissive here to allow passing unknown values as they are
@@ -144,15 +160,25 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T, 
     const models = isList ? userModel : [userModel];
 
     const result = models.map((model) => {
+      // @ts-ignore
+      const typeByCi = model["@odata.type"]?.replace(/^#/, "");
       return Object.entries(model).reduce((collector, [key, value]) => {
-        // @ts-ignore
-        const prop: QValuePathModel = this[key];
+        let prop = this[key as keyof this] as QValuePathModel | undefined;
+        let finalKey = prop?.getPath();
+        if (typeByCi && typeof this.__subtypeMapping !== "undefined") {
+          const qName = this.__subtypeMapping[typeByCi];
+          const subProp = this[`${qName}_${key}` as keyof this] as QValuePathModel | undefined;
+          if (subProp) {
+            prop = subProp;
+            finalKey = subProp.getPath().replace(new RegExp(`^${typeByCi}/`), "");
+          }
+        }
         const asEntity = prop as QEntityPathModel<any>;
         if (typeof asEntity?.getEntity === "function") {
           const entity = asEntity.getEntity();
-          collector[prop.getPath()] = entity.convertToOData(value);
+          collector[finalKey!] = entity.convertToOData(value);
         } else if (prop) {
-          collector[prop.getPath()] = prop.converter ? prop.converter.convertTo(value) : value;
+          collector[finalKey!] = prop.converter ? prop.converter.convertTo(value) : value;
         }
         // control information is passed as is
         else if (key.startsWith("@")) {

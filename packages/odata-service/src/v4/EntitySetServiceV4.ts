@@ -91,7 +91,7 @@ export abstract class EntitySetServiceV4<
    * @return
    */
   public async create<ReturnType extends Partial<T> | void = T>(
-    model: ODataModelPayloadV4<EditableT>,
+    model: EditableT,
     requestConfig?: ODataHttpClientConfig<ClientType>,
   ): ODataResponse<ReturnType> {
     const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;

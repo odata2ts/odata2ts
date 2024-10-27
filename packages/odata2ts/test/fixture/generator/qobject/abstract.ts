@@ -1,10 +1,18 @@
-import { QBooleanParam, QBooleanPath, QId, QueryObject } from "@odata2ts/odata-query-objects";
+import {
+  ENUMERABLE_PROP_DEFINITION,
+  QBooleanParam,
+  QBooleanPath,
+  QId,
+  QueryObject,
+} from "@odata2ts/odata-query-objects";
 // @ts-ignore
 import type { ExtendsFromEntityId } from "./TesterModel";
 
 export class QBookBaseType extends QueryObject {}
 
 export class QBook extends QBookBaseType {
+  protected readonly __subtypeMapping = { "Tester.ExtendsFromEntity": "QExtendsFromEntity" };
+
   public get QExtendsFromEntity_id() {
     return this.__asQExtendsFromEntity().id;
   }
@@ -13,6 +21,7 @@ export class QBook extends QBookBaseType {
     return new QExtendsFromEntity(this.withPrefix("Tester.ExtendsFromEntity"));
   }
 }
+Object.defineProperties(QBook.prototype, { QExtendsFromEntity_id: ENUMERABLE_PROP_DEFINITION });
 
 export const qBook = new QBook();
 
@@ -33,6 +42,8 @@ export class QExtendsFromEntityId extends QId<ExtendsFromEntityId> {
 export class QComplexBaseType extends QueryObject {}
 
 export class QComplex extends QComplexBaseType {
+  protected readonly __subtypeMapping = { "Tester.ExtendsFromComplex": "QExtendsFromComplex" };
+
   public get QExtendsFromComplex_test() {
     return this.__asQExtendsFromComplex().test;
   }
@@ -41,6 +52,7 @@ export class QComplex extends QComplexBaseType {
     return new QExtendsFromComplex(this.withPrefix("Tester.ExtendsFromComplex"));
   }
 }
+Object.defineProperties(QComplex.prototype, { QExtendsFromComplex_test: ENUMERABLE_PROP_DEFINITION });
 
 export const qComplex = new QComplex();
 
