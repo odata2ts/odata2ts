@@ -40,11 +40,13 @@ export class GrandParentService<in out ClientType extends ODataHttpClient> exten
 
   public asParentService() {
     const { client, path, options } = this.__base;
+    options.subtype = true;
     return new ParentService(client, path, "Tester.Parent", options);
   }
 
   public asChildService() {
     const { client, path, options } = this.__base;
+    options.subtype = true;
     return new ChildService(client, path, "Tester.Child", options);
   }
 }
@@ -62,11 +64,13 @@ export class GrandParentCollectionService<in out ClientType extends ODataHttpCli
 
   public asParentCollectionService() {
     const { client, path, options } = this.__base;
+    options.subtype = true;
     return new ParentCollectionService(client, path, "Tester.Parent", options);
   }
 
   public asChildCollectionService() {
     const { client, path, options } = this.__base;
+    options.subtype = true;
     return new ChildCollectionService(client, path, "Tester.Child", options);
   }
 }
@@ -83,6 +87,7 @@ export class ParentService<in out ClientType extends ODataHttpClient> extends En
 
   public asChildService() {
     const { client, path, options } = this.__base;
+    options.subtype = true;
     return new ChildService(client, path, "Tester.Child", options);
   }
 }
@@ -100,6 +105,7 @@ export class ParentCollectionService<in out ClientType extends ODataHttpClient> 
 
   public asChildCollectionService() {
     const { client, path, options } = this.__base;
+    options.subtype = true;
     return new ChildCollectionService(client, path, "Tester.Child", options);
   }
 }
