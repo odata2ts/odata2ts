@@ -1,12 +1,11 @@
-import { AxiosClient } from "@odata2ts/http-client-axios";
+import { FetchClient } from "@odata2ts/http-client-fetch";
 import { describe, expect, test } from "vitest";
-import { EditablePlanItemModel, PlanItemModel } from "../../build/trippin-rw/TrippinRwModel";
 import { TrippinRwService } from "../../build/trippin-rw/TrippinRwService";
 import { EditableEventModel } from "../../build/trippin/TrippinModel";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/V4/(S(xjqbds2oavibr01gt1fny24s))/TripPinServiceRW";
-  const odataClient = new AxiosClient();
+  const odataClient = new FetchClient();
 
   const trippinService = new TrippinRwService(odataClient, BASE_URL);
 
@@ -43,8 +42,7 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("create derived entity", async () => {
-    const model: EditableEventModel = {
-      // @ts-ignore
+    const model: EditableEventModel & { "@odata.type"?: string } = {
       "@odata.type": "#Microsoft.OData.SampleService.Models.TripPin.Event",
       planItemId: 33,
       confirmationCode: "4372899DD",
@@ -63,11 +61,7 @@ describe("Integration Testing of Service Generation", () => {
       },
     };
     const response = await trippinService.people("russellwhyte").trips(0).planItems().create(model);
-    const {
-      //@ts-ignore
-      "@odata.context": ctxt,
-      ...data
-    } = response.data;
+    const { "@odata.context": ctxt, ...data } = response.data;
 
     expect(data).toStrictEqual(model);
   });

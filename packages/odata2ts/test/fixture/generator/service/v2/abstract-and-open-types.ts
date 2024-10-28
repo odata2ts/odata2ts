@@ -66,21 +66,6 @@ export class AbstractEntityService<in out ClientType extends ODataHttpClient> ex
   constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qAbstractEntity, options);
   }
-
-  public asOpenEntityService() {
-    const { client, path, options } = this.__base;
-    return new OpenEntityService(client, path, "Tester.OpenEntity", options);
-  }
-
-  public asExtendedFromAbstractService() {
-    const { client, path, options } = this.__base;
-    return new ExtendedFromAbstractService(client, path, "Tester.ExtendedFromAbstract", options);
-  }
-
-  public asExtendedFromOpenService() {
-    const { client, path, options } = this.__base;
-    return new ExtendedFromOpenService(client, path, "Tester.ExtendedFromOpen", options);
-  }
 }
 
 export class OpenEntityService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
@@ -91,11 +76,6 @@ export class OpenEntityService<in out ClientType extends ODataHttpClient> extend
 > {
   constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qOpenEntity, options);
-  }
-
-  public asExtendedFromOpenService() {
-    const { client, path, options } = this.__base;
-    return new ExtendedFromOpenService(client, path, "Tester.ExtendedFromOpen", options);
   }
 }
 

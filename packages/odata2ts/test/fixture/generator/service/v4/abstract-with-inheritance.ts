@@ -42,7 +42,7 @@ export class AbstractEntityService<in out ClientType extends ODataHttpClient> ex
 
   public asTestEntityService() {
     const { client, path, options } = this.__base;
-    return new TestEntityService(client, path, "Tester.TestEntity", options);
+    return new TestEntityService(client, path, "Tester.TestEntity", { ...options, subtype: true });
   }
 }
 
@@ -59,7 +59,7 @@ export class AbstractEntityCollectionService<in out ClientType extends ODataHttp
 
   public asTestEntityCollectionService() {
     const { client, path, options } = this.__base;
-    return new TestEntityCollectionService(client, path, "Tester.TestEntity", options);
+    return new TestEntityCollectionService(client, path, "Tester.TestEntity", { ...options, subtype: true });
   }
 }
 

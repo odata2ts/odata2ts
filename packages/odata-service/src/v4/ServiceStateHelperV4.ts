@@ -1,8 +1,14 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
+import { ODataModelPayloadV4 } from "@odata2ts/odata-core";
 import { createQueryBuilderV4, ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { QComplexParam, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
+
+export interface SubtypeOptions {
+  withCastPathSegment?: boolean;
+  withTypeControlInfo?: boolean;
+}
 
 export class ServiceStateHelperV4<
   in out ClientType extends ODataHttpClient,
@@ -30,4 +36,22 @@ export class ServiceStateHelperV4<
 
     return this.path;
   };
+
+  public evaluateSubtypeOptions(options: SubtypeOptions | undefined) {
+    const isSubtype = !!this.options.subtype;
+    const dontUseCastPathSegment = isSubtype && !options?.withCastPathSegment;
+    return {
+      dontUseCastPathSegment,
+      useTypeCi:
+        (isSubtype && dontUseCastPathSegment && options?.withTypeControlInfo !== false) ||
+        (isSubtype && options?.withTypeControlInfo),
+    };
+  }
+
+  public addTypeControlInfo<T>(model: ODataModelPayloadV4<T>) {
+    return {
+      "@odata.type": `#${this.name}`,
+      ...model,
+    };
+  }
 }

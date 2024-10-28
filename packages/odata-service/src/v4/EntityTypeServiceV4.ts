@@ -3,7 +3,7 @@ import { ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core"
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { convertV4ModelResponse, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
-import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
+import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
 export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObjectModel> {
   protected readonly __base: ServiceStateHelperV4<ClientType, Q>;
@@ -25,12 +25,14 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
   public async patch(
     model: ODataModelPayloadV4<Partial<EditableT>>,
     requestConfig?: ODataHttpClientConfig<ClientType>,
+    patchOptions?: SubtypeOptions,
   ): ODataResponse<void | ODataModelResponseV4<T>> {
-    const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
+    const { client, qModel, basePath, path, getDefaultHeaders, qResponseType } = this.__base;
+    const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(patchOptions);
 
     const result = await client.patch<void | ODataModelResponseV4<T>>(
-      path,
-      qModel.convertToOData(model),
+      dontUseCastPathSegment ? basePath : path,
+      qModel.convertToOData(useTypeCi ? this.__base.addTypeControlInfo(model) : model),
       requestConfig,
       getDefaultHeaders(),
     );
@@ -40,12 +42,14 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
   public async update(
     model: ODataModelPayloadV4<EditableT>,
     requestConfig?: ODataHttpClientConfig<ClientType>,
+    updateOptions?: SubtypeOptions,
   ): ODataResponse<void | ODataModelResponseV4<T>> {
-    const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
+    const { client, qModel, basePath, path, getDefaultHeaders, qResponseType } = this.__base;
+    const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(updateOptions);
 
     const result = await client.put<void | ODataModelResponseV4<T>>(
-      path,
-      qModel.convertToOData(model),
+      dontUseCastPathSegment ? basePath : path,
+      qModel.convertToOData(useTypeCi ? this.__base.addTypeControlInfo(model) : model),
       requestConfig,
       getDefaultHeaders(),
     );

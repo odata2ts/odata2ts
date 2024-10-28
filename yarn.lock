@@ -1220,6 +1220,7 @@ __metadata:
     "@odata2ts/converter-luxon": ^0.2.3
     "@odata2ts/converter-v2-to-v4": ^0.5.3
     "@odata2ts/http-client-axios": ^0.11.3
+    "@odata2ts/http-client-fetch": ^0.8.0
     "@odata2ts/odata-service": ^0.21.0
     "@odata2ts/odata2ts": ^0.38.1
     "@types/luxon": ^3.4.2
@@ -1253,6 +1254,15 @@ __metadata:
   dependencies:
     "@odata2ts/http-client-api": ^0.6.2
   checksum: 979a36f9022032914712342d7f16f079a1a6e4c048da6540c66a7f8ed5a33e5ad8647b0173d21631845e7d179cb93326b900accde9864eb9f90bf8a4ac32030e
+  languageName: node
+  linkType: hard
+
+"@odata2ts/http-client-fetch@npm:^0.8.0":
+  version: 0.8.0
+  resolution: "@odata2ts/http-client-fetch@npm:0.8.0"
+  dependencies:
+    "@odata2ts/http-client-base": ^0.5.3
+  checksum: d9dfed350f3da1fd04a626ff1eb48931dc9e29f6734231008a5a93a61db54ef2037bcbcca9502c35dc9ff53db789098c2c652ca45f4f5815cba9defedbd6c02b
   languageName: node
   linkType: hard
 

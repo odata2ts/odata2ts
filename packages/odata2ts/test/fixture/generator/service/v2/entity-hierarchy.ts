@@ -37,16 +37,6 @@ export class GrandParentService<in out ClientType extends ODataHttpClient> exten
   constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qGrandParent, options);
   }
-
-  public asParentService() {
-    const { client, path, options } = this.__base;
-    return new ParentService(client, path, "Tester.Parent", options);
-  }
-
-  public asChildService() {
-    const { client, path, options } = this.__base;
-    return new ChildService(client, path, "Tester.Child", options);
-  }
 }
 
 export class GrandParentCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV2<
@@ -59,16 +49,6 @@ export class GrandParentCollectionService<in out ClientType extends ODataHttpCli
   constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qGrandParent, new QGrandParentId(name), options);
   }
-
-  public asParentCollectionService() {
-    const { client, path, options } = this.__base;
-    return new ParentCollectionService(client, path, "Tester.Parent", options);
-  }
-
-  public asChildCollectionService() {
-    const { client, path, options } = this.__base;
-    return new ChildCollectionService(client, path, "Tester.Child", options);
-  }
 }
 
 export class ParentService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
@@ -79,11 +59,6 @@ export class ParentService<in out ClientType extends ODataHttpClient> extends En
 > {
   constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qParent, options);
-  }
-
-  public asChildService() {
-    const { client, path, options } = this.__base;
-    return new ChildService(client, path, "Tester.Child", options);
   }
 }
 
@@ -96,11 +71,6 @@ export class ParentCollectionService<in out ClientType extends ODataHttpClient> 
 > {
   constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qParent, new QGrandParentId(name), options);
-  }
-
-  public asChildCollectionService() {
-    const { client, path, options } = this.__base;
-    return new ChildCollectionService(client, path, "Tester.Child", options);
   }
 }
 
