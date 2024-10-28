@@ -1,12 +1,11 @@
-import { AxiosClient } from "@odata2ts/http-client-axios";
+import { FetchClient } from "@odata2ts/http-client-fetch";
 import { describe, expect, test } from "vitest";
-import { EditablePlanItemModel, PlanItemModel } from "../../build/trippin-rw/TrippinRwModel";
 import { TrippinRwService } from "../../build/trippin-rw/TrippinRwService";
 import { EditableEventModel } from "../../build/trippin/TrippinModel";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/V4/(S(xjqbds2oavibr01gt1fny24s))/TripPinServiceRW";
-  const odataClient = new AxiosClient();
+  const odataClient = new FetchClient();
 
   const trippinService = new TrippinRwService(odataClient, BASE_URL);
 

@@ -21,6 +21,7 @@
     "@odata2ts/converter-luxon": "^0.2.3",
     "@odata2ts/converter-v2-to-v4": "^0.5.3",
     "@odata2ts/http-client-axios": "^0.11.3",
+    "@odata2ts/http-client-fetch": "^0.8.0",
     "@odata2ts/odata-service": "^0.21.0",
     "axios": "^1.7.3",
     "bignumber.js": "^9.1.2",

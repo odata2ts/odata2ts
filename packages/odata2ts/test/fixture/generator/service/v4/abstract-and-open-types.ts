@@ -74,20 +74,17 @@ export class AbstractEntityService<in out ClientType extends ODataHttpClient> ex
 
   public asOpenEntityService() {
     const { client, path, options } = this.__base;
-    options.subtype = true;
-    return new OpenEntityService(client, path, "Tester.OpenEntity", options);
+    return new OpenEntityService(client, path, "Tester.OpenEntity", { ...options, subtype: true });
   }
 
   public asExtendedFromAbstractService() {
     const { client, path, options } = this.__base;
-    options.subtype = true;
-    return new ExtendedFromAbstractService(client, path, "Tester.ExtendedFromAbstract", options);
+    return new ExtendedFromAbstractService(client, path, "Tester.ExtendedFromAbstract", { ...options, subtype: true });
   }
 
   public asExtendedFromOpenService() {
     const { client, path, options } = this.__base;
-    options.subtype = true;
-    return new ExtendedFromOpenService(client, path, "Tester.ExtendedFromOpen", options);
+    return new ExtendedFromOpenService(client, path, "Tester.ExtendedFromOpen", { ...options, subtype: true });
   }
 }
 
@@ -103,8 +100,7 @@ export class OpenEntityService<in out ClientType extends ODataHttpClient> extend
 
   public asExtendedFromOpenService() {
     const { client, path, options } = this.__base;
-    options.subtype = true;
-    return new ExtendedFromOpenService(client, path, "Tester.ExtendedFromOpen", options);
+    return new ExtendedFromOpenService(client, path, "Tester.ExtendedFromOpen", { ...options, subtype: true });
   }
 }
 

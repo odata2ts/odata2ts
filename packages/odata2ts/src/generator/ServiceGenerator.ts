@@ -665,20 +665,21 @@ class ServiceGenerator {
   ): PropsAndOps {
     const result: PropsAndOps = { properties: [], methods: [] };
 
-    model.subtypes.forEach((subtype) => {
-      const subClass = this.dataModel.getModel(subtype) as ComplexType;
-      const serviceName = isCollection ? subClass.serviceCollectionName : subClass.serviceName;
-      const serviceType = importContainer.addGeneratedService(subClass.fqName, serviceName);
-      result.methods.push({
-        name: `as${upperCaseFirst(serviceName)}`,
-        scope: Scope.Public,
-        statements: [
-          "const { client, path, options } = this.__base;",
-          "options.subtype = true;",
-          `return new ${serviceType}(client, path, "${subClass.fqName}", options);`,
-        ],
+    if (this.version === ODataVersions.V4) {
+      model.subtypes.forEach((subtype) => {
+        const subClass = this.dataModel.getModel(subtype) as ComplexType;
+        const serviceName = isCollection ? subClass.serviceCollectionName : subClass.serviceName;
+        const serviceType = importContainer.addGeneratedService(subClass.fqName, serviceName);
+        result.methods.push({
+          name: `as${upperCaseFirst(serviceName)}`,
+          scope: Scope.Public,
+          statements: [
+            "const { client, path, options } = this.__base;",
+            `return new ${serviceType}(client, path, "${subClass.fqName}", { ...options, subtype: true });`,
+          ],
+        });
       });
-    });
+    }
 
     return result;
   }
