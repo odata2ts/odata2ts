@@ -3,11 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.39.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.38.1...@odata2ts/odata2ts@0.39.0) (2024-10-28)
+
+### Features
+
+* **generator:** add cast operations to base type services ([#327](https://github.com/odata2ts/odata2ts/issues/327)) ([df52284](https://github.com/odata2ts/odata2ts/commit/df522846e275c160266c02d5c5b49c8be995b3fb))
+* **generator:** conversion of subtype by control info ([#331](https://github.com/odata2ts/odata2ts/issues/331)) ([a8a8a50](https://github.com/odata2ts/odata2ts/commit/a8a8a50c5a619cfe7e32bf6fa399e2f5b1f55ffa))
+* **generator:** qobjects with casted subtype props ([#328](https://github.com/odata2ts/odata2ts/issues/328)) ([88eb9bd](https://github.com/odata2ts/odata2ts/commit/88eb9bdedf02fa4d74ebfc638f89aca583f1852d))
+* **service:** subtype services ([#332](https://github.com/odata2ts/odata2ts/issues/332)) ([6918735](https://github.com/odata2ts/odata2ts/commit/691873557d21418561f017189fe896d544ffcba5))
+* **service:** support no url encoding ([#326](https://github.com/odata2ts/odata2ts/issues/326)) ([304bc62](https://github.com/odata2ts/odata2ts/commit/304bc627199766f7a930bffe28e39bb24eea39b1))
+
+### BREAKING CHANGES
+
+* **service:** dedicated options parameter for all services
+
 ## [0.38.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.38.0...@odata2ts/odata2ts@0.38.1) (2024-09-19)
 
 ### Bug Fixes
 
 * **generator:** api usage analysis must respect alias ([#317](https://github.com/odata2ts/odata2ts/issues/317)) ([5877161](https://github.com/odata2ts/odata2ts/commit/5877161317d09c5ded9b44ce4a7ecd0f65e65235))
+
 * **generator:** set peer dependency of TS to >= 4.7 ([949d874](https://github.com/odata2ts/odata2ts/commit/949d8749828dda06a2072d4153556c53d0adb3cf))
 
 # [0.38.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.37.0...@odata2ts/odata2ts@0.38.0) (2024-09-11)
@@ -15,12 +30,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Bug Fixes
 
 * auto name clash resolution for v4 actions ([#315](https://github.com/odata2ts/odata2ts/issues/315)) ([3366843](https://github.com/odata2ts/odata2ts/commit/3366843dc227f9c8edd5b4660d63c564cc82f121))
+
 * **generator:** add rimraf as dependency ([9f08ccd](https://github.com/odata2ts/odata2ts/commit/9f08ccd5fc68b1de381ea1cb711c6e667ca5be98))
+
 * **generator:** use typeof when using enums as types ([baf784f](https://github.com/odata2ts/odata2ts/commit/baf784f76f119c2394ba4f1c3cd93359dc31171e))
 
 ### Features
 
 * compile src & test folders as sanity check ([12607f0](https://github.com/odata2ts/odata2ts/commit/12607f04a4ec1142d750318cab5964f3d9a513c4))
+
 * **generator:** allow for numeric enums ([#308](https://github.com/odata2ts/odata2ts/issues/308)) ([a5c36e6](https://github.com/odata2ts/odata2ts/commit/a5c36e6433bb5d793d5f970b12d6ebb8a4c5270d))
 
 # [0.37.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.36.3...@odata2ts/odata2ts@0.37.0) (2024-08-25)
@@ -36,6 +54,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### BREAKING CHANGES
 
 * as there is no generated index file all file paths must be fixed.
+
 * ESM tends to break stuff
 
 ## [0.36.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.36.2...@odata2ts/odata2ts@0.36.3) (2024-08-12)
@@ -61,9 +80,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### Features
 
 * **generator:** add ts-nocheck to each generated file by default ([#284](https://github.com/odata2ts/odata2ts/issues/284)) ([655a3ab](https://github.com/odata2ts/odata2ts/commit/655a3ab801c79e34841f35b1a72cf7d02064f3b8))
+
 * **generator:** generate services based on API reference chain ([#275](https://github.com/odata2ts/odata2ts/issues/275)) ([8fd415b](https://github.com/odata2ts/odata2ts/commit/8fd415bd0a49144e14da08cd5e32d44e947c7f23))
+
 * **generator:** support function overloads for different parameter sets ([#282](https://github.com/odata2ts/odata2ts/issues/282)) ([0b53271](https://github.com/odata2ts/odata2ts/commit/0b532710499d975155c21984a62707ecf4789439))
+
 * **generator:** support type-only imports ([#290](https://github.com/odata2ts/odata2ts/issues/290)) ([dea381e](https://github.com/odata2ts/odata2ts/commit/dea381e7c31f84e03acbaafc15ede58aa9041c13))
+
 * model files always get type checked (no [@ts-nocheck](https://github.com/ts-nocheck)) ([#288](https://github.com/odata2ts/odata2ts/issues/288)) ([43ca58b](https://github.com/odata2ts/odata2ts/commit/43ca58bf72bb8e783b80798eaa73d5fd19676627))
 
 ### BREAKING CHANGES

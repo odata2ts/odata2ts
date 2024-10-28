@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.11.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-main@0.10.1...@odata2ts/example-main@0.11.0) (2024-10-28)
+
+### Features
+
+* **generator:** conversion of subtype by control info ([#331](https://github.com/odata2ts/odata2ts/issues/331)) ([a8a8a50](https://github.com/odata2ts/odata2ts/commit/a8a8a50c5a619cfe7e32bf6fa399e2f5b1f55ffa))
+* **generator:** qobjects with casted subtype props ([#328](https://github.com/odata2ts/odata2ts/issues/328)) ([88eb9bd](https://github.com/odata2ts/odata2ts/commit/88eb9bdedf02fa4d74ebfc638f89aca583f1852d))
+* **service:** subtype services ([#332](https://github.com/odata2ts/odata2ts/issues/332)) ([6918735](https://github.com/odata2ts/odata2ts/commit/691873557d21418561f017189fe896d544ffcba5))
+* **service:** support no url encoding ([#326](https://github.com/odata2ts/odata2ts/issues/326)) ([304bc62](https://github.com/odata2ts/odata2ts/commit/304bc627199766f7a930bffe28e39bb24eea39b1))
+
+### BREAKING CHANGES
+
+* **service:** dedicated options parameter for all services
+
 ## [0.10.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/example-main@0.10.0...@odata2ts/example-main@0.10.1) (2024-09-19)
 
 **Note:** Version bump only for package @odata2ts/example-main

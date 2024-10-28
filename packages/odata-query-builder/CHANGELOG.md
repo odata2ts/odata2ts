@@ -3,11 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.18.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder@0.18.0...@odata2ts/odata-query-builder@0.18.1) (2024-10-28)
+
+**Note:** Version bump only for package @odata2ts/odata-query-builder
+
 # [0.18.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder@0.17.0...@odata2ts/odata-query-builder@0.18.0) (2024-09-11)
 
 ### Features
 
 * compile src & test folders as sanity check ([12607f0](https://github.com/odata2ts/odata2ts/commit/12607f04a4ec1142d750318cab5964f3d9a513c4))
+
 * **generator:** allow for numeric enums ([#308](https://github.com/odata2ts/odata2ts/issues/308)) ([a5c36e6](https://github.com/odata2ts/odata2ts/commit/a5c36e6433bb5d793d5f970b12d6ebb8a4c5270d))
 
 # [0.17.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder@0.16.10...@odata2ts/odata-query-builder@0.17.0) (2024-08-25)

@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/example-main",
-  "version": "0.10.1",
+  "version": "0.11.0",
   "private": true,
   "description": "Main odata2ts configuration examples also serving for integration tests",
   "repository": "git@github.com:odata2ts/odata2ts.git",
@@ -22,13 +22,13 @@
     "@odata2ts/converter-v2-to-v4": "^0.5.3",
     "@odata2ts/http-client-axios": "^0.11.3",
     "@odata2ts/http-client-fetch": "^0.8.0",
-    "@odata2ts/odata-service": "^0.21.0",
+    "@odata2ts/odata-service": "^0.22.0",
     "axios": "^1.7.3",
     "bignumber.js": "^9.1.2",
     "luxon": "^3.5.0"
   },
   "devDependencies": {
-    "@odata2ts/odata2ts": "^0.38.1",
+    "@odata2ts/odata2ts": "^0.39.0",
     "@types/luxon": "^3.4.2"
   },
   "publishConfig": {
