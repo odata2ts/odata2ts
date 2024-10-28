@@ -43,8 +43,7 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("create derived entity", async () => {
-    const model: EditableEventModel = {
-      // @ts-ignore
+    const model: EditableEventModel & { "@odata.type"?: string } = {
       "@odata.type": "#Microsoft.OData.SampleService.Models.TripPin.Event",
       planItemId: 33,
       confirmationCode: "4372899DD",
@@ -63,11 +62,7 @@ describe("Integration Testing of Service Generation", () => {
       },
     };
     const response = await trippinService.people("russellwhyte").trips(0).planItems().create(model);
-    const {
-      //@ts-ignore
-      "@odata.context": ctxt,
-      ...data
-    } = response.data;
+    const { "@odata.context": ctxt, ...data } = response.data;
 
     expect(data).toStrictEqual(model);
   });
