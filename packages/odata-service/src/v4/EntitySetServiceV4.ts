@@ -8,7 +8,7 @@ import {
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
-import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
+import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
 export abstract class EntitySetServiceV4<
   in out ClientType extends ODataHttpClient,
@@ -88,17 +88,20 @@ export abstract class EntitySetServiceV4<
    *
    * @param model
    * @param requestConfig
+   * @param createOptions
    * @return
    */
   public async create<ReturnType extends Partial<T> | void = T>(
-    model: EditableT,
+    model: ODataModelPayloadV4<EditableT>,
     requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): ODataResponse<ReturnType> {
-    const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
+    createOptions?: SubtypeOptions,
+  ): ODataResponse<ODataModelResponseV4<ReturnType>> {
+    const { client, qModel, basePath, path, getDefaultHeaders, qResponseType } = this.__base;
+    const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(createOptions);
 
     const result = await client.post<ODataModelResponseV4<T> | void>(
-      path,
-      qModel.convertToOData(model),
+      dontUseCastPathSegment ? basePath : path,
+      qModel.convertToOData(useTypeCi ? this.__base.addTypeControlInfo(model) : model),
       requestConfig,
       getDefaultHeaders(),
     );

@@ -7,7 +7,7 @@ export class ServiceStateHelper<out ClientType extends ODataHttpClient> {
 
   public constructor(
     public readonly client: ClientType,
-    basePath: string,
+    public basePath: string,
     public name?: string,
     public options: ODataServiceOptionsInternal = {},
   ) {

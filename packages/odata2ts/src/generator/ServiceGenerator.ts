@@ -674,6 +674,7 @@ class ServiceGenerator {
         scope: Scope.Public,
         statements: [
           "const { client, path, options } = this.__base;",
+          "options.subtype = true;",
           `return new ${serviceType}(client, path, "${subClass.fqName}", options);`,
         ],
       });
