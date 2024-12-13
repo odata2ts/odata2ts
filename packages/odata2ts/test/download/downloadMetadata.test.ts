@@ -12,6 +12,7 @@ describe("Download Test", () => {
   const DEFAULT_REQUEST_CONFIG: AxiosRequestConfig = {
     url: DEFAULT_URL + "/$metadata",
     method: "GET",
+    headers: { Accept: "application/xml" },
   };
   const AJAX_RESULT = "ajdfoaifjj";
 
@@ -84,6 +85,7 @@ describe("Download Test", () => {
       auth: { password: "xxx hidden xxx", username: "user" },
       method: "GET",
       url: "http://localhost:3000/api/$metadata",
+      headers: { Accept: "application/xml" },
     });
   });
 
@@ -99,7 +101,7 @@ describe("Download Test", () => {
 
   test("custom request config overwrites defaults", async () => {
     const config: UrlSourceConfiguration = {
-      custom: { method: "POST", url: "hey" },
+      custom: { method: "POST", url: "hey", headers: { Accept: "something/else" } },
     };
 
     await downloadMetadata(DEFAULT_URL, config);
