@@ -101,9 +101,9 @@ export function filterInEmulated<T>(path: string, mapValue: MapValue<T>) {
    */
   return (...values: Array<T>) => {
     return values.reduce(
-      (expression, value) => {
+      (expression, value, currentIndex) => {
         const expr = buildQFilterOperation(path, StandardFilterOperators.EQUALS, mapValue(value));
-        return expression ? expression.or(expr) : expr;
+        return expression ? expression.or(expr, currentIndex < values.length - 1) : expr;
       },
       null as unknown as QFilterExpression,
     );
