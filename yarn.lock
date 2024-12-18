@@ -1199,8 +1199,8 @@ __metadata:
     "@cap-js/sqlite": ^1
     "@odata2ts/converter-big-number": ^0.2.3
     "@odata2ts/http-client-axios": ^0.11.3
-    "@odata2ts/odata-service": ^0.22.0
-    "@odata2ts/odata2ts": ^0.39.0
+    "@odata2ts/odata-service": ^0.22.1
+    "@odata2ts/odata2ts": ^0.39.1
     "@sap/cds": 7.9.4
     "@sap/cds-odata-v2-adapter-proxy": ^1.9.21
     axios: 0.27.2
@@ -1221,8 +1221,8 @@ __metadata:
     "@odata2ts/converter-v2-to-v4": ^0.5.3
     "@odata2ts/http-client-axios": ^0.11.3
     "@odata2ts/http-client-fetch": ^0.8.0
-    "@odata2ts/odata-service": ^0.22.0
-    "@odata2ts/odata2ts": ^0.39.0
+    "@odata2ts/odata-service": ^0.22.1
+    "@odata2ts/odata2ts": ^0.39.1
     "@types/luxon": ^3.4.2
     axios: ^1.7.3
     bignumber.js: ^9.1.2
@@ -1279,15 +1279,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/odata-query-builder@^0.18.1, @odata2ts/odata-query-builder@workspace:packages/odata-query-builder":
+"@odata2ts/odata-query-builder@^0.18.2, @odata2ts/odata-query-builder@workspace:packages/odata-query-builder":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-builder@workspace:packages/odata-query-builder"
   dependencies:
-    "@odata2ts/odata-query-objects": ^0.26.0
+    "@odata2ts/odata-query-objects": ^0.27.0
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-query-objects@^0.26.0, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
+"@odata2ts/odata-query-objects@^0.27.0, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
@@ -1298,18 +1298,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-service@^0.22.0, @odata2ts/odata-service@workspace:packages/odata-service":
+"@odata2ts/odata-service@^0.22.1, @odata2ts/odata-service@workspace:packages/odata-service":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
     "@odata2ts/http-client-api": ^0.6.2
-    "@odata2ts/odata-query-builder": ^0.18.1
-    "@odata2ts/odata-query-objects": ^0.26.0
+    "@odata2ts/odata-query-builder": ^0.18.2
+    "@odata2ts/odata-query-objects": ^0.27.0
     ts-expect: ^1.3.0
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2ts@^0.39.0, @odata2ts/odata2ts@workspace:packages/odata2ts":
+"@odata2ts/odata2ts@^0.39.1, @odata2ts/odata2ts@workspace:packages/odata2ts":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2ts@workspace:packages/odata2ts"
   dependencies:
@@ -1318,8 +1318,8 @@ __metadata:
     "@odata2ts/converter-v2-to-v4": ^0.5.1
     "@odata2ts/http-client-api": ^0.6.2
     "@odata2ts/odata-core": ^0.6.0
-    "@odata2ts/odata-query-objects": ^0.26.0
-    "@odata2ts/odata-service": ^0.22.0
+    "@odata2ts/odata-query-objects": ^0.27.0
+    "@odata2ts/odata-service": ^0.22.1
     "@odata2ts/test-converters": ^0.5.0
     "@prettier/plugin-xml": ^3.4.1
     "@types/node": ^22.4.0
@@ -1339,8 +1339,8 @@ __metadata:
     upper-case-first: ^2.0.2
     xml2js: ^0.6.0
   peerDependencies:
-    "@odata2ts/odata-query-objects": ^0.26.0
-    "@odata2ts/odata-service": ^0.22.0
+    "@odata2ts/odata-query-objects": ^0.27.0
+    "@odata2ts/odata-service": ^0.22.1
     typescript: ">= 4.7"
   bin:
     odata2ts: lib/run-cli.js

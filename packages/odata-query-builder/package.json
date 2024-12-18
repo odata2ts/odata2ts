@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-query-builder",
-  "version": "0.18.1",
+  "version": "0.18.2",
   "description": "Allows for building type-safe OData queries with a fluent API",
   "keywords": [
     "query builder",
@@ -33,7 +33,7 @@
     "test-compile": "tsc -p tsconfig.compile.json"
   },
   "dependencies": {
-    "@odata2ts/odata-query-objects": "^0.26.0"
+    "@odata2ts/odata-query-objects": "^0.27.0"
   },
   "publishConfig": {
     "access": "public"

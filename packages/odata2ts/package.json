@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata2ts",
-  "version": "0.39.0",
+  "version": "0.39.1",
   "description": "Flexible generator to produce various TypeScript artefacts (from simple model interfaces to complete odata clients) from OData metadata files",
   "keywords": [
     "odata2ts",
@@ -69,14 +69,14 @@
   },
   "devDependencies": {
     "@odata2ts/converter-v2-to-v4": "^0.5.1",
-    "@odata2ts/odata-query-objects": "^0.26.0",
-    "@odata2ts/odata-service": "^0.22.0",
+    "@odata2ts/odata-query-objects": "^0.27.0",
+    "@odata2ts/odata-service": "^0.22.1",
     "@odata2ts/test-converters": "^0.5.0",
     "@types/node": "^22.4.0"
   },
   "peerDependencies": {
-    "@odata2ts/odata-query-objects": "^0.26.0",
-    "@odata2ts/odata-service": "^0.22.0",
+    "@odata2ts/odata-query-objects": "^0.27.0",
+    "@odata2ts/odata-service": "^0.22.1",
     "typescript": ">= 4.7"
   },
   "publishConfig": {

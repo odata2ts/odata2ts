@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.39.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.39.0...@odata2ts/odata2ts@0.39.1) (2024-12-18)
+
+### Bug Fixes
+
+* **odata2ts:** add Accept header for metadata downloads ([#340](https://github.com/odata2ts/odata2ts/issues/340)) ([dcdd997](https://github.com/odata2ts/odata2ts/commit/dcdd9975ee9f34bf0474c22372db39fcb80e9bae))
+
 # [0.39.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.38.1...@odata2ts/odata2ts@0.39.0) (2024-10-28)
 
 ### Features

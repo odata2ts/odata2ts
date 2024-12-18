@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.27.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.26.0...@odata2ts/odata-query-objects@0.27.0) (2024-12-18)
+
+### Features
+
+* **q-objects:** emulated in-statement without extra parentheses ([#341](https://github.com/odata2ts/odata2ts/issues/341)) ([34c91ed](https://github.com/odata2ts/odata2ts/commit/34c91ed40dadbd7e5a95e1581757e9140b2774e6))
+
 # [0.26.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.25.0...@odata2ts/odata-query-objects@0.26.0) (2024-10-28)
 
 ### Features
