@@ -12,11 +12,15 @@ export class QFilterExpression {
     return this;
   }
 
-  private combine(expression: QFilterExpression | null | undefined, isOrOperation: boolean) {
+  private combine(
+    expression: QFilterExpression | null | undefined,
+    isOrOperation: boolean,
+    withoutParentheses = false,
+  ) {
     if (expression?.toString()) {
       if (this.expression) {
         const newExpr = `${this.expression} ${isOrOperation ? "or" : "and"} ${expression.toString()}`;
-        return new QFilterExpression(isOrOperation ? `(${newExpr})` : newExpr);
+        return new QFilterExpression(isOrOperation && !withoutParentheses ? `(${newExpr})` : newExpr);
       } else {
         return expression;
       }
@@ -28,7 +32,7 @@ export class QFilterExpression {
     return this.combine(expression, false);
   }
 
-  public or(expression: QFilterExpression | null | undefined): QFilterExpression {
-    return this.combine(expression, true);
+  public or(expression: QFilterExpression | null | undefined, withoutParentheses = false): QFilterExpression {
+    return this.combine(expression, true, withoutParentheses);
   }
 }

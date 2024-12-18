@@ -92,4 +92,13 @@ describe("QFilterExpression test", () => {
       `(${exampleResult} or ${exampleNumberResult}) and (${exampleResult} or ${exampleNumberResult})`,
     );
   });
+
+  test("or without parentheses", () => {
+    const toTest = exampleExpression
+      .or(exampleNumberExpr, true)
+      .or(exampleExpression.or(exampleNumberExpr, true), true)
+      .toString();
+
+    expect(toTest).toBe(`${exampleResult} or ${exampleNumberResult} or ${exampleResult} or ${exampleNumberResult}`);
+  });
 });
