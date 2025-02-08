@@ -62,12 +62,12 @@ describe("V2 Data Types & Converter Tests", function () {
   });
 
   test("v2: DateTime in URL", async () => {
-    const expected = "2006-11-05T00:00:00.000Z";
+    const exampleDate = "2006-11-05T00:00:00.000Z";
 
     await DATA_TYPE_SERVICE.oneOfEverything().query((builder, qOoe) => {
-      return builder.filter(qOoe.dateTimeType.eq(DateTime.fromISO(expected)));
+      return builder.filter(qOoe.dateTimeType.eq(DateTime.fromISO(exampleDate)));
     });
 
-    expect(ODATA_CLIENT.lastUrl).toBe(`${ONE_OF_EVERYTHING_URL}?$filter=DateTimeType eq datetime'${expected}'`);
+    expect(ODATA_CLIENT.lastUrl).toBe(`${ONE_OF_EVERYTHING_URL}?$filter=DateTimeType eq datetime'${exampleDate}'`);
   });
 });

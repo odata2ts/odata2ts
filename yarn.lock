@@ -639,12 +639,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/converter-runtime@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@odata2ts/converter-runtime@npm:0.5.0"
+"@odata2ts/converter-runtime@npm:^0.5.5":
+  version: 0.5.5
+  resolution: "@odata2ts/converter-runtime@npm:0.5.5"
   dependencies:
-    "@odata2ts/converter-api": "npm:^0.2.2"
-  checksum: 10/b46a3839abf20065eb5029d0a2962bfd3f47800c4f7f1b2695e3bc8acddde4467e3e30bdc3b3d58cc8945d5fd888e16e89e625c598f4f862bffb821339c770d7
+    "@odata2ts/converter-api": "npm:^0.2.6"
+  checksum: 10/798e65e65b6db0eb04e5fa3e642bfd3ac6ad9e2a2d217b65599abe10e084d90b89e0f88a36de044283b8f9c249c230fb7b594708e79bfcb3d0659aea261bf7b5
   languageName: node
   linkType: hard
 
@@ -788,7 +788,7 @@ __metadata:
   resolution: "@odata2ts/odata2ts@workspace:packages/odata2ts"
   dependencies:
     "@odata2ts/converter-api": "npm:^0.2.5"
-    "@odata2ts/converter-runtime": "npm:^0.5.0"
+    "@odata2ts/converter-runtime": "npm:^0.5.5"
     "@odata2ts/converter-v2-to-v4": "npm:^0.5.1"
     "@odata2ts/http-client-api": "npm:^0.6.2"
     "@odata2ts/odata-core": "npm:^0.6.0"
