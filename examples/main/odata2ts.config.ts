@@ -144,7 +144,6 @@ const config: ConfigFileOptions = {
       allowRenaming: true,
       converters: [
         "@odata2ts/converter-v2-to-v4",
-        "@odata2ts/converter-luxon",
         "@odata2ts/converter-big-number",
         {
           module: "@odata2ts/converter-common",
