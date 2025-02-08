@@ -1,13 +1,13 @@
 import { BigNumber } from "bignumber.js";
 import { describe, expect, test } from "vitest";
-import { EditableProductModel } from "../../build/odataV2/ODataDemoModel";
-import { ODataDemoService } from "../../build/odataV2/ODataDemoService";
+import { EditableProductModel } from "../../src-generated/odataV2/ODataDemoModel";
+import { ODataDemoService } from "../../src-generated/odataV2/ODataDemoService";
 import { MockODataClient } from "../MockODataClient";
 
 describe("V2 CRUD Functionality Tests", function () {
   const BASE_URL = "test";
   const odataClient = new MockODataClient(true);
-  const testService = new ODataDemoService(odataClient, BASE_URL);
+  const testService = new ODataDemoService(odataClient, BASE_URL, { noUrlEncoding: true });
 
   test("create", () => {
     const model: EditableProductModel = {

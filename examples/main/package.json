@@ -9,7 +9,7 @@
   "type": "module",
   "scripts": {
     "build": "yarn clean && yarn generate",
-    "clean": "rimraf build",
+    "clean": "rimraf build src-generated",
     "generate": "odata2ts",
     "int-test": "vitest run --dir int-test",
     "test": "tsc && vitest run --dir test",

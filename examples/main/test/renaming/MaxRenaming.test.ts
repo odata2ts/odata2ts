@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { servicexxx_Trippin_xxxs } from "../../build/trippin-max-renaming/servicexxx_Trippin_xxxs";
+import { servicexxx_Trippin_xxxs } from "../../src-generated/trippin-max-renaming/servicexxx_Trippin_xxxs";
 import type {
   EDITABLE_LOCATION,
   EDITABLE_THE_PERSON,
   THE_PERSON_ID,
-} from "../../build/trippin-max-renaming/TRIPPIN_TYPES";
-import { FEATURE, PERSON_GENDER } from "../../build/trippin-max-renaming/TRIPPIN_TYPES";
+} from "../../src-generated/trippin-max-renaming/TRIPPIN_TYPES";
+import { FEATURE, PERSON_GENDER } from "../../src-generated/trippin-max-renaming/TRIPPIN_TYPES";
 import { MockODataClient } from "../MockODataClient";
 
 describe("Testing Generation With Max Renaming Options", () => {
@@ -13,7 +13,7 @@ describe("Testing Generation With Max Renaming Options", () => {
   const odataClient = new MockODataClient();
 
   // noinspection JSPotentiallyInvalidConstructorUsage
-  const testService = new servicexxx_Trippin_xxxs(odataClient, BASE_URL);
+  const testService = new servicexxx_Trippin_xxxs(odataClient, BASE_URL, { noUrlEncoding: true });
 
   let editModel: EDITABLE_THE_PERSON;
 

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "../TestConstants";
+import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinTestConstants";
 
 describe("Trippin: Operation Test", function () {
   test("unbound function", async () => {

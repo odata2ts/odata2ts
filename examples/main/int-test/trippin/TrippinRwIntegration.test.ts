@@ -1,7 +1,7 @@
 import { FetchClient } from "@odata2ts/http-client-fetch";
 import { describe, expect, test } from "vitest";
-import { TrippinRwService } from "../../build/trippin-rw/TrippinRwService";
-import { EditableEventModel } from "../../build/trippin/TrippinModel";
+import { TrippinRwService } from "../../src-generated/trippin-rw/TrippinRwService";
+import { EditableEventModel } from "../../src-generated/trippin/TrippinModel";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/V4/(S(xjqbds2oavibr01gt1fny24s))/TripPinServiceRW";
