@@ -5,7 +5,7 @@ function srcFolder(name: string, isSpecial = false) {
 }
 
 function outputFolder(name: string, isSpecial = false) {
-  return `build/${isSpecial ? "specials/" : ""}${name}`;
+  return `src-generated/${isSpecial ? "specials/" : ""}${name}`;
 }
 
 const config: ConfigFileOptions = {
@@ -135,15 +135,22 @@ const config: ConfigFileOptions = {
         { type: TypeModel.OperationImportType, name: "ResetDataSource", mappedName: "DoReset" },
       ],
     },
-    // using all data types for v2 and converters
+    // using all data types for v2
     dataTypesV2: {
       source: srcFolder("data-types-v2.xml"),
       output: outputFolder("data-types-v2"),
-      enablePrimitivePropertyServices: true,
+      disableAutoManagedKey: true,
+      allowRenaming: true,
+    },
+    // using all data types for v2 and applying converters
+    dataTypesV2Converted: {
+      source: srcFolder("data-types-v2.xml"),
+      output: outputFolder("data-types-v2-converted"),
       disableAutoManagedKey: true,
       allowRenaming: true,
       converters: [
         "@odata2ts/converter-v2-to-v4",
+        "@odata2ts/converter-luxon",
         "@odata2ts/converter-big-number",
         {
           module: "@odata2ts/converter-common",

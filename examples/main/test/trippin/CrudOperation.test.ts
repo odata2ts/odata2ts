@@ -4,8 +4,8 @@ import {
   EditablePersonModel,
   FeatureModel,
   PersonGenderModel,
-} from "../../build/trippin/TrippinModel";
-import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "../TestConstants";
+} from "../../src-generated/trippin/TrippinModel";
+import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinTestConstants";
 
 describe("Testing Generation of TrippinService", () => {
   let editModel: EditablePersonModel;

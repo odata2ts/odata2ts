@@ -1,8 +1,8 @@
 import { AxiosClient } from "@odata2ts/http-client-axios";
 import { BigNumber } from "bignumber.js";
 import { describe, expect, test } from "vitest";
-import { EditableProductModel } from "../../build/odataV2/ODataDemoModel";
-import { ODataDemoService } from "../../build/odataV2/ODataDemoService";
+import { EditableProductModel } from "../../src-generated/odataV2/ODataDemoModel";
+import { ODataDemoService } from "../../src-generated/odataV2/ODataDemoService";
 
 /**
  * This sample service is buggy:

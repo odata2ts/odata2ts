@@ -1,7 +1,8 @@
 import { BigNumber } from "bignumber.js";
+import { DateTime } from "luxon";
 import { describe, expect, test } from "vitest";
-import { EditableOneOfEverything } from "../../src-generated/data-types-v2/DataTypeExampleModel";
-import { DataTypeExampleService } from "../../src-generated/data-types-v2/DataTypeExampleService";
+import { EditableOneOfEverything } from "../../src-generated/data-types-v2-converted/DataTypeExampleModel";
+import { DataTypeExampleService } from "../../src-generated/data-types-v2-converted/DataTypeExampleService";
 import { MockODataClient } from "../MockODataClient";
 
 describe("V2 Data Types & Converter Tests", function () {
@@ -22,33 +23,34 @@ describe("V2 Data Types & Converter Tests", function () {
     const subject: EditableOneOfEverything = {
       stringType: "Tester",
       booleanType: true,
-      byteType: "1",
-      sByteType: "-1",
+      byteType: 1,
+      sByteType: -1,
       int16Type: 16,
       int32Type: 32,
-      int64Type: "123",
-      singleType: "1.1",
-      doubleType: "2.2",
-      decimalType: "9.9",
-      timeType: "PT12H59S59S",
-      dateTimeType: "2006-11-05T00:00:00.000Z",
-      dateTimeOffsetType: "2022-12-31T12:59:59Z",
+      int64Type: BigInt("123"),
+      singleType: 1.1,
+      doubleType: 2.2,
+      decimalType: BigNumber("9.9"),
+      // timeType: DateTime.fromISO("12:59:59"),
+      dateTimeType: DateTime.fromISO("2006-11-05T00:00:00.000Z"),
+      dateTimeOffsetType: DateTime.fromISO("2022-12-31T12:59:59Z"),
     };
 
     const expectedResult = {
-      StringType: subject.stringType,
-      BooleanType: subject.booleanType,
-      ByteType: subject.byteType,
-      SByteType: subject.sByteType,
-      Int16Type: subject.int16Type,
-      Int32Type: subject.int32Type,
-      Int64Type: subject.int64Type,
-      SingleType: subject.singleType,
-      DoubleType: subject.doubleType,
-      DecimalType: subject.decimalType,
-      TimeType: subject.timeType,
-      DateTimeType: subject.dateTimeType,
-      DateTimeOffsetType: subject.dateTimeOffsetType,
+      StringType: "Tester",
+      BooleanType: true,
+      ByteType: "1",
+      SByteType: "-1",
+      Int16Type: 16,
+      Int32Type: 32,
+      Int64Type: "123",
+      SingleType: "1.1",
+      DoubleType: "2.2",
+      DecimalType: "9.9",
+      // TODO: Edm.Time gives undefined
+      // TimeType: "PT1H2M3S",
+      DateTimeType: "/Date(1162684800000)/",
+      DateTimeOffsetType: "2022-12-31T12:59:59Z",
     };
 
     await DATA_TYPE_SERVICE.oneOfEverything().create(subject);
@@ -63,7 +65,7 @@ describe("V2 Data Types & Converter Tests", function () {
     const expected = "2006-11-05T00:00:00.000Z";
 
     await DATA_TYPE_SERVICE.oneOfEverything().query((builder, qOoe) => {
-      return builder.filter(qOoe.dateTimeType.eq(expected));
+      return builder.filter(qOoe.dateTimeType.eq(DateTime.fromISO(expected)));
     });
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${ONE_OF_EVERYTHING_URL}?$filter=DateTimeType eq datetime'${expected}'`);

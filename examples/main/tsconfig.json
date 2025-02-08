@@ -5,5 +5,5 @@
     "noEmit": true,
     "lib": ["DOM"]
   },
-  "include": ["build", "test", "int-test"]
+  "include": ["src-generated", "test", "int-test"]
 }

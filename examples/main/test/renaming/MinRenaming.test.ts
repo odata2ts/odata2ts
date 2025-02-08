@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import type { EditableLocation, EditablePerson, PersonId } from "../../build/trippin-min-naming/TrippinModel";
-import { Feature, PersonGender } from "../../build/trippin-min-naming/TrippinModel";
-import { TrippinService } from "../../build/trippin-min-naming/TrippinService";
+import type { EditableLocation, EditablePerson, PersonId } from "../../src-generated/trippin-min-naming/TrippinModel";
+import { Feature, PersonGender } from "../../src-generated/trippin-min-naming/TrippinModel";
+import { TrippinService } from "../../src-generated/trippin-min-naming/TrippinService";
 import { MockODataClient } from "../MockODataClient";
 
 describe("Testing Generation with min renaming options", () => {
@@ -9,7 +9,7 @@ describe("Testing Generation with min renaming options", () => {
   const odataClient = new MockODataClient();
 
   // noinspection JSPotentiallyInvalidConstructorUsAge
-  const testService = new TrippinService(odataClient, BASE_URL);
+  const testService = new TrippinService(odataClient, BASE_URL, { noUrlEncoding: true });
 
   let editModel: EditablePerson;
 

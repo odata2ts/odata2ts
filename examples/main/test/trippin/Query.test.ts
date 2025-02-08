@@ -1,9 +1,8 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { describe, expect, test } from "vitest";
-import { PersonIdModel, PersonModel } from "../../build/trippin/TrippinModel";
-import { TrippinService } from "../../build/trippin/TrippinService";
-import { BASE_URL, ODATA_CLIENT, TRIPPIN, TRIPPIN_NE } from "../TestConstants";
+import { PersonIdModel, PersonModel } from "../../src-generated/trippin/TrippinModel";
+import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinTestConstants";
 
 type SelectedPersonShape = Pick<PersonModel, "user" | "lastName" | "addressInfo">;
 
@@ -30,7 +29,7 @@ describe("Trippin: Testing Query Functionality", function () {
   });
 
   test("entitySet: query with select", async () => {
-    const expected = `${BASE_URL}/People?%24select=UserName%2CLastName%2CAddressInfo`;
+    const expected = `${BASE_URL}/People?$select=UserName,LastName,AddressInfo`;
 
     // const response = await TRIPPIN.people().query((builder) => builder.select("user", "lastName", "addressInfo"));
 
@@ -69,7 +68,7 @@ describe("Trippin: Testing Query Functionality", function () {
       return builder.filter(qPerson.trips.any());
     });
 
-    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People?%24filter=Trips%2Fany()`);
+    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People?$filter=Trips/any()`);
   });
 
   test("any: without return type", async () => {
@@ -77,29 +76,29 @@ describe("Trippin: Testing Query Functionality", function () {
       return builder.filter(qPerson.trips.any(() => {}));
     });
 
-    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People?%24filter=Trips%2Fany()`);
+    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People?$filter=Trips/any()`);
   });
 
   test("no url encoding", async () => {
-    await TRIPPIN_NE.people("hei/ner").query((b, q) => b.filter(q.age.gt(18)));
+    await TRIPPIN.people("hei/ner").query((b, q) => b.filter(q.age.gt(18)));
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('hei/ner')?$filter=Age gt 18`);
   });
 
   test("function without url encoding", async () => {
-    await TRIPPIN_NE.people("heiner").getFriendsTrips({ userName: "hei/ner" });
+    await TRIPPIN.people("heiner").getFriendsTrips({ userName: "hei/ner" });
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('heiner')/Trippin.GetFriendsTrips(userName='hei/ner')`);
   });
 
   test("casting derived entity type", async () => {
-    await TRIPPIN_NE.people("russellwhyte").trips(0).planItems().asFlightCollectionService().query();
+    await TRIPPIN.people("russellwhyte").trips(0).planItems().asFlightCollectionService().query();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('russellwhyte')/Trips(0)/PlanItems/Trippin.Flight`);
   });
 
   test("select & expand casted prop of derived entity type", async () => {
-    await TRIPPIN_NE.people("russellwhyte")
+    await TRIPPIN.people("russellwhyte")
       .trips(0)
       .planItems()
       .query((b, q) => {
@@ -112,7 +111,7 @@ describe("Trippin: Testing Query Functionality", function () {
   });
 
   test("filter casted prop of derived entity type", async () => {
-    await TRIPPIN_NE.people("russellwhyte")
+    await TRIPPIN.people("russellwhyte")
       .trips(0)
       .planItems()
       .query((b, q) => {

@@ -11,6 +11,7 @@ gen/
 target/
 _out
 coverage
+src-generated
 
 # Typescript
 tsconfig.build.tsbuildinfo
