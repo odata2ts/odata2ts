@@ -38,11 +38,11 @@ export abstract class QParam<Type extends PrimitiveParamType, ConvertedType>
   protected abstract parseValueFromUrl: UrlParamValueParser<Type>;
 
   public convertFrom(value: FlexibleConversionModel<Type>): FlexibleConversionModel<ConvertedType> {
-    return Array.isArray(value) ? value.map(this.converter.convertFrom) : this.converter.convertFrom(value);
+    return Array.isArray(value) ? value.map((v) => this.converter.convertFrom(v)) : this.converter.convertFrom(value);
   }
 
   public convertTo(value: FlexibleConversionModel<ConvertedType>): FlexibleConversionModel<Type> {
-    return Array.isArray(value) ? value.map(this.converter.convertTo) : this.converter.convertTo(value);
+    return Array.isArray(value) ? value.map((v) => this.converter.convertTo(v)) : this.converter.convertTo(value);
   }
 
   public formatUrlValue(value: FlexibleConversionModel<ConvertedType>): string | undefined {
