@@ -1,5 +1,4 @@
 import { BigNumber } from "bignumber.js";
-import { DateTime, Duration } from "luxon";
 import { describe, expect, test } from "vitest";
 import { EditableOneOfEverything } from "../../build/data-types-v2/DataTypeExampleModel";
 import { DataTypeExampleService } from "../../build/data-types-v2/DataTypeExampleService";
@@ -7,15 +6,15 @@ import { MockODataClient } from "../MockODataClient";
 
 describe("V2 Data Types & Converter Tests", function () {
   const BASE_URL = "EXP";
+  const ONE_OF_EVERYTHING_URL = `${BASE_URL}/OneOfEverything`;
   const ODATA_CLIENT = new MockODataClient();
   const DATA_TYPE_SERVICE = new DataTypeExampleService(ODATA_CLIENT, BASE_URL);
+  const ENC = encodeURIComponent;
 
   test("sanity check", async () => {
-    const expected = `${BASE_URL}/OneOfEverything`;
-
     const toTest = DATA_TYPE_SERVICE.oneOfEverything();
 
-    expect(toTest.getPath()).toBe(expected);
+    expect(toTest.getPath()).toBe(ONE_OF_EVERYTHING_URL);
     expect(toTest.getKeySpec().length).toBe(1);
     expect(toTest.getKeySpec()[0].getName()).toEqual("StringType");
   });
@@ -33,7 +32,8 @@ describe("V2 Data Types & Converter Tests", function () {
       doubleType: 2.2,
       decimalType: BigNumber("9.9"),
       // timeType: DateTime.fromISO("12:59:59"),
-      dateTimeOffsetType: DateTime.fromISO("2022-12-31T12:59:59Z"),
+      dateTimeType: "2006-11-05T00:00:00.000Z",
+      dateTimeOffsetType: "2022-12-31T12:59:59Z",
     };
 
     const expectedResult = {
@@ -49,7 +49,8 @@ describe("V2 Data Types & Converter Tests", function () {
       DecimalType: "9.9",
       // TODO: Edm.Time gives undefined
       // TimeType: "PT1H2M3S",
-      DateTimeOffsetType: "2022-12-31T12:59:59.000Z",
+      DateTimeType: "/Date(1162684800000)/",
+      DateTimeOffsetType: "2022-12-31T12:59:59Z",
     };
 
     await DATA_TYPE_SERVICE.oneOfEverything().create(subject);
@@ -58,5 +59,17 @@ describe("V2 Data Types & Converter Tests", function () {
     expect(ODATA_CLIENT.lastData).toStrictEqual(expectedResult);
     await DATA_TYPE_SERVICE.oneOfEverything("abc").patch(subject);
     expect(ODATA_CLIENT.lastData).toStrictEqual(expectedResult);
+  });
+
+  test("v2: DateTime in URL", async () => {
+    const expected = "2006-11-05T00:00:00.000Z";
+
+    await DATA_TYPE_SERVICE.oneOfEverything().query((builder, qOoe) => {
+      return builder.filter(qOoe.dateTimeType.eq(expected));
+    });
+
+    expect(ODATA_CLIENT.lastUrl).toBe(
+      `${ONE_OF_EVERYTHING_URL}?${ENC("$filter")}=${ENC(`DateTimeType eq datetime'${expected}'`)}`,
+    );
   });
 });
