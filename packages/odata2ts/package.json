@@ -39,7 +39,6 @@
     "dev": "yarn generate trippin odata",
     "generate": "npx tsx src/run-cli.ts",
     "int-test": "yarn clean && vitest run --dir int-test",
-    "prepack": "tsc",
     "test": "yarn test-compile && vitest run --dir test",
     "test-compile": "tsc -p tsconfig.compile.json",
     "test-compile-large": "npx --node-options=\"--max-old-space-size=14000\" tsc -p tsconfig.compile.json",
