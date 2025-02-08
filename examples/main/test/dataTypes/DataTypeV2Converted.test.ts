@@ -50,7 +50,7 @@ describe("V2 Data Types & Converter Tests", function () {
       // TODO: Edm.Time gives undefined
       // TimeType: "PT1H2M3S",
       DateTimeType: "/Date(1162684800000)/",
-      DateTimeOffsetType: "2022-12-31T12:59:59Z",
+      DateTimeOffsetType: "2022-12-31T12:59:59.000Z",
     };
 
     await DATA_TYPE_SERVICE.oneOfEverything().create(subject);
