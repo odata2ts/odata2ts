@@ -12,25 +12,18 @@
     "examples/*"
   ],
   "scripts": {
-    "build": "yarn clean && lerna run build",
-    "check-circular-deps": "npx madge --extensions ts --circular packages/odata2ts/src packages/odata-core/src packages/odata-query-builder/src packages/odata-query-objects/src packages/odata-service/src",
+    "build": "yarn clean && yarn workspaces foreach -A -pt run build",
+    "check-circular-deps": "yarn workspaces foreach -A -p run check-circular-deps",
     "clean": "rimraf coverage",
     "coverage": "vitest run --coverage",
     "generate-from-url": "yarn workspace @odata2ts/example-bookshop generate-from-url",
-    "int-test": "lerna run --parallel int-test",
-    "release": "env-cmd -f .env.local --no-override lerna version",
+    "int-test": "yarn workspaces foreach -A -p run int-test",
     "start-cap": "yarn workspace @odata2ts/example-bookshop start",
-    "test": "lerna run --parallel test",
-    "test-compile": "lerna run --parallel test-compile",
-    "version": "yarn install && git add yarn.lock",
-    "postversion": "lerna publish from-git"
+    "test": "yarn workspaces foreach -A -p run test",
+    "test-compile": "yarn workspaces foreach -A -p run test-compile"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
-    "@lerna-lite/cli": "^2.4.1",
-    "@lerna-lite/publish": "^2.4.1",
-    "@lerna-lite/run": "^2.4.1",
-    "@lerna-lite/version": "^2.4.1",
     "@prettier/plugin-xml": "^3.4.1",
     "@types/node": "^22.4.0",
     "@vitest/coverage-istanbul": "^2.0.5",
@@ -42,5 +35,5 @@
     "typescript": "5.1.3",
     "vitest": "^2.0.5"
   },
-  "packageManager": "yarn@3.5.0"
+  "packageManager": "yarn@4.6.0"
 }

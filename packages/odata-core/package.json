@@ -29,7 +29,7 @@
     "check-circular-deps": "madge ./src --extensions ts --circular",
     "clean": "rimraf lib coverage",
     "compile": "tsc",
-    "prepublish": "yarn build"
+    "prepack": "yarn compile"
   },
   "publishConfig": {
     "access": "public"
