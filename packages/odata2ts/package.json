@@ -39,14 +39,14 @@
     "dev": "yarn generate trippin odata",
     "generate": "npx tsx src/run-cli.ts",
     "int-test": "yarn clean && vitest run --dir int-test",
-    "prepublish": "yarn build",
+    "prepack": "tsc",
     "test": "yarn test-compile && vitest run --dir test",
     "test-compile": "tsc -p tsconfig.compile.json",
     "test-compile-large": "npx --node-options=\"--max-old-space-size=14000\" tsc -p tsconfig.compile.json",
     "testing": "vitest --dir test"
   },
   "dependencies": {
-    "@odata2ts/converter-api": "^0.2.2",
+    "@odata2ts/converter-api": "^0.2.5",
     "@odata2ts/converter-runtime": "^0.5.0",
     "@odata2ts/http-client-api": "^0.6.2",
     "@odata2ts/odata-core": "^0.6.0",

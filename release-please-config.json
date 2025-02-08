@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "plugins": [
+    {
+      "type": "node-workspace",
+      "updatePeerDependencies": true,
+      "merge": false
+    }
+  ],
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "include-component-in-tag": true,
+  "separate-pull-requests": false,
+  "pull-request-title-pattern": "chore(release): publish branch ${branch}",
+  "group-pull-request-title-pattern": "chore(release): publish branch ${branch}",
+  "packages": {
+    "packages/odata2ts": {
+      "component": "@odata2ts/odata2ts"
+    },
+    "packages/odata-core": {
+      "component": "@odata2ts/odata-core"
+    },
+    "packages/odata-query-builder": {
+      "component": "@odata2ts/odata-query-builder"
+    },
+    "packages/odata-query-objects": {
+      "component": "@odata2ts/odata-query-objects"
+    },
+    "packages/odata-service": {
+      "component": "@odata2ts/odata-service"
+    }
+  }
+}

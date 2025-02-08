@@ -8,32 +8,28 @@ on:
     types: [assigned, opened, synchronize, reopened]
 
 jobs:
-  check_circular_deps:
-    name: Check for Circular Deps
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 20
-      - name: Check for circular dependencies
-        run: npx madge --extensions ts --circular packages/odata2ts/src packages/odata-core/src packages/odata-query-builder/src packages/odata-query-objects/src packages/odata-service/src
-  tests_with_coverage:
+  test:
     name: Testing With Coverage
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        node: [ 20 ]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node }}
       - name: Install cds globally
         run: npm i -g @sap/cds-dk
       - name: Install packages
-        run: corepack enable && yarn set version 3.5.0 && yarn install
+        run: yarn --immutable
       - name: Build packages
         run: yarn build
       - name: Type Test
         run: yarn test-compile
+      - name: Check Circular Deps
+        run: yarn check-circular-deps
       - name: Start CAP server & run tests
         run: |
           yarn start-cap &
