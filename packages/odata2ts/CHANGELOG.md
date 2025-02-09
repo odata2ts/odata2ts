@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
+    * @odata2ts/odata-service bumped from ^0.22.1 to ^0.22.2
+  * peerDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
+    * @odata2ts/odata-service bumped from ^0.22.1 to ^0.22.2
+
 ## [0.39.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.39.0...@odata2ts/odata2ts@0.39.1) (2024-12-18)
 
 ### Bug Fixes
