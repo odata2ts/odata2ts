@@ -30,7 +30,6 @@
     "clean": "rimraf lib coverage",
     "compile": "tsc",
     "compile-test": "tsc -p tsconfig.test.json",
-    "prepack": "yarn compile",
     "test": "yarn test-compile && vitest run",
     "test-compile": "tsc -p tsconfig.compile.json"
   },

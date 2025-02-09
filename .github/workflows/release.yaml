@@ -69,6 +69,8 @@ jobs:
           cache: yarn
       - name: Install packages
         run: yarn --immutable
+      - name: Build packages
+        run: yarn build
       - name: Publish packages
         run: yarn workspaces foreach -A --topological-dev --no-private npm publish --tolerate-republish
         env:

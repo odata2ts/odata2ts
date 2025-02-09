@@ -28,8 +28,7 @@
     "build": "yarn clean && yarn compile",
     "check-circular-deps": "madge ./src --extensions ts --circular",
     "clean": "rimraf lib coverage",
-    "compile": "tsc",
-    "prepack": "yarn compile"
+    "compile": "tsc"
   },
   "publishConfig": {
     "access": "public"
