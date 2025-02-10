@@ -33,6 +33,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * ESM tends to break stuff
 
+## [0.27.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.27.0...@odata2ts/odata-query-objects-v0.27.1) (2025-02-09)
+
+
+### Bug Fixes
+
+* DateTime with v2-to-v4-converter shouldn't convert URL values ([#348](https://github.com/odata2ts/odata2ts/issues/348)) ([20af677](https://github.com/odata2ts/odata2ts/commit/20af67762099e944bdb2cdfb3a83f7c6aa166c00))
+
 ## [0.23.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.23.0...@odata2ts/odata-query-objects@0.23.1) (2024-08-01)
 
 ### Bug Fixes
