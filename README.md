@@ -4,7 +4,7 @@
 # odata2ts
 
 If you use TypeScript and need to interact with an OData service, then `odata2ts` might
-be for you. It centers around the generation of TypeScript artefacts
+be for you. It centers around the generation of TypeScript artifacts
 out of readily available metadata descriptions of given OData services.
 
 With the help of `odata2ts` you can:
@@ -23,7 +23,7 @@ Feature Highlights:
 - use existing or own converters to interact with data types of your choice
 - allows for name mappings of attributes
 
-The generated code artefacts can be used in Browser or Node.js environments.
+The generated code artifacts can be used in Browser or Node.js environments.
 
 ## Documentation
 
