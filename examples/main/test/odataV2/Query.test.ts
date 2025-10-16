@@ -1,5 +1,5 @@
 import type { HttpResponseModel } from "@odata2ts/http-client-api";
-import type { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
+import type { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
 import { describe, expect, test } from "vitest";
 import { ProductModel } from "../../src-generated/odataV2/ODataDemoModel";
 import { ODataDemoService } from "../../src-generated/odataV2/ODataDemoService";
@@ -11,7 +11,7 @@ describe("Unit Tests for V2 OData Demo Service", function () {
   const testService = new ODataDemoService(odataClient, BASE_URL, { noUrlEncoding: true });
 
   test("get by id", async () => {
-    const result: HttpResponseModel<ODataModelResponseV2<ProductModel>> = await testService.products(123).query();
+    const result: HttpResponseModel<ODataEntityModelResponseV2<ProductModel>> = await testService.products(123).query();
 
     expect(odataClient.lastUrl).toBe("test/Products(123)");
     expect(result.status).toBe(200);

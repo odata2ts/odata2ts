@@ -101,17 +101,6 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
 
   /*
 
-  test("function call", async () => {
-    const result = await testService.getProductsByRating({ rating: 4 });
-
-    expect(result.status).toBe(200);
-    // no count query => no "results" object (bug in odata-service)
-    // @ts-ignore
-    expect(result.data.d[0]).toMatchObject(BOOK_ZERO);
-  });
-
-
-
   test("create key and parse key", async () => {
     const expectedSimple = 333;
     const expectedComplex = { id: expectedSimple };

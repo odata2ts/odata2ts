@@ -359,25 +359,29 @@ class QueryObjectGenerator {
 
     let returnTypeOpStmt: string = "";
     if (returnType) {
-      const collectionSuffix = returnType.isCollection ? "_COLLECTION" : "";
       if (returnType.dataType === DataTypes.ComplexType || returnType.dataType === DataTypes.ModelType) {
         if (returnType.qObject) {
           const opRt = imports.addQObject(QueryObjectImports.OperationReturnType);
           const rts = imports.addQObject(QueryObjectImports.ReturnTypes);
+          const rType = returnType.isCollection
+            ? "COLLECTION"
+            : returnType.dataType === DataTypes.ComplexType
+              ? "COMPLEX"
+              : "ENTITY";
           const qComplexParam = imports.addQObject(QueryObjectImports.QComplexParam);
           const returnQName = imports.addGeneratedQObject(returnType.fqType, returnType.qObject);
 
-          returnTypeOpStmt = `new ${opRt}(${rts}.COMPLEX${collectionSuffix}, new ${qComplexParam}("NONE", new ${returnQName}))`;
+          returnTypeOpStmt = `new ${opRt}(${rts}.${rType}, new ${qComplexParam}("NONE", new ${returnQName}))`;
         }
       }
       // currently, it only makes sense to add the OperationReturnType if a converter is present
       else if (returnType.converters && returnType.qParam) {
         const rtClass = imports.addQObject(QueryObjectImports.OperationReturnType);
         const rtTypes = imports.addQObject(QueryObjectImports.ReturnTypes);
+        const rType = returnType.isCollection ? "COLLECTION" : "VALUE";
         const qParam = imports.addQObject(returnType.qParam);
 
-        // TODO: some constants with string concat
-        const rtKind = `${rtTypes}.VALUE${collectionSuffix}`;
+        const rtKind = `${rtTypes}.${rType}`;
 
         const converterParam = returnType.converters
           ? ", " + this.generateConverterStmt(imports, returnType.converters)

@@ -10,6 +10,11 @@ service CatalogService @(path:'/browse') {
     author.name as author
   } excluding { createdBy, modifiedBy };
 
+  type StockPrice {
+    stock  : Integer;
+    price  : Decimal;
+  }
+
   @requires: 'authenticated-user'
   action submitOrder ( book: Books:ID, quantity: Integer ) returns { stock: Integer };
   event OrderedBook : { book: Books:ID; quantity: Integer; buyer: String };
@@ -18,5 +23,7 @@ service CatalogService @(path:'/browse') {
   function helloI18n() returns array of String;
   function getBestBook() returns Books;
   function getBestBooks() returns array of Books;
+  function getONEStockPrice() returns StockPrice;
+  function GET_STOCK_PRICES() returns array of StockPrice;
 
 }

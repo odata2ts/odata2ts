@@ -1,6 +1,7 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
 import {
   CollectionServiceV2,
+  ComplexTypeServiceV2,
   EntitySetServiceV2,
   EntityTypeServiceV2,
   ODataService,
@@ -69,7 +70,7 @@ export class BookCollectionService<in out ClientType extends ODataHttpClient> ex
   }
 }
 
-export class ReviewerService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
+export class ReviewerService<in out ClientType extends ODataHttpClient> extends ComplexTypeServiceV2<
   ClientType,
   Reviewer,
   EditableReviewer,

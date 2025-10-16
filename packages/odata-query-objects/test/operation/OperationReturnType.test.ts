@@ -15,13 +15,14 @@ describe("OperationReturnType Tests", function () {
     new QBooleanParam("TEST", "test", booleanToNumberConverter),
   );
   const VALUE_COLLECTION_RETURN_TYPE = new OperationReturnType(
-    ReturnTypes.VALUE_COLLECTION,
+    ReturnTypes.COLLECTION,
     new QBooleanParam("NONE", undefined, booleanToNumberConverter),
   );
 
   const qModelParam = new QComplexParam("XXX", new QSimpleEntityWithConverter());
-  const MODEL_RETURN_TYPE = new OperationReturnType(ReturnTypes.COMPLEX, qModelParam);
-  const MODEL_COLLECTION_RETURN_TYPE = new OperationReturnType(ReturnTypes.COMPLEX_COLLECTION, qModelParam);
+  const MODEL_RETURN_TYPE = new OperationReturnType(ReturnTypes.ENTITY, qModelParam);
+  const COMPLEX_RETURN_TYPE = new OperationReturnType(ReturnTypes.COMPLEX, qModelParam);
+  const MODEL_COLLECTION_RETURN_TYPE = new OperationReturnType(ReturnTypes.COLLECTION, qModelParam);
 
   const MODEL_INPUT: SimpleEntityUnconverted = {
     ID: 123,
@@ -69,7 +70,7 @@ describe("OperationReturnType Tests", function () {
 
   test("primitive collection conversion", () => {
     expect(VALUE_COLLECTION_RETURN_TYPE.type).toBeInstanceOf(QBooleanParam);
-    expect(VALUE_COLLECTION_RETURN_TYPE.returnType).toBe(ReturnTypes.VALUE_COLLECTION);
+    expect(VALUE_COLLECTION_RETURN_TYPE.returnType).toBe(ReturnTypes.COLLECTION);
 
     expect(
       VALUE_COLLECTION_RETURN_TYPE.convertResponse(createV4ValueOrCollectionResponse([true, false])).data,
@@ -80,14 +81,14 @@ describe("OperationReturnType Tests", function () {
 
   test("model conversion", () => {
     expect(MODEL_RETURN_TYPE.type).toBe(qModelParam);
-    expect(MODEL_RETURN_TYPE.returnType).toBe(ReturnTypes.COMPLEX);
+    expect(MODEL_RETURN_TYPE.returnType).toBe(ReturnTypes.ENTITY);
 
     expect(MODEL_RETURN_TYPE.convertResponse(createV4ModelResponse(MODEL_INPUT)).data).toStrictEqual(MODEL_CONVERTED);
   });
 
   test("model collection conversion", () => {
     expect(MODEL_COLLECTION_RETURN_TYPE.type).toBe(qModelParam);
-    expect(MODEL_COLLECTION_RETURN_TYPE.returnType).toBe(ReturnTypes.COMPLEX_COLLECTION);
+    expect(MODEL_COLLECTION_RETURN_TYPE.returnType).toBe(ReturnTypes.COLLECTION);
 
     expect(
       MODEL_COLLECTION_RETURN_TYPE.convertResponse(createV4ValueOrCollectionResponse([MODEL_INPUT])).data,
@@ -107,6 +108,14 @@ describe("OperationReturnType Tests", function () {
       VALUE_COLLECTION_RETURN_TYPE.convertResponseV2(createV2CollectionResponse([true, false])).data.d,
     ).toStrictEqual({
       results: [1, 0],
+    });
+  });
+
+  test("complex type conversion V2", () => {
+    expect(
+      COMPLEX_RETURN_TYPE.convertResponseV2(createV2ValueOrModelResponse({ Address: MODEL_INPUT })).data,
+    ).toStrictEqual({
+      d: MODEL_CONVERTED,
     });
   });
 

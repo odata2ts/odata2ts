@@ -1,9 +1,9 @@
 import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
-import { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
+import { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import {
   convertV2CollectionResponse,
-  convertV2ModelResponse,
+  convertV2EntityModelResponse,
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
@@ -81,16 +81,16 @@ export abstract class EntitySetServiceV2<
   public async create<ReturnType extends Partial<T> = T>(
     model: EditableT,
     requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): ODataResponse<ODataModelResponseV2<ReturnType>> {
+  ): ODataResponse<ODataEntityModelResponseV2<ReturnType>> {
     const { client, qModel, path, getDefaultHeaders } = this.__base;
 
-    const result = await client.post<ODataModelResponseV2<T>>(
+    const result = await client.post<ODataEntityModelResponseV2<T>>(
       path,
       qModel.convertToOData(model),
       requestConfig,
       getDefaultHeaders(),
     );
-    return convertV2ModelResponse(result, this.__base.qResponseType);
+    return convertV2EntityModelResponse(result, this.__base.qResponseType);
   }
 
   /**

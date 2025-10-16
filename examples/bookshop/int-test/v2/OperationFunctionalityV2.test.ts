@@ -58,4 +58,27 @@ describe("CAP V2 Integration Testing: Operation Capabilities", () => {
     expect(result.data.d.results.length).toBe(5);
     expect(result.data.d.results[0]).toMatchObject(BOOK_ZERO);
   });
+
+  test("complex type returning function", async () => {
+    const result = await testService.getOneStockPrice();
+
+    expect(result.status).toBe(200);
+    expect(result.data).toBeDefined();
+    expect(result.data.d).toMatchObject({
+      __metadata: {
+        type: "CatalogService.StockPrice",
+      },
+      price: new BigNumber("11.11"),
+      stock: 12,
+    });
+  });
+
+  test("complex type collection returning function", async () => {
+    const result = await testService.getStockPrices();
+
+    expect(result.status).toBe(200);
+    expect(result.data).toBeDefined();
+    expect(result.data.d.results.length).toBe(5);
+    expect(result.data.d.results[1]).toMatchObject({ stock: 11, price: new BigNumber("12.34") });
+  });
 });

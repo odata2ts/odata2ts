@@ -1,5 +1,5 @@
-@server = http://localhost:4004
-@me = Basic {{$processEnv USER}}:
+#@server = http://localhost:4004
+#@me = Basic {{$processEnv USER}}:
 
 
 ### ------------------------------------------------------------------------
@@ -46,7 +46,8 @@ Authorization: {{admin}}
 
 ###
 # @name get simple prop v2
-GET {{server}}/v2/admin/Books(201)/title
+GET {{server}}/v2/browse/Books(201)/title
+Accept: application/json
 Authorization: {{admin}}
 
 ###
@@ -160,12 +161,12 @@ Authorization: {{me}}
 
 ###
 # @name v2 complex type response
-GET {{server}}/v2/browse/helloI18n()
+GET {{server}}/v2/browse/getONEStockPrice()
 Authorization: {{me}}
 
 ###
 # @name v2 complex collection type response
-GET {{server}}/v2/browse/helloI18n()
+GET {{server}}/v2/browse/GET_STOCK_PRICES()
 Authorization: {{me}}
 
 

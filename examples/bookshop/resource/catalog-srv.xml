@@ -45,6 +45,8 @@
         <FunctionImport Name="helloI18n" Function="CatalogService.helloI18n"/>
         <FunctionImport Name="getBestBook" Function="CatalogService.getBestBook" EntitySet="Books"/>
         <FunctionImport Name="getBestBooks" Function="CatalogService.getBestBooks" EntitySet="Books"/>
+        <FunctionImport Name="getONEStockPrice" Function="CatalogService.getONEStockPrice"/>
+        <FunctionImport Name="GET_STOCK_PRICES" Function="CatalogService.GET_STOCK_PRICES"/>
       </EntityContainer>
       <EntityType Name="ListOfBooks">
         <Key>
@@ -130,6 +132,7 @@
         <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
         <Property Name="code" Type="Edm.String" MaxLength="3" Nullable="false"/>
         <Property Name="symbol" Type="Edm.String" MaxLength="5"/>
+        <Property Name="minorUnit" Type="Edm.Int16"/>
         <NavigationProperty Name="texts" Type="Collection(CatalogService.Currencies_texts)">
           <OnDelete Action="Cascade"/>
         </NavigationProperty>
@@ -167,6 +170,10 @@
         <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
         <Property Name="code" Type="Edm.String" MaxLength="3" Nullable="false"/>
       </EntityType>
+      <ComplexType Name="StockPrice">
+        <Property Name="stock" Type="Edm.Int32"/>
+        <Property Name="price" Type="Edm.Decimal" Scale="variable"/>
+      </ComplexType>
       <ComplexType Name="return_CatalogService_submitOrder">
         <Property Name="stock" Type="Edm.Int32"/>
       </ComplexType>
@@ -186,7 +193,13 @@
         <ReturnType Type="CatalogService.Books"/>
       </Function>
       <Function Name="getBestBooks" IsBound="false" IsComposable="false">
-        <ReturnType Type="Collection(CatalogService.Books)" Nullable="false"/>
+        <ReturnType Type="Collection(CatalogService.Books)"/>
+      </Function>
+      <Function Name="getONEStockPrice" IsBound="false" IsComposable="false">
+        <ReturnType Type="CatalogService.StockPrice"/>
+      </Function>
+      <Function Name="GET_STOCK_PRICES" IsBound="false" IsComposable="false">
+        <ReturnType Type="Collection(CatalogService.StockPrice)" Nullable="false"/>
       </Function>
       <Annotations Target="CatalogService.EntityContainer/ListOfBooks">
         <Annotation Term="Capabilities.DeleteRestrictions">
@@ -209,12 +222,12 @@
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="Created On"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
       </Annotations>
       <Annotations Target="CatalogService.ListOfBooks/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="Changed On"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
       </Annotations>
       <Annotations Target="CatalogService.ListOfBooks/genre_ID">
         <Annotation Term="Common.ValueList">
@@ -236,14 +249,14 @@
         </Annotation>
       </Annotations>
       <Annotations Target="CatalogService.ListOfBooks/currency">
-        <Annotation Term="Common.Label" String="Currency"/>
-        <Annotation Term="Core.Description" String="Currency code as specified by ISO 4217"/>
+        <Annotation Term="Common.Label" String="{i18n>Currency}"/>
+        <Annotation Term="Core.Description" String="{i18n>CurrencyCode.Description}"/>
       </Annotations>
       <Annotations Target="CatalogService.ListOfBooks/currency_code">
-        <Annotation Term="Common.Label" String="Currency"/>
+        <Annotation Term="Common.Label" String="{i18n>Currency}"/>
         <Annotation Term="Common.ValueList">
           <Record Type="Common.ValueListType">
-            <PropertyValue Property="Label" String="Currency"/>
+            <PropertyValue Property="Label" String="{i18n>Currency}"/>
             <PropertyValue Property="CollectionPath" String="Currencies"/>
             <PropertyValue Property="Parameters">
               <Collection>
@@ -258,7 +271,7 @@
             </PropertyValue>
           </Record>
         </Annotation>
-        <Annotation Term="Core.Description" String="Currency code as specified by ISO 4217"/>
+        <Annotation Term="Core.Description" String="{i18n>CurrencyCode.Description}"/>
       </Annotations>
       <Annotations Target="CatalogService.ListOfBooks/image">
         <Annotation Term="Core.MediaType" String="image/png"/>
@@ -284,12 +297,12 @@
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="Created On"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
       </Annotations>
       <Annotations Target="CatalogService.Books/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="Changed On"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
       </Annotations>
       <Annotations Target="CatalogService.Books/genre_ID">
         <Annotation Term="Common.ValueList">
@@ -311,14 +324,14 @@
         </Annotation>
       </Annotations>
       <Annotations Target="CatalogService.Books/currency">
-        <Annotation Term="Common.Label" String="Currency"/>
-        <Annotation Term="Core.Description" String="Currency code as specified by ISO 4217"/>
+        <Annotation Term="Common.Label" String="{i18n>Currency}"/>
+        <Annotation Term="Core.Description" String="{i18n>CurrencyCode.Description}"/>
       </Annotations>
       <Annotations Target="CatalogService.Books/currency_code">
-        <Annotation Term="Common.Label" String="Currency"/>
+        <Annotation Term="Common.Label" String="{i18n>Currency}"/>
         <Annotation Term="Common.ValueList">
           <Record Type="Common.ValueListType">
-            <PropertyValue Property="Label" String="Currency"/>
+            <PropertyValue Property="Label" String="{i18n>Currency}"/>
             <PropertyValue Property="CollectionPath" String="Currencies"/>
             <PropertyValue Property="Parameters">
               <Collection>
@@ -333,7 +346,7 @@
             </PropertyValue>
           </Record>
         </Annotation>
-        <Annotation Term="Core.Description" String="Currency code as specified by ISO 4217"/>
+        <Annotation Term="Core.Description" String="{i18n>CurrencyCode.Description}"/>
       </Annotations>
       <Annotations Target="CatalogService.Books/image">
         <Annotation Term="Core.MediaType" String="image/png"/>
@@ -348,10 +361,10 @@
         </Annotation>
       </Annotations>
       <Annotations Target="CatalogService.Genres/name">
-        <Annotation Term="Common.Label" String="Name"/>
+        <Annotation Term="Common.Label" String="{i18n>Name}"/>
       </Annotations>
       <Annotations Target="CatalogService.Genres/descr">
-        <Annotation Term="Common.Label" String="Description"/>
+        <Annotation Term="Common.Label" String="{i18n>Description}"/>
       </Annotations>
       <Annotations Target="CatalogService.Genres/parent_ID">
         <Annotation Term="Common.ValueList">
@@ -382,42 +395,45 @@
         </Annotation>
       </Annotations>
       <Annotations Target="CatalogService.Currencies/name">
-        <Annotation Term="Common.Label" String="Name"/>
+        <Annotation Term="Common.Label" String="{i18n>Name}"/>
       </Annotations>
       <Annotations Target="CatalogService.Currencies/descr">
-        <Annotation Term="Common.Label" String="Description"/>
+        <Annotation Term="Common.Label" String="{i18n>Description}"/>
       </Annotations>
       <Annotations Target="CatalogService.Currencies/code">
         <Annotation Term="Common.Text" Path="name"/>
-        <Annotation Term="Common.Label" String="Currency Code"/>
+        <Annotation Term="Common.Label" String="{i18n>CurrencyCode}"/>
       </Annotations>
       <Annotations Target="CatalogService.Currencies/symbol">
-        <Annotation Term="Common.Label" String="Currency Symbol"/>
+        <Annotation Term="Common.Label" String="{i18n>CurrencySymbol}"/>
+      </Annotations>
+      <Annotations Target="CatalogService.Currencies/minorUnit">
+        <Annotation Term="Common.Label" String="{i18n>CurrencyMinorUnit}"/>
       </Annotations>
       <Annotations Target="CatalogService.Books_texts/locale">
-        <Annotation Term="Common.Label" String="Language Code"/>
+        <Annotation Term="Common.Label" String="{i18n>LanguageCode}"/>
       </Annotations>
       <Annotations Target="CatalogService.Genres_texts/locale">
-        <Annotation Term="Common.Label" String="Language Code"/>
+        <Annotation Term="Common.Label" String="{i18n>LanguageCode}"/>
       </Annotations>
       <Annotations Target="CatalogService.Genres_texts/name">
-        <Annotation Term="Common.Label" String="Name"/>
+        <Annotation Term="Common.Label" String="{i18n>Name}"/>
       </Annotations>
       <Annotations Target="CatalogService.Genres_texts/descr">
-        <Annotation Term="Common.Label" String="Description"/>
+        <Annotation Term="Common.Label" String="{i18n>Description}"/>
       </Annotations>
       <Annotations Target="CatalogService.Currencies_texts/locale">
-        <Annotation Term="Common.Label" String="Language Code"/>
+        <Annotation Term="Common.Label" String="{i18n>LanguageCode}"/>
       </Annotations>
       <Annotations Target="CatalogService.Currencies_texts/name">
-        <Annotation Term="Common.Label" String="Name"/>
+        <Annotation Term="Common.Label" String="{i18n>Name}"/>
       </Annotations>
       <Annotations Target="CatalogService.Currencies_texts/descr">
-        <Annotation Term="Common.Label" String="Description"/>
+        <Annotation Term="Common.Label" String="{i18n>Description}"/>
       </Annotations>
       <Annotations Target="CatalogService.Currencies_texts/code">
         <Annotation Term="Common.Text" Path="name"/>
-        <Annotation Term="Common.Label" String="Currency Code"/>
+        <Annotation Term="Common.Label" String="{i18n>CurrencyCode}"/>
       </Annotations>
     </Schema>
   </edmx:DataServices>

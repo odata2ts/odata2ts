@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Install cds globally
-        run: npm i -g @sap/cds-dk
+        run: npm i -g @sap/cds-dk@8.9.4
       - name: Install packages
         run: yarn --immutable
       - name: Build packages

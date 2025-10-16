@@ -2,7 +2,8 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import {
   ODataCollectionResponseV2,
   ODataCollectionResponseV4,
-  ODataModelResponseV2,
+  ODataComplexModelResponseV2,
+  ODataEntityModelResponseV2,
   ODataModelResponseV4,
   ODataValueResponseV2,
   ODataValueResponseV4,
@@ -66,8 +67,20 @@ export const convertV2ValueResponse: ResponseConverterV2 = (response, qResponseT
   return response;
 };
 
-export const convertV2ModelResponse: ResponseConverter = (response, qResponseType) => {
-  const asV2Model = response.data as ODataModelResponseV2<any>;
+export const convertV2ComplexModelResponse: ResponseConverterV2 = (response, qResponseType) => {
+  const asV2Model = response.data as ODataComplexModelResponseV2<any>;
+  if (typeof asV2Model?.d === "object") {
+    const values = Object.values(asV2Model.d);
+    if (values.length === 1 && typeof values[0] === "object") {
+      asV2Model.d = qResponseType.convertFrom(values[0]);
+    }
+  }
+
+  return response;
+};
+
+export const convertV2EntityModelResponse: ResponseConverterV2 = (response, qResponseType) => {
+  const asV2Model = response.data as ODataEntityModelResponseV2<any>;
   if (asV2Model?.d && typeof asV2Model.d === "object") {
     asV2Model.d = qResponseType.convertFrom(asV2Model.d);
   }
@@ -75,7 +88,7 @@ export const convertV2ModelResponse: ResponseConverter = (response, qResponseTyp
   return response;
 };
 
-export const convertV2CollectionResponse: ResponseConverter = (response, qResponseType) => {
+export const convertV2CollectionResponse: ResponseConverterV2 = (response, qResponseType) => {
   const asV2Collection = response.data as ODataCollectionResponseV2<any>;
   const value = asV2Collection?.d?.results;
   if (value && typeof value === "object") {

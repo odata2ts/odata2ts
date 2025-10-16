@@ -2,7 +2,8 @@ import { booleanToNumberConverter } from "@odata2ts/test-converters";
 import { describe, expect, test } from "vitest";
 import {
   convertV2CollectionResponse,
-  convertV2ModelResponse,
+  convertV2ComplexModelResponse,
+  convertV2EntityModelResponse,
   convertV2ValueResponse,
   convertV4CollectionResponse,
   convertV4ModelResponse,
@@ -74,8 +75,28 @@ describe("ResponseHelper Tests", function () {
     checkThatNonMatchingInputPassesAsItIs(nonMatching, convertV2ValueResponse, qParam);
   });
 
+  test("convertV2ComplexResponse", () => {
+    const result = convertV2ComplexModelResponse(createResponse({ d: { Address: MODEL_INPUT } }), qModelParam);
+    expect(result.data.d).toStrictEqual(MODEL_CONVERTED);
+  });
+
+  test("convertV2ComplexResponse: just return non matching input", () => {
+    const nonMatching = [
+      // unknown model
+      { d: { x: VALUE_INPUT, y: VALUE_INPUT } },
+      // not an object
+      { d: "test" },
+      { d: { results: "test" } },
+      // wrong response structure => "d" is missing
+      { test: 123 },
+      null,
+    ];
+
+    checkThatNonMatchingInputPassesAsItIs(nonMatching, convertV2ComplexModelResponse, qModelParam);
+  });
+
   test("convertV2ModelResponse", () => {
-    const result = convertV2ModelResponse(createResponse({ d: MODEL_INPUT }), qModelParam);
+    const result = convertV2EntityModelResponse(createResponse({ d: MODEL_INPUT }), qModelParam);
     expect(result.data.d).toStrictEqual(MODEL_CONVERTED);
   });
 
@@ -92,7 +113,7 @@ describe("ResponseHelper Tests", function () {
       null,
     ];
 
-    checkThatNonMatchingInputPassesAsItIs(nonMatching, convertV2ModelResponse, qModelParam);
+    checkThatNonMatchingInputPassesAsItIs(nonMatching, convertV2EntityModelResponse, qModelParam);
   });
 
   test("convertV2CollectionResponse", () => {

@@ -1,5 +1,5 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
-import { ODataModelResponseV2 } from "@odata2ts/odata-core";
+import { ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { beforeEach, describe, expect, test } from "vitest";
 import { DEFAULT_HEADERS, MERGE_HEADERS } from "../../src/RequestHeaders";
@@ -48,13 +48,13 @@ describe("EntityTypeService V2 Test", () => {
 
   test("entityType V2: typing of query stuff", async () => {
     // typing test of result
-    const result: HttpResponseModel<ODataModelResponseV2<PersonModel>> = await testService.query((builder) => {
+    const result: HttpResponseModel<ODataEntityModelResponseV2<PersonModel>> = await testService.query((builder) => {
       // typing test of builder
       const resultB: ODataQueryBuilderV2<QPersonV2> = builder;
     });
 
     // manual typings provided
-    const result2: HttpResponseModel<ODataModelResponseV2<{ userName: string }>> = await testService.query<
+    const result2: HttpResponseModel<ODataEntityModelResponseV2<{ userName: string }>> = await testService.query<
       Pick<PersonModel, "userName">
     >((builder) => {
       // typing test of builder
