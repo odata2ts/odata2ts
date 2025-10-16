@@ -1,3 +1,5 @@
+import { ODataComplexModelResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
+
 /**
  * All module names of the main dependencies.
  */
@@ -15,8 +17,10 @@ export const LIB_MODULES = {
 export enum CoreImports {
   DeferredContent,
   ODataCollectionResponse, // versioned
-  ODataModelResponse, // versioned
+  ODataModelResponseV4,
   ODataValueResponse, // versioned
+  ODataEntityModelResponseV2,
+  ODataComplexModelResponseV2,
 }
 
 /**
@@ -24,11 +28,7 @@ export enum CoreImports {
  * ODataCollectionResponse = ODataCollectionResponseV2 + ODataCollectionResponseV4
  *
  */
-export const VERSIONED_CORE_IMPORTS = [
-  CoreImports.ODataCollectionResponse,
-  CoreImports.ODataValueResponse,
-  CoreImports.ODataModelResponse,
-];
+export const VERSIONED_CORE_IMPORTS = [CoreImports.ODataCollectionResponse, CoreImports.ODataValueResponse];
 
 /**
  * Most relevant, but not all imports from query objects library

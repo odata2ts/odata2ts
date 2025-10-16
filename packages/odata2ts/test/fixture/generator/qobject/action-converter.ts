@@ -21,10 +21,7 @@ export class QActionWithConverter extends QAction<ActionWithConverterParams> {
   private readonly params = [new QStringParam("test", undefined, stringToPrefixModelConverter)];
 
   constructor() {
-    super(
-      "ActionWithConverter",
-      new OperationReturnType(ReturnTypes.COMPLEX, new QComplexParam("NONE", new QPerson())),
-    );
+    super("ActionWithConverter", new OperationReturnType(ReturnTypes.ENTITY, new QComplexParam("NONE", new QPerson())));
   }
 
   getParams() {

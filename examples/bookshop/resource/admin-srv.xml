@@ -114,6 +114,7 @@
         <Property Name="descr" Type="Edm.String" MaxLength="1000"/>
         <Property Name="code" Type="Edm.String" MaxLength="3" Nullable="false"/>
         <Property Name="symbol" Type="Edm.String" MaxLength="5"/>
+        <Property Name="minorUnit" Type="Edm.Int16"/>
         <NavigationProperty Name="texts" Type="Collection(AdminService.Currencies_texts)">
           <OnDelete Action="Cascade"/>
         </NavigationProperty>
@@ -155,25 +156,25 @@
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="Angelegt am"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
       </Annotations>
       <Annotations Target="AdminService.Books/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="Die eindeutige ID eines Benutzers"/>
-        <Annotation Term="Common.Label" String="Angelegt von"/>
+        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
       </Annotations>
       <Annotations Target="AdminService.Books/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="Geändert am"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
       </Annotations>
       <Annotations Target="AdminService.Books/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="Die eindeutige ID eines Benutzers"/>
-        <Annotation Term="Common.Label" String="Geändert von"/>
+        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
       </Annotations>
       <Annotations Target="AdminService.Books/genre_ID">
         <Annotation Term="Common.ValueList">
@@ -195,14 +196,14 @@
         </Annotation>
       </Annotations>
       <Annotations Target="AdminService.Books/currency">
-        <Annotation Term="Common.Label" String="Währung"/>
-        <Annotation Term="Core.Description" String="Währungscode gemäß ISO 4217"/>
+        <Annotation Term="Common.Label" String="{i18n>Currency}"/>
+        <Annotation Term="Core.Description" String="{i18n>CurrencyCode.Description}"/>
       </Annotations>
       <Annotations Target="AdminService.Books/currency_code">
-        <Annotation Term="Common.Label" String="Währung"/>
+        <Annotation Term="Common.Label" String="{i18n>Currency}"/>
         <Annotation Term="Common.ValueList">
           <Record Type="Common.ValueListType">
-            <PropertyValue Property="Label" String="Währung"/>
+            <PropertyValue Property="Label" String="{i18n>Currency}"/>
             <PropertyValue Property="CollectionPath" String="Currencies"/>
             <PropertyValue Property="Parameters">
               <Collection>
@@ -217,7 +218,7 @@
             </PropertyValue>
           </Record>
         </Annotation>
-        <Annotation Term="Core.Description" String="Währungscode gemäß ISO 4217"/>
+        <Annotation Term="Core.Description" String="{i18n>CurrencyCode.Description}"/>
       </Annotations>
       <Annotations Target="AdminService.Books/image">
         <Annotation Term="Core.MediaType" String="image/png"/>
@@ -226,25 +227,25 @@
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="Angelegt am"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedAt}"/>
       </Annotations>
       <Annotations Target="AdminService.Authors/createdBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="Core.Immutable" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="Die eindeutige ID eines Benutzers"/>
-        <Annotation Term="Common.Label" String="Angelegt von"/>
+        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+        <Annotation Term="Common.Label" String="{i18n>CreatedBy}"/>
       </Annotations>
       <Annotations Target="AdminService.Authors/modifiedAt">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Common.Label" String="Geändert am"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedAt}"/>
       </Annotations>
       <Annotations Target="AdminService.Authors/modifiedBy">
         <Annotation Term="UI.HiddenFilter" Bool="true"/>
         <Annotation Term="Core.Computed" Bool="true"/>
-        <Annotation Term="Core.Description" String="Die eindeutige ID eines Benutzers"/>
-        <Annotation Term="Common.Label" String="Geändert von"/>
+        <Annotation Term="Core.Description" String="{i18n>UserID.Description}"/>
+        <Annotation Term="Common.Label" String="{i18n>ChangedBy}"/>
       </Annotations>
       <Annotations Target="AdminService.Genres">
         <Annotation Term="UI.Identification">
@@ -256,10 +257,10 @@
         </Annotation>
       </Annotations>
       <Annotations Target="AdminService.Genres/name">
-        <Annotation Term="Common.Label" String="Name"/>
+        <Annotation Term="Common.Label" String="{i18n>Name}"/>
       </Annotations>
       <Annotations Target="AdminService.Genres/descr">
-        <Annotation Term="Common.Label" String="Beschreibung"/>
+        <Annotation Term="Common.Label" String="{i18n>Description}"/>
       </Annotations>
       <Annotations Target="AdminService.Genres/parent_ID">
         <Annotation Term="Common.ValueList">
@@ -290,42 +291,45 @@
         </Annotation>
       </Annotations>
       <Annotations Target="AdminService.Currencies/name">
-        <Annotation Term="Common.Label" String="Name"/>
+        <Annotation Term="Common.Label" String="{i18n>Name}"/>
       </Annotations>
       <Annotations Target="AdminService.Currencies/descr">
-        <Annotation Term="Common.Label" String="Beschreibung"/>
+        <Annotation Term="Common.Label" String="{i18n>Description}"/>
       </Annotations>
       <Annotations Target="AdminService.Currencies/code">
         <Annotation Term="Common.Text" Path="name"/>
-        <Annotation Term="Common.Label" String="Währungscode"/>
+        <Annotation Term="Common.Label" String="{i18n>CurrencyCode}"/>
       </Annotations>
       <Annotations Target="AdminService.Currencies/symbol">
-        <Annotation Term="Common.Label" String="Währungssymbol"/>
+        <Annotation Term="Common.Label" String="{i18n>CurrencySymbol}"/>
+      </Annotations>
+      <Annotations Target="AdminService.Currencies/minorUnit">
+        <Annotation Term="Common.Label" String="{i18n>CurrencyMinorUnit}"/>
       </Annotations>
       <Annotations Target="AdminService.Books_texts/locale">
-        <Annotation Term="Common.Label" String="Sprachencode"/>
+        <Annotation Term="Common.Label" String="{i18n>LanguageCode}"/>
       </Annotations>
       <Annotations Target="AdminService.Genres_texts/locale">
-        <Annotation Term="Common.Label" String="Sprachencode"/>
+        <Annotation Term="Common.Label" String="{i18n>LanguageCode}"/>
       </Annotations>
       <Annotations Target="AdminService.Genres_texts/name">
-        <Annotation Term="Common.Label" String="Name"/>
+        <Annotation Term="Common.Label" String="{i18n>Name}"/>
       </Annotations>
       <Annotations Target="AdminService.Genres_texts/descr">
-        <Annotation Term="Common.Label" String="Beschreibung"/>
+        <Annotation Term="Common.Label" String="{i18n>Description}"/>
       </Annotations>
       <Annotations Target="AdminService.Currencies_texts/locale">
-        <Annotation Term="Common.Label" String="Sprachencode"/>
+        <Annotation Term="Common.Label" String="{i18n>LanguageCode}"/>
       </Annotations>
       <Annotations Target="AdminService.Currencies_texts/name">
-        <Annotation Term="Common.Label" String="Name"/>
+        <Annotation Term="Common.Label" String="{i18n>Name}"/>
       </Annotations>
       <Annotations Target="AdminService.Currencies_texts/descr">
-        <Annotation Term="Common.Label" String="Beschreibung"/>
+        <Annotation Term="Common.Label" String="{i18n>Description}"/>
       </Annotations>
       <Annotations Target="AdminService.Currencies_texts/code">
         <Annotation Term="Common.Text" Path="name"/>
-        <Annotation Term="Common.Label" String="Währungscode"/>
+        <Annotation Term="Common.Label" String="{i18n>CurrencyCode}"/>
       </Annotations>
     </Schema>
   </edmx:DataServices>

@@ -2,6 +2,7 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { QParamModel } from "../param/QParamModel";
 import {
   convertV2CollectionResponse,
+  convertV2ComplexModelResponse,
   convertV2EntityModelResponse,
   convertV2ValueResponse,
   convertV4CollectionResponse,
@@ -9,24 +10,24 @@ import {
   convertV4ValueResponse,
   ResponseConverter,
   ResponseConverterV2,
-} from "./ResponseHelper.js";
+} from "./ResponseHelper";
 
 export enum ReturnTypes {
   VOID,
   VALUE,
-  VALUE_COLLECTION,
+  COLLECTION,
+  ENTITY,
   COMPLEX,
-  COMPLEX_COLLECTION,
 }
 
 function getResponseConverter(returnType: ReturnTypes): ResponseConverter | undefined {
   switch (returnType) {
     case ReturnTypes.VALUE:
       return convertV4ValueResponse;
+    case ReturnTypes.ENTITY:
     case ReturnTypes.COMPLEX:
       return convertV4ModelResponse;
-    case ReturnTypes.VALUE_COLLECTION:
-    case ReturnTypes.COMPLEX_COLLECTION:
+    case ReturnTypes.COLLECTION:
       return convertV4CollectionResponse;
     default:
       return undefined;
@@ -38,9 +39,10 @@ function getResponseConverterV2(returnType: ReturnTypes): ResponseConverterV2 | 
     case ReturnTypes.VALUE:
       return convertV2ValueResponse;
     case ReturnTypes.COMPLEX:
+      return convertV2ComplexModelResponse;
+    case ReturnTypes.ENTITY:
       return convertV2EntityModelResponse;
-    case ReturnTypes.VALUE_COLLECTION:
-    case ReturnTypes.COMPLEX_COLLECTION:
+    case ReturnTypes.COLLECTION:
       return convertV2CollectionResponse;
     default:
       return undefined;

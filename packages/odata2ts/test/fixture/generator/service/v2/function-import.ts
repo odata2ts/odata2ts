@@ -1,5 +1,5 @@
 import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
-import type { ODataCollectionResponseV2, ODataModelResponseV2 } from "@odata2ts/odata-core";
+import type { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
 import { EntitySetServiceV2, EntityTypeServiceV2, ODataService, ODataServiceOptions } from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
@@ -39,7 +39,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   public async bestBook(
     params: BestBookParams,
     requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataModelResponseV2<TestEntity>>> {
+  ): Promise<HttpResponseModel<ODataEntityModelResponseV2<TestEntity>>> {
     if (!this._qBestBook) {
       this._qBestBook = new QBestBook();
     }
@@ -53,7 +53,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   public async postBestBook(
     params: PostBestBookParams,
     requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataModelResponseV2<TestEntity>>> {
+  ): Promise<HttpResponseModel<ODataEntityModelResponseV2<TestEntity>>> {
     if (!this._qPostBestBook) {
       this._qPostBestBook = new QPostBestBook();
     }

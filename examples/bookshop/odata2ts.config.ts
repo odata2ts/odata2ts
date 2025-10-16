@@ -1,9 +1,14 @@
-import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, Modes, UrlSourceConfiguration } from "@odata2ts/odata2ts";
 
 const managedProps = ["createdAt", "createdBy", "modifiedAt", "modifiedBy"];
 
+const authConfig: UrlSourceConfiguration = {
+  username: "alice",
+  password: "",
+};
+
 const config: ConfigFileOptions = {
-  debug: true,
+  debug: false,
   mode: Modes.service,
   emitMode: EmitModes.ts,
   prettier: true,
@@ -11,6 +16,7 @@ const config: ConfigFileOptions = {
   enablePrimitivePropertyServices: true,
   v4BigNumberAsString: true,
   converters: ["@odata2ts/converter-big-number"],
+  refreshFile: true,
   naming: {
     models: {
       suffix: "Model",
@@ -25,16 +31,14 @@ const config: ConfigFileOptions = {
     },
     catV2: {
       serviceName: "catV2",
+      sourceUrl: "http://localhost:4004/v2/browse",
       source: "resource/v2/catalog-v2-srv.xml",
       output: "src/catV2",
     },
     admin: {
       serviceName: "admin",
       sourceUrl: "http://localhost:4004/odata/v4/admin",
-      sourceUrlConfig: {
-        username: "alice",
-        password: "",
-      },
+      sourceUrlConfig: authConfig,
       source: "build/admin-srv.xml",
       output: "src/admin",
       propertiesByName: [

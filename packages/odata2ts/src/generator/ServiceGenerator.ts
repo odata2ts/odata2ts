@@ -658,7 +658,9 @@ class ServiceGenerator {
       ? CoreImports.ODataCollectionResponse
       : returnType?.dataType === DataTypes.PrimitiveType
         ? CoreImports.ODataValueResponse
-        : CoreImports.ODataModelResponse;
+        : this.version === ODataVersions.V4
+          ? CoreImports.ODataModelResponseV4
+          : CoreImports.ODataEntityModelResponseV2;
 
     return imports.addCoreLib(this.version, typeToImport);
   }
