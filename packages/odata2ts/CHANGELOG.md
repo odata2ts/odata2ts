@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.39.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.39.1...@odata2ts/odata2ts-v0.39.2) (2025-10-16)
+
+
+### Bug Fixes
+
+* unpack & convert returned complex types in V2 ([#362](https://github.com/odata2ts/odata2ts/issues/362)) ([2072ed6](https://github.com/odata2ts/odata2ts/commit/2072ed6583f704074b255992374458a96c1954a2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-core bumped from ^0.6.0 to ^0.6.1
+  * devDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
+    * @odata2ts/odata-service bumped from ^0.22.1 to ^0.22.2
+  * peerDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
+    * @odata2ts/odata-service bumped from ^0.22.1 to ^0.22.2
+
 ## [0.39.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.39.0...@odata2ts/odata2ts@0.39.1) (2024-12-18)
 
 ### Bug Fixes

@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-core",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Enums and interfaces for OData V2 and V4 data types and response models",
   "keywords": [
     "odata",

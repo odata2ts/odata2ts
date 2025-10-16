@@ -37,6 +37,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * feat(example): integration tests for primitive type services
 
+## [0.6.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-core@0.6.0...@odata2ts/odata-core-v0.6.1) (2025-10-16)
+
+
+### Bug Fixes
+
+* unpack & convert returned complex types in V2 ([#362](https://github.com/odata2ts/odata2ts/issues/362)) ([2072ed6](https://github.com/odata2ts/odata2ts/commit/2072ed6583f704074b255992374458a96c1954a2))
+
 ## [0.3.8](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-core@0.3.7...@odata2ts/odata-core@0.3.8) (2023-06-14)
 
 **Note:** Version bump only for package @odata2ts/odata-core

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
+
 ## [0.18.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder@0.18.1...@odata2ts/odata-query-builder@0.18.2) (2024-12-18)
 
 **Note:** Version bump only for package @odata2ts/odata-query-builder
