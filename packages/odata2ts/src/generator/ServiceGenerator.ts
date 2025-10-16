@@ -238,13 +238,18 @@ class ServiceGenerator {
     };
   }
 
-  private generateEntityTypeService(file: FileHandler, model: ComplexType) {
+  private generateEntityTypeService(file: FileHandler, model: ComplexType, isComplexType = false) {
     const importContainer = file.getImports();
 
     const operations = this.dataModel.getEntityTypeOperations(model.fqName);
     const props = [...model.baseProps, ...model.props];
 
-    const entityServiceType = importContainer.addServiceObject(this.version, ServiceImports.EntityTypeService);
+    const entityServiceType = importContainer.addServiceObject(
+      this.version,
+      this.version === ODataVersions.V2 && isComplexType
+        ? ServiceImports.ComplexTypeService
+        : ServiceImports.EntityTypeService,
+    );
     const httpClient = importContainer.addClientApi(ClientApiImports.ODataHttpClient);
 
     // note: predictable first imports => no need to take renaming into account
@@ -579,7 +584,7 @@ class ServiceGenerator {
         const file = this.project.createOrGetServiceFile(model.folderPath, model.serviceName, [model.serviceName]);
 
         // entity type service
-        this.generateEntityTypeService(file, model);
+        this.generateEntityTypeService(file, model, true);
 
         return this.project.finalizeFile(file);
       });

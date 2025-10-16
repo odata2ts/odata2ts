@@ -3,7 +3,7 @@
  */
 export interface ODataCollectionResponseV2<T> {
   d: {
-    results: Array<EntityModelV2<T>>;
+    results: Array<T>;
     /**
      * Count of items in the collection.
      * Only present, if OData has been instructed to do counting.
@@ -25,14 +25,24 @@ export interface ODataCollectionResponseV2<T> {
 }
 
 /**
- * Response to a query for an EntityType or ComplexType.
+ * Response to a query for an EntityType.
  */
-export interface ODataModelResponseV2<T> {
-  d: EntityModelV2<T> | ComplexModelV2<T>;
+export interface ODataEntityModelResponseV2<T> {
+  d: EntityModelV2<T>;
+}
+
+/**
+ * Response to a query for a ComplexType.
+ */
+export interface ODataComplexModelResponseV2<T> {
+  d: {
+    [key: string]: ComplexModelV2<T>;
+  };
 }
 
 /**
  * Response to a query for a single property of primitive type.
+ * Also used for a single ComplexType.
  */
 export interface ODataValueResponseV2<T> {
   d: { [key: string]: T };
@@ -70,7 +80,7 @@ export interface EnityMetaModelV3 extends EntityMetaModelV2 {
    */
   properties?: Record<string, { associationuri: string }>;
   /**
-   * Advertisment for actions.
+   * Advertisement for actions.
    * Since V3
    *
    * See https://www.odata.org/documentation/odata-version-3-0/json-verbose-format/#advertisementforafunctionoraction

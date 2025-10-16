@@ -1,12 +1,12 @@
 import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
-import { ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
+import { ODataComplexModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
-import { convertV2EntityModelResponse, QueryObjectModel } from "@odata2ts/odata-query-objects";
+import { convertV2ComplexModelResponse, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptions } from "../ODataServiceOptions";
 import { MERGE_HEADERS } from "../RequestHeaders.js";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
-export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObjectModel> {
+export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObjectModel> {
   protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
 
   protected constructor(client: ClientType, basePath: string, name: string, qModel: Q, options?: ODataServiceOptions) {
@@ -36,11 +36,11 @@ export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, E
   public async query<ReturnType extends Partial<T> = T>(
     queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void,
     requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): ODataResponse<ODataEntityModelResponseV2<ReturnType>> {
+  ): ODataResponse<ODataComplexModelResponseV2<ReturnType>> {
     const { client, qResponseType, getDefaultHeaders, applyQueryBuilder } = this.__base;
 
     const url = applyQueryBuilder(queryFn);
-    const response = await client.get<ODataEntityModelResponseV2<any>>(url, requestConfig, getDefaultHeaders());
-    return convertV2EntityModelResponse(response, qResponseType);
+    const response = await client.get<ODataComplexModelResponseV2<any>>(url, requestConfig, getDefaultHeaders());
+    return convertV2ComplexModelResponse(response, qResponseType);
   }
 }

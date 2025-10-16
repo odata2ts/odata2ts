@@ -135,4 +135,20 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
     expect(result.status).toBe(200);
     expect(PRODUCT_ZERO.price.isEqualTo(result.data?.d.price!)).toBeTruthy();
   });
+
+  test("get complex prop", async () => {
+    const result = await testService.suppliers(0).address().query();
+
+    expect(result.status).toBe(200);
+    expect(result.data.d).toStrictEqual({
+      city: "Sammamish",
+      country: "USA",
+      state: "WA",
+      street: "NE 228th",
+      zipCode: "98074",
+      __metadata: {
+        type: "ODataDemo.Address",
+      },
+    });
+  });
 });

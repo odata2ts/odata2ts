@@ -2,7 +2,7 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { QParamModel } from "../param/QParamModel";
 import {
   convertV2CollectionResponse,
-  convertV2ModelResponse,
+  convertV2EntityModelResponse,
   convertV2ValueResponse,
   convertV4CollectionResponse,
   convertV4ModelResponse,
@@ -38,7 +38,7 @@ function getResponseConverterV2(returnType: ReturnTypes): ResponseConverterV2 | 
     case ReturnTypes.VALUE:
       return convertV2ValueResponse;
     case ReturnTypes.COMPLEX:
-      return convertV2ModelResponse;
+      return convertV2EntityModelResponse;
     case ReturnTypes.VALUE_COLLECTION:
     case ReturnTypes.COMPLEX_COLLECTION:
       return convertV2CollectionResponse;

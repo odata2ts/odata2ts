@@ -72,6 +72,7 @@ export enum ServiceImports {
   PrimitiveTypeService,
   CollectionService,
   EntitySetService,
+  ComplexTypeService,
 }
 
 /**
@@ -83,4 +84,5 @@ export const VERSIONED_SERVICE_IMPORTS = [
   ServiceImports.PrimitiveTypeService,
   ServiceImports.CollectionService,
   ServiceImports.EntitySetService,
+  ServiceImports.ComplexTypeService,
 ];
