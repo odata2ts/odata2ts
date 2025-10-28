@@ -33,4 +33,12 @@ describe("Unit Tests for V2 OData Demo Service", function () {
       "Content-Type": "application/json",
     });
   });
+
+  test("in filter", async () => {
+    await testService.products().query((builder, qProduct) => builder.filter(qProduct.name.in(["x", "y"], "z")));
+    expect(odataClient.lastUrl).toBe("test/Products?$filter=(Name eq 'x' or Name eq 'y' or Name eq 'z')");
+
+    await testService.products().query((builder, qProduct) => builder.filter(qProduct.name.in("x", "y", "z")));
+    expect(odataClient.lastUrl).toBe("test/Products?$filter=(Name eq 'x' or Name eq 'y' or Name eq 'z')");
+  });
 });
