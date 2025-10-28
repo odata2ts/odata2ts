@@ -144,6 +144,10 @@ export function createStringTests<T extends QStringPath | QStringV2Path>(toTest:
     const result = toTest.in("X", "y", "z").toString();
 
     expect(result).toBe(`(Country eq 'X' or Country eq 'y' or Country eq 'z')`);
+    expect(result).toBe(toTest.in(["X", "y"], "z").toString());
+    expect(result).toBe(toTest.in(["X", "y", "z"]).toString());
+    expect(result).toBe(toTest.in("X", ["y", "z"]).toString());
+    expect(result).toBe(toTest.in(["X"], ["y", "z"]).toString());
   });
 
   test("concat prefix", () => {

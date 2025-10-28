@@ -99,14 +99,11 @@ export function filterInEmulated<T>(path: string, mapValue: MapValue<T>) {
    *
    * The in-statement is actually emulated by using an or-concatenation of equals-statements.
    */
-  return (...values: Array<T>) => {
-    return values.reduce(
-      (expression, value, currentIndex) => {
-        const expr = buildQFilterOperation(path, StandardFilterOperators.EQUALS, mapValue(value));
-        return expression ? expression.or(expr, currentIndex < values.length - 1) : expr;
-      },
-      null as unknown as QFilterExpression,
-    );
+  return (...values: Array<T | Array<T>>) => {
+    return flattenList(values).reduce<QFilterExpression>((expression, value, idx, coll) => {
+      const expr = buildQFilterOperation(path, StandardFilterOperators.EQUALS, mapValue(value));
+      return expression.or(expr, idx < coll.length - 1);
+    }, new QFilterExpression());
   };
 }
 
@@ -117,7 +114,18 @@ export function filterIn<T>(path: string, mapValue: MapValue<T>) {
    * This implementation uses the native in-statement which is available since V4, but not implemented by
    * all V4 OData services.
    */
-  return (...values: Array<T>) => {
-    return buildQFilterOperation(path, StandardFilterOperators.IN, `(${values.map(mapValue).join(",")})`);
+  return (...values: Array<T | Array<T>>) => {
+    return buildQFilterOperation(path, StandardFilterOperators.IN, `(${flattenList(values).map(mapValue).join(",")})`);
   };
+}
+
+function flattenList<T>(values: Array<T | Array<T>>): Array<T> {
+  return values.reduce<Array<T>>((collector, current) => {
+    if (Array.isArray(current)) {
+      collector.push(...current);
+    } else {
+      collector.push(current);
+    }
+    return collector;
+  }, []);
 }

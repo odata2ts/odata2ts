@@ -1,7 +1,6 @@
 import { stringToPrefixModelConverter } from "@odata2ts/test-converters";
 import { describe, expect, test } from "vitest";
-import { QStringPath } from "../../../src";
-import { getIdentityConverter } from "../../../src/IdentityConverter";
+import { getIdentityConverter, QStringPath } from "../../../src";
 import { createStringTests } from "../StringBaseTests";
 
 describe("QStringPath test", () => {
