@@ -1,4 +1,9 @@
-import { QFilterExpression, QOrderByExpression, QueryObjectModel } from "@odata2ts/odata-query-objects";
+import {
+  QFilterExpression,
+  QOrderByExpression,
+  QSelectExpression,
+  QueryObjectModel,
+} from "@odata2ts/odata-query-objects";
 import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
   ExpandingFunction,
@@ -26,12 +31,12 @@ class ExpandingODataQueryBuilderV4<Q extends QueryObjectModel> implements Expand
     this.builder = new ODataQueryBuilder(property, qEntity, { expandingBuilder: true });
   }
 
-  public select(...props: NullableParamList<keyof Q>) {
+  public select(...props: NullableParamList<keyof Q | QSelectExpression>) {
     this.builder.select(props);
     return this;
   }
 
-  public expand<Prop extends ExpandType<Q>>(...props: NullableParamList<Prop>) {
+  public expand<Prop extends ExpandType<Q>>(...props: NullableParamList<Prop | QSelectExpression>) {
     this.builder.expand(props);
     return this;
   }

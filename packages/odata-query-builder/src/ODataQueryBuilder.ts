@@ -4,6 +4,7 @@ import {
   QOrderByExpression,
   QPathModel,
   QSearchTerm,
+  QSelectExpression,
   QueryObjectModel,
   searchTerm,
 } from "@odata2ts/odata-query-objects";
@@ -99,8 +100,17 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     }
   }
 
-  public select(props: NullableParamList<keyof Q>) {
-    const filteredPaths = props.filter((p): p is keyof Q => !!p).map((p) => this.getEntityProp(p).getPath());
+  public filterSelectAndMapPath(props: NullableParamList<keyof Q | QSelectExpression>) {
+    return props
+      .filter((p): p is keyof Q | QSelectExpression => !!p)
+      .map((p) => {
+        const path = p instanceof QSelectExpression ? p : this.getEntityProp(p);
+        return path.getPath();
+      });
+  }
+
+  public select(props: NullableParamList<keyof Q | QSelectExpression>) {
+    const filteredPaths = this.filterSelectAndMapPath(props);
     if (filteredPaths.length) {
       this.getSelects().push(...filteredPaths);
     }
@@ -122,8 +132,8 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     );
   } */
 
-  public expand<Prop extends ExpandType<Q>>(props: NullableParamList<Prop>) {
-    const filteredPaths = props.filter((p): p is Prop => !!p).map((p) => this.getEntityProp(p).getPath());
+  public expand<Prop extends ExpandType<Q>>(props: NullableParamList<Prop | QSelectExpression>) {
+    const filteredPaths = this.filterSelectAndMapPath(props);
     if (filteredPaths.length) {
       this.getExpands().push(...filteredPaths);
     }

@@ -1,3 +1,4 @@
+import { QSelectExpression } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, test } from "vitest";
 import { createQueryBuilderV2, ODataQueryBuilderV2 } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
@@ -91,13 +92,13 @@ describe("ODataQueryBuilderV2 Test", () => {
     const candidate = toTest
       .expanding("address", (builder) => {
         builder.expanding("responsible", (respBuilder) => {
-          respBuilder.select("name").expand("address");
+          respBuilder.select("name", new QSelectExpression("xxx")).expand("address", new QSelectExpression("CUSTOM"));
         });
       })
       .build();
 
     const expected = addBase(
-      "$select=Address/responsible/name&$expand=Address,Address/responsible,Address/responsible/Address",
+      "$select=Address/responsible/name,Address/responsible/xxx&$expand=Address,Address/responsible,Address/responsible/Address,Address/responsible/CUSTOM",
     );
 
     expect(candidate).toBe(expected);

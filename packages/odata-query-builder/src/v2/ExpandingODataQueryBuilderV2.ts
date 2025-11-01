@@ -1,4 +1,4 @@
-import { QEntityPath, QueryObjectModel } from "@odata2ts/odata-query-objects";
+import { QEntityPath, QSelectExpression, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
   EntityExtractor,
@@ -32,27 +32,22 @@ class ExpandingODataQueryBuilderV2<Q extends QueryObjectModel> implements Expand
 
   private getPrefixedPath = (path: string) => `${this.builder.getPath()}/${path}`;
 
-  private getPrefixedPathForProp = (prop: keyof Q) => {
-    const path = this.builder.getEntityProp(prop).getPath();
-    return this.getPrefixedPath(path);
-  };
-
-  public select(...props: NullableParamList<keyof Q>) {
-    const filtered = props.filter((p): p is keyof Q => !!p);
+  public select(...props: NullableParamList<keyof Q | QSelectExpression>) {
+    const filtered = this.builder.filterSelectAndMapPath(props);
     if (filtered.length) {
-      filtered.map(this.getPrefixedPathForProp).forEach((path) => {
-        this.selects.add(path);
+      filtered.forEach((path) => {
+        this.selects.add(this.getPrefixedPath(path));
       });
     }
 
     return this;
   }
 
-  public expand<Prop extends ExpandType<Q>>(...props: NullableParamList<Prop>) {
-    const filtered = props.filter((p): p is NonNullable<Prop> => !!p);
+  public expand<Prop extends ExpandType<Q>>(...props: NullableParamList<Prop | QSelectExpression>) {
+    const filtered = this.builder.filterSelectAndMapPath(props);
     if (filtered.length) {
-      filtered.map(this.getPrefixedPathForProp).forEach((path) => {
-        this.expands.add(path);
+      filtered.forEach((path) => {
+        this.expands.add(this.getPrefixedPath(path));
       });
     }
 

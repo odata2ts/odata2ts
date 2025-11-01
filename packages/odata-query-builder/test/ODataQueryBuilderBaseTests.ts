@@ -1,4 +1,4 @@
-import { QueryObject } from "@odata2ts/odata-query-objects";
+import { QSelectExpression, QueryObject } from "@odata2ts/odata-query-objects";
 import { beforeEach, expect, test } from "vitest";
 import { ODataQueryBuilderConfig, ODataQueryBuilderV2, ODataQueryBuilderV4, QFilterExpression } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
@@ -86,6 +86,13 @@ export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) 
 
     expect(candidate).toBe("/Persons");
     expect(toTest.select().build()).toBe("/Persons");
+  });
+
+  test("select: custom props", () => {
+    const candidate = toTest.select("name", new QSelectExpression("Test")).build();
+    const expected = addBase("$select=name,Test");
+
+    expect(candidate).toBe(expected);
   });
 
   test("skip", () => {
@@ -246,6 +253,20 @@ export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) 
   test("expand: two simple ones", () => {
     const candidate = toTest.expand("address", "altAdresses").build();
     const expected = addBase("$expand=Address,AltAdresses");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expand: custom prop", () => {
+    const candidate = toTest.expand(new QSelectExpression("XXX")).build();
+    const expected = addBase("$expand=XXX");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expand: mixed with custom prop", () => {
+    const candidate = toTest.expand(new QSelectExpression("x_yz"), "address").build();
+    const expected = addBase("$expand=x_yz,Address");
 
     expect(candidate).toBe(expected);
   });

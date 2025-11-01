@@ -39,6 +39,20 @@ describe("Trippin: Testing Query Functionality", function () {
     expect(ODATA_CLIENT.lastUrl).toBe(expected);
   });
 
+  test("entitySet: query with unknown select", async () => {
+    const expected = `${BASE_URL}/People?$select=UserName,TheTest,test2`;
+
+    // const response = await TRIPPIN.people().query((builder) => builder.select("user", "lastName", "addressInfo"));
+
+    const response = await TRIPPIN.people().query((builder) =>
+      builder
+        // @ts-ignore
+        .select("user", "TheTest", "test2"),
+    );
+
+    expect(ODATA_CLIENT.lastUrl).toBe(expected);
+  });
+
   test("complex type: query", async () => {
     await TRIPPIN.people("tester").homeAddress().query();
 
