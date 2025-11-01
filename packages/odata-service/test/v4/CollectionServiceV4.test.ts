@@ -50,7 +50,7 @@ describe("CollectionService V4 Tests", () => {
   });
 
   test("string enum collection: filter", async () => {
-    const params = getParams({ $filter: "($it eq 'A' or $it eq 'B')" });
+    const params = getParams({ $filter: "$it eq 'A' or $it eq 'B'" });
 
     const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
 

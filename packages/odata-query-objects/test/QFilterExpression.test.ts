@@ -15,10 +15,28 @@ describe("QFilterExpression test", () => {
     expect(new QFilterExpression("").toString()).toBe("");
   });
 
+  test("group operator", () => {
+    const toTest = exampleExpression.group().toString();
+
+    expect(toTest).toBe(`(${exampleResult})`);
+  });
+
+  test("group operator with empty filter", () => {
+    const toTest = new QFilterExpression().group().toString();
+
+    expect(toTest).toBe("");
+  });
+
+  test("group operator multiple times", () => {
+    const toTest = exampleExpression.group().group().group().toString();
+
+    expect(toTest).toBe(`(((${exampleResult})))`);
+  });
+
   test("not operator", () => {
     const toTest = exampleExpression.not().toString();
 
-    expect(toTest).toBe(`not(${exampleResult})`);
+    expect(toTest).toBe(`not ${exampleResult}`);
   });
 
   test("not operator with empty filter", () => {
@@ -30,7 +48,7 @@ describe("QFilterExpression test", () => {
   test("not operator multiple times", () => {
     const toTest = exampleExpression.not().not().not().toString();
 
-    expect(toTest).toBe(`not(not(not(${exampleResult})))`);
+    expect(toTest).toBe(`not not not ${exampleResult}`);
   });
 
   test("and operator", () => {
@@ -58,7 +76,7 @@ describe("QFilterExpression test", () => {
   test("or operator", () => {
     const toTest = exampleExpression.or(exampleNumberExpr).toString();
 
-    expect(toTest).toBe(`(${exampleResult} or ${exampleNumberResult})`);
+    expect(toTest).toBe(`${exampleResult} or ${exampleNumberResult}`);
   });
 
   test("or operator with empty filter", () => {
@@ -74,31 +92,24 @@ describe("QFilterExpression test", () => {
   test("or operator multiple times", () => {
     const toTest = exampleExpression.or(exampleNumberExpr).or(exampleNumberExpr).or(exampleExpression).toString();
 
-    expect(toTest).toBe(
-      `(((${exampleResult} or ${exampleNumberResult}) or ${exampleNumberResult}) or ${exampleResult})`,
-    );
+    expect(toTest).toBe(`${exampleResult} or ${exampleNumberResult} or ${exampleNumberResult} or ${exampleResult}`);
   });
 
   test("combination", () => {
-    const toTest = exampleExpression.not().or(exampleNumberExpr).and(exampleNumberExpr).toString();
+    const toTest = exampleNumberExpr.and(exampleExpression.not().or(exampleNumberExpr).group()).toString();
 
-    expect(toTest).toBe(`(not(${exampleResult}) or ${exampleNumberResult}) and ${exampleNumberResult}`);
+    expect(toTest).toBe(`${exampleNumberResult} and (not ${exampleResult} or ${exampleNumberResult})`);
   });
 
   test("or with parentheses", () => {
-    const toTest = exampleExpression.or(exampleNumberExpr).and(exampleExpression.or(exampleNumberExpr)).toString();
+    const toTest = exampleExpression
+      .or(exampleNumberExpr)
+      .group()
+      .and(exampleExpression.or(exampleNumberExpr).group())
+      .toString();
 
     expect(toTest).toBe(
       `(${exampleResult} or ${exampleNumberResult}) and (${exampleResult} or ${exampleNumberResult})`,
     );
-  });
-
-  test("or without parentheses", () => {
-    const toTest = exampleExpression
-      .or(exampleNumberExpr, true)
-      .or(exampleExpression.or(exampleNumberExpr, true), true)
-      .toString();
-
-    expect(toTest).toBe(`${exampleResult} or ${exampleNumberResult} or ${exampleResult} or ${exampleNumberResult}`);
   });
 });

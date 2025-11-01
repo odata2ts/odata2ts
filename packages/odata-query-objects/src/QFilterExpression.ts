@@ -5,22 +5,25 @@ export class QFilterExpression {
     return this.expression?.trim() || "";
   }
 
-  public not(): QFilterExpression {
+  public group(): QFilterExpression {
     if (this.expression?.trim()) {
-      return new QFilterExpression(`not(${this.expression})`);
+      return new QFilterExpression(`(${this.expression})`);
     }
     return this;
   }
 
-  private combine(
-    expression: QFilterExpression | null | undefined,
-    isOrOperation: boolean,
-    withoutParentheses = false,
-  ) {
+  public not(): QFilterExpression {
+    if (this.expression?.trim()) {
+      return new QFilterExpression(`not ${this.expression}`);
+    }
+    return this;
+  }
+
+  private combine(expression: QFilterExpression | null | undefined, isOrOperation: boolean) {
     if (expression?.toString()) {
       if (this.expression) {
         const newExpr = `${this.expression} ${isOrOperation ? "or" : "and"} ${expression.toString()}`;
-        return new QFilterExpression(isOrOperation && !withoutParentheses ? `(${newExpr})` : newExpr);
+        return new QFilterExpression(newExpr);
       } else {
         return expression;
       }
@@ -32,7 +35,7 @@ export class QFilterExpression {
     return this.combine(expression, false);
   }
 
-  public or(expression: QFilterExpression | null | undefined, withoutParentheses = false): QFilterExpression {
-    return this.combine(expression, true, withoutParentheses);
+  public or(expression: QFilterExpression | null | undefined): QFilterExpression {
+    return this.combine(expression, true);
   }
 }
