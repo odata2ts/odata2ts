@@ -9,6 +9,20 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
   * dependencies
     * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
 
+## [0.18.4](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.18.3...@odata2ts/odata-query-builder-v0.18.4) (2025-11-01)
+
+
+### Features
+
+* allow custom select and expand via QSelectExpression  ([#368](https://github.com/odata2ts/odata2ts/issues/368)) ([1d26ac7](https://github.com/odata2ts/odata2ts/commit/1d26ac79207eb6008c2bafe2cee1d6ca110742d6))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-objects bumped from ^0.27.1 to ^0.28.0
+
 ## [0.18.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder@0.18.1...@odata2ts/odata-query-builder@0.18.2) (2024-12-18)
 
 **Note:** Version bump only for package @odata2ts/odata-query-builder

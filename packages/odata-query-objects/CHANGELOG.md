@@ -33,6 +33,23 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * ESM tends to break stuff
 
+## [0.28.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.27.1...@odata2ts/odata-query-objects-v0.28.0) (2025-11-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **qobjects:** Previously parentheses were set automatically for or-expressions and erroneously for not-expressions; now users have to set parenthesis explicitly via `.group()`
+
+### Features
+
+* allow custom select and expand via QSelectExpression  ([#368](https://github.com/odata2ts/odata2ts/issues/368)) ([1d26ac7](https://github.com/odata2ts/odata2ts/commit/1d26ac79207eb6008c2bafe2cee1d6ca110742d6))
+* **qobjects:** allow arrays for in-filter ([#363](https://github.com/odata2ts/odata2ts/issues/363)) ([610c905](https://github.com/odata2ts/odata2ts/commit/610c9052bc3d6557cf5bcc4876a0ce9ffdf34ae4))
+
+
+### Code Refactoring
+
+* **qobjects:** parentheses only via `group` ([#366](https://github.com/odata2ts/odata2ts/issues/366)) ([4d917ed](https://github.com/odata2ts/odata2ts/commit/4d917edefd05ccb77019ae0103fcc1dd52ac8b0e))
+
 ## [0.27.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects@0.27.0...@odata2ts/odata-query-objects-v0.27.1) (2025-10-16)
 
 
