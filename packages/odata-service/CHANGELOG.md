@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.23.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service-v0.22.2...@odata2ts/odata-service-v0.23.0) (2025-11-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **qobjects:** Previously parentheses were set automatically for or-expressions and erroneously for not-expressions; now users have to set parenthesis explicitly via `.group()`
+
+### Code Refactoring
+
+* **qobjects:** parentheses only via `group` ([#366](https://github.com/odata2ts/odata2ts/issues/366)) ([4d917ed](https://github.com/odata2ts/odata2ts/commit/4d917edefd05ccb77019ae0103fcc1dd52ac8b0e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-builder bumped from ^0.18.3 to ^0.18.4
+    * @odata2ts/odata-query-objects bumped from ^0.27.1 to ^0.28.0
+
 ## [0.22.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service@0.22.1...@odata2ts/odata-service-v0.22.2) (2025-10-16)
 
 
