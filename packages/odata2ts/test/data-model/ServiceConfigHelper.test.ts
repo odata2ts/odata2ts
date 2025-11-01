@@ -20,7 +20,7 @@ describe("ServiceConfigHelper Tests", function () {
       skipComments: true,
       disableAutomaticNameClashResolution: false,
       bundledFileGeneration: false,
-      numericEnums: false,
+      enumType: "string",
     });
   }
 
@@ -36,7 +36,7 @@ describe("ServiceConfigHelper Tests", function () {
       skipComments: true,
       disableAutomaticNameClashResolution: false,
       bundledFileGeneration: false,
-      numericEnums: false,
+      enumType: "string",
     });
   }
 

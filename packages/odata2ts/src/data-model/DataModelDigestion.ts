@@ -480,17 +480,14 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
       // special handling for enums
       if (modelType === DataTypes.EnumType) {
+        const isNumericEnum = this.options.enumType === "numeric";
         const enumConfig = this.serviceConfigHelper.findEnumTypeConfig(dataTypeNamespace, dataTypeName);
         result = {
           dataType: modelType,
           type: this.namingHelper.getEnumName(enumConfig?.mappedName ?? odataDataType),
-          qPath: this.options.numericEnums ? "QNumericEnumPath" : "QEnumPath",
-          qObject: isCollection
-            ? this.options.numericEnums
-              ? "QNumericEnumCollection"
-              : "QEnumCollection"
-            : undefined,
-          qParam: this.options.numericEnums ? "QNumericEnumParam" : "QEnumParam",
+          qPath: isNumericEnum ? "QNumericEnumPath" : "QEnumPath",
+          qObject: isCollection ? (isNumericEnum ? "QNumericEnumCollection" : "QEnumCollection") : undefined,
+          qParam: isNumericEnum ? "QNumericEnumParam" : "QEnumParam",
         };
       }
       // handling of complex & entity types

@@ -212,7 +212,7 @@ class QueryObjectGenerator {
       const name = this.namingHelper.getQPropName(prop.name);
       const isModelType = prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
       const isEnumType = prop.dataType === DataTypes.EnumType;
-      const isNumericEnum = this.options.numericEnums;
+      const isNumericEnum = this.options.enumType === "numeric";
 
       let qPathInit: string;
 
