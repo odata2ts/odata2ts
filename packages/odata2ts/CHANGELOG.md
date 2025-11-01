@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.40.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.39.2...@odata2ts/odata2ts-v0.40.0) (2025-11-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **odata2ts:** config option `numericEnum` has been refactored to `enumType`; use `enumType: "numeric"` if you previously used `numericEnum: true`.
+
+### Features
+
+* **odata2ts:** generate enums as string union type ([#367](https://github.com/odata2ts/odata2ts/issues/367)) ([22a5516](https://github.com/odata2ts/odata2ts/commit/22a551671d660fbf915fb4542b62551cf070a260))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.27.1 to ^0.28.0
+    * @odata2ts/odata-service bumped from ^0.22.2 to ^0.23.0
+  * peerDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.27.1 to ^0.28.0
+    * @odata2ts/odata-service bumped from ^0.22.2 to ^0.23.0
+
 ## [0.39.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts@0.39.1...@odata2ts/odata2ts-v0.39.2) (2025-10-16)
 
 
