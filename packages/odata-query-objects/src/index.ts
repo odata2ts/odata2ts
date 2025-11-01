@@ -1,5 +1,6 @@
 export * from "./odata/ODataModel";
 export * from "./QueryObjectModel";
+export { QSelectExpression } from "./QSelectExpression";
 export { QFilterExpression } from "./QFilterExpression";
 export { QOrderByExpression } from "./QOrderByExpression";
 export { QSearchTerm, searchTerm } from "./QSearchTerm";
