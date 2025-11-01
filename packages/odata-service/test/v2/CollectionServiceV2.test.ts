@@ -7,11 +7,9 @@ import {
   StringCollection,
 } from "@odata2ts/odata-query-objects";
 import { describe, expect, test } from "vitest";
-import { CollectionServiceV2, ODataServiceOptions } from "../../src";
-import { DEFAULT_HEADERS } from "../../src/RequestHeaders";
+import { CollectionServiceV2, DEFAULT_HEADERS, ODataServiceOptions } from "../../src";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
 import { MockClient } from "../mock/MockClient";
-import { StringTestEnum } from "../v4/CollectionServiceV4.test";
 
 export enum NumericTestEnum {
   A,
@@ -60,7 +58,7 @@ describe("CollectionService V2 Tests", () => {
   });
 
   test("numeric enum collection: filter", async () => {
-    const params = getParams({ $filter: "($it eq 'A' or $it eq 'B')" });
+    const params = getParams({ $filter: "$it eq 'A' or $it eq 'B'" });
 
     const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
 

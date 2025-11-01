@@ -100,10 +100,11 @@ export function filterInEmulated<T>(path: string, mapValue: MapValue<T>) {
    * The in-statement is actually emulated by using an or-concatenation of equals-statements.
    */
   return (...values: Array<T | Array<T>>) => {
-    return flattenList(values).reduce<QFilterExpression>((expression, value, idx, coll) => {
-      const expr = buildQFilterOperation(path, StandardFilterOperators.EQUALS, mapValue(value));
-      return expression.or(expr, idx < coll.length - 1);
+    const flatVals = flattenList(values);
+    const result = flatVals.reduce<QFilterExpression>((expression, value) => {
+      return expression.or(buildQFilterOperation(path, StandardFilterOperators.EQUALS, mapValue(value)));
     }, new QFilterExpression());
+    return flatVals.length > 1 ? result.group() : result;
   };
 }
 
