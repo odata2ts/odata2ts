@@ -4,11 +4,11 @@ import { QSelectExpression } from "../src";
 describe("QSelectExpression test", () => {
   test("handling empty, null, undefined", () => {
     // @ts-ignore
-    expect(new QSelectExpression(null).toString()).toBe("");
-    expect(new QSelectExpression().toString()).toBe("");
-    expect(new QSelectExpression(undefined).toString()).toBe("");
-    expect(new QSelectExpression("    ").toString()).toBe("");
-    expect(new QSelectExpression("").toString()).toBe("");
+    expect(new QSelectExpression(null).getPath()).toBe("");
+    expect(new QSelectExpression().getPath()).toBe("");
+    expect(new QSelectExpression(undefined).getPath()).toBe("");
+    expect(new QSelectExpression("    ").getPath()).toBe("");
+    expect(new QSelectExpression("").getPath()).toBe("");
   });
 
   test("get path", () => {
