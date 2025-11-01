@@ -1,4 +1,10 @@
-import { QFilterExpression, QOrderByExpression, QSearchTerm, QueryObjectModel } from "@odata2ts/odata-query-objects";
+import {
+  QFilterExpression,
+  QOrderByExpression,
+  QSearchTerm,
+  QSelectExpression,
+  QueryObjectModel,
+} from "@odata2ts/odata-query-objects";
 import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
   ExpandingFunction,
@@ -48,7 +54,7 @@ class ODataQueryBuilderV4<Q extends QueryObjectModel> implements ODataQueryBuild
     return this;
   }
 
-  public select(...props: NullableParamList<keyof Q>) {
+  public select(...props: NullableParamList<keyof Q | QSelectExpression>) {
     this.builder.select(props);
     return this;
   }
@@ -58,7 +64,7 @@ class ODataQueryBuilderV4<Q extends QueryObjectModel> implements ODataQueryBuild
     return this;
   }
 
-  public expand<Prop extends ExpandType<Q>>(...props: NullableParamList<Prop>) {
+  public expand<Prop extends ExpandType<Q>>(...props: NullableParamList<Prop | QSelectExpression>) {
     this.builder.expand(props);
     return this;
   }

@@ -5,6 +5,7 @@ import {
   QFilterExpression,
   QOrderByExpression,
   QSearchTerm,
+  QSelectExpression,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
 
@@ -67,7 +68,7 @@ export interface ODataQueryBuilderModel<Q extends QueryObjectModel, ReturnType> 
    * @param props the property names to select as they are specified on the query object
    * @returns this query builder
    */
-  select: (...props: NullableParamList<keyof Q>) => ReturnType;
+  select: (...props: NullableParamList<keyof Q | QSelectExpression>) => ReturnType;
 
   /**
    * Specify as many filter expressions as you want by facilitating query objects.
@@ -113,7 +114,7 @@ export interface ODataQueryBuilderModel<Q extends QueryObjectModel, ReturnType> 
    * @param props the attributes to expand
    * @returns this query builder
    */
-  expand: <Prop extends ExpandType<Q>>(...props: NullableParamList<Prop>) => ReturnType;
+  expand: <Prop extends ExpandType<Q>>(...props: NullableParamList<Prop | QSelectExpression>) => ReturnType;
 
   /**
    * Expand one property, which is an entity or entity collection.

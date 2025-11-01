@@ -1,4 +1,4 @@
-import { searchTerm } from "@odata2ts/odata-query-objects";
+import { QSelectExpression, searchTerm } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, test } from "vitest";
 import { createQueryBuilderV4, ODataQueryBuilderV4 } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
@@ -138,6 +138,17 @@ describe("ODataQueryBuilderV4 Test", () => {
       })
       .build();
     const expected = addBase("$expand=Address($expand=responsible)");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expanding: with custom prop", () => {
+    const candidate = toTest
+      .expanding("address", (builder, qAddress) => {
+        builder.select(new QSelectExpression("THE1")).expand(new QSelectExpression("xxx"));
+      })
+      .build();
+    const expected = addBase("$expand=Address($select=THE1;$expand=xxx)");
 
     expect(candidate).toBe(expected);
   });
