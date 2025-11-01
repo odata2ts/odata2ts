@@ -26,7 +26,7 @@ const defaultConfig: DefaultConfiguration = {
   v4BigNumberAsString: false,
   disableAutomaticNameClashResolution: false,
   bundledFileGeneration: true,
-  numericEnums: false,
+  enumType: "string",
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,

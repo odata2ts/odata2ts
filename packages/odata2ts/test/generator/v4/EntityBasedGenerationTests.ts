@@ -61,7 +61,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("oneNumericEnumType", "enum-numeric-min.ts", { numericEnums: true });
+    await generateAndCompare("oneNumericEnumType", "enum-numeric-min.ts", { enumType: "numeric" });
   });
 
   test(`${testSuiteName}: complex type`, async () => {
@@ -216,7 +216,8 @@ export function createEntityBasedGenerationTests(
     // when generating model
     // then match fixture text
     await generateAndCompare("entityEnum", "entity-enum.ts");
-    await generateAndCompare("entityEnumNumeric", "entity-enum-numeric.ts", { numericEnums: true });
+    await generateAndCompare("entityEnumNumeric", "entity-enum-numeric.ts", { enumType: "numeric" });
+    await generateAndCompare("entityEnumStringUnion", "entity-enum-string-union.ts", { enumType: "string-union" });
   });
 
   test(`${testSuiteName}: entity & complex entity`, async () => {

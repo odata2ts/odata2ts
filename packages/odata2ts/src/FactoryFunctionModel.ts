@@ -17,7 +17,7 @@ export type DigestionOptions = Pick<
   | "skipComments"
   | "disableAutomaticNameClashResolution"
   | "bundledFileGeneration"
-  | "numericEnums"
+  | "enumType"
 >;
 
 /**
@@ -36,7 +36,7 @@ export type GeneratorFunctionOptions = Pick<
   | "skipOperations"
   | "skipComments"
   | "v2ModelsWithExtraResultsWrapping"
-  | "numericEnums"
+  | "enumType"
 >;
 
 export type EntityBasedGeneratorFunction = (

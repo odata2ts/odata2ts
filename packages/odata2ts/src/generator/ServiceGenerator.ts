@@ -33,7 +33,7 @@ import { ImportContainer } from "./ImportContainer.js";
 export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "properties" | "methods">> {}
 
 export interface ServiceGeneratorOptions
-  extends Pick<ConfigFileOptions, "enablePrimitivePropertyServices" | "v4BigNumberAsString" | "numericEnums"> {}
+  extends Pick<ConfigFileOptions, "enablePrimitivePropertyServices" | "v4BigNumberAsString" | "enumType"> {}
 
 export async function generateServices(
   project: ProjectManager,
@@ -383,7 +383,7 @@ class ServiceGenerator {
 
     const collectionServiceType = imports.addServiceObject(this.version, ServiceImports.CollectionService);
     const isEnum = prop.dataType === DataTypes.EnumType;
-    const isNumericEnum = this.options.numericEnums;
+    const isNumericEnum = this.options.enumType === "numeric";
     let qType: string;
     let type: string;
 

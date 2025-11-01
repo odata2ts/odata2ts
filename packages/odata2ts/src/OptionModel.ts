@@ -263,10 +263,10 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    */
   bundledFileGeneration?: boolean;
   /**
-   * If enabled, odata2ts will generate numeric enums instead of string enums.
-   * This
+   * By default, odata2ts generates string enums.
+   * With this option you can also generate numeric enums or a simple string union type.
    */
-  numericEnums?: boolean;
+  enumType?: "string" | "numeric" | "string-union";
 }
 
 /**
