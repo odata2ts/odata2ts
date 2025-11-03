@@ -1,6 +1,6 @@
-import { QSelectExpression, QueryObject } from "@odata2ts/odata-query-objects";
+import { QFilterExpression, QSelectExpression, QueryObject } from "@odata2ts/odata-query-objects";
 import { beforeEach, expect, test } from "vitest";
-import { ODataQueryBuilderConfig, ODataQueryBuilderV2, ODataQueryBuilderV4, QFilterExpression } from "../src";
+import { ODataQueryBuilderConfig, ODataQueryBuilderV2, ODataQueryBuilderV4 } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 
 /**
