@@ -31,9 +31,21 @@ describe("Trippin: Testing Query Functionality", function () {
   test("entitySet: query with select", async () => {
     const expected = `${BASE_URL}/People?$select=UserName,LastName,AddressInfo`;
 
-    // const response = await TRIPPIN.people().query((builder) => builder.select("user", "lastName", "addressInfo"));
-
     const response = await TRIPPIN.people().query((builder) => builder.select("user", "lastName", "addressInfo"));
+    const dataType: Array<SelectedPersonShape> = response?.data?.value;
+
+    expect(ODATA_CLIENT.lastUrl).toBe(expected);
+  });
+
+  test("entitySet: query with count expand and order by", async () => {
+    const expected = `${BASE_URL}/People?$expand=Trips($count=true)&$orderby=Trips/$count asc&$count=true`;
+
+    const response = await TRIPPIN.people().query((builder, qPerson) =>
+      builder
+        .count()
+        .expanding("trips", (tBuilder) => tBuilder.count())
+        .orderBy(qPerson.trips.countAsc()),
+    );
     const dataType: Array<SelectedPersonShape> = response?.data?.value;
 
     expect(ODATA_CLIENT.lastUrl).toBe(expected);

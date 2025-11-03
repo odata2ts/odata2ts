@@ -101,13 +101,15 @@ describe("ODataQueryBuilderV4 Test", () => {
     expect(candidate).toBe(expected);
   });
 
-  test("expanding: 1:n with filter & skip & top", async () => {
+  test("expanding: 1:n with filter & count & skip & top", async () => {
     const candidate = toTest
       .expanding("altAdresses", (builder, qEntity) => {
-        builder.select("street").skip(1).top(0).filter(qEntity.street.equals("Teststr. 12"));
+        builder.select("street").count().skip(1).top(0).filter(qEntity.street.equals("Teststr. 12"));
       })
       .build();
-    const expected = addBase("$expand=AltAdresses($select=street;$filter=street eq 'Teststr. 12';$top=0;$skip=1)");
+    const expected = addBase(
+      "$expand=AltAdresses($select=street;$filter=street eq 'Teststr. 12';$count=true;$top=0;$skip=1)",
+    );
 
     expect(candidate).toBe(expected);
   });
