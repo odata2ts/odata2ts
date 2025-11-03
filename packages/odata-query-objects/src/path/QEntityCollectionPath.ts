@@ -1,5 +1,6 @@
 import { LambdaFunctions } from "../odata/ODataModel";
 import { QFilterExpression } from "../QFilterExpression";
+import { QOrderByExpression } from "../QOrderByExpression";
 import { QueryObject } from "../QueryObject";
 import { LambdaOperatorType } from "./base/LambdaOperatorType";
 import { QEntityPathModel } from "./QPathModel";
@@ -48,5 +49,19 @@ export class QEntityCollectionPath<Q extends QueryObject> implements QEntityPath
 
   public all(fn?: LambdaOperatorType<Q>, prefix?: string): QFilterExpression {
     return this.lambdaFunction(LambdaFunctions.ALL, fn, prefix);
+  }
+
+  /**
+   * Sort by total count of these collection items in ascending order.
+   */
+  public countAsc(): QOrderByExpression {
+    return new QOrderByExpression(`${this.getPath()}/$count asc`);
+  }
+
+  /**
+   * Sort by total count of these collection items in ascending order.
+   */
+  public countDesc(): QOrderByExpression {
+    return new QOrderByExpression(`${this.getPath()}/$count desc`);
   }
 }

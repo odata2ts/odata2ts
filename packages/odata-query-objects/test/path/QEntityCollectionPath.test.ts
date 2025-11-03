@@ -123,4 +123,9 @@ describe("QEntityCollectionPath test", () => {
       .toString();
     expect(result).toBe("test/all(testing:testing/id gt 18)");
   });
+
+  test("count ascending and descending", () => {
+    expect(createToTest().countAsc().toString()).toBe("test/$count asc");
+    expect(createToTest().countDesc().toString()).toBe("test/$count desc");
+  });
 });

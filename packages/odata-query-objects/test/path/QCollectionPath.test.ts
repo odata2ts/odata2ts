@@ -105,4 +105,9 @@ describe("QCollectionPath test", () => {
       .toString();
     expect(result).toBe("test/all(testing:testing eq 'New York')");
   });
+
+  test("count ascending and descending", () => {
+    expect(createToTest().countAsc().toString()).toBe("test/$count asc");
+    expect(createToTest().countDesc().toString()).toBe("test/$count desc");
+  });
 });
