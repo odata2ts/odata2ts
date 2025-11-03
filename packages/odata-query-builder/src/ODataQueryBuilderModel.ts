@@ -226,7 +226,7 @@ type BaseOps = "select" | "expand" | "filter" | "orderBy";
 type V2ExpandingOps = "select" | "expand"; // custom expanding & build method
 type V2Ops = BuilderOp | BaseOps | "count" | PaginationOps; // custom expanding method
 type V4Ops = V2Ops | "expanding" | "groupBy" | "search";
-type V4ExpandingOps = BuilderOp | BaseOps | "expanding" | PaginationOps;
+type V4ExpandingOps = V2Ops | "expanding";
 
 export type V2ExpandResult = { selects: Array<string>; expands: Array<string> };
 

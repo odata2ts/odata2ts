@@ -68,6 +68,11 @@ class ExpandingODataQueryBuilderV4<Q extends QueryObjectModel> implements Expand
     return this;
   }
 
+  public count(doCount = true) {
+    this.builder.count(doCount);
+    return this;
+  }
+
   /**
    * Build the final URI string for this expanded entity or entity collection.
    * This method is called internally.
