@@ -9,6 +9,25 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
   * dependencies
     * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
 
+## [0.18.5](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.18.4...@odata2ts/odata-query-builder-v0.18.5) (2025-11-03)
+
+
+### Features
+
+* **query-builder:** allow for counting v4 collections ([3442b63](https://github.com/odata2ts/odata2ts/commit/3442b63712590f921c596059012275b405358a66))
+
+
+### Bug Fixes
+
+* **build:** wrong deps for example projects ([#369](https://github.com/odata2ts/odata2ts/issues/369)) ([5725abc](https://github.com/odata2ts/odata2ts/commit/5725abc5f2648b50ce907d40729be7a426af5097))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-objects bumped from ^0.28.0 to ^0.28.1
+
 ## [0.18.4](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.18.3...@odata2ts/odata-query-builder-v0.18.4) (2025-11-01)
 
 
