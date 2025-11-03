@@ -1,4 +1,3 @@
-import { QBook } from "@odata2ts/odata2ts/test/fixture/generator/qobject/abstract";
 import { ENUMERABLE_PROP_DEFINITION, QNumberPath, QStringPath, QueryObject } from "../../src";
 
 export interface PlanItemModel {
