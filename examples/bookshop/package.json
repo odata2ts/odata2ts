@@ -24,9 +24,9 @@
     "watch": "cds watch"
   },
   "dependencies": {
-    "@odata2ts/converter-big-number": "^0.2.3",
-    "@odata2ts/http-client-axios": "^0.11.3",
-    "@odata2ts/odata-service": "^0.22.1",
+    "@odata2ts/converter-big-number": "^0.2.7",
+    "@odata2ts/http-client-axios": "^0.12.0",
+    "@odata2ts/odata-service": "^0.23.0",
     "@sap/cds": "7.9.4",
     "@sap/cds-odata-v2-adapter-proxy": "^1.9.21",
     "axios": "0.27.2",
