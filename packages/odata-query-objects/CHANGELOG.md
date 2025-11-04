@@ -33,6 +33,18 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * ESM tends to break stuff
 
+## [0.28.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.28.0...@odata2ts/odata-query-objects-v0.28.1) (2025-11-03)
+
+
+### Features
+
+* **qobjects:** allow to order collections by count ([b407d41](https://github.com/odata2ts/odata2ts/commit/b407d418b7efa8069ff88f2186723a2002b136c4))
+
+
+### Bug Fixes
+
+* **build:** wrong deps for example projects ([#369](https://github.com/odata2ts/odata2ts/issues/369)) ([5725abc](https://github.com/odata2ts/odata2ts/commit/5725abc5f2648b50ce907d40729be7a426af5097))
+
 ## [0.28.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.27.1...@odata2ts/odata-query-objects-v0.28.0) (2025-11-01)
 
 

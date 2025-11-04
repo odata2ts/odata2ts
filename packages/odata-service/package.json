@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-service",
-  "version": "0.23.0",
+  "version": "0.23.1",
   "description": "Main runtime dependency of odata2ts for generated odata client services",
   "keywords": [
     "odata client",
@@ -35,8 +35,8 @@
   },
   "dependencies": {
     "@odata2ts/http-client-api": "^0.6.2",
-    "@odata2ts/odata-query-builder": "^0.18.4",
-    "@odata2ts/odata-query-objects": "^0.28.0"
+    "@odata2ts/odata-query-builder": "^0.18.5",
+    "@odata2ts/odata-query-objects": "^0.28.1"
   },
   "devDependencies": {
     "ts-expect": "^1.3.0"

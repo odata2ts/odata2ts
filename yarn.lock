@@ -741,15 +741,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-query-builder@npm:^0.18.4, @odata2ts/odata-query-builder@workspace:packages/odata-query-builder":
+"@odata2ts/odata-query-builder@npm:^0.18.5, @odata2ts/odata-query-builder@workspace:packages/odata-query-builder":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-builder@workspace:packages/odata-query-builder"
   dependencies:
-    "@odata2ts/odata-query-objects": "npm:^0.28.0"
+    "@odata2ts/odata-query-objects": "npm:^0.28.1"
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-query-objects@npm:^0.28.0, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
+"@odata2ts/odata-query-objects@npm:^0.28.1, @odata2ts/odata-query-objects@workspace:packages/odata-query-objects":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
@@ -760,13 +760,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-service@npm:^0.23.0, @odata2ts/odata-service@workspace:packages/odata-service":
+"@odata2ts/odata-service@npm:^0.23.0, @odata2ts/odata-service@npm:^0.23.1, @odata2ts/odata-service@workspace:packages/odata-service":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
     "@odata2ts/http-client-api": "npm:^0.6.2"
-    "@odata2ts/odata-query-builder": "npm:^0.18.4"
-    "@odata2ts/odata-query-objects": "npm:^0.28.0"
+    "@odata2ts/odata-query-builder": "npm:^0.18.5"
+    "@odata2ts/odata-query-objects": "npm:^0.28.1"
     ts-expect: "npm:^1.3.0"
   languageName: unknown
   linkType: soft
@@ -814,8 +814,8 @@ __metadata:
     "@odata2ts/converter-v2-to-v4": "npm:^0.5.1"
     "@odata2ts/http-client-api": "npm:^0.6.2"
     "@odata2ts/odata-core": "npm:^0.6.1"
-    "@odata2ts/odata-query-objects": "npm:^0.28.0"
-    "@odata2ts/odata-service": "npm:^0.23.0"
+    "@odata2ts/odata-query-objects": "npm:^0.28.1"
+    "@odata2ts/odata-service": "npm:^0.23.1"
     "@odata2ts/test-converters": "npm:^0.5.0"
     "@prettier/plugin-xml": "npm:^3.4.1"
     "@types/node": "npm:^22.4.0"
@@ -835,8 +835,8 @@ __metadata:
     upper-case-first: "npm:^2.0.2"
     xml2js: "npm:^0.6.0"
   peerDependencies:
-    "@odata2ts/odata-query-objects": ^0.28.0
-    "@odata2ts/odata-service": ^0.23.0
+    "@odata2ts/odata-query-objects": ^0.28.1
+    "@odata2ts/odata-service": ^0.23.1
     typescript: ">= 4.7"
   bin:
     odata2ts: lib/run-cli.js
