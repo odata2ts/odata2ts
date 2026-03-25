@@ -1,5 +1,6 @@
 import { ValueConverterImport } from "@odata2ts/converter-runtime";
 import { ODataVersions } from "@odata2ts/odata-core";
+import { QPathOptions } from "@odata2ts/odata-query-objects";
 import {
   GetAccessorDeclarationStructure,
   MethodDeclarationStructure,
@@ -240,7 +241,12 @@ class QueryObjectGenerator {
           qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${qObject})`;
         } else {
           let converterStmt = this.generateConverterStmt(importContainer, prop.converters);
-          qPathInit = `new ${qPath}(this.withPrefix("${odataName}")${converterStmt ? `, ${converterStmt}` : ""})`;
+          const options = JSON.stringify({
+            nativeIn: this.options.enableNativeInOperator || undefined,
+          } satisfies Partial<QPathOptions>);
+          const qPathOptions = options !== "{}" ? `, ${options}` : "";
+          converterStmt = converterStmt ? `, ${converterStmt}` : qPathOptions ? ", undefined" : "";
+          qPathInit = `new ${qPath}(this.withPrefix("${odataName}")${converterStmt}${qPathOptions})`;
         }
       }
 

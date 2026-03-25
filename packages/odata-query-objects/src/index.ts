@@ -47,6 +47,7 @@ export { QSingleV2Param } from "./param/v2/QSingleV2Param";
 export { QDoubleV2Param } from "./param/v2/QDoubleV2Param";
 export { QTimeV2Param } from "./param/v2/QTimeV2Param";
 
+export { QPathOptions } from "./path/base/QBasePath";
 export { QBooleanPath } from "./path/QBooleanPath";
 export { QBinaryPath } from "./path/QBinaryPath";
 export { QCollectionPath } from "./path/QCollectionPath";

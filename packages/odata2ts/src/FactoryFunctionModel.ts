@@ -38,6 +38,7 @@ export type GeneratorFunctionOptions = Pick<
   | "skipComments"
   | "v2ModelsWithExtraResultsWrapping"
   | "enumType"
+  | "enableNativeInOperator"
 >;
 
 export type EntityBasedGeneratorFunction = (

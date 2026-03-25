@@ -20,6 +20,7 @@ import {
 
 export type ExtractConverted<T> = T extends ValueConverter<any, infer Converted> ? Converted : never;
 export type InputModel<T> = QValuePathModel | ExtractConverted<T>;
+export type QPathOptions = { nativeIn: boolean };
 
 const CONVERSION_OPTIONS: ConverterOptions = { urlConversion: true };
 
@@ -32,7 +33,7 @@ export abstract class QBasePath<ValueType extends UrlExpressionValueModel, Conve
       ValueType,
       ConvertedType
     > = getIdentityConverter<ValueType>() as ValueConverter<ValueType, ConvertedType>,
-    public readonly options: { nativeIn: boolean } = { nativeIn: false },
+    public readonly options: QPathOptions = { nativeIn: false },
   ) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
