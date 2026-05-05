@@ -22,6 +22,7 @@ describe("ServiceConfigHelper Tests", function () {
       disableAutomaticNameClashResolution: false,
       bundledFileGeneration: false,
       enumType: "string",
+      enableNativeInOperator: false,
     });
   }
 
@@ -39,6 +40,7 @@ describe("ServiceConfigHelper Tests", function () {
       disableAutomaticNameClashResolution: false,
       bundledFileGeneration: false,
       enumType: "string",
+      enableNativeInOperator: false,
     });
   }
 

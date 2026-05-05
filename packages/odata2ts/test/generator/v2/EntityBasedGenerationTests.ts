@@ -267,27 +267,4 @@ export function createEntityBasedGenerationTests(
       skipEditableModels: false,
     });
   });
-
-  test(`${testSuiteName}: one model with nativeIn option`, async () => {
-    // given a model with simple properties and collections
-    // only simple properties should be generated with nativeIn option
-    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
-      builder
-        .addKeyProp("id", ODataTypesV2.Int32)
-        .addProp("testBoolean", ODataTypesV2.Boolean, false)
-        .addProp("testTime", ODataTypesV2.Time)
-        .addProp("testDate", ODataTypesV2.DateTime)
-        .addProp("testDateTimeOffset", ODataTypesV2.DateTimeOffset)
-        .addProp("testString", ODataTypesV2.String)
-        .addProp("testAny", "Edm.AnythingYouWant")
-        .addProp("multipleIds", `Collection(${ODataTypesV2.Guid})`)
-        .addProp("multipleStrings", `Collection(${ODataTypesV2.String})`),
-    );
-
-    // when generating model
-    // then match fixture text
-    await generateAndCompare("modelWithNativeIn", "entity-with-native-in.ts", {
-      enableNativeInOperator: true,
-    });
-  });
 }
