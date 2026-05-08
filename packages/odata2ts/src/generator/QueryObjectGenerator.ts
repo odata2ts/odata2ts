@@ -263,7 +263,7 @@ class QueryObjectGenerator {
           qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${qObject})`;
         } else {
           let converterStmt = this.generateConverterStmt(importContainer, prop.converters);
-          const addConverter = converterStmt;
+          const addConverter = !!converterStmt;
           const addOptions = this.options.enableNativeInOperator; // limited to hardcoded enableNativeIn for now
           converterStmt = converterStmt || "undefined";
 
