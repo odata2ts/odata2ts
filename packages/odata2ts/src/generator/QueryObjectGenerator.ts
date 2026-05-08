@@ -1,6 +1,5 @@
 import { ValueConverterImport } from "@odata2ts/converter-runtime";
 import { ODataVersions } from "@odata2ts/odata-core";
-import { QPathOptions } from "@odata2ts/odata-query-objects";
 import {
   GetAccessorDeclarationStructure,
   MethodDeclarationStructure,
@@ -49,6 +48,8 @@ class QueryObjectGenerator {
   public async generate(): Promise<void> {
     this.project.initQObjects();
 
+    this.generateOptions();
+
     // process EntityType & ComplexType
     const promises: Array<Promise<void>> = [...this.generateEntityTypes(), ...this.generateComplexTypes()];
     if (!this.options.skipOperations) {
@@ -59,6 +60,27 @@ class QueryObjectGenerator {
     await Promise.all(promises);
 
     return this.project.finalizeQObjects();
+  }
+
+  private generateOptions() {
+    const file = this.project.createOrGetQObjectFile("", "");
+
+    // for now assume only enableNativeInOperator requires options to be processed
+    if (!this.options.enableNativeInOperator) {
+      return;
+    }
+
+    // hardcode enableNativeInOperator for now
+    file.getFile().addVariableStatement({
+      declarationKind: VariableDeclarationKind.Const,
+      isExported: false,
+      declarations: [
+        {
+          name: "OPTS",
+          initializer: `{ nativeIn: true }`,
+        },
+      ],
+    });
   }
 
   private generateEntityTypes() {
@@ -241,12 +263,13 @@ class QueryObjectGenerator {
           qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${qObject})`;
         } else {
           let converterStmt = this.generateConverterStmt(importContainer, prop.converters);
-          const options = JSON.stringify({
-            nativeIn: this.options.enableNativeInOperator || undefined,
-          } satisfies Partial<QPathOptions>);
-          const qPathOptions = options !== "{}" ? `, ${options}` : "";
-          converterStmt = converterStmt ? `, ${converterStmt}` : qPathOptions ? ", undefined" : "";
-          qPathInit = `new ${qPath}(this.withPrefix("${odataName}")${converterStmt}${qPathOptions})`;
+          const addConverter = converterStmt;
+          const addOptions = this.options.enableNativeInOperator; // limited to hardcoded enableNativeIn for now
+          converterStmt = converterStmt || "undefined";
+
+          qPathInit = `new ${qPath}(this.withPrefix("${odataName}")${
+            addOptions ? `, ${converterStmt}, OPTS` : addConverter ? `, ${converterStmt}` : ""
+          })`;
         }
       }
 
