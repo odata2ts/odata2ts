@@ -1,4 +1,4 @@
-import { ODataTypesV2, ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
+import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { EmitModes } from "../../../src";
 import { digest } from "../../../src/data-model/DataModelDigestionV4";
@@ -202,15 +202,15 @@ describe("Query Object Generator Tests V4", () => {
     // only simple properties should be generated with nativeIn option
     odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
       builder
-        .addKeyProp("id", ODataTypesV2.Int32)
-        .addProp("testBoolean", ODataTypesV2.Boolean, false)
-        .addProp("testTime", ODataTypesV2.Time)
-        .addProp("testDate", ODataTypesV2.DateTime)
-        .addProp("testDateTimeOffset", ODataTypesV2.DateTimeOffset)
-        .addProp("testString", ODataTypesV2.String)
+        .addKeyProp("id", ODataTypesV4.Int32)
+        .addProp("testBoolean", ODataTypesV4.Boolean, false)
+        .addProp("testTime", ODataTypesV4.TimeOfDay)
+        .addProp("testDate", ODataTypesV4.Date)
+        .addProp("testDateTimeOffset", ODataTypesV4.DateTimeOffset)
+        .addProp("testString", ODataTypesV4.String)
         .addProp("testAny", "Edm.AnythingYouWant")
-        .addProp("multipleIds", `Collection(${ODataTypesV2.Guid})`)
-        .addProp("multipleStrings", `Collection(${ODataTypesV2.String})`),
+        .addProp("multipleIds", `Collection(${ODataTypesV4.Guid})`)
+        .addProp("multipleStrings", `Collection(${ODataTypesV4.String})`),
     );
 
     // when generating model
