@@ -244,15 +244,15 @@ export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) 
   */
 
   test("expand: simple", () => {
-    const candidate = toTest.expand("address").build();
-    const expected = addBase("$expand=Address");
+    const candidate = toTest.expand("bestFriend").build();
+    const expected = addBase("$expand=bestFriend");
 
     expect(candidate).toBe(expected);
   });
 
   test("expand: two simple ones", () => {
-    const candidate = toTest.expand("address", "altAdresses").build();
-    const expected = addBase("$expand=Address,AltAdresses");
+    const candidate = toTest.expand("bestFriend", "friends").build();
+    const expected = addBase("$expand=bestFriend,friends");
 
     expect(candidate).toBe(expected);
   });
@@ -265,18 +265,27 @@ export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) 
   });
 
   test("expand: mixed with custom prop", () => {
-    const candidate = toTest.expand(new QSelectExpression("x_yz"), "address").build();
-    const expected = addBase("$expand=x_yz,Address");
+    const candidate = toTest.expand(new QSelectExpression("x_yz"), "bestFriend").build();
+    const expected = addBase("$expand=x_yz,bestFriend");
 
     expect(candidate).toBe(expected);
   });
 
   test("expand: ignore nullables", () => {
     const expectedNull = addBase("");
-    const expected = addBase("$expand=Address");
+    const expected = addBase("$expand=bestFriend");
 
     expect(toTest.expand(null).build()).toBe(expectedNull);
     expect(toTest.expand(undefined).build()).toBe(expectedNull);
-    expect(toTest.expand("address", undefined, null).build()).toBe(expected);
+    expect(toTest.expand("bestFriend", undefined, null).build()).toBe(expected);
+  });
+
+  test("expand: won't work for complex types or collections", () => {
+    // @ts-expect-error
+    toTest.expand("likedFeatures");
+    // @ts-expect-error
+    toTest.expand("address");
+    // @ts-expect-error
+    toTest.expand("altAddresses");
   });
 }
