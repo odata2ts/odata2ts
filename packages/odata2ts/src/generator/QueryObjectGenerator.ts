@@ -274,7 +274,7 @@ class QueryObjectGenerator {
           converterStmt = converterStmt || "undefined";
 
           qPathInit = `new ${qPath}(this.withPrefix("${odataName}")${
-            addOptions ? `, ${converterStmt}, OPTS` : addConverter ? `, ${converterStmt}` : ""
+            addOptions ? `, ${converterStmt}, ${OPTIONS_STATEMENT}` : addConverter ? `, ${converterStmt}` : ""
           })`;
         }
       }
