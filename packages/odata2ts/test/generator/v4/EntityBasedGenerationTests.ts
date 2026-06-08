@@ -152,6 +152,7 @@ export function createEntityBasedGenerationTests(
     // then match fixture text
     await generateAndCompare("entity-relationships", "entity-relationships.ts", {
       skipEditableModels: false,
+      skipIdModels: false,
       disableAutoManagedKey: true,
     });
   });
@@ -176,6 +177,7 @@ export function createEntityBasedGenerationTests(
     await generateAndCompare("multiple-namespaces", "entity-relationships.ts", {
       skipEditableModels: false,
       disableAutoManagedKey: true,
+      skipIdModels: false,
     });
   });
 
