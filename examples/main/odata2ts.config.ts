@@ -49,6 +49,7 @@ const config: ConfigFileOptions = {
       // TrippinService does not generate IDs on the server, but the client side => demo service
       disableAutoManagedKey: true,
       allowRenaming: true,
+      bundledFileGeneration: false,
       naming: {
         models: {
           suffix: "Model",
@@ -197,7 +198,6 @@ const config: ConfigFileOptions = {
     },
     edgeCases: {
       disableAutomaticNameClashResolution: true,
-      bundledFileGeneration: true,
       serviceName: "edgeCase",
       source: srcFolder("edge-cases.xml", true),
       output: outputFolder("edge-cases", true),

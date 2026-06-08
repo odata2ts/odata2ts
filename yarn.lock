@@ -677,7 +677,7 @@ __metadata:
     "@odata2ts/http-client-axios": "npm:^0.12.0"
     "@odata2ts/http-client-fetch": "npm:^0.9.0"
     "@odata2ts/odata-service": "npm:^0.23.0"
-    "@odata2ts/odata2ts": "npm:^0.39.1"
+    "@odata2ts/odata2ts": "npm:^0.40.1"
     "@types/luxon": "npm:^3.4.2"
     axios: "npm:^1.13.1"
     bignumber.js: "npm:^9.1.2"
@@ -805,7 +805,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/odata2ts@workspace:packages/odata2ts":
+"@odata2ts/odata2ts@npm:^0.40.1, @odata2ts/odata2ts@workspace:packages/odata2ts":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2ts@workspace:packages/odata2ts"
   dependencies:
