@@ -28,7 +28,7 @@
     "luxon": "^3.5.0"
   },
   "devDependencies": {
-    "@odata2ts/odata2ts": "^0.39.1",
+    "@odata2ts/odata2ts": "^0.40.1",
     "@types/luxon": "^3.4.2"
   },
   "publishConfig": {

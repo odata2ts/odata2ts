@@ -138,6 +138,7 @@ class QueryObjectGenerator {
       >(
         (collector, subtype) => {
           const subClass = this.dataModel.getModel(subtype) as ComplexType;
+          const subClassName = imports.addGeneratedQObject(subClass.fqName, subClass.qName);
           const methodName = `__as${subClass.qName}`;
           const enumerablePropDef = imports.addQObject(QueryObjectImports.ENUMERABLE_PROP_DEFINITION);
 
@@ -157,7 +158,7 @@ class QueryObjectGenerator {
           collector[2].push({
             name: methodName,
             scope: Scope.Private,
-            statements: `return new ${subClass.qName}(this.withPrefix("${subClass.fqName}"))`,
+            statements: `return new ${subClassName}(this.withPrefix("${subClass.fqName}"))`,
           });
 
           return collector;
