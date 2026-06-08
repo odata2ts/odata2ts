@@ -2,7 +2,7 @@ import {
   ENUMERABLE_PROP_DEFINITION,
   QBooleanParam,
   QBooleanPath,
-  QEntityPath,
+  QComplexPath,
   QEnumPath,
   QId,
   QueryObject,
@@ -54,7 +54,7 @@ export class QparentId extends QId<parentId> {
 export class QBook extends parentBaseType {
   public readonly id = new QBooleanPath(this.withPrefix("id"));
   public readonly my_Choice = new QEnumPath(this.withPrefix("my_Choice"), Choice);
-  public readonly Address = new QEntityPath(this.withPrefix("Address"), () => QLOCATION);
+  public readonly Address = new QComplexPath(this.withPrefix("Address"), () => QLOCATION);
 }
 
 export const qBook = new QBook();

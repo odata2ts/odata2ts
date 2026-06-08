@@ -221,15 +221,7 @@ class QueryObjectGenerator {
 
       // factor in collections
       if (prop.isCollection) {
-        const qPath = importContainer.addQObject(
-          isModelType
-            ? QueryObjectImports.QEntityCollectionPath
-            : isEnumType
-              ? isNumericEnum
-                ? QueryObjectImports.QNumericEnumCollectionPath
-                : QueryObjectImports.QEnumCollectionPath
-              : QueryObjectImports.QCollectionPath,
-        );
+        const qPath = importContainer.addQObject(prop.qPath);
         const qObject = isModelType
           ? importContainer.addGeneratedQObject(prop.fqType, prop.qObject!)
           : isEnumType

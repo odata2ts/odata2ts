@@ -1,5 +1,3 @@
-import { ODataComplexModelResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
-
 /**
  * All module names of the main dependencies.
  */
@@ -40,12 +38,6 @@ export enum QueryObjectImports {
   QFunction = "QFunction",
   QAction = "QAction",
   EnumCollection = "EnumCollection",
-  QEnumCollection = "QEnumCollection",
-  QNumericEnumCollection = "QNumericEnumCollection",
-  QEnumCollectionPath = "QEnumCollectionPath",
-  QNumericEnumCollectionPath = "QNumericEnumCollectionPath",
-  QCollectionPath = "QCollectionPath",
-  QEntityCollectionPath = "QEntityCollectionPath",
   OperationReturnType = "OperationReturnType",
   ReturnTypes = "ReturnTypes",
   QComplexParam = "QComplexParam",

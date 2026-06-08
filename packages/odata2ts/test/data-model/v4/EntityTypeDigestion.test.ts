@@ -338,7 +338,7 @@ describe("V4: EntityTypeDigestion Test", () => {
         type: "string",
         isCollection: true,
         qObject: "QGuidCollection",
-        qPath: "QGuidPath",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleStrings",
@@ -346,7 +346,7 @@ describe("V4: EntityTypeDigestion Test", () => {
         type: "string",
         isCollection: true,
         qObject: "QStringCollection",
-        qPath: "QStringPath",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleNumbers",
@@ -354,7 +354,7 @@ describe("V4: EntityTypeDigestion Test", () => {
         type: "number",
         isCollection: true,
         qObject: "QNumberCollection",
-        qPath: "QNumberPath",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleBooleans",
@@ -362,7 +362,7 @@ describe("V4: EntityTypeDigestion Test", () => {
         type: "boolean",
         isCollection: true,
         qObject: "QBooleanCollection",
-        qPath: "QBooleanPath",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleTimes",
@@ -370,7 +370,7 @@ describe("V4: EntityTypeDigestion Test", () => {
         type: "string",
         isCollection: true,
         qObject: "QTimeOfDayCollection",
-        qPath: "QTimeOfDayPath",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleDates",
@@ -378,7 +378,7 @@ describe("V4: EntityTypeDigestion Test", () => {
         type: "string",
         isCollection: true,
         qObject: "QDateCollection",
-        qPath: "QDatePath",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleDateTimes",
@@ -386,7 +386,7 @@ describe("V4: EntityTypeDigestion Test", () => {
         type: "string",
         isCollection: true,
         qObject: "QDateTimeOffsetCollection",
-        qPath: "QDateTimeOffsetPath",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleBinaries",
@@ -394,7 +394,7 @@ describe("V4: EntityTypeDigestion Test", () => {
         type: "string",
         isCollection: true,
         qObject: "QBinaryCollection",
-        qPath: "QBinaryPath",
+        qPath: "QCollectionPath",
       },
     ]);
   });
