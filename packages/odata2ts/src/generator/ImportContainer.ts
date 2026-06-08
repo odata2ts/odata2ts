@@ -175,6 +175,15 @@ export class ImportContainer {
     }
   }
 
+  public addGeneratedQBaseObject(model: ComplexType, isTypeOnly = false) {
+    if (!model.qBaseName) {
+      throw new Error(`Model ${model.fqName} has no base type!`);
+    }
+    return this.bundledFileGeneration
+      ? this.addGeneratedImport("", this.mainFileNames.qObject, model.qBaseName, isTypeOnly)
+      : this.addGeneratedImport(model.folderPath, model.qBaseName, model.qBaseName, isTypeOnly);
+  }
+
   public addGeneratedQObject(fqName: string, name: string, isTypeOnly = false) {
     if (this.bundledFileGeneration) {
       return this.addGeneratedImport("", this.mainFileNames.qObject, name, isTypeOnly);

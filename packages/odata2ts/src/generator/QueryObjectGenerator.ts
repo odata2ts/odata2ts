@@ -103,30 +103,39 @@ class QueryObjectGenerator {
     });
   }
 
-  private generateModel(file: FileHandler, model: ComplexType) {
-    const imports = file.getImports();
-    const properties = this.generateQueryObjectProps(file.getImports(), model.props);
-
-    let extendsClause: string;
+  private getExtendsClauseForQObjects(model: ComplexType, imports: ImportContainer) {
     if (model.baseClasses.length) {
       const baseClass = model.baseClasses[0];
       const baseModel = this.dataModel.getModel(baseClass) as ComplexType;
       if (!baseModel) {
         throw new Error(`Entity or complex type "${baseClass}" from baseClass attribute not found!`);
       }
-      extendsClause = imports.addGeneratedQObject(baseClass, baseModel.qBaseName!);
-    } else {
-      extendsClause = imports.addQObject(QueryObjectImports.QueryObject);
+      return imports.addGeneratedQBaseObject(baseModel);
     }
 
-    if (model.qBaseName) {
-      // base class which used for extension
+    return imports.addQObject(QueryObjectImports.QueryObject);
+  }
+
+  private generateModel(file: FileHandler, model: ComplexType) {
+    const imports = file.getImports();
+
+    if (!model.qBaseName) {
       file.getFile().addClass({
+        name: model.qName,
+        isExported: true,
+        extends: this.getExtendsClauseForQObjects(model, imports),
+        properties: this.generateQueryObjectProps(file.getImports(), model.props),
+      });
+    } else {
+      // base class used for extension needs an own file
+      const baseFile = this.project.createOrGetQObjectFile(model.folderPath, model.qBaseName, [model.qBaseName]);
+      baseFile.getFile().addClass({
         name: model.qBaseName,
         isExported: true,
-        extends: extendsClause,
-        properties,
+        extends: this.getExtendsClauseForQObjects(model, baseFile.getImports()),
+        properties: this.generateQueryObjectProps(baseFile.getImports(), model.props),
       });
+      this.project.finalizeFile(baseFile);
 
       const [props, getAccessors, methods, statements] = Array.from(model.subtypes).reduce<
         [
@@ -169,7 +178,7 @@ class QueryObjectGenerator {
       file.getFile().addClass({
         name: model.qName,
         isExported: true,
-        extends: model.qBaseName,
+        extends: imports.addGeneratedQBaseObject(model),
         properties: [
           {
             name: "__subtypeMapping",
@@ -183,13 +192,6 @@ class QueryObjectGenerator {
       });
 
       file.getFile().addStatements(`Object.defineProperties(${model.qName}.prototype, { ${statements.join(",")} });`);
-    } else {
-      file.getFile().addClass({
-        name: model.qName,
-        isExported: true,
-        extends: extendsClause,
-        properties: properties,
-      });
     }
 
     file.getFile().addVariableStatement({
