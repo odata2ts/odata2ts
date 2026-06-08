@@ -1,6 +1,7 @@
 import {
   QBooleanPath,
   QCollectionPath,
+  QComplexPath,
   QDatePath,
   QDateTimeOffsetPath,
   QEntityCollectionPath,
@@ -33,6 +34,10 @@ export enum Ratings {
   POOR,
 }
 
+export interface ComplexType {
+  test: string;
+}
+
 export interface SimpleEntity {
   id: number;
   name: string;
@@ -61,6 +66,10 @@ export interface ComplexEntity {
 
 export type ComplexEntityId = Pick<ComplexEntity, "ID" | "ID2">;
 
+export class QComplexType extends QueryObject<ComplexType> {
+  public readonly test = new QStringPath(this.withPrefix("test"));
+}
+
 export class QSimpleEntity extends QueryObject<SimpleEntity> {
   public readonly id = new QNumberPath(this.withPrefix("id"));
   public readonly name = new QStringPath(this.withPrefix("name"));
@@ -86,6 +95,7 @@ export class QComplexEntity extends QueryObject<ComplexEntity> {
   public readonly cz = new QDateTimeOffsetPath(this.withPrefix("cz"));
   public readonly xy = new QEntityPath(this.withPrefix("xy"), () => QSimpleEntity);
   public readonly xx = new QEntityCollectionPath(this.withPrefix("xx"), () => QSimpleEntity);
+  public readonly ct = new QComplexPath(this.withPrefix("ct"), () => QComplexType);
   public readonly primitiveCollection = new QCollectionPath(
     this.withPrefix("PrimitiveCollection"),
     () => QStringCollection,

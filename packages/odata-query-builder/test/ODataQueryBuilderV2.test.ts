@@ -41,8 +41,8 @@ describe("ODataQueryBuilderV2 Test", () => {
   });
 
   test("expanding: simple", () => {
-    const candidate = toTest.expanding("address", () => {}).build();
-    const expected = addBase("$expand=Address");
+    const candidate = toTest.expanding("bestFriend", () => {}).build();
+    const expected = addBase("$expand=bestFriend");
 
     expect(candidate).toBe(expected);
   });
@@ -63,16 +63,16 @@ describe("ODataQueryBuilderV2 Test", () => {
   test("expanding: ignore null function", () => {
     const expected = addBase("");
 
-    expect(toTest.expanding("address", null).build()).toBe(expected);
-    expect(toTest.expanding("address", undefined).build()).toBe(expected);
-    expect(toTest.expanding("address", (builder) => builder.expanding("responsible", undefined)).build()).toBe(
-      addBase("$expand=Address"),
+    expect(toTest.expanding("bestFriend", null).build()).toBe(expected);
+    expect(toTest.expanding("bestFriend", undefined).build()).toBe(expected);
+    expect(toTest.expanding("bestFriend", (builder) => builder.expanding("bestFriend", undefined)).build()).toBe(
+      addBase("$expand=bestFriend"),
     );
   });
 
   test("expanding: selecting nested prop", () => {
-    const candidate = toTest.expanding("address", (builder) => builder.select("street")).build();
-    const expected = addBase("$select=Address/street&$expand=Address");
+    const candidate = toTest.expanding("bestFriend", (builder) => builder.select("age")).build();
+    const expected = addBase("$select=bestFriend/age&$expand=bestFriend");
 
     expect(candidate).toBe(expected);
   });
@@ -80,25 +80,27 @@ describe("ODataQueryBuilderV2 Test", () => {
   test("expanding: selecting nested prop mixed with selects and expands", () => {
     const candidate = toTest
       .select("name")
-      .expand("altAdresses")
-      .expanding("address", (builder) => builder.select("street"))
+      .expand("friends")
+      .expanding("bestFriend", (builder) => builder.select("age"))
       .build();
-    const expected = addBase("$select=name,Address/street&$expand=AltAdresses,Address");
+    const expected = addBase("$select=name,bestFriend/age&$expand=friends,bestFriend");
 
     expect(candidate).toBe(expected);
   });
 
   test("select: deeply nested prop", () => {
     const candidate = toTest
-      .expanding("address", (builder) => {
-        builder.expanding("responsible", (respBuilder) => {
-          respBuilder.select("name", new QSelectExpression("xxx")).expand("address", new QSelectExpression("CUSTOM"));
+      .expanding("bestFriend", (builder) => {
+        builder.expanding("bestFriend", (respBuilder) => {
+          respBuilder
+            .select("name", new QSelectExpression("xxx"))
+            .expand("bestFriend", new QSelectExpression("CUSTOM"));
         });
       })
       .build();
 
     const expected = addBase(
-      "$select=Address/responsible/name,Address/responsible/xxx&$expand=Address,Address/responsible,Address/responsible/Address,Address/responsible/CUSTOM",
+      "$select=bestFriend/bestFriend/name,bestFriend/bestFriend/xxx&$expand=bestFriend,bestFriend/bestFriend,bestFriend/bestFriend/bestFriend,bestFriend/bestFriend/CUSTOM",
     );
 
     expect(candidate).toBe(expected);

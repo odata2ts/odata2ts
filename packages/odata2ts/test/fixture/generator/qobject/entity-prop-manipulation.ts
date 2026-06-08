@@ -1,7 +1,7 @@
 import {
   QBooleanParam,
   QBooleanPath,
-  QEntityPath,
+  QComplexPath,
   QId,
   QNumberParam,
   QNumberPath,
@@ -27,7 +27,7 @@ export class QCategoryId extends QId<CategoryId> {
 
 export class QBook extends QueryObject {
   public readonly id = new QBooleanPath(this.withPrefix("ID"));
-  public readonly address = new QEntityPath(this.withPrefix("address"), () => QLOCATION);
+  public readonly address = new QComplexPath(this.withPrefix("address"), () => QLOCATION);
 }
 
 export const qBook = new QBook();

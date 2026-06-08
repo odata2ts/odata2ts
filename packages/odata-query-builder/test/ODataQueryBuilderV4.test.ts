@@ -37,12 +37,12 @@ describe("ODataQueryBuilderV4 Test", () => {
   test("config: encoded & no double encoding for expanded entities", () => {
     const candidate = createQueryBuilderV4("/Persons", qPerson)
       .select("name", "age")
-      .expanding("altAdresses", (expBuilder, qEntity) => {
-        expBuilder.filter(qEntity.street.equals("AC/DC & Brothers"));
+      .expanding("friends", (expBuilder, qEntity) => {
+        expBuilder.filter(qEntity.name.equals("AC/DC & Brothers"));
       })
       .build();
     const expected = addBase(
-      "%24select=name%2Cage&%24expand=AltAdresses(%24filter%3Dstreet%20eq%20'AC%2FDC%20%26%20Brothers')",
+      "%24select=name%2Cage&%24expand=friends(%24filter%3Dname%20eq%20'AC%2FDC%20%26%20Brothers')",
     );
 
     expect(candidate).toBe(expected);
@@ -64,8 +64,8 @@ describe("ODataQueryBuilderV4 Test", () => {
   });
 
   test("expanding: simple", () => {
-    const candidate = toTest.expanding("address", () => {}).build();
-    const expected = addBase("$expand=Address");
+    const candidate = toTest.expanding("bestFriend", () => {}).build();
+    const expected = addBase("$expand=bestFriend");
 
     expect(candidate).toBe(expected);
   });
@@ -86,30 +86,28 @@ describe("ODataQueryBuilderV4 Test", () => {
   test("expanding: ignore null function", () => {
     const expected = addBase("");
 
-    expect(toTest.expanding("address", null).build()).toBe(expected);
-    expect(toTest.expanding("address", undefined).build()).toBe(expected);
+    expect(toTest.expanding("bestFriend", null).build()).toBe(expected);
+    expect(toTest.expanding("bestFriend", undefined).build()).toBe(expected);
   });
 
   test("expanding: with select", () => {
     const candidate = toTest
-      .expanding("address", (builder) => {
-        builder.select("street");
+      .expanding("bestFriend", (builder) => {
+        builder.select("age");
       })
       .build();
-    const expected = addBase("$expand=Address($select=street)");
+    const expected = addBase("$expand=bestFriend($select=age)");
 
     expect(candidate).toBe(expected);
   });
 
   test("expanding: 1:n with filter & count & skip & top", async () => {
     const candidate = toTest
-      .expanding("altAdresses", (builder, qEntity) => {
-        builder.select("street").count().skip(1).top(0).filter(qEntity.street.equals("Teststr. 12"));
+      .expanding("friends", (builder, qEntity) => {
+        builder.select("name").count().skip(1).top(0).filter(qEntity.name.equals("Teststr. 12"));
       })
       .build();
-    const expected = addBase(
-      "$expand=AltAdresses($select=street;$filter=street eq 'Teststr. 12';$count=true;$top=0;$skip=1)",
-    );
+    const expected = addBase("$expand=friends($select=name;$filter=name eq 'Teststr. 12';$count=true;$top=0;$skip=1)");
 
     expect(candidate).toBe(expected);
   });
@@ -117,17 +115,17 @@ describe("ODataQueryBuilderV4 Test", () => {
   test("expanding: nested expanding", () => {
     const candidate = toTest
       .select("name", "age")
-      .expanding("address", (builder, qAddress) => {
+      .expanding("friends", (builder, qFriend) => {
         builder
-          .select("street")
-          .filter(qAddress.street.startsWith("Kam"))
-          .expanding("responsible", (respExpand) => {
+          .select("name")
+          .filter(qFriend.name.startsWith("Kam"))
+          .expanding("bestFriend", (respExpand) => {
             respExpand.select("name");
           });
       })
       .build();
     const expected = addBase(
-      "$select=name,age&$expand=Address($select=street;$expand=responsible($select=name);$filter=startswith(street,'Kam'))",
+      "$select=name,age&$expand=friends($select=name;$expand=bestFriend($select=name);$filter=startswith(name,'Kam'))",
     );
 
     expect(candidate).toBe(expected);
@@ -135,45 +133,45 @@ describe("ODataQueryBuilderV4 Test", () => {
 
   test("expanding: nested expand", () => {
     const candidate = toTest
-      .expanding("address", (builder, qAddress) => {
-        builder.expand("responsible");
+      .expanding("bestFriend", (builder, qAddress) => {
+        builder.expand("bestFriend");
       })
       .build();
-    const expected = addBase("$expand=Address($expand=responsible)");
+    const expected = addBase("$expand=bestFriend($expand=bestFriend)");
 
     expect(candidate).toBe(expected);
   });
 
   test("expanding: with custom prop", () => {
     const candidate = toTest
-      .expanding("address", (builder, qAddress) => {
+      .expanding("bestFriend", (builder, qAddress) => {
         builder.select(new QSelectExpression("THE1")).expand(new QSelectExpression("xxx"));
       })
       .build();
-    const expected = addBase("$expand=Address($select=THE1;$expand=xxx)");
+    const expected = addBase("$expand=bestFriend($select=THE1;$expand=xxx)");
 
     expect(candidate).toBe(expected);
   });
 
   test("expanding: combining simple & complex expand", () => {
     const candidate = toTest
-      .expanding("address", (builder) => {
-        builder.select("street");
+      .expanding("bestFriend", (builder) => {
+        builder.select("name");
       })
-      .expand("altAdresses")
+      .expand("friends")
       .build();
-    const expected = addBase("$expand=Address($select=street),AltAdresses");
+    const expected = addBase("$expand=bestFriend($select=name),friends");
 
     expect(candidate).toBe(expected);
   });
 
   test("expanding: orderBy", () => {
     const candidate = toTest
-      .expanding("altAdresses", (builder, qAddress) => {
-        builder.orderBy(qAddress.street.asc());
+      .expanding("friends", (builder, qPerson) => {
+        builder.orderBy(qPerson.name.asc());
       })
       .build();
-    const expected = addBase("$expand=AltAdresses($orderby=street asc)");
+    const expected = addBase("$expand=friends($orderby=name asc)");
 
     expect(candidate).toBe(expected);
   });

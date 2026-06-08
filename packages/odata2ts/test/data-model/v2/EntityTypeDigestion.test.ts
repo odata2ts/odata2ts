@@ -361,7 +361,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         type: "string",
         isCollection: true,
         qObject: "QGuidV2Collection",
-        qPath: "QGuidV2Path",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleStrings",
@@ -369,7 +369,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         type: "string",
         isCollection: true,
         qObject: "QStringV2Collection",
-        qPath: "QStringV2Path",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleNumbers",
@@ -377,7 +377,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         type: "string",
         isCollection: true,
         qObject: "QStringNumberV2Collection",
-        qPath: "QStringNumberV2Path",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleBooleans",
@@ -385,7 +385,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         type: "boolean",
         isCollection: true,
         qObject: "QBooleanCollection",
-        qPath: "QBooleanPath",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleTimes",
@@ -393,7 +393,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         type: "string",
         isCollection: true,
         qObject: "QTimeV2Collection",
-        qPath: "QTimeV2Path",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleDateTimes",
@@ -401,7 +401,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         type: "string",
         isCollection: true,
         qObject: "QDateTimeV2Collection",
-        qPath: "QDateTimeV2Path",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleDateTimeOffsets",
@@ -409,7 +409,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         type: "string",
         isCollection: true,
         qObject: "QDateTimeOffsetV2Collection",
-        qPath: "QDateTimeOffsetV2Path",
+        qPath: "QCollectionPath",
       },
       {
         name: "multipleBinaries",
@@ -417,7 +417,7 @@ describe("V2: EntityTypeDigestion Test", () => {
         type: "string",
         isCollection: true,
         qObject: "QBinaryCollection",
-        qPath: "QBinaryPath",
+        qPath: "QCollectionPath",
       },
     ]);
   });
@@ -480,7 +480,7 @@ describe("V2: EntityTypeDigestion Test", () => {
       name: "products",
       odataName: "products",
       qObject: "QProduct",
-      qPath: "QEntityPath",
+      qPath: "QEntityCollectionPath",
       qParam: "QComplexParam",
       type: "Product",
       fqType: withNs("Product"),

@@ -1,6 +1,7 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import { beforeEach, expect, test } from "vitest";
 import { RunOptions } from "../../src";
+import { run } from "../../src/cli";
 import { digest } from "../../src/data-model/DataModelDigestionV4";
 import { DataTypes } from "../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../src/data-model/NamingHelper";
@@ -18,7 +19,7 @@ export function createComplexAndEnumTests() {
   const FQ_ENTITY_NAME = withNs(ENTITY_NAME);
 
   let odataBuilder: ODataModelBuilderV4;
-  let runOpts: Omit<RunOptions, "source" | "output"> = getTestConfig();
+  let runOpts: Omit<RunOptions, "source" | "output">;
 
   function doDigest() {
     const namingHelper = new NamingHelper(runOpts, SERVICE_NAME);
@@ -27,6 +28,7 @@ export function createComplexAndEnumTests() {
 
   beforeEach(() => {
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
+    runOpts = getTestConfig();
   });
 
   test("EnumType: enum type", async () => {
@@ -59,6 +61,58 @@ export function createComplexAndEnumTests() {
     });
   });
 
+  test("numeric enum type", async () => {
+    odataBuilder
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoice", withNs("Choice")),
+      )
+      .addEnumType("Choice", [
+        { name: "A", value: 1 },
+        { name: "B", value: 9 },
+        { name: "C", value: 4 },
+      ]);
+
+    runOpts.enumType = "numeric";
+    const result = await doDigest();
+    const model = result.getEntityType(FQ_ENTITY_NAME);
+
+    expect(model!.props[1]).toMatchObject({
+      dataType: DataTypes.EnumType,
+      isCollection: false,
+      managed: undefined,
+      type: "Choice",
+      name: "myChoice",
+      qObject: undefined,
+      qPath: "QNumericEnumPath",
+      qParam: "QNumericEnumParam",
+    });
+  });
+
+  test("string-union enum type", async () => {
+    odataBuilder
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoice", withNs("Choice")),
+      )
+      .addEnumType("Choice", [
+        { name: "A", value: 1 },
+        { name: "B", value: 9 },
+        { name: "C", value: 4 },
+      ]);
+
+    runOpts.enumType = "string-union";
+    const result = await doDigest();
+    const model = result.getEntityType(FQ_ENTITY_NAME);
+
+    expect(model!.props[1]).toMatchObject({
+      dataType: DataTypes.EnumType,
+      type: "Choice",
+      name: "myChoice",
+      qObject: undefined,
+      qPath: "QEnumPath",
+      qParam: "QEnumParam",
+    });
+  });
+
   test("EnumType: enum collection", async () => {
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
@@ -84,7 +138,7 @@ export function createComplexAndEnumTests() {
       odataName: "myChoices",
       odataType: `Collection(${withNs("Choice")})`,
       qObject: "QEnumCollection",
-      qPath: "QEnumPath",
+      qPath: "QEnumCollectionPath",
       qParam: "QEnumParam",
     });
   });
@@ -111,7 +165,7 @@ export function createComplexAndEnumTests() {
       odataName: "branding",
       odataType: withNs("Brand"),
       qObject: "QBrand",
-      qPath: "QEntityPath",
+      qPath: "QComplexPath",
       qParam: "QComplexParam",
     });
   });

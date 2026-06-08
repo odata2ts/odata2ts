@@ -10,9 +10,11 @@ export interface Person {
   deceased: boolean;
   createdAt: string;
   Address: Address;
-  AltAdresses: Array<Address>;
+  AltAddresses: Array<Address>;
   Feature: Features;
   LikedFeatures: Array<Features>;
+  bestFriend: Person;
+  friends: Array<Person>;
 }
 
 export interface Address {

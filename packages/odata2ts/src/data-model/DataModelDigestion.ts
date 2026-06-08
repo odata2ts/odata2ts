@@ -18,6 +18,7 @@ import { ComplexType, EntityType, EnumType, Property, Schema, TypeDefinition } f
 import { EntityContainerV3, SchemaV3 } from "./edmx/ODataEdmxModelV3.js";
 import { EntityContainerV4, SchemaV4 } from "./edmx/ODataEdmxModelV4.js";
 import { NamingHelper } from "./NamingHelper.js";
+import { QueryObjectTypes } from "./QueryObjectTypes.js";
 import { ServiceConfigHelper, WithoutName } from "./ServiceConfigHelper.js";
 import { NameClashValidator } from "./validation/NameClashValidator.js";
 import { NameValidator } from "./validation/NameValidator.js";
@@ -472,6 +473,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       const modelType = this.model2Type.get(odataDataType)!;
       const [dataTypeName, dataTypePrefix] = this.namingHelper.getNameAndServicePrefix(odataDataType);
       const dataTypeNamespace: NamespaceWithAlias = [dataTypePrefix!];
+      const isComplexType = modelType === DataTypes.ComplexType;
       if (!modelType) {
         throw new Error(
           `Couldn't determine model type (EntityType, ComplexType, etc) for property "${p.$.Name}"! Given data type: "${odataDataType}".`,
@@ -485,23 +487,38 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         result = {
           dataType: modelType,
           type: this.namingHelper.getEnumName(enumConfig?.mappedName ?? odataDataType),
-          qPath: isNumericEnum ? "QNumericEnumPath" : "QEnumPath",
-          qObject: isCollection ? (isNumericEnum ? "QNumericEnumCollection" : "QEnumCollection") : undefined,
+          qPath: isCollection
+            ? isNumericEnum
+              ? QueryObjectTypes.QNumericEnumCollectionPath
+              : QueryObjectTypes.QEnumCollectionPath
+            : isNumericEnum
+              ? QueryObjectTypes.QNumericEnumPath
+              : QueryObjectTypes.QEnumPath,
+          qObject: isCollection
+            ? isNumericEnum
+              ? QueryObjectTypes.QNumericEnumCollection
+              : QueryObjectTypes.QEnumCollection
+            : undefined,
           qParam: isNumericEnum ? "QNumericEnumParam" : "QEnumParam",
         };
       }
       // handling of complex & entity types
       else {
-        const entityConfig =
-          modelType === DataTypes.ComplexType
-            ? this.serviceConfigHelper.findComplexTypeConfig(dataTypeNamespace, dataTypeName)
-            : this.serviceConfigHelper.findEntityTypeConfig(dataTypeNamespace, dataTypeName);
+        const entityConfig = isComplexType
+          ? this.serviceConfigHelper.findComplexTypeConfig(dataTypeNamespace, dataTypeName)
+          : this.serviceConfigHelper.findEntityTypeConfig(dataTypeNamespace, dataTypeName);
         const typeName = entityConfig?.mappedName ?? odataDataType;
 
         result = {
           dataType: modelType,
           type: this.namingHelper.getModelName(typeName),
-          qPath: "QEntityPath",
+          qPath: isCollection
+            ? isComplexType
+              ? QueryObjectTypes.QComplexCollectionPath
+              : QueryObjectTypes.QEntityCollectionPath
+            : isComplexType
+              ? QueryObjectTypes.QComplexPath
+              : QueryObjectTypes.QEntityPath,
           qObject: this.namingHelper.getQName(typeName),
           qParam: "QComplexParam",
         };
@@ -518,7 +535,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         dataType: DataTypes.PrimitiveType,
         type,
         typeModule,
-        qPath,
+        qPath: isCollection ? QueryObjectTypes.QCollectionPath : qPath,
         qParam,
         qObject: isCollection ? qCollection : undefined,
         converters,

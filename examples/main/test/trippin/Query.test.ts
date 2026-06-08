@@ -37,7 +37,7 @@ describe("Trippin: Testing Query Functionality", function () {
     expect(ODATA_CLIENT.lastUrl).toBe(expected);
   });
 
-  test("entitySet: query with count expand and order by", async () => {
+  test("entitySet: query with count, expand and order by", async () => {
     const expected = `${BASE_URL}/People?$expand=Trips($count=true)&$orderby=Trips/$count asc&$count=true`;
 
     const response = await TRIPPIN.people().query((builder, qPerson) =>
@@ -133,5 +133,17 @@ describe("Trippin: Testing Query Functionality", function () {
     expect(ODATA_CLIENT.lastUrl).toBe(
       `${BASE_URL}/People('russellwhyte')/Trips(0)/PlanItems?$filter=Trippin.Flight/FlightNumber eq '123'`,
     );
+  });
+
+  // only EntityType and EntitySet are allowed to be expanded
+  test("the Non-Expandables", async () => {
+    //@ts-expect-error: collection of primitive types
+    TRIPPIN.people().query((builder) => builder.expand("emails"));
+    //@ts-expect-error: collection of enum types
+    TRIPPIN.people().query((builder) => builder.expand("features"));
+    //@ts-expect-error: collection of complex types
+    TRIPPIN.people().query((builder) => builder.expand("addressInfo"));
+    //@ts-expect-error: complex type
+    TRIPPIN.people().query((builder) => builder.expand("homeAddress"));
   });
 });
