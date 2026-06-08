@@ -24,11 +24,11 @@ export type ExtractPropertyNamesOfType<QPath, QPathTypes> = {
 
 /**
  * Retrieves all property names which are expandable,
- * i.e. props of type QEntityPath, QEntityCollectionPath and QCollectionPath
+ * i.e. props of type QEntityPath and QEntityCollectionPath
  */
 export type ExpandType<Q extends QueryObjectModel> = ExtractPropertyNamesOfType<
   Q,
-  QEntityPath<any> | QEntityCollectionPath<any> | QCollectionPath<any>
+  QEntityPath<any> | QEntityCollectionPath<any>
 >;
 
 export type Nullable = null | undefined;
@@ -209,9 +209,9 @@ export interface V2ExpandingFunction<Q extends QueryObjectModel, ReturnType> {
    * You can then select, expand or do further expanding.
    *
    * @example
-   * builder.expanding("address", (expBuilder) => expBuilder.select("street", "city")) // $select=address/street,address/city&$expand=address}
+   * builder.expanding("address", (expBuilder) => expBuilder.select("street", "city")) // $select=address/street,address/city&$expand=address
    * @example
-   * builder.expanding("address", (expBuilder) => expBuilder.expand("country")) // $expand=address,address/country}
+   * builder.expanding("address", (expBuilder) => expBuilder.expand("country")) // $expand=address,address/country
    * @param prop the name of the property which should be expanded (must be an entity or entity collection)
    * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
    * @returns this query builder
