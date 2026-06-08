@@ -240,16 +240,16 @@ export class ProjectManager {
   }
 
   public createOrGetModelFile(folderPath: string, name: string, reservedNames?: Array<string> | undefined) {
-    if (this.mainModelFile) {
-      return this.mainModelFile;
+    if (this.options.bundledFileGeneration) {
+      return this.mainModelFile!;
     }
 
     // model files always allow for type checking
     return this.createFile(name, reservedNames, folderPath, true);
   }
   public createOrGetQObjectFile(folderPath: string, name: string, reservedNames?: Array<string> | undefined) {
-    if (this.mainQFile) {
-      return this.mainQFile;
+    if (this.options.bundledFileGeneration) {
+      return this.mainQFile!;
     }
 
     return this.createFile(name, reservedNames, folderPath);
