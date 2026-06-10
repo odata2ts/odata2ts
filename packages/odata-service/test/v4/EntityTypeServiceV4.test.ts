@@ -8,16 +8,16 @@ import { PersonModel } from "../fixture/PersonModel";
 import { EditableFlightModel, PlanItemService } from "../fixture/v4/BaseTypeModel";
 import { PersonModelService } from "../fixture/v4/PersonModelService";
 import { QPersonV4 } from "../fixture/v4/QPersonV4";
-import { MockODataClient } from "../mock/MockODataClient";
+import { MockClient } from "../mock/MockClient";
 
 describe("EntityTypeService V4 Tests", () => {
-  const odataClient = new MockODataClient(false);
+  const odataClient = new MockClient(false);
   const BASE_URL = "test";
   const NAME = "test('tester')";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
   const REQUEST_CONFIG = { test: "Test" };
 
-  let testService: PersonModelService<MockODataClient>;
+  let testService: PersonModelService<MockClient>;
 
   commonEntityTypeServiceTests(odataClient, PersonModelService);
 

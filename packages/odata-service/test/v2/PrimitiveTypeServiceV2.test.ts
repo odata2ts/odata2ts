@@ -1,17 +1,17 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { PrimitiveTypeServiceV2 } from "../../src/index.js";
 import { PersonModelV2Service } from "../fixture/v2/PersonModelV2Service";
-import { MockODataClient } from "../mock/MockODataClient";
+import { MockClient } from "../mock/MockClient";
 
 describe("PrimitiveTypeService V2 Test", () => {
-  const odataClient = new MockODataClient(true);
+  const odataClient = new MockClient(true);
   const BASE_URL = "path";
   const NAME = "test('tester')";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}/UserName`;
 
   const REQUEST_CONFIG = { test: "Test" };
 
-  let testService: PrimitiveTypeServiceV2<MockODataClient, string>;
+  let testService: PrimitiveTypeServiceV2<MockClient, string>;
 
   beforeEach(() => {
     testService = new PersonModelV2Service(odataClient, BASE_URL, NAME).userName();

@@ -5,7 +5,7 @@ import { describe, expect, test } from "vitest";
 import { CollectionServiceV4, ODataServiceOptions } from "../../src";
 import { DEFAULT_HEADERS } from "../../src/RequestHeaders";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
-import { MockODataClient } from "../mock/MockODataClient";
+import { MockClient } from "../mock/MockClient";
 
 export enum StringTestEnum {
   A = "A",
@@ -14,7 +14,7 @@ export enum StringTestEnum {
 }
 
 describe("CollectionService V4 Tests", () => {
-  const odataClient = new MockODataClient(false);
+  const odataClient = new MockClient(false);
   const BASE_PATH = "";
   const NAME_STRING = "testString";
   const NAME_ENUM = "testEnum";
@@ -23,13 +23,13 @@ describe("CollectionService V4 Tests", () => {
     basePath: string,
     name: string,
     options?: ODataServiceOptions,
-  ): CollectionServiceV4<MockODataClient, StringCollection, QStringCollection> => {
+  ): CollectionServiceV4<MockClient, StringCollection, QStringCollection> => {
     return new CollectionServiceV4(odataClient, basePath, name, new QStringCollection(), options);
   };
   const enumConstructor = (
     basePath: string,
     name: string,
-  ): CollectionServiceV4<MockODataClient, EnumCollection<StringTestEnum>, QEnumCollection<typeof StringTestEnum>> => {
+  ): CollectionServiceV4<MockClient, EnumCollection<StringTestEnum>, QEnumCollection<typeof StringTestEnum>> => {
     return new CollectionServiceV4(odataClient, basePath, name, new QEnumCollection(StringTestEnum));
   };
 

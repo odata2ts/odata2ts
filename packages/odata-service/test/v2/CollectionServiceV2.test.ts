@@ -9,7 +9,7 @@ import {
 import { describe, expect, test } from "vitest";
 import { CollectionServiceV2, DEFAULT_HEADERS, ODataServiceOptions } from "../../src";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
-import { MockODataClient } from "../mock/MockODataClient";
+import { MockClient } from "../mock/MockClient";
 
 export enum NumericTestEnum {
   A,
@@ -18,7 +18,7 @@ export enum NumericTestEnum {
 }
 
 describe("CollectionService V2 Tests", () => {
-  const odataClient = new MockODataClient(true);
+  const odataClient = new MockClient(true);
   const BASE_PATH = "";
   const NAME_STRING = "testString";
   const NAME_ENUM = "testEnum";
@@ -27,14 +27,14 @@ describe("CollectionService V2 Tests", () => {
     basePath: string,
     name: string,
     options?: ODataServiceOptions,
-  ): CollectionServiceV2<MockODataClient, StringCollection, QStringV2Collection> => {
+  ): CollectionServiceV2<MockClient, StringCollection, QStringV2Collection> => {
     return new CollectionServiceV2(odataClient, basePath, name, new QStringV2Collection(), options);
   };
   const enumConstructor = (
     basePath: string,
     name: string,
   ): CollectionServiceV2<
-    MockODataClient,
+    MockClient,
     EnumCollection<NumericTestEnum>,
     QNumericEnumCollection<typeof NumericTestEnum>
   > => {

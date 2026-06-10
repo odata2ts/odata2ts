@@ -1,6 +1,6 @@
-import { ODataHttpClient, ODataHttpMethods, ODataRequestConfig, ODataResponse } from "@odata2ts/http-client-api";
+import { ODataHttpClient, ODataResponse } from "@odata2ts/http-client-api";
 
-export interface MockRequestConfig extends ODataRequestConfig {
+export interface MockRequestConfig {
   test: string;
 }
 
@@ -21,22 +21,6 @@ export class MockODataClient implements ODataHttpClient<MockRequestConfig> {
 
   constructor(public isV2 = false) {}
 
-  request<ResponseModel>(
-    url: string,
-    method: ODataHttpMethods,
-    data: any,
-    requestConfig?: MockRequestConfig,
-    additionalHeaders?: Record<string, string>,
-  ): ODataResponse<ResponseModel> {
-    this.lastUrl = url;
-    this.lastData = data;
-    this.lastOperation = method;
-    this.lastRequestConfig = requestConfig || undefined;
-    this.additionalHeaders = additionalHeaders;
-
-    // @ts-ignore
-    return this.respond();
-  }
   post<ResponseModel>(
     url: string,
     data: any,
@@ -125,16 +109,6 @@ export class MockODataClient implements ODataHttpClient<MockRequestConfig> {
     additionalHeaders?: Record<string, string>,
   ): ODataResponse<ReadableStream> {
     throw new Error("Operation getBlob not supported!");
-  }
-
-  createBlob(
-    url: string,
-    data: Blob,
-    mimeType: string,
-    requestConfig?: MockRequestConfig,
-    additionalHeaders?: Record<string, string>,
-  ): ODataResponse<void | Blob> {
-    throw new Error("Operation createBlob not supported!");
   }
 
   updateBlob(
