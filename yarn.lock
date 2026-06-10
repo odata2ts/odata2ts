@@ -653,8 +653,8 @@ __metadata:
   dependencies:
     "@cap-js/sqlite": "npm:^1"
     "@odata2ts/converter-big-number": "npm:^0.2.7"
-    "@odata2ts/http-client-axios": "npm:^0.12.0"
-    "@odata2ts/odata-service": "npm:^0.23.0"
+    "@odata2ts/http-client-axios": "npm:^0.12.2"
+    "@odata2ts/odata-service": "npm:^0.23.1"
     "@odata2ts/odata2ts": "npm:^0.39.1"
     "@sap/cds": "npm:7.9.4"
     "@sap/cds-odata-v2-adapter-proxy": "npm:^1.9.21"
@@ -692,13 +692,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/http-client-api@npm:^0.6.3":
-  version: 0.6.3
-  resolution: "@odata2ts/http-client-api@npm:0.6.3"
-  checksum: 10/1e64266e80e32d5466fa81a0f9d2d1d639064f62327f760cd77472bcae6d3436c59cba126b3b53423402763893644b2f5c52624e9309ebc62ffa21b5484d2dd9
-  languageName: node
-  linkType: hard
-
 "@odata2ts/http-client-api@npm:^0.6.4":
   version: 0.6.4
   resolution: "@odata2ts/http-client-api@npm:0.6.4"
@@ -713,17 +706,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/http-client-axios@npm:^0.12.0":
-  version: 0.12.0
-  resolution: "@odata2ts/http-client-axios@npm:0.12.0"
-  dependencies:
-    "@odata2ts/http-client-base": "npm:^0.5.4"
-  peerDependencies:
-    axios: ^0.27.0 || ^1.0.0
-  checksum: 10/da7b27021a76f811eb3c81d37afd62c26840002a3fb709bd36e5db4e04cd634c57a4d01fe6f6dce37a0e177ae7c50becf01652e2687d3fa3681ac699f8189596
-  languageName: node
-  linkType: hard
-
 "@odata2ts/http-client-axios@npm:^0.12.2":
   version: 0.12.2
   resolution: "@odata2ts/http-client-axios@npm:0.12.2"
@@ -732,15 +714,6 @@ __metadata:
   peerDependencies:
     axios: ^0.27.0 || ^1.0.0
   checksum: 10/f74ec0ba28638dc1254248d6fecdfbb1290c8668bdac39787847cb3a62b283762396956fa814977f151adaf67a7a890045e1897fbfc22583db79cffb8afb65fc
-  languageName: node
-  linkType: hard
-
-"@odata2ts/http-client-base@npm:^0.5.4":
-  version: 0.5.4
-  resolution: "@odata2ts/http-client-base@npm:0.5.4"
-  dependencies:
-    "@odata2ts/http-client-api": "npm:^0.6.3"
-  checksum: 10/17e697241fc41446a72480114aee2f3ea3259c40cb7e431dbc0c84344ee04b1b3635741643b71ef69f6f66e52b490962ece1cb9824f918a7bc2e87827a032445
   languageName: node
   linkType: hard
 
@@ -794,7 +767,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-service@npm:^0.23.0, @odata2ts/odata-service@npm:^0.23.1, @odata2ts/odata-service@workspace:packages/odata-service":
+"@odata2ts/odata-service@npm:^0.23.1, @odata2ts/odata-service@workspace:packages/odata-service":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
