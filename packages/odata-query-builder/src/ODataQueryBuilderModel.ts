@@ -223,10 +223,11 @@ type BuilderOp = "build";
 type PaginationOps = "skip" | "top";
 type BaseOps = "select" | "expand" | "filter" | "orderBy";
 
+type CommonOps = BuilderOp | BaseOps | "count" | PaginationOps; // custom expanding method
+type V2Ops = CommonOps;
 type V2ExpandingOps = "select" | "expand"; // custom expanding & build method
-type V2Ops = BuilderOp | BaseOps | "count" | PaginationOps; // custom expanding method
-type V4Ops = V2Ops | "expanding" | "groupBy" | "search";
-type V4ExpandingOps = V2Ops | "expanding";
+type V4Ops = CommonOps | "expanding" | "groupBy" | "search";
+type V4ExpandingOps = CommonOps | "expanding";
 
 export type V2ExpandResult = { selects: Array<string>; expands: Array<string> };
 
@@ -235,7 +236,12 @@ export type V2ExpandResult = { selects: Array<string>; expands: Array<string> };
  */
 export interface ODataQueryBuilderV2<Q extends QueryObjectModel>
   extends Pick<ODataQueryBuilderModel<Q, ODataQueryBuilderV2<Q>>, V2Ops>,
-    V2ExpandingFunction<Q, ODataQueryBuilderV2<Q>> {}
+    V2ExpandingFunction<Q, ODataQueryBuilderV2<Q>> {
+  /**
+   * Creates a new builder with the identical state (deep copy).
+   */
+  clone: () => ODataQueryBuilderV2<Q>;
+}
 
 export interface ExpandingODataQueryBuilderV2<Q extends QueryObjectModel>
   extends Pick<ODataQueryBuilderModel<Q, ExpandingODataQueryBuilderV2<Q>>, V2ExpandingOps>,
@@ -248,7 +254,12 @@ export interface ExpandingODataQueryBuilderV2<Q extends QueryObjectModel>
 }
 
 export interface ODataQueryBuilderV4<Q extends QueryObjectModel>
-  extends Pick<ODataQueryBuilderModel<Q, ODataQueryBuilderV4<Q>>, V4Ops> {}
+  extends Pick<ODataQueryBuilderModel<Q, ODataQueryBuilderV4<Q>>, V4Ops> {
+  /**
+   * Creates a new builder with the identical state (deep copy).
+   */
+  clone: () => ODataQueryBuilderV4<Q>;
+}
 
 export interface ExpandingODataQueryBuilderV4<Q extends QueryObjectModel>
   extends Pick<ODataQueryBuilderModel<Q, ExpandingODataQueryBuilderV4<Q>>, V4ExpandingOps> {}
