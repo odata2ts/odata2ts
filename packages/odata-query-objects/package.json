@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@odata2ts/converter-api": "^0.2.6",
-    "@odata2ts/http-client-api": "^0.6.2",
+    "@odata2ts/http-client-api": "^0.6.4",
     "@odata2ts/odata-core": "^0.6.1"
   },
   "devDependencies": {
