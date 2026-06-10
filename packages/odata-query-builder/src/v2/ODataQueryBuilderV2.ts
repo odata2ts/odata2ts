@@ -46,8 +46,18 @@ export function createQueryBuilderV2<Q extends QueryObjectModel>(
 class ODataQueryBuilderV2<Q extends QueryObjectModel> implements ODataQueryBuilderV2Model<Q> {
   private builder: ODataQueryBuilder<Q>;
 
-  constructor(path: string, qEntity: Q, config?: ODataQueryBuilderConfig) {
+  constructor(
+    protected path: string,
+    protected qEntity: Q,
+    protected config?: ODataQueryBuilderConfig,
+  ) {
     this.builder = new ODataQueryBuilder(path, qEntity, config);
+  }
+
+  public clone() {
+    const clone = new ODataQueryBuilderV2(this.path, this.qEntity, this.config);
+    clone.builder = this.builder.copyState(clone.builder);
+    return clone;
   }
 
   public select(...props: NullableParamList<keyof Q | QSelectExpression>) {

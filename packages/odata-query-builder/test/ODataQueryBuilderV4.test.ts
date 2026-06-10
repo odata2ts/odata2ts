@@ -243,4 +243,21 @@ describe("ODataQueryBuilderV4 Test", () => {
 
     expect(candidate).toBe(addBase('$search=(NOT testing AND test2 OR "phrase is a phrase")'));
   });
+
+  test("clone: all fields set", () => {
+    toTest
+      .select("name", "age")
+      .filter(qPerson.name.eq("Horst"))
+      .expand("friends")
+      .count()
+      .top(10)
+      .skip(20)
+      .orderBy(qPerson.name.asc())
+      .search("hey")
+      .groupBy("address");
+
+    const result = toTest.clone();
+
+    expect(JSON.stringify(result)).toStrictEqual(JSON.stringify(toTest));
+  });
 });

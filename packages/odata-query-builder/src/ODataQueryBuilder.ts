@@ -49,6 +49,21 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     this.unencoded = !!config && !!config.unencoded;
   }
 
+  public copyState(builder: ODataQueryBuilder<Q>) {
+    Object.entries(this).forEach(([key, value]) => {
+      if (value !== undefined) {
+        if (Array.isArray(value)) {
+          // @ts-ignore
+          builder[key] = value.slice();
+        } else if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+          // @ts-ignore
+          builder[key] = value;
+        }
+      }
+    });
+    return builder;
+  }
+
   public getPath() {
     return this.path;
   }

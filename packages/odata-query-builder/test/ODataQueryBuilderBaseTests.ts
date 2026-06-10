@@ -288,4 +288,17 @@ export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) 
     // @ts-expect-error
     toTest.expand("altAddresses");
   });
+
+  test("clone", () => {
+    const expected = JSON.stringify(toTest);
+
+    // clone is identical
+    let result = toTest.clone();
+    expect(JSON.stringify(result)).toStrictEqual(expected);
+
+    // changing the clone won't change original
+    result.select("createdAt");
+    expect(JSON.stringify(result)).not.toStrictEqual(expected);
+    expect(JSON.stringify(toTest)).toBe(expected);
+  });
 }

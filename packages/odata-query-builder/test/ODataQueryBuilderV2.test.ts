@@ -105,4 +105,19 @@ describe("ODataQueryBuilderV2 Test", () => {
 
     expect(candidate).toBe(expected);
   });
+
+  test("clone: all fields set", () => {
+    toTest
+      .select("name", "age")
+      .filter(qPerson.name.eq("Horst"))
+      .expand("friends")
+      .count()
+      .top(10)
+      .skip(20)
+      .orderBy(qPerson.name.asc());
+
+    const result = toTest.clone();
+
+    expect(JSON.stringify(result)).toStrictEqual(JSON.stringify(toTest));
+  });
 });
