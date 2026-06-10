@@ -14,16 +14,16 @@ import {
 import { PersonModelCollectionService } from "../fixture/v4/PersonModelService";
 import { QPersonV4 } from "../fixture/v4/QPersonV4";
 import { TestCollectionService } from "../fixture/v4/TypingModelService";
-import { MockClient } from "../mock/MockClient";
+import { MockODataClient } from "../mock/MockODataClient";
 
 describe("V4 EntitySetService Test", () => {
-  const odataClient = new MockClient(false);
+  const odataClient = new MockODataClient(false);
   const BASE_URL = "/base";
   const NAME = "test";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
   const REQUEST_CONFIG = { test: "Test" };
 
-  let testService: PersonModelCollectionService<MockClient>;
+  let testService: PersonModelCollectionService<MockODataClient>;
 
   commonEntitySetTests(odataClient, PersonModelCollectionService);
 

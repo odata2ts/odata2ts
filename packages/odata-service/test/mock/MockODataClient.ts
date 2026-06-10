@@ -1,24 +1,42 @@
-import { ODataHttpClient, ODataResponse } from "@odata2ts/http-client-api";
+import { ODataHttpClient, ODataHttpMethods, ODataRequestConfig, ODataResponse } from "@odata2ts/http-client-api";
 
-export interface MockRequestConfig {
+export interface MockRequestConfig extends ODataRequestConfig {
   test: string;
 }
 
 /**
- * Mock for an ODataHttpClient.
+ * Mock for an ODataClient.
  * Use <code>client.lastUrl</code> or <code>client.lastData</code> to acces passed data.
  */
-export class MockClient implements ODataHttpClient<MockRequestConfig> {
+export class MockODataClient implements ODataHttpClient<MockRequestConfig> {
   public lastUrl?: string;
   public lastData?: any;
   public lastOperation?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  public lastRequestConfig?: MockRequestConfig;
   public additionalHeaders?: Record<string, string>;
+  public lastRequestConfig?: MockRequestConfig;
+
+  public bigNumbersAsString?: boolean;
 
   public responseData?: any;
 
-  constructor(public isV2: boolean) {}
+  constructor(public isV2 = false) {}
 
+  request<ResponseModel>(
+    url: string,
+    method: ODataHttpMethods,
+    data: any,
+    requestConfig?: MockRequestConfig,
+    additionalHeaders?: Record<string, string>,
+  ): ODataResponse<ResponseModel> {
+    this.lastUrl = url;
+    this.lastData = data;
+    this.lastOperation = method;
+    this.lastRequestConfig = requestConfig || undefined;
+    this.additionalHeaders = additionalHeaders;
+
+    // @ts-ignore
+    return this.respond();
+  }
   post<ResponseModel>(
     url: string,
     data: any,
@@ -109,6 +127,16 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
     throw new Error("Operation getBlob not supported!");
   }
 
+  createBlob(
+    url: string,
+    data: Blob,
+    mimeType: string,
+    requestConfig?: MockRequestConfig,
+    additionalHeaders?: Record<string, string>,
+  ): ODataResponse<void | Blob> {
+    throw new Error("Operation createBlob not supported!");
+  }
+
   updateBlob(
     url: string,
     data: Blob,
@@ -119,23 +147,25 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
     throw new Error("Operation updateBlob not supported!");
   }
 
-  setModelResponse(data: any) {
+  public setModelResponse(data: any) {
     this.responseData = this.isV2 ? { d: data } : data;
   }
 
-  setCollectionResponse(data: any) {
+  public setCollectionResponse(data: any) {
     this.responseData = this.isV2 ? { d: { results: data } } : { value: data };
   }
 
   private respond() {
-    const result = Promise.resolve({
+    const genericResponse = {
       status: 200,
       statusText: "OK",
       headers: {},
       data: this.responseData ?? null,
-    });
+    };
+    return Promise.resolve(genericResponse);
+  }
 
-    this.responseData = null;
-    return result;
+  retrieveBigNumbersAsString(enabled: boolean): void {
+    this.bigNumbersAsString = enabled;
   }
 }

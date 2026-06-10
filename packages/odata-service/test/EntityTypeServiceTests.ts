@@ -1,12 +1,12 @@
 import { beforeEach, expect, test } from "vitest";
 import { ODataServiceOptions } from "../src";
 import { EditablePersonModel, Feature, PersonModelServiceVersion } from "./fixture/PersonModel";
-import { MockClient } from "./mock/MockClient";
+import { MockODataClient } from "./mock/MockODataClient";
 
 export function commonEntityTypeServiceTests(
-  odataClient: MockClient,
+  odataClient: MockODataClient,
   serviceConstructor: new (
-    odataClient: MockClient,
+    odataClient: MockODataClient,
     basePath: string,
     name: string,
     options?: ODataServiceOptions,

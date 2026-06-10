@@ -1,15 +1,15 @@
 import { describe, expect, test } from "vitest";
 import { ODataService } from "../src";
-import { MockClient } from "./mock/MockClient";
+import { MockODataClient } from "./mock/MockODataClient";
 
-class TestODataService extends ODataService<MockClient> {
+class TestODataService extends ODataService<MockODataClient> {
   public exposeAddFullPath(path?: string) {
     return this.__base.addFullPath(path);
   }
 }
 
 describe("ODataService Test", () => {
-  const odataClient = new MockClient(false);
+  const odataClient = new MockODataClient(false);
   const BASE_URL = "/test";
 
   test("odataService: simple init", () => {

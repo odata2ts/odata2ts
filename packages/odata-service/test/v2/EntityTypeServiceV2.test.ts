@@ -7,17 +7,17 @@ import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { PersonModel } from "../fixture/PersonModel";
 import { PersonModelV2Service } from "../fixture/v2/PersonModelV2Service";
 import { QPersonV2 } from "../fixture/v2/QPersonV2";
-import { MockClient } from "../mock/MockClient";
+import { MockODataClient } from "../mock/MockODataClient";
 
 describe("EntityTypeService V2 Test", () => {
-  const odataClient = new MockClient(true);
+  const odataClient = new MockODataClient(true);
   const BASE_URL = "path";
   const NAME = "test('tester')";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
 
   const REQUEST_CONFIG = { test: "Test" };
 
-  let testService: PersonModelV2Service<MockClient>;
+  let testService: PersonModelV2Service<MockODataClient>;
 
   commonEntityTypeServiceTests(odataClient, PersonModelV2Service);
 
