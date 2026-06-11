@@ -8,8 +8,8 @@ import {
   convertV4CollectionResponse,
   convertV4ModelResponse,
   convertV4ValueResponse,
-  ResponseConverter,
-  ResponseConverterV2,
+  ResponseAdapter,
+  ResponseAdapterV2,
 } from "./ResponseHelper";
 
 export enum ReturnTypes {
@@ -20,7 +20,7 @@ export enum ReturnTypes {
   COMPLEX,
 }
 
-function getResponseConverter(returnType: ReturnTypes): ResponseConverter | undefined {
+function getResponseAdapter(returnType: ReturnTypes): ResponseAdapter | undefined {
   switch (returnType) {
     case ReturnTypes.VALUE:
       return convertV4ValueResponse;
@@ -34,7 +34,7 @@ function getResponseConverter(returnType: ReturnTypes): ResponseConverter | unde
   }
 }
 
-function getResponseConverterV2(returnType: ReturnTypes): ResponseConverterV2 | undefined {
+function getResponseAdapterV2(returnType: ReturnTypes): ResponseAdapterV2 | undefined {
   switch (returnType) {
     case ReturnTypes.VALUE:
       return convertV2ValueResponse;
@@ -56,12 +56,13 @@ export class OperationReturnType<QObject extends QParamModel<any, any> | void> {
   ) {}
 
   private doConvert(response: HttpResponseModel<any>, isV2: boolean = false) {
-    const responseConverter = isV2 ? getResponseConverterV2(this.returnType) : getResponseConverter(this.returnType);
-    if (!this.type || !responseConverter) {
+    const converter = this.type;
+    const responseAdapter = isV2 ? getResponseAdapterV2(this.returnType) : getResponseAdapter(this.returnType);
+    if (!converter || !responseAdapter) {
       return response;
     }
 
-    return responseConverter(response, this.type);
+    return responseAdapter(response, [converter]);
   }
 
   public convertResponse(response: HttpResponseModel<any>) {

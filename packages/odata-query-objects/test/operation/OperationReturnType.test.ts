@@ -14,6 +14,10 @@ describe("OperationReturnType Tests", function () {
     ReturnTypes.VALUE,
     new QBooleanParam("TEST", "test", booleanToNumberConverter),
   );
+  const VALUE_RETURN_TYPE2 = new OperationReturnType(
+    ReturnTypes.VALUE,
+    new QBooleanParam("XXX", undefined, booleanToNumberConverter),
+  );
   const VALUE_COLLECTION_RETURN_TYPE = new OperationReturnType(
     ReturnTypes.COLLECTION,
     new QBooleanParam("NONE", undefined, booleanToNumberConverter),
@@ -100,6 +104,11 @@ describe("OperationReturnType Tests", function () {
   test("primitive conversion V2", () => {
     expect(VALUE_RETURN_TYPE.convertResponseV2(createV2ValueOrModelResponse({ TEST: false })).data.d).toStrictEqual({
       test: 0,
+    });
+
+    // without fitting name and without mappedName
+    expect(VALUE_RETURN_TYPE2.convertResponseV2(createV2ValueOrModelResponse({ TEST: false })).data.d).toStrictEqual({
+      TEST: 0,
     });
   });
 

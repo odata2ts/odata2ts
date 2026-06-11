@@ -10,17 +10,17 @@ import {
 } from "@odata2ts/odata-core";
 import { QParamModel } from "../param/QParamModel";
 
-export interface Convertible extends Pick<QParamModel<any, any>, "convertFrom" | "convertTo"> {}
-export type ConvertibleV2 = Convertible & Pick<QParamModel<any, any>, "getName" | "getMappedName">;
+export interface ResponseConverter extends Pick<QParamModel<any, any>, "convertFrom"> {}
+export type ResponseConverterV2 = ResponseConverter & Partial<Pick<QParamModel<any, any>, "getName" | "getMappedName">>;
 
-export type ResponseConverter = (
+export type ResponseAdapter = (
   response: HttpResponseModel<any>,
-  qResponseType: Convertible,
+  converters: Array<ResponseConverter>,
 ) => HttpResponseModel<any>;
 
-export type ResponseConverterV2 = (
+export type ResponseAdapterV2 = (
   response: HttpResponseModel<any>,
-  qResponseType: ConvertibleV2,
+  converters: Array<ResponseConverterV2>,
 ) => HttpResponseModel<any>;
 
 /*
@@ -44,88 +44,98 @@ function getValueForV2OrV1ResponseModels(responseData: ODataValueResponseV2<any>
 }
 */
 
-export const convertV2ValueResponse: ResponseConverterV2 = (response, qResponseType) => {
+export const convertV2ValueResponse: ResponseAdapterV2 = (response, converters) => {
   const asV2Model = response.data as ODataValueResponseV2<any>;
   const value = asV2Model?.d;
   if (typeof value === "object") {
-    // we try to match by known attribute name
-    if (value.hasOwnProperty(qResponseType.getName())) {
-      // map attribute name and convert the attribute value
-      asV2Model.d = { [qResponseType.getMappedName()]: qResponseType.convertFrom(value[qResponseType.getName()]) };
-    }
-    // alternatively, if single attribute is given, then we use that one
-    else {
-      const keyValue = Object.entries(value);
-      if (keyValue.length === 1) {
-        const [key, val] = keyValue[0];
-        // convert value only
-        asV2Model.d[key] = qResponseType.convertFrom(val);
+    converters.forEach((converter) => {
+      // we try to match by known attribute name
+      const name = typeof converter.getName === "function" ? converter.getName() : undefined;
+      const mappedName = typeof converter.getMappedName === "function" ? converter.getMappedName() : name;
+      if (name && mappedName && value.hasOwnProperty(name)) {
+        // map attribute name and convert the attribute value
+        asV2Model.d = { [mappedName]: converter.convertFrom(value[name]) };
       }
-    }
+      // alternatively, if single attribute is given, then we use that one
+      else {
+        const keyValue = Object.entries(value);
+        if (keyValue.length === 1) {
+          const [key, val] = keyValue[0];
+          // convert value only
+          asV2Model.d[key] = converter.convertFrom(val);
+        }
+      }
+    }, value);
   }
 
   return response;
 };
 
-export const convertV2ComplexModelResponse: ResponseConverterV2 = (response, qResponseType) => {
+export const convertV2ComplexModelResponse: ResponseAdapter = (response, converters) => {
   const asV2Model = response.data as ODataComplexModelResponseV2<any>;
   if (typeof asV2Model?.d === "object") {
     const values = Object.values(asV2Model.d);
     if (values.length === 1 && typeof values[0] === "object") {
-      asV2Model.d = qResponseType.convertFrom(values[0]);
+      asV2Model.d = applyConverters(values[0], converters);
     }
   }
 
   return response;
 };
 
-export const convertV2EntityModelResponse: ResponseConverterV2 = (response, qResponseType) => {
+export const convertV2EntityModelResponse: ResponseAdapter = (response, converters) => {
   const asV2Model = response.data as ODataEntityModelResponseV2<any>;
   if (asV2Model?.d && typeof asV2Model.d === "object") {
-    asV2Model.d = qResponseType.convertFrom(asV2Model.d);
+    asV2Model.d = applyConverters(asV2Model.d, converters);
   }
 
   return response;
 };
 
-export const convertV2CollectionResponse: ResponseConverterV2 = (response, qResponseType) => {
+export const convertV2CollectionResponse: ResponseAdapter = (response, converters) => {
   const asV2Collection = response.data as ODataCollectionResponseV2<any>;
   const value = asV2Collection?.d?.results;
   if (value && typeof value === "object") {
-    asV2Collection.d.results = qResponseType.convertFrom(value);
+    asV2Collection.d.results = applyConverters(value, converters);
   }
   // support for V1
   else if (asV2Collection?.d && typeof asV2Collection.d === "object") {
-    asV2Collection.d = qResponseType.convertFrom(asV2Collection.d);
+    asV2Collection.d = applyConverters(asV2Collection.d, converters);
   }
 
   return response;
 };
 
-export const convertV4ValueResponse: ResponseConverter = (response, qResponseType) => {
+export const convertV4ValueResponse: ResponseAdapter = (response, converters) => {
   const asV4Value = response.data?.value as ODataValueResponseV4<any>;
   if (response.status === 204) {
     response.data = { value: null };
   } else if (asV4Value !== undefined && asV4Value !== null) {
-    response.data.value = qResponseType.convertFrom(asV4Value);
+    response.data.value = applyConverters(asV4Value, converters);
   }
   return response;
 };
 
-export const convertV4ModelResponse: ResponseConverter = (response, qResponseType) => {
+export const convertV4ModelResponse: ResponseAdapter = (response, converters) => {
   const asV4Model = response.data as ODataModelResponseV4<any>;
   if (asV4Model && typeof asV4Model === "object") {
-    response.data = qResponseType.convertFrom(asV4Model);
+    response.data = applyConverters(asV4Model, converters);
   }
   return response;
 };
 
-export const convertV4CollectionResponse: ResponseConverter = (response, qResponseType) => {
+export const convertV4CollectionResponse: ResponseAdapter = (response, converters) => {
   const asV4Collection = response.data as ODataCollectionResponseV4<any>;
   const value = asV4Collection?.value;
-  if (value && typeof value === "object") {
-    asV4Collection.value = qResponseType.convertFrom(value);
+  if (value && typeof value === "object" && converters.length) {
+    asV4Collection.value = applyConverters(value, converters);
   }
 
   return response;
+};
+
+const applyConverters = <T>(value: T, converters: Array<ResponseConverter>) => {
+  return converters.reduce((result, converter) => {
+    return converter.convertFrom(result);
+  }, value);
 };
