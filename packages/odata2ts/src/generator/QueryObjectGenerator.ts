@@ -36,8 +36,6 @@ export const generateQueryObjects: EntityBasedGeneratorFunction = (
   return generator.generate();
 };
 
-const OPTIONS_STATEMENT = "OPTS";
-
 class QueryObjectGenerator {
   constructor(
     private project: ProjectManager,
@@ -49,6 +47,8 @@ class QueryObjectGenerator {
 
   public async generate(): Promise<void> {
     this.project.initQObjects();
+
+    this.generateOptions();
 
     // process EntityType & ComplexType
     const promises: Array<Promise<void>> = [...this.generateEntityTypes(), ...this.generateComplexTypes()];
@@ -62,9 +62,30 @@ class QueryObjectGenerator {
     return this.project.finalizeQObjects();
   }
 
+  private generateOptions() {
+    const file = this.project.createOrGetQObjectFile("", "");
+
+    // for now assume only enableNativeInOperator requires options to be processed
+    if (!this.options.enableNativeInOperator) {
+      return;
+    }
+
+    // hardcode enableNativeInOperator for now
+    file.getFile().addVariableStatement({
+      declarationKind: VariableDeclarationKind.Const,
+      isExported: false,
+      declarations: [
+        {
+          name: "OPTS",
+          initializer: `{ nativeIn: true }`,
+        },
+      ],
+    });
+  }
+
   private generateEntityTypes() {
     return this.dataModel.getEntityTypes().map((model) => {
-      const file = this.createOrGetQObjectFileWithOptions(model, [
+      const file = this.project.createOrGetQObjectFile(model.folderPath, model.qName, [
         model.qName,
         firstCharLowerCase(model.qName),
         model.id.qName,
@@ -94,7 +115,10 @@ class QueryObjectGenerator {
 
   private generateComplexTypes() {
     return this.dataModel.getComplexTypes().map((model) => {
-      const file = this.createOrGetQObjectFileWithOptions(model, [model.qName, firstCharLowerCase(model.qName)]);
+      const file = this.project.createOrGetQObjectFile(model.folderPath, model.qName, [
+        model.qName,
+        firstCharLowerCase(model.qName),
+      ]);
 
       this.generateModel(file, model);
 
@@ -203,36 +227,6 @@ class QueryObjectGenerator {
         },
       ],
     });
-  }
-
-  private createOrGetQObjectFileWithOptions(model: ComplexType, reservedNames?: string[]) {
-    const file = this.project.createOrGetQObjectFile(model.folderPath, model.qName, reservedNames);
-
-    // for now assume only enableNativeInOperator requires options to be processed
-    if (this.options.enableNativeInOperator && !this.fileHasOptions(file)) {
-      file.getFile().addVariableStatement({
-        declarationKind: VariableDeclarationKind.Const,
-        isExported: false,
-        declarations: [
-          {
-            name: OPTIONS_STATEMENT,
-            initializer: `{ nativeIn: true }`,
-          },
-        ],
-      });
-    }
-
-    return file;
-  }
-
-  private fileHasOptions(file: FileHandler) {
-    return (
-      file
-        .getFile()
-        .getVariableStatement((statement) =>
-          statement.getDeclarations().some((decl) => decl.getName() === OPTIONS_STATEMENT),
-        ) !== undefined
-    );
   }
 
   private generateQueryObjectProps(
