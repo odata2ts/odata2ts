@@ -240,7 +240,7 @@ class QueryObjectGenerator {
       prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
     const addOptions = this.options.enableNativeInOperator; // limited to hardcoded enableNativeIn for now
 
-    if (props.some((prop) => !prop.isCollection && !isModelType(prop) && !isEnumType(prop) && addOptions)) {
+    if (addOptions && props.some((prop) => !prop.isCollection && !isModelType(prop) && !isEnumType(prop))) {
       importContainer.addFromMainQObject(OPTIONS_STATEMENT);
     }
 
