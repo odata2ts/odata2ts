@@ -33,6 +33,7 @@ export type DigesterFunction<S extends Schema<any, any>> = (
 
 export type GeneratorFunctionOptions = Pick<
   RunOptions,
+  | "bundledFileGeneration"
   | "skipEditableModels"
   | "skipIdModels"
   | "skipOperations"
