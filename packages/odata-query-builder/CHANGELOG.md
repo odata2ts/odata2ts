@@ -9,6 +9,25 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
   * dependencies
     * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
 
+## [0.18.6](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.18.5...@odata2ts/odata-query-builder-v0.18.6) (2026-07-03)
+
+
+### Features
+
+* **query-builder:** clone method for main builders ([#380](https://github.com/odata2ts/odata2ts/issues/380)) ([2b1f817](https://github.com/odata2ts/odata2ts/commit/2b1f8176e070f1c1b464ff221b6f5773dba20a4d))
+
+
+### Bug Fixes
+
+* restrict-expand ([#379](https://github.com/odata2ts/odata2ts/issues/379)) ([8624b2d](https://github.com/odata2ts/odata2ts/commit/8624b2d80e6f91f5ce0dcedf53a2e22a20713de3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-objects bumped from ^0.28.1 to ^0.28.2
+
 ## [0.18.5](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.18.4...@odata2ts/odata-query-builder-v0.18.5) (2025-11-03)
 
 

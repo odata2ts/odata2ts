@@ -33,6 +33,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * ESM tends to break stuff
 
+## [0.28.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.28.1...@odata2ts/odata-query-objects-v0.28.2) (2026-07-03)
+
+
+### Bug Fixes
+
+* restrict-expand ([#379](https://github.com/odata2ts/odata2ts/issues/379)) ([8624b2d](https://github.com/odata2ts/odata2ts/commit/8624b2d80e6f91f5ce0dcedf53a2e22a20713de3))
+
 ## [0.28.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.28.0...@odata2ts/odata-query-objects-v0.28.1) (2025-11-03)
 
 

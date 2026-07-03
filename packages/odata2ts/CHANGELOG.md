@@ -13,6 +13,31 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-objects bumped from ^0.28.0 to ^0.28.1
     * @odata2ts/odata-service bumped from ^0.23.0 to ^0.23.1
 
+## [0.40.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.40.1...@odata2ts/odata2ts-v0.40.2) (2026-07-03)
+
+
+### Features
+
+* **odata2ts:** allow for native in-operator (V4 only) ([b7ddbf0](https://github.com/odata2ts/odata2ts/commit/b7ddbf0f87c9ed20f8c52611988a3f133bce5b2f))
+
+
+### Bug Fixes
+
+* **odata2ts:** fix subclass import for unbundled generation ([#378](https://github.com/odata2ts/odata2ts/issues/378)) ([537db36](https://github.com/odata2ts/odata2ts/commit/537db369e04b972ab473b0ef2cf4c8d8d858120a))
+* **odata2ts:** properly check for bundled file generation ([#376](https://github.com/odata2ts/odata2ts/issues/376)) ([3e09fc8](https://github.com/odata2ts/odata2ts/commit/3e09fc8aace4f3dc599d1eabdebb52142c1bc779))
+* restrict-expand ([#379](https://github.com/odata2ts/odata2ts/issues/379)) ([8624b2d](https://github.com/odata2ts/odata2ts/commit/8624b2d80e6f91f5ce0dcedf53a2e22a20713de3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.28.1 to ^0.28.2
+    * @odata2ts/odata-service bumped from ^0.23.1 to ^0.23.2
+  * peerDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.28.1 to ^0.28.2
+    * @odata2ts/odata-service bumped from ^0.23.1 to ^0.23.2
+
 ## [0.40.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.39.2...@odata2ts/odata2ts-v0.40.0) (2025-11-01)
 
 
