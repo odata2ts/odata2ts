@@ -19,6 +19,7 @@ export type DigestionOptions = Pick<
   | "disableAutomaticNameClashResolution"
   | "bundledFileGeneration"
   | "enumType"
+  | "enableNativeInOperator"
 >;
 
 /**
@@ -32,12 +33,14 @@ export type DigesterFunction<S extends Schema<any, any>> = (
 
 export type GeneratorFunctionOptions = Pick<
   RunOptions,
+  | "bundledFileGeneration"
   | "skipEditableModels"
   | "skipIdModels"
   | "skipOperations"
   | "skipComments"
   | "v2ModelsWithExtraResultsWrapping"
   | "enumType"
+  | "enableNativeInOperator"
 >;
 
 export type EntityBasedGeneratorFunction = (

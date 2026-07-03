@@ -21,7 +21,7 @@ describe("Query Object Generator Tests V4", () => {
   const GENERATE: EntityBasedGeneratorFunctionWithoutVersion = async (dataModel, options, namingHelper) => {
     const projectManager = await createProjectManager("build/unitTest", EmitModes.ts, namingHelper, dataModel, {
       noOutput: true,
-      bundledFileGeneration: true,
+      bundledFileGeneration: options.bundledFileGeneration ?? true,
       allowTypeChecking: true,
     });
     await generateQueryObjects(projectManager, dataModel, ODataVersions.V4, options, namingHelper);
@@ -37,8 +37,8 @@ describe("Query Object Generator Tests V4", () => {
 
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, MODEL_FILE, GENERATE);
 
-  async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<DigestionOptions>) {
-    await fixtureComparatorHelper.generateAndCompare(MODEL_FILE, fixturePath, odataBuilder.getSchemas(), genOptions);
+  async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<DigestionOptions>, fileToInspect = MODEL_FILE) {
+    await fixtureComparatorHelper.generateAndCompare(fileToInspect, fixturePath, odataBuilder.getSchemas(), genOptions);
   }
 
   beforeAll(async () => {
@@ -195,5 +195,50 @@ describe("Query Object Generator Tests V4", () => {
     // when generating model
     // then match fixture text
     await generateAndCompare("overloadedFunction2", "function-overloaded-2.ts");
+  });
+
+  test(`QObject generation with nativeIn option`, async () => {
+    // given a model with simple properties and collections
+    // only simple properties should be generated with nativeIn option
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Int32)
+        .addProp("testBoolean", ODataTypesV4.Boolean, false)
+        .addProp("testTime", ODataTypesV4.TimeOfDay)
+        .addProp("testDate", ODataTypesV4.Date)
+        .addProp("testDateTimeOffset", ODataTypesV4.DateTimeOffset)
+        .addProp("testString", ODataTypesV4.String)
+        .addProp("testAny", "Edm.AnythingYouWant")
+        .addProp("multipleIds", `Collection(${ODataTypesV4.Guid})`)
+        .addProp("multipleStrings", `Collection(${ODataTypesV4.String})`),
+    );
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("modelWithNativeIn", "entity-with-native-in.ts", {
+      enableNativeInOperator: true,
+    });
+  });
+
+  test(`QObject generation with nativeIn option and unbundled mode`, async () => {
+    // given a model with simple properties and collections
+    // only simple properties should be generated with nativeIn option
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Int32)
+    );
+
+    // when generating model
+    // then match fixture text of main qobject
+    await generateAndCompare("modelWithNativeInAndUnbundled", "unbundled-main-native-in.ts", {
+      enableNativeInOperator: true,
+      bundledFileGeneration: false
+    });
+    // when generating model
+    // then match fixture text of unbundled file
+    await generateAndCompare("modelWithNativeInAndUnbundled2", "unbundled-file-native-in.ts", {
+      enableNativeInOperator: true,
+      bundledFileGeneration: false
+    }, `${SERVICE_NAME.toLowerCase()}/${ENTITY_NAME.toLowerCase()}/Q${ENTITY_NAME}`);
   });
 });

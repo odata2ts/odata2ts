@@ -101,6 +101,7 @@ const defaultConfig: DefaultConfiguration = {
   },
   propertiesByName: [],
   byTypeAndName: [],
+  enableNativeInOperator: false
 };
 
 const { models, queryObjects, services } = defaultConfig.naming;

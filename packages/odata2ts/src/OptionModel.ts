@@ -267,6 +267,14 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * With this option you can also generate numeric enums or a simple string union type.
    */
   enumType?: "string" | "numeric" | "string-union";
+  /**
+   * By default, odata2ts emulates the in operator by rolling it out as a series of equals-or-expressions.
+   * This allows for maximum compatibility with all V4 services, as well as V2 services.
+   * 
+   * Setting this value to true will instead use the native in operator, resulting in smaller queries
+   * on V4 services that support it.
+   */
+  enableNativeInOperator?: boolean;
 }
 
 /**

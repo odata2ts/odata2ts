@@ -36,6 +36,8 @@ export const generateQueryObjects: EntityBasedGeneratorFunction = (
   return generator.generate();
 };
 
+const OPTIONS_STATEMENT = "OPTS";
+
 class QueryObjectGenerator {
   constructor(
     private project: ProjectManager,
@@ -48,6 +50,8 @@ class QueryObjectGenerator {
   public async generate(): Promise<void> {
     this.project.initQObjects();
 
+    this.generateOptions();
+
     // process EntityType & ComplexType
     const promises: Array<Promise<void>> = [...this.generateEntityTypes(), ...this.generateComplexTypes()];
     if (!this.options.skipOperations) {
@@ -58,6 +62,27 @@ class QueryObjectGenerator {
     await Promise.all(promises);
 
     return this.project.finalizeQObjects();
+  }
+
+  private generateOptions() {
+    const file = this.project.createOrGetMainQObjectFile();
+
+    // for now assume only enableNativeInOperator requires options to be processed
+    if (!this.options.enableNativeInOperator) {
+      return;
+    }
+
+    // for now hardcode enableNativeInOperator
+    file.getFile().addVariableStatement({
+      declarationKind: VariableDeclarationKind.Const,
+      isExported: !this.options.bundledFileGeneration,
+      declarations: [
+        {
+          name: OPTIONS_STATEMENT,
+          initializer: `{ nativeIn: true }`,
+        },
+      ],
+    });
   }
 
   private generateEntityTypes() {
@@ -210,37 +235,48 @@ class QueryObjectGenerator {
     importContainer: ImportContainer,
     props: Array<PropertyModel>,
   ): Array<OptionalKind<PropertyDeclarationStructure>> {
+    const isEnumType = (prop: PropertyModel) => prop.dataType === DataTypes.EnumType;
+    const isModelType = (prop: PropertyModel) =>
+      prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
+    const addOptions = this.options.enableNativeInOperator; // limited to hardcoded enableNativeIn for now
+
+    if (addOptions && props.some((prop) => !prop.isCollection && !isModelType(prop) && !isEnumType(prop))) {
+      importContainer.addFromMainQObject(OPTIONS_STATEMENT);
+    }
+
     return props.map((prop) => {
       const { odataName } = prop;
       const name = this.namingHelper.getQPropName(prop.name);
-      const isModelType = prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
-      const isEnumType = prop.dataType === DataTypes.EnumType;
-      const isNumericEnum = this.options.enumType === "numeric";
 
       let qPathInit: string;
 
       // factor in collections
       if (prop.isCollection) {
         const qPath = importContainer.addQObject(prop.qPath);
-        const qObject = isModelType
+        const qObject = isModelType(prop)
           ? importContainer.addGeneratedQObject(prop.fqType, prop.qObject!)
-          : isEnumType
+          : isEnumType(prop)
             ? importContainer.addGeneratedModel(prop.fqType, prop.type, false)
             : importContainer.addQObject(prop.qObject!);
 
-        qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${isEnumType ? qObject : `() => ${qObject}`})`;
+        qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${isEnumType(prop) ? qObject : `() => ${qObject}`})`;
       } else {
         // add import for data type
         const qPath = importContainer.addQObject(prop.qPath);
-        if (isModelType) {
+        if (isModelType(prop)) {
           const qObject = importContainer.addGeneratedQObject(prop.fqType, prop.qObject!);
           qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), () => ${qObject})`;
-        } else if (isEnumType) {
+        } else if (isEnumType(prop)) {
           const qObject = importContainer.addGeneratedModel(prop.fqType, prop.type, false);
           qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${qObject})`;
         } else {
           let converterStmt = this.generateConverterStmt(importContainer, prop.converters);
-          qPathInit = `new ${qPath}(this.withPrefix("${odataName}")${converterStmt ? `, ${converterStmt}` : ""})`;
+          const addConverter = !!converterStmt;
+          converterStmt = converterStmt || "undefined";
+
+          qPathInit = `new ${qPath}(this.withPrefix("${odataName}")${
+            addOptions ? `, ${converterStmt}, ${OPTIONS_STATEMENT}` : addConverter ? `, ${converterStmt}` : ""
+          })`;
         }
       }
 

@@ -92,7 +92,7 @@ export function createEntityBasedGenerationTests(
   });
 
   test(`${testSuiteName}: one max model`, async () => {
-    // given one minimal model
+    // given one maximal model
     odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
       builder
         .addKeyProp("id", ODataTypesV2.Guid)

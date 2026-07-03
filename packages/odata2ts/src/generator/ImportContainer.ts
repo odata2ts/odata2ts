@@ -69,6 +69,10 @@ export class ImportContainer {
     return importName;
   }
 
+  public addFromMainQObject(name: string, isTypeOnly = false) {
+    return this.addGeneratedImport("", this.mainFileNames.qObject, name, isTypeOnly);
+  }
+
   private addFromQObject(name: string, typeOnlyImport = false) {
     const importName = this.importedNameValidator.validateName(LIB_MODULES.qObject, name);
 
