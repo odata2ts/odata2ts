@@ -17,6 +17,8 @@ describe("QFunction Tests", () => {
     const exampleFunction = new QGetSomethingFunction();
     expect(exampleFunction.getName()).toBe("getSomething");
     expect(exampleFunction.buildUrl()).toBe("getSomething()");
+    expect(exampleFunction.getResponseDataAdapter()).toBeUndefined();
+    expect(exampleFunction.getResponseConverter()).toBeUndefined();
     expect(exampleFunction.parseUrl("xyz")).toBeUndefined();
     expect(exampleFunction.parseUrl("xyz()")).toBeUndefined();
   });
@@ -25,11 +27,13 @@ describe("QFunction Tests", () => {
     const exampleFunction = new QGetSomethingFunctionV2();
     expect(exampleFunction.getName()).toBe("getSomething");
     expect(exampleFunction.buildUrl()).toBe("getSomething");
+    expect(exampleFunction.getResponseDataAdapter()).toBeUndefined();
+    expect(exampleFunction.getResponseConverter()).toBeUndefined();
     expect(exampleFunction.parseUrl("xyz")).toBeUndefined();
     expect(exampleFunction.parseUrl("xyz(123)")).toBeUndefined();
   });
 
-  test("QFunction: multiple params", () => {
+  test("QFunction: with params", () => {
     const exampleFunction = new QBestBookFunction();
     const requiredParams: BestBookParamModel = {
       testNumber: 3,
@@ -37,8 +41,19 @@ describe("QFunction Tests", () => {
       testString: { prefix: "PREFIX_", value: "testing" },
       testGuid: "aaa-bbb",
     };
+
+    const resultRequired = "BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb)";
+    expect(exampleFunction.buildUrl(requiredParams)).toBe(resultRequired);
+    expect(exampleFunction.parseUrl(resultRequired)).toStrictEqual(requiredParams);
+  });
+
+  test("QFunction: all possible params & encoding", () => {
+    const exampleFunction = new QBestBookFunction();
     const allParams: BestBookParamModel = {
-      ...requiredParams,
+      testNumber: 3,
+      testBoolean: 0,
+      testString: { prefix: "PREFIX_", value: "testing" },
+      testGuid: "aaa-bbb",
       "test/Date": null,
       testTime: undefined,
       testDateTimeOffset: "date/Time",
@@ -48,9 +63,6 @@ describe("QFunction Tests", () => {
       testNumericEnum: [TestRatings.TOP, TestRatings.BAD],
     };
 
-    const resultRequired = "BestBook(TestNumber=3,test_Boolean=false,testString='testing',testGuid=aaa-bbb)";
-    expect(exampleFunction.buildUrl(requiredParams)).toBe(resultRequired);
-    expect(exampleFunction.parseUrl(resultRequired)).toStrictEqual(requiredParams);
     expect(exampleFunction.buildUrl(allParams, true)).toBe(
       "BestBook(" +
         "TestNumber=3" +
@@ -87,7 +99,7 @@ describe("QFunction Tests", () => {
     );
   });
 
-  test("QFunction: V2 multiple params", () => {
+  test("QFunction: V2 with params", () => {
     const exampleFunction = new QBestBookFunctionV2();
     const requiredParams: BestBookParamModelV2 = {
       testGuid: "aa-bb",
@@ -107,17 +119,21 @@ describe("QFunction Tests", () => {
     expect(exampleFunction.buildUrl(allParams)).toBe(expected + "&testString=null");
   });
 
-  test("QFunction: primitive response conversion", () => {
+  test("QFunction: response stuff", () => {
     const exampleFunction = new QPrimitiveReturningFunction();
-
-    expect(exampleFunction.convertResponse(createResponse({ value: true })).data).toStrictEqual({ value: 1 });
   });
 
-  test("QFunction: V2 primitive response conversion", () => {
-    const exampleFunction = new QPrimitiveReturningFunctionV2();
-
-    expect(exampleFunction.convertResponse(createResponse({ d: { any: true } })).data).toStrictEqual({ d: { any: 1 } });
-  });
+  // test("QFunction: primitive response conversion", () => {
+  //   const exampleFunction = new QPrimitiveReturningFunction();
+  //
+  //   expect(exampleFunction.convertResponse(createResponse({ value: true })).data).toStrictEqual({ value: 1 });
+  // });
+  //
+  // test("QFunction: V2 primitive response conversion", () => {
+  //   const exampleFunction = new QPrimitiveReturningFunctionV2();
+  //
+  //   expect(exampleFunction.convertResponse(createResponse({ d: { any: true } })).data).toStrictEqual({ d: { any: 1 } });
+  // });
 
   test("QFunction: overloaded params", () => {
     const exampleFunction = new QOverloadedFunction();

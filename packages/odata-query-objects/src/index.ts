@@ -16,7 +16,6 @@ export * from "./operation/ResponseHelper";
 export { QFunction } from "./operation/QFunction";
 export { QAction } from "./operation/QAction";
 export { QId } from "./operation/QId";
-export { OperationReturnType, ReturnTypes } from "./operation/OperationReturnType";
 
 export * from "./param/UrlParamModel";
 export * from "./param/UrlParamHelper";

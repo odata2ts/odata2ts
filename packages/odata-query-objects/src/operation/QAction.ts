@@ -1,14 +1,15 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { QParamModel } from "../param/QParamModel";
-import { emptyOperationReturnType, OperationReturnType } from "./OperationReturnType";
+import { FlexibleConversionModel } from "../QueryObjectModel";
+import { getResponseDataAdapter, ResponseDataAdapter, ResponseDataConverter, ReturnTypes } from "./ResponseHelper";
 
 type ActionParams = Record<string, any>;
 type FilteredParamModel = [string, any];
 
-export abstract class QAction<ParamModel = undefined> {
+export abstract class QAction<ParamModel = undefined, ResponseStructure = undefined> {
   public constructor(
     protected name: string,
-    protected qReturnType: OperationReturnType<any> = emptyOperationReturnType,
+    protected returnType: ReturnTypes = ReturnTypes.VOID,
+    protected responseConverter?: ResponseDataConverter<any, ResponseStructure>,
   ) {}
 
   public abstract getParams(): Array<QParamModel<any, any>> | undefined;
@@ -21,55 +22,42 @@ export abstract class QAction<ParamModel = undefined> {
     return this.name;
   }
 
-  public convertUserParams(params: ParamModel): ActionParams | undefined {
+  public getRequestConverter() {
     const qParams = this.getParams();
-
-    if (!params || !qParams) {
+    if (!qParams) {
       return undefined;
     }
 
-    return Object.entries<any>(params)
-      .map(([key, value]) => {
-        const qParam = qParams.find((q) => q.getMappedName() === key);
-        if (!qParam) {
-          throw new Error(`Unknown parameter "${key}"!`);
+    return {
+      convertTo: (data: FlexibleConversionModel<ParamModel>) => {
+        if (!data) {
+          return undefined;
         }
 
-        // maps the name and converts the value
-        return [qParam.getName(), qParam.convertTo(value)];
-      })
-      .filter((p): p is FilteredParamModel => p[1] !== undefined)
-      .reduce((collector, [key, value]) => {
-        collector[key] = value;
-        return collector;
-      }, {} as ActionParams);
+        return Object.entries<any>(data)
+          .map(([key, value]) => {
+            const qParam = qParams.find((q) => q.getMappedName() === key);
+            if (!qParam) {
+              throw new Error(`Unknown parameter "${key}"!`);
+            }
+
+            // maps the name and converts the value
+            return [qParam.getName(), qParam.convertTo(value)];
+          })
+          .filter((p): p is FilteredParamModel => p[1] !== undefined)
+          .reduce((collector, [key, value]) => {
+            collector[key] = value;
+            return collector;
+          }, {} as ActionParams);
+      },
+    };
   }
 
-  public convertODataParams(params: ParamModel extends undefined ? undefined : ActionParams): ParamModel | undefined {
-    const qParams = this.getParams();
-
-    if (!params || !qParams) {
-      return undefined;
-    }
-
-    return Object.entries<any>(params)
-      .map(([key, value]) => {
-        const qParam = qParams.find((q) => q.getName() === key);
-        if (!qParam) {
-          throw new Error(`Unknown parameter "${key}"!`);
-        }
-
-        // maps the name and converts the value
-        return [qParam.getMappedName(), qParam.convertFrom(value)];
-      })
-      .filter((p): p is FilteredParamModel => p[1] !== undefined)
-      .reduce((collector, [key, value]) => {
-        collector[key as keyof ParamModel] = value;
-        return collector;
-      }, {} as ParamModel);
+  public getResponseDataAdapter(): ResponseDataAdapter | undefined {
+    return getResponseDataAdapter(this.returnType);
   }
 
-  public convertResponse(response: HttpResponseModel<any>) {
-    return this.qReturnType.convertResponse(response);
+  public getResponseConverter(): ResponseDataConverter | undefined {
+    return this.responseConverter;
   }
 }

@@ -1,5 +1,5 @@
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
-import { OperationReturnType, QBooleanParam, QFunction, QNumberParam, QStringParam, ReturnTypes } from "../../../src";
+import { QBooleanParam, QFunction, QNumberParam, QStringParam, ReturnTypes } from "../../../src";
 
 export type OverloadedFunctionParamModel =
   | {
@@ -19,7 +19,7 @@ export class QOverloadedFunction extends QFunction<OverloadedFunctionParamModel>
   ];
 
   constructor() {
-    super("OverloadedFunction", new OperationReturnType(ReturnTypes.VALUE, new QBooleanParam("NONE")));
+    super("OverloadedFunction", ReturnTypes.VALUE, new QBooleanParam("NONE"));
   }
 
   public getParams() {

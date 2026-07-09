@@ -1,11 +1,15 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { QParamModel } from "../param/QParamModel";
-import { emptyOperationReturnType, OperationReturnType } from "./OperationReturnType";
+import {
+  getResponseDataAdapter,
+  getResponseDataAdapterV2,
+  ResponseDataAdapter,
+  ResponseDataConverter,
+  ReturnTypes,
+} from "./ResponseHelper";
 
 type FunctionParams = Record<string, string>;
 type FilteredParamModel = [string, string];
 
-// const REGEXP_PATH = /(^[^(]+)\(.*/;
 const REGEXP_PARAMS = /.*\(([^)]+)\)/;
 const REGEXP_V2_PARAMS = /.*\?(.+)/;
 
@@ -45,10 +49,11 @@ function compileQueryParams(params: FunctionParams | undefined, notEncoded: bool
  *
  * This includes handling of entity id paths (same format as V4 functions).
  */
-export abstract class QFunction<ParamModel = undefined> {
+export abstract class QFunction<ParamModel = undefined, ResponseStructure = undefined> {
   public constructor(
     protected name: string,
-    protected qReturnType: OperationReturnType<any> = emptyOperationReturnType,
+    protected returnType: ReturnTypes = ReturnTypes.VOID,
+    protected responseConverter?: ResponseDataConverter<any, ResponseStructure>,
     protected config: { v2Mode?: boolean } = {},
   ) {}
 
@@ -175,8 +180,12 @@ export abstract class QFunction<ParamModel = undefined> {
     }, {} as ParamModel);
   }
 
-  public convertResponse(response: HttpResponseModel<any>) {
-    return this.isV2() ? this.qReturnType.convertResponseV2(response) : this.qReturnType.convertResponse(response);
+  public getResponseDataAdapter(): ResponseDataAdapter | undefined {
+    return this.isV2() ? getResponseDataAdapter(this.returnType) : getResponseDataAdapterV2(this.returnType);
+  }
+
+  public getResponseConverter(): ResponseDataConverter | undefined {
+    return this.responseConverter;
   }
 
   private findSingleParam() {

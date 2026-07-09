@@ -1,17 +1,12 @@
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
-import { OperationReturnType, QAction, QBooleanParam, QComplexParam, QFunction, ReturnTypes } from "../../../src";
-import { QSimpleEntityWithConverter } from "../SimpleEntityWithConverter";
+import { QAction, QBooleanParam, QComplexParam, QFunction, ReturnTypes } from "../../../src";
+import { QSimpleEntityWithConverter, SimpleEntityWithConverter } from "../SimpleEntityWithConverter";
 
-export const PRIMITIVE = new OperationReturnType(
-  ReturnTypes.VALUE,
-  new QBooleanParam("NONE", undefined, booleanToNumberConverter),
-);
+const CUSTOM_RETURN_TYPE = new QBooleanParam("NONE", undefined, booleanToNumberConverter);
 
-const MODEL = new OperationReturnType(ReturnTypes.ENTITY, new QComplexParam("XXX", new QSimpleEntityWithConverter()));
-
-export class QPrimitiveReturningFunction extends QFunction<{}> {
+export class QPrimitiveReturningFunction extends QFunction<undefined, number> {
   constructor() {
-    super("Primitive", PRIMITIVE);
+    super("Primitive", ReturnTypes.VALUE, CUSTOM_RETURN_TYPE);
   }
 
   public getParams() {
@@ -19,9 +14,9 @@ export class QPrimitiveReturningFunction extends QFunction<{}> {
   }
 }
 
-export class QPrimitiveReturningFunctionV2 extends QFunction<{}> {
+export class QPrimitiveReturningFunctionV2 extends QFunction<undefined, number> {
   constructor() {
-    super("Primitive", PRIMITIVE, { v2Mode: true });
+    super("Primitive", ReturnTypes.VALUE, CUSTOM_RETURN_TYPE, { v2Mode: true });
   }
 
   public getParams() {
@@ -29,9 +24,13 @@ export class QPrimitiveReturningFunctionV2 extends QFunction<{}> {
   }
 }
 
-export class QComplexReturningAction extends QAction<{}> {
+export class QComplexReturningAction extends QAction<undefined, SimpleEntityWithConverter> {
   constructor() {
-    super("Complex", MODEL);
+    super(
+      "Complex",
+      ReturnTypes.ENTITY,
+      new QComplexParam<SimpleEntityWithConverter, QSimpleEntityWithConverter>("XXX", new QSimpleEntityWithConverter()),
+    );
   }
 
   public getParams() {

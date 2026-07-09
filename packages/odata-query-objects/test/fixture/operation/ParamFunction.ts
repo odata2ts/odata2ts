@@ -1,6 +1,5 @@
 import { booleanToNumberConverter, PrefixModel, stringToPrefixModelConverter } from "@odata2ts/test-converters";
 import {
-  OperationReturnType,
   QBooleanParam,
   QComplexParam,
   QDateParam,
@@ -63,7 +62,7 @@ export class QBestBookFunction extends QFunction<BestBookParamModel> {
   ];
 
   constructor() {
-    super("BestBook", new OperationReturnType(ReturnTypes.VALUE, new QBooleanParam("NONE")));
+    super("BestBook", ReturnTypes.VALUE, new QBooleanParam("NONE"));
   }
 
   public getParams() {
@@ -91,7 +90,7 @@ export class QBestBookFunctionV2 extends QFunction<BestBookParamModelV2> {
   ];
 
   constructor() {
-    super("BestBook", new OperationReturnType(ReturnTypes.VALUE, new QBooleanParam("NONE")), { v2Mode: true });
+    super("BestBook", ReturnTypes.VALUE, new QBooleanParam("NONE"), { v2Mode: true });
   }
 
   public getParams() {

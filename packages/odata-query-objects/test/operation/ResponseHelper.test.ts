@@ -11,10 +11,7 @@ import {
   QBooleanParam,
   QComplexParam,
   QParamModel,
-  ResponseAdapter,
-  ResponseAdapterV2,
-  ResponseConverter,
-  ResponseConverterV2,
+  ResponseDataAdapter,
 } from "../../src";
 import {
   QSimpleEntityWithConverter,
@@ -42,22 +39,22 @@ describe("ResponseHelper Tests", function () {
 
   const checkThatNonMatchingInputPassesAsItIs = (
     nonMatchingResponses: Array<any>,
-    responseConverter: ResponseAdapter | ResponseAdapterV2,
+    responseDataAdapter: ResponseDataAdapter,
     qObject: QParamModel<any, any>,
   ) => {
     nonMatchingResponses.forEach((nm) => {
-      const result = responseConverter(createResponse(nm), [qObject]);
+      const result = responseDataAdapter(createResponse(nm), qObject);
       expect(result.data).toStrictEqual(nm);
     });
   };
 
   test("convertV2ValueResponse with non-matching attribute name", () => {
-    const result = convertV2ValueResponse(createResponse({ d: { myResult: VALUE_INPUT } }), [qParam]);
+    const result = convertV2ValueResponse(createResponse({ d: { myResult: VALUE_INPUT } }), qParam);
     expect(result.data.d).toStrictEqual({ myResult: VALUE_CONVERTED });
   });
 
   test("convertV2ValueResponse with attribute mapping", () => {
-    const result = convertV2ValueResponse(createResponse({ d: { TEST: VALUE_INPUT } }), [qParam]);
+    const result = convertV2ValueResponse(createResponse({ d: { TEST: VALUE_INPUT } }), qParam);
     expect(result.data.d).toStrictEqual({ testProp: VALUE_CONVERTED });
   });
 
@@ -78,7 +75,7 @@ describe("ResponseHelper Tests", function () {
   });
 
   test("convertV2ComplexResponse", () => {
-    const result = convertV2ComplexModelResponse(createResponse({ d: { Address: MODEL_INPUT } }), [qModelParam]);
+    const result = convertV2ComplexModelResponse(createResponse({ d: { Address: MODEL_INPUT } }), qModelParam);
     expect(result.data.d).toStrictEqual(MODEL_CONVERTED);
   });
 
@@ -98,7 +95,7 @@ describe("ResponseHelper Tests", function () {
   });
 
   test("convertV2ModelResponse", () => {
-    const result = convertV2EntityModelResponse(createResponse({ d: MODEL_INPUT }), [qModelParam]);
+    const result = convertV2EntityModelResponse(createResponse({ d: MODEL_INPUT }), qModelParam);
     expect(result.data.d).toStrictEqual(MODEL_CONVERTED);
   });
 
@@ -119,17 +116,17 @@ describe("ResponseHelper Tests", function () {
   });
 
   test("convertV2CollectionResponse", () => {
-    const result = convertV2CollectionResponse(createResponse({ d: { results: [MODEL_INPUT] } }), [qModelParam]);
+    const result = convertV2CollectionResponse(createResponse({ d: { results: [MODEL_INPUT] } }), qModelParam);
     expect(result.data.d.results).toStrictEqual([MODEL_CONVERTED]);
   });
 
   test("convertV2CollectionResponse also works with one object instead of list", () => {
-    const result = convertV2CollectionResponse(createResponse({ d: { results: MODEL_INPUT } }), [qModelParam]);
+    const result = convertV2CollectionResponse(createResponse({ d: { results: MODEL_INPUT } }), qModelParam);
     expect(result.data.d.results).toStrictEqual(MODEL_CONVERTED);
   });
 
   test("convertV2CollectionResponse for primitive collection response V2", () => {
-    const result = convertV2CollectionResponse(createResponse({ d: [MODEL_INPUT] }), [qModelParam]);
+    const result = convertV2CollectionResponse(createResponse({ d: [MODEL_INPUT] }), qModelParam);
     expect(result.data.d).toStrictEqual([MODEL_CONVERTED]);
   });
 
@@ -154,7 +151,7 @@ describe("ResponseHelper Tests", function () {
   });
 
   test("convertV4ValueResponse", () => {
-    const result = convertV4ValueResponse(createResponse({ value: true }), [qParam]);
+    const result = convertV4ValueResponse(createResponse({ value: true }), qParam);
     expect(result.data).toStrictEqual({ value: 1 });
   });
 
@@ -173,7 +170,7 @@ describe("ResponseHelper Tests", function () {
   });
 
   test("convertV4ModelResponse", () => {
-    const result = convertV4ModelResponse(createResponse(MODEL_INPUT), [qModelParam]);
+    const result = convertV4ModelResponse(createResponse(MODEL_INPUT), qModelParam);
     expect(result.data).toStrictEqual(MODEL_CONVERTED);
   });
 
@@ -191,12 +188,12 @@ describe("ResponseHelper Tests", function () {
   });
 
   test("convertV4CollectionResponse", () => {
-    const result = convertV4CollectionResponse(createResponse({ value: [MODEL_INPUT] }), [qModelParam]);
+    const result = convertV4CollectionResponse(createResponse({ value: [MODEL_INPUT] }), qModelParam);
     expect(result.data.value).toStrictEqual([MODEL_CONVERTED]);
   });
 
   test("convertV4CollectionResponse: also works with one object instead of list", () => {
-    const result = convertV4CollectionResponse(createResponse({ value: MODEL_INPUT }), [qModelParam]);
+    const result = convertV4CollectionResponse(createResponse({ value: MODEL_INPUT }), qModelParam);
     expect(result.data.value).toStrictEqual(MODEL_CONVERTED);
   });
 

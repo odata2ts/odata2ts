@@ -12,6 +12,8 @@ describe("QId Tests", () => {
     expect(exampleFunction.getName()).toBe("EntityXy");
     expect(exampleFunction.isV2()).toBeFalsy();
     expect(exampleFunction.getParams().length).toBe(1);
+    expect(exampleFunction.getResponseDataAdapter()).toBeUndefined();
+    expect(exampleFunction.getResponseConverter()).toBeUndefined();
   });
 
   test("build and parse URL", () => {

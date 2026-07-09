@@ -16,7 +16,7 @@ export class QGetSomethingFunction extends QFunction {
 
 export class QGetSomethingFunctionV2 extends QFunction {
   constructor() {
-    super("getSomething", undefined, { v2Mode: true });
+    super("getSomething", undefined, undefined, { v2Mode: true });
   }
 
   public getParams() {
