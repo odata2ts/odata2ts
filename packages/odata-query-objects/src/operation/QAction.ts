@@ -1,18 +1,14 @@
 import { QParamModel } from "../param/QParamModel";
 import { FlexibleConversionModel } from "../QueryObjectModel";
-import { ExtractDataTypeFromV4ResponseStructure, MainResponseConverter } from "../response/MainResponseConverter";
+import { MainResponseConverter } from "../response/MainResponseConverter";
 
 type ActionParams = Record<string, any>;
 type FilteredParamModel = [string, any];
 
-export abstract class QAction<
-  ParamModel,
-  ResponseStructure = undefined,
-  ResponseDataType = ExtractDataTypeFromV4ResponseStructure<ResponseStructure>,
-> {
+export abstract class QAction<ParamModel, ResponseStructure = undefined> {
   public constructor(
     protected name: string,
-    protected responseConverter?: MainResponseConverter<ResponseDataType, ResponseStructure>,
+    protected responseConverter?: MainResponseConverter<ResponseStructure>,
   ) {}
 
   public abstract getParams(): Array<QParamModel<any, any>> | undefined;

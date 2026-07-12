@@ -15,5 +15,5 @@ export type ResponseDataConverter<ConvertedType> =
  * However, to reduce complexity we hide this fact and publicly use the ResponseConverter interface,
  * while the corresponding converter and adapter implement this prop name mapping feature.
  */
-export type ResponseValueConverterV2<ConvertedType> = ResponseDataConverter<ConvertedType> &
+export type ResponseValueConverterV2<ConvertedType> = Pick<QParamModel<any, ConvertedType>, "convertFrom"> &
   Partial<Pick<QParamModel<any, any>, "getName" | "getMappedName">>;

@@ -17,7 +17,7 @@ export type ExtractDataTypeFromV4ResponseStructure<ResponseStructure> = Response
   | ODataModelResponseV4<infer T>
   | ODataCollectionResponseV4<infer T>
   ? T
-  : never;
+  : ResponseStructure;
 
 export type ExtractDataTypeFromV2ResponseStructure<ResponseStructure> = ResponseStructure extends
   | ODataValueResponseV2<infer T>
@@ -25,13 +25,13 @@ export type ExtractDataTypeFromV2ResponseStructure<ResponseStructure> = Response
   | ODataComplexModelResponseV2<infer T>
   | ODataCollectionResponseV2<infer T>
   ? T
-  : never;
+  : ResponseStructure;
 
-export type ExtractDataTypeFromResponseStructure<ResponseStructure> =
-  | ExtractDataTypeFromV4ResponseStructure<ResponseStructure>
-  | ExtractDataTypeFromV2ResponseStructure<ResponseStructure>;
+export type ExtractDataTypeFromResponseStructure<ResponseStructure> = ExtractDataTypeFromV2ResponseStructure<
+  ExtractDataTypeFromV4ResponseStructure<ResponseStructure>
+>;
 
-export abstract class MainResponseConverter<Type, Structure> {
+export abstract class MainResponseConverter<Structure, Type = ExtractDataTypeFromResponseStructure<Structure>> {
   public constructor(protected converter: ResponseDataConverter<Type>) {}
 
   public abstract convert(response: HttpResponseModel<any>): HttpResponseModel<Structure>;

@@ -2,7 +2,7 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataComplexModelResponseV2 } from "@odata2ts/odata-core";
 import { MainResponseConverter } from "../MainResponseConverter";
 
-export class ComplexResponseConverterV2<T> extends MainResponseConverter<T, ODataComplexModelResponseV2<T>> {
+export class ComplexResponseConverterV2<T> extends MainResponseConverter<ODataComplexModelResponseV2<T>, T> {
   public convert(response: HttpResponseModel<any>): HttpResponseModel<ODataComplexModelResponseV2<T>> {
     const data = response.data;
     if (typeof data?.d === "object") {

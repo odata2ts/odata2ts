@@ -5,7 +5,7 @@ import { MainResponseConverter } from "../MainResponseConverter";
 /**
  * For response types: EntityType and ComplexType.
  */
-export class ModelResponseConverterV4<T> extends MainResponseConverter<T, ODataModelResponseV4<T>> {
+export class ModelResponseConverterV4<T> extends MainResponseConverter<ODataModelResponseV4<T>, T> {
   public convert(response: HttpResponseModel<any>): HttpResponseModel<ODataModelResponseV4<T>> {
     const data = response.data;
     if (data && typeof data === "object") {

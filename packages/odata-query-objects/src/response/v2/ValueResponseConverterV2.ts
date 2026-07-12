@@ -3,7 +3,7 @@ import { ODataValueResponseV2 } from "@odata2ts/odata-core";
 import { MainResponseConverter } from "../MainResponseConverter";
 import { ResponseValueConverterV2 } from "../ResponseDataConverter";
 
-export class ValueResponseConverterV2<T> extends MainResponseConverter<T, ODataValueResponseV2<T>> {
+export class ValueResponseConverterV2<T> extends MainResponseConverter<ODataValueResponseV2<T>, T> {
   public convert(response: HttpResponseModel<any>): HttpResponseModel<ODataValueResponseV2<T>> {
     const data = response.data;
     const value = data?.d;

@@ -1,5 +1,5 @@
 import { QParamModel } from "../param/QParamModel";
-import { ExtractDataTypeFromResponseStructure, MainResponseConverter } from "../response/MainResponseConverter";
+import { MainResponseConverter } from "../response/MainResponseConverter";
 
 type FunctionParams = Record<string, string>;
 type FilteredParamModel = [string, string];
@@ -43,14 +43,10 @@ function compileQueryParams(params: FunctionParams | undefined, notEncoded: bool
  *
  * This includes handling of entity id paths (same format as V4 functions).
  */
-export abstract class QFunction<
-  ParamModel,
-  ResponseStructure,
-  ResponseDataType = ExtractDataTypeFromResponseStructure<ResponseStructure>,
-> {
+export abstract class QFunction<ParamModel, ResponseStructure> {
   public constructor(
     protected name: string,
-    protected responseConverter?: MainResponseConverter<ResponseDataType, ResponseStructure>,
+    protected responseConverter?: MainResponseConverter<ResponseStructure>,
     protected config: { v2Mode?: boolean } = {},
   ) {}
 
