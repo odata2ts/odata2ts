@@ -1,8 +1,8 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { describe, expect, test } from "vitest";
 import { EMPTY_ACTION_NAME, QEmptyAction } from "../fixture/operation/EmptyAction";
 import { ParamActionParamModel, QParamAction } from "../fixture/operation/ParamAction";
-import { QComplexReturningAction, QPrimitiveReturningFunction } from "../fixture/operation/ReturningFunctions";
-import { SimpleEntityUnconverted, SimpleEntityWithConverter } from "../fixture/SimpleEntityWithConverter";
 import { createResponse } from "../test-infra/TestResponseHelper";
 
 describe("QAction Tests", () => {
@@ -12,7 +12,6 @@ describe("QAction Tests", () => {
     expect(exampleOperation.buildUrl()).toBe(EMPTY_ACTION_NAME);
     expect(exampleOperation.getParams()).toBeUndefined();
     expect(exampleOperation.getRequestConverter()).toBeUndefined();
-    expect(exampleOperation.getResponseDataAdapter()).toBeUndefined();
     expect(exampleOperation.getResponseConverter()).toBeUndefined();
   });
 
@@ -21,7 +20,6 @@ describe("QAction Tests", () => {
 
     expect(exampleOperation.getParams()).toBeDefined();
     expect(exampleOperation.getParams().length).toBe(7);
-    expect(exampleOperation.getResponseDataAdapter()).toBeDefined();
     expect(exampleOperation.getResponseConverter()).toBeDefined();
     expect(exampleOperation.getRequestConverter()).toBeDefined();
   });
@@ -64,5 +62,18 @@ describe("QAction Tests", () => {
     expect(reqConv.convertTo()).toBeUndefined();
     // @ts-expect-error
     expect(() => reqConv.convertTo({ dummy: "xxx" })).toThrow("Unknown parameter");
+  });
+
+  test("response converter: conversion", () => {
+    const origResponse: HttpResponseModel<any> = createResponse({ value: "test" });
+
+    const conv = new QParamAction().getResponseConverter()!;
+    expect(conv).toBeDefined();
+
+    const result: HttpResponseModel<ODataValueResponseV4<string>> = conv.convert(origResponse);
+    expect(result).toStrictEqual({
+      ...origResponse,
+      data: { value: "TEST" },
+    });
   });
 });

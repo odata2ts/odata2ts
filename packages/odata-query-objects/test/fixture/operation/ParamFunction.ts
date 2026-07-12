@@ -1,5 +1,8 @@
+import { ODataEntityModelResponseV2, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { booleanToNumberConverter, PrefixModel, stringToPrefixModelConverter } from "@odata2ts/test-converters";
 import {
+  EntityResponseConverterV2,
+  ModelResponseConverterV4,
   QBooleanParam,
   QComplexParam,
   QDateParam,
@@ -15,7 +18,6 @@ import {
   QStringParam,
   QTimeOfDayParam,
   QTimeV2Param,
-  ReturnTypes,
 } from "../../../src";
 import { BookModel, QBook } from "./BookModel";
 
@@ -46,7 +48,7 @@ export interface BestBookParamModel {
   testNumericEnum?: Array<TestRatings>;
 }
 
-export class QBestBookFunction extends QFunction<BestBookParamModel> {
+export class QBestBookFunction extends QFunction<BestBookParamModel, ODataModelResponseV4<BookModel>> {
   private readonly params = [
     new QNumberParam("TestNumber", "testNumber"),
     new QBooleanParam("test_Boolean", "testBoolean", booleanToNumberConverter),
@@ -62,7 +64,7 @@ export class QBestBookFunction extends QFunction<BestBookParamModel> {
   ];
 
   constructor() {
-    super("BestBook", ReturnTypes.VALUE, new QBooleanParam("NONE"));
+    super("BestBook", new ModelResponseConverterV4(new QBook()));
   }
 
   public getParams() {
@@ -79,7 +81,7 @@ export interface BestBookParamModelV2 {
   testString?: string | null;
 }
 
-export class QBestBookFunctionV2 extends QFunction<BestBookParamModelV2> {
+export class QBestBookFunctionV2 extends QFunction<BestBookParamModelV2, ODataEntityModelResponseV2<BookModel>> {
   private readonly params = [
     new QGuidV2Param("testGuid"),
     new QDateTimeV2Param("testDateTime"),
@@ -90,7 +92,7 @@ export class QBestBookFunctionV2 extends QFunction<BestBookParamModelV2> {
   ];
 
   constructor() {
-    super("BestBook", ReturnTypes.VALUE, new QBooleanParam("NONE"), { v2Mode: true });
+    super("BestBook", new EntityResponseConverterV2<BookModel>(new QBook()), { v2Mode: true });
   }
 
   public getParams() {

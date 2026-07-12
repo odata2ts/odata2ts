@@ -1,4 +1,7 @@
-import { describe, expect, test } from "vitest";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { describe, expect, expectTypeOf, test } from "vitest";
+import { BookModel } from "../fixture/operation/BookModel";
 import { QGetSomethingFunction, QGetSomethingFunctionV2 } from "../fixture/operation/EmptyFunction";
 import { OverloadedFunctionParamModel, QOverloadedFunction } from "../fixture/operation/OverloadedFunction";
 import {
@@ -17,7 +20,6 @@ describe("QFunction Tests", () => {
     const exampleFunction = new QGetSomethingFunction();
     expect(exampleFunction.getName()).toBe("getSomething");
     expect(exampleFunction.buildUrl()).toBe("getSomething()");
-    expect(exampleFunction.getResponseDataAdapter()).toBeUndefined();
     expect(exampleFunction.getResponseConverter()).toBeUndefined();
     expect(exampleFunction.parseUrl("xyz")).toBeUndefined();
     expect(exampleFunction.parseUrl("xyz()")).toBeUndefined();
@@ -27,7 +29,6 @@ describe("QFunction Tests", () => {
     const exampleFunction = new QGetSomethingFunctionV2();
     expect(exampleFunction.getName()).toBe("getSomething");
     expect(exampleFunction.buildUrl()).toBe("getSomething");
-    expect(exampleFunction.getResponseDataAdapter()).toBeUndefined();
     expect(exampleFunction.getResponseConverter()).toBeUndefined();
     expect(exampleFunction.parseUrl("xyz")).toBeUndefined();
     expect(exampleFunction.parseUrl("xyz(123)")).toBeUndefined();
@@ -77,7 +78,7 @@ describe("QFunction Tests", () => {
         ",testNumericEnum=@testNumericEnum" +
         ")" +
         '?@testCollection=["a","b"]' +
-        '&@TEST_ENTITY={"title":"testBook","AUTHOR":{"name":"testAuthor"}}' +
+        '&@TEST_ENTITY={"Title":"testBook","AUTHOR":{"Name":"testAuthor"}}' +
         '&@testNumericEnum=["TOP","BAD"]',
     );
     expect(exampleFunction.buildUrl(allParams)).toBe(
@@ -94,7 +95,7 @@ describe("QFunction Tests", () => {
         ",testNumericEnum=@testNumericEnum" +
         ")" +
         "?@testCollection=%5B%22a%22%2C%22b%22%5D" +
-        "&@TEST_ENTITY=%7B%22title%22%3A%22testBook%22%2C%22AUTHOR%22%3A%7B%22name%22%3A%22testAuthor%22%7D%7D" +
+        "&@TEST_ENTITY=%7B%22Title%22%3A%22testBook%22%2C%22AUTHOR%22%3A%7B%22Name%22%3A%22testAuthor%22%7D%7D" +
         "&@testNumericEnum=%5B%22TOP%22%2C%22BAD%22%5D",
     );
   });
@@ -119,8 +120,39 @@ describe("QFunction Tests", () => {
     expect(exampleFunction.buildUrl(allParams)).toBe(expected + "&testString=null");
   });
 
-  test("QFunction: response stuff", () => {
-    const exampleFunction = new QPrimitiveReturningFunction();
+  test("QFunction: response converter", () => {
+    const responseConverter = new QBestBookFunction().getResponseConverter()!;
+    const exampleBook = {
+      Title: "Wuthering Heights",
+      AUTHOR: {
+        Name: "Heinz Tester",
+      },
+    };
+    const exampleResponse: HttpResponseModel<any> = {
+      status: 200,
+      statusText: "OK",
+      headers: {},
+      data: exampleBook,
+    };
+
+    expect(responseConverter).toBeDefined();
+    const result = responseConverter.convert(exampleResponse);
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<BookModel>>>();
+
+    expect(result).toStrictEqual({
+      ...exampleResponse,
+      data: {
+        title: exampleBook.Title,
+        author: {
+          name: {
+            prefix: "PREFIX_",
+            value: exampleBook.AUTHOR.Name,
+          },
+        },
+      },
+    });
+
+    // const exampleFunction = new QPrimitiveReturningFunction();
   });
 
   // test("QFunction: primitive response conversion", () => {

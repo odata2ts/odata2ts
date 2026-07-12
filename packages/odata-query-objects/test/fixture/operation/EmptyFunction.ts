@@ -1,6 +1,6 @@
 import { QFunction } from "../../../src";
 
-export class QGetSomethingFunction extends QFunction {
+export class QGetSomethingFunction extends QFunction<undefined, void> {
   constructor() {
     super("getSomething");
   }
@@ -14,9 +14,9 @@ export class QGetSomethingFunction extends QFunction {
   }
 }
 
-export class QGetSomethingFunctionV2 extends QFunction {
+export class QGetSomethingFunctionV2 extends QFunction<undefined, void> {
   constructor() {
-    super("getSomething", undefined, undefined, { v2Mode: true });
+    super("getSomething", undefined, { v2Mode: true });
   }
 
   public getParams() {

@@ -1,11 +1,5 @@
 import { QParamModel } from "../param/QParamModel";
-import {
-  getResponseDataAdapter,
-  getResponseDataAdapterV2,
-  ResponseDataAdapter,
-  ResponseDataConverter,
-  ReturnTypes,
-} from "./ResponseHelper";
+import { ExtractDataTypeFromResponseStructure, MainResponseConverter } from "../response/MainResponseConverter";
 
 type FunctionParams = Record<string, string>;
 type FilteredParamModel = [string, string];
@@ -49,11 +43,14 @@ function compileQueryParams(params: FunctionParams | undefined, notEncoded: bool
  *
  * This includes handling of entity id paths (same format as V4 functions).
  */
-export abstract class QFunction<ParamModel = undefined, ResponseStructure = undefined> {
+export abstract class QFunction<
+  ParamModel,
+  ResponseStructure,
+  ResponseDataType = ExtractDataTypeFromResponseStructure<ResponseStructure>,
+> {
   public constructor(
     protected name: string,
-    protected returnType: ReturnTypes = ReturnTypes.VOID,
-    protected responseConverter?: ResponseDataConverter<any, ResponseStructure>,
+    protected responseConverter?: MainResponseConverter<ResponseDataType, ResponseStructure>,
     protected config: { v2Mode?: boolean } = {},
   ) {}
 
@@ -180,11 +177,7 @@ export abstract class QFunction<ParamModel = undefined, ResponseStructure = unde
     }, {} as ParamModel);
   }
 
-  public getResponseDataAdapter(): ResponseDataAdapter | undefined {
-    return this.isV2() ? getResponseDataAdapter(this.returnType) : getResponseDataAdapterV2(this.returnType);
-  }
-
-  public getResponseConverter(): ResponseDataConverter | undefined {
+  public getResponseConverter() {
     return this.responseConverter;
   }
 

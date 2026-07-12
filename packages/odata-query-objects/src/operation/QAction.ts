@@ -1,15 +1,18 @@
 import { QParamModel } from "../param/QParamModel";
 import { FlexibleConversionModel } from "../QueryObjectModel";
-import { getResponseDataAdapter, ResponseDataAdapter, ResponseDataConverter, ReturnTypes } from "./ResponseHelper";
+import { ExtractDataTypeFromV4ResponseStructure, MainResponseConverter } from "../response/MainResponseConverter";
 
 type ActionParams = Record<string, any>;
 type FilteredParamModel = [string, any];
 
-export abstract class QAction<ParamModel = undefined, ResponseStructure = undefined> {
+export abstract class QAction<
+  ParamModel,
+  ResponseStructure = undefined,
+  ResponseDataType = ExtractDataTypeFromV4ResponseStructure<ResponseStructure>,
+> {
   public constructor(
     protected name: string,
-    protected returnType: ReturnTypes = ReturnTypes.VOID,
-    protected responseConverter?: ResponseDataConverter<any, ResponseStructure>,
+    protected responseConverter?: MainResponseConverter<ResponseDataType, ResponseStructure>,
   ) {}
 
   public abstract getParams(): Array<QParamModel<any, any>> | undefined;
@@ -53,11 +56,7 @@ export abstract class QAction<ParamModel = undefined, ResponseStructure = undefi
     };
   }
 
-  public getResponseDataAdapter(): ResponseDataAdapter | undefined {
-    return getResponseDataAdapter(this.returnType);
-  }
-
-  public getResponseConverter(): ResponseDataConverter | undefined {
+  public getResponseConverter() {
     return this.responseConverter;
   }
 }
