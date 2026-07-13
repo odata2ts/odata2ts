@@ -1,0 +1,83 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { createQueryBuilderV4, ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
+import { ModelResponseConverterV4 } from "@odata2ts/odata-query-objects";
+import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
+import { DEFAULT_HEADERS, UrlBuilderRequestCmdV4 } from "../../src";
+import { Feature, PersonModel } from "../fixture/PersonModel";
+import { QPersonV4, qPersonV4 } from "../fixture/v4/QPersonV4";
+import { MockClient } from "../mock/MockClient";
+
+describe("UrlBuilderRequestCmdV4 tests", () => {
+  const DEFAULT_URL = "/test/ing";
+
+  let client: MockClient;
+  let queryBuilder: ODataQueryBuilderV4<QPersonV4>;
+
+  beforeEach(() => {
+    client = new MockClient(false);
+    queryBuilder = createQueryBuilderV4(DEFAULT_URL, qPersonV4, { unencoded: true });
+  });
+
+  test("base props", () => {
+    const candidate = new UrlBuilderRequestCmdV4(client, queryBuilder, qPersonV4);
+
+    expect(candidate.getUrl()).toBe(DEFAULT_URL);
+    expect(candidate.getInfo().url).toBe(DEFAULT_URL);
+  });
+
+  test("with new URL", () => {
+    const candidate = new UrlBuilderRequestCmdV4(client, queryBuilder, qPersonV4);
+    const newCandidate = candidate.withNewUrl((builder) => builder.select("userName"));
+
+    expect(candidate.getUrl()).toBe(DEFAULT_URL);
+    expect(newCandidate.getUrl()).toBe(DEFAULT_URL + "?$select=UserName");
+  });
+
+  test("new URL multiple times", () => {
+    const candidate = new UrlBuilderRequestCmdV4(client, queryBuilder, qPersonV4);
+    let newCandidate = candidate.withNewUrl((builder) => builder.select("userName"));
+    newCandidate = newCandidate.withNewUrl((builder, qPerson) => builder.filter(qPerson.age.gt("40")));
+
+    expect(newCandidate.getUrl()).toBe(DEFAULT_URL + "?$select=UserName&$filter=Age gt 40");
+  });
+
+  test("execute", async () => {
+    const candidate = new UrlBuilderRequestCmdV4<MockClient, ODataModelResponseV4<PersonModel>, QPersonV4>(
+      client,
+      queryBuilder,
+      qPersonV4,
+      {
+        headers: DEFAULT_HEADERS,
+        mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
+      },
+    );
+
+    client.responseData = {
+      UserName: "tester",
+      Age: 14,
+      FavFeature: "Feature1",
+      Features: ["Feature1"],
+    };
+
+    const requestConfig = { headers: { x: "y" }, test: "ing" };
+    const result = await candidate
+      .withNewUrl((builder, qPerson) => builder.filter(qPerson.age.gt("40")))
+      .appendRequestConverter((info) => info.withData("test"))
+      .execute(requestConfig);
+
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
+
+    expect(client.lastUrl).toBe(DEFAULT_URL + "?$filter=Age gt 40");
+    expect(client.lastData).toBe("test");
+    expect(client.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
+    expect(client.lastRequestConfig).toStrictEqual(requestConfig);
+
+    expect(result.data).toStrictEqual({
+      userName: "tester",
+      age: "14",
+      favFeature: Feature.Feature1,
+      features: [Feature.Feature1],
+    });
+  });
+});

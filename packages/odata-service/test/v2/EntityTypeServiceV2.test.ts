@@ -1,12 +1,8 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
-import { ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
-import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { beforeEach, describe, expect, test } from "vitest";
-import { DEFAULT_HEADERS, MERGE_HEADERS } from "../../src/RequestHeaders";
+import { DEFAULT_HEADERS, MERGE_HEADERS } from "../../src";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { PersonModel } from "../fixture/PersonModel";
 import { PersonModelV2Service } from "../fixture/v2/PersonModelV2Service";
-import { QPersonV2 } from "../fixture/v2/QPersonV2";
 import { MockClient } from "../mock/MockClient";
 
 describe("EntityTypeService V2 Test", () => {
@@ -14,8 +10,6 @@ describe("EntityTypeService V2 Test", () => {
   const BASE_URL = "path";
   const NAME = "test('tester')";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
-
-  const REQUEST_CONFIG = { test: "Test" };
 
   let testService: PersonModelV2Service<MockClient>;
 
@@ -26,61 +20,35 @@ describe("EntityTypeService V2 Test", () => {
   });
 
   test("entityType: patch = merge", async () => {
-    const model: Partial<PersonModel> = { Age: "45" };
+    const model: Partial<PersonModel> = { age: "45" };
     const odataModel = { Age: 45 };
 
-    odataClient.setModelResponse(odataModel);
-    let result = await testService.patch(model);
-    // @ts-ignore
-    const resultData = result.data.d;
+    const cmd = testService.patch(model);
+    const request = cmd.getInfo();
 
-    expect(odataClient.lastUrl).toBe(EXPECTED_PATH);
-    expect(odataClient.lastOperation).toBe("POST");
-    expect(odataClient.lastData).toEqual({ Age: 45 });
-    expect(odataClient.lastRequestConfig).toBeUndefined();
-    expect(odataClient.additionalHeaders).toStrictEqual({ ...DEFAULT_HEADERS, ...MERGE_HEADERS });
-    expect(resultData).toStrictEqual(odataModel);
-
-    result = await testService.patch(model, REQUEST_CONFIG);
-    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
-    expect(result.data).toBeNull();
-  });
-
-  test("entityType V2: typing of query stuff", async () => {
-    // typing test of result
-    const result: HttpResponseModel<ODataEntityModelResponseV2<PersonModel>> = await testService.query((builder) => {
-      // typing test of builder
-      const resultB: ODataQueryBuilderV2<QPersonV2> = builder;
-    });
-
-    // manual typings provided
-    const result2: HttpResponseModel<ODataEntityModelResponseV2<{ userName: string }>> = await testService.query<
-      Pick<PersonModel, "userName">
-    >((builder) => {
-      // typing test of builder
-      const resultB: ODataQueryBuilderV2<QPersonV2> = builder;
-    });
+    expect(request.url).toBe(EXPECTED_PATH);
+    expect(request.method).toBe("POST");
+    expect(request.data).toStrictEqual(model);
+    expect(cmd.getInfoConverted().data).toStrictEqual(odataModel);
+    expect(request.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...MERGE_HEADERS });
   });
 
   test("entityType V2: function params", async () => {
-    await testService.getSomething({
-      testGuid: { prefix: "xxx", value: "123" },
-      testDateTime: "1",
-      testDateTimeO: "2",
-      testTime: "3",
-    });
-    expect(odataClient.lastUrl).toBe(
+    const expected =
       EXPECTED_PATH +
-        "/GET_SOMETHING?TEST_GUID=guid'123'&testDateTime=datetime'1'&testDateTimeO=datetimeoffset'2'&testTime=time'3'",
-    );
-    expect(odataClient.lastData).toBeUndefined();
-    expect(odataClient.lastOperation).toBe("GET");
-    expect(odataClient.lastRequestConfig).toBeUndefined();
+      "/GET_SOMETHING?TEST_GUID=guid'123'&testDateTime=datetime'1'&testDateTimeO=datetimeoffset'2'&testTime=time'3'";
 
-    await testService.getSomething(
-      { testGuid: { prefix: "xxx", value: "123" }, testDateTime: "1", testDateTimeO: "2", testTime: "3" },
-      REQUEST_CONFIG,
-    );
-    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
+    const request = testService
+      .getSomething({
+        testGuid: { prefix: "xxx", value: "123" },
+        testDateTime: "1",
+        testDateTimeO: "2",
+        testTime: "3",
+      })
+      .getInfo();
+
+    expect(request.url).toBe(expected);
+    expect(request.data).toBeUndefined();
+    expect(request.method).toBe("GET");
   });
 });

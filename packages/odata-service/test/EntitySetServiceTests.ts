@@ -1,7 +1,6 @@
 import { beforeEach, expect, test } from "vitest";
-import { EntitySetServiceV2, EntitySetServiceV4, ODataServiceOptions } from "../src";
-import { DEFAULT_HEADERS } from "../src/RequestHeaders";
-import { EditablePersonModel, Feature, PersonId, PersonModel } from "./fixture/PersonModel";
+import { DEFAULT_HEADERS, EntitySetServiceV2, EntitySetServiceV4, ODataServiceOptions } from "../src";
+import { EditablePersonModel, PersonId, PersonModel } from "./fixture/PersonModel";
 import { QPersonV2 } from "./fixture/v2/QPersonV2";
 import { QPersonV4 } from "./fixture/v4/QPersonV4";
 import { MockClient } from "./mock/MockClient";
@@ -20,7 +19,6 @@ export function commonEntitySetTests(
   const BASE_URL = "/base";
   const NAME = "EntityXY";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
-  const REQUEST_CONFIG = { test: "Test" };
 
   let testService:
     | EntitySetServiceV4<MockClient, PersonModel, EditablePersonModel, QPersonV4, PersonId>
@@ -56,61 +54,41 @@ export function commonEntitySetTests(
 
   test("entitySet: query", async () => {
     const expected = `${EXPECTED_PATH}`;
-    const expectedData = [
-      {
-        userName: "tester",
-        Age: "14",
-        FavFeature: Feature.Feature1,
-      },
-    ];
 
-    odataClient.setCollectionResponse([
-      {
-        UserName: "tester",
-        Age: 14,
-        FavFeature: Feature.Feature1,
-      },
-    ]);
-    let result = await testService.query();
-    // @ts-ignore
-    const resultData = result.data.d?.results || result.data.value;
+    const cmd = testService.query();
+    const request = cmd.getInfo();
 
-    expect(odataClient.lastUrl).toBe(expected);
-    expect(odataClient.lastData).toBeUndefined();
-    expect(odataClient.lastOperation).toBe("GET");
-    expect(odataClient.lastRequestConfig).toBeUndefined();
-    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
-    expect(resultData).toStrictEqual(expectedData);
-
-    await testService.query(undefined, REQUEST_CONFIG);
-    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
+    expect(request.url).toBe(expected);
+    expect(request.data).toBeUndefined();
+    expect(request.method).toBe("GET");
+    expect(request.headers).toStrictEqual(DEFAULT_HEADERS);
   });
 
   test("entitySet: query with select", async () => {
     const expected = `${EXPECTED_PATH}?${encodeURIComponent("$select")}=${encodeURIComponent("UserName,Age")}`;
 
-    await testService.query((queryBuilder) => queryBuilder.select("userName", "Age"));
+    const request = testService.query((queryBuilder) => queryBuilder.select("userName", "age")).getInfo();
 
-    expect(odataClient.lastUrl).toBe(expected);
-    expect(odataClient.lastData).toBeUndefined();
-    expect(odataClient.lastOperation).toBe("GET");
+    expect(request.url).toBe(expected);
+    expect(request.data).toBeUndefined();
+    expect(request.method).toBe("GET");
   });
 
   test("entitySet: query with qObject", async () => {
     const expected = `${EXPECTED_PATH}?${encodeURIComponent("$filter")}=${encodeURIComponent("Age gt 18")}`;
 
-    await testService.query((queryBuilder, qObj) => queryBuilder.filter(qObj.Age.gt("18")));
+    const request = testService.query((queryBuilder, qObj) => queryBuilder.filter(qObj.age.gt("18"))).getInfo();
 
-    expect(odataClient.lastUrl).toBe(expected);
-    expect(odataClient.lastData).toBeUndefined();
-    expect(odataClient.lastOperation).toBe("GET");
+    expect(request.url).toBe(expected);
+    expect(request.data).toBeUndefined();
+    expect(request.method).toBe("GET");
   });
 
   test("entitySet: no url encoding", async () => {
     const toTest = new serviceConstructor(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
 
-    await toTest.query((qb, q) => qb.filter(q.userName.eq("2")));
+    const request = toTest.query((qb, q) => qb.filter(q.userName.eq("2"))).getInfo();
 
-    expect(odataClient.lastUrl).toBe(EXPECTED_PATH + "?$filter=UserName eq '2'");
+    expect(request.url).toBe(EXPECTED_PATH + "?$filter=UserName eq '2'");
   });
 }

@@ -27,14 +27,16 @@ export class ServiceStateHelperV4<
     this.qResponseType = new QComplexParam("NONE", qModel);
   }
 
-  public applyQueryBuilder = (queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void): string => {
+  public createQueryBuilder = (
+    queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
+    path = this.path,
+  ): ODataQueryBuilderV4<Q> => {
+    const builder = createQueryBuilderV4(path, this.qModel, { unencoded: this.isUrlNotEncoded() });
     if (queryFn) {
-      const builder = createQueryBuilderV4(this.path, this.qModel, { unencoded: this.isUrlNotEncoded() });
       queryFn(builder, this.qModel);
-      return builder.build();
     }
 
-    return this.path;
+    return builder;
   };
 
   public evaluateSubtypeOptions(options: SubtypeOptions | undefined) {

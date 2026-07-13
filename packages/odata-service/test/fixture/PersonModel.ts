@@ -28,14 +28,14 @@ export enum Feature {
 
 export interface PersonModel {
   userName: string;
-  Age: string;
-  FavFeature: Feature;
-  Features: Array<Feature>;
-  Friends: Array<PersonModel>;
-  BestFriend?: PersonModel;
+  age: string;
+  favFeature: Feature;
+  features: Array<Feature>;
+  friends: Array<PersonModel>;
+  bestFriend?: PersonModel;
 }
 
-export interface EditablePersonModel extends Pick<PersonModel, "userName" | "Age" | "FavFeature" | "Features"> {}
+export interface EditablePersonModel extends Pick<PersonModel, "userName" | "age" | "favFeature" | "features"> {}
 
 export type PersonId = string | { userName: string };
 

@@ -1,13 +1,14 @@
-import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
+import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import {
-  convertV2CollectionResponse,
-  convertV2EntityModelResponse,
+  CollectionResponseConverterV2,
+  EntityResponseConverterV2,
   PrimitiveCollectionType,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptions } from "../ODataServiceOptions";
+import { UrlBuilderRequestCmdV2, UrlRequestCmd } from "../request";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
@@ -32,56 +33,60 @@ export class CollectionServiceV2<
    * Add a new item to the collection.
    *
    * @param model primitive value
-   * @param requestConfig
    */
-  public async add(
-    model: EditableT,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): ODataResponse<ODataEntityModelResponseV2<T>> {
-    const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
-    const result = await client.post<ODataEntityModelResponseV2<T>>(
+  public add(model: EditableT) {
+    const { path, client, qModel, getDefaultHeaders, qResponseType } = this.__base;
+
+    return new UrlRequestCmd<ClientType, ODataEntityModelResponseV2<T>, EditableT>(
+      client,
+      ODataHttpMethods.Post,
       path,
-      qModel.convertToOData(model),
-      requestConfig,
-      getDefaultHeaders(),
+      model,
+      {
+        headers: getDefaultHeaders(),
+        mainRequestConverter: qModel,
+        mainResponseConverter: new EntityResponseConverterV2(qResponseType),
+      },
     );
-    return convertV2EntityModelResponse(result, qResponseType);
   }
 
   /**
    * Update the whole collection.
    *
    * @param models set of primitive values
-   * @param requestConfig
    */
-  public update(models: Array<EditableT>, requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
-    const { client, qModel, path, getDefaultHeaders } = this.__base;
+  public update(models: Array<EditableT>) {
+    const { client, path, qModel, getDefaultHeaders } = this.__base;
 
-    return client.put(path, qModel.convertToOData(models), requestConfig, getDefaultHeaders());
+    return new UrlRequestCmd<ClientType, void, Array<EditableT>>(client, ODataHttpMethods.Put, path, models, {
+      headers: getDefaultHeaders(),
+      mainRequestConverter: qModel,
+    });
   }
 
   /**
    * Delete the whole collection.
    */
-  public async delete(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
+  public delete() {
     const { client, path } = this.__base;
-    return client.delete(path, requestConfig);
+
+    return new UrlRequestCmd<ClientType, void>(client, ODataHttpMethods.Delete, path, undefined);
   }
 
   /**
    * Query collection.
    */
-  public async query<ReturnType = T>(
-    queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): ODataResponse<ODataCollectionResponseV2<ReturnType>> {
-    const { client, qResponseType, getDefaultHeaders, applyQueryBuilder } = this.__base;
+  public query<ReturnType = T>(queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void) {
+    const { client, qModel, qResponseType, getDefaultHeaders, createQueryBuilder } = this.__base;
 
-    const response = await client.get<ODataCollectionResponseV2<any>>(
-      applyQueryBuilder(queryFn),
-      requestConfig,
-      getDefaultHeaders(),
+    return new UrlBuilderRequestCmdV2<ClientType, ODataCollectionResponseV2<ReturnType>, Q>(
+      client,
+      createQueryBuilder(queryFn),
+      qModel,
+      {
+        headers: getDefaultHeaders(),
+        mainResponseConverter: new CollectionResponseConverterV2(qResponseType),
+      },
     );
-    return convertV2CollectionResponse(response, qResponseType);
   }
 }

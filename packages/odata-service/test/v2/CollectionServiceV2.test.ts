@@ -1,5 +1,3 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
-import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 import {
   EnumCollection,
   QNumericEnumCollection,
@@ -44,17 +42,17 @@ describe("CollectionService V2 Tests", () => {
   commonCollectionTests(odataClient, stringConstructor, enumConstructor);
 
   test("numeric enum collection: add", async () => {
-    const REQUEST_CONFIG = { test: "Test" };
-
     const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
 
-    await enumService.add(NumericTestEnum.A, REQUEST_CONFIG);
+    const cmd = enumService.add(NumericTestEnum.A);
+    const result = cmd.getInfoConverted();
 
-    expect(odataClient.lastUrl).toBe(NAME_ENUM);
-    expect(odataClient.lastOperation).toBe("POST");
-    expect(odataClient.lastData).toEqual(NumericTestEnum[NumericTestEnum.A]);
-    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
-    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
+    expect(result.url).toBe(NAME_ENUM);
+    expect(result.method).toBe("POST");
+    expect(result.headers).toStrictEqual(DEFAULT_HEADERS);
+    expect(result.data).toEqual(NumericTestEnum[NumericTestEnum.A]);
+    // without conversion
+    expect(cmd.getInfo().data).toEqual(NumericTestEnum.A);
   });
 
   test("numeric enum collection: filter", async () => {
@@ -62,20 +60,10 @@ describe("CollectionService V2 Tests", () => {
 
     const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
 
-    await enumService.query((queryBuilder, qObj) =>
-      queryBuilder.filter(qObj.it.eq(NumericTestEnum.A).or(qObj.it.eq(1))),
-    );
-    expect(odataClient.lastUrl).toBe(NAME_ENUM + params);
-  });
-
-  test("collection: query response typing test", async () => {
-    const stringService = stringConstructor(BASE_PATH, NAME_STRING);
-    const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
-
-    // typing tests
-    const result: HttpResponseModel<ODataCollectionResponseV2<string>> = await stringService.query();
-    const resultEnum: HttpResponseModel<ODataCollectionResponseV2<string>> = await enumService.query();
-    const result2: HttpResponseModel<ODataCollectionResponseV2<number>> = await enumService.query<number>();
+    const request = enumService
+      .query((queryBuilder, qObj) => queryBuilder.filter(qObj.it.eq(NumericTestEnum.A).or(qObj.it.eq(1))))
+      .getInfo();
+    expect(request.url).toBe(NAME_ENUM + params);
   });
 
   test("collection: count", async () => {
@@ -83,8 +71,8 @@ describe("CollectionService V2 Tests", () => {
     const params = getParams({ $inlinecount: "allpages" });
     const expected = "testString" + params;
 
-    await stringService.query((builder) => builder.count());
+    const request = stringService.query((builder) => builder.count()).getInfo();
 
-    expect(odataClient.lastUrl).toBe(expected);
+    expect(request.url).toBe(expected);
   });
 });

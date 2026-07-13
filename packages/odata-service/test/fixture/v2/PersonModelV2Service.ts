@@ -1,12 +1,14 @@
-import { ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
+import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
+import { ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
 import { Features } from "@odata2ts/odata-query-builder/test/fixture/types/SimplePersonModel";
-import { QEnumCollection } from "@odata2ts/odata-query-objects";
+import { EntityResponseConverterV2, QEnumCollection } from "@odata2ts/odata-query-objects";
 import {
   CollectionServiceV2,
   EntitySetServiceV2,
   EntityTypeServiceV2,
   ODataServiceOptions,
   PrimitiveTypeServiceV2,
+  UrlRequestCmd,
 } from "../../../src";
 import { EditablePersonModel, GetSomethingFunctionParams, PersonId, PersonModel } from "../PersonModel";
 import { QPersonIdFunction } from "../QPerson";
@@ -28,7 +30,7 @@ export class PersonModelV2Service<ClientType extends ODataHttpClient> extends En
   public userName() {
     const { client, path, qModel, options } = this.__base;
 
-    return new PrimitiveTypeServiceV2<ClientType, "string">(
+    return new PrimitiveTypeServiceV2<ClientType, string>(
       client,
       path,
       "UserName",
@@ -52,10 +54,18 @@ export class PersonModelV2Service<ClientType extends ODataHttpClient> extends En
     super(client, basePath, name, new QPersonV2(), options);
   }
 
-  public getSomething(params: GetSomethingFunctionParams, requestConfig?: ODataHttpClientConfig<ClientType>) {
+  public getSomething(params: GetSomethingFunctionParams) {
     const { client, addFullPath, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qGetSomething.buildUrl(params, isUrlNotEncoded()));
-    return client.get(url, requestConfig);
+    return new UrlRequestCmd<ClientType, ODataEntityModelResponseV2<PersonModel>>(
+      client,
+      ODataHttpMethods.Get,
+      url,
+      undefined,
+      {
+        mainResponseConverter: new EntityResponseConverterV2(qPersonV2),
+      },
+    );
   }
 }
 

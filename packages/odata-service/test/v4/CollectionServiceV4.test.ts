@@ -1,9 +1,6 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
-import { ODataCollectionResponseV4 } from "@odata2ts/odata-core";
 import { EnumCollection, QEnumCollection, QStringCollection, StringCollection } from "@odata2ts/odata-query-objects";
 import { describe, expect, test } from "vitest";
-import { CollectionServiceV4, ODataServiceOptions } from "../../src";
-import { DEFAULT_HEADERS } from "../../src/RequestHeaders";
+import { CollectionServiceV4, DEFAULT_HEADERS, ODataServiceOptions } from "../../src";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
 import { MockClient } from "../mock/MockClient";
 
@@ -36,17 +33,16 @@ describe("CollectionService V4 Tests", () => {
   commonCollectionTests(odataClient, stringConstructor, enumConstructor);
 
   test("string enum collection: add", async () => {
-    const REQUEST_CONFIG = { test: "Test" };
-
     const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
 
-    await enumService.add(StringTestEnum.A, REQUEST_CONFIG);
+    const cmd = enumService.add(StringTestEnum.A);
+    const request = cmd.getInfo();
 
-    expect(odataClient.lastUrl).toBe(NAME_ENUM);
-    expect(odataClient.lastOperation).toBe("POST");
-    expect(odataClient.lastData).toEqual(StringTestEnum.A);
-    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
-    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
+    expect(request.url).toBe(NAME_ENUM);
+    expect(request.method).toBe("POST");
+    expect(request.headers).toStrictEqual(DEFAULT_HEADERS);
+    expect(request.data).toEqual(StringTestEnum.A);
+    expect(cmd.getInfoConverted().data).toEqual(StringTestEnum.A);
   });
 
   test("string enum collection: filter", async () => {
@@ -54,10 +50,10 @@ describe("CollectionService V4 Tests", () => {
 
     const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
 
-    await enumService.query((queryBuilder, qObj) =>
-      queryBuilder.filter(qObj.it.eq(StringTestEnum.A).or(qObj.it.eq("B"))),
-    );
-    expect(odataClient.lastUrl).toBe(NAME_ENUM + params);
+    const request = enumService
+      .query((queryBuilder, qObj) => queryBuilder.filter(qObj.it.eq(StringTestEnum.A).or(qObj.it.eq("B"))))
+      .getInfo();
+    expect(request.url).toBe(NAME_ENUM + params);
   });
 
   test("collection: big number", async () => {
@@ -65,21 +61,12 @@ describe("CollectionService V4 Tests", () => {
       bigNumbersAsString: true,
     });
 
-    await testService.query();
+    const request = testService.query().getInfo();
 
-    expect(odataClient.additionalHeaders).toStrictEqual({
+    expect(request.headers).toStrictEqual({
       Accept: "application/json;IEEE754Compatible=true",
       "Content-Type": "application/json;IEEE754Compatible=true",
     });
-  });
-
-  test("collection: query typing", async () => {
-    const stringService = stringConstructor(BASE_PATH, NAME_STRING);
-    const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
-
-    const result: HttpResponseModel<ODataCollectionResponseV4<string>> = await stringService.query();
-    const resultEnum: HttpResponseModel<ODataCollectionResponseV4<string>> = await enumService.query();
-    const result2: HttpResponseModel<ODataCollectionResponseV4<number>> = await enumService.query<number>();
   });
 
   test("collection: count", async () => {
@@ -87,8 +74,8 @@ describe("CollectionService V4 Tests", () => {
     const params = getParams({ $count: "true" });
     const expected = "testString" + params;
 
-    await stringService.query((builder) => builder.count());
+    const request = stringService.query((builder) => builder.count()).getInfo();
 
-    expect(odataClient.lastUrl).toBe(expected);
+    expect(request.url).toBe(expected);
   });
 });
