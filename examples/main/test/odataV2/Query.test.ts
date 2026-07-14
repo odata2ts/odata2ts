@@ -1,5 +1,6 @@
 import type { HttpResponseModel } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
+import { BigNumber } from "bignumber.js";
 import { describe, expect, test } from "vitest";
 import { ProductModel } from "../../src-generated/odataV2/ODataDemoModel";
 import { ODataDemoService } from "../../src-generated/odataV2/ODataDemoService";
@@ -27,7 +28,9 @@ describe("Unit Tests for V2 OData Demo Service", function () {
   test("proper query", async () => {
     const result: HttpResponseModel<ODataCollectionResponseV2<ProductModel>> = await testService
       .products()
-      .query((builder, qProduct) => builder.select("id", "name").filter(qProduct.price.plus("1").gt("1000")))
+      .query((builder, qProduct) =>
+        builder.select("id", "name").filter(qProduct.price.plus(BigNumber("1")).gt(BigNumber("1000"))),
+      )
       .execute();
 
     expect(result.status).toBe(200);

@@ -36,7 +36,7 @@ describe("Testing Generation with min renaming options", () => {
   test("unbound action", async () => {
     await testService.ResetDataSource().execute();
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/ResetDataSource`);
-    expect(odataClient.lastData).toEqual({});
+    expect(odataClient.lastData).toBeUndefined();
   });
 
   test("entitySet", async () => {

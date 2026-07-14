@@ -25,7 +25,7 @@ describe("Trippin: Operation Test", function () {
   test("unbound action", async () => {
     await TRIPPIN.resetDataSource().execute();
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/ResetDataSource`);
-    expect(ODATA_CLIENT.lastData).toEqual({});
+    expect(ODATA_CLIENT.lastData).toEqual(undefined);
   });
 
   test("bound action", async () => {

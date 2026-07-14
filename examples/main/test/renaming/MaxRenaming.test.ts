@@ -40,7 +40,7 @@ describe("Testing Generation With Max Renaming Options", () => {
   test("unbound action", async () => {
     await testService.do_reset_act().execute();
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/ResetDataSource`);
-    expect(odataClient.lastData).toEqual({});
+    expect(odataClient.lastData).toBeUndefined();
   });
 
   test("entitySet", async () => {
