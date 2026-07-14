@@ -35,7 +35,7 @@ export class CollectionServiceV2<
    * @param model primitive value
    */
   public add(model: EditableT) {
-    const { path, client, qModel, getDefaultHeaders, qResponseType } = this.__base;
+    const { path, client, qModel, getDefaultHeaders } = this.__base;
 
     return new UrlRequestCmd<ClientType, ODataEntityModelResponseV2<T>, EditableT>(
       client,
@@ -45,7 +45,7 @@ export class CollectionServiceV2<
       {
         headers: getDefaultHeaders(),
         mainRequestConverter: qModel,
-        mainResponseConverter: new EntityResponseConverterV2(qResponseType),
+        mainResponseConverter: new EntityResponseConverterV2(qModel),
       },
     );
   }
@@ -77,7 +77,7 @@ export class CollectionServiceV2<
    * Query collection.
    */
   public query<ReturnType = T>(queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void) {
-    const { client, qModel, qResponseType, getDefaultHeaders, createQueryBuilder } = this.__base;
+    const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV2<ClientType, ODataCollectionResponseV2<ReturnType>, Q>(
       client,
@@ -85,7 +85,7 @@ export class CollectionServiceV2<
       qModel,
       {
         headers: getDefaultHeaders(),
-        mainResponseConverter: new CollectionResponseConverterV2(qResponseType),
+        mainResponseConverter: new CollectionResponseConverterV2(qModel),
       },
     );
   }

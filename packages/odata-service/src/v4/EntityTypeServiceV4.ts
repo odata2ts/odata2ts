@@ -24,7 +24,7 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
   }
 
   public patch(model: ODataModelPayloadV4<Partial<EditableT>>, patchOptions?: SubtypeOptions) {
-    const { client, qModel, basePath, path, getDefaultHeaders, qResponseType } = this.__base;
+    const { client, qModel, basePath, path, getDefaultHeaders } = this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(patchOptions);
 
     // add control info automatically, if required
@@ -38,13 +38,13 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
       {
         headers: getDefaultHeaders(),
         mainRequestConverter: qModel,
-        mainResponseConverter: new ModelResponseConverterV4(qResponseType),
+        mainResponseConverter: new ModelResponseConverterV4(qModel),
       },
     );
   }
 
   public update(model: ODataModelPayloadV4<EditableT>, updateOptions?: SubtypeOptions) {
-    const { client, basePath, path, getDefaultHeaders, qResponseType } = this.__base;
+    const { client, basePath, path, getDefaultHeaders, qModel } = this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(updateOptions);
 
     // add control info automatically, if required
@@ -58,8 +58,8 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
       data,
       {
         headers: getDefaultHeaders(),
-        mainRequestConverter: qResponseType,
-        mainResponseConverter: new ModelResponseConverterV4(qResponseType),
+        mainRequestConverter: qModel,
+        mainResponseConverter: new ModelResponseConverterV4(qModel),
       },
     );
   }
@@ -70,7 +70,7 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
   }
 
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void) {
-    const { client, qModel, createQueryBuilder, getDefaultHeaders, qResponseType } = this.__base;
+    const { client, qModel, createQueryBuilder, getDefaultHeaders } = this.__base;
 
     return new UrlBuilderRequestCmdV4<ClientType, ODataModelResponseV4<ReturnType>, Q>(
       client,
@@ -78,7 +78,7 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
       qModel,
       {
         headers: getDefaultHeaders(),
-        mainResponseConverter: new ModelResponseConverterV4(qResponseType),
+        mainResponseConverter: new ModelResponseConverterV4(qModel),
       },
     );
   }

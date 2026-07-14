@@ -5,7 +5,7 @@ import {
   QEntityPath,
   QEnumCollectionPath,
   QEnumPath,
-  QFunction,
+  QFunctionV4,
   QGuidParam,
   QNumberPath,
   QStringPath,
@@ -26,7 +26,10 @@ export class QPersonV4 extends QueryObject<EditablePersonModel> {
 
 export const qPersonV4 = new QPersonV4();
 
-export class QGetSomethingFunction<ResponseStructure> extends QFunction<GetSomethingFunctionParams, ResponseStructure> {
+export class QGetSomethingFunction<ResponseStructure> extends QFunctionV4<
+  GetSomethingFunctionParams,
+  ResponseStructure
+> {
   constructor() {
     super("GET_SOMETHING");
   }

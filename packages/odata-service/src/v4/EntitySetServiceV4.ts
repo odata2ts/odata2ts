@@ -95,7 +95,7 @@ export abstract class EntitySetServiceV4<
     model: ODataModelPayloadV4<EditableT>,
     createOptions?: SubtypeOptions,
   ) {
-    const { client, basePath, path, getDefaultHeaders, qResponseType } = this.__base;
+    const { client, basePath, path, getDefaultHeaders, qModel } = this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(createOptions);
 
     // add control info automatically, if required
@@ -108,8 +108,8 @@ export abstract class EntitySetServiceV4<
       data,
       {
         headers: getDefaultHeaders(),
-        mainRequestConverter: qResponseType,
-        mainResponseConverter: new ModelResponseConverterV4(qResponseType),
+        mainRequestConverter: qModel,
+        mainResponseConverter: new ModelResponseConverterV4(qModel),
       },
     );
   }
@@ -120,7 +120,7 @@ export abstract class EntitySetServiceV4<
    * @param queryFn provide the query logic with the help of the builder and the query-object
    */
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void) {
-    const { client, qModel, qResponseType, createQueryBuilder, getDefaultHeaders } = this.__base;
+    const { client, qModel, createQueryBuilder, getDefaultHeaders } = this.__base;
 
     return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseV4<ReturnType>, Q>(
       client,
@@ -128,7 +128,7 @@ export abstract class EntitySetServiceV4<
       qModel,
       {
         headers: getDefaultHeaders(),
-        mainResponseConverter: new CollectionResponseConverterV4(qResponseType),
+        mainResponseConverter: new CollectionResponseConverterV4(qModel),
       },
     );
   }

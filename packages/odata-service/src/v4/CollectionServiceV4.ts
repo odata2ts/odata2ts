@@ -41,17 +41,17 @@ export class CollectionServiceV4<
    * @param model primitive value
    */
   public add(model: ODataModelPayloadV4<EditableT>) {
-    const { path, client, getDefaultHeaders, qResponseType } = this.__base;
+    const { path, client, getDefaultHeaders, qModel } = this.__base;
 
-    return new UrlRequestCmd<ClientType, void | ODataModelResponseV4<T>, EditableT>(
+    return new UrlRequestCmd<ClientType, ODataModelResponseV4<T>, EditableT>(
       client,
       ODataHttpMethods.Post,
       path,
       model,
       {
         headers: getDefaultHeaders(),
-        mainRequestConverter: qResponseType,
-        mainResponseConverter: new ModelResponseConverterV4(qResponseType),
+        mainRequestConverter: qModel,
+        mainResponseConverter: new ModelResponseConverterV4(qModel),
       },
     );
   }
@@ -62,7 +62,7 @@ export class CollectionServiceV4<
    * @param models set of primitive values
    */
   public update(models: Array<ODataModelPayloadV4<EditableT>>) {
-    const { path, client, getDefaultHeaders, qResponseType } = this.__base;
+    const { path, client, getDefaultHeaders, qModel } = this.__base;
 
     return new UrlRequestCmd<ClientType, void | ODataCollectionResponseV4<T>, Array<EditableT>>(
       client,
@@ -71,8 +71,8 @@ export class CollectionServiceV4<
       models,
       {
         headers: getDefaultHeaders(),
-        mainRequestConverter: qResponseType,
-        mainResponseConverter: new ModelResponseConverterV4(qResponseType),
+        mainRequestConverter: qModel,
+        mainResponseConverter: new ModelResponseConverterV4(qModel),
       },
     );
   }
@@ -90,7 +90,7 @@ export class CollectionServiceV4<
    * Query collection of primitive values.
    */
   public query<ReturnType = T>(queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void) {
-    const { client, qModel, getDefaultHeaders, createQueryBuilder, qResponseType } = this.__base;
+    const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseV4<ReturnType>, Q>(
       client,
@@ -98,7 +98,7 @@ export class CollectionServiceV4<
       qModel,
       {
         headers: getDefaultHeaders(),
-        mainResponseConverter: new CollectionResponseConverterV4(qResponseType),
+        mainResponseConverter: new CollectionResponseConverterV4(qModel),
       },
     );
   }

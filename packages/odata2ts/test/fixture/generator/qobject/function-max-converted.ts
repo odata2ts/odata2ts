@@ -6,7 +6,7 @@ import {
   QDateParam,
   QDateTimeOffsetParam,
   QEnumParam,
-  QFunction,
+  QFunctionV4,
   QGuidParam,
   QNumberParam,
   QStringParam,
@@ -35,7 +35,7 @@ export class QComplex extends QueryObject {
 
 export const qComplex = new QComplex();
 
-export class QMaxFunction extends QFunction<MaxFunctionParams, ODataValueResponseV4<string>> {
+export class QMaxFunction extends QFunctionV4<MaxFunctionParams, ODataValueResponseV4<string>> {
   private readonly params = [
     new QStringParam("TEST_STRING", "testString", stringToPrefixModelConverter),
     new QNumberParam("testNumber"),

@@ -44,7 +44,7 @@ export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, 
   }
 
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void) {
-    const { client, qModel, qResponseType, getDefaultHeaders, createQueryBuilder } = this.__base;
+    const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV2<ClientType, ODataComplexModelResponseV2<ReturnType>, Q>(
       client,
@@ -52,7 +52,7 @@ export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, 
       qModel,
       {
         headers: getDefaultHeaders(),
-        mainResponseConverter: new ComplexResponseConverterV2(qResponseType),
+        mainResponseConverter: new ComplexResponseConverterV2(qModel),
       },
     );
   }

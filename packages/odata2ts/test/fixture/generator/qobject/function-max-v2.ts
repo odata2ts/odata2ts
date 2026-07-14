@@ -5,7 +5,7 @@ import {
   QDateTimeV2Param,
   QDecimalV2Param,
   QDoubleV2Param,
-  QFunction,
+  QFunctionV2,
   QGuidV2Param,
   QInt64V2Param,
   QNumberParam,
@@ -25,7 +25,7 @@ export class QTheEntity extends QueryObject {
 
 export const qTheEntity = new QTheEntity();
 
-export class QMaxFunction extends QFunction<MaxFunctionParams, ODataValueResponseV2<boolean>> {
+export class QMaxFunction extends QFunctionV2<MaxFunctionParams, ODataValueResponseV2<boolean>> {
   private readonly params = [
     new QStringParam("TEST_STRING", "testString"),
     new QNumberParam("testInt16"),
@@ -44,7 +44,7 @@ export class QMaxFunction extends QFunction<MaxFunctionParams, ODataValueRespons
   ];
 
   constructor() {
-    super("MAX_FUNCTION", undefined, { v2Mode: true });
+    super("MAX_FUNCTION");
   }
 
   getParams() {

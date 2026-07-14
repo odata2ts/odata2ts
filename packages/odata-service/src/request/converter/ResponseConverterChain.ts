@@ -11,7 +11,7 @@ export class ResponseConverterChain<TargetType, FinalType = TargetType> {
   private prepends: Array<ResponseConverter<ResponseSourceType, ResponseSourceType>> = [];
   private appends: Array<ResponseConverter<any, any>> = [];
 
-  public constructor(private mainConverter?: MainResponseConverter<TargetType>) {}
+  public constructor(private mainConverter?: MainResponseConverter<TargetType, any>) {}
 
   public prependConverter(converter: ResponseConverter<ResponseSourceType, ResponseSourceType>) {
     this.prepends.push(converter);

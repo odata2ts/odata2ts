@@ -1,7 +1,7 @@
 import type { ODataValueResponseV4 } from "@odata2ts/odata-core";
-import { QFunction } from "@odata2ts/odata-query-objects";
+import { QFunctionV4 } from "@odata2ts/odata-query-objects";
 
-export class QMinFunction extends QFunction<undefined, ODataValueResponseV4<string>> {
+export class QMinFunction extends QFunctionV4<undefined, ODataValueResponseV4<string>> {
   private readonly params: [] = [];
 
   constructor() {

@@ -1,6 +1,6 @@
 import { ValueConverter } from "@odata2ts/converter-api";
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataEntityModelResponseV2, ODataValueResponseV2 } from "@odata2ts/odata-core";
+import { ODataValueResponseV2 } from "@odata2ts/odata-core";
 import {
   FlexibleConversionModel,
   getIdentityConverter,

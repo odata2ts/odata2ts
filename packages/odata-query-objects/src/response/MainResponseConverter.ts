@@ -27,11 +27,7 @@ export type ExtractDataTypeFromV2ResponseStructure<ResponseStructure> = Response
   ? T
   : ResponseStructure;
 
-export type ExtractDataTypeFromResponseStructure<ResponseStructure> = ExtractDataTypeFromV2ResponseStructure<
-  ExtractDataTypeFromV4ResponseStructure<ResponseStructure>
->;
-
-export abstract class MainResponseConverter<Structure, Type = ExtractDataTypeFromResponseStructure<Structure>> {
+export abstract class MainResponseConverter<Structure, Type> {
   public constructor(protected converter: ResponseDataConverter<Type>) {}
 
   public abstract convert(response: HttpResponseModel<any>): HttpResponseModel<Structure>;

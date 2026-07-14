@@ -5,7 +5,7 @@ import {
   QEntityPath,
   QEnumCollectionPath,
   QEnumPath,
-  QFunction,
+  QFunctionV2,
   QGuidV2Param,
   QNumberPath,
   QStringV2Path,
@@ -26,9 +26,9 @@ export class QPersonV2 extends QueryObject<PersonModel> {
 
 export const qPersonV2 = new QPersonV2();
 
-export class QGetSomethingFunction extends QFunction<GetSomethingFunctionParams, void> {
+export class QGetSomethingFunction extends QFunctionV2<GetSomethingFunctionParams, void> {
   constructor() {
-    super("GET_SOMETHING", undefined, { v2Mode: true });
+    super("GET_SOMETHING", undefined);
   }
 
   getParams() {

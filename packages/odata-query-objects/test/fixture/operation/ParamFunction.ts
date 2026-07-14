@@ -10,7 +10,8 @@ import {
   QDateTimeOffsetV2Param,
   QDateTimeV2Param,
   QEnumParam,
-  QFunction,
+  QFunctionV2,
+  QFunctionV4,
   QGuidParam,
   QGuidV2Param,
   QNumberParam,
@@ -48,7 +49,7 @@ export interface BestBookParamModel {
   testNumericEnum?: Array<TestRatings>;
 }
 
-export class QBestBookFunction extends QFunction<BestBookParamModel, ODataModelResponseV4<BookModel>> {
+export class QBestBookFunction extends QFunctionV4<BestBookParamModel, ODataModelResponseV4<BookModel>> {
   private readonly params = [
     new QNumberParam("TestNumber", "testNumber"),
     new QBooleanParam("test_Boolean", "testBoolean", booleanToNumberConverter),
@@ -81,7 +82,7 @@ export interface BestBookParamModelV2 {
   testString?: string | null;
 }
 
-export class QBestBookFunctionV2 extends QFunction<BestBookParamModelV2, ODataEntityModelResponseV2<BookModel>> {
+export class QBestBookFunctionV2 extends QFunctionV2<BestBookParamModelV2, ODataEntityModelResponseV2<BookModel>> {
   private readonly params = [
     new QGuidV2Param("testGuid"),
     new QDateTimeV2Param("testDateTime"),
@@ -92,7 +93,7 @@ export class QBestBookFunctionV2 extends QFunction<BestBookParamModelV2, ODataEn
   ];
 
   constructor() {
-    super("BestBook", new EntityResponseConverterV2<BookModel>(new QBook()), { v2Mode: true });
+    super("BestBook", new EntityResponseConverterV2<BookModel>(new QBook()));
   }
 
   public getParams() {

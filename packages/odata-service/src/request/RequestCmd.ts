@@ -20,7 +20,7 @@ export interface RequestCmdOptions<ResponseStructure, DataStructure> {
    * Sets the main response converter which converts from the OData facing model
    * to the user facing model.
    */
-  mainResponseConverter?: MainResponseConverter<ResponseStructure>;
+  mainResponseConverter?: MainResponseConverter<ResponseStructure, any>;
 }
 
 /**

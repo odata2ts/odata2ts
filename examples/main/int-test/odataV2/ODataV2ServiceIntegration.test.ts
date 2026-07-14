@@ -54,11 +54,13 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   test("get unknown product", async () => {
     const axiosFailMsg = "Resource not found for the segment 'Products'.";
     const axiosClientMsgPrefix = "OData server responded with error: ";
-    await expect(() => testService.products(666).query()).rejects.toThrow(axiosClientMsgPrefix + axiosFailMsg);
+    await expect(() => testService.products(666).query().execute()).rejects.toThrow(
+      axiosClientMsgPrefix + axiosFailMsg,
+    );
 
     // again, but now inspect error in detail
     try {
-      await testService.products(666).query();
+      await testService.products(666).query().execute();
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {

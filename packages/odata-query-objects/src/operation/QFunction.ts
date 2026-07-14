@@ -44,11 +44,9 @@ function compileQueryParams(params: FunctionParams | undefined, notEncoded: bool
  * This includes handling of entity id paths (same format as V4 functions).
  */
 export abstract class QFunction<ParamModel, ResponseStructure> {
-  public constructor(
-    protected name: string,
-    protected responseConverter?: MainResponseConverter<ResponseStructure>,
-    protected config: { v2Mode?: boolean } = {},
-  ) {}
+  public constructor(protected name: string) {}
+
+  public abstract isV2(): boolean;
 
   public abstract getParams(): Array<QParamModel<any, any>> | Array<Array<QParamModel<any, any>>>;
 
@@ -65,10 +63,6 @@ export abstract class QFunction<ParamModel, ResponseStructure> {
 
   public getName(): string {
     return this.name;
-  }
-
-  public isV2(): boolean {
-    return !!this.config.v2Mode;
   }
 
   public buildUrl(params?: ParamModel, notEncoded = false): string {
@@ -171,10 +165,6 @@ export abstract class QFunction<ParamModel, ResponseStructure> {
       model[qParam.getMappedName() as keyof ParamModel] = qParam.parseUrlValue(value);
       return model;
     }, {} as ParamModel);
-  }
-
-  public getResponseConverter() {
-    return this.responseConverter;
   }
 
   private findSingleParam() {

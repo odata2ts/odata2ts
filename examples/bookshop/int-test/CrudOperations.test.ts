@@ -96,7 +96,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     const {
       //@ts-ignore
       data: { "image@odata.mediaContentType": image, ...queried },
-    } = await srv.query()!;
+    } = await srv.query().execute();
 
     expect(result.data).toMatchObject(queried);
   });

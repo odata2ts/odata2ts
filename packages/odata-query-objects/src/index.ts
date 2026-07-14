@@ -13,6 +13,8 @@ export { QPrimitiveCollection } from "./primitve-collection/QPrimitiveCollection
 export * from "./primitve-collection/PrimitiveCollectionModel";
 
 export { QFunction } from "./operation/QFunction";
+export { QFunctionV4 } from "./operation/QFunctionV4";
+export { QFunctionV2 } from "./operation/QFunctionV2";
 export { QAction } from "./operation/QAction";
 export { QId } from "./operation/QId";
 
@@ -76,7 +78,6 @@ export { QDateTimeV2Path } from "./path/v2/QDateTimeV2Path";
 export { QTimeV2Path } from "./path/v2/QTimeV2Path";
 
 export * from "./response/ResponseDataConverter";
-export * from "./response/ResponseTypes";
 export * from "./response/MainResponseConverter";
 export * from "./response/v2/ValueResponseConverterV2";
 export * from "./response/v2/ComplexResponseConverterV2";

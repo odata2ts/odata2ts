@@ -43,7 +43,7 @@ export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, E
   }
 
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void) {
-    const { client, qModel, qResponseType, getDefaultHeaders, createQueryBuilder } = this.__base;
+    const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV2<ClientType, ODataEntityModelResponseV2<ReturnType>, Q>(
       client,
@@ -51,7 +51,7 @@ export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, E
       qModel,
       {
         headers: getDefaultHeaders(),
-        mainResponseConverter: new EntityResponseConverterV2(qResponseType),
+        mainResponseConverter: new EntityResponseConverterV2(qModel),
       },
     );
   }

@@ -385,7 +385,12 @@ class QueryObjectGenerator {
     const isParamsOptional = !![operation.parameters, ...(operation.overrides ?? [])].find((pSet) => pSet.length === 0);
 
     // imports
-    const qOp = operation.type === OperationTypes.Action ? QueryObjectImports.QAction : QueryObjectImports.QFunction;
+    const qOp =
+      operation.type === OperationTypes.Action
+        ? QueryObjectImports.QAction
+        : isV2
+          ? QueryObjectImports.QFunctionV2
+          : QueryObjectImports.QFunctionV4;
     const qOperation = imports.addQObject(qOp);
     const paramModelName = hasParams ? imports.addGeneratedModel(baseFqName, operation.paramsModelName) : undefined;
     const rtType = !returnType
@@ -427,11 +432,7 @@ class QueryObjectGenerator {
       ],
       ctors: [
         {
-          statements: [
-            `super("${operation.odataName}"${returnTypeOpStmt ? ", " + returnTypeOpStmt : isV2 ? ", undefined" : ""}${
-              isV2 ? ", { v2Mode: true }" : ""
-            })`,
-          ],
+          statements: [`super("${operation.odataName}"${returnTypeOpStmt ? ", " + returnTypeOpStmt : ""})`],
         },
       ],
       methods: [

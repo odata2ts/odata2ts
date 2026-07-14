@@ -3,14 +3,14 @@ import { booleanToNumberConverter } from "@odata2ts/test-converters";
 import {
   ModelResponseConverterV4,
   QAction,
-  QBooleanParam,
-  QFunction,
+  QFunctionV2,
+  QFunctionV4,
   ValueResponseConverterV2,
   ValueResponseConverterV4,
 } from "../../../src";
 import { QSimpleEntityWithConverter, SimpleEntityWithConverter } from "../SimpleEntityWithConverter";
 
-export class QPrimitiveReturningFunction extends QFunction<undefined, ODataValueResponseV4<number>> {
+export class QPrimitiveReturningFunction extends QFunctionV4<undefined, ODataValueResponseV4<number>> {
   constructor() {
     super("Primitive", new ValueResponseConverterV4<number>(booleanToNumberConverter));
   }
@@ -20,9 +20,9 @@ export class QPrimitiveReturningFunction extends QFunction<undefined, ODataValue
   }
 }
 
-export class QPrimitiveReturningFunctionV2 extends QFunction<undefined, ODataValueResponseV2<number>> {
+export class QPrimitiveReturningFunctionV2 extends QFunctionV2<undefined, ODataValueResponseV2<number>> {
   constructor() {
-    super("Primitive", new ValueResponseConverterV2<number>(booleanToNumberConverter), { v2Mode: true });
+    super("Primitive", new ValueResponseConverterV2<number>(booleanToNumberConverter));
   }
 
   public getParams() {

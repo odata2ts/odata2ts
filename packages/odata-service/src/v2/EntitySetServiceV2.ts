@@ -1,7 +1,12 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
-import { EntityResponseConverterV2, QId, QueryObjectModel } from "@odata2ts/odata-query-objects";
+import {
+  CollectionResponseConverterV2,
+  EntityResponseConverterV2,
+  QId,
+  QueryObjectModel,
+} from "@odata2ts/odata-query-objects";
 import { ODataServiceOptions } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV2, UrlRequestCmd } from "../request";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
@@ -74,7 +79,7 @@ export abstract class EntitySetServiceV2<
    * @return
    */
   public create<ReturnType extends Partial<T> = T>(model: EditableT) {
-    const { path, client, qModel, qResponseType, getDefaultHeaders } = this.__base;
+    const { path, client, qModel, getDefaultHeaders } = this.__base;
 
     return new UrlRequestCmd<ClientType, ODataEntityModelResponseV2<ReturnType>, EditableT>(
       client,
@@ -84,7 +89,7 @@ export abstract class EntitySetServiceV2<
       {
         headers: getDefaultHeaders(),
         mainRequestConverter: qModel,
-        mainResponseConverter: new EntityResponseConverterV2(qResponseType),
+        mainResponseConverter: new EntityResponseConverterV2(qModel),
       },
     );
   }
@@ -95,7 +100,7 @@ export abstract class EntitySetServiceV2<
    * @param queryFn provide the query logic with the help of the builder and the query-object
    */
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void) {
-    const { client, qModel, qResponseType, getDefaultHeaders, createQueryBuilder } = this.__base;
+    const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV2<ClientType, ODataCollectionResponseV2<ReturnType>, Q>(
       client,
@@ -103,7 +108,7 @@ export abstract class EntitySetServiceV2<
       qModel,
       {
         headers: getDefaultHeaders(),
-        mainResponseConverter: new EntityResponseConverterV2(qResponseType),
+        mainResponseConverter: new CollectionResponseConverterV2(qModel),
       },
     );
   }

@@ -8,8 +8,6 @@ export class ServiceStateHelperV2<
   in out ClientType extends ODataHttpClient,
   Q extends QueryObjectModel,
 > extends ServiceStateHelper<ClientType> {
-  public readonly qResponseType: QComplexParam<any, Q>;
-
   public constructor(
     client: ClientType,
     basePath: string,
@@ -18,7 +16,6 @@ export class ServiceStateHelperV2<
     options?: ODataServiceOptions,
   ) {
     super(client, basePath, name, options);
-    this.qResponseType = new QComplexParam("NONE", qModel);
   }
 
   public createQueryBuilder = (
