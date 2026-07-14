@@ -1,5 +1,5 @@
+import { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
-
 import {
   QAction,
   QBooleanParam,
@@ -9,7 +9,9 @@ import {
   QNumberParam,
   QStringParam,
   QTimeOfDayParam,
+  ValueResponseConverterV4,
 } from "../../../src";
+import { SampleResponseConverter } from "./SampleResponseConverter";
 
 export const PARAM_ACTION_NAME = "ParaM_ACTion";
 
@@ -23,7 +25,7 @@ export interface ParamActionParamModel {
   testDateTimeOffset?: string | null;
 }
 
-export class QParamAction extends QAction<ParamActionParamModel> {
+export class QParamAction extends QAction<ParamActionParamModel, ODataValueResponseV4<string>> {
   private params = [
     new QStringParam("TEST_STRING", "testString"),
     new QNumberParam("testNumber"),
@@ -35,7 +37,7 @@ export class QParamAction extends QAction<ParamActionParamModel> {
   ];
 
   constructor() {
-    super(PARAM_ACTION_NAME);
+    super(PARAM_ACTION_NAME, new ValueResponseConverterV4<string>(SampleResponseConverter));
   }
 
   public getParams() {

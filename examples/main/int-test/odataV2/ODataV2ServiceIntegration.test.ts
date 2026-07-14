@@ -27,7 +27,10 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   };
 
   test("list products with count", async () => {
-    const result = await testService.products().query((b) => b.count());
+    const result = await testService
+      .products()
+      .query((b) => b.count())
+      .execute();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data.d).toBeDefined();
@@ -39,7 +42,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   });
 
   test("get product zero", async () => {
-    const result = await testService.products(0).query();
+    const result = await testService.products(0).query().execute();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data.d).toBeDefined();
@@ -51,11 +54,13 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   test("get unknown product", async () => {
     const axiosFailMsg = "Resource not found for the segment 'Products'.";
     const axiosClientMsgPrefix = "OData server responded with error: ";
-    await expect(() => testService.products(666).query()).rejects.toThrow(axiosClientMsgPrefix + axiosFailMsg);
+    await expect(() => testService.products(666).query().execute()).rejects.toThrow(
+      axiosClientMsgPrefix + axiosFailMsg,
+    );
 
     // again, but now inspect error in detail
     try {
-      await testService.products(666).query();
+      await testService.products(666).query().execute();
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
@@ -76,7 +81,7 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   });
 
   test("function call", async () => {
-    const result = await testService.getProductsByRating({ rating: 4 });
+    const result = await testService.getProductsByRating({ rating: 4 }).execute();
 
     expect(result.status).toBe(200);
     // no count query => no "results" object (bug in odata-service)
@@ -85,14 +90,17 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   });
 
   test("deep select query", async () => {
-    const result = await testService.products().query((b, qProduct) => {
-      b.count()
-        .select("id", "name")
-        .expanding("category", (expBuilder) => {
-          expBuilder.select("name", "id");
-        })
-        .filter(qProduct.id.eq(0));
-    });
+    const result = await testService
+      .products()
+      .query((b, qProduct) => {
+        b.count()
+          .select("id", "name")
+          .expanding("category", (expBuilder) => {
+            expBuilder.select("name", "id");
+          })
+          .filter(qProduct.id.eq(0));
+      })
+      .execute();
     expect(result.status).toBe(200);
     expect(result.data.d.results).toBeDefined();
 
@@ -123,21 +131,21 @@ describe("Integration Testing of generated stuff for Sample V2 OData Service", (
   });
 
   test("get primitive prop", async () => {
-    const result = await testService.products(PRODUCT_ZERO.id).name().getValue();
+    const result = await testService.products(PRODUCT_ZERO.id).name().getValue().execute();
 
     expect(result.status).toBe(200);
     expect(result.data?.d).toStrictEqual({ name: PRODUCT_ZERO.name });
   });
 
   test("get primitive prop with converter", async () => {
-    const result = await testService.products(PRODUCT_ZERO.id).price().getValue();
+    const result = await testService.products(PRODUCT_ZERO.id).price().getValue().execute();
 
     expect(result.status).toBe(200);
     expect(PRODUCT_ZERO.price.isEqualTo(result.data?.d.price!)).toBeTruthy();
   });
 
   test("get complex prop", async () => {
-    const result = await testService.suppliers(0).address().query();
+    const result = await testService.suppliers(0).address().query().execute();
 
     expect(result.status).toBe(200);
     expect(result.data.d).toStrictEqual({

@@ -34,8 +34,7 @@ export class QComplexParam<Type, Q extends QueryObjectModel> implements QParamMo
   }
 
   public formatUrlValue(value: ParamValueModel<Type> | Array<ParamValueModel<Type>>): string | undefined {
-    const result = Array.isArray(value) ? this.convertTo(value) : this.convertTo(value);
-    return JSON.stringify(result);
+    return JSON.stringify(this.convertTo(value));
   }
 
   public parseUrlValue(value: string | undefined): ParamValueModel<Type> | Array<ParamValueModel<Type>> {

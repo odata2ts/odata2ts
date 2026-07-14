@@ -57,13 +57,13 @@ describe("V4 Data Types & Converter Tests", function () {
       DurationType: "P1Y",
     };
 
-    await DATA_TYPE_SERVICE.oneOfEverything().create(subject);
+    await DATA_TYPE_SERVICE.oneOfEverything().create(subject).execute();
     expect(ODATA_CLIENT.lastData).toStrictEqual(expectedResult);
 
-    await DATA_TYPE_SERVICE.oneOfEverything("abc").update(subject);
+    await DATA_TYPE_SERVICE.oneOfEverything("abc").update(subject).execute();
     expect(ODATA_CLIENT.lastData).toStrictEqual(expectedResult);
 
-    await DATA_TYPE_SERVICE.oneOfEverything("abc").patch(subject);
+    await DATA_TYPE_SERVICE.oneOfEverything("abc").patch(subject).execute();
     expect(ODATA_CLIENT.lastData).toStrictEqual(expectedResult);
   });
 });

@@ -21,12 +21,13 @@
     "generate-from-url": "odata2ts && tsc -p tsconfig.compile.json",
     "int-test": "vitest run --dir int-test",
     "start": "cds run",
+    "test": "vitest run --dir test",
     "watch": "cds watch"
   },
   "dependencies": {
-    "@odata2ts/converter-big-number": "^0.2.7",
+    "@odata2ts/converter-big-number": "^0.2.8",
     "@odata2ts/http-client-axios": "^0.12.2",
-    "@odata2ts/odata-service": "^0.23.1",
+    "@odata2ts/odata-service": "^0.23.2",
     "@sap/cds": "7.9.4",
     "@sap/cds-odata-v2-adapter-proxy": "^1.9.21",
     "axios": "0.27.2",
@@ -36,7 +37,7 @@
   },
   "devDependencies": {
     "@cap-js/sqlite": "^1",
-    "@odata2ts/odata2ts": "^0.39.1",
+    "@odata2ts/odata2ts": "^0.40.2",
     "sqlite3": "^5"
   },
   "publishConfig": {

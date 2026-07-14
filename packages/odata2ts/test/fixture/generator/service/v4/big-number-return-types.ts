@@ -1,4 +1,5 @@
-import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
+import type { ODataHttpClient } from "@odata2ts/http-client-api";
+import { ODataHttpMethods } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV4, ODataValueResponseV4 } from "@odata2ts/odata-core";
 import {
   EntitySetServiceV4,
@@ -6,6 +7,7 @@ import {
   ODataService,
   ODataServiceOptions,
   ODataServiceOptionsInternal,
+  UrlRequestCmd,
 } from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
@@ -34,43 +36,49 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
       : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
   }
 
-  public async pingBigNumber(
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataValueResponseV4<string>>> {
+  public pingBigNumber() {
     if (!this._qPingBigNumber) {
       this._qPingBigNumber = new QPingBigNumber();
     }
 
-    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._qPingBigNumber.buildUrl());
-    const response = await client.post(url, {}, requestConfig, getDefaultHeaders());
-    return this._qPingBigNumber.convertResponse(response);
+
+    return new UrlRequestCmd<ClientType, ODataValueResponseV4<string>>(client, ODataHttpMethods.Post, url, undefined, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: this._qPingBigNumber.getResponseConverter(),
+    });
   }
 
-  public async pingDecimal(
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataValueResponseV4<string>>> {
+  public pingDecimal() {
     if (!this._qPingDecimal) {
       this._qPingDecimal = new QPingDecimal();
     }
 
-    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._qPingDecimal.buildUrl());
-    const response = await client.post(url, {}, requestConfig, getDefaultHeaders());
-    return this._qPingDecimal.convertResponse(response);
+
+    return new UrlRequestCmd<ClientType, ODataValueResponseV4<string>>(client, ODataHttpMethods.Post, url, undefined, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: this._qPingDecimal.getResponseConverter(),
+    });
   }
 
-  public async pingDecimalCollection(
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataCollectionResponseV4<string>>> {
+  public pingDecimalCollection() {
     if (!this._qPingDecimalCollection) {
       this._qPingDecimalCollection = new QPingDecimalCollection();
     }
 
-    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._qPingDecimalCollection.buildUrl());
-    const response = await client.post(url, {}, requestConfig, getDefaultHeaders());
-    return this._qPingDecimalCollection.convertResponse(response);
+
+    return new UrlRequestCmd<ClientType, ODataCollectionResponseV4<string>>(
+      client,
+      ODataHttpMethods.Post,
+      url,
+      undefined,
+      { headers: getDefaultHeaders(), mainResponseConverter: this._qPingDecimalCollection.getResponseConverter() },
+    );
   }
 }
 

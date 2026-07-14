@@ -1,8 +1,9 @@
-import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
+import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
-import { convertV4ModelResponse, QueryObjectModel } from "@odata2ts/odata-query-objects";
+import { ModelResponseConverterV4, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
+import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
 export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObjectModel> {
@@ -22,52 +23,63 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
     return this.__base.path;
   }
 
-  public async patch(
-    model: ODataModelPayloadV4<Partial<EditableT>>,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-    patchOptions?: SubtypeOptions,
-  ): ODataResponse<void | ODataModelResponseV4<T>> {
-    const { client, qModel, basePath, path, getDefaultHeaders, qResponseType } = this.__base;
+  public patch(model: ODataModelPayloadV4<Partial<EditableT>>, patchOptions?: SubtypeOptions) {
+    const { client, qModel, basePath, path, getDefaultHeaders } = this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(patchOptions);
 
-    const result = await client.patch<void | ODataModelResponseV4<T>>(
+    // add control info automatically, if required
+    const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
+
+    return new UrlRequestCmd<ClientType, ODataModelResponseV4<T> | void, ODataModelPayloadV4<Partial<EditableT>>>(
+      client,
+      ODataHttpMethods.Patch,
       dontUseCastPathSegment ? basePath : path,
-      qModel.convertToOData(useTypeCi ? this.__base.addTypeControlInfo(model) : model),
-      requestConfig,
-      getDefaultHeaders(),
+      data,
+      {
+        headers: getDefaultHeaders(),
+        mainRequestConverter: qModel,
+        mainResponseConverter: new ModelResponseConverterV4(qModel),
+      },
     );
-    return convertV4ModelResponse(result, qResponseType);
   }
 
-  public async update(
-    model: ODataModelPayloadV4<EditableT>,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-    updateOptions?: SubtypeOptions,
-  ): ODataResponse<void | ODataModelResponseV4<T>> {
-    const { client, qModel, basePath, path, getDefaultHeaders, qResponseType } = this.__base;
+  public update(model: ODataModelPayloadV4<EditableT>, updateOptions?: SubtypeOptions) {
+    const { client, basePath, path, getDefaultHeaders, qModel } = this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(updateOptions);
 
-    const result = await client.put<void | ODataModelResponseV4<T>>(
+    // add control info automatically, if required
+    const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
+
+    // return convertV4ModelResponse(result, qResponseType);
+    return new UrlRequestCmd<ClientType, ODataModelResponseV4<T> | void, ODataModelPayloadV4<EditableT>>(
+      client,
+      ODataHttpMethods.Put,
       dontUseCastPathSegment ? basePath : path,
-      qModel.convertToOData(useTypeCi ? this.__base.addTypeControlInfo(model) : model),
-      requestConfig,
-      getDefaultHeaders(),
+      data,
+      {
+        headers: getDefaultHeaders(),
+        mainRequestConverter: qModel,
+        mainResponseConverter: new ModelResponseConverterV4(qModel),
+      },
     );
-    return convertV4ModelResponse(result, qResponseType);
   }
 
-  public async delete(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
+  public delete() {
     const { client, path } = this.__base;
-    return client.delete(path, requestConfig);
+    return new UrlRequestCmd<ClientType, void>(client, ODataHttpMethods.Delete, path, undefined);
   }
 
-  public async query<ReturnType extends Partial<T> = T>(
-    queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): ODataResponse<ODataModelResponseV4<ReturnType>> {
-    const { client, applyQueryBuilder, getDefaultHeaders, qResponseType } = this.__base;
+  public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void) {
+    const { client, qModel, createQueryBuilder, getDefaultHeaders } = this.__base;
 
-    const response = await client.get(applyQueryBuilder(queryFn), requestConfig, getDefaultHeaders());
-    return convertV4ModelResponse(response, qResponseType);
+    return new UrlBuilderRequestCmdV4<ClientType, ODataModelResponseV4<ReturnType>, Q>(
+      client,
+      createQueryBuilder(queryFn),
+      qModel,
+      {
+        headers: getDefaultHeaders(),
+        mainResponseConverter: new ModelResponseConverterV4(qModel),
+      },
+    );
   }
 }

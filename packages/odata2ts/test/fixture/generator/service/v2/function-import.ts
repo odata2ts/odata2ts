@@ -1,6 +1,13 @@
-import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
+import type { ODataHttpClient } from "@odata2ts/http-client-api";
+import { ODataHttpMethods } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
-import { EntitySetServiceV2, EntityTypeServiceV2, ODataService, ODataServiceOptions } from "@odata2ts/odata-service";
+import {
+  EntitySetServiceV2,
+  EntityTypeServiceV2,
+  ODataService,
+  ODataServiceOptions,
+  UrlRequestCmd,
+} from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
 // @ts-ignore
@@ -23,45 +30,55 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
       : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
   }
 
-  public async mostPop(
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataCollectionResponseV2<TestEntity>>> {
+  public mostPop() {
     if (!this._qMostPop) {
       this._qMostPop = new QMostPop();
     }
 
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qMostPop.buildUrl(isUrlNotEncoded()));
-    const response = await client.get(url, requestConfig, getDefaultHeaders());
-    return this._qMostPop.convertResponse(response);
+
+    return new UrlRequestCmd<ClientType, ODataCollectionResponseV2<TestEntity>>(
+      client,
+      ODataHttpMethods.Get,
+      url,
+      undefined,
+      { headers: getDefaultHeaders(), mainResponseConverter: this._qMostPop.getResponseConverter() },
+    );
   }
 
-  public async bestBook(
-    params: BestBookParams,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataEntityModelResponseV2<TestEntity>>> {
+  public bestBook(params: BestBookParams) {
     if (!this._qBestBook) {
       this._qBestBook = new QBestBook();
     }
 
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qBestBook.buildUrl(params, isUrlNotEncoded()));
-    const response = await client.get(url, requestConfig, getDefaultHeaders());
-    return this._qBestBook.convertResponse(response);
+
+    return new UrlRequestCmd<ClientType, ODataEntityModelResponseV2<TestEntity>>(
+      client,
+      ODataHttpMethods.Get,
+      url,
+      undefined,
+      { headers: getDefaultHeaders(), mainResponseConverter: this._qBestBook.getResponseConverter() },
+    );
   }
 
-  public async postBestBook(
-    params: PostBestBookParams,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataEntityModelResponseV2<TestEntity>>> {
+  public postBestBook(params: PostBestBookParams) {
     if (!this._qPostBestBook) {
       this._qPostBestBook = new QPostBestBook();
     }
 
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qPostBestBook.buildUrl(params, isUrlNotEncoded()));
-    const response = await client.post(url, undefined, requestConfig, getDefaultHeaders());
-    return this._qPostBestBook.convertResponse(response);
+
+    return new UrlRequestCmd<ClientType, ODataEntityModelResponseV2<TestEntity>>(
+      client,
+      ODataHttpMethods.Post,
+      url,
+      undefined,
+      { headers: getDefaultHeaders(), mainResponseConverter: this._qPostBestBook.getResponseConverter() },
+    );
   }
 }
 

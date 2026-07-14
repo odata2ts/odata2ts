@@ -1,17 +1,18 @@
+import { ODataModelResponseV4, ODataValueResponseV2, ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
-import { OperationReturnType, QAction, QBooleanParam, QComplexParam, QFunction, ReturnTypes } from "../../../src";
-import { QSimpleEntityWithConverter } from "../SimpleEntityWithConverter";
+import {
+  ModelResponseConverterV4,
+  QAction,
+  QFunctionV2,
+  QFunctionV4,
+  ValueResponseConverterV2,
+  ValueResponseConverterV4,
+} from "../../../src";
+import { QSimpleEntityWithConverter, SimpleEntityWithConverter } from "../SimpleEntityWithConverter";
 
-export const PRIMITIVE = new OperationReturnType(
-  ReturnTypes.VALUE,
-  new QBooleanParam("NONE", undefined, booleanToNumberConverter),
-);
-
-const MODEL = new OperationReturnType(ReturnTypes.ENTITY, new QComplexParam("XXX", new QSimpleEntityWithConverter()));
-
-export class QPrimitiveReturningFunction extends QFunction<{}> {
+export class QPrimitiveReturningFunction extends QFunctionV4<undefined, ODataValueResponseV4<number>> {
   constructor() {
-    super("Primitive", PRIMITIVE);
+    super("Primitive", new ValueResponseConverterV4<number>(booleanToNumberConverter));
   }
 
   public getParams() {
@@ -19,9 +20,9 @@ export class QPrimitiveReturningFunction extends QFunction<{}> {
   }
 }
 
-export class QPrimitiveReturningFunctionV2 extends QFunction<{}> {
+export class QPrimitiveReturningFunctionV2 extends QFunctionV2<undefined, ODataValueResponseV2<number>> {
   constructor() {
-    super("Primitive", PRIMITIVE, { v2Mode: true });
+    super("Primitive", new ValueResponseConverterV2<number>(booleanToNumberConverter));
   }
 
   public getParams() {
@@ -29,9 +30,9 @@ export class QPrimitiveReturningFunctionV2 extends QFunction<{}> {
   }
 }
 
-export class QComplexReturningAction extends QAction<{}> {
+export class QComplexReturningAction extends QAction<undefined, ODataModelResponseV4<SimpleEntityWithConverter>> {
   constructor() {
-    super("Complex", MODEL);
+    super("Complex", new ModelResponseConverterV4<SimpleEntityWithConverter>(new QSimpleEntityWithConverter()));
   }
 
   public getParams() {

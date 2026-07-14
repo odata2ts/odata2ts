@@ -1,5 +1,5 @@
 import { beforeEach, expect, test } from "vitest";
-import { DEFAULT_HEADERS } from "../src/RequestHeaders";
+import { DEFAULT_HEADERS } from "../src";
 import {
   EnumCollectionService,
   EnumCollectionServiceConstructor,
@@ -23,7 +23,6 @@ export function commonCollectionTests(
   const STRING_URL = `${BASE_URL}/${NAME_STRING}`;
   const NAME_ENUM = "Feature";
   const ENUM_URL = `${BASE_URL}/${NAME_ENUM}`;
-  const REQUEST_CONFIG = { test: "Test" };
 
   let stringService: StringCollectionService;
   let enumService: EnumCollectionService;
@@ -34,19 +33,18 @@ export function commonCollectionTests(
   });
 
   test("collection: query", async () => {
-    await stringService.query();
-    expect(odataClient.lastUrl).toBe(STRING_URL);
-    expect(odataClient.lastData).toBeUndefined();
-    expect(odataClient.lastOperation).toBe("GET");
-    expect(odataClient.lastRequestConfig).toBeUndefined();
-    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
+    let request = stringService.query().getInfo();
 
-    await enumService.query(undefined, REQUEST_CONFIG);
-    expect(odataClient.lastUrl).toBe(ENUM_URL);
-    expect(odataClient.lastData).toBeUndefined();
-    expect(odataClient.lastOperation).toBe("GET");
-    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
-    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
+    expect(request.url).toBe(STRING_URL);
+    expect(request.data).toBeUndefined();
+    expect(request.method).toBe("GET");
+    expect(request.headers).toStrictEqual(DEFAULT_HEADERS);
+
+    request = enumService.query(undefined).getInfo();
+    expect(request.url).toBe(ENUM_URL);
+    expect(request.data).toBeUndefined();
+    expect(request.method).toBe("GET");
+    expect(request.headers).toStrictEqual(DEFAULT_HEADERS);
   });
 
   test("collection: skip & top, but no select, expand", async () => {
@@ -54,21 +52,25 @@ export function commonCollectionTests(
     const expectedString = STRING_URL + params;
     const expectedEnum = ENUM_URL + params;
 
-    await stringService.query((queryBuilder) => {
-      queryBuilder.skip(1).top(2);
-    });
+    let request = stringService
+      .query((queryBuilder) => {
+        queryBuilder.skip(1).top(2);
+      })
+      .getInfo();
 
-    expect(odataClient.lastUrl).toBe(expectedString);
-    expect(odataClient.lastData).toBeUndefined();
-    expect(odataClient.lastOperation).toBe("GET");
+    expect(request.url).toBe(expectedString);
+    expect(request.data).toBeUndefined();
+    expect(request.method).toBe("GET");
 
-    await enumService.query((queryBuilder) => {
-      queryBuilder.skip(1).top(2);
-    });
+    request = enumService
+      .query((queryBuilder) => {
+        queryBuilder.skip(1).top(2);
+      })
+      .getInfo();
 
-    expect(odataClient.lastUrl).toBe(expectedEnum);
-    expect(odataClient.lastData).toBeUndefined();
-    expect(odataClient.lastOperation).toBe("GET");
+    expect(request.url).toBe(expectedEnum);
+    expect(request.data).toBeUndefined();
+    expect(request.method).toBe("GET");
   });
 
   test("collection: filter", async () => {
@@ -76,17 +78,16 @@ export function commonCollectionTests(
     const expectedString = STRING_URL + params;
     const expectedEnum = ENUM_URL + params;
 
-    await stringService.query((queryBuilder, qObj) => queryBuilder.filter(qObj.it.eq("hi")));
-    expect(odataClient.lastUrl).toBe(expectedString);
+    const request = stringService.query((queryBuilder, qObj) => queryBuilder.filter(qObj.it.eq("hi"))).getInfo();
+    expect(request.url).toBe(expectedString);
   });
 
   test("collection: add", async () => {
-    await stringService.add("test");
+    const request = stringService.add("test").getInfo();
 
-    expect(odataClient.lastUrl).toBe(STRING_URL);
-    expect(odataClient.lastOperation).toBe("POST");
-    expect(odataClient.lastData).toEqual("test");
-    expect(odataClient.lastRequestConfig).toBeUndefined();
+    expect(request.url).toBe(STRING_URL);
+    expect(request.method).toBe("POST");
+    expect(request.data).toEqual("test");
   });
 
   test("collection: no patch", async () => {
@@ -96,36 +97,28 @@ export function commonCollectionTests(
 
   test("collection: update", async () => {
     const model = ["test1", "t2"];
-    await stringService.update(model);
+    const request = stringService.update(model).getInfo();
 
-    expect(odataClient.lastUrl).toBe(STRING_URL);
-    expect(odataClient.lastOperation).toBe("PUT");
-    expect(odataClient.lastData).toEqual(model);
-    expect(odataClient.lastRequestConfig).toBeUndefined();
-    expect(odataClient.additionalHeaders).toStrictEqual(DEFAULT_HEADERS);
-
-    await stringService.update(model, REQUEST_CONFIG);
-    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
+    expect(request.url).toBe(STRING_URL);
+    expect(request.method).toBe("PUT");
+    expect(request.data).toEqual(model);
+    expect(request.headers).toStrictEqual(DEFAULT_HEADERS);
   });
 
   test("collection: delete", async () => {
-    await stringService.delete();
+    const request = stringService.delete().getInfo();
 
-    expect(odataClient.lastUrl).toBe(STRING_URL);
-    expect(odataClient.lastOperation).toBe("DELETE");
-    expect(odataClient.lastData).toBeUndefined();
-    expect(odataClient.lastRequestConfig).toBeUndefined();
-    expect(odataClient.additionalHeaders).toBeUndefined();
-
-    await stringService.delete(REQUEST_CONFIG);
-    expect(odataClient.lastRequestConfig).toMatchObject(REQUEST_CONFIG);
+    expect(request.url).toBe(STRING_URL);
+    expect(request.method).toBe("DELETE");
+    expect(request.data).toBeUndefined();
+    expect(request.headers).toBeUndefined();
   });
 
   test("collection: no url encoding", async () => {
     const toTest = stringCollectionServiceConstructor(BASE_URL, NAME_STRING, { noUrlEncoding: true });
 
-    await toTest.query((qb, q) => qb.filter(q.it.eq("2")));
+    const request = toTest.query((qb, q) => qb.filter(q.it.eq("2"))).getInfo();
 
-    expect(odataClient.lastUrl).toBe(STRING_URL + "?$filter=$it eq '2'");
+    expect(request.url).toBe(STRING_URL + "?$filter=$it eq '2'");
   });
 }

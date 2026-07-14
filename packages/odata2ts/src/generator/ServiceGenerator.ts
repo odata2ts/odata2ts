@@ -20,14 +20,14 @@ import {
   OperationType,
   OperationTypes,
   PropertyModel,
-  ReturnTypeModel,
   SingletonType,
 } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
 import { ConfigFileOptions, Modes } from "../OptionModel.js";
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
-import { ClientApiImports, CoreImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects.js";
+import { ClientApiImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects.js";
+import { importReturnType } from "./import/ImportResponseHelper.js";
 import { ImportContainer } from "./ImportContainer.js";
 
 export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "properties" | "methods">> {}
@@ -600,9 +600,9 @@ class ServiceGenerator {
     const isParamsOptional = !![operation.parameters, ...(operation.overrides ?? [])].find((pSet) => pSet.length === 0);
 
     // importing dependencies
-    const httpClientConfigModel = importContainer.addClientApi(ClientApiImports.ODataHttpClientConfig);
-    const odataResponse = importContainer.addClientApi(ClientApiImports.HttpResponseModel);
-    const responseStructure = this.importReturnType(importContainer, returnType);
+    const odataHttpMethods = importContainer.addClientApi(ClientApiImports.ODataHttpMethods);
+    const requestCmd = importContainer.addServiceObject(this.version, ServiceImports.UrlRequestCmd);
+    const responseStructure = returnType ? importReturnType(this.version, importContainer, returnType) : undefined;
     const qOperationName = importContainer.addGeneratedQObject(baseFqName, operation.qName);
     const rtType =
       returnType?.type && returnType.dataType !== DataTypes.PrimitiveType
@@ -612,55 +612,35 @@ class ServiceGenerator {
       ? importContainer.addGeneratedModel(baseFqName, operation.paramsModelName)
       : undefined;
 
-    const requestConfigParam = {
-      name: "requestConfig",
-      hasQuestionToken: true,
-      type: `${httpClientConfigModel}<ClientType>`,
-    };
     const qOpProp = "this." + this.namingHelper.getPrivatePropName(operation.qName);
 
     return {
       scope: Scope.Public,
-      isAsync: true,
       name,
       parameters: hasParams
-        ? [{ name: "params", type: paramsModelName, hasQuestionToken: isParamsOptional }, requestConfigParam]
-        : [requestConfigParam],
-      returnType: `Promise<${odataResponse}<${responseStructure}<${rtType || "void"}>>>`,
+        ? [{ name: "params", type: paramsModelName, hasQuestionToken: isParamsOptional }]
+        : undefined,
+      // returnType: `Promise<${odataResponse}<${responseStructure}<${rtType || "void"}>>>`,
       statements: [
         `if(!${qOpProp}) {`,
         `  ${qOpProp} = new ${qOperationName}()`,
         "}",
 
-        `const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;`,
-        `const url = addFullPath(${qOpProp}.buildUrl(${isFunc && hasParams ? "params, " : ""}${isFunc ? "isUrlNotEncoded()" : ""}));`,
-        `${returnType ? "const response = await " : "return"} client.${
-          !isFunc
-            ? // actions: since V4
-              `post(url, ${hasParams ? `${qOpProp}.convertUserParams(params)` : "{}"}, ${
-                requestConfigParam.name
-              }, getDefaultHeaders())`
-            : operation.usePost
-              ? // V2 POST => BUT values are still query params, they are not part of the request body
-                `post(url, undefined, ${requestConfigParam.name}, getDefaultHeaders())`
-              : // functions: since V2
-                `get(url, ${requestConfigParam.name}, getDefaultHeaders())`
-        };`,
-        returnType ? `return ${qOpProp}.convertResponse(response);` : "",
+        `const { addFullPath, client, getDefaultHeaders${isFunc ? ", isUrlNotEncoded" : ""} } = this.__base;`,
+        `const url = addFullPath(${qOpProp}.buildUrl(${!isFunc ? "" : hasParams ? "params, isUrlNotEncoded()" : "isUrlNotEncoded()"}));`,
+        "",
+        `return new ${requestCmd}<ClientType, ${responseStructure ? `${responseStructure}<${rtType}>` : "void"}${!isFunc && hasParams ? ", " + paramsModelName : ""}>(` +
+          "client," +
+          `${odataHttpMethods}.${!isFunc || operation.usePost ? "Post" : "Get"},` +
+          `url, ${!isFunc && hasParams ? "params," : "undefined,"}` +
+          "{ " +
+          "headers: getDefaultHeaders()" +
+          (!isFunc && hasParams ? `, mainRequestConverter: ${qOpProp}.getRequestConverter()` : "") +
+          (returnType ? `, mainResponseConverter: ${qOpProp}.getResponseConverter()` : "") +
+          "});",
+        // returnType ? `return ${qOpProp}.convertResponse(response);` : "",
       ],
     };
-  }
-
-  private importReturnType(imports: ImportContainer, returnType: ReturnTypeModel | undefined): string {
-    const typeToImport: CoreImports = returnType?.isCollection
-      ? CoreImports.ODataCollectionResponse
-      : returnType?.dataType === DataTypes.PrimitiveType
-        ? CoreImports.ODataValueResponse
-        : this.version === ODataVersions.V4
-          ? CoreImports.ODataModelResponseV4
-          : CoreImports.ODataEntityModelResponseV2;
-
-    return imports.addCoreLib(this.version, typeToImport);
   }
 
   private generateCastOperations(

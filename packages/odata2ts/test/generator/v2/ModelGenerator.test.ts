@@ -6,12 +6,9 @@ import { DigestionOptions } from "../../../src/FactoryFunctionModel";
 import { generateModels } from "../../../src/generator";
 import { createProjectManager } from "../../../src/project/ProjectManager";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
-import {
-  createHelper,
-  EntityBasedGeneratorFunctionWithoutVersion,
-  FixtureComparatorHelper,
-} from "../comparator/FixtureComparatorHelper";
+import { createHelper, EntityBasedGeneratorFunctionWithoutVersion, FixtureComparatorHelper } from "../comparator/FixtureComparatorHelper";
 import { createEntityBasedGenerationTests, ENTITY_NAME, SERVICE_NAME } from "./EntityBasedGenerationTests";
+
 
 describe("Model Generator Tests V2", () => {
   const TEST_SUITE_NAME = "Model Generator";
@@ -37,7 +34,7 @@ describe("Model Generator Tests V2", () => {
 
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, MODEL_FILE, GENERATE);
 
-  async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<DigestionOptions>) {
+  async function generateAndCompare(fixturePath: string, genOptions?: Partial<DigestionOptions>) {
     await fixtureComparatorHelper.generateAndCompare(MODEL_FILE, fixturePath, odataBuilder.getSchemas(), genOptions);
   }
 
@@ -57,7 +54,7 @@ describe("Model Generator Tests V2", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("minFunction", "operation-min.ts");
+    await generateAndCompare("operation-min.ts");
   });
 
   test(`${TEST_SUITE_NAME}: max function param model`, async () => {
@@ -74,7 +71,7 @@ describe("Model Generator Tests V2", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("maxFunction", "operation-max.ts");
+    await generateAndCompare("operation-max.ts");
   });
 
   test(`${TEST_SUITE_NAME}: extra results wrapping`, async () => {
@@ -89,7 +86,7 @@ describe("Model Generator Tests V2", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("extra-results-wrapping", "entity-relationships-v2-extra-wrapping.ts", {
+    await generateAndCompare("entity-relationships-v2-extra-wrapping.ts", {
       v2ModelsWithExtraResultsWrapping: true,
     });
   });

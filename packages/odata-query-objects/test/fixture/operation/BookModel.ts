@@ -1,5 +1,4 @@
 import { PrefixModel, stringToPrefixModelConverter } from "@odata2ts/test-converters";
-
 import { QEntityPath, QStringPath, QueryObject } from "../../../src";
 
 export interface BookModel {
@@ -8,7 +7,7 @@ export interface BookModel {
 }
 
 export class QBook extends QueryObject<BookModel> {
-  public readonly title = new QStringPath("title");
+  public readonly title = new QStringPath("Title");
   public readonly author = new QEntityPath("AUTHOR", () => QAuthor);
 }
 
@@ -17,5 +16,5 @@ export interface AuthorModel {
 }
 
 export class QAuthor extends QueryObject<AuthorModel> {
-  public readonly name = new QStringPath("name", stringToPrefixModelConverter);
+  public readonly name = new QStringPath("Name", stringToPrefixModelConverter);
 }

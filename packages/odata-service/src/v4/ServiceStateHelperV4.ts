@@ -14,27 +14,26 @@ export class ServiceStateHelperV4<
   in out ClientType extends ODataHttpClient,
   Q extends QueryObjectModel,
 > extends ServiceStateHelper<ClientType> {
-  public readonly qResponseType: QComplexParam<any, Q>;
-
   public constructor(
     client: ClientType,
     basePath: string,
     name: string,
-    public readonly qModel: Q,
+    public qModel: Q,
     options?: ODataServiceOptionsInternal,
   ) {
     super(client, basePath, name, options);
-    this.qResponseType = new QComplexParam("NONE", qModel);
   }
 
-  public applyQueryBuilder = (queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void): string => {
+  public createQueryBuilder = (
+    queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
+    path = this.path,
+  ): ODataQueryBuilderV4<Q> => {
+    const builder = createQueryBuilderV4(path, this.qModel, { unencoded: this.isUrlNotEncoded() });
     if (queryFn) {
-      const builder = createQueryBuilderV4(this.path, this.qModel, { unencoded: this.isUrlNotEncoded() });
       queryFn(builder, this.qModel);
-      return builder.build();
     }
 
-    return this.path;
+    return builder;
   };
 
   public evaluateSubtypeOptions(options: SubtypeOptions | undefined) {

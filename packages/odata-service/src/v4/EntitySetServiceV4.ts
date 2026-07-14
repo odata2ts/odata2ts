@@ -1,13 +1,14 @@
-import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
+import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import {
-  convertV4CollectionResponse,
-  convertV4ModelResponse,
+  CollectionResponseConverterV4,
+  ModelResponseConverterV4,
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
+import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
 export abstract class EntitySetServiceV4<
@@ -87,40 +88,48 @@ export abstract class EntitySetServiceV4<
    * Create a new model.
    *
    * @param model
-   * @param requestConfig
    * @param createOptions
    * @return
    */
-  public async create<ReturnType extends Partial<T> | void = T>(
+  public create<ReturnType extends Partial<T> | void = T>(
     model: ODataModelPayloadV4<EditableT>,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
     createOptions?: SubtypeOptions,
-  ): ODataResponse<ODataModelResponseV4<ReturnType>> {
-    const { client, qModel, basePath, path, getDefaultHeaders, qResponseType } = this.__base;
+  ) {
+    const { client, basePath, path, getDefaultHeaders, qModel } = this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(createOptions);
 
-    const result = await client.post<ODataModelResponseV4<T> | void>(
+    // add control info automatically, if required
+    const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
+
+    return new UrlRequestCmd<ClientType, ODataModelResponseV4<ReturnType>, ODataModelPayloadV4<EditableT>>(
+      client,
+      ODataHttpMethods.Post,
       dontUseCastPathSegment ? basePath : path,
-      qModel.convertToOData(useTypeCi ? this.__base.addTypeControlInfo(model) : model),
-      requestConfig,
-      getDefaultHeaders(),
+      data,
+      {
+        headers: getDefaultHeaders(),
+        mainRequestConverter: qModel,
+        mainResponseConverter: new ModelResponseConverterV4(qModel),
+      },
     );
-    return convertV4ModelResponse(result, qResponseType);
   }
 
   /**
    * Query the entity set.
    *
    * @param queryFn provide the query logic with the help of the builder and the query-object
-   * @param requestConfig any special configurations for this request
    */
-  public async query<ReturnType extends Partial<T> = T>(
-    queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): ODataResponse<ODataCollectionResponseV4<ReturnType>> {
-    const { client, qResponseType, applyQueryBuilder, getDefaultHeaders } = this.__base;
+  public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void) {
+    const { client, qModel, createQueryBuilder, getDefaultHeaders } = this.__base;
 
-    const response = await client.get(applyQueryBuilder(queryFn), requestConfig, getDefaultHeaders());
-    return convertV4CollectionResponse(response, qResponseType);
+    return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseV4<ReturnType>, Q>(
+      client,
+      createQueryBuilder(queryFn),
+      qModel,
+      {
+        headers: getDefaultHeaders(),
+        mainResponseConverter: new CollectionResponseConverterV4(qModel),
+      },
+    );
   }
 }

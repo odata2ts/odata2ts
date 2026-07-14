@@ -1,12 +1,21 @@
 import { ValueConverter } from "@odata2ts/converter-api";
-import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
+import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataValueResponseV4 } from "@odata2ts/odata-core";
-import { convertV4ValueResponse } from "@odata2ts/odata-query-objects";
-import { getIdentityConverter } from "@odata2ts/odata-query-objects/lib/IdentityConverter";
+import { getIdentityConverter, ValueResponseConverterV4 } from "@odata2ts/odata-query-objects";
+import { FlexibleConversionModel } from "@odata2ts/odata-query-objects/src/QueryObjectModel";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
+import { UrlRequestCmd } from "../request";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
 
-// const RAW_VALUE_SUFFIX = "/$value";
+class ValueRequestConverter<T> {
+  constructor(private valueConverter: ValueConverter<any, any>) {}
+
+  convertToOData(userModel: FlexibleConversionModel<T>): FlexibleConversionModel<any> {
+    return {
+      value: this.valueConverter.convertTo(userModel),
+    };
+  }
+}
 
 export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
   protected readonly __base: ServiceStateHelper<ClientType>;
@@ -31,36 +40,37 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
    * Requesting a <code>null</code> value results in 204 (No Content).
    * This makes the value undefined.
    *
-   * @param requestConfig
    */
-  public async getValue(
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): ODataResponse<void | ODataValueResponseV4<T>> {
+  public getValue() {
     const { client, path, getDefaultHeaders } = this.__base;
+    const converter = this.__converter;
 
-    const result = await client.get(path, requestConfig, getDefaultHeaders());
-    return convertV4ValueResponse(result, this.__converter);
+    return new UrlRequestCmd<ClientType, ODataValueResponseV4<T> | void>(
+      client,
+      ODataHttpMethods.Get,
+      path,
+      undefined,
+      {
+        headers: getDefaultHeaders(),
+        mainRequestConverter: converter,
+        mainResponseConverter: new ValueResponseConverterV4(converter),
+      },
+    );
   }
 
-  /*public async getRawValue(requestConfig?: ODataClientConfig<ClientType>): ODataResponse<any> {
-    const { client, qModel, path } = this.__base;
-
-    return client.get(path + RAW_VALUE_SUFFIX, requestConfig);
-  }*/
-
-  public async updateValue(
-    value: T,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): ODataResponse<void | ODataValueResponseV4<T>> {
+  public updateValue(value: T) {
     const { client, path, getDefaultHeaders } = this.__base;
+    const converter = this.__converter;
 
-    const requestBody = { value: this.__converter.convertTo(value) };
-    const result = await client.put(path, requestBody, requestConfig, getDefaultHeaders());
-    return convertV4ValueResponse(result, this.__converter);
+    return new UrlRequestCmd<ClientType, ODataValueResponseV4<T> | void, T>(client, ODataHttpMethods.Put, path, value, {
+      headers: getDefaultHeaders(),
+      mainRequestConverter: new ValueRequestConverter<T>(converter),
+      mainResponseConverter: new ValueResponseConverterV4(converter),
+    });
   }
 
-  public deleteValue(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
+  public deleteValue() {
     const { client, path } = this.__base;
-    return client.delete(path, requestConfig);
+    return new UrlRequestCmd<ClientType, ODataValueResponseV4<T | void>>(client, ODataHttpMethods.Delete, path);
   }
 }

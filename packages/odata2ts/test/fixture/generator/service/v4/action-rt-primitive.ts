@@ -1,10 +1,12 @@
-import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
+import type { ODataHttpClient } from "@odata2ts/http-client-api";
+import { ODataHttpMethods } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV4, ODataValueResponseV4 } from "@odata2ts/odata-core";
 import {
   EntitySetServiceV4,
   EntityTypeServiceV4,
   ODataService,
   ODataServiceOptionsInternal,
+  UrlRequestCmd,
 } from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
@@ -28,43 +30,49 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
       : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
   }
 
-  public async pingString(
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataValueResponseV4<string>>> {
+  public pingString() {
     if (!this._qPingString) {
       this._qPingString = new QPingString();
     }
 
-    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._qPingString.buildUrl());
-    const response = await client.post(url, {}, requestConfig, getDefaultHeaders());
-    return this._qPingString.convertResponse(response);
+
+    return new UrlRequestCmd<ClientType, ODataValueResponseV4<string>>(client, ODataHttpMethods.Post, url, undefined, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: this._qPingString.getResponseConverter(),
+    });
   }
 
-  public async pingNumber(
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataValueResponseV4<number>>> {
+  public pingNumber() {
     if (!this._qPingNumber) {
       this._qPingNumber = new QPingNumber();
     }
 
-    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._qPingNumber.buildUrl());
-    const response = await client.post(url, {}, requestConfig, getDefaultHeaders());
-    return this._qPingNumber.convertResponse(response);
+
+    return new UrlRequestCmd<ClientType, ODataValueResponseV4<number>>(client, ODataHttpMethods.Post, url, undefined, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: this._qPingNumber.getResponseConverter(),
+    });
   }
 
-  public async pingCollection(
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataCollectionResponseV4<string>>> {
+  public pingCollection() {
     if (!this._qPingCollection) {
       this._qPingCollection = new QPingCollection();
     }
 
-    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._qPingCollection.buildUrl());
-    const response = await client.post(url, {}, requestConfig, getDefaultHeaders());
-    return this._qPingCollection.convertResponse(response);
+
+    return new UrlRequestCmd<ClientType, ODataCollectionResponseV4<string>>(
+      client,
+      ODataHttpMethods.Post,
+      url,
+      undefined,
+      { headers: getDefaultHeaders(), mainResponseConverter: this._qPingCollection.getResponseConverter() },
+    );
   }
 }
 

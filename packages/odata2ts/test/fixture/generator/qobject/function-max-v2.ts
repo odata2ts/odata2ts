@@ -1,23 +1,31 @@
+import type { ODataValueResponseV2 } from "@odata2ts/odata-core";
 import {
   QBooleanParam,
   QDateTimeOffsetV2Param,
   QDateTimeV2Param,
   QDecimalV2Param,
   QDoubleV2Param,
-  QFunction,
+  QFunctionV2,
   QGuidV2Param,
   QInt64V2Param,
   QNumberParam,
   QSingleV2Param,
   QStringNumberV2Param,
   QStringParam,
+  QStringV2Path,
   QTimeV2Param,
+  QueryObject,
 } from "@odata2ts/odata-query-objects";
-import { booleanToNumberConverter } from "@odata2ts/test-converters";
 // @ts-ignore
 import type { MaxFunctionParams } from "./TesterModel";
 
-export class QMaxFunction extends QFunction<MaxFunctionParams> {
+export class QTheEntity extends QueryObject {
+  public readonly id = new QStringV2Path(this.withPrefix("id"));
+}
+
+export const qTheEntity = new QTheEntity();
+
+export class QMaxFunction extends QFunctionV2<MaxFunctionParams, ODataValueResponseV2<boolean>> {
   private readonly params = [
     new QStringParam("TEST_STRING", "testString"),
     new QNumberParam("testInt16"),
@@ -28,7 +36,7 @@ export class QMaxFunction extends QFunction<MaxFunctionParams> {
     new QSingleV2Param("testSingle"),
     new QDoubleV2Param("testDouble"),
     new QDecimalV2Param("testDecimal"),
-    new QBooleanParam("testBoolean", undefined, booleanToNumberConverter),
+    new QBooleanParam("testBoolean"),
     new QGuidV2Param("testGuid"),
     new QTimeV2Param("testTime"),
     new QDateTimeV2Param("testDate"),
@@ -36,7 +44,7 @@ export class QMaxFunction extends QFunction<MaxFunctionParams> {
   ];
 
   constructor() {
-    super("MAX_FUNCTION", undefined, { v2Mode: true });
+    super("MAX_FUNCTION");
   }
 
   getParams() {

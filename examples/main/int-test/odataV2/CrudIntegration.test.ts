@@ -36,11 +36,11 @@ describe("CRUD Integration Tests for OData Demo V2", () => {
   describe("create new product", () => {
     test("create product", async () => {
       try {
-        await productService.delete();
+        await productService.delete().execute();
       } catch (e) {}
 
       // when creating the product
-      const createResponse = await testService.products().create(NEW_PRODUCT_REQUEST);
+      const createResponse = await testService.products().create(NEW_PRODUCT_REQUEST).execute();
       // then return object matches our product
       expect(createResponse.status).toBe(201);
       expect(createResponse.data.d).toMatchObject(NEW_PRODUCT_RESPONSE);
@@ -49,10 +49,13 @@ describe("CRUD Integration Tests for OData Demo V2", () => {
 
     test("create 2nd product", async () => {
       try {
-        await product2Service.delete();
+        await product2Service.delete().execute();
       } catch (e) {}
 
-      const createResponse = await testService.products().create({ ...NEW_PRODUCT_REQUEST, id: NEW_PRODUCT_2_ID });
+      const createResponse = await testService
+        .products()
+        .create({ ...NEW_PRODUCT_REQUEST, id: NEW_PRODUCT_2_ID })
+        .execute();
       // then return object matches our product
       expect(createResponse.status).toBe(201);
     });
@@ -69,14 +72,14 @@ describe("CRUD Integration Tests for OData Demo V2", () => {
     test("patch product", async () => {
       // given a service for the new product
       // when updating the description, we expect no error
-      const response = await product2Service.patch({ description: "Updated Desc" });
+      const response = await product2Service.patch({ description: "Updated Desc" }).execute();
       expect(response.status).toBe(204);
       expect(response.data).toBeFalsy();
     });
 
     test("update primitive prop", async () => {
       const newValue = "Updated by Primitive Prop";
-      const result = await product2Service.name().updateValue(newValue);
+      const result = await product2Service.name().updateValue(newValue).execute();
 
       expect(result.status).toBe(204);
       expect(result.data).toBeFalsy();
@@ -84,19 +87,19 @@ describe("CRUD Integration Tests for OData Demo V2", () => {
 
     test("update primitive prop with converter", async () => {
       const newValue = new BigNumber("0.01234567890123456789");
-      const result = await product2Service.price().updateValue(newValue);
+      const result = await product2Service.price().updateValue(newValue).execute();
 
       expect(result.status).toBe(204);
       expect(result.data).toBeFalsy();
 
-      const response = await product2Service.price().getValue();
+      const response = await product2Service.price().getValue().execute();
       expect(newValue.isEqualTo(response.data?.d.price!)).toBeTruthy();
     });
   });
 
   describe("delete product", () => {
     test("delete product", async () => {
-      const response = await productService.delete();
+      const response = await productService.delete().execute();
       expect(response.status).toBe(204);
       expect(response.data).toBeFalsy();
 

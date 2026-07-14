@@ -1,10 +1,10 @@
 import { QAction } from "@odata2ts/odata-query-objects";
 
-export class QEmptyAction extends QAction {
+export class QTestAction extends QAction<undefined> {
   private readonly params: [] = [];
 
   constructor() {
-    super("EmptyAction");
+    super("TestAction");
   }
 
   getParams() {

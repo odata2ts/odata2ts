@@ -1,13 +1,14 @@
-import { ODataHttpClient, ODataHttpClientConfig, ODataResponse } from "@odata2ts/http-client-api";
+import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import {
-  convertV4CollectionResponse,
-  convertV4ModelResponse,
+  CollectionResponseConverterV4,
+  ModelResponseConverterV4,
   PrimitiveCollectionType,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
+import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
@@ -38,63 +39,67 @@ export class CollectionServiceV4<
    * Add a new item to the collection.
    *
    * @param model primitive value
-   * @param requestConfig
    */
-  public async add(
-    model: ODataModelPayloadV4<EditableT>,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): ODataResponse<void | ODataModelResponseV4<T>> {
-    const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
+  public add(model: ODataModelPayloadV4<EditableT>) {
+    const { path, client, getDefaultHeaders, qModel } = this.__base;
 
-    const result = await client.post<void | ODataModelResponseV4<T>>(
+    return new UrlRequestCmd<ClientType, ODataModelResponseV4<T>, EditableT>(
+      client,
+      ODataHttpMethods.Post,
       path,
-      qModel.convertToOData(model),
-      requestConfig,
-      getDefaultHeaders(),
+      model,
+      {
+        headers: getDefaultHeaders(),
+        mainRequestConverter: qModel,
+        mainResponseConverter: new ModelResponseConverterV4(qModel),
+      },
     );
-    return convertV4ModelResponse(result, qResponseType);
   }
 
   /**
    * Update the whole collection.
    *
    * @param models set of primitive values
-   * @param requestConfig
    */
-  public async update(
-    models: Array<ODataModelPayloadV4<EditableT>>,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): ODataResponse<void | ODataCollectionResponseV4<T>> {
-    const { client, qModel, path, getDefaultHeaders, qResponseType } = this.__base;
+  public update(models: Array<ODataModelPayloadV4<EditableT>>) {
+    const { path, client, getDefaultHeaders, qModel } = this.__base;
 
-    const result = await client.put<void | ODataCollectionResponseV4<T>>(
+    return new UrlRequestCmd<ClientType, void | ODataCollectionResponseV4<T>, Array<EditableT>>(
+      client,
+      ODataHttpMethods.Put,
       path,
-      qModel.convertToOData(models),
-      requestConfig,
-      getDefaultHeaders(),
+      models,
+      {
+        headers: getDefaultHeaders(),
+        mainRequestConverter: qModel,
+        mainResponseConverter: new ModelResponseConverterV4(qModel),
+      },
     );
-    return convertV4ModelResponse(result, qResponseType);
   }
 
   /**
    * Delete the whole collection.
    */
-  public async delete(requestConfig?: ODataHttpClientConfig<ClientType>): ODataResponse<void> {
+  public delete() {
     const { client, path } = this.__base;
 
-    return client.delete(path, requestConfig);
+    return new UrlRequestCmd<ClientType, void>(client, ODataHttpMethods.Delete, path, undefined);
   }
 
   /**
    * Query collection of primitive values.
    */
-  public async query<ReturnType = T>(
-    queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): ODataResponse<ODataCollectionResponseV4<ReturnType>> {
-    const { client, getDefaultHeaders, applyQueryBuilder, qResponseType } = this.__base;
+  public query<ReturnType = T>(queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void) {
+    const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
-    const response = await client.get(applyQueryBuilder(queryFn), requestConfig, getDefaultHeaders());
-    return convertV4CollectionResponse(response, qResponseType);
+    return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseV4<ReturnType>, Q>(
+      client,
+      createQueryBuilder(queryFn),
+      qModel,
+      {
+        headers: getDefaultHeaders(),
+        mainResponseConverter: new CollectionResponseConverterV4(qModel),
+      },
+    );
   }
 }

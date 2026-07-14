@@ -1,10 +1,12 @@
-import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
+import type { ODataHttpClient } from "@odata2ts/http-client-api";
+import { ODataHttpMethods } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import {
   EntitySetServiceV4,
   EntityTypeServiceV4,
   ODataService,
   ODataServiceOptionsInternal,
+  UrlRequestCmd,
 } from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
@@ -27,31 +29,38 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
       : new TestEntityService(client, path, new QTestEntityId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
   }
 
-  public async mostPop(
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataCollectionResponseV4<TestEntity>>> {
+  public mostPop() {
     if (!this._qGetBestsellers) {
       this._qGetBestsellers = new QGetBestsellers();
     }
 
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qGetBestsellers.buildUrl(isUrlNotEncoded()));
-    const response = await client.get(url, requestConfig, getDefaultHeaders());
-    return this._qGetBestsellers.convertResponse(response);
+
+    return new UrlRequestCmd<ClientType, ODataCollectionResponseV4<TestEntity>>(
+      client,
+      ODataHttpMethods.Get,
+      url,
+      undefined,
+      { headers: getDefaultHeaders(), mainResponseConverter: this._qGetBestsellers.getResponseConverter() },
+    );
   }
 
-  public async bestBook(
-    params: FirstBookParams,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataModelResponseV4<TestEntity>>> {
+  public bestBook(params: FirstBookParams) {
     if (!this._qFirstBook) {
       this._qFirstBook = new QFirstBook();
     }
 
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qFirstBook.buildUrl(params, isUrlNotEncoded()));
-    const response = await client.get(url, requestConfig, getDefaultHeaders());
-    return this._qFirstBook.convertResponse(response);
+
+    return new UrlRequestCmd<ClientType, ODataModelResponseV4<TestEntity>>(
+      client,
+      ODataHttpMethods.Get,
+      url,
+      undefined,
+      { headers: getDefaultHeaders(), mainResponseConverter: this._qFirstBook.getResponseConverter() },
+    );
   }
 }
 

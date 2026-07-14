@@ -1,8 +1,8 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { describe, expect, test } from "vitest";
 import { EMPTY_ACTION_NAME, QEmptyAction } from "../fixture/operation/EmptyAction";
 import { ParamActionParamModel, QParamAction } from "../fixture/operation/ParamAction";
-import { QComplexReturningAction, QPrimitiveReturningFunction } from "../fixture/operation/ReturningFunctions";
-import { SimpleEntityUnconverted, SimpleEntityWithConverter } from "../fixture/SimpleEntityWithConverter";
 import { createResponse } from "../test-infra/TestResponseHelper";
 
 describe("QAction Tests", () => {
@@ -11,11 +11,22 @@ describe("QAction Tests", () => {
     expect(exampleOperation.getName()).toBe(EMPTY_ACTION_NAME);
     expect(exampleOperation.buildUrl()).toBe(EMPTY_ACTION_NAME);
     expect(exampleOperation.getParams()).toBeUndefined();
-    expect(exampleOperation.convertUserParams(undefined)).toBeUndefined();
-    expect(exampleOperation.convertODataParams(undefined)).toBeUndefined();
+    expect(exampleOperation.getRequestConverter()).toBeUndefined();
+    expect(exampleOperation.getResponseConverter()).toBeUndefined();
   });
 
   test("QAction: with params", () => {
+    const exampleOperation = new QParamAction();
+
+    expect(exampleOperation.getParams()).toBeDefined();
+    expect(exampleOperation.getParams().length).toBe(7);
+    expect(exampleOperation.getResponseConverter()).toBeDefined();
+    expect(exampleOperation.getRequestConverter()).toBeDefined();
+  });
+
+  test("request converter: conversion", () => {
+    const reqConv = new QParamAction().getRequestConverter()!;
+
     const requiredUserParams: ParamActionParamModel = {
       testGuid: "aaa-bbb",
       testString: "hi",
@@ -38,47 +49,31 @@ describe("QAction Tests", () => {
       testDate: null,
       testTime: "PY32",
     };
-    const exampleOperation = new QParamAction();
 
-    expect(exampleOperation.getParams()).toBeDefined();
-    expect(exampleOperation.getParams().length).toBe(7);
-    expect(exampleOperation.convertUserParams(requiredUserParams)).toMatchObject(requiredODataParams);
-    expect(exampleOperation.convertUserParams(allUserParams)).toMatchObject(allODataParams);
-    expect(exampleOperation.convertODataParams(requiredODataParams)).toMatchObject(requiredUserParams);
-    expect(exampleOperation.convertODataParams(allODataParams)).toMatchObject(allUserParams);
+    expect(reqConv).toBeDefined();
+    expect(reqConv.convertTo(requiredUserParams)).toMatchObject(requiredODataParams);
+    expect(reqConv.convertTo(allUserParams)).toMatchObject(allODataParams);
   });
 
-  test("with wrong params", () => {
-    const requiredUserParams: ParamActionParamModel = {
-      testGuid: "aaa-bbb",
-      testString: "hi",
-      testBoolean: 1,
-      testNumber: 3,
-    };
-    const exampleOperation = new QParamAction();
+  test("request converter: with wrong params", () => {
+    const reqConv = new QParamAction().getRequestConverter()!;
 
     // @ts-expect-error
-    expect(exampleOperation.convertUserParams()).toBeUndefined();
+    expect(reqConv.convertTo()).toBeUndefined();
     // @ts-expect-error
-    expect(exampleOperation.convertODataParams()).toBeUndefined();
-    // @ts-expect-error
-    expect(() => exampleOperation.convertUserParams({ dummy: "xxx" })).toThrow("Unknown parameter");
-    expect(() => exampleOperation.convertODataParams({ dummy: "xxx" })).toThrow("Unknown parameter");
+    expect(() => reqConv.convertTo({ dummy: "xxx" })).toThrow("Unknown parameter");
   });
 
-  test("QAction: model response conversion", () => {
-    const exampleAction = new QComplexReturningAction();
-    const MODEL_INPUT: SimpleEntityUnconverted = {
-      ID: 123,
-      truth: true,
-      AGE: 62,
-    };
-    const MODEL_CONVERTED: SimpleEntityWithConverter = {
-      id: 123,
-      truth: 1,
-      age: "62",
-    };
+  test("response converter: conversion", () => {
+    const origResponse: HttpResponseModel<any> = createResponse({ value: "test" });
 
-    expect(exampleAction.convertResponse(createResponse(MODEL_INPUT)).data).toStrictEqual(MODEL_CONVERTED);
+    const conv = new QParamAction().getResponseConverter()!;
+    expect(conv).toBeDefined();
+
+    const result: HttpResponseModel<ODataValueResponseV4<string>> = conv.convert(origResponse);
+    expect(result).toStrictEqual({
+      ...origResponse,
+      data: { value: "TEST" },
+    });
   });
 });

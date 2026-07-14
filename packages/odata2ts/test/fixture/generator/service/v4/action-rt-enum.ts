@@ -1,10 +1,12 @@
-import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
+import type { ODataHttpClient } from "@odata2ts/http-client-api";
+import { ODataHttpMethods } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import {
   EntitySetServiceV4,
   EntityTypeServiceV4,
   ODataService,
   ODataServiceOptionsInternal,
+  UrlRequestCmd,
 } from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QBook } from "./QTester";
@@ -38,35 +40,38 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
     super(client, basePath, name, qBook, options);
   }
 
-  public async like(
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataModelResponseV4<void>>> {
+  public like() {
     if (!this._bookQLike) {
       this._bookQLike = new Book_QLike();
     }
 
-    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._bookQLike.buildUrl());
-    return client.post(url, {}, requestConfig, getDefaultHeaders());
+
+    return new UrlRequestCmd<ClientType, void>(client, ODataHttpMethods.Post, url, undefined, {
+      headers: getDefaultHeaders(),
+    });
   }
 
-  public async rate(
-    params: Book_RateParams,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataModelResponseV4<Rating>>> {
+  public rate(params: Book_RateParams) {
     if (!this._bookQRate) {
       this._bookQRate = new Book_QRate();
     }
 
-    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._bookQRate.buildUrl());
-    const response = await client.post(
+
+    return new UrlRequestCmd<ClientType, ODataModelResponseV4<Rating>, Book_RateParams>(
+      client,
+      ODataHttpMethods.Post,
       url,
-      this._bookQRate.convertUserParams(params),
-      requestConfig,
-      getDefaultHeaders(),
+      params,
+      {
+        headers: getDefaultHeaders(),
+        mainRequestConverter: this._bookQRate.getRequestConverter(),
+        mainResponseConverter: this._bookQRate.getResponseConverter(),
+      },
     );
-    return this._bookQRate.convertResponse(response);
   }
 }
 
@@ -83,22 +88,24 @@ export class BookCollectionService<in out ClientType extends ODataHttpClient> ex
     super(client, basePath, name, qBook, new QBookId(name), options);
   }
 
-  public async ratings(
-    params: Book_RatingsParams,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataCollectionResponseV4<Rating>>> {
+  public ratings(params: Book_RatingsParams) {
     if (!this._bookQRatings) {
       this._bookQRatings = new Book_QRatings();
     }
 
-    const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
+    const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._bookQRatings.buildUrl());
-    const response = await client.post(
+
+    return new UrlRequestCmd<ClientType, ODataCollectionResponseV4<Rating>, Book_RatingsParams>(
+      client,
+      ODataHttpMethods.Post,
       url,
-      this._bookQRatings.convertUserParams(params),
-      requestConfig,
-      getDefaultHeaders(),
+      params,
+      {
+        headers: getDefaultHeaders(),
+        mainRequestConverter: this._bookQRatings.getRequestConverter(),
+        mainResponseConverter: this._bookQRatings.getResponseConverter(),
+      },
     );
-    return this._bookQRatings.convertResponse(response);
   }
 }

@@ -1,5 +1,6 @@
+import { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
-import { OperationReturnType, QBooleanParam, QFunction, QNumberParam, QStringParam, ReturnTypes } from "../../../src";
+import { QBooleanParam, QFunctionV4, QNumberParam, QStringParam, ValueResponseConverterV4 } from "../../../src";
 
 export type OverloadedFunctionParamModel =
   | {
@@ -9,7 +10,7 @@ export type OverloadedFunctionParamModel =
   | { id: string }
   | string;
 
-export class QOverloadedFunction extends QFunction<OverloadedFunctionParamModel> {
+export class QOverloadedFunction extends QFunctionV4<OverloadedFunctionParamModel, ODataValueResponseV4<boolean>> {
   private readonly params = [
     [
       new QNumberParam("TestNumber", "testNumber"),
@@ -19,7 +20,7 @@ export class QOverloadedFunction extends QFunction<OverloadedFunctionParamModel>
   ];
 
   constructor() {
-    super("OverloadedFunction", new OperationReturnType(ReturnTypes.VALUE, new QBooleanParam("NONE")));
+    super("OverloadedFunction", new ValueResponseConverterV4<boolean>(new QBooleanParam("NONE")));
   }
 
   public getParams() {

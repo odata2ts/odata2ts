@@ -1,5 +1,6 @@
 import type { HttpResponseModel } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
+import { BigNumber } from "bignumber.js";
 import { describe, expect, test } from "vitest";
 import { ProductModel } from "../../src-generated/odataV2/ODataDemoModel";
 import { ODataDemoService } from "../../src-generated/odataV2/ODataDemoService";
@@ -11,7 +12,10 @@ describe("Unit Tests for V2 OData Demo Service", function () {
   const testService = new ODataDemoService(odataClient, BASE_URL, { noUrlEncoding: true });
 
   test("get by id", async () => {
-    const result: HttpResponseModel<ODataEntityModelResponseV2<ProductModel>> = await testService.products(123).query();
+    const result: HttpResponseModel<ODataEntityModelResponseV2<ProductModel>> = await testService
+      .products(123)
+      .query()
+      .execute();
 
     expect(odataClient.lastUrl).toBe("test/Products(123)");
     expect(result.status).toBe(200);
@@ -24,7 +28,10 @@ describe("Unit Tests for V2 OData Demo Service", function () {
   test("proper query", async () => {
     const result: HttpResponseModel<ODataCollectionResponseV2<ProductModel>> = await testService
       .products()
-      .query((builder, qProduct) => builder.select("id", "name").filter(qProduct.price.plus("1").gt("1000")));
+      .query((builder, qProduct) =>
+        builder.select("id", "name").filter(qProduct.price.plus(BigNumber("1")).gt(BigNumber("1000"))),
+      )
+      .execute();
 
     expect(result.status).toBe(200);
     expect(odataClient.lastUrl).toBe("test/Products?$select=ID,Name&$filter=Price add 1 gt 1000");
@@ -35,10 +42,16 @@ describe("Unit Tests for V2 OData Demo Service", function () {
   });
 
   test("in filter", async () => {
-    await testService.products().query((builder, qProduct) => builder.filter(qProduct.name.in(["x", "y"], "z")));
+    await testService
+      .products()
+      .query((builder, qProduct) => builder.filter(qProduct.name.in(["x", "y"], "z")))
+      .execute();
     expect(odataClient.lastUrl).toBe("test/Products?$filter=(Name eq 'x' or Name eq 'y' or Name eq 'z')");
 
-    await testService.products().query((builder, qProduct) => builder.filter(qProduct.name.in("x", "y", "z")));
+    await testService
+      .products()
+      .query((builder, qProduct) => builder.filter(qProduct.name.in("x", "y", "z")))
+      .execute();
     expect(odataClient.lastUrl).toBe("test/Products?$filter=(Name eq 'x' or Name eq 'y' or Name eq 'z')");
   });
 });

@@ -1,10 +1,11 @@
+import type { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import {
   QBooleanParam,
   QComplexParam,
   QDateParam,
   QDateTimeOffsetParam,
   QEnumParam,
-  QFunction,
+  QFunctionV4,
   QGuidParam,
   QNumberParam,
   QStringParam,
@@ -12,7 +13,6 @@ import {
   QTimeOfDayParam,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
-import { booleanToNumberConverter } from "@odata2ts/test-converters";
 // @ts-ignore
 import type { MaxFunctionParams } from "./TesterModel";
 
@@ -28,11 +28,11 @@ export class QComplex extends QueryObject {
 
 export const qComplex = new QComplex();
 
-export class QMaxFunction extends QFunction<MaxFunctionParams> {
+export class QMaxFunction extends QFunctionV4<MaxFunctionParams, ODataValueResponseV4<boolean>> {
   private readonly params = [
     new QStringParam("TEST_STRING", "testString"),
     new QNumberParam("testNumber"),
-    new QBooleanParam("testBoolean", undefined, booleanToNumberConverter),
+    new QBooleanParam("testBoolean"),
     new QGuidParam("testGuid"),
     new QTimeOfDayParam("testTime"),
     new QDateParam("testDate"),

@@ -37,7 +37,7 @@ describe("Query Object Generator Tests V4", () => {
 
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, MODEL_FILE, GENERATE);
 
-  async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<DigestionOptions>, fileToInspect = MODEL_FILE) {
+  async function generateAndCompare(fixturePath: string, genOptions?: Partial<DigestionOptions>, fileToInspect = MODEL_FILE) {
     await fixtureComparatorHelper.generateAndCompare(fileToInspect, fixturePath, odataBuilder.getSchemas(), genOptions);
   }
 
@@ -49,24 +49,21 @@ describe("Query Object Generator Tests V4", () => {
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
   });
 
-  test(`min QFunction`, async () => {
+  test(`QFunction: min`, async () => {
     // given a simple function
-    odataBuilder.addFunction("MinFunction", ODataTypesV4.String, false, (builder) =>
-      builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true),
-    );
+    odataBuilder.addFunction("MinFunction", ODataTypesV4.String, false);
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("minFunction", "function-min.ts");
+    await generateAndCompare("function-min.ts");
   });
 
-  test(`max QFunction`, async () => {
-    // given a function
+  test(`QFunction: max params`, async () => {
     odataBuilder
       .addComplexType("Complex", undefined, (builder) => builder.addProp("a", ODataTypesV4.String))
       .addEntityType("TheEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
       .addEnumType("TheEnum", [{ name: "One", value: 1 }])
-      .addFunction("MAX_FUNCTION", ODataTypesV4.String, false, (builder) =>
+      .addFunction("MAX_FUNCTION", ODataTypesV4.Boolean, false, (builder) =>
         builder
           .addParam("TEST_STRING", ODataTypesV4.String, false)
           .addParam("testNumber", ODataTypesV4.Int32, false)
@@ -81,95 +78,68 @@ describe("Query Object Generator Tests V4", () => {
           .addParam("enum", `${withNs("TheEnum")}`),
       );
 
-    // when generating model
-    // then match fixture text
-    await generateAndCompare("maxFunction", "function-max.ts", {
-      converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
+    await generateAndCompare("function-max.ts");
+  });
+
+  test("QFunction: Max params converted", async () => {
+    odataBuilder
+      .addComplexType("Complex", undefined, (builder) => builder.addProp("a", ODataTypesV4.String))
+      .addEntityType("TheEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addEnumType("TheEnum", [{ name: "One", value: 1 }])
+      .addFunction("MAX_FUNCTION", ODataTypesV4.Boolean, false, (builder) =>
+        builder
+          .addParam("TEST_STRING", ODataTypesV4.String, false)
+          .addParam("testNumber", ODataTypesV4.Int32, false)
+          .addParam("testBoolean", ODataTypesV4.Boolean, false)
+          .addParam("testGuid", ODataTypesV4.Guid, false)
+          .addParam("testTime", ODataTypesV4.TimeOfDay, false)
+          .addParam("testDate", ODataTypesV4.Date, false)
+          .addParam("testDateTimeOffset", ODataTypesV4.DateTimeOffset, false)
+          .addParam("testDateTimeOffset", ODataTypesV4.DateTimeOffset, false)
+          .addParam("complex", `${withNs("Complex")}`)
+          .addParam("ENTITY", `${withNs("TheEntity")}`)
+          .addParam("enum", `${withNs("TheEnum")}`),
+      );
+
+    await generateAndCompare("function-max-converted.ts", {
+      converters: [{ module: "@odata2ts/test-converters" }],
     });
   });
 
-  test(`bound QFunction`, async () => {
-    // given one minimal model with bound function
+  test(`QFunction: bound`, async () => {
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
-      .addFunction("MinFunction", ODataTypesV4.String, true, (builder) =>
+      .addFunction("MinFunction", ODataTypesV4.Boolean, true, (builder) =>
         builder
           .addParam("book", `${withNs("Book")}`)
           .addParam("test", ODataTypesV4.String, false)
           .addParam("optTest", ODataTypesV4.Boolean, true),
       );
 
-    // when generating model
-    // then match fixture text
-    await generateAndCompare("boundFunc", "function-bound.ts", {
-      converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
-    });
+    await generateAndCompare("function-bound.ts");
   });
 
-  test(`collection bound QFunction`, async () => {
-    // given one minimal model with bound function
+  test(`QFunction: collection bound`, async () => {
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
-      .addFunction("MinFunction", ODataTypesV4.String, true, (builder) =>
+      .addFunction("MinFunction", ODataTypesV4.Boolean, true, (builder) =>
         builder
           .addParam("_it", `Collection(${withNs("Book")})`)
           .addParam("test", ODataTypesV4.String, false)
           .addParam("optTest", ODataTypesV4.Boolean, true),
       );
 
-    // when generating model
-    // then match fixture text => actually there's no diff in the generated q objects between bound-to-entity and bound-to-collection
-    await generateAndCompare("collBoundFunc", "function-bound.ts", {
-      converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
-    });
+    await generateAndCompare("function-bound.ts");
   });
 
-  test(`min QAction`, async () => {
-    // given a simple function
-    odataBuilder.addAction("MinAction", ODataTypesV4.Boolean, false, (builder) =>
-      builder.addParam("test", ODataTypesV4.String, false).addParam("opt_Test", ODataTypesV4.String, true),
-    );
+  test("QFunction: primitive collection response", async () => {
+    odataBuilder.addFunction("TestFunction", `Collection(${ODataTypesV4.String})`, false);
 
-    // when generating model
-    // then match fixture text
-    await generateAndCompare("minAction", "action-min.ts", {
-      converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
-    });
+    await generateAndCompare("function-rt-collection.ts");
   });
 
-  test(`QAction with converter`, async () => {
-    // given a simple function
-    odataBuilder
-      .addEntityType("Person", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
-      .addAction("ActionWithConverter", `${withNs("Person")}`, false, (builder) =>
-        builder.addParam("test", ODataTypesV4.String, false),
-      );
-
-    // when generating model
-    // then match fixture text
-    await generateAndCompare("actionWithConverter", "action-converter.ts", {
-      converters: [{ module: "@odata2ts/test-converters", use: ["stringToPrefixModelConverter"] }],
-    });
-  });
-
-  test(`bound QAction`, async () => {
-    // given a simple function
-    odataBuilder
-      .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
-      .addAction("BoundAction", ODataTypesV4.Boolean, true, (builder) =>
-        builder
-          .addParam("test", `${SERVICE_NAME}.${ENTITY_NAME}`, false)
-          .addParam("opt_Test", ODataTypesV4.String, true),
-      );
-
-    // when generating model
-    // then match fixture text
-    await generateAndCompare("boundAction", "action-bound.ts");
-  });
-
-  test(`QFunction with overloaded params`, async () => {
+  test(`QFunction: overloaded params`, async () => {
     const funcName = "OverloadedFunction";
-    // given an overloaded function
     odataBuilder
       .addFunction(funcName, ODataTypesV4.String, false, (builder) =>
         builder.addParam("test", ODataTypesV4.String, false).addParam("optTest", ODataTypesV4.String, true),
@@ -178,23 +148,49 @@ describe("Query Object Generator Tests V4", () => {
         builder.addParam("id", ODataTypesV4.Guid);
       });
 
-    // when generating model
-    // then match fixture text
-    await generateAndCompare("overloadedFunction", "function-overloaded.ts");
+    await generateAndCompare("function-overloaded.ts");
   });
 
-  test(`QFunction with overloaded params 2`, async () => {
+  test(`QFunction: overloaded params 2`, async () => {
     const funcName = "OverloadedFunction";
-    // given an overloaded function
     odataBuilder
       .addFunction(funcName, ODataTypesV4.String, false)
       .addFunction(funcName, ODataTypesV4.String, false, (builder) => {
         builder.addParam("test", ODataTypesV4.String, false);
       });
 
-    // when generating model
-    // then match fixture text
-    await generateAndCompare("overloadedFunction2", "function-overloaded-2.ts");
+    await generateAndCompare("function-overloaded-2.ts");
+  });
+
+  test(`QAction: no response`, async () => {
+    odataBuilder.addAction("TestAction", undefined, false, (builder) =>
+      builder.addParam("test", ODataTypesV4.String, false).addParam("opt_Test", ODataTypesV4.String, true),
+    );
+
+    await generateAndCompare("action-no-response.ts");
+  });
+
+  test(`QAction: response types`, async () => {
+    odataBuilder
+      .addEntityType("Person", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addAction("APrimitive", ODataTypesV4.Boolean, false)
+      .addAction("APrimitiveCollection", `Collection(${ODataTypesV4.Boolean})`, false)
+      .addAction("AModel", `${withNs("Person")}`, false)
+      .addAction("AModelCollection", `Collection(${withNs("Person")})`, false);
+
+    await generateAndCompare("action-response-types.ts");
+  });
+
+  test(`QAction: bound`, async () => {
+    odataBuilder
+      .addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Boolean))
+      .addAction("BoundAction", ODataTypesV4.Boolean, true, (builder) =>
+        builder
+          .addParam("test", `${SERVICE_NAME}.${ENTITY_NAME}`, false)
+          .addParam("opt_Test", ODataTypesV4.String, true),
+      );
+
+    await generateAndCompare("action-bound.ts");
   });
 
   test(`QObject generation with nativeIn option`, async () => {
@@ -215,7 +211,7 @@ describe("Query Object Generator Tests V4", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("modelWithNativeIn", "entity-with-native-in.ts", {
+    await generateAndCompare("entity-with-native-in.ts", {
       enableNativeInOperator: true,
     });
   });
@@ -230,13 +226,13 @@ describe("Query Object Generator Tests V4", () => {
 
     // when generating model
     // then match fixture text of main qobject
-    await generateAndCompare("modelWithNativeInAndUnbundled", "unbundled-main-native-in.ts", {
+    await generateAndCompare("unbundled-main-native-in.ts", {
       enableNativeInOperator: true,
       bundledFileGeneration: false
     });
     // when generating model
     // then match fixture text of unbundled file
-    await generateAndCompare("modelWithNativeInAndUnbundled2", "unbundled-file-native-in.ts", {
+    await generateAndCompare("unbundled-file-native-in.ts", {
       enableNativeInOperator: true,
       bundledFileGeneration: false
     }, `${SERVICE_NAME.toLowerCase()}/${ENTITY_NAME.toLowerCase()}/Q${ENTITY_NAME}`);

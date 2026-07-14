@@ -103,8 +103,12 @@ export class ImportContainer {
     const name = ClientApiImports[clientApi];
     const importName = this.importedNameValidator.validateName(LIB_MODULES.clientApi, name);
 
-    // complete client api consists only of types
-    this.libs.clientApi.typeOnly.set(name, importName);
+    if (clientApi === ClientApiImports.ODataHttpMethods) {
+      this.libs.clientApi.regular.set(name, importName);
+    } else {
+      // complete client api consists only of types
+      this.libs.clientApi.typeOnly.set(name, importName);
+    }
     return importName;
   }
 

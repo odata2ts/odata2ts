@@ -16,19 +16,19 @@
     "test-compile": "tsc"
   },
   "dependencies": {
-    "@odata2ts/converter-big-number": "^0.2.7",
+    "@odata2ts/converter-big-number": "^0.2.8",
     "@odata2ts/converter-common": "^0.3.7",
     "@odata2ts/converter-luxon": "^0.2.7",
     "@odata2ts/converter-v2-to-v4": "^0.5.7",
     "@odata2ts/http-client-axios": "^0.12.2",
     "@odata2ts/http-client-fetch": "^0.9.2",
-    "@odata2ts/odata-service": "^0.23.1",
+    "@odata2ts/odata-service": "^0.23.2",
     "axios": "^1.13.1",
     "bignumber.js": "^9.1.2",
     "luxon": "^3.5.0"
   },
   "devDependencies": {
-    "@odata2ts/odata2ts": "^0.40.1",
+    "@odata2ts/odata2ts": "^0.40.2",
     "@types/luxon": "^3.4.2"
   },
   "publishConfig": {

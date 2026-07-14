@@ -5,7 +5,7 @@ import {
   QEntityPath,
   QEnumCollectionPath,
   QEnumPath,
-  QFunction,
+  QFunctionV4,
   QGuidParam,
   QNumberPath,
   QStringPath,
@@ -17,16 +17,19 @@ import { EditablePersonModel, Feature, GetSomethingFunctionParams } from "../Per
 
 export class QPersonV4 extends QueryObject<EditablePersonModel> {
   public readonly userName = new QStringPath(this.withPrefix("UserName"));
-  public readonly Age = new QNumberPath(this.withPrefix("Age"), numberToStringConverter);
-  public readonly FavFeature = new QEnumPath(this.withPrefix("FavFeature"), Feature);
-  public readonly Features = new QEnumCollectionPath(this.withPrefix("Features"), Feature);
-  public readonly Friends = new QEntityCollectionPath(this.withPrefix("Friends"), () => QPersonV4);
-  public readonly BestFriend = new QEntityPath(this.withPrefix("BestFriend"), () => QPersonV4);
+  public readonly age = new QNumberPath(this.withPrefix("Age"), numberToStringConverter);
+  public readonly favFeature = new QEnumPath(this.withPrefix("FavFeature"), Feature);
+  public readonly features = new QEnumCollectionPath(this.withPrefix("Features"), Feature);
+  public readonly friends = new QEntityCollectionPath(this.withPrefix("Friends"), () => QPersonV4);
+  public readonly bestFriend = new QEntityPath(this.withPrefix("BestFriend"), () => QPersonV4);
 }
 
 export const qPersonV4 = new QPersonV4();
 
-export class QGetSomethingFunction extends QFunction<GetSomethingFunctionParams> {
+export class QGetSomethingFunction<ResponseStructure> extends QFunctionV4<
+  GetSomethingFunctionParams,
+  ResponseStructure
+> {
   constructor() {
     super("GET_SOMETHING");
   }

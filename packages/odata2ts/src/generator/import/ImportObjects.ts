@@ -35,12 +35,18 @@ export enum QueryObjectImports {
   QueryObject = "QueryObject",
   ENUMERABLE_PROP_DEFINITION = "ENUMERABLE_PROP_DEFINITION",
   QId = "QId",
-  QFunction = "QFunction",
+  QFunctionV2 = "QFunctionV2",
+  QFunctionV4 = "QFunctionV4",
   QAction = "QAction",
   EnumCollection = "EnumCollection",
-  OperationReturnType = "OperationReturnType",
-  ReturnTypes = "ReturnTypes",
   QComplexParam = "QComplexParam",
+  CollectionResponseConverterV4 = "CollectionResponseConverterV4",
+  CollectionResponseConverterV2 = "CollectionResponseConverterV2",
+  ValueResponseConverterV4 = "ValueResponseConverterV4",
+  ValueResponseConverterV2 = "ValueResponseConverterV2",
+  ModelResponseConverterV4 = "ModelResponseConverterV4",
+  EntityResponseConverterV2 = "EntityResponseConverterV2",
+  ComplexResponseConverterV2 = "ComplexResponseConverterV2",
 }
 
 /**
@@ -50,6 +56,7 @@ export enum ClientApiImports {
   ODataHttpClient,
   ODataHttpClientConfig,
   HttpResponseModel,
+  ODataHttpMethods,
 }
 
 /**
@@ -65,6 +72,7 @@ export enum ServiceImports {
   CollectionService,
   EntitySetService,
   ComplexTypeService,
+  UrlRequestCmd,
 }
 
 /**

@@ -1,5 +1,7 @@
-import { ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
-import { QEnumCollection } from "@odata2ts/odata-query-objects";
+import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
+import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ModelResponseConverterV4, QEnumCollection } from "@odata2ts/odata-query-objects";
+import { UrlRequestCmd } from "@odata2ts/odata-service";
 import {
   CollectionServiceV4,
   EntitySetServiceV4,
@@ -25,18 +27,12 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
 
   public userName() {
     const { client, path, qModel, options } = this.__base;
-    return new PrimitiveTypeServiceV4<ClientType, "string">(
-      client,
-      path,
-      "UserName",
-      qModel.userName.converter,
-      options,
-    );
+    return new PrimitiveTypeServiceV4<ClientType, string>(client, path, "UserName", qModel.userName.converter, options);
   }
 
   public age() {
     const { client, path, qModel, options } = this.__base;
-    return new PrimitiveTypeServiceV4<ClientType, "string">(client, path, "Age", qModel.Age.converter, options);
+    return new PrimitiveTypeServiceV4<ClientType, string>(client, path, "Age", qModel.age.converter, options);
   }
 
   public get features() {
@@ -54,10 +50,18 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
     return new PersonModelCollectionService(client, path, "Friends", options);
   }
 
-  public getSomething(params: GetSomethingFunctionParams, requestConfig?: ODataHttpClientConfig<ClientType>) {
+  public getSomething(params: GetSomethingFunctionParams) {
     const { addFullPath, client, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qGetSomething.buildUrl(params, isUrlNotEncoded()));
-    return client.get(url, requestConfig);
+    return new UrlRequestCmd<ClientType, ODataModelResponseV4<PersonModel>>(
+      client,
+      ODataHttpMethods.Get,
+      url,
+      undefined,
+      {
+        mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
+      },
+    );
   }
 }
 
