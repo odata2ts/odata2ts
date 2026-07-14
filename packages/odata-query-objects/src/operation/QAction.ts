@@ -21,14 +21,14 @@ export abstract class QAction<ParamModel, ResponseStructure = undefined> {
     return this.name;
   }
 
-  public getRequestConverter() {
+  public getRequestConverter(): Pick<QParamModel<any, ParamModel>, "convertTo"> | undefined {
     const qParams = this.getParams();
     if (!qParams) {
       return undefined;
     }
 
     return {
-      convertTo: (data: FlexibleConversionModel<ParamModel>) => {
+      convertTo: (data: FlexibleConversionModel<ParamModel>): FlexibleConversionModel<any> => {
         if (!data) {
           return undefined;
         }
