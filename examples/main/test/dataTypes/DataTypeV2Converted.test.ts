@@ -53,20 +53,22 @@ describe("V2 Data Types & Converter Tests", function () {
       DateTimeOffsetType: "2022-12-31T12:59:59.000Z",
     };
 
-    await DATA_TYPE_SERVICE.oneOfEverything().create(subject);
+    await DATA_TYPE_SERVICE.oneOfEverything().create(subject).execute();
     expect(ODATA_CLIENT.lastData).toStrictEqual(expectedResult);
-    await DATA_TYPE_SERVICE.oneOfEverything("abc").update(subject);
+    await DATA_TYPE_SERVICE.oneOfEverything("abc").update(subject).execute();
     expect(ODATA_CLIENT.lastData).toStrictEqual(expectedResult);
-    await DATA_TYPE_SERVICE.oneOfEverything("abc").patch(subject);
+    await DATA_TYPE_SERVICE.oneOfEverything("abc").patch(subject).execute();
     expect(ODATA_CLIENT.lastData).toStrictEqual(expectedResult);
   });
 
   test("v2: DateTime in URL", async () => {
     const exampleDate = "2006-11-05T00:00:00.000Z";
 
-    await DATA_TYPE_SERVICE.oneOfEverything().query((builder, qOoe) => {
-      return builder.filter(qOoe.dateTimeType.eq(DateTime.fromISO(exampleDate)));
-    });
+    await DATA_TYPE_SERVICE.oneOfEverything()
+      .query((builder, qOoe) => {
+        return builder.filter(qOoe.dateTimeType.eq(DateTime.fromISO(exampleDate)));
+      })
+      .execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${ONE_OF_EVERYTHING_URL}?$filter=DateTimeType eq datetime'${exampleDate}'`);
   });

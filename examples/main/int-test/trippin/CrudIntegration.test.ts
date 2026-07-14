@@ -37,20 +37,20 @@ describe.skip("Trippin: CRUD Integration Tests", function () {
     const horstService = trippinService.people(horst.user);
 
     try {
-      await horstService.delete();
+      await horstService.delete().execute();
     } catch (e) {}
 
     // when creating a new person
-    let result = await trippinService.people().create(horst);
+    let result = await trippinService.people().create(horst).execute();
     // then returned object matches our person
     expect(result.data).toMatchObject(horst);
 
     // given a service for the new person
     // when updating some props, we expect no error
-    await horstService.patch({ middleName: "middle", age: 33 });
+    await horstService.patch({ middleName: "middle", age: 33 }).execute();
 
     // when deleting this new product, we expect no error
     // await new Promise((res) => global.setTimeout(res, 1000));
-    await horstService.delete();
+    await horstService.delete().execute();
   });
 });

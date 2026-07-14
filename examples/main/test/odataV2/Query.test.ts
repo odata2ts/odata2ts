@@ -11,7 +11,10 @@ describe("Unit Tests for V2 OData Demo Service", function () {
   const testService = new ODataDemoService(odataClient, BASE_URL, { noUrlEncoding: true });
 
   test("get by id", async () => {
-    const result: HttpResponseModel<ODataEntityModelResponseV2<ProductModel>> = await testService.products(123).query();
+    const result: HttpResponseModel<ODataEntityModelResponseV2<ProductModel>> = await testService
+      .products(123)
+      .query()
+      .execute();
 
     expect(odataClient.lastUrl).toBe("test/Products(123)");
     expect(result.status).toBe(200);
@@ -24,7 +27,8 @@ describe("Unit Tests for V2 OData Demo Service", function () {
   test("proper query", async () => {
     const result: HttpResponseModel<ODataCollectionResponseV2<ProductModel>> = await testService
       .products()
-      .query((builder, qProduct) => builder.select("id", "name").filter(qProduct.price.plus("1").gt("1000")));
+      .query((builder, qProduct) => builder.select("id", "name").filter(qProduct.price.plus("1").gt("1000")))
+      .execute();
 
     expect(result.status).toBe(200);
     expect(odataClient.lastUrl).toBe("test/Products?$select=ID,Name&$filter=Price add 1 gt 1000");
@@ -35,10 +39,16 @@ describe("Unit Tests for V2 OData Demo Service", function () {
   });
 
   test("in filter", async () => {
-    await testService.products().query((builder, qProduct) => builder.filter(qProduct.name.in(["x", "y"], "z")));
+    await testService
+      .products()
+      .query((builder, qProduct) => builder.filter(qProduct.name.in(["x", "y"], "z")))
+      .execute();
     expect(odataClient.lastUrl).toBe("test/Products?$filter=(Name eq 'x' or Name eq 'y' or Name eq 'z')");
 
-    await testService.products().query((builder, qProduct) => builder.filter(qProduct.name.in("x", "y", "z")));
+    await testService
+      .products()
+      .query((builder, qProduct) => builder.filter(qProduct.name.in("x", "y", "z")))
+      .execute();
     expect(odataClient.lastUrl).toBe("test/Products?$filter=(Name eq 'x' or Name eq 'y' or Name eq 'z')");
   });
 });

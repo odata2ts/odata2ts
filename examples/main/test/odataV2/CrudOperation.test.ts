@@ -19,7 +19,7 @@ describe("V2 CRUD Functionality Tests", function () {
       description: "Description",
       discontinuedDate: null,
     };
-    testService.products().create(model);
+    testService.products().create(model).execute();
 
     expect(odataClient.lastOperation).toBe("POST");
     expect(odataClient.lastUrl).toBe("test/Products");
@@ -47,7 +47,7 @@ describe("V2 CRUD Functionality Tests", function () {
       releaseDate: "xyz",
       discontinuedDate: null,
     };
-    testService.products(123).update(model);
+    testService.products(123).update(model).execute();
 
     expect(odataClient.lastOperation).toBe("PUT");
     expect(odataClient.lastUrl).toBe("test/Products(123)");
@@ -69,7 +69,7 @@ describe("V2 CRUD Functionality Tests", function () {
     const model: Partial<EditableProductModel> = {
       description: "test",
     };
-    testService.products(123).patch(model);
+    testService.products(123).patch(model).execute();
 
     expect(odataClient.lastOperation).toBe("POST");
     expect(odataClient.lastUrl).toBe("test/Products(123)");
@@ -83,7 +83,7 @@ describe("V2 CRUD Functionality Tests", function () {
   });
 
   test("delete", () => {
-    testService.products(123).delete();
+    testService.products(123).delete().execute();
 
     expect(odataClient.lastOperation).toBe("DELETE");
     expect(odataClient.lastUrl).toBe("test/Products(123)");

@@ -10,7 +10,9 @@ describe("Trippin: Testing Query Functionality", function () {
   test("entitySet", async () => {
     const expected = `${BASE_URL}/People`;
 
-    const response: HttpResponseModel<ODataCollectionResponseV4<PersonModel>> = await TRIPPIN.people().query();
+    const response: HttpResponseModel<ODataCollectionResponseV4<PersonModel>> = await TRIPPIN.people()
+      .query()
+      .execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(expected);
     expect(ODATA_CLIENT.lastOperation).toBe("GET");
@@ -21,7 +23,9 @@ describe("Trippin: Testing Query Functionality", function () {
     const testId: PersonIdModel = { user: "williams" };
     const expected = `${BASE_URL}/People(UserName='williams')`;
 
-    const response: HttpResponseModel<ODataModelResponseV4<PersonModel>> = await TRIPPIN.people(testId).query();
+    const response: HttpResponseModel<ODataModelResponseV4<PersonModel>> = await TRIPPIN.people(testId)
+      .query()
+      .execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(expected);
     expect(ODATA_CLIENT.lastOperation).toBe("GET");
@@ -31,7 +35,9 @@ describe("Trippin: Testing Query Functionality", function () {
   test("entitySet: query with select", async () => {
     const expected = `${BASE_URL}/People?$select=UserName,LastName,AddressInfo`;
 
-    const response = await TRIPPIN.people().query((builder) => builder.select("user", "lastName", "addressInfo"));
+    const response = await TRIPPIN.people()
+      .query((builder) => builder.select("user", "lastName", "addressInfo"))
+      .execute();
     const dataType: Array<SelectedPersonShape> = response?.data?.value;
 
     expect(ODATA_CLIENT.lastUrl).toBe(expected);
@@ -40,19 +46,22 @@ describe("Trippin: Testing Query Functionality", function () {
   test("entitySet: query with count, expand and order by", async () => {
     const expected = `${BASE_URL}/People?$expand=Trips($count=true)&$orderby=Trips/$count asc&$count=true`;
 
-    const response = await TRIPPIN.people().query((builder, qPerson) =>
-      builder
-        .count()
-        .expanding("trips", (tBuilder) => tBuilder.count())
-        .orderBy(qPerson.trips.countAsc()),
-    );
+    const response = await TRIPPIN.people()
+      .query((builder, qPerson) =>
+        builder
+          .count()
+          .expanding("trips", (tBuilder) => tBuilder.count())
+          .orderBy(qPerson.trips.countAsc()),
+      )
+      .execute();
+
     const dataType: Array<SelectedPersonShape> = response?.data?.value;
 
     expect(ODATA_CLIENT.lastUrl).toBe(expected);
   });
 
   test("complex type: query", async () => {
-    await TRIPPIN.people("tester").homeAddress().query();
+    await TRIPPIN.people("tester").homeAddress().query().execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/HomeAddress`);
     expect(ODATA_CLIENT.lastOperation).toBe("GET");
@@ -60,7 +69,7 @@ describe("Trippin: Testing Query Functionality", function () {
   });
 
   test("complex collection: query", async () => {
-    await TRIPPIN.people("tester").addressInfo().query();
+    await TRIPPIN.people("tester").addressInfo().query().execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(ODATA_CLIENT.lastOperation).toBe("GET");
@@ -68,7 +77,7 @@ describe("Trippin: Testing Query Functionality", function () {
   });
 
   test("primitive type: get value", async () => {
-    await TRIPPIN.people("tester").age().getValue();
+    await TRIPPIN.people("tester").age().getValue().execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/Age`);
     expect(ODATA_CLIENT.lastOperation).toBe("GET");
@@ -76,35 +85,41 @@ describe("Trippin: Testing Query Functionality", function () {
   });
 
   test("any: without args", async () => {
-    await TRIPPIN.people().query((builder, qPerson) => {
-      return builder.filter(qPerson.trips.any());
-    });
+    await TRIPPIN.people()
+      .query((builder, qPerson) => {
+        return builder.filter(qPerson.trips.any());
+      })
+      .execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People?$filter=Trips/any()`);
   });
 
   test("any: without return type", async () => {
-    await TRIPPIN.people().query((builder, qPerson) => {
-      return builder.filter(qPerson.trips.any(() => {}));
-    });
+    await TRIPPIN.people()
+      .query((builder, qPerson) => {
+        return builder.filter(qPerson.trips.any(() => {}));
+      })
+      .execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People?$filter=Trips/any()`);
   });
 
   test("no url encoding", async () => {
-    await TRIPPIN.people("hei/ner").query((b, q) => b.filter(q.age.gt(18)));
+    await TRIPPIN.people("hei/ner")
+      .query((b, q) => b.filter(q.age.gt(18)))
+      .execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('hei/ner')?$filter=Age gt 18`);
   });
 
   test("function without url encoding", async () => {
-    await TRIPPIN.people("heiner").getFriendsTrips({ userName: "hei/ner" });
+    await TRIPPIN.people("heiner").getFriendsTrips({ userName: "hei/ner" }).execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('heiner')/Trippin.GetFriendsTrips(userName='hei/ner')`);
   });
 
   test("casting derived entity type", async () => {
-    await TRIPPIN.people("russellwhyte").trips(0).planItems().asFlightCollectionService().query();
+    await TRIPPIN.people("russellwhyte").trips(0).planItems().asFlightCollectionService().query().execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('russellwhyte')/Trips(0)/PlanItems/Trippin.Flight`);
   });
@@ -115,7 +130,8 @@ describe("Trippin: Testing Query Functionality", function () {
       .planItems()
       .query((b, q) => {
         return b.select("QFlight_airline").expand("QFlight_airline");
-      });
+      })
+      .execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(
       `${BASE_URL}/People('russellwhyte')/Trips(0)/PlanItems?$select=Trippin.Flight/Airline&$expand=Trippin.Flight/Airline`,
@@ -128,7 +144,8 @@ describe("Trippin: Testing Query Functionality", function () {
       .planItems()
       .query((b, q) => {
         return b.filter(q.QFlight_flightNumber.eq("123"));
-      });
+      })
+      .execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(
       `${BASE_URL}/People('russellwhyte')/Trips(0)/PlanItems?$filter=Trippin.Flight/FlightNumber eq '123'`,

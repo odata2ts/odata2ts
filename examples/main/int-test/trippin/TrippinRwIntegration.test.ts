@@ -10,7 +10,13 @@ describe("Integration Testing of Service Generation", () => {
   const trippinService = new TrippinRwService(odataClient, BASE_URL);
 
   test("casting derived entity type", async () => {
-    const response = await trippinService.people("russellwhyte").trips(0).planItems(11).asFlightService().query();
+    const response = await trippinService
+      .people("russellwhyte")
+      .trips(0)
+      .planItems(11)
+      .asFlightService()
+      .query()
+      .execute();
 
     const { "@odata.context": ignore, ...result } = response.data;
     expect(result).toStrictEqual({
@@ -31,7 +37,8 @@ describe("Integration Testing of Service Generation", () => {
       .planItems()
       .query((builder, q) => {
         return builder.select("QFlight_flightNumber").filter(q.QFlight_flightNumber.eq("AA26"));
-      });
+      })
+      .execute();
 
     expect(response.data.value).toStrictEqual([
       {
@@ -60,7 +67,7 @@ describe("Integration Testing of Service Generation", () => {
         },
       },
     };
-    const response = await trippinService.people("russellwhyte").trips(0).planItems().create(model);
+    const response = await trippinService.people("russellwhyte").trips(0).planItems().create(model).execute();
     const { "@odata.context": ctxt, ...data } = response.data;
 
     expect(data).toStrictEqual(model);

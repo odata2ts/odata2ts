@@ -11,9 +11,11 @@ describe("V2 Operation (FunctionImport) Tests", function () {
   const testService = new ODataDemoService(odataClient, BASE_URL, { noUrlEncoding: true });
 
   test("productsByRating", async () => {
-    const result: HttpResponseModel<ODataCollectionResponseV2<ProductModel>> = await testService.getProductsByRating({
-      rating: 5,
-    });
+    const result: HttpResponseModel<ODataCollectionResponseV2<ProductModel>> = await testService
+      .getProductsByRating({
+        rating: 5,
+      })
+      .execute();
 
     expect(odataClient.lastOperation).toBe("GET");
     expect(odataClient.lastUrl).toBe("test/GetProductsByRating?rating=5");

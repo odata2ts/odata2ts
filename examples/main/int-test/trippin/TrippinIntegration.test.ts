@@ -13,24 +13,24 @@ describe("Integration Testing of Service Generation", () => {
   // skipped, because it breaks the session state
   // => new session id must be chosen
   test.skip("unbound action", async () => {
-    const result = await trippinService.resetDataSource();
+    const result = await trippinService.resetDataSource().execute();
     expect(result.data).toBe("");
   });
 
   test("unbound function", async () => {
-    const result = await trippinService.getPersonWithMostFriends();
+    const result = await trippinService.getPersonWithMostFriends().execute();
     expect(result.data.firstName).toBe("Russell");
     expect(result.data.lastName).toBe("Whyte");
     expect(result.data.age).toBeNull();
   });
 
   test("unbound function with params", async () => {
-    const result = await trippinService.getNearestAirport({ lat: 123, lon: 345 });
+    const result = await trippinService.getNearestAirport({ lat: 123, lon: 345 }).execute();
     expect(result.data.icaoCode).toBe("ZBAA");
   });
 
   test("bound function", async () => {
-    const result = await trippinService.people("russellwhyte").getFriendsTrips({ userName: "scottketchum" });
+    const result = await trippinService.people("russellwhyte").getFriendsTrips({ userName: "scottketchum" }).execute();
     expect(result.data.value.length).toBe(2);
   });
 
@@ -61,7 +61,7 @@ describe("Integration Testing of Service Generation", () => {
       // trips: [],
     };
 
-    const result = await trippinService.people("russellwhyte").query();
+    const result = await trippinService.people("russellwhyte").query().execute();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
 
@@ -71,7 +71,7 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("get primitive prop value", async () => {
-    const result = await trippinService.people("russellwhyte").firstName().getValue();
+    const result = await trippinService.people("russellwhyte").firstName().getValue().execute();
     expect(result.status).toBe(200);
     expect(result.data).toMatchObject({ value: "Russell" });
   });
@@ -79,7 +79,7 @@ describe("Integration Testing of Service Generation", () => {
   test("update primitive prop value", async () => {
     // Trippin Bug: We get 400 => not supported actually
     try {
-      await trippinService.people("russellwhyte").middleName().updateValue("k2");
+      await trippinService.people("russellwhyte").middleName().updateValue("k2").execute();
       expect(true).toBe(false);
     } catch (e) {
       const error = e as AxiosClientError;
@@ -91,7 +91,7 @@ describe("Integration Testing of Service Generation", () => {
   test("delete primitive prop value", async () => {
     // Trippin Bug: We get 500 => not supported actually
     try {
-      await trippinService.people("russellwhyte").firstName().deleteValue();
+      await trippinService.people("russellwhyte").firstName().deleteValue().execute();
       expect(true).toBe(false);
     } catch (e) {
       const error = e as AxiosClientError;
@@ -107,7 +107,8 @@ describe("Integration Testing of Service Generation", () => {
     };
     const result = await trippinService
       .people("russellwhyte")
-      .query((qb) => qb.select("bestFriend", "friends").expand("bestFriend", "friends"));
+      .query((qb) => qb.select("bestFriend", "friends").expand("bestFriend", "friends"))
+      .execute();
 
     expect(result.status).toBe(200);
     expect(result.data.bestFriend).toMatchObject(expectedBestFriend);
@@ -123,7 +124,7 @@ describe("Integration Testing of Service Generation", () => {
 
     // again, but now inspect error in detail
     try {
-      await trippinService.people("XXX").query();
+      await trippinService.people("XXX").query().execute();
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
@@ -136,21 +137,25 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("entitySet query", async () => {
-    const result = await trippinService.people().query();
+    const result = await trippinService.people().query().execute();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data.value.length).toBe(20);
   });
 
   test("entitySet query people with any Feature 1", async () => {
-    const result = await trippinService.people().query((builder, qPerson) => {
-      return builder
-        .count()
-        .top(10)
-        .select("firstName", "lastName")
-        .filter(qPerson.trips.any((qTrip) => qTrip.budget.gt(2999)))
-        .expanding("trips", (tBuilder) => tBuilder.select("description", "budget"));
-    });
+    const result = await trippinService
+      .people()
+      .query((builder, qPerson) => {
+        return builder
+          .count()
+          .top(10)
+          .select("firstName", "lastName")
+          .filter(qPerson.trips.any((qTrip) => qTrip.budget.gt(2999)))
+          .expanding("trips", (tBuilder) => tBuilder.select("description", "budget"));
+      })
+      .execute();
+
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(result.data).toMatchObject({ "@odata.count": 4 });
@@ -216,7 +221,7 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("deep entitySet query", async () => {
-    const result = await trippinService.people("russellwhyte").trips().query();
+    const result = await trippinService.people("russellwhyte").trips().query().execute();
     expect(trippinService.people("russellwhyte").trips().getPath()).toBe(BASE_URL + "/People('russellwhyte')/Trips");
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
@@ -224,7 +229,7 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("collection of strings", async () => {
-    const result = await trippinService.people("russellwhyte").addressInfo().query();
+    const result = await trippinService.people("russellwhyte").addressInfo().query().execute();
 
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
@@ -254,7 +259,8 @@ describe("Integration Testing of Service Generation", () => {
       .trips(0)
       .planItems()
       .asFlightCollectionService()
-      .query();
+      .query()
+      .execute();
 
     expect(response.data).toMatchObject({});
   });
