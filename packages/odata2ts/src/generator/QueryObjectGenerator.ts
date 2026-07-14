@@ -248,8 +248,6 @@ class QueryObjectGenerator {
     return props.map((prop) => {
       const { odataName } = prop;
       const name = this.namingHelper.getQPropName(prop.name);
-      const isModelType = prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
-      const isEnumType = prop.dataType === DataTypes.EnumType;
 
       let qPathInit: string;
 
