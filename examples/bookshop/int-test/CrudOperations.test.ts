@@ -10,7 +10,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
   test("get book zero", async () => {
     const bookZeroId = 201;
 
-    const result = await testService.books(bookZeroId).query();
+    const result = await testService.books(bookZeroId).query().execute();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
 
@@ -46,11 +46,11 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     };
 
     try {
-      await testService.books(id).delete();
+      await testService.books(id).delete().execute();
     } catch (e) {}
 
     // when creating the book
-    let result = await bookSrv.create(book);
+    let result = await bookSrv.create(book).execute();
     // then return object matches our book
     expect(result.status).toBe(201);
     expect(result.data).toMatchObject({
@@ -72,11 +72,11 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     expect(location).toBe(id);
 
     // when updating the description, we expect no error
-    await testService.books(location).patch({ descr: "Updated Desc" });
+    await testService.books(location).patch({ descr: "Updated Desc" }).execute();
 
     // when deleting this new book, we expect no error
     await new Promise((res) => setTimeout(res, 1000));
-    await testService.books(id).delete();
+    await testService.books(id).delete().execute();
   });
 
   test("patch book", async () => {
@@ -86,7 +86,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     };
 
     const srv = testService.books(271);
-    const result = await srv.patch(updated);
+    const result = await srv.patch(updated).execute();
 
     expect(result.status).toBe(200);
     expect(result.data!.descr).toBe(updated.descr);
@@ -107,7 +107,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     };
 
     const srv = testService.books(252);
-    const queried = await srv.query();
+    const queried = await srv.query().execute();
     const {
       "@odata.context": ctxt,
       //@ts-ignore
@@ -121,7 +121,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     } = queried.data;
     const updated = { ...passThrough, ...toUpdate };
 
-    const result = await srv.update(updated);
+    const result = await srv.update(updated).execute();
 
     expect(result.status).toBe(200);
     expect(result.data).toMatchObject(updated);
@@ -141,7 +141,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
 
     const srv = testService.books(251);
 
-    const result = await srv.update(toUpdate);
+    const result = await srv.update(toUpdate).execute();
 
     expect(result.status).toBe(200);
     expect(result.data).toMatchObject({
@@ -156,14 +156,14 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
   });
 
   test("get primitive property", async () => {
-    const response = await testService.books(271).price().getValue();
+    const response = await testService.books(271).price().getValue().execute();
 
     expect(response.status).toBe(200);
     expect(new BigNumber(150).isEqualTo(response.data!.value)).toBeTruthy();
   });
 
   test("update primitive property", async () => {
-    const response = await testService.books(251).price().updateValue(new BigNumber(999));
+    const response = await testService.books(251).price().updateValue(new BigNumber(999)).execute();
 
     expect(response.status).toBe(200);
     expect(new BigNumber(999).isEqualTo(response.data!.value)).toBeTruthy();

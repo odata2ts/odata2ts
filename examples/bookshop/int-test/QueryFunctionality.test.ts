@@ -20,7 +20,10 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   };
 
   test("list books with count", async () => {
-    const result = await testService.books().query((b) => b.count());
+    const result = await testService
+      .books()
+      .query((b) => b.count())
+      .execute();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
     expect(typeof result.data["@odata.count"]).toBe("string");
@@ -33,7 +36,7 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   });
 
   test("get book zero", async () => {
-    const result = await testService.books(BOOK_ZERO.id).query();
+    const result = await testService.books(BOOK_ZERO.id).query().execute();
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
 
@@ -43,11 +46,11 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
 
   test("get unknown book", async () => {
     const axiosFailMsg = "Not Found";
-    await expect(() => testService.books(-1).query()).rejects.toThrow(axiosFailMsg);
+    await expect(() => testService.books(-1).query().execute()).rejects.toThrow(axiosFailMsg);
 
     // again, but now inspect error in detail
     try {
-      await testService.books(-1).query();
+      await testService.books(-1).query().execute();
       // we expect an error and no success
       expect(1).toBe(2);
     } catch (error) {
@@ -68,15 +71,18 @@ describe("CAP V4 Integration Testing: Query Capabilities", () => {
   });
 
   test("deep select query", async () => {
-    const result = await testService.books().query((b, qBook) => {
-      b.count()
-        .select("id", "title", "stock", "price")
-        .expanding("genre", (expBuilder) => {
-          return expBuilder.select("name").expand("parent");
-        })
-        .filter(qBook.stock.gt(3), qBook.price.gt(new BigNumber(2)))
-        .orderBy(qBook.id.asc());
-    });
+    const result = await testService
+      .books()
+      .query((b, qBook) => {
+        b.count()
+          .select("id", "title", "stock", "price")
+          .expanding("genre", (expBuilder) => {
+            return expBuilder.select("name").expand("parent");
+          })
+          .filter(qBook.stock.gt(3), qBook.price.gt(new BigNumber(2)))
+          .orderBy(qBook.id.asc());
+      })
+      .execute();
     expect(result.status).toBe(200);
     expect(result.data.value).toBeDefined();
 

@@ -26,7 +26,7 @@ describe("CAP V2 Integration Testing: Operation Capabilities", () => {
   };
 
   test("string returning function with param", async () => {
-    const result = await testService.hello({ to: "Horst" });
+    const result = await testService.hello({ to: "Horst" }).execute();
 
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
@@ -35,7 +35,7 @@ describe("CAP V2 Integration Testing: Operation Capabilities", () => {
   });
 
   test("string collection returning function", async () => {
-    const result = await testService.helloI18n();
+    const result = await testService.helloI18n().execute();
 
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
@@ -43,7 +43,7 @@ describe("CAP V2 Integration Testing: Operation Capabilities", () => {
   });
 
   test("entity type returning function", async () => {
-    const result = await testService.getBestBook();
+    const result = await testService.getBestBook().execute();
 
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
@@ -51,7 +51,7 @@ describe("CAP V2 Integration Testing: Operation Capabilities", () => {
   });
 
   test("entity collection returning function", async () => {
-    const result = await testService.getBestBooks();
+    const result = await testService.getBestBooks().execute();
 
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
@@ -60,7 +60,7 @@ describe("CAP V2 Integration Testing: Operation Capabilities", () => {
   });
 
   test("complex type returning function", async () => {
-    const result = await testService.getOneStockPrice();
+    const result = await testService.getOneStockPrice().execute();
 
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
@@ -74,7 +74,7 @@ describe("CAP V2 Integration Testing: Operation Capabilities", () => {
   });
 
   test("complex type collection returning function", async () => {
-    const result = await testService.getStockPrices();
+    const result = await testService.getStockPrices().execute();
 
     expect(result.status).toBe(200);
     expect(result.data).toBeDefined();
