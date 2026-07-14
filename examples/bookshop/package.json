@@ -21,6 +21,7 @@
     "generate-from-url": "odata2ts && tsc -p tsconfig.compile.json",
     "int-test": "vitest run --dir int-test",
     "start": "cds run",
+    "test": "vitest run --dir test",
     "watch": "cds watch"
   },
   "dependencies": {
@@ -36,7 +37,7 @@
   },
   "devDependencies": {
     "@cap-js/sqlite": "^1",
-    "@odata2ts/odata2ts": "^0.39.2",
+    "@odata2ts/odata2ts": "^0.40.2",
     "sqlite3": "^5"
   },
   "publishConfig": {
