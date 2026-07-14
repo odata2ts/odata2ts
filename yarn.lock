@@ -590,16 +590,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/converter-big-number@npm:^0.2.7":
-  version: 0.2.7
-  resolution: "@odata2ts/converter-big-number@npm:0.2.7"
-  dependencies:
-    "@odata2ts/converter-api": "npm:^0.2.6"
-    bignumber.js: "npm:>1"
-  checksum: 10/e3307dc417bdedef86fee94c104dbf6c45c8f6357877aa228fa03ec7753954656c5405f05c2ba9dd01c6abc189098098cc69feae302c90ddf2a7d5a731f80a48
-  languageName: node
-  linkType: hard
-
 "@odata2ts/converter-big-number@npm:^0.2.8":
   version: 0.2.8
   resolution: "@odata2ts/converter-big-number@npm:0.2.8"
@@ -662,10 +652,10 @@ __metadata:
   resolution: "@odata2ts/example-bookshop@workspace:examples/bookshop"
   dependencies:
     "@cap-js/sqlite": "npm:^1"
-    "@odata2ts/converter-big-number": "npm:^0.2.7"
+    "@odata2ts/converter-big-number": "npm:^0.2.8"
     "@odata2ts/http-client-axios": "npm:^0.12.2"
-    "@odata2ts/odata-service": "npm:^0.23.1"
-    "@odata2ts/odata2ts": "npm:^0.39.1"
+    "@odata2ts/odata-service": "npm:^0.23.2"
+    "@odata2ts/odata2ts": "npm:^0.39.2"
     "@sap/cds": "npm:7.9.4"
     "@sap/cds-odata-v2-adapter-proxy": "npm:^1.9.21"
     axios: "npm:0.27.2"
@@ -695,10 +685,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/http-client-api@npm:^0.6.2":
-  version: 0.6.2
-  resolution: "@odata2ts/http-client-api@npm:0.6.2"
-  checksum: 10/17e79f491df174e986a1d3e7348a95f4a62d5b423e8194a130e72a3cfe6ee966437a3e67f363871d1b49613f3da7b4e9b75f8d57cd8f947fb2cf78b3721e700c
+"@odata2ts/http-client-api@npm:^0.6.2, @odata2ts/http-client-api@npm:^0.6.5":
+  version: 0.6.5
+  resolution: "@odata2ts/http-client-api@npm:0.6.5"
+  checksum: 10/2a4f84d9bf3af9dc8bc0975116bf723b20ca7aa5be328b962f32f800b2fc2dd0f196aabc55fd7b5855d40a09f0930e855edcb1ee007235b0c624410b6599b0f0
   languageName: node
   linkType: hard
 
@@ -706,13 +696,6 @@ __metadata:
   version: 0.6.4
   resolution: "@odata2ts/http-client-api@npm:0.6.4"
   checksum: 10/739f0cc8102efdc95659e766268e124b346a99ddbd54ceec111d5421a91e3e45c541200ee2dbabd5c7d2c535baed465b5643fd8d3d64726b71aa1bd1783f422f
-  languageName: node
-  linkType: hard
-
-"@odata2ts/http-client-api@npm:^0.6.5":
-  version: 0.6.5
-  resolution: "@odata2ts/http-client-api@npm:0.6.5"
-  checksum: 10/2a4f84d9bf3af9dc8bc0975116bf723b20ca7aa5be328b962f32f800b2fc2dd0f196aabc55fd7b5855d40a09f0930e855edcb1ee007235b0c624410b6599b0f0
   languageName: node
   linkType: hard
 
@@ -777,7 +760,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-service@npm:^0.23.1, @odata2ts/odata-service@npm:^0.23.2, @odata2ts/odata-service@workspace:packages/odata-service":
+"@odata2ts/odata-service@npm:^0.23.2, @odata2ts/odata-service@workspace:packages/odata-service":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
@@ -788,7 +771,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2ts@npm:^0.39.1":
+"@odata2ts/odata2ts@npm:^0.39.2":
   version: 0.39.2
   resolution: "@odata2ts/odata2ts@npm:0.39.2"
   dependencies:
