@@ -1,9 +1,8 @@
-import { QFunction, QStringParam } from "@odata2ts/odata-query-objects";
-// @ts-ignore
-import type { MinFunctionParams } from "./TesterModel";
+import type { ODataValueResponseV2 } from "@odata2ts/odata-core";
+import { QFunction } from "@odata2ts/odata-query-objects";
 
-export class QMinFunction extends QFunction<MinFunctionParams> {
-  private readonly params = [new QStringParam("test"), new QStringParam("optTest")];
+export class QMinFunction extends QFunction<undefined, ODataValueResponseV2<string>> {
+  private readonly params: [] = [];
 
   constructor() {
     super("MinFunction", undefined, { v2Mode: true });
@@ -11,5 +10,9 @@ export class QMinFunction extends QFunction<MinFunctionParams> {
 
   getParams() {
     return this.params;
+  }
+
+  buildUrl(notEncoded = false) {
+    return super.buildUrl(undefined, notEncoded);
   }
 }

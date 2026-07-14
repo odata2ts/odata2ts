@@ -1,3 +1,4 @@
+import { createChain } from "@odata2ts/converter-runtime";
 import type { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import {
   QBooleanParam,
@@ -12,27 +13,33 @@ import {
   QStringPath,
   QTimeOfDayParam,
   QueryObject,
+  ValueResponseConverterV4,
 } from "@odata2ts/odata-query-objects";
+import {
+  booleanToNumberConverter,
+  numberToStringConverter,
+  stringToPrefixModelConverter,
+} from "@odata2ts/test-converters";
 // @ts-ignore
 import type { MaxFunctionParams } from "./TesterModel";
 
 export class QTheEntity extends QueryObject {
-  public readonly id = new QStringPath(this.withPrefix("id"));
+  public readonly id = new QStringPath(this.withPrefix("id"), stringToPrefixModelConverter);
 }
 
 export const qTheEntity = new QTheEntity();
 
 export class QComplex extends QueryObject {
-  public readonly a = new QStringPath(this.withPrefix("a"));
+  public readonly a = new QStringPath(this.withPrefix("a"), stringToPrefixModelConverter);
 }
 
 export const qComplex = new QComplex();
 
-export class QMaxFunction extends QFunction<MaxFunctionParams, ODataValueResponseV4<boolean>> {
+export class QMaxFunction extends QFunction<MaxFunctionParams, ODataValueResponseV4<string>> {
   private readonly params = [
-    new QStringParam("TEST_STRING", "testString"),
+    new QStringParam("TEST_STRING", "testString", stringToPrefixModelConverter),
     new QNumberParam("testNumber"),
-    new QBooleanParam("testBoolean"),
+    new QBooleanParam("testBoolean", undefined, createChain(booleanToNumberConverter, numberToStringConverter)),
     new QGuidParam("testGuid"),
     new QTimeOfDayParam("testTime"),
     new QDateParam("testDate"),
@@ -44,7 +51,7 @@ export class QMaxFunction extends QFunction<MaxFunctionParams, ODataValueRespons
   ];
 
   constructor() {
-    super("MAX_FUNCTION");
+    super("MAX_FUNCTION", new ValueResponseConverterV4(createChain(booleanToNumberConverter, numberToStringConverter)));
   }
 
   getParams() {

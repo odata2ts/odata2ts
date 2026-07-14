@@ -1,10 +1,12 @@
-import type { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig } from "@odata2ts/http-client-api";
+import type { ODataHttpClient } from "@odata2ts/http-client-api";
+import { ODataHttpMethods } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import {
   EntitySetServiceV4,
   EntityTypeServiceV4,
   ODataService,
   ODataServiceOptionsInternal,
+  UrlRequestCmd,
 } from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QBook } from "./QTester";
@@ -37,17 +39,18 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
     super(client, basePath, name, qBook, options);
   }
 
-  public async bestReview(
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataModelResponseV4<Review>>> {
+  public bestReview() {
     if (!this._bookQBestReview) {
       this._bookQBestReview = new Book_QBestReview();
     }
 
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._bookQBestReview.buildUrl(isUrlNotEncoded()));
-    const response = await client.get(url, requestConfig, getDefaultHeaders());
-    return this._bookQBestReview.convertResponse(response);
+
+    return new UrlRequestCmd<ClientType, ODataModelResponseV4<Review>>(client, ODataHttpMethods.Get, url, undefined, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: this._bookQBestReview.getResponseConverter(),
+    });
   }
 }
 
@@ -64,17 +67,20 @@ export class BookCollectionService<in out ClientType extends ODataHttpClient> ex
     super(client, basePath, name, qBook, new QBookId(name), options);
   }
 
-  public async filterReviews(
-    params: Book_FilterReviewsParams,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
-  ): Promise<HttpResponseModel<ODataCollectionResponseV4<Review>>> {
+  public filterReviews(params: Book_FilterReviewsParams) {
     if (!this._bookQFilterReviews) {
       this._bookQFilterReviews = new Book_QFilterReviews();
     }
 
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._bookQFilterReviews.buildUrl(params, isUrlNotEncoded()));
-    const response = await client.get(url, requestConfig, getDefaultHeaders());
-    return this._bookQFilterReviews.convertResponse(response);
+
+    return new UrlRequestCmd<ClientType, ODataCollectionResponseV4<Review>>(
+      client,
+      ODataHttpMethods.Get,
+      url,
+      undefined,
+      { headers: getDefaultHeaders(), mainResponseConverter: this._bookQFilterReviews.getResponseConverter() },
+    );
   }
 }

@@ -37,7 +37,7 @@ describe("Model Generator Tests V4", () => {
 
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, MODEL_FILE, GENERATE);
 
-  async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<DigestionOptions>) {
+  async function generateAndCompare(fixturePath: string, genOptions?: Partial<DigestionOptions>) {
     await fixtureComparatorHelper.generateAndCompare(MODEL_FILE, fixturePath, odataBuilder.getSchemas(), genOptions);
   }
 
@@ -57,7 +57,7 @@ describe("Model Generator Tests V4", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("minFunction", "operation-min.ts");
+    await generateAndCompare("operation-min.ts");
   });
 
   test(`${TEST_SUITE_NAME}: min action param model`, async () => {
@@ -69,7 +69,7 @@ describe("Model Generator Tests V4", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("minAction", "operation-min.ts");
+    await generateAndCompare("operation-min.ts");
   });
 
   test(`${TEST_SUITE_NAME}: max function param model`, async () => {
@@ -87,7 +87,7 @@ describe("Model Generator Tests V4", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("maxFunction", "operation-max.ts");
+    await generateAndCompare("operation-max.ts");
   });
 
   test(`${TEST_SUITE_NAME}: max action param model`, async () => {
@@ -105,7 +105,7 @@ describe("Model Generator Tests V4", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("maxAction", "operation-max.ts");
+    await generateAndCompare("operation-max.ts");
   });
 
   test(`${TEST_SUITE_NAME}: bound function`, async () => {
@@ -121,7 +121,7 @@ describe("Model Generator Tests V4", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("boundFunction", "operation-bound.ts");
+    await generateAndCompare("operation-bound.ts");
   });
 
   test(`${TEST_SUITE_NAME}: collection bound function`, async () => {
@@ -137,7 +137,7 @@ describe("Model Generator Tests V4", () => {
 
     // when generating model
     // then match fixture text => actually there's no diff in the generated param models between bound-to-entity and bound-to-collection
-    await generateAndCompare("collBoundFunction", "operation-bound.ts");
+    await generateAndCompare("operation-bound.ts");
   });
 
   test(`${TEST_SUITE_NAME}: Entity relationships`, async () => {
@@ -157,7 +157,7 @@ describe("Model Generator Tests V4", () => {
 
     // when generating model
     // then match original fixture => config option has no effect
-    await generateAndCompare("entityRelationships", "entity-relationships.ts", {
+    await generateAndCompare("entity-relationships.ts", {
       v2ModelsWithExtraResultsWrapping: true,
       skipEditableModels: false,
       skipIdModels: false,
@@ -177,7 +177,7 @@ describe("Model Generator Tests V4", () => {
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("commentedModel", "entity-with-comments.ts", {
+    await generateAndCompare("entity-with-comments.ts", {
       skipComments: false,
       converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
       propertiesByName: [...["id"].map((name) => ({ name, managed: true }))],
@@ -196,7 +196,7 @@ describe("Model Generator Tests V4", () => {
 
     // when generating parameter model
     // then match fixture text
-    await generateAndCompare("funcOverload", "function-overload.ts");
+    await generateAndCompare("function-overload.ts");
   });
 
   test(`${TEST_SUITE_NAME}: overloaded function params (changed order)`, async () => {
@@ -211,7 +211,7 @@ describe("Model Generator Tests V4", () => {
 
     // when generating parameter model
     // then match fixture text
-    await generateAndCompare("funcOverload2", "function-overload.ts");
+    await generateAndCompare("function-overload.ts");
   });
 
   test(`${TEST_SUITE_NAME}: overloaded function params (multiple sets)`, async () => {
@@ -231,6 +231,6 @@ describe("Model Generator Tests V4", () => {
 
     // when generating parameter model
     // then match fixture text
-    await generateAndCompare("funcOverload3", "function-overload-multiple.ts", {});
+    await generateAndCompare("function-overload-multiple.ts", {});
   });
 });

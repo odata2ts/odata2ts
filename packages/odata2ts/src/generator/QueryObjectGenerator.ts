@@ -23,6 +23,7 @@ import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../Facto
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
 import { QueryObjectImports } from "./import/ImportObjects.js";
+import { importMainResponseConverter, importReturnType } from "./import/ImportResponseHelper.js";
 import { ImportContainer } from "./ImportContainer.js";
 
 export const generateQueryObjects: EntityBasedGeneratorFunction = (
@@ -247,6 +248,8 @@ class QueryObjectGenerator {
     return props.map((prop) => {
       const { odataName } = prop;
       const name = this.namingHelper.getQPropName(prop.name);
+      const isModelType = prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
+      const isEnumType = prop.dataType === DataTypes.EnumType;
 
       let qPathInit: string;
 
@@ -387,44 +390,34 @@ class QueryObjectGenerator {
     const qOp = operation.type === OperationTypes.Action ? QueryObjectImports.QAction : QueryObjectImports.QFunction;
     const qOperation = imports.addQObject(qOp);
     const paramModelName = hasParams ? imports.addGeneratedModel(baseFqName, operation.paramsModelName) : undefined;
+    const rtType = !returnType
+      ? undefined
+      : returnType.type && returnType.dataType !== DataTypes.PrimitiveType
+        ? imports.addGeneratedModel(returnType.fqType, returnType.type)
+        : returnType.type;
+    const responseStructure = returnType ? importReturnType(this.version, imports, returnType) : undefined;
+    const completeResponseStructure = responseStructure && rtType ? `${responseStructure}<${rtType}>` : undefined;
 
     let returnTypeOpStmt: string = "";
     if (returnType) {
       if (returnType.dataType === DataTypes.ComplexType || returnType.dataType === DataTypes.ModelType) {
+        // without converter no conversion
         if (returnType.qObject) {
-          const opRt = imports.addQObject(QueryObjectImports.OperationReturnType);
-          const rts = imports.addQObject(QueryObjectImports.ReturnTypes);
-          const rType = returnType.isCollection
-            ? "COLLECTION"
-            : returnType.dataType === DataTypes.ComplexType
-              ? "COMPLEX"
-              : "ENTITY";
-          const qComplexParam = imports.addQObject(QueryObjectImports.QComplexParam);
-          const returnQName = imports.addGeneratedQObject(returnType.fqType, returnType.qObject);
-
-          returnTypeOpStmt = `new ${opRt}(${rts}.${rType}, new ${qComplexParam}("NONE", new ${returnQName}))`;
+          returnTypeOpStmt = `new ${importMainResponseConverter(this.version, imports, returnType)}(new ${imports.addGeneratedQObject(returnType.fqType, returnType.qObject)})`;
         }
       }
-      // currently, it only makes sense to add the OperationReturnType if a converter is present
-      else if (returnType.converters && returnType.qParam) {
-        const rtClass = imports.addQObject(QueryObjectImports.OperationReturnType);
-        const rtTypes = imports.addQObject(QueryObjectImports.ReturnTypes);
-        const rType = returnType.isCollection ? "COLLECTION" : "VALUE";
-        const qParam = imports.addQObject(returnType.qParam);
-
-        const rtKind = `${rtTypes}.${rType}`;
-
-        const converterParam = returnType.converters
-          ? ", " + this.generateConverterStmt(imports, returnType.converters)
-          : "";
-        returnTypeOpStmt = `new ${rtClass}(${rtKind}, new ${qParam}("NONE", undefined${converterParam}))`;
+      // Primitive Types: without converter no conversion
+      else if (returnType.converters) {
+        returnTypeOpStmt = `new ${importMainResponseConverter(this.version, imports, returnType)}(${this.generateConverterStmt(imports, returnType.converters)})`;
       }
     }
+
+    const classWithGenerics = `${qOperation}<${hasParams ? paramModelName : "undefined"}${returnType ? ", " + completeResponseStructure : ""}>`;
 
     file.getFile().addClass({
       name: operation.qName,
       isExported: true,
-      extends: qOperation + (hasParams ? `<${paramModelName}>` : ""),
+      extends: classWithGenerics,
       properties: [
         {
           name: "params",

@@ -32,7 +32,7 @@ describe("Query Object Generator Tests V2", () => {
 
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, MODEL_FILE, GENERATE);
 
-  async function generateAndCompare(id: string, fixturePath: string, genOptions?: Partial<RunOptions>) {
+  async function generateAndCompare(fixturePath: string, genOptions?: Partial<RunOptions>) {
     await fixtureComparatorHelper.generateAndCompare(MODEL_FILE, fixturePath, odataBuilder.getSchemas(), genOptions);
   }
 
@@ -44,41 +44,68 @@ describe("Query Object Generator Tests V2", () => {
     odataBuilder = new ODataModelBuilderV2(SERVICE_NAME);
   });
 
-  test(`${TEST_SUITE_NAME}: min function param model`, async () => {
+  test(`QFunction: min = no params & string response `, async () => {
     // given a simple function
-    odataBuilder.addFunctionImport("MinFunction", ODataTypesV2.String, (builder) =>
-      builder.addParam("test", ODataTypesV2.String, false).addParam("optTest", ODataTypesV2.String, true),
-    );
+    odataBuilder.addFunctionImport("MinFunction", ODataTypesV2.String);
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("minFunction", "function-min-v2.ts");
+    await generateAndCompare("function-min-v2.ts");
   });
 
-  test(`${TEST_SUITE_NAME}: max function param model`, async () => {
+  test(`QFunction: max params`, async () => {
     // given a simple function
-    odataBuilder.addFunctionImport("MAX_FUNCTION", ODataTypesV2.String, (builder) =>
-      builder
-        .addParam("TEST_STRING", ODataTypesV2.String, false)
-        .addParam("testInt16", ODataTypesV2.Int16, false)
-        .addParam("testInt32", ODataTypesV2.Int32, false)
-        .addParam("testByte", ODataTypesV2.Byte, false)
-        .addParam("testSByte", ODataTypesV2.SByte, false)
-        .addParam("testInt64", ODataTypesV2.Int64, false)
-        .addParam("testSingle", ODataTypesV2.Single, false)
-        .addParam("testDouble", ODataTypesV2.Double, false)
-        .addParam("testDecimal", ODataTypesV2.Decimal, false)
-        .addParam("testBoolean", ODataTypesV2.Boolean, false)
-        .addParam("testGuid", ODataTypesV2.Guid, false)
-        .addParam("testTime", ODataTypesV2.Time, false)
-        .addParam("testDate", ODataTypesV2.DateTime, false)
-        .addParam("testDateTimeOffset", ODataTypesV2.DateTimeOffset, false),
-    );
+    odataBuilder
+      .addEntityType("TheEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.String))
+      .addFunctionImport("MAX_FUNCTION", ODataTypesV2.Boolean, (builder) =>
+        builder
+          .addParam("TEST_STRING", ODataTypesV2.String, false)
+          .addParam("testInt16", ODataTypesV2.Int16, false)
+          .addParam("testInt32", ODataTypesV2.Int32, false)
+          .addParam("testByte", ODataTypesV2.Byte, false)
+          .addParam("testSByte", ODataTypesV2.SByte, false)
+          .addParam("testInt64", ODataTypesV2.Int64, false)
+          .addParam("testSingle", ODataTypesV2.Single, false)
+          .addParam("testDouble", ODataTypesV2.Double, false)
+          .addParam("testDecimal", ODataTypesV2.Decimal, false)
+          .addParam("testBoolean", ODataTypesV2.Boolean, false)
+          .addParam("testGuid", ODataTypesV2.Guid, false)
+          .addParam("testTime", ODataTypesV2.Time, false)
+          .addParam("testDate", ODataTypesV2.DateTime, false)
+          .addParam("testDateTimeOffset", ODataTypesV2.DateTimeOffset, false),
+      );
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("maxFunction", "function-max-v2.ts", {
-      converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
+    await generateAndCompare("function-max-v2.ts");
+  });
+
+  test(`QFunction: max params converted`, async () => {
+    // given a simple function
+    odataBuilder
+      .addEntityType("TheEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.String))
+      .addFunctionImport("MAX_FUNCTION", ODataTypesV2.Boolean, (builder) =>
+        builder
+          .addParam("TEST_STRING", ODataTypesV2.String, false)
+          .addParam("testInt16", ODataTypesV2.Int16, false)
+          .addParam("testInt32", ODataTypesV2.Int32, false)
+          .addParam("testByte", ODataTypesV2.Byte, false)
+          .addParam("testSByte", ODataTypesV2.SByte, false)
+          .addParam("testInt64", ODataTypesV2.Int64, false)
+          .addParam("testSingle", ODataTypesV2.Single, false)
+          .addParam("testDouble", ODataTypesV2.Double, false)
+          .addParam("testDecimal", ODataTypesV2.Decimal, false)
+          .addParam("testBoolean", ODataTypesV2.Boolean, false)
+          .addParam("testGuid", ODataTypesV2.Guid, false)
+          .addParam("testTime", ODataTypesV2.Time, false)
+          .addParam("testDate", ODataTypesV2.DateTime, false)
+          .addParam("testDateTimeOffset", ODataTypesV2.DateTimeOffset, false),
+      );
+
+    // when generating model
+    // then match fixture text
+    await generateAndCompare("function-max-v2-converted.ts", {
+      converters: [{ module: "@odata2ts/test-converters" }],
     });
   });
 });

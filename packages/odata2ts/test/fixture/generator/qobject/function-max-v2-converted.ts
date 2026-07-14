@@ -1,3 +1,4 @@
+import { createChain } from "@odata2ts/converter-runtime";
 import type { ODataValueResponseV2 } from "@odata2ts/odata-core";
 import {
   QBooleanParam,
@@ -15,19 +16,25 @@ import {
   QStringV2Path,
   QTimeV2Param,
   QueryObject,
+  ValueResponseConverterV2,
 } from "@odata2ts/odata-query-objects";
+import {
+  booleanToNumberConverter,
+  numberToStringConverter,
+  stringToPrefixModelConverter,
+} from "@odata2ts/test-converters";
 // @ts-ignore
 import type { MaxFunctionParams } from "./TesterModel";
 
 export class QTheEntity extends QueryObject {
-  public readonly id = new QStringV2Path(this.withPrefix("id"));
+  public readonly id = new QStringV2Path(this.withPrefix("id"), stringToPrefixModelConverter);
 }
 
 export const qTheEntity = new QTheEntity();
 
-export class QMaxFunction extends QFunction<MaxFunctionParams, ODataValueResponseV2<boolean>> {
+export class QMaxFunction extends QFunction<MaxFunctionParams, ODataValueResponseV2<string>> {
   private readonly params = [
-    new QStringParam("TEST_STRING", "testString"),
+    new QStringParam("TEST_STRING", "testString", stringToPrefixModelConverter),
     new QNumberParam("testInt16"),
     new QNumberParam("testInt32"),
     new QStringNumberV2Param("testByte"),
@@ -36,7 +43,7 @@ export class QMaxFunction extends QFunction<MaxFunctionParams, ODataValueRespons
     new QSingleV2Param("testSingle"),
     new QDoubleV2Param("testDouble"),
     new QDecimalV2Param("testDecimal"),
-    new QBooleanParam("testBoolean"),
+    new QBooleanParam("testBoolean", undefined, createChain(booleanToNumberConverter, numberToStringConverter)),
     new QGuidV2Param("testGuid"),
     new QTimeV2Param("testTime"),
     new QDateTimeV2Param("testDate"),
@@ -44,7 +51,11 @@ export class QMaxFunction extends QFunction<MaxFunctionParams, ODataValueRespons
   ];
 
   constructor() {
-    super("MAX_FUNCTION", undefined, { v2Mode: true });
+    super(
+      "MAX_FUNCTION",
+      new ValueResponseConverterV2(createChain(booleanToNumberConverter, numberToStringConverter)),
+      { v2Mode: true },
+    );
   }
 
   getParams() {

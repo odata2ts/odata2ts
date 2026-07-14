@@ -1,10 +1,11 @@
+import type { ODataCollectionResponseV4 } from "@odata2ts/odata-core";
 import { QFunction } from "@odata2ts/odata-query-objects";
 
-export class QEmptyFunction extends QFunction {
+export class QTestFunction extends QFunction<undefined, ODataCollectionResponseV4<string>> {
   private readonly params: [] = [];
 
   constructor() {
-    super("EmptyFunction");
+    super("TestFunction");
   }
 
   getParams() {

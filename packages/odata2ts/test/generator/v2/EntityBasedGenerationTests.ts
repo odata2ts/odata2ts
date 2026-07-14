@@ -21,7 +21,7 @@ export function createEntityBasedGenerationTests(
   let odataBuilder: ODataModelBuilderV2;
   let fixtureComparatorHelper: FixtureComparatorHelper;
 
-  async function generateAndCompare(id: string, fixturePath: string, options?: TestOptions) {
+  async function generateAndCompare(fixturePath: string, options?: TestOptions) {
     await fixtureComparatorHelper.generateAndCompare(
       generatedFileName,
       fixturePath,
@@ -54,7 +54,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("oneEnumType", "enum-numeric-min.ts", { enumType: "numeric" });
+    await generateAndCompare("enum-numeric-min.ts", { enumType: "numeric" });
   });
 
   test(`${testSuiteName}: complex type`, async () => {
@@ -63,7 +63,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("complexType", "complex-min.ts");
+    await generateAndCompare("complex-min.ts");
   });
 
   test(`${testSuiteName}: complex type with editable`, async () => {
@@ -76,7 +76,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("complexTypeEdit", "complex-editable.ts", {
+    await generateAndCompare("complex-editable.ts", {
       skipIdModels: false,
       skipEditableModels: false,
     });
@@ -88,7 +88,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("oneModel", "entity-min.ts");
+    await generateAndCompare("entity-min.ts");
   });
 
   test(`${testSuiteName}: one max model`, async () => {
@@ -125,7 +125,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("oneMaxModel", "entity-max-v2.ts", {
+    await generateAndCompare("entity-max-v2.ts", {
       skipIdModels: false,
       skipEditableModels: false,
       propertiesByName: [
@@ -156,7 +156,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("entity-relationships", "entity-relationships-v2.ts");
+    await generateAndCompare("entity-relationships-v2.ts");
   });
 
   test(`${testSuiteName}: base class`, async () => {
@@ -172,7 +172,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("baseClass", "entity-hierarchy.ts", {
+    await generateAndCompare("entity-hierarchy.ts", {
       skipIdModels: false,
       skipEditableModels: false,
       disableAutoManagedKey: true,
@@ -196,9 +196,9 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("entityEnum", "entity-enum.ts");
-    await generateAndCompare("entityEnum", "entity-enum-numeric.ts", { enumType: "numeric" });
-    await generateAndCompare("entityEnumStringUnion", "entity-enum-string-union.ts", { enumType: "string-union" });
+    await generateAndCompare("entity-enum.ts");
+    await generateAndCompare("entity-enum-numeric.ts", { enumType: "numeric" });
+    await generateAndCompare("entity-enum-string-union.ts", { enumType: "string-union" });
   });
 
   test(`${testSuiteName}: entity & complex type`, async () => {
@@ -220,7 +220,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("entityComplex", "entity-complex.ts");
+    await generateAndCompare("entity-complex.ts");
   });
 
   test(`${testSuiteName}: convert boolean to string`, async () => {
@@ -231,7 +231,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("entityConverter", "entity-converter.ts", { converters: ["@odata2ts/test-converters"] });
+    await generateAndCompare("entity-converter.ts", { converters: ["@odata2ts/test-converters"] });
   });
 
   test(`${testSuiteName}: abstract entity & complex type`, async () => {
@@ -247,7 +247,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("abstract", "abstract.ts", { skipIdModels: false, skipEditableModels: false });
+    await generateAndCompare("abstract.ts", { skipIdModels: false, skipEditableModels: false });
   });
 
   test(`${testSuiteName}: abstract entity type with keys`, async () => {
@@ -262,7 +262,7 @@ export function createEntityBasedGenerationTests(
 
     // when generating model
     // then match fixture text
-    await generateAndCompare("abstract-with-prop-inheritance", "abstract-with-inheritance.ts", {
+    await generateAndCompare("abstract-with-inheritance.ts", {
       skipIdModels: false,
       skipEditableModels: false,
     });
