@@ -99,10 +99,6 @@ describe("Integration Testing of Service Generation", () => {
     const originalName = "Rome Ciampino Airport";
     const expectedName = "Tester";
 
-    try {
-      await trippinService.airports("LIRA").patch({ name: originalName }).execute();
-    } catch (e) {}
-
     const request = baseRequest.compose().patch({
       name: expectedName,
     });
@@ -122,5 +118,7 @@ describe("Integration Testing of Service Generation", () => {
     const result = await trippinService.airports("LIRA").query().execute();
 
     expect(result.data.name).toBe(expectedName);
+
+    await trippinService.airports("LIRA").patch({ name: originalName }).execute();
   });
 });
