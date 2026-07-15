@@ -4,7 +4,7 @@ import { createProperty } from "../ODataBuilderHelper";
 export class ODataOperationBuilderV4 {
   private operation: Operation;
 
-  constructor(name: string, returnType?: string, isBound?: boolean) {
+  constructor(name: string, returnType?: string, isBound?: boolean, isComposable?: boolean) {
     this.operation = {
       $: {
         Name: name,
@@ -21,6 +21,9 @@ export class ODataOperationBuilderV4 {
     }
     if (typeof isBound === "boolean") {
       this.operation.$.IsBound = isBound ? "true" : "false";
+    }
+    if (typeof isComposable === "boolean") {
+      this.operation.$.IsComposable = isComposable ? "true" : "false";
     }
   }
 

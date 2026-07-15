@@ -1,17 +1,18 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ModelResponseConverterV4, QEnumCollection } from "@odata2ts/odata-query-objects";
-import { UrlRequestCmd } from "@odata2ts/odata-service";
 import {
   CollectionServiceV4,
+  ComposableUrlRequestCmd,
   EntitySetServiceV4,
   EntityTypeServiceV4,
   ODataServiceOptionsInternal,
   PrimitiveTypeServiceV4,
+  UrlRequestCmd,
 } from "../../../src";
 import { EditablePersonModel, Feature, GetSomethingFunctionParams, PersonId, PersonModel } from "../PersonModel";
 import { QPersonIdFunction } from "../QPerson";
-import { QGetSomethingFunction, QPersonV4, qPersonV4 } from "./QPersonV4";
+import { QGetSomethingComposable, QGetSomethingFunction, QPersonV4, qPersonV4 } from "./QPersonV4";
 
 export class PersonModelService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
   ClientType,
@@ -20,6 +21,8 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
   QPersonV4
 > {
   private _qGetSomething = new QGetSomethingFunction();
+
+  private _qGetComposable = new QGetSomethingComposable();
 
   constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
     super(client, basePath, name, new QPersonV4(), options);
@@ -53,11 +56,26 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
   public getSomething(params: GetSomethingFunctionParams) {
     const { addFullPath, client, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qGetSomething.buildUrl(params, isUrlNotEncoded()));
+
     return new UrlRequestCmd<ClientType, ODataModelResponseV4<PersonModel>>(
       client,
       ODataHttpMethods.Get,
       url,
       undefined,
+      {
+        mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
+      },
+    );
+  }
+
+  public getSomethingComposable(params: GetSomethingFunctionParams) {
+    const { addFullPath, client, isUrlNotEncoded, options } = this.__base;
+    const url = addFullPath(this._qGetComposable.buildUrl(params, isUrlNotEncoded()));
+
+    return new ComposableUrlRequestCmd<ClientType, PersonModelService<ClientType>, ODataModelResponseV4<PersonModel>>(
+      client,
+      url,
+      (finalUrl: string) => new PersonModelService<ClientType>(client, finalUrl, "", options),
       {
         mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
       },

@@ -27,11 +27,12 @@ export class UrlBuilderRequestCmdV4<
   }
 
   /**
-   * Allow for URL manipulation by creating a new RequestCmd.
+   * Add to the existing query builder, thereby creating a clone.
    *
    * @param modFunction the function to modify the URL
+   * @returns
    */
-  public withNewUrl(modFunction: (urlBuilder: ODataQueryBuilderV4<Q>, q: Q) => ODataQueryBuilderV4<Q>) {
+  public addToQuery(modFunction: (urlBuilder: ODataQueryBuilderV4<Q>, q: Q) => ODataQueryBuilderV4<Q>) {
     if (!modFunction) {
       throw new Error("changeUrl requires the modification function as first argument!");
     }

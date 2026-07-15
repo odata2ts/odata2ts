@@ -222,6 +222,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     operations.forEach((op) => {
       const odataName = op.$.Name;
       const isBound = op.$.IsBound === "true";
+      const isComposable = op.$.IsComposable === "true";
       const fqName = withNamespace(namespace, odataName);
       const opConfig = this.serviceConfigHelper.findOperationTypeConfig(ns, odataName);
       const params: Array<PropertyModel> = op.Parameter?.map((p) => this.mapProp(p)) ?? [];
@@ -257,6 +258,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
         type,
         parameters: params,
         returnType,
+        composable: isComposable,
       };
 
       if (bindingProp) {

@@ -46,3 +46,47 @@ Accept: application/json
     }
   }
 }
+
+###
+# --- Composable Functions ---
+
+### base request
+GET {{baseUrl}}/GetNearestAirport(lat=1,lon=2)
+
+### add query params to composable function
+GET {{baseUrl}}/GetNearestAirport(lat=1,lon=2)?$select=IcaoCode,Name
+
+### navigation by path => not working
+GET {{baseUrl}}/GetNearestAirport(lat=1,lon=2)/Location
+
+### however, that is working
+GET {{baseUrl}}/Airports('KSFO')/Location
+
+### base request 2: requires NS, simple function name won't work
+GET {{baseUrl}}/People('russellwhyte')/Trips(0)/Microsoft.OData.SampleService.Models.TripPin.GetInvolvedPeople()
+
+### add query params
+GET {{baseUrl}}/People('russellwhyte')/Trips(0)/Microsoft.OData.SampleService.Models.TripPin.GetInvolvedPeople()?$select=UserName,LastName
+
+### create person after function
+POST {{baseUrl}}/People('russellwhyte')/Trips(0)/Microsoft.OData.SampleService.Models.TripPin.GetInvolvedPeople()
+Content-Type: application/json
+Accept: application/json
+
+{
+
+}
+
+### base request 3
+POST {{baseUrl}}/People('russellwhyte')/Microsoft.OData.SampleService.Models.TripPin.GetFriendsTrips(userName='scottketchum')/
+Content-Type: application/json
+Accept: application/json
+
+{
+  "ShareId": "9d9b2fa0-efbf-490e-a5e3-bac8f7d47354",
+  "Description": "Test Trip",
+  "Name": "Just for Fun!",
+  "Budget": 1000,
+  "StartsAt": "2014-01-01T00:00:00Z",
+  "EndsAt": "2014-01-04T00:00:00Z"
+}

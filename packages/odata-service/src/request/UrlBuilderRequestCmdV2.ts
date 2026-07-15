@@ -26,7 +26,7 @@ export class UrlBuilderRequestCmdV2<
    *
    * @param modFunction the function to modify the URL
    */
-  public withNewUrl(modFunction: (urlBuilder: ODataQueryBuilderV2<Q>, q: Q) => ODataQueryBuilderV2<Q>) {
+  public addToQuery(modFunction: (urlBuilder: ODataQueryBuilderV2<Q>, q: Q) => ODataQueryBuilderV2<Q>) {
     if (!modFunction) {
       throw new Error("changeUrl requires the modification function as first argument!");
     }

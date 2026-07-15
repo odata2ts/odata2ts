@@ -1,5 +1,4 @@
 import { ODataVersions } from "@odata2ts/odata-core";
-
 import {
   ComplexTypeV4,
   EntitySetV4,
@@ -111,7 +110,7 @@ export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, Sch
   public addEntityType(
     name: string,
     options: undefined | ModelBuilderOptions,
-    builderFn: (builder: ODataEntityTypeBuilderV4) => void
+    builderFn: (builder: ODataEntityTypeBuilderV4) => void,
   ) {
     if (!this.currentSchema.EntityType) {
       this.currentSchema.EntityType = [];
@@ -127,7 +126,7 @@ export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, Sch
   public addComplexType(
     name: string,
     options: undefined | ModelBuilderOptions,
-    builderFn: (builder: ODataComplexTypeBuilderV4) => void
+    builderFn: (builder: ODataComplexTypeBuilderV4) => void,
   ) {
     if (!this.currentSchema.ComplexType) {
       this.currentSchema.ComplexType = [];
@@ -144,7 +143,7 @@ export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, Sch
     name: string,
     returnType: string,
     isBound?: boolean,
-    paramBuilder?: (builder: ODataOperationBuilderV4) => void
+    paramBuilder?: (builder: ODataOperationBuilderV4) => void,
   ) {
     if (!this.currentSchema.Function) {
       this.currentSchema.Function = [];
@@ -159,11 +158,30 @@ export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, Sch
     return this;
   }
 
+  public addComposableFunction(
+    name: string,
+    returnType: string,
+    isBound?: boolean,
+    paramBuilder?: (builder: ODataOperationBuilderV4) => void,
+  ) {
+    if (!this.currentSchema.Function) {
+      this.currentSchema.Function = [];
+    }
+
+    const builder = new ODataOperationBuilderV4(name, returnType, isBound, true);
+    if (paramBuilder) {
+      paramBuilder(builder);
+    }
+    this.currentSchema.Function.push(builder.getOperation());
+
+    return this;
+  }
+
   public addAction(
     name: string,
     returnType?: string,
     isBound?: boolean,
-    paramBuilder?: (builder: ODataOperationBuilderV4) => void
+    paramBuilder?: (builder: ODataOperationBuilderV4) => void,
   ) {
     if (!this.currentSchema.Action) {
       this.currentSchema.Action = [];

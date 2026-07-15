@@ -1,7 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { BookModel } from "../fixture/operation/BookModel";
+import { BookModel, QBook } from "../fixture/operation/BookModel";
 import { QGetSomethingFunction, QGetSomethingFunctionV2 } from "../fixture/operation/EmptyFunction";
 import { OverloadedFunctionParamModel, QOverloadedFunction } from "../fixture/operation/OverloadedFunction";
 import {
@@ -12,12 +12,11 @@ import {
   TestFeatures,
   TestRatings,
 } from "../fixture/operation/ParamFunction";
-import { QPrimitiveReturningFunction, QPrimitiveReturningFunctionV2 } from "../fixture/operation/ReturningFunctions";
-import { createResponse } from "../test-infra/TestResponseHelper";
 
 describe("QFunction Tests", () => {
   test("QFunction: base props", () => {
     const exampleFunction = new QGetSomethingFunction();
+    expect(exampleFunction.isV2()).toBeFalsy();
     expect(exampleFunction.getName()).toBe("getSomething");
     expect(exampleFunction.buildUrl()).toBe("getSomething()");
     expect(exampleFunction.getResponseConverter()).toBeUndefined();
@@ -27,6 +26,7 @@ describe("QFunction Tests", () => {
 
   test("QFunction: V2 mode", () => {
     const exampleFunction = new QGetSomethingFunctionV2();
+    expect(exampleFunction.isV2()).toBeTruthy();
     expect(exampleFunction.getName()).toBe("getSomething");
     expect(exampleFunction.buildUrl()).toBe("getSomething");
     expect(exampleFunction.getResponseConverter()).toBeUndefined();
@@ -151,21 +151,7 @@ describe("QFunction Tests", () => {
         },
       },
     });
-
-    // const exampleFunction = new QPrimitiveReturningFunction();
   });
-
-  // test("QFunction: primitive response conversion", () => {
-  //   const exampleFunction = new QPrimitiveReturningFunction();
-  //
-  //   expect(exampleFunction.convertResponse(createResponse({ value: true })).data).toStrictEqual({ value: 1 });
-  // });
-  //
-  // test("QFunction: V2 primitive response conversion", () => {
-  //   const exampleFunction = new QPrimitiveReturningFunctionV2();
-  //
-  //   expect(exampleFunction.convertResponse(createResponse({ d: { any: true } })).data).toStrictEqual({ d: { any: 1 } });
-  // });
 
   test("QFunction: overloaded params", () => {
     const exampleFunction = new QOverloadedFunction();

@@ -1,23 +1,25 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { RequestCmd, RequestCmdOptions } from "./RequestCmd";
 
-export class UrlRequestCmd<
+export type CreateServiceFunction<ComposableService> = (path: string) => ComposableService;
+
+export class ComposableUrlRequestCmd<
   ClientType extends ODataHttpClient,
+  ComposableService,
   ResponseStructure,
   DataStructure = undefined,
 > extends RequestCmd<ClientType, ResponseStructure, DataStructure> {
   constructor(
-    protected client: ClientType,
-    protected method: ODataHttpMethods,
-    protected url: string,
-    protected data?: DataStructure,
+    client: ClientType,
+    protected basePath: string,
+    protected createService: CreateServiceFunction<ComposableService>,
     protected options: RequestCmdOptions<ResponseStructure, DataStructure> = {},
   ) {
-    super(client, method, data, options);
+    super(client, ODataHttpMethods.Get, undefined, options);
   }
 
   public getUrl(): string {
-    return this.url;
+    return this.basePath;
   }
 
   /**
@@ -30,12 +32,15 @@ export class UrlRequestCmd<
       throw new Error("withUrl requires a new URL!");
     }
 
-    return new UrlRequestCmd<ClientType, ResponseStructure, DataStructure>(
+    return new ComposableUrlRequestCmd<ClientType, ComposableService, ResponseStructure, DataStructure>(
       this.client,
-      this.method,
       url,
-      this.data,
+      this.createService,
       this.options,
     );
+  }
+
+  public compose() {
+    return this.createService(this.getUrl());
   }
 }

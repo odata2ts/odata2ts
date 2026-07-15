@@ -95,6 +95,7 @@ export interface OperationType {
   returnType?: ReturnTypeModel;
   usePost?: boolean;
   overrides?: Array<Array<PropertyModel>>;
+  composable?: boolean;
 }
 
 export interface ReturnTypeModel extends PropertyModel {}

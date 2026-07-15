@@ -37,7 +37,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._qPing.buildUrl());
 
-    return new UrlRequestCmd<ClientType, void>(client, ODataHttpMethods.Post, url, undefined, {
+    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Post, url, undefined, {
       headers: getDefaultHeaders(),
     });
   }

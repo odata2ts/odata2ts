@@ -41,8 +41,10 @@ describe("Function Digestion Test", () => {
     const result = await doDigest();
 
     expect(result.getEntityTypeOperations("xyz")).toEqual([]);
-    expect(result.getUnboundOperationTypes()).toMatchObject([
+    expect(result.getUnboundOperationTypes()).toStrictEqual([
       {
+        composable: false,
+        fqName: "FunctionTest.GetBestFriend",
         odataName: "GetBestFriend",
         name: "getBestFriend",
         qName: "QGetBestFriend",
@@ -58,6 +60,12 @@ describe("Function Digestion Test", () => {
           qObject: undefined,
           required: false,
           isCollection: false,
+          converters: undefined,
+          fqType: "Edm.Boolean",
+          managed: undefined,
+          qParam: "QBooleanParam",
+          qPath: "QBooleanPath",
+          typeModule: undefined,
         },
       },
     ]);
@@ -193,6 +201,23 @@ describe("Function Digestion Test", () => {
     odataBuilder.addFunction("GetBestFriend", ODataTypesV4.Boolean, true);
 
     await expect(doDigest()).rejects.toThrowError("no parameters");
+  });
+
+  test("Function: Composable", async () => {
+    odataBuilder
+      .addEntityType("User", undefined, (builder) => {
+        builder.addKeyProp("id", ODataTypesV4.String);
+      })
+      .addComposableFunction("GetBestFriend", withNs("User"));
+
+    const result = await doDigest();
+
+    expect(result.getUnboundOperationTypes()).toMatchObject([
+      {
+        name: "getBestFriend",
+        composable: true,
+      },
+    ]);
   });
 
   test("Function Import: min case", async () => {
