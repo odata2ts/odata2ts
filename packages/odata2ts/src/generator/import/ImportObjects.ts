@@ -73,6 +73,7 @@ export enum ServiceImports {
   EntitySetService,
   ComplexTypeService,
   UrlRequestCmd,
+  UrlGetRequestCmd,
   ComposableUrlRequestCmd,
 }
 

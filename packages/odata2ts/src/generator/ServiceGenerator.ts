@@ -610,7 +610,11 @@ class ServiceGenerator {
     // importing dependencies
     const requestCmd = importContainer.addServiceObject(
       this.version,
-      isComposable ? ServiceImports.ComposableUrlRequestCmd : ServiceImports.UrlRequestCmd,
+      isComposable
+        ? ServiceImports.ComposableUrlRequestCmd
+        : isFunc && !operation.usePost
+          ? ServiceImports.UrlGetRequestCmd
+          : ServiceImports.UrlRequestCmd,
     );
     const responseStructure = returnType ? importReturnType(this.version, importContainer, returnType) : undefined;
     const responseService = responseServiceName
@@ -642,8 +646,9 @@ class ServiceGenerator {
         `);`
       : `return new ${requestCmd}<ClientType, ${responseStructure ? `${responseStructure}<${rtType}>` : "undefined"}${!isFunc && hasParams ? ", " + paramsModelName : ""}>(` +
         `client,` +
-        `${importContainer.addClientApi(ClientApiImports.ODataHttpMethods)}.${!isFunc || operation.usePost ? "Post" : "Get"},` +
-        `url, ${!isFunc && hasParams ? "params," : "undefined,"}` +
+        `${isFunc && !operation.usePost ? "" : `${importContainer.addClientApi(ClientApiImports.ODataHttpMethods)}.${!isFunc || operation.usePost ? "Post" : "Get"},`}` +
+        `url, ` +
+        `${!isFunc && hasParams ? "params," : !isFunc || operation.usePost ? "undefined," : ""}` +
         optionStmt +
         `);`;
 

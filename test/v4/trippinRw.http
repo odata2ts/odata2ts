@@ -67,26 +67,3 @@ GET {{baseUrl}}/People('russellwhyte')/Trips(0)/Microsoft.OData.SampleService.Mo
 
 ### add query params
 GET {{baseUrl}}/People('russellwhyte')/Trips(0)/Microsoft.OData.SampleService.Models.TripPin.GetInvolvedPeople()?$select=UserName,LastName
-
-### create person after function
-POST {{baseUrl}}/People('russellwhyte')/Trips(0)/Microsoft.OData.SampleService.Models.TripPin.GetInvolvedPeople()
-Content-Type: application/json
-Accept: application/json
-
-{
-
-}
-
-### base request 3
-POST {{baseUrl}}/People('russellwhyte')/Microsoft.OData.SampleService.Models.TripPin.GetFriendsTrips(userName='scottketchum')/
-Content-Type: application/json
-Accept: application/json
-
-{
-  "ShareId": "9d9b2fa0-efbf-490e-a5e3-bac8f7d47354",
-  "Description": "Test Trip",
-  "Name": "Just for Fun!",
-  "Budget": 1000,
-  "StartsAt": "2014-01-01T00:00:00Z",
-  "EndsAt": "2014-01-04T00:00:00Z"
-}

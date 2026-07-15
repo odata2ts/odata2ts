@@ -2,6 +2,7 @@ import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { RequestCmd, RequestCmdOptions } from "./RequestCmd";
+import { GetToPostConverter } from "./RequestHelper";
 
 export type UrlBuilderRequestCmdOptions<ResponseStructure> = Omit<
   RequestCmdOptions<ResponseStructure, undefined>,
@@ -39,5 +40,20 @@ export class UrlBuilderRequestCmdV4<
     const builder = modFunction(this.urlBuilder.clone(), this.q);
 
     return new UrlBuilderRequestCmdV4(this.client, builder, this.q, this.options);
+  }
+
+  /**
+   * Transform this GET request into a POST request by appending a special request converter:
+   * - GET => POST
+   * - url?params => url/$request
+   * - data: undefined => data: ?params
+   * - headers => add: content-type = text plain
+   */
+  public asPostRequest() {
+    if (this.getUrl().indexOf("?") > -1) {
+      this.appendRequestConverter(GetToPostConverter);
+    }
+
+    return this;
   }
 }

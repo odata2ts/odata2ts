@@ -388,11 +388,7 @@ GET {{baseUrl}}/People('russellwhyte')/Trips?$filter=startswith(cast(Budget, Emd
 # --- Group by ---
 
 ### Groupby
-@name
 GET {{baseUrl}}/People?$select=Gender&$apply=aggregate(Gender with countdistinct as counter)
-
-### Groupby
-GET {{baseUrl}}/People?$select=Age
 
 
 # --- Metadata Control ---
