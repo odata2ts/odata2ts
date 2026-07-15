@@ -1,12 +1,11 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
-import { ODataHttpMethods } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import {
   EntitySetServiceV4,
   EntityTypeServiceV4,
   ODataService,
   ODataServiceOptionsInternal,
-  UrlRequestCmd,
+  UrlGetRequestCmd,
 } from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QBook } from "./QTester";
@@ -47,7 +46,7 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._bookQBestReview.buildUrl(isUrlNotEncoded()));
 
-    return new UrlRequestCmd<ClientType, ODataModelResponseV4<Review>>(client, ODataHttpMethods.Get, url, undefined, {
+    return new UrlGetRequestCmd<ClientType, ODataModelResponseV4<Review>>(client, url, {
       headers: getDefaultHeaders(),
       mainResponseConverter: this._bookQBestReview.getResponseConverter(),
     });
@@ -75,12 +74,9 @@ export class BookCollectionService<in out ClientType extends ODataHttpClient> ex
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._bookQFilterReviews.buildUrl(params, isUrlNotEncoded()));
 
-    return new UrlRequestCmd<ClientType, ODataCollectionResponseV4<Review>>(
-      client,
-      ODataHttpMethods.Get,
-      url,
-      undefined,
-      { headers: getDefaultHeaders(), mainResponseConverter: this._bookQFilterReviews.getResponseConverter() },
-    );
+    return new UrlGetRequestCmd<ClientType, ODataCollectionResponseV4<Review>>(client, url, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: this._bookQFilterReviews.getResponseConverter(),
+    });
   }
 }

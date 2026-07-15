@@ -1,12 +1,11 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
-import { ODataHttpMethods } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import {
   EntitySetServiceV4,
   EntityTypeServiceV4,
   ODataService,
   ODataServiceOptionsInternal,
-  UrlRequestCmd,
+  UrlGetRequestCmd,
 } from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QTestEntity } from "./QTester";
@@ -37,13 +36,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qGetBestsellers.buildUrl(isUrlNotEncoded()));
 
-    return new UrlRequestCmd<ClientType, ODataCollectionResponseV4<TestEntity>>(
-      client,
-      ODataHttpMethods.Get,
-      url,
-      undefined,
-      { headers: getDefaultHeaders(), mainResponseConverter: this._qGetBestsellers.getResponseConverter() },
-    );
+    return new UrlGetRequestCmd<ClientType, ODataCollectionResponseV4<TestEntity>>(client, url, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: this._qGetBestsellers.getResponseConverter(),
+    });
   }
 
   public bestBook(params: FirstBookParams) {
@@ -54,13 +50,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qFirstBook.buildUrl(params, isUrlNotEncoded()));
 
-    return new UrlRequestCmd<ClientType, ODataModelResponseV4<TestEntity>>(
-      client,
-      ODataHttpMethods.Get,
-      url,
-      undefined,
-      { headers: getDefaultHeaders(), mainResponseConverter: this._qFirstBook.getResponseConverter() },
-    );
+    return new UrlGetRequestCmd<ClientType, ODataModelResponseV4<TestEntity>>(client, url, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: this._qFirstBook.getResponseConverter(),
+    });
   }
 }
 

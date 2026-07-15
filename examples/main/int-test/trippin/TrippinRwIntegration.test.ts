@@ -121,4 +121,19 @@ describe("Integration Testing of Service Generation", () => {
 
     await trippinService.airports("LIRA").patch({ name: originalName }).execute();
   });
+
+  test.skip("GET as POST request", async () => {
+    const candidate = trippinService.people("russellwhyte").query((builder) => builder.select("userName"));
+
+    expect(candidate.asPostRequest().getInfoConverted()).toMatchObject({
+      method: "POST",
+      url: BASE_URL + "/People('russellwhyte')/$query",
+      data: "%24select=UserName",
+    });
+
+    const result = await candidate.asPostRequest().execute();
+
+    expect(result.status).toBe(200);
+    expect(result.data).toBeDefined();
+  });
 });

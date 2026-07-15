@@ -81,4 +81,23 @@ describe("UrlBuilderRequestCmdV4 tests", () => {
       features: [Feature.Feature1],
     });
   });
+
+  test("as POST request", () => {
+    const candidate = new UrlBuilderRequestCmdV4<MockClient, ODataModelResponseV4<PersonModel>, QPersonV4>(
+      client,
+      queryBuilder,
+      qPersonV4,
+      {
+        headers: DEFAULT_HEADERS,
+        mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
+      },
+    ).addToQuery((builder) => builder.select("userName"));
+
+    expect(candidate.asPostRequest().getInfoConverted()).toMatchObject({
+      method: "POST",
+      url: DEFAULT_URL + "/$query",
+      headers: { "Content-Type": "text/plain" },
+      data: "$select=UserName",
+    });
+  });
 });

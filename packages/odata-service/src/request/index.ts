@@ -2,6 +2,7 @@ export * from "./RequestInfo";
 
 export * from "./RequestCmd";
 export * from "./UrlRequestCmd";
+export * from "./UrlGetRequestCmd";
 export * from "./UrlBuilderRequestCmdV4";
 export * from "./UrlBuilderRequestCmdV2";
 export * from "./ComposableUrlRequestCmd";

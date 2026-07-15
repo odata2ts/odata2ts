@@ -8,6 +8,7 @@ import {
   EntityTypeServiceV4,
   ODataServiceOptionsInternal,
   PrimitiveTypeServiceV4,
+  UrlGetRequestCmd,
   UrlRequestCmd,
 } from "../../../src";
 import { EditablePersonModel, Feature, GetSomethingFunctionParams, PersonId, PersonModel } from "../PersonModel";
@@ -66,6 +67,15 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
         mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
       },
     );
+  }
+
+  public getSomething2() {
+    const { addFullPath, client, isUrlNotEncoded } = this.__base;
+    const url = addFullPath(this._qGetSomething.buildUrl(undefined, isUrlNotEncoded()));
+
+    return new UrlGetRequestCmd<ClientType, ODataModelResponseV4<PersonModel>>(client, url, {
+      mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
+    });
   }
 
   public getSomethingComposable(params: GetSomethingFunctionParams) {
