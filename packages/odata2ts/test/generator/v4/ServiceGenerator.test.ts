@@ -194,6 +194,28 @@ describe("Service Generator Tests V4", () => {
     await compareMainService("function-rt-complex.ts");
   });
 
+  test("Service Generator: composable function", async () => {
+    odataBuilder
+      .addComplexType("Review", undefined, (builder) => builder.addProp("content", ODataTypesV4.String))
+      .addEntityType("Book", undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("review", withNs("Review")),
+      )
+      .addEntitySet("Books", withNs("Book"))
+      // .addComplexType("Review", undefined, (builder) => builder.addProp("content", ODataTypesV4.String))
+      .addComposableFunction("getBest", withNs("Book"))
+      .addFunctionImport("BestBook", withNs("getBest"), "none")
+      .addComposableFunction("getTop10", `Collection(${withNs("Book")})`)
+      .addFunctionImport("Top10", withNs("getTop10"), "none")
+      .addComposableFunction("getBestReview", withNs("Review"))
+      .addFunctionImport("BestReview", withNs("getBestReview"), "none");
+
+    // when generating
+    await doGenerate();
+
+    // then service has those functions
+    await compareMainService("function-composable.ts");
+  });
+
   test("Service Generator: action with enum return type", async () => {
     // given one EntitySet
     odataBuilder

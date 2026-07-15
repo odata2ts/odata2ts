@@ -79,6 +79,7 @@ export interface Operation {
   $: {
     Name: string;
     IsBound?: "true" | "false";
+    IsComposable?: "true" | "false";
   };
   Parameter?: Array<Parameter>;
   ReturnType?: Array<ReturnType>;

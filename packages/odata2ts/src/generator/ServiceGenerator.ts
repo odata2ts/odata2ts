@@ -598,11 +598,24 @@ class ServiceGenerator {
     const returnType = operation.returnType;
     const hasParams = operation.parameters.length > 0 || operation.overrides?.length;
     const isParamsOptional = !![operation.parameters, ...(operation.overrides ?? [])].find((pSet) => pSet.length === 0);
+    const isComposable =
+      operation.composable && returnType && returnType.fqType && returnType.dataType !== DataTypes.PrimitiveType;
+    const responseServiceName =
+      !isComposable || !returnType
+        ? undefined
+        : returnType.isCollection
+          ? this.namingHelper.getCollectionServiceName(returnType.fqType)
+          : this.namingHelper.getServiceName(returnType.fqType);
 
     // importing dependencies
-    const odataHttpMethods = importContainer.addClientApi(ClientApiImports.ODataHttpMethods);
-    const requestCmd = importContainer.addServiceObject(this.version, ServiceImports.UrlRequestCmd);
+    const requestCmd = importContainer.addServiceObject(
+      this.version,
+      isComposable ? ServiceImports.ComposableUrlRequestCmd : ServiceImports.UrlRequestCmd,
+    );
     const responseStructure = returnType ? importReturnType(this.version, importContainer, returnType) : undefined;
+    const responseService = responseServiceName
+      ? importContainer.addGeneratedService(returnType!.fqType, responseServiceName)
+      : undefined;
     const qOperationName = importContainer.addGeneratedQObject(baseFqName, operation.qName);
     const rtType =
       returnType?.type && returnType.dataType !== DataTypes.PrimitiveType
@@ -614,31 +627,41 @@ class ServiceGenerator {
 
     const qOpProp = "this." + this.namingHelper.getPrivatePropName(operation.qName);
 
+    const optionStmt =
+      `{ ` +
+      `headers: getDefaultHeaders()` +
+      (!isFunc && hasParams ? `, mainRequestConverter: ${qOpProp}.getRequestConverter()` : "") +
+      (returnType ? `, mainResponseConverter: ${qOpProp}.getResponseConverter()` : "") +
+      `}`;
+    const requestCmdStmt = isComposable
+      ? `return new ${requestCmd}<ClientType, ${responseService}<ClientType>, ${responseStructure}<${rtType}>>(` +
+        `client,` +
+        `url,` +
+        `(finalUrl: string) => new ${responseService}<ClientType>(client, finalUrl, "", options),` +
+        optionStmt +
+        `);`
+      : `return new ${requestCmd}<ClientType, ${responseStructure ? `${responseStructure}<${rtType}>` : "undefined"}${!isFunc && hasParams ? ", " + paramsModelName : ""}>(` +
+        `client,` +
+        `${importContainer.addClientApi(ClientApiImports.ODataHttpMethods)}.${!isFunc || operation.usePost ? "Post" : "Get"},` +
+        `url, ${!isFunc && hasParams ? "params," : "undefined,"}` +
+        optionStmt +
+        `);`;
+
     return {
       scope: Scope.Public,
       name,
       parameters: hasParams
         ? [{ name: "params", type: paramsModelName, hasQuestionToken: isParamsOptional }]
         : undefined,
-      // returnType: `Promise<${odataResponse}<${responseStructure}<${rtType || "void"}>>>`,
       statements: [
         `if(!${qOpProp}) {`,
         `  ${qOpProp} = new ${qOperationName}()`,
         "}",
 
-        `const { addFullPath, client, getDefaultHeaders${isFunc ? ", isUrlNotEncoded" : ""} } = this.__base;`,
+        `const { addFullPath, client, getDefaultHeaders${isFunc ? `, isUrlNotEncoded${isComposable ? ", options" : ""}` : ""} } = this.__base;`,
         `const url = addFullPath(${qOpProp}.buildUrl(${!isFunc ? "" : hasParams ? "params, isUrlNotEncoded()" : "isUrlNotEncoded()"}));`,
-        "",
-        `return new ${requestCmd}<ClientType, ${responseStructure ? `${responseStructure}<${rtType}>` : "void"}${!isFunc && hasParams ? ", " + paramsModelName : ""}>(` +
-          "client," +
-          `${odataHttpMethods}.${!isFunc || operation.usePost ? "Post" : "Get"},` +
-          `url, ${!isFunc && hasParams ? "params," : "undefined,"}` +
-          "{ " +
-          "headers: getDefaultHeaders()" +
-          (!isFunc && hasParams ? `, mainRequestConverter: ${qOpProp}.getRequestConverter()` : "") +
-          (returnType ? `, mainResponseConverter: ${qOpProp}.getResponseConverter()` : "") +
-          "});",
-        // returnType ? `return ${qOpProp}.convertResponse(response);` : "",
+        ``,
+        requestCmdStmt,
       ],
     };
   }

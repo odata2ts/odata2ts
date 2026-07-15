@@ -39,6 +39,7 @@ describe("Action Digestion Test", () => {
       type: OperationTypes.Action,
       parameters: [],
       returnType: undefined,
+      composable: false,
     };
 
     odataBuilder.addAction(opName);
