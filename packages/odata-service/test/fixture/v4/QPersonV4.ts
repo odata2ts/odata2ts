@@ -1,3 +1,4 @@
+import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import {
   QDateParam,
   QDateTimeOffsetParam,
@@ -12,8 +13,9 @@ import {
   QTimeOfDayParam,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
+import { QFunctionComposable } from "@odata2ts/odata-query-objects/lib/operation/QFunctionComposable";
 import { numberToStringConverter, stringToPrefixModelConverter } from "@odata2ts/test-converters";
-import { EditablePersonModel, Feature, GetSomethingFunctionParams } from "../PersonModel";
+import { EditablePersonModel, Feature, GetSomethingFunctionParams, PersonModel } from "../PersonModel";
 
 export class QPersonV4 extends QueryObject<EditablePersonModel> {
   public readonly userName = new QStringPath(this.withPrefix("UserName"));
@@ -26,12 +28,28 @@ export class QPersonV4 extends QueryObject<EditablePersonModel> {
 
 export const qPersonV4 = new QPersonV4();
 
-export class QGetSomethingFunction<ResponseStructure> extends QFunctionV4<
-  GetSomethingFunctionParams,
-  ResponseStructure
-> {
+export class QGetSomethingFunction extends QFunctionV4<GetSomethingFunctionParams, ODataModelResponseV4<PersonModel>> {
   constructor() {
     super("GET_SOMETHING");
+  }
+
+  getParams() {
+    return [
+      new QGuidParam("TEST_GUID", "testGuid", stringToPrefixModelConverter),
+      new QDateParam("testDateTime"),
+      new QDateTimeOffsetParam("testDateTimeO"),
+      new QTimeOfDayParam("testTime"),
+    ];
+  }
+}
+
+export class QGetSomethingComposable extends QFunctionComposable<
+  QPersonV4,
+  GetSomethingFunctionParams,
+  ODataModelResponseV4<PersonModel>
+> {
+  constructor() {
+    super("GET_SOMETHING", new QPersonV4());
   }
 
   getParams() {

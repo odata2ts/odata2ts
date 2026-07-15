@@ -26,18 +26,19 @@ describe("UrlBuilderRequestCmd tests", () => {
     expect(candidate.getInfo().url).toBe(DEFAULT_URL);
   });
 
-  test("with new URL", () => {
+  test("add to query", () => {
     const candidate = new UrlBuilderRequestCmdV2(client, queryBuilder, qPersonV2);
-    const newCandidate = candidate.withNewUrl((builder) => builder.select("userName"));
+    const newCandidate = candidate.addToQuery((builder) => builder.select("userName"));
 
     expect(candidate.getUrl()).toBe(DEFAULT_URL);
-    expect(newCandidate.getUrl()).toBe(DEFAULT_URL + "?$select=UserName");
+    expect(newCandidate.getInfo()).toMatchObject({ ...candidate.getInfo(), url: DEFAULT_URL + "?$select=UserName" });
   });
 
   test("new URL multiple times", () => {
     const candidate = new UrlBuilderRequestCmdV2(client, queryBuilder, qPersonV2);
-    let newCandidate = candidate.withNewUrl((builder, qPerson) => builder.select("userName"));
-    newCandidate = newCandidate.withNewUrl((builder, qPerson) => builder.filter(qPerson.age.gt("40")));
+    const newCandidate = candidate
+      .addToQuery((builder, qPerson) => builder.select("userName"))
+      .addToQuery((builder, qPerson) => builder.filter(qPerson.age.gt("40")));
 
     expect(newCandidate.getUrl()).toBe(DEFAULT_URL + "?$select=UserName&$filter=Age gt 40");
   });
@@ -64,7 +65,7 @@ describe("UrlBuilderRequestCmd tests", () => {
 
     const requestConfig = { headers: { x: "y" }, test: "ing" };
     const result = await candidate
-      .withNewUrl((builder, qPerson) => builder.filter(qPerson.age.gt("40")))
+      .addToQuery((builder, qPerson) => builder.filter(qPerson.age.gt("40")))
       .appendRequestConverter((info) => info.withData("test"))
       .execute(requestConfig);
 

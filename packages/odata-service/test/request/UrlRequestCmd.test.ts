@@ -66,7 +66,7 @@ describe("UrlRequestCmd tests", () => {
     expectTypeOf(candidate.getInfo()).toEqualTypeOf<RequestInfo<EditablePersonModel>>();
   });
 
-  test("change url", () => {
+  test("with new url", () => {
     const newUrl = "/foo/bar/baz";
     const candidate = new UrlRequestCmd<MockClient, ODataModelResponseV4<PersonModel>, EditablePersonModel>(
       client,
@@ -78,7 +78,7 @@ describe("UrlRequestCmd tests", () => {
       },
     );
 
-    const newCandy = candidate.changeUrl(newUrl);
+    const newCandy = candidate.withUrl(newUrl);
 
     expectTypeOf(newCandy).toEqualTypeOf(candidate);
 
