@@ -1,3 +1,4 @@
+import { getIdentityConverter } from "@odata2ts/odata-query-objects";
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
 import { describe, expect, test } from "vitest";
 import { QBooleanParam, ValueResponseConverterV4 } from "../../../src";
@@ -8,12 +9,22 @@ describe("ValueResponseConverterV4 tests", () => {
   const VALUE_INPUT = true;
   const VALUE_CONVERTED = 1;
 
-  test("convert", () => {
+  test("convert with noop", () => {
+    const data = { value: 43 };
+    const converter = new ValueResponseConverterV4(getIdentityConverter());
+
+    const result = converter.convert(createResponse(data));
+
+    expect(result.data).toStrictEqual(data);
+  });
+
+  test("convert with proper converters", () => {
     const converter = new ValueResponseConverterV4(qValueParam);
     const converter2 = new ValueResponseConverterV4(booleanToNumberConverter);
+    const response = createResponse({ value: VALUE_INPUT });
 
-    const result = converter.convert(createResponse({ value: VALUE_INPUT }));
-    const result2 = converter2.convert(createResponse({ value: VALUE_INPUT }));
+    const result = converter.convert(response);
+    const result2 = converter2.convert(response);
 
     expect(result.data).toStrictEqual({ value: VALUE_CONVERTED });
     expect(result2).toStrictEqual(result);
