@@ -72,4 +72,55 @@ describe("Integration Testing of Service Generation", () => {
 
     expect(data).toStrictEqual(model);
   });
+
+  test("composable function: with additional query", async () => {
+    const baseRequest = trippinService.getNearestAirport({ lat: 1, lon: 2 });
+
+    const request = baseRequest.compose().query((builder) => builder.select("icaoCode", "name"));
+    expect(request.getUrl()).toBe(baseRequest.getUrl() + "?%24select=IcaoCode%2CName");
+
+    const response = await request.execute();
+
+    // expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<AirportModel>>>();
+
+    expect(response.status).toBe(200);
+    expect(response.data).toMatchObject({ icaoCode: "LIRA", name: "Rome Ciampino Airport" });
+    expect(response.data.iataCode).toBeUndefined();
+  });
+
+  test("composable function: with additional path segments", async () => {
+    const baseRequest = trippinService.getNearestAirport({ lat: 1, lon: 2 });
+
+    expect(baseRequest.compose().location().query().getUrl()).toBe(baseRequest.getUrl() + "/Location");
+  });
+
+  test("composable function: action afterwards", async () => {
+    const baseRequest = trippinService.getNearestAirport({ lat: 1, lon: 2 });
+    const originalName = "Rome Ciampino Airport";
+    const expectedName = "Tester";
+
+    try {
+      await trippinService.airports("LIRA").patch({ name: originalName }).execute();
+    } catch (e) {}
+
+    const request = baseRequest.compose().patch({
+      name: expectedName,
+    });
+
+    expect(request.getInfo()).toMatchObject({
+      url: baseRequest.getUrl() + "",
+      method: "PATCH",
+    });
+
+    const response = await request.execute();
+
+    // expectTypeOf(response).toEqualTypeOf<HttpResponseModel<undefined>>();
+
+    expect(response.status).toBe(204);
+    expect(response.data).toBeUndefined;
+
+    const result = await trippinService.airports("LIRA").query().execute();
+
+    expect(result.data.name).toBe(expectedName);
+  });
 });
