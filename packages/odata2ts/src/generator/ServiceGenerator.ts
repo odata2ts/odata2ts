@@ -606,13 +606,14 @@ class ServiceGenerator {
         : returnType.isCollection
           ? this.namingHelper.getCollectionServiceName(returnType.fqType)
           : this.namingHelper.getServiceName(returnType.fqType);
+    const useUrlGetCmd = this.version === ODataVersions.V4 && isFunc && !operation.usePost;
 
     // importing dependencies
     const requestCmd = importContainer.addServiceObject(
       this.version,
       isComposable
         ? ServiceImports.ComposableUrlRequestCmd
-        : isFunc && !operation.usePost
+        : useUrlGetCmd
           ? ServiceImports.UrlGetRequestCmd
           : ServiceImports.UrlRequestCmd,
     );
@@ -646,9 +647,9 @@ class ServiceGenerator {
         `);`
       : `return new ${requestCmd}<ClientType, ${responseStructure ? `${responseStructure}<${rtType}>` : "undefined"}${!isFunc && hasParams ? ", " + paramsModelName : ""}>(` +
         `client,` +
-        `${isFunc && !operation.usePost ? "" : `${importContainer.addClientApi(ClientApiImports.ODataHttpMethods)}.${!isFunc || operation.usePost ? "Post" : "Get"},`}` +
+        `${useUrlGetCmd ? "" : `${importContainer.addClientApi(ClientApiImports.ODataHttpMethods)}.${!isFunc || operation.usePost ? "Post" : "Get"},`}` +
         `url, ` +
-        `${!isFunc && hasParams ? "params," : !isFunc || operation.usePost ? "undefined," : ""}` +
+        `${useUrlGetCmd ? "" : !isFunc && hasParams ? "params," : "undefined,"}` +
         optionStmt +
         `);`;
 
