@@ -86,7 +86,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     };
 
     const srv = testService.books(271);
-    const result = await srv.patch(updated).execute();
+    const result = await srv.patch<true>(updated).execute();
 
     expect(result.status).toBe(200);
     expect(result.data!.descr).toBe(updated.descr);
@@ -121,7 +121,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
     } = queried.data;
     const updated = { ...passThrough, ...toUpdate };
 
-    const result = await srv.update(updated).execute();
+    const result = await srv.update<true>(updated).execute();
 
     expect(result.status).toBe(200);
     expect(result.data).toMatchObject(updated);
@@ -141,7 +141,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
 
     const srv = testService.books(251);
 
-    const result = await srv.update(toUpdate).execute();
+    const result = await srv.update<true>(toUpdate).execute();
 
     expect(result.status).toBe(200);
     expect(result.data).toMatchObject({
@@ -163,7 +163,7 @@ describe("CAP V4 Integration Testing: CRUD capabilities", () => {
   });
 
   test("update primitive property", async () => {
-    const response = await testService.books(251).price().updateValue(new BigNumber(999)).execute();
+    const response = await testService.books(251).price().updateValue<true>(new BigNumber(999)).execute();
 
     expect(response.status).toBe(200);
     expect(new BigNumber(999).isEqualTo(response.data!.value)).toBeTruthy();
