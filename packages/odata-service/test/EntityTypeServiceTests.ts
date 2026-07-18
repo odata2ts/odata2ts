@@ -1,6 +1,7 @@
-import { beforeEach, expect, test } from "vitest";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { beforeEach, expect, expectTypeOf, test } from "vitest";
 import { ODataServiceOptions } from "../src";
-import { EditablePersonModel, Feature, PersonModelServiceVersion } from "./fixture/PersonModel";
+import { PersonModelServiceVersion } from "./fixture/PersonModel";
 import { MockClient } from "./mock/MockClient";
 
 export function commonEntityTypeServiceTests(
@@ -62,38 +63,18 @@ export function commonEntityTypeServiceTests(
     expect(testService.create).toBeUndefined();
   });
 
-  test("entityType: update", async () => {
-    const model: EditablePersonModel = {
-      userName: "tester",
-      age: "14",
-      favFeature: Feature.Feature1,
-      features: [Feature.Feature1],
-    };
-    const odataModel = {
-      UserName: "tester",
-      Age: 14,
-      FavFeature: "Feature1",
-      Features: ["Feature1"],
-    };
-
-    const cmd = testService.update(model);
-    const request = cmd.getInfo();
-
-    expect(request.url).toBe(EXPECTED_PATH);
-    expect(request.method).toBe("PUT");
-    expect(request.headers).toStrictEqual(DEFAULT_HEADERS);
-    expect(request.data).toEqual(model);
-    expect(cmd.getInfoConverted().data).toEqual(odataModel);
-  });
-
   test("entityType: delete", async () => {
-    const request = testService.delete().getInfoConverted();
+    const request = testService.delete();
+    const result = request.getInfoConverted();
 
-    expect(request.url).toBe(EXPECTED_PATH);
-    expect(request.method).toBe("DELETE");
-    expect(request.data).toBeUndefined();
+    expect(result).toStrictEqual(request.getInfo());
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.method).toBe("DELETE");
+    expect(result.data).toBeUndefined();
     expect(odataClient.lastRequestConfig).toBeUndefined();
-    expect(request.headers).toBeUndefined();
+    expect(result.headers).toBeUndefined();
+
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("entityType: no url encoding", async () => {

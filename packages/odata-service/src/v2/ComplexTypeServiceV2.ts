@@ -22,7 +22,7 @@ export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, 
     const { client, qModel, path, getDefaultHeaders } = this.__base;
     const headers = { ...getDefaultHeaders(), ...MERGE_HEADERS };
 
-    return new UrlRequestCmd<ClientType, void, Partial<EditableT>>(client, ODataHttpMethods.Post, path, model, {
+    return new UrlRequestCmd<ClientType, undefined, Partial<EditableT>>(client, ODataHttpMethods.Post, path, model, {
       headers,
       mainRequestConverter: qModel,
     });
@@ -31,7 +31,7 @@ export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, 
   public update(model: EditableT) {
     const { client, qModel, path, getDefaultHeaders } = this.__base;
 
-    return new UrlRequestCmd<ClientType, void, EditableT>(client, ODataHttpMethods.Put, path, model, {
+    return new UrlRequestCmd<ClientType, undefined, EditableT>(client, ODataHttpMethods.Put, path, model, {
       headers: getDefaultHeaders(),
       mainRequestConverter: qModel,
     });
@@ -40,7 +40,7 @@ export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, 
   public delete() {
     const { client, path } = this.__base;
 
-    return new UrlRequestCmd<ClientType, void>(client, ODataHttpMethods.Delete, path, undefined);
+    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path, undefined);
   }
 
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void) {

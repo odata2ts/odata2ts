@@ -1,8 +1,15 @@
-import { beforeEach, describe, expect, test } from "vitest";
-import { DEFAULT_HEADERS } from "../../src";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
+import { DEFAULT_HEADERS, RequestInfo } from "../../src";
 import { commonEntitySetTests } from "../EntitySetServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
-import { EditableFlightModel, PlanItemCollectionService } from "../fixture/v4/BaseTypeModel";
+import {
+  EditableFlightModel,
+  FlightModel,
+  PlanItemCollectionService,
+  PlanItemModel,
+} from "../fixture/v4/BaseTypeModel";
 import { PersonModelCollectionService } from "../fixture/v4/PersonModelService";
 import { TestCollectionService } from "../fixture/v4/TypingModelService";
 import { MockClient } from "../mock/MockClient";
@@ -21,17 +28,6 @@ describe("V4 EntitySetService Test", () => {
     testService = new PersonModelCollectionService(odataClient, BASE_URL, NAME);
   });
 
-  test("entitySet: big number", async () => {
-    testService = new PersonModelCollectionService(odataClient, BASE_URL, NAME, { bigNumbersAsString: true });
-
-    const request = testService.query().getInfo();
-
-    expect(request.headers).toStrictEqual({
-      Accept: "application/json;IEEE754Compatible=true",
-      "Content-Type": "application/json;IEEE754Compatible=true",
-    });
-  });
-
   test("entitySet: create", async () => {
     const model: EditablePersonModel = {
       userName: "tester",
@@ -46,19 +42,29 @@ describe("V4 EntitySetService Test", () => {
       Features: ["Feature1"],
     };
 
-    const cmd = testService.create(model);
-    let request = cmd.getInfo();
+    const request = testService.create(model);
+    let result = request.getInfo();
 
-    expect(request.url).toBe(EXPECTED_PATH);
-    expect(request.method).toBe("POST");
-    expect(request.headers).toStrictEqual(DEFAULT_HEADERS);
-    expect(request.data).toStrictEqual(model);
-    expect(cmd.getInfoConverted().data).toStrictEqual(odataModel);
+    expectTypeOf(result).toEqualTypeOf<RequestInfo<ODataModelPayloadV4<EditablePersonModel>>>();
+
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.method).toBe("POST");
+    expect(result.headers).toStrictEqual(DEFAULT_HEADERS);
+    expect(result.data).toStrictEqual(model);
+    expect(request.getInfoConverted().data).toStrictEqual(odataModel);
+
+    // check type conversion
+    odataClient.setModelResponse(odataModel);
+    const response = await testService.create(model).execute();
+    expect(response.data).toStrictEqual(model);
+
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
+    expectTypeOf(await testService.create<false>(model).execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
 
     // subtype options won't take effect
-    request = testService.create(model, { withTypeControlInfo: true, withCastPathSegment: true }).getInfoConverted();
-    expect(request.url).toBe(EXPECTED_PATH);
-    expect(request.data).toStrictEqual(odataModel);
+    result = testService.create(model, { withTypeControlInfo: true, withCastPathSegment: true }).getInfoConverted();
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.data).toStrictEqual(odataModel);
   });
 
   test("entitySet: create subtype", async () => {
@@ -83,6 +89,8 @@ describe("V4 EntitySetService Test", () => {
     expect(request.method).toBe("POST");
     expect(request.data).toStrictEqual(expectedModel);
     expect(cmd.getInfoConverted().data).toStrictEqual(odataModel);
+
+    expectTypeOf(await cmd.execute()).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<FlightModel>>>();
   });
 
   test("entitySet: create subtype from base type", async () => {
@@ -94,17 +102,19 @@ describe("V4 EntitySetService Test", () => {
       flightNumber: "F123",
     };
     const odataModel = {
-      "@odata.type": "#Tester.Flight",
+      "@odata.type": inputModel["@odata.type"],
       Id: inputModel.id,
       Name: inputModel.name,
       FlightNumber: inputModel.flightNumber,
     };
 
-    const cmd = serviceToTest.create(inputModel);
-    const request = cmd.getInfo();
+    const request = serviceToTest.create(inputModel);
+    const result = request.getInfo();
 
-    expect(request.data).toStrictEqual(inputModel);
-    expect(cmd.getInfoConverted().data).toStrictEqual(odataModel);
+    expect(result.data).toStrictEqual(inputModel);
+    expect(request.getInfoConverted().data).toStrictEqual(odataModel);
+
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PlanItemModel>>>();
   });
 
   test("entitySet: create subtype with options", async () => {
@@ -121,22 +131,41 @@ describe("V4 EntitySetService Test", () => {
     };
     const odataModelTyped = { ...odataModel, "@odata.type": "#Tester.Flight" };
 
-    // don't add control info about type
-    let request = serviceToTest.create(inputModel, { withTypeControlInfo: false }).getInfoConverted();
-    expect(request.url).toBe(EXPECTED_PATH);
-    expect(request.data).toStrictEqual(odataModel);
+    // as subtype control info gets added automatically
+    let request = serviceToTest.create(inputModel);
+    let result = request.getInfoConverted();
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.data).toStrictEqual(odataModelTyped);
 
-    // use path segment for type info
-    request = serviceToTest.create(inputModel, { withCastPathSegment: true }).getInfoConverted();
-    expect(request.url).toBe(EXPECTED_PATH + "/Tester.Flight");
-    expect(request.data).toStrictEqual(odataModel);
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<FlightModel>>>();
+
+    // don't add control info about type
+    result = serviceToTest.create(inputModel, { withTypeControlInfo: false }).getInfoConverted();
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.data).toStrictEqual(odataModel);
+
+    // use path segment for type info instead
+    result = serviceToTest.create(inputModel, { withCastPathSegment: true }).getInfoConverted();
+    expect(result.url).toBe(EXPECTED_PATH + "/Tester.Flight");
+    expect(result.data).toStrictEqual(odataModel);
 
     // use all options
-    request = serviceToTest
+    result = serviceToTest
       .create(inputModel, { withCastPathSegment: true, withTypeControlInfo: true })
       .getInfoConverted();
-    expect(request.url).toBe(EXPECTED_PATH + "/Tester.Flight");
-    expect(request.data).toStrictEqual(odataModelTyped);
+    expect(result.url).toBe(EXPECTED_PATH + "/Tester.Flight");
+    expect(result.data).toStrictEqual(odataModelTyped);
+  });
+
+  test("entitySet: big number", async () => {
+    testService = new PersonModelCollectionService(odataClient, BASE_URL, NAME, { bigNumbersAsString: true });
+
+    const request = testService.query().getInfo();
+
+    expect(request.headers).toStrictEqual({
+      Accept: "application/json;IEEE754Compatible=true",
+      "Content-Type": "application/json;IEEE754Compatible=true",
+    });
   });
 
   test("entitySet: createKey & parseKey with conversions", async () => {

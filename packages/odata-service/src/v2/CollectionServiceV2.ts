@@ -1,14 +1,15 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
+import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import {
   CollectionResponseConverterV2,
-  EntityResponseConverterV2,
+  MainResponseConverter,
   PrimitiveCollectionType,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptions } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV2, UrlRequestCmd } from "../request";
+import { CollectionModificationResponseV2 } from "./ResponseTypeChoicesV2";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
@@ -17,7 +18,7 @@ export class CollectionServiceV2<
   in out ClientType extends ODataHttpClient,
   T,
   Q extends QueryObjectModel,
-  EditableT = PrimitiveExtractor<T>,
+  PrimitiveT = PrimitiveExtractor<T>,
 > {
   protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
 
@@ -30,14 +31,15 @@ export class CollectionServiceV2<
   }
 
   /**
-   * Add a new item to the collection.
+   * Add a new item to the collection (V3 only).
+   * Spec: {@link https://www.odata.org/documentation/odata-version-3-0/odata-version-3-0-core-protocol/#updateacollectionproperty}
    *
    * @param model primitive value
    */
-  public add(model: EditableT) {
+  public add<Response extends boolean = false>(model: PrimitiveT) {
     const { path, client, qModel, getDefaultHeaders } = this.__base;
 
-    return new UrlRequestCmd<ClientType, ODataEntityModelResponseV2<T>, EditableT>(
+    return new UrlRequestCmd<ClientType, CollectionModificationResponseV2<Response, PrimitiveT>, PrimitiveT>(
       client,
       ODataHttpMethods.Post,
       path,
@@ -45,23 +47,37 @@ export class CollectionServiceV2<
       {
         headers: getDefaultHeaders(),
         mainRequestConverter: qModel,
-        mainResponseConverter: new EntityResponseConverterV2(qModel),
+        mainResponseConverter: new CollectionResponseConverterV2(qModel) as MainResponseConverter<
+          CollectionModificationResponseV2<Response, PrimitiveT>,
+          T
+        >,
       },
     );
   }
 
   /**
    * Update the whole collection.
+   * Spec: {@link https://www.odata.org/documentation/odata-version-3-0/odata-version-3-0-core-protocol/#updateacollectionproperty}
    *
    * @param models set of primitive values
    */
-  public update(models: Array<EditableT>) {
+  public update<Response extends boolean = false>(models: Array<PrimitiveT>) {
     const { client, path, qModel, getDefaultHeaders } = this.__base;
 
-    return new UrlRequestCmd<ClientType, void, Array<EditableT>>(client, ODataHttpMethods.Put, path, models, {
-      headers: getDefaultHeaders(),
-      mainRequestConverter: qModel,
-    });
+    return new UrlRequestCmd<ClientType, CollectionModificationResponseV2<Response, PrimitiveT>, Array<PrimitiveT>>(
+      client,
+      ODataHttpMethods.Put,
+      path,
+      models,
+      {
+        headers: getDefaultHeaders(),
+        mainRequestConverter: qModel,
+        mainResponseConverter: new CollectionResponseConverterV2(qModel) as MainResponseConverter<
+          CollectionModificationResponseV2<Response, PrimitiveT>,
+          T
+        >,
+      },
+    );
   }
 
   /**
@@ -70,7 +86,7 @@ export class CollectionServiceV2<
   public delete() {
     const { client, path } = this.__base;
 
-    return new UrlRequestCmd<ClientType, void>(client, ODataHttpMethods.Delete, path, undefined);
+    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path, undefined);
   }
 
   /**

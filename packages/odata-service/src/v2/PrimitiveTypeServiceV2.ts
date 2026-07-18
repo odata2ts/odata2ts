@@ -57,9 +57,10 @@ export class PrimitiveTypeServiceV2<in out ClientType extends ODataHttpClient, T
   }
 
   /**
-   * Requesting a <code>null</code> value results in 204 (No Content).
-   * This makes the value undefined.
+   * Get the primitive value.
+   * Spec: {@link https://www.odata.org/documentation/odata-version-2-0/operations/} - 2.2 Retrieving individual properties
    *
+   * Always returns the response structure, the value might be `null`.
    */
   public getValue() {
     const { client, path, getDefaultHeaders } = this.__base;
@@ -75,20 +76,32 @@ export class PrimitiveTypeServiceV2<in out ClientType extends ODataHttpClient, T
     return this.client.get(this.getPath() + RAW_VALUE_SUFFIX, requestConfig, { headers: OPEN_ACCEPT_HEADER });
   }*/
 
+  /**
+   * Update the value.
+   * Spec: {@link https://www.odata.org/documentation/odata-version-2-0/operations/} - 2.6 Updating Entries
+   *
+   * The response is 204 with no data.
+   *
+   * @param value
+   */
   public updateValue(value: T) {
     const { client, path, getDefaultHeaders, name } = this.__base;
     const converter = this.__converter;
 
-    return new UrlRequestCmd<ClientType, ODataValueResponseV2<T>, T>(client, ODataHttpMethods.Put, path, value, {
+    return new UrlRequestCmd<ClientType, undefined, T>(client, ODataHttpMethods.Put, path, value, {
       headers: getDefaultHeaders(),
       mainRequestConverter: new ValueRequestConverter(converter, name!),
-      mainResponseConverter: new ValueResponseConverterV2(converter),
     });
   }
 
+  /**
+   * Delete the value.
+   *
+   * Returns 204 with no data.
+   */
   public deleteValue() {
     const { client, path } = this.__base;
 
-    return new UrlRequestCmd<ClientType, void>(client, ODataHttpMethods.Delete, path, undefined);
+    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path, undefined);
   }
 }

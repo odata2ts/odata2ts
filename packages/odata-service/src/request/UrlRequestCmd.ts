@@ -7,11 +7,11 @@ export class UrlRequestCmd<
   DataStructure = undefined,
 > extends RequestCmd<ClientType, ResponseStructure, DataStructure> {
   constructor(
-    protected client: ClientType,
-    protected method: ODataHttpMethods,
+    client: ClientType,
+    method: ODataHttpMethods,
     protected url: string,
-    protected data?: DataStructure,
-    protected options: RequestCmdOptions<ResponseStructure, DataStructure> = {},
+    data?: DataStructure,
+    options: RequestCmdOptions<ResponseStructure, DataStructure> = {},
   ) {
     super(client, method, data, options);
   }

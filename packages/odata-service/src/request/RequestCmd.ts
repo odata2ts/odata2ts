@@ -15,7 +15,7 @@ export interface RequestCmdOptions<ResponseStructure, DataStructure> {
    * Sets the main request converter which converts from the user facing model
    * to the OData facing model.
    */
-  mainRequestConverter?: MainRequestConverter<DataStructure>;
+  mainRequestConverter?: MainRequestConverter<DataStructure, any>;
   /**
    * Sets the main response converter which converts from the OData facing model
    * to the user facing model.
@@ -32,8 +32,8 @@ export abstract class RequestCmd<
   DataStructure = undefined,
   FinalResponseStructure = ResponseStructure,
 > {
-  private requestConverter: RequestConverterChain<DataStructure>;
-  private responseConverter: ResponseConverterChain<ResponseStructure, FinalResponseStructure>;
+  private readonly requestConverter: RequestConverterChain<DataStructure>;
+  private readonly responseConverter: ResponseConverterChain<ResponseStructure, FinalResponseStructure>;
 
   public constructor(
     protected client: ClientType,
@@ -70,7 +70,7 @@ export abstract class RequestCmd<
    * to the OData facing model, for which we don't have any typings, so we use <code>any</code>.
    *
    */
-  public getInfoConverted() {
+  public getInfoConverted(): RequestInfo<any> {
     const request = this.getInfo();
     const converter = this.requestConverter;
 
@@ -152,7 +152,7 @@ export abstract class RequestCmd<
     const request = this.getInfoConverted();
 
     // execute the request
-    const response = await this.client.request<any>(
+    const response = await this.client.request<ResponseStructure>(
       request.url,
       request.method,
       request.data,

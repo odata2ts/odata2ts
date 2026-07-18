@@ -1,7 +1,9 @@
-import { beforeEach, describe, expect, test } from "vitest";
-import { DEFAULT_HEADERS } from "../../src";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
+import { DEFAULT_HEADERS, RequestInfo } from "../../src";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
-import { PersonModel } from "../fixture/PersonModel";
+import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { EditableFlightModel, PlanItemService } from "../fixture/v4/BaseTypeModel";
 import { PersonModelService } from "../fixture/v4/PersonModelService";
 import { MockClient } from "../mock/MockClient";
@@ -24,19 +26,68 @@ describe("EntityTypeService V4 Tests", () => {
     const model: Partial<PersonModel> = { age: "45" };
     const requestModel = { Age: 45 };
 
-    const cmd = testService.patch(model);
-    let request = cmd.getInfo();
+    const request = testService.patch(model);
+    const result = request.getInfo();
 
-    expect(request.url).toBe(EXPECTED_PATH);
-    expect(request.method).toBe("PATCH");
-    expect(request.headers).toStrictEqual(DEFAULT_HEADERS);
-    expect(request.data).toEqual(model);
-    expect(cmd.getInfoConverted().data).toEqual(requestModel);
+    expectTypeOf(result).toEqualTypeOf<RequestInfo<ODataModelPayloadV4<Partial<EditablePersonModel>>>>();
 
-    // subtype options won't take effect
-    request = testService.patch(model, { withCastPathSegment: true, withTypeControlInfo: true }).getInfoConverted();
-    expect(request.url).toBe(EXPECTED_PATH);
-    expect(request.data).toEqual(requestModel);
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.method).toBe("PATCH");
+    expect(result.headers).toStrictEqual(DEFAULT_HEADERS);
+    expect(result.data).toEqual(model);
+    expect(request.getInfoConverted().data).toEqual(requestModel);
+
+    expectTypeOf(await testService.patch(model).execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
+    expectTypeOf(await testService.patch<false>(model).execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
+
+    // check response conversion
+    odataClient.setModelResponse(requestModel);
+    const response = await testService.patch<true>(model).execute();
+
+    expect(response.data).toStrictEqual(model);
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
+
+    // subtype options won't take any effect
+    const request2 = testService
+      .patch(model, { withCastPathSegment: true, withTypeControlInfo: true })
+      .getInfoConverted();
+    expect(request2).toMatchObject(request.getInfoConverted());
+  });
+
+  test("entityType V4: update", async () => {
+    const model: EditablePersonModel = {
+      userName: "tester",
+      age: "14",
+      favFeature: Feature.Feature1,
+      features: [Feature.Feature1],
+    };
+    const requestModel = {
+      UserName: "tester",
+      Age: 14,
+      FavFeature: "Feature1",
+      Features: ["Feature1"],
+    };
+
+    const request = testService.update(model);
+    let result = request.getInfo();
+
+    expectTypeOf(result).toEqualTypeOf<RequestInfo<ODataModelPayloadV4<EditablePersonModel>>>();
+
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.method).toBe("PUT");
+    expect(result.headers).toStrictEqual(DEFAULT_HEADERS);
+    expect(result.data).toEqual(model);
+    expect(request.getInfoConverted().data).toEqual(requestModel);
+
+    expectTypeOf(await testService.update(model).execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
+    expectTypeOf(await testService.update<false>(model).execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
+
+    // check response conversion
+    odataClient.setModelResponse(requestModel);
+    const response = await testService.update<true>(model).execute();
+
+    expect(response.data).toStrictEqual(model);
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
   });
 
   test("entityType V4: patch & update subtype", async () => {
@@ -59,20 +110,24 @@ describe("EntityTypeService V4 Tests", () => {
 
     // patch
     const patchCmd = serviceToTest.patch(inputModel);
-    let request = patchCmd.getInfo();
+    let result = patchCmd.getInfo();
 
-    expect(request.url).toBe(EXPECTED_PATH);
-    expect(request.method).toBe("PATCH");
-    expect(request.data).toEqual(expectedModel);
+    expectTypeOf(result).toEqualTypeOf<RequestInfo<ODataModelPayloadV4<Partial<EditableFlightModel>>>>();
+
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.method).toBe("PATCH");
+    expect(result.data).toEqual(expectedModel);
     expect(patchCmd.getInfoConverted().data).toEqual(odataModel);
 
     // update
     const updateCmd = serviceToTest.update(inputModel);
-    request = updateCmd.getInfo();
-    expect(request.url).toBe(EXPECTED_PATH);
-    expect(request.method).toBe("PUT");
-    expect(request.data).toEqual(expectedModel);
+    const resultUpdate = updateCmd.getInfo();
+    expect(resultUpdate.url).toBe(EXPECTED_PATH);
+    expect(resultUpdate.method).toBe("PUT");
+    expect(resultUpdate.data).toEqual(expectedModel);
     expect(updateCmd.getInfoConverted().data).toStrictEqual(odataModel);
+
+    expectTypeOf(resultUpdate).toEqualTypeOf<RequestInfo<ODataModelPayloadV4<EditableFlightModel>>>();
   });
 
   test("entityType V4: patch & update subtype with options", async () => {

@@ -1,5 +1,5 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataCollectionResponseV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataCollectionResponseV4, ODataModelPayloadV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import {
   CollectionResponseConverterV4,
@@ -9,6 +9,7 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
+import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
 export abstract class EntitySetServiceV4<
@@ -61,8 +62,8 @@ export abstract class EntitySetServiceV4<
    * Create an OData path for an entity with a given id.
    * Might be useful for routing.
    *
-   * @example createKey(1234) => myEntity(1234)
-   * @example createKey({id: 1234, name: "Test"}) => myEntity(id=1234,name='Test')
+   * @example `createKey("1234")` => `"myEntity('1234')"`
+   * @example `createKey({number: 1234, name: "Test"})` => `"myEntity(number=1234,name='Test')"`
    * @param id either a primitive value (single key entities only) or an object
    * @param notEncoded if set to {@code true}, special chars are not escaped
    */
@@ -75,8 +76,8 @@ export abstract class EntitySetServiceV4<
    * Parse an OData path representing the id of an entity.
    * Might be useful for routing in combination with createKey.
    *
-   * @example parseKey("myEntity(1234)") => 1234
-   * @example parseKey("myEntity(id=1234,name='Test')") => { id: 1234, name: "Test" }
+   * @example `parseKey("myEntity(1234)")` => `"1234"`
+   * @example `parseKey("myEntity(id=1234,name='Test')")` => `{ id: 1234, name: "Test" }`
    * @param keyPath e.g. myEntity(id=1234,name='Test')
    * @param notDecoded if set to {@code true}, encoded special chars are not decoded
    */
@@ -86,12 +87,23 @@ export abstract class EntitySetServiceV4<
 
   /**
    * Create a new model.
+   * Spec: {@link https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_CreateanEntity}).
+   *
+   * The response of this operation is status 201 with the proper and complete model including the usually required id.
+   * With a header field of "Prefer" and value "return=minimal" the OData server should respond with
+   * status 204 and comes with no response data at all.
+   * Both implementations have to supply the URL to the resource in the header field "Location", so you can always
+   * extract the ID as part of this URL (the appropriate QId object can help parsing here).
+   *
+   * If you know in which way your server responds, you can easily supply this information via a boolean switch
+   * to get the correct typing. `true` (default) means that the complete entity is returned, while `false` determines
+   * that no data is returned, e.g. `create<false>(...)`.
    *
    * @param model
    * @param createOptions
-   * @return
+   * @return command object for request execution
    */
-  public create<ReturnType extends Partial<T> | void = T>(
+  public create<Response extends boolean = true>(
     model: ODataModelPayloadV4<EditableT>,
     createOptions?: SubtypeOptions,
   ) {
@@ -101,7 +113,7 @@ export abstract class EntitySetServiceV4<
     // add control info automatically, if required
     const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
 
-    return new UrlRequestCmd<ClientType, ODataModelResponseV4<ReturnType>, ODataModelPayloadV4<EditableT>>(
+    return new UrlRequestCmd<ClientType, EntityModificationResponseV4<Response, T>, ODataModelPayloadV4<EditableT>>(
       client,
       ODataHttpMethods.Post,
       dontUseCastPathSegment ? basePath : path,
@@ -116,6 +128,7 @@ export abstract class EntitySetServiceV4<
 
   /**
    * Query the entity set.
+   * Spec: {@link https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_QueryingCollections}
    *
    * @param queryFn provide the query logic with the help of the builder and the query-object
    */

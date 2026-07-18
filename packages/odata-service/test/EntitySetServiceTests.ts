@@ -28,8 +28,11 @@ export function commonEntitySetTests(
     testService = new serviceConstructor(odataClient, BASE_URL, NAME);
   });
 
-  test("entitySet: setup", async () => {
+  test("entitySet: path & key spec", async () => {
     expect(testService.getPath()).toBe(EXPECTED_PATH);
+    expect(testService.getKeySpec().length).toBe(1);
+    expect(testService.getKeySpec()[0].getName()).toBe("UserName");
+    expect(testService.getKeySpec()[0].getMappedName()).toBe("userName");
   });
 
   test("entitySet: createKey", async () => {

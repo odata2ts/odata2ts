@@ -19,7 +19,7 @@ export class RequestConverterChain<SourceType> {
       return request;
     }
 
-    const asQ = converter as QueryObjectModel<S, T>;
+    const asQ = converter as QueryObjectModel<T>;
     const asQPM = converter as QParamModel<S, T>;
 
     // QueryObject are used for data transformations

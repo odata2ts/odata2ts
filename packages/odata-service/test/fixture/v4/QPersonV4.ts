@@ -17,7 +17,7 @@ import {
 import { numberToStringConverter, stringToPrefixModelConverter } from "@odata2ts/test-converters";
 import { EditablePersonModel, Feature, GetSomethingFunctionParams, PersonModel } from "../PersonModel";
 
-export class QPersonV4 extends QueryObject<EditablePersonModel> {
+export class QPersonV4 extends QueryObject<PersonModel> {
   public readonly userName = new QStringPath(this.withPrefix("UserName"));
   public readonly age = new QNumberPath(this.withPrefix("Age"), numberToStringConverter);
   public readonly favFeature = new QEnumPath(this.withPrefix("FavFeature"), Feature);

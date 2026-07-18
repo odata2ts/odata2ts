@@ -74,14 +74,17 @@ export abstract class EntitySetServiceV2<
 
   /**
    * Create a new model.
+   * Spec: {@link https://www.odata.org/documentation/odata-version-2-0/operations/} - 2.4 Creating new Entries
+   *
+   * The service should respond with 201 (Created) and the newly created model.
    *
    * @param model
    * @return
    */
-  public create<ReturnType extends Partial<T> = T>(model: EditableT) {
+  public create(model: EditableT) {
     const { path, client, qModel, getDefaultHeaders } = this.__base;
 
-    return new UrlRequestCmd<ClientType, ODataEntityModelResponseV2<ReturnType>, EditableT>(
+    return new UrlRequestCmd<ClientType, ODataEntityModelResponseV2<T>, EditableT>(
       client,
       ODataHttpMethods.Post,
       path,

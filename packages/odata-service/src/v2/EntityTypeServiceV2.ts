@@ -18,28 +18,51 @@ export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, E
     return this.__base.path;
   }
 
+  /**
+   * Patch (partially update) the current entity.
+   * Spec: {@link https://www.odata.org/documentation/odata-version-2-0/operations/} - 2.6 Updating Entries
+   *
+   * While the method is called `patch` to align with V4, under the hood a `MERGE` request is sent.
+   * The service should respond with status 204 and no data.
+   *
+   * @param model
+   */
   public patch(model: Partial<EditableT>) {
     const { client, qModel, path, getDefaultHeaders } = this.__base;
     const headers = { ...getDefaultHeaders(), ...MERGE_HEADERS };
 
-    return new UrlRequestCmd<ClientType, void, Partial<EditableT>>(client, ODataHttpMethods.Post, path, model, {
+    return new UrlRequestCmd<ClientType, undefined, Partial<EditableT>>(client, ODataHttpMethods.Post, path, model, {
       headers,
       mainRequestConverter: qModel,
     });
   }
 
+  /**
+   * Update the current entity.
+   * Spec: {@link https://www.odata.org/documentation/odata-version-2-0/operations/} - 2.6 Updating Entries
+   *
+   * The service should respond with status 204 and no data.
+   *
+   * @param model
+   */
   public update(model: EditableT) {
     const { client, qModel, path, getDefaultHeaders } = this.__base;
 
-    return new UrlRequestCmd<ClientType, void, EditableT>(client, ODataHttpMethods.Put, path, model, {
+    return new UrlRequestCmd<ClientType, undefined, EditableT>(client, ODataHttpMethods.Put, path, model, {
       headers: getDefaultHeaders(),
       mainRequestConverter: qModel,
     });
   }
 
+  /**
+   * Delete the current entity.
+   * Spec: {@link https://www.odata.org/documentation/odata-version-2-0/operations/} - 2.8 Deleting Entries
+   *
+   * The service should respond with status 204 and no data.
+   */
   public delete() {
     const { client, path } = this.__base;
-    return new UrlRequestCmd<ClientType, void>(client, ODataHttpMethods.Delete, path, undefined);
+    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path, undefined);
   }
 
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void) {

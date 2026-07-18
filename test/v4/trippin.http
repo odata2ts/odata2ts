@@ -20,6 +20,10 @@ GET {{rootUrl}}
 # @name metadata
 GET {{baseUrl}}/$metadata
 
+### root
+GET {{baseUrl}}/
+x-csrf-token: "request"
+
 
 # --- ENTITY SETS ---
 
@@ -77,24 +81,40 @@ GET {{baseUrl}}/People('heineritis')
 ###
 # @name patch new person
 PATCH {{baseUrl}}/People('heineritis')
+If-Match: W/"08DEE2EAE2B320C9"
 Content-Type: {{contentType}}
+Prefer:  return=representation
 
 {
-  "MiddleName": "H."
+  "MiddleName": "H.",
+  "Emails": ["heineritis@odata.org", "hey@ho.org"]
 }
 
 ###
 # @name update new person
-PUT {{baseUrl}}/People('heineritis')
+PUT {{baseUrl}}/People('heineritis')?$select=FirstName
+If-Match: W/"08DEE2DA9CA82E73"
 Content-Type: application/json
 
 {
-  "Age": 33
+  "UserName": "heineritis",
+  "FirstName": "Horst",
+  "LastName": "Tester",
+  "Emails": ["heineritis@odata.org"],
+  "AddressInfo": [{
+    "Address": "Teststr. 33, Biefe",
+    "City": {
+      "Name": "San Biefe",
+      "CountryRegion": "France",
+      "Region": "Arrandissement 13"
+    }
+  }]
 }
 
 ###
 # @name delete person
-DELETE  {{baseUrl}}/People('heineritis')
+DELETE {{baseUrl}}/People('heineritis')
+If-Match: W/"08DEE2DAB5FE108B"
 
 ###
 # @name get prop
@@ -106,7 +126,7 @@ PUT {{baseUrl}}/People('heineritis')/FirstName
 Content-Type: {{contentType}}
 
 {
-  "value": "Horst"
+  "value": "Heiner"
 }
 
 ###
@@ -141,6 +161,7 @@ Content-Type: {{contentType}}
   "StartsAt": "2021-01-01T00:00:00Z",
   "EndsAt": "2021-01-04T00:00:00Z"
 }
+
 ###
 # @name update associated collection item by Id
 # => 501 not implemented
@@ -150,6 +171,7 @@ Content-Type: {{contentType}}
 {
   "Budget": 3005
 }
+
 ###
 # @name delete associated entity
 DELETE  {{baseUrl}}/People('russellwhyte')/Trips(5)

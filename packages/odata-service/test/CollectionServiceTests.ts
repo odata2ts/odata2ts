@@ -1,4 +1,5 @@
-import { beforeEach, expect, test } from "vitest";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { beforeEach, expect, expectTypeOf, test } from "vitest";
 import { DEFAULT_HEADERS } from "../src";
 import {
   EnumCollectionService,
@@ -6,7 +7,6 @@ import {
   StringCollectionService,
   StringCollectionServiceConstructor,
 } from "./fixture/PersonModel";
-import { MockClient } from "./mock/MockClient";
 
 export function getParams(params: { [key: string]: string }) {
   const ps = Object.entries(params).map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
@@ -14,7 +14,6 @@ export function getParams(params: { [key: string]: string }) {
 }
 
 export function commonCollectionTests(
-  odataClient: MockClient,
   stringCollectionServiceConstructor: StringCollectionServiceConstructor,
   enumCollectionServiceConstructor: EnumCollectionServiceConstructor,
 ) {
@@ -30,6 +29,11 @@ export function commonCollectionTests(
   beforeEach(() => {
     stringService = stringCollectionServiceConstructor(BASE_URL, NAME_STRING);
     enumService = enumCollectionServiceConstructor(BASE_URL, NAME_ENUM);
+  });
+
+  test("collection: no patch", async () => {
+    // @ts-expect-error
+    expect(stringService.patch).toBeUndefined();
   });
 
   test("collection: query", async () => {
@@ -80,38 +84,6 @@ export function commonCollectionTests(
 
     const request = stringService.query((queryBuilder, qObj) => queryBuilder.filter(qObj.it.eq("hi"))).getInfo();
     expect(request.url).toBe(expectedString);
-  });
-
-  test("collection: add", async () => {
-    const request = stringService.add("test").getInfo();
-
-    expect(request.url).toBe(STRING_URL);
-    expect(request.method).toBe("POST");
-    expect(request.data).toEqual("test");
-  });
-
-  test("collection: no patch", async () => {
-    // @ts-expect-error
-    expect(stringService.patch).toBeUndefined();
-  });
-
-  test("collection: update", async () => {
-    const model = ["test1", "t2"];
-    const request = stringService.update(model).getInfo();
-
-    expect(request.url).toBe(STRING_URL);
-    expect(request.method).toBe("PUT");
-    expect(request.data).toEqual(model);
-    expect(request.headers).toStrictEqual(DEFAULT_HEADERS);
-  });
-
-  test("collection: delete", async () => {
-    const request = stringService.delete().getInfo();
-
-    expect(request.url).toBe(STRING_URL);
-    expect(request.method).toBe("DELETE");
-    expect(request.data).toBeUndefined();
-    expect(request.headers).toBeUndefined();
   });
 
   test("collection: no url encoding", async () => {
