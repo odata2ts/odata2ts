@@ -1,8 +1,13 @@
 import { FIXED_DATE, FIXED_STRING } from "@odata2ts/test-converters";
 import { describe, expect, test } from "vitest";
 import { QEntityCollectionPath, QEntityPath, QStringV2Path, QueryObject } from "../src";
-import { EventModel, PlanItemModel, QPlanItem } from "./fixture/BaseTypeModel";
-import { QSimpleEntityWithConverter, QTestEntity } from "./fixture/SimpleEntityWithConverter";
+import { EventModel, QPlanItem } from "./fixture/BaseTypeModel";
+import {
+  QSimpleEntityWithConverter,
+  QTestEntity,
+  SimpleEntityWithConverter,
+  TestEntity,
+} from "./fixture/SimpleEntityWithConverter";
 
 describe("QueryObject tests", () => {
   const qToTest = new QSimpleEntityWithConverter();
@@ -137,7 +142,7 @@ describe("QueryObject tests", () => {
   });
 
   test("convertToOData: partial model", () => {
-    const result = qToTest.convertToOData({ id: 123 });
+    const result = qToTest.convertToOData({ id: 123 } as SimpleEntityWithConverter);
     expect(result).toStrictEqual({ ID: 123 });
   });
 
@@ -177,7 +182,6 @@ describe("QueryObject tests", () => {
   });
 
   test("convertToOData: strict, but control info allowed", () => {
-    return;
     expect(
       qToTest.convertToOData(
         // @ts-ignore
@@ -195,7 +199,7 @@ describe("QueryObject tests", () => {
         { id: 456, truth: 1 },
         { id: 789, truth: 0 },
       ],
-    });
+    } as TestEntity);
     expect(result).toStrictEqual({
       CREATED_AT: FIXED_STRING,
       simple: { ID: 123, truth: false },
@@ -212,7 +216,7 @@ describe("QueryObject tests", () => {
       simpleEntity: undefined,
       simpleEntities: [],
       options: [1],
-    });
+    } as unknown as TestEntity);
     expect(result).toStrictEqual({
       NAME: undefined,
       simple: undefined,
@@ -221,7 +225,9 @@ describe("QueryObject tests", () => {
     });
     // @ts-expect-error
     expect(qToTestWithAssoc.convertToOData({ options: null })).toStrictEqual({ options: null });
-    expect(qToTestWithAssoc.convertToOData({ options: undefined })).toStrictEqual({ options: undefined });
+    expect(qToTestWithAssoc.convertToOData({ options: undefined } as unknown as TestEntity)).toStrictEqual({
+      options: undefined,
+    });
   });
 
   test("subtype casting", () => {
