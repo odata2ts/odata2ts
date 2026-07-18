@@ -1,4 +1,3 @@
-import { PartialDeep } from "type-fest";
 import { QEntityPathModel, QValuePathModel } from "./path/QPathModel";
 import { FlexibleConversionModel, QueryObjectModel } from "./QueryObjectModel";
 
@@ -18,7 +17,7 @@ function getMapping(q: QueryObject) {
 
 export const ENUMERABLE_PROP_DEFINITION = { enumerable: true };
 
-export class QueryObject<T extends object = any> implements QueryObjectModel<T, PartialDeep<T>> {
+export class QueryObject<T extends object = any> implements QueryObjectModel<T> {
   private __propMapping?: Map<string, keyof this>;
   protected readonly __subtypeMapping?: Record<string, string>;
 
@@ -60,9 +59,9 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T, 
    */
   public convertFromOData(odataModel: null): null;
   public convertFromOData(odataModel: undefined): undefined;
-  public convertFromOData(odataModel: object): PartialDeep<T> | Array<PartialDeep<T>>;
+  public convertFromOData(odataModel: object): T | Array<T>;
   // public convertFromOData(odataModel: Array<object>): Array<PartialDeep<T>>;
-  public convertFromOData(odataModel: FlexibleConversionModel<any>): FlexibleConversionModel<PartialDeep<T>> {
+  public convertFromOData(odataModel: FlexibleConversionModel<any>): FlexibleConversionModel<T> {
     if (odataModel === null || odataModel === undefined) {
       return odataModel;
     }
@@ -117,7 +116,7 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T, 
         }
 
         return collector;
-      }, {} as any) as PartialDeep<T>;
+      }, {} as any) as T;
     });
 
     return isList ? result : result[0];
@@ -143,12 +142,9 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T, 
    */
   public convertToOData(userModel: null, failForUnknownProps?: boolean): null;
   public convertToOData(userModel: undefined, failForUnknownProps?: boolean): undefined;
-  public convertToOData(userModel: PartialDeep<T>, failForUnknownProps?: boolean): object;
-  public convertToOData(userModel: Array<PartialDeep<T>>, failForUnknownProps?: boolean): Array<object>;
-  public convertToOData(
-    userModel: PartialDeep<T> | Array<PartialDeep<T>> | null | undefined,
-    failForUnknownProps = false,
-  ) {
+  public convertToOData(userModel: T, failForUnknownProps?: boolean): object;
+  public convertToOData(userModel: Array<T>, failForUnknownProps?: boolean): Array<object>;
+  public convertToOData(userModel: T | Array<T> | null | undefined, failForUnknownProps = false) {
     if (userModel === null || userModel === undefined) {
       return userModel;
     }

@@ -6,7 +6,7 @@ import { QueryObjectModel } from "../QueryObjectModel";
  */
 export type ResponseDataConverter<ConvertedType> =
   | Pick<QParamModel<any, ConvertedType>, "convertFrom">
-  | Pick<QueryObjectModel<any, ConvertedType>, "convertFromOData">;
+  | Pick<QueryObjectModel<ConvertedType>, "convertFromOData">;
 
 /**
  * OData V2 responds to value queries with a partial entity model only consisting of the given property.

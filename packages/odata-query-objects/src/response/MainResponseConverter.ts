@@ -33,7 +33,7 @@ export abstract class MainResponseConverter<Structure, Type> {
   public abstract convert(response: HttpResponseModel<any>): HttpResponseModel<Structure>;
 
   protected applyConverter(value: Type) {
-    const qModel = this.converter as QueryObjectModel<any, Type>;
+    const qModel = this.converter as QueryObjectModel<Type>;
     const qParam = this.converter as QParamModel<any, Type>;
 
     if (typeof qModel.convertFromOData === "function") {
@@ -42,5 +42,6 @@ export abstract class MainResponseConverter<Structure, Type> {
     if (typeof qParam.convertFrom === "function") {
       return qParam.convertFrom(value);
     }
+    return value;
   }
 }
