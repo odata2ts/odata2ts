@@ -145,6 +145,17 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
     throw new Error("Operation updateBlob not supported!");
   }
 
+  setValueResponse(data: any, name?: string) {
+    if (this.isV2) {
+      if (!name) {
+        throw Error("Parameter [name] must be supplied for V2 responses!");
+      }
+      this.responseData = { d: { [name]: data } };
+    } else {
+      this.responseData = { value: data };
+    }
+  }
+
   setModelResponse(data: any) {
     this.responseData = this.isV2 ? { d: data } : data;
   }

@@ -1,10 +1,15 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 import {
+  BooleanCollection,
   EnumCollection,
+  QBooleanCollection,
   QNumericEnumCollection,
   QStringV2Collection,
   StringCollection,
 } from "@odata2ts/odata-query-objects";
-import { describe, expect, test } from "vitest";
+import { booleanToNumberConverter } from "@odata2ts/test-converters";
+import { describe, expect, expectTypeOf, test } from "vitest";
 import { CollectionServiceV2, DEFAULT_HEADERS, ODataServiceOptions } from "../../src";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
 import { MockClient } from "../mock/MockClient";
@@ -15,11 +20,22 @@ export enum NumericTestEnum {
   ZEBRA = 99,
 }
 
+type RESPONSE_TYPE_DEFAULT = HttpResponseModel<undefined>;
+type RESPONSE_TYPE_ENUM = HttpResponseModel<ODataCollectionResponseV2<NumericTestEnum>>;
+type RESPONSE_TYPE_STRING = HttpResponseModel<ODataCollectionResponseV2<string>>;
+
 describe("CollectionService V2 Tests", () => {
   const odataClient = new MockClient(true);
   const BASE_PATH = "";
   const NAME_STRING = "testString";
   const NAME_ENUM = "testEnum";
+
+  const service = new CollectionServiceV2<MockClient, BooleanCollection, QBooleanCollection<number>, number>(
+    odataClient,
+    BASE_PATH,
+    NAME_STRING,
+    new QBooleanCollection(undefined, booleanToNumberConverter),
+  );
 
   const stringConstructor = (
     basePath: string,
@@ -39,7 +55,7 @@ describe("CollectionService V2 Tests", () => {
     return new CollectionServiceV2(odataClient, basePath, name, new QNumericEnumCollection(NumericTestEnum));
   };
 
-  commonCollectionTests(odataClient, stringConstructor, enumConstructor);
+  commonCollectionTests(stringConstructor, enumConstructor);
 
   test("numeric enum collection: add", async () => {
     const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
@@ -53,6 +69,38 @@ describe("CollectionService V2 Tests", () => {
     expect(result.data).toEqual(NumericTestEnum[NumericTestEnum.A]);
     // without conversion
     expect(cmd.getInfo().data).toEqual(NumericTestEnum.A);
+
+    expectTypeOf(await enumService.add(NumericTestEnum.A).execute()).toEqualTypeOf<RESPONSE_TYPE_DEFAULT>();
+    expectTypeOf(await enumService.add<false>(NumericTestEnum.A).execute()).toEqualTypeOf<RESPONSE_TYPE_DEFAULT>();
+
+    // check response conversion
+    odataClient.setCollectionResponse([0]);
+    const response = await enumService.add<true>(NumericTestEnum.A).execute();
+    expect(response.data).toStrictEqual({ d: { results: [NumericTestEnum.A] } });
+
+    expectTypeOf(response).toEqualTypeOf<RESPONSE_TYPE_ENUM>();
+  });
+
+  test("collection: update", async () => {
+    const stringService = stringConstructor(BASE_PATH, NAME_STRING);
+    const model = ["test1", "t2"];
+    const request = stringService.update(model);
+    const result = request.getInfo();
+
+    expect(result.url).toBe(NAME_STRING);
+    expect(result.method).toBe("PUT");
+    expect(result.data).toEqual(model);
+    expect(result.headers).toStrictEqual(DEFAULT_HEADERS);
+
+    expectTypeOf(await stringService.update(model).execute()).toEqualTypeOf<RESPONSE_TYPE_DEFAULT>();
+    expectTypeOf(await stringService.update<false>(model).execute()).toEqualTypeOf<RESPONSE_TYPE_DEFAULT>();
+
+    // check response conversion
+    odataClient.setCollectionResponse(model);
+    const response = await stringService.update<true>(model).execute();
+    expect(response.data).toStrictEqual({ d: { results: model } });
+
+    expectTypeOf(response).toEqualTypeOf<RESPONSE_TYPE_STRING>();
   });
 
   test("numeric enum collection: filter", async () => {

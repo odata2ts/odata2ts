@@ -1,23 +1,25 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataCollectionResponseV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataCollectionResponseV4, ODataModelPayloadV4 } from "@odata2ts/odata-core";
 import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import {
   CollectionResponseConverterV4,
-  ModelResponseConverterV4,
+  MainResponseConverter,
   PrimitiveCollectionType,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
+import { PrimitiveCollection } from "@odata2ts/odata-query-objects/src/primitve-collection/PrimitiveCollectionModel";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
+import { CollectionModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
 
-type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
+export type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
 
 export class CollectionServiceV4<
   in out ClientType extends ODataHttpClient,
   T,
   Q extends QueryObjectModel,
-  EditableT = PrimitiveExtractor<T>,
+  PrimitiveT = PrimitiveExtractor<T>,
 > {
   protected readonly __base: ServiceStateHelperV4<ClientType, Q>;
 
@@ -37,13 +39,22 @@ export class CollectionServiceV4<
 
   /**
    * Add a new item to the collection.
+   * Spec: https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_UpdateaCollectionProperty
+   *
+   * The response of this operation is dependent on the `Prefer` header.
+   * By default, you get 204 and no response data, while adding the prefer header with `Prefer: return=representation`
+   * should yield status 200 with the proper and complete model.
+   *
+   * If you know in which way your server responds, you can easily supply this information via a boolean switch
+   * to get the correct typing. `true` means that the complete entity is returned, while `false` (default) determines
+   * that no data is returned, e.g. `add<true>(...)`.
    *
    * @param model primitive value
    */
-  public add(model: ODataModelPayloadV4<EditableT>) {
+  public add<Response extends boolean = false>(model: ODataModelPayloadV4<PrimitiveT>) {
     const { path, client, getDefaultHeaders, qModel } = this.__base;
 
-    return new UrlRequestCmd<ClientType, ODataModelResponseV4<T>, EditableT>(
+    return new UrlRequestCmd<ClientType, CollectionModificationResponseV4<Response, PrimitiveT>, PrimitiveT>(
       client,
       ODataHttpMethods.Post,
       path,
@@ -51,20 +62,32 @@ export class CollectionServiceV4<
       {
         headers: getDefaultHeaders(),
         mainRequestConverter: qModel,
-        mainResponseConverter: new ModelResponseConverterV4(qModel),
+        mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
+          CollectionModificationResponseV4<Response, PrimitiveT>,
+          T
+        >,
       },
     );
   }
 
   /**
    * Update the whole collection.
+   * Spec: https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_UpdateaCollectionProperty
+   *
+   * The response of this operation is dependent on the `Prefer` header.
+   * By default, you get 204 and no response data, while adding the prefer header with `Prefer: return=representation`
+   * should yield status 200 with the proper and complete model.
+   *
+   * If you know in which way your server responds, you can easily supply this information via a boolean switch
+   * to get the correct typing. `true` means that the complete entity is returned, while `false` (default) determines
+   * that no data is returned, e.g. `update<true>(...).
    *
    * @param models set of primitive values
    */
-  public update(models: Array<ODataModelPayloadV4<EditableT>>) {
+  public update<Response extends boolean = false>(models: Array<ODataModelPayloadV4<PrimitiveT>>) {
     const { path, client, getDefaultHeaders, qModel } = this.__base;
 
-    return new UrlRequestCmd<ClientType, void | ODataCollectionResponseV4<T>, Array<EditableT>>(
+    return new UrlRequestCmd<ClientType, CollectionModificationResponseV4<Response, PrimitiveT>, Array<PrimitiveT>>(
       client,
       ODataHttpMethods.Put,
       path,
@@ -72,22 +95,29 @@ export class CollectionServiceV4<
       {
         headers: getDefaultHeaders(),
         mainRequestConverter: qModel,
-        mainResponseConverter: new ModelResponseConverterV4(qModel),
+        mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
+          CollectionModificationResponseV4<Response, PrimitiveT>,
+          T
+        >,
       },
     );
   }
 
   /**
    * Delete the whole collection.
+   * Spec: https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_UpdateaCollectionProperty
    */
   public delete() {
     const { client, path } = this.__base;
 
-    return new UrlRequestCmd<ClientType, void>(client, ODataHttpMethods.Delete, path, undefined);
+    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path, undefined);
   }
 
   /**
    * Query collection of primitive values.
+   * Spec: {@link https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_QueryingCollections}
+   *
+   * @param queryFn provide the query logic with the help of the builder and the query-object
    */
   public query<ReturnType = T>(queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;

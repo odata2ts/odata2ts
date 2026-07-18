@@ -1,11 +1,12 @@
 import { ValueConverter } from "@odata2ts/converter-api";
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataValueResponseV4 } from "@odata2ts/odata-core";
-import { getIdentityConverter, ValueResponseConverterV4 } from "@odata2ts/odata-query-objects";
+import { getIdentityConverter, MainResponseConverter, ValueResponseConverterV4 } from "@odata2ts/odata-query-objects";
 import { FlexibleConversionModel } from "@odata2ts/odata-query-objects/src/QueryObjectModel";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlRequestCmd } from "../request";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
+import { ValueModificationResponseV4 } from "./ResponseTypeChoicesV4";
 
 class ValueRequestConverter<T> {
   constructor(private valueConverter: ValueConverter<any, any>) {}
@@ -19,7 +20,7 @@ class ValueRequestConverter<T> {
 
 export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
   protected readonly __base: ServiceStateHelper<ClientType>;
-  protected readonly __converter: ValueConverter<any, any>;
+  protected readonly __converter: ValueConverter<any, T>;
 
   public constructor(
     client: ClientType,
@@ -37,40 +38,64 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
   }
 
   /**
-   * Requesting a <code>null</code> value results in 204 (No Content).
-   * This makes the value undefined.
+   * Get the value.
+   * Spec: {@link https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_RequestingIndividualProperties}
    *
+   * Requesting a <code>null</code> value actually results in 204 (No Content).
    */
   public getValue() {
     const { client, path, getDefaultHeaders } = this.__base;
     const converter = this.__converter;
 
-    return new UrlRequestCmd<ClientType, ODataValueResponseV4<T> | void>(
+    return new UrlRequestCmd<ClientType, ODataValueResponseV4<T> | undefined>(
       client,
       ODataHttpMethods.Get,
       path,
       undefined,
       {
         headers: getDefaultHeaders(),
-        mainRequestConverter: converter,
         mainResponseConverter: new ValueResponseConverterV4(converter),
       },
     );
   }
 
-  public updateValue(value: T) {
+  /**
+   * Update the value.
+   * Spec: https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_UpdateaPrimitiveProperty
+   *
+   * The response of this operation is dependent on the OData server implementation.
+   * It is either status 200 with the proper and complete model or status 204 with no response data at all.
+   * Both implementations have to supply the URL to the resource in the header field "Location", so you can always
+   * extract the ID as part of this URL (the appropriate QId object can help parsing here).
+   *
+   * If you know in which way your server responds, you can easily supply this information via a boolean switch
+   * to get the correct typing. `true` means that the complete entity is returned, while `false` determines
+   * that no data is returned, e.g. `updateValue<true>(...)`.
+   *
+   * @param value
+   */
+  public updateValue<Response extends boolean = false>(value: T) {
     const { client, path, getDefaultHeaders } = this.__base;
     const converter = this.__converter;
 
-    return new UrlRequestCmd<ClientType, ODataValueResponseV4<T> | void, T>(client, ODataHttpMethods.Put, path, value, {
-      headers: getDefaultHeaders(),
-      mainRequestConverter: new ValueRequestConverter<T>(converter),
-      mainResponseConverter: new ValueResponseConverterV4(converter),
-    });
+    return new UrlRequestCmd<ClientType, ValueModificationResponseV4<Response, T>, T>(
+      client,
+      ODataHttpMethods.Put,
+      path,
+      value,
+      {
+        headers: getDefaultHeaders(),
+        mainRequestConverter: new ValueRequestConverter(converter),
+        mainResponseConverter: new ValueResponseConverterV4<T>(converter) as MainResponseConverter<
+          ValueModificationResponseV4<Response, T>,
+          T
+        >,
+      },
+    );
   }
 
   public deleteValue() {
     const { client, path } = this.__base;
-    return new UrlRequestCmd<ClientType, ODataValueResponseV4<T | void>>(client, ODataHttpMethods.Delete, path);
+    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path);
   }
 }

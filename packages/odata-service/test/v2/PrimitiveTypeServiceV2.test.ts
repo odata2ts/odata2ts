@@ -1,5 +1,7 @@
-import { beforeEach, describe, expect, test } from "vitest";
-import { PrimitiveTypeServiceV2 } from "../../src";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { ODataValueResponseV2 } from "@odata2ts/odata-core";
+import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
+import { PrimitiveTypeServiceV2, RequestInfo } from "../../src";
 import { PersonModelV2Service } from "../fixture/v2/PersonModelV2Service";
 import { MockClient } from "../mock/MockClient";
 
@@ -7,7 +9,8 @@ describe("PrimitiveTypeService V2 Test", () => {
   const odataClient = new MockClient(true);
   const BASE_URL = "path";
   const NAME = "test('tester')";
-  const EXPECTED_PATH = `${BASE_URL}/${NAME}/UserName`;
+  const PROPERTY_NAME = "UserName";
+  const EXPECTED_PATH = `${BASE_URL}/${NAME}/${PROPERTY_NAME}`;
 
   let testService: PrimitiveTypeServiceV2<MockClient, string>;
 
@@ -20,29 +23,44 @@ describe("PrimitiveTypeService V2 Test", () => {
   });
 
   test("primitiveType V2: get value", async () => {
-    const request = testService.getValue().getInfo();
+    const request = testService.getValue();
+    const result = request.getInfo();
 
-    expect(request.url).toBe(EXPECTED_PATH);
-    expect(request.data).toBeUndefined();
-    expect(request.method).toBe("GET");
+    expectTypeOf(result).toEqualTypeOf<RequestInfo>();
+
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.data).toBeUndefined();
+    expect(result.method).toBe("GET");
+    expect(result).toStrictEqual(request.getInfoConverted());
+
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<ODataValueResponseV2<string>>>();
   });
 
   test("primitiveType V2: update value", async () => {
     const value = "test";
-    const cmd = testService.updateValue(value);
-    const request = cmd.getInfo();
+    const request = testService.updateValue(value);
+    const result = request.getInfo();
 
-    expect(request.url).toBe(EXPECTED_PATH);
-    expect(request.data).toEqual(value);
-    expect(cmd.getInfoConverted().data).toEqual({ UserName: "test" });
-    expect(request.method).toBe("PUT");
+    expectTypeOf(result).toEqualTypeOf<RequestInfo<string>>();
+
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.data).toEqual(value);
+    expect(request.getInfoConverted().data).toEqual({ UserName: "test" });
+    expect(result.method).toBe("PUT");
+
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("primitiveType V2: delete value", async () => {
-    const request = testService.deleteValue().getInfo();
+    const request = testService.deleteValue();
+    const result = request.getInfo();
 
-    expect(request.url).toBe(EXPECTED_PATH);
-    expect(request.data).toBeUndefined();
-    expect(request.method).toBe("DELETE");
+    expectTypeOf(result).toEqualTypeOf<RequestInfo>();
+
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.data).toBeUndefined();
+    expect(result.method).toBe("DELETE");
+
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 });

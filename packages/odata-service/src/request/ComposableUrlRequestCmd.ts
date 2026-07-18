@@ -1,4 +1,5 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
+// import { CleanUndefined } from "@odata2ts/odata-query-objects";
 import { RequestCmd, RequestCmdOptions } from "./RequestCmd";
 
 export type CreateServiceFunction<ComposableService> = (path: string) => ComposableService;
