@@ -1,92 +1,84 @@
-import { beforeEach, describe, expect, test } from "vitest";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
 import {
   EditableLocationModel,
   EditablePersonModel,
   FeatureModel,
   PersonGenderModel,
+  PersonModel,
 } from "../../src-generated/trippin/TrippinModel";
 import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinTestConstants";
 
 describe("Testing Generation of TrippinService", () => {
-  let editModel: EditablePersonModel;
-
-  beforeEach(() => {
-    editModel = {
-      traditionalGenderCategories: PersonGenderModel.Unknown,
-      user: "williams",
-      age: 66,
-      favoriteFeature: FeatureModel.Feature1,
-      features: [],
-      firstName: "Heinz",
-    };
-  });
+  const userModel: EditablePersonModel = {
+    traditionalGenderCategories: PersonGenderModel.Unknown,
+    user: "williams",
+    age: 66,
+    favoriteFeature: FeatureModel.Feature1,
+    features: [],
+    firstName: "Heinz",
+  };
+  const odataModel = {
+    UserName: "williams",
+    FavoriteFeature: "Feature1",
+    Features: [],
+    FirstName: "Heinz",
+    Age: 66,
+    Gender: "Unknown",
+  };
 
   test("entitySet: create", async () => {
     const expectedUrl = `${BASE_URL}/People`;
 
-    await TRIPPIN.people().create(editModel).execute();
+    ODATA_CLIENT.setModelResponse(odataModel);
+    const response = await TRIPPIN.people().create(userModel).execute();
 
     expect(ODATA_CLIENT.lastOperation).toBe("POST");
     expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
-    expect(ODATA_CLIENT.lastData).toStrictEqual({
-      UserName: "williams",
-      FavoriteFeature: "Feature1",
-      Features: [],
-      FirstName: "Heinz",
-      Age: 66,
-      Gender: "Unknown",
-    });
+    expect(ODATA_CLIENT.lastData).toStrictEqual(odataModel);
+
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
+    expect(response.data).toStrictEqual(userModel);
   });
 
   test("entityType: update", async () => {
-    const id = "williams";
+    const id = userModel.user;
     const expectedUrl = `${BASE_URL}/People('${id}')`;
-    const model: EditablePersonModel = {
-      user: "williams",
-      firstName: "Heinz",
-      age: 91,
-      traditionalGenderCategories: PersonGenderModel.Unknown,
-      favoriteFeature: FeatureModel.Feature1,
-      features: [],
-    };
 
-    await TRIPPIN.people(id).update(model).execute();
+    const response = await TRIPPIN.people(id).update(userModel).execute();
 
     expect(ODATA_CLIENT.lastOperation).toBe("PUT");
     expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
-    expect(ODATA_CLIENT.lastData).toStrictEqual({
-      UserName: "williams",
-      FirstName: "Heinz",
-      Age: 91,
-      Gender: "Unknown",
-      FavoriteFeature: FeatureModel.Feature1,
-      Features: [],
-    });
+    expect(ODATA_CLIENT.lastData).toStrictEqual(odataModel);
+
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("entityType: patch", async () => {
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
-    const model = {
-      age: 30,
-    };
 
-    await TRIPPIN.people(id).patch(model).execute();
+    const response = await TRIPPIN.people(id).patch({ age: 30 }).execute();
 
     expect(ODATA_CLIENT.lastOperation).toBe("PATCH");
     expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
     expect(ODATA_CLIENT.lastData).toStrictEqual({ Age: 30 });
+
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("entityType: delete", async () => {
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
 
-    await TRIPPIN.people(id).delete().execute();
+    const response = await TRIPPIN.people(id).delete().execute();
 
     expect(ODATA_CLIENT.lastOperation).toBe("DELETE");
     expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
     expect(ODATA_CLIENT.lastData).toBe(undefined);
+
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("complex type: update", async () => {
