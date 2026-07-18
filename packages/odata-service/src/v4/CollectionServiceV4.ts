@@ -7,7 +7,6 @@ import {
   PrimitiveCollectionType,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { PrimitiveCollection } from "@odata2ts/odata-query-objects/src/primitve-collection/PrimitiveCollectionModel";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
 import { CollectionModificationResponseV4 } from "./ResponseTypeChoicesV4";

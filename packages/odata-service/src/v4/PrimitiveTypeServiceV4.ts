@@ -41,7 +41,7 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
    * Get the value.
    * Spec: {@link https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_RequestingIndividualProperties}
    *
-   * Requesting a <code>null</code> value actually results in 204 (No Content).
+   * Requesting a `null` value actually results in 204 (No Content), so `data: undefined` and not `data: { value: undefined }`.
    */
   public getValue() {
     const { client, path, getDefaultHeaders } = this.__base;
@@ -63,13 +63,12 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
    * Update the value.
    * Spec: https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_UpdateaPrimitiveProperty
    *
-   * The response of this operation is dependent on the OData server implementation.
-   * It is either status 200 with the proper and complete model or status 204 with no response data at all.
-   * Both implementations have to supply the URL to the resource in the header field "Location", so you can always
-   * extract the ID as part of this URL (the appropriate QId object can help parsing here).
+   * The response of this operation is dependent on the `Prefer` header.
+   * By default, you get 204 and no response data, while adding the prefer header with `Prefer: return=representation`
+   * should yield status 200 with the proper and complete model.
    *
    * If you know in which way your server responds, you can easily supply this information via a boolean switch
-   * to get the correct typing. `true` means that the complete entity is returned, while `false` determines
+   * to get the correct typing. `true` means that the complete entity is returned, while `false` (default) determines
    * that no data is returned, e.g. `updateValue<true>(...)`.
    *
    * @param value
@@ -94,6 +93,12 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
     );
   }
 
+  /**
+   * Delete the value.
+   * Spec: https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_UpdateaPrimitiveProperty
+   *
+   * The response should be 204 and no data.
+   */
   public deleteValue() {
     const { client, path } = this.__base;
     return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path);
