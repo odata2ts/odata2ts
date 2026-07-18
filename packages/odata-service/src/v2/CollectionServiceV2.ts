@@ -31,8 +31,16 @@ export class CollectionServiceV2<
   }
 
   /**
-   * Add a new item to the collection (V3 only).
+   * Add a new item to the collection (should only work with OData V3).
    * Spec: {@link https://www.odata.org/documentation/odata-version-3-0/odata-version-3-0-core-protocol/#updateacollectionproperty}
+   *
+   * The response of this operation is dependent on the `Prefer` header.
+   * By default, you get 204 and no response data, while adding the prefer header with `Prefer: return=representation`
+   * should yield status 200 with the proper and complete model.
+   *
+   * If you know in which way your server responds, you can easily supply this information via a boolean switch
+   * to get the correct typing. `true` means that the complete entity is returned, while `false` (default) determines
+   * that no data is returned, e.g. `add<true>(...)`.
    *
    * @param model primitive value
    */
@@ -58,6 +66,14 @@ export class CollectionServiceV2<
   /**
    * Update the whole collection.
    * Spec: {@link https://www.odata.org/documentation/odata-version-3-0/odata-version-3-0-core-protocol/#updateacollectionproperty}
+   *
+   * The response of this operation is dependent on the `Prefer` header.
+   * By default, you get 204 and no response data, while adding the prefer header with `Prefer: return=representation`
+   * should yield status 200 with the proper and complete model.
+   *
+   * If you know in which way your server responds, you can easily supply this information via a boolean switch
+   * to get the correct typing. `true` means that the complete entity is returned, while `false` (default) determines
+   * that no data is returned, e.g. `update<true>(...)`.
    *
    * @param models set of primitive values
    */
