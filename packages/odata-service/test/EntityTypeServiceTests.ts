@@ -48,14 +48,32 @@ export function commonEntityTypeServiceTests(
     expect(request.method).toBe("GET");
   });
 
-  test("entityType: query with qObject", async () => {
-    const expected = `${EXPECTED_PATH}?${encodeURIComponent("$filter")}=${encodeURIComponent("Age gt 18")}`;
+  test("entityType: query with expand", async () => {
+    const expected = `${EXPECTED_PATH}?${encodeURIComponent("$expand")}=${encodeURIComponent("BestFriend")}`;
 
-    const request = testService.query((queryBuilder, qObj) => queryBuilder.filter(qObj.age.gt("18"))).getInfo();
+    const request = testService.query((queryBuilder) => queryBuilder.expand("bestFriend")).getInfo();
 
     expect(request.url).toBe(expected);
     expect(request.data).toBeUndefined();
     expect(request.method).toBe("GET");
+  });
+
+  test("entityType: query builder doesn't allow filter/top/skip/count/orderBy", async () => {
+    // $filter, $top, $skip, $count and $orderby only make sense on a collection, never on a single-entity GET,
+    // so the model-cardinality query builder must not expose them.
+    testService.query((queryBuilder, qObj) => {
+      // @ts-expect-error: filter is not available for a single model
+      queryBuilder.filter(qObj.age.gt("18"));
+      // @ts-expect-error: top is not available for a single model
+      queryBuilder.top(1);
+      // @ts-expect-error: skip is not available for a single model
+      queryBuilder.skip(1);
+      // @ts-expect-error: count is not available for a single model
+      queryBuilder.count();
+      // @ts-expect-error: orderBy is not available for a single model
+      queryBuilder.orderBy(qObj.age.asc());
+      return queryBuilder;
+    });
   });
 
   test("entityType: no create", async () => {
@@ -80,8 +98,8 @@ export function commonEntityTypeServiceTests(
   test("entityType: no url encoding", async () => {
     const toTest = new serviceConstructor(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
 
-    const request = toTest.query((qb, q) => qb.filter(q.userName.eq("2"))).getInfo();
+    const request = toTest.query((qb) => qb.select("userName")).getInfo();
 
-    expect(request.url).toBe(EXPECTED_PATH + "?$filter=UserName eq '2'");
+    expect(request.url).toBe(EXPECTED_PATH + "?$select=UserName");
   });
 }

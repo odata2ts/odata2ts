@@ -1,6 +1,6 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
+import { ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { ModelResponseConverterV4, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
@@ -118,12 +118,12 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
    *
    * @param queryFn provide the query logic with the help of the builder and the query-object
    */
-  public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void) {
-    const { client, qModel, createQueryBuilder, getDefaultHeaders } = this.__base;
+  public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void) {
+    const { client, qModel, createModelQueryBuilder, getDefaultHeaders } = this.__base;
 
-    return new UrlBuilderRequestCmdV4<ClientType, ODataModelResponseV4<ReturnType>, Q>(
+    return new UrlBuilderRequestCmdV4<ClientType, ODataModelResponseV4<ReturnType>, Q, ModelQueryBuilderV4<Q>>(
       client,
-      createQueryBuilder(queryFn),
+      createModelQueryBuilder(queryFn),
       qModel,
       {
         headers: getDefaultHeaders(),

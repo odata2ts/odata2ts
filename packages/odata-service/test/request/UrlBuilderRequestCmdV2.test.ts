@@ -1,6 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
-import { createQueryBuilderV2, ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
+import { CollectionQueryBuilderV2, createQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { EntityResponseConverterV2 } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
 import { DEFAULT_HEADERS, UrlBuilderRequestCmdV2 } from "../../src";
@@ -12,7 +12,7 @@ describe("UrlBuilderRequestCmd tests", () => {
   const DEFAULT_URL = "/test/ing";
 
   let client: MockClient;
-  let queryBuilder: ODataQueryBuilderV2<QPersonV2>;
+  let queryBuilder: CollectionQueryBuilderV2<QPersonV2>;
 
   beforeEach(() => {
     client = new MockClient(false);

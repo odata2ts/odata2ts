@@ -1,6 +1,6 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { ODataModelPayloadV4 } from "@odata2ts/odata-core";
-import { createQueryBuilderV4, ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
+import { CollectionQueryBuilderV4, createQueryBuilderV4, ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
@@ -25,9 +25,21 @@ export class ServiceStateHelperV4<
   }
 
   public createQueryBuilder = (
-    queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void,
+    queryFn?: (builder: CollectionQueryBuilderV4<Q>, qObject: Q) => void,
     path = this.path,
-  ): ODataQueryBuilderV4<Q> => {
+  ): CollectionQueryBuilderV4<Q> => {
+    const builder = createQueryBuilderV4(path, this.qModel, { unencoded: this.isUrlNotEncoded() });
+    if (queryFn) {
+      queryFn(builder, this.qModel);
+    }
+
+    return builder;
+  };
+
+  public createModelQueryBuilder = (
+    queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
+    path = this.path,
+  ): ModelQueryBuilderV4<Q> => {
     const builder = createQueryBuilderV4(path, this.qModel, { unencoded: this.isUrlNotEncoded() });
     if (queryFn) {
       queryFn(builder, this.qModel);

@@ -2,6 +2,7 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ModelResponseConverterV4 } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
+import { CollectionQueryBuilderV4, ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { ComposableUrlRequestCmd, UrlBuilderRequestCmdV4 } from "../../src";
 import { Feature, PersonModel } from "../fixture/PersonModel";
 import { PersonModelService } from "../fixture/v4/PersonModelService";
@@ -70,7 +71,19 @@ describe("ComposableUrlRequestCmd tests", () => {
   test("compose: direct select query", () => {
     const cmd = candidate.compose().query((builder) => builder.select("age", "userName"));
 
-    expectTypeOf(cmd).toEqualTypeOf<UrlBuilderRequestCmdV4<MockClient, ODataModelResponseV4<PersonModel>, QPersonV4>>();
+    // Type-level check via assignment: expect-type's toEqualTypeOf/toMatchTypeOf cannot prove equality here
+    // because addToQuery's modFunction parameter is itself a generic function type over Builder/Q, which trips
+    // expect-type's strict (invariant) function comparison even though the types are equal. A plain assignment
+    // uses TypeScript's own (bivariant, method-appropriate) comparison instead.
+    // Model cardinality, because `candidate` is composed directly (bound to a single resource), not via a
+    // collection-valued navigation property.
+    const typeCheck: UrlBuilderRequestCmdV4<
+      MockClient,
+      ODataModelResponseV4<PersonModel>,
+      QPersonV4,
+      ModelQueryBuilderV4<QPersonV4>
+    > = cmd;
+    expectTypeOf(typeCheck).not.toBeAny();
 
     expect(cmd.getUrl()).toStrictEqual(`${DEFAULT_URL}?$select=Age,UserName`);
   });
@@ -78,9 +91,14 @@ describe("ComposableUrlRequestCmd tests", () => {
   test("compose: path navigation & query", () => {
     const cmd = candidate.compose().friends.query((builder) => builder.select("age", "userName"));
 
-    expectTypeOf(cmd).toEqualTypeOf<
-      UrlBuilderRequestCmdV4<MockClient, ODataCollectionResponseV4<PersonModel>, QPersonV4>
-    >();
+    // see comment in "compose: direct select query" above
+    const typeCheck: UrlBuilderRequestCmdV4<
+      MockClient,
+      ODataCollectionResponseV4<PersonModel>,
+      QPersonV4,
+      CollectionQueryBuilderV4<QPersonV4>
+    > = cmd;
+    expectTypeOf(typeCheck).not.toBeAny();
 
     expect(cmd.getUrl()).toStrictEqual(`${DEFAULT_URL}/Friends?$select=Age,UserName`);
   });

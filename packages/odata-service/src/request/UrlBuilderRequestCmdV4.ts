@@ -1,5 +1,5 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
+import { CollectionQueryBuilderV4, ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { RequestCmd, RequestCmdOptions } from "./RequestCmd";
 import { GetToPostConverter } from "./RequestHelper";
@@ -13,10 +13,11 @@ export class UrlBuilderRequestCmdV4<
   ClientType extends ODataHttpClient,
   ResponseStructure,
   Q extends QueryObjectModel,
+  Builder extends ModelQueryBuilderV4<Q> = CollectionQueryBuilderV4<Q>,
 > extends RequestCmd<ClientType, ResponseStructure> {
   constructor(
     protected client: ClientType,
-    protected urlBuilder: ODataQueryBuilderV4<Q>,
+    protected urlBuilder: Builder,
     protected q: Q,
     protected options: UrlBuilderRequestCmdOptions<ResponseStructure> = {},
   ) {
@@ -33,13 +34,18 @@ export class UrlBuilderRequestCmdV4<
    * @param modFunction the function to modify the URL
    * @returns
    */
-  public addToQuery(modFunction: (urlBuilder: ODataQueryBuilderV4<Q>, q: Q) => ODataQueryBuilderV4<Q>) {
+  public addToQuery(modFunction: (urlBuilder: Builder, q: Q) => Builder) {
     if (!modFunction) {
       throw new Error("changeUrl requires the modification function as first argument!");
     }
-    const builder = modFunction(this.urlBuilder.clone(), this.q);
+    const builder = modFunction(this.urlBuilder.clone() as Builder, this.q);
 
-    return new UrlBuilderRequestCmdV4(this.client, builder, this.q, this.options);
+    return new UrlBuilderRequestCmdV4<ClientType, ResponseStructure, Q, Builder>(
+      this.client,
+      builder,
+      this.q,
+      this.options,
+    );
   }
 
   /**
