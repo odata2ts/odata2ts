@@ -7,12 +7,12 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
+  CollectionQueryBuilderV2 as ODataQueryBuilderV2Model,
   ExpandingFunctionV2,
   ExpandType,
   NullableParam,
   NullableParamList,
   ODataQueryBuilderConfig,
-  ODataQueryBuilderV2 as ODataQueryBuilderV2Model,
 } from "../ODataQueryBuilderModel.js";
 import { createExpandingQueryBuilderV2 } from "./ExpandingODataQueryBuilderV2";
 

@@ -1,6 +1,6 @@
 import { QSelectExpression } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, test } from "vitest";
-import { createQueryBuilderV2, ODataQueryBuilderV2 } from "../src";
+import { CollectionQueryBuilderV2, createQueryBuilderV2 } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 import { createBaseTests } from "./ODataQueryBuilderBaseTests";
 
@@ -15,7 +15,7 @@ function addBase(urlPart: string) {
 }
 
 describe("ODataQueryBuilderV2 Test", () => {
-  let toTest: ODataQueryBuilderV2<QPerson>;
+  let toTest: CollectionQueryBuilderV2<QPerson>;
 
   createBaseTests(createQueryBuilderV2);
 

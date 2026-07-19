@@ -1,6 +1,6 @@
 import { QSelectExpression, searchTerm } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, test } from "vitest";
-import { createQueryBuilderV4, ODataQueryBuilderV4 } from "../src";
+import { CollectionQueryBuilderV4, createQueryBuilderV4 } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 import { createBaseTests } from "./ODataQueryBuilderBaseTests";
 
@@ -15,8 +15,8 @@ function addBase(urlPart: string) {
 }
 
 describe("ODataQueryBuilderV4 Test", () => {
-  let toTest: ODataQueryBuilderV4<QPerson>;
-  let toTest2: ODataQueryBuilderV4<QPerson>;
+  let toTest: CollectionQueryBuilderV4<QPerson>;
+  let toTest2: CollectionQueryBuilderV4<QPerson>;
 
   // @ts-ignore: hard to get the typing right here, so we always use the V2 model as common ground
   // all we care about here, is that V4 covers all the functionally V2 has
