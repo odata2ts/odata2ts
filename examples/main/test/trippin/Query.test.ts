@@ -106,10 +106,10 @@ describe("Trippin: Testing Query Functionality", function () {
 
   test("no url encoding", async () => {
     await TRIPPIN.people("hei/ner")
-      .query((b, q) => b.filter(q.age.gt(18)))
+      .query((b) => b.select("age"))
       .execute();
 
-    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('hei/ner')?$filter=Age gt 18`);
+    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('hei/ner')?$select=Age`);
   });
 
   test("function without url encoding", async () => {
