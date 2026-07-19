@@ -10,7 +10,7 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { ODataOperators } from "./ODataModel";
 import {
-  ExpandingODataQueryBuilderV4,
+  ExpandingCollectionQueryBuilderV4,
   ExpandType,
   NullableParam,
   NullableParamList,
@@ -163,7 +163,7 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
    * @param builderFn
    */
   public expanding<Prop extends ExpandType<Q>>(
-    creator: (property: string, qEntity: Q) => ExpandingODataQueryBuilderV4<Q>,
+    creator: (property: string, qEntity: Q) => ExpandingCollectionQueryBuilderV4<Q>,
     prop: Prop,
     builderFn: (builder: any, qObject: any) => void,
   ) {

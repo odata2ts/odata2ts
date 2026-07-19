@@ -1,6 +1,6 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
-import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
+import { CollectionQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import {
   CollectionResponseConverterV2,
   EntityResponseConverterV2,
@@ -102,7 +102,7 @@ export abstract class EntitySetServiceV2<
    *
    * @param queryFn provide the query logic with the help of the builder and the query-object
    */
-  public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void) {
+  public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: CollectionQueryBuilderV2<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV2<ClientType, ODataCollectionResponseV2<ReturnType>, Q>(

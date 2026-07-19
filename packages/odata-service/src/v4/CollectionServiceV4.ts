@@ -1,6 +1,6 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelPayloadV4 } from "@odata2ts/odata-core";
-import { ODataQueryBuilderV4 } from "@odata2ts/odata-query-builder";
+import { CollectionQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import {
   CollectionResponseConverterV4,
   MainResponseConverter,
@@ -118,7 +118,7 @@ export class CollectionServiceV4<
    *
    * @param queryFn provide the query logic with the help of the builder and the query-object
    */
-  public query<ReturnType = T>(queryFn?: (builder: ODataQueryBuilderV4<Q>, qObject: Q) => void) {
+  public query<ReturnType = T>(queryFn?: (builder: CollectionQueryBuilderV4<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseV4<ReturnType>, Q>(

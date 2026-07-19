@@ -1,6 +1,6 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataComplexModelResponseV2 } from "@odata2ts/odata-core";
-import { ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
+import { ModelQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { ComplexResponseConverterV2, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptions } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV2, UrlRequestCmd } from "../request";
@@ -43,12 +43,12 @@ export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, 
     return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path, undefined);
   }
 
-  public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void) {
-    const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
+  public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
+    const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
-    return new UrlBuilderRequestCmdV2<ClientType, ODataComplexModelResponseV2<ReturnType>, Q>(
+    return new UrlBuilderRequestCmdV2<ClientType, ODataComplexModelResponseV2<ReturnType>, Q, ModelQueryBuilderV2<Q>>(
       client,
-      createQueryBuilder(queryFn),
+      createModelQueryBuilder(queryFn),
       qModel,
       {
         headers: getDefaultHeaders(),

@@ -1,6 +1,6 @@
 import { QFilterExpression, QSelectExpression, QueryObject } from "@odata2ts/odata-query-objects";
 import { beforeEach, expect, test } from "vitest";
-import { ODataQueryBuilderConfig, ODataQueryBuilderV2, ODataQueryBuilderV4 } from "../src";
+import { CollectionQueryBuilderV2, CollectionQueryBuilderV4, ODataQueryBuilderConfig } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 
 /**
@@ -14,8 +14,8 @@ function addBase(urlPart: string) {
 }
 
 type QueryBuilder =
-  | Omit<ODataQueryBuilderV2<QPerson>, "expanding" | "count">
-  | Omit<ODataQueryBuilderV4<QPerson>, "expanding" | "count" | "groupBy">;
+  | Omit<CollectionQueryBuilderV2<QPerson>, "expanding" | "count">
+  | Omit<CollectionQueryBuilderV4<QPerson>, "expanding" | "count" | "groupBy">;
 
 export type BuilderFactoryFunction<Q extends QueryObject> = (
   path: string,

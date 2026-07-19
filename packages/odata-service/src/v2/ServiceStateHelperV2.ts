@@ -1,5 +1,5 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
-import { createQueryBuilderV2, ODataQueryBuilderV2 } from "@odata2ts/odata-query-builder";
+import { CollectionQueryBuilderV2, createQueryBuilderV2, ModelQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { QComplexParam, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptions } from "../ODataServiceOptions";
 import { ServiceStateHelper } from "../ServiceStateHelper";
@@ -19,9 +19,21 @@ export class ServiceStateHelperV2<
   }
 
   public createQueryBuilder = (
-    queryFn?: (builder: ODataQueryBuilderV2<Q>, qObject: Q) => void,
+    queryFn?: (builder: CollectionQueryBuilderV2<Q>, qObject: Q) => void,
     path = this.path,
-  ): ODataQueryBuilderV2<Q> => {
+  ): CollectionQueryBuilderV2<Q> => {
+    const builder = createQueryBuilderV2(path, this.qModel, { unencoded: this.isUrlNotEncoded() });
+    if (queryFn) {
+      queryFn(builder, this.qModel);
+    }
+
+    return builder;
+  };
+
+  public createModelQueryBuilder = (
+    queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void,
+    path = this.path,
+  ): ModelQueryBuilderV2<Q> => {
     const builder = createQueryBuilderV2(path, this.qModel, { unencoded: this.isUrlNotEncoded() });
     if (queryFn) {
       queryFn(builder, this.qModel);

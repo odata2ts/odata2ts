@@ -1,5 +1,4 @@
 import {
-  QCollectionPath,
   QEntityCollectionPath,
   QEntityPath,
   QFilterExpression,
@@ -37,12 +36,19 @@ export type NullableParam<OptionType> = OptionType | Nullable;
 
 export type NullableParamList<OptionType> = Array<OptionType | Nullable>;
 
+/**
+ * The nested builder type passed into an `expanding()` callback depends on whether the expanded property
+ * is a to-one (single model) or to-many (collection) navigation property: a to-one target only allows
+ * select/expand/expanding, while a to-many target keeps the full set of system query options.
+ */
 export type ExpandingFunction<Prop> =
-  | ((expBuilder: ExpandingODataQueryBuilderV4<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void)
+  | (Prop extends QEntityCollectionPath<any>
+      ? (expBuilder: ExpandingCollectionQueryBuilderV4<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void
+      : (expBuilder: ExpandingModelQueryBuilderV4<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void)
   | Nullable;
 
 export type ExpandingFunctionV2<Prop> =
-  | ((expBuilder: ExpandingODataQueryBuilderV2<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void)
+  | ((expBuilder: ExpandingQueryBuilderV2<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void)
   | Nullable;
 
 export interface ODataQueryBuilderConfig {
@@ -220,32 +226,51 @@ export interface V2ExpandingFunction<Q extends QueryObjectModel, ReturnType> {
 }
 
 type BuilderOp = "build";
-type PaginationOps = "skip" | "top";
-type BaseOps = "select" | "expand" | "filter" | "orderBy";
+type ModelOps = "select" | "expand" | BuilderOp;
+type CollectionOnlyOps = "filter" | "orderBy" | "count" | "skip" | "top";
 
-type CommonOps = BuilderOp | BaseOps | "count" | PaginationOps; // custom expanding method
-type V2Ops = CommonOps;
-type V2ExpandingOps = "select" | "expand"; // custom expanding & build method
-type V4Ops = CommonOps | "expanding" | "groupBy" | "search";
-type V4ExpandingOps = CommonOps | "expanding";
+// custom `expanding` method implementation not listed here
+type V2ModelOps = ModelOps;
+type V2CollectionOps = ModelOps | CollectionOnlyOps;
+// custom expanding & build method
+type V2ExpandingOps = "select" | "expand";
+
+type V4ModelOps = ModelOps | "expanding";
+type V4CollectionOps = V4ModelOps | CollectionOnlyOps | "groupBy" | "search";
+type V4ModelExpandingOps = V4ModelOps;
+type V4CollectionExpandingOps = V4ModelOps | CollectionOnlyOps;
 
 export type V2ExpandResult = { selects: Array<string>; expands: Array<string> };
 
 /**
- * Contract for ODataQueryBuilder for V2.
+ * Contract for ODataQueryBuilder for V2, bound to a collection of models:
+ * exposes the full set of system query options.
  */
-export interface ODataQueryBuilderV2<Q extends QueryObjectModel>
-  extends Pick<ODataQueryBuilderModel<Q, ODataQueryBuilderV2<Q>>, V2Ops>,
-    V2ExpandingFunction<Q, ODataQueryBuilderV2<Q>> {
+export interface CollectionQueryBuilderV2<Q extends QueryObjectModel>
+  extends Pick<ODataQueryBuilderModel<Q, CollectionQueryBuilderV2<Q>>, V2CollectionOps>,
+    V2ExpandingFunction<Q, CollectionQueryBuilderV2<Q>> {
   /**
    * Creates a new builder with the identical state (deep copy).
    */
-  clone: () => ODataQueryBuilderV2<Q>;
+  clone: () => CollectionQueryBuilderV2<Q>;
 }
 
-export interface ExpandingODataQueryBuilderV2<Q extends QueryObjectModel>
-  extends Pick<ODataQueryBuilderModel<Q, ExpandingODataQueryBuilderV2<Q>>, V2ExpandingOps>,
-    V2ExpandingFunction<Q, ExpandingODataQueryBuilderV2<Q>> {
+/**
+ * Contract for ODataQueryBuilder for V2, bound to a single model (EntityType or ComplexType instance):
+ * only select/expand/expanding are meaningful.
+ */
+export interface ModelQueryBuilderV2<Q extends QueryObjectModel>
+  extends Pick<ODataQueryBuilderModel<Q, ModelQueryBuilderV2<Q>>, V2ModelOps>,
+    V2ExpandingFunction<Q, ModelQueryBuilderV2<Q>> {
+  /**
+   * Creates a new builder with the identical state (deep copy).
+   */
+  clone: () => ModelQueryBuilderV2<Q>;
+}
+
+export interface ExpandingQueryBuilderV2<Q extends QueryObjectModel>
+  extends Pick<ODataQueryBuilderModel<Q, ExpandingQueryBuilderV2<Q>>, V2ExpandingOps>,
+    V2ExpandingFunction<Q, ExpandingQueryBuilderV2<Q>> {
   /**
    * Build result is actually a list of select and expand strings, which must be consumed manually by the
    * caller of the build function.
@@ -253,13 +278,32 @@ export interface ExpandingODataQueryBuilderV2<Q extends QueryObjectModel>
   build: () => V2ExpandResult;
 }
 
-export interface ODataQueryBuilderV4<Q extends QueryObjectModel>
-  extends Pick<ODataQueryBuilderModel<Q, ODataQueryBuilderV4<Q>>, V4Ops> {
+/**
+ * Contract for ODataQueryBuilder for V4, bound to a collection of models:
+ * exposes the full set of system query options.
+ */
+export interface CollectionQueryBuilderV4<Q extends QueryObjectModel>
+  extends Pick<ODataQueryBuilderModel<Q, CollectionQueryBuilderV4<Q>>, V4CollectionOps> {
   /**
    * Creates a new builder with the identical state (deep copy).
    */
-  clone: () => ODataQueryBuilderV4<Q>;
+  clone: () => CollectionQueryBuilderV4<Q>;
 }
 
-export interface ExpandingODataQueryBuilderV4<Q extends QueryObjectModel>
-  extends Pick<ODataQueryBuilderModel<Q, ExpandingODataQueryBuilderV4<Q>>, V4ExpandingOps> {}
+/**
+ * Contract for ODataQueryBuilder for V4, bound to a single model (EntityType or ComplexType instance):
+ * only select/expand/expanding are meaningful.
+ */
+export interface ModelQueryBuilderV4<Q extends QueryObjectModel>
+  extends Pick<ODataQueryBuilderModel<Q, ModelQueryBuilderV4<Q>>, V4ModelOps> {
+  /**
+   * Creates a new builder with the identical state (deep copy).
+   */
+  clone: () => ModelQueryBuilderV4<Q>;
+}
+
+export interface ExpandingCollectionQueryBuilderV4<Q extends QueryObjectModel>
+  extends Pick<ODataQueryBuilderModel<Q, ExpandingCollectionQueryBuilderV4<Q>>, V4CollectionExpandingOps> {}
+
+export interface ExpandingModelQueryBuilderV4<Q extends QueryObjectModel>
+  extends Pick<ODataQueryBuilderModel<Q, ExpandingModelQueryBuilderV4<Q>>, V4ModelExpandingOps> {}
