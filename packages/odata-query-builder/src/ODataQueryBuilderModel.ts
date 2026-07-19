@@ -227,30 +227,19 @@ export interface V2ExpandingFunction<Q extends QueryObjectModel, ReturnType> {
 }
 
 type BuilderOp = "build";
-type PaginationOps = "skip" | "top";
-type BaseOps = "select" | "expand" | "filter" | "orderBy";
+type ModelOps = "select" | "expand" | BuilderOp;
+type CollectionOnlyOps = "filter" | "orderBy" | "count" | "skip" | "top";
 
-type CommonOps = BuilderOp | BaseOps | "count" | PaginationOps; // custom expanding method
-type V2Ops = CommonOps;
-type V2ExpandingOps = "select" | "expand"; // custom expanding & build method
-type V4Ops = CommonOps | "expanding" | "groupBy" | "search";
-type V4ExpandingOps = CommonOps | "expanding";
-
-/**
- * Cardinality-based operation groups: a builder bound to a single model (EntityType or ComplexType instance)
- * only allows select/expand/expanding, since $filter/$top/$skip/$count/$orderby/$apply are meaningless on a
- * single-instance request. A builder bound to a collection of models allows the full set.
- */
-type ModelOps = "select" | "expand" | "build";
-type CollectionOnlyOps = "filter" | "orderBy" | "count" | PaginationOps;
-
+// custom `expanding` method implementation not listed here
 type V2ModelOps = ModelOps;
-type V2CollectionOps = V2Ops; // identical option set to before, just named per cardinality
+type V2CollectionOps = ModelOps | CollectionOnlyOps;
+// custom expanding & build method
+type V2ExpandingOps = "select" | "expand";
 
 type V4ModelOps = ModelOps | "expanding";
-type V4CollectionOps = V4Ops; // identical option set to before, just named per cardinality
-type V4ModelExpandingOps = ModelOps | "expanding";
-type V4CollectionExpandingOps = V4ExpandingOps; // identical option set to before, just named per cardinality
+type V4CollectionOps = V4ModelOps | CollectionOnlyOps | "groupBy" | "search";
+type V4ModelExpandingOps = V4ModelOps;
+type V4CollectionExpandingOps = V4ModelOps | CollectionOnlyOps;
 
 export type V2ExpandResult = { selects: Array<string>; expands: Array<string> };
 
