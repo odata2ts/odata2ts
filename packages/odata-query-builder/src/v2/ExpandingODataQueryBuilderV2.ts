@@ -3,7 +3,7 @@ import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
   EntityExtractor,
   ExpandingFunctionV2,
-  ExpandingODataQueryBuilderV2 as ExpandingODataQueryBuilderV2Model,
+  ExpandingQueryBuilderV2 as ExpandingODataQueryBuilderV2Model,
   ExpandType,
   NullableParamList,
 } from "../ODataQueryBuilderModel";

@@ -1,5 +1,4 @@
 import {
-  QCollectionPath,
   QEntityCollectionPath,
   QEntityPath,
   QFilterExpression,
@@ -49,7 +48,7 @@ export type ExpandingFunction<Prop> =
   | Nullable;
 
 export type ExpandingFunctionV2<Prop> =
-  | ((expBuilder: ExpandingODataQueryBuilderV2<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void)
+  | ((expBuilder: ExpandingQueryBuilderV2<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void)
   | Nullable;
 
 export interface ODataQueryBuilderConfig {
@@ -269,9 +268,9 @@ export interface ModelQueryBuilderV2<Q extends QueryObjectModel>
   clone: () => ModelQueryBuilderV2<Q>;
 }
 
-export interface ExpandingODataQueryBuilderV2<Q extends QueryObjectModel>
-  extends Pick<ODataQueryBuilderModel<Q, ExpandingODataQueryBuilderV2<Q>>, V2ExpandingOps>,
-    V2ExpandingFunction<Q, ExpandingODataQueryBuilderV2<Q>> {
+export interface ExpandingQueryBuilderV2<Q extends QueryObjectModel>
+  extends Pick<ODataQueryBuilderModel<Q, ExpandingQueryBuilderV2<Q>>, V2ExpandingOps>,
+    V2ExpandingFunction<Q, ExpandingQueryBuilderV2<Q>> {
   /**
    * Build result is actually a list of select and expand strings, which must be consumed manually by the
    * caller of the build function.
