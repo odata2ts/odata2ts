@@ -25,6 +25,15 @@ describe("PrimitiveTypeService V4 Test", () => {
     expect(service.getPath()).toBe(EXPECTED_PATH);
   });
 
+  test("primitiveType V4: defaults to identity converter when none is given", async () => {
+    const defaultService = new PrimitiveTypeServiceV4<MockClient, string>(odataClient, BASE_URL, NAME);
+
+    odataClient.setValueResponse("tester");
+    const response = await defaultService.getValue().execute();
+
+    expect(response.data?.value).toBe("tester");
+  });
+
   test("primitiveType V4: get value", async () => {
     const request = service.getValue();
     const result = request.getInfo();

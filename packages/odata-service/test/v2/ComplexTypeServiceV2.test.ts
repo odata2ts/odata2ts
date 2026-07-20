@@ -1,4 +1,5 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { ODataComplexModelResponseV2 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
 import { DEFAULT_HEADERS, MERGE_HEADERS } from "../../src";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
@@ -15,6 +16,43 @@ describe("ComplexTypeService V2 Test", () => {
 
   beforeEach(() => {
     testService = new FakedComplexServiceV2(odataClient, BASE_URL, NAME);
+  });
+
+  test("complexType: getPath", () => {
+    expect(testService.getPath()).toBe(EXPECTED_PATH);
+  });
+
+  test("complexType: delete", async () => {
+    const request = testService.delete();
+    const result = request.getInfo();
+
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.method).toBe("DELETE");
+    expect(result.data).toBeUndefined();
+
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
+  });
+
+  test("complexType: query", async () => {
+    const request = testService.query();
+    const result = request.getInfo();
+
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.method).toBe("GET");
+    expect(result.data).toBeUndefined();
+
+    expectTypeOf(await request.execute()).toEqualTypeOf<
+      HttpResponseModel<ODataComplexModelResponseV2<PersonModel>>
+    >();
+  });
+
+  test("complexType: query with select", async () => {
+    const unencodedService = new FakedComplexServiceV2(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+
+    const request = unencodedService.query((b) => b.select("age"));
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$select=Age");
+    expect(request.getInfo().method).toBe("GET");
   });
 
   test("complexType: patch = merge", async () => {

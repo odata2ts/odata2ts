@@ -23,7 +23,8 @@ describe("FileHandler Test", () => {
 
   const mockFile: SourceFile = {
     addImportDeclarations: vi.fn(),
-    addStatements: vi.fn(),
+    // @ts-ignore
+    addStatements: vi.fn(() => [{ setOrder: vi.fn() }]),
     emit: vi.fn(),
     // @ts-ignore
     getFilePath: () => MOCKED_FILE_PATH,
@@ -38,12 +39,22 @@ describe("FileHandler Test", () => {
     vi.clearAllMocks();
   });
 
-  function createFileHandler(options: { path?: string; fileName?: string; reservedNames?: Array<string> } = {}) {
-    const { path = DEFAULT_PATH, fileName = DEFAULT_FILENAME, reservedNames = [] } = options;
+  function createFileHandler(
+    options: {
+      path?: string;
+      fileName?: string;
+      reservedNames?: Array<string>;
+      allowTypeChecking?: boolean;
+      formatter?: FileFormatter | undefined;
+    } = {},
+  ) {
+    const { path = DEFAULT_PATH, fileName = DEFAULT_FILENAME, reservedNames = [], allowTypeChecking = true } =
+      options;
+    const fileFormatter = "formatter" in options ? options.formatter : formatter;
 
     const imports = new ImportContainer(path, fileName, DEFAULT_DATA_MODEL, MAIN_FILE_NAMES, true, reservedNames);
 
-    return new FileHandler(path, fileName, mockFile, imports, formatter, true);
+    return new FileHandler(path, fileName, mockFile, imports, fileFormatter, allowTypeChecking);
   }
 
   test("Smoke Test", () => {
@@ -127,5 +138,53 @@ describe("FileHandler Test", () => {
 
     // imports should have been added, but we don't test that here
     // => other tests rely on this fact
+  });
+
+  test("write: adds @ts-nocheck when type checking is disallowed", async () => {
+    const pm = createFileHandler({ allowTypeChecking: false });
+
+    await pm.write(EmitModes.ts);
+
+    expect(mockFile.addStatements).toHaveBeenCalledTimes(1);
+  });
+
+  test("write: invalid emit mode throws", async () => {
+    const pm = createFileHandler();
+
+    await expect(pm.write("invalid" as EmitModes)).rejects.toThrow('Emit mode "invalid" is invalid!');
+  });
+
+  test("write TS file: no formatter writes the raw content", async () => {
+    const pm = createFileHandler({ formatter: undefined });
+
+    await pm.write(EmitModes.ts);
+
+    expect(formatter.format).not.toHaveBeenCalled();
+    expect(writeFile).toHaveBeenCalledWith(MOCKED_FILE_PATH, MOCKED_FILE_CONTENT);
+  });
+
+  // Note: formatAndWriteFile()'s inner `catch (writeError)` around `writeFile(...)` (=> process.exit(3)) is
+  // structurally unreachable - the call is `return writeFile(...)` without `await`, so a rejection surfaces
+  // asynchronously outside that synchronous try block and is never caught there. Not tested here.
+
+  test("write TS file: formatting failure logs, writes error.log and exits with code 99", async () => {
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const failingFormatter: FileFormatter = {
+      getSettings: () => ({}),
+      format: vi.fn(async () => {
+        throw new Error("bad syntax");
+      }),
+    };
+
+    const pm = createFileHandler({ formatter: failingFormatter });
+    await pm.write(EmitModes.ts);
+
+    expect(errorSpy).toHaveBeenCalledWith("Formatting failed", expect.any(Error));
+    expect(writeFile).toHaveBeenCalledWith("error.log", "Error: bad syntax");
+    expect(exitSpy).toHaveBeenCalledWith(99);
+
+    exitSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 });

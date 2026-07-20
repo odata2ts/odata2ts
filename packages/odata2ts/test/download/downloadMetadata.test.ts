@@ -72,6 +72,20 @@ describe("Download Test", () => {
     expect(axiosSpy).toHaveBeenCalledWith({ auth: config, ...DEFAULT_REQUEST_CONFIG });
   });
 
+  test("url already ending with $metadata is used as is", async () => {
+    const url = DEFAULT_URL + "/$metadata";
+
+    await downloadMetadata(url);
+
+    expect(axiosSpy).toHaveBeenCalledWith(DEFAULT_REQUEST_CONFIG);
+  });
+
+  test("url already ending with a slash doesn't get a double slash", async () => {
+    await downloadMetadata(DEFAULT_URL + "/");
+
+    expect(axiosSpy).toHaveBeenCalledWith(DEFAULT_REQUEST_CONFIG);
+  });
+
   test("with debug", async () => {
     await downloadMetadata(DEFAULT_URL, undefined, true);
 
@@ -87,6 +101,19 @@ describe("Download Test", () => {
       url: "http://localhost:3000/api/$metadata",
       headers: { Accept: "application/xml" },
     });
+  });
+
+  test("with debug - auth without a password is logged as is", async () => {
+    const config: UrlSourceConfiguration = {
+      custom: { baseURL: DEFAULT_URL, auth: { username: "user" } as any },
+    };
+
+    await downloadMetadata(DEFAULT_URL, config, true);
+
+    expect(logInfoSpy).toHaveBeenLastCalledWith(
+      "Request configuration:",
+      expect.objectContaining({ auth: { username: "user" } }),
+    );
   });
 
   test("custom request config", async () => {

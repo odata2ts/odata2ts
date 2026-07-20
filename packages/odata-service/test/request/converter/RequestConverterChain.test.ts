@@ -88,6 +88,15 @@ describe("RequestConverterChain tests", () => {
     );
   });
 
+  test("throws for a main converter with wrong signature", () => {
+    const invalidConverter = {} as MainRequestConverter<number, any>;
+    const candidate = new RequestConverterChain(invalidConverter);
+
+    expect(() => candidate.convert(testRequestInfo)).toThrow(
+      "Wrong conversion function signature for request converter!",
+    );
+  });
+
   test("mixed append and prepend", () => {
     blankCandidate.prependConverter((value) => value.withData(value.data! * 2));
     blankCandidate.appendConverter((value) => value.withData(value.data! * 3));

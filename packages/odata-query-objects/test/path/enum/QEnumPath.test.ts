@@ -24,11 +24,11 @@ describe("QEnumPath test", () => {
 
   test("fails without enum", () => {
     // @ts-expect-error
-    expect(() => new QNumericEnumPath("feature")).toThrow();
+    expect(() => new QEnumPath("feature")).toThrow("QEnumPath: Enum must be supplied! ");
     // @ts-expect-error
-    expect(() => new QNumericEnumPath("feature", null)).toThrow();
+    expect(() => new QEnumPath("feature", null)).toThrow("QEnumPath: Enum must be supplied! ");
     // @ts-expect-error
-    expect(() => new QNumericEnumPath("feature", undefined)).toThrow();
+    expect(() => new QEnumPath("feature", undefined)).toThrow("QEnumPath: Enum must be supplied! ");
   });
 
   test("orderBy asc", () => {

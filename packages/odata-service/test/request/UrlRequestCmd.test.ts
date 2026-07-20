@@ -87,6 +87,13 @@ describe("UrlRequestCmd tests", () => {
     expect(newCandy.getInfo()).toMatchObject({ ...candidate.getInfo(), url: newUrl });
   });
 
+  test("with new url: guard against empty url", () => {
+    const candidate = new UrlRequestCmd<MockClient, void>(client, ODataHttpMethods.Get, DEFAULT_URL);
+
+    expect(() => candidate.withUrl("")).toThrow("withUrl requires a new URL!");
+    expect(() => candidate.withUrl("   ")).toThrow("withUrl requires a new URL!");
+  });
+
   test("execute", async () => {
     const candidate = new UrlRequestCmd<MockClient, void>(client, ODataHttpMethods.Get, DEFAULT_URL);
 

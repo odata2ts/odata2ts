@@ -45,6 +45,12 @@ export function commonEntitySetTests(
     expect(testService.createKey({ userName: "&/?" }, true)).toBe(`${NAME}(UserName='&/?')`);
   });
 
+  test("entitySet: createKey strips leading slash produced by the id function", async () => {
+    const slashService = new serviceConstructor(odataClient, BASE_URL, "/" + NAME);
+
+    expect(slashService.createKey("xxx")).toBe(`${NAME}('xxx')`);
+  });
+
   test("entitySet: parseKey", async () => {
     expect(testService.parseKey(`${NAME}('xxx')`)).toBe("xxx");
     expect(testService.parseKey(`${NAME}(UserName='xxx')`)).toStrictEqual({ userName: "xxx" });

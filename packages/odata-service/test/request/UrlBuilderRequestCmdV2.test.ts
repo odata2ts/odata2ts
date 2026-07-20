@@ -61,6 +61,14 @@ describe("UrlBuilderRequestCmd tests", () => {
     expect(newCandidate.getInfo().data).toStrictEqual({ userName: "tester" });
   });
 
+  test("add to query: guard against missing modification function", () => {
+    const candidate = new UrlBuilderRequestCmdV2(client, ODataHttpMethods.Get, queryBuilder, qPersonV2);
+
+    expect(() => candidate.addToQuery(undefined as any)).toThrow(
+      "changeUrl requires the modification function as first argument!",
+    );
+  });
+
   test("add to query", () => {
     const candidate = new UrlBuilderRequestCmdV2(client, ODataHttpMethods.Get, queryBuilder, qPersonV2);
     const newCandidate = candidate.addToQuery((builder) => builder.select("userName"));

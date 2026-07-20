@@ -1,6 +1,6 @@
 import { QSelectExpression, searchTerm } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, test } from "vitest";
-import { CollectionQueryBuilderV4, createQueryBuilderV4 } from "../src";
+import { CollectionQueryBuilderV4, createExpandingQueryBuilderV4, createQueryBuilderV4 } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 import { createBaseTests } from "./ODataQueryBuilderBaseTests";
 
@@ -281,6 +281,26 @@ describe("ODataQueryBuilderV4 Test", () => {
     expect(candidate).toBe(expected);
   });
 
+  test("expanding: hoisting bucket is reused across multiple complex hops on the same builder", () => {
+    const candidate = toTest
+      .expanding("address", (builder) => {
+        builder.select("street").expanding("responsible", (respBuilder) => {
+          respBuilder.select("name");
+        });
+      })
+      .expanding("altAddresses", (builder) => {
+        builder.select("street").expanding("responsible", (respBuilder) => {
+          respBuilder.select("age");
+        });
+      })
+      .build();
+    const expected = addBase(
+      "$select=Address($select=street),AltAdresses($select=street)&$expand=Address/responsible($select=name),AltAdresses/responsible($select=age)",
+    );
+
+    expect(candidate).toBe(expected);
+  });
+
   test("expanding: complex prop nested inside entity stays inline", () => {
     const candidate = toTest
       .expanding("bestFriend", (builder) => {
@@ -369,6 +389,12 @@ describe("ODataQueryBuilderV4 Test", () => {
     expect(candidate).toBe(addBase("$search=testing AND test2"));
   });
 
+  test("search: consecutive calls append to the already initialized term list", () => {
+    const candidate = toTest.search("testing").search("more").build();
+
+    expect(candidate).toBe(addBase("$search=testing AND more"));
+  });
+
   test("search: with operators", () => {
     const candidate = toTest.search(searchTerm("testing").not().and("test2").or("phrase is a phrase")).build();
 
@@ -390,5 +416,37 @@ describe("ODataQueryBuilderV4 Test", () => {
     const result = toTest.clone();
 
     expect(JSON.stringify(result)).toStrictEqual(JSON.stringify(toTest));
+  });
+
+  test("clone: skips explicitly undefined own properties", () => {
+    toTest.select("name");
+    // simulate an own property that was explicitly reset to undefined (e.g. hoistedExpandsBucket after build())
+    (toTest as any).builder.itemsCount = undefined;
+
+    const result = toTest.clone();
+
+    expect(JSON.stringify(result)).toStrictEqual(JSON.stringify(toTest));
+  });
+
+  test("engine (internal): addSelects/addExpands ignore an empty path list", () => {
+    (toTest as any).builder.addSelects();
+    (toTest as any).builder.addExpands();
+
+    expect(toTest.build()).toBe(addBase(""));
+  });
+
+  test("expanding builder (internal): build() renders its own query string", () => {
+    const expander = createExpandingQueryBuilderV4("bestFriend", qPerson);
+
+    expect(expander.select("age").build()).toBe("bestFriend($select=age)");
+  });
+
+  test("expanding builder (internal): expanding() with a nullish callback is a no-op", () => {
+    const expander = createExpandingQueryBuilderV4("bestFriend", qPerson);
+
+    // @ts-ignore
+    expect(expander.expanding("friends", null).build()).toBe("bestFriend");
+    // @ts-ignore
+    expect(expander.expanding("friends", undefined).build()).toBe("bestFriend");
   });
 });

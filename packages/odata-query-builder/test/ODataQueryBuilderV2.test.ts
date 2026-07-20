@@ -1,6 +1,6 @@
 import { QSelectExpression } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, test } from "vitest";
-import { CollectionQueryBuilderV2, createQueryBuilderV2 } from "../src";
+import { CollectionQueryBuilderV2, createExpandingQueryBuilderV2, createQueryBuilderV2 } from "../src";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 import { createBaseTests } from "./ODataQueryBuilderBaseTests";
 
@@ -214,6 +214,31 @@ describe("ODataQueryBuilderV2 Test", () => {
     );
 
     expect(candidate).toBe(expected);
+  });
+
+  // Note: expanding()'s `expands.length` check (this file, ~line 98) is structurally unreachable - the inner
+  // ExpandingODataQueryBuilderV2's own `expands` Set is always seeded with its `property` in its constructor,
+  // so `expander.build().expands` can never be empty. Not tested here.
+
+  test("expanding: nested expanding without a select produces no selects, only expands", () => {
+    const candidate = toTest
+      .expanding("bestFriend", (builder) => {
+        builder.expanding("friends", () => {});
+      })
+      .build();
+    const expected = addBase("$expand=bestFriend,bestFriend/friends");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expanding builder (internal): select/expand ignore nullables", () => {
+    const expander = createExpandingQueryBuilderV2("bestFriend", qPerson);
+
+    // Note: the `expands.length` check hit by this call (expander's own expands, ~line 73) is structurally
+    // unreachable in the other direction - it always has at least the seeded `property` - but this call still
+    // exercises the empty-input guards in select()/expand() themselves (~lines 38, 49).
+    expect(expander.select(null, undefined).build().selects).toStrictEqual([]);
+    expect(expander.expand(null, undefined).build().expands).toStrictEqual(["bestFriend"]);
   });
 
   test("clone: all fields set", () => {
