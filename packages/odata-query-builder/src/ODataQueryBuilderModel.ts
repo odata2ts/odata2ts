@@ -1,4 +1,6 @@
 import {
+  QComplexCollectionPath,
+  QComplexPath,
   QEntityCollectionPath,
   QEntityPath,
   QFilterExpression,
@@ -9,10 +11,18 @@ import {
 } from "@odata2ts/odata-query-objects";
 
 /**
- * Extracts the wrapped entity from QEntityPath or QEntityCollectionPath
+ * Extracts the wrapped entity from QEntityPath, QEntityCollectionPath, QComplexPath or QComplexCollectionPath
  */
 export type EntityExtractor<QProp> =
-  QProp extends QEntityPath<infer ET> ? ET : QProp extends QEntityCollectionPath<infer ET> ? ET : never;
+  QProp extends QEntityPath<infer ET>
+    ? ET
+    : QProp extends QEntityCollectionPath<infer ET>
+      ? ET
+      : QProp extends QComplexPath<infer ET>
+        ? ET
+        : QProp extends QComplexCollectionPath<infer ET>
+          ? ET
+          : never;
 
 /**
  * Extracts all keys from a property (Q*Path), but only for the given types
@@ -22,12 +32,26 @@ export type ExtractPropertyNamesOfType<QPath, QPathTypes> = {
 }[keyof QPath];
 
 /**
- * Retrieves all property names which are expandable,
- * i.e. props of type QEntityPath and QEntityCollectionPath
+ * Retrieves all property names which are expandable via a plain `$expand`,
+ * i.e. props of type QEntityPath and QEntityCollectionPath.
+ *
+ * Complex-typed properties are deliberately excluded: per the OData V4 ABNF, an `expandPath` can never terminate
+ * on a bare complex property (only `*`, a stream property, or a navigation property are valid terminal segments),
+ * so a plain `$expand=ComplexProp` is not valid V4 syntax. Use `expanding()` instead (see NestingType).
  */
 export type ExpandType<Q extends QueryObjectModel> = ExtractPropertyNamesOfType<
   Q,
   QEntityPath<any> | QEntityCollectionPath<any>
+>;
+
+/**
+ * Retrieves all property names which are valid `expanding()` targets, i.e. entity/entity-collection navigation
+ * properties (rendered as `$expand=Prop(...)`) as well as complex/complex-collection properties (rendered as
+ * `$select=Prop(...)`, since complex types are always inline and never need `$expand` in V4).
+ */
+export type NestingType<Q extends QueryObjectModel> = ExtractPropertyNamesOfType<
+  Q,
+  QEntityPath<any> | QEntityCollectionPath<any> | QComplexPath<any> | QComplexCollectionPath<any>
 >;
 
 export type Nullable = null | undefined;
@@ -38,11 +62,14 @@ export type NullableParamList<OptionType> = Array<OptionType | Nullable>;
 
 /**
  * The nested builder type passed into an `expanding()` callback depends on whether the expanded property
- * is a to-one (single model) or to-many (collection) navigation property: a to-one target only allows
- * select/expand/expanding, while a to-many target keeps the full set of system query options.
+ * is a to-one (single model) or to-many (collection) property — entity or complex, it doesn't matter which:
+ * a to-one target only allows select/expand/expanding, while a to-many target keeps the full set of system
+ * query options. Whether the property itself is an entity/entity-collection (rendered as `$expand=Prop(...)`)
+ * or a complex/complex-collection type (rendered as `$select=Prop(...)`) is resolved dynamically at runtime
+ * by the engine — the nested builder's shape only depends on cardinality.
  */
 export type ExpandingFunction<Prop> =
-  | (Prop extends QEntityCollectionPath<any>
+  | (Prop extends QEntityCollectionPath<any> | QComplexCollectionPath<any>
       ? (expBuilder: ExpandingCollectionQueryBuilderV4<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void
       : (expBuilder: ExpandingModelQueryBuilderV4<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void)
   | Nullable;
@@ -134,11 +161,16 @@ export interface ODataQueryBuilderModel<Q extends QueryObjectModel, ReturnType> 
    *     .select("city")
    *     .filter(qAddress.country.eq("IT"))
    * })} // $expand=address($select=City;$filter=Country eq 'IT')
-   * @param prop the name of the property which should be expanded (must be an entity or entity collection)
+   * @example
+   * builder.expanding("homeAddress", (addressBuilder) => {
+   *   addressBuilder.select("city")
+   * })} // $select=homeAddress($select=city) -- homeAddress is a complex type, not a navigation property
+   * @param prop the name of the property which should be expanded (an entity, entity collection, complex type
+   * or complex type collection)
    * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
    * @returns this query builder
    */
-  expanding: <Prop extends ExpandType<Q>>(prop: Prop, expBuilderFn: ExpandingFunction<Q[Prop]>) => ReturnType;
+  expanding: <Prop extends NestingType<Q>>(prop: Prop, expBuilderFn: ExpandingFunction<Q[Prop]>) => ReturnType;
 
   /**
    * Simple group by clause for properties (no aggregate functionality yet).
@@ -206,7 +238,7 @@ export interface ODataQueryBuilderModel<Q extends QueryObjectModel, ReturnType> 
 
 export interface V2ExpandingFunction<Q extends QueryObjectModel, ReturnType> {
   /**
-   * Expand one property, which is an entity or entity collection.
+   * Expand one property, which is an entity, entity collection, complex type or complex type collection.
    * The second parameter is a callback function which receives a specialized URI builder and the proper query object
    * for the expanded entity.
    * With the help of the builder you can further select, filter, expand, etc.
@@ -218,27 +250,37 @@ export interface V2ExpandingFunction<Q extends QueryObjectModel, ReturnType> {
    * builder.expanding("address", (expBuilder) => expBuilder.select("street", "city")) // $select=address/street,address/city&$expand=address
    * @example
    * builder.expanding("address", (expBuilder) => expBuilder.expand("country")) // $expand=address,address/country
-   * @param prop the name of the property which should be expanded (must be an entity or entity collection)
+   * @param prop the name of the property which should be expanded (an entity, entity collection, complex type
+   * or complex type collection)
    * @param builderFn function which receives an entity specific builder as first & the appropriate query object as second argument
    * @returns this query builder
    */
-  expanding: <Prop extends ExpandType<Q>>(prop: Prop, expBuilderFn: ExpandingFunctionV2<Q[Prop]>) => ReturnType;
+  expanding: <Prop extends NestingType<Q>>(prop: Prop, expBuilderFn: ExpandingFunctionV2<Q[Prop]>) => ReturnType;
+}
+
+/**
+ * V2 only: `expand` is widened to also accept complex/complex-collection properties, since (unlike V4, where
+ * complex types are always inline) V2 requires `$expand=ComplexProp` alongside `$select=ComplexProp/Sub` for a
+ * complex-typed property to appear in the response at all.
+ */
+export interface V2ExpandFunction<Q extends QueryObjectModel, ReturnType> {
+  expand: <Prop extends NestingType<Q>>(...props: NullableParamList<Prop | QSelectExpression>) => ReturnType;
 }
 
 type BuilderOp = "build";
 type ModelOps = "select" | "expand" | BuilderOp;
 type CollectionOnlyOps = "filter" | "orderBy" | "count" | "skip" | "top";
 
-// custom `expanding` method implementation not listed here
-type V2ModelOps = ModelOps;
-type V2CollectionOps = ModelOps | CollectionOnlyOps;
+// `expand`/`expanding` method implementations not listed here, provided via V2ExpandFunction/V2ExpandingFunction
+type V2ModelOps = "select" | BuilderOp;
+type V2CollectionOps = "select" | BuilderOp | CollectionOnlyOps;
 // custom expanding & build method
-type V2ExpandingOps = "select" | "expand";
+type V2ExpandingOps = "select";
 
 type V4ModelOps = ModelOps | "expanding";
 type V4CollectionOps = V4ModelOps | CollectionOnlyOps | "groupBy" | "search";
 type V4ModelExpandingOps = V4ModelOps;
-type V4CollectionExpandingOps = V4ModelOps | CollectionOnlyOps;
+type V4CollectionExpandingOps = V4ModelOps | CollectionOnlyOps | "search";
 
 export type V2ExpandResult = { selects: Array<string>; expands: Array<string> };
 
@@ -248,7 +290,8 @@ export type V2ExpandResult = { selects: Array<string>; expands: Array<string> };
  */
 export interface CollectionQueryBuilderV2<Q extends QueryObjectModel>
   extends Pick<ODataQueryBuilderModel<Q, CollectionQueryBuilderV2<Q>>, V2CollectionOps>,
-    V2ExpandingFunction<Q, CollectionQueryBuilderV2<Q>> {
+    V2ExpandingFunction<Q, CollectionQueryBuilderV2<Q>>,
+    V2ExpandFunction<Q, CollectionQueryBuilderV2<Q>> {
   /**
    * Creates a new builder with the identical state (deep copy).
    */
@@ -261,7 +304,8 @@ export interface CollectionQueryBuilderV2<Q extends QueryObjectModel>
  */
 export interface ModelQueryBuilderV2<Q extends QueryObjectModel>
   extends Pick<ODataQueryBuilderModel<Q, ModelQueryBuilderV2<Q>>, V2ModelOps>,
-    V2ExpandingFunction<Q, ModelQueryBuilderV2<Q>> {
+    V2ExpandingFunction<Q, ModelQueryBuilderV2<Q>>,
+    V2ExpandFunction<Q, ModelQueryBuilderV2<Q>> {
   /**
    * Creates a new builder with the identical state (deep copy).
    */
@@ -270,7 +314,8 @@ export interface ModelQueryBuilderV2<Q extends QueryObjectModel>
 
 export interface ExpandingQueryBuilderV2<Q extends QueryObjectModel>
   extends Pick<ODataQueryBuilderModel<Q, ExpandingQueryBuilderV2<Q>>, V2ExpandingOps>,
-    V2ExpandingFunction<Q, ExpandingQueryBuilderV2<Q>> {
+    V2ExpandingFunction<Q, ExpandingQueryBuilderV2<Q>>,
+    V2ExpandFunction<Q, ExpandingQueryBuilderV2<Q>> {
   /**
    * Build result is actually a list of select and expand strings, which must be consumed manually by the
    * caller of the build function.

@@ -7,12 +7,13 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
-  CollectionQueryBuilderV4 as ODataQueryBuilderV4Model,
   ExpandingFunction,
   ExpandType,
+  NestingType,
   NullableParam,
   NullableParamList,
   ODataQueryBuilderConfig,
+  CollectionQueryBuilderV4 as ODataQueryBuilderV4Model,
 } from "../ODataQueryBuilderModel";
 import { createExpandingQueryBuilderV4 } from "./ExpandingODataQueryBuilderV4";
 
@@ -79,7 +80,7 @@ class ODataQueryBuilderV4<Q extends QueryObjectModel> implements ODataQueryBuild
     return this;
   }
 
-  public expanding<Prop extends ExpandType<Q>>(prop: Prop, builderFn: ExpandingFunction<Q[Prop]>) {
+  public expanding<Prop extends NestingType<Q>>(prop: Prop, builderFn: ExpandingFunction<Q[Prop]>) {
     if (!prop) {
       throw new Error("Expanding prop must be defined!");
     }

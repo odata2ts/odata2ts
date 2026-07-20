@@ -74,6 +74,37 @@ describe("Query Builder Cardinality", () => {
         "/Persons?$expand=friends($select=name;$filter=name eq 'Horst';$orderby=name asc;$count=true;$top=1;$skip=0)",
       );
     });
+
+    test("expanding a to-one complex prop narrows the nested builder to model ops", () => {
+      createQueryBuilderV4("/Persons", qPerson).expanding("address", (nested, qAddress) => {
+        nested.select("street").expanding("responsible", (respNested) => {
+          respNested.select("name");
+        });
+
+        // @ts-expect-error: filter is not available for a to-one expanded model, even a complex one
+        nested.filter(qAddress.street.eq("Horststr."));
+        // @ts-expect-error: top is not available for a to-one expanded model, even a complex one
+        nested.top(1);
+        // @ts-expect-error: skip is not available for a to-one expanded model, even a complex one
+        nested.skip(1);
+        // @ts-expect-error: count is not available for a to-one expanded model, even a complex one
+        nested.count();
+        // @ts-expect-error: orderBy is not available for a to-one expanded model, even a complex one
+        nested.orderBy(qAddress.street.asc());
+      });
+    });
+
+    test("expanding a to-many complex prop keeps the nested builder at full (collection) ops incl. search", () => {
+      const candidate = createQueryBuilderV4("/Persons", qPerson, { unencoded: true })
+        .expanding("altAddresses", (nested, qAddress) => {
+          nested.select("street").filter(qAddress.street.eq("Horststr.")).top(1).skip(0).count().search("berlin");
+        })
+        .build();
+
+      expect(candidate).toBe(
+        "/Persons?$select=AltAdresses($select=street;$filter=street eq 'Horststr.';$count=true;$top=1;$skip=0;$search=berlin)",
+      );
+    });
   });
 
   describe("V2", () => {
