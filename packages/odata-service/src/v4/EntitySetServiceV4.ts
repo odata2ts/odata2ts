@@ -121,9 +121,7 @@ export abstract class EntitySetServiceV4<
       Q,
       ModelQueryBuilderV4<Q>,
       ODataModelPayloadV4<EditableT>
-    >(client, createModelQueryBuilder(queryFn, actualPath), qModel, {
-      method: ODataHttpMethods.Post,
-      data,
+    >(client, ODataHttpMethods.Post, createModelQueryBuilder(queryFn, actualPath), qModel, data, {
       headers: getDefaultHeaders(),
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
@@ -143,8 +141,10 @@ export abstract class EntitySetServiceV4<
 
     return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseV4<ReturnType>, Q>(
       client,
+      ODataHttpMethods.Get,
       createQueryBuilder(queryFn),
       qModel,
+      undefined,
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new CollectionResponseConverterV4(qModel),

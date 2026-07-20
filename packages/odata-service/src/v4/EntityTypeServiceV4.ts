@@ -57,9 +57,7 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
       Q,
       ModelQueryBuilderV4<Q>,
       ODataModelPayloadV4<Partial<EditableT>>
-    >(client, createModelQueryBuilder(queryFn, actualPath), qModel, {
-      method: ODataHttpMethods.Patch,
-      data,
+    >(client, ODataHttpMethods.Patch, createModelQueryBuilder(queryFn, actualPath), qModel, data, {
       headers: getDefaultHeaders(),
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
@@ -99,9 +97,7 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
       Q,
       ModelQueryBuilderV4<Q>,
       ODataModelPayloadV4<EditableT>
-    >(client, createModelQueryBuilder(queryFn, actualPath), qModel, {
-      method: ODataHttpMethods.Put,
-      data,
+    >(client, ODataHttpMethods.Put, createModelQueryBuilder(queryFn, actualPath), qModel, data, {
       headers: getDefaultHeaders(),
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
@@ -132,8 +128,10 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
 
     return new UrlBuilderRequestCmdV4<ClientType, ODataModelResponseV4<ReturnType>, Q, ModelQueryBuilderV4<Q>>(
       client,
+      ODataHttpMethods.Get,
       createModelQueryBuilder(queryFn),
       qModel,
+      undefined,
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new ModelResponseConverterV4(qModel),

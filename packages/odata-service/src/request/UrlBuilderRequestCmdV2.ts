@@ -3,20 +3,6 @@ import { CollectionQueryBuilderV2, ModelQueryBuilderV2 } from "@odata2ts/odata-q
 import { QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { RequestCmd, RequestCmdOptions } from "./RequestCmd";
 
-export interface UrlBuilderRequestCmdOptionsV2<ResponseStructure, DataStructure = undefined>
-  extends RequestCmdOptions<ResponseStructure, DataStructure> {
-  /**
-   * HTTP method for this request. Defaults to GET, the only method relevant for plain `.query()` use.
-   * Write operations (create/update/patch/add) that also shape their response via $select/$expand
-   * supply PUT/PATCH/POST here.
-   */
-  method?: ODataHttpMethods;
-  /**
-   * Request payload, e.g. the entity being created or updated. Irrelevant for GET.
-   */
-  data?: DataStructure;
-}
-
 export class UrlBuilderRequestCmdV2<
   ClientType extends ODataHttpClient,
   ResponseStructure,
@@ -26,11 +12,13 @@ export class UrlBuilderRequestCmdV2<
 > extends RequestCmd<ClientType, ResponseStructure, DataStructure> {
   constructor(
     protected client: ClientType,
+    method: ODataHttpMethods,
     protected urlBuilder: Builder,
     protected q: Q,
-    protected options: UrlBuilderRequestCmdOptionsV2<ResponseStructure, DataStructure> = {},
+    data?: DataStructure,
+    protected options: RequestCmdOptions<ResponseStructure, DataStructure> = {},
   ) {
-    super(client, options.method ?? ODataHttpMethods.Get, options.data, options);
+    super(client, method, data, options);
   }
 
   public getUrl(): string {
@@ -50,8 +38,10 @@ export class UrlBuilderRequestCmdV2<
 
     return new UrlBuilderRequestCmdV2<ClientType, ResponseStructure, Q, Builder, DataStructure>(
       this.client,
+      this.method,
       builder,
       this.q,
+      this.data,
       this.options,
     );
   }

@@ -33,11 +33,11 @@ export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, E
 
     return new UrlBuilderRequestCmdV2<ClientType, undefined, Q, ModelQueryBuilderV2<Q>, Partial<EditableT>>(
       client,
+      ODataHttpMethods.Post,
       createModelQueryBuilder(queryFn),
       qModel,
+      model,
       {
-        method: ODataHttpMethods.Post,
-        data: model,
         headers,
         mainRequestConverter: qModel,
       },
@@ -57,11 +57,11 @@ export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, E
 
     return new UrlBuilderRequestCmdV2<ClientType, undefined, Q, ModelQueryBuilderV2<Q>, EditableT>(
       client,
+      ODataHttpMethods.Put,
       createModelQueryBuilder(queryFn),
       qModel,
+      model,
       {
-        method: ODataHttpMethods.Put,
-        data: model,
         headers: getDefaultHeaders(),
         mainRequestConverter: qModel,
       },
@@ -84,8 +84,10 @@ export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, E
 
     return new UrlBuilderRequestCmdV2<ClientType, ODataEntityModelResponseV2<ReturnType>, Q, ModelQueryBuilderV2<Q>>(
       client,
+      ODataHttpMethods.Get,
       createModelQueryBuilder(queryFn),
       qModel,
+      undefined,
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new EntityResponseConverterV2(qModel),

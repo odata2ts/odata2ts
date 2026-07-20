@@ -24,11 +24,11 @@ export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, 
 
     return new UrlBuilderRequestCmdV2<ClientType, undefined, Q, ModelQueryBuilderV2<Q>, Partial<EditableT>>(
       client,
+      ODataHttpMethods.Post,
       createModelQueryBuilder(queryFn),
       qModel,
+      model,
       {
-        method: ODataHttpMethods.Post,
-        data: model,
         headers,
         mainRequestConverter: qModel,
       },
@@ -40,11 +40,11 @@ export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, 
 
     return new UrlBuilderRequestCmdV2<ClientType, undefined, Q, ModelQueryBuilderV2<Q>, EditableT>(
       client,
+      ODataHttpMethods.Put,
       createModelQueryBuilder(queryFn),
       qModel,
+      model,
       {
-        method: ODataHttpMethods.Put,
-        data: model,
         headers: getDefaultHeaders(),
         mainRequestConverter: qModel,
       },
@@ -62,8 +62,10 @@ export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, 
 
     return new UrlBuilderRequestCmdV2<ClientType, ODataComplexModelResponseV2<ReturnType>, Q, ModelQueryBuilderV2<Q>>(
       client,
+      ODataHttpMethods.Get,
       createModelQueryBuilder(queryFn),
       qModel,
+      undefined,
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new ComplexResponseConverterV2(qModel),

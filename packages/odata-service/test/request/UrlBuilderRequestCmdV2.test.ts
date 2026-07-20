@@ -20,14 +20,14 @@ describe("UrlBuilderRequestCmd tests", () => {
   });
 
   test("base props", () => {
-    const candidate = new UrlBuilderRequestCmdV2(client, queryBuilder, qPersonV2);
+    const candidate = new UrlBuilderRequestCmdV2(client, ODataHttpMethods.Get, queryBuilder, qPersonV2);
 
     expect(candidate.getUrl()).toBe(DEFAULT_URL);
     expect(candidate.getInfo().url).toBe(DEFAULT_URL);
   });
 
-  test("defaults to GET with no data when no method/data option is given", () => {
-    const candidate = new UrlBuilderRequestCmdV2(client, queryBuilder, qPersonV2);
+  test("defaults to no data when no data param is given", () => {
+    const candidate = new UrlBuilderRequestCmdV2(client, ODataHttpMethods.Get, queryBuilder, qPersonV2);
 
     expect(candidate.getInfo().method).toBe(ODataHttpMethods.Get);
     expect(candidate.getInfo().data).toBeUndefined();
@@ -40,7 +40,7 @@ describe("UrlBuilderRequestCmd tests", () => {
       QPersonV2,
       CollectionQueryBuilderV2<QPersonV2>,
       PersonModel
-    >(client, queryBuilder, qPersonV2, { method: ODataHttpMethods.Put, data: { userName: "tester" } as PersonModel });
+    >(client, ODataHttpMethods.Put, queryBuilder, qPersonV2, { userName: "tester" } as PersonModel);
 
     expect(candidate.getInfo().method).toBe(ODataHttpMethods.Put);
     expect(candidate.getInfo().data).toStrictEqual({ userName: "tester" });
@@ -53,7 +53,7 @@ describe("UrlBuilderRequestCmd tests", () => {
       QPersonV2,
       CollectionQueryBuilderV2<QPersonV2>,
       PersonModel
-    >(client, queryBuilder, qPersonV2, { method: ODataHttpMethods.Put, data: { userName: "tester" } as PersonModel });
+    >(client, ODataHttpMethods.Put, queryBuilder, qPersonV2, { userName: "tester" } as PersonModel);
     const newCandidate = candidate.addToQuery((builder) => builder.select("age"));
 
     expect(newCandidate.getUrl()).toBe(DEFAULT_URL + "?$select=Age");
@@ -62,7 +62,7 @@ describe("UrlBuilderRequestCmd tests", () => {
   });
 
   test("add to query", () => {
-    const candidate = new UrlBuilderRequestCmdV2(client, queryBuilder, qPersonV2);
+    const candidate = new UrlBuilderRequestCmdV2(client, ODataHttpMethods.Get, queryBuilder, qPersonV2);
     const newCandidate = candidate.addToQuery((builder) => builder.select("userName"));
 
     expect(candidate.getUrl()).toBe(DEFAULT_URL);
@@ -70,7 +70,7 @@ describe("UrlBuilderRequestCmd tests", () => {
   });
 
   test("new URL multiple times", () => {
-    const candidate = new UrlBuilderRequestCmdV2(client, queryBuilder, qPersonV2);
+    const candidate = new UrlBuilderRequestCmdV2(client, ODataHttpMethods.Get, queryBuilder, qPersonV2);
     const newCandidate = candidate
       .addToQuery((builder, qPerson) => builder.select("userName"))
       .addToQuery((builder, qPerson) => builder.filter(qPerson.age.gt("40")));
@@ -81,8 +81,10 @@ describe("UrlBuilderRequestCmd tests", () => {
   test("execute", async () => {
     const candidate = new UrlBuilderRequestCmdV2<MockClient, ODataEntityModelResponseV2<PersonModel>, QPersonV2>(
       client,
+      ODataHttpMethods.Get,
       queryBuilder,
       qPersonV2,
+      undefined,
       {
         headers: DEFAULT_HEADERS,
         mainResponseConverter: new EntityResponseConverterV2(qPersonV2),

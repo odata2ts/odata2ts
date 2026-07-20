@@ -62,9 +62,7 @@ export class CollectionServiceV4<
       Q,
       ModelQueryBuilderV4<Q>,
       PrimitiveT
-    >(client, createModelQueryBuilder(queryFn), qModel, {
-      method: ODataHttpMethods.Post,
-      data: model,
+    >(client, ODataHttpMethods.Post, createModelQueryBuilder(queryFn), qModel, model, {
       headers: getDefaultHeaders(),
       mainRequestConverter: qModel,
       mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
@@ -100,9 +98,7 @@ export class CollectionServiceV4<
       Q,
       ModelQueryBuilderV4<Q>,
       Array<PrimitiveT>
-    >(client, createModelQueryBuilder(queryFn), qModel, {
-      method: ODataHttpMethods.Put,
-      data: models,
+    >(client, ODataHttpMethods.Put, createModelQueryBuilder(queryFn), qModel, models, {
       headers: getDefaultHeaders(),
       mainRequestConverter: qModel,
       mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
@@ -133,8 +129,10 @@ export class CollectionServiceV4<
 
     return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseV4<ReturnType>, Q>(
       client,
+      ODataHttpMethods.Get,
       createQueryBuilder(queryFn),
       qModel,
+      undefined,
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new CollectionResponseConverterV4(qModel),
