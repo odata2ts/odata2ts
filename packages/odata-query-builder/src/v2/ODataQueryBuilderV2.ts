@@ -13,6 +13,7 @@ import {
   NullableParamList,
   ODataQueryBuilderConfig,
   CollectionQueryBuilderV2 as ODataQueryBuilderV2Model,
+  SelectType,
 } from "../ODataQueryBuilderModel.js";
 import { createExpandingQueryBuilderV2 } from "./ExpandingODataQueryBuilderV2";
 
@@ -60,7 +61,7 @@ class ODataQueryBuilderV2<Q extends QueryObjectModel> implements ODataQueryBuild
     return clone;
   }
 
-  public select(...props: NullableParamList<keyof Q | QSelectExpression>) {
+  public select(...props: NullableParamList<SelectType<Q>>) {
     this.builder.select(props);
     return this;
   }

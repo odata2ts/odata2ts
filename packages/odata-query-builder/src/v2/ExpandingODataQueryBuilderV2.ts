@@ -6,6 +6,7 @@ import {
   ExpandingQueryBuilderV2 as ExpandingODataQueryBuilderV2Model,
   NestingType,
   NullableParamList,
+  SelectType,
 } from "../ODataQueryBuilderModel";
 
 export function createExpandingQueryBuilderV2<Q extends QueryObjectModel>(
@@ -32,7 +33,7 @@ class ExpandingODataQueryBuilderV2<Q extends QueryObjectModel> implements Expand
 
   private getPrefixedPath = (path: string) => `${this.builder.getPath()}/${path}`;
 
-  public select(...props: NullableParamList<keyof Q | QSelectExpression>) {
+  public select(...props: NullableParamList<SelectType<Q>>) {
     const filtered = this.builder.filterSelectAndMapPath(props);
     if (filtered.length) {
       filtered.forEach((path) => {

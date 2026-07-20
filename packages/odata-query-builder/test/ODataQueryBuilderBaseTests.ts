@@ -95,6 +95,24 @@ export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) 
     expect(candidate).toBe(expected);
   });
 
+  test("select: wildcard", () => {
+    const candidate = toTest.select("*").build();
+
+    expect(candidate).toBe(addBase("$select=*"));
+  });
+
+  test("select: wildcard combined with named prop in one call", () => {
+    const candidate = toTest.select("*", "name").build();
+
+    expect(candidate).toBe(addBase("$select=*,name"));
+  });
+
+  test("select: wildcard combined with named prop across chained calls", () => {
+    const candidate = toTest.select("*").select("name").build();
+
+    expect(candidate).toBe(addBase("$select=*,name"));
+  });
+
   test("skip", () => {
     expect(toTest.skip(99).build()).toBe(addBase("$skip=99"));
     refresh();
