@@ -654,8 +654,8 @@ __metadata:
     "@cap-js/sqlite": "npm:^1"
     "@odata2ts/converter-big-number": "npm:^0.2.8"
     "@odata2ts/http-client-axios": "npm:^0.12.2"
-    "@odata2ts/odata-service": "npm:^0.23.2"
-    "@odata2ts/odata2ts": "npm:^0.40.2"
+    "@odata2ts/odata-service": "workspace:^"
+    "@odata2ts/odata2ts": "workspace:^"
     "@sap/cds": "npm:7.9.4"
     "@sap/cds-odata-v2-adapter-proxy": "npm:^1.9.21"
     axios: "npm:0.27.2"
@@ -676,8 +676,8 @@ __metadata:
     "@odata2ts/converter-v2-to-v4": "npm:^0.5.7"
     "@odata2ts/http-client-axios": "npm:^0.12.2"
     "@odata2ts/http-client-fetch": "npm:^0.9.2"
-    "@odata2ts/odata-service": "npm:^0.23.2"
-    "@odata2ts/odata2ts": "npm:^0.40.2"
+    "@odata2ts/odata-service": "workspace:^"
+    "@odata2ts/odata2ts": "workspace:^"
     "@types/luxon": "npm:^3.4.2"
     axios: "npm:^1.13.1"
     bignumber.js: "npm:^9.1.2"
@@ -760,7 +760,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata-service@npm:^0.23.2, @odata2ts/odata-service@workspace:packages/odata-service":
+"@odata2ts/odata-service@npm:^0.23.2, @odata2ts/odata-service@workspace:^, @odata2ts/odata-service@workspace:packages/odata-service":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-service@workspace:packages/odata-service"
   dependencies:
@@ -771,7 +771,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/odata2ts@npm:^0.40.2, @odata2ts/odata2ts@workspace:packages/odata2ts":
+"@odata2ts/odata2ts@workspace:^, @odata2ts/odata2ts@workspace:packages/odata2ts":
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata2ts@workspace:packages/odata2ts"
   dependencies:
