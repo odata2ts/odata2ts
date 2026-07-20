@@ -1,12 +1,11 @@
 import { defineConfig } from "vitest/config";
-import { coverageReporterOptions } from "./vitest-coverage.shared";
+import { coverageReporterOptions } from "../../vitest-coverage.shared";
 
 export default defineConfig({
   test: {
-    globals: true,
     coverage: {
       ...coverageReporterOptions,
-      include: ["packages/**/src/**"],
+      include: ["src/**"],
     },
   },
 });
