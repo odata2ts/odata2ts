@@ -1,5 +1,5 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
-import { ComplexTypeServiceV2, ODataServiceOptions } from "@odata2ts/odata-service";
+import { ComplexTypeServiceV2, ODataServiceOptions } from "../../../src";
 import { EditablePersonModel, PersonModel } from "../PersonModel";
 import { qPersonV2, QPersonV2 } from "./QPersonV2";
 

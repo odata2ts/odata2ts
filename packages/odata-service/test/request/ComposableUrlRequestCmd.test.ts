@@ -33,6 +33,22 @@ describe("ComposableUrlRequestCmd tests", () => {
     expect(candidate.getInfo().url).toBe(DEFAULT_URL);
   });
 
+  test("with new URL: guard against empty url", () => {
+    expect(() => candidate.withUrl("")).toThrow("withUrl requires a new URL!");
+    expect(() => candidate.withUrl("   ")).toThrow("withUrl requires a new URL!");
+  });
+
+  test("without options argument", () => {
+    const noOptionsCandidate = new ComposableUrlRequestCmd<MockClient, PersonModelService<MockClient>, undefined>(
+      client,
+      DEFAULT_URL,
+      (url: string) => new PersonModelService(client, url, "", { noUrlEncoding: true }),
+    );
+
+    expect(noOptionsCandidate.getUrl()).toBe(DEFAULT_URL);
+    expect(noOptionsCandidate.getInfo().headers).toBeUndefined();
+  });
+
   test("with new URL", () => {
     const newUrl = "hey/ho/there";
     const newCandidate = candidate.withUrl(newUrl);

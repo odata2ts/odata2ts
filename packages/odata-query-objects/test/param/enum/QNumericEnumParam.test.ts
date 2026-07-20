@@ -28,6 +28,13 @@ describe("QNumericEnumParam Tests", () => {
     expect(() => new QNumericEnumParam(TestEnum, null)).toThrowError();
   });
 
+  test("fail creation: missing enum with a valid name", () => {
+    // @ts-expect-error
+    expect(() => new QNumericEnumParam(null, NAME)).toThrow("Enum must be supplied!");
+    // @ts-expect-error
+    expect(() => new QNumericEnumParam(undefined, NAME)).toThrow("Enum must be supplied!");
+  });
+
   test("mapped name", () => {
     const mappedName = "testB";
     const toTest = new QNumericEnumParam(TestEnum, NAME, mappedName);
@@ -48,4 +55,7 @@ describe("QNumericEnumParam Tests", () => {
     expect(toTest.parseUrlValue("null")).toBe(null);
     expect(toTest.parseUrlValue(undefined)).toBe(undefined);
   });
+
+  // Note: see QEnumParam.test.ts for why BaseEnumParam.parseUrlValue()'s JSON-array fallback branch is
+  // structurally unreachable and not tested here.
 });

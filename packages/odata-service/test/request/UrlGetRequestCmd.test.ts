@@ -33,4 +33,13 @@ describe("UrlRequestCmd tests", () => {
       data: "x=y&zz=top",
     });
   });
+
+  test("as POST request: no-op when url has no query params", () => {
+    const noQueryCandidate = new UrlGetRequestCmd(CLIENT, "test/ing");
+
+    expect(noQueryCandidate.asPostRequest().getInfo()).toMatchObject({
+      method: "GET",
+      url: "test/ing",
+    });
+  });
 });

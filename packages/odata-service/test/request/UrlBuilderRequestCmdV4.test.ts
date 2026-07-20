@@ -61,6 +61,14 @@ describe("UrlBuilderRequestCmdV4 tests", () => {
     expect(newCandidate.getInfo().data).toStrictEqual({ userName: "tester" });
   });
 
+  test("add to query: guard against missing modification function", () => {
+    const candidate = new UrlBuilderRequestCmdV4(client, ODataHttpMethods.Get, queryBuilder, qPersonV4);
+
+    expect(() => candidate.addToQuery(undefined as any)).toThrow(
+      "changeUrl requires the modification function as first argument!",
+    );
+  });
+
   test("add to query", () => {
     const candidate = new UrlBuilderRequestCmdV4(client, ODataHttpMethods.Get, queryBuilder, qPersonV4);
     const newCandidate = candidate.addToQuery((builder) => builder.select("userName"));
@@ -137,6 +145,15 @@ describe("UrlBuilderRequestCmdV4 tests", () => {
       url: DEFAULT_URL + "/$query",
       headers: { "Content-Type": "text/plain" },
       data: "$select=UserName",
+    });
+  });
+
+  test("as POST request: no-op when url has no query params", () => {
+    const candidate = new UrlBuilderRequestCmdV4(client, ODataHttpMethods.Get, queryBuilder, qPersonV4);
+
+    expect(candidate.asPostRequest().getInfo()).toMatchObject({
+      method: ODataHttpMethods.Get,
+      url: DEFAULT_URL,
     });
   });
 });

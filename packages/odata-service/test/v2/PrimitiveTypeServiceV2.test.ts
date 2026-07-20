@@ -22,6 +22,34 @@ describe("PrimitiveTypeService V2 Test", () => {
     expect(testService.getPath()).toBe(EXPECTED_PATH);
   });
 
+  test("primitiveType V2: internal converter name and mapped name", () => {
+    const converter = (testService as any).__converter;
+
+    expect(converter.getName()).toBe(PROPERTY_NAME);
+    expect(converter.getMappedName()).toBe("userName");
+  });
+
+  test("primitiveType V2: internal converter without mapped name falls back to name", () => {
+    const noMappedNameService = new PrimitiveTypeServiceV2<MockClient, string>(odataClient, BASE_URL, NAME);
+    const converter = (noMappedNameService as any).__converter;
+
+    expect(converter.getMappedName()).toBe(NAME);
+  });
+
+  test("primitiveType V2: internal converter with explicit mapped name", () => {
+    const mappedService = new PrimitiveTypeServiceV2<MockClient, string>(
+      odataClient,
+      BASE_URL,
+      NAME,
+      undefined,
+      "mappedUserName",
+    );
+    const converter = (mappedService as any).__converter;
+
+    expect(converter.getName()).toBe(NAME);
+    expect(converter.getMappedName()).toBe("mappedUserName");
+  });
+
   test("primitiveType V2: get value", async () => {
     const request = testService.getValue();
     const result = request.getInfo();

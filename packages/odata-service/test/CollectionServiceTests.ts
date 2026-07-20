@@ -36,6 +36,22 @@ export function commonCollectionTests(
     expect(stringService.patch).toBeUndefined();
   });
 
+  test("collection: getPath", () => {
+    expect(stringService.getPath()).toBe(STRING_URL);
+    expect(enumService.getPath()).toBe(ENUM_URL);
+  });
+
+  test("collection: delete", async () => {
+    const request = stringService.delete();
+    const result = request.getInfo();
+
+    expect(result.url).toBe(STRING_URL);
+    expect(result.method).toBe("DELETE");
+    expect(result.data).toBeUndefined();
+
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
+  });
+
   test("collection: query", async () => {
     let request = stringService.query().getInfo();
 

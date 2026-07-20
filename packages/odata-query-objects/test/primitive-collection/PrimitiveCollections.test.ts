@@ -19,6 +19,7 @@ import {
   QNumberV2Collection,
   QNumericEnumCollection,
   QStringCollection,
+  QStringNumberV2Collection,
   QStringV2Collection,
   QTimeOfDayCollection,
   QTimeV2Collection,
@@ -54,6 +55,7 @@ describe("PrimitiveCollections tests", () => {
   const STRING_BASED_COLLECTIONS = [
     QStringCollection,
     QStringV2Collection,
+    QStringNumberV2Collection,
     QGuidCollection,
     QGuidV2Collection,
     QDateTimeOffsetCollection,

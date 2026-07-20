@@ -57,4 +57,9 @@ describe("QEnumParam Tests", () => {
     expect(toTest.parseUrlValue("null")).toBe(null);
     expect(toTest.parseUrlValue(undefined)).toBe(undefined);
   });
+
+  // Note: BaseEnumParam.parseUrlValue()'s JSON-array fallback branch (`if (value && parsed === undefined)`)
+  // is structurally unreachable - parseWithQuotes() throws for any truthy, non-"null", unquoted string before
+  // that check is reached, and parseNullValue() only ever produces `undefined` when `value` itself is falsy
+  // (making the `value &&` half of the condition false). Not tested here.
 });
