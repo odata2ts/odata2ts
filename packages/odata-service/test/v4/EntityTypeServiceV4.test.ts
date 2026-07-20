@@ -90,6 +90,71 @@ describe("EntityTypeService V4 Tests", () => {
     expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
   });
 
+  test("entityType V4: patch with select/expand", async () => {
+    const unencodedService = new PersonModelService(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+    const model: Partial<PersonModel> = { age: "45" };
+
+    const request = unencodedService.patch(model, undefined, (b) => b.select("age"));
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$select=Age");
+    expect(request.getInfo().method).toBe("PATCH");
+  });
+
+  test("entityType V4: update with select/expand", async () => {
+    const unencodedService = new PersonModelService(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+    const model: EditablePersonModel = {
+      userName: "tester",
+      age: "14",
+      favFeature: Feature.Feature1,
+      features: [Feature.Feature1],
+    };
+
+    const request = unencodedService.update(model, undefined, (b) =>
+      b.expanding("bestFriend", (nested) => nested.select("age")),
+    );
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$expand=BestFriend($select=Age)");
+    expect(request.getInfo().method).toBe("PUT");
+  });
+
+  test("entityType V4: update returns a builder-backed Cmd, addToQuery works", async () => {
+    const unencodedService = new PersonModelService(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+    const model: EditablePersonModel = {
+      userName: "tester",
+      age: "14",
+      favFeature: Feature.Feature1,
+      features: [Feature.Feature1],
+    };
+
+    const request = unencodedService.update(model).addToQuery((b) => b.select("age"));
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$select=Age");
+    expect(request.getInfo().method).toBe("PUT");
+    expect(request.getInfo().data).toEqual(model);
+  });
+
+  test("entityType V4: update query builder only allows select/expand/expanding", () => {
+    testService.update({} as EditablePersonModel, undefined, (b, q) => {
+      // @ts-expect-error: filter is not available for a single-model write response builder
+      b.filter(q.age.gt("1"));
+      // @ts-expect-error: top is not available for a single-model write response builder
+      b.top(1);
+    });
+  });
+
+  test("entityType V4: patch & update subtype with select/expand respects cast path", async () => {
+    const serviceToTest = new PlanItemService(odataClient, BASE_URL, NAME, { noUrlEncoding: true }).asFlightService();
+    const inputModel: EditableFlightModel = {
+      id: 123,
+      name: "Optional",
+      flightNumber: "F123",
+    };
+
+    const request = serviceToTest.update(inputModel, { withCastPathSegment: true }, (b) => b.select("name"));
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "/Tester.Flight?$select=Name");
+  });
+
   test("entityType V4: patch & update subtype", async () => {
     const serviceToTest = new PlanItemService(odataClient, BASE_URL, NAME).asFlightService();
     const inputModel: EditableFlightModel = {

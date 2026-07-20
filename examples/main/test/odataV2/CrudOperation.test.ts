@@ -38,6 +38,44 @@ describe("V2 CRUD Functionality Tests", function () {
     });
   });
 
+  test("create with select/expand", () => {
+    const model: EditableProductModel = {
+      id: 123,
+      name: "test",
+      price: new BigNumber("12.03"),
+      rating: 5,
+      releaseDate: "xyz",
+      description: "Description",
+      discontinuedDate: null,
+    };
+    testService
+      .products()
+      .create(model, (b) => b.select("name"))
+      .execute();
+
+    expect(odataClient.lastOperation).toBe("POST");
+    expect(odataClient.lastUrl).toBe("test/Products?$select=Name");
+  });
+
+  test("update returns a builder-backed Cmd, addToQuery works", () => {
+    const model = {
+      id: 123,
+      name: "test",
+      price: new BigNumber("12.03"),
+      rating: 5,
+      releaseDate: "xyz",
+      discontinuedDate: null,
+    };
+    testService
+      .products(123)
+      .update(model)
+      .addToQuery((b) => b.select("name"))
+      .execute();
+
+    expect(odataClient.lastOperation).toBe("PUT");
+    expect(odataClient.lastUrl).toBe("test/Products(123)?$select=Name");
+  });
+
   test("update", () => {
     const model = {
       id: 123,

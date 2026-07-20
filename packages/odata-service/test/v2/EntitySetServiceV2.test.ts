@@ -53,4 +53,39 @@ describe("V2 EntitySetService Test", () => {
     expect(response.data).toStrictEqual({ d: model });
     expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataEntityModelResponseV2<PersonModel>>>();
   });
+
+  test("entitySet: create with select/expand", async () => {
+    const unencodedService = new PersonModelV2CollectionService(odataClient, BASE_URL, NAME, {
+      noUrlEncoding: true,
+    });
+    const model: EditablePersonModel = {
+      userName: "tester",
+      age: "14",
+      favFeature: Feature.Feature1,
+      features: [Feature.Feature1],
+    };
+
+    const request = unencodedService.create(model, (b) => b.select("userName"));
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$select=UserName");
+    expect(request.getInfo().method).toBe("POST");
+  });
+
+  test("entitySet: create returns a builder-backed Cmd, addToQuery works", async () => {
+    const unencodedService = new PersonModelV2CollectionService(odataClient, BASE_URL, NAME, {
+      noUrlEncoding: true,
+    });
+    const model: EditablePersonModel = {
+      userName: "tester",
+      age: "14",
+      favFeature: Feature.Feature1,
+      features: [Feature.Feature1],
+    };
+
+    const request = unencodedService.create(model).addToQuery((b) => b.select("userName"));
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$select=UserName");
+    expect(request.getInfo().method).toBe("POST");
+    expect(request.getInfo().data).toEqual(model);
+  });
 });

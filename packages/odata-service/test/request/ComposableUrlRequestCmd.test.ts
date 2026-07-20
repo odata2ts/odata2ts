@@ -1,8 +1,8 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { CollectionQueryBuilderV4, ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { ModelResponseConverterV4 } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { CollectionQueryBuilderV4, ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { ComposableUrlRequestCmd, UrlBuilderRequestCmdV4 } from "../../src";
 import { Feature, PersonModel } from "../fixture/PersonModel";
 import { PersonModelService } from "../fixture/v4/PersonModelService";

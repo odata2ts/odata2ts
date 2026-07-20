@@ -58,4 +58,30 @@ describe("ComplexTypeService V2 Test", () => {
 
     expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
+
+  test("complexType: patch with select/expand", async () => {
+    const unencodedService = new FakedComplexServiceV2(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+    const model: Partial<PersonModel> = { age: "45" };
+
+    const request = unencodedService.patch(model, (b) => b.select("age"));
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$select=Age");
+    expect(request.getInfo().method).toBe("POST");
+  });
+
+  test("complexType: update returns a builder-backed Cmd, addToQuery works", async () => {
+    const unencodedService = new FakedComplexServiceV2(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+    const model: EditablePersonModel = {
+      userName: "tester",
+      age: "14",
+      favFeature: Feature.Feature1,
+      features: [Feature.Feature1],
+    };
+
+    const request = unencodedService.update(model).addToQuery((b) => b.select("age"));
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$select=Age");
+    expect(request.getInfo().method).toBe("PUT");
+    expect(request.getInfo().data).toEqual(model);
+  });
 });

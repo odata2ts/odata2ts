@@ -1,4 +1,4 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { HttpResponseModel, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { CollectionQueryBuilderV4, createQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { ModelResponseConverterV4 } from "@odata2ts/odata-query-objects";
@@ -24,6 +24,41 @@ describe("UrlBuilderRequestCmdV4 tests", () => {
 
     expect(candidate.getUrl()).toBe(DEFAULT_URL);
     expect(candidate.getInfo().url).toBe(DEFAULT_URL);
+  });
+
+  test("defaults to GET with no data when no method/data option is given", () => {
+    const candidate = new UrlBuilderRequestCmdV4(client, queryBuilder, qPersonV4);
+
+    expect(candidate.getInfo().method).toBe(ODataHttpMethods.Get);
+    expect(candidate.getInfo().data).toBeUndefined();
+  });
+
+  test("carries an explicit method and data payload, e.g. for a write operation", () => {
+    const candidate = new UrlBuilderRequestCmdV4<
+      MockClient,
+      undefined,
+      QPersonV4,
+      CollectionQueryBuilderV4<QPersonV4>,
+      PersonModel
+    >(client, queryBuilder, qPersonV4, { method: ODataHttpMethods.Put, data: { userName: "tester" } as PersonModel });
+
+    expect(candidate.getInfo().method).toBe(ODataHttpMethods.Put);
+    expect(candidate.getInfo().data).toStrictEqual({ userName: "tester" });
+  });
+
+  test("addToQuery on a write Cmd keeps method and data intact", () => {
+    const candidate = new UrlBuilderRequestCmdV4<
+      MockClient,
+      undefined,
+      QPersonV4,
+      CollectionQueryBuilderV4<QPersonV4>,
+      PersonModel
+    >(client, queryBuilder, qPersonV4, { method: ODataHttpMethods.Put, data: { userName: "tester" } as PersonModel });
+    const newCandidate = candidate.addToQuery((builder) => builder.select("age"));
+
+    expect(newCandidate.getUrl()).toBe(DEFAULT_URL + "?$select=Age");
+    expect(newCandidate.getInfo().method).toBe(ODataHttpMethods.Put);
+    expect(newCandidate.getInfo().data).toStrictEqual({ userName: "tester" });
   });
 
   test("add to query", () => {

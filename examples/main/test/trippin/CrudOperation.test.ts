@@ -55,6 +55,44 @@ describe("Testing Generation of TrippinService", () => {
     expectTypeOf(response).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
+  test("entitySet: create with select/expand", async () => {
+    const expectedUrl = `${BASE_URL}/People?$select=FirstName`;
+
+    ODATA_CLIENT.setModelResponse(odataModel);
+    const response = await TRIPPIN.people()
+      .create(userModel, undefined, (b) => b.select("firstName"))
+      .execute();
+
+    expect(ODATA_CLIENT.lastOperation).toBe("POST");
+    expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
+  });
+
+  test("entityType: update with select/expand", async () => {
+    const id = userModel.user;
+    const expectedUrl = `${BASE_URL}/People('${id}')?$expand=BestFriend`;
+
+    const response = await TRIPPIN.people(id)
+      .update(userModel, undefined, (b) => b.expand("bestFriend"))
+      .execute();
+
+    expect(ODATA_CLIENT.lastOperation).toBe("PUT");
+    expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<undefined>>();
+  });
+
+  test("entityType: update returns a builder-backed Cmd, addToQuery works", async () => {
+    const id = userModel.user;
+    const expectedUrl = `${BASE_URL}/People('${id}')?$select=FirstName`;
+
+    await TRIPPIN.people(id)
+      .update(userModel)
+      .addToQuery((b) => b.select("firstName"))
+      .execute();
+
+    expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
+  });
+
   test("entityType: patch", async () => {
     const id = "williams";
     const expectedUrl = `${BASE_URL}/People('${id}')`;
@@ -103,6 +141,18 @@ describe("Testing Generation of TrippinService", () => {
     await TRIPPIN.people("tester").addressInfo().add(model).execute();
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
+    expect(ODATA_CLIENT.lastOperation).toBe("POST");
+    expect(ODATA_CLIENT.lastData).toStrictEqual({ Address: "TestAdress" });
+  });
+
+  test("complex collection: create with select/expand", async () => {
+    const model: EditableLocationModel = { address: "TestAdress" };
+    await TRIPPIN.people("tester")
+      .addressInfo()
+      .add(model, (b) => b.select("address"))
+      .execute();
+
+    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo?$select=Address`);
     expect(ODATA_CLIENT.lastOperation).toBe("POST");
     expect(ODATA_CLIENT.lastData).toStrictEqual({ Address: "TestAdress" });
   });

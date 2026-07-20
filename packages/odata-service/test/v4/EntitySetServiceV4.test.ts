@@ -67,6 +67,37 @@ describe("V4 EntitySetService Test", () => {
     expect(result.data).toStrictEqual(odataModel);
   });
 
+  test("entitySet: create with select/expand", async () => {
+    const unencodedService = new PersonModelCollectionService(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+    const model: EditablePersonModel = {
+      userName: "tester",
+      age: "14",
+      favFeature: Feature.Feature1,
+      features: [Feature.Feature1],
+    };
+
+    const request = unencodedService.create(model, undefined, (b) => b.select("userName"));
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$select=UserName");
+    expect(request.getInfo().method).toBe("POST");
+  });
+
+  test("entitySet: create returns a builder-backed Cmd, addToQuery works", async () => {
+    const unencodedService = new PersonModelCollectionService(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+    const model: EditablePersonModel = {
+      userName: "tester",
+      age: "14",
+      favFeature: Feature.Feature1,
+      features: [Feature.Feature1],
+    };
+
+    const request = unencodedService.create(model).addToQuery((b) => b.select("userName"));
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$select=UserName");
+    expect(request.getInfo().method).toBe("POST");
+    expect(request.getInfo().data).toEqual(model);
+  });
+
   test("entitySet: create subtype", async () => {
     const serviceToTest = new PlanItemCollectionService(odataClient, BASE_URL, NAME).asFlightCollectionService();
     const inputModel: EditableFlightModel = {

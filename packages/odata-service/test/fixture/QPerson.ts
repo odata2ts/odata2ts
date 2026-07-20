@@ -1,5 +1,4 @@
 import { QId, QStringParam } from "@odata2ts/odata-query-objects";
-
 import { PersonId } from "./PersonModel";
 
 /**

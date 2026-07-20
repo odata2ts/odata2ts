@@ -4,24 +4,34 @@ import { QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { RequestCmd, RequestCmdOptions } from "./RequestCmd";
 import { GetToPostConverter } from "./RequestHelper";
 
-export type UrlBuilderRequestCmdOptions<ResponseStructure> = Omit<
-  RequestCmdOptions<ResponseStructure, undefined>,
-  "mainRequestConverter"
->;
+export interface UrlBuilderRequestCmdOptions<ResponseStructure, DataStructure = undefined>
+  extends RequestCmdOptions<ResponseStructure, DataStructure> {
+  /**
+   * HTTP method for this request. Defaults to GET, the only method relevant for plain `.query()` use.
+   * Write operations (create/update/patch/add) that also shape their response via $select/$expand
+   * supply PUT/PATCH/POST here.
+   */
+  method?: ODataHttpMethods;
+  /**
+   * Request payload, e.g. the entity being created or updated. Irrelevant for GET.
+   */
+  data?: DataStructure;
+}
 
 export class UrlBuilderRequestCmdV4<
   ClientType extends ODataHttpClient,
   ResponseStructure,
   Q extends QueryObjectModel,
   Builder extends ModelQueryBuilderV4<Q> = CollectionQueryBuilderV4<Q>,
-> extends RequestCmd<ClientType, ResponseStructure> {
+  DataStructure = undefined,
+> extends RequestCmd<ClientType, ResponseStructure, DataStructure> {
   constructor(
     protected client: ClientType,
     protected urlBuilder: Builder,
     protected q: Q,
-    protected options: UrlBuilderRequestCmdOptions<ResponseStructure> = {},
+    protected options: UrlBuilderRequestCmdOptions<ResponseStructure, DataStructure> = {},
   ) {
-    super(client, ODataHttpMethods.Get, undefined, options);
+    super(client, options.method ?? ODataHttpMethods.Get, options.data, options);
   }
 
   public getUrl(): string {
@@ -40,7 +50,7 @@ export class UrlBuilderRequestCmdV4<
     }
     const builder = modFunction(this.urlBuilder.clone() as Builder, this.q);
 
-    return new UrlBuilderRequestCmdV4<ClientType, ResponseStructure, Q, Builder>(
+    return new UrlBuilderRequestCmdV4<ClientType, ResponseStructure, Q, Builder, DataStructure>(
       this.client,
       builder,
       this.q,
