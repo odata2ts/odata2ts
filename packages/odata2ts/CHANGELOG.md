@@ -13,49 +13,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-objects bumped from ^0.28.0 to ^0.28.1
     * @odata2ts/odata-service bumped from ^0.23.0 to ^0.23.1
 
-## [0.41.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.40.2...@odata2ts/odata2ts-v0.41.0) (2026-07-20)
-
-
-### ⚠ BREAKING CHANGES
-
-* **qobject:** removing OperationReturnType, ResponseHelper and ResponseTypes
-* **qobject:** QAction & QFunction with different constructor signatures; intro of QFunctionV2 & QFunctionV4
-* **service:** introduce RequestCmd as intermediary command object including converters
-* **service:** adapt operations to UrlRequestCmd
-* use command pattern to allow users to retrieve request info (URL, method, data, headers) and add request and response converters before performing the request via the new `execute()` method
-
-### Features
-
-* allow GET request to be POSTed ([#388](https://github.com/odata2ts/odata2ts/issues/388)) ([bbdce8f](https://github.com/odata2ts/odata2ts/commit/bbdce8f5e90cdfd4e59330861e258584dc804158))
-* composable functions ([#386](https://github.com/odata2ts/odata2ts/issues/386)) ([2eac7c1](https://github.com/odata2ts/odata2ts/commit/2eac7c1b8049e8cf7d6ee6be2e465f8e9ef0464d))
-* Intermediary RequestCmd ([#384](https://github.com/odata2ts/odata2ts/issues/384)) ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
-* **odata2ts:** recognize IsComposable attribute & generate composable request commands ([2eac7c1](https://github.com/odata2ts/odata2ts/commit/2eac7c1b8049e8cf7d6ee6be2e465f8e9ef0464d))
-* **service:** introduce ComposableUrlRequestCmd ([2eac7c1](https://github.com/odata2ts/odata2ts/commit/2eac7c1b8049e8cf7d6ee6be2e465f8e9ef0464d))
-
-
-### Bug Fixes
-
-* **example:** use new execute method ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
-
-
-### Code Refactoring
-
-* **qobject:** QAction & QFunction with different constructor signatures; intro of QFunctionV2 & QFunctionV4 ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
-* **qobject:** removing OperationReturnType, ResponseHelper and ResponseTypes ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
-* **service:** adapt operations to UrlRequestCmd ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
-* **service:** introduce RequestCmd as intermediary command object including converters ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
-
-
-### Dependencies
-
-* The following workspace dependencies were updated
-  * devDependencies
-    * @odata2ts/odata-query-objects bumped from ^0.28.2 to ^0.29.0
-    * @odata2ts/odata-service bumped from ^0.23.2 to ^0.24.0
-  * peerDependencies
-    * @odata2ts/odata-query-objects bumped from ^0.28.2 to ^0.29.0
-    * @odata2ts/odata-service bumped from ^0.23.2 to ^0.24.0
-
 ## [0.40.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.40.1...@odata2ts/odata2ts-v0.40.2) (2026-07-03)
 
 
