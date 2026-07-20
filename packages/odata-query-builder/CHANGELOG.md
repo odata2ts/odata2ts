@@ -9,6 +9,30 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
   * dependencies
     * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
 
+## [0.19.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.18.6...@odata2ts/odata-query-builder-v0.19.0) (2026-07-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **query-builder:** ODataQueryBuilderV2, ODataQueryBuilderV4 and ExpandingODataQueryBuilderV4 no longer exist as exported types. Use CollectionQueryBuilderV2/V4 (same member set as before) instead, or ModelQueryBuilderV2/V4 for single-model builders.
+
+### Features
+
+* **query-builder:** Deep Select for Complex Types ([#391](https://github.com/odata2ts/odata2ts/issues/391)) ([91b71ac](https://github.com/odata2ts/odata2ts/commit/91b71ac62cb2a0fbec6e88787346bbc2c1405e53))
+* **query-builder:** explicitly support wildcard in select ([#392](https://github.com/odata2ts/odata2ts/issues/392)) ([bd63dac](https://github.com/odata2ts/odata2ts/commit/bd63dac3794027640a8698b4bc7e7e494791655a))
+
+
+### Code Refactoring
+
+* **query-builder:** query builder cardinality split ([#390](https://github.com/odata2ts/odata2ts/issues/390)) ([fceb004](https://github.com/odata2ts/odata2ts/commit/fceb004cb732233e15f7cfe91f84c35fee39ccf4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-objects bumped from ^0.28.2 to ^0.29.0
+
 ## [0.18.6](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.18.5...@odata2ts/odata-query-builder-v0.18.6) (2026-07-03)
 
 
