@@ -14,8 +14,8 @@ function addBase(urlPart: string) {
 }
 
 type QueryBuilder =
-  | Omit<CollectionQueryBuilderV2<QPerson>, "expanding" | "count">
-  | Omit<CollectionQueryBuilderV4<QPerson>, "expanding" | "count" | "groupBy">;
+  | Omit<CollectionQueryBuilderV2<QPerson>, "expanding" | "count" | "expand">
+  | Omit<CollectionQueryBuilderV4<QPerson>, "expanding" | "count" | "groupBy" | "expand">;
 
 export type BuilderFactoryFunction<Q extends QueryObject> = (
   path: string,
@@ -215,78 +215,6 @@ export function createBaseTests(createBuilder: BuilderFactoryFunction<QPerson>) 
     const expected = addBase(`$filter=${raw}`);
 
     expect(candidate).toBe(expected);
-  });
-
-  /*
-  test("filterOr: simple", () => {
-    const candidate = toTest.filterOr(qPerson.name.eq("Heinz")).build();
-    const expected = addBase("$filter=name eq 'Heinz'");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("filterOr: 2 filters", () => {
-    const candidate = toTest.filterOr(qPerson.name.eq("Heinz"), qPerson.age.ge(12)).build();
-    const expected = addBase("$filter=name eq 'Heinz' or age ge 12");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("filterOr: multiple times", () => {
-    const candidate = toTest
-      .filterOr(qPerson.name.eq("Heinz"), qPerson.age.ge(12))
-      .filterOr(QPerson.deceased.isTrue(), QPerson.age.gt(50))
-      .build();
-    const expected = addBase("$filter=(name eq 'Heinz' or age ge 8) and (deceased eq true or age gt 50)");
-
-    expect(candidate).toBe(expected);
-  });
-  */
-
-  test("expand: simple", () => {
-    const candidate = toTest.expand("bestFriend").build();
-    const expected = addBase("$expand=bestFriend");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("expand: two simple ones", () => {
-    const candidate = toTest.expand("bestFriend", "friends").build();
-    const expected = addBase("$expand=bestFriend,friends");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("expand: custom prop", () => {
-    const candidate = toTest.expand(new QSelectExpression("XXX")).build();
-    const expected = addBase("$expand=XXX");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("expand: mixed with custom prop", () => {
-    const candidate = toTest.expand(new QSelectExpression("x_yz"), "bestFriend").build();
-    const expected = addBase("$expand=x_yz,bestFriend");
-
-    expect(candidate).toBe(expected);
-  });
-
-  test("expand: ignore nullables", () => {
-    const expectedNull = addBase("");
-    const expected = addBase("$expand=bestFriend");
-
-    expect(toTest.expand(null).build()).toBe(expectedNull);
-    expect(toTest.expand(undefined).build()).toBe(expectedNull);
-    expect(toTest.expand("bestFriend", undefined, null).build()).toBe(expected);
-  });
-
-  test("expand: won't work for complex types or collections", () => {
-    // @ts-expect-error
-    toTest.expand("likedFeatures");
-    // @ts-expect-error
-    toTest.expand("address");
-    // @ts-expect-error
-    toTest.expand("altAddresses");
   });
 
   test("clone", () => {

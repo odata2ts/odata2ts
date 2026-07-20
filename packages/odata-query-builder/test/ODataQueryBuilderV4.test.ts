@@ -63,6 +63,52 @@ describe("ODataQueryBuilderV4 Test", () => {
     expect(candidate).toBe(expected);
   });
 
+  test("expand: simple", () => {
+    const candidate = toTest.expand("bestFriend").build();
+    const expected = addBase("$expand=bestFriend");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expand: two simple ones", () => {
+    const candidate = toTest.expand("bestFriend", "friends").build();
+    const expected = addBase("$expand=bestFriend,friends");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expand: custom prop", () => {
+    const candidate = toTest.expand(new QSelectExpression("XXX")).build();
+    const expected = addBase("$expand=XXX");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expand: mixed with custom prop", () => {
+    const candidate = toTest.expand(new QSelectExpression("x_yz"), "bestFriend").build();
+    const expected = addBase("$expand=x_yz,bestFriend");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expand: ignore nullables", () => {
+    const expectedNull = addBase("");
+    const expected = addBase("$expand=bestFriend");
+
+    expect(toTest.expand(null).build()).toBe(expectedNull);
+    expect(toTest.expand(undefined).build()).toBe(expectedNull);
+    expect(toTest.expand("bestFriend", undefined, null).build()).toBe(expected);
+  });
+
+  test("expand: won't work for complex types or collections", () => {
+    // @ts-expect-error - an expandPath can never terminate on a bare complex property, use expanding() instead
+    toTest.expand("likedFeatures");
+    // @ts-expect-error
+    toTest.expand("address");
+    // @ts-expect-error
+    toTest.expand("altAddresses");
+  });
+
   test("expanding: simple", () => {
     const candidate = toTest.expanding("bestFriend", () => {}).build();
     const expected = addBase("$expand=bestFriend");
@@ -133,7 +179,7 @@ describe("ODataQueryBuilderV4 Test", () => {
 
   test("expanding: nested expand", () => {
     const candidate = toTest
-      .expanding("bestFriend", (builder, qAddress) => {
+      .expanding("bestFriend", (builder) => {
         builder.expand("bestFriend");
       })
       .build();
@@ -144,7 +190,7 @@ describe("ODataQueryBuilderV4 Test", () => {
 
   test("expanding: with custom prop", () => {
     const candidate = toTest
-      .expanding("bestFriend", (builder, qAddress) => {
+      .expanding("bestFriend", (builder) => {
         builder.select(new QSelectExpression("THE1")).expand(new QSelectExpression("xxx"));
       })
       .build();
@@ -172,6 +218,65 @@ describe("ODataQueryBuilderV4 Test", () => {
       })
       .build();
     const expected = addBase("$expand=friends($orderby=name asc)");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expanding: single complex prop renders as $select, no $expand", () => {
+    const candidate = toTest.expanding("address", (builder) => builder.select("street")).build();
+    const expected = addBase("$select=Address($select=street)");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expanding: complex collection prop keeps collection-only ops incl. search", () => {
+    const candidate = toTest
+      .expanding("altAddresses", (builder, qAddr) => {
+        builder.select("street").filter(qAddr.street.startsWith("H")).count().top(1).skip(0).search("berlin");
+      })
+      .build();
+    const expected = addBase(
+      "$select=AltAdresses($select=street;$filter=startswith(street,'H');$count=true;$top=1;$skip=0;$search=berlin)",
+    );
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expanding: entity nested inside complex prop gets hoisted to the nearest $expand", () => {
+    const candidate = toTest
+      .expanding("address", (builder) => {
+        builder.select("street").expanding("responsible", (respBuilder) => {
+          respBuilder.select("name");
+        });
+      })
+      .build();
+    const expected = addBase("$select=Address($select=street)&$expand=Address/responsible($select=name)");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expanding: complex prop nested inside entity stays inline", () => {
+    const candidate = toTest
+      .expanding("bestFriend", (builder) => {
+        builder.expanding("address", (addrBuilder) => {
+          addrBuilder.select("street");
+        });
+      })
+      .build();
+    const expected = addBase("$expand=bestFriend($select=Address($select=street))");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expanding: complex prop nested inside complex prop stays inline", () => {
+    const candidate = toTest
+      .expanding("address", (builder) => {
+        builder.expanding("geo", (geoBuilder) => {
+          geoBuilder.select("lat");
+        });
+      })
+      .build();
+    const expected = addBase("$select=Address($select=geo($select=lat))");
 
     expect(candidate).toBe(expected);
   });

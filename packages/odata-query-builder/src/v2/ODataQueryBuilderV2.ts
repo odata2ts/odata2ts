@@ -1,5 +1,5 @@
 import {
-  QEntityPath,
+  QEntityPathModel,
   QFilterExpression,
   QOrderByExpression,
   QSelectExpression,
@@ -7,12 +7,12 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
-  CollectionQueryBuilderV2 as ODataQueryBuilderV2Model,
   ExpandingFunctionV2,
-  ExpandType,
+  NestingType,
   NullableParam,
   NullableParamList,
   ODataQueryBuilderConfig,
+  CollectionQueryBuilderV2 as ODataQueryBuilderV2Model,
 } from "../ODataQueryBuilderModel.js";
 import { createExpandingQueryBuilderV2 } from "./ExpandingODataQueryBuilderV2";
 
@@ -70,12 +70,12 @@ class ODataQueryBuilderV2<Q extends QueryObjectModel> implements ODataQueryBuild
     return this;
   }
 
-  public expand<Prop extends ExpandType<Q>>(...props: NullableParamList<Prop | QSelectExpression>) {
+  public expand<Prop extends NestingType<Q>>(...props: NullableParamList<Prop | QSelectExpression>) {
     this.builder.expand(props);
     return this;
   }
 
-  public expanding<Prop extends ExpandType<Q>>(prop: Prop, builderFn: ExpandingFunctionV2<Q[Prop]>) {
+  public expanding<Prop extends NestingType<Q>>(prop: Prop, builderFn: ExpandingFunctionV2<Q[Prop]>) {
     if (!prop) {
       throw new Error("Expanding prop must be defined!");
     }
@@ -83,7 +83,7 @@ class ODataQueryBuilderV2<Q extends QueryObjectModel> implements ODataQueryBuild
       return this;
     }
 
-    const entityProp = this.builder.getEntityProp<QEntityPath<any>>(prop);
+    const entityProp = this.builder.getEntityProp<QEntityPathModel<any>>(prop);
     const entity = entityProp.getEntity();
 
     const expander = createExpandingQueryBuilderV2(entityProp.getPath(), entity);

@@ -36,6 +36,7 @@ export const qPerson = new QPerson();
 export class QAddress extends QueryObject {
   public readonly street = new QStringPath(this.withPrefix("street"));
   public readonly responsible = new QEntityPath<QPerson>(this.withPrefix("responsible"), () => QPerson);
+  public readonly geo = new QComplexPath<QGeoPosition>(this.withPrefix("geo"), () => QGeoPosition);
 
   constructor(path?: string) {
     super(path);
@@ -43,3 +44,14 @@ export class QAddress extends QueryObject {
 }
 
 export const qAddress = new QAddress();
+
+export class QGeoPosition extends QueryObject {
+  public readonly lat = new QNumberPath(this.withPrefix("lat"));
+  public readonly lng = new QNumberPath(this.withPrefix("lng"));
+
+  constructor(path?: string) {
+    super(path);
+  }
+}
+
+export const qGeoPosition = new QGeoPosition();
