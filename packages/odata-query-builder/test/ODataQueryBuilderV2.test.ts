@@ -85,6 +85,11 @@ describe("ODataQueryBuilderV2 Test", () => {
     expect(candidate).toBe(expected);
   });
 
+  test("expand: wildcard is not a valid expand target", () => {
+    // @ts-expect-error - "*" is a select()-only wildcard, not usable with V2's widened expand() either
+    toTest.expand("*");
+  });
+
   test("expanding: simple", () => {
     const candidate = toTest.expanding("bestFriend", () => {}).build();
     const expected = addBase("$expand=bestFriend");
@@ -118,6 +123,20 @@ describe("ODataQueryBuilderV2 Test", () => {
   test("expanding: selecting nested prop", () => {
     const candidate = toTest.expanding("bestFriend", (builder) => builder.select("age")).build();
     const expected = addBase("$select=bestFriend/age&$expand=bestFriend");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expanding: wildcard select on nav prop flattens to prefix/*", () => {
+    const candidate = toTest.expanding("bestFriend", (builder) => builder.select("*")).build();
+    const expected = addBase("$select=bestFriend/*&$expand=bestFriend");
+
+    expect(candidate).toBe(expected);
+  });
+
+  test("expanding: wildcard select on complex prop flattens to prefix/*", () => {
+    const candidate = toTest.expanding("address", (builder) => builder.select("*")).build();
+    const expected = addBase("$select=Address/*&$expand=Address");
 
     expect(candidate).toBe(expected);
   });

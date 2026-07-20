@@ -54,6 +54,14 @@ export type NestingType<Q extends QueryObjectModel> = ExtractPropertyNamesOfType
   QEntityPath<any> | QEntityCollectionPath<any> | QComplexPath<any> | QComplexCollectionPath<any>
 >;
 
+/**
+ * Retrieves all valid `select()` targets: any property name of the entity, a raw `QSelectExpression`, or the
+ * literal wildcard `"*"` (OData `$select=*` - "all structural properties"). Deliberately NOT reused by
+ * `expand()`/`expanding()` (see ExpandType/NestingType) - `$expand=*` is a distinct, unsupported system query
+ * option and must stay unreachable from expand's public surface.
+ */
+export type SelectType<Q extends QueryObjectModel> = keyof Q | "*" | QSelectExpression;
+
 export type Nullable = null | undefined;
 
 export type NullableParam<OptionType> = OptionType | Nullable;
@@ -94,14 +102,22 @@ export interface ODataQueryBuilderModel<Q extends QueryObjectModel, ReturnType> 
    *
    * This function can be called multiple times.
    *
+   * The literal wildcard `"*"` selects all structural properties and can be combined with other select items,
+   * e.g. `builder.select("*", "bestFriend")` // $select=*,bestFriend. Note: unlike V4 (where complex/navigation
+   * content is always inlined), V2's `$select` is a pure response-shaping filter and does not by itself cause
+   * complex or navigation content to be included - use `expand()`/`expanding()` for that in V2 as well.
+   *
    * @example
    * builder.select("lastName", "firstName", undefined) // $select=lastName,firstName
    * @example
    * builder.select("lastName", false ? "firstName" : undefined) // $select=lastName
-   * @param props the property names to select as they are specified on the query object
+   * @example
+   * builder.select("*", "bestFriend") // $select=*,bestFriend
+   * @param props the property names to select as they are specified on the query object, or "*" for all
+   * structural properties
    * @returns this query builder
    */
-  select: (...props: NullableParamList<keyof Q | QSelectExpression>) => ReturnType;
+  select: (...props: NullableParamList<SelectType<Q>>) => ReturnType;
 
   /**
    * Specify as many filter expressions as you want by facilitating query objects.

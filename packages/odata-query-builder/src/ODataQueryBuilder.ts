@@ -17,6 +17,7 @@ import {
   NullableParam,
   NullableParamList,
   ODataQueryBuilderConfig,
+  SelectType,
 } from "./ODataQueryBuilderModel.js";
 
 /**
@@ -131,16 +132,23 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     }
   }
 
-  public filterSelectAndMapPath(props: NullableParamList<keyof Q | QSelectExpression>) {
+  public filterSelectAndMapPath(props: NullableParamList<SelectType<Q>>): Array<string> {
     return props
-      .filter((p): p is keyof Q | QSelectExpression => !!p)
-      .map((p) => {
-        const path = p instanceof QSelectExpression ? p : this.getEntityProp(p);
-        return path.getPath();
+      .filter((p): p is SelectType<Q> => !!p)
+      .map((p): string => {
+        if (p instanceof QSelectExpression) {
+          return p.getPath();
+        }
+        // "*" ($select=*, "all structural properties") is not an entity property - passes through as a
+        // literal path segment, never looked up via getEntityProp().
+        if (p === "*") {
+          return "*";
+        }
+        return this.getEntityProp(p as keyof Q).getPath();
       });
   }
 
-  public select(props: NullableParamList<keyof Q | QSelectExpression>) {
+  public select(props: NullableParamList<SelectType<Q>>) {
     const filteredPaths = this.filterSelectAndMapPath(props);
     if (filteredPaths.length) {
       this.getSelects().push(...filteredPaths);

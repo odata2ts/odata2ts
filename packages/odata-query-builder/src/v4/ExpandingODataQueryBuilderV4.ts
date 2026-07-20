@@ -13,6 +13,7 @@ import {
   NestingType,
   NullableParam,
   NullableParamList,
+  SelectType,
 } from "../ODataQueryBuilderModel";
 
 export function createExpandingQueryBuilderV4<Q extends QueryObjectModel>(
@@ -44,7 +45,7 @@ class ExpandingODataQueryBuilderV4<Q extends QueryObjectModel> implements Expand
     return this.builder;
   }
 
-  public select(...props: NullableParamList<keyof Q | QSelectExpression>) {
+  public select(...props: NullableParamList<SelectType<Q>>) {
     this.builder.select(props);
     return this;
   }
