@@ -41,6 +41,24 @@ describe("Unit Tests for V2 OData Demo Service", function () {
     });
   });
 
+  test('query with select("*") wildcard', async () => {
+    await testService
+      .products()
+      .query((b) => b.select("*"))
+      .execute();
+
+    expect(odataClient.lastUrl).toBe("test/Products?$select=*");
+  });
+
+  test("expanding: wildcard select on a nav prop flattens to prefix/*", async () => {
+    await testService
+      .products(123)
+      .query((b) => b.expanding("supplier", (supplierBuilder) => supplierBuilder.select("*")))
+      .execute();
+
+    expect(odataClient.lastUrl).toBe("test/Products(123)?$select=Supplier/*&$expand=Supplier");
+  });
+
   test("in filter", async () => {
     await testService
       .products()

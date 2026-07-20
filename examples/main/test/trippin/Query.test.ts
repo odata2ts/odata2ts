@@ -43,6 +43,38 @@ describe("Trippin: Testing Query Functionality", function () {
     expect(ODATA_CLIENT.lastUrl).toBe(expected);
   });
 
+  test('entitySet: query with select("*") wildcard', async () => {
+    await TRIPPIN.people()
+      .query((b) => b.select("*"))
+      .execute();
+
+    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People?$select=*`);
+  });
+
+  test('entitySet: query with select("*") combined with a named prop', async () => {
+    await TRIPPIN.people()
+      .query((b) => b.select("*", "user"))
+      .execute();
+
+    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People?$select=*,UserName`);
+  });
+
+  test("entitySet: nested wildcard select via expanding() on a nav prop", async () => {
+    await TRIPPIN.people()
+      .query((b) => b.expanding("bestFriend", (friendBuilder) => friendBuilder.select("*")))
+      .execute();
+
+    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People?$expand=BestFriend($select=*)`);
+  });
+
+  test("entitySet: nested wildcard select via expanding() on a complex prop", async () => {
+    await TRIPPIN.people()
+      .query((b) => b.expanding("homeAddress", (addrBuilder) => addrBuilder.select("*")))
+      .execute();
+
+    expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People?$select=HomeAddress($select=*)`);
+  });
+
   test("entitySet: query with count, expand and order by", async () => {
     const expected = `${BASE_URL}/People?$expand=Trips($count=true)&$orderby=Trips/$count asc&$count=true`;
 
