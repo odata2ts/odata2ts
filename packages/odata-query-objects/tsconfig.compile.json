@@ -4,5 +4,6 @@
     "module": "CommonJS",
     "rootDirs": ["src", "test"],
     "noEmit": true
-  }
+  },
+  "exclude": ["vite.config.ts"]
 }

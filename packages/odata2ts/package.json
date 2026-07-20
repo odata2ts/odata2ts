@@ -36,6 +36,7 @@
     "clean-v2": "rimraf build/v2",
     "clean-v4": "rimraf build/v4",
     "compile": "tsc -p tsconfig.compile.json",
+    "coverage": "vitest run --dir test --coverage --testTimeout=30000",
     "dev": "yarn generate trippin odata",
     "generate": "npx tsx src/run-cli.ts",
     "int-test": "yarn clean && vitest run --dir int-test",

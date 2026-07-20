@@ -5,5 +5,5 @@
     "noEmit": true,
     "lib": ["DOM", "esnext"]
   },
-  "exclude": ["node_modules", "lib"]
+  "exclude": ["node_modules", "lib", "vite.config.ts"]
 }

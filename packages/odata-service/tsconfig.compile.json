@@ -6,5 +6,5 @@
     "lib": ["DOM"],
     "noEmit": true
   },
-  "exclude": ["lib"]
+  "exclude": ["lib", "vite.config.ts"]
 }
