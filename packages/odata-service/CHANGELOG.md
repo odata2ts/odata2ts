@@ -17,6 +17,52 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-builder bumped from ^0.18.5 to ^0.18.6
     * @odata2ts/odata-query-objects bumped from ^0.28.1 to ^0.28.2
 
+## [0.24.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service-v0.23.2...@odata2ts/odata-service-v0.24.0) (2026-07-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **query-builder:** ODataQueryBuilderV2, ODataQueryBuilderV4 and ExpandingODataQueryBuilderV4 no longer exist as exported types. Use CollectionQueryBuilderV2/V4 (same member set as before) instead, or ModelQueryBuilderV2/V4 for single-model builders.
+* **@odata2ts/odata-service:** responses for update and patch are expected to be 204 by default (no response data); OData V4 supports the Prefer header to indicate that the server should respond with data, if implemented at all. Via a boolean switch users can get typings for those cases, e.g. `patch<true>(...)`
+* **qobject:** removing OperationReturnType, ResponseHelper and ResponseTypes
+* **qobject:** QAction & QFunction with different constructor signatures; intro of QFunctionV2 & QFunctionV4
+* **service:** introduce RequestCmd as intermediary command object including converters
+* **service:** adapt operations to UrlRequestCmd
+* use command pattern to allow users to retrieve request info (URL, method, data, headers) and add request and response converters before performing the request via the new `execute()` method
+
+### Features
+
+* allow GET request to be POSTed ([#388](https://github.com/odata2ts/odata2ts/issues/388)) ([bbdce8f](https://github.com/odata2ts/odata2ts/commit/bbdce8f5e90cdfd4e59330861e258584dc804158))
+* composable functions ([#386](https://github.com/odata2ts/odata2ts/issues/386)) ([2eac7c1](https://github.com/odata2ts/odata2ts/commit/2eac7c1b8049e8cf7d6ee6be2e465f8e9ef0464d))
+* Intermediary RequestCmd ([#384](https://github.com/odata2ts/odata2ts/issues/384)) ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
+* **odata-service:** support select/expand on create/update/patch/add ([#393](https://github.com/odata2ts/odata2ts/issues/393)) ([6fac2a2](https://github.com/odata2ts/odata2ts/commit/6fac2a20585f2f938cd05084ace2e744db303247))
+* **odata2ts:** recognize IsComposable attribute & generate composable request commands ([2eac7c1](https://github.com/odata2ts/odata2ts/commit/2eac7c1b8049e8cf7d6ee6be2e465f8e9ef0464d))
+* **service:** introduce ComposableUrlRequestCmd ([2eac7c1](https://github.com/odata2ts/odata2ts/commit/2eac7c1b8049e8cf7d6ee6be2e465f8e9ef0464d))
+
+
+### Bug Fixes
+
+* **@odata2ts/odata-service:** added some missing documentation ([912cc5f](https://github.com/odata2ts/odata2ts/commit/912cc5f6f5bf173e9f5d52d44fc9697bd64bd9d5))
+* **@odata2ts/odata-service:** improved response types ([1c2c12f](https://github.com/odata2ts/odata2ts/commit/1c2c12fa74ad5a183c75eb42b0e5e88f5cbfc506))
+* **example:** use new execute method ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
+
+
+### Code Refactoring
+
+* **qobject:** QAction & QFunction with different constructor signatures; intro of QFunctionV2 & QFunctionV4 ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
+* **qobject:** removing OperationReturnType, ResponseHelper and ResponseTypes ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
+* **query-builder:** query builder cardinality split ([#390](https://github.com/odata2ts/odata2ts/issues/390)) ([fceb004](https://github.com/odata2ts/odata2ts/commit/fceb004cb732233e15f7cfe91f84c35fee39ccf4))
+* **service:** adapt operations to UrlRequestCmd ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
+* **service:** introduce RequestCmd as intermediary command object including converters ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-builder bumped from ^0.18.6 to ^0.19.0
+    * @odata2ts/odata-query-objects bumped from ^0.28.2 to ^0.29.0
+
 ## [0.23.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service-v0.22.2...@odata2ts/odata-service-v0.23.0) (2025-11-01)
 
 
