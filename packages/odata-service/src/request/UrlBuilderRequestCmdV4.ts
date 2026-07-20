@@ -4,24 +4,22 @@ import { QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { RequestCmd, RequestCmdOptions } from "./RequestCmd";
 import { GetToPostConverter } from "./RequestHelper";
 
-export type UrlBuilderRequestCmdOptions<ResponseStructure> = Omit<
-  RequestCmdOptions<ResponseStructure, undefined>,
-  "mainRequestConverter"
->;
-
 export class UrlBuilderRequestCmdV4<
   ClientType extends ODataHttpClient,
   ResponseStructure,
   Q extends QueryObjectModel,
   Builder extends ModelQueryBuilderV4<Q> = CollectionQueryBuilderV4<Q>,
-> extends RequestCmd<ClientType, ResponseStructure> {
+  DataStructure = undefined,
+> extends RequestCmd<ClientType, ResponseStructure, DataStructure> {
   constructor(
     protected client: ClientType,
+    method: ODataHttpMethods,
     protected urlBuilder: Builder,
     protected q: Q,
-    protected options: UrlBuilderRequestCmdOptions<ResponseStructure> = {},
+    data?: DataStructure,
+    protected options: RequestCmdOptions<ResponseStructure, DataStructure> = {},
   ) {
-    super(client, ODataHttpMethods.Get, undefined, options);
+    super(client, method, data, options);
   }
 
   public getUrl(): string {
@@ -40,10 +38,12 @@ export class UrlBuilderRequestCmdV4<
     }
     const builder = modFunction(this.urlBuilder.clone() as Builder, this.q);
 
-    return new UrlBuilderRequestCmdV4<ClientType, ResponseStructure, Q, Builder>(
+    return new UrlBuilderRequestCmdV4<ClientType, ResponseStructure, Q, Builder, DataStructure>(
       this.client,
+      this.method,
       builder,
       this.q,
+      this.data,
       this.options,
     );
   }

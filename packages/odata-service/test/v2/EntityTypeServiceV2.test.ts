@@ -64,6 +64,57 @@ describe("EntityTypeService V2 Test", () => {
     expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
+  test("entityType: patch with select/expand", async () => {
+    const unencodedService = new PersonModelV2Service(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+    const model: Partial<PersonModel> = { age: "45" };
+
+    const request = unencodedService.patch(model, (b) => b.select("age"));
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$select=Age");
+    expect(request.getInfo().method).toBe("POST");
+    expect(request.getInfo().headers).toStrictEqual({ ...DEFAULT_HEADERS, ...MERGE_HEADERS });
+  });
+
+  test("entityType: update with select/expand", async () => {
+    const unencodedService = new PersonModelV2Service(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+    const model: EditablePersonModel = {
+      userName: "tester",
+      age: "14",
+      favFeature: Feature.Feature1,
+      features: [Feature.Feature1],
+    };
+
+    const request = unencodedService.update(model, (b) => b.expanding("bestFriend", (nested) => nested.select("age")));
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$select=BestFriend/Age&$expand=BestFriend");
+    expect(request.getInfo().method).toBe("PUT");
+  });
+
+  test("entityType: update returns a builder-backed Cmd, addToQuery works", async () => {
+    const unencodedService = new PersonModelV2Service(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+    const model: EditablePersonModel = {
+      userName: "tester",
+      age: "14",
+      favFeature: Feature.Feature1,
+      features: [Feature.Feature1],
+    };
+
+    const request = unencodedService.update(model).addToQuery((b) => b.select("age"));
+
+    expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$select=Age");
+    expect(request.getInfo().method).toBe("PUT");
+    expect(request.getInfo().data).toEqual(model);
+  });
+
+  test("entityType: update query builder only allows select/expand/expanding", () => {
+    testService.update({} as EditablePersonModel, (b, q) => {
+      // @ts-expect-error: filter is not available for a single-model write response builder
+      b.filter(q.age.gt("1"));
+      // @ts-expect-error: top is not available for a single-model write response builder
+      b.top(1);
+    });
+  });
+
   test("entityType V2: function params", async () => {
     const expected =
       EXPECTED_PATH +

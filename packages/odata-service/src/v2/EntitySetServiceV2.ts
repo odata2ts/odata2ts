@@ -1,6 +1,6 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
-import { CollectionQueryBuilderV2 } from "@odata2ts/odata-query-builder";
+import { CollectionQueryBuilderV2, ModelQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import {
   CollectionResponseConverterV2,
   EntityResponseConverterV2,
@@ -8,7 +8,7 @@ import {
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptions } from "../ODataServiceOptions";
-import { UrlBuilderRequestCmdV2, UrlRequestCmd } from "../request";
+import { UrlBuilderRequestCmdV2 } from "../request";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
 export abstract class EntitySetServiceV2<
@@ -81,13 +81,14 @@ export abstract class EntitySetServiceV2<
    * @param model
    * @return
    */
-  public create(model: EditableT) {
-    const { path, client, qModel, getDefaultHeaders } = this.__base;
+  public create(model: EditableT, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
+    const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
-    return new UrlRequestCmd<ClientType, ODataEntityModelResponseV2<T>, EditableT>(
+    return new UrlBuilderRequestCmdV2<ClientType, ODataEntityModelResponseV2<T>, Q, ModelQueryBuilderV2<Q>, EditableT>(
       client,
       ODataHttpMethods.Post,
-      path,
+      createModelQueryBuilder(queryFn),
+      qModel,
       model,
       {
         headers: getDefaultHeaders(),
@@ -102,13 +103,17 @@ export abstract class EntitySetServiceV2<
    *
    * @param queryFn provide the query logic with the help of the builder and the query-object
    */
-  public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: CollectionQueryBuilderV2<Q>, qObject: Q) => void) {
+  public query<ReturnType extends Partial<T> = T>(
+    queryFn?: (builder: CollectionQueryBuilderV2<Q>, qObject: Q) => void,
+  ) {
     const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV2<ClientType, ODataCollectionResponseV2<ReturnType>, Q>(
       client,
+      ODataHttpMethods.Get,
       createQueryBuilder(queryFn),
       qModel,
+      undefined,
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new CollectionResponseConverterV2(qModel),

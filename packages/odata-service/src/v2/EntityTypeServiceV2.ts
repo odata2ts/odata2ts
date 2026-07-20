@@ -27,14 +27,21 @@ export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, E
    *
    * @param model
    */
-  public patch(model: Partial<EditableT>) {
-    const { client, qModel, path, getDefaultHeaders } = this.__base;
+  public patch(model: Partial<EditableT>, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
+    const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
     const headers = { ...getDefaultHeaders(), ...MERGE_HEADERS };
 
-    return new UrlRequestCmd<ClientType, undefined, Partial<EditableT>>(client, ODataHttpMethods.Post, path, model, {
-      headers,
-      mainRequestConverter: qModel,
-    });
+    return new UrlBuilderRequestCmdV2<ClientType, undefined, Q, ModelQueryBuilderV2<Q>, Partial<EditableT>>(
+      client,
+      ODataHttpMethods.Post,
+      createModelQueryBuilder(queryFn),
+      qModel,
+      model,
+      {
+        headers,
+        mainRequestConverter: qModel,
+      },
+    );
   }
 
   /**
@@ -45,13 +52,20 @@ export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, E
    *
    * @param model
    */
-  public update(model: EditableT) {
-    const { client, qModel, path, getDefaultHeaders } = this.__base;
+  public update(model: EditableT, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
+    const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
-    return new UrlRequestCmd<ClientType, undefined, EditableT>(client, ODataHttpMethods.Put, path, model, {
-      headers: getDefaultHeaders(),
-      mainRequestConverter: qModel,
-    });
+    return new UrlBuilderRequestCmdV2<ClientType, undefined, Q, ModelQueryBuilderV2<Q>, EditableT>(
+      client,
+      ODataHttpMethods.Put,
+      createModelQueryBuilder(queryFn),
+      qModel,
+      model,
+      {
+        headers: getDefaultHeaders(),
+        mainRequestConverter: qModel,
+      },
+    );
   }
 
   /**
@@ -70,8 +84,10 @@ export class EntityTypeServiceV2<in out ClientType extends ODataHttpClient, T, E
 
     return new UrlBuilderRequestCmdV2<ClientType, ODataEntityModelResponseV2<ReturnType>, Q, ModelQueryBuilderV2<Q>>(
       client,
+      ODataHttpMethods.Get,
       createModelQueryBuilder(queryFn),
       qModel,
+      undefined,
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new EntityResponseConverterV2(qModel),

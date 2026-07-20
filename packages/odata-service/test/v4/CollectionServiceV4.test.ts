@@ -79,6 +79,17 @@ describe("CollectionService V4 Tests", () => {
     expectTypeOf(response).toEqualTypeOf<RESPONSE_TYPE_ENUM>();
   });
 
+  test("string enum collection: add with select/expand", async () => {
+    const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
+
+    const cmd = enumService.add(StringTestEnum.A, (b) => b.select("*"));
+    const request = cmd.getInfo();
+
+    expect(request.url).toBe(`${NAME_ENUM}?${encodeURIComponent("$select")}=${encodeURIComponent("*")}`);
+    expect(request.method).toBe("POST");
+    expect(request.data).toEqual(StringTestEnum.A);
+  });
+
   test("collection: add with converter", async () => {
     const request = serviceConv.add<true>(1);
     const result = request.getInfoConverted();
@@ -115,6 +126,17 @@ describe("CollectionService V4 Tests", () => {
     expect(response.data).toStrictEqual({ value: userModel });
 
     expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV4<number>>>();
+  });
+
+  test("collection: update with select/expand and addToQuery", async () => {
+    const service = serviceConv;
+    const userModel = [1, 0];
+
+    const request = service.update(userModel).addToQuery((b) => b.select("*"));
+
+    expect(request.getInfo().url).toBe(`${NAME_STRING}?${encodeURIComponent("$select")}=${encodeURIComponent("*")}`);
+    expect(request.getInfo().method).toBe("PUT");
+    expect(request.getInfo().data).toEqual(userModel);
   });
 
   test("string enum collection: filter", async () => {

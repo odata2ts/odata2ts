@@ -42,18 +42,22 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
   public patch<Response extends boolean = false>(
     model: ODataModelPayloadV4<Partial<EditableT>>,
     patchOptions?: SubtypeOptions,
+    queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
-    const { client, qModel, basePath, path, getDefaultHeaders } = this.__base;
+    const { client, qModel, basePath, path, getDefaultHeaders, createModelQueryBuilder } = this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(patchOptions);
 
     // add control info automatically, if required
     const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
+    const actualPath = dontUseCastPathSegment ? basePath : path;
 
-    return new UrlRequestCmd<
+    return new UrlBuilderRequestCmdV4<
       ClientType,
       EntityModificationResponseV4<Response, T>,
+      Q,
+      ModelQueryBuilderV4<Q>,
       ODataModelPayloadV4<Partial<EditableT>>
-    >(client, ODataHttpMethods.Patch, dontUseCastPathSegment ? basePath : path, data, {
+    >(client, ODataHttpMethods.Patch, createModelQueryBuilder(queryFn, actualPath), qModel, data, {
       headers: getDefaultHeaders(),
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
@@ -78,25 +82,26 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
   public update<Response extends boolean = false>(
     model: ODataModelPayloadV4<EditableT>,
     updateOptions?: SubtypeOptions,
+    queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
-    const { client, basePath, path, getDefaultHeaders, qModel } = this.__base;
+    const { client, basePath, path, getDefaultHeaders, qModel, createModelQueryBuilder } = this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(updateOptions);
 
     // add control info automatically, if required
     const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
+    const actualPath = dontUseCastPathSegment ? basePath : path;
 
-    // return convertV4ModelResponse(result, qResponseType);
-    return new UrlRequestCmd<ClientType, EntityModificationResponseV4<Response, T>, ODataModelPayloadV4<EditableT>>(
-      client,
-      ODataHttpMethods.Put,
-      dontUseCastPathSegment ? basePath : path,
-      data,
-      {
-        headers: getDefaultHeaders(),
-        mainRequestConverter: qModel,
-        mainResponseConverter: new ModelResponseConverterV4(qModel),
-      },
-    );
+    return new UrlBuilderRequestCmdV4<
+      ClientType,
+      EntityModificationResponseV4<Response, T>,
+      Q,
+      ModelQueryBuilderV4<Q>,
+      ODataModelPayloadV4<EditableT>
+    >(client, ODataHttpMethods.Put, createModelQueryBuilder(queryFn, actualPath), qModel, data, {
+      headers: getDefaultHeaders(),
+      mainRequestConverter: qModel,
+      mainResponseConverter: new ModelResponseConverterV4(qModel),
+    });
   }
 
   /**
@@ -123,8 +128,10 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
 
     return new UrlBuilderRequestCmdV4<ClientType, ODataModelResponseV4<ReturnType>, Q, ModelQueryBuilderV4<Q>>(
       client,
+      ODataHttpMethods.Get,
       createModelQueryBuilder(queryFn),
       qModel,
+      undefined,
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new ModelResponseConverterV4(qModel),

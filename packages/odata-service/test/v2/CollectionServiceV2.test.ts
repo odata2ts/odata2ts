@@ -81,6 +81,29 @@ describe("CollectionService V2 Tests", () => {
     expectTypeOf(response).toEqualTypeOf<RESPONSE_TYPE_ENUM>();
   });
 
+  test("numeric enum collection: add with select/expand", async () => {
+    const enumService = enumConstructor(BASE_PATH, NAME_ENUM);
+    const params = getParams({ $select: "*" });
+
+    const cmd = enumService.add(NumericTestEnum.A, (b) => b.select("*"));
+    const result = cmd.getInfo();
+
+    expect(result.url).toBe(NAME_ENUM + params);
+    expect(result.method).toBe("POST");
+  });
+
+  test("collection: update with select/expand and addToQuery", async () => {
+    const stringService = stringConstructor(BASE_PATH, NAME_STRING);
+    const model = ["test1", "t2"];
+    const params = getParams({ $select: "*" });
+
+    const request = stringService.update(model).addToQuery((b) => b.select("*"));
+
+    expect(request.getInfo().url).toBe(NAME_STRING + params);
+    expect(request.getInfo().method).toBe("PUT");
+    expect(request.getInfo().data).toEqual(model);
+  });
+
   test("collection: update", async () => {
     const stringService = stringConstructor(BASE_PATH, NAME_STRING);
     const model = ["test1", "t2"];

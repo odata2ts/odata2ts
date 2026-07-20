@@ -1,6 +1,6 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelPayloadV4 } from "@odata2ts/odata-core";
-import { CollectionQueryBuilderV4 } from "@odata2ts/odata-query-builder";
+import { CollectionQueryBuilderV4, ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import {
   CollectionResponseConverterV4,
   MainResponseConverter,
@@ -50,23 +50,26 @@ export class CollectionServiceV4<
    *
    * @param model primitive value
    */
-  public add<Response extends boolean = false>(model: ODataModelPayloadV4<PrimitiveT>) {
-    const { path, client, getDefaultHeaders, qModel } = this.__base;
+  public add<Response extends boolean = false>(
+    model: ODataModelPayloadV4<PrimitiveT>,
+    queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
+  ) {
+    const { client, getDefaultHeaders, qModel, createModelQueryBuilder } = this.__base;
 
-    return new UrlRequestCmd<ClientType, CollectionModificationResponseV4<Response, PrimitiveT>, PrimitiveT>(
-      client,
-      ODataHttpMethods.Post,
-      path,
-      model,
-      {
-        headers: getDefaultHeaders(),
-        mainRequestConverter: qModel,
-        mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
-          CollectionModificationResponseV4<Response, PrimitiveT>,
-          T
-        >,
-      },
-    );
+    return new UrlBuilderRequestCmdV4<
+      ClientType,
+      CollectionModificationResponseV4<Response, PrimitiveT>,
+      Q,
+      ModelQueryBuilderV4<Q>,
+      PrimitiveT
+    >(client, ODataHttpMethods.Post, createModelQueryBuilder(queryFn), qModel, model, {
+      headers: getDefaultHeaders(),
+      mainRequestConverter: qModel,
+      mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
+        CollectionModificationResponseV4<Response, PrimitiveT>,
+        T
+      >,
+    });
   }
 
   /**
@@ -83,23 +86,26 @@ export class CollectionServiceV4<
    *
    * @param models set of primitive values
    */
-  public update<Response extends boolean = false>(models: Array<ODataModelPayloadV4<PrimitiveT>>) {
-    const { path, client, getDefaultHeaders, qModel } = this.__base;
+  public update<Response extends boolean = false>(
+    models: Array<ODataModelPayloadV4<PrimitiveT>>,
+    queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
+  ) {
+    const { client, getDefaultHeaders, qModel, createModelQueryBuilder } = this.__base;
 
-    return new UrlRequestCmd<ClientType, CollectionModificationResponseV4<Response, PrimitiveT>, Array<PrimitiveT>>(
-      client,
-      ODataHttpMethods.Put,
-      path,
-      models,
-      {
-        headers: getDefaultHeaders(),
-        mainRequestConverter: qModel,
-        mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
-          CollectionModificationResponseV4<Response, PrimitiveT>,
-          T
-        >,
-      },
-    );
+    return new UrlBuilderRequestCmdV4<
+      ClientType,
+      CollectionModificationResponseV4<Response, PrimitiveT>,
+      Q,
+      ModelQueryBuilderV4<Q>,
+      Array<PrimitiveT>
+    >(client, ODataHttpMethods.Put, createModelQueryBuilder(queryFn), qModel, models, {
+      headers: getDefaultHeaders(),
+      mainRequestConverter: qModel,
+      mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
+        CollectionModificationResponseV4<Response, PrimitiveT>,
+        T
+      >,
+    });
   }
 
   /**
@@ -123,8 +129,10 @@ export class CollectionServiceV4<
 
     return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseV4<ReturnType>, Q>(
       client,
+      ODataHttpMethods.Get,
       createQueryBuilder(queryFn),
       qModel,
+      undefined,
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new CollectionResponseConverterV4(qModel),
