@@ -100,7 +100,29 @@ export class PersonModelCollectionService<ClientType extends ODataHttpClient> ex
   QPersonV4,
   PersonId
 > {
+  private _qGetSomething = new QGetSomethingFunction();
+
   constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
     super(client, basePath, name, qPersonV4, new QPersonIdFunction(name), options);
+  }
+
+  /**
+   * Operation bound to the entity collection (binding param is `Collection(Person)`).
+   * Its URL segment is appended to the collection path itself — i.e. without any key predicate,
+   * in contrast to the same operation bound to a single entity.
+   */
+  public getSomething(params: GetSomethingFunctionParams) {
+    const { addFullPath, client, isUrlNotEncoded } = this.__base;
+    const url = addFullPath(this._qGetSomething.buildUrl(params, isUrlNotEncoded()));
+
+    return new UrlRequestCmd<ClientType, ODataModelResponseV4<PersonModel>>(
+      client,
+      ODataHttpMethods.Get,
+      url,
+      undefined,
+      {
+        mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
+      },
+    );
   }
 }

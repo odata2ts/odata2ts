@@ -197,6 +197,51 @@ describe("Function Digestion Test", () => {
     ]);
   });
 
+  test("Function: bound to entity collection", async () => {
+    odataBuilder
+      .addEntityType("User", undefined, (builder) => {
+        builder.addKeyProp("id", ODataTypesV4.String);
+      })
+      // binding param is a Collection => bound to the entity collection, not a single entity
+      .addFunction("countActive", ODataTypesV4.Boolean, true, (builder) => {
+        builder.addParam("users", `Collection(${withNs("User")})`);
+      })
+      .addFunction("listNames", `Collection(${ODataTypesV4.String})`, true, (builder) => {
+        builder.addParam("users", `Collection(${withNs("User")})`).addParam("filter", ODataTypesV4.String);
+      });
+
+    const result = await doDigest();
+
+    // collection-bound operations must NOT show up as (single-)entity-bound operations ...
+    expect(result.getEntityTypeOperations(withNs("User"))).toStrictEqual([]);
+    // ... but as entity-set (collection) operations instead
+    expect(result.getEntitySetOperations(withNs("User"))).toMatchObject([
+      {
+        fqName: withNs("countActive"),
+        name: "countActive",
+        qName: "User_QCountActive",
+        paramsModelName: "User_CountActiveParams",
+        type: OperationTypes.Function,
+        parameters: [],
+      },
+      {
+        name: "listNames",
+        type: OperationTypes.Function,
+        parameters: [
+          {
+            name: "filter",
+            type: "string",
+          },
+        ],
+        returnType: {
+          isCollection: true,
+          dataType: DataTypes.PrimitiveType,
+          type: "string",
+        },
+      },
+    ]);
+  });
+
   test("Function: fail bound function without params", async () => {
     odataBuilder.addFunction("GetBestFriend", ODataTypesV4.Boolean, true);
 

@@ -199,6 +199,24 @@ describe("V4 EntitySetService Test", () => {
     });
   });
 
+  test("entitySet: collection-bound function sits on the collection path (no key predicate)", async () => {
+    const unencodedService = new PersonModelCollectionService(odataClient, BASE_URL, NAME, { noUrlEncoding: true });
+
+    const request = unencodedService
+      .getSomething({
+        testGuid: { prefix: "xxx", value: "123" },
+        testDateTime: "1",
+        testDateTimeO: "2",
+        testTime: "3",
+      })
+      .getInfo();
+
+    // operation is bound to the collection => appended directly to the set path, without any key predicate
+    expect(request.url).toBe(`${EXPECTED_PATH}/GET_SOMETHING(TEST_GUID=123,testDateTime=1,testDateTimeO=2,testTime=3)`);
+    expect(request.method).toBe("GET");
+    expect(request.data).toBeUndefined();
+  });
+
   test("entitySet: createKey & parseKey with conversions", async () => {
     const toTest = new TestCollectionService(odataClient, "", NAME);
     expect(toTest.createKey("123")).toBe(`${NAME}(123)`);
