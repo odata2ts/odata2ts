@@ -138,6 +138,43 @@ describe("Action Digestion Test", () => {
     ]);
   });
 
+  test("Action: bound to entity collection", async () => {
+    odataBuilder
+      // binding param is a Collection => bound to the entity collection, not a single entity
+      .addAction("archiveAll", ODataTypesV4.Boolean, true, (builder) => {
+        builder.addParam("users", `Collection(${withNs("User")})`).addParam("reason", ODataTypesV4.String);
+      })
+      .addEntityType("User", undefined, (builder) => {
+        builder.addKeyProp("id", ODataTypesV4.String);
+      });
+
+    const result = await doDigest();
+
+    // collection-bound operations must NOT show up as (single-)entity-bound operations ...
+    expect(result.getEntityTypeOperations(withNs("User"))).toStrictEqual([]);
+    // ... but as entity-set (collection) operations instead
+    expect(result.getEntitySetOperations(withNs("User"))).toMatchObject([
+      {
+        fqName: withNs("archiveAll"),
+        name: "archiveAll",
+        qName: "User_QArchiveAll",
+        paramsModelName: "User_ArchiveAllParams",
+        type: OperationTypes.Action,
+        parameters: [
+          {
+            name: "reason",
+            type: "string",
+          },
+        ],
+        returnType: {
+          isCollection: false,
+          type: "boolean",
+        },
+      },
+    ]);
+    expect(result.getUnboundOperationTypes()).toStrictEqual([]);
+  });
+
   test("Action: fail bound function without params", async () => {
     odataBuilder.addAction("NotifyBestFriend", ODataTypesV4.Boolean, true);
 
