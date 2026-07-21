@@ -20,8 +20,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - name: Install cds globally
-        run: npm i -g @sap/cds-dk@8.9.4
       - name: Install packages
         run: yarn --immutable
       - name: Build packages
@@ -30,12 +28,8 @@ jobs:
         run: yarn test-compile
       - name: Check Circular Deps
         run: yarn check-circular-deps
-      - name: Start CAP server & run tests
-        run: |
-          yarn start-cap &
-          sleep 15
-          yarn generate-from-url &&
-          yarn coverage
+      - name: Run Tests
+        run: yarn coverage
       - name: Coveralls
         uses: coverallsapp/github-action@v1.1.2
         with:

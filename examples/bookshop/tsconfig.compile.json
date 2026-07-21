@@ -1,8 +1,0 @@
-{
-  "extends": "../../tsconfig.settings.json",
-  "compilerOptions": {
-    "rootDirs": ["int-test"],
-    "noEmit": true
-  },
-  "exclude": ["node_modules", "lib"]
-}
