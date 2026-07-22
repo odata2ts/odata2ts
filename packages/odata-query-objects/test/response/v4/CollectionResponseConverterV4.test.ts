@@ -109,4 +109,17 @@ describe("CollectionResponseConverterV4 tests", () => {
     expect(converter.convert(createResponse({ value: null })).data.value).toBeNull();
     expect(converter.convert(createResponse({ value: undefined })).data.value).toBeUndefined();
   });
+
+  test("collection of primitives with a RAW value converter (element-wise) — regression test", () => {
+    // this mirrors what the generator actually emits for a Collection(primitive) operation return type
+    // with an active converter (e.g. Big Number, Luxon): the raw ValueConverter is passed directly,
+    // not wrapped in a QNumberCollection/QPrimitiveCollection. Without the element-wise mapping in
+    // MainResponseConverter.applyConverter, this raw converter would receive the whole array instead
+    // of one element at a time.
+    const converter = new CollectionResponseConverterV4(numberToStringConverter);
+
+    const result = converter.convert(createResponse({ value: [1, 2, 3] }));
+
+    expect(result.data.value).toStrictEqual(["1", "2", "3"]);
+  });
 });

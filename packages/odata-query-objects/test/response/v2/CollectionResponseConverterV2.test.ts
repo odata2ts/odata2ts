@@ -1,3 +1,4 @@
+import { numberToStringConverter } from "@odata2ts/test-converters";
 import { describe, expect, test } from "vitest";
 import { CollectionResponseConverterV2 } from "../../../src";
 import { BookModel, QBook } from "../../fixture/operation/BookModel";
@@ -77,5 +78,15 @@ describe("CollectionResponseConverterV2 tests", () => {
       const result = MAIN_CONVERTER.convert(createResponse(nm));
       expect(result.data).toStrictEqual(nm);
     });
+  });
+
+  test("collection of primitives with a RAW value converter (element-wise) — regression test", () => {
+    // mirrors what the generator emits for a Collection(primitive) return type with an active converter:
+    // the raw ValueConverter is passed directly, not wrapped in a collection-aware query object.
+    const converter = new CollectionResponseConverterV2(numberToStringConverter);
+
+    const result = converter.convert(createResponse({ d: { results: [1, 2, 3] } }));
+
+    expect(result.data.d.results).toStrictEqual(["1", "2", "3"]);
   });
 });

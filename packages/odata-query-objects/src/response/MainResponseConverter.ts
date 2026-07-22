@@ -40,7 +40,11 @@ export abstract class MainResponseConverter<Structure, Type> {
       return qModel.convertFromOData(value);
     }
     if (typeof qParam.convertFrom === "function") {
-      return qParam.convertFrom(value);
+      // A raw ValueConverter's convertFrom only handles a single value. When this converter is used
+      // by CollectionResponseConverterV4 / CollectionResponseConverterV2, `value` is the whole response
+      // array, so it must be mapped element-wise here (mirroring how QueryObject/QPrimitiveCollection
+      // already handle arrays in their own convertFromOData).
+      return Array.isArray(value) ? value.map((v) => qParam.convertFrom(v)) : qParam.convertFrom(value);
     }
     return value;
   }
