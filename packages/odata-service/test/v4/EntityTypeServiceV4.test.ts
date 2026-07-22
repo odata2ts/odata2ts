@@ -248,4 +248,30 @@ describe("EntityTypeService V4 Tests", () => {
       "Content-Type": "application/json;IEEE754Compatible=true",
     });
   });
+
+  test("operation V4: model return type is run through the response converter", async () => {
+    const odataModel = { UserName: "russell", Age: 45, FavFeature: "Feature1", Features: ["Feature1"] };
+    const expected = {
+      userName: "russell",
+      age: "45", // number -> string via converter
+      favFeature: Feature.Feature1,
+      features: [Feature.Feature1],
+    };
+
+    odataClient.setModelResponse(odataModel);
+    const response = await testService
+      .getSomething({ testGuid: { prefix: "xxx", value: "123" }, testDateTime: "1", testDateTimeO: "2", testTime: "3" })
+      .execute();
+
+    expect(response.data).toStrictEqual(expected);
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
+  });
+
+  test("operation V4: value return type is run through the response converter", async () => {
+    // server delivers a number, the converter turns it into a string
+    odataClient.setValueResponse(45);
+    const response = await testService.getScore().execute();
+
+    expect(response.data?.value).toBe("45");
+  });
 });

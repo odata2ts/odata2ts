@@ -151,6 +151,10 @@ export class MockODataClient implements ODataHttpClient<MockRequestConfig> {
     this.responseData = this.isV2 ? { d: data } : data;
   }
 
+  public setValueResponse(data: any) {
+    this.responseData = this.isV2 ? { d: data } : { value: data };
+  }
+
   public setCollectionResponse(data: any) {
     this.responseData = this.isV2 ? { d: { results: data } } : { value: data };
   }

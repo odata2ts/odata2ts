@@ -1,9 +1,15 @@
+import { numberToStringConverter } from "@odata2ts/test-converters";
 import { describe, expect, test } from "vitest";
-import { CollectionResponseConverterV4 } from "../../../src";
+import { CollectionResponseConverterV4, QEnumCollection, QNumberCollection } from "../../../src";
 import { BookModel, QBook } from "../../fixture/operation/BookModel";
 import { createResponse } from "../../test-infra/TestResponseHelper";
 
-describe("ModelResponseConverterV4 tests", () => {
+enum SampleEnum {
+  A = "A",
+  B = "B",
+}
+
+describe("CollectionResponseConverterV4 tests", () => {
   const MODEL_INPUT = [
     {
       Title: "Wuthering Heights",
@@ -75,5 +81,32 @@ describe("ModelResponseConverterV4 tests", () => {
       const result = MAIN_CONVERTER.convert(createResponse(nm));
       expect(result.data).toStrictEqual(nm);
     });
+  });
+
+  test("collection of primitives with a value converter (element-wise)", () => {
+    const converter = new CollectionResponseConverterV4(
+      new QNumberCollection<string>(undefined, numberToStringConverter),
+    );
+
+    const result = converter.convert(createResponse({ value: [1, 2, 3] }));
+
+    expect(result.data.value).toStrictEqual(["1", "2", "3"]);
+  });
+
+  test("collection of enums passes the values through", () => {
+    const converter = new CollectionResponseConverterV4(new QEnumCollection(SampleEnum));
+
+    const result = converter.convert(createResponse({ value: [SampleEnum.A, SampleEnum.B] }));
+
+    expect(result.data.value).toStrictEqual([SampleEnum.A, SampleEnum.B]);
+  });
+
+  test("collection of primitives: null / undefined value is left untouched", () => {
+    const converter = new CollectionResponseConverterV4(
+      new QNumberCollection<string>(undefined, numberToStringConverter),
+    );
+
+    expect(converter.convert(createResponse({ value: null })).data.value).toBeNull();
+    expect(converter.convert(createResponse({ value: undefined })).data.value).toBeUndefined();
   });
 });
