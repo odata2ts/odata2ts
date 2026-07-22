@@ -16,9 +16,8 @@
     "check-circular-deps": "yarn workspaces foreach -A -p run check-circular-deps",
     "clean": "rimraf coverage",
     "coverage": "vitest run --coverage",
-    "generate-from-url": "yarn workspace @odata2ts/example-bookshop generate-from-url",
     "int-test": "yarn workspaces foreach -A -p run int-test",
-    "start-cap": "yarn workspace @odata2ts/example-bookshop start",
+    "int-test:cap": "yarn workspace @odata2ts/example-cap int-test",
     "test": "yarn workspaces foreach -A -p run test",
     "test-compile": "yarn workspaces foreach -A -p run test-compile"
   },

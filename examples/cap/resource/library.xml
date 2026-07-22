@@ -1,0 +1,926 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Capabilities.V1.xml">
+    <edmx:Include Alias="Capabilities" Namespace="Org.OData.Capabilities.V1"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
+    <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Core.V1.xml">
+    <edmx:Include Alias="Core" Namespace="Org.OData.Core.V1"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Validation.V1.xml">
+    <edmx:Include Alias="Validation" Namespace="Org.OData.Validation.V1"/>
+  </edmx:Reference>
+  <edmx:DataServices>
+    <Schema Namespace="Library.Service" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <Annotation Term="Core.Links">
+        <Collection>
+          <Record>
+            <PropertyValue Property="rel" String="author"/>
+            <PropertyValue Property="href" String="https://cap.cloud.sap"/>
+          </Record>
+        </Collection>
+      </Annotation>
+      <EntityContainer Name="EntityContainer">
+        <EntitySet Name="Books" EntityType="Library.Service.Books">
+          <NavigationPropertyBinding Path="Copies" Target="Copies"/>
+          <NavigationPropertyBinding Path="Publisher" Target="Publishers"/>
+        </EntitySet>
+        <EntitySet Name="Copies" EntityType="Library.Service.Copies">
+          <NavigationPropertyBinding Path="Location" Target="Branches"/>
+        </EntitySet>
+        <EntitySet Name="Branches" EntityType="Library.Service.Branches"/>
+        <EntitySet Name="Publishers" EntityType="Library.Service.Publishers">
+          <NavigationPropertyBinding Path="Books" Target="Books"/>
+        </EntitySet>
+        <EntitySet Name="Magazines" EntityType="Library.Service.Magazines">
+          <NavigationPropertyBinding Path="Copies" Target="Copies"/>
+        </EntitySet>
+        <EntitySet Name="TradeJournals" EntityType="Library.Service.TradeJournals">
+          <NavigationPropertyBinding Path="Copies" Target="Copies"/>
+        </EntitySet>
+        <EntitySet Name="Audiobooks" EntityType="Library.Service.Audiobooks">
+          <NavigationPropertyBinding Path="Copies" Target="Copies"/>
+          <NavigationPropertyBinding Path="Chapters" Target="AudiobookChapters"/>
+        </EntitySet>
+        <EntitySet Name="AudiobookChapters" EntityType="Library.Service.AudiobookChapters">
+          <NavigationPropertyBinding Path="up_" Target="Audiobooks"/>
+        </EntitySet>
+        <EntitySet Name="DVDs" EntityType="Library.Service.DVDs">
+          <NavigationPropertyBinding Path="Copies" Target="Copies"/>
+        </EntitySet>
+        <EntitySet Name="EBooks" EntityType="Library.Service.EBooks">
+          <NavigationPropertyBinding Path="Copies" Target="Copies"/>
+        </EntitySet>
+        <EntitySet Name="CollectorsItems" EntityType="Library.Service.CollectorsItems">
+          <NavigationPropertyBinding Path="Copies" Target="Copies"/>
+          <NavigationPropertyBinding Path="StorageLocation" Target="Branches"/>
+        </EntitySet>
+        <EntitySet Name="Members" EntityType="Library.Service.Members">
+          <NavigationPropertyBinding Path="Loans" Target="Loans"/>
+          <NavigationPropertyBinding Path="Reservations" Target="Reservations"/>
+          <NavigationPropertyBinding Path="IdDocument" Target="IdDocuments"/>
+        </EntitySet>
+        <EntitySet Name="Loans" EntityType="Library.Service.Loans">
+          <NavigationPropertyBinding Path="Member" Target="Members"/>
+          <NavigationPropertyBinding Path="Copy" Target="Copies"/>
+        </EntitySet>
+        <EntitySet Name="Reservations" EntityType="Library.Service.Reservations">
+          <NavigationPropertyBinding Path="Member" Target="Members"/>
+        </EntitySet>
+        <EntitySet Name="IdDocuments" EntityType="Library.Service.IdDocuments"/>
+        <EntitySet Name="Bookmobiles" EntityType="Library.Service.Bookmobiles"/>
+        <Singleton Name="MainBranch" Type="Library.Service.MainBranch"/>
+        <EntitySet Name="PublisherBranches" EntityType="Library.Service.PublisherBranches"/>
+        <FunctionImport Name="TotalMediaCount" Function="Library.Service.TotalMediaCount"/>
+        <FunctionImport Name="AllLanguages" Function="Library.Service.AllLanguages"/>
+        <FunctionImport Name="LoanStatistics" Function="Library.Service.LoanStatistics"/>
+        <FunctionImport Name="StatsPerBranch" Function="Library.Service.StatsPerBranch"/>
+        <FunctionImport Name="MostReadMedium" Function="Library.Service.MostReadMedium" EntitySet="Books"/>
+        <FunctionImport Name="NewReleases" Function="Library.Service.NewReleases" EntitySet="Books"/>
+        <FunctionImport Name="Search" Function="Library.Service.Search" EntitySet="Books"/>
+        <ActionImport Name="ClosureDay" Action="Library.Service.ClosureDay"/>
+        <ActionImport Name="NextInventoryNumber" Action="Library.Service.NextInventoryNumber"/>
+        <ActionImport Name="CleanUpKeywords" Action="Library.Service.CleanUpKeywords"/>
+        <ActionImport Name="YearEndClosing" Action="Library.Service.YearEndClosing"/>
+        <ActionImport Name="RunOverdueNotices" Action="Library.Service.RunOverdueNotices"/>
+        <ActionImport Name="AcquireCollectorsItem" Action="Library.Service.AcquireCollectorsItem" EntitySet="CollectorsItems"/>
+        <ActionImport Name="RunStockCheck" Action="Library.Service.RunStockCheck" EntitySet="Books"/>
+      </EntityContainer>
+      <EntityType Name="Books">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
+        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
+        <Property Name="PublicationDate" Type="Edm.Date"/>
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
+        <Property Name="PopularityScore" Type="Edm.Double"/>
+        <NavigationProperty Name="Copies" Type="Collection(Library.Service.Copies)"/>
+        <Property Name="ISBN" Type="Edm.String" MaxLength="13"/>
+        <Property Name="PageCount" Type="Edm.Int16"/>
+        <Property Name="AgeRating" Type="Edm.Byte"/>
+        <NavigationProperty Name="Publisher" Type="Library.Service.Publishers" Partner="Books">
+          <ReferentialConstraint Property="Publisher_Id" ReferencedProperty="Id"/>
+        </NavigationProperty>
+        <Property Name="Publisher_Id" Type="Edm.Int32"/>
+      </EntityType>
+      <EntityType Name="Copies">
+        <Key>
+          <PropertyRef Name="MediumId"/>
+          <PropertyRef Name="InventoryNumber"/>
+        </Key>
+        <Property Name="MediumId" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="InventoryNumber" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="Condition" Type="Edm.Byte"/>
+        <Property Name="IsLoanable" Type="Edm.Boolean" Nullable="false" DefaultValue="true"/>
+        <Property Name="Status" Type="Edm.Byte"/>
+        <Property Name="AcquisitionDate" Type="Edm.Date"/>
+        <Property Name="WeightKg" Type="Edm.Single"/>
+        <Property Name="Location_" Type="Edm.String" MaxLength="10"/>
+        <NavigationProperty Name="Location" Type="Library.Service.Branches">
+          <ReferentialConstraint Property="Location_Id" ReferencedProperty="Id"/>
+        </NavigationProperty>
+        <Property Name="Location_Id" Type="Edm.Int32"/>
+      </EntityType>
+      <EntityType Name="Branches">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="Name" Type="Edm.String" MaxLength="100" Nullable="false"/>
+        <Property Name="Address_Street" Type="Edm.String" MaxLength="120"/>
+        <Property Name="Address_City" Type="Edm.String" MaxLength="80"/>
+        <Property Name="Address_PostalCode" Type="Edm.String" MaxLength="10"/>
+        <Property Name="Address_Country" Type="Edm.String" MaxLength="60"/>
+        <Property Name="Location" Type="Edm.GeographyPoint" SRID="4326"/>
+        <Property Name="CatchmentArea" Type="Edm.GeographyPolygon" SRID="4326"/>
+        <Property Name="LowestFloor" Type="Edm.SByte"/>
+        <Property Name="FloorPlanOrigin" Type="Edm.GeometryPoint" SRID="0"/>
+        <Property Name="FloorPlanShapes" Type="Edm.GeometryCollection" SRID="0"/>
+        <Property Name="OpensAt" Type="Edm.TimeOfDay"/>
+        <Property Name="ClosesAt" Type="Edm.TimeOfDay"/>
+        <Property Name="Amenities" Type="Edm.Int32"/>
+        <Property Name="Population" Type="Edm.Int64"/>
+      </EntityType>
+      <EntityType Name="Publishers">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="Name" Type="Edm.String" MaxLength="100" Nullable="false"/>
+        <Property Name="Country" Type="Edm.String" MaxLength="60"/>
+        <Property Name="Founded" Type="Edm.Date"/>
+        <NavigationProperty Name="Books" Type="Collection(Library.Service.Books)" Partner="Publisher"/>
+      </EntityType>
+      <EntityType Name="Magazines">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
+        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
+        <Property Name="PublicationDate" Type="Edm.Date"/>
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
+        <Property Name="PopularityScore" Type="Edm.Double"/>
+        <NavigationProperty Name="Copies" Type="Collection(Library.Service.Copies)"/>
+        <Property Name="ISBN" Type="Edm.String" MaxLength="13"/>
+        <Property Name="IssueNumber" Type="Edm.Int32"/>
+      </EntityType>
+      <EntityType Name="TradeJournals">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
+        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
+        <Property Name="PublicationDate" Type="Edm.Date"/>
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
+        <Property Name="PopularityScore" Type="Edm.Double"/>
+        <NavigationProperty Name="Copies" Type="Collection(Library.Service.Copies)"/>
+        <Property Name="ISBN" Type="Edm.String" MaxLength="13"/>
+        <Property Name="IssueNumber" Type="Edm.Int32"/>
+        <Property Name="Field" Type="Edm.String"/>
+      </EntityType>
+      <EntityType Name="Audiobooks">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
+        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
+        <Property Name="PublicationDate" Type="Edm.Date"/>
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
+        <Property Name="PopularityScore" Type="Edm.Double"/>
+        <NavigationProperty Name="Copies" Type="Collection(Library.Service.Copies)"/>
+        <Property Name="Duration" Type="Edm.Duration"/>
+        <Property Name="Narrator" Type="Edm.String"/>
+        <Property Name="Sample" Type="Edm.Stream"/>
+        <NavigationProperty Name="Chapters" Type="Collection(Library.Service.AudiobookChapters)" Partner="up_">
+          <OnDelete Action="Cascade"/>
+        </NavigationProperty>
+      </EntityType>
+      <EntityType Name="AudiobookChapters">
+        <Key>
+          <PropertyRef Name="Id"/>
+          <PropertyRef Name="up__Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
+        <NavigationProperty Name="up_" Type="Library.Service.Audiobooks" Partner="Chapters">
+          <ReferentialConstraint Property="up__Id" ReferencedProperty="Id"/>
+        </NavigationProperty>
+        <Property Name="up__Id" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Title" Type="Edm.String"/>
+        <Property Name="content" Type="Edm.Stream"/>
+      </EntityType>
+      <EntityType Name="DVDs">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
+        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
+        <Property Name="PublicationDate" Type="Edm.Date"/>
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
+        <Property Name="PopularityScore" Type="Edm.Double"/>
+        <NavigationProperty Name="Copies" Type="Collection(Library.Service.Copies)"/>
+        <Property Name="Duration" Type="Edm.Duration"/>
+        <Property Name="RegionCode" Type="Edm.Byte"/>
+      </EntityType>
+      <EntityType Name="EBooks">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
+        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
+        <Property Name="PublicationDate" Type="Edm.Date"/>
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
+        <Property Name="PopularityScore" Type="Edm.Double"/>
+        <NavigationProperty Name="Copies" Type="Collection(Library.Service.Copies)"/>
+        <Property Name="FileFormat" Type="Edm.String" MaxLength="20"/>
+        <Property Name="content" Type="Edm.Stream"/>
+      </EntityType>
+      <EntityType Name="CollectorsItems" OpenType="true">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
+        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
+        <Property Name="PublicationDate" Type="Edm.Date"/>
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
+        <Property Name="PopularityScore" Type="Edm.Double"/>
+        <NavigationProperty Name="Copies" Type="Collection(Library.Service.Copies)"/>
+        <Property Name="ExtraData" Type="Edm.Untyped"/>
+        <NavigationProperty Name="StorageLocation" Type="Library.Service.Branches">
+          <ReferentialConstraint Property="StorageLocation_Id" ReferencedProperty="Id"/>
+        </NavigationProperty>
+        <Property Name="StorageLocation_Id" Type="Edm.Int32"/>
+      </EntityType>
+      <EntityType Name="Members">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="Name" Type="Edm.String" MaxLength="100" Nullable="false"/>
+        <Property Name="DateOfBirth" Type="Edm.Date"/>
+        <Property Name="Address_Street" Type="Edm.String" MaxLength="120"/>
+        <Property Name="Address_City" Type="Edm.String" MaxLength="80"/>
+        <Property Name="Address_PostalCode" Type="Edm.String" MaxLength="10"/>
+        <Property Name="Address_Country" Type="Edm.String" MaxLength="60"/>
+        <Property Name="PreviousAddresses" Type="Collection(Library.Service.Library_Catalog_PostalAddress)" Nullable="true"/>
+        <Property Name="ActiveSince" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="Balance" Type="Edm.Decimal" Precision="9" Scale="2"/>
+        <NavigationProperty Name="Loans" Type="Collection(Library.Service.Loans)" Partner="Member">
+          <OnDelete Action="Cascade"/>
+        </NavigationProperty>
+        <NavigationProperty Name="Reservations" Type="Collection(Library.Service.Reservations)" Partner="Member">
+          <OnDelete Action="Cascade"/>
+        </NavigationProperty>
+        <NavigationProperty Name="IdDocument" Type="Library.Service.IdDocuments">
+          <ReferentialConstraint Property="IdDocument_Id" ReferencedProperty="Id"/>
+        </NavigationProperty>
+        <Property Name="IdDocument_Id" Type="Edm.Guid"/>
+      </EntityType>
+      <EntityType Name="Loans">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="LoanedAt" Type="Edm.DateTimeOffset" Precision="7" Nullable="false"/>
+        <Property Name="DueDate" Type="Edm.Date" Nullable="false"/>
+        <Property Name="ReturnedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="LateFee" Type="Edm.Decimal" Precision="5" Scale="2"/>
+        <NavigationProperty Name="Member" Type="Library.Service.Members" Nullable="false" Partner="Loans">
+          <ReferentialConstraint Property="Member_Id" ReferencedProperty="Id"/>
+        </NavigationProperty>
+        <Property Name="Member_Id" Type="Edm.Int32" Nullable="false"/>
+        <NavigationProperty Name="Copy" Type="Library.Service.Copies" Nullable="false">
+          <ReferentialConstraint Property="Copy_MediumId" ReferencedProperty="MediumId"/>
+          <ReferentialConstraint Property="Copy_InventoryNumber" ReferencedProperty="InventoryNumber"/>
+        </NavigationProperty>
+        <Property Name="Copy_MediumId" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Copy_InventoryNumber" Type="Edm.Int32" Nullable="false"/>
+      </EntityType>
+      <EntityType Name="Reservations">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="ReservedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <NavigationProperty Name="Member" Type="Library.Service.Members" Partner="Reservations">
+          <ReferentialConstraint Property="Member_Id" ReferencedProperty="Id"/>
+        </NavigationProperty>
+        <Property Name="Member_Id" Type="Edm.Int32"/>
+      </EntityType>
+      <EntityType Name="IdDocuments">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Scan" Type="Edm.Binary"/>
+        <Property Name="UploadedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+      </EntityType>
+      <EntityType Name="Bookmobiles">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="LicensePlate" Type="Edm.String" MaxLength="12"/>
+        <Property Name="Route" Type="Edm.GeographyLineString" SRID="4326"/>
+        <Property Name="CurrentPosition" Type="Edm.GeographyPoint" SRID="4326"/>
+      </EntityType>
+      <EntityType Name="MainBranch">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="Name" Type="Edm.String" MaxLength="100" Nullable="false"/>
+        <Property Name="Address_Street" Type="Edm.String" MaxLength="120"/>
+        <Property Name="Address_City" Type="Edm.String" MaxLength="80"/>
+        <Property Name="Address_PostalCode" Type="Edm.String" MaxLength="10"/>
+        <Property Name="Address_Country" Type="Edm.String" MaxLength="60"/>
+        <Property Name="Location" Type="Edm.GeographyPoint" SRID="4326"/>
+        <Property Name="CatchmentArea" Type="Edm.GeographyPolygon" SRID="4326"/>
+        <Property Name="LowestFloor" Type="Edm.SByte"/>
+        <Property Name="FloorPlanOrigin" Type="Edm.GeometryPoint" SRID="0"/>
+        <Property Name="FloorPlanShapes" Type="Edm.GeometryCollection" SRID="0"/>
+        <Property Name="OpensAt" Type="Edm.TimeOfDay"/>
+        <Property Name="ClosesAt" Type="Edm.TimeOfDay"/>
+        <Property Name="Amenities" Type="Edm.Int32"/>
+        <Property Name="Population" Type="Edm.Int64"/>
+      </EntityType>
+      <EntityType Name="PublisherBranches">
+        <Key>
+          <PropertyRef Name="Id"/>
+        </Key>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="City" Type="Edm.String" MaxLength="80"/>
+        <Property Name="Country" Type="Edm.String" MaxLength="60"/>
+      </EntityType>
+      <ComplexType Name="Library_Catalog_MediumStats">
+        <Property Name="TotalLoanCount" Type="Edm.Int64"/>
+        <Property Name="AverageLoanDuration" Type="Edm.Duration"/>
+      </ComplexType>
+      <ComplexType Name="Library_Catalog_ConditionReport">
+        <Property Name="ConditionBefore" Type="Edm.Byte"/>
+        <Property Name="ConditionAfter" Type="Edm.Byte"/>
+        <Property Name="Remark" Type="Edm.String"/>
+      </ComplexType>
+      <ComplexType Name="Library_Catalog_PostalAddress">
+        <Property Name="Street" Type="Edm.String" MaxLength="120"/>
+        <Property Name="City" Type="Edm.String" MaxLength="80"/>
+        <Property Name="PostalCode" Type="Edm.String" MaxLength="10"/>
+        <Property Name="Country" Type="Edm.String" MaxLength="60"/>
+      </ComplexType>
+      <ComplexType Name="Library_Circulation_OverdueNotice">
+        <Property Name="Reason" Type="Edm.String"/>
+        <Property Name="Amount" Type="Edm.Decimal" Precision="5" Scale="2"/>
+        <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+      </ComplexType>
+      <ComplexType Name="Library_Circulation_LoanStats">
+        <Property Name="TotalLoans" Type="Edm.Int64"/>
+        <Property Name="AverageLoanDuration" Type="Edm.Duration"/>
+      </ComplexType>
+      <ComplexType Name="Library_Circulation_DateRange">
+        <Property Name="From" Type="Edm.Date"/>
+        <Property Name="To" Type="Edm.Date"/>
+      </ComplexType>
+      <ComplexType Name="Library_Circulation_BranchStats">
+        <Property Name="BranchId" Type="Edm.Int32"/>
+        <Property Name="LoanCount" Type="Edm.Int64"/>
+      </ComplexType>
+      <ComplexType Name="Library_Circulation_AnnualReport">
+        <Property Name="Year" Type="Edm.Int32"/>
+        <Property Name="TotalLoans" Type="Edm.Int64"/>
+        <Property Name="TotalLateFees" Type="Edm.Decimal" Precision="12" Scale="2"/>
+      </ComplexType>
+      <Function Name="LoanMetrics" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.Books"/>
+        <ReturnType Type="Library.Service.Library_Catalog_MediumStats"/>
+      </Function>
+      <Function Name="LoanMetrics" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.Magazines"/>
+        <ReturnType Type="Library.Service.Library_Catalog_MediumStats"/>
+      </Function>
+      <Function Name="LoanMetrics" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.TradeJournals"/>
+        <ReturnType Type="Library.Service.Library_Catalog_MediumStats"/>
+      </Function>
+      <Function Name="LoanMetrics" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.Audiobooks"/>
+        <ReturnType Type="Library.Service.Library_Catalog_MediumStats"/>
+      </Function>
+      <Function Name="LoanMetrics" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.DVDs"/>
+        <ReturnType Type="Library.Service.Library_Catalog_MediumStats"/>
+      </Function>
+      <Function Name="LoanMetrics" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.EBooks"/>
+        <ReturnType Type="Library.Service.Library_Catalog_MediumStats"/>
+      </Function>
+      <Function Name="LoanMetrics" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.CollectorsItems"/>
+        <ReturnType Type="Library.Service.Library_Catalog_MediumStats"/>
+      </Function>
+      <Function Name="AvailableLanguages" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Collection(Library.Service.Books)" Nullable="true"/>
+        <ReturnType Type="Collection(Edm.String)" Nullable="true"/>
+      </Function>
+      <Function Name="AvailableLanguages" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Collection(Library.Service.Magazines)" Nullable="true"/>
+        <ReturnType Type="Collection(Edm.String)" Nullable="true"/>
+      </Function>
+      <Function Name="AvailableLanguages" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Collection(Library.Service.TradeJournals)" Nullable="true"/>
+        <ReturnType Type="Collection(Edm.String)" Nullable="true"/>
+      </Function>
+      <Function Name="AvailableLanguages" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Collection(Library.Service.Audiobooks)" Nullable="true"/>
+        <ReturnType Type="Collection(Edm.String)" Nullable="true"/>
+      </Function>
+      <Function Name="AvailableLanguages" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Collection(Library.Service.DVDs)" Nullable="true"/>
+        <ReturnType Type="Collection(Edm.String)" Nullable="true"/>
+      </Function>
+      <Function Name="AvailableLanguages" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Collection(Library.Service.EBooks)" Nullable="true"/>
+        <ReturnType Type="Collection(Edm.String)" Nullable="true"/>
+      </Function>
+      <Function Name="AvailableLanguages" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Collection(Library.Service.CollectorsItems)" Nullable="true"/>
+        <ReturnType Type="Collection(Edm.String)" Nullable="true"/>
+      </Function>
+      <Function Name="AvailableCopies" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.Books"/>
+        <ReturnType Type="Collection(Library.Service.Copies)"/>
+      </Function>
+      <Function Name="AvailableCopies" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.Magazines"/>
+        <ReturnType Type="Collection(Library.Service.Copies)"/>
+      </Function>
+      <Function Name="AvailableCopies" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.TradeJournals"/>
+        <ReturnType Type="Collection(Library.Service.Copies)"/>
+      </Function>
+      <Function Name="AvailableCopies" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.Audiobooks"/>
+        <ReturnType Type="Collection(Library.Service.Copies)"/>
+      </Function>
+      <Function Name="AvailableCopies" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.DVDs"/>
+        <ReturnType Type="Collection(Library.Service.Copies)"/>
+      </Function>
+      <Function Name="AvailableCopies" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.EBooks"/>
+        <ReturnType Type="Collection(Library.Service.Copies)"/>
+      </Function>
+      <Function Name="AvailableCopies" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.CollectorsItems"/>
+        <ReturnType Type="Collection(Library.Service.Copies)"/>
+      </Function>
+      <Function Name="AvailableCopy" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.Books"/>
+        <ReturnType Type="Library.Service.Copies"/>
+      </Function>
+      <Function Name="AvailableCopy" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.Magazines"/>
+        <ReturnType Type="Library.Service.Copies"/>
+      </Function>
+      <Function Name="AvailableCopy" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.TradeJournals"/>
+        <ReturnType Type="Library.Service.Copies"/>
+      </Function>
+      <Function Name="AvailableCopy" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.Audiobooks"/>
+        <ReturnType Type="Library.Service.Copies"/>
+      </Function>
+      <Function Name="AvailableCopy" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.DVDs"/>
+        <ReturnType Type="Library.Service.Copies"/>
+      </Function>
+      <Function Name="AvailableCopy" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.EBooks"/>
+        <ReturnType Type="Library.Service.Copies"/>
+      </Function>
+      <Function Name="AvailableCopy" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.CollectorsItems"/>
+        <ReturnType Type="Library.Service.Copies"/>
+      </Function>
+      <Action Name="Reserve" IsBound="true">
+        <Parameter Name="in" Type="Library.Service.Books"/>
+        <Parameter Name="MemberId" Type="Edm.Int32"/>
+        <ReturnType Type="Edm.Int32"/>
+      </Action>
+      <Action Name="Reserve" IsBound="true">
+        <Parameter Name="in" Type="Library.Service.Magazines"/>
+        <Parameter Name="MemberId" Type="Edm.Int32"/>
+        <ReturnType Type="Edm.Int32"/>
+      </Action>
+      <Action Name="Reserve" IsBound="true">
+        <Parameter Name="in" Type="Library.Service.TradeJournals"/>
+        <Parameter Name="MemberId" Type="Edm.Int32"/>
+        <ReturnType Type="Edm.Int32"/>
+      </Action>
+      <Action Name="Reserve" IsBound="true">
+        <Parameter Name="in" Type="Library.Service.Audiobooks"/>
+        <Parameter Name="MemberId" Type="Edm.Int32"/>
+        <ReturnType Type="Edm.Int32"/>
+      </Action>
+      <Action Name="Reserve" IsBound="true">
+        <Parameter Name="in" Type="Library.Service.DVDs"/>
+        <Parameter Name="MemberId" Type="Edm.Int32"/>
+        <ReturnType Type="Edm.Int32"/>
+      </Action>
+      <Action Name="Reserve" IsBound="true">
+        <Parameter Name="in" Type="Library.Service.EBooks"/>
+        <Parameter Name="MemberId" Type="Edm.Int32"/>
+        <ReturnType Type="Edm.Int32"/>
+      </Action>
+      <Action Name="Reserve" IsBound="true">
+        <Parameter Name="in" Type="Library.Service.CollectorsItems"/>
+        <Parameter Name="MemberId" Type="Edm.Int32"/>
+        <ReturnType Type="Edm.Int32"/>
+      </Action>
+      <Action Name="CheckOut" IsBound="true">
+        <Parameter Name="in" Type="Library.Service.Copies"/>
+        <Parameter Name="MemberId" Type="Edm.Int32"/>
+      </Action>
+      <Action Name="AssessCondition" IsBound="true">
+        <Parameter Name="in" Type="Library.Service.Copies"/>
+        <Parameter Name="NewCondition" Type="Edm.Byte"/>
+        <Parameter Name="Remark" Type="Edm.String"/>
+        <ReturnType Type="Library.Service.Library_Catalog_ConditionReport"/>
+      </Action>
+      <Function Name="OutstandingBalance" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.Members"/>
+        <ReturnType Type="Edm.Decimal" Precision="9" Scale="2"/>
+      </Function>
+      <Function Name="NoticeHistory" IsBound="true" IsComposable="false">
+        <Parameter Name="in" Type="Library.Service.Members"/>
+        <ReturnType Type="Collection(Library.Service.Library_Circulation_OverdueNotice)" Nullable="true"/>
+      </Function>
+      <Action Name="RunReminders" IsBound="true">
+        <Parameter Name="in" Type="Library.Service.Members"/>
+        <ReturnType Type="Collection(Library.Service.Library_Circulation_OverdueNotice)" Nullable="true"/>
+      </Action>
+      <Action Name="Renew" IsBound="true" EntitySetPath="in">
+        <Parameter Name="in" Type="Library.Service.Loans"/>
+        <ReturnType Type="Library.Service.Loans"/>
+      </Action>
+      <Action Name="RenewAll" IsBound="true" EntitySetPath="in">
+        <Parameter Name="in" Type="Collection(Library.Service.Loans)" Nullable="true"/>
+        <ReturnType Type="Collection(Library.Service.Loans)"/>
+      </Action>
+      <Action Name="BulkRenew" IsBound="true">
+        <Parameter Name="in" Type="Collection(Library.Service.Loans)" Nullable="true"/>
+        <ReturnType Type="Collection(Edm.String)" Nullable="true"/>
+      </Action>
+      <Function Name="TotalMediaCount" IsBound="false" IsComposable="false">
+        <ReturnType Type="Edm.Int64"/>
+      </Function>
+      <Function Name="AllLanguages" IsBound="false" IsComposable="false">
+        <ReturnType Type="Collection(Edm.String)" Nullable="true"/>
+      </Function>
+      <Function Name="LoanStatistics" IsBound="false" IsComposable="false">
+        <Parameter Name="Period" Type="Library.Service.Library_Circulation_DateRange"/>
+        <ReturnType Type="Library.Service.Library_Circulation_LoanStats"/>
+      </Function>
+      <Function Name="StatsPerBranch" IsBound="false" IsComposable="false">
+        <ReturnType Type="Collection(Library.Service.Library_Circulation_BranchStats)" Nullable="true"/>
+      </Function>
+      <Function Name="MostReadMedium" IsBound="false" IsComposable="false">
+        <ReturnType Type="Library.Service.Books"/>
+      </Function>
+      <Function Name="NewReleases" IsBound="false" IsComposable="false">
+        <ReturnType Type="Collection(Library.Service.Books)"/>
+      </Function>
+      <Function Name="Search" IsBound="false" IsComposable="false">
+        <Parameter Name="Term" Type="Edm.String" Nullable="false"/>
+        <Parameter Name="MaxResults" Type="Edm.Int32"/>
+        <ReturnType Type="Collection(Library.Service.Books)"/>
+      </Function>
+      <Action Name="ClosureDay" IsBound="false">
+        <Parameter Name="Day" Type="Edm.Date" Nullable="false"/>
+      </Action>
+      <Action Name="NextInventoryNumber" IsBound="false">
+        <ReturnType Type="Edm.Int32"/>
+      </Action>
+      <Action Name="CleanUpKeywords" IsBound="false">
+        <Parameter Name="Obsolete" Type="Collection(Edm.String)" Nullable="true"/>
+        <ReturnType Type="Collection(Edm.String)" Nullable="true"/>
+      </Action>
+      <Action Name="YearEndClosing" IsBound="false">
+        <Parameter Name="Year" Type="Edm.Int32" Nullable="false"/>
+        <ReturnType Type="Library.Service.Library_Circulation_AnnualReport"/>
+      </Action>
+      <Action Name="RunOverdueNotices" IsBound="false">
+        <ReturnType Type="Collection(Library.Service.Library_Circulation_OverdueNotice)" Nullable="true"/>
+      </Action>
+      <Action Name="AcquireCollectorsItem" IsBound="false">
+        <Parameter Name="Title" Type="Edm.String" Nullable="false"/>
+        <Parameter Name="Description" Type="Edm.String"/>
+        <ReturnType Type="Library.Service.CollectorsItems"/>
+      </Action>
+      <Action Name="RunStockCheck" IsBound="false">
+        <ReturnType Type="Collection(Library.Service.Books)"/>
+      </Action>
+      <Annotations Target="Library.Service.Books">
+        <Annotation Term="Core.AlternateKeys">
+          <Collection>
+            <Record Type="Core.AlternateKey">
+              <PropertyValue Property="Key">
+                <Collection>
+                  <Record Type="Core.PropertyRef">
+                    <PropertyValue Property="Name" PropertyPath="ISBN"/>
+                  </Record>
+                </Collection>
+              </PropertyValue>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.EntityContainer/Books">
+        <Annotation Term="Capabilities.SearchRestrictions">
+          <Record Type="Capabilities.SearchRestrictionsType">
+            <PropertyValue Property="Searchable" Bool="true"/>
+          </Record>
+        </Annotation>
+        <Annotation Term="Core.AlternateKeys">
+          <Collection>
+            <Record Type="Core.AlternateKey">
+              <PropertyValue Property="Key">
+                <Collection>
+                  <Record Type="Core.PropertyRef">
+                    <PropertyValue Property="Name" PropertyPath="ISBN"/>
+                  </Record>
+                </Collection>
+              </PropertyValue>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.Books/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.Books/PopularityScore">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.EntityContainer/Copies">
+        <Annotation Term="Core.OptimisticConcurrency">
+          <Collection/>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.Copies/MediumId">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.Copies/Status">
+        <Annotation Term="Validation.AllowedValues">
+          <Collection>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="Available"/>
+              <PropertyValue Property="Value" Int="0"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="OnLoan"/>
+              <PropertyValue Property="Value" Int="1"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="InRepair"/>
+              <PropertyValue Property="Value" Int="2"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="Missing"/>
+              <PropertyValue Property="Value" Int="3"/>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.Branches/Amenities">
+        <Annotation Term="Validation.AllowedValues">
+          <Collection>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="WheelchairAccessible"/>
+              <PropertyValue Property="Value" Int="1"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="Parking"/>
+              <PropertyValue Property="Value" Int="2"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="Café"/>
+              <PropertyValue Property="Value" Int="4"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="KidsArea"/>
+              <PropertyValue Property="Value" Int="8"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="StudyRoom"/>
+              <PropertyValue Property="Value" Int="16"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="FullService"/>
+              <PropertyValue Property="Value" Int="31"/>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.Magazines">
+        <Annotation Term="Core.AlternateKeys">
+          <Collection>
+            <Record Type="Core.AlternateKey">
+              <PropertyValue Property="Key">
+                <Collection>
+                  <Record Type="Core.PropertyRef">
+                    <PropertyValue Property="Name" PropertyPath="ISBN"/>
+                  </Record>
+                </Collection>
+              </PropertyValue>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.EntityContainer/Magazines">
+        <Annotation Term="Capabilities.SearchRestrictions">
+          <Record Type="Capabilities.SearchRestrictionsType">
+            <PropertyValue Property="Searchable" Bool="true"/>
+          </Record>
+        </Annotation>
+        <Annotation Term="Core.AlternateKeys">
+          <Collection>
+            <Record Type="Core.AlternateKey">
+              <PropertyValue Property="Key">
+                <Collection>
+                  <Record Type="Core.PropertyRef">
+                    <PropertyValue Property="Name" PropertyPath="ISBN"/>
+                  </Record>
+                </Collection>
+              </PropertyValue>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.Magazines/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.Magazines/PopularityScore">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.TradeJournals">
+        <Annotation Term="Core.AlternateKeys">
+          <Collection>
+            <Record Type="Core.AlternateKey">
+              <PropertyValue Property="Key">
+                <Collection>
+                  <Record Type="Core.PropertyRef">
+                    <PropertyValue Property="Name" PropertyPath="ISBN"/>
+                  </Record>
+                </Collection>
+              </PropertyValue>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.EntityContainer/TradeJournals">
+        <Annotation Term="Capabilities.SearchRestrictions">
+          <Record Type="Capabilities.SearchRestrictionsType">
+            <PropertyValue Property="Searchable" Bool="true"/>
+          </Record>
+        </Annotation>
+        <Annotation Term="Core.AlternateKeys">
+          <Collection>
+            <Record Type="Core.AlternateKey">
+              <PropertyValue Property="Key">
+                <Collection>
+                  <Record Type="Core.PropertyRef">
+                    <PropertyValue Property="Name" PropertyPath="ISBN"/>
+                  </Record>
+                </Collection>
+              </PropertyValue>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.TradeJournals/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.TradeJournals/PopularityScore">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.EntityContainer/Audiobooks">
+        <Annotation Term="Capabilities.SearchRestrictions">
+          <Record Type="Capabilities.SearchRestrictionsType">
+            <PropertyValue Property="Searchable" Bool="true"/>
+          </Record>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.Audiobooks/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.Audiobooks/PopularityScore">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.Audiobooks/Sample">
+        <Annotation Term="Core.MediaType" String="audio/mpeg"/>
+      </Annotations>
+      <Annotations Target="Library.Service.AudiobookChapters/content">
+        <Annotation Term="Core.MediaType" String="audio/mpeg"/>
+      </Annotations>
+      <Annotations Target="Library.Service.EntityContainer/DVDs">
+        <Annotation Term="Capabilities.SearchRestrictions">
+          <Record Type="Capabilities.SearchRestrictionsType">
+            <PropertyValue Property="Searchable" Bool="true"/>
+          </Record>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.DVDs/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.DVDs/PopularityScore">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.EntityContainer/EBooks">
+        <Annotation Term="Capabilities.SearchRestrictions">
+          <Record Type="Capabilities.SearchRestrictionsType">
+            <PropertyValue Property="Searchable" Bool="true"/>
+          </Record>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.EBooks/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.EBooks/PopularityScore">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.EBooks/content">
+        <Annotation Term="Core.MediaType" String="application/epub+zip"/>
+      </Annotations>
+      <Annotations Target="Library.Service.EntityContainer/CollectorsItems">
+        <Annotation Term="Capabilities.SearchRestrictions">
+          <Record Type="Capabilities.SearchRestrictionsType">
+            <PropertyValue Property="Searchable" Bool="true"/>
+          </Record>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.CollectorsItems/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.CollectorsItems/PopularityScore">
+        <Annotation Term="Core.Computed" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.Loans/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.Reservations/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.IdDocuments/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+      </Annotations>
+      <Annotations Target="Library.Service.MainBranch/Amenities">
+        <Annotation Term="Validation.AllowedValues">
+          <Collection>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="WheelchairAccessible"/>
+              <PropertyValue Property="Value" Int="1"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="Parking"/>
+              <PropertyValue Property="Value" Int="2"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="Café"/>
+              <PropertyValue Property="Value" Int="4"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="KidsArea"/>
+              <PropertyValue Property="Value" Int="8"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="StudyRoom"/>
+              <PropertyValue Property="Value" Int="16"/>
+            </Record>
+            <Record Type="Validation.AllowedValue">
+              <Annotation Term="Core.SymbolicName" String="FullService"/>
+              <PropertyValue Property="Value" Int="31"/>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.LoanStatistics(Library.Service.Library_Circulation_DateRange)/Period">
+        <Annotation Term="Core.OptionalParameter">
+          <Record Type="Core.OptionalParameterType"/>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.Search(Edm.String,Edm.Int32)/MaxResults">
+        <Annotation Term="Core.OptionalParameter">
+          <Record Type="Core.OptionalParameterType"/>
+        </Annotation>
+      </Annotations>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
