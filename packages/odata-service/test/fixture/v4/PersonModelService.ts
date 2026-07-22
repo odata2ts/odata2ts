@@ -1,5 +1,5 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataModelResponseV4, ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { ModelResponseConverterV4, QEnumCollection } from "@odata2ts/odata-query-objects";
 import {
   CollectionServiceV4,
@@ -13,7 +13,7 @@ import {
 } from "../../../src";
 import { EditablePersonModel, Feature, GetSomethingFunctionParams, PersonId, PersonModel } from "../PersonModel";
 import { QPersonIdFunction } from "../QPerson";
-import { QGetSomethingComposable, QGetSomethingFunction, QPersonV4, qPersonV4 } from "./QPersonV4";
+import { QGetScoreFunction, QGetSomethingComposable, QGetSomethingFunction, QPersonV4, qPersonV4 } from "./QPersonV4";
 
 export class PersonModelService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
   ClientType,
@@ -24,6 +24,8 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
   private _qGetSomething = new QGetSomethingFunction();
 
   private _qGetComposable = new QGetSomethingComposable();
+
+  private _qGetScore = new QGetScoreFunction();
 
   constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
     super(client, basePath, name, new QPersonV4(), options);
@@ -90,6 +92,19 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
         mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
       },
     );
+  }
+
+  /**
+   * Operation with a primitive (value) return type — used to verify that the value response is run
+   * through the operation's response converter on {@link execute}.
+   */
+  public getScore() {
+    const { addFullPath, client, isUrlNotEncoded } = this.__base;
+    const url = addFullPath(this._qGetScore.buildUrl(undefined, isUrlNotEncoded()));
+
+    return new UrlGetRequestCmd<ClientType, ODataValueResponseV4<string>>(client, url, {
+      mainResponseConverter: this._qGetScore.getResponseConverter(),
+    });
   }
 }
 

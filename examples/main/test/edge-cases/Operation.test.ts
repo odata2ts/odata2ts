@@ -35,4 +35,24 @@ describe("EdgeCases: Bound Operation Cardinality", () => {
     // @ts-expect-error
     service.UserParam("someKey").GetParam;
   });
+
+  test("collection-bound function delivers its model return value through the response converter", async () => {
+    const odataModel = { UserId: "u1", Warehouse: "WH01", Plant: "P1" };
+    odataClient.setModelResponse(odataModel);
+
+    const response = await service.UserParam().GetParam().execute();
+
+    // this model is generated without renaming / value converters, so the conversion is structural here;
+    // the point of the end-to-end test is that the operation result comes back as the model, unwrapped from
+    // the response envelope by the generated ModelResponseConverter
+    expect(response.data).toStrictEqual(odataModel);
+  });
+
+  test("unbound function delivers a primitive value return through the response converter", async () => {
+    odataClient.setValueResponse(true);
+
+    const response = await service.GetX().execute();
+
+    expect(response.data?.value).toBe(true);
+  });
 });

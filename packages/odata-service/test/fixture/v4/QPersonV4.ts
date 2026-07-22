@@ -1,4 +1,4 @@
-import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataModelResponseV4, ODataValueResponseV4 } from "@odata2ts/odata-core";
 import {
   ModelResponseConverterV4,
   QDateParam,
@@ -13,6 +13,7 @@ import {
   QStringPath,
   QTimeOfDayParam,
   QueryObject,
+  ValueResponseConverterV4,
 } from "@odata2ts/odata-query-objects";
 import { numberToStringConverter, stringToPrefixModelConverter } from "@odata2ts/test-converters";
 import { EditablePersonModel, Feature, GetSomethingFunctionParams, PersonModel } from "../PersonModel";
@@ -58,5 +59,19 @@ export class QGetSomethingComposable extends QFunctionV4<
       new QDateTimeOffsetParam("testDateTimeO"),
       new QTimeOfDayParam("testTime"),
     ];
+  }
+}
+
+/**
+ * Operation with a primitive (value) return type, whose response value is run through a converter
+ * (server delivers a number, the model side receives a string).
+ */
+export class QGetScoreFunction extends QFunctionV4<undefined, ODataValueResponseV4<string>> {
+  constructor() {
+    super("GET_SCORE", new ValueResponseConverterV4(numberToStringConverter));
+  }
+
+  getParams() {
+    return [];
   }
 }

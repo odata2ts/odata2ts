@@ -242,6 +242,42 @@ describe("Function Digestion Test", () => {
     ]);
   });
 
+  test("Function: return types complex, entity and enum", async () => {
+    odataBuilder
+      .addComplexType("Complex", undefined, (builder) => builder.addProp("a", ODataTypesV4.String))
+      .addEntityType("TheEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addEnumType("TheEnum", [{ name: "One", value: 1 }])
+      .addFunction("returnsComplex", withNs("Complex"), false)
+      .addFunction("returnsEntity", withNs("TheEntity"), false)
+      .addFunction("returnsEnum", withNs("TheEnum"), false);
+
+    const result = await doDigest();
+    const ops = result.getUnboundOperationTypes();
+    const returnTypeOf = (name: string) => ops.find((op) => op.name === name)?.returnType;
+
+    // single complex type return
+    expect(returnTypeOf("returnsComplex")).toMatchObject({
+      dataType: DataTypes.ComplexType,
+      type: "Complex",
+      qObject: "QComplex",
+      isCollection: false,
+    });
+    // single entity type return
+    expect(returnTypeOf("returnsEntity")).toMatchObject({
+      dataType: DataTypes.ModelType,
+      type: "TheEntity",
+      qObject: "QTheEntity",
+      isCollection: false,
+    });
+    // single enum return (enums have no qObject)
+    expect(returnTypeOf("returnsEnum")).toMatchObject({
+      dataType: DataTypes.EnumType,
+      type: "TheEnum",
+      qObject: undefined,
+      isCollection: false,
+    });
+  });
+
   test("Function: fail bound function without params", async () => {
     odataBuilder.addFunction("GetBestFriend", ODataTypesV4.Boolean, true);
 
