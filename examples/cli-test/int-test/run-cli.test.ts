@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import { access } from "node:fs/promises";
 import { createRequire } from "node:module";
+import path from "node:path";
 import { rimraf } from "rimraf";
 import { afterAll, describe, expect, test } from "vitest";
 
@@ -8,8 +9,12 @@ import { afterAll, describe, expect, test } from "vitest";
 // so this test exercises the same artefact a real npm consumer runs.
 const CLI_BIN = createRequire(import.meta.url).resolve("@odata2ts/odata2ts/lib/run-cli.js");
 
-const OUTPUT_PATH = "./int-test/build";
-const DUMMY_SOURCE = "./int-test/fixture/dummy.xml";
+// Resolved relative to this file, not `process.cwd()`: a root-level `vitest run` across the
+// whole workspace does not chdir into each project, so plain relative paths like "./int-test/..."
+// would resolve against the repo root instead of this package.
+const INT_TEST_DIR = import.meta.dirname;
+const OUTPUT_PATH = path.join(INT_TEST_DIR, "build");
+const DUMMY_SOURCE = path.join(INT_TEST_DIR, "fixture/dummy.xml");
 
 describe("Run-Cli Test", () => {
   afterAll(() => rimraf(OUTPUT_PATH));
