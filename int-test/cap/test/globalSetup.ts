@@ -1,4 +1,4 @@
-import { GenericContainer, Wait } from "testcontainers";
+import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import type { GlobalSetupContext } from "vitest/node";
 
 /**
@@ -27,10 +27,21 @@ export default async function setup({ provide }: GlobalSetupContext) {
     return () => {};
   }
 
-  const container = await new GenericContainer(IMAGE)
-    .withExposedPorts(CONTAINER_PORT)
-    .withWaitStrategy(Wait.forHttp(`${SERVICE_PATH}/`, CONTAINER_PORT).forStatusCode(200))
-    .start();
+  let container: StartedTestContainer;
+  try {
+    container = await new GenericContainer(IMAGE)
+      .withExposedPorts(CONTAINER_PORT)
+      .withWaitStrategy(Wait.forHttp(`${SERVICE_PATH}/`, CONTAINER_PORT).forStatusCode(200))
+      .start();
+  } catch (e) {
+    throw new Error(
+      `Could not start the test server container "${IMAGE}".\n` +
+        `Is a Docker daemon running? Without Docker, run against a server you started yourself:\n` +
+        `  LIBRARY_BASE_URL=http://localhost:4004${SERVICE_PATH} yarn int-test:cap\n` +
+        `Original error: ${e instanceof Error ? e.message : String(e)}`,
+      { cause: e },
+    );
+  }
 
   provide("libraryBaseUrl", `http://localhost:${container.getMappedPort(CONTAINER_PORT)}${SERVICE_PATH}`);
 

@@ -1,5 +1,5 @@
 {
-  "name": "@odata2ts/example-cap",
+  "name": "@odata2ts/int-test-cap",
   "version": "0.0.0",
   "private": true,
   "description": "Integration tests running odata2ts against the SAP CAP implementation of the standardized \"Library\" OData V4 test server",
@@ -10,17 +10,17 @@
     "build": "yarn clean && yarn generate",
     "clean": "rimraf build src-generated",
     "generate": "odata2ts",
-    "int-test": "vitest run",
+    "test": "vitest run",
     "test-compile": "tsc"
   },
   "dependencies": {
-    "@odata2ts/http-client-axios": "^0.12.2",
-    "@odata2ts/odata-service": "workspace:^",
-    "axios": "^1.13.1"
+    "@odata2ts/http-client-fetch": "^0.9.2",
+    "@odata2ts/odata-service": "workspace:^"
   },
   "devDependencies": {
     "@odata2ts/odata2ts": "workspace:^",
     "@types/node": "^22.4.0",
-    "testcontainers": "^10.13.2"
+    "testcontainers": "^10.13.2",
+    "vitest": "^2.0.5"
   }
 }

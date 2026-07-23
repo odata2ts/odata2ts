@@ -5,5 +5,5 @@
     "noEmit": true,
     "lib": ["ESNext", "DOM"]
   },
-  "include": ["src-generated", "int-test"]
+  "include": ["src-generated", "test"]
 }

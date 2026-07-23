@@ -1,0 +1,35 @@
+name: Integration Tests
+
+# Called from the Build & Test workflow so that `needs:` can order it after the unit tests - `needs:`
+# does not work across workflows, and a separately triggered workflow would run in parallel instead.
+on:
+  workflow_call:
+
+jobs:
+  # One matrix leg per package in the int-test/ workspace group. Adding another test server (ASP.NET,
+  # Java, ...) means adding its package plus one entry here - no language-specific toolchain is ever
+  # needed in this repo, since every server is consumed as a Docker image.
+  #
+  # examples/* are deliberately absent: they are their own category and are run on demand only.
+  integration-test:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest # Docker is preinstalled, which testcontainers needs
+    strategy:
+      # one server being unavailable should not hide the results of the others
+      fail-fast: false
+      matrix:
+        include:
+          - name: cap
+            package: "@odata2ts/int-test-cap"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install packages
+        run: yarn --immutable
+      # also generates the client of the int-test package - offline, from the committed metadata
+      - name: Build packages
+        run: yarn build
+      - name: Run integration tests
+        run: yarn workspace ${{ matrix.package }} test
