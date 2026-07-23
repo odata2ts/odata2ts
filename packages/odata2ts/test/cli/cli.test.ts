@@ -272,7 +272,7 @@ describe("Cli Test", () => {
   }
 
   async function testServiceName(name: string) {
-    const args = [...defaultArgs, "-name", name];
+    const args = [...defaultArgs, "--service-name", name];
     runOptions.serviceName = name;
 
     await testCli(args);
