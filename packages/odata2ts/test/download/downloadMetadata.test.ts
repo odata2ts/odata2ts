@@ -18,7 +18,6 @@ describe("Download Test", () => {
 
   let axiosSpy: MockInstance<any>;
   let logInfoSpy: MockInstance;
-  let logErrorSpy: MockInstance;
 
   beforeAll(() => {
     axiosSpy = vi.spyOn(axios, "request").mockImplementation(() => {
@@ -26,7 +25,7 @@ describe("Download Test", () => {
     });
     // mock console to keep a clean test output
     logInfoSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-    logErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
   afterEach(() => {

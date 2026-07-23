@@ -251,7 +251,6 @@ describe("ServiceConfigHelper Tests", function () {
   });
 
   test("find config: case insensitive regexp", () => {
-    const [ns, alias] = DEFAULT_NAMESPACES;
     const name = /NS1\.test/i;
     const mappedName = "xyz";
     const expectedResult = { mappedName };

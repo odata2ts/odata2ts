@@ -1,18 +1,9 @@
 import { describe, expect, test } from "vitest";
-import {
-  CliOptions,
-  ConfigFileOptions,
-  EmitModes,
-  getDefaultConfig,
-  getMinimalConfig,
-  Modes,
-  NamingStrategies,
-} from "../src";
+import { CliOptions, ConfigFileOptions, EmitModes, getDefaultConfig, Modes, NamingStrategies } from "../src";
 import { evaluateConfigOptions } from "../src/evaluateConfig";
 
 describe("Config Evaluation Tests", () => {
   const defaultConfig = getDefaultConfig();
-  const minConfig = getMinimalConfig();
 
   test("minimal CLI opts", () => {
     const minOpts = { source: "source", output: "output" };

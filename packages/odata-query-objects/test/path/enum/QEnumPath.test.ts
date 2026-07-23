@@ -48,7 +48,6 @@ describe("QEnumPath test", () => {
   test("equals", () => {
     const value = "Feature1";
     const result = toTest.equals(FeatureEnum.Feature1);
-    const result2 = toTest.equals("Feature1");
 
     expect(result.toString()).toBe("feature eq 'Feature1'");
     expect(result.toString()).toBe(toTest.eq(value).toString());

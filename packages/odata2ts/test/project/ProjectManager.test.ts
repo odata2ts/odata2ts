@@ -3,7 +3,6 @@ import { ODataTypesV4 } from "@odata2ts/odata-core";
 import { mkdirp } from "mkdirp";
 import { EmitResult } from "ts-morph";
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
-import type { MockInstance } from "vitest";
 import { EmitModes } from "../../src";
 import { DataModel } from "../../src/data-model/DataModel";
 import { digest } from "../../src/data-model/DataModelDigestionV4";
@@ -60,8 +59,6 @@ describe("ProjectManager Test", () => {
   let bundledFileGeneration: boolean;
   let noOutput: boolean;
 
-  let consoleSpy: MockInstance;
-
   let usedDataModel: DataModel | undefined;
 
   function withNs(name: string) {
@@ -69,7 +66,7 @@ describe("ProjectManager Test", () => {
   }
 
   beforeAll(() => {
-    consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "log").mockImplementation(() => {});
   });
 
   beforeEach(() => {
