@@ -1,6 +1,5 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
-import { Features } from "@odata2ts/odata-query-builder/test/fixture/types/SimplePersonModel";
 import { EntityResponseConverterV2, QEnumCollection } from "@odata2ts/odata-query-objects";
 import {
   CollectionServiceV2,
@@ -10,7 +9,7 @@ import {
   PrimitiveTypeServiceV2,
   UrlRequestCmd,
 } from "../../../src";
-import { EditablePersonModel, GetSomethingFunctionParams, PersonId, PersonModel } from "../PersonModel";
+import { EditablePersonModel, Feature, GetSomethingFunctionParams, PersonId, PersonModel } from "../PersonModel";
 import { QPersonIdFunction } from "../QPerson";
 import { QGetSomethingFunction, QPersonV2, qPersonV2 } from "./QPersonV2";
 
@@ -24,7 +23,7 @@ export class PersonModelV2Service<ClientType extends ODataHttpClient> extends En
 
   public get features() {
     const { client, path, options } = this.__base;
-    return new CollectionServiceV2(client, path, "Features", new QEnumCollection(Features), options);
+    return new CollectionServiceV2(client, path, "Features", new QEnumCollection(Feature), options);
   }
 
   public userName() {
