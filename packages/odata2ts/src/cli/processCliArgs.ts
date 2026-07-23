@@ -1,5 +1,4 @@
 import { Command, Option } from "commander";
-
 import { CliOptions, EmitModes, Modes } from "../OptionModel.js";
 
 function parseMode(value: string, dummyPrevious: Modes | undefined) {
@@ -42,31 +41,31 @@ export function processCliArgs(argv: Array<string>) {
     .option("-u, --source-url <sourceUrl>", "URL to the root of the OData service")
     .option(
       "-f, --refresh-file",
-      "Download metadata again and overwrite existing file (only applies if sourceUrl is specified)"
+      "Download metadata again and overwrite existing file (only applies if sourceUrl is specified)",
     )
     .addOption(
       new Option("-m, --mode <mode>", "What kind of stuff gets generated")
         .choices(Object.values(Modes).filter((t): t is string => isNaN(Number(t))))
-        .argParser<Modes>(parseMode)
+        .argParser<Modes>(parseMode),
     )
     .addOption(
       new Option(
         "-e, --emit-mode <mode>",
-        "Output TS source files, compiled JS files with/wihthout generated d.ts files"
+        "Output TS source files, compiled JS files with/wihthout generated d.ts files",
       )
         .choices(Object.values(EmitModes))
-        .argParser<EmitModes>(parseEmitMode)
+        .argParser<EmitModes>(parseEmitMode),
     )
     .option("-p, --prettier", "Format result with prettier (only applies if emitMode=ts)")
     .option(
       "-t, --tsconfig <path>",
-      "Specify alternative to 'tsconfig.json' to use specific compilerOptions (applies if emitMode is not ts)"
+      "Specify alternative to 'tsconfig.json' to use specific compilerOptions (applies if emitMode is not ts)",
     )
     .option("-d, --debug", "Verbose debug infos")
-    .option("-name, --service-name <serviceName>", "Give the service your own name")
+    .option("--service-name <serviceName>", "Give the service your own name")
     .option(
       "-n, --disable-auto-managed-key",
-      "Don't mark single key props as managed by the server side (not editable)"
+      "Don't mark single key props as managed by the server side (not editable)",
     )
     .option("-r, --allow-renaming", "Allow that property and entity names may be changed by configured casing")
     .parse(argv);
