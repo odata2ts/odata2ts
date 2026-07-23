@@ -4,6 +4,26 @@ These examples serve as example of how to integrate `odata2ts`.
 
 They are also used internally as basis for integration tests.
 
+## Prerequisites: build the workspace first
+
+Unlike the core packages, this example is **not** covered by the `src` dev-resolution (TypeScript `paths` /
+Vitest alias) that lets the individual packages type-check and test without a prior build. Two things here
+depend on **compiled** output and therefore require a build up front:
+
+- `yarn generate` invokes the `odata2ts` binary (`packages/odata2ts/lib/run-cli.js`) — a real Node process,
+  so the generator must be built.
+- The generated code and its tests resolve the runtime packages (`@odata2ts/odata-service` etc.) through
+  their `lib/` at runtime, so those must be built too.
+
+So before generating or running the tests in this directory, build once from the repo root:
+
+```
+yarn build
+```
+
+This runs the topological build (`odata-core` → `odata-query-objects` → `odata-query-builder` →
+`odata-service` → `odata2ts`) in the correct order. Only then run `yarn generate` and `yarn test` here.
+
 ## Trippin
 
 OData2ts generation example based on the publicly available [Trippin service](https://www.odata.org/odata-services/).
