@@ -16,7 +16,7 @@ import {
   ValueResponseConverterV4,
 } from "@odata2ts/odata-query-objects";
 import { numberToStringConverter, stringToPrefixModelConverter } from "@odata2ts/test-converters";
-import { EditablePersonModel, Feature, GetSomethingFunctionParams, PersonModel } from "../PersonModel";
+import { Feature, GetSomethingFunctionParams, PersonModel } from "../PersonModel";
 
 export class QPersonV4 extends QueryObject<PersonModel> {
   public readonly userName = new QStringPath(this.withPrefix("UserName"));

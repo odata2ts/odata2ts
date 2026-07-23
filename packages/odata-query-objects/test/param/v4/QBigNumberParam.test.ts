@@ -1,6 +1,6 @@
 import { stringToPrefixModelConverter } from "@odata2ts/test-converters";
 import { describe, expect, test } from "vitest";
-import { QBigNumberParam, QNumberParam } from "../../../src";
+import { QBigNumberParam } from "../../../src";
 
 describe("QBigNumberParam Tests", () => {
   const name = "T3st_bbb";

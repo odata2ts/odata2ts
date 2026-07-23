@@ -6,7 +6,6 @@ import {
   QEntityCollectionPath,
   QEntityPath,
   QNumberPath,
-  QNumericEnumCollection,
   QNumericEnumCollectionPath,
   QNumericEnumPath,
   QStringPath,

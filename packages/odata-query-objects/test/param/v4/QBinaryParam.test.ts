@@ -1,6 +1,6 @@
 import { stringToPrefixModelConverter } from "@odata2ts/test-converters";
 import { describe, expect, test } from "vitest";
-import { QBinaryParam, QBinaryV2Param } from "../../../src";
+import { QBinaryParam } from "../../../src";
 
 describe("QBinary Tests", () => {
   const name = "T3st_bbb";
