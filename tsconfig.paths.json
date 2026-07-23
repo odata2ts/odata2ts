@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@odata2ts/odata-core": ["packages/odata-core/src/index.ts"],
+      "@odata2ts/odata-query-objects": ["packages/odata-query-objects/src/index.ts"],
+      "@odata2ts/odata-query-builder": ["packages/odata-query-builder/src/index.ts"],
+      "@odata2ts/odata-service": ["packages/odata-service/src/index.ts"],
+      "@odata2ts/odata2ts": ["packages/odata2ts/src/index.ts"]
+    }
+  }
+}
