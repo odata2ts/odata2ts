@@ -1,6 +1,6 @@
 import { FIXED_DATE, FIXED_STRING, fixedDateConverter, stringToPrefixModelConverter } from "@odata2ts/test-converters";
 import { describe, expect, test } from "vitest";
-import { QEnumParam, QNumericEnumParam } from "../../../src";
+import { QNumericEnumParam } from "../../../src";
 
 describe("QNumericEnumParam Tests", () => {
   enum TestEnum {

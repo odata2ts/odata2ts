@@ -8,7 +8,6 @@ import {
 } from "../../../src/data-model/edmx/ODataEdmxModelBase";
 import { ODataComplexTypeBuilderBase } from "./ODataComplexTypeBuilderBase";
 import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase";
-import { NavProps } from "./v4/ODataModelBuilderV4";
 
 export interface ModelBuilderOptions {
   baseType?: string;

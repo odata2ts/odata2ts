@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { QComplexPath } from "../../src";
-import { QComplexType, QSimpleEntity } from "../fixture/SimpleComplexModel";
+import { QComplexType } from "../fixture/SimpleComplexModel";
 
 describe("QComplexPath test", () => {
   test("smoke test", () => {

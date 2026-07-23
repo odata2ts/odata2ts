@@ -1,7 +1,6 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import { beforeEach, expect, test } from "vitest";
 import { RunOptions } from "../../src";
-import { run } from "../../src/cli";
 import { digest } from "../../src/data-model/DataModelDigestionV4";
 import { DataTypes } from "../../src/data-model/DataTypeModel";
 import { NamingHelper } from "../../src/data-model/NamingHelper";

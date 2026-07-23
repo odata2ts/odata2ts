@@ -1,6 +1,6 @@
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
 import { describe, expect, test } from "vitest";
-import { QBooleanParam, ValueResponseConverterV2, ValueResponseConverterV4 } from "../../../src";
+import { QBooleanParam, ValueResponseConverterV2 } from "../../../src";
 import { createResponse } from "../../test-infra/TestResponseHelper";
 
 describe("ValueResponseConverterV2 tests", () => {
