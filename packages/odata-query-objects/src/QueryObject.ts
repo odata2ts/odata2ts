@@ -18,14 +18,14 @@ function getMapping(q: QueryObject) {
 export const ENUMERABLE_PROP_DEFINITION = { enumerable: true };
 
 export class QueryObject<T extends object = any> implements QueryObjectModel<T> {
-  private __propMapping?: Map<string, keyof this>;
+  private __propMapping?: Map<string, string>;
   protected readonly __subtypeMapping?: Record<string, string>;
 
   constructor(private __prefix?: string) {}
 
-  private __getPropMapping(): Map<string, keyof this> {
+  private __getPropMapping(): Map<string, string> {
     if (!this.__propMapping) {
-      this.__propMapping = getMapping(this) as Map<string, keyof this>;
+      this.__propMapping = getMapping(this);
     }
     return this.__propMapping;
   }
@@ -85,7 +85,7 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T> 
             finalKey = (newPropKey as string).replace(new RegExp(`^${this.__subtypeMapping[typeByCi]}_`), "");
           }
         }
-        const prop = propKey ? (this[propKey] as unknown as QValuePathModel) : undefined;
+        const prop = propKey ? (this[propKey as keyof this] as unknown as QValuePathModel) : undefined;
         if (prop && finalKey) {
           // complex props
           const asComplexType = prop as QEntityPathModel<any>;
