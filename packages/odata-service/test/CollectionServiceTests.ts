@@ -96,7 +96,6 @@ export function commonCollectionTests(
   test("collection: filter", async () => {
     const params = getParams({ $filter: "$it eq 'hi'" });
     const expectedString = STRING_URL + params;
-    const expectedEnum = ENUM_URL + params;
 
     const request = stringService.query((queryBuilder, qObj) => queryBuilder.filter(qObj.it.eq("hi"))).getInfo();
     expect(request.url).toBe(expectedString);

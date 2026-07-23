@@ -13,13 +13,12 @@ vi.mock("mkdirp");
 vi.mock("node:fs/promises");
 vi.mock("../src/download");
 
-const { mockCosmi, searchSpy } = vi.hoisted(() => {
+const { mockCosmi } = vi.hoisted(() => {
   const spy = vi.fn();
   return {
     mockCosmi: {
       search: async () => spy,
     },
-    searchSpy: spy,
   };
 });
 vi.mock("cosmiconfig", () => {

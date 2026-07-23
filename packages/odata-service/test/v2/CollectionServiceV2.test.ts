@@ -1,14 +1,11 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 import {
-  BooleanCollection,
   EnumCollection,
-  QBooleanCollection,
   QNumericEnumCollection,
   QStringV2Collection,
   StringCollection,
 } from "@odata2ts/odata-query-objects";
-import { booleanToNumberConverter } from "@odata2ts/test-converters";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { CollectionServiceV2, DEFAULT_HEADERS, ODataServiceOptions } from "../../src";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
@@ -29,13 +26,6 @@ describe("CollectionService V2 Tests", () => {
   const BASE_PATH = "";
   const NAME_STRING = "testString";
   const NAME_ENUM = "testEnum";
-
-  const service = new CollectionServiceV2<MockClient, BooleanCollection, QBooleanCollection<number>, number>(
-    odataClient,
-    BASE_PATH,
-    NAME_STRING,
-    new QBooleanCollection(undefined, booleanToNumberConverter),
-  );
 
   const stringConstructor = (
     basePath: string,

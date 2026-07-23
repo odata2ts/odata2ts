@@ -6,8 +6,6 @@ import { NamingHelper } from "../../../src/data-model/NamingHelper";
 import { getTestConfig } from "../../test.config";
 import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
 
-const NOOP_FN = () => {};
-
 describe("V2: EntityTypeDigestion Test", () => {
   const SERVICE_NAME = "Tester";
   const CONFIG = getTestConfig();
