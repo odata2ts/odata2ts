@@ -22,7 +22,8 @@ export interface Book {
 export type BookId = { id: string; id2: number; id3: boolean };
 
 export interface EditableBook
-  extends Pick<Book, "id3" | "truth">,
+  extends
+    Pick<Book, "id3" | "truth">,
     Partial<
       Pick<
         Book,
