@@ -1,8 +1,12 @@
 import { ValueConverter } from "@odata2ts/converter-api";
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataValueResponseV4 } from "@odata2ts/odata-core";
-import { getIdentityConverter, MainResponseConverter, ValueResponseConverterV4 } from "@odata2ts/odata-query-objects";
-import { FlexibleConversionModel } from "@odata2ts/odata-query-objects/src/QueryObjectModel";
+import {
+  FlexibleConversionModel,
+  getIdentityConverter,
+  MainResponseConverter,
+  ValueResponseConverterV4,
+} from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlRequestCmd } from "../request";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
