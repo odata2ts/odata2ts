@@ -9,16 +9,17 @@
   "type": "module",
   "workspaces": [
     "packages/*",
-    "examples/*"
+    "examples/*",
+    "int-test/*"
   ],
   "scripts": {
     "build": "yarn clean && yarn workspaces foreach -A -pt run build",
     "check-circular-deps": "yarn workspaces foreach -A -p run check-circular-deps",
     "clean": "rimraf coverage",
     "coverage": "vitest run --coverage",
-    "int-test": "yarn workspaces foreach -A -p run int-test",
-    "int-test:cap": "yarn workspace @odata2ts/example-cap int-test",
-    "test": "yarn workspaces foreach -A -p run test",
+    "int-test": "yarn workspaces foreach -A -p --include 'int-test/*' run test",
+    "int-test:cap": "yarn workspace @odata2ts/int-test-cap test",
+    "test": "yarn workspaces foreach -A -p --include 'packages/*' run test",
     "test-compile": "yarn workspaces foreach -A -p run test-compile"
   },
   "devDependencies": {

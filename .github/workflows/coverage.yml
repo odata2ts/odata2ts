@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    name: Testing With Coverage
+    name: Unit Tests With Coverage
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -34,3 +34,11 @@ jobs:
         uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Integration tests run against real OData servers and are by far the most expensive part of the
+  # pipeline, so they form a separate stage that only starts once the unit tests are green. They live
+  # in their own workflow file and are pulled in here, because `needs:` cannot order across workflows.
+  integration-test:
+    name: Integration Tests
+    needs: test
+    uses: ./.github/workflows/integration-test.yml

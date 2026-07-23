@@ -29,7 +29,9 @@
   },
   "devDependencies": {
     "@odata2ts/odata2ts": "workspace:^",
-    "@types/luxon": "^3.4.2"
+    "@types/luxon": "^3.4.2",
+    "typescript": "5.1.3",
+    "vitest": "^2.0.5"
   },
   "publishConfig": {
     "access": "public"
