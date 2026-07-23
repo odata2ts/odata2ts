@@ -23,17 +23,17 @@
     "test-compile": "yarn workspaces foreach -A -p run test-compile"
   },
   "devDependencies": {
-    "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
-    "@prettier/plugin-xml": "^3.4.1",
-    "@types/node": "^22.4.0",
-    "@vitest/coverage-istanbul": "^2.0.5",
-    "env-cmd": "^10.1.0",
-    "madge": "^6.1.0",
-    "prettier": "^3.3.3",
-    "prettier-plugin-packagejson": "^2.5.1",
-    "rimraf": "^5.0.1",
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+    "@prettier/plugin-xml": "^3.4.2",
+    "@types/node": "^24",
+    "@vitest/coverage-istanbul": "^4.1.10",
+    "env-cmd": "^11.0.0",
+    "madge": "^8.0.0",
+    "prettier": "^3.9.6",
+    "prettier-plugin-packagejson": "^3.0.2",
+    "rimraf": "^6.1.3",
     "typescript": "5.1.3",
-    "vitest": "^2.0.5"
+    "vitest": "^4.1.10"
   },
   "packageManager": "yarn@4.6.0"
 }

@@ -26,9 +26,12 @@
   ],
   "scripts": {
     "build": "yarn clean && yarn compile",
-    "check-circular-deps": "madge ./src --extensions ts --circular",
+    "check-circular-deps": "madge ./src --extensions ts --circular --exclude \"^\\.\\./\\.\\./\"",
     "clean": "rimraf lib coverage",
     "compile": "tsc"
+  },
+  "dependencies": {
+    "tslib": "^2.8.1"
   },
   "publishConfig": {
     "access": "public"

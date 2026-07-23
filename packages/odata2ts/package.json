@@ -30,7 +30,7 @@
   ],
   "scripts": {
     "build": "yarn clean && tsc",
-    "check-circular-deps": "madge ./src --extensions ts --circular",
+    "check-circular-deps": "madge ./src --extensions ts --circular --exclude \"^\\.\\./\\.\\./\"",
     "check-circular-generated": "madge ./build --extensions ts --circular",
     "clean": "rimraf lib build",
     "clean-v2": "rimraf build/v2",
@@ -50,29 +50,29 @@
     "@odata2ts/converter-runtime": "^0.5.5",
     "@odata2ts/http-client-api": "^0.6.5",
     "@odata2ts/odata-core": "^0.6.1",
-    "@prettier/plugin-xml": "^3.4.1",
-    "@types/xml2js": "^0.4.11",
-    "axios": "^1.4.0",
+    "@prettier/plugin-xml": "^3.4.2",
+    "@types/xml2js": "^0.4.14",
+    "axios": "^1.18.1",
     "change-case": "^5.4.4",
     "commander": "^10.0.1",
     "cosmiconfig": "^8.2.0",
     "cosmiconfig-typescript-loader": "^5.0.0",
     "deepmerge": "^4.3.1",
     "mkdirp": "^3.0.1",
-    "prettier": "^3.3.3",
-    "rimraf": "^5.0.1",
+    "prettier": "^3.9.6",
+    "rimraf": "^6.1.3",
     "ts-morph": "^18.0.0",
     "tsconfig-loader": "^1.1.0",
-    "type-fest": "2.12.2",
+    "type-fest": "^5.8.0",
     "upper-case-first": "^2.0.2",
-    "xml2js": "^0.6.0"
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@odata2ts/converter-v2-to-v4": "^0.5.1",
     "@odata2ts/odata-query-objects": "^0.29.0",
     "@odata2ts/odata-service": "^0.24.0",
     "@odata2ts/test-converters": "^0.5.0",
-    "@types/node": "^22.4.0"
+    "@types/node": "^24"
   },
   "peerDependencies": {
     "@odata2ts/odata-query-objects": "^0.29.0",

@@ -19,5 +19,4 @@ export interface WithOwnStuff extends Book {
 export type WithOwnStuffId = { id: boolean; id2: boolean };
 
 export interface EditableWithOwnStuff
-  extends Pick<WithOwnStuff, "id" | "id2">,
-    Partial<Pick<WithOwnStuff, "test" | "test2">> {}
+  extends Pick<WithOwnStuff, "id" | "id2">, Partial<Pick<WithOwnStuff, "test" | "test2">> {}
