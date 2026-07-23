@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:DataServices>
+    <Schema Namespace="Dummy" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityType Name="Item">
+        <Key>
+          <PropertyRef Name="id" />
+        </Key>
+        <Property Name="id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="name" Type="Edm.String" />
+      </EntityType>
+      <EntityContainer Name="Container">
+        <EntitySet Name="Items" EntityType="Dummy.Item" />
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
