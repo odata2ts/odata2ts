@@ -1,0 +1,55 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "schedule:weekly"],
+  "dependencyDashboard": true,
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "description": "Internal @odata2ts/* sibling packages are managed via release-please and the other odata2ts repos, not Renovate",
+      "matchPackageNames": ["@odata2ts/**"],
+      "enabled": false
+    },
+    {
+      "description": "Group all prettier-related packages together",
+      "matchPackageNames": [
+        "prettier",
+        "prettier-plugin-packagejson",
+        "@ianvs/prettier-plugin-sort-imports",
+        "@prettier/plugin-xml"
+      ],
+      "groupName": "prettier"
+    },
+    {
+      "description": "Group vitest with its coverage plugin",
+      "matchPackageNames": ["vitest", "@vitest/coverage-istanbul"],
+      "groupName": "vitest"
+    },
+    {
+      "description": "Keep @types/node aligned with the Node 24 runtime major",
+      "matchPackageNames": ["@types/node"],
+      "allowedVersions": "<25"
+    },
+    {
+      "description": "Automerge safe devDependency patch/minor updates once CI is green",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "dev dependencies (patch/minor)",
+      "automerge": true,
+      "platformAutomerge": true
+    },
+    {
+      "description": "Never automerge major updates - always requires manual review",
+      "matchUpdateTypes": ["major"],
+      "automerge": false
+    },
+    {
+      "description": "typescript and ts-morph are a coupled, manually-evaluated core upgrade (ts-morph's major versions bundle a specific TypeScript version internally) - hold back for explicit approval, never automerge. See project notes on the 6.0.3/28.0.0 upgrade and the still-deferred TypeScript 7.0 jump.",
+      "matchPackageNames": ["typescript", "ts-morph", "@ts-morph/common"],
+      "groupName": "typescript & ts-morph (core, manual)",
+      "dependencyDashboardApproval": true,
+      "automerge": false
+    }
+  ]
+}
