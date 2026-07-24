@@ -48,6 +48,8 @@ jobs:
       - name: Build packages
         run: yarn build
       - name: Install floor TypeScript version
-        run: yarn workspace @odata2ts/example-ts-floor-check run install-floor-ts
+        working-directory: examples/ts-floor-check
+        run: yarn install-floor-ts
       - name: Verify generated output type-checks under the declared minimum TypeScript version
-        run: yarn workspace @odata2ts/example-ts-floor-check run int-test
+        working-directory: examples/ts-floor-check
+        run: yarn int-test

@@ -10,7 +10,7 @@
   "scripts": {
     "clean": "rimraf build",
     "install-floor-ts": "npm --prefix floor-ts install",
-    "int-test": "vitest run"
+    "int-test": "node ../../node_modules/.bin/vitest run"
   },
   "dependencies": {
     "@odata2ts/odata-service": "workspace:^"
