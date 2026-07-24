@@ -1,15 +1,15 @@
 import path from "path";
 import { ODataTypesV2, ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, expect, test } from "vitest";
-import { EmitModes, RunOptions } from "../../../src";
-import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { NamingHelper } from "../../../src/data-model/NamingHelper";
-import { generateServices } from "../../../src/generator";
-import { createProjectManager, ProjectManager } from "../../../src/project/ProjectManager";
-import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
-import { getTestConfig } from "../../test.config";
-import { createFixtureComparator, FixtureComparator } from "../comparator/FixtureComparator";
-import { SERVICE_NAME } from "./EntityBasedGenerationTests";
+import { digest } from "../../../src/data-model/DataModelDigestionV2.js";
+import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
+import { generateServices } from "../../../src/generator/index.js";
+import { EmitModes, RunOptions } from "../../../src/index.js";
+import { createProjectManager, ProjectManager } from "../../../src/project/ProjectManager.js";
+import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2.js";
+import { getTestConfig } from "../../test.config.js";
+import { createFixtureComparator, FixtureComparator } from "../comparator/FixtureComparator.js";
+import { SERVICE_NAME } from "./EntityBasedGenerationTests.js";
 
 describe("Service Generator Tests V2", () => {
   const FIXTURE_PATH = "generator/service";

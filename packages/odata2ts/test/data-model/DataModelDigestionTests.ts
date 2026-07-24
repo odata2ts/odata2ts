@@ -1,14 +1,14 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
 import { beforeEach, expect, test } from "vitest";
-import { Modes, NamingStrategies, TypeModel } from "../../src";
-import { NamespaceWithAlias, withNamespace } from "../../src/data-model/DataModel";
-import { ODataVersion } from "../../src/data-model/DataTypeModel";
-import { NamingHelper } from "../../src/data-model/NamingHelper";
-import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel";
-import { TestOptions, TestSettings } from "../generator/TestTypes";
-import { getTestConfig } from "../test.config";
-import { ODataModelBuilder } from "./builder/ODataModelBuilder";
+import { NamespaceWithAlias, withNamespace } from "../../src/data-model/DataModel.js";
+import { ODataVersion } from "../../src/data-model/DataTypeModel.js";
+import { NamingHelper } from "../../src/data-model/NamingHelper.js";
+import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel.js";
+import { Modes, NamingStrategies, TypeModel } from "../../src/index.js";
+import { TestOptions, TestSettings } from "../generator/TestTypes.js";
+import { getTestConfig } from "../test.config.js";
+import { ODataModelBuilder } from "./builder/ODataModelBuilder.js";
 
 export type ModelBuilderConstructor<MB extends ODataModelBuilder<any, any, any, any>> = new (serviceName: string) => MB;
 

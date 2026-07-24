@@ -1,8 +1,8 @@
 import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, test } from "vitest";
-import { DataModel, NamespaceWithAlias } from "../../src/data-model/DataModel";
-import { DataTypes, ODataVersion } from "../../src/data-model/DataTypeModel";
+import { DataModel, NamespaceWithAlias } from "../../src/data-model/DataModel.js";
+import { DataTypes, ODataVersion } from "../../src/data-model/DataTypeModel.js";
 
 describe("Data Model Tests", function () {
   let dataModel: DataModel;

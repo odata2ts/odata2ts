@@ -9,13 +9,13 @@ import {
   ODataServiceOptions,
 } from "@odata2ts/odata-service";
 // @ts-ignore
-import type { QBook } from "./QTester";
+import type { QBook } from "./QTester.js";
 // @ts-ignore
-import { qBook, QBookId } from "./QTester";
+import { qBook, QBookId } from "./QTester.js";
 // @ts-ignore
-import type { Book, BookId, EditableBook } from "./TesterModel";
+import type { Book, BookId, EditableBook } from "./TesterModel.js";
 // @ts-ignore
-import { Choice } from "./TesterModel";
+import { Choice } from "./TesterModel.js";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   public books(): BookCollectionService<ClientType>;

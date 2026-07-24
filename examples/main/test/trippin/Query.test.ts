@@ -1,8 +1,8 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { describe, expect, test } from "vitest";
-import { PersonIdModel, PersonModel } from "../../src-generated/trippin/TrippinModel";
-import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinTestConstants";
+import { PersonIdModel, PersonModel } from "../../src-generated/trippin/TrippinModel.js";
+import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinTestConstants.js";
 
 type SelectedPersonShape = Pick<PersonModel, "user" | "lastName" | "addressInfo">;
 

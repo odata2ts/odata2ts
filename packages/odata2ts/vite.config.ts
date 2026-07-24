@@ -1,6 +1,6 @@
 import { defineConfig } from "vitest/config";
-import { coverageReporterOptions } from "../../vitest-coverage.shared";
-import { workspaceAlias } from "../../vitest-resolve.shared";
+import { coverageReporterOptions } from "../../vitest-coverage.shared.js";
+import { workspaceAlias } from "../../vitest-resolve.shared.js";
 
 export default defineConfig({
   resolve: {

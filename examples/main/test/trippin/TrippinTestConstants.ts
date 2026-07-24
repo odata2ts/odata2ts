@@ -1,5 +1,5 @@
-import { TrippinService } from "../../src-generated/trippin/TrippinService";
-import { MockODataClient } from "../MockODataClient";
+import { TrippinService } from "../../src-generated/trippin/TrippinService.js";
+import { MockODataClient } from "../MockODataClient.js";
 
 export const BASE_URL = "/test";
 export const ODATA_CLIENT = new MockODataClient();

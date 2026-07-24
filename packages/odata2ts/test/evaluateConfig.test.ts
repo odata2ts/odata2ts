@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { CliOptions, ConfigFileOptions, EmitModes, getDefaultConfig, Modes, NamingStrategies } from "../src";
-import { evaluateConfigOptions } from "../src/evaluateConfig";
+import { evaluateConfigOptions } from "../src/evaluateConfig.js";
+import { CliOptions, ConfigFileOptions, EmitModes, getDefaultConfig, Modes, NamingStrategies } from "../src/index.js";
 
 describe("Config Evaluation Tests", () => {
   const defaultConfig = getDefaultConfig();

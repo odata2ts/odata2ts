@@ -3,13 +3,13 @@ import { ODataTypesV4 } from "@odata2ts/odata-core";
 import { mkdirp } from "mkdirp";
 import { EmitResult } from "ts-morph";
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
-import { EmitModes } from "../../src";
-import { DataModel } from "../../src/data-model/DataModel";
-import { digest } from "../../src/data-model/DataModelDigestionV4";
-import { NamingHelper } from "../../src/data-model/NamingHelper";
-import { createProjectManager } from "../../src/project/ProjectManager";
-import { ODataModelBuilderV4 } from "../data-model/builder/v4/ODataModelBuilderV4";
-import { getTestConfig } from "../test.config";
+import { DataModel } from "../../src/data-model/DataModel.js";
+import { digest } from "../../src/data-model/DataModelDigestionV4.js";
+import { NamingHelper } from "../../src/data-model/NamingHelper.js";
+import { EmitModes } from "../../src/index.js";
+import { createProjectManager } from "../../src/project/ProjectManager.js";
+import { ODataModelBuilderV4 } from "../data-model/builder/v4/ODataModelBuilderV4.js";
+import { getTestConfig } from "../test.config.js";
 
 vi.mock("mkdirp");
 

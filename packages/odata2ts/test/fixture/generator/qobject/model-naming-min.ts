@@ -8,9 +8,9 @@ import {
   QueryObject,
 } from "@odata2ts/odata-query-objects";
 // @ts-ignore
-import type { BookId, parentId } from "./TesterModel";
+import type { BookId, parentId } from "./TesterModel.js";
 // @ts-ignore
-import { Choice } from "./TesterModel";
+import { Choice } from "./TesterModel.js";
 
 export class parentBaseType extends QueryObject {
   public readonly parentId = new QBooleanPath(this.withPrefix("parentId"));

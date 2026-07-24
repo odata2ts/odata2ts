@@ -1,13 +1,13 @@
 import { ODataTypesV2 } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, test } from "vitest";
-import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
+import { digest } from "../../../src/data-model/DataModelDigestionV2.js";
+import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2.js";
 import {
   createHelper,
   EntityBasedGeneratorFunctionWithoutVersion,
   FixtureComparatorHelper,
-} from "../comparator/FixtureComparatorHelper";
-import { TestOptions } from "../TestTypes";
+} from "../comparator/FixtureComparatorHelper.js";
+import { TestOptions } from "../TestTypes.js";
 
 export const SERVICE_NAME = "Tester";
 export const ENTITY_NAME = "Book";

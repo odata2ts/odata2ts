@@ -23,7 +23,7 @@ import {
   QueryObject,
 } from "@odata2ts/odata-query-objects";
 // @ts-ignore
-import type { BookId } from "./TesterModel";
+import type { BookId } from "./TesterModel.js";
 
 export class QBook extends QueryObject {
   public readonly id = new QGuidPath(this.withPrefix("id"));

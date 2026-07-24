@@ -1,6 +1,6 @@
-import { ComplexTypeV4 } from "../../../../src/data-model/edmx/ODataEdmxModelV4";
-import { ODataComplexTypeBuilderBase } from "../ODataComplexTypeBuilderBase";
-import { createNavProp } from "./ODataBuilderV4Helper";
+import { ComplexTypeV4 } from "../../../../src/data-model/edmx/ODataEdmxModelV4.js";
+import { ODataComplexTypeBuilderBase } from "../ODataComplexTypeBuilderBase.js";
+import { createNavProp } from "./ODataBuilderV4Helper.js";
 
 export class ODataComplexTypeBuilderV4 extends ODataComplexTypeBuilderBase<ComplexTypeV4> {
   protected createVersionedComplexType(): ComplexTypeV4 {

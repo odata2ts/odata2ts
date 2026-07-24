@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { OperationTypes } from "../../../src/data-model/DataTypeModel";
-import { NoopValidator } from "../../../src/data-model/validation/NoopValidator";
+import { OperationTypes } from "../../../src/data-model/DataTypeModel.js";
+import { NoopValidator } from "../../../src/data-model/validation/NoopValidator.js";
 
 describe("NoopValidator Tests", function () {
   let validator: NoopValidator;

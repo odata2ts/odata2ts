@@ -1,12 +1,12 @@
 import { ODataVersions } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, test } from "vitest";
-import { getDefaultConfig } from "../../src";
-import { NamespaceWithAlias } from "../../src/data-model/DataModel";
-import { digest } from "../../src/data-model/DataModelDigestionV4";
-import { NamingHelper } from "../../src/data-model/NamingHelper";
-import { ClientApiImports, ServiceImports } from "../../src/generator/import/ImportObjects";
-import { ImportContainer } from "../../src/generator/ImportContainer";
-import { ODataModelBuilderV4 } from "../data-model/builder/v4/ODataModelBuilderV4";
+import { NamespaceWithAlias } from "../../src/data-model/DataModel.js";
+import { digest } from "../../src/data-model/DataModelDigestionV4.js";
+import { NamingHelper } from "../../src/data-model/NamingHelper.js";
+import { ClientApiImports, ServiceImports } from "../../src/generator/import/ImportObjects.js";
+import { ImportContainer } from "../../src/generator/ImportContainer.js";
+import { getDefaultConfig } from "../../src/index.js";
+import { ODataModelBuilderV4 } from "../data-model/builder/v4/ODataModelBuilderV4.js";
 
 describe("ImportContainer tests", function () {
   const SERVICE_NAME = "Test";
@@ -131,7 +131,11 @@ describe("ImportContainer tests", function () {
       const importDecls = importContainer.getImportDeclarations();
 
       expect(importDecls).toHaveLength(3);
-      expect(importDecls.map((d) => d.moduleSpecifier)).toStrictEqual(["./TestModel", "./QTest", "./TestService"]);
+      expect(importDecls.map((d) => d.moduleSpecifier)).toStrictEqual([
+        "./TestModel.js",
+        "./QTest.js",
+        "./TestService.js",
+      ]);
     });
   });
 
@@ -160,7 +164,7 @@ describe("ImportContainer tests", function () {
 
       const importDecls = importContainer.getImportDeclarations();
 
-      expect(importDecls.map((d) => d.moduleSpecifier)).toStrictEqual(["./TestModel", "./QTest"]);
+      expect(importDecls.map((d) => d.moduleSpecifier)).toStrictEqual(["./TestModel.js", "./QTest.js"]);
     });
 
     test("addGeneratedModel/QObject/Service: known fqName imports from the model's own file", async () => {
@@ -214,7 +218,7 @@ describe("ImportContainer tests", function () {
       importContainer.addGeneratedQBaseObject(model);
 
       const importDecls = importContainer.getImportDeclarations();
-      expect(importDecls[0].moduleSpecifier).toBe("./QTest");
+      expect(importDecls[0].moduleSpecifier).toBe("./QTest.js");
     });
   });
 });

@@ -6,7 +6,7 @@ import {
   ODataServiceOptionsInternal,
 } from "@odata2ts/odata-service";
 // @ts-ignore
-import type { QAbstractEntity, QExtendedFromAbstract, QExtendedFromOpen, QOpenEntity } from "./QTester";
+import type { QAbstractEntity, QExtendedFromAbstract, QExtendedFromOpen, QOpenEntity } from "./QTester.js";
 import {
   qAbstractEntity,
   qExtendedFromAbstract,
@@ -15,7 +15,7 @@ import {
   QExtendedFromOpenId,
   qOpenEntity,
   // @ts-ignore
-} from "./QTester";
+} from "./QTester.js";
 import type {
   AbstractEntity,
   EditableAbstractEntity,
@@ -28,7 +28,7 @@ import type {
   ExtendedFromOpenId,
   OpenEntity,
   // @ts-ignore
-} from "./TesterModel";
+} from "./TesterModel.js";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   public fromAbstract(): ExtendedFromAbstractCollectionService<ClientType>;

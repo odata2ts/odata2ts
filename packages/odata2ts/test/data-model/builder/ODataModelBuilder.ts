@@ -5,9 +5,9 @@ import {
   EnumType,
   ODataEdmxModelBase,
   Schema,
-} from "../../../src/data-model/edmx/ODataEdmxModelBase";
-import { ODataComplexTypeBuilderBase } from "./ODataComplexTypeBuilderBase";
-import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase";
+} from "../../../src/data-model/edmx/ODataEdmxModelBase.js";
+import { ODataComplexTypeBuilderBase } from "./ODataComplexTypeBuilderBase.js";
+import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase.js";
 
 export interface ModelBuilderOptions {
   baseType?: string;

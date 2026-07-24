@@ -2,9 +2,9 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { AxiosClient, AxiosClientError } from "@odata2ts/http-client-axios";
 import { ODataCollectionResponseV4, ODataModelResponseV4, ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { describe, expect, expectTypeOf, test } from "vitest";
-import type { LocationModel, PersonIdModel, PersonModel, TripModel } from "../../src-generated/trippin/TrippinModel";
-import { FeatureModel, PersonGenderModel } from "../../src-generated/trippin/TrippinModel";
-import { TrippinService } from "../../src-generated/trippin/TrippinService";
+import type { LocationModel, PersonIdModel, PersonModel, TripModel } from "../../src-generated/trippin/TrippinModel.js";
+import { FeatureModel, PersonGenderModel } from "../../src-generated/trippin/TrippinModel.js";
+import { TrippinService } from "../../src-generated/trippin/TrippinService.js";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";

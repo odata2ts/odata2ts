@@ -1,15 +1,14 @@
 import { ODataVersions } from "@odata2ts/odata-core";
-
 import {
   ComplexTypeV3,
   EntityTypeV3,
   ODataEdmxModelV3,
   SchemaV3,
-} from "../../../../src/data-model/edmx/ODataEdmxModelV3";
-import { ModelBuilderOptions, ODataModelBuilder } from "../ODataModelBuilder";
-import { ODataComplexTypeBuilderV2 } from "./ODataComplexTypeBuilderV2";
-import { ODataEntityTypeBuilderV2 } from "./ODataEntityTypeBuilderV2";
-import { ODataFunctionBuilderV2 } from "./ODataFunctionBuilderV2";
+} from "../../../../src/data-model/edmx/ODataEdmxModelV3.js";
+import { ModelBuilderOptions, ODataModelBuilder } from "../ODataModelBuilder.js";
+import { ODataComplexTypeBuilderV2 } from "./ODataComplexTypeBuilderV2.js";
+import { ODataEntityTypeBuilderV2 } from "./ODataEntityTypeBuilderV2.js";
+import { ODataFunctionBuilderV2 } from "./ODataFunctionBuilderV2.js";
 
 export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, SchemaV3, EntityTypeV3, ComplexTypeV3> {
   constructor(serviceName: string) {
@@ -36,7 +35,7 @@ export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, Sch
     name: string,
     returnType?: string,
     paramBuilder?: (builder: ODataFunctionBuilderV2) => void,
-    usePostMethod?: boolean
+    usePostMethod?: boolean,
   ) {
     const container = this.getEntityContainer();
     if (!container.FunctionImport) {
@@ -55,7 +54,7 @@ export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, Sch
   public addEntityType(
     name: string,
     options: undefined | ModelBuilderOptions,
-    builderFn: (builder: ODataEntityTypeBuilderV2) => void
+    builderFn: (builder: ODataEntityTypeBuilderV2) => void,
   ) {
     if (!this.currentSchema.EntityType) {
       this.currentSchema.EntityType = [];
@@ -88,7 +87,7 @@ export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, Sch
   public addComplexType(
     name: string,
     options: undefined | ModelBuilderOptions,
-    builderFn: (builder: ODataComplexTypeBuilderV2) => void
+    builderFn: (builder: ODataComplexTypeBuilderV2) => void,
   ) {
     if (!this.currentSchema.ComplexType) {
       this.currentSchema.ComplexType = [];

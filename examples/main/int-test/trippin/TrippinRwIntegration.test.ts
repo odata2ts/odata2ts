@@ -1,7 +1,7 @@
 import { FetchClient } from "@odata2ts/http-client-fetch";
 import { describe, expect, test } from "vitest";
-import { EditableEventModel } from "../../src-generated/trippin-rw/microsoft-o-data-sample-service-models-trip-pin/event/EventModel";
-import { TrippinRwService } from "../../src-generated/trippin-rw/TrippinRwService";
+import { EditableEventModel } from "../../src-generated/trippin-rw/microsoft-o-data-sample-service-models-trip-pin/event/EventModel.js";
+import { TrippinRwService } from "../../src-generated/trippin-rw/TrippinRwService.js";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/V4/(S(xjqbds2oavibr01gt1fny24s))/TripPinServiceRW";

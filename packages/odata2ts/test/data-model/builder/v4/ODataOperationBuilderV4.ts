@@ -1,5 +1,5 @@
-import { Operation } from "../../../../src/data-model/edmx/ODataEdmxModelV4";
-import { createProperty } from "../ODataBuilderHelper";
+import { Operation } from "../../../../src/data-model/edmx/ODataEdmxModelV4.js";
+import { createProperty } from "../ODataBuilderHelper.js";
 
 export class ODataOperationBuilderV4 {
   private operation: Operation;

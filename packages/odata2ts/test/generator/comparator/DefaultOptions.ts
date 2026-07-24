@@ -1,5 +1,5 @@
-import { getTestConfig, getTestConfigMinimal } from "../../test.config";
-import { TestOptions, TestSettings } from "../TestTypes";
+import { getTestConfig, getTestConfigMinimal } from "../../test.config.js";
+import { TestOptions, TestSettings } from "../TestTypes.js";
 
 const DEFAULT_COMPARE_OPTS: TestOptions = {
   skipIdModels: true,

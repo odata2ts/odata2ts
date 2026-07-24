@@ -1,15 +1,15 @@
 import { ODataVersions } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
-import { RunOptions } from "../../../src";
-import { DataModel } from "../../../src/data-model/DataModel";
-import { Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
-import { NamingHelper } from "../../../src/data-model/NamingHelper";
-import { DigesterFunction } from "../../../src/FactoryFunctionModel";
-import { ProjectManager } from "../../../src/project/ProjectManager";
-import { TestOptions, TestSettings } from "../TestTypes";
-import { DEFAULT_MIN_OPTIONS, DEFAULT_RUN_OPTIONS } from "./DefaultOptions";
-import { createFixtureComparator, FixtureComparator } from "./FixtureComparator";
-import { ServiceFixtureComparatorHelper } from "./ServiceFixtureComparatorHelper";
+import { DataModel } from "../../../src/data-model/DataModel.js";
+import { Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase.js";
+import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
+import { DigesterFunction } from "../../../src/FactoryFunctionModel.js";
+import { RunOptions } from "../../../src/index.js";
+import { ProjectManager } from "../../../src/project/ProjectManager.js";
+import { TestOptions, TestSettings } from "../TestTypes.js";
+import { DEFAULT_MIN_OPTIONS, DEFAULT_RUN_OPTIONS } from "./DefaultOptions.js";
+import { createFixtureComparator, FixtureComparator } from "./FixtureComparator.js";
+import { ServiceFixtureComparatorHelper } from "./ServiceFixtureComparatorHelper.js";
 
 export type EntityBasedGeneratorFunctionWithoutVersion = (
   dataModel: DataModel,

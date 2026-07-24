@@ -1,15 +1,15 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, test } from "vitest";
-import { ConfigFileOptions, NamingStrategies } from "../../../src";
-import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { TypeModel } from "../../../src/TypeModel";
-import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
+import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
+import { ConfigFileOptions, NamingStrategies } from "../../../src/index.js";
+import { TypeModel } from "../../../src/TypeModel.js";
+import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
 import {
   createHelper,
   EntityBasedGeneratorFunctionWithoutVersion,
   FixtureComparatorHelper,
-} from "../comparator/FixtureComparatorHelper";
-import { TestOptions } from "../TestTypes";
+} from "../comparator/FixtureComparatorHelper.js";
+import { TestOptions } from "../TestTypes.js";
 
 export const SERVICE_NAME = "Tester";
 export const ENTITY_NAME = "Book";

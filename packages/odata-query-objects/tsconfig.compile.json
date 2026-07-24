@@ -1,7 +1,6 @@
 {
   "extends": ["../../tsconfig.settings.json", "../../tsconfig.paths.json"],
   "compilerOptions": {
-    "module": "CommonJS",
     "rootDirs": ["src", "test"],
     "noEmit": true
   },

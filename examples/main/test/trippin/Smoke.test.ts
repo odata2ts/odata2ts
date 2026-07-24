@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { PersonIdModel } from "../../src-generated/trippin/TrippinModel";
-import { BASE_URL, TRIPPIN } from "./TrippinTestConstants";
+import { PersonIdModel } from "../../src-generated/trippin/TrippinModel.js";
+import { BASE_URL, TRIPPIN } from "./TrippinTestConstants.js";
 
 describe("Trippin: Smoke Test", function () {
   test("entitySet", async () => {

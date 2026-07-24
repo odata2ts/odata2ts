@@ -1,8 +1,12 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import type { EditableLocation, EditablePerson, PersonId } from "../../src-generated/trippin-min-naming/TrippinModel";
-import { Feature, PersonGender } from "../../src-generated/trippin-min-naming/TrippinModel";
-import { TrippinService } from "../../src-generated/trippin-min-naming/TrippinService";
-import { MockODataClient } from "../MockODataClient";
+import type {
+  EditableLocation,
+  EditablePerson,
+  PersonId,
+} from "../../src-generated/trippin-min-naming/TrippinModel.js";
+import { Feature, PersonGender } from "../../src-generated/trippin-min-naming/TrippinModel.js";
+import { TrippinService } from "../../src-generated/trippin-min-naming/TrippinService.js";
+import { MockODataClient } from "../MockODataClient.js";
 
 describe("Testing Generation with min renaming options", () => {
   const BASE_URL = "/test";

@@ -2,9 +2,9 @@ import type { HttpResponseModel } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
 import { BigNumber } from "bignumber.js";
 import { describe, expect, test } from "vitest";
-import { ProductModel } from "../../src-generated/odataV2/ODataDemoModel";
-import { ODataDemoService } from "../../src-generated/odataV2/ODataDemoService";
-import { MockODataClient } from "../MockODataClient";
+import { ProductModel } from "../../src-generated/odataV2/ODataDemoModel.js";
+import { ODataDemoService } from "../../src-generated/odataV2/ODataDemoService.js";
+import { MockODataClient } from "../MockODataClient.js";
 
 describe("Unit Tests for V2 OData Demo Service", function () {
   const BASE_URL = "test";

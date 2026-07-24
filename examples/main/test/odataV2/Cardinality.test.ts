@@ -1,8 +1,8 @@
 import { CollectionQueryBuilderV2, ModelQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { describe, expect, test } from "vitest";
-import { QProduct } from "../../src-generated/odataV2/QODataDemo";
-import { ODataDemoService } from "../../src-generated/odataV2/ODataDemoService";
-import { MockODataClient } from "../MockODataClient";
+import { ODataDemoService } from "../../src-generated/odataV2/ODataDemoService.js";
+import { QProduct } from "../../src-generated/odataV2/QODataDemo.js";
+import { MockODataClient } from "../MockODataClient.js";
 
 /**
  * Integration test for the query builder's cardinality split (Model vs. Collection), run against the

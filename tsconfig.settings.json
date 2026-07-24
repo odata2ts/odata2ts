@@ -2,8 +2,8 @@
   "compilerOptions": {
     "target": "ES2016",
     "lib": ["esnext"],
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
     "types": ["node"],
     "strict": true,
     "allowJs": true,

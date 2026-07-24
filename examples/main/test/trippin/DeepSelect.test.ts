@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinTestConstants";
+import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinTestConstants.js";
 
 /**
  * Integration test for deep select on complex-typed properties via the unified `expanding()`, run against

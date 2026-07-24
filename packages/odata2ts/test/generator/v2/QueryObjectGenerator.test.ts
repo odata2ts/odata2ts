@@ -1,16 +1,16 @@
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
-import { EmitModes, RunOptions } from "../../../src";
-import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { generateQueryObjects } from "../../../src/generator";
-import { createProjectManager } from "../../../src/project/ProjectManager";
-import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2";
+import { digest } from "../../../src/data-model/DataModelDigestionV2.js";
+import { generateQueryObjects } from "../../../src/generator/index.js";
+import { EmitModes, RunOptions } from "../../../src/index.js";
+import { createProjectManager } from "../../../src/project/ProjectManager.js";
+import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2.js";
 import {
   createHelper,
   EntityBasedGeneratorFunctionWithoutVersion,
   FixtureComparatorHelper,
-} from "../comparator/FixtureComparatorHelper";
-import { createEntityBasedGenerationTests, SERVICE_NAME } from "./EntityBasedGenerationTests";
+} from "../comparator/FixtureComparatorHelper.js";
+import { createEntityBasedGenerationTests, SERVICE_NAME } from "./EntityBasedGenerationTests.js";
 
 describe("Query Object Generator Tests V2", () => {
   const TEST_SUITE_NAME = "Query Object Generator";

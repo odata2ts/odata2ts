@@ -2,14 +2,20 @@ import path from "path";
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
 import { beforeAll, beforeEach, describe, test } from "vitest";
-import { ConfigFileOptions, EmitModes, NamingStrategies, OverridableNamingOptions, RunOptions } from "../../../src";
-import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { NamingHelper } from "../../../src/data-model/NamingHelper";
-import { createProjectManager, ProjectManager } from "../../../src/project/ProjectManager";
-import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
-import { getTestConfig } from "../../test.config";
-import { createServiceHelper } from "../comparator/FixtureComparatorHelper";
-import { ServiceFixtureComparatorHelper } from "../comparator/ServiceFixtureComparatorHelper";
+import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
+import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
+import {
+  ConfigFileOptions,
+  EmitModes,
+  NamingStrategies,
+  OverridableNamingOptions,
+  RunOptions,
+} from "../../../src/index.js";
+import { createProjectManager, ProjectManager } from "../../../src/project/ProjectManager.js";
+import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
+import { getTestConfig } from "../../test.config.js";
+import { createServiceHelper } from "../comparator/FixtureComparatorHelper.js";
+import { ServiceFixtureComparatorHelper } from "../comparator/ServiceFixtureComparatorHelper.js";
 
 describe("Service Generator Tests V4", () => {
   const FIXTURE_PATH = "generator/service";

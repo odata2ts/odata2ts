@@ -1,12 +1,12 @@
 import { writeFile } from "fs/promises";
 import { SourceFile } from "ts-morph";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { EmitModes } from "../../src";
-import { DataModel } from "../../src/data-model/DataModel";
-import { ODataVersion } from "../../src/data-model/DataTypeModel";
-import { ImportContainer } from "../../src/generator/ImportContainer";
-import { FileHandler } from "../../src/project/FileHandler";
-import { FileFormatter } from "../../src/project/formatter/FileFormatter";
+import { DataModel } from "../../src/data-model/DataModel.js";
+import { ODataVersion } from "../../src/data-model/DataTypeModel.js";
+import { ImportContainer } from "../../src/generator/ImportContainer.js";
+import { EmitModes } from "../../src/index.js";
+import { FileHandler } from "../../src/project/FileHandler.js";
+import { FileFormatter } from "../../src/project/formatter/FileFormatter.js";
 
 // global mock for file operations
 vi.mock("fs/promises");
@@ -48,8 +48,7 @@ describe("FileHandler Test", () => {
       formatter?: FileFormatter | undefined;
     } = {},
   ) {
-    const { path = DEFAULT_PATH, fileName = DEFAULT_FILENAME, reservedNames = [], allowTypeChecking = true } =
-      options;
+    const { path = DEFAULT_PATH, fileName = DEFAULT_FILENAME, reservedNames = [], allowTypeChecking = true } = options;
     const fileFormatter = "formatter" in options ? options.formatter : formatter;
 
     const imports = new ImportContainer(path, fileName, DEFAULT_DATA_MODEL, MAIN_FILE_NAMES, true, reservedNames);

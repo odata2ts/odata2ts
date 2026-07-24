@@ -1,6 +1,6 @@
-import { ODataEntityTypeBuilderBase } from "../ODataEntityTypeBuilderBase";
-import { EntityTypeV4 } from "../../../../src/data-model/edmx/ODataEdmxModelV4";
-import { createNavProp } from "./ODataBuilderV4Helper";
+import { EntityTypeV4 } from "../../../../src/data-model/edmx/ODataEdmxModelV4.js";
+import { ODataEntityTypeBuilderBase } from "../ODataEntityTypeBuilderBase.js";
+import { createNavProp } from "./ODataBuilderV4Helper.js";
 
 export class ODataEntityTypeBuilderV4 extends ODataEntityTypeBuilderBase<EntityTypeV4> {
   protected createVersionedEntityType(): EntityTypeV4 {

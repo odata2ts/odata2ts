@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { servicexxx_Trippin_xxxs } from "../../src-generated/trippin-max-renaming/servicexxx_Trippin_xxxs";
+import { servicexxx_Trippin_xxxs } from "../../src-generated/trippin-max-renaming/servicexxx_Trippin_xxxs.js";
 import type {
   EDITABLE_LOCATION,
   EDITABLE_THE_PERSON,
   THE_PERSON_ID,
-} from "../../src-generated/trippin-max-renaming/TRIPPIN_TYPES";
-import { FEATURE, PERSON_GENDER } from "../../src-generated/trippin-max-renaming/TRIPPIN_TYPES";
-import { MockODataClient } from "../MockODataClient";
+} from "../../src-generated/trippin-max-renaming/TRIPPIN_TYPES.js";
+import { FEATURE, PERSON_GENDER } from "../../src-generated/trippin-max-renaming/TRIPPIN_TYPES.js";
+import { MockODataClient } from "../MockODataClient.js";
 
 describe("Testing Generation With Max Renaming Options", () => {
   const BASE_URL = "/test";

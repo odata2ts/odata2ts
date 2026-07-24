@@ -1,8 +1,8 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { afterEach, beforeAll, describe, expect, test, vi } from "vitest";
 import type { MockInstance } from "vitest";
-import { UrlSourceConfiguration } from "../../src";
-import { downloadMetadata } from "../../src/download/downloadMetadata";
+import { downloadMetadata } from "../../src/download/downloadMetadata.js";
+import { UrlSourceConfiguration } from "../../src/index.js";
 
 vi.mock("axios");
 vi.mock("fs-extra");

@@ -7,11 +7,11 @@ import {
   PrimitiveTypeServiceV2,
 } from "@odata2ts/odata-service";
 // @ts-ignore
-import type { QAuthor, QBook } from "./QTester";
+import type { QAuthor, QBook } from "./QTester.js";
 // @ts-ignore
-import { qAuthor, QAuthorId, qBook, QBookId } from "./QTester";
+import { qAuthor, QAuthorId, qBook, QBookId } from "./QTester.js";
 // @ts-ignore
-import type { Author, AuthorId, Book, BookId, EditableAuthor, EditableBook } from "./TesterModel";
+import type { Author, AuthorId, Book, BookId, EditableAuthor, EditableBook } from "./TesterModel.js";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   public books(): BookCollectionService<ClientType>;

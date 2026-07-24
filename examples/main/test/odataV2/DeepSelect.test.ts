@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { ODataDemoService } from "../../src-generated/odataV2/ODataDemoService";
-import { MockODataClient } from "../MockODataClient";
+import { ODataDemoService } from "../../src-generated/odataV2/ODataDemoService.js";
+import { MockODataClient } from "../MockODataClient.js";
 
 /**
  * Integration test for deep select on complex-typed properties in V2, run against the actually generated

@@ -10,11 +10,11 @@ import {
   UrlRequestCmd,
 } from "@odata2ts/odata-service";
 // @ts-ignore
-import type { QTestEntity } from "./QTester";
+import type { QTestEntity } from "./QTester.js";
 // @ts-ignore
-import { QPingBigNumber, QPingDecimal, QPingDecimalCollection, qTestEntity, QTestEntityId } from "./QTester";
+import { QPingBigNumber, QPingDecimal, QPingDecimalCollection, qTestEntity, QTestEntityId } from "./QTester.js";
 // @ts-ignore
-import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel";
+import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel.js";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   private _qPingBigNumber?: QPingBigNumber;

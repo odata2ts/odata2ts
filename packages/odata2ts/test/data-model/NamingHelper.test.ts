@@ -1,10 +1,10 @@
 import deepmerge from "deepmerge";
 import { beforeEach, describe, expect, test } from "vitest";
-import { getDefaultConfig, NamingStrategies, RunOptions } from "../../src";
-import { NamespaceWithAlias } from "../../src/data-model/DataModel";
-import { NamingHelper } from "../../src/data-model/NamingHelper";
-import { TestOptions } from "../generator/TestTypes";
-import { getTestConfigMinimal } from "../test.config";
+import { NamespaceWithAlias } from "../../src/data-model/DataModel.js";
+import { NamingHelper } from "../../src/data-model/NamingHelper.js";
+import { getDefaultConfig, NamingStrategies, RunOptions } from "../../src/index.js";
+import { TestOptions } from "../generator/TestTypes.js";
+import { getTestConfigMinimal } from "../test.config.js";
 
 describe("NamingHelper Tests", function () {
   const NAMESPACE = "TRIPPIN";

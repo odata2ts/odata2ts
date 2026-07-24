@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { PropertyGenerationOptions, TypeBasedGenerationOptions, TypeModel } from "../../src";
-import { NamespaceWithAlias } from "../../src/data-model/DataModel";
-import { ServiceConfigHelper } from "../../src/data-model/ServiceConfigHelper";
+import { NamespaceWithAlias } from "../../src/data-model/DataModel.js";
+import { ServiceConfigHelper } from "../../src/data-model/ServiceConfigHelper.js";
+import { PropertyGenerationOptions, TypeBasedGenerationOptions, TypeModel } from "../../src/index.js";
 
 describe("ServiceConfigHelper Tests", function () {
   const DEFAULT_NAMESPACES: NamespaceWithAlias = ["NS1", "self"];

@@ -1,26 +1,25 @@
 import { ODataVersions } from "@odata2ts/odata-core";
 import { SourceFile } from "ts-morph";
-
-import { Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase";
-import { NamingHelper } from "../../../src/data-model/NamingHelper";
-import { DigesterFunction } from "../../../src/FactoryFunctionModel";
-import { generateServices } from "../../../src/generator";
-import { ServiceGeneratorOptions } from "../../../src/generator/ServiceGenerator";
-import { ProjectManager } from "../../../src/project/ProjectManager";
-import { DEFAULT_RUN_OPTIONS } from "./DefaultOptions";
-import { FixtureComparator } from "./FixtureComparator";
+import { Schema } from "../../../src/data-model/edmx/ODataEdmxModelBase.js";
+import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
+import { DigesterFunction } from "../../../src/FactoryFunctionModel.js";
+import { generateServices } from "../../../src/generator/index.js";
+import { ServiceGeneratorOptions } from "../../../src/generator/ServiceGenerator.js";
+import { ProjectManager } from "../../../src/project/ProjectManager.js";
+import { DEFAULT_RUN_OPTIONS } from "./DefaultOptions.js";
+import { FixtureComparator } from "./FixtureComparator.js";
 
 export class ServiceFixtureComparatorHelper {
   constructor(
     private comparator: FixtureComparator,
     private digest: DigesterFunction<any>,
-    private version: ODataVersions
+    private version: ODataVersions,
   ) {}
 
   public async createDataModel(
     schemas: Array<Schema<any, any>>,
     namingHelper: NamingHelper,
-    options?: ServiceGeneratorOptions
+    options?: ServiceGeneratorOptions,
   ) {
     return this.digest(schemas, { ...DEFAULT_RUN_OPTIONS, ...options }, namingHelper);
   }
