@@ -13,6 +13,32 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-objects bumped from ^0.28.0 to ^0.28.1
     * @odata2ts/odata-service bumped from ^0.23.0 to ^0.23.1
 
+## [0.42.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.41.0...@odata2ts/odata2ts-v0.42.0) (2026-07-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* **odata2ts:** the undocumented `-name` shorthand for --service-name is removed. It never worked as a real short flag (multi-character short flags are invalid; only the long form was ever reliably parsed) and only appeared to work due to commander's previous lenient validation. Use --service-name <serviceName> instead.
+
+### Bug Fixes
+
+* migrate to nodenext module resolution for TypeScript 6.0 ([e58d95f](https://github.com/odata2ts/odata2ts/commit/e58d95f4bcfa673753c6fdd5495040222c710edb))
+* **odata2ts:** commander 15 + cosmiconfig 9 ([51e7eb9](https://github.com/odata2ts/odata2ts/commit/51e7eb9c843d7b89671f4c3dc3824e1503e1a35e))
+* **odata2ts:** move CLI smoke test to its own examples package ([94753ba](https://github.com/odata2ts/odata2ts/commit/94753ba68bfb4f0742c734c378d46797d737c904))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-core bumped from ^0.6.1 to ^0.6.2
+  * devDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.29.0 to ^0.29.1
+    * @odata2ts/odata-service bumped from ^0.24.0 to ^0.24.1
+  * peerDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.29.0 to ^0.29.1
+    * @odata2ts/odata-service bumped from ^0.24.0 to ^0.24.1
+
 ## [0.41.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.40.2...@odata2ts/odata2ts-v0.41.0) (2026-07-20)
 
 

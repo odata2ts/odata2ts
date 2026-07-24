@@ -33,6 +33,22 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * ESM tends to break stuff
 
+## [0.29.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.29.0...@odata2ts/odata-query-objects-v0.29.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* migrate to nodenext module resolution for TypeScript 6.0 ([e58d95f](https://github.com/odata2ts/odata2ts/commit/e58d95f4bcfa673753c6fdd5495040222c710edb))
+* **odata-query-objects:** make Q*Path discriminator public readonly ([5d15004](https://github.com/odata2ts/odata2ts/commit/5d150045cdf4d6b8393b4a58587d6d7f4d8ccd7b))
+* **odata-query-objects:** type __propMapping as Map&lt;string, string&gt; ([6045d50](https://github.com/odata2ts/odata2ts/commit/6045d50239a86a7f5f012086f1ca599b7643098c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-core bumped from ^0.6.1 to ^0.6.2
+
 ## [0.29.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.28.2...@odata2ts/odata-query-objects-v0.29.0) (2026-07-20)
 
 

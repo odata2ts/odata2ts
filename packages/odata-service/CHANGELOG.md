@@ -17,6 +17,22 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-builder bumped from ^0.18.5 to ^0.18.6
     * @odata2ts/odata-query-objects bumped from ^0.28.1 to ^0.28.2
 
+## [0.24.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service-v0.24.0...@odata2ts/odata-service-v0.24.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* migrate to nodenext module resolution for TypeScript 6.0 ([e58d95f](https://github.com/odata2ts/odata2ts/commit/e58d95f4bcfa673753c6fdd5495040222c710edb))
+* **odata-service:** drop cross-package deep imports ([acbf791](https://github.com/odata2ts/odata2ts/commit/acbf79167a8452c6315c64d199bac4fbffa4e4e7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-builder bumped from ^0.19.0 to ^0.19.1
+    * @odata2ts/odata-query-objects bumped from ^0.29.0 to ^0.29.1
+
 ## [0.24.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service-v0.23.2...@odata2ts/odata-service-v0.24.0) (2026-07-20)
 
 
