@@ -1,0 +1,21 @@
+{
+  "name": "@odata2ts/example-ts-floor-check",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Verifies that a generated full client (models, q-objects and services) and the runtime packages it imports still type-check under the minimum TypeScript version declared in packages/odata2ts's peerDependencies",
+  "repository": "git@github.com:odata2ts/odata2ts.git",
+  "license": "MIT",
+  "author": "texttechne",
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf build",
+    "install-floor-ts": "npm --prefix floor-ts install",
+    "int-test": "vitest run"
+  },
+  "dependencies": {
+    "@odata2ts/odata-service": "workspace:^"
+  },
+  "devDependencies": {
+    "@odata2ts/odata2ts": "workspace:^"
+  }
+}

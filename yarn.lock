@@ -559,6 +559,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@odata2ts/example-ts-floor-check@workspace:examples/ts-floor-check":
+  version: 0.0.0-use.local
+  resolution: "@odata2ts/example-ts-floor-check@workspace:examples/ts-floor-check"
+  dependencies:
+    "@odata2ts/odata-service": "workspace:^"
+    "@odata2ts/odata2ts": "workspace:^"
+  languageName: unknown
+  linkType: soft
+
 "@odata2ts/http-client-api@npm:^0.6.4":
   version: 0.6.4
   resolution: "@odata2ts/http-client-api@npm:0.6.4"
