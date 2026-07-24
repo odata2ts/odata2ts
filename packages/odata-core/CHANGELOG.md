@@ -37,6 +37,13 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * feat(example): integration tests for primitive type services
 
+## [0.6.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-core-v0.6.1...@odata2ts/odata-core-v0.6.2) (2026-07-24)
+
+
+### Bug Fixes
+
+* migrate to nodenext module resolution for TypeScript 6.0 ([e58d95f](https://github.com/odata2ts/odata2ts/commit/e58d95f4bcfa673753c6fdd5495040222c710edb))
+
 ## [0.6.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-core@0.6.0...@odata2ts/odata-core-v0.6.1) (2025-10-16)
 
 

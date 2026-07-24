@@ -9,6 +9,20 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
   * dependencies
     * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
 
+## [0.19.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.19.0...@odata2ts/odata-query-builder-v0.19.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* migrate to nodenext module resolution for TypeScript 6.0 ([e58d95f](https://github.com/odata2ts/odata2ts/commit/e58d95f4bcfa673753c6fdd5495040222c710edb))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-objects bumped from ^0.29.0 to ^0.29.1
+
 ## [0.19.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.18.6...@odata2ts/odata-query-builder-v0.19.0) (2026-07-20)
 
 
