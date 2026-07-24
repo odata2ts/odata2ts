@@ -1,0 +1,8 @@
+{
+  "name": "floor-ts",
+  "private": true,
+  "description": "Isolated, plain-npm-managed install of the minimum TypeScript version declared in packages/odata2ts's peerDependencies (>= 4.7). Kept out of the Yarn workspace on purpose so it never gets hoisted/overridden by the repo's own (newer) typescript devDependency. If that peer floor is ever raised, update the pinned version here to match.",
+  "dependencies": {
+    "typescript": "4.7.4"
+  }
+}

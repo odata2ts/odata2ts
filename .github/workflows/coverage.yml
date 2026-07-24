@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        node: [ 24 ]
+        node: [24]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,3 +34,22 @@ jobs:
         uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  ts-floor-check:
+    name: TypeScript Floor Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install packages
+        run: yarn --immutable
+      - name: Build packages
+        run: yarn build
+      - name: Install floor TypeScript version
+        working-directory: examples/ts-floor-check
+        run: yarn install-floor-ts
+      - name: Verify generated output type-checks under the declared minimum TypeScript version
+        working-directory: examples/ts-floor-check
+        run: yarn int-test
