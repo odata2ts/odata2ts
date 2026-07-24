@@ -1,10 +1,10 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, test } from "vitest";
-import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { DataTypes, OperationType, OperationTypes } from "../../../src/data-model/DataTypeModel";
-import { NamingHelper } from "../../../src/data-model/NamingHelper";
-import { getTestConfig } from "../../test.config";
-import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4";
+import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
+import { DataTypes, OperationType, OperationTypes } from "../../../src/data-model/DataTypeModel.js";
+import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
+import { getTestConfig } from "../../test.config.js";
+import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4.js";
 
 describe("Action Digestion Test", () => {
   const SERVICE_NAME = "ActionTest";

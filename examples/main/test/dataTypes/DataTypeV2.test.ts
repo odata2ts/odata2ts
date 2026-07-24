@@ -1,8 +1,8 @@
 import { BigNumber } from "bignumber.js";
 import { describe, expect, test } from "vitest";
-import { EditableOneOfEverything } from "../../src-generated/data-types-v2/DataTypeExampleModel";
-import { DataTypeExampleService } from "../../src-generated/data-types-v2/DataTypeExampleService";
-import { MockODataClient } from "../MockODataClient";
+import { EditableOneOfEverything } from "../../src-generated/data-types-v2/DataTypeExampleModel.js";
+import { DataTypeExampleService } from "../../src-generated/data-types-v2/DataTypeExampleService.js";
+import { MockODataClient } from "../MockODataClient.js";
 
 describe("V2 Data Types & Converter Tests", function () {
   const BASE_URL = "EXP";

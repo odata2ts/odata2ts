@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { TypeModel } from "../../../src";
-import { OperationTypes } from "../../../src/data-model/DataTypeModel";
-import { NameClashValidator } from "../../../src/data-model/validation/NameClashValidator";
+import { OperationTypes } from "../../../src/data-model/DataTypeModel.js";
+import { NameClashValidator } from "../../../src/data-model/validation/NameClashValidator.js";
+import { TypeModel } from "../../../src/index.js";
 
 describe("NameClashValidator Tests", function () {
   let validator: NameClashValidator;

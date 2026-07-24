@@ -7,7 +7,7 @@ import {
   QueryObject,
 } from "@odata2ts/odata-query-objects";
 // @ts-ignore
-import type { Person } from "./TesterModel";
+import type { Person } from "./TesterModel.js";
 
 export class QPerson extends QueryObject {
   public readonly id = new QStringPath(this.withPrefix("id"));

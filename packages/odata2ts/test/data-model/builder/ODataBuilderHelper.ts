@@ -1,4 +1,4 @@
-import { Property } from "../../../src/data-model/edmx/ODataEdmxModelBase";
+import { Property } from "../../../src/data-model/edmx/ODataEdmxModelBase.js";
 
 export function createProperty(name: string, type: string, nullable?: boolean, maxLength?: number, precision?: number) {
   const prop: Property = {

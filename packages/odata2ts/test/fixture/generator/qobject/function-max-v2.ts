@@ -17,7 +17,7 @@ import {
   QueryObject,
 } from "@odata2ts/odata-query-objects";
 // @ts-ignore
-import type { MaxFunctionParams } from "./TesterModel";
+import type { MaxFunctionParams } from "./TesterModel.js";
 
 export class QTheEntity extends QueryObject {
   public readonly id = new QStringV2Path(this.withPrefix("id"));

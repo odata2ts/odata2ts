@@ -1,17 +1,17 @@
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
-import { EmitModes } from "../../../src";
-import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { DigestionOptions } from "../../../src/FactoryFunctionModel";
-import { generateQueryObjects } from "../../../src/generator";
-import { createProjectManager } from "../../../src/project/ProjectManager";
-import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
+import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
+import { DigestionOptions } from "../../../src/FactoryFunctionModel.js";
+import { generateQueryObjects } from "../../../src/generator/index.js";
+import { EmitModes } from "../../../src/index.js";
+import { createProjectManager } from "../../../src/project/ProjectManager.js";
+import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
 import {
   createHelper,
   EntityBasedGeneratorFunctionWithoutVersion,
   FixtureComparatorHelper,
-} from "../comparator/FixtureComparatorHelper";
-import { createEntityBasedGenerationTests, ENTITY_NAME, SERVICE_NAME } from "./EntityBasedGenerationTests";
+} from "../comparator/FixtureComparatorHelper.js";
+import { createEntityBasedGenerationTests, ENTITY_NAME, SERVICE_NAME } from "./EntityBasedGenerationTests.js";
 
 describe("Query Object Generator Tests V4", () => {
   const TEST_SUITE_NAME = "Query Object Generator";
@@ -37,7 +37,11 @@ describe("Query Object Generator Tests V4", () => {
 
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, MODEL_FILE, GENERATE);
 
-  async function generateAndCompare(fixturePath: string, genOptions?: Partial<DigestionOptions>, fileToInspect = MODEL_FILE) {
+  async function generateAndCompare(
+    fixturePath: string,
+    genOptions?: Partial<DigestionOptions>,
+    fileToInspect = MODEL_FILE,
+  ) {
     await fixtureComparatorHelper.generateAndCompare(fileToInspect, fixturePath, odataBuilder.getSchemas(), genOptions);
   }
 
@@ -219,22 +223,23 @@ describe("Query Object Generator Tests V4", () => {
   test(`QObject generation with nativeIn option and unbundled mode`, async () => {
     // given a model with simple properties and collections
     // only simple properties should be generated with nativeIn option
-    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
-      builder
-        .addKeyProp("id", ODataTypesV4.Int32)
-    );
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Int32));
 
     // when generating model
     // then match fixture text of main qobject
     await generateAndCompare("unbundled-main-native-in.ts", {
       enableNativeInOperator: true,
-      bundledFileGeneration: false
+      bundledFileGeneration: false,
     });
     // when generating model
     // then match fixture text of unbundled file
-    await generateAndCompare("unbundled-file-native-in.ts", {
-      enableNativeInOperator: true,
-      bundledFileGeneration: false
-    }, `${SERVICE_NAME.toLowerCase()}/${ENTITY_NAME.toLowerCase()}/Q${ENTITY_NAME}`);
+    await generateAndCompare(
+      "unbundled-file-native-in.ts",
+      {
+        enableNativeInOperator: true,
+        bundledFileGeneration: false,
+      },
+      `${SERVICE_NAME.toLowerCase()}/${ENTITY_NAME.toLowerCase()}/Q${ENTITY_NAME}`,
+    );
   });
 });

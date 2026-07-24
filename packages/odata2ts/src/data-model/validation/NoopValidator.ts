@@ -1,4 +1,4 @@
-import { OperationTypes } from "../DataTypeModel";
+import { OperationTypes } from "../DataTypeModel.js";
 import { NameValidator, ValidationError } from "./NameValidator.js";
 
 export class NoopValidator implements NameValidator {

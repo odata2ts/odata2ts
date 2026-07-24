@@ -9,11 +9,17 @@ import {
   UrlRequestCmd,
 } from "@odata2ts/odata-service";
 // @ts-ignore
-import type { QTestEntity } from "./QTester";
+import type { QTestEntity } from "./QTester.js";
 // @ts-ignore
-import { QBestBook, QMostPop, QPostBestBook, qTestEntity, QTestEntityId } from "./QTester";
-// @ts-ignore
-import type { BestBookParams, EditableTestEntity, PostBestBookParams, TestEntity, TestEntityId } from "./TesterModel";
+import { QBestBook, QMostPop, QPostBestBook, qTestEntity, QTestEntityId } from "./QTester.js";
+import type {
+  BestBookParams,
+  EditableTestEntity,
+  PostBestBookParams,
+  TestEntity,
+  TestEntityId,
+  // @ts-ignore
+} from "./TesterModel.js";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   private _qMostPop?: QMostPop;

@@ -6,7 +6,7 @@ import {
   QueryObject,
 } from "@odata2ts/odata-query-objects";
 // @ts-ignore
-import type { ExtendsFromEntityId } from "./TesterModel";
+import type { ExtendsFromEntityId } from "./TesterModel.js";
 
 export class QBookBaseType extends QueryObject {}
 

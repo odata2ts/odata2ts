@@ -4,9 +4,11 @@ import { FlexibleConversionModel, QueryObjectModel } from "../QueryObjectModel";
 
 const PRIMITIVE_VALUE_REFERENCE = "$it";
 
-export abstract class QPrimitiveCollection<Type, ConvertedType, QType extends QValuePathModel>
-  implements QueryObjectModel<ConvertedType>
-{
+export abstract class QPrimitiveCollection<
+  Type,
+  ConvertedType,
+  QType extends QValuePathModel,
+> implements QueryObjectModel<ConvertedType> {
   public abstract readonly it: QType;
 
   constructor(
@@ -28,7 +30,8 @@ export abstract class QPrimitiveCollection<Type, ConvertedType, QType extends QV
 
     const converter = this.it.converter;
     return !converter
-      ? odataModel
+      ? // no converter means Type and ConvertedType are the same at runtime
+        (odataModel as unknown as FlexibleConversionModel<ConvertedType>)
       : Array.isArray(odataModel)
         ? odataModel.map((om) => converter.convertFrom(om))
         : converter.convertFrom(odataModel);
@@ -44,7 +47,8 @@ export abstract class QPrimitiveCollection<Type, ConvertedType, QType extends QV
 
     const converter = this.it.converter;
     return !converter
-      ? userModel
+      ? // no converter means Type and ConvertedType are the same at runtime
+        (userModel as unknown as FlexibleConversionModel<Type>)
       : Array.isArray(userModel)
         ? userModel.map((um) => converter.convertTo(um))
         : converter.convertTo(userModel);

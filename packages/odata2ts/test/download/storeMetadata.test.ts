@@ -2,7 +2,7 @@ import { writeFile } from "node:fs/promises";
 import { mkdirp } from "mkdirp";
 import { format, resolveConfig } from "prettier";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { storeMetadata } from "../../src/download";
+import { storeMetadata } from "../../src/download/index.js";
 
 vi.mock("mkdirp");
 vi.mock("rimraf");

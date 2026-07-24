@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { edgeCaseService } from "../../src-generated/specials/edge-cases/edgeCaseService";
-import { MockODataClient } from "../MockODataClient";
+import { edgeCaseService } from "../../src-generated/specials/edge-cases/edgeCaseService.js";
+import { MockODataClient } from "../MockODataClient.js";
 
 /**
  * Integration test against the actual generator output for the difference between operations

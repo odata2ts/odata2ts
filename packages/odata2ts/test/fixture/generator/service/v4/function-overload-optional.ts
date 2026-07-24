@@ -2,9 +2,9 @@ import type { ODataHttpClient } from "@odata2ts/http-client-api";
 import type { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { ODataService, UrlGetRequestCmd } from "@odata2ts/odata-service";
 // @ts-ignore
-import { QBestReview } from "./QTester";
+import { QBestReview } from "./QTester.js";
 // @ts-ignore
-import type { BestReviewParams } from "./TesterModel";
+import type { BestReviewParams } from "./TesterModel.js";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   private _qBestReview?: QBestReview;

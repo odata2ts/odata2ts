@@ -1,17 +1,17 @@
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
-import { EmitModes } from "../../../src";
-import { digest } from "../../../src/data-model/DataModelDigestionV4";
-import { DigestionOptions } from "../../../src/FactoryFunctionModel";
-import { generateModels } from "../../../src/generator";
-import { createProjectManager } from "../../../src/project/ProjectManager";
-import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4";
+import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
+import { DigestionOptions } from "../../../src/FactoryFunctionModel.js";
+import { generateModels } from "../../../src/generator/index.js";
+import { EmitModes } from "../../../src/index.js";
+import { createProjectManager } from "../../../src/project/ProjectManager.js";
+import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
 import {
   createHelper,
   EntityBasedGeneratorFunctionWithoutVersion,
   FixtureComparatorHelper,
-} from "../comparator/FixtureComparatorHelper";
-import { createEntityBasedGenerationTests, ENTITY_NAME, SERVICE_NAME } from "./EntityBasedGenerationTests";
+} from "../comparator/FixtureComparatorHelper.js";
+import { createEntityBasedGenerationTests, ENTITY_NAME, SERVICE_NAME } from "./EntityBasedGenerationTests.js";
 
 describe("Model Generator Tests V4", () => {
   const TEST_SUITE_NAME = "Model Generator";

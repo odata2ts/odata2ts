@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinRwTestConstants";
+import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinRwTestConstants.js";
 
 const TRIPPIN_NS = "Microsoft.OData.SampleService.Models.TripPin";
 

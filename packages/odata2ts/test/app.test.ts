@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import type { MockInstance } from "vitest";
-import { EmitModes, Modes, RunOptions } from "../src";
-import { runApp } from "../src/app";
-import * as Generator from "../src/generator";
-import * as ProjectManager from "../src/project/ProjectManager";
-import { ODataModelBuilderV2 } from "./data-model/builder/v2/ODataModelBuilderV2";
-import { ODataModelBuilderV4 } from "./data-model/builder/v4/ODataModelBuilderV4";
-import { getTestConfig } from "./test.config";
+import { runApp } from "../src/app.js";
+import * as Generator from "../src/generator/index.js";
+import { EmitModes, Modes, RunOptions } from "../src/index.js";
+import * as ProjectManager from "../src/project/ProjectManager.js";
+import { ODataModelBuilderV2 } from "./data-model/builder/v2/ODataModelBuilderV2.js";
+import { ODataModelBuilderV4 } from "./data-model/builder/v4/ODataModelBuilderV4.js";
+import { getTestConfig } from "./test.config.js";
 
 vi.mock("fs-extra");
 vi.mock("ts-morph");

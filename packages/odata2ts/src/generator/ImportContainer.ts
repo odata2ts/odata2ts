@@ -277,6 +277,9 @@ export class ImportContainer {
 
   private getModuleSpecifier(filePath: string): string {
     const relativePath = path.relative(this.path, filePath).replaceAll(path.sep, "/");
-    return !relativePath.startsWith(".") ? "./" + relativePath : relativePath;
+    const withPrefix = !relativePath.startsWith(".") ? "./" + relativePath : relativePath;
+    // explicit extensions are required by ECMAScript imports under node16/nodenext resolution
+    // and are also understood by TypeScript's classic resolution, so this is safe either way
+    return `${withPrefix}.js`;
   }
 }

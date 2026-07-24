@@ -1,9 +1,9 @@
 import type { HttpResponseModel } from "@odata2ts/http-client-api";
 import type { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 import { describe, expect, test } from "vitest";
-import { ProductModel } from "../../src-generated/odataV2/ODataDemoModel";
-import { ODataDemoService } from "../../src-generated/odataV2/ODataDemoService";
-import { MockODataClient } from "../MockODataClient";
+import { ProductModel } from "../../src-generated/odataV2/ODataDemoModel.js";
+import { ODataDemoService } from "../../src-generated/odataV2/ODataDemoService.js";
+import { MockODataClient } from "../MockODataClient.js";
 
 describe("V2 Operation (FunctionImport) Tests", function () {
   const BASE_URL = "test";

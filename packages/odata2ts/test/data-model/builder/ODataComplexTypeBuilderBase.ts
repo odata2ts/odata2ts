@@ -1,6 +1,6 @@
-import { ComplexType } from "../../../src/data-model/edmx/ODataEdmxModelBase";
-import { CommonEntityAndComplexBuilderBase } from "./CommonEntityAndComplexBuilderBase";
-import { createProperty } from "./ODataBuilderHelper";
+import { ComplexType } from "../../../src/data-model/edmx/ODataEdmxModelBase.js";
+import { CommonEntityAndComplexBuilderBase } from "./CommonEntityAndComplexBuilderBase.js";
+import { createProperty } from "./ODataBuilderHelper.js";
 
 export abstract class ODataComplexTypeBuilderBase<CT extends ComplexType> extends CommonEntityAndComplexBuilderBase {
   protected complexType: CT = this.createVersionedComplexType();

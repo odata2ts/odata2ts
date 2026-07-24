@@ -1,6 +1,6 @@
 import { IndentationText, NewLineKind, QuoteKind } from "ts-morph";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { PrettierFormatter } from "../../../src/project/formatter/PrettierFormatter";
+import { PrettierFormatter } from "../../../src/project/formatter/PrettierFormatter.js";
 
 const mockedPrettier = vi.hoisted(() => ({
   resolveConfig: vi.fn(),
@@ -64,10 +64,7 @@ describe("PrettierFormatter tests", () => {
     const result = await formatter.format("const x=1");
 
     expect(result).toBe("formatted!");
-    expect(mockedPrettier.format).toHaveBeenCalledWith(
-      "const x=1",
-      expect.objectContaining({ parser: "typescript" }),
-    );
+    expect(mockedPrettier.format).toHaveBeenCalledWith("const x=1", expect.objectContaining({ parser: "typescript" }));
   });
 
   test.each([

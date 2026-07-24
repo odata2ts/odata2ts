@@ -1,5 +1,5 @@
-import { FunctionImport } from "../../../../src/data-model/edmx/ODataEdmxModelV3";
-import { createProperty } from "../ODataBuilderHelper";
+import { FunctionImport } from "../../../../src/data-model/edmx/ODataEdmxModelV3.js";
+import { createProperty } from "../ODataBuilderHelper.js";
 
 export class ODataFunctionBuilderV2 {
   private function: FunctionImport;

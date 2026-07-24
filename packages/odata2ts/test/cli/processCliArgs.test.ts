@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { processCliArgs } from "../../src/cli/processCliArgs";
+import { processCliArgs } from "../../src/cli/processCliArgs.js";
 
 describe("processCliArgs tests", () => {
   const BASE_ARGV = ["node", "cli.js"];

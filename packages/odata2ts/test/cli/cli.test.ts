@@ -1,12 +1,12 @@
 import { access, readFile } from "node:fs/promises";
-import type { CosmiconfigResult } from "cosmiconfig/dist/types";
+import type { CosmiconfigResult } from "cosmiconfig";
 import { mkdirp } from "mkdirp";
 import { rimraf } from "rimraf";
 import { afterAll, beforeAll, beforeEach, describe, expect, MockInstance, test, vi } from "vitest";
-import { CliOptions, ConfigFileOptions, EmitModes, getDefaultConfig, Modes, RunOptions } from "../../src";
-import * as app from "../../src/app";
-import { run } from "../../src/cli";
-import * as downloader from "../../src/download";
+import * as app from "../../src/app.js";
+import { run } from "../../src/cli/index.js";
+import * as downloader from "../../src/download/index.js";
+import { CliOptions, ConfigFileOptions, EmitModes, getDefaultConfig, Modes, RunOptions } from "../../src/index.js";
 
 vi.mock("rimraf");
 vi.mock("mkdirp");

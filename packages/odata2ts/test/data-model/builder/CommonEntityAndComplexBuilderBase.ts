@@ -1,4 +1,4 @@
-import { ComplexType, EntityType } from "../../../src/data-model/edmx/ODataEdmxModelBase";
+import { ComplexType, EntityType } from "../../../src/data-model/edmx/ODataEdmxModelBase.js";
 
 export interface EntityOrComplexBuilderOptions {
   baseType?: string;
@@ -7,7 +7,10 @@ export interface EntityOrComplexBuilderOptions {
 }
 
 export abstract class CommonEntityAndComplexBuilderBase {
-  public constructor(private name: string, private options?: EntityOrComplexBuilderOptions) {}
+  public constructor(
+    private name: string,
+    private options?: EntityOrComplexBuilderOptions,
+  ) {}
 
   protected createComplexType(): ComplexType {
     return {

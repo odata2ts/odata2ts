@@ -1,4 +1,4 @@
-import { NavigationProperty } from "../../../../src/data-model/edmx/ODataEdmxModelV4";
+import { NavigationProperty } from "../../../../src/data-model/edmx/ODataEdmxModelV4.js";
 
 export function createNavProp(name: string, type: string, partner?: string, nullable?: boolean) {
   const navProp: NavigationProperty = {

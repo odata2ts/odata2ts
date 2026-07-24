@@ -8,11 +8,11 @@ import {
   UrlGetRequestCmd,
 } from "@odata2ts/odata-service";
 // @ts-ignore
-import type { QTestEntity } from "./QTester";
+import type { QTestEntity } from "./QTester.js";
 // @ts-ignore
-import { QFirstBook, QGetBestsellers, qTestEntity, QTestEntityId } from "./QTester";
+import { QFirstBook, QGetBestsellers, qTestEntity, QTestEntityId } from "./QTester.js";
 // @ts-ignore
-import type { EditableTestEntity, FirstBookParams, TestEntity, TestEntityId } from "./TesterModel";
+import type { EditableTestEntity, FirstBookParams, TestEntity, TestEntityId } from "./TesterModel.js";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   private _qGetBestsellers?: QGetBestsellers;

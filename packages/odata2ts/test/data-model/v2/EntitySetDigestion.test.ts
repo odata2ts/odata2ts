@@ -1,9 +1,9 @@
 import { ODataTypesV2 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, test } from "vitest";
-import { digest } from "../../../src/data-model/DataModelDigestionV2";
-import { NamingHelper } from "../../../src/data-model/NamingHelper";
-import { getTestConfig } from "../../test.config";
-import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2";
+import { digest } from "../../../src/data-model/DataModelDigestionV2.js";
+import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
+import { getTestConfig } from "../../test.config.js";
+import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2.js";
 
 describe("EntitySet Digestion Test", () => {
   const SERVICE_NAME = "EntitySetTest";

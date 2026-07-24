@@ -1,4 +1,4 @@
-import { getDefaultConfig, getMinimalConfig } from "../src";
+import { getDefaultConfig, getMinimalConfig } from "../src/index.js";
 
 export function getTestConfig() {
   const config = getDefaultConfig();

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { NoopFormatter } from "../../../src/project/formatter/NoopFormatter";
+import { NoopFormatter } from "../../../src/project/formatter/NoopFormatter.js";
 
 describe("NoopFormatter tests", () => {
   test("init resolves to itself", async () => {

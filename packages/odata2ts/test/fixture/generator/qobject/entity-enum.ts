@@ -1,6 +1,6 @@
 import { QBooleanPath, QEnumCollectionPath, QEnumPath, QueryObject } from "@odata2ts/odata-query-objects";
 // @ts-ignore
-import { Choice } from "./TesterModel";
+import { Choice } from "./TesterModel.js";
 
 export class QBook extends QueryObject {
   public readonly id = new QBooleanPath(this.withPrefix("id"));

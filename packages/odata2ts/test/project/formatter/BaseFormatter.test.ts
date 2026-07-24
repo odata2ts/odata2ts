@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { BaseFormatter } from "../../../src/project/formatter/BaseFormatter";
+import { BaseFormatter } from "../../../src/project/formatter/BaseFormatter.js";
 
 class TestFormatter extends BaseFormatter {
   public async init(): Promise<BaseFormatter> {

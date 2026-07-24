@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, Modes, TypeModel } from "./lib";
+import { ConfigFileOptions, EmitModes, Modes, TypeModel } from "./lib/index.js";
 
 const config: ConfigFileOptions = {
   debug: true,

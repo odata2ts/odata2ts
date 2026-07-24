@@ -1,9 +1,9 @@
 import { BigNumber } from "bignumber.js";
 import { DateTime } from "luxon";
 import { describe, expect, test } from "vitest";
-import type { EditableOneOfEverything } from "../../src-generated/data-types-v4/DataTypeExampleModel";
-import { DataTypeExampleService } from "../../src-generated/data-types-v4/DataTypeExampleService";
-import { MockODataClient } from "../MockODataClient";
+import type { EditableOneOfEverything } from "../../src-generated/data-types-v4/DataTypeExampleModel.js";
+import { DataTypeExampleService } from "../../src-generated/data-types-v4/DataTypeExampleService.js";
+import { MockODataClient } from "../MockODataClient.js";
 
 describe("V4 Data Types & Converter Tests", function () {
   const BASE_URL = "EXP";

@@ -7,8 +7,8 @@ import {
   FeatureModel,
   PersonGenderModel,
   PersonModel,
-} from "../../src-generated/trippin/TrippinModel";
-import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinTestConstants";
+} from "../../src-generated/trippin/TrippinModel.js";
+import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinTestConstants.js";
 
 describe("Testing Generation of TrippinService", () => {
   const userModel: EditablePersonModel = {

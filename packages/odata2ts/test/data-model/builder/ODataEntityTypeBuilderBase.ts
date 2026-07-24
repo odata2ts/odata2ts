@@ -1,6 +1,6 @@
-import { EntityType } from "../../../src/data-model/edmx/ODataEdmxModelBase";
-import { CommonEntityAndComplexBuilderBase } from "./CommonEntityAndComplexBuilderBase";
-import { createProperty } from "./ODataBuilderHelper";
+import { EntityType } from "../../../src/data-model/edmx/ODataEdmxModelBase.js";
+import { CommonEntityAndComplexBuilderBase } from "./CommonEntityAndComplexBuilderBase.js";
+import { createProperty } from "./ODataBuilderHelper.js";
 
 export abstract class ODataEntityTypeBuilderBase<ET extends EntityType> extends CommonEntityAndComplexBuilderBase {
   protected entityType: ET = this.createVersionedEntityType();

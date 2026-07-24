@@ -1,5 +1,5 @@
-import { TypeModel } from "../../TypeModel";
-import { OperationTypes } from "../DataTypeModel";
+import { TypeModel } from "../../TypeModel.js";
+import { OperationTypes } from "../DataTypeModel.js";
 
 export interface NameValidator {
   addEntityType(fqName: string, name: string): string;

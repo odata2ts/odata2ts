@@ -1,12 +1,9 @@
 import { ODataVersions } from "@odata2ts/odata-core";
 import { describe, expect, test, vi } from "vitest";
-import { DataTypes, ReturnTypeModel } from "../../../src/data-model/DataTypeModel";
-import { ImportContainer } from "../../../src/generator/ImportContainer";
-import { CoreImports } from "../../../src/generator/import/ImportObjects";
-import {
-  importMainResponseConverter,
-  importReturnType,
-} from "../../../src/generator/import/ImportResponseHelper";
+import { DataTypes, ReturnTypeModel } from "../../../src/data-model/DataTypeModel.js";
+import { CoreImports } from "../../../src/generator/import/ImportObjects.js";
+import { importMainResponseConverter, importReturnType } from "../../../src/generator/import/ImportResponseHelper.js";
+import { ImportContainer } from "../../../src/generator/ImportContainer.js";
 
 function mockImports() {
   return {

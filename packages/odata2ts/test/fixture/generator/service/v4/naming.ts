@@ -6,11 +6,11 @@ import {
   ODataServiceOptionsInternal,
 } from "@odata2ts/odata-service";
 // @ts-ignore
-import type { Q_TEST_ENTITY } from "./QTester";
+import type { Q_TEST_ENTITY } from "./QTester.js";
 // @ts-ignore
-import { q_TEST_ENTITY, Q_TEST_ENTITY_ID } from "./QTester";
+import { q_TEST_ENTITY, Q_TEST_ENTITY_ID } from "./QTester.js";
 // @ts-ignore
-import type { EDITABLE_TEST_ENTITY, TEST_ENTITY, TEST_ENTITY_ID } from "./TesterModel";
+import type { EDITABLE_TEST_ENTITY, TEST_ENTITY, TEST_ENTITY_ID } from "./TesterModel.js";
 
 export class tester<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   public NAVIGATE_TO_LIST(): TEST_ENTITY_COLLECTION_SRV<ClientType>;

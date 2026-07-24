@@ -7,11 +7,11 @@ import {
   ODataEdmxModelV4,
   SchemaV4,
   Singleton,
-} from "../../../../src/data-model/edmx/ODataEdmxModelV4";
-import { ModelBuilderOptions, ODataModelBuilder } from "../ODataModelBuilder";
-import { ODataComplexTypeBuilderV4 } from "./ODataComplexTypeBuilderV4";
-import { ODataEntityTypeBuilderV4 } from "./ODataEntityTypeBuilderV4";
-import { ODataOperationBuilderV4 } from "./ODataOperationBuilderV4";
+} from "../../../../src/data-model/edmx/ODataEdmxModelV4.js";
+import { ModelBuilderOptions, ODataModelBuilder } from "../ODataModelBuilder.js";
+import { ODataComplexTypeBuilderV4 } from "./ODataComplexTypeBuilderV4.js";
+import { ODataEntityTypeBuilderV4 } from "./ODataEntityTypeBuilderV4.js";
+import { ODataOperationBuilderV4 } from "./ODataOperationBuilderV4.js";
 
 export interface NavProp {
   path: string;

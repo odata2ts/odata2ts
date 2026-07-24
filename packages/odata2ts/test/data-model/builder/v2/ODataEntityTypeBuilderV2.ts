@@ -1,5 +1,5 @@
-import { Association, EntityTypeV3 } from "../../../../src/data-model/edmx/ODataEdmxModelV3";
-import { ODataEntityTypeBuilderBase } from "../ODataEntityTypeBuilderBase";
+import { Association, EntityTypeV3 } from "../../../../src/data-model/edmx/ODataEdmxModelV3.js";
+import { ODataEntityTypeBuilderBase } from "../ODataEntityTypeBuilderBase.js";
 
 export class ODataEntityTypeBuilderV2 extends ODataEntityTypeBuilderBase<EntityTypeV3> {
   private associations: Array<Association> = [];

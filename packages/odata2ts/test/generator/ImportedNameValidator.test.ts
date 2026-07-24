@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { ImportedNameValidator } from "../../src/generator/ImportedNameValidator";
+import { ImportedNameValidator } from "../../src/generator/ImportedNameValidator.js";
 
 describe("ImportedNameValidator tests", () => {
   test("first registration of a name returns it unchanged", () => {

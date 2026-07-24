@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinTestConstants";
+import { BASE_URL, ODATA_CLIENT, TRIPPIN } from "./TrippinTestConstants.js";
 
 /**
  * Integration test for the query builder's cardinality split (Model vs. Collection), run against the
