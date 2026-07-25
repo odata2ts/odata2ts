@@ -9,6 +9,7 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV4 } from "../request";
+import { ODATA_VERSION_HEADERS } from "../RequestHeaders.js";
 import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
@@ -122,7 +123,7 @@ export abstract class EntitySetServiceV4<
       ModelQueryBuilderV4<Q>,
       ODataModelPayloadV4<EditableT>
     >(client, ODataHttpMethods.Post, createModelQueryBuilder(queryFn, actualPath), qModel, data, {
-      headers: getDefaultHeaders(),
+      headers: { ...getDefaultHeaders(), ...ODATA_VERSION_HEADERS },
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
     });

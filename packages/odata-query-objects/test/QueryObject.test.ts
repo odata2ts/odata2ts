@@ -251,4 +251,23 @@ describe("QueryObject tests", () => {
     const result2 = qBaseType.convertToOData(finalModel);
     expect(result2).toStrictEqual(rawModel);
   });
+
+  test("subtype casting via type control info without the odata prefix", () => {
+    const qBaseType = new QPlanItem();
+
+    // a service answering with OData 4.01 or greater omits the "odata." prefix as well as the hash symbol
+    const result = qBaseType.convertFromOData({
+      "@type": "Tester.Event",
+      Id: 123,
+      Name: "Test",
+      Description: "Desc",
+    });
+
+    expect(result).toStrictEqual({
+      "@type": "Tester.Event",
+      id: 123,
+      name: "Test",
+      description: "Desc",
+    });
+  });
 });

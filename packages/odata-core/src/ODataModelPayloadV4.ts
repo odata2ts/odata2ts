@@ -3,6 +3,9 @@
  *
  * Result object is directly returned.
  * Additional context attribute is merged into result object.
+ *
+ * Since odata2ts targets OData 4.0, control information is written with the {@code odata.} prefix, which is what
+ * 4.0 payloads require; the prefix-less form of 4.01 and greater is deliberately not used.
  */
 export type ODataModelPayloadV4<T> = T & {
   /**

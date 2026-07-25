@@ -1,4 +1,12 @@
 /**
+ * odata2ts targets OData 4.0, hence all control information is modelled with the {@code odata.} prefix, which
+ * 4.0 payloads are required to use. Payloads of 4.01 or greater use the prefix-less form ({@code @count},
+ * {@code @type}, ...), which is deliberately not modelled here.
+ *
+ * See https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html#sec_ControlInformation
+ */
+
+/**
  * Response to a collection query.
  */
 export interface ODataCollectionResponseV4<T> {

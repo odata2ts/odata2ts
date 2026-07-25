@@ -18,7 +18,7 @@ export const enum StringFilterFunctions {
   LENGTH = "length",
   STARTS_WITH = "startswith",
   // SUBSTRING = "substring"
-  MATCHES_PATTERN = "matchesPattern", // v4 only
+  MATCHES_PATTERN = "matchesPattern", // v4 only; introduced in 4.01, but we don't differentiate 4.0 and 4.01
   TO_LOWER = "tolower",
   TO_UPPER = "toupper",
   TRIM = "trim",
@@ -35,7 +35,7 @@ export const enum NumberFilterOperators {
   SUBTRACTION = "sub",
   MULTIPLICATION = "mul",
   DIVISION = "div",
-  DIVISION_WITH_FRACTION = "divby", //v4 only
+  DIVISION_WITH_FRACTION = "divby", //v4 only; introduced in 4.01, but we don't differentiate 4.0 and 4.01
   MODULO = "mod",
 }
 
