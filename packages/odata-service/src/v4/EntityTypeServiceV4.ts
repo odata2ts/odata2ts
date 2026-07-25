@@ -4,6 +4,7 @@ import { ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { ModelResponseConverterV4, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
+import { ODATA_VERSION_HEADERS } from "../RequestHeaders.js";
 import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
@@ -58,7 +59,7 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
       ModelQueryBuilderV4<Q>,
       ODataModelPayloadV4<Partial<EditableT>>
     >(client, ODataHttpMethods.Patch, createModelQueryBuilder(queryFn, actualPath), qModel, data, {
-      headers: getDefaultHeaders(),
+      headers: { ...getDefaultHeaders(), ...ODATA_VERSION_HEADERS },
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
     });
@@ -98,7 +99,7 @@ export class EntityTypeServiceV4<in out ClientType extends ODataHttpClient, T, E
       ModelQueryBuilderV4<Q>,
       ODataModelPayloadV4<EditableT>
     >(client, ODataHttpMethods.Put, createModelQueryBuilder(queryFn, actualPath), qModel, data, {
-      headers: getDefaultHeaders(),
+      headers: { ...getDefaultHeaders(), ...ODATA_VERSION_HEADERS },
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
     });

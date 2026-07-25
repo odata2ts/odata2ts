@@ -1,7 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, RequestInfo } from "../../src";
+import { DEFAULT_HEADERS, ODATA_VERSION_HEADERS, RequestInfo } from "../../src";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { EditableFlightModel, PlanItemService } from "../fixture/v4/BaseTypeModel";
@@ -33,7 +33,7 @@ describe("EntityTypeService V4 Tests", () => {
 
     expect(result.url).toBe(EXPECTED_PATH);
     expect(result.method).toBe("PATCH");
-    expect(result.headers).toStrictEqual(DEFAULT_HEADERS);
+    expect(result.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...ODATA_VERSION_HEADERS });
     expect(result.data).toEqual(model);
     expect(request.getInfoConverted().data).toEqual(requestModel);
 
@@ -75,7 +75,7 @@ describe("EntityTypeService V4 Tests", () => {
 
     expect(result.url).toBe(EXPECTED_PATH);
     expect(result.method).toBe("PUT");
-    expect(result.headers).toStrictEqual(DEFAULT_HEADERS);
+    expect(result.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...ODATA_VERSION_HEADERS });
     expect(result.data).toEqual(model);
     expect(request.getInfoConverted().data).toEqual(requestModel);
 

@@ -10,7 +10,13 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { CollectionServiceV4, DEFAULT_HEADERS, ODataServiceOptions, RequestInfo } from "../../src";
+import {
+  CollectionServiceV4,
+  DEFAULT_HEADERS,
+  ODATA_VERSION_HEADERS,
+  ODataServiceOptions,
+  RequestInfo,
+} from "../../src";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
 import { MockClient } from "../mock/MockClient";
 
@@ -60,7 +66,7 @@ describe("CollectionService V4 Tests", () => {
 
     expect(request.url).toBe(NAME_ENUM);
     expect(request.method).toBe("POST");
-    expect(request.headers).toStrictEqual(DEFAULT_HEADERS);
+    expect(request.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...ODATA_VERSION_HEADERS });
     expect(request.data).toEqual(StringTestEnum.A);
     expect(cmd.getInfoConverted().data).toEqual(StringTestEnum.A);
 
@@ -113,7 +119,7 @@ describe("CollectionService V4 Tests", () => {
 
     expect(result.url).toBe(NAME_STRING);
     expect(result.method).toBe("PUT");
-    expect(result.headers).toStrictEqual(DEFAULT_HEADERS);
+    expect(result.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...ODATA_VERSION_HEADERS });
     expect(result.data).toEqual(userModel);
     expect(request.getInfoConverted().data).toStrictEqual(odataModel);
 

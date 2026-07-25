@@ -15,6 +15,20 @@ function getMapping(q: QueryObject) {
   return result;
 }
 
+/**
+ * Retrieves the type control information of a model, which is used to detect subtypes.
+ *
+ * odata2ts targets OData 4.0, where this control information is named {@code @odata.type} and its value is
+ * prefixed with a hash symbol. Payloads of 4.01 or greater omit the {@code odata.} prefix and, for built-in
+ * primitive types, also the hash symbol. Since the response version is up to the service, both spellings are
+ * accepted here.
+ *
+ * See https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html#sec_ControlInformationtypeodatatype
+ */
+function getTypeControlInfo(model: any): string | undefined {
+  return (model["@odata.type"] ?? model["@type"])?.replace(/^#/, "");
+}
+
 export const ENUMERABLE_PROP_DEFINITION = { enumerable: true };
 
 export class QueryObject<T extends object = any> implements QueryObjectModel<T> {
@@ -73,7 +87,7 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T> 
     const models = isList ? (odataModel as Array<T>) : [odataModel];
 
     const result = models.map((model) => {
-      const typeByCi = model["@odata.type"]?.replace(/^#/, "");
+      const typeByCi = getTypeControlInfo(model);
       return Object.entries(model).reduce((collector, [key, value]) => {
         let propKey = this.__getPropMapping().get(key);
         let finalKey: string = propKey as string;
@@ -156,8 +170,7 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T> 
     const models = isList ? userModel : [userModel];
 
     const result = models.map((model) => {
-      // @ts-ignore
-      const typeByCi = model["@odata.type"]?.replace(/^#/, "");
+      const typeByCi = getTypeControlInfo(model);
       return Object.entries(model).reduce((collector, [key, value]) => {
         let prop = this[key as keyof this] as QValuePathModel | undefined;
         let finalKey = prop?.getPath();

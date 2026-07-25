@@ -9,6 +9,7 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
+import { ODATA_VERSION_HEADERS } from "../RequestHeaders.js";
 import { CollectionModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
 
@@ -63,7 +64,7 @@ export class CollectionServiceV4<
       ModelQueryBuilderV4<Q>,
       PrimitiveT
     >(client, ODataHttpMethods.Post, createModelQueryBuilder(queryFn), qModel, model, {
-      headers: getDefaultHeaders(),
+      headers: { ...getDefaultHeaders(), ...ODATA_VERSION_HEADERS },
       mainRequestConverter: qModel,
       mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
         CollectionModificationResponseV4<Response, PrimitiveT>,
@@ -99,7 +100,7 @@ export class CollectionServiceV4<
       ModelQueryBuilderV4<Q>,
       Array<PrimitiveT>
     >(client, ODataHttpMethods.Put, createModelQueryBuilder(queryFn), qModel, models, {
-      headers: getDefaultHeaders(),
+      headers: { ...getDefaultHeaders(), ...ODATA_VERSION_HEADERS },
       mainRequestConverter: qModel,
       mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
         CollectionModificationResponseV4<Response, PrimitiveT>,

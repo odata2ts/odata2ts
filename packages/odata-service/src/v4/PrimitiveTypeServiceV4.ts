@@ -9,6 +9,7 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlRequestCmd } from "../request";
+import { ODATA_VERSION_HEADERS } from "../RequestHeaders.js";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
 import { ValueModificationResponseV4 } from "./ResponseTypeChoicesV4";
 
@@ -87,7 +88,7 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
       path,
       value,
       {
-        headers: getDefaultHeaders(),
+        headers: { ...getDefaultHeaders(), ...ODATA_VERSION_HEADERS },
         mainRequestConverter: new ValueRequestConverter(converter),
         mainResponseConverter: new ValueResponseConverterV4<T>(converter) as MainResponseConverter<
           ValueModificationResponseV4<Response, T>,
