@@ -1,7 +1,6 @@
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
-import { DigestionOptions } from "../../../src/FactoryFunctionModel.js";
 import { generateModels } from "../../../src/generator/index.js";
 import { EmitModes } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
@@ -11,6 +10,7 @@ import {
   EntityBasedGeneratorFunctionWithoutVersion,
   FixtureComparatorHelper,
 } from "../comparator/FixtureComparatorHelper.js";
+import { TestOptions } from "../TestTypes.js";
 import { createEntityBasedGenerationTests, ENTITY_NAME, SERVICE_NAME } from "./EntityBasedGenerationTests.js";
 
 describe("Model Generator Tests V4", () => {
@@ -37,7 +37,7 @@ describe("Model Generator Tests V4", () => {
 
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, MODEL_FILE, GENERATE);
 
-  async function generateAndCompare(fixturePath: string, genOptions?: Partial<DigestionOptions>) {
+  async function generateAndCompare(fixturePath: string, genOptions?: TestOptions) {
     await fixtureComparatorHelper.generateAndCompare(MODEL_FILE, fixturePath, odataBuilder.getSchemas(), genOptions);
   }
 
@@ -232,5 +232,51 @@ describe("Model Generator Tests V4", () => {
     // when generating parameter model
     // then match fixture text
     await generateAndCompare("function-overload-multiple.ts", {});
+  });
+
+  test(`${TEST_SUITE_NAME}: binding notation of OData 4.01`, async () => {
+    // given entities related to each other
+    odataBuilder
+      .addEntityType("Author", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Int32))
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Int32)
+          .addProp("author", withNs("Author"), false)
+          .addProp("altAuthor", withNs("Author"), true)
+          .addProp("relatedAuthors", `Collection(${withNs("Author")})`),
+      );
+
+    // when generating for 4.01
+    // then the editable model uses the short form instead of the @odata.bind notation
+    await generateAndCompare("entity-relationships-v401.ts", {
+      odataVersionV4: "4.01",
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: binding props can be skipped`, async () => {
+    // given entities related to each other
+    odataBuilder
+      .addEntityType("Author", undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.Int32).addProp("name", ODataTypesV4.Boolean, true),
+      )
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Int32)
+          .addProp("author", withNs("Author"), false)
+          .addProp("altAuthor", withNs("Author"), true)
+          .addProp("relatedAuthors", `Collection(${withNs("Author")})`),
+      );
+
+    // when skipping the binding props
+    // then the editable model is the one we had before the feature
+    await generateAndCompare("entity-relationships-no-binding.ts", {
+      skipBindingProps: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
   });
 });

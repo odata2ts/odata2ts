@@ -1,5 +1,5 @@
 import { ODataVersions } from "@odata2ts/odata-core";
-import { JSDocStructure, OptionalKind, StructureKind } from "ts-morph";
+import { JSDocStructure, OptionalKind, PropertySignatureStructure, StructureKind } from "ts-morph";
 import { DataModel } from "../data-model/DataModel.js";
 import { ComplexType, DataTypes, EntityType, OperationType, PropertyModel } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
@@ -242,6 +242,7 @@ class ModelGenerator {
       .map((p) => `"${p.name}"`)
       .join(" | ");
     const complexProps = allProps.filter((p) => p.dataType === DataTypes.ComplexType);
+    const bindingProps = allProps.filter((p) => this.isBindableNavProp(p)).map((p) => this.generateBindingProp(p));
 
     const extendsClause = [
       requiredProps ? `Pick<${model.modelName}, ${requiredProps}>` : null,
@@ -252,18 +253,62 @@ class ModelGenerator {
       name: model.editableName,
       isExported: true,
       extends: extendsClause,
-      properties: !complexProps
-        ? undefined
-        : complexProps.map((p) => {
-            return {
-              name: p.name,
-              type: this.getEditablePropType(file.getImports(), p),
-              // optional props don't need to be specified in editable model
-              // also, entities would require deep insert func => we make it optional for now
-              hasQuestionToken: !p.required || p.dataType === DataTypes.ModelType,
-            };
-          }),
+      properties: [
+        ...complexProps.map((p) => {
+          return {
+            name: p.name,
+            type: this.getEditablePropType(file.getImports(), p),
+            // optional props don't need to be specified in editable model
+            // also, entities would require deep insert func => we make it optional for now
+            hasQuestionToken: !p.required || p.dataType === DataTypes.ModelType,
+          };
+        }),
+        ...bindingProps,
+      ],
     });
+  }
+
+  /**
+   * A navigation property can be bound to an already existing entity, as long as that entity is
+   * addressable by a URL - which requires it to have a key.
+   */
+  private isBindableNavProp(prop: PropertyModel) {
+    if (this.options.skipBindingProps) {
+      return false;
+    }
+    return prop.dataType === DataTypes.ModelType && !!this.dataModel.getEntityType(prop.fqType)?.keyNames.length;
+  }
+
+  /**
+   * Binding an existing entity to a navigation property, see odata2ts issue #38.
+   *
+   * The notation is dictated by the OData version which is targeted, and it is the notation itself which
+   * ends up on the wire, hence the OData name is used here and not the mapped one:
+   * - V2: {@code { "Category": { "__metadata": { "uri": "Categories(1)" } } }}
+   * - 4.0: {@code { "Category@odata.bind": "Categories(1)" }}
+   * - 4.01: {@code { "Category": { "@id": "Categories(1)" } }}
+   *
+   * Removing a binding is only possible for a nullable single-valued navigation property, by setting it to
+   * null. Collection-valued bind operations add to the collection, they never replace it, so there is
+   * nothing to remove with - that requires $ref, which odata2ts doesn't support yet.
+   */
+  private generateBindingProp(prop: PropertyModel): OptionalKind<PropertySignatureStructure> {
+    const isV2 = this.version === ODataVersions.V2;
+    const isV401 = !isV2 && this.options.odataVersionV4 === "4.01";
+
+    const name = isV2 || isV401 ? prop.odataName : `${prop.odataName}@odata.bind`;
+    const singleType = isV2 ? `{ __metadata: { uri: string } }` : isV401 ? `{ "@id": string }` : "string";
+    const type = prop.isCollection ? `Array<${singleType}>` : singleType + (prop.required ? "" : " | null");
+
+    return {
+      // the notation is no identifier, so it must be quoted
+      name: `"${name}"`,
+      type,
+      hasQuestionToken: true,
+      docs: this.options.skipComments
+        ? undefined
+        : [{ description: `Bind "${prop.name}" to an already existing entity by its URL.` }],
+    };
   }
 
   private getEditablePropType(imports: ImportContainer, prop: PropertyModel): string {

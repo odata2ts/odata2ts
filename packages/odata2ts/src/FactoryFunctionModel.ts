@@ -41,6 +41,8 @@ export type GeneratorFunctionOptions = Pick<
   | "v2ModelsWithExtraResultsWrapping"
   | "enumType"
   | "enableNativeInOperator"
+  | "odataVersionV4"
+  | "skipBindingProps"
 >;
 
 export type EntityBasedGeneratorFunction = (
