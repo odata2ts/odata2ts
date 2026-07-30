@@ -103,6 +103,7 @@ const defaultConfig: DefaultConfiguration = {
   byTypeAndName: [],
   enableNativeInOperator: false,
   odataVersionV4: "4.0",
+  enableBindingProps: false,
 };
 
 const { models, queryObjects, services } = defaultConfig.naming;

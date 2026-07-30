@@ -270,4 +270,20 @@ describe("QueryObject tests", () => {
       description: "Desc",
     });
   });
+
+  test("binding notation of a navigation property survives the conversion", () => {
+    // the binding notations of odata2ts issue #38 address a navigation property by URL instead of sending
+    // a nested entity. simpleEntity / simpleEntities are real navigation props of this query object, so the
+    // value goes through the nested conversion - which must leave the notation alone and not mistake it for
+    // a deep insert. The key itself is mapped as usual, here simpleEntity -> simple.
+    expect(qToTestWithAssoc.convertToOData({ simpleEntity: { "@id": "Simples(1)" } } as any)).toStrictEqual({
+      simple: { "@id": "Simples(1)" },
+    });
+    expect(
+      qToTestWithAssoc.convertToOData({ simpleEntity: { __metadata: { uri: "Simples(1)" } } } as any),
+    ).toStrictEqual({ simple: { __metadata: { uri: "Simples(1)" } } });
+    expect(qToTestWithAssoc.convertToOData({ simpleEntities: [{ "@id": "Simples(1)" }] } as any)).toStrictEqual({
+      simpleList: [{ "@id": "Simples(1)" }],
+    });
+  });
 });

@@ -1,7 +1,6 @@
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV2.js";
-import { DigestionOptions } from "../../../src/FactoryFunctionModel.js";
 import { generateModels } from "../../../src/generator/index.js";
 import { EmitModes } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
@@ -11,6 +10,7 @@ import {
   EntityBasedGeneratorFunctionWithoutVersion,
   FixtureComparatorHelper,
 } from "../comparator/FixtureComparatorHelper.js";
+import { TestOptions } from "../TestTypes.js";
 import { createEntityBasedGenerationTests, ENTITY_NAME, SERVICE_NAME } from "./EntityBasedGenerationTests.js";
 
 describe("Model Generator Tests V2", () => {
@@ -37,7 +37,7 @@ describe("Model Generator Tests V2", () => {
 
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, MODEL_FILE, GENERATE);
 
-  async function generateAndCompare(fixturePath: string, genOptions?: Partial<DigestionOptions>) {
+  async function generateAndCompare(fixturePath: string, genOptions?: TestOptions) {
     await fixtureComparatorHelper.generateAndCompare(MODEL_FILE, fixturePath, odataBuilder.getSchemas(), genOptions);
   }
 
@@ -91,6 +91,27 @@ describe("Model Generator Tests V2", () => {
     // then match fixture text
     await generateAndCompare("entity-relationships-v2-extra-wrapping.ts", {
       v2ModelsWithExtraResultsWrapping: true,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: binding notation of V2`, async () => {
+    // given entities related to each other by an association, which is how V2 expresses it
+    odataBuilder
+      .addEntityType("Author", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Int32))
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV2.Int32)
+          .addNavProp("author", withNs("Author"), "Book_Author", "1")
+          .addNavProp("relatedAuthors", withNs("Author"), "Book_RelatedAuthors", "*"),
+      );
+
+    // when generating
+    // then the editable model uses the __metadata uri notation
+    await generateAndCompare("entity-relationships-binding-v2.ts", {
+      enableBindingProps: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
     });
   });
 });

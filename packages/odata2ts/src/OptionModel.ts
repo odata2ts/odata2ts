@@ -285,6 +285,14 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * compatible version.
    */
   odataVersionV4?: "4.0" | "4.01";
+  /**
+   * Adds one property per navigation property to the editable models, which allows to bind an already
+   * existing entity to it, in the notation of the targeted OData version, e.g. {@code "Author@odata.bind"}
+   * for 4.0.
+   *
+   * Opt-in, so by default no such property is generated.
+   */
+  enableBindingProps?: boolean;
 }
 
 /**
