@@ -42,7 +42,7 @@ export type GeneratorFunctionOptions = Pick<
   | "enumType"
   | "enableNativeInOperator"
   | "odataVersionV4"
-  | "skipBindingProps"
+  | "enableBindingProps"
 >;
 
 export type EntityBasedGeneratorFunction = (

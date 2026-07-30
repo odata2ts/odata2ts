@@ -273,7 +273,7 @@ class ModelGenerator {
    * addressable by a URL - which requires it to have a key.
    */
   private isBindableNavProp(prop: PropertyModel) {
-    if (this.options.skipBindingProps) {
+    if (!this.options.enableBindingProps) {
       return false;
     }
     return prop.dataType === DataTypes.ModelType && !!this.dataModel.getEntityType(prop.fqType)?.keyNames.length;

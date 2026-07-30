@@ -108,6 +108,7 @@ describe("Model Generator Tests V2", () => {
     // when generating
     // then the editable model uses the __metadata uri notation
     await generateAndCompare("entity-relationships-binding-v2.ts", {
+      enableBindingProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,

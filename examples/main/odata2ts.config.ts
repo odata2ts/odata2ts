@@ -18,6 +18,7 @@ const config: ConfigFileOptions = {
     // Just the Trippin service with a bit of mapping
     trippin: {
       source: srcFolder("trippin.xml"),
+      enableBindingProps: true,
       output: outputFolder("trippin"),
       // TrippinService does not generate IDs on the server, but the client side => demo service
       disableAutoManagedKey: true,
@@ -180,6 +181,7 @@ const config: ConfigFileOptions = {
     // trippin has operations, so the versioned response types actually show up in the generate
     trippinV401: {
       serviceName: "TrippinV401",
+      enableBindingProps: true,
       source: srcFolder("trippin.xml"),
       output: outputFolder("trippin-v401"),
       odataVersionV4: "4.01",
@@ -189,6 +191,7 @@ const config: ConfigFileOptions = {
     // Example of OData V2 service from odata.org
     odataV2: {
       source: srcFolder("odata-v2.xml"),
+      enableBindingProps: true,
       output: outputFolder("odataV2"),
       allowRenaming: true,
       // this demo service does not generate IDs, but requires the client to create new IDs

@@ -16,4 +16,8 @@ export interface Book {
 
 export type BookId = number | { id: number };
 
-export interface EditableBook extends Pick<Book, "id"> {}
+export interface EditableBook extends Pick<Book, "id"> {
+  "author@odata.bind"?: string;
+  "altAuthor@odata.bind"?: string | null;
+  "relatedAuthors@odata.bind"?: Array<string>;
+}

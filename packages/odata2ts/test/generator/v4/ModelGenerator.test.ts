@@ -249,6 +249,7 @@ describe("Model Generator Tests V4", () => {
     // when generating for 4.01
     // then the editable model uses the short form instead of the @odata.bind notation
     await generateAndCompare("entity-relationships-v401.ts", {
+      enableBindingProps: true,
       odataVersionV4: "4.01",
       skipEditableModels: false,
       skipIdModels: false,
@@ -256,7 +257,7 @@ describe("Model Generator Tests V4", () => {
     });
   });
 
-  test(`${TEST_SUITE_NAME}: binding props can be skipped`, async () => {
+  test(`${TEST_SUITE_NAME}: binding props of OData 4.0`, async () => {
     // given entities related to each other
     odataBuilder
       .addEntityType("Author", undefined, (builder) =>
@@ -270,10 +271,10 @@ describe("Model Generator Tests V4", () => {
           .addProp("relatedAuthors", `Collection(${withNs("Author")})`),
       );
 
-    // when skipping the binding props
-    // then the editable model is the one we had before the feature
-    await generateAndCompare("entity-relationships-no-binding.ts", {
-      skipBindingProps: true,
+    // when opting into the binding props
+    // then the editable model allows to bind an existing entity via the @odata.bind notation
+    await generateAndCompare("entity-relationships-binding.ts", {
+      enableBindingProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
