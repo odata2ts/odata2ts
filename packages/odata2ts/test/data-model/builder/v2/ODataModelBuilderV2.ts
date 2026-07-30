@@ -31,6 +31,24 @@ export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, Sch
     return this;
   }
 
+  /**
+   * The V2 counterpart of V4's NavigationPropertyBinding: states by which EntitySets the ends of an
+   * association are realized.
+   */
+  public addAssociationSet(name: string, association: string, ends: Array<{ role: string; entitySet: string }>) {
+    const container = this.getEntityContainer();
+    if (!container.AssociationSet) {
+      container.AssociationSet = [];
+    }
+
+    container.AssociationSet.push({
+      $: { Name: name, Association: association },
+      End: ends.map(({ role, entitySet }) => ({ $: { Role: role, EntitySet: entitySet } })),
+    });
+
+    return this;
+  }
+
   public addFunctionImport(
     name: string,
     returnType?: string,

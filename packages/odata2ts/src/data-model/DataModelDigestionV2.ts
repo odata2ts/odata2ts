@@ -1,12 +1,18 @@
-import { MappedConverterChains, loadConverters } from "@odata2ts/converter-runtime";
+import { loadConverters, MappedConverterChains } from "@odata2ts/converter-runtime";
 import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
-
 import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel.js";
 import { withNamespace } from "./DataModel.js";
 import { Digester, TypeModel } from "./DataModelDigestion.js";
-import { ODataVersion, OperationTypes, PropertyModel } from "./DataTypeModel.js";
+import { NavPropBindingType, ODataVersion, OperationTypes, PropertyModel } from "./DataTypeModel.js";
 import { ComplexType, Property } from "./edmx/ODataEdmxModelBase.js";
-import { AssociationEnd, ComplexTypeV3, EntityTypeV3, NavigationProperty, SchemaV3 } from "./edmx/ODataEdmxModelV3.js";
+import {
+  AssociationEnd,
+  ComplexTypeV3,
+  EntityContainerV3,
+  EntityTypeV3,
+  NavigationProperty,
+  SchemaV3,
+} from "./edmx/ODataEdmxModelV3.js";
 import { NamingHelper } from "./NamingHelper.js";
 
 /**
@@ -28,7 +34,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
     schemas: Array<SchemaV3>,
     options: DigestionOptions,
     namingHelper: NamingHelper,
-    converters: MappedConverterChains | undefined
+    converters: MappedConverterChains | undefined,
   ) {
     super(ODataVersion.V2, schemas, options, namingHelper, converters);
   }
@@ -45,6 +51,51 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
       }
     }
     throw new Error(`Association end couldn't be determined for NavigationProperty [${np.$.Name}]`);
+  }
+
+  private findEdmxEntityType(fqTypeName: string): EntityTypeV3 | undefined {
+    const name = this.namingHelper.stripServicePrefix(fqTypeName);
+    for (let schema of this.schemas) {
+      const found = schema.EntityType?.find((et) => et.$.Name === name);
+      if (found) {
+        return found;
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * The V2 counterpart of V4's NavigationPropertyBinding: an AssociationSet states by which EntitySets the
+   * two ends of an association are realized, which is exactly the information needed to know where a
+   * navigation property points to.
+   *
+   * The same association can be realized by more than one AssociationSet, hence the matching one is the one
+   * whose end for the source role is this very entity set.
+   */
+  private getNavPropBindings(
+    container: EntityContainerV3,
+    entitySetName: string,
+    fqEntityTypeName: string,
+  ): Array<NavPropBindingType> {
+    const navProps = this.findEdmxEntityType(fqEntityTypeName)?.NavigationProperty;
+    if (!navProps?.length || !container.AssociationSet?.length) {
+      return [];
+    }
+
+    return navProps.reduce<Array<NavPropBindingType>>((collector, np) => {
+      const relationship = this.namingHelper.stripServicePrefix(np.$.Relationship);
+      const associationSet = container.AssociationSet!.find(
+        (as) =>
+          this.namingHelper.stripServicePrefix(as.$.Association) === relationship &&
+          as.End.some((end) => end.$.Role === np.$.FromRole && end.$.EntitySet === entitySetName),
+      );
+      const target = associationSet?.End.find((end) => end.$.Role === np.$.ToRole)?.$.EntitySet;
+
+      if (target) {
+        collector.push({ path: np.$.Name, target });
+      }
+      return collector;
+    }, []);
   }
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV3): Array<Property> {
@@ -133,6 +184,7 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
           odataName,
           name,
           entityType,
+          navPropBinding: this.getNavPropBindings(container, odataName, entitySet.$.EntityType),
         });
       });
     }
