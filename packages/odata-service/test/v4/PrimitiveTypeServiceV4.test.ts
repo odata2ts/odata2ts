@@ -1,7 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, ODATA_VERSION_HEADERS, PrimitiveTypeServiceV4, RequestInfo } from "../../src/";
+import { DEFAULT_HEADERS, getODataVersionHeaders, PrimitiveTypeServiceV4, RequestInfo } from "../../src/";
 import { PersonModelService } from "../fixture/v4/PersonModelService";
 import { MockClient } from "../mock/MockClient";
 
@@ -66,7 +66,7 @@ describe("PrimitiveTypeService V4 Test", () => {
     expect(result.url).toBe(EXPECTED_PATH);
     expect(result.data).toStrictEqual({ value });
     expect(result.method).toBe("PUT");
-    expect(result.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...ODATA_VERSION_HEADERS });
+    expect(result.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...getODataVersionHeaders() });
     expect(odataClient.lastRequestConfig).toBeUndefined();
 
     expectTypeOf(request.getInfo()).toEqualTypeOf<RequestInfo<string>>();

@@ -176,6 +176,16 @@ const config: ConfigFileOptions = {
         },
       ],
     },
+    // same model as trippin, but targeting OData 4.01 instead of the default 4.0;
+    // trippin has operations, so the versioned response types actually show up in the generate
+    trippinV401: {
+      serviceName: "TrippinV401",
+      source: srcFolder("trippin.xml"),
+      output: outputFolder("trippin-v401"),
+      odataVersionV4: "4.01",
+      disableAutoManagedKey: true,
+      allowRenaming: true,
+    },
     // Example of OData V2 service from odata.org
     odataV2: {
       source: srcFolder("odata-v2.xml"),

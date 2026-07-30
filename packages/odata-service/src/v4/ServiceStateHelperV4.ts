@@ -1,5 +1,5 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
-import { ODataModelPayloadV4 } from "@odata2ts/odata-core";
+import { ODataModelPayloadFor, ODataVersionV4 } from "@odata2ts/odata-core";
 import { CollectionQueryBuilderV4, createQueryBuilderV4, ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
@@ -13,13 +13,14 @@ export interface SubtypeOptions {
 export class ServiceStateHelperV4<
   in out ClientType extends ODataHttpClient,
   Q extends QueryObjectModel,
-> extends ServiceStateHelper<ClientType> {
+  V extends ODataVersionV4 = "4.0",
+> extends ServiceStateHelper<ClientType, V> {
   public constructor(
     client: ClientType,
     basePath: string,
     name: string,
     public qModel: Q,
-    options?: ODataServiceOptionsInternal,
+    options?: ODataServiceOptionsInternal<V>,
   ) {
     super(client, basePath, name, options);
   }
@@ -59,10 +60,16 @@ export class ServiceStateHelperV4<
     };
   }
 
-  public addTypeControlInfo<T>(model: ODataModelPayloadV4<T>) {
-    return {
-      "@odata.type": `#${this.name}`,
-      ...model,
-    };
+  public addTypeControlInfo<T>(model: ODataModelPayloadFor<V, T>): ODataModelPayloadFor<V, T> {
+    // control information supplied by the user wins, in either spelling: adding ours on top would
+    // produce a payload carrying both forms, which is not valid
+    if ("@odata.type" in model || "@type" in model) {
+      return model;
+    }
+
+    // 4.01 and greater use the short form of the control information
+    return this.options.odataVersionV4 === "4.01"
+      ? { "@type": `#${this.name}`, ...model }
+      : { "@odata.type": `#${this.name}`, ...model };
   }
 }

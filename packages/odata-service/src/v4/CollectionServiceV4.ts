@@ -1,5 +1,5 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataCollectionResponseV4, ODataModelPayloadV4 } from "@odata2ts/odata-core";
+import { ODataCollectionResponseFor, ODataVersionV4 } from "@odata2ts/odata-core";
 import { CollectionQueryBuilderV4, ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import {
   CollectionResponseConverterV4,
@@ -9,7 +9,6 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
-import { ODATA_VERSION_HEADERS } from "../RequestHeaders.js";
 import { CollectionModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
 
@@ -20,15 +19,16 @@ export class CollectionServiceV4<
   T,
   Q extends QueryObjectModel,
   PrimitiveT = PrimitiveExtractor<T>,
+  V extends ODataVersionV4 = "4.0",
 > {
-  protected readonly __base: ServiceStateHelperV4<ClientType, Q>;
+  protected readonly __base: ServiceStateHelperV4<ClientType, Q, V>;
 
   public constructor(
     client: ClientType,
     basePath: string,
     name: string,
     qModel: Q,
-    options?: ODataServiceOptionsInternal,
+    options?: ODataServiceOptionsInternal<V>,
   ) {
     this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, options);
   }
@@ -50,24 +50,25 @@ export class CollectionServiceV4<
    * that no data is returned, e.g. `add<true>(...)`.
    *
    * @param model primitive value
+   * @param queryFn
    */
   public add<Response extends boolean = false>(
-    model: ODataModelPayloadV4<PrimitiveT>,
+    model: PrimitiveT,
     queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
-    const { client, getDefaultHeaders, qModel, createModelQueryBuilder } = this.__base;
+    const { client, getDefaultHeaders, getVersionHeaders, qModel, createModelQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV4<
       ClientType,
-      CollectionModificationResponseV4<Response, PrimitiveT>,
+      CollectionModificationResponseV4<Response, PrimitiveT, V>,
       Q,
       ModelQueryBuilderV4<Q>,
       PrimitiveT
     >(client, ODataHttpMethods.Post, createModelQueryBuilder(queryFn), qModel, model, {
-      headers: { ...getDefaultHeaders(), ...ODATA_VERSION_HEADERS },
+      headers: { ...getDefaultHeaders(), ...getVersionHeaders() },
       mainRequestConverter: qModel,
       mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
-        CollectionModificationResponseV4<Response, PrimitiveT>,
+        CollectionModificationResponseV4<Response, PrimitiveT, V>,
         T
       >,
     });
@@ -86,24 +87,25 @@ export class CollectionServiceV4<
    * that no data is returned, e.g. `update<true>(...).
    *
    * @param models set of primitive values
+   * @param queryFn
    */
   public update<Response extends boolean = false>(
-    models: Array<ODataModelPayloadV4<PrimitiveT>>,
+    models: Array<PrimitiveT>,
     queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
-    const { client, getDefaultHeaders, qModel, createModelQueryBuilder } = this.__base;
+    const { client, getDefaultHeaders, getVersionHeaders, qModel, createModelQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV4<
       ClientType,
-      CollectionModificationResponseV4<Response, PrimitiveT>,
+      CollectionModificationResponseV4<Response, PrimitiveT, V>,
       Q,
       ModelQueryBuilderV4<Q>,
       Array<PrimitiveT>
     >(client, ODataHttpMethods.Put, createModelQueryBuilder(queryFn), qModel, models, {
-      headers: { ...getDefaultHeaders(), ...ODATA_VERSION_HEADERS },
+      headers: { ...getDefaultHeaders(), ...getVersionHeaders() },
       mainRequestConverter: qModel,
       mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
-        CollectionModificationResponseV4<Response, PrimitiveT>,
+        CollectionModificationResponseV4<Response, PrimitiveT, V>,
         T
       >,
     });
@@ -128,7 +130,7 @@ export class CollectionServiceV4<
   public query<ReturnType = T>(queryFn?: (builder: CollectionQueryBuilderV4<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
-    return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseV4<ReturnType>, Q>(
+    return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseFor<V, ReturnType>, Q>(
       client,
       ODataHttpMethods.Get,
       createQueryBuilder(queryFn),

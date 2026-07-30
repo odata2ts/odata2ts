@@ -5,10 +5,11 @@ import { CoreImports } from "../../../src/generator/import/ImportObjects.js";
 import { importMainResponseConverter, importReturnType } from "../../../src/generator/import/ImportResponseHelper.js";
 import { ImportContainer } from "../../../src/generator/ImportContainer.js";
 
-function mockImports() {
+function mockImports(isV401 = false) {
   return {
     addCoreLib: vi.fn((_v: ODataVersions, lib: any) => String(lib)),
     addQObject: vi.fn((qo: any) => String(qo)),
+    isV401: vi.fn(() => isV401),
   } as unknown as ImportContainer;
 }
 
@@ -37,6 +38,13 @@ describe("ImportResponseHelper tests", () => {
       importReturnType(ODataVersions.V4, imports, mkReturnType(DataTypes.ModelType, false));
 
       expect(imports.addCoreLib).toHaveBeenCalledWith(ODataVersions.V4, CoreImports.ODataModelResponseV4);
+    });
+
+    test("V4 targeting 4.01: entity/model type uses the short form of the control information", () => {
+      const imports = mockImports(true);
+      importReturnType(ODataVersions.V4, imports, mkReturnType(DataTypes.ModelType, false));
+
+      expect(imports.addCoreLib).toHaveBeenCalledWith(ODataVersions.V4, CoreImports.ODataModelResponseV401);
     });
   });
 

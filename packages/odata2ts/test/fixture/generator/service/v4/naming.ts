@@ -1,4 +1,5 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
+import type { ODataVersionV4 } from "@odata2ts/odata-core";
 import {
   EntitySetServiceV4,
   EntityTypeServiceV4,
@@ -24,25 +25,20 @@ export class tester<in out ClientType extends ODataHttpClient> extends ODataServ
   }
 }
 
-export class TEST_ENTITY_SRV<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
-  ClientType,
-  TEST_ENTITY,
-  EDITABLE_TEST_ENTITY,
-  Q_TEST_ENTITY
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class TEST_ENTITY_SRV<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntityTypeServiceV4<ClientType, TEST_ENTITY, EDITABLE_TEST_ENTITY, Q_TEST_ENTITY, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, q_TEST_ENTITY, options);
   }
 }
 
-export class TEST_ENTITY_COLLECTION_SRV<in out ClientType extends ODataHttpClient> extends EntitySetServiceV4<
-  ClientType,
-  TEST_ENTITY,
-  EDITABLE_TEST_ENTITY,
-  Q_TEST_ENTITY,
-  TEST_ENTITY_ID
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class TEST_ENTITY_COLLECTION_SRV<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntitySetServiceV4<ClientType, TEST_ENTITY, EDITABLE_TEST_ENTITY, Q_TEST_ENTITY, TEST_ENTITY_ID, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, q_TEST_ENTITY, new Q_TEST_ENTITY_ID(name), options);
   }
 }

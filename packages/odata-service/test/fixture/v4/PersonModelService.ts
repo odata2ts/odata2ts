@@ -1,5 +1,5 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataModelResponseV4, ODataValueResponseV4 } from "@odata2ts/odata-core";
+import { ODataModelResponseV4, ODataValueResponseV4, ODataVersionV4 } from "@odata2ts/odata-core";
 import { ModelResponseConverterV4, QEnumCollection } from "@odata2ts/odata-query-objects";
 import {
   CollectionServiceV4,
@@ -15,30 +15,34 @@ import { EditablePersonModel, Feature, GetSomethingFunctionParams, PersonId, Per
 import { QPersonIdFunction } from "../QPerson";
 import { QGetScoreFunction, QGetSomethingComposable, QGetSomethingFunction, QPersonV4, qPersonV4 } from "./QPersonV4";
 
-export class PersonModelService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
-  ClientType,
-  PersonModel,
-  EditablePersonModel,
-  QPersonV4
-> {
+export class PersonModelService<
+  ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntityTypeServiceV4<ClientType, PersonModel, EditablePersonModel, QPersonV4, V> {
   private _qGetSomething = new QGetSomethingFunction();
 
   private _qGetComposable = new QGetSomethingComposable();
 
   private _qGetScore = new QGetScoreFunction();
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QPersonV4(), options);
   }
 
   public userName() {
     const { client, path, qModel, options } = this.__base;
-    return new PrimitiveTypeServiceV4<ClientType, string>(client, path, "UserName", qModel.userName.converter, options);
+    return new PrimitiveTypeServiceV4<ClientType, string, V>(
+      client,
+      path,
+      "UserName",
+      qModel.userName.converter,
+      options,
+    );
   }
 
   public age() {
     const { client, path, qModel, options } = this.__base;
-    return new PrimitiveTypeServiceV4<ClientType, string>(client, path, "Age", qModel.age.converter, options);
+    return new PrimitiveTypeServiceV4<ClientType, string, V>(client, path, "Age", qModel.age.converter, options);
   }
 
   public get features() {
@@ -84,14 +88,13 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
     const { addFullPath, client, isUrlNotEncoded, options } = this.__base;
     const url = addFullPath(this._qGetComposable.buildUrl(params, isUrlNotEncoded()));
 
-    return new ComposableUrlRequestCmd<ClientType, PersonModelService<ClientType>, ODataModelResponseV4<PersonModel>>(
-      client,
-      url,
-      (finalUrl: string) => new PersonModelService<ClientType>(client, finalUrl, "", options),
-      {
-        mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
-      },
-    );
+    return new ComposableUrlRequestCmd<
+      ClientType,
+      PersonModelService<ClientType, V>,
+      ODataModelResponseV4<PersonModel>
+    >(client, url, (finalUrl: string) => new PersonModelService<ClientType, V>(client, finalUrl, "", options), {
+      mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
+    });
   }
 
   /**
@@ -108,16 +111,13 @@ export class PersonModelService<ClientType extends ODataHttpClient> extends Enti
   }
 }
 
-export class PersonModelCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
-  ClientType,
-  PersonModel,
-  EditablePersonModel,
-  QPersonV4,
-  PersonId
-> {
+export class PersonModelCollectionService<
+  ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntitySetServiceV4<ClientType, PersonModel, EditablePersonModel, QPersonV4, PersonId, V> {
   private _qGetSomething = new QGetSomethingFunction();
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qPersonV4, new QPersonIdFunction(name), options);
   }
 

@@ -178,6 +178,7 @@ describe("App Test", () => {
       bundledFileGeneration: true,
       tsConfigPath: "tsconfig.json",
       allowTypeChecking: false,
+      odataVersionV4: "4.0",
     });
 
     // then only generateModels was called
@@ -206,6 +207,7 @@ describe("App Test", () => {
       bundledFileGeneration: false,
       tsConfigPath: "test.json",
       allowTypeChecking: false,
+      odataVersionV4: "4.0",
     });
 
     // then generateModels & generateQObjects was called

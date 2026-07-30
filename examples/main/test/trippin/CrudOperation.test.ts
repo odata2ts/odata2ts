@@ -1,6 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
+import { describe, expect, expectTypeOf, test } from "vitest";
 import {
   EditableLocationModel,
   EditablePersonModel,
@@ -27,6 +27,11 @@ describe("Testing Generation of TrippinService", () => {
     Age: 66,
     Gender: "Unknown",
   };
+  const MODIFY_HEADERS = {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "OData-Version": "4.0",
+  };
 
   test("entitySet: create", async () => {
     const expectedUrl = `${BASE_URL}/People`;
@@ -37,22 +42,10 @@ describe("Testing Generation of TrippinService", () => {
     expect(ODATA_CLIENT.lastOperation).toBe("POST");
     expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
     expect(ODATA_CLIENT.lastData).toStrictEqual(odataModel);
+    expect(ODATA_CLIENT.additionalHeaders).toStrictEqual(MODIFY_HEADERS);
 
     expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
     expect(response.data).toStrictEqual(userModel);
-  });
-
-  test("entityType: update", async () => {
-    const id = userModel.user;
-    const expectedUrl = `${BASE_URL}/People('${id}')`;
-
-    const response = await TRIPPIN.people(id).update(userModel).execute();
-
-    expect(ODATA_CLIENT.lastOperation).toBe("PUT");
-    expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
-    expect(ODATA_CLIENT.lastData).toStrictEqual(odataModel);
-
-    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("entitySet: create with select/expand", async () => {
@@ -68,6 +61,20 @@ describe("Testing Generation of TrippinService", () => {
     expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
   });
 
+  test("entityType: update", async () => {
+    const id = userModel.user;
+    const expectedUrl = `${BASE_URL}/People('${id}')`;
+
+    const response = await TRIPPIN.people(id).update(userModel).execute();
+
+    expect(ODATA_CLIENT.lastOperation).toBe("PUT");
+    expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
+    expect(ODATA_CLIENT.lastData).toStrictEqual(odataModel);
+    expect(ODATA_CLIENT.additionalHeaders).toStrictEqual(MODIFY_HEADERS);
+
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<undefined>>();
+  });
+
   test("entityType: update with select/expand", async () => {
     const id = userModel.user;
     const expectedUrl = `${BASE_URL}/People('${id}')?$expand=BestFriend`;
@@ -81,7 +88,7 @@ describe("Testing Generation of TrippinService", () => {
     expectTypeOf(response).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
-  test("entityType: update returns a builder-backed Cmd, addToQuery works", async () => {
+  test("entityType: addToQuery", async () => {
     const id = userModel.user;
     const expectedUrl = `${BASE_URL}/People('${id}')?$select=FirstName`;
 
@@ -102,6 +109,7 @@ describe("Testing Generation of TrippinService", () => {
     expect(ODATA_CLIENT.lastOperation).toBe("PATCH");
     expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
     expect(ODATA_CLIENT.lastData).toStrictEqual({ Age: 30 });
+    expect(ODATA_CLIENT.additionalHeaders).toStrictEqual(MODIFY_HEADERS);
 
     expectTypeOf(response).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
@@ -115,6 +123,7 @@ describe("Testing Generation of TrippinService", () => {
     expect(ODATA_CLIENT.lastOperation).toBe("DELETE");
     expect(ODATA_CLIENT.lastUrl).toBe(expectedUrl);
     expect(ODATA_CLIENT.lastData).toBe(undefined);
+    expect(ODATA_CLIENT.additionalHeaders).toBeUndefined();
 
     expectTypeOf(response).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
@@ -134,6 +143,7 @@ describe("Testing Generation of TrippinService", () => {
       Address: "Test Address",
       City: { Name: "Test City" },
     });
+    expect(ODATA_CLIENT.additionalHeaders).toStrictEqual(MODIFY_HEADERS);
   });
 
   test("complex collection: create", async () => {
@@ -143,6 +153,7 @@ describe("Testing Generation of TrippinService", () => {
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(ODATA_CLIENT.lastOperation).toBe("POST");
     expect(ODATA_CLIENT.lastData).toStrictEqual({ Address: "TestAdress" });
+    expect(ODATA_CLIENT.additionalHeaders).toStrictEqual(MODIFY_HEADERS);
   });
 
   test("complex collection: create with select/expand", async () => {
@@ -164,6 +175,7 @@ describe("Testing Generation of TrippinService", () => {
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(ODATA_CLIENT.lastOperation).toBe("PUT");
     expect(ODATA_CLIENT.lastData).toStrictEqual([{ Address: "TestAddress 1" }, { Address: "test 2" }]);
+    expect(ODATA_CLIENT.additionalHeaders).toStrictEqual(MODIFY_HEADERS);
   });
 
   test("complex collection: delete", async () => {
@@ -172,5 +184,6 @@ describe("Testing Generation of TrippinService", () => {
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(ODATA_CLIENT.lastOperation).toBe("DELETE");
     expect(ODATA_CLIENT.lastData).toBeUndefined();
+    expect(ODATA_CLIENT.additionalHeaders).toBeUndefined();
   });
 });

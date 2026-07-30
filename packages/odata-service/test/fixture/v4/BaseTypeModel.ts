@@ -1,4 +1,5 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
+import { ODataVersionV4 } from "@odata2ts/odata-core";
 import {
   ENUMERABLE_PROP_DEFINITION,
   QId,
@@ -15,9 +16,7 @@ export interface PlanItemModel {
   name: string | null;
 }
 
-export interface EditablePlanItemModel
-  extends Pick<PlanItemModel, "id" | "@odata.type">,
-    Partial<Pick<PlanItemModel, "name">> {}
+export interface EditablePlanItemModel extends Pick<PlanItemModel, "id">, Partial<Pick<PlanItemModel, "name">> {}
 
 export type PlanItemIdModel = string | { id: number };
 
@@ -26,9 +25,7 @@ export interface EventModel extends PlanItemModel {
   description: string | null;
 }
 
-export interface EditableEventModel
-  extends Pick<EventModel, "id" | "@odata.type">,
-    Partial<Pick<EventModel, "name" | "description">> {}
+export interface EditableEventModel extends Pick<EventModel, "id">, Partial<Pick<EventModel, "name" | "description">> {}
 
 export interface FlightModel extends PlanItemModel {
   "@odata.type"?: "#Tester.Flight";
@@ -36,8 +33,7 @@ export interface FlightModel extends PlanItemModel {
 }
 
 export interface EditableFlightModel
-  extends Pick<FlightModel, "id" | "@odata.type" | "flightNumber">,
-    Partial<Pick<EventModel, "name">> {}
+  extends Pick<FlightModel, "id" | "flightNumber">, Partial<Pick<EventModel, "name">> {}
 
 export class QPlanItemBaseType<Model extends PlanItemModel> extends QueryObject<Model> {
   public readonly id = new QNumberPath(this.withPrefix("Id"));
@@ -83,13 +79,11 @@ export class QFlight extends QPlanItemBaseType<FlightModel> {
   public readonly flightNumber = new QStringPath(this.withPrefix("FlightNumber"));
 }
 
-export class PlanItemService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
-  ClientType,
-  PlanItemModel,
-  EditablePlanItemModel,
-  QPlanItem
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class PlanItemService<
+  ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntityTypeServiceV4<ClientType, PlanItemModel, EditablePlanItemModel, QPlanItem, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QPlanItem(), options);
   }
 
@@ -106,14 +100,11 @@ export class PlanItemService<ClientType extends ODataHttpClient> extends EntityT
   }
 }
 
-export class PlanItemCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
-  ClientType,
-  PlanItemModel,
-  EditablePlanItemModel,
-  QPlanItem,
-  PlanItemIdModel
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class PlanItemCollectionService<
+  ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntitySetServiceV4<ClientType, PlanItemModel, EditablePlanItemModel, QPlanItem, PlanItemIdModel, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QPlanItem(), new QPlanItemId(name), options);
   }
 
@@ -130,48 +121,38 @@ export class PlanItemCollectionService<ClientType extends ODataHttpClient> exten
   }
 }
 
-export class FlightService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
-  ClientType,
-  FlightModel,
-  EditableFlightModel,
-  QFlight
-> {
-  constructor(client: ClientType, basePath: string, name: string, options: ODataServiceOptionsInternal) {
+export class FlightService<
+  ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntityTypeServiceV4<ClientType, FlightModel, EditableFlightModel, QFlight, V> {
+  constructor(client: ClientType, basePath: string, name: string, options: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QFlight(), options);
   }
 }
 
-export class FlightCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
-  ClientType,
-  FlightModel,
-  EditableFlightModel,
-  QFlight,
-  PlanItemIdModel
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class FlightCollectionService<
+  ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntitySetServiceV4<ClientType, FlightModel, EditableFlightModel, QFlight, PlanItemIdModel, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QFlight(), new QPlanItemId(name), options);
   }
 }
 
-export class EventService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
-  ClientType,
-  EventModel,
-  EditableEventModel,
-  QEvent
-> {
-  constructor(client: ClientType, basePath: string, name: string, options: ODataServiceOptionsInternal) {
+export class EventService<
+  ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntityTypeServiceV4<ClientType, EventModel, EditableEventModel, QEvent, V> {
+  constructor(client: ClientType, basePath: string, name: string, options: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QEvent(), options);
   }
 }
 
-export class EventCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
-  ClientType,
-  EventModel,
-  EditableEventModel,
-  QEvent,
-  PlanItemIdModel
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class EventCollectionService<
+  ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntitySetServiceV4<ClientType, EventModel, EditableEventModel, QEvent, PlanItemIdModel, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QEvent(), new QPlanItemId(name), options);
   }
 }

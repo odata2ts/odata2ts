@@ -1,5 +1,5 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
-import type { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import type { ODataCollectionResponseV4, ODataModelResponseV4, ODataVersionV4 } from "@odata2ts/odata-core";
 import {
   ComposableUrlRequestCmd,
   EntitySetServiceV4,
@@ -78,19 +78,17 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 }
 
-export class BookService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
-  ClientType,
-  Book,
-  EditableBook,
-  QBook
-> {
-  private _review?: ReviewService<ClientType>;
+export class BookService<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntityTypeServiceV4<ClientType, Book, EditableBook, QBook, V> {
+  private _review?: ReviewService<ClientType, V>;
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, options);
   }
 
-  public review(): ReviewService<ClientType> {
+  public review(): ReviewService<ClientType, V> {
     if (!this._review) {
       const { client, path, options } = this.__base;
       this._review = new ReviewService(client, path, "review", options);
@@ -100,25 +98,20 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
   }
 }
 
-export class BookCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV4<
-  ClientType,
-  Book,
-  EditableBook,
-  QBook,
-  BookId
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class BookCollectionService<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntitySetServiceV4<ClientType, Book, EditableBook, QBook, BookId, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, new QBookId(name), options);
   }
 }
 
-export class ReviewService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
-  ClientType,
-  Review,
-  EditableReview,
-  QReview
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class ReviewService<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntityTypeServiceV4<ClientType, Review, EditableReview, QReview, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qReview, options);
   }
 }
