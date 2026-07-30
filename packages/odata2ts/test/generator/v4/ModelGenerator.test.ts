@@ -257,6 +257,31 @@ describe("Model Generator Tests V4", () => {
     });
   });
 
+  test(`${TEST_SUITE_NAME}: no binding props for OData 4.01 by default`, async () => {
+    // given entities related to each other
+    odataBuilder
+      .addEntityType("Author", undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.Int32).addProp("name", ODataTypesV4.Boolean, true),
+      )
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Int32)
+          .addProp("author", withNs("Author"), false)
+          .addProp("altAuthor", withNs("Author"), true)
+          .addProp("relatedAuthors", `Collection(${withNs("Author")})`),
+      );
+
+    // when generating for 4.01 without opting in
+    // then no binding prop at all: in 4.01 it goes by the name of the navigation property itself,
+    // so it must be absent rather than show up with the binding type
+    await generateAndCompare("entity-relationships.ts", {
+      odataVersionV4: "4.01",
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
   test(`${TEST_SUITE_NAME}: binding props of OData 4.0`, async () => {
     // given entities related to each other
     odataBuilder
