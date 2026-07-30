@@ -1,4 +1,5 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
+import type { ODataVersionV4 } from "@odata2ts/odata-core";
 import {
   EntitySetServiceV4,
   EntityTypeServiceV4,
@@ -30,13 +31,11 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 }
 
-export class AbstractEntityService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
-  ClientType,
-  AbstractEntity,
-  EditableAbstractEntity,
-  QAbstractEntity
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class AbstractEntityService<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntityTypeServiceV4<ClientType, AbstractEntity, EditableAbstractEntity, QAbstractEntity, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qAbstractEntity, options);
   }
 
@@ -46,14 +45,11 @@ export class AbstractEntityService<in out ClientType extends ODataHttpClient> ex
   }
 }
 
-export class AbstractEntityCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV4<
-  ClientType,
-  AbstractEntity,
-  EditableAbstractEntity,
-  QAbstractEntity,
-  AbstractEntityId
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class AbstractEntityCollectionService<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntitySetServiceV4<ClientType, AbstractEntity, EditableAbstractEntity, QAbstractEntity, AbstractEntityId, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qAbstractEntity, new QAbstractEntityId(name), options);
   }
 
@@ -63,25 +59,20 @@ export class AbstractEntityCollectionService<in out ClientType extends ODataHttp
   }
 }
 
-export class TestEntityService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
-  ClientType,
-  TestEntity,
-  EditableTestEntity,
-  QTestEntity
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class TestEntityService<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntityTypeServiceV4<ClientType, TestEntity, EditableTestEntity, QTestEntity, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTestEntity, options);
   }
 }
 
-export class TestEntityCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV4<
-  ClientType,
-  TestEntity,
-  EditableTestEntity,
-  QTestEntity,
-  AbstractEntityId
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class TestEntityCollectionService<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntitySetServiceV4<ClientType, TestEntity, EditableTestEntity, QTestEntity, AbstractEntityId, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTestEntity, new QAbstractEntityId(name), options);
   }
 }

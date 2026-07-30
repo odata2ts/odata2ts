@@ -1,10 +1,16 @@
-/**
- * Response to query for an EntityType or ComplexType
+/*
+ * All control information is modelled with the short form here, e.g. "@type" instead of "@odata.type",
+ * which payloads of OData 4.01 and greater should use. The prefixed form of 4.0 lives in ODataModelPayloadV4.
  *
- * Result object is directly returned.
- * Additional context attribute is merged into result object.
+ * The control information is factored out into its own type, so that FlexibleModelPayloadV4 can recombine it.
+ *
+ * See https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html#sec_ControlInformation
  */
-export type ODataModelPayloadV401<T> = T & {
+
+/**
+ * Control information of a request payload for an EntityType or ComplexType.
+ */
+export interface ModelPayloadControlInfoV401 {
   /**
    * The type control information MUST appear in requests,
    * if the type cannot be heuristically determined (see link for heuristics) and one of the following is true:
@@ -13,10 +19,8 @@ export type ODataModelPayloadV401<T> = T & {
    *
    * For built-in primitive types the value is the unqualified name of the primitive type.
    *
-   * For payloads described by an OData-Version header with a value of 4.0,
-   * this name MUST be prefixed with the hash symbol (#);
-   * for non-OData 4.0 payloads, built-in primitive type values SHOULD be represented without the hash symbol,
-   * but consumers of 4.01 or greater payloads MUST support values with or without the hash symbol.
+   * Built-in primitive type values SHOULD be represented without the hash symbol (#), but consumers of 4.01 or
+   * greater payloads MUST support values with or without it.
    *
    * For all other types, the URI may be absolute or relative to the type of the containing object.
    * The root type may be absolute or relative to the root context URL.
@@ -34,4 +38,11 @@ export type ODataModelPayloadV401<T> = T & {
    * See: https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html#sec_ControlInformationcontextodatacontex
    */
   "@context"?: string;
-};
+}
+
+/**
+ * Request payload for an EntityType or ComplexType.
+ *
+ * The model is sent directly, control information is merged into it.
+ */
+export type ODataModelPayloadV401<T> = T & ModelPayloadControlInfoV401;

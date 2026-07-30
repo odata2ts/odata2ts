@@ -1,15 +1,16 @@
-/**
- * odata2ts targets OData 4.0, hence all control information is modelled with the {@code odata.} prefix, which
- * 4.0 payloads are required to use. Payloads of 4.01 or greater use the prefix-less form ({@code @count},
- * {@code @type}, ...), which is deliberately not modelled here.
+/*
+ * All control information is modelled with the {@code odata.} prefix here, which 4.0 payloads are required to
+ * use. The short form of 4.01 and greater ({@code @count}, {@code @type}, ...) lives in ResponseModelV401.
+ *
+ * The control information is factored out into its own types, so that FlexibleResponseModelV4 can recombine it.
  *
  * See https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html#sec_ControlInformation
  */
 
 /**
- * Response to a collection query.
+ * Control information of a collection response.
  */
-export interface ODataCollectionResponseV4<T> {
+export interface CollectionControlInfoV4 {
   /**
    * The context control information returns the context URL for the payload. This URL can be absolute or relative.
    *
@@ -62,6 +63,12 @@ export interface ODataCollectionResponseV4<T> {
    * It contains a URL that allows retrieving the next subset of the requested collection.
    */
   "@odata.nextLink"?: string;
+}
+
+/**
+ * Response to a collection query.
+ */
+export interface ODataCollectionResponseV4<T> extends CollectionControlInfoV4 {
   /**
    * The requested collection value.
    */
@@ -69,12 +76,9 @@ export interface ODataCollectionResponseV4<T> {
 }
 
 /**
- * Response to query for an EntityType or ComplexType
- *
- * Result object is directly returned.
- * Additional context attribute is merged into result object.
+ * Control information of a response for an EntityType or ComplexType.
  */
-export type ODataModelResponseV4<T> = T & {
+export interface ModelControlInfoV4 {
   /**
    * The context control information returns the context URL for the payload. This URL can be absolute or relative.
    *
@@ -135,14 +139,28 @@ export type ODataModelResponseV4<T> = T & {
    * The editLink control information contains the edit URL of the entity.
    */
   "@odata.editLink"?: string;
-};
+}
+
+/**
+ * Response to query for an EntityType or ComplexType
+ *
+ * Result object is directly returned.
+ * Additional context attribute is merged into result object.
+ */
+export type ODataModelResponseV4<T> = T & ModelControlInfoV4;
+
+/**
+ * Control information of a response for a single value.
+ */
+export interface ValueControlInfoV4 {
+  "@odata.context"?: string;
+  "@odata.type"?: string;
+}
 
 /**
  * Response to a value query on a property.
  */
-export interface ODataValueResponseV4<T> {
-  "@odata.context"?: string;
-  "@odata.type"?: string;
+export interface ODataValueResponseV4<T> extends ValueControlInfoV4 {
   value: T;
 }
 

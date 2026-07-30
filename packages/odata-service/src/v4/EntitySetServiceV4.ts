@@ -1,5 +1,5 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataCollectionResponseV4, ODataModelPayloadV4 } from "@odata2ts/odata-core";
+import { ODataCollectionResponseFor, ODataModelPayloadFor, ODataVersionV4 } from "@odata2ts/odata-core";
 import { CollectionQueryBuilderV4, ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import {
   CollectionResponseConverterV4,
@@ -9,7 +9,6 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV4 } from "../request";
-import { ODATA_VERSION_HEADERS } from "../RequestHeaders.js";
 import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
@@ -19,8 +18,9 @@ export abstract class EntitySetServiceV4<
   EditableT,
   Q extends QueryObjectModel,
   EIdType,
+  V extends ODataVersionV4 = "4.0",
 > {
-  protected readonly __base: ServiceStateHelperV4<ClientType, Q>;
+  protected readonly __base: ServiceStateHelperV4<ClientType, Q, V>;
   protected readonly __idFunction: QId<EIdType>;
 
   /**
@@ -41,7 +41,7 @@ export abstract class EntitySetServiceV4<
     name: string,
     qModel: Q,
     idFunction: QId<EIdType>,
-    options?: ODataServiceOptionsInternal,
+    options?: ODataServiceOptionsInternal<V>,
   ) {
     this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, options);
     this.__idFunction = idFunction;
@@ -102,14 +102,16 @@ export abstract class EntitySetServiceV4<
    *
    * @param model
    * @param createOptions
+   * @param queryFn
    * @return command object for request execution
    */
   public create<Response extends boolean = true>(
-    model: ODataModelPayloadV4<EditableT>,
+    model: ODataModelPayloadFor<V, EditableT>,
     createOptions?: SubtypeOptions,
     queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
-    const { client, basePath, path, getDefaultHeaders, qModel, createModelQueryBuilder } = this.__base;
+    const { client, basePath, path, getDefaultHeaders, getVersionHeaders, qModel, createModelQueryBuilder } =
+      this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(createOptions);
 
     // add control info automatically, if required
@@ -118,12 +120,12 @@ export abstract class EntitySetServiceV4<
 
     return new UrlBuilderRequestCmdV4<
       ClientType,
-      EntityModificationResponseV4<Response, T>,
+      EntityModificationResponseV4<Response, T, V>,
       Q,
       ModelQueryBuilderV4<Q>,
-      ODataModelPayloadV4<EditableT>
+      ODataModelPayloadFor<V, EditableT>
     >(client, ODataHttpMethods.Post, createModelQueryBuilder(queryFn, actualPath), qModel, data, {
-      headers: { ...getDefaultHeaders(), ...ODATA_VERSION_HEADERS },
+      headers: { ...getDefaultHeaders(), ...getVersionHeaders() },
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
     });
@@ -140,7 +142,7 @@ export abstract class EntitySetServiceV4<
   ) {
     const { client, qModel, createQueryBuilder, getDefaultHeaders } = this.__base;
 
-    return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseV4<ReturnType>, Q>(
+    return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseFor<V, ReturnType>, Q>(
       client,
       ODataHttpMethods.Get,
       createQueryBuilder(queryFn),

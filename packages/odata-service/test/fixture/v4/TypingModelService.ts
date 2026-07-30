@@ -1,4 +1,5 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
+import { ODataVersionV4 } from "@odata2ts/odata-core";
 import {
   QCollectionPath,
   QDatePath,
@@ -47,25 +48,20 @@ export class QTestIdFunction extends QId<TestModelId> {
   }
 }
 
-export class TestService<ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
-  ClientType,
-  TestModel,
-  EditableTestModel,
-  QTest
-> {
-  constructor(client: ClientType, basePath: string, name: string, options: ODataServiceOptionsInternal) {
+export class TestService<
+  ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntityTypeServiceV4<ClientType, TestModel, EditableTestModel, QTest, V> {
+  constructor(client: ClientType, basePath: string, name: string, options: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTest, options);
   }
 }
 
-export class TestCollectionService<ClientType extends ODataHttpClient> extends EntitySetServiceV4<
-  ClientType,
-  TestModel,
-  EditableTestModel,
-  QTest,
-  TestModelId
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class TestCollectionService<
+  ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntitySetServiceV4<ClientType, TestModel, EditableTestModel, QTest, TestModelId, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTest, new QTestIdFunction(name), options);
   }
 }

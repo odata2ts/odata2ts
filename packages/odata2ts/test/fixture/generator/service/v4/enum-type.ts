@@ -1,4 +1,5 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
+import type { ODataVersionV4 } from "@odata2ts/odata-core";
 import type { EnumCollection } from "@odata2ts/odata-query-objects";
 import { QEnumCollection } from "@odata2ts/odata-query-objects";
 import {
@@ -7,6 +8,7 @@ import {
   EntityTypeServiceV4,
   ODataService,
   ODataServiceOptionsInternal,
+  PrimitiveExtractor,
 } from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QBook } from "./QTester.js";
@@ -29,15 +31,19 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 }
 
-export class BookService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
-  ClientType,
-  Book,
-  EditableBook,
-  QBook
-> {
-  private _altChoices?: CollectionServiceV4<ClientType, EnumCollection<typeof Choice>, QEnumCollection<typeof Choice>>;
+export class BookService<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntityTypeServiceV4<ClientType, Book, EditableBook, QBook, V> {
+  private _altChoices?: CollectionServiceV4<
+    ClientType,
+    EnumCollection<typeof Choice>,
+    QEnumCollection<typeof Choice>,
+    PrimitiveExtractor<EnumCollection<typeof Choice>>,
+    V
+  >;
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, options);
   }
 
@@ -51,14 +57,11 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
   }
 }
 
-export class BookCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV4<
-  ClientType,
-  Book,
-  EditableBook,
-  QBook,
-  BookId
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class BookCollectionService<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntitySetServiceV4<ClientType, Book, EditableBook, QBook, BookId, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, new QBookId(name), options);
   }
 }

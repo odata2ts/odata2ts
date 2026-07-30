@@ -16,9 +16,11 @@ export enum CoreImports {
   DeferredContent,
   ODataCollectionResponse, // versioned
   ODataModelResponseV4,
+  ODataModelResponseV401,
   ODataValueResponse, // versioned
   ODataEntityModelResponseV2,
   ODataComplexModelResponseV2,
+  ODataVersionV4,
 }
 
 /**
@@ -75,6 +77,7 @@ export enum ServiceImports {
   UrlRequestCmd,
   UrlGetRequestCmd,
   ComposableUrlRequestCmd,
+  PrimitiveExtractor,
 }
 
 /**

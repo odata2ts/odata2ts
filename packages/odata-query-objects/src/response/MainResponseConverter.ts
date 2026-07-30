@@ -2,11 +2,14 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import {
   ODataCollectionResponseV2,
   ODataCollectionResponseV4,
+  ODataCollectionResponseV401,
   ODataComplexModelResponseV2,
   ODataEntityModelResponseV2,
   ODataModelResponseV4,
+  ODataModelResponseV401,
   ODataValueResponseV2,
   ODataValueResponseV4,
+  ODataValueResponseV401,
 } from "@odata2ts/odata-core";
 import { QParamModel } from "../param/QParamModel";
 import { QueryObjectModel } from "../QueryObjectModel";
@@ -16,6 +19,9 @@ export type ExtractDataTypeFromV4ResponseStructure<ResponseStructure> = Response
   | ODataValueResponseV4<infer T>
   | ODataModelResponseV4<infer T>
   | ODataCollectionResponseV4<infer T>
+  | ODataValueResponseV401<infer T>
+  | ODataModelResponseV401<infer T>
+  | ODataCollectionResponseV401<infer T>
   ? T
   : ResponseStructure;
 

@@ -54,13 +54,29 @@ export class ImportContainer {
     protected mainFileNames: { model: string; qObject: string; service: string },
     protected readonly bundledFileGeneration: boolean,
     protected reservedNames: Array<string> | undefined,
+    protected readonly odataVersionV4: "4.0" | "4.01" = "4.0",
   ) {
     this.importedNameValidator = new ImportedNameValidator(reservedNames);
   }
 
+  /**
+   * Whether OData 4.01 is targeted, which uses the short form of the control information,
+   * e.g. "@count" instead of "@odata.count". Only ever true for V4.
+   */
+  public isV401() {
+    return this.odataVersionV4 === "4.01";
+  }
+
+  /**
+   * The suffix of versioned core imports, e.g. "V4" of ODataCollectionResponseV4.
+   */
+  private getCoreVersionSuffix(odataVersion: ODataVersions) {
+    return odataVersion === ODataVersions.V4 && this.isV401() ? "V401" : ODataVersions[odataVersion];
+  }
+
   public addCoreLib(odataVersion: ODataVersions, coreLib: CoreImports) {
     const isVersioned = VERSIONED_CORE_IMPORTS.includes(coreLib);
-    const name = CoreImports[coreLib] + (isVersioned ? ODataVersions[odataVersion] : "");
+    const name = CoreImports[coreLib] + (isVersioned ? this.getCoreVersionSuffix(odataVersion) : "");
     const importName = this.importedNameValidator.validateName(LIB_MODULES.core, name);
 
     // TODO: currently only types are imported, however enums could potentially be imported too

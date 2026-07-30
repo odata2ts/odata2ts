@@ -270,18 +270,29 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
   /**
    * By default, odata2ts emulates the in operator by rolling it out as a series of equals-or-expressions.
    * This allows for maximum compatibility with all V4 services, as well as V2 services.
-   * 
+   *
    * Setting this value to true will instead use the native in operator, resulting in smaller queries
    * on V4 services that support it.
    */
   enableNativeInOperator?: boolean;
+  /**
+   * The OData version to target. It is declared via the OData-Version header on each request carrying a body,
+   * which governs how the service interprets the request payload, and it selects the response types to generate:
+   * 4.0 payloads must use the "odata." prefix for control information, while 4.01 and greater use the short form
+   * ("@count" instead of "@odata.count").
+   *
+   * Only relevant for V4 services and ignored for V2. Defaults to "4.0", the more widely deployed and more
+   * compatible version.
+   */
+  odataVersionV4?: "4.0" | "4.01";
 }
 
 /**
  * Custom generation options which are dependent on a specific odata service.
  */
 export interface ServiceGenerationOptions
-  extends Required<Pick<CliOptions, "source" | "output">>,
+  extends
+    Required<Pick<CliOptions, "source" | "output">>,
     Pick<CliOptions, "sourceUrl" | "refreshFile">,
     Omit<ConfigFileOptions, "services"> {
   /**
@@ -306,7 +317,8 @@ export interface ServiceGenerationOptions
  * Every property is required, except the overriding service name.
  */
 export interface RunOptions
-  extends Required<Omit<ServiceGenerationOptions, "serviceName" | "sourceUrl" | "sourceUrlConfig" | "refreshFile">>,
+  extends
+    Required<Omit<ServiceGenerationOptions, "serviceName" | "sourceUrl" | "sourceUrlConfig" | "refreshFile">>,
     Pick<ServiceGenerationOptions, "serviceName" | "sourceUrl" | "sourceUrlConfig" | "refreshFile"> {
   naming: NameSettings;
 }
@@ -344,9 +356,7 @@ export interface RenameOptions {
 }
 
 export type TypeBasedGenerationOptions =
-  | GenericTypeGenerationOptions
-  | ComplexTypeGenerationOptions
-  | EntityTypeGenerationOptions;
+  GenericTypeGenerationOptions | ComplexTypeGenerationOptions | EntityTypeGenerationOptions;
 
 export interface GenericTypeGenerationOptions extends RenameOptions {
   type:

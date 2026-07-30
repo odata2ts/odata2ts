@@ -1,6 +1,6 @@
 import { ValueConverter } from "@odata2ts/converter-api";
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataValueResponseV4 } from "@odata2ts/odata-core";
+import { ODataValueResponseFor, ODataVersionV4 } from "@odata2ts/odata-core";
 import {
   FlexibleConversionModel,
   getIdentityConverter,
@@ -9,7 +9,6 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlRequestCmd } from "../request";
-import { ODATA_VERSION_HEADERS } from "../RequestHeaders.js";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
 import { ValueModificationResponseV4 } from "./ResponseTypeChoicesV4";
 
@@ -23,8 +22,8 @@ class ValueRequestConverter<T> {
   }
 }
 
-export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
-  protected readonly __base: ServiceStateHelper<ClientType>;
+export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T, V extends ODataVersionV4 = "4.0"> {
+  protected readonly __base: ServiceStateHelper<ClientType, V>;
   protected readonly __converter: ValueConverter<any, T>;
 
   public constructor(
@@ -32,7 +31,7 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
     basePath: string,
     name: string,
     converter: ValueConverter<any, any> = getIdentityConverter(),
-    options?: ODataServiceOptionsInternal,
+    options?: ODataServiceOptionsInternal<V>,
   ) {
     this.__base = new ServiceStateHelper(client, basePath, name, options);
     this.__converter = converter;
@@ -52,7 +51,7 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
     const { client, path, getDefaultHeaders } = this.__base;
     const converter = this.__converter;
 
-    return new UrlRequestCmd<ClientType, ODataValueResponseV4<T> | undefined>(
+    return new UrlRequestCmd<ClientType, ODataValueResponseFor<V, T> | undefined>(
       client,
       ODataHttpMethods.Get,
       path,
@@ -79,19 +78,19 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T> {
    * @param value
    */
   public updateValue<Response extends boolean = false>(value: T) {
-    const { client, path, getDefaultHeaders } = this.__base;
+    const { client, path, getDefaultHeaders, getVersionHeaders } = this.__base;
     const converter = this.__converter;
 
-    return new UrlRequestCmd<ClientType, ValueModificationResponseV4<Response, T>, T>(
+    return new UrlRequestCmd<ClientType, ValueModificationResponseV4<Response, T, V>, T>(
       client,
       ODataHttpMethods.Put,
       path,
       value,
       {
-        headers: { ...getDefaultHeaders(), ...ODATA_VERSION_HEADERS },
+        headers: { ...getDefaultHeaders(), ...getVersionHeaders() },
         mainRequestConverter: new ValueRequestConverter(converter),
         mainResponseConverter: new ValueResponseConverterV4<T>(converter) as MainResponseConverter<
-          ValueModificationResponseV4<Response, T>,
+          ValueModificationResponseV4<Response, T, V>,
           T
         >,
       },

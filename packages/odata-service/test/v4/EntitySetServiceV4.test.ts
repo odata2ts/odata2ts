@@ -1,7 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
-import { ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { FlexibleODataModelPayloadV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, ODATA_VERSION_HEADERS, RequestInfo } from "../../src";
+import { DEFAULT_HEADERS, getODataVersionHeaders, RequestInfo } from "../../src";
 import { commonEntitySetTests } from "../EntitySetServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import {
@@ -49,7 +49,7 @@ describe("V4 EntitySetService Test", () => {
 
     expect(result.url).toBe(EXPECTED_PATH);
     expect(result.method).toBe("POST");
-    expect(result.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...ODATA_VERSION_HEADERS });
+    expect(result.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...getODataVersionHeaders() });
     expect(result.data).toStrictEqual(model);
     expect(request.getInfoConverted().data).toStrictEqual(odataModel);
 
@@ -126,7 +126,8 @@ describe("V4 EntitySetService Test", () => {
 
   test("entitySet: create subtype from base type", async () => {
     const serviceToTest = new PlanItemCollectionService(odataClient, BASE_URL, NAME);
-    const inputModel: EditableFlightModel = {
+    // control information belongs to the payload, not to the model
+    const inputModel: ODataModelPayloadV4<EditableFlightModel> = {
       "@odata.type": "#Tester.Flight",
       id: 123,
       name: "Optional",

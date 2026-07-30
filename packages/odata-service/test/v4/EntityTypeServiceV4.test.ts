@@ -1,7 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
-import { ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { FlexibleODataModelPayloadV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, ODATA_VERSION_HEADERS, RequestInfo } from "../../src";
+import { DEFAULT_HEADERS, getODataVersionHeaders, RequestInfo } from "../../src";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { EditableFlightModel, PlanItemService } from "../fixture/v4/BaseTypeModel";
@@ -33,7 +33,7 @@ describe("EntityTypeService V4 Tests", () => {
 
     expect(result.url).toBe(EXPECTED_PATH);
     expect(result.method).toBe("PATCH");
-    expect(result.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...ODATA_VERSION_HEADERS });
+    expect(result.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...getODataVersionHeaders() });
     expect(result.data).toEqual(model);
     expect(request.getInfoConverted().data).toEqual(requestModel);
 
@@ -75,7 +75,7 @@ describe("EntityTypeService V4 Tests", () => {
 
     expect(result.url).toBe(EXPECTED_PATH);
     expect(result.method).toBe("PUT");
-    expect(result.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...ODATA_VERSION_HEADERS });
+    expect(result.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...getODataVersionHeaders() });
     expect(result.data).toEqual(model);
     expect(request.getInfoConverted().data).toEqual(requestModel);
 
@@ -238,6 +238,63 @@ describe("EntityTypeService V4 Tests", () => {
     expect(request.data).toEqual(odataModelWithType);
   });
 
+  test("entityType V4: OData 4.01 declares the version and uses the short form of the type control info", async () => {
+    const serviceToTest = new PlanItemService(odataClient, BASE_URL, NAME, {
+      odataVersionV4: "4.01",
+    }).asFlightService();
+    const inputModel: EditableFlightModel = {
+      id: 123,
+      name: "Optional",
+      flightNumber: "F123",
+    };
+    const odataModel = {
+      Id: inputModel.id,
+      Name: inputModel.name,
+      FlightNumber: inputModel.flightNumber,
+    };
+
+    const request = serviceToTest
+      .patch(inputModel, { withCastPathSegment: true, withTypeControlInfo: true })
+      .getInfoConverted();
+
+    expect(request.data).toEqual({ ...odataModel, "@type": "#Tester.Flight" });
+    expect(request.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...getODataVersionHeaders("4.01") });
+  });
+
+  test("entityType V4: payload control info is either prefixed or short, never both", async () => {
+    // note: a model which declares control information itself (as EditableFlightModel does) can only be
+    // spread into the spelling it declares - generated models never declare any, so this is not a concern
+    const person: EditablePersonModel = {
+      userName: "tester",
+      age: "14",
+      favFeature: Feature.Feature1,
+      features: [Feature.Feature1],
+    };
+
+    // each form on its own is a valid payload
+    const prefixed: FlexibleODataModelPayloadV4<EditablePersonModel> = { ...person, "@odata.type": "#Tester.Person" };
+    const short: FlexibleODataModelPayloadV4<EditablePersonModel> = { ...person, "@type": "#Tester.Person" };
+
+    const bothSpellings = { ...person, "@odata.type": "#Tester.Person", "@type": "#Tester.Person" };
+    // @ts-expect-error: mixing the two spellings does not describe any real payload
+    const mixed: FlexibleODataModelPayloadV4<EditablePersonModel> = bothSpellings;
+
+    expect(prefixed["@odata.type"]).toBe("#Tester.Person");
+    expect(short["@type"]).toBe("#Tester.Person");
+    expect(mixed).toBeDefined();
+  });
+
+  test("entityType V4: control info supplied by the user is not overwritten", async () => {
+    const serviceToTest = new PlanItemService(odataClient, BASE_URL, NAME).asFlightService();
+    const inputModel: EditableFlightModel = { id: 123, name: "Optional", flightNumber: "F123" };
+
+    const request = serviceToTest
+      .patch({ ...inputModel, "@odata.type": "#Tester.SomethingElse" }, { withTypeControlInfo: true })
+      .getInfoConverted();
+
+    expect(request.data["@odata.type"]).toBe("#Tester.SomethingElse");
+  });
+
   test("entityType V4: big number", async () => {
     testService = new PersonModelService(odataClient, BASE_URL, NAME, { bigNumbersAsString: true });
 
@@ -264,6 +321,7 @@ describe("EntityTypeService V4 Tests", () => {
       .execute();
 
     expect(response.data).toStrictEqual(expected);
+    // operations keep the response type the generator emitted, here 4.0
     expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
   });
 

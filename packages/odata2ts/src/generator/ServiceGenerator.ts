@@ -26,14 +26,16 @@ import { NamingHelper } from "../data-model/NamingHelper.js";
 import { ConfigFileOptions, Modes } from "../OptionModel.js";
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
-import { ClientApiImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects.js";
+import { ClientApiImports, CoreImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects.js";
 import { importReturnType } from "./import/ImportResponseHelper.js";
 import { ImportContainer } from "./ImportContainer.js";
 
 export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "properties" | "methods">> {}
 
-export interface ServiceGeneratorOptions
-  extends Pick<ConfigFileOptions, "enablePrimitivePropertyServices" | "v4BigNumberAsString" | "enumType"> {}
+export interface ServiceGeneratorOptions extends Pick<
+  ConfigFileOptions,
+  "enablePrimitivePropertyServices" | "v4BigNumberAsString" | "enumType" | "odataVersionV4"
+> {}
 
 export async function generateServices(
   project: ProjectManager,
@@ -57,6 +59,52 @@ class ServiceGenerator {
 
   private isV4BigNumber() {
     return this.options.v4BigNumberAsString && this.version === ODataVersions.V4;
+  }
+
+  private isV401() {
+    return this.options.odataVersionV4 === "4.01" && this.version === ODataVersions.V4;
+  }
+
+  /**
+   * The version type argument as seen from the main service, which pins it: the main service does not
+   * declare V itself, everything it hands out infers the version from the options.
+   */
+  private getMainVersionArg() {
+    return this.isV401() ? `, "4.01"` : "";
+  }
+
+  /**
+   * The version type argument as seen from a generated service class, which declares V itself and passes
+   * it on, so that nested services keep the version of the client they belong to.
+   */
+  private getServiceVersionArg() {
+    return this.version === ODataVersions.V4 ? ", V" : "";
+  }
+
+  /**
+   * Type parameters of a generated service class. V4 services are generic over the OData version.
+   */
+  private getServiceTypeParams(imports: ImportContainer, httpClient: string) {
+    const params = [`in out ClientType extends ${httpClient}`];
+    if (this.version === ODataVersions.V4) {
+      params.push(`V extends ${imports.addCoreLib(ODataVersions.V4, CoreImports.ODataVersionV4)} = "4.0"`);
+    }
+    return params;
+  }
+
+  /**
+   * Options which are decided at generation time, but only take effect at runtime, hence they are passed
+   * on to the base service. Results in a constructor being generated, if there are any.
+   */
+  private getRuntimeOptions() {
+    const options: Array<string> = [];
+    if (this.isV4BigNumber()) {
+      options.push("bigNumbersAsString: true");
+    }
+    if (this.isV401()) {
+      options.push(`odataVersionV4: "4.01"`);
+    }
+    return options;
   }
 
   public async generate(): Promise<void> {
@@ -86,12 +134,14 @@ class ServiceGenerator {
       this.generateMainServiceOperations(unboundOperations, importContainer),
     );
 
+    const runtimeOptions = this.getRuntimeOptions();
+
     mainServiceFile.getFile().addClass({
       isExported: true,
       name: mainServiceName,
       typeParameters: [`in out ClientType extends ${httpClient}`],
-      extends: `${rootService}<ClientType>`,
-      ctors: this.isV4BigNumber()
+      extends: `${rootService}<ClientType${this.getMainVersionArg()}>`,
+      ctors: runtimeOptions.length
         ? [
             {
               parameters: [
@@ -103,7 +153,7 @@ class ServiceGenerator {
                   hasQuestionToken: true,
                 },
               ],
-              statements: [`super(client, basePath, options);`, "this.__base.options.bigNumbersAsString = true;"],
+              statements: [`super(client, basePath, { ...options, ${runtimeOptions.join(", ")} });`],
             },
           ]
         : [],
@@ -119,7 +169,9 @@ class ServiceGenerator {
     const result: PropsAndOps = { properties: [], methods: [] };
 
     Object.values(container.entitySets).forEach(({ name, odataName, entityType }) => {
-      result.methods.push(this.generateRelatedServiceGetter(name, odataName, entityType, importContainer));
+      result.methods.push(
+        this.generateRelatedServiceGetter(name, odataName, entityType, importContainer, this.getMainVersionArg()),
+      );
     });
 
     Object.values(container.singletons).forEach((singleton) => {
@@ -143,7 +195,7 @@ class ServiceGenerator {
       }
 
       result.properties.push(this.generateQOperationProp(op));
-      result.methods.push(this.generateMethod(name, op, importContainer, ""));
+      result.methods.push(this.generateMethod(name, op, importContainer, "", this.getMainVersionArg()));
     });
 
     return result;
@@ -154,6 +206,7 @@ class ServiceGenerator {
     odataPropName: string,
     entityType: EntityType,
     imports: ImportContainer,
+    versionArg: string,
   ): OptionalKind<MethodDeclarationStructure> {
     const idName = imports.addGeneratedModel(entityType.id.fqName, entityType.id.modelName);
     const idFunctionName = imports.addGeneratedQObject(entityType.id.fqName, entityType.id.qName);
@@ -173,7 +226,7 @@ class ServiceGenerator {
       overloads: [
         {
           parameters: [],
-          returnType: `${collectionName}<ClientType>`,
+          returnType: `${collectionName}<ClientType${versionArg}>`,
         },
         {
           parameters: [
@@ -182,7 +235,7 @@ class ServiceGenerator {
               type: idName,
             },
           ],
-          returnType: `${serviceName}<ClientType>`,
+          returnType: `${serviceName}<ClientType${versionArg}>`,
         },
       ],
       statements: [
@@ -205,7 +258,7 @@ class ServiceGenerator {
     return {
       scope: Scope.Private,
       name: this.namingHelper.getPrivatePropName(name),
-      type: `${type}<ClientType>`,
+      type: `${type}<ClientType${this.getMainVersionArg()}>`,
       hasQuestionToken: true,
     };
   }
@@ -276,15 +329,20 @@ class ServiceGenerator {
     file.getFile().addClass({
       isExported: true,
       name: model.serviceName,
-      typeParameters: [`in out ClientType extends ${httpClient}`],
-      extends: entityServiceType + `<ClientType, ${modelName}, ${editableModelName}, ${qName}>`,
+      typeParameters: this.getServiceTypeParams(importContainer, httpClient),
+      extends:
+        entityServiceType + `<ClientType, ${modelName}, ${editableModelName}, ${qName}${this.getServiceVersionArg()}>`,
       ctors: [
         {
           parameters: [
             { name: "client", type: "ClientType" },
             { name: "basePath", type: "string" },
             { name: "name", type: "string" },
-            { name: "options", type: serviceOptions, hasQuestionToken: true },
+            {
+              name: "options",
+              type: `${serviceOptions}${this.getServiceVersionArg() ? "<V>" : ""}`,
+              hasQuestionToken: true,
+            },
           ],
           statements: [`super(client, basePath, name, ${qObjectName}, options);`],
         },
@@ -315,7 +373,13 @@ class ServiceGenerator {
           }
 
           result.methods.push(
-            this.generateRelatedServiceGetter(prop.name, prop.odataName, entityType, importContainer),
+            this.generateRelatedServiceGetter(
+              prop.name,
+              prop.odataName,
+              entityType,
+              importContainer,
+              this.getServiceVersionArg(),
+            ),
           );
         }
         // collection of primitive or enum types
@@ -343,7 +407,9 @@ class ServiceGenerator {
 
     operations.forEach((operation) => {
       result.properties.push(this.generateQOperationProp(operation));
-      result.methods.push(this.generateMethod(operation.name, operation, importContainer, model.fqName));
+      result.methods.push(
+        this.generateMethod(operation.name, operation, importContainer, model.fqName, this.getServiceVersionArg()),
+      );
     });
 
     return result;
@@ -359,10 +425,10 @@ class ServiceGenerator {
       const qModelName = imports.addGeneratedQObject(propModel.fqName, propModel.qName, true);
       const collectionServiceType = imports.addServiceObject(this.version, ServiceImports.CollectionService);
 
-      propModelType = `${collectionServiceType}<ClientType, ${modelName}, ${qModelName}, ${editableModelName}>`;
+      propModelType = `${collectionServiceType}<ClientType, ${modelName}, ${qModelName}, ${editableModelName}${this.getServiceVersionArg()}>`;
     } else {
       const serviceName = imports.addGeneratedService(propModel.fqName, propModel.serviceName);
-      propModelType = `${serviceName}<ClientType>`;
+      propModelType = `${serviceName}<ClientType${this.getServiceVersionArg()}>`;
     }
 
     return {
@@ -397,7 +463,11 @@ class ServiceGenerator {
       type = imports.addQObjectType(`${upperCaseFirst(prop.type)}Collection`);
       qType = imports.addQObjectType(prop.qObject);
     }
-    const collectionType = `${collectionServiceType}<ClientType, ${type}, ${qType}>`;
+    // the version is the last type param, so the defaulted primitive type has to be spelled out for it
+    const versionArgs = this.getServiceVersionArg()
+      ? `, ${imports.addServiceObject(this.version, ServiceImports.PrimitiveExtractor)}<${type}>, V`
+      : "";
+    const collectionType = `${collectionServiceType}<ClientType, ${type}, ${qType}${versionArgs}>`;
 
     return {
       scope: Scope.Private,
@@ -417,7 +487,7 @@ class ServiceGenerator {
     return {
       scope: Scope.Private,
       name: this.namingHelper.getPrivatePropName(prop.name),
-      type: `${serviceType}<ClientType, ${type}>`,
+      type: `${serviceType}<ClientType, ${type}${this.getServiceVersionArg()}>`,
       hasQuestionToken: true,
     };
   }
@@ -439,8 +509,8 @@ class ServiceGenerator {
           model.fqName,
           model.qName,
           true,
-        )}, ${imports.addGeneratedModel(model.fqName, model.editableName)}>`
-      : `${type}<ClientType>`;
+        )}, ${imports.addGeneratedModel(model.fqName, model.editableName)}${this.getServiceVersionArg()}>`
+      : `${type}<ClientType${this.getServiceVersionArg()}>`;
 
     const privateSrvProp = "this." + this.namingHelper.getPrivatePropName(prop.name);
 
@@ -531,17 +601,21 @@ class ServiceGenerator {
     file.getFile().addClass({
       isExported: true,
       name: model.serviceCollectionName,
-      typeParameters: ["in out ClientType extends ODataHttpClient"],
+      typeParameters: this.getServiceTypeParams(importContainer, "ODataHttpClient"),
       extends:
         entitySetServiceType +
-        `<ClientType, ${model.modelName}, ${editableModelName}, ${model.qName}, ${paramsModelName}>`,
+        `<ClientType, ${model.modelName}, ${editableModelName}, ${model.qName}, ${paramsModelName}${this.getServiceVersionArg()}>`,
       ctors: [
         {
           parameters: [
             { name: "client", type: "ClientType" },
             { name: "basePath", type: "string" },
             { name: "name", type: "string" },
-            { name: "options", type: serviceOptions, hasQuestionToken: true },
+            {
+              name: "options",
+              type: `${serviceOptions}${this.getServiceVersionArg() ? "<V>" : ""}`,
+              hasQuestionToken: true,
+            },
           ],
           statements: [`super(client, basePath, name, ${qObjectName}, new ${qIdFunctionName}(name), options);`],
         },
@@ -593,6 +667,7 @@ class ServiceGenerator {
     operation: OperationType,
     importContainer: ImportContainer,
     baseFqName: string,
+    versionArg: string,
   ): OptionalKind<MethodDeclarationStructure> {
     const isFunc = operation.type === OperationTypes.Function;
     const returnType = operation.returnType;
@@ -639,10 +714,10 @@ class ServiceGenerator {
       (returnType ? `, mainResponseConverter: ${qOpProp}.getResponseConverter()` : "") +
       `}`;
     const requestCmdStmt = isComposable
-      ? `return new ${requestCmd}<ClientType, ${responseService}<ClientType>, ${responseStructure}<${rtType}>>(` +
+      ? `return new ${requestCmd}<ClientType, ${responseService}<ClientType${versionArg}>, ${responseStructure}<${rtType}>>(` +
         `client,` +
         `url,` +
-        `(finalUrl: string) => new ${responseService}<ClientType>(client, finalUrl, "", options),` +
+        `(finalUrl: string) => new ${responseService}<ClientType${versionArg}>(client, finalUrl, "", options),` +
         optionStmt +
         `);`
       : `return new ${requestCmd}<ClientType, ${responseStructure ? `${responseStructure}<${rtType}>` : "undefined"}${!isFunc && hasParams ? ", " + paramsModelName : ""}>(` +

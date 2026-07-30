@@ -21,6 +21,7 @@ export interface ProjectManagerOptions {
    */
   noOutput?: boolean;
   allowTypeChecking?: boolean;
+  odataVersionV4?: "4.0" | "4.01";
 }
 
 export async function createProjectManager(
@@ -112,6 +113,7 @@ export class ProjectManager {
       this.namingHelper.getFileNames(),
       !!this.options.bundledFileGeneration,
       reservedNames,
+      this.options.odataVersionV4,
     );
 
     return new FileHandler(

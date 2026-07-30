@@ -1,7 +1,16 @@
-/**
- * Response to a collection query.
+/*
+ * All control information is modelled with the short form here, e.g. "@count" instead of "@odata.count",
+ * which payloads of OData 4.01 and greater should use. The prefixed form of 4.0 lives in ResponseModelV4.
+ *
+ * The control information is factored out into its own types, so that FlexibleResponseModelV4 can recombine it.
+ *
+ * See https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html#sec_ControlInformation
  */
-export interface ODataCollectionResponseV401<T> {
+
+/**
+ * Control information of a collection response.
+ */
+export interface CollectionControlInfoV401 {
   /**
    * The context control information returns the context URL for the payload. This URL can be absolute or relative.
    *
@@ -17,13 +26,8 @@ export interface ODataCollectionResponseV401<T> {
    * if the type cannot be heuristically determined (see link for heuristics) and one of the following is true:
    * - The type is derived from the type specified for the (collection of) entities or (collection of) complex type instances
    *
-   * For payloads described by an OData-Version header with a value of 4.0,
-   * this name MUST be prefixed with the hash symbol (#);
-   * for non-OData 4.0 payloads, built-in primitive type values SHOULD be represented without the hash symbol,
-   * but consumers of 4.01 or greater payloads MUST support values with or without the hash symbol.
-   *
-   * For all other types, the URI may be absolute or relative to the type of the containing object.
-   * The root type may be absolute or relative to the root context URL.
+   * Built-in primitive type values SHOULD be represented without the hash symbol (#), but consumers of 4.01 or
+   * greater payloads MUST support values with or without it.
    *
    * See https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html#sec_ControlInformationtypeodatatype
    */
@@ -54,6 +58,12 @@ export interface ODataCollectionResponseV401<T> {
    * It contains a URL that allows retrieving the next subset of the requested collection.
    */
   "@nextLink"?: string;
+}
+
+/**
+ * Response to a collection query.
+ */
+export interface ODataCollectionResponseV401<T> extends CollectionControlInfoV401 {
   /**
    * The requested collection value.
    */
@@ -61,12 +71,9 @@ export interface ODataCollectionResponseV401<T> {
 }
 
 /**
- * Response to query for an EntityType or ComplexType
- *
- * Result object is directly returned.
- * Additional context attribute is merged into result object.
+ * Control information of a response for an EntityType or ComplexType.
  */
-export type ODataModelResponseV401<T> = T & {
+export interface ModelControlInfoV401 {
   /**
    * The context control information returns the context URL for the payload. This URL can be absolute or relative.
    *
@@ -82,13 +89,8 @@ export type ODataModelResponseV401<T> = T & {
    * if the type cannot be heuristically determined (see link for heuristics) and the following is true:
    * The type is derived from the type specified for the (collection of) entities or (collection of) complex type instances
    *
-   * For payloads described by an OData-Version header with a value of 4.0,
-   * this name MUST be prefixed with the hash symbol (#);
-   * for non-OData 4.0 payloads, built-in primitive type values SHOULD be represented without the hash symbol,
-   * but consumers of 4.01 or greater payloads MUST support values with or without the hash symbol.
-   *
-   * For all other types, the URI may be absolute or relative to the type of the containing object.
-   * The root type may be absolute or relative to the root context URL.
+   * Built-in primitive type values SHOULD be represented without the hash symbol (#), but consumers of 4.01 or
+   * greater payloads MUST support values with or without it.
    *
    * See https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html#sec_ControlInformationtypeodatatype
    */
@@ -127,13 +129,27 @@ export type ODataModelResponseV401<T> = T & {
    * The editLink control information contains the edit URL of the entity.
    */
   "@editLink"?: string;
-};
+}
+
+/**
+ * Response to query for an EntityType or ComplexType
+ *
+ * Result object is directly returned.
+ * Additional context attribute is merged into result object.
+ */
+export type ODataModelResponseV401<T> = T & ModelControlInfoV401;
+
+/**
+ * Control information of a response for a single value.
+ */
+export interface ValueControlInfoV401 {
+  "@context"?: string;
+  "@type"?: string;
+}
 
 /**
  * Response to a value query on a property.
  */
-export interface ODataValueResponseV401<T> {
-  "@context"?: string;
-  "@type"?: string;
+export interface ODataValueResponseV401<T> extends ValueControlInfoV401 {
   value: T;
 }

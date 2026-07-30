@@ -84,6 +84,17 @@ describe("Service Generator Tests V4", () => {
     await compareMainService("min-big-numbers.ts");
   });
 
+  test("Service Generator: Min OData 4.01", async () => {
+    // given the 4.01 setting
+    const options: ConfigFileOptions = { odataVersionV4: "4.01" };
+
+    // when generating
+    await doGenerate(options);
+
+    // then the version is set on the main service, since it only takes effect at runtime
+    await compareMainService("min-v401.ts");
+  });
+
   test("Service Generator: One EntitySet", async () => {
     // given one EntitySet
     odataBuilder

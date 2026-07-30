@@ -1,4 +1,5 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
+import type { ODataVersionV4 } from "@odata2ts/odata-core";
 import type { StringCollection } from "@odata2ts/odata-query-objects";
 import { QBigNumberCollection } from "@odata2ts/odata-query-objects";
 import {
@@ -8,6 +9,7 @@ import {
   ODataService,
   ODataServiceOptions,
   ODataServiceOptionsInternal,
+  PrimitiveExtractor,
 } from "@odata2ts/odata-service";
 // @ts-ignore
 import type { QTestEntity } from "./QTester.js";
@@ -18,8 +20,7 @@ import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   constructor(client: ClientType, basePath: string, options?: ODataServiceOptions) {
-    super(client, basePath, options);
-    this.__base.options.bigNumbersAsString = true;
+    super(client, basePath, { ...options, bigNumbersAsString: true });
   }
 
   public ents(): TestEntityCollectionService<ClientType>;
@@ -33,15 +34,19 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 }
 
-export class TestEntityService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV4<
-  ClientType,
-  TestEntity,
-  EditableTestEntity,
-  QTestEntity
-> {
-  private _bigNumberCollection?: CollectionServiceV4<ClientType, StringCollection, QBigNumberCollection>;
+export class TestEntityService<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntityTypeServiceV4<ClientType, TestEntity, EditableTestEntity, QTestEntity, V> {
+  private _bigNumberCollection?: CollectionServiceV4<
+    ClientType,
+    StringCollection,
+    QBigNumberCollection,
+    PrimitiveExtractor<StringCollection>,
+    V
+  >;
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTestEntity, options);
   }
 
@@ -61,14 +66,11 @@ export class TestEntityService<in out ClientType extends ODataHttpClient> extend
   }
 }
 
-export class TestEntityCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV4<
-  ClientType,
-  TestEntity,
-  EditableTestEntity,
-  QTestEntity,
-  TestEntityId
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal) {
+export class TestEntityCollectionService<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntitySetServiceV4<ClientType, TestEntity, EditableTestEntity, QTestEntity, TestEntityId, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTestEntity, new QTestEntityId(name), options);
   }
 }

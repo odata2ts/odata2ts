@@ -18,13 +18,14 @@ export function importReturnType(
     return imports.addCoreLib(version, typeToImport);
   }
 
-  return version === ODataVersions.V2
-    ? importReturnTypeV2(imports, returnType)
-    : importReturnTypeV4(imports, returnType);
+  return version === ODataVersions.V2 ? importReturnTypeV2(imports, returnType) : importReturnTypeV4(imports);
 }
 
-function importReturnTypeV4(imports: ImportContainer, returnType: ReturnTypeModel) {
-  return imports.addCoreLib(ODataVersions.V4, CoreImports.ODataModelResponseV4);
+function importReturnTypeV4(imports: ImportContainer) {
+  return imports.addCoreLib(
+    ODataVersions.V4,
+    imports.isV401() ? CoreImports.ODataModelResponseV401 : CoreImports.ODataModelResponseV4,
+  );
 }
 
 function importReturnTypeV2(imports: ImportContainer, returnType: ReturnTypeModel) {

@@ -1,13 +1,16 @@
-/**
- * Response to query for an EntityType or ComplexType
+/*
+ * All control information is modelled with the {@code odata.} prefix here, which 4.0 payloads are required to
+ * use. The short form of 4.01 and greater lives in ODataModelPayloadV401.
  *
- * Result object is directly returned.
- * Additional context attribute is merged into result object.
+ * The control information is factored out into its own type, so that FlexibleModelPayloadV4 can recombine it.
  *
- * Since odata2ts targets OData 4.0, control information is written with the {@code odata.} prefix, which is what
- * 4.0 payloads require; the prefix-less form of 4.01 and greater is deliberately not used.
+ * See https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html#sec_ControlInformation
  */
-export type ODataModelPayloadV4<T> = T & {
+
+/**
+ * Control information of a request payload for an EntityType or ComplexType.
+ */
+export interface ModelPayloadControlInfoV4 {
   /**
    * The type control information MUST appear in requests,
    * if the type cannot be heuristically determined (see link for heuristics) and one of the following is true:
@@ -37,4 +40,11 @@ export type ODataModelPayloadV4<T> = T & {
    * See: https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html#sec_ControlInformationcontextodatacontex
    */
   "@odata.context"?: string;
-};
+}
+
+/**
+ * Request payload for an EntityType or ComplexType.
+ *
+ * The model is sent directly, control information is merged into it.
+ */
+export type ODataModelPayloadV4<T> = T & ModelPayloadControlInfoV4;
