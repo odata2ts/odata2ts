@@ -35,6 +35,21 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+  int-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install packages
+        run: yarn --immutable
+      - name: Build packages
+        run: yarn build
+      - name: Run integration tests against the live OData services
+        run: yarn workspace @odata2ts/example-main int-test
+
   ts-floor-check:
     name: TypeScript Floor Check
     runs-on: ubuntu-latest
