@@ -122,6 +122,14 @@ describe("Integration Testing of Service Generation", () => {
     await trippinService.airports("LIRA").patch({ name: originalName }).execute();
   });
 
+  /**
+   * Skipped because this service does not implement "$query" at all: POST to it answers with 500
+   * ("Value cannot be null. Parameter name: type"), regardless of the request body, while the equivalent
+   * plain GET works. So it cannot tell a correct request from a broken one - see the double quoting of
+   * https://github.com/odata2ts/odata2ts/issues/383, which went unnoticed for exactly that reason.
+   *
+   * To be enabled once we run our own test servers.
+   */
   test.skip("GET as POST request", async () => {
     const candidate = trippinService.people("russellwhyte").query((builder) => builder.select("userName"));
 
