@@ -1,5 +1,16 @@
+import { fileURLToPath } from "node:url";
 import { defaultExclude, defineConfig } from "vitest/config";
 import { coverageReporterOptions } from "./vitest-coverage.shared";
+
+/*
+ * This config is also loaded when a package runs vitest with its own directory as root - there is no
+ * per-package config in `examples/*`. The exclusions below describe the **aggregate run started from the
+ * repository root** and must not leak into those scoped runs, where they would remove exactly the tests
+ * that were asked for: `examples/ts-floor-check` runs a bare `vitest run` whose own `int-test/` would
+ * match `int-test/**`, and `examples/main` runs `--dir int-test` on the very path excluded here.
+ */
+const repoRoot = fileURLToPath(new URL(".", import.meta.url)).replace(/\/$/, "");
+const isAggregateRun = process.cwd() === repoRoot;
 
 export default defineConfig({
   test: {
@@ -23,7 +34,7 @@ export default defineConfig({
      *
      * Note: a custom exclude replaces vitest's defaults instead of extending them, hence defaultExclude.
      */
-    exclude: [...defaultExclude, "int-test/**", "examples/main/int-test/**"],
+    exclude: isAggregateRun ? [...defaultExclude, "int-test/**", "examples/main/int-test/**"] : defaultExclude,
     coverage: {
       ...coverageReporterOptions,
       include: ["packages/**/src/**"],
