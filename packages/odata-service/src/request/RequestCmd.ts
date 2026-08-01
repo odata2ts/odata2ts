@@ -152,16 +152,33 @@ export abstract class RequestCmd<
     const request = this.getInfoConverted();
 
     // execute the request
-    const response = await this.client.request<ResponseStructure>(
+    const response = await this.sendRequest(request, requestConfig);
+
+    // apply response converters
+    return this.convertResponse(response);
+  }
+
+  /**
+   * Hands the prepared request over to the HTTP client.
+   *
+   * Overridden by commands whose payload cannot travel the generic JSON path: binary data needs the
+   * client's dedicated blob operations, which pass the body through untouched and read the response as
+   * binary instead of parsing it as JSON.
+   *
+   * @param request the request with all request converters applied
+   * @param requestConfig optional configuration
+   */
+  protected sendRequest(
+    request: RequestInfo<any>,
+    requestConfig?: ODataHttpClientConfig<ClientType>,
+  ): Promise<HttpResponseModel<any>> {
+    return this.client.request<ResponseStructure>(
       request.url,
       request.method,
       request.data,
       requestConfig,
       request.headers,
     );
-
-    // apply response converters
-    return this.convertResponse(response);
   }
 
   private convertResponse(response: HttpResponseModel<any>) {

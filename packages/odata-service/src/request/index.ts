@@ -6,6 +6,8 @@ export * from "./UrlGetRequestCmd";
 export * from "./UrlBuilderRequestCmdV4";
 export * from "./UrlBuilderRequestCmdV2";
 export * from "./ComposableUrlRequestCmd";
+export * from "./BlobGetRequestCmd";
+export * from "./BlobUpdateRequestCmd";
 
 export * from "./converter/RequestConverter";
 export * from "./converter/RequestConverterChain";

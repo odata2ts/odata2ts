@@ -11,6 +11,8 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
   public lastUrl?: string;
   public lastData?: any;
   public lastOperation?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  /** The MIME type of the last blob operation - only those carry one. */
+  public lastMimeType?: string;
   public lastRequestConfig?: MockRequestConfig;
   public additionalHeaders?: Record<string, string>;
 
@@ -114,7 +116,15 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
     requestConfig?: MockRequestConfig,
     additionalHeaders?: Record<string, string>,
   ): ODataResponse<Blob> {
-    throw new Error("Operation getBlob not supported!");
+    this.lastUrl = url;
+    this.lastData = undefined;
+    this.lastOperation = "GET";
+    this.lastMimeType = undefined;
+    this.lastRequestConfig = requestConfig || undefined;
+    this.additionalHeaders = additionalHeaders;
+
+    // @ts-ignore
+    return this.respond();
   }
 
   getStream(
@@ -142,7 +152,15 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
     requestConfig?: MockRequestConfig,
     additionalHeaders?: Record<string, string>,
   ): ODataResponse<void | Blob> {
-    throw new Error("Operation updateBlob not supported!");
+    this.lastUrl = url;
+    this.lastData = data;
+    this.lastOperation = "PUT";
+    this.lastMimeType = mimeType;
+    this.lastRequestConfig = requestConfig || undefined;
+    this.additionalHeaders = additionalHeaders;
+
+    // @ts-ignore
+    return this.respond();
   }
 
   setValueResponse(data: any, name?: string) {
@@ -158,6 +176,13 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
 
   setModelResponse(data: any) {
     this.responseData = this.isV2 ? { d: data } : data;
+  }
+
+  /**
+   * Binary responses are not wrapped in any way - a blob is handed over as it came.
+   */
+  setBlobResponse(data: Blob) {
+    this.responseData = data;
   }
 
   setCollectionResponse(data: any) {
