@@ -495,4 +495,38 @@ describe("Service Generator Tests V4", () => {
     // then service has one function with multiple parameter types
     await compareMainService("function-overload-optional.ts");
   });
+
+  test("Service Generator: stream property", async () => {
+    // given an entity with a stream property
+    odataBuilder
+      .addEntityType("Audiobook", undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Guid)
+          .addProp("title", ODataTypesV4.String, false)
+          .addProp("Sample", ODataTypesV4.Stream),
+      )
+      .addEntitySet("Audiobooks", withNs("Audiobook"));
+
+    // when generating - note: no enablePrimitivePropertyServices, that switch must not apply here,
+    // since the stream service is the only way to reach the content at all
+    await doGenerate();
+
+    // then the entity service hands out a stream service for the property
+    await compareMainService("stream-property.ts");
+  });
+
+  test("Service Generator: media entity", async () => {
+    // given a media entity, i.e. an entity whose own representation is binary content
+    odataBuilder
+      .addEntityType("EBook", { hasStream: true }, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.Guid).addProp("title", ODataTypesV4.String, false),
+      )
+      .addEntitySet("EBooks", withNs("EBook"));
+
+    // when generating
+    await doGenerate();
+
+    // then its service extends the media entity service, which adds the $value access
+    await compareMainService("media-entity.ts");
+  });
 });

@@ -78,6 +78,8 @@ export enum ServiceImports {
   UrlGetRequestCmd,
   ComposableUrlRequestCmd,
   PrimitiveExtractor,
+  StreamService,
+  MediaEntityService,
 }
 
 /**
@@ -90,4 +92,7 @@ export const VERSIONED_SERVICE_IMPORTS = [
   ServiceImports.CollectionService,
   ServiceImports.EntitySetService,
   ServiceImports.ComplexTypeService,
+  // V4 only in fact - streams are an OData V4 concept, so these are never requested for V2
+  ServiceImports.StreamService,
+  ServiceImports.MediaEntityService,
 ];

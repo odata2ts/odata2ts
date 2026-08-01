@@ -306,4 +306,20 @@ describe("Model Generator Tests V4", () => {
       disableAutoManagedKey: true,
     });
   });
+
+  test(`${TEST_SUITE_NAME}: stream property is no part of any model`, async () => {
+    // given an entity with a stream property
+    odataBuilder.addEntityType("Audiobook", undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Guid)
+        .addProp("title", ODataTypesV4.String, false)
+        .addProp("Sample", ODataTypesV4.Stream),
+    );
+
+    // when generating models
+    // then `Sample` is absent from both models: binary content is not part of the JSON payload, so a
+    // property of type string would promise a value no server ever sends - and it cannot be written
+    // through create/update either, only through its own URL
+    await generateAndCompare("entity-stream-property.ts", { skipEditableModels: false });
+  });
 });

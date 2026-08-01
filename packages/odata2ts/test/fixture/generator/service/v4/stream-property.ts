@@ -1,0 +1,53 @@
+import type { ODataHttpClient } from "@odata2ts/http-client-api";
+import type { ODataVersionV4 } from "@odata2ts/odata-core";
+import {
+  EntitySetServiceV4,
+  EntityTypeServiceV4,
+  ODataService,
+  ODataServiceOptionsInternal,
+  StreamServiceV4,
+} from "@odata2ts/odata-service";
+import type { QAudiobook } from "./QTester.js";
+import { qAudiobook, QAudiobookId } from "./QTester.js";
+import type { Audiobook, AudiobookId, EditableAudiobook } from "./TesterModel.js";
+
+export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
+  public audiobooks(): AudiobookCollectionService<ClientType>;
+  public audiobooks(id: AudiobookId): AudiobookService<ClientType>;
+  public audiobooks(id?: AudiobookId | undefined) {
+    const fieldName = "Audiobooks";
+    const { client, path, options, isUrlNotEncoded } = this.__base;
+    return typeof id === "undefined" || id === null
+      ? new AudiobookCollectionService(client, path, fieldName, options)
+      : new AudiobookService(client, path, new QAudiobookId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
+  }
+}
+
+export class AudiobookService<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntityTypeServiceV4<ClientType, Audiobook, EditableAudiobook, QAudiobook, V> {
+  private _sample?: StreamServiceV4<ClientType, V>;
+
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+    super(client, basePath, name, qAudiobook, options);
+  }
+
+  public sample() {
+    if (!this._sample) {
+      const { client, path, options } = this.__base;
+      this._sample = new StreamServiceV4(client, path, "Sample", options);
+    }
+
+    return this._sample;
+  }
+}
+
+export class AudiobookCollectionService<
+  in out ClientType extends ODataHttpClient,
+  V extends ODataVersionV4 = "4.0",
+> extends EntitySetServiceV4<ClientType, Audiobook, EditableAudiobook, QAudiobook, AudiobookId, V> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+    super(client, basePath, name, qAudiobook, new QAudiobookId(name), options);
+  }
+}

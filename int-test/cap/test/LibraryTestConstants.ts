@@ -12,3 +12,7 @@ export const LIBRARY = new LibraryService(ODATA_CLIENT, BASE_URL);
 /** "Der Prozess" - a book with fixed, well-known values. */
 export const BOOK_DER_PROZESS = "11111111-1111-1111-1111-111111111111";
 export const UNKNOWN_ID = "00000000-0000-0000-0000-000000000000";
+
+/** Carriers of binary content: a named stream property (`Sample`) and CAP's take on a media entity. */
+export const AUDIOBOOK = "44444444-4444-4444-4444-444444444441";
+export const EBOOK = "66666666-6666-6666-6666-666666666661";

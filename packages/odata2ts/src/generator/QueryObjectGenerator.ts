@@ -180,6 +180,9 @@ class QueryObjectGenerator {
           collector[0].push(`"${subClass.fqName}": "${subClass.qName}"`);
 
           subClass.props.forEach((prop) => {
+            if (prop.isStream) {
+              return;
+            }
             const propName = this.namingHelper.getQPropName(prop.name);
             const fqPropName = `${subClass.qName}_${propName}`;
             collector[1].push({
@@ -234,8 +237,11 @@ class QueryObjectGenerator {
 
   private generateQueryObjectProps(
     importContainer: ImportContainer,
-    props: Array<PropertyModel>,
+    allProps: Array<PropertyModel>,
   ): Array<OptionalKind<PropertyDeclarationStructure>> {
+    // stream properties get no q-path: filtering, ordering and the like do not apply to binary content,
+    // and it is not part of the payload a q-object converts
+    const props = allProps.filter((prop) => !prop.isStream);
     const isEnumType = (prop: PropertyModel) => prop.dataType === DataTypes.EnumType;
     const isModelType = (prop: PropertyModel) =>
       prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;

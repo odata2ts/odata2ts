@@ -62,6 +62,7 @@ Test files follow the same scheme in every package, one concern per file:
 | `core/QueryFunctionality.test.ts` | the system query options on read requests                                      |
 | `core/Operations.test.ts`         | functions and actions, bound and unbound                                       |
 | `feature/CrudQuery.test.ts`       | system query options on `create`/`add`/`update`/`patch`                        |
+| `feature/Blobs.test.ts`           | binary content: stream properties and media entities                           |
 
 Where a server does not support something, the test asserts the rejection rather than being dropped -
 that keeps the limitation visible instead of silently untested.
