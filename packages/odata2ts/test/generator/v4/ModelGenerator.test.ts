@@ -136,8 +136,9 @@ describe("Model Generator Tests V4", () => {
       );
 
     // when generating model
-    // then match fixture text => actually there's no diff in the generated param models between bound-to-entity and bound-to-collection
-    await generateAndCompare("operation-bound.ts");
+    // then the params model is named after the *collection* binding: an operation bound to a single
+    // instance and one bound to the collection are different overloads and must not share a name.
+    await generateAndCompare("operation-bound-collection.ts");
   });
 
   test(`${TEST_SUITE_NAME}: Entity relationships`, async () => {

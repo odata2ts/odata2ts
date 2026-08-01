@@ -10,9 +10,9 @@ import {
 // @ts-ignore
 import type { QBook } from "./QTester.js";
 // @ts-ignore
-import { Book_QBestReview, Book_QFilterReviews, qBook, QBookId } from "./QTester.js";
+import { Book_QBestReview, BookCollection_QFilterReviews, qBook, QBookId } from "./QTester.js";
 // @ts-ignore
-import type { Book, Book_FilterReviewsParams, BookId, EditableBook, Review } from "./TesterModel.js";
+import type { Book, BookCollection_FilterReviewsParams, BookId, EditableBook, Review } from "./TesterModel.js";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   public books(): BookCollectionService<ClientType>;
@@ -55,23 +55,23 @@ export class BookCollectionService<
   in out ClientType extends ODataHttpClient,
   V extends ODataVersionV4 = "4.0",
 > extends EntitySetServiceV4<ClientType, Book, EditableBook, QBook, BookId, V> {
-  private _bookQFilterReviews?: Book_QFilterReviews;
+  private _bookCollectionQFilterReviews?: BookCollection_QFilterReviews;
 
   constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, new QBookId(name), options);
   }
 
-  public filterReviews(params: Book_FilterReviewsParams) {
-    if (!this._bookQFilterReviews) {
-      this._bookQFilterReviews = new Book_QFilterReviews();
+  public filterReviews(params: BookCollection_FilterReviewsParams) {
+    if (!this._bookCollectionQFilterReviews) {
+      this._bookCollectionQFilterReviews = new BookCollection_QFilterReviews();
     }
 
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
-    const url = addFullPath(this._bookQFilterReviews.buildUrl(params, isUrlNotEncoded()));
+    const url = addFullPath(this._bookCollectionQFilterReviews.buildUrl(params, isUrlNotEncoded()));
 
     return new UrlGetRequestCmd<ClientType, ODataCollectionResponseV4<Review>>(client, url, {
       headers: getDefaultHeaders(),
-      mainResponseConverter: this._bookQFilterReviews.getResponseConverter(),
+      mainResponseConverter: this._bookCollectionQFilterReviews.getResponseConverter(),
     });
   }
 }

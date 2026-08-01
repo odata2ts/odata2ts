@@ -157,8 +157,8 @@ describe("Action Digestion Test", () => {
       {
         fqName: withNs("archiveAll"),
         name: "archiveAll",
-        qName: "User_QArchiveAll",
-        paramsModelName: "User_ArchiveAllParams",
+        qName: "UserCollection_QArchiveAll",
+        paramsModelName: "UserCollection_ArchiveAllParams",
         type: OperationTypes.Action,
         parameters: [
           {
