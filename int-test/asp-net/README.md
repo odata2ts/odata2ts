@@ -25,6 +25,13 @@ only, against fixtures - and a fixture cannot show that the link actually moved 
 file asserts the round trip _and_ that the previously linked entity is left untouched, because getting
 that wrong is silent: the server answers 204 either way.
 
+**Query options in the request body.** `test/feature/QueryInRequestBody.test.ts` proves odata2ts#383:
+`asPostRequest()` moves the query string into a `text/plain` body of `POST <resource>/$query`. It is the
+only end-to-end coverage the feature has, because the live Trippin service does not implement `$query` -
+it answers 500 to any POST against it, whatever the body, and so cannot tell a correct request from a
+broken one. The file also covers the case the feature exists for: a query whose URL exceeds the server's
+8 KB request line, rejected as a GET and answered as a POST.
+
 **Operation overloads.** The reference model carries two overload pairs, and generating this client is
 what surfaced odata2ts#423 - both overloads produced the same Q-object name, so the generated file did
 not compile. `test/core/Operations.test.ts` covers the resulting behaviour.
