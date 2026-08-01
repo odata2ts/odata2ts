@@ -674,6 +674,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@odata2ts/int-test-asp-net@workspace:int-test/asp-net":
+  version: 0.0.0-use.local
+  resolution: "@odata2ts/int-test-asp-net@workspace:int-test/asp-net"
+  dependencies:
+    "@odata2ts/http-client-fetch": "npm:^0.10.0"
+    "@odata2ts/odata-service": "workspace:^"
+    "@odata2ts/odata2ts": "workspace:^"
+    testcontainers: "npm:^12.0.4"
+  languageName: unknown
+  linkType: soft
+
 "@odata2ts/int-test-cap@workspace:int-test/cap":
   version: 0.0.0-use.local
   resolution: "@odata2ts/int-test-cap@workspace:int-test/cap"
