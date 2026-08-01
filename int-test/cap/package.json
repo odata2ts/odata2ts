@@ -10,8 +10,8 @@
     "build": "yarn clean && yarn generate",
     "clean": "rimraf build src-generated",
     "generate": "odata2ts",
-    "test": "vitest run",
-    "test-compile": "tsc"
+    "test": "node ../../node_modules/.bin/vitest run",
+    "test-compile": "node ../../node_modules/.bin/tsc"
   },
   "dependencies": {
     "@odata2ts/http-client-fetch": "^0.10.0",
