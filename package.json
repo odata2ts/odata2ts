@@ -18,6 +18,7 @@
     "clean": "rimraf coverage",
     "coverage": "vitest run --coverage",
     "int-test": "yarn workspaces foreach -A -p --include 'int-test/*' run test",
+    "int-test:asp-net": "yarn workspace @odata2ts/int-test-asp-net test",
     "int-test:cap": "yarn workspace @odata2ts/int-test-cap test",
     "test": "yarn workspaces foreach -A -p --include 'packages/*' --include 'examples/*' run test",
     "test-compile": "yarn workspaces foreach -A -p run test-compile"

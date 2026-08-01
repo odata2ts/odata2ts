@@ -1,0 +1,24 @@
+{
+  "name": "@odata2ts/int-test-asp-net",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Integration tests running odata2ts against the ASP.NET Core implementation of the standardized \"Library\" OData V4 test server",
+  "repository": "git@github.com:odata2ts/odata2ts.git",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "yarn clean && yarn generate",
+    "clean": "rimraf build src-generated",
+    "generate": "odata2ts",
+    "test": "node ../../node_modules/.bin/vitest run",
+    "test-compile": "node ../../node_modules/.bin/tsc"
+  },
+  "dependencies": {
+    "@odata2ts/http-client-fetch": "^0.10.0",
+    "@odata2ts/odata-service": "workspace:^"
+  },
+  "devDependencies": {
+    "@odata2ts/odata2ts": "workspace:^",
+    "testcontainers": "^12.0.4"
+  }
+}

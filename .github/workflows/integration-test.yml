@@ -22,6 +22,8 @@ jobs:
         include:
           - name: cap
             package: "@odata2ts/int-test-cap"
+          - name: asp-net
+            package: "@odata2ts/int-test-asp-net"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

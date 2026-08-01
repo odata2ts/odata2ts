@@ -33,9 +33,10 @@ start Docker containers.
 
 ## The servers
 
-| package                  | server                                                          |
-| ------------------------ | --------------------------------------------------------------- |
-| [`cap`](./cap/README.md) | SAP CAP implementation of the standardized "Library" test model |
+| package                          | server                                                          |
+| -------------------------------- | --------------------------------------------------------------- |
+| [`cap`](./cap/README.md)         | SAP CAP implementation of the standardized "Library" test model |
+| [`asp-net`](./asp-net/README.md) | ASP.NET Core implementation of the same model                   |
 
 ## Layout of a package
 
