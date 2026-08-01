@@ -11,9 +11,16 @@ import {
 // @ts-ignore
 import type { QBook } from "./QTester.js";
 // @ts-ignore
-import { Book_QLike, Book_QRate, Book_QRatings, qBook, QBookId } from "./QTester.js";
-// @ts-ignore
-import type { Book, Book_RateParams, Book_RatingsParams, BookId, EditableBook, Rating } from "./TesterModel.js";
+import { Book_QLike, Book_QRate, BookCollection_QRatings, qBook, QBookId } from "./QTester.js";
+import type {
+  Book,
+  Book_RateParams,
+  BookCollection_RatingsParams,
+  BookId,
+  EditableBook,
+  Rating,
+  // @ts-ignore
+} from "./TesterModel.js";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
   public books(): BookCollectionService<ClientType>;
@@ -77,29 +84,29 @@ export class BookCollectionService<
   in out ClientType extends ODataHttpClient,
   V extends ODataVersionV4 = "4.0",
 > extends EntitySetServiceV4<ClientType, Book, EditableBook, QBook, BookId, V> {
-  private _bookQRatings?: Book_QRatings;
+  private _bookCollectionQRatings?: BookCollection_QRatings;
 
   constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, new QBookId(name), options);
   }
 
-  public ratings(params: Book_RatingsParams) {
-    if (!this._bookQRatings) {
-      this._bookQRatings = new Book_QRatings();
+  public ratings(params: BookCollection_RatingsParams) {
+    if (!this._bookCollectionQRatings) {
+      this._bookCollectionQRatings = new BookCollection_QRatings();
     }
 
     const { addFullPath, client, getDefaultHeaders } = this.__base;
-    const url = addFullPath(this._bookQRatings.buildUrl());
+    const url = addFullPath(this._bookCollectionQRatings.buildUrl());
 
-    return new UrlRequestCmd<ClientType, ODataCollectionResponseV4<Rating>, Book_RatingsParams>(
+    return new UrlRequestCmd<ClientType, ODataCollectionResponseV4<Rating>, BookCollection_RatingsParams>(
       client,
       ODataHttpMethods.Post,
       url,
       params,
       {
         headers: getDefaultHeaders(),
-        mainRequestConverter: this._bookQRatings.getRequestConverter(),
-        mainResponseConverter: this._bookQRatings.getResponseConverter(),
+        mainRequestConverter: this._bookCollectionQRatings.getRequestConverter(),
+        mainResponseConverter: this._bookCollectionQRatings.getResponseConverter(),
       },
     );
   }

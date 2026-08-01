@@ -235,7 +235,21 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
       }
 
       const bindingProp = isBound ? params.shift() : undefined;
-      const bindingEntityName = bindingProp ? this.dataModel.getModel(bindingProp!.fqType)?.name : undefined;
+      /*
+       * The binding type alone does not identify a bound operation: the spec allows two overloads that
+       * differ only in cardinality - one bound to `Medium`, one to `Collection(Medium)`. Both carry the
+       * same fully qualified name and the same binding type, so a name derived from the type alone
+       * collides and the generated Q-objects end up with a duplicate identifier.
+       *
+       * Collection-bound operations therefore get a `Collection` infix, which is the same distinction
+       * odata2ts already draws for services (`MediumService` vs. `MediumCollectionService`).
+       */
+      const bindingModel = bindingProp ? this.dataModel.getModel(bindingProp.fqType) : undefined;
+      const bindingEntityName = bindingModel
+        ? bindingProp!.isCollection
+          ? `${bindingModel.name}Collection`
+          : bindingModel.name
+        : undefined;
 
       const opName = bindingEntityName
         ? this.nameValidator.addBoundOperationType(bindingEntityName, fqName, opConfig?.mappedName || odataName, type)

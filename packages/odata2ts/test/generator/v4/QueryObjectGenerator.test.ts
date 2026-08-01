@@ -133,7 +133,7 @@ describe("Query Object Generator Tests V4", () => {
           .addParam("optTest", ODataTypesV4.Boolean, true),
       );
 
-    await generateAndCompare("function-bound.ts");
+    await generateAndCompare("function-bound-collection.ts");
   });
 
   test("QFunction: primitive collection response", async () => {

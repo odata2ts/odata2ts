@@ -219,8 +219,8 @@ describe("Function Digestion Test", () => {
       {
         fqName: withNs("countActive"),
         name: "countActive",
-        qName: "User_QCountActive",
-        paramsModelName: "User_CountActiveParams",
+        qName: "UserCollection_QCountActive",
+        paramsModelName: "UserCollection_CountActiveParams",
         type: OperationTypes.Function,
         parameters: [],
       },
