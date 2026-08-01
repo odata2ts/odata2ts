@@ -242,4 +242,19 @@ describe("Query Object Generator Tests V4", () => {
       `${SERVICE_NAME.toLowerCase()}/${ENTITY_NAME.toLowerCase()}/Q${ENTITY_NAME}`,
     );
   });
+
+  test(`${TEST_SUITE_NAME}: stream property gets no q-path`, async () => {
+    // given an entity with a stream property
+    odataBuilder.addEntityType("Audiobook", undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Guid)
+        .addProp("title", ODataTypesV4.String, false)
+        .addProp("Sample", ODataTypesV4.Stream),
+    );
+
+    // when generating q-objects
+    // then `Sample` has no q-path: filtering and ordering do not apply to binary content, and the
+    // q-object converts a payload the stream is not part of
+    await generateAndCompare("entity-stream-property.ts");
+  });
 });

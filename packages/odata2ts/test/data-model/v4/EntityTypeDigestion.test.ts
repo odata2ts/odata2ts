@@ -451,4 +451,42 @@ describe("V4: EntityTypeDigestion Test", () => {
 
     expect(result.getEntityTypes().length).toBe(3);
   });
+
+  test("EntityTypes: media entity", async () => {
+    odataBuilder.addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Guid));
+    odataBuilder.addEntityType("EBook", { hasStream: true }, (builder) => builder.addKeyProp("id", ODataTypesV4.Guid));
+
+    const result = await doDigest();
+
+    expect(result.getEntityType(withNs("EBook"))!.hasStream).toBe(true);
+    expect(result.getEntityType(withNs("Book"))!.hasStream).toBeFalsy();
+  });
+
+  test("EntityTypes: media entity trait is inherited", async () => {
+    // A type derived from a media entity is one itself - its content is reachable the same way, so the
+    // flag has to survive the base class, exactly like `OpenType` does.
+    odataBuilder.addEntityType("Medium", { hasStream: true }, (builder) => builder.addKeyProp("id", ODataTypesV4.Guid));
+    odataBuilder.addEntityType("EBook", { baseType: withNs("Medium") }, (builder) =>
+      builder.addProp("fileFormat", ODataTypesV4.String),
+    );
+
+    const result = await doDigest();
+
+    expect(result.getEntityType(withNs("EBook"))!.hasStream).toBe(true);
+  });
+
+  test("EntityTypes: stream property", async () => {
+    odataBuilder.addEntityType("Audiobook", undefined, (builder) =>
+      builder.addKeyProp("id", ODataTypesV4.Guid).addProp("Sample", ODataTypesV4.Stream),
+    );
+
+    const result = await doDigest();
+    const model = result.getEntityType(withNs("Audiobook"))!;
+
+    // Marked, so models and q-object can leave it out and a stream service can be generated for it.
+    // The entity itself is no media entity: the stream is one property among others.
+    expect(model.props.find((p) => p.odataName === "Sample")).toMatchObject({ isStream: true });
+    expect(model.hasStream).toBeFalsy();
+    expect(model.props.find((p) => p.odataName === "id")!.isStream).toBeUndefined();
+  });
 });

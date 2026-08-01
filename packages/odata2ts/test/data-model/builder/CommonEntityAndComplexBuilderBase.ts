@@ -4,6 +4,8 @@ export interface EntityOrComplexBuilderOptions {
   baseType?: string;
   abstract?: boolean;
   open?: boolean;
+  /** Media entity: only meaningful on entity types, and only in V4. */
+  hasStream?: boolean;
 }
 
 export abstract class CommonEntityAndComplexBuilderBase {
@@ -25,8 +27,14 @@ export abstract class CommonEntityAndComplexBuilderBase {
   }
 
   protected createEntityType(): EntityType {
+    const complexType = this.createComplexType();
+
     return {
-      ...this.createComplexType(),
+      ...complexType,
+      $: {
+        ...complexType.$,
+        ...(this.options?.hasStream ? { HasStream: "true" as const } : {}),
+      },
       Key: [{ PropertyRef: [] }],
     };
   }

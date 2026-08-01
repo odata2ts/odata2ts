@@ -1,4 +1,5 @@
 import { MappedConverterChains } from "@odata2ts/converter-runtime";
+import { ODataTypesV4 } from "@odata2ts/odata-core";
 import type { DigestionOptions } from "../FactoryFunctionModel.js";
 import {
   ComplexTypeGenerationOptions,
@@ -27,7 +28,7 @@ import { NoopValidator } from "./validation/NoopValidator.js";
 type CollectorTuple = [
   Array<PropertyModel>,
   Array<string>,
-  { fqIdName: string; idName: string; qIdName: string; open: boolean },
+  { fqIdName: string; idName: string; qIdName: string; open: boolean; hasStream: boolean },
 ];
 
 function ifTrue(value: string | undefined): boolean {
@@ -277,6 +278,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         keys: [], // postprocess required to include props from base classes
         getKeyUnion: () => keyNames.join(" | "),
         subtypes: new Set(),
+        // postprocess required as well: HasStream is inherited from base types
+        hasStream: ifTrue((model as EntityType).$.HasStream),
       });
     }
   }
@@ -357,7 +360,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
       // get props & keys from base types
       const [baseProps, baseKeys, baseAttributes] = this.collectBaseClassPropsAndKeys(et, []);
-      const { fqIdName, idName, qIdName, open } = baseAttributes;
+      const { fqIdName, idName, qIdName, open, hasStream } = baseAttributes;
       et.baseProps = baseProps.map((bp) => ({ ...bp }));
 
       if (!et.keyNames.length && idName) {
@@ -370,6 +373,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       }
       if (open) {
         et.open = open;
+      }
+      if (hasStream) {
+        et.hasStream = true;
       }
       et.keyNames.unshift(...baseKeys.filter((bk) => !et.keyNames.includes(bk)));
     });
@@ -408,7 +414,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
           throw new Error(`BaseModel "${bc}" doesn't exist!`);
         }
 
-        let { fqIdName, idName, qIdName, open } = attributes;
+        let { fqIdName, idName, qIdName, open, hasStream } = attributes;
 
         // recursive
         if (baseModel.baseClasses.length) {
@@ -426,6 +432,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
           if (parentAttributes?.open) {
             open = true;
           }
+          if (parentAttributes?.hasStream) {
+            hasStream = true;
+          }
         }
 
         props.push(...baseModel.props);
@@ -439,9 +448,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         if (baseModel.open) {
           open = true;
         }
-        return [props, keys, { fqIdName, idName, qIdName, open }];
+        // media entities pass the trait on: a type derived from one is a media entity itself
+        if (entityModel.hasStream) {
+          hasStream = true;
+        }
+        return [props, keys, { fqIdName, idName, qIdName, open, hasStream }];
       },
-      [[], [], { fqIdName: "", idName: "", qIdName: "", open: false }] as CollectorTuple,
+      [[], [], { fqIdName: "", idName: "", qIdName: "", open: false, hasStream: false }] as CollectorTuple,
     );
   }
 
@@ -553,6 +566,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       fqType: odataDataType,
       required: ifFalse(p.$.Nullable),
       isCollection: isCollection,
+      // only set when it applies: a flag on every single property would be noise
+      ...(odataDataType === ODataTypesV4.Stream ? { isStream: true } : undefined),
       managed: typeof entityPropConfig?.managed !== "undefined" ? entityPropConfig.managed : configProp?.managed,
       ...result,
     };

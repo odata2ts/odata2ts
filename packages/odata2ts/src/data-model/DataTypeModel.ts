@@ -33,6 +33,12 @@ export interface PropertyModel {
   dataType: DataTypes;
   converters?: Array<ValueConverterImport>;
   managed?: boolean;
+  /**
+   * An `Edm.Stream` property: binary content which never travels in the entity's JSON payload, but is
+   * addressed by its own URL. Such a property is therefore absent from the models and the q-object and
+   * gets its own service instead.
+   */
+  isStream?: boolean;
 }
 
 export type ModelType = EntityType | ComplexType | EnumType;
@@ -50,6 +56,11 @@ export interface EntityType extends ComplexType {
   keyNames: Array<string>;
   keys: Array<PropertyModel>;
   getKeyUnion(): string;
+  /**
+   * Media entity (`HasStream="true"`): the entity's own representation is binary content, reachable by
+   * appending `$value` to its URL. Inherited from base types.
+   */
+  hasStream: boolean;
 }
 
 export interface ComplexType {

@@ -13,6 +13,8 @@ export interface ModelBuilderOptions {
   baseType?: string;
   abstract?: boolean;
   open?: boolean;
+  /** Media entity: only meaningful on entity types, and only in V4. */
+  hasStream?: boolean;
 }
 
 export abstract class ODataModelBuilder<

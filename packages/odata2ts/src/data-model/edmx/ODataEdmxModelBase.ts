@@ -46,6 +46,11 @@ export interface EntityType {
     BaseType?: string;
     Abstract?: "true" | "false";
     OpenType?: "true" | "false";
+    /**
+     * Marks a media entity, i.e. an entity whose own representation is binary content, addressed by
+     * appending `$value` to its URL. V4 only, and inherited by derived types.
+     */
+    HasStream?: "true" | "false";
   };
   Key: Array<PropertyRef>;
   Property: Array<Property>;

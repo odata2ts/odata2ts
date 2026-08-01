@@ -297,11 +297,17 @@ class ServiceGenerator {
     const operations = this.dataModel.getEntityTypeOperations(model.fqName);
     const props = [...model.baseProps, ...model.props];
 
+    // a media entity's own representation is binary content, reachable via `$value` - that access is
+    // what the specialized base class adds on top of the regular entity service
+    const isMediaEntity = this.version === ODataVersions.V4 && !isComplexType && (model as EntityType).hasStream;
+
     const entityServiceType = importContainer.addServiceObject(
       this.version,
       this.version === ODataVersions.V2 && isComplexType
         ? ServiceImports.ComplexTypeService
-        : ServiceImports.EntityTypeService,
+        : isMediaEntity
+          ? ServiceImports.MediaEntityService
+          : ServiceImports.EntityTypeService,
     );
     const httpClient = importContainer.addClientApi(ClientApiImports.ODataHttpClient);
 
@@ -360,8 +366,18 @@ class ServiceGenerator {
     const result: PropsAndOps = { properties: [], methods: [] };
 
     props.forEach((prop) => {
+      // stream properties: binary content behind its own URL, so always a service of its own - the
+      // enablePrimitivePropertyServices switch deliberately does not apply, since there is no other way
+      // to reach the content at all
+      if (prop.isStream) {
+        result.properties.push(this.generateStreamProp(importContainer, prop));
+        result.methods.push(this.generateStreamGetter(importContainer, prop));
+      }
       // collection of ComplexTypes, ComplexTypes, or EntityTypes
-      if ((prop.dataType === DataTypes.ModelType && !prop.isCollection) || prop.dataType === DataTypes.ComplexType) {
+      else if (
+        (prop.dataType === DataTypes.ModelType && !prop.isCollection) ||
+        prop.dataType === DataTypes.ComplexType
+      ) {
         result.properties.push(this.generateModelProp(importContainer, prop));
         result.methods.push(this.generateModelPropGetter(importContainer, prop));
       } else if (prop.isCollection) {
@@ -489,6 +505,40 @@ class ServiceGenerator {
       name: this.namingHelper.getPrivatePropName(prop.name),
       type: `${serviceType}<ClientType, ${type}${this.getServiceVersionArg()}>`,
       hasQuestionToken: true,
+    };
+  }
+
+  private generateStreamProp(
+    imports: ImportContainer,
+    prop: PropertyModel,
+  ): OptionalKind<PropertyDeclarationStructure> {
+    const serviceType = imports.addServiceObject(this.version, ServiceImports.StreamService);
+
+    return {
+      scope: Scope.Private,
+      name: this.namingHelper.getPrivatePropName(prop.name),
+      type: `${serviceType}<ClientType${this.getServiceVersionArg()}>`,
+      hasQuestionToken: true,
+    };
+  }
+
+  private generateStreamGetter(
+    imports: ImportContainer,
+    prop: PropertyModel,
+  ): OptionalKind<MethodDeclarationStructure> {
+    const serviceType = imports.addServiceObject(this.version, ServiceImports.StreamService);
+    const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
+
+    return {
+      scope: Scope.Public,
+      name: this.namingHelper.getRelatedServiceGetter(prop.name),
+      statements: [
+        `if(!${propName}) {`,
+        `  const { client, path, options } = this.__base;`,
+        `  ${propName} = new ${serviceType}(client, path, "${prop.odataName}", options)`,
+        "}",
+        `return ${propName}`,
+      ],
     };
   }
 

@@ -9,6 +9,15 @@ import { ProjectManager } from "../project/ProjectManager.js";
 import { CoreImports } from "./import/ImportObjects.js";
 import { ImportContainer } from "./ImportContainer.js";
 
+/**
+ * Stream properties are left out of every generated model: `Edm.Stream` content is not part of the
+ * entity's JSON payload, it lives behind its own URL. Typing it as a string would promise a value that
+ * no server ever sends.
+ */
+function notStream(prop: PropertyModel): boolean {
+  return !prop.isStream;
+}
+
 export const generateModels: EntityBasedGeneratorFunction = (
   project: ProjectManager,
   dataModel,
@@ -141,7 +150,9 @@ class ModelGenerator {
     file.getFile().addInterface({
       name: model.modelName,
       isExported: true,
-      properties: model.props.map((p) => {
+      // stream properties are absent on purpose: binary content never travels in the JSON payload, it
+      // is addressed by its own URL - see the stream service the ServiceGenerator emits for them
+      properties: model.props.filter(notStream).map((p) => {
         const isEntity = p.dataType == DataTypes.ModelType;
         return {
           name: p.name,
@@ -231,7 +242,8 @@ class ModelGenerator {
 
   private generateEditableModel(file: FileHandler, model: ComplexType) {
     const entityTypes = [DataTypes.ModelType, DataTypes.ComplexType];
-    const allProps = [...model.baseProps, ...model.props].filter((p) => !p.managed);
+    // stream props are not writable through the payload either - the stream service is the only way in
+    const allProps = [...model.baseProps, ...model.props].filter((p) => !p.managed && notStream(p));
 
     const requiredProps = allProps
       .filter((p) => p.required && !entityTypes.includes(p.dataType))
