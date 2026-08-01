@@ -14,13 +14,11 @@
     "test-compile": "tsc"
   },
   "dependencies": {
-    "@odata2ts/http-client-fetch": "^0.9.2",
+    "@odata2ts/http-client-fetch": "^0.10.0",
     "@odata2ts/odata-service": "workspace:^"
   },
   "devDependencies": {
     "@odata2ts/odata2ts": "workspace:^",
-    "@types/node": "^22.4.0",
-    "testcontainers": "^10.13.2",
-    "vitest": "^2.0.5"
+    "testcontainers": "^12.0.4"
   }
 }

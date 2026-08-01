@@ -1,6 +1,6 @@
 import { FetchClient } from "@odata2ts/http-client-fetch";
 import { inject } from "vitest";
-import { LibraryService } from "../src-generated/library/LibraryService";
+import { LibraryService } from "../src-generated/library/LibraryService.js";
 
 /** Base URL of the running server, provided by `globalSetup` (container or external server). */
 export const BASE_URL = inject("libraryBaseUrl");

@@ -10,7 +10,8 @@ jobs:
   # Java, ...) means adding its package plus one entry here - no language-specific toolchain is ever
   # needed in this repo, since every server is consumed as a Docker image.
   #
-  # examples/* are deliberately absent: they are their own category and are run on demand only.
+  # examples/* are absent here: their mock-based `test/` suites run in the unit-test stage, and the
+  # network-bound `examples/main/int-test` has its own job in coverage.yml.
   integration-test:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest # Docker is preinstalled, which testcontainers needs
@@ -25,7 +26,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - name: Install packages
         run: yarn --immutable
       # also generates the client of the int-test package - offline, from the committed metadata

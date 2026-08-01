@@ -13,3 +13,8 @@ coverage
 
 CHANGELOG.md
 .gitignore
+
+# Committed $metadata snapshots: byte-faithful copies of what the server emits.
+# Reformatting them would make them stop being a snapshot.
+int-test/*/resource/
+examples/*/resource/

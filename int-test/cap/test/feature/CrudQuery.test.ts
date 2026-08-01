@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "vitest";
-import { EditableBooks } from "../../src-generated/library/LibraryModel";
-import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants";
+import { EditableBooks } from "../../src-generated/library/LibraryModel.js";
+import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
  * System query options on **write** requests: `create`, `add`, `update` and `patch`.

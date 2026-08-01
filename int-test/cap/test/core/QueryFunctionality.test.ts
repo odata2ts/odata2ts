@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants";
+import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
  * The system query options on read requests. Their use on write requests (create / add / update /

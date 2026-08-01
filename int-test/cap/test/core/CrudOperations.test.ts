@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { EditableBooks } from "../../src-generated/library/LibraryModel";
-import { BOOK_DER_PROZESS, LIBRARY, UNKNOWN_ID } from "../LibraryTestConstants";
+import { EditableBooks } from "../../src-generated/library/LibraryModel.js";
+import { BOOK_DER_PROZESS, LIBRARY, UNKNOWN_ID } from "../LibraryTestConstants.js";
 
 /**
  * The plain CRUD surface. Reading here means reading *without* any system query option - those are

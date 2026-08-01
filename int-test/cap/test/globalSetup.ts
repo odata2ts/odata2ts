@@ -1,5 +1,5 @@
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
-import type { GlobalSetupContext } from "vitest/node";
+import type { TestProject } from "vitest/node";
 
 /**
  * Provisions the "Library" OData server for the integration tests and tears it down afterwards.
@@ -20,10 +20,10 @@ const IMAGE = process.env.CAP_SERVER_IMAGE ?? "ghcr.io/odata2ts/test-server-cap:
 const SERVICE_PATH = "/odata/v4/library";
 const CONTAINER_PORT = 4004;
 
-export default async function setup({ provide }: GlobalSetupContext) {
+export default async function setup(project: TestProject) {
   const externalBaseUrl = process.env.LIBRARY_BASE_URL;
   if (externalBaseUrl) {
-    provide("libraryBaseUrl", externalBaseUrl.replace(/\/+$/, ""));
+    project.provide("libraryBaseUrl", externalBaseUrl.replace(/\/+$/, ""));
     return () => {};
   }
 
@@ -43,7 +43,7 @@ export default async function setup({ provide }: GlobalSetupContext) {
     );
   }
 
-  provide("libraryBaseUrl", `http://localhost:${container.getMappedPort(CONTAINER_PORT)}${SERVICE_PATH}`);
+  project.provide("libraryBaseUrl", `http://localhost:${container.getMappedPort(CONTAINER_PORT)}${SERVICE_PATH}`);
 
   return async () => {
     await container.stop();

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants";
+import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
  * Functions and actions - unbound (via the entity container) as well as bound to an entity.

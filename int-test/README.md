@@ -5,19 +5,31 @@ starts and stops itself. It is the third workspace group, next to `packages/` an
 
 Each group has its own purpose and its own way of being run:
 
-| group        | what                                              | run by                                                         |
-| ------------ | ------------------------------------------------- | -------------------------------------------------------------- |
-| `packages/*` | the library, unit tests with a mocked HTTP client | `yarn test`, `yarn coverage`, `Unit Tests With Coverage` in CI |
-| `int-test/*` | real servers, started as Docker containers        | `yarn int-test`, `Integration Tests` in CI                     |
-| `examples/*` | showcases of generator configuration              | **on demand only** - never part of a pipeline                  |
+| group        | what                                                       | run by                                                         |
+| ------------ | ---------------------------------------------------------- | -------------------------------------------------------------- |
+| `packages/*` | the library, unit tests with a mocked HTTP client          | `yarn test`, `yarn coverage`, `Unit Tests With Coverage` in CI |
+| `examples/*` | generator showcases; `test/` runs against generated output | `yarn test`, `yarn coverage`, `Unit Tests With Coverage` in CI |
+| `int-test/*` | real servers, started as Docker containers                 | `yarn int-test`, `Container Integration Tests` in CI           |
 
-`examples/*` have `test` / `int-test` scripts of their own, but neither the root scripts nor CI ever
-invoke them; run them explicitly when you want them, e.g.
-`yarn workspace @odata2ts/example-main int-test`.
+`examples/*` deliberately stay in the main run. Their `test/` suites exercise the artifacts the
+generator really produced, and that is the only place a generator regression surfaces - a fixture-based
+test inside `packages/*` compares the generator against itself and cannot catch one. They are
+mock-based and deterministic, so they cost little.
 
-The groups are selected by path, not by package name: `yarn test` uses `--include 'packages/*'` and
-`yarn int-test` uses `--include 'int-test/*'`. `vitest.workspace.ts` likewise only lists `packages/*`,
-so the coverage run cannot even see the other two groups.
+Two exceptions run outside that main stage, both because they depend on something external:
+
+- `examples/main/int-test/**` talks to the live services at `services.odata.org`. It is excluded in
+  `vite.config.ts` and has its own `Integration Tests` job.
+- `examples/ts-floor-check` needs a separately installed TypeScript version and has its own job too.
+
+The groups are selected by path, not by package name: `yarn test` uses
+`--include 'packages/*' --include 'examples/*'`, `yarn int-test` uses `--include 'int-test/*'`.
+
+For the coverage run the mechanism is a different one, and it is worth knowing: **there is no
+`vitest.workspace.ts`** — Vitest 4 removed the workspace concept, and a file of that name is silently
+ignored. `vitest run --coverage` walks the whole repository from the root `vite.config.ts`, so keeping
+`int-test/**` out of it is done by the `exclude` there. Without that entry the coverage run would try to
+start Docker containers.
 
 ## The servers
 
