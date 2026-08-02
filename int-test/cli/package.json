@@ -1,5 +1,5 @@
 {
-  "name": "@odata2ts/example-cli-test",
+  "name": "@odata2ts/cli",
   "version": "0.1.0",
   "private": true,
   "description": "End-to-end smoke test of the compiled odata2ts CLI binary",
@@ -9,7 +9,7 @@
   "type": "module",
   "scripts": {
     "clean": "rimraf build",
-    "int-test": "vitest run",
+    "test": "vitest run",
     "test-compile": "tsc"
   },
   "devDependencies": {

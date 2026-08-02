@@ -486,6 +486,14 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@odata2ts/cli@workspace:int-test/cli":
+  version: 0.0.0-use.local
+  resolution: "@odata2ts/cli@workspace:int-test/cli"
+  dependencies:
+    "@odata2ts/odata2ts": "workspace:^"
+  languageName: unknown
+  linkType: soft
+
 "@odata2ts/converter-api@npm:^0.2.1":
   version: 0.2.1
   resolution: "@odata2ts/converter-api@npm:0.2.1"
@@ -566,14 +574,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/example-cli-test@workspace:examples/cli-test":
-  version: 0.0.0-use.local
-  resolution: "@odata2ts/example-cli-test@workspace:examples/cli-test"
-  dependencies:
-    "@odata2ts/odata2ts": "workspace:^"
-  languageName: unknown
-  linkType: soft
-
 "@odata2ts/example-main@workspace:examples/main":
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-main@workspace:examples/main"
@@ -593,9 +593,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/example-ts-floor-check@workspace:examples/ts-floor-check":
+"@odata2ts/example-ts-floor-check@workspace:int-test/ts-floor-check":
   version: 0.0.0-use.local
-  resolution: "@odata2ts/example-ts-floor-check@workspace:examples/ts-floor-check"
+  resolution: "@odata2ts/example-ts-floor-check@workspace:int-test/ts-floor-check"
   dependencies:
     "@odata2ts/odata-service": "workspace:^"
     "@odata2ts/odata2ts": "workspace:^"
