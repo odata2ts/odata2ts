@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { expectODataError } from "../expectODataError.js";
 import { BASE_URL, BOOK_DER_PROZESS, BRANCH_CENTRAL, BRANCH_SUBURBAN, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
@@ -78,7 +79,9 @@ describe("ASP.NET Library: binding existing entities", () => {
     const patched = await copy.patch({ "Location@odata.bind": null }).execute();
     expect(patched.status).toBe(204);
 
-    await expect(copy.Location().query().execute()).rejects.toThrow();
+    // the link is gone, so the navigation target is not there any more - and this server sends no error
+    // body with a 404, which is why the message is the client's own fallback
+    await expectODataError(copy.Location().query().execute(), { status: 404, message: /No error message/ });
   });
 
   test("binding a navigation property backed by a referential constraint", async () => {

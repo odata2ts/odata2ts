@@ -38,11 +38,26 @@ Test files follow the same scheme in every package, one concern per file:
 | `core/CrudOperations.test.ts`     | create, read, update, patch, delete - reading **without** system query options |
 | `core/QueryFunctionality.test.ts` | the system query options on read requests                                      |
 | `core/Operations.test.ts`         | functions and actions, bound and unbound                                       |
+| `core/Singleton.test.ts`          | the singleton: addressed by name, read and written like an entity              |
 | `feature/CrudQuery.test.ts`       | system query options on `create`/`add`/`update`/`patch`                        |
 | `feature/Blobs.test.ts`           | binary content: stream properties and media entities                           |
+| `feature/Subtypes.test.ts`        | type cast segment and derived types' properties (ASP.NET only - CAP is flat)   |
 
 Where a server does not support something, the test asserts the rejection rather than being dropped -
 that keeps the limitation visible instead of silently untested.
+
+Two rules hold for every test here:
+
+- **Errors are asserted with status _and_ message**, through `test/expectODataError.ts`. A bare
+  `rejects.toThrow()` also passes for a typo in the URL or a 500 where a 404 was meant. The messages
+  differ per server and are pinned as they arrive - ASP.NET sends no body with a 404, so the client's
+  fallback text shows, while CAP sends `"Not Found"`.
+- **Response structures are typed**, via `expectTypeOf`. That is the only place a regression in the
+  generated typing surfaces, and it is checked by `yarn test-compile` (`tsc`), not at runtime. Note that
+  `expectTypeOf` evaluates its argument, so pass the method (`cmd.execute`), never a live call.
+
+These suites, not `examples/main`, are where important integration coverage belongs: everything in
+`examples/main` is optional (see the repository's CLAUDE.md).
 
 ## Adding another test server
 

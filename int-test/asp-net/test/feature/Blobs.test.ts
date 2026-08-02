@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { AUDIOBOOK, BASE_URL, EBOOK, LIBRARY } from "../LibraryTestConstants.js";
+import { expectODataError } from "../expectODataError.js";
+import { AUDIOBOOK, BASE_URL, EBOOK, LIBRARY, UNKNOWN_ID } from "../LibraryTestConstants.js";
 
 /**
  * Binary content - odata2ts issue #149 - against a server that models both shapes OData offers.
@@ -57,10 +58,33 @@ describe("ASP.NET Library: binary content", () => {
       expect(read.data?.type).toBe("audio/ogg");
     });
 
-    test("deleting a stream property is not supported here", async () => {
-      // The server serves GET and PUT on a stream property but refuses DELETE with 405 - kept as an
-      // assertion rather than dropped, so the limitation stays visible instead of silently untested.
-      await expect(audiobook().Sample().deleteBlob().execute()).rejects.toThrow();
+    test("deleting the content leaves the entity in place", async () => {
+      await audiobook()
+        .Sample()
+        .updateBlob(new Blob(["to be removed"], { type: "audio/mpeg" }))
+        .execute();
+
+      const deleted = await audiobook().Sample().deleteBlob().execute();
+      expect(deleted.status).toBe(204);
+
+      // 204 and no blob, *not* 404: the property exists as part of the entity, its content does not
+      const read = await audiobook().Sample().getBlob().execute();
+      expect(read.status).toBe(204);
+      expect(read.data).toBeUndefined();
+
+      const entity = await LIBRARY.Media(AUDIOBOOK).query().execute();
+      expect(entity.data.Title).toBeDefined();
+    });
+
+    test("deleting is idempotent, and 404 only for an unknown entity", async () => {
+      // The distinction the server has to keep: an empty stream is a state, a missing audiobook is not.
+      const again = await audiobook().Sample().deleteBlob().execute();
+      expect(again.status).toBe(204);
+
+      await expectODataError(LIBRARY.Media(UNKNOWN_ID).asAudiobookService().Sample().deleteBlob().execute(), {
+        status: 404,
+        message: /No error message/,
+      });
     });
   });
 

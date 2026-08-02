@@ -37,9 +37,8 @@ broken one. The file also covers the case the feature exists for: a query whose 
 and `AudiobookChapter` carry their content at `$value`, while `Audiobook.Sample` is a named stream
 property. The two are addressed differently, and the file pins the URLs because getting it wrong yields a
 404 rather than a wrong payload: `Sample` is declared on the subtype and exists **only** behind the type
-cast, whereas `$value` addresses the entity itself and must **not** carry the cast segment. `DELETE` on a
-stream property is refused here with 405 - asserted, not skipped. CAP models none of this as a media
-entity, which is why the same feature looks different in `int-test/cap`.
+cast, whereas `$value` addresses the entity itself and must **not** carry the cast segment. CAP models
+none of this as a media entity, which is why the same feature looks different in `int-test/cap`.
 
 **Operation overloads.** The reference model carries two overload pairs, and generating this client is
 what surfaced odata2ts#423 - both overloads produced the same Q-object name, so the generated file did

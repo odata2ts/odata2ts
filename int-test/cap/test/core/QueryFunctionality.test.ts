@@ -78,4 +78,65 @@ describe("CAP Library: query functionality", () => {
     expect(result.data.Publisher).toBeDefined();
     expect(result.data.Publisher?.Id).toBeDefined();
   });
+  test("$filter with in", async () => {
+    const result = await LIBRARY.Books()
+      .query((builder, qBook) => {
+        builder.filter(qBook.Language.in("de", "en"));
+      })
+      .execute();
+
+    expect(result.status).toBe(200);
+    expect(result.data.value.length).toBeGreaterThan(0);
+    expect(result.data.value.every((book) => book.Language === "de" || book.Language === "en")).toBe(true);
+  });
+
+  test("$filter with any on a navigation collection", async () => {
+    const result = await LIBRARY.Books()
+      .query((builder, qBook) => {
+        builder.select("Title").filter(qBook.Copies.any((qCopy) => qCopy.IsLoanable.eq(true)));
+      })
+      .execute();
+
+    expect(result.status).toBe(200);
+
+    const expanded = await LIBRARY.Books()
+      .query((builder) => builder.select("Title").expand("Copies"))
+      .execute();
+    const expectedTitles = expanded.data.value
+      .filter((book) => book.Copies?.some((copy) => copy.IsLoanable))
+      .map((book) => book.Title)
+      .sort();
+
+    expect(result.data.value.map((book) => book.Title).sort()).toStrictEqual(expectedTitles);
+  });
+
+  /**
+   * Skipped because it **takes the server down**, not because odata2ts gets it wrong: a lambda over a
+   * *primitive* collection - `$filter=Keywords/all(a:a ne 'X')`, which is valid OData and exactly what the
+   * query builder renders - makes `@sap/cds` 10.0.3 throw an uncaught TypeError in its OData parser
+   * (`libx/odata/parse/afterburner.js`, `_validateXpr`: "Cannot read properties of undefined (reading
+   * 'id')") and the process exits. All test files share one server, so running it would fail everything
+   * after it. Works on ASP.NET, see the same test there.
+   */
+  test.skip("$filter with all on a primitive collection", async () => {
+    const result = await LIBRARY.Books()
+      .query((builder, qBook) => {
+        builder.select("Title").filter(qBook.Keywords.all((keyword) => keyword.it.ne("Nonexistent")));
+      })
+      .execute();
+
+    expect(result.status).toBe(200);
+  });
+
+  test("an invalid query option is silently ignored here", async () => {
+    // A negative $top is refused with 400 by ASP.NET; CAP accepts the request and answers with the
+    // unrestricted set. Asserted because the difference matters to a client: there is no error to react
+    // to, and a caller who trusts $top would page wrongly without noticing.
+    const result = await LIBRARY.Books()
+      .query((builder) => builder.top(-1))
+      .execute();
+
+    expect(result.status).toBe(200);
+    expect(result.data.value.length).toBeGreaterThan(0);
+  });
 });
