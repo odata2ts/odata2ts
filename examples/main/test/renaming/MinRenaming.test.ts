@@ -194,7 +194,11 @@ describe("Testing Generation with min renaming options", () => {
 
     expect(odataClient.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(odataClient.lastOperation).toBe("PUT");
-    expect(odataClient.lastData).toStrictEqual([{ Address: "TestAddress 1" }, { Address: "test 2" }]);
+    expect(odataClient.lastData).toStrictEqual({
+      // a collection property update is wrapped, per OData JSON format - sending the bare array made
+      // servers accept the request and quietly empty the collection
+      value: [{ Address: "TestAddress 1" }, { Address: "test 2" }],
+    });
   });
 
   test("complex collection: delete", async () => {
