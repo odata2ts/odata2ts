@@ -7,8 +7,11 @@ import {
   ODataServiceOptionsInternal,
   StreamServiceV4,
 } from "@odata2ts/odata-service";
+// @ts-ignore
 import type { QAudiobook } from "./QTester.js";
+// @ts-ignore
 import { qAudiobook, QAudiobookId } from "./QTester.js";
+// @ts-ignore
 import type { Audiobook, AudiobookId, EditableAudiobook } from "./TesterModel.js";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {

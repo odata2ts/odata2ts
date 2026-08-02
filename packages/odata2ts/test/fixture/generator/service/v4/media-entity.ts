@@ -6,8 +6,11 @@ import {
   ODataService,
   ODataServiceOptionsInternal,
 } from "@odata2ts/odata-service";
+// @ts-ignore
 import type { QEBook } from "./QTester.js";
+// @ts-ignore
 import { qEBook, QEBookId } from "./QTester.js";
+// @ts-ignore
 import type { EBook, EBookId, EditableEBook } from "./TesterModel.js";
 
 export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
