@@ -10,20 +10,53 @@ import { LIBRARY } from "../LibraryTestConstants.js";
  * design and not a trait of this server - a composition is a contained-in relationship, where operations
  * cascade, while an association is a plain reference that does not.
  *
- * What the three tests pin is how that rule *presents itself*, which differs by cardinality:
+ * What these tests pin is how that rule *presents itself*, and the decisive pairing is the middle two:
+ * the cardinality is the same, only the relationship kind differs.
  *
- * - **composition** (`Audiobooks/Chapters`): the children are created and linked
+ * - **to-many composition** (`Audiobooks/Chapters`): the children are created and linked
+ * - **to-one composition** (`Members/IdDocument`): the child is created — nested non-key properties and
+ *   all
+ * - **to-one association** (`Copies/Location`): the very same shape is a **400**. The foreign key sits
+ *   on this entity, so CAP can act, but only on a nested object containing nothing but the key
  * - **to-many association** (`Books/Copies`): 201, and the nested data is dropped without a word. The
  *   payload is not even validated - a property that exists nowhere passes just as quietly
- * - **to-one association** (`Copies/Location`): the foreign key sits on this entity, so CAP can act -
- *   but only on a nested object containing nothing but the key. Anything else is a 400
  *
- * The two association cases are the reason this file is worth its length: the same generated property
- * silently does nothing in one case and fails loudly in the other, and ASP.NET creates the entity in
- * both. `enableDeepInsertProps` therefore says what the *protocol* allows, not what a given server does.
+ * The association cases are why this file is worth its length: the same generated property creates an
+ * entity, silently does nothing, or fails loudly, depending on something `$metadata` does not carry -
+ * and ASP.NET creates the entity in all of them. `enableDeepInsertProps` therefore says what the
+ * *protocol* allows, not what a given server does with it.
  */
 describe("CAP Library: deep insert", () => {
-  test("a composition is created along with the entity", async () => {
+  test("a to-one composition is created along with the entity", async () => {
+    // The counterpart to the to-one *association* below, and the reason `Member.IdDocument` is modelled
+    // as a composition on that server: an identity document belongs to exactly one member. Nothing in
+    // the metadata distinguishes the two - the payload here is what the association refuses with 400.
+    const uploadedAt = "2026-08-02T10:00:00Z";
+    const name = `Deep Insert Member ${Date.now()}`;
+
+    const created = await LIBRARY.Members()
+      .create({
+        Name: name,
+        // no key: CAP generates it, so it is no part of the editable model
+        IdDocument: { UploadedAt: uploadedAt },
+      })
+      .execute();
+
+    expect(created.status).toBe(201);
+
+    // Looked up by name rather than by `created.data.Id`: for an entity whose key is a *generated
+    // integer* CAP answers the create with an entirely different row (the first one), so the response
+    // does not describe what was just created. Entities with a UUID key answer correctly.
+    const read = await LIBRARY.Members()
+      .query((builder, qMember) => builder.filter(qMember.Name.eq(name)).expanding("IdDocument", (doc) => doc))
+      .execute();
+
+    expect(read.data.value).toHaveLength(1);
+    expect(read.data.value[0].IdDocument).toBeDefined();
+    expect(read.data.value[0].IdDocument?.UploadedAt).toContain("2026-08-02T10:00:00");
+  });
+
+  test("a to-many composition is created along with the entity", async () => {
     // CAP does not generate this key, unlike the ones of the entity sets themselves
     const chapterId = Math.floor(Math.random() * 1_000_000) + 900_000;
 
