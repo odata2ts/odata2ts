@@ -1,7 +1,13 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataVersionV4 } from "@odata2ts/odata-core";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
-import { BlobGetRequestCmd, BlobUpdateRequestCmd, UrlRequestCmd } from "../request";
+import {
+  BlobGetRequestCmd,
+  BlobUpdateRequestCmd,
+  StreamGetRequestCmd,
+  StreamUpdateRequestCmd,
+  UrlRequestCmd,
+} from "../request";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
 
 const DEFAULT_MIME_TYPE = "application/octet-stream";
@@ -51,6 +57,38 @@ export class StreamServiceV4<out ClientType extends ODataHttpClient, V extends O
     const { client, path } = this.__base;
 
     return new BlobUpdateRequestCmd<ClientType>(client, path, data, mimeType || data.type || DEFAULT_MIME_TYPE);
+  }
+
+  /**
+   * Read the binary content as a stream, so that it does not have to be held in memory as a whole.
+   *
+   * Same request as {@link getBlob}, only the response is not buffered. Reading a stream requires the
+   * fetch API, so the axios and the jquery client refuse this call - use `getBlob` with those.
+   *
+   * An entity which exists but has no content yet answers 204, so `data` is `undefined`.
+   */
+  public getStream() {
+    const { client, path } = this.__base;
+
+    return new StreamGetRequestCmd<ClientType>(client, path);
+  }
+
+  /**
+   * Replace the binary content from a stream, so that it does not have to be held in memory as a whole.
+   *
+   * Same request as {@link updateBlob}, only the body is streamed. Sending a stream requires the fetch
+   * API, so the axios and the jquery client refuse this call - use `updateBlob` with those.
+   *
+   * Unlike a blob a stream carries no MIME type of its own, hence the fallback to
+   * `application/octet-stream` when none is given.
+   *
+   * @param data the binary content
+   * @param mimeType the content's MIME type
+   */
+  public updateStream(data: ReadableStream, mimeType?: string) {
+    const { client, path } = this.__base;
+
+    return new StreamUpdateRequestCmd<ClientType>(client, path, data, mimeType || DEFAULT_MIME_TYPE);
   }
 
   /**

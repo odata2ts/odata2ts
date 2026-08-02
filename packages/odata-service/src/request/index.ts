@@ -8,6 +8,8 @@ export * from "./UrlBuilderRequestCmdV2";
 export * from "./ComposableUrlRequestCmd";
 export * from "./BlobGetRequestCmd";
 export * from "./BlobUpdateRequestCmd";
+export * from "./StreamGetRequestCmd";
+export * from "./StreamUpdateRequestCmd";
 
 export * from "./converter/RequestConverter";
 export * from "./converter/RequestConverterChain";

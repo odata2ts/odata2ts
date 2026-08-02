@@ -132,7 +132,15 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
     requestConfig?: MockRequestConfig,
     additionalHeaders?: Record<string, string>,
   ): ODataResponse<ReadableStream> {
-    throw new Error("Operation getBlob not supported!");
+    this.lastUrl = url;
+    this.lastData = undefined;
+    this.lastOperation = "GET";
+    this.lastMimeType = undefined;
+    this.lastRequestConfig = requestConfig || undefined;
+    this.additionalHeaders = additionalHeaders;
+
+    // @ts-ignore
+    return this.respond();
   }
 
   createBlob(
@@ -143,6 +151,34 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
     additionalHeaders?: Record<string, string>,
   ): ODataResponse<void | Blob> {
     throw new Error("Operation createBlob not supported!");
+  }
+
+  createStream(
+    url: string,
+    data: ReadableStream,
+    mimeType: string,
+    requestConfig?: MockRequestConfig,
+    additionalHeaders?: Record<string, string>,
+  ): ODataResponse<void | ReadableStream> {
+    throw new Error("Operation createStream not supported!");
+  }
+
+  updateStream(
+    url: string,
+    data: ReadableStream,
+    mimeType: string,
+    requestConfig?: MockRequestConfig,
+    additionalHeaders?: Record<string, string>,
+  ): ODataResponse<void | ReadableStream> {
+    this.lastUrl = url;
+    this.lastData = data;
+    this.lastOperation = "PUT";
+    this.lastMimeType = mimeType;
+    this.lastRequestConfig = requestConfig || undefined;
+    this.additionalHeaders = additionalHeaders;
+
+    // @ts-ignore
+    return this.respond();
   }
 
   updateBlob(
@@ -182,6 +218,13 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
    * Binary responses are not wrapped in any way - a blob is handed over as it came.
    */
   setBlobResponse(data: Blob) {
+    this.responseData = data;
+  }
+
+  /**
+   * Same for a stream: whatever the server sent is handed over as it came.
+   */
+  setStreamResponse(data: ReadableStream) {
     this.responseData = data;
   }
 
