@@ -43,6 +43,8 @@ export type GeneratorFunctionOptions = Pick<
   | "enableNativeInOperator"
   | "odataVersionV4"
   | "enableBindingProps"
+  | "enableDeepInsertProps"
+  | "v2EditableModelsWithExtraResultsWrapping"
 >;
 
 export type EntityBasedGeneratorFunction = (

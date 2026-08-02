@@ -307,6 +307,82 @@ describe("Model Generator Tests V4", () => {
     });
   });
 
+  function addRelatedEntities() {
+    odataBuilder
+      .addEntityType("Author", undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.Int32).addProp("name", ODataTypesV4.Boolean, true),
+      )
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Int32)
+          .addProp("author", withNs("Author"), false)
+          .addProp("altAuthor", withNs("Author"), true)
+          .addProp("relatedAuthors", `Collection(${withNs("Author")})`),
+      );
+  }
+
+  test(`${TEST_SUITE_NAME}: deep insert props`, async () => {
+    // given entities related to each other
+    addRelatedEntities();
+
+    // when opting into the deep insert props
+    // then the navigation properties show up on the editable model, typed as the editable model of the
+    // related entity - which is what travels within the payload of a deep insert or deep update
+    await generateAndCompare("entity-relationships-deep-insert.ts", {
+      enableDeepInsertProps: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: deep insert and binding props side by side (4.0)`, async () => {
+    // given entities related to each other
+    addRelatedEntities();
+
+    // when opting into both
+    // then both show up separately, since 4.0 spells a binding with a name of its own
+    await generateAndCompare("entity-relationships-deep-insert-binding.ts", {
+      enableDeepInsertProps: true,
+      enableBindingProps: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: deep insert and binding props share the property in 4.01`, async () => {
+    // given entities related to each other
+    addRelatedEntities();
+
+    // when opting into both for 4.01
+    // then the navigation property accepts either shape: a new entity or a reference to an existing one,
+    // because 4.01 addresses a binding by the very name of the navigation property
+    await generateAndCompare("entity-relationships-deep-insert-binding-v401.ts", {
+      enableDeepInsertProps: true,
+      enableBindingProps: true,
+      odataVersionV4: "4.01",
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: no extra results wrapping for deep insert props in V4`, async () => {
+    // given entities related to each other
+    addRelatedEntities();
+
+    // when the V2 option is set on a V4 service
+    // then it has no effect at all - the wrapping is a V2 speciality
+    await generateAndCompare("entity-relationships-deep-insert.ts", {
+      enableDeepInsertProps: true,
+      v2EditableModelsWithExtraResultsWrapping: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
   test(`${TEST_SUITE_NAME}: stream property is no part of any model`, async () => {
     // given an entity with a stream property
     odataBuilder.addEntityType("Audiobook", undefined, (builder) =>

@@ -1,5 +1,4 @@
 import deepmerge from "deepmerge";
-
 import { getDefaultConfig, getMinimalConfig } from "./defaultConfig.js";
 import { CliOptions, ConfigFileOptions, Modes, RunOptions } from "./OptionModel.js";
 
@@ -28,7 +27,7 @@ import { CliOptions, ConfigFileOptions, Modes, RunOptions } from "./OptionModel.
  */
 export function evaluateConfigOptions(
   cliOpts: CliOptions,
-  configOpts: ConfigFileOptions | undefined
+  configOpts: ConfigFileOptions | undefined,
 ): Array<RunOptions> {
   const defaultConfig = configOpts?.naming?.minimalDefaults ? getMinimalConfig() : getDefaultConfig();
   // No config file
@@ -47,7 +46,7 @@ export function evaluateConfigOptions(
   if ((source && output) || !confServices) {
     if (!source || !output) {
       throw new Error(
-        "No services were configured in config file, so options --source and --output must be specified!"
+        "No services were configured in config file, so options --source and --output must be specified!",
       );
     }
     const merged = deepmerge.all([defaultConfig, confBaseOpts, cliOpts]) as RunOptions;
@@ -79,9 +78,10 @@ function safeGuardOptions(options: RunOptions): RunOptions {
     options.skipIdModels = false;
     options.skipOperations = false;
   }
-  // special option which is only valid for model generation
+  // special options which are only valid for model generation
   if (options.mode !== Modes.models) {
     options.v2ModelsWithExtraResultsWrapping = false;
+    options.v2EditableModelsWithExtraResultsWrapping = false;
   }
 
   return options;

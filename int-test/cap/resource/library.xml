@@ -281,6 +281,7 @@
           <OnDelete Action="Cascade"/>
         </NavigationProperty>
         <NavigationProperty Name="IdDocument" Type="Library.Service.IdDocuments">
+          <OnDelete Action="Cascade"/>
           <ReferentialConstraint Property="IdDocument_Id" ReferencedProperty="Id"/>
         </NavigationProperty>
         <Property Name="IdDocument_Id" Type="Edm.Guid"/>
