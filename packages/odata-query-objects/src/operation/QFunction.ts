@@ -42,7 +42,7 @@ function compileQueryParams(params: FunctionParams | undefined, notEncoded: bool
  *
  * This includes handling of entity id paths (same format as V4 functions).
  */
-export abstract class QFunction<ParamModel, ResponseStructure> {
+export abstract class QFunction<ParamModel, ResponseStructure = undefined> {
   public constructor(protected name: string) {}
 
   public abstract isV2(): boolean;

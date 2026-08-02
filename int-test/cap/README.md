@@ -1,7 +1,9 @@
 # Integration Tests: SAP CAP
 
 Runs odata2ts against [`odata2ts/test-server-cap`](https://github.com/odata2ts/test-server-cap), the
-SAP CAP implementation of the standardized "Library" OData V4 feature test model.
+SAP CAP implementation of the standardized "Library" OData V4 feature test model - **twice**: once over
+OData V4, and once over the OData **V2** face that the same server presents through
+[`@cap-js-community/odata-v2-adapter`](https://github.com/cap-js-community/odata-v2-adapter).
 
 See [../README.md](../README.md) for how this group fits into the repository as a whole and for the
 test-file scheme used here.
@@ -33,7 +35,11 @@ yarn int-test:cap
   so `test/core/Operations.test.ts` fails with 501 against such a server while the other files pass.
 
 Because all test files share one server instance, `fileParallelism` is off - writes in one file must
-not race reads in another.
+not race reads in another. That applies across the two protocol versions as well: `test/v2/` writes to
+the same rows as `test/core/`, so both restore the seed values they touch.
+
+The V2 base URL is not configured anywhere. `globalSetup` derives it from the V4 one by swapping the
+version segment, because that is what the adapter does - there is one server, on one port.
 
 ## Generation
 
@@ -42,6 +48,10 @@ actual `$metadata`. odata2ts is deliberately tested against the metadata CAP rea
 the aspect-based media hierarchy, alternate keys that exist only in the metadata - rather than against
 the idealized reference model. Refresh the snapshot from the running server (or via the server repo's
 `npm run metadata`) whenever the model changes.
+
+A second client is generated the same way from `resource/library-v2.xml`, the snapshot of
+`/odata/v2/library/$metadata`. It is not a second model: the adapter translates the one service on the
+fly, so that file is the translation, and testing against it is what makes the translation visible.
 
 Assertions use the fixed seed data from `db/data/*.csv` in the server repo.
 
@@ -69,3 +79,33 @@ limitation stays visible:
   with no `$value` and no type cast segment - the same feature reaches the ASP.NET server as
   `…/Media(<id>)/$value` and `…/Media(<id>)/Library.Catalog.Audiobook/Sample`. CAP also answers with the
   MIME type declared in its model rather than the uploaded one, where ASP.NET returns what it was given.
+
+## The V2 suite
+
+`test/v2/` mirrors the V4 folders file by file, against the same server through the V2 adapter. It exists
+because V2 is a different client in odata2ts - other services, other response models, other q-object paths -
+and until now it met no running server anywhere in this repository.
+
+Everything the adapter does to the _model_ is documented on the server side, in
+[FEATURE-COVERAGE-V2.md](https://github.com/odata2ts/test-server-cap/blob/main/FEATURE-COVERAGE-V2.md).
+What belongs here is what the **client** does with it:
+
+- **`Edm.Byte` and `Edm.SByte` are typed as `string` but arrive as numbers.** odata2ts groups them with the
+  string-serialised numeric types in `DataModelDigestionV2.mapODataType`, while V2's JSON format puts them
+  among the plain numbers - so `book.AgeRating === "16"` is `false` although both sides are typed `string`.
+  The other string-typed numbers (`Int64`, `Decimal`, `Double`, `Single`) are mapped correctly.
+  Pinned in `test/v2/feature/DataTypes.test.ts`.
+- **There is no binary content API in V2.** `StreamServiceV4` and `MediaEntityServiceV4` have no V2
+  counterpart, and the V2 generator emits neither. The adapter exposes the content properly, as media link
+  entries with `$value` and `media_src` - so this is the one feature where the server is ahead of the
+  client. `test/v2/feature/Blobs.test.ts` asserts the gap from both sides, with the only raw `fetch` calls
+  in this package, since there is no generated API to call.
+- **No ETag handling.** Nothing reads `__metadata.etag`, nothing sends `If-Match`, so `Copies` is
+  create-only - as it is over V4, except that the V2 metadata actually declares the token.
+- **A write answers with a body the typing does not admit.** V2 has no `Prefer: return=representation` and
+  no `<true>` switch, so `update`/`patch` are typed `HttpResponseModel<undefined>`; this server answers 200
+  with the full entity. The data is there and unreachable without a cast.
+- **`QFunctionV2`/`QFunctionV4` needed a default for `ResponseStructure`.** A void V2 operation is a
+  `FunctionImport` with `m:HttpMethod="POST"` - V2 has no separate action - and the generator then emits
+  `QFunctionV2<Params>` with one type argument. Both classes required two, so the generated code did not
+  compile. `QAction` already had the default; the function classes now do too.

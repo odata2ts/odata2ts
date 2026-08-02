@@ -15,16 +15,28 @@ import type { TestProject } from "vitest/node";
  *
  * The image is language-agnostic on purpose: future servers (ASP.NET, Java, ...) implement the same
  * standardized model and only differ in the image name, so this file is the single point that changes.
+ *
+ * The same server answers OData **V2** as well, on a path of its own: `@cap-js-community/odata-v2-adapter`
+ * runs as a CAP plugin in front of the V4 endpoint and translates both ways. Its URL is therefore derived
+ * from the V4 one rather than configured separately - there is only ever one server, see test/v2/.
  */
 const CUSTOM_IMAGE = process.env.CAP_SERVER_IMAGE;
 const IMAGE = CUSTOM_IMAGE ?? "ghcr.io/odata2ts/test-server-cap:latest";
 const SERVICE_PATH = "/odata/v4/library";
+const SERVICE_PATH_V2 = "/odata/v2/library";
 const CONTAINER_PORT = 4004;
+
+/** The V2 endpoint of the very same service - the adapter mirrors the path, only the version segment differs. */
+function toV2(baseUrl: string) {
+  return baseUrl.replace(/\/v4\//, "/v2/");
+}
 
 export default async function setup(project: TestProject) {
   const externalBaseUrl = process.env.LIBRARY_BASE_URL;
   if (externalBaseUrl) {
-    project.provide("libraryBaseUrl", externalBaseUrl.replace(/\/+$/, ""));
+    const trimmed = externalBaseUrl.replace(/\/+$/, "");
+    project.provide("libraryBaseUrl", trimmed);
+    project.provide("libraryV2BaseUrl", toV2(trimmed));
     return () => {};
   }
 
@@ -53,7 +65,9 @@ export default async function setup(project: TestProject) {
     );
   }
 
-  project.provide("libraryBaseUrl", `http://localhost:${container.getMappedPort(CONTAINER_PORT)}${SERVICE_PATH}`);
+  const host = `http://localhost:${container.getMappedPort(CONTAINER_PORT)}`;
+  project.provide("libraryBaseUrl", `${host}${SERVICE_PATH}`);
+  project.provide("libraryV2BaseUrl", `${host}${SERVICE_PATH_V2}`);
 
   return async () => {
     await container.stop();
