@@ -1,4 +1,4 @@
-import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
+import { GenericContainer, PullPolicy, StartedTestContainer, Wait } from "testcontainers";
 import type { TestProject } from "vitest/node";
 
 /**
@@ -16,7 +16,8 @@ import type { TestProject } from "vitest/node";
  * The image is language-agnostic on purpose: future servers (ASP.NET, Java, ...) implement the same
  * standardized model and only differ in the image name, so this file is the single point that changes.
  */
-const IMAGE = process.env.CAP_SERVER_IMAGE ?? "ghcr.io/odata2ts/test-server-cap:latest";
+const CUSTOM_IMAGE = process.env.CAP_SERVER_IMAGE;
+const IMAGE = CUSTOM_IMAGE ?? "ghcr.io/odata2ts/test-server-cap:latest";
 const SERVICE_PATH = "/odata/v4/library";
 const CONTAINER_PORT = 4004;
 
@@ -29,10 +30,19 @@ export default async function setup(project: TestProject) {
 
   let container: StartedTestContainer;
   try {
-    container = await new GenericContainer(IMAGE)
+    let candidate = new GenericContainer(IMAGE)
       .withExposedPorts(CONTAINER_PORT)
-      .withWaitStrategy(Wait.forHttp(`${SERVICE_PATH}/`, CONTAINER_PORT).forStatusCode(200))
-      .start();
+      .withWaitStrategy(Wait.forHttp(`${SERVICE_PATH}/`, CONTAINER_PORT).forStatusCode(200));
+
+    // Testcontainers keeps a locally present image, and `latest` moves - so once the tag has been pulled,
+    // every later run silently tests against that old server. The failures this produces look exactly
+    // like client bugs, which costs far more than the digest check this saves. An image named explicitly
+    // is left alone: that one may well have been built locally and not exist in any registry.
+    if (!CUSTOM_IMAGE) {
+      candidate = candidate.withPullPolicy(PullPolicy.alwaysPull());
+    }
+
+    container = await candidate.start();
   } catch (e) {
     throw new Error(
       `Could not start the test server container "${IMAGE}".\n` +
