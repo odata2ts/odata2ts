@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { afterAll, describe, expect, test } from "vitest";
 import { expectODataError } from "../expectODataError.js";
 import { BASE_URL, BOOK_DER_PROZESS, BRANCH_CENTRAL, BRANCH_SUBURBAN, LIBRARY } from "../LibraryTestConstants.js";
 
@@ -24,6 +24,14 @@ describe("ASP.NET Library: binding existing entities", () => {
   const copyKey = (inventoryNumber: number) => ({
     MediumId: BOOK_DER_PROZESS,
     InventoryNumber: inventoryNumber,
+  });
+
+  // The copies are created here, so they are removed here: a second copy with the same composite key is
+  // refused with 409, which would make a re-run against the same server fail on the first test.
+  afterAll(async () => {
+    for (const inventoryNumber of [BOUND_ON_CREATE, BOUND_TO_CONSTRAINED_NAV, BOUND_WITH_401_NOTATION]) {
+      await LIBRARY.Copies(copyKey(inventoryNumber)).delete().execute();
+    }
   });
 
   test("create with a binding links the entity", async () => {
