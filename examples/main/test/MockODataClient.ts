@@ -147,6 +147,26 @@ export class MockODataClient implements ODataHttpClient<MockRequestConfig> {
     throw new Error("Operation updateBlob not supported!");
   }
 
+  createStream(
+    url: string,
+    data: ReadableStream,
+    mimeType: string,
+    requestConfig?: MockRequestConfig,
+    additionalHeaders?: Record<string, string>,
+  ): ODataResponse<void | ReadableStream> {
+    throw new Error("Operation createStream not supported!");
+  }
+
+  updateStream(
+    url: string,
+    data: ReadableStream,
+    mimeType: string,
+    requestConfig?: MockRequestConfig,
+    additionalHeaders?: Record<string, string>,
+  ): ODataResponse<void | ReadableStream> {
+    throw new Error("Operation updateStream not supported!");
+  }
+
   public setModelResponse(data: any) {
     this.responseData = this.isV2 ? { d: data } : data;
   }

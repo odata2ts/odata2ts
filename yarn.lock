@@ -582,8 +582,8 @@ __metadata:
     "@odata2ts/converter-common": "npm:^0.3.7"
     "@odata2ts/converter-luxon": "npm:^0.2.7"
     "@odata2ts/converter-v2-to-v4": "npm:^0.5.7"
-    "@odata2ts/http-client-axios": "npm:^0.12.2"
-    "@odata2ts/http-client-fetch": "npm:^0.9.2"
+    "@odata2ts/http-client-axios": "npm:^0.14.0"
+    "@odata2ts/http-client-fetch": "npm:^0.11.0"
     "@odata2ts/odata-service": "workspace:^"
     "@odata2ts/odata2ts": "workspace:^"
     "@types/luxon": "npm:^3.7.2"
@@ -602,13 +602,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@odata2ts/http-client-api@npm:^0.6.5":
-  version: 0.6.5
-  resolution: "@odata2ts/http-client-api@npm:0.6.5"
-  checksum: 10/2a4f84d9bf3af9dc8bc0975116bf723b20ca7aa5be328b962f32f800b2fc2dd0f196aabc55fd7b5855d40a09f0930e855edcb1ee007235b0c624410b6599b0f0
-  languageName: node
-  linkType: hard
-
 "@odata2ts/http-client-api@npm:^0.6.7":
   version: 0.6.7
   resolution: "@odata2ts/http-client-api@npm:0.6.7"
@@ -618,23 +611,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/http-client-axios@npm:^0.12.2":
-  version: 0.12.2
-  resolution: "@odata2ts/http-client-axios@npm:0.12.2"
+"@odata2ts/http-client-axios@npm:^0.14.0":
+  version: 0.14.0
+  resolution: "@odata2ts/http-client-axios@npm:0.14.0"
   dependencies:
-    "@odata2ts/http-client-base": "npm:^0.5.6"
+    "@odata2ts/http-client-base": "npm:^0.5.8"
+    tslib: "npm:^2.8.1"
   peerDependencies:
     axios: ^0.27.0 || ^1.0.0
-  checksum: 10/f74ec0ba28638dc1254248d6fecdfbb1290c8668bdac39787847cb3a62b283762396956fa814977f151adaf67a7a890045e1897fbfc22583db79cffb8afb65fc
-  languageName: node
-  linkType: hard
-
-"@odata2ts/http-client-base@npm:^0.5.6":
-  version: 0.5.6
-  resolution: "@odata2ts/http-client-base@npm:0.5.6"
-  dependencies:
-    "@odata2ts/http-client-api": "npm:^0.6.5"
-  checksum: 10/3fc6825ec6d7505d3f2b56377569f45df2d047f1174d2e518c99279c8399c3c1046a5d7be59aa62cc276d7dc16643239b82f19cb437322c38fc40324bc8652b3
+  checksum: 10/ee75c5cda13c2bcf505e38f77e096429198a3ae813b9cb69d2391ea8df5d604bd88710df31421604c1cde5c3853cfbf5fcf79e6aa42f5d831af223f34987ca9c
   languageName: node
   linkType: hard
 
@@ -655,15 +640,6 @@ __metadata:
     "@odata2ts/http-client-base": "npm:^0.5.8"
     tslib: "npm:^2.8.1"
   checksum: 10/e040a17859902bc453790e0ad92d0f85a538c34be4aeec05048c9c60084026a6bfa578e8d4c6d683babfd85e938cf81de97ccac5fac034dc4dcdf3c29389a5f4
-  languageName: node
-  linkType: hard
-
-"@odata2ts/http-client-fetch@npm:^0.9.2":
-  version: 0.9.2
-  resolution: "@odata2ts/http-client-fetch@npm:0.9.2"
-  dependencies:
-    "@odata2ts/http-client-base": "npm:^0.5.6"
-  checksum: 10/7c12d75c060314ff87f226750fa1b95015048a58f6838162173f399e443d845deb3781f7b83fef9eda32e6224e602db3bb7c59673c08c5f3cd91b3d5e74d7716
   languageName: node
   linkType: hard
 
