@@ -32,28 +32,23 @@ describe("CAP Library: deep insert", () => {
     // as a composition on that server: an identity document belongs to exactly one member. Nothing in
     // the metadata distinguishes the two - the payload here is what the association refuses with 400.
     const uploadedAt = "2026-08-02T10:00:00Z";
-    const name = `Deep Insert Member ${Date.now()}`;
 
     const created = await LIBRARY.Members()
       .create({
-        Name: name,
-        // no key: CAP generates it, so it is no part of the editable model
+        Name: "Deep Insert Member",
+        // no key: the server generates it, so it is no part of the editable model
         IdDocument: { UploadedAt: uploadedAt },
       })
       .execute();
 
     expect(created.status).toBe(201);
 
-    // Looked up by name rather than by `created.data.Id`: for an entity whose key is a *generated
-    // integer* CAP answers the create with an entirely different row (the first one), so the response
-    // does not describe what was just created. Entities with a UUID key answer correctly.
-    const read = await LIBRARY.Members()
-      .query((builder, qMember) => builder.filter(qMember.Name.eq(name)).expanding("IdDocument", (doc) => doc))
+    const read = await LIBRARY.Members(created.data.Id)
+      .query((builder) => builder.expanding("IdDocument", (doc) => doc))
       .execute();
 
-    expect(read.data.value).toHaveLength(1);
-    expect(read.data.value[0].IdDocument).toBeDefined();
-    expect(read.data.value[0].IdDocument?.UploadedAt).toContain("2026-08-02T10:00:00");
+    expect(read.data.IdDocument).toBeDefined();
+    expect(read.data.IdDocument?.UploadedAt).toContain("2026-08-02T10:00:00");
   });
 
   test("a to-many composition is created along with the entity", async () => {
