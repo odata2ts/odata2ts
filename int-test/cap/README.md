@@ -56,10 +56,16 @@ limitation stays visible:
 - `add()` on the collection-valued `Keywords` property is refused with _"Method POST is not allowed for
   singletons and individual entities"_ - CAP stores such a property as a plain array element instead of
   exposing it as an addressable collection resource.
+- **A lambda over a primitive collection takes the server down.** `$filter=Keywords/all(a:a ne 'X')` is
+  valid OData and exactly what the query builder renders, but `@sap/cds` 10.0.3 throws an uncaught
+  `TypeError` in its own OData parser (`libx/odata/parse/afterburner.js`, `_validateXpr`) and the process
+  exits. Since all test files share one server, the test for it is `test.skip`ped rather than asserted -
+  the same expression works against ASP.NET. Lambdas over _navigation_ collections are fine here.
+- **An invalid query option is silently accepted.** `$top=-1` answers 200 with the unrestricted set, where
+  ASP.NET refuses it with 400. A client gets nothing to react to, which is why both behaviours are pinned.
 - **Binary content has only one shape here.** CAP emits no `HasStream`, so the reference model's media
   entities arrive as plain `Edm.Stream` properties (`EBook.content`) next to the genuinely named stream
   property (`Audiobook.Sample`). `test/feature/Blobs.test.ts` therefore addresses both by property name,
   with no `$value` and no type cast segment - the same feature reaches the ASP.NET server as
   `…/Media(<id>)/$value` and `…/Media(<id>)/Library.Catalog.Audiobook/Sample`. CAP also answers with the
-  MIME type declared in its model rather than the uploaded one, and it does implement `DELETE` on a
-  stream property, which ASP.NET refuses with 405.
+  MIME type declared in its model rather than the uploaded one, where ASP.NET returns what it was given.

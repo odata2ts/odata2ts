@@ -14,6 +14,22 @@ import { ServiceStateHelperV4 } from "./ServiceStateHelperV4.js";
 
 export type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
 
+/**
+ * Wraps the payload of a collection property update, which the spec represents as an object with a
+ * `value` property - not as a bare array.
+ * Spec: {@link https://docs.oasis-open.org/odata/odata-json-format/v4.01/odata-json-format-v4.01.html#sec_CollectionofPrimitiveValues}
+ *
+ * Sending the bare array is accepted by servers and *silently empties the collection*, which is how this
+ * went unnoticed. `PrimitiveTypeServiceV4` has always wrapped the single-value equivalent the same way.
+ */
+class CollectionRequestConverter<T> {
+  constructor(private qModel: Pick<QueryObjectModel<T>, "convertToOData">) {}
+
+  convertToOData(userModel: T): any {
+    return { value: this.qModel.convertToOData(userModel) };
+  }
+}
+
 export class CollectionServiceV4<
   in out ClientType extends ODataHttpClient,
   T,
@@ -103,7 +119,9 @@ export class CollectionServiceV4<
       Array<PrimitiveT>
     >(client, ODataHttpMethods.Put, createModelQueryBuilder(queryFn), qModel, models, {
       headers: { ...getDefaultHeaders(), ...getVersionHeaders() },
-      mainRequestConverter: qModel,
+      mainRequestConverter: new CollectionRequestConverter<Array<PrimitiveT>>(
+        qModel as unknown as Pick<QueryObjectModel<Array<PrimitiveT>>, "convertToOData">,
+      ),
       mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
         CollectionModificationResponseV4<Response, PrimitiveT, V>,
         T

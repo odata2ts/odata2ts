@@ -121,7 +121,9 @@ describe("CollectionService V4 Tests", () => {
     expect(result.method).toBe("PUT");
     expect(result.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...getODataVersionHeaders() });
     expect(result.data).toEqual(userModel);
-    expect(request.getInfoConverted().data).toStrictEqual(odataModel);
+    // the payload of a collection property update is an object with a `value` property, not a bare array
+    // - sending the array is accepted by servers and silently empties the collection
+    expect(request.getInfoConverted().data).toStrictEqual({ value: odataModel });
 
     expectTypeOf(await service.update(userModel).execute()).toEqualTypeOf<RESPONSE_TYPE_DEFAULT>();
     expectTypeOf(await service.update<false>(userModel).execute()).toEqualTypeOf<RESPONSE_TYPE_DEFAULT>();

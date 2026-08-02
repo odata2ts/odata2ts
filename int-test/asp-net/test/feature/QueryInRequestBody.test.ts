@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { expectODataError } from "../expectODataError.js";
 import { BASE_URL, BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
@@ -68,7 +69,8 @@ describe("ASP.NET Library: query options in the request body", () => {
     );
 
     expect(candidate.getUrl().length).toBeGreaterThan(8192);
-    await expect(candidate.execute()).rejects.toThrow();
+    // 414 is the whole point: the request line is too long, and Kestrel refuses it without a body
+    await expectODataError(candidate.execute(), { status: 414, message: /No error message/ });
 
     const result = await candidate.asPostRequest().execute();
 

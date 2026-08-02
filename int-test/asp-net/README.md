@@ -37,13 +37,30 @@ broken one. The file also covers the case the feature exists for: a query whose 
 and `AudiobookChapter` carry their content at `$value`, while `Audiobook.Sample` is a named stream
 property. The two are addressed differently, and the file pins the URLs because getting it wrong yields a
 404 rather than a wrong payload: `Sample` is declared on the subtype and exists **only** behind the type
-cast, whereas `$value` addresses the entity itself and must **not** carry the cast segment. `DELETE` on a
-stream property is refused here with 405 - asserted, not skipped. CAP models none of this as a media
-entity, which is why the same feature looks different in `int-test/cap`.
+cast, whereas `$value` addresses the entity itself and must **not** carry the cast segment. CAP models
+none of this as a media entity, which is why the same feature looks different in `int-test/cap`.
 
 **Operation overloads.** The reference model carries two overload pairs, and generating this client is
 what surfaced odata2ts#423 - both overloads produced the same Q-object name, so the generated file did
 not compile. `test/core/Operations.test.ts` covers the resulting behaviour.
+
+## Observed ASP.NET behaviour
+
+Where the server does not support something, the test asserts that rather than being dropped:
+
+- **No individual property access.** `…/Media(<id>)/Title`, its `/$value` form and a collection-valued
+  property all answer 404, so the whole `enablePrimitivePropertyServices` surface is unusable here. CAP
+  serves it, see `int-test/cap/test/feature/PropertyServices.test.ts` for what that looks like.
+- **No complex property as a resource.** `…/Branches(1)/Address` answers 404 as well - the value is only
+  reachable through `$select` on the entity.
+- **The type cast works on a collection, not on a single entity.** `/Media/Library.Catalog.Book` is served,
+  `/Media(<id>)/Library.Catalog.Book` is not. The cast _q-properties_ do work on a single entity.
+- **`$select` on a write request is ignored**: create, update and patch answer with the full entity. Same
+  as CAP.
+- **Composition stops at query options.** Query options on a composable function's result are served; a
+  bound operation behind it (`/NewReleases()/Library.Circulation.AvailableCopies()`) is not.
+- **Spatial values contradict the generated typing**: `Edm.GeographyPoint` becomes `string` in the model
+  while the payload carries GeoJSON. That is a generator limitation, pinned in `DataTypes.test.ts`.
 
 ## Generation
 

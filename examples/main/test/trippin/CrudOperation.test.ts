@@ -174,7 +174,11 @@ describe("Testing Generation of TrippinService", () => {
 
     expect(ODATA_CLIENT.lastUrl).toBe(`${BASE_URL}/People('tester')/AddressInfo`);
     expect(ODATA_CLIENT.lastOperation).toBe("PUT");
-    expect(ODATA_CLIENT.lastData).toStrictEqual([{ Address: "TestAddress 1" }, { Address: "test 2" }]);
+    expect(ODATA_CLIENT.lastData).toStrictEqual({
+      // a collection property update is wrapped, per OData JSON format - sending the bare array made
+      // servers accept the request and quietly empty the collection
+      value: [{ Address: "TestAddress 1" }, { Address: "test 2" }],
+    });
     expect(ODATA_CLIENT.additionalHeaders).toStrictEqual(MODIFY_HEADERS);
   });
 

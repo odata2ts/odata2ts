@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test } from "vitest";
 import { EditableBooks } from "../../src-generated/library/LibraryModel.js";
+import { expectODataError } from "../expectODataError.js";
 import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
@@ -77,8 +78,9 @@ describe("CAP Library: query options on write requests", () => {
     // `add()` - a POST against that path - is refused outright. Asserted so the limitation stays visible.
     const id = await givenBook();
 
-    await expect(LIBRARY.Books(id).Keywords().add<true>("Testschlagwort").execute()).rejects.toThrow(
-      /Method POST is not allowed/,
-    );
+    await expectODataError(LIBRARY.Books(id).Keywords().add<true>("Testschlagwort").execute(), {
+      status: 405,
+      message: /Method POST is not allowed/,
+    });
   });
 });

@@ -16,6 +16,9 @@ const config: ConfigFileOptions = {
   prettier: true,
   // we definitely want to type check the generated artifacts
   debug: true,
+  // on, because the property services are a generator feature of their own and otherwise never
+  // meet a real server: see test/feature/PropertyServices.test.ts
+  enablePrimitivePropertyServices: true,
   services: {
     library: {
       serviceName: "Library",

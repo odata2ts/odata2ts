@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { expectODataError } from "../expectODataError.js";
 import { BASE_URL, BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
 describe("ASP.NET Library: query functionality", () => {
@@ -86,5 +87,62 @@ describe("ASP.NET Library: query functionality", () => {
     const response = await fetch(`${BASE_URL}/Media/Library.Catalog.Book`);
 
     expect(response.status).toBe(200);
+  });
+  test("$filter with in", async () => {
+    const result = await LIBRARY.Media()
+      .query((builder, qMedium) => {
+        builder.filter(qMedium.Language.in("de", "en"));
+      })
+      .execute();
+
+    expect(result.status).toBe(200);
+    expect(result.data.value.length).toBeGreaterThan(0);
+    expect(result.data.value.every((medium) => medium.Language === "de" || medium.Language === "en")).toBe(true);
+  });
+
+  test("$filter with any on a navigation collection", async () => {
+    // A lambda operator renders as `Copies/any(a:a/Condition eq 1)`. Whether the server can evaluate that
+    // over a navigation property is the question - a client cannot tell a wrong result from a right one
+    // here, so this asserts against the same set fetched by expansion.
+    const withLoanable = await LIBRARY.Media()
+      .query((builder, qMedium) => {
+        builder.select("Title").filter(qMedium.Copies.any((qCopy) => qCopy.IsLoanable.eq(true)));
+      })
+      .execute();
+
+    expect(withLoanable.status).toBe(200);
+
+    const expanded = await LIBRARY.Media()
+      .query((builder) => builder.select("Title").expand("Copies"))
+      .execute();
+    const expectedTitles = expanded.data.value
+      .filter((medium) => medium.Copies?.some((copy) => copy.IsLoanable))
+      .map((medium) => medium.Title)
+      .sort();
+
+    expect(withLoanable.data.value.map((medium) => medium.Title).sort()).toStrictEqual(expectedTitles);
+  });
+
+  test("$filter with all on a primitive collection", async () => {
+    const result = await LIBRARY.Media()
+      .query((builder, qMedium) => {
+        builder.select("Title").filter(qMedium.Keywords.all((keyword) => keyword.it.ne("Nonexistent")));
+      })
+      .execute();
+
+    expect(result.status).toBe(200);
+    // every medium qualifies, since no keyword has that value - the point is that the server evaluates it
+    expect(result.data.value.length).toBeGreaterThan(0);
+  });
+
+  test("an invalid query option is refused with 400, and the message says why", async () => {
+    // A negative $top is one of the few malformed queries the typed builder happily produces, so it is a
+    // realistic way to reach the server's validation - and a caller needs the message to make sense of it.
+    await expectODataError(
+      LIBRARY.Media()
+        .query((builder) => builder.top(-1))
+        .execute(),
+      { status: 400, message: /\$top query option requires a non-negative integer/ },
+    );
   });
 });
