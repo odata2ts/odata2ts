@@ -232,6 +232,18 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    */
   v2ModelsWithExtraResultsWrapping?: boolean;
   /**
+   * The counterpart of <code>v2ModelsWithExtraResultsWrapping</code> for the editable models: collection
+   * valued navigation properties of a deep insert are wrapped into an extra object with the property
+   * "results", as some V2 services expect it.
+   *
+   * Deliberately its own option, since a service which answers with the extra wrapping does not
+   * necessarily expect it in a request payload - see odata2ts issue #237.
+   *
+   * Like its counterpart this option is only valid if the generation mode is set to <code>models</code>;
+   * it is ignored otherwise.
+   */
+  v2EditableModelsWithExtraResultsWrapping?: boolean;
+  /**
    * Numbers of type `Edm.Int64` and `Edm.Decimal` are represented as `number` in V4.
    * However, these numbers might not fit into JS' number type, which might result in precision loss.
    *
@@ -307,18 +319,6 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * Opt-in, so by default the editable models contain no navigation property at all.
    */
   enableDeepInsertProps?: boolean;
-  /**
-   * The counterpart of <code>v2ModelsWithExtraResultsWrapping</code> for the editable models: collection
-   * valued navigation properties of a deep insert are wrapped into an extra object with the property
-   * "results", as some V2 services expect it.
-   *
-   * Deliberately its own option, since a service which answers with the extra wrapping does not
-   * necessarily expect it in a request payload - see odata2ts issue #237.
-   *
-   * Like its counterpart this option is only valid if the generation mode is set to <code>models</code>;
-   * it is ignored otherwise.
-   */
-  v2EditableModelsWithExtraResultsWrapping?: boolean;
 }
 
 /**
