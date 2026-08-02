@@ -8,9 +8,9 @@
   "author": "texttechne",
   "type": "module",
   "scripts": {
-    "clean": "rimraf build",
-    "install-floor-ts": "npm --prefix floor-ts install",
-    "int-test": "node ../../node_modules/.bin/vitest run"
+    "build": "npm run clean && npm --prefix floor-ts install",
+    "clean": "rimraf floor-ts/node_modules",
+    "test": "node ../../node_modules/.bin/vitest run"
   },
   "dependencies": {
     "@odata2ts/odata-service": "workspace:^"

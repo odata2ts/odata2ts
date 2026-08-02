@@ -35,8 +35,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-  int-test:
-    name: Integration Tests
+  static-int-tests:
+    name: Static Integration Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,27 +47,12 @@ jobs:
         run: yarn --immutable
       - name: Build packages
         run: yarn build
-      - name: Run integration tests against the live OData services
-        run: yarn workspace @odata2ts/example-main int-test
-
-  ts-floor-check:
-    name: TypeScript Floor Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: Install packages
-        run: yarn --immutable
-      - name: Build packages
-        run: yarn build
-      - name: Install floor TypeScript version
-        working-directory: examples/ts-floor-check
-        run: yarn install-floor-ts
       - name: Verify generated output type-checks under the declared minimum TypeScript version
-        working-directory: examples/ts-floor-check
-        run: yarn int-test
+        working-directory: int-test/ts-floor-check
+        run: yarn test
+      - name: Verify CLI works
+        working-directory: int-test/cli
+        run: yarn test
 
   # Container-based integration tests against real OData servers. By far the most expensive part of the
   # pipeline, so they only start once the unit tests are green. They live in their own workflow file and

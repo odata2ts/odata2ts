@@ -16,7 +16,7 @@ const CLI_BIN = createRequire(import.meta.url).resolve("@odata2ts/odata2ts/lib/r
 // whole workspace does not chdir into each project, so plain relative paths would resolve
 // against the repo root instead of this package.
 const PACKAGE_ROOT = path.resolve(import.meta.dirname, "..");
-const FIXTURE = path.join(PACKAGE_ROOT, "int-test/fixture/trippin.xml");
+const FIXTURE = path.join(PACKAGE_ROOT, "test/fixture/trippin.xml");
 const OUT_DIR = path.join(PACKAGE_ROOT, "build");
 const FLOOR_TSC = path.join(PACKAGE_ROOT, "floor-ts/node_modules/.bin/tsc");
 
