@@ -6,7 +6,10 @@ import { QFunction } from "./QFunction";
  *
  * This includes handling of entity id paths (same format as V4 functions).
  */
-export abstract class QFunctionV4<ParamModel, ResponseStructure> extends QFunction<ParamModel, ResponseStructure> {
+export abstract class QFunctionV4<ParamModel, ResponseStructure = undefined> extends QFunction<
+  ParamModel,
+  ResponseStructure
+> {
   public constructor(
     name: string,
     protected responseConverter?: MainResponseConverter<

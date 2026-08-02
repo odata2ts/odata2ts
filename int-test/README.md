@@ -10,10 +10,14 @@ starts and stops itself. Dockerized.
 
 ## The servers
 
-| package                          | server                                                          |
-| -------------------------------- | --------------------------------------------------------------- |
-| [`cap`](./cap/README.md)         | SAP CAP implementation of the standardized "Library" test model |
-| [`asp-net`](./asp-net/README.md) | ASP.NET Core implementation of the same model                   |
+| package                          | server                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------- |
+| [`cap`](./cap/README.md)         | SAP CAP implementation of the standardized "Library" test model - V4 **and** V2 |
+| [`asp-net`](./asp-net/README.md) | ASP.NET Core implementation of the same model                                   |
+
+The CAP server is the only place where odata2ts meets a running **OData V2** service: the same server
+also answers V2 through the `@cap-js-community/odata-v2-adapter` middleware, so `int-test/cap/test/v2/`
+covers the V2 client against it. See that package's README.
 
 ## Layout of a package
 
@@ -25,7 +29,8 @@ int-test/<server>/
 └─ test/
    ├─ <Server>TestConstants.ts   service instance + seed-data keys
    ├─ core/                      what every OData server is expected to do
-   └─ feature/                   individual features, incl. their limitations
+   ├─ feature/                   individual features, incl. their limitations
+   └─ v2/                        the same scheme again, where a server also speaks V2 (cap only)
 ```
 
 Scripts: `build`/`generate` (offline codegen), `test` (the integration tests), `test-compile`
@@ -43,12 +48,17 @@ Test files follow the same scheme in every package, one concern per file:
 | `feature/Blobs.test.ts`               | binary content: stream properties and media entities                           |
 | `feature/Subtypes.test.ts`            | type cast segment and derived types' properties (ASP.NET only - CAP is flat)   |
 | `feature/PropertyServices.test.ts`    | services for individual properties (`enablePrimitivePropertyServices`)         |
-| `feature/DataTypes.test.ts`           | data types round tripped through the server (ASP.NET)                          |
+| `feature/DataTypes.test.ts`           | data types round tripped through the server (ASP.NET, and CAP's V2 suite)      |
 | `feature/DeepSelect.test.ts`          | `expanding()` into complex properties (ASP.NET only - CAP flattens them)       |
 | `feature/ComposableFunctions.test.ts` | composable functions (ASP.NET only - CAP has none)                             |
 
 Where a server does not support something, the test asserts the rejection rather than being dropped -
 that keeps the limitation visible instead of silently untested.
+
+A `v2/` folder repeats `core/` and `feature/` for the V2 protocol, dropping what V2 has no notion of
+(`Prefer: return=representation`, and therefore query options on write requests) and adding what only V2
+raises. `v2/core/Singleton.test.ts` keeps the file name although V2 has no singletons - it covers what
+became of that singleton, which is exactly the comparison the name is for.
 
 Two rules hold for every test here:
 

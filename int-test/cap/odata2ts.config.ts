@@ -1,14 +1,20 @@
 import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
 
 /**
- * Generates the odata2ts client for the standardized "Library" OData V4 test model, as served by the
- * SAP CAP implementation (repo `odata2ts/test-server-cap`).
+ * Generates the odata2ts clients for the standardized "Library" test model, as served by the SAP CAP
+ * implementation (repo `odata2ts/test-server-cap`) - once as OData V4 and once as OData V2.
  *
- * The source is a committed snapshot of the server's actual `$metadata` (`resource/library.xml`), so
- * generation stays offline and server-independent - odata2ts is deliberately tested against the metadata
- * CAP really emits (flat mode, aspect-based media hierarchy, alternate keys only in metadata, ...), not
- * against the idealized reference model. Refresh the snapshot from the running server (or the server
- * repo's `npm run metadata`) whenever the model changes.
+ * The sources are committed snapshots of the server's actual `$metadata` (`resource/library.xml` and
+ * `resource/library-v2.xml`), so generation stays offline and server-independent - odata2ts is
+ * deliberately tested against the metadata CAP really emits (flat mode, aspect-based media hierarchy,
+ * alternate keys only in metadata, ...), not against the idealized reference model. Refresh the
+ * snapshots from the running server (or the server repo's `npm run metadata`) whenever the model changes.
+ *
+ * The V2 model is not a second model: it is the very same service, translated on the fly by the
+ * `@cap-js-community/odata-v2-adapter` middleware that CAP runs in front of its V4 endpoint. Everything
+ * the V2 client sees is therefore that translation - which is exactly what makes it worth testing, since
+ * it is the shape SAP systems actually put on the wire. See test/v2/ and the server repo's
+ * FEATURE-COVERAGE-V2.md.
  */
 const config: ConfigFileOptions = {
   mode: Modes.service,
@@ -27,6 +33,11 @@ const config: ConfigFileOptions = {
       serviceName: "Library",
       source: "resource/library.xml",
       output: "src-generated/library",
+    },
+    libraryV2: {
+      serviceName: "LibraryV2",
+      source: "resource/library-v2.xml",
+      output: "src-generated/library-v2",
     },
   },
 };
