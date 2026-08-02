@@ -254,7 +254,10 @@ class ModelGenerator {
       .map((p) => `"${p.name}"`)
       .join(" | ");
     const complexProps = allProps.filter((p) => p.dataType === DataTypes.ComplexType);
-    const bindingProps = allProps.filter((p) => this.isBindableNavProp(p)).map((p) => this.generateBindingProp(p));
+    const navProps = this.generateNavProps(
+      file.getImports(),
+      allProps.filter((p) => p.dataType === DataTypes.ModelType),
+    );
 
     const extendsClause = [
       requiredProps ? `Pick<${model.modelName}, ${requiredProps}>` : null,
@@ -275,7 +278,7 @@ class ModelGenerator {
             hasQuestionToken: !p.required || p.dataType === DataTypes.ModelType,
           };
         }),
-        ...bindingProps,
+        ...navProps,
       ],
     });
   }
@@ -292,35 +295,93 @@ class ModelGenerator {
   }
 
   /**
-   * Binding an existing entity to a navigation property, see odata2ts issue #38.
+   * The navigation properties of an editable model, which carry two independent, opt-in features:
    *
-   * The notation is dictated by the OData version which is targeted, and it is the notation itself which
-   * ends up on the wire, hence the OData name is used here and not the mapped one:
-   * - V2: {@code { "Category": { "__metadata": { "uri": "Categories(1)" } } }}
-   * - 4.0: {@code { "Category@odata.bind": "Categories(1)" }}
-   * - 4.01: {@code { "Category": { "@id": "Categories(1)" } }}
+   * - binding an existing entity to the navigation property (issue #38)
+   * - deep insert / deep update, i.e. the related entity travelling within this entity's payload (#237)
+   *
+   * They meet in V2 and 4.01, where a binding goes by the very name of the navigation property, so the
+   * property has to accept either shape there. 4.0 spells a binding as {@code "Category@odata.bind"} and
+   * therefore keeps the two apart.
+   *
+   * A binding is addressed by the OData name, since that notation ends up on the wire as it is - it is
+   * passed through the query object untouched. A deep insert is addressed by the mapped name instead:
+   * its payload *is* converted, so the property has to be the one the query object knows.
+   */
+  private generateNavProps(
+    imports: ImportContainer,
+    props: Array<PropertyModel>,
+  ): Array<OptionalKind<PropertySignatureStructure>> {
+    const isV2 = this.version === ODataVersions.V2;
+    const isV401 = !isV2 && this.options.odataVersionV4 === "4.01";
+    // in these versions a binding has no name of its own, so it shares the property with a deep insert
+    const bindingByPropName = isV2 || isV401;
+
+    return props.flatMap((prop) => {
+      const deepInsert = this.options.enableDeepInsertProps;
+      const bindable = this.isBindableNavProp(prop);
+
+      // one entry per resulting property name, so that renaming cannot merge what belongs apart
+      const byName = new Map<string, { shapes: Array<string>; docs: Array<string>; binds: boolean }>();
+      const collect = (name: string, shape: string, doc: string, binds: boolean) => {
+        const entry = byName.get(name) ?? { shapes: [], docs: [], binds: false };
+        entry.shapes.push(shape);
+        entry.docs.push(doc);
+        entry.binds ||= binds;
+        byName.set(name, entry);
+      };
+
+      if (deepInsert) {
+        const editableName = this.dataModel.getComplexType(prop.fqType)!.editableName;
+        collect(
+          prop.name,
+          imports.addGeneratedModel(prop.fqType, editableName),
+          `Create "${prop.name}" along with this entity (deep insert), or update it along with it (deep update).`,
+          false,
+        );
+      }
+      if (bindable) {
+        collect(
+          bindingByPropName ? prop.odataName : `${prop.odataName}@odata.bind`,
+          isV2 ? `{ __metadata: { uri: string } }` : isV401 ? `{ "@id": string }` : "string",
+          `Bind "${prop.name}" to an already existing entity by its URL.`,
+          true,
+        );
+      }
+
+      return [...byName.entries()].map(([name, { shapes, docs, binds }]) => {
+        return {
+          // the binding notation is no identifier, so the name must be quoted
+          name: `"${name}"`,
+          type: this.getNavPropType(prop, shapes, binds),
+          hasQuestionToken: true,
+          docs: this.options.skipComments ? undefined : [{ description: docs.join("\n") }],
+        };
+      });
+    });
+  }
+
+  /**
+   * Decorates the accepted shapes of a navigation property with cardinality and nullability.
    *
    * Removing a binding is only possible for a nullable single-valued navigation property, by setting it to
    * null. Collection-valued bind operations add to the collection, they never replace it, so there is
-   * nothing to remove with - that requires $ref, which odata2ts doesn't support yet.
+   * nothing to remove with - that requires $ref, which odata2ts doesn't support yet. A deep insert has no
+   * such notion at all, hence null is only offered on a property which actually accepts a binding - in 4.0
+   * that is the separate {@code @odata.bind} property, not the one carrying the nested entity.
    */
-  private generateBindingProp(prop: PropertyModel): OptionalKind<PropertySignatureStructure> {
-    const isV2 = this.version === ODataVersions.V2;
-    const isV401 = !isV2 && this.options.odataVersionV4 === "4.01";
+  private getNavPropType(prop: PropertyModel, shapes: Array<string>, bindable: boolean): string {
+    const singleType = shapes.join(" | ");
 
-    const name = isV2 || isV401 ? prop.odataName : `${prop.odataName}@odata.bind`;
-    const singleType = isV2 ? `{ __metadata: { uri: string } }` : isV401 ? `{ "@id": string }` : "string";
-    const type = prop.isCollection ? `Array<${singleType}>` : singleType + (prop.required ? "" : " | null");
+    if (prop.isCollection) {
+      const collectionType = `Array<${singleType}>`;
+      // some V2 services expect the extra results wrapping in the payload as well, see issue #237
+      return this.version === ODataVersions.V2 && this.options.v2EditableModelsWithExtraResultsWrapping
+        ? `{ results: ${collectionType} }`
+        : collectionType;
+    }
 
-    return {
-      // the notation is no identifier, so it must be quoted
-      name: `"${name}"`,
-      type,
-      hasQuestionToken: true,
-      docs: this.options.skipComments
-        ? undefined
-        : [{ description: `Bind "${prop.name}" to an already existing entity by its URL.` }],
-    };
+    return singleType + (bindable && !prop.required ? " | null" : "");
   }
 
   private getEditablePropType(imports: ImportContainer, prop: PropertyModel): string {

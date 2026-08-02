@@ -104,6 +104,8 @@ const defaultConfig: DefaultConfiguration = {
   enableNativeInOperator: false,
   odataVersionV4: "4.0",
   enableBindingProps: false,
+  enableDeepInsertProps: false,
+  v2EditableModelsWithExtraResultsWrapping: false,
 };
 
 const { models, queryObjects, services } = defaultConfig.naming;

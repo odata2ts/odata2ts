@@ -293,6 +293,32 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * Opt-in, so by default no such property is generated.
    */
   enableBindingProps?: boolean;
+  /**
+   * Adds the navigation properties to the editable models, typed as the editable model of the related
+   * entity, which is what a deep insert (POST) or a deep update (PATCH / PUT) sends: the related entities
+   * travel within the payload of the entity they belong to, instead of being created by requests of their
+   * own.
+   *
+   * Together with <code>enableBindingProps</code> a navigation property accepts either shape - a new
+   * entity or a reference to an existing one. In V2 and OData 4.01 a binding goes by the very name of the
+   * navigation property, so there the property is typed as the union of both; 4.0 has a name of its own
+   * for it ({@code "Author@odata.bind"}) and therefore keeps them apart.
+   *
+   * Opt-in, so by default the editable models contain no navigation property at all.
+   */
+  enableDeepInsertProps?: boolean;
+  /**
+   * The counterpart of <code>v2ModelsWithExtraResultsWrapping</code> for the editable models: collection
+   * valued navigation properties of a deep insert are wrapped into an extra object with the property
+   * "results", as some V2 services expect it.
+   *
+   * Deliberately its own option, since a service which answers with the extra wrapping does not
+   * necessarily expect it in a request payload - see odata2ts issue #237.
+   *
+   * Like its counterpart this option is only valid if the generation mode is set to <code>models</code>;
+   * it is ignored otherwise.
+   */
+  v2EditableModelsWithExtraResultsWrapping?: boolean;
 }
 
 /**

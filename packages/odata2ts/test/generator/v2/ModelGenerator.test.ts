@@ -114,4 +114,77 @@ describe("Model Generator Tests V2", () => {
       disableAutoManagedKey: true,
     });
   });
+
+  function addRelatedEntities() {
+    odataBuilder
+      .addEntityType("Author", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Int32))
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV2.Int32)
+          .addNavProp("author", withNs("Author"), "Book_Author", "1")
+          .addNavProp("relatedAuthors", withNs("Author"), "Book_RelatedAuthors", "*"),
+      );
+  }
+
+  test(`${TEST_SUITE_NAME}: deep insert props`, async () => {
+    // given entities related to each other
+    addRelatedEntities();
+
+    // when opting into the deep insert props
+    // then the navigation properties show up on the editable model, typed as the editable model of the
+    // related entity
+    await generateAndCompare("entity-relationships-deep-insert-v2.ts", {
+      enableDeepInsertProps: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: deep insert props with extra results wrapping`, async () => {
+    // given entities related to each other
+    addRelatedEntities();
+
+    // when opting into the extra wrapping for editable models
+    // then only the collection valued navigation property carries the extra results object
+    await generateAndCompare("entity-relationships-deep-insert-v2-extra-wrapping.ts", {
+      enableDeepInsertProps: true,
+      v2EditableModelsWithExtraResultsWrapping: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: the wrapping of the readable models does not reach the editable ones`, async () => {
+    // given entities related to each other
+    addRelatedEntities();
+
+    // when only the readable models are asked to carry the extra wrapping
+    // then the deep insert props stay unwrapped: a service answering with the wrapping does not
+    // necessarily expect it in a request payload, see issue #237
+    await generateAndCompare("entity-relationships-deep-insert-v2-response-wrapping.ts", {
+      enableDeepInsertProps: true,
+      v2ModelsWithExtraResultsWrapping: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: deep insert and binding props share the property in V2`, async () => {
+    // given entities related to each other
+    addRelatedEntities();
+
+    // when opting into both
+    // then the navigation property accepts either shape, since V2 addresses a binding by the very name
+    // of the navigation property
+    await generateAndCompare("entity-relationships-deep-insert-binding-v2.ts", {
+      enableDeepInsertProps: true,
+      enableBindingProps: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
 });

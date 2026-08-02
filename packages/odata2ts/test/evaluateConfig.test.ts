@@ -286,4 +286,42 @@ describe("Config Evaluation Tests", () => {
       v2ModelsWithExtraResultsWrapping: false,
     });
   });
+
+  /**
+   * Both wrappings are a matter of the models alone: the generated client removes the extra wrapping
+   * from a response by itself, so a generated service must never see it in its types.
+   */
+  test("both extra wrapping options only survive in models mode", () => {
+    const cliOpts: CliOptions = { source: "source", output: "output" };
+    const wrappingOpts = {
+      v2ModelsWithExtraResultsWrapping: true,
+      v2EditableModelsWithExtraResultsWrapping: true,
+    };
+
+    [Modes.service, Modes.qobjects, Modes.all].forEach((mode) => {
+      const result = evaluateConfigOptions(cliOpts, { mode, ...wrappingOpts });
+
+      expect(result[0], `mode ${mode}`).toMatchObject({
+        v2ModelsWithExtraResultsWrapping: false,
+        v2EditableModelsWithExtraResultsWrapping: false,
+      });
+    });
+
+    const modelsResult = evaluateConfigOptions(cliOpts, { mode: Modes.models, ...wrappingOpts });
+    expect(modelsResult[0]).toMatchObject(wrappingOpts);
+  });
+
+  /**
+   * The deep insert props, unlike the wrapping, are meant for the generated services as well - that is
+   * where a deep insert is actually sent.
+   */
+  test("deep insert props survive every mode", () => {
+    const cliOpts: CliOptions = { source: "source", output: "output" };
+
+    [Modes.service, Modes.qobjects, Modes.all, Modes.models].forEach((mode) => {
+      const result = evaluateConfigOptions(cliOpts, { mode, enableDeepInsertProps: true });
+
+      expect(result[0], `mode ${mode}`).toMatchObject({ enableDeepInsertProps: true });
+    });
+  });
 });
