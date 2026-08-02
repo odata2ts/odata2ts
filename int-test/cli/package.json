@@ -9,8 +9,7 @@
   "type": "module",
   "scripts": {
     "clean": "rimraf build",
-    "test": "vitest run",
-    "test-compile": "tsc"
+    "test": "node ../../node_modules/.bin/vitest run run"
   },
   "devDependencies": {
     "@odata2ts/odata2ts": "workspace:^"
