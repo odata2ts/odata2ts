@@ -69,6 +69,23 @@ export class MediaEntityServiceV4<
   }
 
   /**
+   * Read the entity's binary content as a stream. Shortcut for `content().getStream()`.
+   */
+  public getStream() {
+    return this.content().getStream();
+  }
+
+  /**
+   * Replace the entity's binary content from a stream. Shortcut for `content().updateStream(...)`.
+   *
+   * @param data the binary content
+   * @param mimeType the content's MIME type
+   */
+  public updateStream(data: ReadableStream, mimeType?: string) {
+    return this.content().updateStream(data, mimeType);
+  }
+
+  /**
    * Delete the entity's binary content, leaving the entity itself in place. Shortcut for
    * `content().deleteBlob()`.
    */

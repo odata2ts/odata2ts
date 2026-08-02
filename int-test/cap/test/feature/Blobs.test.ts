@@ -1,4 +1,5 @@
-import { describe, expect, test } from "vitest";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { describe, expect, expectTypeOf, test } from "vitest";
 import { AUDIOBOOK, BASE_URL, EBOOK, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
@@ -19,6 +20,11 @@ import { AUDIOBOOK, BASE_URL, EBOOK, LIBRARY } from "../LibraryTestConstants.js"
 describe("CAP Library: binary content", () => {
   async function textOf(blob: Blob | undefined) {
     return blob === undefined ? undefined : blob.text();
+  }
+
+  /** Same for a stream, which has to be consumed before anything can be asserted about it. */
+  async function textOfStream(stream: ReadableStream | undefined) {
+    return stream === undefined ? undefined : new Response(stream).text();
   }
 
   describe("stream property on a subtype-free entity set", () => {
@@ -95,6 +101,64 @@ describe("CAP Library: binary content", () => {
       const entity = await ebook().query().execute();
       expect(entity.data.Language).toBe("en");
       expect(entity.data.Title).toBeDefined();
+    });
+  });
+
+  /**
+   * The same content over the same URLs, only never held in memory as a whole. Which is why these
+   * assertions look like the blob ones above: the transport differs, the result must not.
+   *
+   * Both carriers are stream properties here - CAP emits no `HasStream`, so there is no media-entity
+   * shortcut to stream from, unlike in `int-test/asp-net`.
+   */
+  describe("streamed transfer", () => {
+    const audiobook = () => LIBRARY.Audiobooks(AUDIOBOOK);
+    const ebook = () => LIBRARY.EBooks(EBOOK);
+
+    test("upload and download round trip", async () => {
+      const content = "ID3 pretend-this-is-a-large-mp3";
+
+      const updated = await audiobook()
+        .Sample()
+        .updateStream(new Blob([content]).stream(), "audio/mpeg")
+        .execute();
+      expect(updated.status).toBe(204);
+
+      const read = await audiobook().Sample().getStream().execute();
+
+      expect(read.status).toBe(200);
+      expect(await textOfStream(read.data)).toBe(content);
+      expectTypeOf(read).toEqualTypeOf<HttpResponseModel<ReadableStream | undefined>>();
+    });
+
+    test("what was streamed up can be read as a blob and vice versa", async () => {
+      // The two ways of transferring must be interchangeable - the server stores bytes, not a shape.
+      const content = "streamed up, buffered down";
+
+      await ebook()
+        .content()
+        .updateStream(new Blob([content]).stream(), "application/epub+zip")
+        .execute();
+      expect(await textOf((await ebook().content().getBlob().execute()).data)).toBe(content);
+
+      await ebook()
+        .content()
+        .updateBlob(new Blob([content], { type: "application/epub+zip" }))
+        .execute();
+      expect(await textOfStream((await ebook().content().getStream().execute()).data)).toBe(content);
+    });
+
+    test("deleted content answers 204 without a stream", async () => {
+      await audiobook()
+        .Sample()
+        .updateStream(new Blob(["to be removed"]).stream(), "audio/mpeg")
+        .execute();
+      await audiobook().Sample().deleteBlob().execute();
+
+      const read = await audiobook().Sample().getStream().execute();
+
+      expect(read.status).toBe(204);
+      expect(read.data).toBeUndefined();
     });
   });
 });

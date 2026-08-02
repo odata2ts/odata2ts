@@ -83,6 +83,53 @@ describe("StreamService V4 Test", () => {
     expect(odataClient.lastMimeType).toBe("application/octet-stream");
   });
 
+  test("stream V4: get stream", async () => {
+    const request = service.getStream();
+    const result = request.getInfo();
+
+    expectTypeOf(result).toEqualTypeOf<RequestInfo>();
+
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.data).toBeUndefined();
+    expect(result.method).toBe("GET");
+    // as with a blob: the JSON default headers must not be sent here
+    expect(result.headers).toBeUndefined();
+
+    const stream = new Blob(["audio"], { type: MIME_TYPE }).stream();
+    odataClient.setStreamResponse(stream);
+    const response = await request.execute();
+
+    expect(odataClient.lastUrl).toBe(EXPECTED_PATH);
+    expect(odataClient.lastOperation).toBe("GET");
+    // the stream itself, not a buffered copy of it
+    expect(response.data).toBe(stream);
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ReadableStream | undefined>>();
+  });
+
+  test("stream V4: update stream", async () => {
+    const stream = new Blob(["audio"], { type: MIME_TYPE }).stream();
+    const request = service.updateStream(stream, MIME_TYPE);
+    const result = request.getInfo();
+
+    expect(result.url).toBe(EXPECTED_PATH);
+    expect(result.method).toBe("PUT");
+    expect(result.data).toBe(stream);
+
+    await request.execute();
+
+    expect(odataClient.lastOperation).toBe("PUT");
+    expect(odataClient.lastData).toBe(stream);
+    expect(odataClient.lastMimeType).toBe(MIME_TYPE);
+    expectTypeOf(request.getInfo()).toEqualTypeOf<RequestInfo<ReadableStream>>();
+  });
+
+  test("stream V4: a stream without a MIME type falls back to octet-stream", async () => {
+    // unlike a blob a stream carries no type of its own, so there is nothing else to fall back to
+    await service.updateStream(new Blob(["audio"], { type: MIME_TYPE }).stream()).execute();
+
+    expect(odataClient.lastMimeType).toBe("application/octet-stream");
+  });
+
   test("stream V4: delete blob", async () => {
     const request = service.deleteBlob();
     const result = request.getInfo();

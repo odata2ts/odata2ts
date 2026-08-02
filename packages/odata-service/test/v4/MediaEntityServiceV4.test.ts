@@ -51,6 +51,29 @@ describe("MediaEntityService V4 Test", () => {
     expect(odataClient.lastMimeType).toBe("application/epub+zip");
   });
 
+  test("mediaEntity V4: read the content as a stream", async () => {
+    const stream = new Blob(["epub"]).stream();
+    odataClient.setStreamResponse(stream);
+
+    const response = await service.getStream().execute();
+
+    expect(odataClient.lastUrl).toBe(CONTENT_PATH);
+    expect(odataClient.lastOperation).toBe("GET");
+    expect(response.data).toBe(stream);
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ReadableStream | undefined>>();
+  });
+
+  test("mediaEntity V4: write the content from a stream", async () => {
+    const stream = new Blob(["epub"]).stream();
+
+    await service.updateStream(stream, "application/epub+zip").execute();
+
+    expect(odataClient.lastUrl).toBe(CONTENT_PATH);
+    expect(odataClient.lastOperation).toBe("PUT");
+    expect(odataClient.lastData).toBe(stream);
+    expect(odataClient.lastMimeType).toBe("application/epub+zip");
+  });
+
   test("mediaEntity V4: delete the content", async () => {
     await service.deleteBlob().execute();
 
