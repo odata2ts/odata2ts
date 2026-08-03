@@ -14,11 +14,18 @@
     "test-compile": "node ../../node_modules/.bin/tsc"
   },
   "dependencies": {
+    "@odata2ts/converter-big-number": "^0.2.8",
+    "@odata2ts/converter-common": "^0.3.7",
+    "@odata2ts/converter-luxon": "^0.2.7",
+    "@odata2ts/converter-v2-to-v4": "^0.5.7",
     "@odata2ts/http-client-fetch": "^0.11.0",
-    "@odata2ts/odata-service": "workspace:^"
+    "@odata2ts/odata-service": "workspace:^",
+    "bignumber.js": "^9.1.2",
+    "luxon": "^3.7.2"
   },
   "devDependencies": {
     "@odata2ts/odata2ts": "workspace:^",
+    "@types/luxon": "^3.7.2",
     "testcontainers": "^12.0.4"
   }
 }

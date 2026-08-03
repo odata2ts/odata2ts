@@ -403,7 +403,12 @@ class QueryObjectGenerator {
       ? undefined
       : returnType.type && returnType.dataType !== DataTypes.PrimitiveType
         ? imports.addGeneratedModel(returnType.fqType, returnType.type)
-        : returnType.type;
+        : // a converter may map a primitive onto a type that lives in a module of its own (BigNumber,
+          // DateTime, ...); without this the name is emitted but never imported and the q-object file
+          // does not compile. Same handling as ModelGenerator applies to a converted property.
+          returnType.typeModule
+          ? imports.addCustomType(returnType.typeModule, returnType.type, true)
+          : returnType.type;
     const responseStructure = returnType ? importReturnType(this.version, imports, returnType) : undefined;
     const completeResponseStructure = responseStructure && rtType ? `${responseStructure}<${rtType}>` : undefined;
 

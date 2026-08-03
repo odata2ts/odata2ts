@@ -50,6 +50,23 @@ The server holds its data in memory and rebuilds it per process, so a restart is
 nothing to deploy or seed. Test files still share one instance, so `fileParallelism` is off and anything
 written is put back.
 
+## Two generated clients
+
+The package generates the model **twice** from the same snapshot:
+
+| Service            | Output                            | Purpose                                             |
+| ------------------ | --------------------------------- | --------------------------------------------------- |
+| `library`          | `src-generated/library`           | no converters - pins what the server actually sends |
+| `libraryConverted` | `src-generated/library-converted` | Luxon, BigNumber, bigint, and `converter-v2-to-v4`  |
+
+V2 is where converters earn their keep: the format hands over every timestamp as `/Date(<ticks>)/` and
+every numeric type that does not fit a JS number as a string, so the raw model types all of those as
+`string`. Both halves are worth pinning, and neither is meaningful alone - `feature/DataTypes.test.ts`
+covers the wire format, `feature/Converters.test.ts` covers what the converters make of it.
+
+This is the first place converters meet a **running** V2 server at all; `examples/main` covers the
+converted V2 model only against a mock client.
+
 ## Generation
 
 The client is generated offline from `resource/library-v2.xml`, a committed snapshot of the server's
@@ -78,3 +95,26 @@ Where the server does not support something, the test asserts the rejection rath
 - **No binary content API.** The server declares two media link entries and serves them from `/$value`;
   `@odata2ts/odata-service` has no V2 counterpart to `StreamServiceV4`, so `feature/Blobs.test.ts`
   asserts the gap from both sides with the only raw `fetch` calls in this package.
+- **A query option on a write is refused with 405.** Olingo routes on the shape of the URI, so an entity
+  URI carrying `$select` is a route with no `PUT` handler. CAP honours the same request, so a query
+  option on a write does not port between V2 servers.
+- **Expanding a complex property is refused.** odata2ts widened `expand()` to accept complex properties
+  for V2, because V2 does not inline them the way V4 does - but this server takes navigation properties
+  only, and inlines its complex values anyway. `feature/ComplexTypes.test.ts` pins both rejections next
+  to the deep select through a _navigation_ property, which does work.
+- **A converted date cannot be filtered on.** The Luxon converter renders `datetime'…T00:00:00.000Z'`,
+  and V2's `Edm.DateTime` is timezone-less - its ABNF has no offset - so a strict server rejects it. The
+  raw client renders `datetime'…T00:00:00'` and is accepted. This one is odata2ts', not the server's.
+
+## Bugs this package found
+
+Three, all fixed in the same branch, none of which any existing suite could have caught:
+
+- `PrimitiveTypeServiceV2` destructured its converter (`{ convertFrom, convertTo }`), which strips `this`
+  - so any converter implemented as a class threw, and `ChainedConverter` is exactly that, produced as
+    soon as two converters are configured. `PrimitiveTypeServiceV4` never had the bug.
+- `QueryObjectGenerator` emitted a converter-mapped operation return type without importing it, so a
+  service with both converters and a `Edm.Decimal`-returning operation generated a q-object file that
+  did not compile.
+- The server's own `MostReadMedium` unboxed a nullable score and answered 500 once a client had created
+  an entity without it (fixed in test-server-olingo-v2).
