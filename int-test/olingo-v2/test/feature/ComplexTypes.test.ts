@@ -77,14 +77,25 @@ describe("Olingo Library: complex types", () => {
   });
 
   test("deep select into a complex property is refused as well", async () => {
-    // `expanding()` renders V2's flattened deep select, `$select=Address/City&$expand=Address`. Same
-    // story: valid for some V2 services, not for this one.
+    /*
+     * `expanding()` renders V2's flattened deep select, `$select=Address/City&$expand=Address`. Same
+     * story: valid for some V2 services, not for this one.
+     *
+     * The request is malformed twice over for this server - the expand names a complex property and the
+     * select traverses one - and Olingo reports whichever of the two validations happens to run first.
+     * Both spellings are accepted here rather than pinning one, because which arrives is an ordering
+     * detail inside the server: the file on its own yields "Invalid segment", the full suite yields the
+     * navigation-property message. The refusal is the finding; its wording is not.
+     */
     const cmd = LIBRARY.Members(1).query((b) => b.expanding("Address", (address) => address.select("City")));
     const url = decodeURIComponent(cmd.getUrl());
     expect(url).toContain("$select=Address/City");
     expect(url).toContain("$expand=Address");
 
-    await expectODataError(cmd.execute(), { status: 400, message: /Invalid segment: 'Address\/City'/ });
+    await expectODataError(cmd.execute(), {
+      status: 400,
+      message: /Invalid segment: 'Address\/City'|must be a navigation property/,
+    });
   });
 
   test("deep select through a navigation property does work", async () => {
