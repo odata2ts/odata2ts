@@ -24,6 +24,8 @@ jobs:
             package: "@odata2ts/int-test-cap"
           - name: asp-net
             package: "@odata2ts/int-test-asp-net"
+          - name: olingo-v2
+            package: "@odata2ts/int-test-olingo-v2"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
