@@ -95,11 +95,11 @@ What belongs here is what the **client** does with it:
   among the plain numbers - so `book.AgeRating === "16"` is `false` although both sides are typed `string`.
   The other string-typed numbers (`Int64`, `Decimal`, `Double`, `Single`) are mapped correctly.
   Pinned in `test/v2/feature/DataTypes.test.ts`.
-- **There is no binary content API in V2.** `StreamServiceV4` and `MediaEntityServiceV4` have no V2
-  counterpart, and the V2 generator emits neither. The adapter exposes the content properly, as media link
-  entries with `$value` and `media_src` - so this is the one feature where the server is ahead of the
-  client. `test/v2/feature/Blobs.test.ts` asserts the gap from both sides, with the only raw `fetch` calls
-  in this package, since there is no generated API to call.
+- **Binary content changes shape between the versions.** What the V4 metadata declares as `Edm.Stream`
+  properties (`EBook.content`, `Audiobook.Sample`) the adapter re-expresses as media link entries, since
+  V2 has no stream type - so the same rows are reached as `EBooks(<id>)/content` over V4 and as
+  `EBooks(guid'<id>')/$value` over V2, and an entity can carry only one payload here.
+  `test/v2/feature/Blobs.test.ts` writes over one version and reads over the other to pin that they meet.
 - **No ETag handling.** Nothing reads `__metadata.etag`, nothing sends `If-Match`, so `Copies` is
   create-only - as it is over V4, except that the V2 metadata actually declares the token.
 - **A write answers with a body the typing does not admit.** V2 has no `Prefer: return=representation` and

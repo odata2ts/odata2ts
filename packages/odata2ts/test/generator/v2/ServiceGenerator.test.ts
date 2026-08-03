@@ -239,4 +239,19 @@ describe("Service Generator Tests V2", () => {
     // NOTE: it's irrelevant that the OpenEntityService has no keys defined as long as it's not referenced via EntitySet or NavProp
     await compareMainService("abstract-and-open-types.ts");
   });
+
+  test("Service Generator: media link entry", async () => {
+    // given a media link entry, i.e. an entity pointing at the binary content which is its own
+    odataBuilder
+      .addEntityType("EBook", { hasStream: true }, (builder) =>
+        builder.addKeyProp("id", ODataTypesV2.Guid).addProp("title", ODataTypesV2.String, false),
+      )
+      .addEntitySet("EBooks", withNs("EBook"));
+
+    // when generating
+    await doGenerate();
+
+    // then its service extends the media entity service, which adds the $value access
+    await compareMainService("media-entity.ts");
+  });
 });

@@ -92,9 +92,10 @@ Where the server does not support something, the test asserts the rejection rath
 - **Deleting a property value answers 405.** Olingo's dispatcher has no route for `DELETE` on a property
   URL. Setting a value to null this way is a `MAY` in V1–V3.
 - **A side-effecting operation answers 201, not 200** — even when it creates nothing.
-- **No binary content API.** The server declares two media link entries and serves them from `/$value`;
-  `@odata2ts/odata-service` has no V2 counterpart to `StreamServiceV4`, so `feature/Blobs.test.ts`
-  asserts the gap from both sides with the only raw `fetch` calls in this package.
+- **A binary error response carries no message.** The client reads the response of a binary request as a
+  blob, error responses included, so the XML error body this server sends back for a `$value` on an
+  unknown entity is never looked into: the status is right, the message is the client's fallback.
+  Pinned in `feature/Blobs.test.ts`.
 - **A query option on a modification request is out of scope for V2.** System query options are defined
   for retrieval only, so there is no `$select` on a `PUT` for a service to honour. This server routes on
   the shape of the URI and answers 405; that is a conforming reaction to a request the protocol does not

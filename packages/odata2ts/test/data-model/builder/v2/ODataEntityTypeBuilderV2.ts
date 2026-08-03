@@ -5,7 +5,14 @@ export class ODataEntityTypeBuilderV2 extends ODataEntityTypeBuilderBase<EntityT
   private associations: Array<Association> = [];
 
   protected createVersionedEntityType(): EntityTypeV3 {
-    return this.createEntityType();
+    const entityType = this.createEntityType();
+    // V2 spells the media entity marker in the metadata namespace
+    const { HasStream, ...attributes } = entityType.$;
+
+    return {
+      ...entityType,
+      $: { ...attributes, ...(HasStream ? { "m:HasStream": HasStream } : {}) },
+    };
   }
 
   public getAssociations() {

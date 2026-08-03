@@ -298,8 +298,9 @@ class ServiceGenerator {
     const props = [...model.baseProps, ...model.props];
 
     // a media entity's own representation is binary content, reachable via `$value` - that access is
-    // what the specialized base class adds on top of the regular entity service
-    const isMediaEntity = this.version === ODataVersions.V4 && !isComplexType && (model as EntityType).hasStream;
+    // what the specialized base class adds on top of the regular entity service. V2 calls the same thing
+    // a media link entry and addresses it the same way.
+    const isMediaEntity = !isComplexType && (model as EntityType).hasStream;
 
     const entityServiceType = importContainer.addServiceObject(
       this.version,

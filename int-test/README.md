@@ -45,7 +45,7 @@ Test files follow the same scheme in every package, one concern per file:
 | `core/Operations.test.ts`             | functions and actions, bound and unbound                                       |
 | `core/Singleton.test.ts`              | the singleton: addressed by name, read and written like an entity              |
 | `feature/CrudQuery.test.ts`           | system query options on `create`/`add`/`update`/`patch`                        |
-| `feature/Blobs.test.ts`               | binary content: stream properties and media entities                           |
+| `feature/Blobs.test.ts`               | binary content: stream properties, media entities, V2's media link entries     |
 | `feature/Subtypes.test.ts`            | type cast segment and derived types' properties (ASP.NET only - CAP is flat)   |
 | `feature/PropertyServices.test.ts`    | services for individual properties (`enablePrimitivePropertyServices`)         |
 | `feature/DataTypes.test.ts`           | data types round tripped through the server (ASP.NET, and CAP's V2 suite)      |

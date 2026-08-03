@@ -110,6 +110,14 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    */
   protected abstract mapODataType(type: string): TypeModel;
 
+  /**
+   * Whether the entity's own representation is binary content: a media entity in V4, a media link entry
+   * in V2. Both versions know the same marker, V2 puts it into the metadata namespace though.
+   */
+  protected isMediaEntity(entityType: ET): boolean {
+    return ifTrue(entityType.$.HasStream);
+  }
+
   public async digest(): Promise<DataModel> {
     this.digestEntityTypesAndOperations();
 
@@ -278,8 +286,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         keys: [], // postprocess required to include props from base classes
         getKeyUnion: () => keyNames.join(" | "),
         subtypes: new Set(),
-        // postprocess required as well: HasStream is inherited from base types
-        hasStream: ifTrue((model as EntityType).$.HasStream),
+        // postprocess required as well: the media entity marker is inherited from base types
+        hasStream: this.isMediaEntity(model),
       });
     }
   }
