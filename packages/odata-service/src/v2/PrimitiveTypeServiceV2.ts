@@ -1,4 +1,4 @@
-import { ValueConverter } from "@odata2ts/converter-api";
+import { ConverterOptions, ValueConverter } from "@odata2ts/converter-api";
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataValueResponseV2 } from "@odata2ts/odata-core";
 import {
@@ -35,14 +35,21 @@ export class PrimitiveTypeServiceV2<in out ClientType extends ODataHttpClient, T
     client: ClientType,
     basePath: string,
     name: string,
-    { convertTo, convertFrom }: ValueConverter<any, T> = getIdentityConverter(),
+    converter: ValueConverter<any, T> = getIdentityConverter(),
     mappedName?: string,
     options?: ODataServiceOptions,
   ) {
     this.__base = new ServiceStateHelper(client, basePath, name, options);
+    /*
+     * The two conversion methods are delegated to rather than pulled off the converter, because a
+     * converter may be a class with instance state: destructuring `{ convertFrom, convertTo }` strips
+     * `this`, and `ChainedConverter` - which is what a configuration with more than one converter
+     * produces - then throws on its own `this.converter2`. PrimitiveTypeServiceV4 keeps the object as
+     * it is for the same reason.
+     */
     this.__converter = {
-      convertFrom,
-      convertTo,
+      convertFrom: (value, converterOptions?: ConverterOptions) => converter.convertFrom(value, converterOptions),
+      convertTo: (value, converterOptions?: ConverterOptions) => converter.convertTo(value, converterOptions),
       getName() {
         return name;
       },

@@ -25,6 +25,35 @@ const config: ConfigFileOptions = {
       source: "resource/library-v2.xml",
       output: "src-generated/library",
     },
+    /**
+     * The same model a second time, with converters switched on.
+     *
+     * V2 is where converters matter most: its JSON format hands over every timestamp as
+     * `/Date(<ticks>)/` and every numeric type that does not fit a JS number as a string, so the raw
+     * model types those as `string` and leaves the caller to parse them. The converters turn that into
+     * `DateTime`, `BigNumber` and `bigint` on the way in and back on the way out.
+     *
+     * Generated separately rather than replacing the raw client, because both halves are worth testing:
+     * `feature/DataTypes.test.ts` pins what the server actually sends, and `feature/Converters.test.ts`
+     * pins what the converters make of it. Neither is meaningful without the other.
+     */
+    libraryConverted: {
+      serviceName: "LibraryConverted",
+      source: "resource/library-v2.xml",
+      output: "src-generated/library-converted",
+      enablePrimitivePropertyServices: true,
+      converters: [
+        // maps V2's own spellings onto the V4 ones, so a date is an ISO string before anything else
+        // touches it - the base every other converter here builds on
+        "@odata2ts/converter-v2-to-v4",
+        "@odata2ts/converter-luxon",
+        "@odata2ts/converter-big-number",
+        {
+          module: "@odata2ts/converter-common",
+          use: ["int64ToBigIntConverter"],
+        },
+      ],
+    },
   },
 };
 
