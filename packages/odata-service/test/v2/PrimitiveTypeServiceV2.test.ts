@@ -50,6 +50,39 @@ describe("PrimitiveTypeService V2 Test", () => {
     expect(converter.getMappedName()).toBe("mappedUserName");
   });
 
+  test("primitiveType V2: the converter is delegated to, not taken apart", async () => {
+    /*
+     * Both directions go through the converter object itself rather than through methods pulled off it.
+     * That matters for any converter implemented as a class - `ChainedConverter`, which is what a
+     * configuration with more than one converter produces, keeps its state in `this` and throws once its
+     * methods are detached. The V4 service has always kept the object; this asserts that V2 does too.
+     */
+    const stateful = new (class {
+      public readonly id = "Stateful";
+      public readonly from = "string" as const;
+      public readonly to = "string" as const;
+      private readonly marker = "!";
+      convertFrom(value: string | null | undefined) {
+        return value === null || value === undefined ? value : `from${this.marker}${value}`;
+      }
+      convertTo(value: string | null | undefined) {
+        return value === null || value === undefined ? value : `to${this.marker}${value}`;
+      }
+    })();
+
+    const service = new PrimitiveTypeServiceV2<MockClient, string>(
+      odataClient,
+      BASE_URL,
+      NAME,
+      stateful as any,
+      PROPERTY_NAME,
+    );
+    const converter = (service as any).__converter;
+
+    expect(converter.convertFrom("value")).toBe("from!value");
+    expect(converter.convertTo("value")).toBe("to!value");
+  });
+
   test("primitiveType V2: get value", async () => {
     const request = testService.getValue();
     const result = request.getInfo();
