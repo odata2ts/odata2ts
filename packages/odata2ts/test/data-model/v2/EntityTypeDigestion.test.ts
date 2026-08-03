@@ -489,4 +489,29 @@ describe("V2: EntityTypeDigestion Test", () => {
       required: false,
     } as PropertyModel);
   });
+
+  test("EntityTypes: media link entry", async () => {
+    // V2's counterpart of V4's media entity, only that the marker sits in the metadata namespace:
+    // `m:HasStream="true"`. Reading the V4 spelling instead would silently find nothing.
+    odataBuilder.addEntityType("Book", undefined, (builder) => builder.addKeyProp("id", ODataTypesV2.Guid));
+    odataBuilder.addEntityType("EBook", { hasStream: true }, (builder) => builder.addKeyProp("id", ODataTypesV2.Guid));
+
+    const result = await doDigest();
+
+    expect(result.getEntityType(withNs("EBook"))!.hasStream).toBe(true);
+    expect(result.getEntityType(withNs("Book"))!.hasStream).toBeFalsy();
+  });
+
+  test("EntityTypes: media link entry trait is inherited", async () => {
+    // Same as in V4: a type derived from a media link entry has its content at the same place, so the
+    // flag has to survive the base class.
+    odataBuilder.addEntityType("Medium", { hasStream: true }, (builder) => builder.addKeyProp("id", ODataTypesV2.Guid));
+    odataBuilder.addEntityType("EBook", { baseType: withNs("Medium") }, (builder) =>
+      builder.addProp("fileFormat", ODataTypesV2.String),
+    );
+
+    const result = await doDigest();
+
+    expect(result.getEntityType(withNs("EBook"))!.hasStream).toBe(true);
+  });
 });

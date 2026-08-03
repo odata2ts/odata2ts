@@ -5,6 +5,7 @@ import {
   CollectionServiceV2,
   EntitySetServiceV2,
   EntityTypeServiceV2,
+  MediaEntityServiceV2,
   ODataServiceOptions,
   PrimitiveTypeServiceV2,
   UrlRequestCmd,
@@ -65,6 +66,18 @@ export class PersonModelV2Service<ClientType extends ODataHttpClient> extends En
         mainResponseConverter: new EntityResponseConverterV2(qPersonV2),
       },
     );
+  }
+}
+
+/** Same entity, only declared `m:HasStream="true"` - which is all the generator does differently. */
+export class PersonModelV2MediaService<ClientType extends ODataHttpClient> extends MediaEntityServiceV2<
+  ClientType,
+  PersonModel,
+  EditablePersonModel,
+  QPersonV2
+> {
+  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+    super(client, basePath, name, new QPersonV2(), options);
   }
 }
 

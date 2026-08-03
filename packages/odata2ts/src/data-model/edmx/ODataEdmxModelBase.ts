@@ -48,7 +48,9 @@ export interface EntityType {
     OpenType?: "true" | "false";
     /**
      * Marks a media entity, i.e. an entity whose own representation is binary content, addressed by
-     * appending `$value` to its URL. V4 only, and inherited by derived types.
+     * appending `$value` to its URL. Inherited by derived types.
+     *
+     * V4 spelling; V2 knows the same marker as `m:HasStream` and calls such an entity a media link entry.
      */
     HasStream?: "true" | "false";
   };

@@ -120,6 +120,10 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
     return [];
   }
 
+  protected isMediaEntity(entityType: EntityTypeV3): boolean {
+    return entityType.$["m:HasStream"] === "true";
+  }
+
   // in V2 all we have & need is the FunctionImport: Function & Action elements are only known in V4.
   protected digestOperations(schema: SchemaV3) {}
 

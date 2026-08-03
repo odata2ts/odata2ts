@@ -4,7 +4,7 @@ export interface EntityOrComplexBuilderOptions {
   baseType?: string;
   abstract?: boolean;
   open?: boolean;
-  /** Media entity: only meaningful on entity types, and only in V4. */
+  /** Media entity (V4) resp. media link entry (V2): only meaningful on entity types. */
   hasStream?: boolean;
 }
 

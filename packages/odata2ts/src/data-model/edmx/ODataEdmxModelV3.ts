@@ -16,6 +16,13 @@ export interface SchemaV3 extends Schema<EntityTypeV3, ComplexTypeV3> {
 }
 
 export interface EntityTypeV3 extends EntityType {
+  $: EntityType["$"] & {
+    /**
+     * Marks a media link entry, i.e. an entity pointing at a media resource which holds its binary
+     * content. Same marker as V4's `HasStream`, only in the metadata namespace.
+     */
+    "m:HasStream"?: "true" | "false";
+  };
   NavigationProperty?: Array<NavigationProperty>;
 }
 

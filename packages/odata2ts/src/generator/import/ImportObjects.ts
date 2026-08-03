@@ -92,7 +92,8 @@ export const VERSIONED_SERVICE_IMPORTS = [
   ServiceImports.CollectionService,
   ServiceImports.EntitySetService,
   ServiceImports.ComplexTypeService,
-  // V4 only in fact - streams are an OData V4 concept, so these are never requested for V2
-  ServiceImports.StreamService,
   ServiceImports.MediaEntityService,
+  // V4 only in fact - a stream *property* is an OData V4 concept, and V2's only binary content is the
+  // media link entry's own, which MediaEntityServiceV2 reaches on its own
+  ServiceImports.StreamService,
 ];
