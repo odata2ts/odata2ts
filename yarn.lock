@@ -665,6 +665,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@odata2ts/int-test-olingo-v2@workspace:int-test/olingo-v2":
+  version: 0.0.0-use.local
+  resolution: "@odata2ts/int-test-olingo-v2@workspace:int-test/olingo-v2"
+  dependencies:
+    "@odata2ts/http-client-fetch": "npm:^0.11.0"
+    "@odata2ts/odata-service": "workspace:^"
+    "@odata2ts/odata2ts": "workspace:^"
+    testcontainers: "npm:^12.0.4"
+  languageName: unknown
+  linkType: soft
+
 "@odata2ts/odata-core@npm:^0.1.0":
   version: 0.1.0
   resolution: "@odata2ts/odata-core@npm:0.1.0"
