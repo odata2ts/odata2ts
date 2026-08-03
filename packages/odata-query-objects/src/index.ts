@@ -38,7 +38,7 @@ export { QDateTimeOffsetParam } from "./param/v4/QDateTimeOffsetParam";
 
 export { QGuidV2Param } from "./param/v2/QGuidV2Param";
 export { QBinaryV2Param } from "./param/v2/QBinaryV2Param";
-export { QDateTimeV2Param } from "./param/v2/QDateTimeV2Param";
+export { QDateTimeV2Param, toDateTimeV2UrlValue } from "./param/v2/QDateTimeV2Param";
 export { QDateTimeOffsetV2Param } from "./param/v2/QDateTimeOffsetV2Param";
 export { QStringNumberV2Param } from "./param/v2/QStringNumberV2Param";
 export { QDecimalV2Param } from "./param/v2/QDecimalV2Param";
