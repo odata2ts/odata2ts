@@ -61,7 +61,7 @@ export default async function setup(project: TestProject) {
         `Is a Docker daemon running? Without Docker, run against a server you started yourself:\n` +
         `  LIBRARY_BASE_URL=http://localhost:4004${SERVICE_PATH} yarn int-test:cap\n` +
         `Original error: ${e instanceof Error ? e.message : String(e)}`,
-      { cause: e },
+      { cause: e as Error },
     );
   }
 

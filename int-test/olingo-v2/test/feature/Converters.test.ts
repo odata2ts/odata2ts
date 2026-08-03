@@ -76,30 +76,31 @@ describe("Olingo Library: value converters", () => {
     expect(typeof copy.Condition).toBe("number");
   });
 
-  test("a converted date cannot be filtered on: the literal it renders is not valid V2", async () => {
+  test("a converted date can be filtered on", async () => {
     /*
-     * The direction that had never been tested, and it does not work. Going *out*, the converter renders
-     * a `DateTime` as `datetime'1925-04-26T00:00:00.000Z'` - with fractional seconds and a `Z`. V2's
-     * `Edm.DateTime` is timezone-less and its ABNF has no offset, so that literal is invalid and a strict
-     * server refuses it.
-     *
-     * The raw client, handed the same instant as a plain string, renders `datetime'1925-04-26T00:00:00'`
-     * and gets 200. So converters make reading a date pleasant and filtering on one impossible, and the
-     * workaround is to drop back to the unconverted client for that one query.
-     *
-     * Recorded as a client-side defect, not a server one: it is odata2ts that emits the literal.
+     * The direction that had never been tested: a `DateTime` going *out*. V2's `Edm.DateTime` literal is
+     * timezone-less - its ABNF has no offset - while a converter hands back a full ISO string, `Z` and
+     * all. `QDateTimeV2Path` therefore normalises the value to UTC and drops the designator, so what
+     * reaches the server is a literal it accepts.
      */
     const cmd = CONVERTED.Books().query((b, q) =>
       b.filter(q.PublicationDate.eq(DateTime.fromISO("1925-04-26T00:00:00", { zone: "utc" }))),
     );
-    expect(decodeURIComponent(cmd.getUrl())).toContain("datetime'1925-04-26T00:00:00.000Z'");
+    expect(decodeURIComponent(cmd.getUrl())).toContain("$filter=PublicationDate eq datetime'1925-04-26T00:00:00'");
 
-    await expectODataError(cmd.execute(), { status: 400, message: /Invalid filter expression/ });
+    const result = await cmd.execute();
+    expect(result.data.d.results.map((book) => book.Title)).toStrictEqual(["Der Prozess"]);
+  });
 
-    // what the raw client sends for the same instant, and what the server wants
-    const raw = LIBRARY.Books().query((b, q) => b.filter(q.PublicationDate.eq("1925-04-26T00:00:00")));
-    expect(decodeURIComponent(raw.getUrl())).toContain("datetime'1925-04-26T00:00:00'");
-    expect((await raw.execute()).data.d.results.map((book) => book.Title)).toStrictEqual(["Der Prozess"]);
+  test("a date given in another zone is normalised to the same instant", async () => {
+    // the normalisation has to shift, not truncate: 02:00+02:00 is the same instant as 00:00Z, and the
+    // literal V2 wants is the UTC one
+    const cmd = CONVERTED.Books().query((b, q) =>
+      b.filter(q.PublicationDate.eq(DateTime.fromISO("1925-04-26T02:00:00+02:00", { setZone: true }))),
+    );
+    expect(decodeURIComponent(cmd.getUrl())).toContain("datetime'1925-04-26T00:00:00'");
+
+    expect((await cmd.execute()).data.d.results.map((book) => book.Title)).toStrictEqual(["Der Prozess"]);
   });
 
   test("a converted value survives a write and comes back converted", async () => {

@@ -95,20 +95,21 @@ Where the server does not support something, the test asserts the rejection rath
 - **No binary content API.** The server declares two media link entries and serves them from `/$value`;
   `@odata2ts/odata-service` has no V2 counterpart to `StreamServiceV4`, so `feature/Blobs.test.ts`
   asserts the gap from both sides with the only raw `fetch` calls in this package.
-- **A query option on a write is refused with 405.** Olingo routes on the shape of the URI, so an entity
-  URI carrying `$select` is a route with no `PUT` handler. CAP honours the same request, so a query
-  option on a write does not port between V2 servers.
+- **A query option on a modification request is out of scope for V2.** System query options are defined
+  for retrieval only, so there is no `$select` on a `PUT` for a service to honour. This server routes on
+  the shape of the URI and answers 405; that is a conforming reaction to a request the protocol does not
+  describe. The client lets it be expressed because the command type is shared with the read path.
 - **Expanding a complex property is refused.** odata2ts widened `expand()` to accept complex properties
   for V2, because V2 does not inline them the way V4 does - but this server takes navigation properties
   only, and inlines its complex values anyway. `feature/ComplexTypes.test.ts` pins both rejections next
   to the deep select through a _navigation_ property, which does work.
-- **A converted date cannot be filtered on.** The Luxon converter renders `datetime'…T00:00:00.000Z'`,
-  and V2's `Edm.DateTime` is timezone-less - its ABNF has no offset - so a strict server rejects it. The
-  raw client renders `datetime'…T00:00:00'` and is accepted. This one is odata2ts', not the server's.
+- **Filtering on a converted date works**, and did not before: V2's `Edm.DateTime` literal is
+  timezone-less while a converter hands back a full ISO string, so `QDateTimeV2Path` now normalises to
+  UTC and drops the designator. A strict V2 server rejects the ISO form outright.
 
 ## Bugs this package found
 
-Three, all fixed in the same branch, none of which any existing suite could have caught:
+Four, all fixed in the same branch, none of which any existing suite could have caught:
 
 - `PrimitiveTypeServiceV2` destructured its converter (`{ convertFrom, convertTo }`), which strips `this`
   - so any converter implemented as a class threw, and `ChainedConverter` is exactly that, produced as
@@ -116,5 +117,8 @@ Three, all fixed in the same branch, none of which any existing suite could have
 - `QueryObjectGenerator` emitted a converter-mapped operation return type without importing it, so a
   service with both converters and a `Edm.Decimal`-returning operation generated a q-object file that
   did not compile.
+- `QDateTimeV2Path` and `QDateTimeV2Param` wrapped a converted value into `datetime'...'` verbatim, so a
+  converted date produced `datetime'...T00:00:00.000Z'` - a literal V2 does not define, since
+  `Edm.DateTime` carries no timezone. Filtering on a date was therefore impossible with converters on.
 - The server's own `MostReadMedium` unboxed a nullable score and answered 500 once a client had created
   an entity without it (fixed in test-server-olingo-v2).
