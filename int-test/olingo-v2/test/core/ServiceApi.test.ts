@@ -51,36 +51,48 @@ describe("Olingo Library: service API", () => {
   });
 
   test("addToQuery adds options to a command that already exists", async () => {
-    // written against a throwaway entity on purpose: `update` is a PUT, so it resets every property it
-    // does not carry, and the seed data is what the other files assert against
-    const created = await LIBRARY.Books().create({ Title: "addToQuery probe", Language: "de" }).execute();
+    // `query()` takes its options up front, but a command can also be widened afterwards - which is what
+    // `addToQuery` is for, and it composes with what the query function already set
+    const cmd = LIBRARY.Books()
+      .query((builder, q) => builder.filter(q.Language.eq("de")))
+      .addToQuery((builder) => builder.select("Title").top(1));
+
+    const url = decodeURIComponent(cmd.getUrl());
+    expect(url).toContain("$filter=Language eq 'de'");
+    expect(url).toContain("$select=Title");
+    expect(url).toContain("$top=1");
+
+    const result = await cmd.execute();
+    expect(result.status).toBe(200);
+    expect(result.data.d.results).toHaveLength(1);
+    expect(result.data.d.results[0].ISBN).toBeUndefined();
+  });
+
+  test("a query option on a modification request is out of scope for V2", async () => {
+    /*
+     * `addToQuery` is available on the write commands too, because the command type is shared - but V2
+     * defines system query options for retrieval only. There is no `$select` on a `PUT` to honour, and
+     * nothing in [MS-ODATA] says what a service should do with one.
+     *
+     * This server routes on the shape of the URI, so an entity URI carrying a query option is simply a
+     * route with no `PUT` handler and the answer is 405. That is a conforming reaction to a request the
+     * protocol does not describe; the interesting part is only that the client lets it be expressed.
+     */
+    const created = await LIBRARY.Books().create({ Title: "write option probe", Language: "de" }).execute();
     const id = created.data.d.Id;
 
-    // `update` returns a builder-backed command, so query options can be attached after the payload -
-    // which is the only way to reach them for the write verbs, whose signatures take no query function
-    const cmd = LIBRARY.Books(id)
-      .update({ Title: "addToQuery probe", Language: "de" })
-      .addToQuery((builder) => builder.select("Title"));
+    await expectODataError(
+      LIBRARY.Books(id)
+        .update({ Title: "write option probe", Language: "de" })
+        .addToQuery((builder) => builder.select("Title"))
+        .execute(),
+      { status: 405, message: /does not allow the HTTP method/ },
+    );
 
-    expect(decodeURIComponent(cmd.getUrl())).toBe(`${BASE_URL}/Books(guid'${id}')?$select=Title`);
-
-    /*
-     * And this server refuses it. Olingo routes on the shape of the URI, so an entity URI carrying a
-     * query option is a different route - one with no PUT handler - and the answer is 405 rather than
-     * the option simply being ignored.
-     *
-     * Worth pinning because the failure mode is unhelpful: the write is rejected wholesale for the sake
-     * of an option that could not have changed anything. CAP takes the same request and honours the
-     * write, so a query option on a write is not portable between V2 servers at all.
-     */
-    await expectODataError(cmd.execute(), {
-      status: 405,
-      message: /does not allow the HTTP method/,
-    });
-
-    // without the option the very same write succeeds
-    const plain = LIBRARY.Books(id).update({ Title: "addToQuery probe", Language: "de" });
-    expect((await plain.execute()).status).toBe(204);
+    // the same write without the option is an ordinary V2 request and succeeds
+    expect((await LIBRARY.Books(id).update({ Title: "write option probe", Language: "de" }).execute()).status).toBe(
+      204,
+    );
 
     await LIBRARY.Books(id).delete().execute();
   });

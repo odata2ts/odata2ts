@@ -60,14 +60,19 @@ describe("V2 Data Types & Converter Tests", function () {
   });
 
   test("v2: DateTime in URL", async () => {
-    const expected = "2006-11-05T00:00:00.000Z";
+    // V2's `datetime` literal is timezone-less - `Edm.DateTime` carries no offset and its ABNF has no
+    // place for one - so an ISO value handed in is normalised to UTC and the designator dropped. A
+    // strict V2 server answers 400 for the `...Z` form; verified against Apache Olingo in
+    // int-test/olingo-v2.
+    const given = "2006-11-05T00:00:00.000Z";
+    const expectedLiteral = "2006-11-05T00:00:00";
 
     await DATA_TYPE_SERVICE.oneOfEverything()
       .query((builder, qOoe) => {
-        return builder.filter(qOoe.dateTimeType.eq(expected));
+        return builder.filter(qOoe.dateTimeType.eq(given));
       })
       .execute();
 
-    expect(ODATA_CLIENT.lastUrl).toBe(`${ONE_OF_EVERYTHING_URL}?$filter=DateTimeType eq datetime'${expected}'`);
+    expect(ODATA_CLIENT.lastUrl).toBe(`${ONE_OF_EVERYTHING_URL}?$filter=DateTimeType eq datetime'${expectedLiteral}'`);
   });
 });

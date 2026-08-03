@@ -2,6 +2,9 @@ import { FIXED_DATE, FIXED_STRING, fixedDateConverter } from "@odata2ts/test-con
 import { describe, expect, test } from "vitest";
 import { QDateTimeV2Param } from "../../../src";
 
+/** The same instant as FIXED_STRING, in the timezone-less form V2's `datetime` literal requires. */
+const FIXED_STRING_URL = FIXED_STRING.replace(/\.000Z$/, "").replace(/Z$/, "");
+
 describe("QDateTimeV2Param Tests", () => {
   const name = "T3st_bbb";
   const toTest = new QDateTimeV2Param(name);
@@ -37,7 +40,12 @@ describe("QDateTimeV2Param Tests", () => {
     expect(toTest.formatUrlValue(null)).toBe("null");
     expect(toTest.formatUrlValue(undefined)).toBe(undefined);
 
-    expect(toTestWithConverter.formatUrlValue(new Date())).toBe(`datetime'${FIXED_STRING}'`);
+    /*
+     * The converted value arrives as a full ISO string, but V2's `datetime` literal is timezone-less -
+     * its ABNF has no offset - so the designator is dropped on the way into the URL and the instant is
+     * normalised to UTC. A strict V2 server answers 400 for the ISO form.
+     */
+    expect(toTestWithConverter.formatUrlValue(new Date())).toBe(`datetime'${FIXED_STRING_URL}'`);
   });
 
   test("parseUrlValue", () => {
