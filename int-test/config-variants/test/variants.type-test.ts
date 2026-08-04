@@ -1,5 +1,7 @@
 import { expectTypeOf } from "vitest";
 import type { Amenities as NumericAmenities, Branch as NumericBranch } from "../src-generated/enum-numeric/index.js";
+import { Amenities as unionAmenityMembers } from "../src-generated/enum-string-union/index.js";
+import type { Amenities as UnionAmenities, Branch as UnionBranch } from "../src-generated/enum-string-union/index.js";
 import type { Medium as ModelsOnlyMedium } from "../src-generated/models-only/index.js";
 import type {
   BookDto,
@@ -45,6 +47,16 @@ expectTypeOf<BookDto>().toExtend<MediumDto>();
 // the model itself is there ...
 expectTypeOf<ModelsOnlyMedium>().toBeObject();
 expectTypeOf<ModelsOnlyMedium["Title"]>().toEqualTypeOf<string>();
+
+/* --- enumStringUnion: a union of string literals plus its member list ------------------------------ */
+
+// the type is the plain union, which is the point of the option
+expectTypeOf<UnionAmenities>().toEqualTypeOf<
+  "WheelchairAccessible" | "Parking" | "Café" | "KidsArea" | "StudyRoom" | "FullService"
+>();
+// ... and next to it stands the member list the query objects need, since a union has no runtime form
+expectTypeOf<typeof unionAmenityMembers>().toExtend<ReadonlyArray<UnionAmenities>>();
+expectTypeOf<UnionBranch["Amenities"]>().toEqualTypeOf<UnionAmenities | null>();
 
 /* --- enumNumeric: enums as numbers ---------------------------------------------------------------- */
 

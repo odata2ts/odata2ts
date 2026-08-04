@@ -74,13 +74,19 @@ rather than copied so they cannot drift apart.
 - **`disableAutomaticNameClashResolution`**: its whole effect is to turn a resolvable clash into an error,
   so there is no output to type-check. Covered by unit tests instead.
 
-## Known defect it currently works around
+## What its first run turned up
 
-`enumStringUnion` is restricted to `mode: models`, because generating query objects on top of a string
-union does not compile - which is what the very first run of this package surfaced. The model emits
-`export type Amenities = "…" | "…"`, a type alias, while the query object emits
-`new QEnumPath(this.withPrefix("Amenities"), Amenities)` and hands that alias over as a *value*.
-`QEnumPath` needs a real runtime object, which a string union does not have.
+Two generator defects, both of which had gone unnoticed because no test generated under those options:
 
-So `enumType: "string-union"` cannot presently produce a working client for any model carrying an enum
-property. Widen the variant back to the full mode once that is resolved.
+- **`enableNativeInOperator` produced code which does not compile for any model with an `Edm.Binary`
+  property.** The options argument was appended to every non-collection, non-model, non-enum path,
+  including `QBinaryPath` - which extends `QNoopPath` and takes a path and a converter, nothing else.
+- **`enumType: "string-union"` could not produce a working client for any model carrying an enum
+  property at all.** The model emitted `export type Amenities = "…" | "…"`, a type alias, while the query
+  object handed that alias over to `QEnumPath` as a *value*. A union of string literals exists only in
+  the type system.
+
+Both are fixed. For the second one the generator now emits the member list next to the type alias, under
+the same name - a type and a value of one name coexist, so every use site stays as it was - and
+`QEnumPath` accepts either shape, since a string enum needs no runtime lookup anyway: its members already
+are the values which go on the wire.

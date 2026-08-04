@@ -1,4 +1,4 @@
-import { NumericEnumLike, NumericEnumMember, StringEnumLike, StringEnumMember } from "../enum/EnumModel";
+import { NumericEnumLike, NumericEnumMember, StringEnumSource, StringEnumSourceMember } from "../enum/EnumModel";
 import { QEnumPath } from "../path/enum/QEnumPath";
 import { QNumericEnumPath } from "../path/enum/QNumericEnumPath";
 import { QBinaryPath } from "../path/QBinaryPath";
@@ -147,9 +147,9 @@ export class QDateTimeOffsetV2Collection<ConvertedType = string> extends QPrimit
   public readonly it = new QDateTimeOffsetV2Path<ConvertedType>(this.withPrefix(), this.converter);
 }
 
-export class QEnumCollection<EnumType extends StringEnumLike> extends QPrimitiveCollection<
+export class QEnumCollection<EnumType extends StringEnumSource> extends QPrimitiveCollection<
   string,
-  StringEnumMember<EnumType>,
+  StringEnumSourceMember<EnumType>,
   QEnumPath<EnumType>
 > {
   readonly it: QEnumPath<EnumType>;
