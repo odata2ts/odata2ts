@@ -2,7 +2,7 @@ import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { generateModels } from "../../../src/generator/index.js";
-import { EmitModes } from "../../../src/index.js";
+import { EmitModes, Modes } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
 import {
@@ -247,9 +247,10 @@ describe("Model Generator Tests V4", () => {
           .addProp("relatedAuthors", `Collection(${withNs("Author")})`),
       );
 
-    // when generating for 4.01
+    // when generating for 4.01 without a service
     // then the editable model uses the short form instead of the @odata.bind notation
     await generateAndCompare("entity-relationships-v401.ts", {
+      mode: Modes.models,
       enableBindingProps: true,
       odataVersionV4: "4.01",
       skipEditableModels: false,
@@ -297,9 +298,10 @@ describe("Model Generator Tests V4", () => {
           .addProp("relatedAuthors", `Collection(${withNs("Author")})`),
       );
 
-    // when opting into the binding props
+    // when opting into the binding props without a service
     // then the editable model allows to bind an existing entity via the @odata.bind notation
     await generateAndCompare("entity-relationships-binding.ts", {
+      mode: Modes.models,
       enableBindingProps: true,
       skipEditableModels: false,
       skipIdModels: false,
@@ -320,6 +322,66 @@ describe("Model Generator Tests V4", () => {
           .addProp("relatedAuthors", `Collection(${withNs("Author")})`),
       );
   }
+
+  /**
+   * The entity sets, plus the NavigationPropertyBindings which state where the navigation properties of
+   * a book point to. Without them a binding cannot be expressed by key, since the URL of the referenced
+   * entity is built from the entity set it lives in.
+   */
+  function addRelatedEntitySets() {
+    odataBuilder.addEntitySet("Authors", withNs("Author")).addEntitySet("Books", withNs(ENTITY_NAME), [
+      { path: "author", target: "Authors" },
+      { path: "altAuthor", target: "Authors" },
+      { path: "relatedAuthors", target: "Authors" },
+    ]);
+  }
+
+  test(`${TEST_SUITE_NAME}: binding props by key`, async () => {
+    // given entities related to each other, reachable through entity sets
+    addRelatedEntities();
+    addRelatedEntitySets();
+
+    // when opting into the binding props while a service is generated
+    // then the binding goes by the navigation property itself and carries the key of the entity to bind,
+    // which the query objects turn into the URL the wire notation asks for
+    await generateAndCompare("entity-relationships-binding-by-key.ts", {
+      enableBindingProps: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: deep insert and binding props share the property when bound by key`, async () => {
+    // given entities related to each other, reachable through entity sets
+    addRelatedEntities();
+    addRelatedEntitySets();
+
+    // when opting into both while a service is generated
+    // then the navigation property accepts either shape - a new entity or the key of an existing one -
+    // and the "@id" property tells them apart
+    await generateAndCompare("entity-relationships-deep-insert-binding-by-key.ts", {
+      enableDeepInsertProps: true,
+      enableBindingProps: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: no binding props by key without a NavigationPropertyBinding`, async () => {
+    // given entities related to each other, but no entity set stating where the navigation leads
+    addRelatedEntities();
+
+    // when opting into the binding props while a service is generated
+    // then no binding prop at all: the URL of the referenced entity could not be built
+    await generateAndCompare("entity-relationships.ts", {
+      enableBindingProps: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
 
   test(`${TEST_SUITE_NAME}: deep insert props`, async () => {
     // given entities related to each other
@@ -343,6 +405,7 @@ describe("Model Generator Tests V4", () => {
     // when opting into both
     // then both show up separately, since 4.0 spells a binding with a name of its own
     await generateAndCompare("entity-relationships-deep-insert-binding.ts", {
+      mode: Modes.models,
       enableDeepInsertProps: true,
       enableBindingProps: true,
       skipEditableModels: false,
@@ -359,6 +422,7 @@ describe("Model Generator Tests V4", () => {
     // then the navigation property accepts either shape: a new entity or a reference to an existing one,
     // because 4.01 addresses a binding by the very name of the navigation property
     await generateAndCompare("entity-relationships-deep-insert-binding-v401.ts", {
+      mode: Modes.models,
       enableDeepInsertProps: true,
       enableBindingProps: true,
       odataVersionV4: "4.01",

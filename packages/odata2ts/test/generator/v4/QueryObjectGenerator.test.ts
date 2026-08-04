@@ -1,7 +1,6 @@
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
-import { DigestionOptions } from "../../../src/FactoryFunctionModel.js";
 import { generateQueryObjects } from "../../../src/generator/index.js";
 import { EmitModes } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
@@ -11,6 +10,7 @@ import {
   EntityBasedGeneratorFunctionWithoutVersion,
   FixtureComparatorHelper,
 } from "../comparator/FixtureComparatorHelper.js";
+import { TestOptions } from "../TestTypes.js";
 import { createEntityBasedGenerationTests, ENTITY_NAME, SERVICE_NAME } from "./EntityBasedGenerationTests.js";
 
 describe("Query Object Generator Tests V4", () => {
@@ -39,7 +39,7 @@ describe("Query Object Generator Tests V4", () => {
 
   async function generateAndCompare(
     fixturePath: string,
-    genOptions?: Partial<DigestionOptions>,
+    genOptions?: TestOptions,
     fileToInspect = MODEL_FILE,
   ) {
     await fixtureComparatorHelper.generateAndCompare(fileToInspect, fixturePath, odataBuilder.getSchemas(), genOptions);
@@ -241,6 +241,46 @@ describe("Query Object Generator Tests V4", () => {
       },
       `${SERVICE_NAME.toLowerCase()}/${ENTITY_NAME.toLowerCase()}/Q${ENTITY_NAME}`,
     );
+  });
+
+  function addRelatedEntities() {
+    odataBuilder
+      .addEntityType("Author", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Int32))
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Int32)
+          .addProp("author", withNs("Author"), false)
+          .addProp("relatedAuthors", `Collection(${withNs("Author")})`),
+      );
+  }
+
+  test(`${TEST_SUITE_NAME}: binding of a navigation property`, async () => {
+    // given entities related to each other, reachable through entity sets
+    addRelatedEntities();
+    odataBuilder.addEntitySet("Authors", withNs("Author")).addEntitySet("Books", withNs(ENTITY_NAME), [
+      { path: "author", target: "Authors" },
+      { path: "relatedAuthors", target: "Authors" },
+    ]);
+
+    // when opting into the binding props
+    // then the q-paths carry the id function of the entity set they point to, which is what turns the
+    // key stated in an editable model into the URL of the referenced entity
+    await generateAndCompare("entity-binding.ts", {
+      enableBindingProps: true,
+      skipIdModels: false,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: no binding without a NavigationPropertyBinding`, async () => {
+    // given entities related to each other, but no entity set stating where the navigation leads
+    addRelatedEntities();
+
+    // when opting into the binding props
+    // then the q-paths stay as they are: the URL of the referenced entity could not be built
+    await generateAndCompare("entity-binding-unbound.ts", {
+      enableBindingProps: true,
+      skipIdModels: false,
+    });
   });
 
   test(`${TEST_SUITE_NAME}: stream property gets no q-path`, async () => {

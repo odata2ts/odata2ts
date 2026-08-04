@@ -54,6 +54,7 @@ export { QComplexPath } from "./path/QComplexPath";
 export { QComplexCollectionPath } from "./path/QComplexCollectionPath";
 export { QEntityPath } from "./path/QEntityPath";
 export { QEntityCollectionPath } from "./path/QEntityCollectionPath";
+export { QBinding, type BindingNotation } from "./path/QBinding";
 export * from "./path/QPathModel";
 
 export { QEnumPath } from "./path/enum/QEnumPath";

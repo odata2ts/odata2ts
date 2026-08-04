@@ -4,6 +4,7 @@ import { DataModel } from "../data-model/DataModel.js";
 import { ComplexType, DataTypes, EntityType, OperationType, PropertyModel } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel.js";
+import { Modes } from "../OptionModel.js";
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
 import { CoreImports } from "./import/ImportObjects.js";
@@ -256,6 +257,7 @@ class ModelGenerator {
     const complexProps = allProps.filter((p) => p.dataType === DataTypes.ComplexType);
     const navProps = this.generateNavProps(
       file.getImports(),
+      model.fqName,
       allProps.filter((p) => p.dataType === DataTypes.ModelType),
     );
 
@@ -284,14 +286,38 @@ class ModelGenerator {
   }
 
   /**
+   * Whether a binding is stated by the key of the referenced entity instead of by its URL, which is only
+   * possible where a service is generated: the URL is assembled at runtime, by the query objects, and
+   * those only take part in a request when there is a service to issue it.
+   */
+  private bindsByKey() {
+    return this.options.mode === Modes.service || this.options.mode === Modes.all;
+  }
+
+  /**
    * A navigation property can be bound to an already existing entity, as long as that entity is
    * addressable by a URL - which requires it to have a key.
+   *
+   * Where the binding is stated by key, two more things have to be in place: the id model, which is the
+   * shape of that key, and the entity set the navigation property points to, since the URL is built from
+   * it. Neither is inferable, so a navigation property missing one of them gets no binding at all.
    */
-  private isBindableNavProp(prop: PropertyModel) {
-    if (!this.options.enableBindingProps) {
+  private isBindableNavProp(ownerFqName: string, prop: PropertyModel) {
+    if (!this.options.enableBindingProps || prop.dataType !== DataTypes.ModelType) {
       return false;
     }
-    return prop.dataType === DataTypes.ModelType && !!this.dataModel.getEntityType(prop.fqType)?.keyNames.length;
+    const target = this.dataModel.getEntityType(prop.fqType);
+    if (!target?.keyNames.length) {
+      return false;
+    }
+    if (!this.bindsByKey()) {
+      return true;
+    }
+    return (
+      !this.options.skipIdModels &&
+      target.generateId &&
+      !!this.dataModel.getNavPropBindingTarget(ownerFqName, prop.odataName)
+    );
   }
 
   /**
@@ -300,26 +326,32 @@ class ModelGenerator {
    * - binding an existing entity to the navigation property (issue #38)
    * - deep insert / deep update, i.e. the related entity travelling within this entity's payload (#237)
    *
-   * They meet in V2 and 4.01, where a binding goes by the very name of the navigation property, so the
-   * property has to accept either shape there. 4.0 spells a binding as {@code "Category@odata.bind"} and
-   * therefore keeps the two apart.
+   * Where a service is generated, both go by the mapped name of the navigation property and are told
+   * apart by the {@code "@id"} property, which carries the key of the entity to bind. The query objects
+   * turn that key into the notation of the targeted OData version when the request is converted, so the
+   * user never has to spell out a URL they would have to assemble themselves.
    *
-   * A binding is addressed by the OData name, since that notation ends up on the wire as it is - it is
-   * passed through the query object untouched. A deep insert is addressed by the mapped name instead:
-   * its payload *is* converted, so the property has to be the one the query object knows.
+   * Without a service there is nothing to do that conversion, so the binding is stated as it goes on the
+   * wire: by the OData name, since that notation is passed through the query object untouched. It meets
+   * the deep insert in V2 and 4.01, where a binding goes by the very name of the navigation property, so
+   * the property accepts either shape there; 4.0 spells it as {@code "Category@odata.bind"} and therefore
+   * keeps the two apart. A deep insert is addressed by the mapped name in either case: its payload *is*
+   * converted, so the property has to be the one the query object knows.
    */
   private generateNavProps(
     imports: ImportContainer,
+    ownerFqName: string,
     props: Array<PropertyModel>,
   ): Array<OptionalKind<PropertySignatureStructure>> {
     const isV2 = this.version === ODataVersions.V2;
     const isV401 = !isV2 && this.options.odataVersionV4 === "4.01";
     // in these versions a binding has no name of its own, so it shares the property with a deep insert
     const bindingByPropName = isV2 || isV401;
+    const byKey = this.bindsByKey();
 
     return props.flatMap((prop) => {
       const deepInsert = this.options.enableDeepInsertProps;
-      const bindable = this.isBindableNavProp(prop);
+      const bindable = this.isBindableNavProp(ownerFqName, prop);
 
       // one entry per resulting property name, so that renaming cannot merge what belongs apart
       const byName = new Map<string, { shapes: Array<string>; docs: Array<string>; binds: boolean }>();
@@ -341,12 +373,23 @@ class ModelGenerator {
         );
       }
       if (bindable) {
-        collect(
-          bindingByPropName ? prop.odataName : `${prop.odataName}@odata.bind`,
-          isV2 ? `{ __metadata: { uri: string } }` : isV401 ? `{ "@id": string }` : "string",
-          `Bind "${prop.name}" to an already existing entity by its URL.`,
-          true,
-        );
+        if (byKey) {
+          const target = this.dataModel.getEntityType(prop.fqType)!;
+          const idName = imports.addGeneratedModel(prop.fqType, target.id.modelName);
+          collect(
+            prop.name,
+            `{ "@id": ${idName} }`,
+            `Bind "${prop.name}" to an already existing entity by its key.`,
+            true,
+          );
+        } else {
+          collect(
+            bindingByPropName ? prop.odataName : `${prop.odataName}@odata.bind`,
+            isV2 ? `{ __metadata: { uri: string } }` : isV401 ? `{ "@id": string }` : "string",
+            `Bind "${prop.name}" to an already existing entity by its URL.`,
+            true,
+          );
+        }
       }
 
       return [...byName.entries()].map(([name, { shapes, docs, binds }]) => {

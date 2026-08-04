@@ -2,7 +2,7 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { Book, Member } from "../../src-generated/library/LibraryModel.js";
-import { BASE_URL, LIBRARY } from "../LibraryTestConstants.js";
+import { LIBRARY } from "../LibraryTestConstants.js";
 
 /**
  * Deep insert - odata2ts issue #237 - against a server that actually stores the nested entities.
@@ -12,8 +12,9 @@ import { BASE_URL, LIBRARY } from "../LibraryTestConstants.js";
  * entities have to be *created and linked* on the other side, which is what a fixture cannot show and
  * these tests can.
  *
- * The client is generated for OData 4.0, so a binding is spelled `Nav@odata.bind` and stays a separate
- * property - a deep insert and a binding can therefore be sent side by side, which the last test does.
+ * A binding is stated by the key of the entity to bind (`{"@id": key}`) and therefore shares the property
+ * with the deep insert; the `"@id"` tells the two apart. Sending both for one entity is what the last
+ * test does - for OData 4.0 the query objects split them into two properties again.
  */
 describe("ASP.NET Library: deep insert", () => {
   /** The server assigns the keys here, so each test reads back what it created rather than a fixture id. */
@@ -109,7 +110,7 @@ describe("ASP.NET Library: deep insert", () => {
             Condition: 1,
             IsLoanable: true,
             WeightKg: 0.5,
-            "Location@odata.bind": `${BASE_URL}/Branches(${branchId})`,
+            Location: { "@id": branchId },
           },
         ],
       })
