@@ -1,0 +1,22 @@
+{
+  "name": "@odata2ts/int-test-config-variants",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Compile gate for the configuration surface: generates the same model under a set of configurations and type-checks the result",
+  "repository": "git@github.com:odata2ts/odata2ts.git",
+  "license": "MIT",
+  "author": "texttechne",
+  "type": "module",
+  "scripts": {
+    "build": "yarn clean && yarn generate",
+    "clean": "rimraf src-generated",
+    "generate": "odata2ts",
+    "test-compile": "node ../../node_modules/.bin/tsc"
+  },
+  "dependencies": {
+    "@odata2ts/odata-service": "workspace:^"
+  },
+  "devDependencies": {
+    "@odata2ts/odata2ts": "workspace:^"
+  }
+}

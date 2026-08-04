@@ -4,6 +4,8 @@ This folder contains integration tests in general. Some are static like:
 
 - cli: Testing the CLI
 - ts-floor-check: Testing that the minimum TS Version promise holds
+- config-variants: Compile gate for the configuration surface - generates the model under a set of
+  configurations and type-checks the result
 
 Others test odata2ts against a **real, running OData server** that this repo
 starts and stops itself. Dockerized.
