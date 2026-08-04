@@ -300,8 +300,13 @@ export class ProjectManager {
   }
 
   /**
-   * Generates the barrel files, re-exporting everything that has been generated: one index file per folder
-   * which holds generated files, one per namespace above those, and one at the root of the output directory.
+   * Generates the barrel files, re-exporting everything that has been generated: one index file per
+   * namespace and one at the root of the output directory.
+   *
+   * The files of a folder are always re-exported by the index of its <em>parent</em> - the namespace level
+   * for the model folders, the output root for everything else. Model folders therefore get no index of
+   * their own, which means no generated artefact can ever collide with one: a model literally named "index"
+   * is simply re-exported like any other.
    *
    * The root barrel re-exports the files on root level flatly, but each namespace under its own name
    * ({@code export * as libraryCatalog from "./library-catalog/index.js"}). OData allows the same type name
@@ -315,38 +320,29 @@ export class ProjectManager {
   public async generateIndexFiles() {
     const folderPaths = [...this.writtenFiles.keys()].filter((folderPath) => folderPath !== "").sort();
 
-    // one barrel per folder holding generated files
-    const barreledFolders: Array<string> = [];
-    for (const folderPath of folderPaths) {
-      if (await this.writeIndexFile(folderPath, this.getFileSpecifiers(folderPath).map(exportAll))) {
-        barreledFolders.push(folderPath);
-      }
-    }
+    // collect the files of each folder under the folder which is to re-export them
+    const specifiersByParent = new Map<string, Array<string>>();
+    folderPaths.forEach((folderPath) => {
+      const lastSlash = folderPath.lastIndexOf("/");
+      const parent = lastSlash < 0 ? "" : folderPath.substring(0, lastSlash);
+      const folderName = lastSlash < 0 ? folderPath : folderPath.substring(lastSlash + 1);
+      const specifiers = this.getWrittenFileNames(folderPath).map((fileName) => `./${folderName}/${fileName}.js`);
 
-    // one barrel per namespace, re-exporting the folders below it
-    const foldersByNamespace = barreledFolders.reduce((collector, folderPath) => {
-      const namespace = folderPath.includes("/") ? folderPath.split("/")[0] : "";
-      collector.set(namespace, [...(collector.get(namespace) || []), folderPath]);
-      return collector;
-    }, new Map<string, Array<string>>());
+      specifiersByParent.set(parent, [...(specifiersByParent.get(parent) || []), ...specifiers]);
+    });
 
+    // one barrel per namespace
     const barreledNamespaces: Array<string> = [];
-    for (const [namespace, namespaceFolders] of foldersByNamespace) {
-      if (!namespace) {
-        continue;
-      }
-      const specifiers = namespaceFolders.map(
-        (folderPath) => `./${folderPath.substring(namespace.length + 1)}/${INDEX_FILE_NAME}.js`,
-      );
-      if (await this.writeIndexFile(namespace, specifiers.map(exportAll))) {
+    for (const [namespace, specifiers] of specifiersByParent) {
+      if (namespace && (await this.writeIndexFile(namespace, specifiers.map(exportAll)))) {
         barreledNamespaces.push(namespace);
       }
     }
 
     await this.writeIndexFile("", [
       ...this.getFileSpecifiers("").map(exportAll),
-      // folders without a namespace level of their own are addressed directly
-      ...(foldersByNamespace.get("") || []).map((folderPath) => exportAll(`./${folderPath}/${INDEX_FILE_NAME}.js`)),
+      // folders without a namespace level of their own are re-exported by the root itself
+      ...(specifiersByParent.get("") || []).map(exportAll),
       ...barreledNamespaces.map((namespace) => {
         const moduleSpecifier = `./${namespace}/${INDEX_FILE_NAME}.js`;
         return barreledNamespaces.length === 1
@@ -356,15 +352,19 @@ export class ProjectManager {
     ]);
   }
 
+  private getWrittenFileNames(folderPath: string) {
+    return (this.writtenFiles.get(folderPath) || []).slice().sort();
+  }
+
   private getFileSpecifiers(folderPath: string) {
-    return (this.writtenFiles.get(folderPath) || [])
-      .slice()
-      .sort()
-      .map((fileName) => `./${fileName}.js`);
+    return this.getWrittenFileNames(folderPath).map((fileName) => `./${fileName}.js`);
   }
 
   /**
-   * @return whether the barrel was written - it is skipped if a generated file already occupies the name
+   * Only ever relevant for the root barrel: no generated file lives on a namespace level, and model folders
+   * get no barrel at all. The root file names are configurable, though, so one of them may occupy the name.
+   *
+   * @return whether the barrel was written
    */
   private async writeIndexFile(
     folderPath: string,

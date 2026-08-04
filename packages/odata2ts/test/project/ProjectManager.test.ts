@@ -2,7 +2,7 @@ import path from "path";
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import { mkdirp } from "mkdirp";
 import { EmitResult } from "ts-morph";
-import { afterAll, beforeAll, beforeEach, describe, expect, MockInstance, test, vi } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
 import { DataModel } from "../../src/data-model/DataModel.js";
 import { digest } from "../../src/data-model/DataModelDigestionV4.js";
 import { NamingHelper } from "../../src/data-model/NamingHelper.js";
@@ -65,11 +65,8 @@ describe("ProjectManager Test", () => {
     return `${NAMESPACE}.${name}`;
   }
 
-  let logWarnSpy: MockInstance;
-
   beforeAll(() => {
     vi.spyOn(console, "log").mockImplementation(() => {});
-    logWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
   });
 
   beforeEach(() => {
@@ -529,10 +526,9 @@ describe("ProjectManager Test", () => {
     // when generating the barrels
     await pm.generateIndexFiles();
 
-    // then the model folder has one of its own
-    expect(getExports(pm, `${ENTITY_FOLDER_PATH}/index`)).toEqual([`./${ENTITY_NAME}.js`]);
-    // and so has the namespace above it
-    expect(getExports(pm, "ns-1-example/index")).toEqual(["./my-entity/index.js"]);
+    // then the namespace re-exports the files of the model folder - which has no barrel of its own
+    expect(getExports(pm, "ns-1-example/index")).toEqual([`./my-entity/${ENTITY_NAME}.js`]);
+    expect(pm.getCachedFiles().has(`${ENTITY_FOLDER_PATH}/index`)).toBe(false);
     // and the root one points at the root level file and at the namespace - flatly, since there's only one
     expect(getExports(pm, "index")).toEqual([`./${MAIN_FILE_NAMES.service}.js`, "./ns-1-example/index.js"]);
     expect(getNamespaceAliases(pm, "index")).toEqual([undefined, undefined]);
@@ -552,7 +548,10 @@ describe("ProjectManager Test", () => {
     // when generating the barrels
     await pm.generateIndexFiles();
 
-    // then the root barrel keeps them apart: the same type name may legitimately occur in both
+    // then each namespace re-exports its own files
+    expect(getExports(pm, "ns-1-example/index")).toEqual([`./my-entity/${ENTITY_NAME}.js`]);
+    expect(getExports(pm, "other-ns/index")).toEqual([`./my-complex/${COMPLEX_NAME}.js`]);
+    // and the root barrel keeps them apart: the same type name may legitimately occur in both
     expect(getExports(pm, "index")).toEqual([
       `./${MAIN_FILE_NAMES.service}.js`,
       "./ns-1-example/index.js",
@@ -579,7 +578,7 @@ describe("ProjectManager Test", () => {
     expect(getExports(pm, "index")).toEqual([`./${MAIN_FILE_NAMES.service}.js`]);
   });
 
-  test("Index file is skipped where an artefact occupies the name", async () => {
+  test("An artefact named like the index file is no special case", async () => {
     // given a model which is literally named "index"
     noOutput = true;
     bundledFileGeneration = false;
@@ -592,10 +591,9 @@ describe("ProjectManager Test", () => {
     // when generating the barrels
     await pm.generateIndexFiles();
 
-    // then that folder gets none and the user is told about it
-    expect(logWarnSpy).toHaveBeenCalledWith(expect.stringContaining(ENTITY_FOLDER_PATH));
-    // and the root barrel doesn't reference the folder either
-    expect(getExports(pm, "index")).toEqual([`./${MAIN_FILE_NAMES.service}.js`]);
+    // then it is re-exported like any other: model folders hold no barrel it could collide with
+    expect(getExports(pm, "ns-1-example/index")).toEqual(["./my-entity/index.js"]);
+    expect(getExports(pm, "index")).toEqual([`./${MAIN_FILE_NAMES.service}.js`, "./ns-1-example/index.js"]);
   });
 
   // test("ProjectManager: create and write model file", async () => {
