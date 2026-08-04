@@ -239,11 +239,11 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T> 
     const result = models.map((model) => {
       const typeByCi = getTypeControlInfo(model);
       return Object.entries(model).reduce((collector, [key, value]) => {
-        let prop = this[key as keyof this] as QValuePathModel | undefined;
+        let prop = this[key as keyof this] as unknown as QValuePathModel | undefined;
         let finalKey = prop?.getPath();
         if (typeByCi && typeof this.__subtypeMapping !== "undefined") {
           const qName = this.__subtypeMapping[typeByCi];
-          const subProp = this[`${qName}_${key}` as keyof this] as QValuePathModel | undefined;
+          const subProp = this[`${qName}_${key}` as keyof this] as unknown as QValuePathModel | undefined;
           if (subProp) {
             prop = subProp;
             finalKey = subProp.getPath().replace(new RegExp(`^${typeByCi}/`), "");
