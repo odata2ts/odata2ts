@@ -73,3 +73,35 @@ attributes and no `SRID` facets, none of which the model builder can express. Th
 `enableBindingProps` is switched on, since proving the binding notations is the point of this package. A
 binding is stated by the key of the entity to bind; the URL the query objects build from it is only worth
 anything if a real server resolves it.
+
+`bundledFileGeneration` is off, so this package generates a folder per model plus the barrel files, while
+`int-test/cap` keeps the bundled default. That way both file layouts are exercised at runtime instead of
+only being type-checked. Models are therefore imported from their namespace barrel
+(`src-generated/library/library-catalog/index.js`), not from one bundled model file.
+
+### The renamed client
+
+The model is generated a **second** time, into `src-generated/library-renamed`, with `allowRenaming` on.
+This is the only place that option meets a running server, and `test/feature/Renaming.test.ts` is the only
+file which uses the resulting client.
+
+Generated separately rather than replacing the raw one, because the point is the *mapping* between the two
+name forms, and a mapping is only observable where both ends are visible: with a single, renamed client a
+wrongly built URL and a broken name mapping look exactly alike. The test writes through the renamed client
+and reads back through the raw one, which is what pins down that the value really landed under the OData
+name on the server.
+
+The option renames what the caller writes, never what is sent - the model reads `title`, the wire still
+says `Title` - and that has to hold in every `$select`, `$filter` and `$orderby`, in the key predicate of a
+URL, in a request payload and when the response is read back. A fixture test accepts a broken mapping just
+as happily as a correct one, and so does `tsc`.
+
+Two names need help there, since renaming creates clashes the metadata does not have:
+
+- `Location_` (a shelf mark) and `Location` (the branch an item sits in) both become `location` under
+  camelCase. `propertiesByName` maps the former to `shelfLocation`. Without it the generator aborts - it
+  does not emit an interface declaring the same name twice, because at runtime the second declaration
+  simply wins and one of the two properties becomes unreachable.
+- `Branch` exists in two namespaces. Unbundled generation keeps both, since they live in folders of their
+  own, but two types of that name are a trap for the reader, so `byTypeAndName` gives the one in
+  `PublisherRegistry` the name `PublisherBranch`. Bundled generation would have invented `Branch2`.

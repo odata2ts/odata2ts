@@ -1,7 +1,8 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { Medium, Member } from "../../src-generated/library/LibraryModel.js";
+import { Medium } from "../../src-generated/library/library-catalog/index.js";
+import { Member } from "../../src-generated/library/library-circulation/index.js";
 import { expectODataError } from "../expectODataError.js";
 import { BOOK_DER_PROZESS, LIBRARY, UNKNOWN_ID } from "../LibraryTestConstants.js";
 

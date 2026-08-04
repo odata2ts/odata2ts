@@ -1,11 +1,18 @@
 import { FetchClient } from "@odata2ts/http-client-fetch";
 import { inject } from "vitest";
+import { LibraryRenamedService } from "../src-generated/library-renamed/LibraryRenamedService.js";
 import { LibraryService } from "../src-generated/library/LibraryService.js";
 
 /** Base URL of the running server, provided by `globalSetup` (container or external server). */
 export const BASE_URL = inject("libraryBaseUrl");
 export const ODATA_CLIENT = new FetchClient();
 export const LIBRARY = new LibraryService(ODATA_CLIENT, BASE_URL);
+
+/**
+ * The very same service, through the client generated with `allowRenaming`. Only `Renaming.test.ts` uses
+ * it: everywhere else the names are the server's own, which is what makes the mapping observable at all.
+ */
+export const LIBRARY_RENAMED = new LibraryRenamedService(ODATA_CLIENT, BASE_URL);
 
 // Fixed keys from the server's seed data.
 

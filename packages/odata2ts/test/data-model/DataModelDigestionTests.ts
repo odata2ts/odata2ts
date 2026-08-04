@@ -157,6 +157,35 @@ export function createDataModelTests(
     await expect(doDigest()).rejects.toThrowError('Cyclic inheritance detected for model "Tester.Child"!');
   });
 
+  test("properties collapsing onto the same name", async () => {
+    // renaming is what brings these two together: on their own they are distinct, valid OData names
+    digestionOptions.allowRenaming = true;
+    odataBuilder.addEntityType("Copy", undefined, (builder) =>
+      builder
+        .addKeyProp("ID", ODataTypesV4.String)
+        .addProp("Location_", ODataTypesV4.String)
+        .addProp("Location", ODataTypesV4.String),
+    );
+
+    await expect(doDigest()).rejects.toThrowError(
+      /Name clash in "Tester.Copy": the properties "Location_" and "Location" both result in the name "location"!/,
+    );
+  });
+
+  test("the clash error points at the configuration which resolves it", async () => {
+    digestionOptions.allowRenaming = true;
+    odataBuilder.addEntityType("Copy", undefined, (builder) =>
+      builder
+        .addKeyProp("ID", ODataTypesV4.String)
+        .addProp("Location_", ODataTypesV4.String)
+        .addProp("Location", ODataTypesV4.String),
+    );
+
+    await expect(doDigest()).rejects.toThrowError(
+      /propertiesByName: \[\{ name: "Location", mappedName: "someOtherName" \}\]/,
+    );
+  });
+
   test(`reordering of classes by inheritance`, async () => {
     odataBuilder
       .addEntityType("GrandChild", { baseType: withNs("Child") }, (builder) => builder)

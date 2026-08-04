@@ -70,7 +70,14 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
     });
 
     if (options.disableAutomaticNameClashResolution) {
-      throw new Error("Name validation failed: Multiple entities have the same name across different namespaces!");
+      const clashes = [...validationErrors.entries()]
+        .map(([name, errors]) => `"${name}" (${errors.map((error) => error.fqName).join(", ")})`)
+        .join("; ");
+      throw new Error(
+        `Name validation failed: multiple types have the same name across different namespaces: ${clashes}! ` +
+          `Automatic name clash resolution is disabled, so give one of them a name of its own, e.g. ` +
+          `byTypeAndName: [{ name: "<fully qualified name>", type: TypeModel.EntityType, mappedName: "SomeOtherName" }].`,
+      );
     }
   }
 

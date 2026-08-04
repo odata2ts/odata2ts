@@ -129,7 +129,9 @@ describe("App Test", () => {
     try {
       await doRunApp();
     } catch (error) {
-      expect(error?.toString()).toContain("same name across different namespaces!");
+      // the message names the offending types and the config option which resolves it
+      expect(error?.toString()).toContain(`"Test" (Tester.Test, New.Test)`);
+      expect(error?.toString()).toContain("byTypeAndName");
     }
 
     expect(logInfoSpy).toHaveBeenCalledTimes(2);
