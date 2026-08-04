@@ -247,9 +247,14 @@ class QueryObjectGenerator {
     const isEnumType = (prop: PropertyModel) => prop.dataType === DataTypes.EnumType;
     const isModelType = (prop: PropertyModel) =>
       prop.dataType === DataTypes.ModelType || prop.dataType === DataTypes.ComplexType;
+    // QBinaryPath is the one path without any comparison operators at all - it extends QNoopPath, whose
+    // constructor takes the path and a converter and nothing else. So it cannot be handed options, and
+    // there would be no point either: there is no `in` to render natively.
+    const takesOptions = (prop: PropertyModel) =>
+      !prop.isCollection && !isModelType(prop) && !isEnumType(prop) && prop.qPath !== "QBinaryPath";
     const addOptions = this.options.enableNativeInOperator; // limited to hardcoded enableNativeIn for now
 
-    if (addOptions && props.some((prop) => !prop.isCollection && !isModelType(prop) && !isEnumType(prop))) {
+    if (addOptions && props.some(takesOptions)) {
       importContainer.addFromMainQObject(OPTIONS_STATEMENT);
     }
 
@@ -286,7 +291,11 @@ class QueryObjectGenerator {
           converterStmt = converterStmt || "undefined";
 
           qPathInit = `new ${qPath}(this.withPrefix("${odataName}")${
-            addOptions ? `, ${converterStmt}, ${OPTIONS_STATEMENT}` : addConverter ? `, ${converterStmt}` : ""
+            addOptions && takesOptions(prop)
+              ? `, ${converterStmt}, ${OPTIONS_STATEMENT}`
+              : addConverter
+                ? `, ${converterStmt}`
+                : ""
           })`;
         }
       }
