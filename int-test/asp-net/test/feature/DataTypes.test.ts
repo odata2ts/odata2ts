@@ -1,5 +1,6 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { Amenities, AvailabilityStatus, EditableMember } from "../../src-generated/library/LibraryModel.js";
+import { Amenities, AvailabilityStatus } from "../../src-generated/library/library-catalog/index.js";
+import { EditableMember } from "../../src-generated/library/library-circulation/index.js";
 import { expectODataError } from "../expectODataError.js";
 import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 

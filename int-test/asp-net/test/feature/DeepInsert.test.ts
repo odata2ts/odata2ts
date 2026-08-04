@@ -1,7 +1,8 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { Book, Member } from "../../src-generated/library/LibraryModel.js";
+import { Book } from "../../src-generated/library/library-catalog/index.js";
+import { Member } from "../../src-generated/library/library-circulation/index.js";
 import { LIBRARY } from "../LibraryTestConstants.js";
 
 /**

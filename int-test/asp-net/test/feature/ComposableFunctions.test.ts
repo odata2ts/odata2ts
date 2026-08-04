@@ -1,7 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4 } from "@odata2ts/odata-core";
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { Medium } from "../../src-generated/library/LibraryModel.js";
+import { Medium } from "../../src-generated/library/library-catalog/index.js";
 import { expectODataError } from "../expectODataError.js";
 import { BASE_URL, LIBRARY } from "../LibraryTestConstants.js";
 
