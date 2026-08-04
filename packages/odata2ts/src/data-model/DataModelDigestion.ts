@@ -22,8 +22,8 @@ import { NamingHelper } from "./NamingHelper.js";
 import { QueryObjectTypes } from "./QueryObjectTypes.js";
 import { ServiceConfigHelper, WithoutName } from "./ServiceConfigHelper.js";
 import { NameClashValidator } from "./validation/NameClashValidator.js";
+import { NamespaceNameValidator } from "./validation/NamespaceNameValidator.js";
 import { NameValidator } from "./validation/NameValidator.js";
-import { NoopValidator } from "./validation/NoopValidator.js";
 
 type CollectorTuple = [
   Array<PropertyModel>,
@@ -68,7 +68,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     const namespaces = schemas.map<NamespaceWithAlias>((s) => [s.$.Namespace, s.$.Alias]);
     this.dataModel = new DataModel(namespaces, version, converters);
     this.serviceConfigHelper = new ServiceConfigHelper(options);
-    this.nameValidator = options.bundledFileGeneration ? new NameClashValidator(options) : new NoopValidator();
+    this.nameValidator = options.bundledFileGeneration ? new NameClashValidator(options) : new NamespaceNameValidator();
 
     this.collectModelTypes(schemas);
   }
@@ -156,6 +156,31 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     });
   }
 
+  /**
+   * Two OData property names may well end up as the same TypeScript name: `Location_` and `Location` both
+   * become `location` once a naming strategy is applied. The generated interface would declare that name
+   * twice and the query object would build two paths under it - at runtime the second one simply wins,
+   * which silently makes one of the two properties unreachable. So this is an error, not a warning.
+   *
+   * There is nothing to resolve automatically here: only the user knows which of the two properties should
+   * carry the plain name, hence the pointer at the configuration.
+   */
+  private assertNoPropNameClash(props: Array<PropertyModel>, fqName: string) {
+    const odataNamesByPropName = new Map<string, string>();
+
+    props.forEach(({ name, odataName }) => {
+      const clashingOdataName = odataNamesByPropName.get(name);
+      if (clashingOdataName) {
+        throw new Error(
+          `Name clash in "${fqName}": the properties "${clashingOdataName}" and "${odataName}" both result in the name "${name}"! ` +
+            `Map one of them to a name of its own, e.g. propertiesByName: [{ name: "${odataName}", mappedName: "someOtherName" }] ` +
+            `- or scoped to this type via byTypeAndName: [{ name: "${fqName}", type: TypeModel.EntityType, properties: [...] }].`,
+        );
+      }
+      odataNamesByPropName.set(name, odataName);
+    });
+  }
+
   private getBaseModel(
     entityConfig: WithoutName<EntityTypeGenerationOptions | ComplexTypeGenerationOptions> | undefined,
     model: ComplexType,
@@ -170,6 +195,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       const epConfig = entityConfig?.properties?.find((ep) => ep.name === p.$.Name);
       return this.mapProp(p, epConfig);
     });
+    this.assertNoPropNameClash(props, fqName);
 
     // support for base types, i.e. extends clause of interfaces
     const baseClasses = [];
