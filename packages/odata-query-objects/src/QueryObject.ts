@@ -1,3 +1,4 @@
+import { QBinding } from "./path/QBinding";
 import { QEntityPathModel, QValuePathModel } from "./path/QPathModel";
 import { FlexibleConversionModel, QueryObjectModel } from "./QueryObjectModel";
 
@@ -27,6 +28,72 @@ function getMapping(q: QueryObject) {
  */
 function getTypeControlInfo(model: any): string | undefined {
   return (model["@odata.type"] ?? model["@type"])?.replace(/^#/, "");
+}
+
+/**
+ * The property by which the editable models state a binding to an already existing entity, carrying its
+ * key. It is the 4.01 spelling, but with the key in place of the URL - see {@link QBinding}.
+ */
+const BINDING_PROP = "@id";
+
+function isBinding(value: any): value is Record<typeof BINDING_PROP, any> {
+  return !!value && typeof value === "object" && !Array.isArray(value) && BINDING_PROP in value;
+}
+
+/**
+ * Writes a navigation property which may carry bindings to already existing entities, deep insert
+ * payloads, or - for a collection valued property - both at once.
+ *
+ * Where the notation keeps a binding apart from the payload (4.0: {@code "Nav@odata.bind"}), a mixed
+ * collection ends up as two properties; the other notations state both under the name of the navigation
+ * property itself and therefore keep the order of the given array.
+ */
+function convertNavProp(
+  collector: Record<string, any>,
+  odataName: string,
+  value: any,
+  entity: QueryObject,
+  binding: QBinding<any>,
+) {
+  // null clears the link, which is the one operation that has no payload counterpart
+  if (value === null || value === undefined) {
+    collector[binding.getKey(odataName)] = value;
+    return;
+  }
+
+  // some V2 services expect collections wrapped in an extra results object, see issue #237
+  const wrapped = !Array.isArray(value) && typeof value === "object" && Array.isArray(value.results);
+  const items: Array<any> | undefined = Array.isArray(value) ? value : wrapped ? value.results : undefined;
+
+  if (!items) {
+    if (isBinding(value)) {
+      collector[binding.getKey(odataName)] = binding.format(value[BINDING_PROP]);
+    } else {
+      collector[odataName] = entity.convertToOData(value);
+    }
+    return;
+  }
+
+  const rewrap = (list: Array<any>) => (wrapped ? { results: list } : list);
+  const bindingKey = binding.getKey(odataName);
+
+  if (bindingKey === odataName) {
+    collector[odataName] = rewrap(
+      items.map((item) => (isBinding(item) ? binding.format(item[BINDING_PROP]) : entity.convertToOData(item))),
+    );
+    return;
+  }
+
+  const payloads = items.filter((item) => !isBinding(item));
+  const bindings = items.filter(isBinding);
+
+  if (bindings.length) {
+    collector[bindingKey] = bindings.map((item) => binding.format(item[BINDING_PROP]));
+  }
+  // an empty array is meaningful on its own, so it is only dropped when the bindings took its place
+  if (payloads.length || !bindings.length) {
+    collector[odataName] = rewrap(payloads.map((item) => entity.convertToOData(item)));
+  }
 }
 
 export const ENUMERABLE_PROP_DEFINITION = { enumerable: true };
@@ -185,7 +252,12 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T> 
         const asEntity = prop as QEntityPathModel<any>;
         if (typeof asEntity?.getEntity === "function") {
           const entity = asEntity.getEntity();
-          collector[finalKey!] = entity.convertToOData(value);
+          const binding = asEntity.getBinding?.();
+          if (binding) {
+            convertNavProp(collector, finalKey!, value, entity, binding);
+          } else {
+            collector[finalKey!] = entity.convertToOData(value);
+          }
         } else if (prop) {
           collector[finalKey!] = prop.converter ? prop.converter.convertTo(value) : value;
         }

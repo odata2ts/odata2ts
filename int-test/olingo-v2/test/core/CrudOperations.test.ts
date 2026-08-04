@@ -112,20 +112,26 @@ describe("Olingo Library: CRUD operations", () => {
     });
   });
 
-  test("a deep insert is refused outright", async () => {
-    // Olingo's ListsProcessor creates one entity from one payload; a nested collection has nowhere to
-    // go and the request is answered 501. The CAP server accepts the same payload along compositions,
-    // so this is the one write shape where the two V2 servers differ fundamentally.
-    await expectODataError(
-      LIBRARY.Books()
-        .create({
-          Title: "Deep Insert Book",
-          Language: "de",
-          Copies: [{ MediumId: UNKNOWN_ID, InventoryNumber: 9901, IsLoanable: true }],
-        } as EditableBook)
-        .execute(),
-      { status: 501, message: /[Nn]ot implemented/ },
-    );
+  test("a deep insert creates the nested entities and links them", async () => {
+    // Olingo's ListsProcessor runs a create payload through `createInlinedEntities`, which creates each
+    // nested entity and then links it - so the foreign key the client sent is overwritten with the key
+    // of the parent that did not exist yet when the payload was written.
+    const created = await LIBRARY.Books()
+      .create({
+        Title: "Deep Insert Book",
+        Language: "de",
+        Copies: [{ MediumId: UNKNOWN_ID, InventoryNumber: 9901, IsLoanable: true }],
+      } as EditableBook)
+      .execute();
+
+    expect(created.status).toBe(201);
+
+    const copies = await LIBRARY.Books(created.data.d.Id).Copies().query().execute();
+    expect(copies.data.d.results.map((copy) => [copy.MediumId, copy.InventoryNumber])).toStrictEqual([
+      [created.data.d.Id, 9901],
+    ]);
+
+    await LIBRARY.Books(created.data.d.Id).delete().execute();
   });
 
   test("an entity with a concurrency token demands a precondition odata2ts cannot send", async () => {

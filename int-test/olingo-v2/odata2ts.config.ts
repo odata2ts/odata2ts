@@ -19,6 +19,10 @@ const config: ConfigFileOptions = {
   // on, because the property services are a generator feature of their own and otherwise never
   // meet a real server: see test/feature/PropertyServices.test.ts
   enablePrimitivePropertyServices: true,
+  // on, because this is the only genuine OData V2 server we have - the one place where the V2 binding
+  // notation the query objects build can be held against a real deserializer:
+  // see test/feature/Binding.test.ts
+  enableBindingProps: true,
   services: {
     library: {
       serviceName: "Library",

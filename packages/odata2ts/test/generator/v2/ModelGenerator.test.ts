@@ -2,7 +2,7 @@ import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV2.js";
 import { generateModels } from "../../../src/generator/index.js";
-import { EmitModes } from "../../../src/index.js";
+import { EmitModes, Modes } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2.js";
 import {
@@ -105,9 +105,10 @@ describe("Model Generator Tests V2", () => {
           .addNavProp("relatedAuthors", withNs("Author"), "Book_RelatedAuthors", "*"),
       );
 
-    // when generating
+    // when generating without a service
     // then the editable model uses the __metadata uri notation
     await generateAndCompare("entity-relationships-binding-v2.ts", {
+      mode: Modes.models,
       enableBindingProps: true,
       skipEditableModels: false,
       skipIdModels: false,
@@ -180,6 +181,58 @@ describe("Model Generator Tests V2", () => {
     // then the navigation property accepts either shape, since V2 addresses a binding by the very name
     // of the navigation property
     await generateAndCompare("entity-relationships-deep-insert-binding-v2.ts", {
+      mode: Modes.models,
+      enableDeepInsertProps: true,
+      enableBindingProps: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+  /**
+   * The entity sets, plus the AssociationSets which state by which of them the ends of the associations
+   * are realized - the V2 counterpart of a NavigationPropertyBinding. Without them a binding cannot be
+   * expressed by key, since the URL of the referenced entity is built from that entity set.
+   */
+  function addRelatedEntitySets() {
+    odataBuilder
+      .addEntitySet("Books", withNs(ENTITY_NAME))
+      .addEntitySet("Authors", withNs("Author"))
+      .addAssociationSet("Book_Author_Set", "Book_Author", [
+        { role: "Book_Author", entitySet: "Books" },
+        { role: "Author_Book", entitySet: "Authors" },
+      ])
+      .addAssociationSet("Book_RelatedAuthors_Set", "Book_RelatedAuthors", [
+        { role: "Book_Author", entitySet: "Books" },
+        { role: "Author_Book", entitySet: "Authors" },
+      ]);
+  }
+
+  test(`${TEST_SUITE_NAME}: binding props by key`, async () => {
+    // given entities related to each other, reachable through entity sets
+    addRelatedEntities();
+    addRelatedEntitySets();
+
+    // when opting into the binding props while a service is generated
+    // then the binding goes by the navigation property itself and carries the key of the entity to bind,
+    // which the query objects turn into the __metadata uri notation
+    await generateAndCompare("entity-relationships-binding-by-key-v2.ts", {
+      enableBindingProps: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+      disableAutoManagedKey: true,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: deep insert and binding props share the property when bound by key`, async () => {
+    // given entities related to each other, reachable through entity sets
+    addRelatedEntities();
+    addRelatedEntitySets();
+
+    // when opting into both while a service is generated
+    // then the navigation property accepts either shape - a new entity or the key of an existing one -
+    // and the "@id" property tells them apart
+    await generateAndCompare("entity-relationships-deep-insert-binding-by-key-v2.ts", {
       enableDeepInsertProps: true,
       enableBindingProps: true,
       skipEditableModels: false,

@@ -298,11 +298,25 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    */
   odataVersionV4?: "4.0" | "4.01";
   /**
-   * Adds one property per navigation property to the editable models, which allows to bind an already
-   * existing entity to it, in the notation of the targeted OData version, e.g. {@code "Author@odata.bind"}
-   * for 4.0.
+   * Allows to bind an already existing entity to a navigation property of the editable models.
    *
-   * Opt-in, so by default no such property is generated.
+   * Where a service is generated (mode {@code service} or {@code all}), the binding goes by the
+   * navigation property itself and states the entity to bind by its key:
+   * {@code { Author: { "@id": 1 } }}. The key is typed as the id model of the related entity, so its
+   * short form is accepted just as well as the full one. The query objects turn that key into the URL
+   * of the entity - relative to the service root - and into the notation of the targeted OData version,
+   * which is why a service is needed for it: {@code "Author@odata.bind"} for 4.0,
+   * {@code {"@id": …}} for 4.01 and {@code {"__metadata": {"uri": …}}} for V2.
+   *
+   * Since that URL is built from the entity set the navigation property points to, a binding is only
+   * generated for navigation properties whose target is known from the metadata - a
+   * NavigationPropertyBinding in V4, an AssociationSet in V2 - and whose related entity has an id model
+   * ({@code skipIdModels} therefore takes it away).
+   *
+   * Without a service the binding is stated as it goes on the wire, by the OData name of the navigation
+   * property and carrying the URL itself, e.g. {@code "Author@odata.bind": "People(1)"} for 4.0.
+   *
+   * Opt-in, so by default no binding is generated.
    */
   enableBindingProps?: boolean;
   /**
@@ -312,9 +326,10 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * own.
    *
    * Together with <code>enableBindingProps</code> a navigation property accepts either shape - a new
-   * entity or a reference to an existing one. In V2 and OData 4.01 a binding goes by the very name of the
-   * navigation property, so there the property is typed as the union of both; 4.0 has a name of its own
-   * for it ({@code "Author@odata.bind"}) and therefore keeps them apart.
+   * entity or a reference to an existing one. Where a service is generated both go by the navigation
+   * property itself and the {@code "@id"} property tells them apart; without one, the binding is spelled
+   * as it goes on the wire, which shares the property in V2 and OData 4.01 but keeps it apart in 4.0
+   * ({@code "Author@odata.bind"}).
    *
    * Opt-in, so by default the editable models contain no navigation property at all.
    */

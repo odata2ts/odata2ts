@@ -9,13 +9,13 @@ import { BASE_URL, BOOK_DER_PROZESS, BRANCH_CENTRAL, BRANCH_SUBURBAN, LIBRARY } 
  * the feature was only ever proven at generator level, against fixtures. A fixture cannot show that the
  * link actually moved on the other side.
  *
- * The client is generated for OData 4.0, so the generated property is `Nav@odata.bind` carrying a URL.
- * The 4.01 spelling - a nested `{"@id": …}` - is sent by hand in the last test, since a 4.0 client does
- * not emit it.
+ * The client is generated as a service, so a binding is stated by the key of the entity to bind
+ * (`{"@id": key}`) and the query objects turn it into what goes on the wire - here, for OData 4.0,
+ * `Nav@odata.bind` carrying the URL. That translation is the very thing under test: whether the URL the
+ * client assembles is one this server actually resolves. The 4.01 spelling of the payload is sent by
+ * hand in the last test, since a 4.0 client does not emit it.
  */
 describe("ASP.NET Library: binding existing entities", () => {
-  const branchUrl = (id: number) => `${BASE_URL}/Branches(${id})`;
-
   /** Copies only this file touches, so re-binding cannot race the other test files. */
   const BOUND_ON_CREATE = 4001;
   const BOUND_TO_CONSTRAINED_NAV = 4002;
@@ -42,7 +42,7 @@ describe("ASP.NET Library: binding existing entities", () => {
         Condition: 1,
         IsLoanable: true,
         WeightKg: 0.4,
-        "Location@odata.bind": branchUrl(BRANCH_CENTRAL),
+        Location: { "@id": BRANCH_CENTRAL },
       })
       .execute();
 
@@ -57,7 +57,7 @@ describe("ASP.NET Library: binding existing entities", () => {
   test("patching the binding re-points the link", async () => {
     const copy = LIBRARY.Copies(copyKey(BOUND_ON_CREATE));
 
-    const patched = await copy.patch({ "Location@odata.bind": branchUrl(BRANCH_SUBURBAN) }).execute();
+    const patched = await copy.patch({ Location: { "@id": BRANCH_SUBURBAN } }).execute();
     expect(patched.status).toBe(204);
 
     const location = await copy.Location().query().execute();
@@ -84,7 +84,7 @@ describe("ASP.NET Library: binding existing entities", () => {
   test("binding to null clears the link", async () => {
     const copy = LIBRARY.Copies(copyKey(BOUND_ON_CREATE));
 
-    const patched = await copy.patch({ "Location@odata.bind": null }).execute();
+    const patched = await copy.patch({ Location: null }).execute();
     expect(patched.status).toBe(204);
 
     // the link is gone, so the navigation target is not there any more - and this server sends no error
@@ -103,7 +103,7 @@ describe("ASP.NET Library: binding existing entities", () => {
         Condition: 1,
         IsLoanable: true,
         WeightKg: 0.4,
-        "Medium@odata.bind": `${BASE_URL}/Media(${BOOK_DER_PROZESS})`,
+        Medium: { "@id": BOOK_DER_PROZESS },
       })
       .execute();
 
@@ -124,7 +124,7 @@ describe("ASP.NET Library: binding existing entities", () => {
         MediumId: BOOK_DER_PROZESS,
         InventoryNumber: BOUND_WITH_401_NOTATION,
         Condition: 1,
-        Location: { "@id": branchUrl(BRANCH_SUBURBAN) },
+        Location: { "@id": `${BASE_URL}/Branches(${BRANCH_SUBURBAN})` },
       }),
     });
 

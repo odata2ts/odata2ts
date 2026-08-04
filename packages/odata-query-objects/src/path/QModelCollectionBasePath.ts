@@ -3,12 +3,14 @@ import { QFilterExpression } from "../QFilterExpression";
 import { QOrderByExpression } from "../QOrderByExpression";
 import { QueryObject } from "../QueryObject";
 import { LambdaOperatorType } from "./base/LambdaOperatorType";
+import { QBinding } from "./QBinding";
 import { QEntityPathModel } from "./QPathModel";
 
 export class QModelCollectionBasePath<Q extends QueryObject> implements QEntityPathModel<Q> {
   constructor(
     private path: string,
     private qEntityFn: () => new (prefix?: string) => Q,
+    private binding?: QBinding<any>,
   ) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
@@ -20,6 +22,10 @@ export class QModelCollectionBasePath<Q extends QueryObject> implements QEntityP
 
   public getPath(): string {
     return this.path;
+  }
+
+  public getBinding(): QBinding<any> | undefined {
+    return this.binding;
   }
 
   public getEntity(withPrefix: boolean = false): Q {

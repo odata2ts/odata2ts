@@ -20,6 +20,7 @@ import {
 } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel.js";
+import { Modes } from "../OptionModel.js";
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
 import { QueryObjectImports } from "./import/ImportObjects.js";
@@ -150,7 +151,7 @@ class QueryObjectGenerator {
         name: model.qName,
         isExported: true,
         extends: this.getExtendsClauseForQObjects(model, imports),
-        properties: this.generateQueryObjectProps(file.getImports(), model.props),
+        properties: this.generateQueryObjectProps(file.getImports(), model.fqName, model.props),
       });
     } else {
       // base class used for extension needs an own file
@@ -159,7 +160,7 @@ class QueryObjectGenerator {
         name: model.qBaseName,
         isExported: true,
         extends: this.getExtendsClauseForQObjects(model, baseFile.getImports()),
-        properties: this.generateQueryObjectProps(baseFile.getImports(), model.props),
+        properties: this.generateQueryObjectProps(baseFile.getImports(), model.fqName, model.props),
       });
       this.project.finalizeFile(baseFile);
 
@@ -237,6 +238,7 @@ class QueryObjectGenerator {
 
   private generateQueryObjectProps(
     importContainer: ImportContainer,
+    ownerFqName: string,
     allProps: Array<PropertyModel>,
   ): Array<OptionalKind<PropertyDeclarationStructure>> {
     // stream properties get no q-path: filtering, ordering and the like do not apply to binary content,
@@ -266,13 +268,15 @@ class QueryObjectGenerator {
             ? importContainer.addGeneratedModel(prop.fqType, prop.type, false)
             : importContainer.addQObject(prop.qObject!);
 
-        qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${isEnumType(prop) ? qObject : `() => ${qObject}`})`;
+        const binding = isEnumType(prop) ? "" : this.generateBindingStmt(importContainer, ownerFqName, prop);
+        qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${isEnumType(prop) ? qObject : `() => ${qObject}`}${binding})`;
       } else {
         // add import for data type
         const qPath = importContainer.addQObject(prop.qPath);
         if (isModelType(prop)) {
           const qObject = importContainer.addGeneratedQObject(prop.fqType, prop.qObject!);
-          qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), () => ${qObject})`;
+          const binding = this.generateBindingStmt(importContainer, ownerFqName, prop);
+          qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), () => ${qObject}${binding})`;
         } else if (isEnumType(prop)) {
           const qObject = importContainer.addGeneratedModel(prop.fqType, prop.type, false);
           qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${qObject})`;
@@ -294,6 +298,40 @@ class QueryObjectGenerator {
         initializer: qPathInit,
       } as OptionalKind<PropertyDeclarationStructure>;
     });
+  }
+
+  /**
+   * The binding of a navigation property, which is what allows the editable models to state a binding by
+   * the key of the referenced entity: the query object turns that key into the URL the wire notation asks
+   * for, using the id function of the entity set the navigation property points to.
+   *
+   * Only generated where a service is generated - without one nothing would ever call the conversion, and
+   * the models state the binding as it goes on the wire instead (see the model generator).
+   *
+   * @returns the constructor argument including its leading comma, or an empty string
+   */
+  private generateBindingStmt(importContainer: ImportContainer, ownerFqName: string, prop: PropertyModel): string {
+    const generatesService = this.options.mode === Modes.service || this.options.mode === Modes.all;
+    if (
+      !generatesService ||
+      !this.options.enableBindingProps ||
+      this.options.skipIdModels ||
+      prop.dataType !== DataTypes.ModelType
+    ) {
+      return "";
+    }
+
+    const target = this.dataModel.getEntityType(prop.fqType);
+    const targetSet = this.dataModel.getNavPropBindingTarget(ownerFqName, prop.odataName);
+    if (!target?.generateId || !target.keyNames.length || !targetSet) {
+      return "";
+    }
+
+    const qBinding = importContainer.addQObject(QueryObjectImports.QBinding);
+    const qId = importContainer.addGeneratedQObject(target.id.fqName, target.id.qName);
+    const notation = this.version === ODataVersions.V2 ? "V2" : this.options.odataVersionV4 === "4.01" ? "4.01" : "4.0";
+
+    return `, new ${qBinding}(() => new ${qId}("${targetSet.odataName}"), "${notation}")`;
   }
 
   private generateConverterStmt(importContainer: ImportContainer, converters: Array<ValueConverterImport> | undefined) {

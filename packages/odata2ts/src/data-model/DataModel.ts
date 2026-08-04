@@ -65,6 +65,7 @@ export class DataModel {
   private readonly namespace2Alias: { [ns: string]: string };
   private aliases: Record<string, string> = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
+  private navPropBindings?: Map<string, EntitySetType>;
 
   constructor(
     namespaces: Array<NamespaceWithAlias>,
@@ -268,6 +269,76 @@ export class DataModel {
 
   public getEntityContainer() {
     return this.container;
+  }
+
+  /**
+   * The entity set a navigation property points to, as stated by the NavigationPropertyBinding of an
+   * entity set or singleton (V4) or by the AssociationSet (V2). Knowing it is what makes a binding
+   * expressible by key: the URL of the referenced entity is built from that entity set.
+   *
+   * Bindings are declared per entity set, while the models are generated per entity type, so a navigation
+   * property realized by more than one entity set with differing targets can only be served by one of
+   * them - the first one wins. Paths of more than one segment (a binding declared for a nested or a
+   * derived navigation property) are left out: they do not address a navigation property of this very
+   * entity type.
+   *
+   * A binding of an inherited navigation property is registered for the base type declaring it as well,
+   * since that is the model the property is generated into.
+   */
+  public getNavPropBindingTarget(fqEntityTypeName: string, navPropOdataName: string): EntitySetType | undefined {
+    if (!this.navPropBindings) {
+      this.navPropBindings = new Map();
+
+      const entitySets = Object.values(this.container.entitySets);
+      const bindingSources: Array<EntitySetType | SingletonType> = [
+        ...entitySets,
+        ...Object.values(this.container.singletons),
+      ];
+
+      for (const source of bindingSources) {
+        for (const { path, target } of source.navPropBinding ?? []) {
+          if (path.includes("/")) {
+            continue;
+          }
+          // the target may be stated qualified by the entity container it lives in
+          const targetName = target.split("/").pop()!.split(".").pop()!;
+          const targetSet = entitySets.find((es) => es.odataName === targetName);
+          if (!targetSet) {
+            continue;
+          }
+
+          for (const owner of this.collectTypeHierarchy(source.entityType)) {
+            const key = `${owner}|${path}`;
+            if (!this.navPropBindings.has(key)) {
+              this.navPropBindings.set(key, targetSet);
+            }
+          }
+        }
+      }
+    }
+
+    return this.navPropBindings.get(`${fqEntityTypeName}|${navPropOdataName}`);
+  }
+
+  /**
+   * The fully qualified names of an entity type and of all its base types.
+   */
+  private collectTypeHierarchy(entityType: EntityType): Array<string> {
+    const result: Array<string> = [];
+    const visited = new Set<string>();
+    const queue: Array<string> = [entityType.fqName];
+
+    while (queue.length) {
+      const fqName = queue.shift()!;
+      if (visited.has(fqName)) {
+        continue;
+      }
+      visited.add(fqName);
+      result.push(fqName);
+      queue.push(...(this.getEntityType(fqName)?.baseClasses ?? []));
+    }
+
+    return result;
   }
 
   public getConverter(dataType: ODataTypesV2 | ODataTypesV4 | string) {

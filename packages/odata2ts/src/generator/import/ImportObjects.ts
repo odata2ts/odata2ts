@@ -37,6 +37,7 @@ export enum QueryObjectImports {
   QueryObject = "QueryObject",
   ENUMERABLE_PROP_DEFINITION = "ENUMERABLE_PROP_DEFINITION",
   QId = "QId",
+  QBinding = "QBinding",
   QFunctionV2 = "QFunctionV2",
   QFunctionV4 = "QFunctionV4",
   QAction = "QAction",

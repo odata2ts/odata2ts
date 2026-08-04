@@ -70,4 +70,6 @@ OData really emits, not the idealized reference model: it has no `TypeDefinition
 attributes and no `SRID` facets, none of which the model builder can express. The server's
 `FEATURE-COVERAGE.md` records why.
 
-`enableBindingProps` is switched on, since proving the binding notations is the point of this package.
+`enableBindingProps` is switched on, since proving the binding notations is the point of this package. A
+binding is stated by the key of the entity to bind; the URL the query objects build from it is only worth
+anything if a real server resolves it.

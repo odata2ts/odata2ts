@@ -1,10 +1,12 @@
 import { QueryObject } from "../QueryObject";
+import { QBinding } from "./QBinding";
 import { QEntityPathModel } from "./QPathModel";
 
 export class QModelBasePath<Q extends QueryObject> implements QEntityPathModel<Q> {
   constructor(
     protected path: string,
     protected qEntityFn: () => new (prefix?: string) => Q,
+    protected binding?: QBinding<any>,
   ) {
     if (!path || !path.trim()) {
       throw new Error("Path must be supplied!");
@@ -16,6 +18,10 @@ export class QModelBasePath<Q extends QueryObject> implements QEntityPathModel<Q
 
   public getPath(): string {
     return this.path;
+  }
+
+  public getBinding(): QBinding<any> | undefined {
+    return this.binding;
   }
 
   public getEntity(withPrefix: boolean = false): Q {
