@@ -22,13 +22,25 @@ describe("QEnumPath test", () => {
     expect(() => new QEnumPath(" ", FeatureEnum)).toThrow();
   });
 
+  test("takes a plain member list, as a string union has no runtime object", () => {
+    // this is the shape `enumType: "string-union"` generates: the members as a list, since a union of
+    // string literals exists only in the type system
+    const members = ["Feature1", "Feature2", "Feature3"] as const;
+    const fromList = new QEnumPath("feature", members);
+
+    expect(fromList.getPath()).toBe("feature");
+    // the value goes on the wire exactly as it does for the enum object
+    expect(fromList.eq("Feature2").toString()).toBe(toTest.eq(FeatureEnum.Feature2).toString());
+    expect(fromList.asc().toString()).toBe("feature asc");
+  });
+
   test("fails without enum", () => {
     // @ts-expect-error
-    expect(() => new QEnumPath("feature")).toThrow("QEnumPath: Enum must be supplied! ");
+    expect(() => new QEnumPath("feature")).toThrow("QEnumPath: Enum or member list must be supplied! ");
     // @ts-expect-error
-    expect(() => new QEnumPath("feature", null)).toThrow("QEnumPath: Enum must be supplied! ");
+    expect(() => new QEnumPath("feature", null)).toThrow("QEnumPath: Enum or member list must be supplied! ");
     // @ts-expect-error
-    expect(() => new QEnumPath("feature", undefined)).toThrow("QEnumPath: Enum must be supplied! ");
+    expect(() => new QEnumPath("feature", undefined)).toThrow("QEnumPath: Enum or member list must be supplied! ");
   });
 
   test("orderBy asc", () => {

@@ -1,5 +1,11 @@
 import { ODataVersions } from "@odata2ts/odata-core";
-import { JSDocStructure, OptionalKind, PropertySignatureStructure, StructureKind } from "ts-morph";
+import {
+  JSDocStructure,
+  OptionalKind,
+  PropertySignatureStructure,
+  StructureKind,
+  VariableDeclarationKind,
+} from "ts-morph";
 import { DataModel } from "../data-model/DataModel.js";
 import { ComplexType, DataTypes, EntityType, OperationType, PropertyModel } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
@@ -67,6 +73,19 @@ class ModelGenerator {
           name: et.modelName,
           isExported: true,
           type: et.members.map((mem) => `"${mem.name}"`).join(" | "),
+        });
+        // A union of string literals exists only in the type system, but the query objects need something
+        // at runtime. So the members are emitted a second time as a list, under the very same name: a type
+        // and a value of one name can coexist, which keeps every use site identical to the enum case.
+        file.getFile().addVariableStatement({
+          declarationKind: VariableDeclarationKind.Const,
+          isExported: true,
+          declarations: [
+            {
+              name: et.modelName,
+              initializer: `[${et.members.map((mem) => `"${mem.name}"`).join(", ")}] as const`,
+            },
+          ],
         });
       } else {
         file.getFile().addEnum({

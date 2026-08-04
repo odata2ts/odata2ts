@@ -1,8 +1,8 @@
-import { NumericEnumLike, StringEnumLike } from "../../enum/EnumModel";
+import { NumericEnumLike, StringEnumSource } from "../../enum/EnumModel";
 import { QEnumCollection } from "../../primitve-collection/PrimitveCollections";
 import { QCollectionPath } from "../QCollectionPath";
 
-export class QEnumCollectionPath<EnumType extends StringEnumLike | NumericEnumLike> extends QCollectionPath<
+export class QEnumCollectionPath<EnumType extends StringEnumSource | NumericEnumLike> extends QCollectionPath<
   QEnumCollection<EnumType>
 > {
   public constructor(
@@ -12,7 +12,7 @@ export class QEnumCollectionPath<EnumType extends StringEnumLike | NumericEnumLi
     // @ts-ignore
     super(path, () => {});
     if (!theEnum) {
-      throw new Error("QEnumCollectionPath: Enum must be supplied!");
+      throw new Error("QEnumCollectionPath: Enum or member list must be supplied!");
     }
   }
 

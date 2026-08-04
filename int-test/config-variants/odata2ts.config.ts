@@ -139,18 +139,15 @@ const config: ConfigFileOptions = {
      * Enums as a plain string union instead of a TypeScript enum. Pure type shape: the values stay the very
      * same strings, so nothing about the wire changes.
      *
-     * Restricted to `mode: models`, because generating query objects on top of it does not compile. The
-     * very first run of this package surfaced it: the model emits `export type Amenities = "…" | "…"`, a
-     * type alias, while the query object emits `new QEnumPath(this.withPrefix("Amenities"), Amenities)` and
-     * hands that alias over as a *value*. `QEnumPath` needs a real runtime object, which a string union
-     * does not have - so the option cannot currently produce a working client for any model with an enum
-     * property. Widen this variant back to the full mode once that is decided.
+     * The full mode on purpose, query objects included. That combination did not compile until the first
+     * run of this package surfaced it: a union of string literals exists only in the type system, while the
+     * query object needs something at runtime. The generator now emits the member list alongside the type
+     * alias, under the same name, and `QEnumPath` takes either shape.
      */
     enumStringUnion: {
       serviceName: "EnumStringUnion",
       source: V4_SOURCE,
       output: "src-generated/enum-string-union",
-      mode: Modes.models,
       enumType: "string-union",
     },
 
