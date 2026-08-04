@@ -107,5 +107,10 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   }
 
   // await Promise.all(promises);
+
+  // barrels come last: they list what has actually been written
+  await project.generateIndexFiles();
+  console.log("Successfully generated index files!");
+
   console.log("Successfully finished!");
 }

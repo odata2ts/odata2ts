@@ -1,6 +1,7 @@
 import * as path from "path";
+import { camelCase } from "change-case";
 import { mkdirp } from "mkdirp";
-import { CompilerOptions, Project, SourceFile } from "ts-morph";
+import { CompilerOptions, ExportDeclarationStructure, OptionalKind, Project, SourceFile } from "ts-morph";
 import { firstCharLowerCase } from "xml2js/lib/processors.js";
 import { DataModel } from "../data-model/DataModel.js";
 import { EntityType } from "../data-model/DataTypeModel.js";
@@ -11,6 +12,16 @@ import { FileHandler } from "./FileHandler.js";
 import { FileFormatter } from "./formatter/FileFormatter.js";
 import { createFormatter } from "./formatter/index.js";
 import { loadTsMorphCompilerOptions } from "./TsMorphHelper.js";
+
+/**
+ * Name of the generated barrel files. Not configurable: "index" is what every module resolution
+ * understands as the entry point of a folder, so a different name would defeat the purpose.
+ */
+const INDEX_FILE_NAME = "index";
+
+function exportAll(moduleSpecifier: string): OptionalKind<ExportDeclarationStructure> {
+  return { moduleSpecifier };
+}
 
 export interface ProjectManagerOptions {
   usePrettier?: boolean;
@@ -56,6 +67,13 @@ export class ProjectManager {
 
   private readonly cachedFiles: Map<string, SourceFile> | undefined;
 
+  /**
+   * Every file that was actually written, by the folder it lives in. This is the basis for the barrel
+   * files, so that they list what has really been emitted - which depends on the generation mode as well
+   * as on whether a main file ended up with any content at all.
+   */
+  private readonly writtenFiles = new Map<string, Array<string>>();
+
   constructor(
     protected outputDir: string,
     protected emitMode: EmitModes,
@@ -88,7 +106,13 @@ export class ProjectManager {
     return this.cachedFiles!;
   }
 
-  private async writeFile(fileHandler: FileHandler) {
+  private async writeFile(fileHandler: FileHandler, trackForIndex = true) {
+    if (trackForIndex) {
+      const folderFiles = this.writtenFiles.get(fileHandler.path) || [];
+      folderFiles.push(fileHandler.fileName);
+      this.writtenFiles.set(fileHandler.path, folderFiles);
+    }
+
     if (this.options.noOutput) {
       await fileHandler.write(this.emitMode, true);
       this.cachedFiles!.set(fileHandler.getFullFilePath(), fileHandler.getFile());
@@ -273,5 +297,92 @@ export class ProjectManager {
     ) {
       await this.writeFile(file);
     }
+  }
+
+  /**
+   * Generates the barrel files, re-exporting everything that has been generated: one index file per folder
+   * which holds generated files, one per namespace above those, and one at the root of the output directory.
+   *
+   * The root barrel re-exports the files on root level flatly, but each namespace under its own name
+   * ({@code export * as libraryCatalog from "./library-catalog/index.js"}). OData allows the same type name
+   * in two namespaces, and unbundled generation keeps those names as they are - a flat re-export would make
+   * both of them unreachable. With only a single namespace that cannot happen, so there it stays flat.
+   *
+   * Bundled file generation only ever emits files on root level, so there the root barrel is all there is.
+   *
+   * Must run after all other files have been written, since the barrels list what was actually emitted.
+   */
+  public async generateIndexFiles() {
+    const folderPaths = [...this.writtenFiles.keys()].filter((folderPath) => folderPath !== "").sort();
+
+    // one barrel per folder holding generated files
+    const barreledFolders: Array<string> = [];
+    for (const folderPath of folderPaths) {
+      if (await this.writeIndexFile(folderPath, this.getFileSpecifiers(folderPath).map(exportAll))) {
+        barreledFolders.push(folderPath);
+      }
+    }
+
+    // one barrel per namespace, re-exporting the folders below it
+    const foldersByNamespace = barreledFolders.reduce((collector, folderPath) => {
+      const namespace = folderPath.includes("/") ? folderPath.split("/")[0] : "";
+      collector.set(namespace, [...(collector.get(namespace) || []), folderPath]);
+      return collector;
+    }, new Map<string, Array<string>>());
+
+    const barreledNamespaces: Array<string> = [];
+    for (const [namespace, namespaceFolders] of foldersByNamespace) {
+      if (!namespace) {
+        continue;
+      }
+      const specifiers = namespaceFolders.map(
+        (folderPath) => `./${folderPath.substring(namespace.length + 1)}/${INDEX_FILE_NAME}.js`,
+      );
+      if (await this.writeIndexFile(namespace, specifiers.map(exportAll))) {
+        barreledNamespaces.push(namespace);
+      }
+    }
+
+    await this.writeIndexFile("", [
+      ...this.getFileSpecifiers("").map(exportAll),
+      // folders without a namespace level of their own are addressed directly
+      ...(foldersByNamespace.get("") || []).map((folderPath) => exportAll(`./${folderPath}/${INDEX_FILE_NAME}.js`)),
+      ...barreledNamespaces.map((namespace) => {
+        const moduleSpecifier = `./${namespace}/${INDEX_FILE_NAME}.js`;
+        return barreledNamespaces.length === 1
+          ? exportAll(moduleSpecifier)
+          : { moduleSpecifier, namespaceExport: camelCase(namespace) };
+      }),
+    ]);
+  }
+
+  private getFileSpecifiers(folderPath: string) {
+    return (this.writtenFiles.get(folderPath) || [])
+      .slice()
+      .sort()
+      .map((fileName) => `./${fileName}.js`);
+  }
+
+  /**
+   * @return whether the barrel was written - it is skipped if a generated file already occupies the name
+   */
+  private async writeIndexFile(
+    folderPath: string,
+    exportDeclarations: Array<OptionalKind<ExportDeclarationStructure>>,
+  ): Promise<boolean> {
+    if (this.writtenFiles.get(folderPath)?.includes(INDEX_FILE_NAME)) {
+      console.warn(
+        `Skipping index file for "${folderPath || "."}": a generated artefact is already named "${INDEX_FILE_NAME}"!`,
+      );
+      return false;
+    }
+
+    // barrels are trivially correct, so they are type checked regardless of the debug option: an ambiguous
+    // re-export is a real problem and should surface instead of being hidden behind @ts-nocheck
+    const fileHandler = this.createFile(INDEX_FILE_NAME, undefined, folderPath, true);
+    fileHandler.getFile().addExportDeclarations(exportDeclarations);
+
+    await this.writeFile(fileHandler, false);
+    return true;
   }
 }

@@ -2,7 +2,7 @@ import path from "path";
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import { mkdirp } from "mkdirp";
 import { EmitResult } from "ts-morph";
-import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, MockInstance, test, vi } from "vitest";
 import { DataModel } from "../../src/data-model/DataModel.js";
 import { digest } from "../../src/data-model/DataModelDigestionV4.js";
 import { NamingHelper } from "../../src/data-model/NamingHelper.js";
@@ -65,8 +65,11 @@ describe("ProjectManager Test", () => {
     return `${NAMESPACE}.${name}`;
   }
 
+  let logWarnSpy: MockInstance;
+
   beforeAll(() => {
     vi.spyOn(console, "log").mockImplementation(() => {});
+    logWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
   });
 
   beforeEach(() => {
@@ -463,6 +466,136 @@ describe("ProjectManager Test", () => {
     await pm.finalizeServices();
 
     expect(pm.getCachedFiles().size).toBe(1);
+  });
+
+  function getExports(pm: Awaited<ReturnType<typeof createProjectManager>>, filePath: string) {
+    return pm
+      .getCachedFiles()
+      .get(filePath)!
+      .getExportDeclarations()
+      .map((exportDecl) => exportDecl.getModuleSpecifierValue());
+  }
+
+  /** the name each export is re-exported under, undefined where it is a flat `export *` */
+  function getNamespaceAliases(pm: Awaited<ReturnType<typeof createProjectManager>>, filePath: string) {
+    return pm
+      .getCachedFiles()
+      .get(filePath)!
+      .getExportDeclarations()
+      .map((exportDecl) => exportDecl.getNamespaceExport()?.getName());
+  }
+
+  test("Index file for bundled generation", async () => {
+    // given all three bundled files
+    noOutput = true;
+    useExhaustiveDataModel(modelBuilder);
+    const pm = await doCreateProjectManager();
+
+    pm.initModels();
+    await pm.finalizeModels();
+    pm.initQObjects();
+    await pm.finalizeQObjects();
+    pm.initServices();
+    await pm.finalizeServices();
+
+    // when generating the barrels
+    await pm.generateIndexFiles();
+
+    // then there's exactly one: bundled generation only ever emits on root level
+    expect([...pm.getCachedFiles().keys()]).toEqual([
+      MAIN_FILE_NAMES.model,
+      MAIN_FILE_NAMES.qObject,
+      MAIN_FILE_NAMES.service,
+      "index",
+    ]);
+    // and it re-exports all of them
+    expect(getExports(pm, "index")).toEqual([
+      `./${MAIN_FILE_NAMES.qObject}.js`,
+      `./${MAIN_FILE_NAMES.model}.js`,
+      `./${MAIN_FILE_NAMES.service}.js`,
+    ]);
+  });
+
+  test("Index files for unbundled generation", async () => {
+    // given one model in its own folder and the main service file on root level
+    noOutput = true;
+    bundledFileGeneration = false;
+    const pm = await doCreateProjectManager();
+
+    await pm.finalizeFile(pm.createOrGetModelFile(ENTITY_FOLDER_PATH, ENTITY_NAME));
+    pm.initServices();
+    await pm.finalizeServices();
+
+    // when generating the barrels
+    await pm.generateIndexFiles();
+
+    // then the model folder has one of its own
+    expect(getExports(pm, `${ENTITY_FOLDER_PATH}/index`)).toEqual([`./${ENTITY_NAME}.js`]);
+    // and so has the namespace above it
+    expect(getExports(pm, "ns-1-example/index")).toEqual(["./my-entity/index.js"]);
+    // and the root one points at the root level file and at the namespace - flatly, since there's only one
+    expect(getExports(pm, "index")).toEqual([`./${MAIN_FILE_NAMES.service}.js`, "./ns-1-example/index.js"]);
+    expect(getNamespaceAliases(pm, "index")).toEqual([undefined, undefined]);
+  });
+
+  test("Index file re-exports several namespaces under their own name", async () => {
+    // given models in two different namespaces
+    noOutput = true;
+    bundledFileGeneration = false;
+    const pm = await doCreateProjectManager();
+
+    await pm.finalizeFile(pm.createOrGetModelFile("ns-1-example/my-entity", ENTITY_NAME));
+    await pm.finalizeFile(pm.createOrGetModelFile("other-ns/my-complex", COMPLEX_NAME));
+    pm.initServices();
+    await pm.finalizeServices();
+
+    // when generating the barrels
+    await pm.generateIndexFiles();
+
+    // then the root barrel keeps them apart: the same type name may legitimately occur in both
+    expect(getExports(pm, "index")).toEqual([
+      `./${MAIN_FILE_NAMES.service}.js`,
+      "./ns-1-example/index.js",
+      "./other-ns/index.js",
+    ]);
+    // the underscore keeps the alias a valid identifier, as the namespace segment starts with a digit
+    expect(getNamespaceAliases(pm, "index")).toEqual([undefined, "ns_1Example", "otherNs"]);
+  });
+
+  test("Index file only lists what has been written", async () => {
+    noOutput = true;
+    bundledFileGeneration = false;
+    const pm = await doCreateProjectManager();
+
+    // the main model file stays empty here, so it never gets written ...
+    pm.createOrGetMainModelFile();
+    await pm.finalizeModels();
+    // ... while the main service file always is
+    pm.initServices();
+    await pm.finalizeServices();
+
+    await pm.generateIndexFiles();
+
+    expect(getExports(pm, "index")).toEqual([`./${MAIN_FILE_NAMES.service}.js`]);
+  });
+
+  test("Index file is skipped where an artefact occupies the name", async () => {
+    // given a model which is literally named "index"
+    noOutput = true;
+    bundledFileGeneration = false;
+    const pm = await doCreateProjectManager();
+
+    await pm.finalizeFile(pm.createOrGetModelFile(ENTITY_FOLDER_PATH, "index"));
+    pm.initServices();
+    await pm.finalizeServices();
+
+    // when generating the barrels
+    await pm.generateIndexFiles();
+
+    // then that folder gets none and the user is told about it
+    expect(logWarnSpy).toHaveBeenCalledWith(expect.stringContaining(ENTITY_FOLDER_PATH));
+    // and the root barrel doesn't reference the folder either
+    expect(getExports(pm, "index")).toEqual([`./${MAIN_FILE_NAMES.service}.js`]);
   });
 
   // test("ProjectManager: create and write model file", async () => {
