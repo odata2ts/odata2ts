@@ -39,8 +39,11 @@ describe("App Test", () => {
   let logInfoSpy: MockInstance;
 
   beforeAll(async () => {
-    // @ts-ignore
-    createPmSpy = vi.spyOn(ProjectManager, "createProjectManager").mockResolvedValue(vi.fn());
+    createPmSpy = vi
+      .spyOn(ProjectManager, "createProjectManager")
+      // runApp calls the barrel generation on the project manager itself
+      // @ts-ignore
+      .mockResolvedValue(Object.assign(vi.fn(), { generateIndexFiles: vi.fn() }));
 
     logInfoSpy = vi.spyOn(console, "log").mockImplementation(() => vi.fn());
   });
@@ -162,7 +165,8 @@ describe("App Test", () => {
     await doRunApp();
 
     expect(logInfoSpy).toHaveBeenNthCalledWith(1, "Successfully generated models!");
-    expect(logInfoSpy).toHaveBeenNthCalledWith(2, "Successfully finished!");
+    expect(logInfoSpy).toHaveBeenNthCalledWith(2, "Successfully generated index files!");
+    expect(logInfoSpy).toHaveBeenNthCalledWith(3, "Successfully finished!");
   });
 
   test("App: generate only models", async () => {

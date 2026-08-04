@@ -1,6 +1,7 @@
 import * as path from "path";
+import { camelCase } from "change-case";
 import { mkdirp } from "mkdirp";
-import { CompilerOptions, Project, SourceFile } from "ts-morph";
+import { CompilerOptions, ExportDeclarationStructure, OptionalKind, Project, SourceFile } from "ts-morph";
 import { firstCharLowerCase } from "xml2js/lib/processors.js";
 import { DataModel } from "../data-model/DataModel.js";
 import { EntityType } from "../data-model/DataTypeModel.js";
@@ -11,6 +12,16 @@ import { FileHandler } from "./FileHandler.js";
 import { FileFormatter } from "./formatter/FileFormatter.js";
 import { createFormatter } from "./formatter/index.js";
 import { loadTsMorphCompilerOptions } from "./TsMorphHelper.js";
+
+/**
+ * Name of the generated barrel files. Not configurable: "index" is what every module resolution
+ * understands as the entry point of a folder, so a different name would defeat the purpose.
+ */
+const INDEX_FILE_NAME = "index";
+
+function exportAll(moduleSpecifier: string): OptionalKind<ExportDeclarationStructure> {
+  return { moduleSpecifier };
+}
 
 export interface ProjectManagerOptions {
   usePrettier?: boolean;
@@ -56,6 +67,13 @@ export class ProjectManager {
 
   private readonly cachedFiles: Map<string, SourceFile> | undefined;
 
+  /**
+   * Every file that was actually written, by the folder it lives in. This is the basis for the barrel
+   * files, so that they list what has really been emitted - which depends on the generation mode as well
+   * as on whether a main file ended up with any content at all.
+   */
+  private readonly writtenFiles = new Map<string, Array<string>>();
+
   constructor(
     protected outputDir: string,
     protected emitMode: EmitModes,
@@ -88,7 +106,13 @@ export class ProjectManager {
     return this.cachedFiles!;
   }
 
-  private async writeFile(fileHandler: FileHandler) {
+  private async writeFile(fileHandler: FileHandler, trackForIndex = true) {
+    if (trackForIndex) {
+      const folderFiles = this.writtenFiles.get(fileHandler.path) || [];
+      folderFiles.push(fileHandler.fileName);
+      this.writtenFiles.set(fileHandler.path, folderFiles);
+    }
+
     if (this.options.noOutput) {
       await fileHandler.write(this.emitMode, true);
       this.cachedFiles!.set(fileHandler.getFullFilePath(), fileHandler.getFile());
@@ -273,5 +297,92 @@ export class ProjectManager {
     ) {
       await this.writeFile(file);
     }
+  }
+
+  /**
+   * Generates the barrel files, re-exporting everything that has been generated: one index file per
+   * namespace and one at the root of the output directory.
+   *
+   * The files of a folder are always re-exported by the index of its <em>parent</em> - the namespace level
+   * for the model folders, the output root for everything else. Model folders therefore get no index of
+   * their own, which means no generated artefact can ever collide with one: a model literally named "index"
+   * is simply re-exported like any other.
+   *
+   * The root barrel re-exports the files on root level flatly, but each namespace under its own name
+   * ({@code export * as libraryCatalog from "./library-catalog/index.js"}). OData allows the same type name
+   * in two namespaces, and unbundled generation keeps those names as they are - a flat re-export would make
+   * both of them unreachable. With only a single namespace that cannot happen, so there it stays flat.
+   *
+   * Bundled file generation only ever emits files on root level, so there the root barrel is all there is.
+   *
+   * Must run after all other files have been written, since the barrels list what was actually emitted.
+   */
+  public async generateIndexFiles() {
+    const folderPaths = [...this.writtenFiles.keys()].filter((folderPath) => folderPath !== "").sort();
+
+    // collect the files of each folder under the folder which is to re-export them
+    const specifiersByParent = new Map<string, Array<string>>();
+    folderPaths.forEach((folderPath) => {
+      const lastSlash = folderPath.lastIndexOf("/");
+      const parent = lastSlash < 0 ? "" : folderPath.substring(0, lastSlash);
+      const folderName = lastSlash < 0 ? folderPath : folderPath.substring(lastSlash + 1);
+      const specifiers = this.getWrittenFileNames(folderPath).map((fileName) => `./${folderName}/${fileName}.js`);
+
+      specifiersByParent.set(parent, [...(specifiersByParent.get(parent) || []), ...specifiers]);
+    });
+
+    // one barrel per namespace
+    const barreledNamespaces: Array<string> = [];
+    for (const [namespace, specifiers] of specifiersByParent) {
+      if (namespace && (await this.writeIndexFile(namespace, specifiers.map(exportAll)))) {
+        barreledNamespaces.push(namespace);
+      }
+    }
+
+    await this.writeIndexFile("", [
+      ...this.getFileSpecifiers("").map(exportAll),
+      // folders without a namespace level of their own are re-exported by the root itself
+      ...(specifiersByParent.get("") || []).map(exportAll),
+      ...barreledNamespaces.map((namespace) => {
+        const moduleSpecifier = `./${namespace}/${INDEX_FILE_NAME}.js`;
+        return barreledNamespaces.length === 1
+          ? exportAll(moduleSpecifier)
+          : { moduleSpecifier, namespaceExport: camelCase(namespace) };
+      }),
+    ]);
+  }
+
+  private getWrittenFileNames(folderPath: string) {
+    return (this.writtenFiles.get(folderPath) || []).slice().sort();
+  }
+
+  private getFileSpecifiers(folderPath: string) {
+    return this.getWrittenFileNames(folderPath).map((fileName) => `./${fileName}.js`);
+  }
+
+  /**
+   * Only ever relevant for the root barrel: no generated file lives on a namespace level, and model folders
+   * get no barrel at all. The root file names are configurable, though, so one of them may occupy the name.
+   *
+   * @return whether the barrel was written
+   */
+  private async writeIndexFile(
+    folderPath: string,
+    exportDeclarations: Array<OptionalKind<ExportDeclarationStructure>>,
+  ): Promise<boolean> {
+    if (this.writtenFiles.get(folderPath)?.includes(INDEX_FILE_NAME)) {
+      console.warn(
+        `Skipping index file for "${folderPath || "."}": a generated artefact is already named "${INDEX_FILE_NAME}"!`,
+      );
+      return false;
+    }
+
+    // barrels are trivially correct, so they are type checked regardless of the debug option: an ambiguous
+    // re-export is a real problem and should surface instead of being hidden behind @ts-nocheck
+    const fileHandler = this.createFile(INDEX_FILE_NAME, undefined, folderPath, true);
+    fileHandler.getFile().addExportDeclarations(exportDeclarations);
+
+    await this.writeFile(fileHandler, false);
+    return true;
   }
 }
