@@ -665,6 +665,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@odata2ts/int-test-config-variants@workspace:int-test/config-variants":
+  version: 0.0.0-use.local
+  resolution: "@odata2ts/int-test-config-variants@workspace:int-test/config-variants"
+  dependencies:
+    "@odata2ts/odata-service": "workspace:^"
+    "@odata2ts/odata2ts": "workspace:^"
+  languageName: unknown
+  linkType: soft
+
 "@odata2ts/int-test-olingo-v2@workspace:int-test/olingo-v2":
   version: 0.0.0-use.local
   resolution: "@odata2ts/int-test-olingo-v2@workspace:int-test/olingo-v2"
