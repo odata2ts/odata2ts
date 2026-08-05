@@ -262,7 +262,6 @@ describe("Query Object Generator Tests V4", () => {
     // then the q-paths carry the id function of the entity set they point to, which is what turns the
     // key stated in an editable model into the URL of the referenced entity
     await generateAndCompare("entity-binding.ts", {
-      enableBindingProps: true,
       skipIdModels: false,
     });
   });
@@ -274,7 +273,6 @@ describe("Query Object Generator Tests V4", () => {
     // when opting into the binding props
     // then the q-paths stay as they are: the URL of the referenced entity could not be built
     await generateAndCompare("entity-binding-unbound.ts", {
-      enableBindingProps: true,
       skipIdModels: false,
     });
   });

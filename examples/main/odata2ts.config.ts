@@ -22,7 +22,6 @@ const config: ConfigFileOptions = {
       // TrippinService does not generate IDs on the server, but the client side => demo service
       disableAutoManagedKey: true,
       allowRenaming: true,
-      enableBindingProps: true,
       naming: {
         models: {
           suffix: "Model",
@@ -58,7 +57,6 @@ const config: ConfigFileOptions = {
     // Example of OData V2 service from odata.org
     odataV2: {
       source: srcFolder("odata-v2.xml"),
-      enableBindingProps: true,
       output: outputFolder("odataV2"),
       allowRenaming: true,
       // this demo service does not generate IDs, but requires the client to create new IDs

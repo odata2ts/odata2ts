@@ -103,8 +103,8 @@ const defaultConfig: DefaultConfiguration = {
   byTypeAndName: [],
   enableNativeInOperator: false,
   odataVersionV4: "4.0",
-  enableBindingProps: false,
-  enableDeepInsertProps: false,
+  disableBindingProps: false,
+  disableDeepInsertProps: false,
   v2EditableModelsWithExtraResultsWrapping: false,
 };
 

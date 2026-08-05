@@ -322,7 +322,7 @@ class ModelGenerator {
    * it. Neither is inferable, so a navigation property missing one of them gets no binding at all.
    */
   private isBindableNavProp(ownerFqName: string, prop: PropertyModel) {
-    if (!this.options.enableBindingProps || prop.dataType !== DataTypes.ModelType) {
+    if (this.options.disableBindingProps || prop.dataType !== DataTypes.ModelType) {
       return false;
     }
     const target = this.dataModel.getEntityType(prop.fqType);
@@ -369,7 +369,7 @@ class ModelGenerator {
     const byKey = this.bindsByKey();
 
     return props.flatMap((prop) => {
-      const deepInsert = this.options.enableDeepInsertProps;
+      const deepInsert = !this.options.disableDeepInsertProps;
       const bindable = this.isBindableNavProp(ownerFqName, prop);
 
       // one entry per resulting property name, so that renaming cannot merge what belongs apart

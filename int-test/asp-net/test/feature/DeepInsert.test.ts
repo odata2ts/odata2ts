@@ -8,7 +8,7 @@ import { LIBRARY } from "../LibraryTestConstants.js";
 /**
  * Deep insert - odata2ts issue #237 - against a server that actually stores the nested entities.
  *
- * With `enableDeepInsertProps` the navigation properties show up on the editable models, typed as the
+ * The navigation properties show up on the editable models, typed as the
  * editable model of the related entity. That the payload nests is only half the feature: the nested
  * entities have to be *created and linked* on the other side, which is what a fixture cannot show and
  * these tests can.

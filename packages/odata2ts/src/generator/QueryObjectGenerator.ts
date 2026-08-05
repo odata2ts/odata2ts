@@ -323,7 +323,7 @@ class QueryObjectGenerator {
     const generatesService = this.options.mode === Modes.service || this.options.mode === Modes.all;
     if (
       !generatesService ||
-      !this.options.enableBindingProps ||
+      this.options.disableBindingProps ||
       this.options.skipIdModels ||
       prop.dataType !== DataTypes.ModelType
     ) {
