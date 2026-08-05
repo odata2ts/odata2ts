@@ -37,6 +37,23 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * feat(example): integration tests for primitive type services
 
+## [0.7.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-core-v0.6.1...@odata2ts/odata-core-v0.7.0) (2026-08-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* CollectionServiceV4.add and update take the primitive value directly instead of a model payload, since control information on a primitive collection member has no meaning in OData.
+
+### Features
+
+* let the odataVersionV4 option govern requests and responses ([#416](https://github.com/odata2ts/odata2ts/issues/416)) ([5e8f6fe](https://github.com/odata2ts/odata2ts/commit/5e8f6feb2e39ab76132fd25b44e1923281daeb06))
+
+
+### Bug Fixes
+
+* declare OData version 4.0 on V4 requests carrying a body ([#414](https://github.com/odata2ts/odata2ts/issues/414)) ([b658f99](https://github.com/odata2ts/odata2ts/commit/b658f9934681699d23288b1a85fa76de4275f5b1))
+* migrate to nodenext module resolution for TypeScript 6.0 ([e58d95f](https://github.com/odata2ts/odata2ts/commit/e58d95f4bcfa673753c6fdd5495040222c710edb))
+
 ## [0.6.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-core@0.6.0...@odata2ts/odata-core-v0.6.1) (2025-10-16)
 
 
