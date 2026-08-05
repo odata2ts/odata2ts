@@ -2393,7 +2393,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dockerode@npm:^5.0.0":
+"dockerode@npm:^5.0.1":
   version: 5.0.1
   resolution: "dockerode@npm:5.0.1"
   dependencies:
@@ -4895,7 +4895,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar-fs@npm:^3.1.2":
+"tar-fs@npm:^3.1.3":
   version: 3.1.3
   resolution: "tar-fs@npm:3.1.3"
   dependencies:
@@ -4961,8 +4961,8 @@ __metadata:
   linkType: hard
 
 "testcontainers@npm:^12.0.4":
-  version: 12.0.4
-  resolution: "testcontainers@npm:12.0.4"
+  version: 12.1.0
+  resolution: "testcontainers@npm:12.1.0"
   dependencies:
     "@balena/dockerignore": "npm:^1.0.2"
     "@types/dockerode": "npm:^4.0.1"
@@ -4971,15 +4971,15 @@ __metadata:
     byline: "npm:^5.0.0"
     debug: "npm:^4.4.3"
     docker-compose: "npm:^1.4.2"
-    dockerode: "npm:^5.0.0"
+    dockerode: "npm:^5.0.1"
     get-port: "npm:^5.1.1"
     proper-lockfile: "npm:^4.1.2"
     properties-reader: "npm:^3.0.1"
     ssh-remote-port-forward: "npm:^1.0.4"
-    tar-fs: "npm:^3.1.2"
+    tar-fs: "npm:^3.1.3"
     tmp: "npm:^0.2.7"
-    undici: "npm:^8.5.0"
-  checksum: 10/a63752b69014306311be2f0919c6acb4e3f7ded88bbf73962cc369c643f44023eeb0f0afc4093b98fe61f972bc85e97c46eda44b536b2b53c47ac879f2801022
+    undici: "npm:^8.9.0"
+  checksum: 10/8695f49cac89a80a94ac49e01f38ed46d60b3bd12b6b5f0d44dc76c72bb6ef667cfd2315f69720d4553572c93fd034a25116ca4ad6764b7028b0731e078cb3d4
   languageName: node
   linkType: hard
 
@@ -5189,10 +5189,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^8.5.0":
-  version: 8.9.0
-  resolution: "undici@npm:8.9.0"
-  checksum: 10/dfad3e233087eafdf1d361acd17c4d45a9590d5db9400458f1c03f47d8f1ef68647e2109ebb982c862e50c227093abd2d5f44b154904fc0b3d22576b6e95cfe7
+"undici@npm:^8.9.0":
+  version: 8.10.0
+  resolution: "undici@npm:8.10.0"
+  checksum: 10/254219966d4a2fb110f565ffe73131caa82e949f207b9dd88930ebc23dfb6561db72ca187391cbd408ceeba7c647cb47d4110e8ae00df44c0c66e8a21e091dc0
   languageName: node
   linkType: hard
 
