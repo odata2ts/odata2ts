@@ -11,7 +11,7 @@
     "build": "yarn clean && yarn generate",
     "clean": "rimraf build src-generated",
     "generate": "odata2ts",
-    "test": "node ../../node_modules/.bin/vitest run --testTimeout=30000",
+    "test": "vitest run --testTimeout=30000",
     "test-compile": "tsc"
   },
   "dependencies": {
@@ -28,7 +28,10 @@
   },
   "devDependencies": {
     "@odata2ts/odata2ts": "workspace:^",
-    "@types/luxon": "^3.7.2"
+    "@types/luxon": "^3.7.2",
+    "rimraf": "^6.1.3",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.10"
   },
   "publishConfig": {
     "access": "public"
