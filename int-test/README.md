@@ -2,7 +2,8 @@
 
 This folder contains integration tests in general. Some are static like:
 
-- cli: Testing the CLI
+- cli: Testing the CLI - argument parsing, config discovery and precedence, the service selection,
+  and `--source-url` against a local HTTP server
 - ts-floor-check: Testing that the minimum TS Version promise holds
 - config-variants: Compile gate for the configuration surface - generates the model under a set of
   configurations and type-checks the result
