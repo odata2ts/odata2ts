@@ -31,6 +31,7 @@
     "@prettier/plugin-xml": "^3.4.2",
     "@types/node": "^24",
     "@vitest/coverage-istanbul": "^4.1.10",
+    "@yarnpkg/types": "^4.0.1",
     "env-cmd": "^11.0.0",
     "madge": "^8.0.0",
     "prettier": "^3.9.6",

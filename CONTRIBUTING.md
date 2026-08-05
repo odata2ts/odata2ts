@@ -50,6 +50,27 @@ yarn install
 yarn build
 ```
 
+### Dependencies
+
+Every workspace must declare the tools its own scripts call — `typescript`, `vitest`, `rimraf`, `madge` and the like.
+Yarn only exposes the binaries of the dependencies a workspace declares itself; there is no fallback to the root's
+`node_modules/.bin`. A script invoking an undeclared binary fails with `command not found`.
+
+To keep those repeated declarations from drifting apart, the root `package.json` is the single source of truth:
+`yarn.config.cjs` holds a [Yarn constraint](https://yarnpkg.com/features/constraints) that pins the
+`dependencies` and `devDependencies` of every workspace to the range declared in the root.
+
+So whenever you add a dependency or change its version:
+
+1. Set the version in the root `package.json`.
+2. Add the dependency to each workspace that needs it — the range doesn't matter yet.
+3. Run `yarn constraints --fix` to align all workspaces with the root, then `yarn install`.
+
+`yarn constraints` (check only, no changes) runs in CI and fails the build on any mismatch.
+
+`peerDependencies` are exempt on purpose: they state what a consumer has to bring along, not what this repo
+installs — e.g. the `typescript: ">= 4.7"` floor of `packages/odata2ts`, which `int-test/ts-floor-check` verifies.
+
 ### Running Unit Tests
 
 To run the **unit tests** of all modules:

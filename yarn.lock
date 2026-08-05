@@ -374,6 +374,8 @@ __metadata:
   resolution: "@odata2ts/cli@workspace:int-test/cli"
   dependencies:
     "@odata2ts/odata2ts": "workspace:^"
+    rimraf: "npm:^6.1.3"
+    vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -448,6 +450,9 @@ __metadata:
     axios: "npm:^1.18.1"
     bignumber.js: "npm:^9.1.2"
     luxon: "npm:^3.7.2"
+    rimraf: "npm:^6.1.3"
+    typescript: "npm:6.0.3"
+    vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -457,6 +462,8 @@ __metadata:
   dependencies:
     "@odata2ts/odata-service": "workspace:^"
     "@odata2ts/odata2ts": "workspace:^"
+    rimraf: "npm:^6.1.3"
+    vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -508,7 +515,10 @@ __metadata:
     "@odata2ts/http-client-fetch": "npm:^0.11.0"
     "@odata2ts/odata-service": "workspace:^"
     "@odata2ts/odata2ts": "workspace:^"
+    rimraf: "npm:^6.1.3"
     testcontainers: "npm:^12.0.4"
+    typescript: "npm:6.0.3"
+    vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -525,7 +535,10 @@ __metadata:
     "@types/luxon": "npm:^3.7.2"
     bignumber.js: "npm:^9.1.2"
     luxon: "npm:^3.7.2"
+    rimraf: "npm:^6.1.3"
     testcontainers: "npm:^12.0.4"
+    typescript: "npm:6.0.3"
+    vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -535,6 +548,8 @@ __metadata:
   dependencies:
     "@odata2ts/odata-service": "workspace:^"
     "@odata2ts/odata2ts": "workspace:^"
+    rimraf: "npm:^6.1.3"
+    typescript: "npm:6.0.3"
   languageName: unknown
   linkType: soft
 
@@ -552,7 +567,10 @@ __metadata:
     "@types/luxon": "npm:^3.7.2"
     bignumber.js: "npm:^9.1.2"
     luxon: "npm:^3.7.2"
+    rimraf: "npm:^6.1.3"
     testcontainers: "npm:^12.0.4"
+    typescript: "npm:6.0.3"
+    vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -560,7 +578,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/odata-core@workspace:packages/odata-core"
   dependencies:
+    madge: "npm:^8.0.0"
+    rimraf: "npm:^6.1.3"
     tslib: "npm:^2.8.1"
+    typescript: "npm:6.0.3"
   languageName: unknown
   linkType: soft
 
@@ -569,7 +590,12 @@ __metadata:
   resolution: "@odata2ts/odata-query-builder@workspace:packages/odata-query-builder"
   dependencies:
     "@odata2ts/odata-query-objects": "npm:^0.29.0"
+    "@vitest/coverage-istanbul": "npm:^4.1.10"
+    madge: "npm:^8.0.0"
+    rimraf: "npm:^6.1.3"
     tslib: "npm:^2.8.1"
+    typescript: "npm:6.0.3"
+    vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -580,8 +606,13 @@ __metadata:
     "@odata2ts/converter-api": "npm:^0.2.6"
     "@odata2ts/http-client-api": "npm:^0.6.7"
     "@odata2ts/odata-core": "npm:^0.6.1"
+    "@vitest/coverage-istanbul": "npm:^4.1.10"
+    madge: "npm:^8.0.0"
+    rimraf: "npm:^6.1.3"
     tslib: "npm:^2.8.1"
     type-fest: "npm:^5.8.0"
+    typescript: "npm:6.0.3"
+    vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -592,8 +623,13 @@ __metadata:
     "@odata2ts/http-client-api": "npm:^0.6.7"
     "@odata2ts/odata-query-builder": "npm:^0.19.0"
     "@odata2ts/odata-query-objects": "npm:^0.29.0"
+    "@vitest/coverage-istanbul": "npm:^4.1.10"
+    madge: "npm:^8.0.0"
+    rimraf: "npm:^6.1.3"
     ts-expect: "npm:^1.3.0"
     tslib: "npm:^2.8.1"
+    typescript: "npm:6.0.3"
+    vitest: "npm:^4.1.10"
   languageName: unknown
   linkType: soft
 
@@ -612,19 +648,23 @@ __metadata:
     "@prettier/plugin-xml": "npm:^3.4.2"
     "@types/node": "npm:^24"
     "@types/xml2js": "npm:^0.4.14"
+    "@vitest/coverage-istanbul": "npm:^4.1.10"
     axios: "npm:^1.18.1"
     change-case: "npm:^5.4.4"
     commander: "npm:^15.0.0"
     cosmiconfig: "npm:^10.0.0"
     cosmiconfig-typescript-loader: "npm:^6.3.0"
     deepmerge: "npm:^4.3.1"
+    madge: "npm:^8.0.0"
     mkdirp: "npm:^3.0.1"
     prettier: "npm:^3.9.6"
     rimraf: "npm:^6.1.3"
     ts-morph: "npm:^28.0.0"
     tsconfig-loader: "npm:^1.1.0"
     type-fest: "npm:^5.8.0"
+    typescript: "npm:6.0.3"
     upper-case-first: "npm:^3.0.0"
+    vitest: "npm:^4.1.10"
     xml2js: "npm:^0.6.2"
   peerDependencies:
     "@odata2ts/odata-query-objects": ^0.29.0
@@ -641,6 +681,8 @@ __metadata:
   dependencies:
     "@odata2ts/converter-api": "npm:^0.2.6"
     "@odata2ts/odata-core": "npm:^0.6.0"
+    rimraf: "npm:^6.1.3"
+    typescript: "npm:6.0.3"
   languageName: unknown
   linkType: soft
 
@@ -652,6 +694,7 @@ __metadata:
     "@prettier/plugin-xml": "npm:^3.4.2"
     "@types/node": "npm:^24"
     "@vitest/coverage-istanbul": "npm:^4.1.10"
+    "@yarnpkg/types": "npm:^4.0.1"
     env-cmd: "npm:^11.0.0"
     madge: "npm:^8.0.0"
     prettier: "npm:^3.9.6"
@@ -1249,6 +1292,15 @@ __metadata:
   dependencies:
     chevrotain: "npm:7.1.1"
   checksum: 10/df1aa7ac0ec81ec6363b515f4bb80043c8c29c2e2c87ba668f142d20090f8a67ae1bde3665ee63ebbca12dd9d77991795d97f02fa0e2e64c20ba7a0636209463
+  languageName: node
+  linkType: hard
+
+"@yarnpkg/types@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "@yarnpkg/types@npm:4.0.1"
+  dependencies:
+    tslib: "npm:^2.4.0"
+  checksum: 10/f391763cd955356e9aad551b29e8de7bbf68a6c8992af7cdc950ccf53f8aff6695ad81aa4c8a8e7c582786a840a4f30617732e2cb49f4109b971a9242c31c9fc
   languageName: node
   linkType: hard
 
@@ -4327,7 +4379,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.8.1":
+"tslib@npm:^2.4.0, tslib@npm:^2.8.1":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: 10/3e2e043d5c2316461cb54e5c7fe02c30ef6dccb3384717ca22ae5c6b5bc95232a6241df19c622d9c73b809bea33b187f6dbc73030963e29950c2141bc32a79f7

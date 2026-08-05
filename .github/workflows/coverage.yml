@@ -22,6 +22,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - name: Install packages
         run: yarn --immutable
+      - name: Check dependency consistency
+        run: yarn constraints
       - name: Build packages
         run: yarn build
       - name: Type Test

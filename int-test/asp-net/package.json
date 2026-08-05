@@ -10,8 +10,8 @@
     "build": "yarn clean && yarn generate",
     "clean": "rimraf build src-generated",
     "generate": "odata2ts",
-    "test": "node ../../node_modules/.bin/vitest run",
-    "test-compile": "node ../../node_modules/.bin/tsc"
+    "test": "vitest run",
+    "test-compile": "tsc"
   },
   "dependencies": {
     "@odata2ts/http-client-fetch": "^0.11.0",
@@ -19,6 +19,9 @@
   },
   "devDependencies": {
     "@odata2ts/odata2ts": "workspace:^",
-    "testcontainers": "^12.0.4"
+    "rimraf": "^6.1.3",
+    "testcontainers": "^12.0.4",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.10"
   }
 }
