@@ -48,7 +48,7 @@ jobs:
       - name: Commit changes
         # only if a PR has been created
         if: ${{ steps.release.outputs.pr }}
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_author: ${{ steps.last-commit.outputs.author }}
           commit_message: ${{ steps.last-commit.outputs.message }}
