@@ -53,6 +53,22 @@ A second client is generated the same way from `resource/library-v2.xml`, the sn
 `/odata/v2/library/$metadata`. It is not a second model: the adapter translates the one service on the
 fly, so that file is the translation, and testing against it is what makes the translation visible.
 
+A third client, `src-generated/library-converted`, is the V4 model once more with value converters and
+`v4BigNumberAsString`. Converters had only ever met a running server as V2, through `int-test/olingo-v2`,
+and V2 is a different problem: there a timestamp arrives as `/Date(<ticks>)/` and every wide numeric type
+as a string, so the raw client types them as `string` and the converter has something obvious to parse.
+V4 sends real ISO values - and types `Edm.Decimal` and `Edm.Int64` as `number`, which is exactly where
+precision disappears unnoticed. `v4BigNumberAsString` therefore belongs with the converters rather than
+being a variant of its own: it asks the server for those two types as strings, and only then is there
+anything left to preserve. See `test/feature/Converters.test.ts`, which writes through the converted
+client and reads back through the raw one.
+
+`enableNativeInOperator` is on for the V4 client, while `int-test/asp-net` keeps the emulating default.
+The option has two states and both are worth having against a real server, so they are split across the
+two V4 packages instead of duplicating a suite. Both `test/core/QueryFunctionality.test.ts` files assert
+the URL, because the emulated and the native spelling return the same rows - the result alone would not
+tell them apart.
+
 Assertions use the fixed seed data from `db/data/*.csv` in the server repo.
 
 ## Observed CAP behaviour

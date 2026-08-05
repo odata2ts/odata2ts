@@ -88,12 +88,18 @@ describe("ASP.NET Library: query functionality", () => {
 
     expect(response.status).toBe(200);
   });
-  test("$filter with in", async () => {
-    const result = await LIBRARY.Media()
-      .query((builder, qMedium) => {
-        builder.filter(qMedium.Language.in("de", "en"));
-      })
-      .execute();
+  test("$filter with in, rolled out as equals-expressions", async () => {
+    // This client keeps the default, which emulates `in` - `int-test/cap` is generated with
+    // `enableNativeInOperator` and covers the other state. Both spellings yield the same rows, so the URL
+    // is the assertion which tells them apart at all.
+    const request = LIBRARY.Media().query((builder, qMedium) => {
+      builder.filter(qMedium.Language.in("de", "en"));
+    });
+
+    // decoded, since the query string travels percent-encoded
+    expect(decodeURIComponent(request.getUrl())).toContain("$filter=(Language eq 'de' or Language eq 'en')");
+
+    const result = await request.execute();
 
     expect(result.status).toBe(200);
     expect(result.data.value.length).toBeGreaterThan(0);

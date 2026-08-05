@@ -78,12 +78,19 @@ describe("CAP Library: query functionality", () => {
     expect(result.data.Publisher).toBeDefined();
     expect(result.data.Publisher?.Id).toBeDefined();
   });
-  test("$filter with in", async () => {
-    const result = await LIBRARY.Books()
-      .query((builder, qBook) => {
-        builder.filter(qBook.Language.in("de", "en"));
-      })
-      .execute();
+  test("$filter with in, rendered natively", async () => {
+    // This client is generated with `enableNativeInOperator`, while `int-test/asp-net` keeps the emulating
+    // default - the option has two states and this is where the native one meets a server. Both spellings
+    // yield the same rows, so the result alone would not tell them apart: the URL is the assertion that
+    // matters, and executing it is what shows the server accepts that spelling at all.
+    const request = LIBRARY.Books().query((builder, qBook) => {
+      builder.filter(qBook.Language.in("de", "en"));
+    });
+
+    // decoded, since the query string travels percent-encoded
+    expect(decodeURIComponent(request.getUrl())).toContain("$filter=Language in ('de','en')");
+
+    const result = await request.execute();
 
     expect(result.status).toBe(200);
     expect(result.data.value.length).toBeGreaterThan(0);

@@ -658,9 +658,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/int-test-cap@workspace:int-test/cap"
   dependencies:
+    "@odata2ts/converter-big-number": "npm:^0.2.8"
+    "@odata2ts/converter-common": "npm:^0.3.7"
+    "@odata2ts/converter-luxon": "npm:^0.2.7"
     "@odata2ts/http-client-fetch": "npm:^0.11.0"
     "@odata2ts/odata-service": "workspace:^"
     "@odata2ts/odata2ts": "workspace:^"
+    "@types/luxon": "npm:^3.7.2"
+    bignumber.js: "npm:^9.1.2"
+    luxon: "npm:^3.7.2"
     testcontainers: "npm:^12.0.4"
   languageName: unknown
   linkType: soft
