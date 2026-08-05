@@ -29,7 +29,7 @@ export type UrlValueModel = string | undefined;
  * Useful for function parameter values.
  */
 export type UrlParamValueFormatter<Type extends boolean | number | string> = (
-  value: ParamValueModel<Type>
+  value: ParamValueModel<Type>,
 ) => UrlValueModel;
 
 /**
@@ -42,5 +42,5 @@ export type UrlParamValueFormatter<Type extends boolean | number | string> = (
  * @param parsingRegExp the regular expression to use to parse the value
  */
 export type UrlParamValueParser<Type extends boolean | number | string> = (
-  urlConformValue: UrlValueModel
+  urlConformValue: UrlValueModel,
 ) => ParamValueModel<Type>;

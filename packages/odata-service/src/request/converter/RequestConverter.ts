@@ -15,5 +15,4 @@ export type RequestConverter<UserType, ODataType = UserType> = (
  * The end user can supply custom request converters.
  */
 export type MainRequestConverter<UserType, ODataType = UserType> =
-  | Pick<QueryObjectModel<UserType>, "convertToOData">
-  | Pick<QParamModel<ODataType, UserType>, "convertTo">;
+  Pick<QueryObjectModel<UserType>, "convertToOData"> | Pick<QParamModel<ODataType, UserType>, "convertTo">;

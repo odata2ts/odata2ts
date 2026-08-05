@@ -18,3 +18,7 @@ CHANGELOG.md
 # Reformatting them would make them stop being a snapshot.
 int-test/*/resource/
 examples/*/resource/
+
+# Generated clients: the generator formats them itself (option `prettier`), and they are gitignored -
+# checking them would only make the result depend on whether a build has run.
+src-generated

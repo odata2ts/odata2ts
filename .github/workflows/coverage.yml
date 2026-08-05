@@ -26,6 +26,8 @@ jobs:
         run: yarn build
       - name: Type Test
         run: yarn test-compile
+      - name: Check formatting
+        run: yarn check-format
       - name: Check Circular Deps
         run: yarn check-circular-deps
       - name: Run Tests

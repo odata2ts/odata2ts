@@ -37,11 +37,7 @@ describe("Query Object Generator Tests V4", () => {
 
   createEntityBasedGenerationTests(TEST_SUITE_NAME, FIXTURE_BASE_PATH, MODEL_FILE, GENERATE);
 
-  async function generateAndCompare(
-    fixturePath: string,
-    genOptions?: TestOptions,
-    fileToInspect = MODEL_FILE,
-  ) {
+  async function generateAndCompare(fixturePath: string, genOptions?: TestOptions, fileToInspect = MODEL_FILE) {
     await fixtureComparatorHelper.generateAndCompare(fileToInspect, fixturePath, odataBuilder.getSchemas(), genOptions);
   }
 

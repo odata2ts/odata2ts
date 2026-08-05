@@ -83,8 +83,7 @@ export type ExpandingFunction<Prop> =
   | Nullable;
 
 export type ExpandingFunctionV2<Prop> =
-  | ((expBuilder: ExpandingQueryBuilderV2<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void)
-  | Nullable;
+  ((expBuilder: ExpandingQueryBuilderV2<EntityExtractor<Prop>>, qObject: EntityExtractor<Prop>) => void) | Nullable;
 
 export interface ODataQueryBuilderConfig {
   expandingBuilder?: boolean;
@@ -305,7 +304,8 @@ export type V2ExpandResult = { selects: Array<string>; expands: Array<string> };
  * exposes the full set of system query options.
  */
 export interface CollectionQueryBuilderV2<Q extends QueryObjectModel>
-  extends Pick<ODataQueryBuilderModel<Q, CollectionQueryBuilderV2<Q>>, V2CollectionOps>,
+  extends
+    Pick<ODataQueryBuilderModel<Q, CollectionQueryBuilderV2<Q>>, V2CollectionOps>,
     V2ExpandingFunction<Q, CollectionQueryBuilderV2<Q>>,
     V2ExpandFunction<Q, CollectionQueryBuilderV2<Q>> {
   /**
@@ -319,7 +319,8 @@ export interface CollectionQueryBuilderV2<Q extends QueryObjectModel>
  * only select/expand/expanding are meaningful.
  */
 export interface ModelQueryBuilderV2<Q extends QueryObjectModel>
-  extends Pick<ODataQueryBuilderModel<Q, ModelQueryBuilderV2<Q>>, V2ModelOps>,
+  extends
+    Pick<ODataQueryBuilderModel<Q, ModelQueryBuilderV2<Q>>, V2ModelOps>,
     V2ExpandingFunction<Q, ModelQueryBuilderV2<Q>>,
     V2ExpandFunction<Q, ModelQueryBuilderV2<Q>> {
   /**
@@ -329,7 +330,8 @@ export interface ModelQueryBuilderV2<Q extends QueryObjectModel>
 }
 
 export interface ExpandingQueryBuilderV2<Q extends QueryObjectModel>
-  extends Pick<ODataQueryBuilderModel<Q, ExpandingQueryBuilderV2<Q>>, V2ExpandingOps>,
+  extends
+    Pick<ODataQueryBuilderModel<Q, ExpandingQueryBuilderV2<Q>>, V2ExpandingOps>,
     V2ExpandingFunction<Q, ExpandingQueryBuilderV2<Q>>,
     V2ExpandFunction<Q, ExpandingQueryBuilderV2<Q>> {
   /**
@@ -343,8 +345,10 @@ export interface ExpandingQueryBuilderV2<Q extends QueryObjectModel>
  * Contract for ODataQueryBuilder for V4, bound to a collection of models:
  * exposes the full set of system query options.
  */
-export interface CollectionQueryBuilderV4<Q extends QueryObjectModel>
-  extends Pick<ODataQueryBuilderModel<Q, CollectionQueryBuilderV4<Q>>, V4CollectionOps> {
+export interface CollectionQueryBuilderV4<Q extends QueryObjectModel> extends Pick<
+  ODataQueryBuilderModel<Q, CollectionQueryBuilderV4<Q>>,
+  V4CollectionOps
+> {
   /**
    * Creates a new builder with the identical state (deep copy).
    */
@@ -355,16 +359,22 @@ export interface CollectionQueryBuilderV4<Q extends QueryObjectModel>
  * Contract for ODataQueryBuilder for V4, bound to a single model (EntityType or ComplexType instance):
  * only select/expand/expanding are meaningful.
  */
-export interface ModelQueryBuilderV4<Q extends QueryObjectModel>
-  extends Pick<ODataQueryBuilderModel<Q, ModelQueryBuilderV4<Q>>, V4ModelOps> {
+export interface ModelQueryBuilderV4<Q extends QueryObjectModel> extends Pick<
+  ODataQueryBuilderModel<Q, ModelQueryBuilderV4<Q>>,
+  V4ModelOps
+> {
   /**
    * Creates a new builder with the identical state (deep copy).
    */
   clone: () => ModelQueryBuilderV4<Q>;
 }
 
-export interface ExpandingCollectionQueryBuilderV4<Q extends QueryObjectModel>
-  extends Pick<ODataQueryBuilderModel<Q, ExpandingCollectionQueryBuilderV4<Q>>, V4CollectionExpandingOps> {}
+export interface ExpandingCollectionQueryBuilderV4<Q extends QueryObjectModel> extends Pick<
+  ODataQueryBuilderModel<Q, ExpandingCollectionQueryBuilderV4<Q>>,
+  V4CollectionExpandingOps
+> {}
 
-export interface ExpandingModelQueryBuilderV4<Q extends QueryObjectModel>
-  extends Pick<ODataQueryBuilderModel<Q, ExpandingModelQueryBuilderV4<Q>>, V4ModelExpandingOps> {}
+export interface ExpandingModelQueryBuilderV4<Q extends QueryObjectModel> extends Pick<
+  ODataQueryBuilderModel<Q, ExpandingModelQueryBuilderV4<Q>>,
+  V4ModelExpandingOps
+> {}

@@ -17,7 +17,7 @@ odata2ts is a configurable generator, which makes its configuration a good part 
 switches plus the nested `naming` settings and the per-type and per-property overrides. The server
 integration tests cannot carry that breadth - every variant there costs Docker, runtime and test code - and
 for most of those options a server would prove nothing anyway, because they never reach the wire. They only
-change the *shape* of the generated code, and a type check is the appropriate judge of that.
+change the _shape_ of the generated code, and a type check is the appropriate judge of that.
 
 So this is the cheap, wide layer underneath the server packages: one generation plus one `tsc` per variant.
 
@@ -47,16 +47,16 @@ One variant per axis against the baseline, plus a single "everything on" one - `
 matrix would not only be expensive, it would be unreadable: with a failure, nobody could tell which axis
 caused it.
 
-| Variant | Axis |
-| --- | --- |
-| `baseline` | plain defaults, so the others have something to be a variant *of* |
-| `modelsOnly` | `mode: models` with `skipEditableModels`, `skipIdModels`, `skipOperations`, `skipComments` - the skip options only take effect in this mode |
-| `qObjectsOnly` | `mode: qobjects` - query objects standing on their own, without the service layer which normally consumes them |
-| `namingCustom` | every naming knob turned away from its default: another strategy per artefact kind, own prefixes and suffixes, `allowRenaming` |
-| `enumStringUnion` | `enumType: "string-union"` |
-| `enumNumeric` | `enumType: "numeric"` |
-| `v2Wrapping` | `v2ModelsWithExtraResultsWrapping` and its editable counterpart, on the V2 model |
-| `everythingOn` | all of it at once - the interaction catcher |
+| Variant           | Axis                                                                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `baseline`        | plain defaults, so the others have something to be a variant _of_                                                                           |
+| `modelsOnly`      | `mode: models` with `skipEditableModels`, `skipIdModels`, `skipOperations`, `skipComments` - the skip options only take effect in this mode |
+| `qObjectsOnly`    | `mode: qobjects` - query objects standing on their own, without the service layer which normally consumes them                              |
+| `namingCustom`    | every naming knob turned away from its default: another strategy per artefact kind, own prefixes and suffixes, `allowRenaming`              |
+| `enumStringUnion` | `enumType: "string-union"`                                                                                                                  |
+| `enumNumeric`     | `enumType: "numeric"`                                                                                                                       |
+| `v2Wrapping`      | `v2ModelsWithExtraResultsWrapping` and its editable counterpart, on the V2 model                                                            |
+| `everythingOn`    | all of it at once - the interaction catcher                                                                                                 |
 
 The sources are the committed metadata snapshots of `int-test/asp-net` and `int-test/olingo-v2`, referenced
 rather than copied so they cannot drift apart.
@@ -83,7 +83,7 @@ Two generator defects, both of which had gone unnoticed because no test generate
   including `QBinaryPath` - which extends `QNoopPath` and takes a path and a converter, nothing else.
 - **`enumType: "string-union"` could not produce a working client for any model carrying an enum
   property at all.** The model emitted `export type Amenities = "…" | "…"`, a type alias, while the query
-  object handed that alias over to `QEnumPath` as a *value*. A union of string literals exists only in
+  object handed that alias over to `QEnumPath` as a _value_. A union of string literals exists only in
   the type system.
 
 Both are fixed. For the second one the generator now emits the member list next to the type alias, under

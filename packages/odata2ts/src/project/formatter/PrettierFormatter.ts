@@ -1,6 +1,5 @@
 import prettier from "prettier";
 import { IndentationText, NewLineKind, QuoteKind } from "ts-morph";
-
 import { BaseFormatter } from "./BaseFormatter.js";
 
 export class PrettierFormatter extends BaseFormatter {

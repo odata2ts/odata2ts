@@ -7,16 +7,19 @@ They are the counterpart to the typescript model interfaces and allow for comple
 renaming and type conversion.
 
 ## Documentation
+
 [Q-Objects Documentation](https://odata2ts.github.io/docs/category/q-objects)
 
 Main documentation for the odata2ts eco system:
 [https://odata2ts.github.io](https://odata2ts.github.io/)
 
 ## Tests
+
 See folder [test](https://github.com/odata2ts/odata2ts/tree/main/packages/odata-query-objects/test)
 for unit tests.
 
 ## Support, Feedback, Contributing
+
 This project is open to feature requests, suggestions, bug reports, usage questions etc.
 via [GitHub issues](https://github.com/odata2ts/odata2ts/issues).
 
@@ -25,15 +28,16 @@ Contributions and feedback are encouraged and always welcome.
 See the [contribution guidelines](https://github.com/odata2ts/odata2ts/blob/main/CONTRIBUTING.md) for further information.
 
 ## Spirit
+
 This project and this module have been created and are maintained in the following spirit:
 
-* adhere to the **OData specification** as much as possible
-  * support any OData service implementation which conforms to the spec
-  * allow to work around faulty implementations if possible
-* stability matters
-  * exercise Test Driven Development
-  * bomb the place with unit tests (code coverage > 95%)
-  * ensure that assumptions & understanding are correct by creating integration tests
+- adhere to the **OData specification** as much as possible
+  - support any OData service implementation which conforms to the spec
+  - allow to work around faulty implementations if possible
+- stability matters
+  - exercise Test Driven Development
+  - bomb the place with unit tests (code coverage > 95%)
+  - ensure that assumptions & understanding are correct by creating integration tests
 
 ## Inspiration
 
@@ -41,7 +45,5 @@ The base idea for generating and using "Query Objects" stems from [QueryDsl](htt
 [Jooq](https://www.jooq.org/) also works this way.
 
 ## License
+
 MIT - see [License](./LICENSE).
-
-
-

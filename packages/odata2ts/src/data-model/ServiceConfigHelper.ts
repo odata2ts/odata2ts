@@ -122,7 +122,7 @@ export class ServiceConfigHelper {
           const regExp = new RegExp(`^${source}$`, ignoreCase ? "i" : "");
           mapping.regExps.push(
             // @ts-ignore: too generic
-            [regExp, ent]
+            [regExp, ent],
           );
           break;
         default:
@@ -135,7 +135,7 @@ export class ServiceConfigHelper {
   private getByName<T extends TypeBasedGenerationOptions>(
     mapping: Record<string, TypeBasedGenerationOptions>,
     namespace: NamespaceWithAlias,
-    nameToMap: string
+    nameToMap: string,
   ) {
     const [ns, alias] = namespace;
     const hayStack = { ...this.mapping.Any.names, ...mapping };
@@ -172,7 +172,7 @@ export class ServiceConfigHelper {
   private findConfig<T extends TypeBasedGenerationOptions>(
     mapping: MappingType<T>,
     namespace: NamespaceWithAlias,
-    name: string
+    name: string,
   ) {
     const stringEnt = this.getByName(mapping.names, namespace, name);
     const reEnt = this.getByRegExp(mapping.regExps, namespace, name);
@@ -182,33 +182,33 @@ export class ServiceConfigHelper {
 
   public findEntityTypeConfig(
     namespace: NamespaceWithAlias,
-    name: string
+    name: string,
   ): WithoutName<EntityTypeGenerationOptions> | undefined {
     return this.findConfig<EntityTypeGenerationOptions>(this.mapping.EntityType, namespace, name);
   }
   public findComplexTypeConfig(
     namespace: NamespaceWithAlias,
-    name: string
+    name: string,
   ): WithoutName<ComplexTypeGenerationOptions> | undefined {
     return this.findConfig(this.mapping.ComplexType, namespace, name);
   }
   public findEnumTypeConfig(
     namespace: NamespaceWithAlias,
-    name: string
+    name: string,
   ): WithoutName<GenericTypeGenerationOptions> | undefined {
     return this.findConfig(this.mapping.EnumType, namespace, name);
   }
 
   public findOperationTypeConfig(
     namespace: NamespaceWithAlias,
-    name: string
+    name: string,
   ): WithoutName<GenericTypeGenerationOptions> | undefined {
     return this.findConfig(this.mapping.OperationType, namespace, name);
   }
 
   public findOperationImportConfig(
     namespace: string,
-    name: string
+    name: string,
   ): WithoutName<GenericTypeGenerationOptions> | undefined {
     return this.findConfig(this.mapping.OperationImportType, [namespace], name);
   }

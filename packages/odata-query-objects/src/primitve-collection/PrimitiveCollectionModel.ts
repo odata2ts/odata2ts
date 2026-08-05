@@ -11,8 +11,4 @@ export type EnumCollection<T> = PrimitiveCollectionType<T>;
 export type NumericEnumCollection<T> = PrimitiveCollectionType<T>;
 
 export type PrimitiveCollection =
-  | StringCollection
-  | NumberCollection
-  | BooleanCollection
-  | EnumCollection<any>
-  | NumericEnumCollection<any>;
+  StringCollection | NumberCollection | BooleanCollection | EnumCollection<any> | NumericEnumCollection<any>;

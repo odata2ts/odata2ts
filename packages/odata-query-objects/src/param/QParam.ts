@@ -6,9 +6,10 @@ import { UrlParamValueFormatter, UrlParamValueParser } from "./UrlParamModel";
 
 export type PrimitiveParamType = string | number | boolean;
 
-export abstract class QParam<Type extends PrimitiveParamType, ConvertedType>
-  implements QParamModel<Type, ConvertedType>
-{
+export abstract class QParam<Type extends PrimitiveParamType, ConvertedType> implements QParamModel<
+  Type,
+  ConvertedType
+> {
   constructor(
     protected name: string,
     protected mappedName?: string,

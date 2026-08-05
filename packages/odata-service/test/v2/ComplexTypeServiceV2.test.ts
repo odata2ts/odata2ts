@@ -41,9 +41,7 @@ describe("ComplexTypeService V2 Test", () => {
     expect(result.method).toBe("GET");
     expect(result.data).toBeUndefined();
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<
-      HttpResponseModel<ODataComplexModelResponseV2<PersonModel>>
-    >();
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<ODataComplexModelResponseV2<PersonModel>>>();
   });
 
   test("complexType: query with select", async () => {

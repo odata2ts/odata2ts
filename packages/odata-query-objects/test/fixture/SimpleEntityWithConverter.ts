@@ -1,5 +1,4 @@
 import { booleanToNumberConverter, fixedDateConverter, numberToStringConverter } from "@odata2ts/test-converters";
-
 import {
   QBooleanCollection,
   QBooleanPath,
@@ -43,11 +42,11 @@ export class QTestEntity extends QueryObject<TestEntity> {
   public readonly simpleEntity = new QEntityPath(this.withPrefix("simple"), () => QSimpleEntityWithConverter);
   public readonly simpleEntities = new QEntityCollectionPath(
     this.withPrefix("simpleList"),
-    () => QSimpleEntityWithConverter
+    () => QSimpleEntityWithConverter,
   );
   public readonly options = new QCollectionPath(
     this.withPrefix("options"),
     () => QBooleanCollection,
-    booleanToNumberConverter
+    booleanToNumberConverter,
   );
 }

@@ -15,8 +15,10 @@
   "scripts": {
     "build": "yarn clean && yarn workspaces foreach -A -pt run build",
     "check-circular-deps": "yarn workspaces foreach -A -p run check-circular-deps",
+    "check-format": "prettier --check .",
     "clean": "rimraf coverage",
     "coverage": "vitest run --coverage",
+    "format": "prettier --write .",
     "int-test": "yarn workspaces foreach -A -p --include 'int-test/*' run test",
     "int-test:asp-net": "yarn workspace @odata2ts/int-test-asp-net test",
     "int-test:cap": "yarn workspace @odata2ts/int-test-cap test",

@@ -1,5 +1,4 @@
 import { booleanToNumberConverter } from "@odata2ts/test-converters";
-
 import { QBooleanParam, QGuidParam, QGuidV2Param, QId, QStringParam } from "../../../src";
 
 export type BookIdModel =

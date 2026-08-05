@@ -85,7 +85,7 @@ The model is generated a **second** time, into `src-generated/library-renamed`, 
 This is the only place that option meets a running server, and `test/feature/Renaming.test.ts` is the only
 file which uses the resulting client.
 
-Generated separately rather than replacing the raw one, because the point is the *mapping* between the two
+Generated separately rather than replacing the raw one, because the point is the _mapping_ between the two
 name forms, and a mapping is only observable where both ends are visible: with a single, renamed client a
 wrongly built URL and a broken name mapping look exactly alike. The test writes through the renamed client
 and reads back through the raw one, which is what pins down that the value really landed under the OData
