@@ -744,7 +744,7 @@ __metadata:
     ts-morph: "npm:^28.0.0"
     tsconfig-loader: "npm:^1.1.0"
     type-fest: "npm:^5.8.0"
-    upper-case-first: "npm:^2.0.2"
+    upper-case-first: "npm:^3.0.0"
     xml2js: "npm:^0.6.2"
   peerDependencies:
     "@odata2ts/odata-query-objects": ^0.29.0
@@ -4914,13 +4914,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^2.0.3":
-  version: 2.7.0
-  resolution: "tslib@npm:2.7.0"
-  checksum: 10/9a5b47ddac65874fa011c20ff76db69f97cf90c78cff5934799ab8894a5342db2d17b4e7613a087046bc1d133d21547ddff87ac558abeec31ffa929c88b7fce6
-  languageName: node
-  linkType: hard
-
 "tslib@npm:^2.4.0, tslib@npm:^2.8.1":
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
@@ -5051,12 +5044,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"upper-case-first@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "upper-case-first@npm:2.0.2"
-  dependencies:
-    tslib: "npm:^2.0.3"
-  checksum: 10/4487db4701effe3b54ced4b3e4aa4d9ab06c548f97244d04aafb642eedf96a76d5a03cf5f38f10f415531d5792d1ac6e1b50f2a76984dc6964ad530f12876409
+"upper-case-first@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "upper-case-first@npm:3.0.0"
+  checksum: 10/68b73fe268767027585a9cc2e17cda7f03f4d05aff1c2484d80557ef339a836ea2d10fbe1fe937c35595fd77676a06e44f75c1d8636b9cf32f9b5b8c1a109686
   languageName: node
   linkType: hard
 
