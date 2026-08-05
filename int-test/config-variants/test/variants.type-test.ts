@@ -1,16 +1,18 @@
 import { expectTypeOf } from "vitest";
-import type { Amenities as NumericAmenities, Branch as NumericBranch } from "../src-generated/enum-numeric/index.js";
-import { Amenities as unionAmenityMembers } from "../src-generated/enum-string-union/index.js";
-import type { Amenities as UnionAmenities, Branch as UnionBranch } from "../src-generated/enum-string-union/index.js";
-import type { Medium as ModelsOnlyMedium } from "../src-generated/models-only/index.js";
+import type { Amenities as NumericAmenities } from "../src-generated/enum-numeric/library-catalog/index.js";
+import type { Branch as NumericBranch } from "../src-generated/enum-numeric/library-circulation/index.js";
+import { Amenities as unionAmenityMembers } from "../src-generated/enum-string-union/library-catalog/index.js";
+import type { Amenities as UnionAmenities } from "../src-generated/enum-string-union/library-catalog/index.js";
+import type { Branch as UnionBranch } from "../src-generated/enum-string-union/library-circulation/index.js";
+import type { Medium as ModelsOnlyMedium } from "../src-generated/models-only/library-catalog/index.js";
 import type {
   BookDto,
   DraftMediumDto,
   Medium_ReserveArgsDto,
   MediumDto,
   MediumKeyDto,
-} from "../src-generated/naming-custom/index.js";
-import type { Member as V2Member } from "../src-generated/v2-wrapping/index.js";
+} from "../src-generated/naming-custom/library-catalog/index.js";
+import type { Member as V2Member } from "../src-generated/v2-wrapping/library-circulation/index.js";
 
 /**
  * Type assertions over the generated variants.
@@ -21,6 +23,10 @@ import type { Member as V2Member } from "../src-generated/v2-wrapping/index.js";
  *
  * They are checked by `yarn test-compile`, never at runtime - `expectTypeOf` is erased. Hence no `test()`
  * wrapper and no vitest run for this package; the file exists to be compiled.
+ *
+ * The imports go to the namespace barrels rather than to the root one: the file layout follows the default,
+ * which is unbundled, and a root barrel re-exports each namespace under its own name where a model has more
+ * than one. Which is itself worth having compiled - it is the shape a user meets by default.
  */
 
 /* --- namingCustom: every naming knob turned away from its default --------------------------------- */

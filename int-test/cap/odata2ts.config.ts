@@ -22,6 +22,10 @@ const config: ConfigFileOptions = {
   prettier: true,
   // we definitely want to type check the generated artifacts
   debug: true,
+  // On against the default, which is unbundled since the file layout became the user's choice. This is the
+  // division of labour with `int-test/asp-net`: that package generates a folder per model, this one keeps
+  // the bundled form, so both layouts are exercised at runtime rather than only type-checked.
+  bundledFileGeneration: true,
   // on, because the property services are a generator feature of their own and otherwise never
   // meet a real server: see test/feature/PropertyServices.test.ts
   enablePrimitivePropertyServices: true,

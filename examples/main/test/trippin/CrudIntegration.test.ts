@@ -1,8 +1,7 @@
 import { AxiosClient } from "@odata2ts/http-client-axios";
 import { describe, expect, test, vi } from "vitest";
-import type { EditablePersonModel, LocationModel } from "../../src-generated/trippin/TrippinModel.js";
-import { FeatureModel, PersonGenderModel } from "../../src-generated/trippin/TrippinModel.js";
-import { TrippinService } from "../../src-generated/trippin/TrippinService.js";
+import type { EditablePersonModel, LocationModel } from "../../src-generated/trippin/index.js";
+import { FeatureModel, PersonGenderModel, TrippinService } from "../../src-generated/trippin/index.js";
 
 describe.skip("Trippin: CRUD Integration Tests", function () {
   const homeBase: LocationModel = {

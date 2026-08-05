@@ -28,8 +28,9 @@ import { ConfigFileOptions, EmitModes, Modes, NamingStrategies, TypeModel } from
  * What is deliberately **not** here:
  *
  * - `bundledFileGeneration`: covered at runtime instead, `int-test/asp-net` generates unbundled while
- *   `int-test/cap` keeps the bundled default. Both states of the axis are exercised by suites which run
- *   anyway, which is more than a type check would show.
+ *   `int-test/cap` pins the bundled form. Both states of the axis are exercised by suites which run anyway,
+ *   which is more than a type check would show. The variants here simply follow the default, so what gets
+ *   type-checked is the layout a user meets without saying anything.
  * - Anything whose effect is on the wire (`enableBindingProps`, `odataVersionV4`, `v4BigNumberAsString`, …):
  *   a type check cannot see a URL or a payload. Those belong to the server packages.
  * - `emitMode` other than `ts`: compiled JS/DTS output is not what `tsc` reads here. That is the CLI test's

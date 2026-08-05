@@ -64,8 +64,10 @@ rather than copied so they cannot drift apart.
 ### Deliberately not here
 
 - **`bundledFileGeneration`**: covered at runtime instead - `int-test/asp-net` generates unbundled while
-  `int-test/cap` keeps the bundled default. Both states are exercised by suites which run anyway, which is
-  more than a type check would show.
+  `int-test/cap` pins the bundled form. Both states are exercised by suites which run anyway, which is more
+  than a type check would show. The variants here follow the default, so what gets type-checked is the
+  layout a user meets without saying anything - including the namespace-aliased barrels a multi-namespace
+  model produces, which is why the type assertions import from the namespace barrels.
 - **Anything whose effect is on the wire** (`enableBindingProps`, `odataVersionV4`, `v4BigNumberAsString`,
   …): a type check cannot see a URL or a payload. `everythingOn` switches several of them on, but only
   because they change the generated surface and can therefore collide with the rest - not as coverage.
