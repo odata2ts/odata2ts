@@ -13,6 +13,65 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-objects bumped from ^0.28.0 to ^0.28.1
     * @odata2ts/odata-service bumped from ^0.23.0 to ^0.23.1
 
+## [0.42.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.41.0...@odata2ts/odata2ts-v0.42.0) (2026-08-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* both options are renamed, with no alias for the old names. A V2 client generated without `v2ResponseResultsWrapping` no longer has the extra wrapping removed from expanded collection valued navigation properties - services which wrap need the option turned on.
+* **odata2ts:** options `enableBindingProps` and `enableDeepInsertProps` are gone, replaced by `disableBindingProps` and `disableDeepInsertProps` with inverted meaning. Editable models now carry the navigation properties, and query objects the bindings, unless you switch them off. Rename the options in your config; if you relied on the previous default, set both to `true`.
+* **odata2ts:** the default `bundledFileGeneration` changes from `true` to `false` and will break your imports. The transition should be eased by using the generated index files. Set `bundledFileGeneration` to "true" to get back the old behaviour, especially when cyclic dependencies in the generated artefacts might be a problem. This is the case for UI5 in constellation with the TS Babel plugin.
+* **odata2ts:** a configuration whose renaming makes two names collapse no longer generates. It used to produce code which does not compile - or compiles by virtue of `@ts-nocheck` and silently drops one of the two properties. Resolve it via `propertiesByName` or `byTypeAndName`.
+* **odata2ts:** state a binding by the key of the entity, not by its URL ([#437](https://github.com/odata2ts/odata2ts/issues/437))
+* **odata2ts:** Edm.Stream properties are no longer part of the generated models or q-objects. Binary content is not part of the JSON payload, so the property could never carry a value; it is now read and written through the generated stream service instead.
+* **odata2ts:** Q-objects and params models of collection-bound operations are renamed from `<Type>_Q<Operation>` to `<Type>Collection_Q<Operation>`. Only collection-bound operations are affected; operations bound to a single instance and unbound operations keep their names.
+* CollectionServiceV4.add and update take the primitive value directly instead of a model payload, since control information on a primitive collection member has no meaning in OData.
+* **odata2ts:** the undocumented `-name` shorthand for --service-name is removed. It never worked as a real short flag (multi-character short flags are invalid; only the long form was ever reliably parsed) and only appeared to work due to commander's previous lenient validation. Use --service-name <serviceName> instead.
+
+### Features
+
+* keep the V2 results wrapping in every mode and rename both options ([ba7eccd](https://github.com/odata2ts/odata2ts/commit/ba7eccd3bc2716080e3cfcbd8038be972f8bcd0b))
+* let the odataVersionV4 option govern requests and responses ([#416](https://github.com/odata2ts/odata2ts/issues/416)) ([5e8f6fe](https://github.com/odata2ts/odata2ts/commit/5e8f6feb2e39ab76132fd25b44e1923281daeb06))
+* **odata-service:** transfer binary content as a stream ([#429](https://github.com/odata2ts/odata2ts/issues/429)) ([6f2208a](https://github.com/odata2ts/odata2ts/commit/6f2208a8d4d692ef805a2bc15eff154eba6c8eb2))
+* **odata2ts:** bind existing entities to navigation properties ([#419](https://github.com/odata2ts/odata2ts/issues/419)) ([70ed99a](https://github.com/odata2ts/odata2ts/commit/70ed99aeabe0d705e4215a86cc18ca6f0a16e196))
+* **odata2ts:** fail generation on unresolvable name clashes ([#440](https://github.com/odata2ts/odata2ts/issues/440)) ([3c1a582](https://github.com/odata2ts/odata2ts/commit/3c1a582c8dd61004adeede14e6962518d4b97653))
+* **odata2ts:** generate binding and deep insert props by default ([6cc7533](https://github.com/odata2ts/odata2ts/commit/6cc7533a7787acc9a74909285b74af6b684ed171))
+* **odata2ts:** generate blob services for streams and media entities ([564d4c7](https://github.com/odata2ts/odata2ts/commit/564d4c72576c0e093a3350c39118a0363aedb053))
+* **odata2ts:** generate index files for every build ([#439](https://github.com/odata2ts/odata2ts/issues/439)) ([63f23bb](https://github.com/odata2ts/odata2ts/commit/63f23bbd7eb0efaf312a2273738cb28c12874115))
+* **odata2ts:** generate one folder per model by default ([#447](https://github.com/odata2ts/odata2ts/issues/447)) ([05eb08f](https://github.com/odata2ts/odata2ts/commit/05eb08fc2f0d59131bfa9493afc5d027d121b171))
+* **odata2ts:** navigation properties in editable models for deep insert and deep update ([#431](https://github.com/odata2ts/odata2ts/issues/431)) ([cc17d3a](https://github.com/odata2ts/odata2ts/commit/cc17d3a9482891c9929434972044f35c2740c520))
+* **odata2ts:** resolve V2 navigation property bindings from AssociationSet ([#418](https://github.com/odata2ts/odata2ts/issues/418)) ([18feab7](https://github.com/odata2ts/odata2ts/commit/18feab7c1e48a8a197246532a832b96714e3286c))
+* **odata2ts:** state a binding by the key of the entity, not by its URL ([#437](https://github.com/odata2ts/odata2ts/issues/437)) ([71e7413](https://github.com/odata2ts/odata2ts/commit/71e7413164a40245238509dd306eb386e099bdcf))
+* read and write binary content over OData V2 ([#436](https://github.com/odata2ts/odata2ts/issues/436)) ([5aa46c2](https://github.com/odata2ts/odata2ts/commit/5aa46c2eaa3e8c180e3b14faceadedb6b6027eaf))
+
+
+### Bug Fixes
+
+* **deps:** update dependency cosmiconfig to v10 ([d10de23](https://github.com/odata2ts/odata2ts/commit/d10de23d09055c3d9cdc029537f2441a3f23e00b))
+* **deps:** update dependency upper-case-first to v3 ([1d90b42](https://github.com/odata2ts/odata2ts/commit/1d90b4223ea45191fb6d2d105fda39e276fb239d))
+* keep package coverage reports out of the aggregate coverage run ([4441e15](https://github.com/odata2ts/odata2ts/commit/4441e15e12a5810db2cf00c6feace7b58ad0c820))
+* local fixture imports must be ignored ([d3266dc](https://github.com/odata2ts/odata2ts/commit/d3266dccf06ec1adef450fccb18cf5365a881357))
+* migrate to nodenext module resolution for TypeScript 6.0 ([e58d95f](https://github.com/odata2ts/odata2ts/commit/e58d95f4bcfa673753c6fdd5495040222c710edb))
+* **odata-query-objects:** let QEnumPath take a plain member list ([225eb61](https://github.com/odata2ts/odata2ts/commit/225eb619a08a3c34d822ee5dbb74ca7848421cdc))
+* **odata-service:** keep the converter object in PrimitiveTypeServiceV2 ([62a4893](https://github.com/odata2ts/odata2ts/commit/62a489353c8253773341cbb32a229da7ca94d3c5))
+* **odata2ts:** commander 15 + cosmiconfig 9 ([51e7eb9](https://github.com/odata2ts/odata2ts/commit/51e7eb9c843d7b89671f4c3dc3824e1503e1a35e))
+* **odata2ts:** distinguish bound operations by the cardinality they bind to ([#423](https://github.com/odata2ts/odata2ts/issues/423)) ([ee485c1](https://github.com/odata2ts/odata2ts/commit/ee485c118febda118020fd242909f43a6385709b))
+* **odata2ts:** don't hand query object options to a binary path ([b43105a](https://github.com/odata2ts/odata2ts/commit/b43105a039392d67debf2717a1262e75a86ce222))
+* **odata2ts:** move CLI smoke test to its own examples package ([94753ba](https://github.com/odata2ts/odata2ts/commit/94753ba68bfb4f0742c734c378d46797d737c904))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-core bumped from ^0.6.1 to ^0.7.0
+  * devDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.29.0 to ^0.30.0
+    * @odata2ts/odata-service bumped from ^0.24.0 to ^0.25.0
+  * peerDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.29.0 to ^0.30.0
+    * @odata2ts/odata-service bumped from ^0.24.0 to ^0.25.0
+
 ## [0.41.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.40.2...@odata2ts/odata2ts-v0.41.0) (2026-07-20)
 
 

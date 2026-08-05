@@ -17,6 +17,39 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-builder bumped from ^0.18.5 to ^0.18.6
     * @odata2ts/odata-query-objects bumped from ^0.28.1 to ^0.28.2
 
+## [0.25.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service-v0.24.0...@odata2ts/odata-service-v0.25.0) (2026-08-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **odata-service:** CollectionServiceV4.update() now sends { value: [...] } instead of the bare array. Servers that accepted the old shape were silently discarding the data.
+* CollectionServiceV4.add and update take the primitive value directly instead of a model payload, since control information on a primitive collection member has no meaning in OData.
+
+### Features
+
+* let the odataVersionV4 option govern requests and responses ([#416](https://github.com/odata2ts/odata2ts/issues/416)) ([5e8f6fe](https://github.com/odata2ts/odata2ts/commit/5e8f6feb2e39ab76132fd25b44e1923281daeb06))
+* **odata-service:** services for binary content ([e0ce2be](https://github.com/odata2ts/odata2ts/commit/e0ce2befacfec7c299898b1f33e210cc316cdbb1))
+* **odata-service:** transfer binary content as a stream ([#429](https://github.com/odata2ts/odata2ts/issues/429)) ([6f2208a](https://github.com/odata2ts/odata2ts/commit/6f2208a8d4d692ef805a2bc15eff154eba6c8eb2))
+* read and write binary content over OData V2 ([#436](https://github.com/odata2ts/odata2ts/issues/436)) ([5aa46c2](https://github.com/odata2ts/odata2ts/commit/5aa46c2eaa3e8c180e3b14faceadedb6b6027eaf))
+
+
+### Bug Fixes
+
+* declare OData version 4.0 on V4 requests carrying a body ([#414](https://github.com/odata2ts/odata2ts/issues/414)) ([b658f99](https://github.com/odata2ts/odata2ts/commit/b658f9934681699d23288b1a85fa76de4275f5b1))
+* migrate to nodenext module resolution for TypeScript 6.0 ([e58d95f](https://github.com/odata2ts/odata2ts/commit/e58d95f4bcfa673753c6fdd5495040222c710edb))
+* **odata-service:** declare the OData version on reads as well ([b4b5c7a](https://github.com/odata2ts/odata2ts/commit/b4b5c7a1d0ce4c8612a70b957e29a716cc18379a))
+* **odata-service:** drop cross-package deep imports ([acbf791](https://github.com/odata2ts/odata2ts/commit/acbf79167a8452c6315c64d199bac4fbffa4e4e7))
+* **odata-service:** keep the converter object in PrimitiveTypeServiceV2 ([62a4893](https://github.com/odata2ts/odata2ts/commit/62a489353c8253773341cbb32a229da7ca94d3c5))
+* **odata-service:** wrap the payload of a collection property update ([#428](https://github.com/odata2ts/odata2ts/issues/428)) ([4cec780](https://github.com/odata2ts/odata2ts/commit/4cec7801ced95b568f2b3764c9b4a035e81f5e62))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-builder bumped from ^0.19.0 to ^0.19.1
+    * @odata2ts/odata-query-objects bumped from ^0.29.0 to ^0.30.0
+
 ## [0.24.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service-v0.23.2...@odata2ts/odata-service-v0.24.0) (2026-07-20)
 
 

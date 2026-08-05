@@ -33,6 +33,43 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * ESM tends to break stuff
 
+## [0.30.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.29.0...@odata2ts/odata-query-objects-v0.30.0) (2026-08-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* both options are renamed, with no alias for the old names. A V2 client generated without `v2ResponseResultsWrapping` no longer has the extra wrapping removed from expanded collection valued navigation properties - services which wrap need the option turned on.
+* **odata2ts:** state a binding by the key of the entity, not by its URL ([#437](https://github.com/odata2ts/odata2ts/issues/437))
+* **odata-service:** CollectionServiceV4.update() now sends { value: [...] } instead of the bare array. Servers that accepted the old shape were silently discarding the data.
+* CollectionServiceV4.add and update take the primitive value directly instead of a model payload, since control information on a primitive collection member has no meaning in OData.
+
+### Features
+
+* keep the V2 results wrapping in every mode and rename both options ([ba7eccd](https://github.com/odata2ts/odata2ts/commit/ba7eccd3bc2716080e3cfcbd8038be972f8bcd0b))
+* let the odataVersionV4 option govern requests and responses ([#416](https://github.com/odata2ts/odata2ts/issues/416)) ([5e8f6fe](https://github.com/odata2ts/odata2ts/commit/5e8f6feb2e39ab76132fd25b44e1923281daeb06))
+* **odata-service:** transfer binary content as a stream ([#429](https://github.com/odata2ts/odata2ts/issues/429)) ([6f2208a](https://github.com/odata2ts/odata2ts/commit/6f2208a8d4d692ef805a2bc15eff154eba6c8eb2))
+* **odata2ts:** bind existing entities to navigation properties ([#419](https://github.com/odata2ts/odata2ts/issues/419)) ([70ed99a](https://github.com/odata2ts/odata2ts/commit/70ed99aeabe0d705e4215a86cc18ca6f0a16e196))
+* **odata2ts:** state a binding by the key of the entity, not by its URL ([#437](https://github.com/odata2ts/odata2ts/issues/437)) ([71e7413](https://github.com/odata2ts/odata2ts/commit/71e7413164a40245238509dd306eb386e099bdcf))
+
+
+### Bug Fixes
+
+* declare OData version 4.0 on V4 requests carrying a body ([#414](https://github.com/odata2ts/odata2ts/issues/414)) ([b658f99](https://github.com/odata2ts/odata2ts/commit/b658f9934681699d23288b1a85fa76de4275f5b1))
+* migrate to nodenext module resolution for TypeScript 6.0 ([e58d95f](https://github.com/odata2ts/odata2ts/commit/e58d95f4bcfa673753c6fdd5495040222c710edb))
+* **odata-query-objects:** let a V2 function import without a return type compile ([#433](https://github.com/odata2ts/odata2ts/issues/433)) ([b218bfb](https://github.com/odata2ts/odata2ts/commit/b218bfba6ad28ca638000a333f8df23b2036b3bd))
+* **odata-query-objects:** let QEnumPath take a plain member list ([225eb61](https://github.com/odata2ts/odata2ts/commit/225eb619a08a3c34d822ee5dbb74ca7848421cdc))
+* **odata-query-objects:** make Q*Path discriminator public readonly ([5d15004](https://github.com/odata2ts/odata2ts/commit/5d150045cdf4d6b8393b4a58587d6d7f4d8ccd7b))
+* **odata-query-objects:** render a V2 datetime literal without a timezone ([29f638f](https://github.com/odata2ts/odata2ts/commit/29f638f1953d3ecaeb0a51258044a2a85c5e8595))
+* **odata-query-objects:** type __propMapping as Map&lt;string, string&gt; ([6045d50](https://github.com/odata2ts/odata2ts/commit/6045d50239a86a7f5f012086f1ca599b7643098c))
+* **odata-service:** wrap the payload of a collection property update ([#428](https://github.com/odata2ts/odata2ts/issues/428)) ([4cec780](https://github.com/odata2ts/odata2ts/commit/4cec7801ced95b568f2b3764c9b4a035e81f5e62))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-core bumped from ^0.6.1 to ^0.7.0
+
 ## [0.29.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.28.2...@odata2ts/odata-query-objects-v0.29.0) (2026-07-20)
 
 
