@@ -8,21 +8,6 @@ on:
     types: [assigned, opened, synchronize, reopened]
 
 jobs:
-  format:
-    name: Formatting
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: Install packages
-        run: yarn --immutable
-      # Nothing else enforces prettier - no format script ran on commit, no hook - so the formatting only
-      # ever reached the files someone happened to touch. This keeps it from drifting again.
-      - name: Check formatting
-        run: yarn check-format
-
   test:
     name: Unit Tests With Coverage
     runs-on: ubuntu-latest
@@ -41,6 +26,8 @@ jobs:
         run: yarn build
       - name: Type Test
         run: yarn test-compile
+      - name: Check formatting
+        run: yarn check-format
       - name: Check Circular Deps
         run: yarn check-circular-deps
       - name: Run Tests
