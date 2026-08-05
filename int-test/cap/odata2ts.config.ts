@@ -37,6 +37,40 @@ const config: ConfigFileOptions = {
       serviceName: "Library",
       source: "resource/library.xml",
       output: "src-generated/library",
+      // V4 only, and on here rather than in `int-test/asp-net`, which keeps the emulating default: the
+      // option has exactly two states and both are worth having against a real server, so they are split
+      // across the two V4 packages instead of duplicating a suite. `test/core/QueryFunctionality.test.ts`
+      // covers it on either side - the assertion differs only in the URL that reaches the server.
+      enableNativeInOperator: true,
+    },
+    /**
+     * The V4 model a second time, with converters switched on.
+     *
+     * Converters had only ever met a real server as V2, through `int-test/olingo-v2`, and V2 is a
+     * different problem: there every timestamp arrives as `/Date(<ticks>)/` and every wide numeric type as
+     * a string, so the raw client types them as `string` and the converter has something to parse. V4 hands
+     * over real ISO values - and types `Edm.Decimal` and `Edm.Int64` as `number`, which is precisely where
+     * precision goes missing without anyone noticing.
+     *
+     * `v4BigNumberAsString` belongs with them rather than being its own variant: it asks the server for
+     * those two types as strings (`IEEE754Compatible` in accept and content-type). Without it the converter
+     * would be handed a number which has already lost its precision, and converting that is pointless. The
+     * two options only mean anything together.
+     *
+     * Generated separately rather than replacing the raw client, because both halves are the point: the raw
+     * one shows what the server actually sends, the converted one what the converters make of it. See
+     * test/feature/Converters.test.ts.
+     */
+    libraryConverted: {
+      serviceName: "LibraryConverted",
+      source: "resource/library.xml",
+      output: "src-generated/library-converted",
+      v4BigNumberAsString: true,
+      converters: [
+        "@odata2ts/converter-luxon",
+        "@odata2ts/converter-big-number",
+        { module: "@odata2ts/converter-common", use: ["int64ToBigIntConverter"] },
+      ],
     },
     libraryV2: {
       serviceName: "LibraryV2",
