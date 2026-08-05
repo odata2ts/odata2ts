@@ -321,24 +321,24 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * Without a service the binding is stated as it goes on the wire, by the OData name of the navigation
    * property and carrying the URL itself, e.g. {@code "Author@odata.bind": "People(1)"} for 4.0.
    *
-   * Opt-in, so by default no binding is generated.
+   * Opt-out, so a binding is generated unless this is switched off.
    */
-  enableBindingProps?: boolean;
+  disableBindingProps?: boolean;
   /**
    * Adds the navigation properties to the editable models, typed as the editable model of the related
    * entity, which is what a deep insert (POST) or a deep update (PATCH / PUT) sends: the related entities
    * travel within the payload of the entity they belong to, instead of being created by requests of their
    * own.
    *
-   * Together with <code>enableBindingProps</code> a navigation property accepts either shape - a new
+   * Together with the binding props a navigation property accepts either shape - a new
    * entity or a reference to an existing one. Where a service is generated both go by the navigation
    * property itself and the {@code "@id"} property tells them apart; without one, the binding is spelled
    * as it goes on the wire, which shares the property in V2 and OData 4.01 but keeps it apart in 4.0
    * ({@code "Author@odata.bind"}).
    *
-   * Opt-in, so by default the editable models contain no navigation property at all.
+   * Opt-out, so the editable models carry the navigation properties unless this is switched off.
    */
-  enableDeepInsertProps?: boolean;
+  disableDeepInsertProps?: boolean;
 }
 
 /**

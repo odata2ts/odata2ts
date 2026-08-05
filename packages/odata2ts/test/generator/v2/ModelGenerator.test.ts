@@ -108,8 +108,8 @@ describe("Model Generator Tests V2", () => {
     // when generating without a service
     // then the editable model uses the __metadata uri notation
     await generateAndCompare("entity-relationships-binding-v2.ts", {
+      disableDeepInsertProps: true,
       mode: Modes.models,
-      enableBindingProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -135,7 +135,6 @@ describe("Model Generator Tests V2", () => {
     // then the navigation properties show up on the editable model, typed as the editable model of the
     // related entity
     await generateAndCompare("entity-relationships-deep-insert-v2.ts", {
-      enableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -149,7 +148,6 @@ describe("Model Generator Tests V2", () => {
     // when opting into the extra wrapping for editable models
     // then only the collection valued navigation property carries the extra results object
     await generateAndCompare("entity-relationships-deep-insert-v2-extra-wrapping.ts", {
-      enableDeepInsertProps: true,
       v2EditableModelsWithExtraResultsWrapping: true,
       skipEditableModels: false,
       skipIdModels: false,
@@ -165,7 +163,6 @@ describe("Model Generator Tests V2", () => {
     // then the deep insert props stay unwrapped: a service answering with the wrapping does not
     // necessarily expect it in a request payload, see issue #237
     await generateAndCompare("entity-relationships-deep-insert-v2-response-wrapping.ts", {
-      enableDeepInsertProps: true,
       v2ModelsWithExtraResultsWrapping: true,
       skipEditableModels: false,
       skipIdModels: false,
@@ -182,8 +179,6 @@ describe("Model Generator Tests V2", () => {
     // of the navigation property
     await generateAndCompare("entity-relationships-deep-insert-binding-v2.ts", {
       mode: Modes.models,
-      enableDeepInsertProps: true,
-      enableBindingProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -217,7 +212,7 @@ describe("Model Generator Tests V2", () => {
     // then the binding goes by the navigation property itself and carries the key of the entity to bind,
     // which the query objects turn into the __metadata uri notation
     await generateAndCompare("entity-relationships-binding-by-key-v2.ts", {
-      enableBindingProps: true,
+      disableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -233,8 +228,6 @@ describe("Model Generator Tests V2", () => {
     // then the navigation property accepts either shape - a new entity or the key of an existing one -
     // and the "@id" property tells them apart
     await generateAndCompare("entity-relationships-deep-insert-binding-by-key-v2.ts", {
-      enableDeepInsertProps: true,
-      enableBindingProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,

@@ -43,8 +43,8 @@ export type GeneratorFunctionOptions = Pick<
   | "enumType"
   | "enableNativeInOperator"
   | "odataVersionV4"
-  | "enableBindingProps"
-  | "enableDeepInsertProps"
+  | "disableBindingProps"
+  | "disableDeepInsertProps"
   | "v2EditableModelsWithExtraResultsWrapping"
 >;
 

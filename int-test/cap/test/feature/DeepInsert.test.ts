@@ -23,7 +23,7 @@ import { LIBRARY } from "../LibraryTestConstants.js";
  *
  * The association cases are why this file is worth its length: the same generated property creates an
  * entity, silently does nothing, or fails loudly, depending on something `$metadata` does not carry -
- * and ASP.NET creates the entity in all of them. `enableDeepInsertProps` therefore says what the
+ * and ASP.NET creates the entity in all of them. The deep insert props therefore say what the
  * *protocol* allows, not what a given server does with it.
  */
 describe("CAP Library: deep insert", () => {

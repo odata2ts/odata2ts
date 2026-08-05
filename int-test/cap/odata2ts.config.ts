@@ -29,13 +29,6 @@ const config: ConfigFileOptions = {
   // on, because the property services are a generator feature of their own and otherwise never
   // meet a real server: see test/feature/PropertyServices.test.ts
   enablePrimitivePropertyServices: true,
-  // on, because a deep insert can only be proven against a server that actually stores the nested
-  // entities: see test/feature/DeepInsert.test.ts
-  enableDeepInsertProps: true,
-  // on, because a binding by key is only proven when a server resolves the URL the query objects build
-  // from it - and this is the only V2 server we have: see test/feature/Binding.test.ts and
-  // test/v2/feature/Binding.test.ts
-  enableBindingProps: true,
   services: {
     library: {
       serviceName: "Library",

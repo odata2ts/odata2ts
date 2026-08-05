@@ -151,6 +151,8 @@ export function createEntityBasedGenerationTests(
     // when generating model
     // then match fixture text
     await generateAndCompare("entity-relationships.ts", {
+      disableBindingProps: true,
+      disableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -175,6 +177,8 @@ export function createEntityBasedGenerationTests(
     // when generating model
     // then match fixture text
     await generateAndCompare("entity-relationships.ts", {
+      disableBindingProps: true,
+      disableDeepInsertProps: true,
       skipEditableModels: false,
       disableAutoManagedKey: true,
       skipIdModels: false,

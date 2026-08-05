@@ -159,6 +159,8 @@ describe("Model Generator Tests V4", () => {
     // when generating model
     // then match original fixture => config option has no effect
     await generateAndCompare("entity-relationships.ts", {
+      disableBindingProps: true,
+      disableDeepInsertProps: true,
       v2ModelsWithExtraResultsWrapping: true,
       skipEditableModels: false,
       skipIdModels: false,
@@ -250,8 +252,8 @@ describe("Model Generator Tests V4", () => {
     // when generating for 4.01 without a service
     // then the editable model uses the short form instead of the @odata.bind notation
     await generateAndCompare("entity-relationships-v401.ts", {
+      disableDeepInsertProps: true,
       mode: Modes.models,
-      enableBindingProps: true,
       odataVersionV4: "4.01",
       skipEditableModels: false,
       skipIdModels: false,
@@ -259,7 +261,7 @@ describe("Model Generator Tests V4", () => {
     });
   });
 
-  test(`${TEST_SUITE_NAME}: no binding props for OData 4.01 by default`, async () => {
+  test(`${TEST_SUITE_NAME}: no binding props for OData 4.01 when switched off`, async () => {
     // given entities related to each other
     odataBuilder
       .addEntityType("Author", undefined, (builder) =>
@@ -273,11 +275,13 @@ describe("Model Generator Tests V4", () => {
           .addProp("relatedAuthors", `Collection(${withNs("Author")})`),
       );
 
-    // when generating for 4.01 without opting in
+    // when generating for 4.01 with both switched off
     // then no binding prop at all: in 4.01 it goes by the name of the navigation property itself,
     // so it must be absent rather than show up with the binding type
     await generateAndCompare("entity-relationships.ts", {
       odataVersionV4: "4.01",
+      disableBindingProps: true,
+      disableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -301,8 +305,8 @@ describe("Model Generator Tests V4", () => {
     // when opting into the binding props without a service
     // then the editable model allows to bind an existing entity via the @odata.bind notation
     await generateAndCompare("entity-relationships-binding.ts", {
+      disableDeepInsertProps: true,
       mode: Modes.models,
-      enableBindingProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -345,7 +349,7 @@ describe("Model Generator Tests V4", () => {
     // then the binding goes by the navigation property itself and carries the key of the entity to bind,
     // which the query objects turn into the URL the wire notation asks for
     await generateAndCompare("entity-relationships-binding-by-key.ts", {
-      enableBindingProps: true,
+      disableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -361,8 +365,6 @@ describe("Model Generator Tests V4", () => {
     // then the navigation property accepts either shape - a new entity or the key of an existing one -
     // and the "@id" property tells them apart
     await generateAndCompare("entity-relationships-deep-insert-binding-by-key.ts", {
-      enableDeepInsertProps: true,
-      enableBindingProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -376,7 +378,8 @@ describe("Model Generator Tests V4", () => {
     // when opting into the binding props while a service is generated
     // then no binding prop at all: the URL of the referenced entity could not be built
     await generateAndCompare("entity-relationships.ts", {
-      enableBindingProps: true,
+      disableBindingProps: true,
+      disableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -391,7 +394,7 @@ describe("Model Generator Tests V4", () => {
     // then the navigation properties show up on the editable model, typed as the editable model of the
     // related entity - which is what travels within the payload of a deep insert or deep update
     await generateAndCompare("entity-relationships-deep-insert.ts", {
-      enableDeepInsertProps: true,
+      disableBindingProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -406,8 +409,6 @@ describe("Model Generator Tests V4", () => {
     // then both show up separately, since 4.0 spells a binding with a name of its own
     await generateAndCompare("entity-relationships-deep-insert-binding.ts", {
       mode: Modes.models,
-      enableDeepInsertProps: true,
-      enableBindingProps: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -423,8 +424,6 @@ describe("Model Generator Tests V4", () => {
     // because 4.01 addresses a binding by the very name of the navigation property
     await generateAndCompare("entity-relationships-deep-insert-binding-v401.ts", {
       mode: Modes.models,
-      enableDeepInsertProps: true,
-      enableBindingProps: true,
       odataVersionV4: "4.01",
       skipEditableModels: false,
       skipIdModels: false,
@@ -439,7 +438,7 @@ describe("Model Generator Tests V4", () => {
     // when the V2 option is set on a V4 service
     // then it has no effect at all - the wrapping is a V2 speciality
     await generateAndCompare("entity-relationships-deep-insert.ts", {
-      enableDeepInsertProps: true,
+      disableBindingProps: true,
       v2EditableModelsWithExtraResultsWrapping: true,
       skipEditableModels: false,
       skipIdModels: false,

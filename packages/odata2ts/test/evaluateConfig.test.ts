@@ -319,9 +319,9 @@ describe("Config Evaluation Tests", () => {
     const cliOpts: CliOptions = { source: "source", output: "output" };
 
     [Modes.service, Modes.qobjects, Modes.all, Modes.models].forEach((mode) => {
-      const result = evaluateConfigOptions(cliOpts, { mode, enableDeepInsertProps: true });
+      const result = evaluateConfigOptions(cliOpts, { mode, disableDeepInsertProps: true });
 
-      expect(result[0], `mode ${mode}`).toMatchObject({ enableDeepInsertProps: true });
+      expect(result[0], `mode ${mode}`).toMatchObject({ disableDeepInsertProps: true });
     });
   });
 });

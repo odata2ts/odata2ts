@@ -31,7 +31,7 @@ import { ConfigFileOptions, EmitModes, Modes, NamingStrategies, TypeModel } from
  *   `int-test/cap` pins the bundled form. Both states of the axis are exercised by suites which run anyway,
  *   which is more than a type check would show. The variants here simply follow the default, so what gets
  *   type-checked is the layout a user meets without saying anything.
- * - Anything whose effect is on the wire (`enableBindingProps`, `odataVersionV4`, `v4BigNumberAsString`, …):
+ * - Anything whose effect is on the wire (`odataVersionV4`, `v4BigNumberAsString`, the binding props, …):
  *   a type check cannot see a URL or a payload. Those belong to the server packages.
  * - `emitMode` other than `ts`: compiled JS/DTS output is not what `tsc` reads here. That is the CLI test's
  *   business.
@@ -201,8 +201,6 @@ const config: ConfigFileOptions = {
       propertiesByName: RESOLVE_LOCATION_CLASH,
       byTypeAndName: [{ name: "PublisherRegistry.Branch", type: TypeModel.EntityType, mappedName: "PublisherBranch" }],
       enumType: "numeric",
-      enableBindingProps: true,
-      enableDeepInsertProps: true,
       enablePrimitivePropertyServices: true,
       enableNativeInOperator: true,
       v4BigNumberAsString: true,
