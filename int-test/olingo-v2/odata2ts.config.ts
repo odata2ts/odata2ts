@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, Modes, TypeModel } from "@odata2ts/odata2ts";
 
 /**
  * Generates the odata2ts client for the "Library" OData V2 test model, as served by the Apache Olingo 2
@@ -28,6 +28,32 @@ const config: ConfigFileOptions = {
       serviceName: "Library",
       source: "resource/library-v2.xml",
       output: "src-generated/library",
+    },
+    /**
+     * The same model a third time, with renaming switched on - the V2 half of what
+     * `int-test/asp-net` does for V4.
+     *
+     * Renaming is not version-neutral, which is why it needs a home on both sides. The mapping between the
+     * TypeScript name and the OData one has to survive whatever the client builds, and V2 builds several of
+     * those things differently: a key predicate carries a type prefix (`Books(guid'…')`), `$expand` cannot
+     * nest query options, and a binding is stated as `__metadata.uri` rather than `@odata.bind`. A mapping
+     * proven over V4 says nothing about any of them.
+     *
+     * Generated separately rather than replacing the raw client, for the same reason as over there: the
+     * point is the mapping, and a mapping is only observable where both name forms are visible at once.
+     * See test/feature/Renaming.test.ts.
+     */
+    libraryRenamed: {
+      serviceName: "LibraryRenamed",
+      source: "resource/library-v2.xml",
+      output: "src-generated/library-renamed",
+      allowRenaming: true,
+      // `Location_` (the shelf mark) and `Location` (the branch an item sits in) both become `location`
+      // under camelCase, and the generator refuses to emit an interface declaring one name twice. The very
+      // same clash as in the V4 metadata, since it is the same model.
+      propertiesByName: [{ name: "Location_", mappedName: "shelfLocation" }],
+      // `Branch` exists in two namespaces here as well
+      byTypeAndName: [{ name: "PublisherRegistry.Branch", type: TypeModel.EntityType, mappedName: "PublisherBranch" }],
     },
     /**
      * The same model a second time, with converters switched on.

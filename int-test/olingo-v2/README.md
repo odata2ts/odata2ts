@@ -50,14 +50,15 @@ The server holds its data in memory and rebuilds it per process, so a restart is
 nothing to deploy or seed. Test files still share one instance, so `fileParallelism` is off and anything
 written is put back.
 
-## Two generated clients
+## Three generated clients
 
-The package generates the model **twice** from the same snapshot:
+The package generates the model **three times** from the same snapshot:
 
 | Service            | Output                            | Purpose                                             |
 | ------------------ | --------------------------------- | --------------------------------------------------- |
 | `library`          | `src-generated/library`           | no converters - pins what the server actually sends |
 | `libraryConverted` | `src-generated/library-converted` | Luxon, BigNumber, bigint, and `converter-v2-to-v4`  |
+| `libraryRenamed`   | `src-generated/library-renamed`   | `allowRenaming` - the V2 half of the name mapping   |
 
 V2 is where converters earn their keep: the format hands over every timestamp as `/Date(<ticks>)/` and
 every numeric type that does not fit a JS number as a string, so the raw model types all of those as
@@ -66,6 +67,23 @@ covers the wire format, `feature/Converters.test.ts` covers what the converters 
 
 This is the first place converters meet a **running** V2 server at all; `examples/main` covers the
 converted V2 model only against a mock client.
+
+`libraryRenamed` is the V2 half of what `int-test/asp-net` does for V4. Renaming is not version-neutral:
+the mapping between the TypeScript name and the OData one has to survive whatever the client builds, and V2
+builds several of those things differently - a key predicate carries a type prefix (`Books(guid'...')`),
+`$expand` cannot nest query options, a binding goes through `__metadata.uri`, and the payload arrives
+wrapped in `d`. A mapping proven over V4 says nothing about any of that. `feature/Renaming.test.ts` writes
+through the renamed client and reads back through the raw one, which is what shows a value landed under its
+OData name rather than under the TypeScript one.
+
+Two names need help there, the same two as in the V4 metadata since it is the same model: `Location_` (a
+shelf mark) and `Location` (the branch an item sits in) both become `location` under camelCase, so
+`propertiesByName` maps the former to `shelfLocation`; and `Branch` exists in two namespaces, so
+`byTypeAndName` gives the one in `PublisherRegistry` the name `PublisherBranch`.
+
+`enumType` has no counterpart on this side: OData V2 has no enum types at all, and what the V4 model
+declares as the `Amenities` enum is a plain `Edm.Int32` in this metadata. The axis is V4-only, not merely
+untested here.
 
 ## Generation
 
