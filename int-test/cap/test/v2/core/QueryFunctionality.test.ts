@@ -147,7 +147,9 @@ describe("CAP Library V2: query functionality", () => {
       .query((b) => b.select("Title").expand("Copies"))
       .execute();
     const expectedTitles = expanded.data.d.results
-      .filter((book) => (book.Copies as Array<{ IsLoanable: boolean }>).some((copy) => copy.IsLoanable))
+      .filter((book) =>
+        (book.Copies as { results: Array<{ IsLoanable: boolean }> }).results.some((copy) => copy.IsLoanable),
+      )
       .map((book) => book.Title)
       .sort();
 

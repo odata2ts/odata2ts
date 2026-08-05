@@ -85,6 +85,16 @@ shelf mark) and `Location` (the branch an item sits in) both become `location` u
 declares as the `Amenities` enum is a plain `Edm.Int32` in this metadata. The axis is V4-only, not merely
 untested here.
 
+All three clients are generated with `v2ResponseResultsWrapping` and `v2PayloadResultsWrapping` on, because
+that is what this server does: an expanded collection valued navigation property arrives as
+`{"Copies": {"results": [...]}}`, the V2 serialisation of a feed. The client hands that structure through untouched, so the options are what
+makes the generated types describe the actual traffic — `feature/ResultsWrapping.test.ts` pins both ends.
+The payload side stays a separate option because no response can settle it: Olingo accepts a deep insert
+wrapped **and** unwrapped, while CAP's V2 adapter answers the wrapped payload with 400 "Value must be an
+array" although it wraps its own responses (odata2ts#237, `int-test/cap/test/v2/feature/ResultsWrapping.test.ts`). With both options off
+the generated types would simply be wrong here, which is why there is no variant for that state — the
+model-only flavour of it lives in the compile gate, `int-test/config-variants`.
+
 ## Generation
 
 The client is generated offline from `resource/library-v2.xml`, a committed snapshot of the server's

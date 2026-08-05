@@ -55,7 +55,7 @@ caused it.
 | `namingCustom`    | every naming knob turned away from its default: another strategy per artefact kind, own prefixes and suffixes, `allowRenaming`              |
 | `enumStringUnion` | `enumType: "string-union"`                                                                                                                  |
 | `enumNumeric`     | `enumType: "numeric"`                                                                                                                       |
-| `v2Wrapping`      | `v2ModelsWithExtraResultsWrapping` and its editable counterpart, on the V2 model                                                            |
+| `v2Wrapping`      | `v2ResponseResultsWrapping` and `v2PayloadResultsWrapping` on bare models - with a service they meet a server in `int-test/olingo-v2`       |
 | `everythingOn`    | all of it at once - the interaction catcher                                                                                                 |
 
 The sources are the committed metadata snapshots of `int-test/asp-net` and `int-test/olingo-v2`, referenced

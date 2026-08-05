@@ -73,6 +73,18 @@ const config: ConfigFileOptions = {
       serviceName: "LibraryV2",
       source: "resource/library-v2.xml",
       output: "src-generated/library-v2",
+      /**
+       * Response wrapped, payload not - and this server is the reason the two are separate options
+       * (odata2ts#237).
+       *
+       * The adapter answers with V2's extra results object around a collection valued attribute, exactly
+       * as the native server in `int-test/olingo-v2` does, and the client hands that structure through
+       * untouched. It refuses the very same shape in a request though: a payload carrying
+       * `{"Keywords": {"results": [...]}}` comes back as 400 "Value must be an array". Olingo accepts
+       * either, so only this side settles the question - see test/v2/feature/ResultsWrapping.test.ts.
+       */
+      v2ResponseResultsWrapping: true,
+      v2PayloadResultsWrapping: false,
     },
   },
 };

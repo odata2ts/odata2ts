@@ -83,7 +83,7 @@ describe("QBinding: binding by key", () => {
   });
 
   test("V2 keeps the extra results wrapping of a collection", () => {
-    // @ts-expect-error: the wrapping is opt-in via v2EditableModelsWithExtraResultsWrapping
+    // @ts-expect-error: the wrapping is opt-in via v2PayloadResultsWrapping
     const result = qBookV2.convertToOData({ relatedAuthors: { results: [{ "@id": 3 }, { id: 4, name: "Kafka" }] } });
 
     expect(result).toStrictEqual({

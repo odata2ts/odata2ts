@@ -171,20 +171,20 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T> 
           // complex props
           const asComplexType = prop as QEntityPathModel<any>;
           if (typeof asComplexType.getEntity === "function") {
-            // workaround: some V2 services wrap expanded entity collections in an extra results object #125
-            // => we unwrap this to stay true to the generated model interfaces
+            // V2 wraps collection valued attributes into an extra results object (#125). The structure is
+            // handed on as the service sent it - stating it is the job of v2ResponseResultsWrapping - but
+            // the entities inside of it still need to be converted.
             const wrappedValue = value as unknown as { results: Array<object> };
-            const sanitizedValue =
+            const isWrapped =
               asComplexType.isCollectionType() &&
-              wrappedValue &&
+              !!wrappedValue &&
               typeof wrappedValue === "object" &&
-              typeof wrappedValue.results === "object" &&
-              Array.isArray(wrappedValue.results)
-                ? wrappedValue.results
-                : value;
+              Array.isArray(wrappedValue.results);
 
             const entity = asComplexType.getEntity();
-            collector[finalKey] = entity.convertFromOData(sanitizedValue);
+            collector[finalKey] = isWrapped
+              ? { results: entity.convertFromOData(wrappedValue.results) }
+              : entity.convertFromOData(value);
           }
           // primitive props
           else {

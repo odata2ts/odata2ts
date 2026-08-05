@@ -218,31 +218,32 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
   naming?: OverridableNamingOptions;
 
   /**
-   * Some OData V2 services generate an extra wrapping for entity collection attributes:
-   * <code>trips: {results: [...]}</code>. So instead of directly returning an array of entities
-   * an object with the property "results" is wrapped around the entity collection.
+   * OData V2 services wrap an entity collection into an extra object carrying the property "results":
+   * <code>trips: {results: [...]}</code>. So instead of an array of entities you receive an object which
+   * holds that array.
    *
-   * If you're using the odata client then there's a build-in workaround in place which transforms
-   * the results to remove this extra mapping. However, if you're only interested in the types, then
-   * the generated models will not match that extra wrapping.
+   * Setting this configuration option to <code>true</code> (default: false) states that structure in
+   * the generated models, so that they describe what the service actually sends.
    *
-   * Setting this configuration option to <code>true</code> (default: false) will add this extra
-   * wrapping to the generated models. But this option is only valid if the generation mode is set
-   * to <code>models</code>; it is ignored otherwise.
+   * It applies to navigation properties only, because that wrapping is how V2 serialises a feed: a
+   * collection of a primitive or of a complex type is a plain array either way.
+   *
+   * The option applies to every generation mode. The client passes the response structure through
+   * untouched, so with the option turned off the generated models will not match the response of a
+   * service which wraps.
    */
-  v2ModelsWithExtraResultsWrapping?: boolean;
+  v2ResponseResultsWrapping?: boolean;
   /**
-   * The counterpart of <code>v2ModelsWithExtraResultsWrapping</code> for the editable models: collection
+   * The counterpart of <code>v2ResponseResultsWrapping</code> for the editable models: collection
    * valued navigation properties of a deep insert are wrapped into an extra object with the property
    * "results", as some V2 services expect it.
    *
    * Deliberately its own option, since a service which answers with the extra wrapping does not
    * necessarily expect it in a request payload - see odata2ts issue #237.
    *
-   * Like its counterpart this option is only valid if the generation mode is set to <code>models</code>;
-   * it is ignored otherwise.
+   * Like its counterpart the option applies to every generation mode.
    */
-  v2EditableModelsWithExtraResultsWrapping?: boolean;
+  v2PayloadResultsWrapping?: boolean;
   /**
    * Numbers of type `Edm.Int64` and `Edm.Decimal` are represented as `number` in V4.
    * However, these numbers might not fit into JS' number type, which might result in precision loss.

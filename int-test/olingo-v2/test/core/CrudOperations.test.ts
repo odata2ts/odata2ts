@@ -120,7 +120,7 @@ describe("Olingo Library: CRUD operations", () => {
       .create({
         Title: "Deep Insert Book",
         Language: "de",
-        Copies: [{ MediumId: UNKNOWN_ID, InventoryNumber: 9901, IsLoanable: true }],
+        Copies: { results: [{ MediumId: UNKNOWN_ID, InventoryNumber: 9901, IsLoanable: true }] },
       } as EditableBook)
       .execute();
 
