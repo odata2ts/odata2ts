@@ -16,6 +16,10 @@ const config: ConfigFileOptions = {
   prettier: true,
   // we definitely want to type check the generated artifacts
   debug: true,
+  // On against the default, which is unbundled since the file layout became the user's choice. Nothing
+  // here is about the layout - the V2 axes are - and the suites import from the bundled paths, so this
+  // keeps the package to its actual subject.
+  bundledFileGeneration: true,
   // on, because the property services are a generator feature of their own and otherwise never
   // meet a real server: see test/feature/PropertyServices.test.ts
   enablePrimitivePropertyServices: true,

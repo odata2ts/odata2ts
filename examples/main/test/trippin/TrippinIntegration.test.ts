@@ -1,10 +1,9 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { AxiosClient, AxiosClientError } from "@odata2ts/http-client-axios";
-import { ODataCollectionResponseV4, ODataModelResponseV4, ODataValueResponseV4 } from "@odata2ts/odata-core";
+import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { describe, expect, expectTypeOf, test } from "vitest";
-import type { LocationModel, PersonIdModel, PersonModel, TripModel } from "../../src-generated/trippin/TrippinModel.js";
-import { FeatureModel, PersonGenderModel } from "../../src-generated/trippin/TrippinModel.js";
-import { TrippinService } from "../../src-generated/trippin/TrippinService.js";
+import type { LocationModel, PersonIdModel, PersonModel, TripModel } from "../../src-generated/trippin/index.js";
+import { FeatureModel, PersonGenderModel, TrippinService } from "../../src-generated/trippin/index.js";
 
 describe("Integration Testing of Service Generation", () => {
   const BASE_URL = "https://services.odata.org/TripPinRESTierService/(S(sivik5crfo3qvprrreziudlp))";
@@ -68,39 +67,6 @@ describe("Integration Testing of Service Generation", () => {
     expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
     expect(result.status).toBe(200);
     expect(result.data).toMatchObject(expected);
-  });
-
-  test("get primitive prop value", async () => {
-    const result = await trippinService.people("russellwhyte").firstName().getValue().execute();
-
-    expectTypeOf(result.data).toEqualTypeOf<ODataValueResponseV4<string> | undefined>();
-    expect(result.status).toBe(200);
-    expect(result.data).toMatchObject({ value: "Russell" });
-  });
-
-  test("update primitive prop value", async () => {
-    // Trippin Bug: We get 400 => not supported actually
-    try {
-      const response = await trippinService.people("russellwhyte").middleName().updateValue("k2").execute();
-      expectTypeOf(response).toEqualTypeOf<HttpResponseModel<undefined>>();
-      expect(true).toBe(false);
-    } catch (e) {
-      const error = e as AxiosClientError;
-      expect(error.status).toBe(400);
-      expect(error.message).toMatch("Model state is not valid with message");
-    }
-  });
-
-  test("delete primitive prop value", async () => {
-    // Trippin Bug: We get 500 => not supported actually
-    try {
-      await trippinService.people("russellwhyte").firstName().deleteValue().execute();
-      expect(true).toBe(false);
-    } catch (e) {
-      const error = e as AxiosClientError;
-      expect(error.status).toBe(500);
-      expect(error.message).toMatch("Element type cannot be found for 'Edm.String'");
-    }
   });
 
   test("get entity with related entities", async () => {

@@ -13,8 +13,9 @@ import { ConfigFileOptions, EmitModes, Modes, TypeModel } from "@odata2ts/odata2
  * `enableBindingProps` is on, because this server is the first one we have that actually honours the
  * binding notations - proving them out end to end is the point of this package.
  *
- * `bundledFileGeneration` is off, as a division of labour: `int-test/cap` keeps the bundled default, so
- * both file layouts are exercised at runtime rather than only type-checked.
+ * `bundledFileGeneration` is off - the default since the file layout became the user's choice - as half of
+ * a division of labour: `int-test/cap` pins the bundled form, so both layouts are exercised at runtime
+ * rather than only type-checked.
  *
  * The model is generated a second time, with `allowRenaming` on - see the `libraryRenamed` service below.
  */
@@ -23,8 +24,8 @@ const config: ConfigFileOptions = {
   emitMode: EmitModes.ts,
   prettier: true,
   debug: true,
-  // off, so that one of the two file layouts meets a real server: this package generates a folder per
-  // model, `int-test/cap` keeps the bundled default
+  // spelled out although it is the default, because it is half of a division of labour: this package
+  // generates a folder per model, `int-test/cap` pins the bundled form, so both layouts meet a real server
   bundledFileGeneration: false,
   enableBindingProps: true,
   // on, because the property services are a generator feature of their own and otherwise never

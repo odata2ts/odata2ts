@@ -11,8 +11,7 @@
     "build": "yarn clean && yarn generate",
     "clean": "rimraf build src-generated",
     "generate": "odata2ts",
-    "int-test": "node ../../node_modules/.bin/vitest run --dir int-test --testTimeout=30000 --retry=2",
-    "test": "tsc && vitest run --dir test",
+    "test": "node ../../node_modules/.bin/vitest run --testTimeout=30000",
     "test-compile": "tsc"
   },
   "dependencies": {

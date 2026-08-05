@@ -269,9 +269,14 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * By default, odata2ts generates a folder structure with individual files per entity.
    * This allows for handling and scaling the generation process for large data structures.
    *
-   * However, especially UI5 has problems with recursive structures, which are absolutely valid within
-   * OData. Here the solution is to generate only one file per type to circumvent cyclic imports.
-   * To enable this behaviour set this option to true.
+   * That structure entails cyclic imports, which are absolutely valid within OData and which any common
+   * ESM or bundler setup resolves without trouble. Some do not: SAP's UI5 module loader is the known case,
+   * and any other bundler unable to handle cyclic dependencies has the same problem. There the solution is
+   * to bundle the generation into one file per kind of artefact, which removes the cycles - set this
+   * option to true.
+   *
+   * Only you know your target platform, so this is your decision to make; where neither applies it is a
+   * matter of preference.
    */
   bundledFileGeneration?: boolean;
   /**

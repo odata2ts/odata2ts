@@ -1,28 +1,15 @@
 # odata2ts Examples
 
-These examples serve as example of how to integrate `odata2ts`.
+These examples use publicly available OData services from odata.org to show how to integrate `odata2ts`.
+They were also used internally as basis for integration tests, a time from which some tests are still left.
 
-They are also used internally as basis for integration tests.
+However, these public available services are all problematic in their own way:
 
-## Prerequisites: build the workspace first
+- not all features are implemented
+- all have their own bugs
+- and state manipulation is a problem on its own
 
-Unlike the core packages, this example is **not** covered by the `src` dev-resolution (TypeScript `paths` /
-Vitest alias) that lets the individual packages type-check and test without a prior build. Two things here
-depend on **compiled** output and therefore require a build up front:
-
-- `yarn generate` invokes the `odata2ts` binary (`packages/odata2ts/lib/run-cli.js`) — a real Node process,
-  so the generator must be built.
-- The generated code and its tests resolve the runtime packages (`@odata2ts/odata-service` etc.) through
-  their `lib/` at runtime, so those must be built too.
-
-So before generating or running the tests in this directory, build once from the repo root:
-
-```
-yarn build
-```
-
-This runs the topological build (`odata-core` → `odata-query-objects` → `odata-query-builder` →
-`odata-service` → `odata2ts`) in the correct order. Only then run `yarn generate` and `yarn test` here.
+So this is more of a stale archive now than anything else.
 
 ## Trippin
 
@@ -70,15 +57,6 @@ Here's just an excerpt of the most important domain models:
 - Airports
 - Me (example of a `Singleton`)
 
-## Feature: Renaming
-
-Minimal naming as well as max renaming options are tested here.
-
-The Trippin service is used, so:
-
-- trippin-min-naming
-- trippin-max-renaming
-
 ## OData V2 Example
 
 OData2ts generation example based on the publicly available [OData V2 service](https://www.odata.org/odata-services/)
@@ -110,45 +88,22 @@ Straight-forward and simple:
 - Categories
 - Suppliers
 
-## Data Type & Converter Examples
+## Building
 
-Two handwritten EDMX files come into play to see all data types in action for v2 and v4.
-Additionally, a lot of converters are thrown into the mix.
+Unlike the core packages, this example is **not** covered by the `src` dev-resolution (TypeScript `paths` /
+Vitest alias) that lets the individual packages type-check and test without a prior build. Two things here
+depend on **compiled** output and therefore require a build up front:
 
-V2:
+- `yarn generate` invokes the `odata2ts` binary (`packages/odata2ts/lib/run-cli.js`) — a real Node process,
+  so the generator must be built.
+- The generated code and its tests resolve the runtime packages (`@odata2ts/odata-service` etc.) through
+  their `lib/` at runtime, so those must be built too.
 
-| Data Type          | Result TS Type | Converter                            |
-| ------------------ | -------------- | ------------------------------------ |
-| Edm.String         | `string`       |                                      |
-| Edm.Boolean        | `boolean`      |                                      |
-| Edm.Int64          | `bigInt`       | converter-common                     |
-| Edm.Decimal        | `BigNumber`    | converter-big-number                 |
-| Other Numbers      | `number`       | converter-v2-to-v4                   |
-| Edm.DateTimeOffset | `DateTime`     | converter-luxon                      |
-| Edm.DateTime       | `DateTime`     | converter-v2-to-v4 & converter-luxon |
-| Edm.Time           | `Duration`     | converter-v2-to-v4 & converter-luxon |
+So before generating or running the tests in this directory, build once from the repo root:
 
-V4:
+```
+yarn build
+```
 
-| Data Type          | Result TS Type | Converter            |
-| ------------------ | -------------- | -------------------- |
-| Edm.String         | `string`       |                      |
-| Edm.Boolean        | `boolean`      |                      |
-| Edm.Int64          | `bigInt`       | converter-common     |
-| Edm.Decimal        | `BigNumber`    | converter-big-number |
-| Other Numbers      | `number`       |                      |
-| Edm.DateTimeOffset | `Date`         | converter-common     |
-| Edm.Date           | `DateTime`     | converter-luxon      |
-| Edm.TimeOfDay      | `DateTime`     | converter-luxon      |
-| Edm.Duration       | `Duration`     | converter-luxon      |
-
-## Specials
-
-A set of handwritten EDMX files to simulate some edge cases which would be impossible to find
-in public OData services.
-
-For these edge cases only typing tests are executed: Does TS compile?
-
-- abstract and open types
-- multiple schemas
-- edge cases
+This runs the topological build (`odata-core` → `odata-query-objects` → `odata-query-builder` →
+`odata-service` → `odata2ts`) in the correct order. Only then run `yarn generate` and `yarn test` here.

@@ -74,8 +74,8 @@ attributes and no `SRID` facets, none of which the model builder can express. Th
 binding is stated by the key of the entity to bind; the URL the query objects build from it is only worth
 anything if a real server resolves it.
 
-`bundledFileGeneration` is off, so this package generates a folder per model plus the barrel files, while
-`int-test/cap` keeps the bundled default. That way both file layouts are exercised at runtime instead of
+`bundledFileGeneration` is off - which is the default since the file layout became the user's choice - so
+this package generates a folder per model plus the barrel files, while `int-test/cap` pins the bundled form. That way both file layouts are exercised at runtime instead of
 only being type-checked. Models are therefore imported from their namespace barrel
 (`src-generated/library/library-catalog/index.js`), not from one bundled model file.
 
