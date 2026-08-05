@@ -61,10 +61,10 @@ describe("CAP Library V2: deep insert", () => {
       .query((builder) => builder.expand("Chapters"))
       .execute();
 
-    const chapters = read.data.d.Chapters as Array<{ Title: string | null; up__Id: string }>;
-    expect(chapters).toHaveLength(1);
-    expect(chapters[0].Title).toBe("First chapter");
-    expect(chapters[0].up__Id).toBe(created.data.d.Id);
+    const chapters = read.data.d.Chapters as { results: Array<{ Title: string | null; up__Id: string }> };
+    expect(chapters.results).toHaveLength(1);
+    expect(chapters.results[0].Title).toBe("First chapter");
+    expect(chapters.results[0].up__Id).toBe(created.data.d.Id);
   });
 
   test("a to-many association is accepted and then dropped", async () => {
@@ -91,7 +91,7 @@ describe("CAP Library V2: deep insert", () => {
       .query((builder) => builder.expand("Copies"))
       .execute();
 
-    expect(read.data.d.Copies).toStrictEqual([]);
+    expect(read.data.d.Copies).toStrictEqual({ results: [] });
   });
 
   test("a to-one association refuses everything but its key", async () => {

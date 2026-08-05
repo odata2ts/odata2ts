@@ -23,6 +23,19 @@ const config: ConfigFileOptions = {
   // on, because the property services are a generator feature of their own and otherwise never
   // meet a real server: see test/feature/PropertyServices.test.ts
   enablePrimitivePropertyServices: true,
+  /**
+   * Both on, because this is what Olingo does: an expanded collection valued navigation property arrives
+   * as `{"Copies": {"results": [...]}}` - the V2 serialisation of a feed - and a deep insert is accepted
+   * in that same shape. The client
+   * hands the structure through untouched, so stating it here is what makes the generated types describe
+   * the actual traffic - see test/feature/ResultsWrapping.test.ts.
+   *
+   * The payload side is its own option because a service which answers with the wrapping does not
+   * necessarily expect it (odata2ts#237); Olingo happens to accept both, which is exactly why the option
+   * cannot be derived from the response side.
+   */
+  v2ResponseResultsWrapping: true,
+  v2PayloadResultsWrapping: true,
   services: {
     library: {
       serviceName: "Library",

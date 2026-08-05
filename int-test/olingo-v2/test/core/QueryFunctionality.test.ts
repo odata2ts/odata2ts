@@ -93,10 +93,10 @@ describe("Olingo Library: query functionality", () => {
       .execute();
 
     expect(result.status).toBe(200);
-    // an expanded navigation property is the data itself, where an unexpanded one is a `__deferred` link
-    const copies = result.data.d.Copies as Array<{ MediumId: string }>;
-    expect(Array.isArray(copies)).toBe(true);
-    expect(copies.every((copy) => copy.MediumId === BOOK_DER_PROZESS)).toBe(true);
+    // an expanded navigation property is the data itself, where an unexpanded one is a `__deferred` link.
+    // V2 states a collection valued one as `{results: [...]}` - see feature/ResultsWrapping.test.ts
+    const copies = result.data.d.Copies as { results: Array<{ MediumId: string }> };
+    expect(copies.results.every((copy) => copy.MediumId === BOOK_DER_PROZESS)).toBe(true);
   });
 
   test("expanding() is a deep select, since $expand carries no options in V2", async () => {

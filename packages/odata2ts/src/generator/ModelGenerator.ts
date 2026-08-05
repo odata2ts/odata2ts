@@ -235,7 +235,10 @@ class ModelGenerator {
     // Collections
     if (prop.isCollection) {
       const type = `Array<${typeName}>`;
-      if (this.dataModel.isV2() && this.options.v2ModelsWithExtraResultsWrapping) {
+      // the extra results object is how V2 serialises a *feed*, so it is an entity collection's business
+      // alone - a collection of a complex or primitive type arrives as a plain array (verified against
+      // CAP's V2 adapter, which wraps `Copies` and hands over `PreviousAddresses` and `Keywords` bare)
+      if (this.dataModel.isV2() && this.options.v2ResponseResultsWrapping && prop.dataType === DataTypes.ModelType) {
         return `{ results: ${type} }` + suffix;
       } else {
         return type + suffix;
@@ -438,7 +441,7 @@ class ModelGenerator {
     if (prop.isCollection) {
       const collectionType = `Array<${singleType}>`;
       // some V2 services expect the extra results wrapping in the payload as well, see issue #237
-      return this.version === ODataVersions.V2 && this.options.v2EditableModelsWithExtraResultsWrapping
+      return this.version === ODataVersions.V2 && this.options.v2PayloadResultsWrapping
         ? `{ results: ${collectionType} }`
         : collectionType;
     }

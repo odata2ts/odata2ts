@@ -166,22 +166,24 @@ const config: ConfigFileOptions = {
     },
 
     /**
-     * The V2 `results` wrapping, in both its read and its write flavour.
+     * The V2 `results` wrapping, in both its read and its write flavour, on bare models.
      *
-     * These two options are the one case which is structurally impossible to test against a server: they
-     * only take effect in `mode: models` and are ignored otherwise, and in that mode no service exists which
-     * could send a request. So the compile gate is not the cheaper home for them, it is the only one.
+     * The options themselves meet a server in `int-test/olingo-v2`, which generates a full client with
+     * both of them on because that is what Olingo sends and accepts. What stays here is the model-only
+     * flavour: `mode: models` emits no service which could carry the shape, so nothing but a type check
+     * can judge it.
      *
      * They are deliberately two options rather than one: a service which answers with the extra wrapping
-     * does not necessarily expect it in a request payload (odata2ts#237).
+     * does not necessarily expect it in a request payload (odata2ts#237) - Olingo accepts either, so the
+     * payload side is a choice no response can settle.
      */
     v2Wrapping: {
       serviceName: "V2Wrapping",
       source: V2_SOURCE,
       output: "src-generated/v2-wrapping",
       mode: Modes.models,
-      v2ModelsWithExtraResultsWrapping: true,
-      v2EditableModelsWithExtraResultsWrapping: true,
+      v2ResponseResultsWrapping: true,
+      v2PayloadResultsWrapping: true,
     },
 
     /**

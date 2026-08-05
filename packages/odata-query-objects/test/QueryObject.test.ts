@@ -85,7 +85,10 @@ describe("QueryObject tests", () => {
     expect(qToTestWithAssoc.convertFromOData({ options: undefined })).toStrictEqual({ options: undefined });
   });
 
-  test("convertFromOData: workaround for extra results wrapping", () => {
+  test("convertFromOData: the extra results wrapping is kept and its content converted", () => {
+    // V2 wraps collection valued attributes (#125). The wrapping is part of the response, so it survives
+    // the conversion - the models state it via v2ResponseResultsWrapping - while the values inside are
+    // converted like any other.
     const result = qToTestWithAssoc.convertFromOData({
       simpleList: {
         results: [
@@ -96,17 +99,36 @@ describe("QueryObject tests", () => {
       options: { results: [true, false, true] },
     });
     expect(result).toStrictEqual({
+      simpleEntities: {
+        results: [
+          { id: "123", truth: 1 },
+          { id: "456", truth: 0 },
+        ],
+      },
+      options: { results: [1, 0, 1] },
+    });
+    expect(qToTestWithAssoc.convertFromOData({ options: null })).toStrictEqual({ options: null });
+    expect(qToTestWithAssoc.convertFromOData({ options: undefined })).toStrictEqual({ options: undefined });
+  });
+
+  test("convertFromOData: an unwrapped collection stays unwrapped", () => {
+    const result = qToTestWithAssoc.convertFromOData({
+      simpleList: [
+        { ID: "123", truth: true },
+        { ID: "456", truth: false },
+      ],
+      options: [true, false, true],
+    });
+    expect(result).toStrictEqual({
       simpleEntities: [
         { id: "123", truth: 1 },
         { id: "456", truth: 0 },
       ],
       options: [1, 0, 1],
     });
-    expect(qToTestWithAssoc.convertFromOData({ options: null })).toStrictEqual({ options: null });
-    expect(qToTestWithAssoc.convertFromOData({ options: undefined })).toStrictEqual({ options: undefined });
   });
 
-  test("convertFromOData: check that workaround is only applied when needed", () => {
+  test("convertFromOData: a property actually named results is no wrapping", () => {
     interface ResultModel {
       NAME: string;
     }

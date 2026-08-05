@@ -259,7 +259,6 @@ describe("Config Evaluation Tests", () => {
       skipEditableModels: true,
       skipIdModels: true,
       skipOperations: true,
-      v2ModelsWithExtraResultsWrapping: true,
     };
     const result = evaluateConfigOptions(cliOpts, opts);
 
@@ -269,46 +268,26 @@ describe("Config Evaluation Tests", () => {
       skipEditableModels: false,
       skipIdModels: false,
       skipOperations: false,
-      v2ModelsWithExtraResultsWrapping: false,
-    });
-  });
-
-  test("safeguard v2ModelsWithExtraResultsWrapping options", () => {
-    const cliOpts: CliOptions = { source: "source", output: "output" };
-    const opts: ConfigFileOptions = {
-      mode: Modes.qobjects,
-      v2ModelsWithExtraResultsWrapping: true,
-    };
-    const result = evaluateConfigOptions(cliOpts, opts);
-
-    expect(result.length).toBe(1);
-    expect(result[0]).toMatchObject({
-      v2ModelsWithExtraResultsWrapping: false,
     });
   });
 
   /**
-   * Both wrappings are a matter of the models alone: the generated client removes the extra wrapping
-   * from a response by itself, so a generated service must never see it in its types.
+   * The wrapping is what the service sends and expects, so it concerns every generated artefact. The
+   * client passes the structure through untouched, which is why a generated service has to state it in
+   * its types just as a bare model does.
    */
-  test("both extra wrapping options only survive in models mode", () => {
+  test("both extra wrapping options survive in every mode", () => {
     const cliOpts: CliOptions = { source: "source", output: "output" };
     const wrappingOpts = {
-      v2ModelsWithExtraResultsWrapping: true,
-      v2EditableModelsWithExtraResultsWrapping: true,
+      v2ResponseResultsWrapping: true,
+      v2PayloadResultsWrapping: true,
     };
 
-    [Modes.service, Modes.qobjects, Modes.all].forEach((mode) => {
+    [Modes.models, Modes.qobjects, Modes.service, Modes.all].forEach((mode) => {
       const result = evaluateConfigOptions(cliOpts, { mode, ...wrappingOpts });
 
-      expect(result[0], `mode ${mode}`).toMatchObject({
-        v2ModelsWithExtraResultsWrapping: false,
-        v2EditableModelsWithExtraResultsWrapping: false,
-      });
+      expect(result[0], `mode ${mode}`).toMatchObject(wrappingOpts);
     });
-
-    const modelsResult = evaluateConfigOptions(cliOpts, { mode: Modes.models, ...wrappingOpts });
-    expect(modelsResult[0]).toMatchObject(wrappingOpts);
   });
 
   /**

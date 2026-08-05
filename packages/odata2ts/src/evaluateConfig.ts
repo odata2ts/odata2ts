@@ -78,11 +78,6 @@ function safeGuardOptions(options: RunOptions): RunOptions {
     options.skipIdModels = false;
     options.skipOperations = false;
   }
-  // special options which are only valid for model generation
-  if (options.mode !== Modes.models) {
-    options.v2ModelsWithExtraResultsWrapping = false;
-    options.v2EditableModelsWithExtraResultsWrapping = false;
-  }
 
   return options;
 }

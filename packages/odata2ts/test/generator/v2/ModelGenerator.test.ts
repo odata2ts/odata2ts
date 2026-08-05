@@ -90,7 +90,29 @@ describe("Model Generator Tests V2", () => {
     // when generating model
     // then match fixture text
     await generateAndCompare("entity-relationships-v2-extra-wrapping.ts", {
-      v2ModelsWithExtraResultsWrapping: true,
+      v2ResponseResultsWrapping: true,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: the extra results wrapping is an entity collection's business`, async () => {
+    // given a model whose collections are of a primitive and of a complex type
+    odataBuilder
+      .addComplexType("Address", undefined, (builder) => builder.addProp("street", ODataTypesV2.String))
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV2.Int32)
+          .addProp("keywords", `Collection(${ODataTypesV2.String})`)
+          .addProp("previousAddresses", `Collection(${withNs("Address")})`),
+      );
+
+    // when opting into the extra wrapping
+    // then both stay plain arrays: the `results` object is how V2 serialises a feed, so it belongs to an
+    // entity collection alone - CAP's V2 adapter wraps an expanded navigation property and hands over a
+    // primitive or complex collection bare
+    await generateAndCompare("entity-collections-v2-extra-wrapping.ts", {
+      v2ResponseResultsWrapping: true,
+      v2PayloadResultsWrapping: true,
+      skipEditableModels: false,
     });
   });
 
@@ -148,7 +170,7 @@ describe("Model Generator Tests V2", () => {
     // when opting into the extra wrapping for editable models
     // then only the collection valued navigation property carries the extra results object
     await generateAndCompare("entity-relationships-deep-insert-v2-extra-wrapping.ts", {
-      v2EditableModelsWithExtraResultsWrapping: true,
+      v2PayloadResultsWrapping: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -163,7 +185,7 @@ describe("Model Generator Tests V2", () => {
     // then the deep insert props stay unwrapped: a service answering with the wrapping does not
     // necessarily expect it in a request payload, see issue #237
     await generateAndCompare("entity-relationships-deep-insert-v2-response-wrapping.ts", {
-      v2ModelsWithExtraResultsWrapping: true,
+      v2ResponseResultsWrapping: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,

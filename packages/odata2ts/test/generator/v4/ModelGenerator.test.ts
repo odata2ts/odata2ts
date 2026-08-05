@@ -161,7 +161,7 @@ describe("Model Generator Tests V4", () => {
     await generateAndCompare("entity-relationships.ts", {
       disableBindingProps: true,
       disableDeepInsertProps: true,
-      v2ModelsWithExtraResultsWrapping: true,
+      v2ResponseResultsWrapping: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -439,7 +439,7 @@ describe("Model Generator Tests V4", () => {
     // then it has no effect at all - the wrapping is a V2 speciality
     await generateAndCompare("entity-relationships-deep-insert.ts", {
       disableBindingProps: true,
-      v2EditableModelsWithExtraResultsWrapping: true,
+      v2PayloadResultsWrapping: true,
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,

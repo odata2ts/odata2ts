@@ -22,7 +22,7 @@ const defaultConfig: DefaultConfiguration = {
   enablePrimitivePropertyServices: false,
   disableAutoManagedKey: false,
   allowRenaming: false,
-  v2ModelsWithExtraResultsWrapping: false,
+  v2ResponseResultsWrapping: false,
   v4BigNumberAsString: false,
   disableAutomaticNameClashResolution: false,
   bundledFileGeneration: false,
@@ -105,7 +105,7 @@ const defaultConfig: DefaultConfiguration = {
   odataVersionV4: "4.0",
   disableBindingProps: false,
   disableDeepInsertProps: false,
-  v2EditableModelsWithExtraResultsWrapping: false,
+  v2PayloadResultsWrapping: false,
 };
 
 const { models, queryObjects, services } = defaultConfig.naming;
