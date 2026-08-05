@@ -63,32 +63,35 @@ describe("ASP.NET Library: OData 4.01", () => {
     expect(location.data.Name).toBe("Central Library");
   });
 
-  test("the response model uses the short form of the control information", async () => {
+  test("the response carries the short form of the control information, as typed", async () => {
     const result = await LIBRARY_401.Media()
       .query((builder) => builder.count().top(0))
       .execute();
 
     expect(result.status).toBe(200);
 
-    // The typing follows the configured version, so this is what a caller has to reach for ...
+    // The typing follows the configured version ...
     expectTypeOf(result.data["@count"]).toEqualTypeOf<number | undefined>();
     // ... and the 4.0 client's spelling is not part of that type at all
     // @ts-expect-error - "@odata.count" does not exist on a 4.01 response model
     result.data["@odata.count"];
+
+    // ... and so does what actually arrives. Which is the whole reason a GET has to declare the version
+    // too: the header governs the *response* shape as much as it governs how a payload is read, and until
+    // it was sent on reads this server answered in 4.0 form while the client was typed for 4.01.
+    const asReceived = result.data as unknown as Record<string, unknown>;
+    expect(asReceived["@count"]).toBeDefined();
+    expect(asReceived["@odata.count"]).toBeUndefined();
+    expect(result.data["@count"]).toBeGreaterThan(0);
   });
 
-  test("what this server actually sends back is the 4.0 spelling", async () => {
-    // The finding, and the reason the test above only pins the *typing*: odata2ts announces the version
-    // through `OData-Version` on requests carrying a body, and a GET carries none. ASP.NET therefore
-    // answers in 4.0 form, so the short-form property a 4.01 client is typed for arrives undefined while
-    // the count sits under the prefixed name. Asserted rather than dropped, because it means the response
-    // typing of `odataVersionV4: "4.01"` is a promise this server does not keep on read requests.
-    const result = await LIBRARY_401.Media()
+  test("the 4.0 client is unaffected and keeps the prefixed form", async () => {
+    // The counter-sample: the version header is only declared where it was configured, so a client on the
+    // default keeps talking 4.0 and reading the prefixed control information.
+    const result = await LIBRARY.Media()
       .query((builder) => builder.count().top(0))
       .execute();
 
-    const asReceived = result.data as unknown as Record<string, unknown>;
-    expect(asReceived["@odata.count"]).toBeDefined();
-    expect(asReceived["@count"]).toBeUndefined();
+    expect(Number(result.data["@odata.count"])).toBeGreaterThan(0);
   });
 });

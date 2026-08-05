@@ -51,11 +51,14 @@ describe("Testing OData 4.01 generation of TrippinService", () => {
     expect(ODATA_CLIENT.additionalHeaders?.["OData-Version"]).toBe("4.01");
   });
 
-  test("no version is declared without a request body", async () => {
+  test("a read declares version 4.01 as well", async () => {
+    // The header governs the shape of the *response* as much as it governs how a payload is read: a
+    // service answering a 4.0 request uses the prefixed control information, while this client is typed
+    // for the short form. Declaring the version only on writes left that promise unkept on every GET.
     await TRIPPIN.people().query().execute();
 
     expect(ODATA_CLIENT.lastOperation).toBe("GET");
-    expect(ODATA_CLIENT.additionalHeaders?.["OData-Version"]).toBeUndefined();
+    expect(ODATA_CLIENT.additionalHeaders?.["OData-Version"]).toBe("4.01");
   });
 
   test("the type control info of a payload uses the short form", async () => {

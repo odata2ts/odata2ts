@@ -20,11 +20,21 @@ export class ServiceStateHelper<out ClientType extends ODataHttpClient, V extend
   };
 
   public getDefaultHeaders = () => {
-    return this.options.bigNumbersAsString ? BIG_NUMBERS_HEADERS : DEFAULT_HEADERS;
+    const base = this.options.bigNumbersAsString ? BIG_NUMBERS_HEADERS : DEFAULT_HEADERS;
+    // An explicitly configured version is announced on every request, reads included: it governs how the
+    // service answers just as much as how it reads a payload, and a response in the other version's shape
+    // is precisely what the generated response models cannot describe.
+    //
+    // Only when it was configured, though. This helper is shared with V2, where the option is never set and
+    // an `OData-Version: 4.x` header would be plainly wrong - and it cannot tell that case apart from a V4
+    // service left on the 4.0 default, since the generator writes the option only for 4.01.
+    return this.options.odataVersionV4 ? { ...base, ...getODataVersionHeaders(this.options.odataVersionV4) } : base;
   };
 
   /**
-   * Only to be added to requests carrying a body, see {@link getODataVersionHeaders}.
+   * The version declared on requests which carry a body, where it governs how the service reads the payload
+   * - see {@link getODataVersionHeaders}. Unlike {@link getDefaultHeaders} this falls back to 4.0, so a V4
+   * request with a body always states a version.
    */
   public getVersionHeaders = () => {
     return getODataVersionHeaders(this.options.odataVersionV4);
