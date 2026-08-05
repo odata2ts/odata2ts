@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 24
       - id: release
-        uses: googleapis/release-please-action@v4.0.2
+        uses: googleapis/release-please-action@v5.0.0
         with:
           config-file: release-please-config.json
           manifest-file: release-please-manifest.json
