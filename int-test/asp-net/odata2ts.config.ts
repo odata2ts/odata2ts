@@ -40,6 +40,26 @@ const config: ConfigFileOptions = {
       output: "src-generated/library",
     },
     /**
+     * The same model once more, targeting OData 4.01 instead of the default 4.0.
+     *
+     * Not distributed across the two V4 packages the way `enableNativeInOperator` is, because it cannot be:
+     * CAP does not speak 4.01, so this server is the only place the option can be held against anything.
+     * Hence additive, next to the 4.0 client rather than instead of it - which is what the version
+     * difference needs anyway, since the whole point is that the two spell the same request differently.
+     *
+     * What changes: a binding loses its own property name and shares one with a deep insert
+     * (`{"@id": key}` instead of `Nav@odata.bind`), the control information in a response drops the
+     * `odata.` prefix (`@count` rather than `@odata.count`), and requests carrying a body announce
+     * `OData-Version: 4.01`. All three are payload, so none of them is visible to a type check.
+     * See test/feature/ODataVersion401.test.ts.
+     */
+    library401: {
+      serviceName: "Library401",
+      source: "resource/library.xml",
+      output: "src-generated/library-401",
+      odataVersionV4: "4.01",
+    },
+    /**
      * The same model a second time, with renaming switched on.
      *
      * Generated separately rather than replacing the raw client, because the point is the *mapping* between

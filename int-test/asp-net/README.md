@@ -79,6 +79,25 @@ anything if a real server resolves it.
 only being type-checked. Models are therefore imported from their namespace barrel
 (`src-generated/library/library-catalog/index.js`), not from one bundled model file.
 
+### The 4.01 client
+
+`src-generated/library-401` is the model once more with `odataVersionV4: "4.01"`. Unlike
+`enableNativeInOperator`, this axis cannot be split across the two V4 packages - CAP does not speak 4.01, so
+this server is the only place it can be held against anything. It is additive rather than a replacement,
+which is what the difference needs anyway: the point is that the two versions spell the same request
+differently, and that is only visible with both clients present.
+
+Everything the option changes is payload, so a type check sees none of it. `feature/ODataVersion401.test.ts`
+asserts the binding notation on the query object itself (`Location: {"@id": …}` against
+`"Location@odata.bind": …`), because this is the one difference a server would swallow either way: ASP.NET
+accepts both, so a client emitting the 4.0 spelling while announcing 4.01 would pass every behavioural test.
+
+It also pins a limitation. odata2ts announces the version through `OData-Version`, a header on requests
+carrying a body - and a GET carries none. This server therefore answers read requests in 4.0 form, so the
+short-form control information a 4.01 client is _typed_ for (`@count`) arrives undefined while the value
+sits under `@odata.count`. The response typing of `odataVersionV4: "4.01"` is a promise this server does not
+keep on reads.
+
 ### The renamed client
 
 The model is generated a **second** time, into `src-generated/library-renamed`, with `allowRenaming` on.

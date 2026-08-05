@@ -116,7 +116,8 @@ describe("ASP.NET Library: binding existing entities", () => {
   test("the server honours the 4.01 notation as well", async () => {
     // Sent by hand: a client generated for 4.0 emits `Nav@odata.bind`. The point is the server side -
     // both notations have to move the link, otherwise a client generated with `odataVersionV4: "4.01"`
-    // would fail against it, silently.
+    // would fail against it, silently. That client now exists; what it emits, and that this server takes
+    // it, is `feature/ODataVersion401.test.ts`. This case stays because it isolates the server half.
     const response = await fetch(`${BASE_URL}/Copies`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
