@@ -1,5 +1,4 @@
 import { ManipulationSettings } from "ts-morph";
-
 import { FileFormatter } from "./FileFormatter.js";
 
 /**

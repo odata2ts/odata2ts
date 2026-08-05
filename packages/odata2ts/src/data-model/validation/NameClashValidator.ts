@@ -3,8 +3,10 @@ import { TypeModel } from "../../TypeModel.js";
 import { OperationTypes } from "../DataTypeModel.js";
 import { NameValidator, ValidationError } from "./NameValidator.js";
 
-export interface NameValidatorOptions
-  extends Pick<ConfigFileOptions, "disableAutomaticNameClashResolution" | "bundledFileGeneration"> {}
+export interface NameValidatorOptions extends Pick<
+  ConfigFileOptions,
+  "disableAutomaticNameClashResolution" | "bundledFileGeneration"
+> {}
 
 export class NameClashValidator implements NameValidator {
   private entityContainer = new Map<string, ValidationError>();

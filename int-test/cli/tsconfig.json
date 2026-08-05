@@ -4,7 +4,5 @@
     "rootDir": ".",
     "noEmit": true
   },
-  "include": [
-    "test"
-  ]
+  "include": ["test"]
 }

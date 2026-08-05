@@ -1,9 +1,10 @@
 import { ParamValueModel, ValueConverter } from "@odata2ts/converter-api";
 import { NumericEnumLike, NumericEnumMember } from "./EnumModel";
 
-export class NumericEnumConverter<EnumType extends NumericEnumLike>
-  implements ValueConverter<string, NumericEnumMember<EnumType>>
-{
+export class NumericEnumConverter<EnumType extends NumericEnumLike> implements ValueConverter<
+  string,
+  NumericEnumMember<EnumType>
+> {
   public from = "Edm.EnumType";
   public id = "NumericEnumConverter";
   public to = "enum";

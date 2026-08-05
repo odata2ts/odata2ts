@@ -5,8 +5,7 @@ import { QueryObjectModel } from "../QueryObjectModel";
  * The main ResponseDataConverter interface, which allows to convert from the OData model to the user model.
  */
 export type ResponseDataConverter<ConvertedType> =
-  | Pick<QParamModel<any, ConvertedType>, "convertFrom">
-  | Pick<QueryObjectModel<ConvertedType>, "convertFromOData">;
+  Pick<QParamModel<any, ConvertedType>, "convertFrom"> | Pick<QueryObjectModel<ConvertedType>, "convertFromOData">;
 
 /**
  * OData V2 responds to value queries with a partial entity model only consisting of the given property.

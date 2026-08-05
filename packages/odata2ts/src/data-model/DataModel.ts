@@ -1,6 +1,5 @@
 import { MappedConverterChains } from "@odata2ts/converter-runtime";
 import { ODataTypesV2, ODataTypesV4 } from "@odata2ts/odata-core";
-
 import {
   ActionImportType,
   ComplexType,
@@ -70,7 +69,7 @@ export class DataModel {
   constructor(
     namespaces: Array<NamespaceWithAlias>,
     private version: ODataVersion,
-    converters: MappedConverterChains = new Map()
+    converters: MappedConverterChains = new Map(),
   ) {
     this.converters = converters;
     this.namespace2Alias = namespaces.reduce<Record<string, string>>((col, [ns, alias]) => {

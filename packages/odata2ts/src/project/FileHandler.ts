@@ -1,7 +1,5 @@
 import { writeFile } from "fs/promises";
-
 import { SourceFile } from "ts-morph";
-
 import { ImportContainer } from "../generator/ImportContainer.js";
 import { EmitModes } from "../OptionModel.js";
 import { FileFormatter } from "./formatter/FileFormatter.js";
@@ -13,7 +11,7 @@ export class FileHandler {
     protected readonly file: SourceFile,
     protected readonly importContainer: ImportContainer,
     protected formatter: FileFormatter | undefined,
-    public readonly allowTypeChecking: boolean
+    public readonly allowTypeChecking: boolean,
   ) {}
 
   public getFullFilePath() {
