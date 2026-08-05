@@ -32,7 +32,7 @@
     "build": "yarn clean && tsc",
     "check-circular-deps": "madge ./src --extensions ts --circular --exclude \"^\\.\\./\\.\\./\"",
     "check-circular-generated": "madge ./build --extensions ts --circular",
-    "clean": "rimraf lib build",
+    "clean": "rimraf lib build coverage",
     "clean-v2": "rimraf build/v2",
     "clean-v4": "rimraf build/v4",
     "compile": "tsc -p tsconfig.compile.json",
