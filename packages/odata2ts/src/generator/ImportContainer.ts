@@ -139,8 +139,17 @@ export class ImportContainer {
   }
 
   // TODO: make sure that regular imports win over additional typeOnly imports
+  /**
+   * Adds an import for a type coming from an arbitrary module, e.g. a converter's target type.
+   *
+   * The type name may be qualified ("BigNumber.Instance"): only its root is importable, the rest
+   * belongs at the place the type is used. So `import { BigNumber } from "bignumber.js"` is registered
+   * and "BigNumber.Instance" returned - with the root replaced should it have been renamed to dodge a
+   * name clash.
+   */
   public addCustomType(moduleName: string, typeName: string, isTypeOnly: boolean = false) {
-    const importName = this.importedNameValidator.validateName(moduleName, typeName);
+    const [rootName, ...qualifiers] = typeName.split(".");
+    const importName = this.importedNameValidator.validateName(moduleName, rootName);
     const imports = isTypeOnly ? this.customTypes.typeOnly : this.customTypes.regular;
     let importList = imports.get(moduleName);
     if (!importList) {
@@ -148,8 +157,8 @@ export class ImportContainer {
       imports.set(moduleName, importList);
     }
 
-    importList.set(typeName, importName);
-    return importName;
+    importList.set(rootName, importName);
+    return [importName, ...qualifiers].join(".");
   }
 
   private pathAndFile(filePath: string, fileName: string) {
