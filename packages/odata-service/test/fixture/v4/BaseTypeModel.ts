@@ -79,11 +79,13 @@ export class QFlight extends QPlanItemBaseType<FlightModel> {
   public readonly flightNumber = new QStringPath(this.withPrefix("FlightNumber"));
 }
 
-export class PlanItemService<
-  ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, PlanItemModel, EditablePlanItemModel, QPlanItem, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class PlanItemService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
+  PlanItemModel,
+  EditablePlanItemModel,
+  QPlanItem,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QPlanItem(), options);
   }
 
@@ -100,11 +102,14 @@ export class PlanItemService<
   }
 }
 
-export class PlanItemCollectionService<
-  ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, PlanItemModel, EditablePlanItemModel, QPlanItem, PlanItemIdModel, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class PlanItemCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  PlanItemModel,
+  EditablePlanItemModel,
+  QPlanItem,
+  PlanItemIdModel,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QPlanItem(), new QPlanItemId(name), options);
   }
 
@@ -121,38 +126,48 @@ export class PlanItemCollectionService<
   }
 }
 
-export class FlightService<
-  ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, FlightModel, EditableFlightModel, QFlight, V> {
-  constructor(client: ClientType, basePath: string, name: string, options: ODataServiceOptionsInternal<V>) {
+export class FlightService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
+  FlightModel,
+  EditableFlightModel,
+  QFlight,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QFlight(), options);
   }
 }
 
-export class FlightCollectionService<
-  ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, FlightModel, EditableFlightModel, QFlight, PlanItemIdModel, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class FlightCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  FlightModel,
+  EditableFlightModel,
+  QFlight,
+  PlanItemIdModel,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QFlight(), new QPlanItemId(name), options);
   }
 }
 
-export class EventService<
-  ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, EventModel, EditableEventModel, QEvent, V> {
-  constructor(client: ClientType, basePath: string, name: string, options: ODataServiceOptionsInternal<V>) {
+export class EventService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
+  EventModel,
+  EditableEventModel,
+  QEvent,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QEvent(), options);
   }
 }
 
-export class EventCollectionService<
-  ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, EventModel, EditableEventModel, QEvent, PlanItemIdModel, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class EventCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  EventModel,
+  EditableEventModel,
+  QEvent,
+  PlanItemIdModel,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QEvent(), new QPlanItemId(name), options);
   }
 }

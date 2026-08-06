@@ -5,14 +5,13 @@ import { RequestCmd, RequestCmdOptions } from "./RequestCmd";
 import { GetToPostConverter } from "./RequestHelper";
 
 export class UrlBuilderRequestCmdV4<
-  ClientType extends ODataHttpClient,
   ResponseStructure,
   Q extends QueryObjectModel,
   Builder extends ModelQueryBuilderV4<Q> = CollectionQueryBuilderV4<Q>,
   DataStructure = undefined,
-> extends RequestCmd<ClientType, ResponseStructure, DataStructure> {
+> extends RequestCmd<ResponseStructure, DataStructure> {
   constructor(
-    protected client: ClientType,
+    protected client: ODataHttpClient,
     method: ODataHttpMethods,
     protected urlBuilder: Builder,
     protected q: Q,
@@ -38,7 +37,7 @@ export class UrlBuilderRequestCmdV4<
     }
     const builder = modFunction(this.urlBuilder.clone() as Builder, this.q);
 
-    return new UrlBuilderRequestCmdV4<ClientType, ResponseStructure, Q, Builder, DataStructure>(
+    return new UrlBuilderRequestCmdV4<ResponseStructure, Q, Builder, DataStructure>(
       this.client,
       this.method,
       builder,

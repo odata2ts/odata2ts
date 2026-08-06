@@ -10,10 +10,10 @@ describe("StreamService V4 Test", () => {
   const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
   const MIME_TYPE = "audio/mpeg";
 
-  let service: StreamServiceV4<MockClient>;
+  let service: StreamServiceV4;
 
   beforeEach(() => {
-    service = new StreamServiceV4<MockClient>(odataClient, BASE_URL, NAME);
+    service = new StreamServiceV4(odataClient, BASE_URL, NAME);
   });
 
   test("stream V4: base tests", () => {

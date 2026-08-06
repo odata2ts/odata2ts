@@ -14,12 +14,12 @@ import { QFirstBook, QGetBestsellers, qTestEntity, QTestEntityId } from "./QTest
 // @ts-ignore
 import type { EditableTestEntity, FirstBookParams, TestEntity, TestEntityId } from "./TesterModel.js";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
+export class TesterService extends ODataService {
   private _qGetBestsellers?: QGetBestsellers;
   private _qFirstBook?: QFirstBook;
 
-  public tests(): TestEntityCollectionService<ClientType>;
-  public tests(id: TestEntityId): TestEntityService<ClientType>;
+  public tests(): TestEntityCollectionService;
+  public tests(id: TestEntityId): TestEntityService;
   public tests(id?: TestEntityId | undefined) {
     const fieldName = "tests";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -36,7 +36,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qGetBestsellers.buildUrl(isUrlNotEncoded()));
 
-    return new UrlGetRequestCmd<ClientType, ODataCollectionResponseV4<TestEntity>>(client, url, {
+    return new UrlGetRequestCmd<ODataCollectionResponseV4<TestEntity>>(client, url, {
       headers: getDefaultHeaders(),
       mainResponseConverter: this._qGetBestsellers.getResponseConverter(),
     });
@@ -50,27 +50,32 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qFirstBook.buildUrl(params, isUrlNotEncoded()));
 
-    return new UrlGetRequestCmd<ClientType, ODataModelResponseV4<TestEntity>>(client, url, {
+    return new UrlGetRequestCmd<ODataModelResponseV4<TestEntity>>(client, url, {
       headers: getDefaultHeaders(),
       mainResponseConverter: this._qFirstBook.getResponseConverter(),
     });
   }
 }
 
-export class TestEntityService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, TestEntity, EditableTestEntity, QTestEntity, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class TestEntityService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
+  TestEntity,
+  EditableTestEntity,
+  QTestEntity,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTestEntity, options);
   }
 }
 
-export class TestEntityCollectionService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, TestEntity, EditableTestEntity, QTestEntity, TestEntityId, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class TestEntityCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  TestEntity,
+  EditableTestEntity,
+  QTestEntity,
+  TestEntityId,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTestEntity, new QTestEntityId(name), options);
   }
 }

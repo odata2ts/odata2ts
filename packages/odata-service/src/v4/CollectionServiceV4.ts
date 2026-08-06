@@ -31,16 +31,15 @@ class CollectionRequestConverter<T> {
 }
 
 export class CollectionServiceV4<
-  in out ClientType extends ODataHttpClient,
   T,
   Q extends QueryObjectModel,
   PrimitiveT = PrimitiveExtractor<T>,
   V extends ODataVersionV4 = "4.0",
 > {
-  protected readonly __base: ServiceStateHelperV4<ClientType, Q, V>;
+  protected readonly __base: ServiceStateHelperV4<Q, V>;
 
   public constructor(
-    client: ClientType,
+    client: ODataHttpClient,
     basePath: string,
     name: string,
     qModel: Q,
@@ -75,7 +74,6 @@ export class CollectionServiceV4<
     const { client, getDefaultHeaders, getVersionHeaders, qModel, createModelQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV4<
-      ClientType,
       CollectionModificationResponseV4<Response, PrimitiveT, V>,
       Q,
       ModelQueryBuilderV4<Q>,
@@ -112,7 +110,6 @@ export class CollectionServiceV4<
     const { client, getDefaultHeaders, getVersionHeaders, qModel, createModelQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV4<
-      ClientType,
       CollectionModificationResponseV4<Response, PrimitiveT, V>,
       Q,
       ModelQueryBuilderV4<Q>,
@@ -136,7 +133,7 @@ export class CollectionServiceV4<
   public delete() {
     const { client, path } = this.__base;
 
-    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path, undefined);
+    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined);
   }
 
   /**
@@ -148,7 +145,7 @@ export class CollectionServiceV4<
   public query<ReturnType = T>(queryFn?: (builder: CollectionQueryBuilderV4<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
-    return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseFor<V, ReturnType>, Q>(
+    return new UrlBuilderRequestCmdV4<ODataCollectionResponseFor<V, ReturnType>, Q>(
       client,
       ODataHttpMethods.Get,
       createQueryBuilder(queryFn),

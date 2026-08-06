@@ -1,4 +1,3 @@
-import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { ODataVersionV4 } from "@odata2ts/odata-core";
 import { QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { EntityTypeServiceV4 } from "./EntityTypeServiceV4";
@@ -16,13 +15,12 @@ const VALUE_SEGMENT = "$value";
  * properties, which are read and written as JSON; only its content is separate.
  */
 export class MediaEntityServiceV4<
-  in out ClientType extends ODataHttpClient,
   T,
   EditableT,
   Q extends QueryObjectModel,
   V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, T, EditableT, Q, V> {
-  private _content?: StreamServiceV4<ClientType, V>;
+> extends EntityTypeServiceV4<T, EditableT, Q, V> {
+  private _content?: StreamServiceV4<V>;
 
   /**
    * The entity's content as its own service, bound to the `$value` URL.
@@ -35,17 +33,17 @@ export class MediaEntityServiceV4<
    *
    * @param subtypeOptions opt the cast path segment back in
    */
-  public content(subtypeOptions?: SubtypeOptions): StreamServiceV4<ClientType, V> {
+  public content(subtypeOptions?: SubtypeOptions): StreamServiceV4<V> {
     const { client, basePath, path, options } = this.__base;
     const { dontUseCastPathSegment } = this.__base.evaluateSubtypeOptions(subtypeOptions);
     const actualPath = dontUseCastPathSegment ? basePath : path;
 
     // only the default is worth caching; anything else is a one-off request shape
     if (subtypeOptions) {
-      return new StreamServiceV4<ClientType, V>(client, actualPath, VALUE_SEGMENT, options);
+      return new StreamServiceV4<V>(client, actualPath, VALUE_SEGMENT, options);
     }
     if (!this._content) {
-      this._content = new StreamServiceV4<ClientType, V>(client, actualPath, VALUE_SEGMENT, options);
+      this._content = new StreamServiceV4<V>(client, actualPath, VALUE_SEGMENT, options);
     }
 
     return this._content;

@@ -1,13 +1,12 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { RequestCmd, RequestCmdOptions } from "./RequestCmd";
 
-export class UrlRequestCmd<
-  ClientType extends ODataHttpClient,
+export class UrlRequestCmd<ResponseStructure, DataStructure = undefined> extends RequestCmd<
   ResponseStructure,
-  DataStructure = undefined,
-> extends RequestCmd<ClientType, ResponseStructure, DataStructure> {
+  DataStructure
+> {
   constructor(
-    client: ClientType,
+    client: ODataHttpClient,
     method: ODataHttpMethods,
     protected url: string,
     data?: DataStructure,
@@ -30,12 +29,6 @@ export class UrlRequestCmd<
       throw new Error("withUrl requires a new URL!");
     }
 
-    return new UrlRequestCmd<ClientType, ResponseStructure, DataStructure>(
-      this.client,
-      this.method,
-      url,
-      this.data,
-      this.options,
-    );
+    return new UrlRequestCmd<ResponseStructure, DataStructure>(this.client, this.method, url, this.data, this.options);
   }
 }

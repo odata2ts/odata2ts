@@ -17,9 +17,9 @@ import type { Book, BookId, EditableBook } from "./TesterModel.js";
 // @ts-ignore
 import { Choice } from "./TesterModel.js";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
-  public books(): BookCollectionService<ClientType>;
-  public books(id: BookId): BookService<ClientType>;
+export class TesterService extends ODataService {
+  public books(): BookCollectionService;
+  public books(id: BookId): BookService;
   public books(id?: BookId | undefined) {
     const fieldName = "books";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -29,15 +29,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 }
 
-export class BookService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
-  ClientType,
-  Book,
-  EditableBook,
-  QBook
-> {
-  private _altChoices?: CollectionServiceV2<ClientType, EnumCollection<typeof Choice>, QEnumCollection<typeof Choice>>;
+export class BookService extends EntityTypeServiceV2<Book, EditableBook, QBook> {
+  private _altChoices?: CollectionServiceV2<EnumCollection<typeof Choice>, QEnumCollection<typeof Choice>>;
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qBook, options);
   }
 
@@ -51,14 +46,8 @@ export class BookService<in out ClientType extends ODataHttpClient> extends Enti
   }
 }
 
-export class BookCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV2<
-  ClientType,
-  Book,
-  EditableBook,
-  QBook,
-  BookId
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+export class BookCollectionService extends EntitySetServiceV2<Book, EditableBook, QBook, BookId> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qBook, new QBookId(name), options);
   }
 }

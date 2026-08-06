@@ -22,12 +22,12 @@ class ValueRequestConverter<T> {
   }
 }
 
-export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T, V extends ODataVersionV4 = "4.0"> {
-  protected readonly __base: ServiceStateHelper<ClientType, V>;
+export class PrimitiveTypeServiceV4<T, V extends ODataVersionV4 = "4.0"> {
+  protected readonly __base: ServiceStateHelper<V>;
   protected readonly __converter: ValueConverter<any, T>;
 
   public constructor(
-    client: ClientType,
+    client: ODataHttpClient,
     basePath: string,
     name: string,
     converter: ValueConverter<any, any> = getIdentityConverter(),
@@ -51,16 +51,10 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T, V
     const { client, path, getDefaultHeaders } = this.__base;
     const converter = this.__converter;
 
-    return new UrlRequestCmd<ClientType, ODataValueResponseFor<V, T> | undefined>(
-      client,
-      ODataHttpMethods.Get,
-      path,
-      undefined,
-      {
-        headers: getDefaultHeaders(),
-        mainResponseConverter: new ValueResponseConverterV4(converter),
-      },
-    );
+    return new UrlRequestCmd<ODataValueResponseFor<V, T> | undefined>(client, ODataHttpMethods.Get, path, undefined, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: new ValueResponseConverterV4(converter),
+    });
   }
 
   /**
@@ -81,7 +75,7 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T, V
     const { client, path, getDefaultHeaders, getVersionHeaders } = this.__base;
     const converter = this.__converter;
 
-    return new UrlRequestCmd<ClientType, ValueModificationResponseV4<Response, T, V>, T>(
+    return new UrlRequestCmd<ValueModificationResponseV4<Response, T, V>, T>(
       client,
       ODataHttpMethods.Put,
       path,
@@ -105,6 +99,6 @@ export class PrimitiveTypeServiceV4<out ClientType extends ODataHttpClient, T, V
    */
   public deleteValue() {
     const { client, path } = this.__base;
-    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path);
+    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path);
   }
 }

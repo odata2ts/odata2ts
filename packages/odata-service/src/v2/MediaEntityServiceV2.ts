@@ -1,4 +1,3 @@
-import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { EntityTypeServiceV2 } from "./EntityTypeServiceV2";
 import { StreamServiceV2 } from "./StreamServiceV2";
@@ -19,21 +18,20 @@ const VALUE_SEGMENT = "$value";
  * Everything an ordinary entity service does stays available - the media link entry still has regular
  * properties, which are read and written as JSON; only its content is separate.
  */
-export class MediaEntityServiceV2<
-  in out ClientType extends ODataHttpClient,
+export class MediaEntityServiceV2<T, EditableT, Q extends QueryObjectModel> extends EntityTypeServiceV2<
   T,
   EditableT,
-  Q extends QueryObjectModel,
-> extends EntityTypeServiceV2<ClientType, T, EditableT, Q> {
-  private _content?: StreamServiceV2<ClientType>;
+  Q
+> {
+  private _content?: StreamServiceV2;
 
   /**
    * The entity's content as its own service, bound to the `$value` URL.
    */
-  public content(): StreamServiceV2<ClientType> {
+  public content(): StreamServiceV2 {
     if (!this._content) {
       const { client, path, options } = this.__base;
-      this._content = new StreamServiceV2<ClientType>(client, path, VALUE_SEGMENT, options);
+      this._content = new StreamServiceV2(client, path, VALUE_SEGMENT, options);
     }
 
     return this._content;

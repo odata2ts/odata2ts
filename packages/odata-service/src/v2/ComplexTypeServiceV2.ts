@@ -7,10 +7,16 @@ import { UrlBuilderRequestCmdV2, UrlRequestCmd } from "../request";
 import { MERGE_HEADERS } from "../RequestHeaders.js";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
-export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, EditableT, Q extends QueryObjectModel> {
-  protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
+export class ComplexTypeServiceV2<T, EditableT, Q extends QueryObjectModel> {
+  protected readonly __base: ServiceStateHelperV2<Q>;
 
-  protected constructor(client: ClientType, basePath: string, name: string, qModel: Q, options?: ODataServiceOptions) {
+  protected constructor(
+    client: ODataHttpClient,
+    basePath: string,
+    name: string,
+    qModel: Q,
+    options?: ODataServiceOptions,
+  ) {
     this.__base = new ServiceStateHelperV2(client, basePath, name, qModel, options);
   }
 
@@ -22,7 +28,7 @@ export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, 
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
     const headers = { ...getDefaultHeaders(), ...MERGE_HEADERS };
 
-    return new UrlBuilderRequestCmdV2<ClientType, undefined, Q, ModelQueryBuilderV2<Q>, Partial<EditableT>>(
+    return new UrlBuilderRequestCmdV2<undefined, Q, ModelQueryBuilderV2<Q>, Partial<EditableT>>(
       client,
       ODataHttpMethods.Post,
       createModelQueryBuilder(queryFn),
@@ -38,7 +44,7 @@ export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, 
   public update(model: EditableT, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
-    return new UrlBuilderRequestCmdV2<ClientType, undefined, Q, ModelQueryBuilderV2<Q>, EditableT>(
+    return new UrlBuilderRequestCmdV2<undefined, Q, ModelQueryBuilderV2<Q>, EditableT>(
       client,
       ODataHttpMethods.Put,
       createModelQueryBuilder(queryFn),
@@ -54,13 +60,13 @@ export class ComplexTypeServiceV2<in out ClientType extends ODataHttpClient, T, 
   public delete() {
     const { client, path } = this.__base;
 
-    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path, undefined);
+    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined);
   }
 
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
-    return new UrlBuilderRequestCmdV2<ClientType, ODataComplexModelResponseV2<ReturnType>, Q, ModelQueryBuilderV2<Q>>(
+    return new UrlBuilderRequestCmdV2<ODataComplexModelResponseV2<ReturnType>, Q, ModelQueryBuilderV2<Q>>(
       client,
       ODataHttpMethods.Get,
       createModelQueryBuilder(queryFn),

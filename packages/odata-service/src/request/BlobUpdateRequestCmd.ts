@@ -1,4 +1,4 @@
-import { ODataHttpClient, ODataHttpClientConfig, ODataHttpMethods } from "@odata2ts/http-client-api";
+import { ODataHttpClient, ODataHttpMethods, ODataRequestConfig } from "@odata2ts/http-client-api";
 import { RequestCmd, RequestCmdOptions } from "./RequestCmd";
 import { RequestInfo } from "./RequestInfo";
 
@@ -12,13 +12,9 @@ import { RequestInfo } from "./RequestInfo";
  * The response is either empty (204) or the stored content, depending on the server, hence
  * `Blob | undefined`.
  */
-export class BlobUpdateRequestCmd<ClientType extends ODataHttpClient> extends RequestCmd<
-  ClientType,
-  Blob | undefined,
-  Blob
-> {
+export class BlobUpdateRequestCmd extends RequestCmd<Blob | undefined, Blob> {
   constructor(
-    client: ClientType,
+    client: ODataHttpClient,
     protected url: string,
     data: Blob,
     protected mimeType: string,
@@ -31,7 +27,7 @@ export class BlobUpdateRequestCmd<ClientType extends ODataHttpClient> extends Re
     return this.url;
   }
 
-  protected sendRequest(request: RequestInfo<any>, requestConfig?: ODataHttpClientConfig<ClientType>) {
+  protected sendRequest(request: RequestInfo<any>, requestConfig?: ODataRequestConfig) {
     return this.client.updateBlob(request.url, request.data, this.mimeType, requestConfig, request.headers);
   }
 }

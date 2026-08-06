@@ -20,10 +20,15 @@ const DEFAULT_MIME_TYPE = "application/octet-stream";
  * declare JSON. What the URL looks like is the versions' business, not this class's: V4 knows a stream
  * property as well as a media entity's `$value`, V2 only the latter.
  */
-export abstract class StreamServiceBase<out ClientType extends ODataHttpClient, V extends ODataVersionV4 = "4.0"> {
-  protected readonly __base: ServiceStateHelper<ClientType, V>;
+export abstract class StreamServiceBase<V extends ODataVersionV4 = "4.0"> {
+  protected readonly __base: ServiceStateHelper<V>;
 
-  public constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  public constructor(
+    client: ODataHttpClient,
+    basePath: string,
+    name: string,
+    options?: ODataServiceOptionsInternal<V>,
+  ) {
     this.__base = new ServiceStateHelper(client, basePath, name, options);
   }
 
@@ -40,7 +45,7 @@ export abstract class StreamServiceBase<out ClientType extends ODataHttpClient, 
   public getBlob() {
     const { client, path } = this.__base;
 
-    return new BlobGetRequestCmd<ClientType>(client, path);
+    return new BlobGetRequestCmd(client, path);
   }
 
   /**
@@ -56,7 +61,7 @@ export abstract class StreamServiceBase<out ClientType extends ODataHttpClient, 
   public updateBlob(data: Blob, mimeType?: string) {
     const { client, path } = this.__base;
 
-    return new BlobUpdateRequestCmd<ClientType>(client, path, data, mimeType || data.type || DEFAULT_MIME_TYPE);
+    return new BlobUpdateRequestCmd(client, path, data, mimeType || data.type || DEFAULT_MIME_TYPE);
   }
 
   /**
@@ -70,7 +75,7 @@ export abstract class StreamServiceBase<out ClientType extends ODataHttpClient, 
   public getStream() {
     const { client, path } = this.__base;
 
-    return new StreamGetRequestCmd<ClientType>(client, path);
+    return new StreamGetRequestCmd(client, path);
   }
 
   /**
@@ -88,7 +93,7 @@ export abstract class StreamServiceBase<out ClientType extends ODataHttpClient, 
   public updateStream(data: ReadableStream, mimeType?: string) {
     const { client, path } = this.__base;
 
-    return new StreamUpdateRequestCmd<ClientType>(client, path, data, mimeType || DEFAULT_MIME_TYPE);
+    return new StreamUpdateRequestCmd(client, path, data, mimeType || DEFAULT_MIME_TYPE);
   }
 
   /**
@@ -100,6 +105,6 @@ export abstract class StreamServiceBase<out ClientType extends ODataHttpClient, 
   public deleteBlob() {
     const { client, path } = this.__base;
 
-    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path);
+    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path);
   }
 }

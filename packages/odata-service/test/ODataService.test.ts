@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { ODataService } from "../src";
 import { MockClient } from "./mock/MockClient";
 
-class TestODataService extends ODataService<MockClient> {
+class TestODataService extends ODataService {
   public exposeAddFullPath(path?: string) {
     return this.__base.addFullPath(path);
   }

@@ -14,13 +14,13 @@ import { qBook, QBookId, QGetBest, QGetBestReview, QGetTop10, qReview } from "./
 // @ts-ignore
 import type { Book, BookId, EditableBook, EditableReview, Review } from "./TesterModel.js";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
+export class TesterService extends ODataService {
   private _qGetBest?: QGetBest;
   private _qGetTop10?: QGetTop10;
   private _qGetBestReview?: QGetBestReview;
 
-  public books(): BookCollectionService<ClientType>;
-  public books(id: BookId): BookService<ClientType>;
+  public books(): BookCollectionService;
+  public books(id: BookId): BookService;
   public books(id?: BookId | undefined) {
     const fieldName = "Books";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -37,10 +37,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded, options } = this.__base;
     const url = addFullPath(this._qGetBest.buildUrl(isUrlNotEncoded()));
 
-    return new ComposableUrlRequestCmd<ClientType, BookService<ClientType>, ODataModelResponseV4<Book>>(
+    return new ComposableUrlRequestCmd<BookService, ODataModelResponseV4<Book>>(
       client,
       url,
-      (finalUrl: string) => new BookService<ClientType>(client, finalUrl, "", options),
+      (finalUrl: string) => new BookService(client, finalUrl, "", options),
       { headers: getDefaultHeaders(), mainResponseConverter: this._qGetBest.getResponseConverter() },
     );
   }
@@ -53,10 +53,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded, options } = this.__base;
     const url = addFullPath(this._qGetTop10.buildUrl(isUrlNotEncoded()));
 
-    return new ComposableUrlRequestCmd<ClientType, BookCollectionService<ClientType>, ODataCollectionResponseV4<Book>>(
+    return new ComposableUrlRequestCmd<BookCollectionService, ODataCollectionResponseV4<Book>>(
       client,
       url,
-      (finalUrl: string) => new BookCollectionService<ClientType>(client, finalUrl, "", options),
+      (finalUrl: string) => new BookCollectionService(client, finalUrl, "", options),
       { headers: getDefaultHeaders(), mainResponseConverter: this._qGetTop10.getResponseConverter() },
     );
   }
@@ -69,26 +69,23 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded, options } = this.__base;
     const url = addFullPath(this._qGetBestReview.buildUrl(isUrlNotEncoded()));
 
-    return new ComposableUrlRequestCmd<ClientType, ReviewService<ClientType>, ODataModelResponseV4<Review>>(
+    return new ComposableUrlRequestCmd<ReviewService, ODataModelResponseV4<Review>>(
       client,
       url,
-      (finalUrl: string) => new ReviewService<ClientType>(client, finalUrl, "", options),
+      (finalUrl: string) => new ReviewService(client, finalUrl, "", options),
       { headers: getDefaultHeaders(), mainResponseConverter: this._qGetBestReview.getResponseConverter() },
     );
   }
 }
 
-export class BookService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, Book, EditableBook, QBook, V> {
-  private _review?: ReviewService<ClientType, V>;
+export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<Book, EditableBook, QBook, V> {
+  private _review?: ReviewService<V>;
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, options);
   }
 
-  public review(): ReviewService<ClientType, V> {
+  public review(): ReviewService<V> {
     if (!this._review) {
       const { client, path, options } = this.__base;
       this._review = new ReviewService(client, path, "review", options);
@@ -98,20 +95,25 @@ export class BookService<
   }
 }
 
-export class BookCollectionService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, Book, EditableBook, QBook, BookId, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class BookCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  Book,
+  EditableBook,
+  QBook,
+  BookId,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, new QBookId(name), options);
   }
 }
 
-export class ReviewService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, Review, EditableReview, QReview, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class ReviewService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
+  Review,
+  EditableReview,
+  QReview,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qReview, options);
   }
 }

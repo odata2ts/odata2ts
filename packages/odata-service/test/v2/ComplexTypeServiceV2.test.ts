@@ -12,7 +12,7 @@ describe("ComplexTypeService V2 Test", () => {
   const NAME = "test('tester')";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
 
-  let testService: FakedComplexServiceV2<MockClient>;
+  let testService: FakedComplexServiceV2;
 
   beforeEach(() => {
     testService = new FakedComplexServiceV2(odataClient, BASE_URL, NAME);

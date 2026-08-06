@@ -31,17 +31,13 @@ describe("CollectionService V2 Tests", () => {
     basePath: string,
     name: string,
     options?: ODataServiceOptions,
-  ): CollectionServiceV2<MockClient, StringCollection, QStringV2Collection> => {
+  ): CollectionServiceV2<StringCollection, QStringV2Collection> => {
     return new CollectionServiceV2(odataClient, basePath, name, new QStringV2Collection(), options);
   };
   const enumConstructor = (
     basePath: string,
     name: string,
-  ): CollectionServiceV2<
-    MockClient,
-    EnumCollection<NumericTestEnum>,
-    QNumericEnumCollection<typeof NumericTestEnum>
-  > => {
+  ): CollectionServiceV2<EnumCollection<NumericTestEnum>, QNumericEnumCollection<typeof NumericTestEnum>> => {
     return new CollectionServiceV2(odataClient, basePath, name, new QNumericEnumCollection(NumericTestEnum));
   };
 

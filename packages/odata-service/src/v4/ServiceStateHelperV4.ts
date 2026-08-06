@@ -11,12 +11,11 @@ export interface SubtypeOptions {
 }
 
 export class ServiceStateHelperV4<
-  in out ClientType extends ODataHttpClient,
   Q extends QueryObjectModel,
   V extends ODataVersionV4 = "4.0",
-> extends ServiceStateHelper<ClientType, V> {
+> extends ServiceStateHelper<V> {
   public constructor(
-    client: ClientType,
+    client: ODataHttpClient,
     basePath: string,
     name: string,
     public qModel: Q,

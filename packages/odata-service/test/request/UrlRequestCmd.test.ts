@@ -31,7 +31,7 @@ describe("UrlRequestCmd tests", () => {
   });
 
   test("base props", () => {
-    const candidate = new UrlRequestCmd<MockClient, void>(client, ODataHttpMethods.Get, DEFAULT_URL);
+    const candidate = new UrlRequestCmd<void>(client, ODataHttpMethods.Get, DEFAULT_URL);
 
     expect(candidate.getUrl()).toBe(DEFAULT_URL);
     expect(candidate.getInfo()).toMatchObject({
@@ -45,7 +45,7 @@ describe("UrlRequestCmd tests", () => {
   });
 
   test("max props", () => {
-    const candidate = new UrlRequestCmd<MockClient, ODataModelResponseV4<PersonModel>, EditablePersonModel>(
+    const candidate = new UrlRequestCmd<ODataModelResponseV4<PersonModel>, EditablePersonModel>(
       client,
       ODataHttpMethods.Get,
       DEFAULT_URL,
@@ -68,7 +68,7 @@ describe("UrlRequestCmd tests", () => {
 
   test("with new url", () => {
     const newUrl = "/foo/bar/baz";
-    const candidate = new UrlRequestCmd<MockClient, ODataModelResponseV4<PersonModel>, EditablePersonModel>(
+    const candidate = new UrlRequestCmd<ODataModelResponseV4<PersonModel>, EditablePersonModel>(
       client,
       ODataHttpMethods.Get,
       DEFAULT_URL,
@@ -88,14 +88,14 @@ describe("UrlRequestCmd tests", () => {
   });
 
   test("with new url: guard against empty url", () => {
-    const candidate = new UrlRequestCmd<MockClient, void>(client, ODataHttpMethods.Get, DEFAULT_URL);
+    const candidate = new UrlRequestCmd<void>(client, ODataHttpMethods.Get, DEFAULT_URL);
 
     expect(() => candidate.withUrl("")).toThrow("withUrl requires a new URL!");
     expect(() => candidate.withUrl("   ")).toThrow("withUrl requires a new URL!");
   });
 
   test("execute", async () => {
-    const candidate = new UrlRequestCmd<MockClient, void>(client, ODataHttpMethods.Get, DEFAULT_URL);
+    const candidate = new UrlRequestCmd<void>(client, ODataHttpMethods.Get, DEFAULT_URL);
 
     const result = await candidate.execute();
 
@@ -109,7 +109,7 @@ describe("UrlRequestCmd tests", () => {
   });
 
   test("execute: with headers & request config", async () => {
-    const candidate = new UrlRequestCmd<MockClient, void>(client, ODataHttpMethods.Put, DEFAULT_URL, undefined, {
+    const candidate = new UrlRequestCmd<void>(client, ODataHttpMethods.Put, DEFAULT_URL, undefined, {
       headers: DEFAULT_HEADERS,
     });
 
@@ -123,7 +123,7 @@ describe("UrlRequestCmd tests", () => {
   });
 
   test("execute: with data", async () => {
-    const candidate = new UrlRequestCmd<MockClient, void, EditablePersonModel>(
+    const candidate = new UrlRequestCmd<void, EditablePersonModel>(
       client,
       ODataHttpMethods.Post,
       DEFAULT_URL,
@@ -139,7 +139,7 @@ describe("UrlRequestCmd tests", () => {
   });
 
   test("execute: with data & main converter", async () => {
-    const candidate = new UrlRequestCmd<MockClient, void, EditablePersonModel>(
+    const candidate = new UrlRequestCmd<void, EditablePersonModel>(
       client,
       ODataHttpMethods.Delete,
       DEFAULT_URL,
@@ -160,7 +160,7 @@ describe("UrlRequestCmd tests", () => {
   });
 
   test("execute: with data & prepended converter", async () => {
-    const candidate = new UrlRequestCmd<MockClient, void, EditablePersonModel>(
+    const candidate = new UrlRequestCmd<void, EditablePersonModel>(
       client,
       ODataHttpMethods.Post,
       DEFAULT_URL,
@@ -181,7 +181,7 @@ describe("UrlRequestCmd tests", () => {
   });
 
   test("execute: with data & appended converter", async () => {
-    const candidate = new UrlRequestCmd<MockClient, void, EditablePersonModel>(
+    const candidate = new UrlRequestCmd<void, EditablePersonModel>(
       client,
       ODataHttpMethods.Get,
       DEFAULT_URL,
@@ -196,11 +196,7 @@ describe("UrlRequestCmd tests", () => {
   });
 
   test("execute: with response", async () => {
-    const candidate = new UrlRequestCmd<MockClient, ODataModelResponseV4<PersonModel>>(
-      client,
-      ODataHttpMethods.Patch,
-      DEFAULT_URL,
-    );
+    const candidate = new UrlRequestCmd<ODataModelResponseV4<PersonModel>>(client, ODataHttpMethods.Patch, DEFAULT_URL);
 
     // we respond with the converted model
     client.responseData = DEFAULT_USER_DATA;
@@ -213,7 +209,7 @@ describe("UrlRequestCmd tests", () => {
   });
 
   test("execute: with response & converter", async () => {
-    const candidate = new UrlRequestCmd<MockClient, ODataModelResponseV4<PersonModel>>(
+    const candidate = new UrlRequestCmd<ODataModelResponseV4<PersonModel>>(
       client,
       ODataHttpMethods.Post,
       DEFAULT_URL,
@@ -235,7 +231,7 @@ describe("UrlRequestCmd tests", () => {
   });
 
   test("execute: with response & prepended converter", async () => {
-    const candidate = new UrlRequestCmd<MockClient, ODataModelResponseV4<PersonModel>>(
+    const candidate = new UrlRequestCmd<ODataModelResponseV4<PersonModel>>(
       client,
       ODataHttpMethods.Post,
       DEFAULT_URL,
@@ -257,7 +253,7 @@ describe("UrlRequestCmd tests", () => {
   });
 
   test("execute: with response & appended converter", async () => {
-    const candidate = new UrlRequestCmd<MockClient, ODataModelResponseV4<PersonModel>>(
+    const candidate = new UrlRequestCmd<ODataModelResponseV4<PersonModel>>(
       client,
       ODataHttpMethods.Post,
       DEFAULT_URL,
@@ -274,7 +270,7 @@ describe("UrlRequestCmd tests", () => {
   });
 
   test("execute: combined features", async () => {
-    const candidate = new UrlRequestCmd<MockClient, ODataCollectionResponseV4<PersonModel>, EditablePersonModel>(
+    const candidate = new UrlRequestCmd<ODataCollectionResponseV4<PersonModel>, EditablePersonModel>(
       client,
       ODataHttpMethods.Post,
       DEFAULT_URL,
@@ -295,7 +291,6 @@ describe("UrlRequestCmd tests", () => {
 
     expectTypeOf(candidate).toEqualTypeOf<
       RequestCmd<
-        MockClient,
         ODataCollectionResponseV4<PersonModel>,
         EditablePersonModel,
         { x: ODataCollectionResponseV4<PersonModel> }

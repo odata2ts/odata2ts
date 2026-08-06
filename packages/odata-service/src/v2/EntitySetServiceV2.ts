@@ -11,18 +11,12 @@ import { ODataServiceOptions } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV2 } from "../request";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
-export abstract class EntitySetServiceV2<
-  in out ClientType extends ODataHttpClient,
-  T,
-  EditableT,
-  Q extends QueryObjectModel,
-  EIdType,
-> {
-  protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
+export abstract class EntitySetServiceV2<T, EditableT, Q extends QueryObjectModel, EIdType> {
+  protected readonly __base: ServiceStateHelperV2<Q>;
   protected readonly __idFunction: QId<EIdType>;
 
   protected constructor(
-    client: ClientType,
+    client: ODataHttpClient,
     basePath: string,
     name: string,
     qModel: Q,
@@ -84,7 +78,7 @@ export abstract class EntitySetServiceV2<
   public create(model: EditableT, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
-    return new UrlBuilderRequestCmdV2<ClientType, ODataEntityModelResponseV2<T>, Q, ModelQueryBuilderV2<Q>, EditableT>(
+    return new UrlBuilderRequestCmdV2<ODataEntityModelResponseV2<T>, Q, ModelQueryBuilderV2<Q>, EditableT>(
       client,
       ODataHttpMethods.Post,
       createModelQueryBuilder(queryFn),
@@ -108,7 +102,7 @@ export abstract class EntitySetServiceV2<
   ) {
     const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
-    return new UrlBuilderRequestCmdV2<ClientType, ODataCollectionResponseV2<ReturnType>, Q>(
+    return new UrlBuilderRequestCmdV2<ODataCollectionResponseV2<ReturnType>, Q>(
       client,
       ODataHttpMethods.Get,
       createQueryBuilder(queryFn),

@@ -1,4 +1,4 @@
-import { ODataHttpClient, ODataHttpClientConfig, ODataHttpMethods } from "@odata2ts/http-client-api";
+import { ODataHttpClient, ODataHttpMethods, ODataRequestConfig } from "@odata2ts/http-client-api";
 import { RequestCmd, RequestCmdOptions } from "./RequestCmd";
 import { RequestInfo } from "./RequestInfo";
 
@@ -12,12 +12,9 @@ import { RequestInfo } from "./RequestInfo";
  * A stream that exists but carries no content answers 204 - hence `ReadableStream | undefined`.
  * Response converters are not involved: binary data is handed over as it came.
  */
-export class StreamGetRequestCmd<ClientType extends ODataHttpClient> extends RequestCmd<
-  ClientType,
-  ReadableStream | undefined
-> {
+export class StreamGetRequestCmd extends RequestCmd<ReadableStream | undefined> {
   constructor(
-    client: ClientType,
+    client: ODataHttpClient,
     protected url: string,
     options: RequestCmdOptions<ReadableStream | undefined, undefined> = {},
   ) {
@@ -28,7 +25,7 @@ export class StreamGetRequestCmd<ClientType extends ODataHttpClient> extends Req
     return this.url;
   }
 
-  protected sendRequest(request: RequestInfo<any>, requestConfig?: ODataHttpClientConfig<ClientType>) {
+  protected sendRequest(request: RequestInfo<any>, requestConfig?: ODataRequestConfig) {
     return this.client.getStream(request.url, requestConfig, request.headers);
   }
 }

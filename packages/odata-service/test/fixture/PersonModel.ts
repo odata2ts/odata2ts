@@ -46,8 +46,8 @@ export interface GetSomethingFunctionParams {
   testTime: string;
 }
 
-export type PersonModelServiceVersion = PMServiceV2<MockClient> | PMServiceV4<MockClient>;
-export type PersonCollectionServiceVersion = PMCServiceV2<MockClient> | PMCServiceV4<MockClient>;
+export type PersonModelServiceVersion = PMServiceV2 | PMServiceV4;
+export type PersonCollectionServiceVersion = PMCServiceV2 | PMCServiceV4;
 
 export type StringCollectionServiceConstructor = (
   basePath: string,
@@ -55,10 +55,9 @@ export type StringCollectionServiceConstructor = (
   options?: ODataServiceOptions,
 ) => StringCollectionService;
 export type StringCollectionService =
-  | CollectionServiceV4<MockClient, StringCollection, QStringCollection>
-  | CollectionServiceV2<MockClient, StringCollection, QStringV2Collection>;
+  CollectionServiceV4<StringCollection, QStringCollection> | CollectionServiceV2<StringCollection, QStringV2Collection>;
 
 export type EnumCollectionServiceConstructor = (basePath: string, name: string) => EnumCollectionService;
 export type EnumCollectionService =
-  | CollectionServiceV4<MockClient, EnumCollection<StringTestEnum>, QEnumCollection<any>>
-  | CollectionServiceV2<MockClient, NumericEnumCollection<NumericTestEnum>, QNumericEnumCollection<any>>;
+  | CollectionServiceV4<EnumCollection<StringTestEnum>, QEnumCollection<any>>
+  | CollectionServiceV2<NumericEnumCollection<NumericTestEnum>, QNumericEnumCollection<any>>;

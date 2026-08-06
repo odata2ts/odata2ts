@@ -4,12 +4,9 @@ import { QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptions } from "../ODataServiceOptions";
 import { ServiceStateHelper } from "../ServiceStateHelper";
 
-export class ServiceStateHelperV2<
-  in out ClientType extends ODataHttpClient,
-  Q extends QueryObjectModel,
-> extends ServiceStateHelper<ClientType> {
+export class ServiceStateHelperV2<Q extends QueryObjectModel> extends ServiceStateHelper {
   public constructor(
-    client: ClientType,
+    client: ODataHttpClient,
     basePath: string,
     name: string,
     public qModel: Q,

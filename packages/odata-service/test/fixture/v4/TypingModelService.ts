@@ -48,20 +48,25 @@ export class QTestIdFunction extends QId<TestModelId> {
   }
 }
 
-export class TestService<
-  ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, TestModel, EditableTestModel, QTest, V> {
-  constructor(client: ClientType, basePath: string, name: string, options: ODataServiceOptionsInternal<V>) {
+export class TestService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
+  TestModel,
+  EditableTestModel,
+  QTest,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTest, options);
   }
 }
 
-export class TestCollectionService<
-  ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, TestModel, EditableTestModel, QTest, TestModelId, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class TestCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  TestModel,
+  EditableTestModel,
+  QTest,
+  TestModelId,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTest, new QTestIdFunction(name), options);
   }
 }

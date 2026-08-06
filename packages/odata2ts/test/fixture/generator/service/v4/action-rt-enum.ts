@@ -22,9 +22,9 @@ import type {
   // @ts-ignore
 } from "./TesterModel.js";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
-  public books(): BookCollectionService<ClientType>;
-  public books(id: BookId): BookService<ClientType>;
+export class TesterService extends ODataService {
+  public books(): BookCollectionService;
+  public books(id: BookId): BookService;
   public books(id?: BookId | undefined) {
     const fieldName = "books";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -34,14 +34,11 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 }
 
-export class BookService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, Book, EditableBook, QBook, V> {
+export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<Book, EditableBook, QBook, V> {
   private _bookQLike?: Book_QLike;
   private _bookQRate?: Book_QRate;
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, options);
   }
 
@@ -53,7 +50,7 @@ export class BookService<
     const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._bookQLike.buildUrl());
 
-    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Post, url, undefined, {
+    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Post, url, undefined, {
       headers: getDefaultHeaders(),
     });
   }
@@ -66,7 +63,7 @@ export class BookService<
     const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._bookQRate.buildUrl());
 
-    return new UrlRequestCmd<ClientType, ODataModelResponseV4<Rating>, Book_RateParams>(
+    return new UrlRequestCmd<ODataModelResponseV4<Rating>, Book_RateParams>(
       client,
       ODataHttpMethods.Post,
       url,
@@ -80,13 +77,16 @@ export class BookService<
   }
 }
 
-export class BookCollectionService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, Book, EditableBook, QBook, BookId, V> {
+export class BookCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  Book,
+  EditableBook,
+  QBook,
+  BookId,
+  V
+> {
   private _bookCollectionQRatings?: BookCollection_QRatings;
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, new QBookId(name), options);
   }
 
@@ -98,7 +98,7 @@ export class BookCollectionService<
     const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._bookCollectionQRatings.buildUrl());
 
-    return new UrlRequestCmd<ClientType, ODataCollectionResponseV4<Rating>, BookCollection_RatingsParams>(
+    return new UrlRequestCmd<ODataCollectionResponseV4<Rating>, BookCollection_RatingsParams>(
       client,
       ODataHttpMethods.Post,
       url,

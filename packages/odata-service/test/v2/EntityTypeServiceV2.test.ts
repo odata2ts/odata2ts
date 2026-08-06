@@ -12,7 +12,7 @@ describe("EntityTypeService V2 Test", () => {
   const NAME = "test('tester')";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
 
-  let testService: PersonModelV2Service<MockClient>;
+  let testService: PersonModelV2Service;
 
   commonEntityTypeServiceTests(odataClient, PersonModelV2Service);
 

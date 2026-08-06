@@ -5,13 +5,12 @@ import { RequestCmd, RequestCmdOptions } from "./RequestCmd";
 export type CreateServiceFunction<ComposableService> = (path: string) => ComposableService;
 
 export class ComposableUrlRequestCmd<
-  ClientType extends ODataHttpClient,
   ComposableService,
   ResponseStructure,
   DataStructure = undefined,
-> extends RequestCmd<ClientType, ResponseStructure, DataStructure> {
+> extends RequestCmd<ResponseStructure, DataStructure> {
   constructor(
-    client: ClientType,
+    client: ODataHttpClient,
     protected basePath: string,
     protected createService: CreateServiceFunction<ComposableService>,
     protected options: RequestCmdOptions<ResponseStructure, DataStructure> = {},
@@ -33,7 +32,7 @@ export class ComposableUrlRequestCmd<
       throw new Error("withUrl requires a new URL!");
     }
 
-    return new ComposableUrlRequestCmd<ClientType, ComposableService, ResponseStructure, DataStructure>(
+    return new ComposableUrlRequestCmd<ComposableService, ResponseStructure, DataStructure>(
       this.client,
       url,
       this.createService,

@@ -14,15 +14,16 @@ import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
 type PrimitiveExtractor<T> = T extends PrimitiveCollectionType<infer E> ? E : T;
 
-export class CollectionServiceV2<
-  in out ClientType extends ODataHttpClient,
-  T,
-  Q extends QueryObjectModel,
-  PrimitiveT = PrimitiveExtractor<T>,
-> {
-  protected readonly __base: ServiceStateHelperV2<ClientType, Q>;
+export class CollectionServiceV2<T, Q extends QueryObjectModel, PrimitiveT = PrimitiveExtractor<T>> {
+  protected readonly __base: ServiceStateHelperV2<Q>;
 
-  public constructor(client: ClientType, basePath: string, name: string, qModel: Q, options?: ODataServiceOptions) {
+  public constructor(
+    client: ODataHttpClient,
+    basePath: string,
+    name: string,
+    qModel: Q,
+    options?: ODataServiceOptions,
+  ) {
     this.__base = new ServiceStateHelperV2(client, basePath, name, qModel, options);
   }
 
@@ -51,7 +52,6 @@ export class CollectionServiceV2<
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV2<
-      ClientType,
       CollectionModificationResponseV2<Response, PrimitiveT>,
       Q,
       ModelQueryBuilderV2<Q>,
@@ -87,7 +87,6 @@ export class CollectionServiceV2<
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV2<
-      ClientType,
       CollectionModificationResponseV2<Response, PrimitiveT>,
       Q,
       ModelQueryBuilderV2<Q>,
@@ -108,7 +107,7 @@ export class CollectionServiceV2<
   public delete() {
     const { client, path } = this.__base;
 
-    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path, undefined);
+    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined);
   }
 
   /**
@@ -117,7 +116,7 @@ export class CollectionServiceV2<
   public query<ReturnType = T>(queryFn?: (builder: CollectionQueryBuilderV2<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
-    return new UrlBuilderRequestCmdV2<ClientType, ODataCollectionResponseV2<ReturnType>, Q>(
+    return new UrlBuilderRequestCmdV2<ODataCollectionResponseV2<ReturnType>, Q>(
       client,
       ODataHttpMethods.Get,
       createQueryBuilder(queryFn),

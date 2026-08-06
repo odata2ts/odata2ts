@@ -10,10 +10,10 @@ describe("StreamService V2 Test", () => {
   const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
   const MIME_TYPE = "application/epub+zip";
 
-  let service: StreamServiceV2<MockClient>;
+  let service: StreamServiceV2;
 
   beforeEach(() => {
-    service = new StreamServiceV2<MockClient>(odataClient, BASE_URL, NAME);
+    service = new StreamServiceV2(odataClient, BASE_URL, NAME);
   });
 
   test("stream V2: base tests", () => {

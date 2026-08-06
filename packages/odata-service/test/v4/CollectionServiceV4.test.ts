@@ -35,7 +35,7 @@ describe("CollectionService V4 Tests", () => {
   const NAME_STRING = "testString";
   const NAME_ENUM = "testEnum";
 
-  const serviceConv = new CollectionServiceV4<MockClient, BooleanCollection, QBooleanCollection<number>, number>(
+  const serviceConv = new CollectionServiceV4<BooleanCollection, QBooleanCollection<number>, number>(
     odataClient,
     BASE_PATH,
     NAME_STRING,
@@ -46,13 +46,13 @@ describe("CollectionService V4 Tests", () => {
     basePath: string,
     name: string,
     options?: ODataServiceOptions,
-  ): CollectionServiceV4<MockClient, StringCollection, QStringCollection> => {
+  ): CollectionServiceV4<StringCollection, QStringCollection> => {
     return new CollectionServiceV4(odataClient, basePath, name, new QStringCollection(), options);
   };
   const enumConstructor = (
     basePath: string,
     name: string,
-  ): CollectionServiceV4<MockClient, EnumCollection<StringTestEnum>, QEnumCollection<typeof StringTestEnum>> => {
+  ): CollectionServiceV4<EnumCollection<StringTestEnum>, QEnumCollection<typeof StringTestEnum>> => {
     return new CollectionServiceV4(odataClient, basePath, name, new QEnumCollection(StringTestEnum));
   };
 
@@ -159,7 +159,7 @@ describe("CollectionService V4 Tests", () => {
   });
 
   test("collection: big number", async () => {
-    const testService = new CollectionServiceV4<MockClient, StringCollection, QStringCollection>(
+    const testService = new CollectionServiceV4<StringCollection, QStringCollection>(
       odataClient,
       BASE_PATH,
       NAME_STRING,
