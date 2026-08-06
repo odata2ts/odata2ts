@@ -7,7 +7,7 @@ describe("UrlRequestCmd tests", () => {
   const DEFAULT_HEADERS = { "Content-Type": "application/json" };
   const CLIENT = new MockClient(false);
 
-  let candidate: UrlGetRequestCmd<MockClient, string>;
+  let candidate: UrlGetRequestCmd<string>;
 
   beforeEach(() => {
     candidate = new UrlGetRequestCmd(CLIENT, DEFAULT_URL, { headers: DEFAULT_HEADERS });

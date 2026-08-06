@@ -14,9 +14,9 @@ import { qAuthor, QAuthorId, qBook, QBookId } from "./QTester.js";
 // @ts-ignore
 import type { Author, AuthorId, Book, BookId, EditableAuthor, EditableBook } from "./TesterModel.js";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
-  public books(): BookCollectionService<ClientType>;
-  public books(id: BookId): BookService<ClientType>;
+export class TesterService extends ODataService {
+  public books(): BookCollectionService;
+  public books(id: BookId): BookService;
   public books(id?: BookId | undefined) {
     const fieldName = "books";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -26,14 +26,16 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 }
 
-export class AuthorService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, Author, EditableAuthor, QAuthor, V> {
-  private _id?: PrimitiveTypeServiceV4<ClientType, string, V>;
-  private _name?: PrimitiveTypeServiceV4<ClientType, string, V>;
+export class AuthorService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
+  Author,
+  EditableAuthor,
+  QAuthor,
+  V
+> {
+  private _id?: PrimitiveTypeServiceV4<string, V>;
+  private _name?: PrimitiveTypeServiceV4<string, V>;
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qAuthor, options);
   }
 
@@ -56,23 +58,23 @@ export class AuthorService<
   }
 }
 
-export class AuthorCollectionService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, Author, EditableAuthor, QAuthor, AuthorId, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class AuthorCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  Author,
+  EditableAuthor,
+  QAuthor,
+  AuthorId,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qAuthor, new QAuthorId(name), options);
   }
 }
 
-export class BookService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, Book, EditableBook, QBook, V> {
-  private _id?: PrimitiveTypeServiceV4<ClientType, string, V>;
-  private _author?: AuthorService<ClientType, V>;
+export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<Book, EditableBook, QBook, V> {
+  private _id?: PrimitiveTypeServiceV4<string, V>;
+  private _author?: AuthorService<V>;
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, options);
   }
 
@@ -85,7 +87,7 @@ export class BookService<
     return this._id;
   }
 
-  public author(): AuthorService<ClientType, V> {
+  public author(): AuthorService<V> {
     if (!this._author) {
       const { client, path, options } = this.__base;
       this._author = new AuthorService(client, path, "AUTHOR", options);
@@ -94,8 +96,8 @@ export class BookService<
     return this._author;
   }
 
-  public relatedAuthors(): AuthorCollectionService<ClientType, V>;
-  public relatedAuthors(id: AuthorId): AuthorService<ClientType, V>;
+  public relatedAuthors(): AuthorCollectionService<V>;
+  public relatedAuthors(id: AuthorId): AuthorService<V>;
   public relatedAuthors(id?: AuthorId | undefined) {
     const fieldName = "RelatedAuthors";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -105,11 +107,14 @@ export class BookService<
   }
 }
 
-export class BookCollectionService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, Book, EditableBook, QBook, BookId, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class BookCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  Book,
+  EditableBook,
+  QBook,
+  BookId,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, new QBookId(name), options);
   }
 }

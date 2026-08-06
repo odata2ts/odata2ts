@@ -11,8 +11,8 @@ import { StreamServiceBase } from "../StreamServiceBase.js";
  * service is ever bound to is the entity's `$value`, and an entity can carry exactly one such payload.
  * That is also why it is not generated for any property - a V2 model has no way of declaring one.
  */
-export class StreamServiceV2<out ClientType extends ODataHttpClient> extends StreamServiceBase<ClientType> {
-  public constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+export class StreamServiceV2 extends StreamServiceBase {
+  public constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, options);
   }
 }

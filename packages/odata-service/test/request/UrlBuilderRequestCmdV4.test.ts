@@ -35,7 +35,6 @@ describe("UrlBuilderRequestCmdV4 tests", () => {
 
   test("carries an explicit method and data payload, e.g. for a write operation", () => {
     const candidate = new UrlBuilderRequestCmdV4<
-      MockClient,
       undefined,
       QPersonV4,
       CollectionQueryBuilderV4<QPersonV4>,
@@ -48,7 +47,6 @@ describe("UrlBuilderRequestCmdV4 tests", () => {
 
   test("addToQuery on a write Cmd keeps method and data intact", () => {
     const candidate = new UrlBuilderRequestCmdV4<
-      MockClient,
       undefined,
       QPersonV4,
       CollectionQueryBuilderV4<QPersonV4>,
@@ -87,7 +85,7 @@ describe("UrlBuilderRequestCmdV4 tests", () => {
   });
 
   test("execute", async () => {
-    const candidate = new UrlBuilderRequestCmdV4<MockClient, ODataModelResponseV4<PersonModel>, QPersonV4>(
+    const candidate = new UrlBuilderRequestCmdV4<ODataModelResponseV4<PersonModel>, QPersonV4>(
       client,
       ODataHttpMethods.Get,
       queryBuilder,
@@ -128,7 +126,7 @@ describe("UrlBuilderRequestCmdV4 tests", () => {
   });
 
   test("as POST request", () => {
-    const candidate = new UrlBuilderRequestCmdV4<MockClient, ODataModelResponseV4<PersonModel>, QPersonV4>(
+    const candidate = new UrlBuilderRequestCmdV4<ODataModelResponseV4<PersonModel>, QPersonV4>(
       client,
       ODataHttpMethods.Get,
       queryBuilder,

@@ -13,14 +13,13 @@ import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
 export abstract class EntitySetServiceV4<
-  in out ClientType extends ODataHttpClient,
   T,
   EditableT,
   Q extends QueryObjectModel,
   EIdType,
   V extends ODataVersionV4 = "4.0",
 > {
-  protected readonly __base: ServiceStateHelperV4<ClientType, Q, V>;
+  protected readonly __base: ServiceStateHelperV4<Q, V>;
   protected readonly __idFunction: QId<EIdType>;
 
   /**
@@ -36,7 +35,7 @@ export abstract class EntitySetServiceV4<
    * @protected
    */
   protected constructor(
-    client: ClientType,
+    client: ODataHttpClient,
     basePath: string,
     name: string,
     qModel: Q,
@@ -119,7 +118,6 @@ export abstract class EntitySetServiceV4<
     const actualPath = dontUseCastPathSegment ? basePath : path;
 
     return new UrlBuilderRequestCmdV4<
-      ClientType,
       EntityModificationResponseV4<Response, T, V>,
       Q,
       ModelQueryBuilderV4<Q>,
@@ -142,7 +140,7 @@ export abstract class EntitySetServiceV4<
   ) {
     const { client, qModel, createQueryBuilder, getDefaultHeaders } = this.__base;
 
-    return new UrlBuilderRequestCmdV4<ClientType, ODataCollectionResponseFor<V, ReturnType>, Q>(
+    return new UrlBuilderRequestCmdV4<ODataCollectionResponseFor<V, ReturnType>, Q>(
       client,
       ODataHttpMethods.Get,
       createQueryBuilder(queryFn),

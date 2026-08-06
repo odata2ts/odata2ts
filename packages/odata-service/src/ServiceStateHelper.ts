@@ -3,11 +3,11 @@ import { ODataVersionV4 } from "@odata2ts/odata-core";
 import { ODataServiceOptionsInternal } from "./ODataServiceOptions";
 import { BIG_NUMBERS_HEADERS, DEFAULT_HEADERS, getODataVersionHeaders } from "./RequestHeaders.js";
 
-export class ServiceStateHelper<out ClientType extends ODataHttpClient, V extends ODataVersionV4 = "4.0"> {
+export class ServiceStateHelper<V extends ODataVersionV4 = "4.0"> {
   public readonly path: string;
 
   public constructor(
-    public readonly client: ClientType,
+    public readonly client: ODataHttpClient,
     public basePath: string,
     public name?: string,
     public options: ODataServiceOptionsInternal<V> = {},

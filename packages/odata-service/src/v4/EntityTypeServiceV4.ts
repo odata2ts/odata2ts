@@ -7,17 +7,11 @@ import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
 import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
-export class EntityTypeServiceV4<
-  in out ClientType extends ODataHttpClient,
-  T,
-  EditableT,
-  Q extends QueryObjectModel,
-  V extends ODataVersionV4 = "4.0",
-> {
-  protected readonly __base: ServiceStateHelperV4<ClientType, Q, V>;
+export class EntityTypeServiceV4<T, EditableT, Q extends QueryObjectModel, V extends ODataVersionV4 = "4.0"> {
+  protected readonly __base: ServiceStateHelperV4<Q, V>;
 
   public constructor(
-    client: ClientType,
+    client: ODataHttpClient,
     basePath: string,
     name: string,
     qModel: Q,
@@ -60,7 +54,6 @@ export class EntityTypeServiceV4<
     const actualPath = dontUseCastPathSegment ? basePath : path;
 
     return new UrlBuilderRequestCmdV4<
-      ClientType,
       EntityModificationResponseV4<Response, T, V>,
       Q,
       ModelQueryBuilderV4<Q>,
@@ -102,7 +95,6 @@ export class EntityTypeServiceV4<
     const actualPath = dontUseCastPathSegment ? basePath : path;
 
     return new UrlBuilderRequestCmdV4<
-      ClientType,
       EntityModificationResponseV4<Response, T, V>,
       Q,
       ModelQueryBuilderV4<Q>,
@@ -123,7 +115,7 @@ export class EntityTypeServiceV4<
    */
   public delete() {
     const { client, path } = this.__base;
-    return new UrlRequestCmd<ClientType, undefined>(client, ODataHttpMethods.Delete, path);
+    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path);
   }
 
   /**
@@ -136,7 +128,7 @@ export class EntityTypeServiceV4<
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void) {
     const { client, qModel, createModelQueryBuilder, getDefaultHeaders } = this.__base;
 
-    return new UrlBuilderRequestCmdV4<ClientType, ODataModelResponseFor<V, ReturnType>, Q, ModelQueryBuilderV4<Q>>(
+    return new UrlBuilderRequestCmdV4<ODataModelResponseFor<V, ReturnType>, Q, ModelQueryBuilderV4<Q>>(
       client,
       ODataHttpMethods.Get,
       createModelQueryBuilder(queryFn),

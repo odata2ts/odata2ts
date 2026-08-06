@@ -13,16 +13,16 @@ export function commonEntitySetTests(
     name: string,
     options?: ODataServiceOptions,
   ) =>
-    | EntitySetServiceV4<MockClient, PersonModel, EditablePersonModel, QPersonV4, PersonId>
-    | EntitySetServiceV2<MockClient, PersonModel, EditablePersonModel, QPersonV2, PersonId>,
+    | EntitySetServiceV4<PersonModel, EditablePersonModel, QPersonV4, PersonId>
+    | EntitySetServiceV2<PersonModel, EditablePersonModel, QPersonV2, PersonId>,
 ) {
   const BASE_URL = "/base";
   const NAME = "EntityXY";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
 
   let testService:
-    | EntitySetServiceV4<MockClient, PersonModel, EditablePersonModel, QPersonV4, PersonId>
-    | EntitySetServiceV2<MockClient, PersonModel, EditablePersonModel, QPersonV2, PersonId>;
+    | EntitySetServiceV4<PersonModel, EditablePersonModel, QPersonV4, PersonId>
+    | EntitySetServiceV2<PersonModel, EditablePersonModel, QPersonV2, PersonId>;
 
   beforeEach(() => {
     testService = new serviceConstructor(odataClient, BASE_URL, NAME);

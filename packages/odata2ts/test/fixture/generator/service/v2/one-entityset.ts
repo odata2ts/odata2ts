@@ -13,9 +13,9 @@ import { qTestEntity, QTestEntityId } from "./QTester.js";
 // @ts-ignore
 import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel.js";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
-  public ents(): TestEntityCollectionService<ClientType>;
-  public ents(id: TestEntityId): TestEntityService<ClientType>;
+export class TesterService extends ODataService {
+  public ents(): TestEntityCollectionService;
+  public ents(id: TestEntityId): TestEntityService;
   public ents(id?: TestEntityId | undefined) {
     const fieldName = "Ents";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -25,22 +25,17 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 }
 
-export class TestEntityService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
-  ClientType,
-  TestEntity,
-  EditableTestEntity,
-  QTestEntity
-> {
-  private _id?: PrimitiveTypeServiceV2<ClientType, string>;
-  private _age?: PrimitiveTypeServiceV2<ClientType, number>;
-  private _deceased?: PrimitiveTypeServiceV2<ClientType, boolean>;
-  private _desc?: PrimitiveTypeServiceV2<ClientType, string>;
-  private _dateAndTime?: PrimitiveTypeServiceV2<ClientType, string>;
-  private _dateAndTimeAndOffset?: PrimitiveTypeServiceV2<ClientType, string>;
-  private _time?: PrimitiveTypeServiceV2<ClientType, string>;
-  private _test?: PrimitiveTypeServiceV2<ClientType, string>;
+export class TestEntityService extends EntityTypeServiceV2<TestEntity, EditableTestEntity, QTestEntity> {
+  private _id?: PrimitiveTypeServiceV2<string>;
+  private _age?: PrimitiveTypeServiceV2<number>;
+  private _deceased?: PrimitiveTypeServiceV2<boolean>;
+  private _desc?: PrimitiveTypeServiceV2<string>;
+  private _dateAndTime?: PrimitiveTypeServiceV2<string>;
+  private _dateAndTimeAndOffset?: PrimitiveTypeServiceV2<string>;
+  private _time?: PrimitiveTypeServiceV2<string>;
+  private _test?: PrimitiveTypeServiceV2<string>;
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qTestEntity, options);
   }
 
@@ -138,14 +133,13 @@ export class TestEntityService<in out ClientType extends ODataHttpClient> extend
   }
 }
 
-export class TestEntityCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV2<
-  ClientType,
+export class TestEntityCollectionService extends EntitySetServiceV2<
   TestEntity,
   EditableTestEntity,
   QTestEntity,
   TestEntityId
 > {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qTestEntity, new QTestEntityId(name), options);
   }
 }

@@ -4,14 +4,13 @@ import { QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { RequestCmd, RequestCmdOptions } from "./RequestCmd";
 
 export class UrlBuilderRequestCmdV2<
-  ClientType extends ODataHttpClient,
   ResponseStructure,
   Q extends QueryObjectModel,
   Builder extends ModelQueryBuilderV2<Q> = CollectionQueryBuilderV2<Q>,
   DataStructure = undefined,
-> extends RequestCmd<ClientType, ResponseStructure, DataStructure> {
+> extends RequestCmd<ResponseStructure, DataStructure> {
   constructor(
-    protected client: ClientType,
+    protected client: ODataHttpClient,
     method: ODataHttpMethods,
     protected urlBuilder: Builder,
     protected q: Q,
@@ -36,7 +35,7 @@ export class UrlBuilderRequestCmdV2<
     }
     const builder = modFunction(this.urlBuilder.clone() as Builder, this.q);
 
-    return new UrlBuilderRequestCmdV2<ClientType, ResponseStructure, Q, Builder, DataStructure>(
+    return new UrlBuilderRequestCmdV2<ResponseStructure, Q, Builder, DataStructure>(
       this.client,
       this.method,
       builder,

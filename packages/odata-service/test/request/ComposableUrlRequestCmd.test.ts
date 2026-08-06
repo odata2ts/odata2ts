@@ -14,18 +14,19 @@ describe("ComposableUrlRequestCmd tests", () => {
   const DEFAULT_HEADERS = { x: "y" };
 
   let client: MockClient;
-  let candidate: ComposableUrlRequestCmd<MockClient, PersonModelService<MockClient>, ODataModelResponseV4<PersonModel>>;
+  let candidate: ComposableUrlRequestCmd<PersonModelService, ODataModelResponseV4<PersonModel>>;
 
   beforeEach(() => {
     client = new MockClient(false);
-    candidate = new ComposableUrlRequestCmd<
-      MockClient,
-      PersonModelService<MockClient>,
-      ODataModelResponseV4<PersonModel>
-    >(client, DEFAULT_URL, (url: string) => new PersonModelService(client, url, "", { noUrlEncoding: true }), {
-      headers: DEFAULT_HEADERS,
-      mainResponseConverter: new ModelResponseConverterV4(new QPersonV4()),
-    });
+    candidate = new ComposableUrlRequestCmd<PersonModelService, ODataModelResponseV4<PersonModel>>(
+      client,
+      DEFAULT_URL,
+      (url: string) => new PersonModelService(client, url, "", { noUrlEncoding: true }),
+      {
+        headers: DEFAULT_HEADERS,
+        mainResponseConverter: new ModelResponseConverterV4(new QPersonV4()),
+      },
+    );
   });
 
   test("base props", () => {
@@ -39,7 +40,7 @@ describe("ComposableUrlRequestCmd tests", () => {
   });
 
   test("without options argument", () => {
-    const noOptionsCandidate = new ComposableUrlRequestCmd<MockClient, PersonModelService<MockClient>, undefined>(
+    const noOptionsCandidate = new ComposableUrlRequestCmd<PersonModelService, undefined>(
       client,
       DEFAULT_URL,
       (url: string) => new PersonModelService(client, url, "", { noUrlEncoding: true }),
@@ -94,7 +95,6 @@ describe("ComposableUrlRequestCmd tests", () => {
     // Model cardinality, because `candidate` is composed directly (bound to a single resource), not via a
     // collection-valued navigation property.
     const typeCheck: UrlBuilderRequestCmdV4<
-      MockClient,
       ODataModelResponseV4<PersonModel>,
       QPersonV4,
       ModelQueryBuilderV4<QPersonV4>
@@ -109,7 +109,6 @@ describe("ComposableUrlRequestCmd tests", () => {
 
     // see comment in "compose: direct select query" above
     const typeCheck: UrlBuilderRequestCmdV4<
-      MockClient,
       ODataCollectionResponseV4<PersonModel>,
       QPersonV4,
       CollectionQueryBuilderV4<QPersonV4>

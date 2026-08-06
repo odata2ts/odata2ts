@@ -31,9 +31,9 @@ import type {
   // @ts-ignore
 } from "./TesterModel.js";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
-  public fromAbstract(): ExtendedFromAbstractCollectionService<ClientType>;
-  public fromAbstract(id: ExtendedFromAbstractId): ExtendedFromAbstractService<ClientType>;
+export class TesterService extends ODataService {
+  public fromAbstract(): ExtendedFromAbstractCollectionService;
+  public fromAbstract(id: ExtendedFromAbstractId): ExtendedFromAbstractService;
   public fromAbstract(id?: ExtendedFromAbstractId | undefined) {
     const fieldName = "FromAbstract";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -47,8 +47,8 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
         );
   }
 
-  public fromOpen(): ExtendedFromOpenCollectionService<ClientType>;
-  public fromOpen(id: ExtendedFromOpenId): ExtendedFromOpenService<ClientType>;
+  public fromOpen(): ExtendedFromOpenCollectionService;
+  public fromOpen(id: ExtendedFromOpenId): ExtendedFromOpenService;
   public fromOpen(id?: ExtendedFromOpenId | undefined) {
     const fieldName = "FromOpen";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -63,11 +63,13 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 }
 
-export class AbstractEntityService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, AbstractEntity, EditableAbstractEntity, QAbstractEntity, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class AbstractEntityService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
+  AbstractEntity,
+  EditableAbstractEntity,
+  QAbstractEntity,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qAbstractEntity, options);
   }
 
@@ -87,11 +89,13 @@ export class AbstractEntityService<
   }
 }
 
-export class OpenEntityService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, OpenEntity, EditableOpenEntity, QOpenEntity, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class OpenEntityService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
+  OpenEntity,
+  EditableOpenEntity,
+  QOpenEntity,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qOpenEntity, options);
   }
 
@@ -101,58 +105,48 @@ export class OpenEntityService<
   }
 }
 
-export class ExtendedFromAbstractService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<
-  ClientType,
+export class ExtendedFromAbstractService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
   ExtendedFromAbstract,
   EditableExtendedFromAbstract,
   QExtendedFromAbstract,
   V
 > {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qExtendedFromAbstract, options);
   }
 }
 
-export class ExtendedFromAbstractCollectionService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<
-  ClientType,
+export class ExtendedFromAbstractCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
   ExtendedFromAbstract,
   EditableExtendedFromAbstract,
   QExtendedFromAbstract,
   ExtendedFromAbstractId,
   V
 > {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qExtendedFromAbstract, new QExtendedFromAbstractId(name), options);
   }
 }
 
-export class ExtendedFromOpenService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, ExtendedFromOpen, EditableExtendedFromOpen, QExtendedFromOpen, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class ExtendedFromOpenService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
+  ExtendedFromOpen,
+  EditableExtendedFromOpen,
+  QExtendedFromOpen,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qExtendedFromOpen, options);
   }
 }
 
-export class ExtendedFromOpenCollectionService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<
-  ClientType,
+export class ExtendedFromOpenCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
   ExtendedFromOpen,
   EditableExtendedFromOpen,
   QExtendedFromOpen,
   ExtendedFromOpenId,
   V
 > {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qExtendedFromOpen, new QExtendedFromOpenId(name), options);
   }
 }

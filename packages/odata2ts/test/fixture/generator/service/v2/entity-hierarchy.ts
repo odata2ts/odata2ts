@@ -16,9 +16,9 @@ import type {
   // @ts-ignore
 } from "./TesterModel.js";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
-  public tests(): ChildCollectionService<ClientType>;
-  public tests(id: ChildId): ChildService<ClientType>;
+export class TesterService extends ODataService {
+  public tests(): ChildCollectionService;
+  public tests(id: ChildId): ChildService;
   public tests(id?: ChildId | undefined) {
     const fieldName = "tests";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -28,71 +28,43 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 }
 
-export class GrandParentService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
-  ClientType,
-  GrandParent,
-  EditableGrandParent,
-  QGrandParent
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+export class GrandParentService extends EntityTypeServiceV2<GrandParent, EditableGrandParent, QGrandParent> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qGrandParent, options);
   }
 }
 
-export class GrandParentCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV2<
-  ClientType,
+export class GrandParentCollectionService extends EntitySetServiceV2<
   GrandParent,
   EditableGrandParent,
   QGrandParent,
   GrandParentId
 > {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qGrandParent, new QGrandParentId(name), options);
   }
 }
 
-export class ParentService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
-  ClientType,
-  Parent,
-  EditableParent,
-  QParent
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+export class ParentService extends EntityTypeServiceV2<Parent, EditableParent, QParent> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qParent, options);
   }
 }
 
-export class ParentCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV2<
-  ClientType,
-  Parent,
-  EditableParent,
-  QParent,
-  GrandParentId
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+export class ParentCollectionService extends EntitySetServiceV2<Parent, EditableParent, QParent, GrandParentId> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qParent, new QGrandParentId(name), options);
   }
 }
 
-export class ChildService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
-  ClientType,
-  Child,
-  EditableChild,
-  QChild
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+export class ChildService extends EntityTypeServiceV2<Child, EditableChild, QChild> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qChild, options);
   }
 }
 
-export class ChildCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV2<
-  ClientType,
-  Child,
-  EditableChild,
-  QChild,
-  ChildId
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+export class ChildCollectionService extends EntitySetServiceV2<Child, EditableChild, QChild, ChildId> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qChild, new QChildId(name), options);
   }
 }

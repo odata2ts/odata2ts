@@ -15,34 +15,30 @@ import { EditablePersonModel, Feature, GetSomethingFunctionParams, PersonId, Per
 import { QPersonIdFunction } from "../QPerson";
 import { QGetScoreFunction, QGetSomethingComposable, QGetSomethingFunction, QPersonV4, qPersonV4 } from "./QPersonV4";
 
-export class PersonModelService<
-  ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, PersonModel, EditablePersonModel, QPersonV4, V> {
+export class PersonModelService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
+  PersonModel,
+  EditablePersonModel,
+  QPersonV4,
+  V
+> {
   private _qGetSomething = new QGetSomethingFunction();
 
   private _qGetComposable = new QGetSomethingComposable();
 
   private _qGetScore = new QGetScoreFunction();
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QPersonV4(), options);
   }
 
   public userName() {
     const { client, path, qModel, options } = this.__base;
-    return new PrimitiveTypeServiceV4<ClientType, string, V>(
-      client,
-      path,
-      "UserName",
-      qModel.userName.converter,
-      options,
-    );
+    return new PrimitiveTypeServiceV4<string, V>(client, path, "UserName", qModel.userName.converter, options);
   }
 
   public age() {
     const { client, path, qModel, options } = this.__base;
-    return new PrimitiveTypeServiceV4<ClientType, string, V>(client, path, "Age", qModel.age.converter, options);
+    return new PrimitiveTypeServiceV4<string, V>(client, path, "Age", qModel.age.converter, options);
   }
 
   public get features() {
@@ -64,22 +60,16 @@ export class PersonModelService<
     const { addFullPath, client, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qGetSomething.buildUrl(params, isUrlNotEncoded()));
 
-    return new UrlRequestCmd<ClientType, ODataModelResponseV4<PersonModel>>(
-      client,
-      ODataHttpMethods.Get,
-      url,
-      undefined,
-      {
-        mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
-      },
-    );
+    return new UrlRequestCmd<ODataModelResponseV4<PersonModel>>(client, ODataHttpMethods.Get, url, undefined, {
+      mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
+    });
   }
 
   public getSomething2() {
     const { addFullPath, client, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qGetSomething.buildUrl(undefined, isUrlNotEncoded()));
 
-    return new UrlGetRequestCmd<ClientType, ODataModelResponseV4<PersonModel>>(client, url, {
+    return new UrlGetRequestCmd<ODataModelResponseV4<PersonModel>>(client, url, {
       mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
     });
   }
@@ -88,13 +78,14 @@ export class PersonModelService<
     const { addFullPath, client, isUrlNotEncoded, options } = this.__base;
     const url = addFullPath(this._qGetComposable.buildUrl(params, isUrlNotEncoded()));
 
-    return new ComposableUrlRequestCmd<
-      ClientType,
-      PersonModelService<ClientType, V>,
-      ODataModelResponseV4<PersonModel>
-    >(client, url, (finalUrl: string) => new PersonModelService<ClientType, V>(client, finalUrl, "", options), {
-      mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
-    });
+    return new ComposableUrlRequestCmd<PersonModelService<V>, ODataModelResponseV4<PersonModel>>(
+      client,
+      url,
+      (finalUrl: string) => new PersonModelService<V>(client, finalUrl, "", options),
+      {
+        mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
+      },
+    );
   }
 
   /**
@@ -105,19 +96,22 @@ export class PersonModelService<
     const { addFullPath, client, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qGetScore.buildUrl(undefined, isUrlNotEncoded()));
 
-    return new UrlGetRequestCmd<ClientType, ODataValueResponseV4<string>>(client, url, {
+    return new UrlGetRequestCmd<ODataValueResponseV4<string>>(client, url, {
       mainResponseConverter: this._qGetScore.getResponseConverter(),
     });
   }
 }
 
-export class PersonModelCollectionService<
-  ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, PersonModel, EditablePersonModel, QPersonV4, PersonId, V> {
+export class PersonModelCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  PersonModel,
+  EditablePersonModel,
+  QPersonV4,
+  PersonId,
+  V
+> {
   private _qGetSomething = new QGetSomethingFunction();
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qPersonV4, new QPersonIdFunction(name), options);
   }
 
@@ -130,14 +124,8 @@ export class PersonModelCollectionService<
     const { addFullPath, client, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qGetSomething.buildUrl(params, isUrlNotEncoded()));
 
-    return new UrlRequestCmd<ClientType, ODataModelResponseV4<PersonModel>>(
-      client,
-      ODataHttpMethods.Get,
-      url,
-      undefined,
-      {
-        mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
-      },
-    );
+    return new UrlRequestCmd<ODataModelResponseV4<PersonModel>>(client, ODataHttpMethods.Get, url, undefined, {
+      mainResponseConverter: new ModelResponseConverterV4(qPersonV4),
+    });
   }
 }

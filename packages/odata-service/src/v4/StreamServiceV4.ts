@@ -1,4 +1,3 @@
-import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { ODataVersionV4 } from "@odata2ts/odata-core";
 import { StreamServiceBase } from "../StreamServiceBase.js";
 
@@ -8,7 +7,4 @@ import { StreamServiceBase } from "../StreamServiceBase.js";
  *
  * The bound URL is the property name for a stream property and `$value` for a media entity's content.
  */
-export class StreamServiceV4<
-  out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends StreamServiceBase<ClientType, V> {}
+export class StreamServiceV4<V extends ODataVersionV4 = "4.0"> extends StreamServiceBase<V> {}

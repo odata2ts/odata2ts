@@ -14,9 +14,9 @@ import { Book_QBestReview, BookCollection_QFilterReviews, qBook, QBookId } from 
 // @ts-ignore
 import type { Book, BookCollection_FilterReviewsParams, BookId, EditableBook, Review } from "./TesterModel.js";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
-  public books(): BookCollectionService<ClientType>;
-  public books(id: BookId): BookService<ClientType>;
+export class TesterService extends ODataService {
+  public books(): BookCollectionService;
+  public books(id: BookId): BookService;
   public books(id?: BookId | undefined) {
     const fieldName = "books";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -26,13 +26,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 }
 
-export class BookService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, Book, EditableBook, QBook, V> {
+export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<Book, EditableBook, QBook, V> {
   private _bookQBestReview?: Book_QBestReview;
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, options);
   }
 
@@ -44,20 +41,23 @@ export class BookService<
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._bookQBestReview.buildUrl(isUrlNotEncoded()));
 
-    return new UrlGetRequestCmd<ClientType, ODataModelResponseV4<Review>>(client, url, {
+    return new UrlGetRequestCmd<ODataModelResponseV4<Review>>(client, url, {
       headers: getDefaultHeaders(),
       mainResponseConverter: this._bookQBestReview.getResponseConverter(),
     });
   }
 }
 
-export class BookCollectionService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, Book, EditableBook, QBook, BookId, V> {
+export class BookCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  Book,
+  EditableBook,
+  QBook,
+  BookId,
+  V
+> {
   private _bookCollectionQFilterReviews?: BookCollection_QFilterReviews;
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, new QBookId(name), options);
   }
 
@@ -69,7 +69,7 @@ export class BookCollectionService<
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._bookCollectionQFilterReviews.buildUrl(params, isUrlNotEncoded()));
 
-    return new UrlGetRequestCmd<ClientType, ODataCollectionResponseV4<Review>>(client, url, {
+    return new UrlGetRequestCmd<ODataCollectionResponseV4<Review>>(client, url, {
       headers: getDefaultHeaders(),
       mainResponseConverter: this._bookCollectionQFilterReviews.getResponseConverter(),
     });

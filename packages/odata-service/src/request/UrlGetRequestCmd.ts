@@ -3,12 +3,9 @@ import { RequestCmdOptions } from "./RequestCmd";
 import { GetToPostConverter } from "./RequestHelper";
 import { UrlRequestCmd } from "./UrlRequestCmd";
 
-export class UrlGetRequestCmd<ClientType extends ODataHttpClient, ResponseStructure> extends UrlRequestCmd<
-  ClientType,
-  ResponseStructure
-> {
+export class UrlGetRequestCmd<ResponseStructure> extends UrlRequestCmd<ResponseStructure> {
   constructor(
-    protected client: ClientType,
+    protected client: ODataHttpClient,
     protected url: string,
     protected options: RequestCmdOptions<ResponseStructure, undefined> = {},
   ) {

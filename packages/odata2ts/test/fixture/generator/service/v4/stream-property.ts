@@ -14,9 +14,9 @@ import { qAudiobook, QAudiobookId } from "./QTester.js";
 // @ts-ignore
 import type { Audiobook, AudiobookId, EditableAudiobook } from "./TesterModel.js";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
-  public audiobooks(): AudiobookCollectionService<ClientType>;
-  public audiobooks(id: AudiobookId): AudiobookService<ClientType>;
+export class TesterService extends ODataService {
+  public audiobooks(): AudiobookCollectionService;
+  public audiobooks(id: AudiobookId): AudiobookService;
   public audiobooks(id?: AudiobookId | undefined) {
     const fieldName = "Audiobooks";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -26,13 +26,15 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 }
 
-export class AudiobookService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, Audiobook, EditableAudiobook, QAudiobook, V> {
-  private _sample?: StreamServiceV4<ClientType, V>;
+export class AudiobookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
+  Audiobook,
+  EditableAudiobook,
+  QAudiobook,
+  V
+> {
+  private _sample?: StreamServiceV4<V>;
 
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qAudiobook, options);
   }
 
@@ -46,11 +48,14 @@ export class AudiobookService<
   }
 }
 
-export class AudiobookCollectionService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, Audiobook, EditableAudiobook, QAudiobook, AudiobookId, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class AudiobookCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  Audiobook,
+  EditableAudiobook,
+  QAudiobook,
+  AudiobookId,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qAudiobook, new QAudiobookId(name), options);
   }
 }

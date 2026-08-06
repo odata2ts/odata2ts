@@ -10,7 +10,7 @@ describe("MediaEntityService V2 Test", () => {
   const ENTITY_PATH = `${BASE_URL}/${NAME}`;
   const CONTENT_PATH = `${ENTITY_PATH}/$value`;
 
-  let service: PersonModelV2MediaService<MockClient>;
+  let service: PersonModelV2MediaService;
 
   beforeEach(() => {
     service = new PersonModelV2MediaService(odataClient, BASE_URL, NAME);

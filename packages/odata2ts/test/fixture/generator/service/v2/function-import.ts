@@ -21,13 +21,13 @@ import type {
   // @ts-ignore
 } from "./TesterModel.js";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
+export class TesterService extends ODataService {
   private _qMostPop?: QMostPop;
   private _qBestBook?: QBestBook;
   private _qPostBestBook?: QPostBestBook;
 
-  public tests(): TestEntityCollectionService<ClientType>;
-  public tests(id: TestEntityId): TestEntityService<ClientType>;
+  public tests(): TestEntityCollectionService;
+  public tests(id: TestEntityId): TestEntityService;
   public tests(id?: TestEntityId | undefined) {
     const fieldName = "tests";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -44,13 +44,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qMostPop.buildUrl(isUrlNotEncoded()));
 
-    return new UrlRequestCmd<ClientType, ODataCollectionResponseV2<TestEntity>>(
-      client,
-      ODataHttpMethods.Get,
-      url,
-      undefined,
-      { headers: getDefaultHeaders(), mainResponseConverter: this._qMostPop.getResponseConverter() },
-    );
+    return new UrlRequestCmd<ODataCollectionResponseV2<TestEntity>>(client, ODataHttpMethods.Get, url, undefined, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: this._qMostPop.getResponseConverter(),
+    });
   }
 
   public bestBook(params: BestBookParams) {
@@ -61,13 +58,10 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qBestBook.buildUrl(params, isUrlNotEncoded()));
 
-    return new UrlRequestCmd<ClientType, ODataEntityModelResponseV2<TestEntity>>(
-      client,
-      ODataHttpMethods.Get,
-      url,
-      undefined,
-      { headers: getDefaultHeaders(), mainResponseConverter: this._qBestBook.getResponseConverter() },
-    );
+    return new UrlRequestCmd<ODataEntityModelResponseV2<TestEntity>>(client, ODataHttpMethods.Get, url, undefined, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: this._qBestBook.getResponseConverter(),
+    });
   }
 
   public postBestBook(params: PostBestBookParams) {
@@ -78,35 +72,26 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders, isUrlNotEncoded } = this.__base;
     const url = addFullPath(this._qPostBestBook.buildUrl(params, isUrlNotEncoded()));
 
-    return new UrlRequestCmd<ClientType, ODataEntityModelResponseV2<TestEntity>>(
-      client,
-      ODataHttpMethods.Post,
-      url,
-      undefined,
-      { headers: getDefaultHeaders(), mainResponseConverter: this._qPostBestBook.getResponseConverter() },
-    );
+    return new UrlRequestCmd<ODataEntityModelResponseV2<TestEntity>>(client, ODataHttpMethods.Post, url, undefined, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: this._qPostBestBook.getResponseConverter(),
+    });
   }
 }
 
-export class TestEntityService<in out ClientType extends ODataHttpClient> extends EntityTypeServiceV2<
-  ClientType,
-  TestEntity,
-  EditableTestEntity,
-  QTestEntity
-> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+export class TestEntityService extends EntityTypeServiceV2<TestEntity, EditableTestEntity, QTestEntity> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qTestEntity, options);
   }
 }
 
-export class TestEntityCollectionService<in out ClientType extends ODataHttpClient> extends EntitySetServiceV2<
-  ClientType,
+export class TestEntityCollectionService extends EntitySetServiceV2<
   TestEntity,
   EditableTestEntity,
   QTestEntity,
   TestEntityId
 > {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptions) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qTestEntity, new QTestEntityId(name), options);
   }
 }

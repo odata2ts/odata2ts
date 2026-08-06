@@ -1,9 +1,10 @@
-import { HttpResponseModel, ODataHttpClient, ODataHttpClientConfig, ODataHttpMethods } from "@odata2ts/http-client-api";
+import { HttpResponseModel, ODataHttpClient, ODataHttpMethods, ODataRequestConfig } from "@odata2ts/http-client-api";
 import { MainResponseConverter } from "@odata2ts/odata-query-objects";
 import { MainRequestConverter, RequestConverter } from "./converter/RequestConverter";
 import { RequestConverterChain } from "./converter/RequestConverterChain";
 import { ResponseConverter } from "./converter/ResponseConverter";
 import { ResponseConverterChain } from "./converter/ResponseConverterChain";
+import { NoInferConfig } from "./NoInferConfig";
 import { RequestInfo } from "./RequestInfo";
 
 export interface RequestCmdOptions<ResponseStructure, DataStructure> {
@@ -27,7 +28,6 @@ export interface RequestCmdOptions<ResponseStructure, DataStructure> {
  * Encapsulates an HTTP request to the OData server. Follows the Command Pattern.
  */
 export abstract class RequestCmd<
-  ClientType extends ODataHttpClient,
   ResponseStructure,
   DataStructure = undefined,
   FinalResponseStructure = ResponseStructure,
@@ -36,7 +36,7 @@ export abstract class RequestCmd<
   private readonly responseConverter: ResponseConverterChain<ResponseStructure, FinalResponseStructure>;
 
   public constructor(
-    protected client: ClientType,
+    protected client: ODataHttpClient,
     protected method: ODataHttpMethods,
     protected data?: DataStructure,
     protected options: RequestCmdOptions<ResponseStructure, DataStructure> = {},
@@ -139,15 +139,21 @@ export abstract class RequestCmd<
   ) {
     this.responseConverter.appendConverter<NewRespStructure>(converter);
 
-    return this as unknown as RequestCmd<ClientType, ResponseStructure, DataStructure, NewRespStructure>;
+    return this as unknown as RequestCmd<ResponseStructure, DataStructure, NewRespStructure>;
   }
 
   /**
    * Main method of this command object: Executes the request.
    *
+   * The config type defaults to what every HTTP client understands - headers and URL params. Anything a
+   * specific client adds on top of that is opted into by naming its config type, e.g.
+   * <code>execute&lt;FetchRequestConfig&gt;({ credentials: "include" })</code>.
+   *
    * @param requestConfig optional configuration
    */
-  public async execute(requestConfig?: ODataHttpClientConfig<ClientType>) {
+  public async execute<RequestConfig extends ODataRequestConfig = ODataRequestConfig>(
+    requestConfig?: NoInferConfig<RequestConfig>,
+  ) {
     // apply request converters
     const request = this.getInfoConverted();
 
@@ -170,7 +176,7 @@ export abstract class RequestCmd<
    */
   protected sendRequest(
     request: RequestInfo<any>,
-    requestConfig?: ODataHttpClientConfig<ClientType>,
+    requestConfig?: ODataRequestConfig,
   ): Promise<HttpResponseModel<any>> {
     return this.client.request<ResponseStructure>(
       request.url,

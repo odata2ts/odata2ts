@@ -57,7 +57,6 @@ export enum QueryObjectImports {
  */
 export enum ClientApiImports {
   ODataHttpClient,
-  ODataHttpClientConfig,
   HttpResponseModel,
   ODataHttpMethods,
 }

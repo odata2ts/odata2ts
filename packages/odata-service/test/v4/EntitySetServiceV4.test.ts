@@ -20,7 +20,7 @@ describe("V4 EntitySetService Test", () => {
   const NAME = "test";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}`;
 
-  let testService: PersonModelCollectionService<MockClient>;
+  let testService: PersonModelCollectionService;
 
   commonEntitySetTests(odataClient, PersonModelCollectionService);
 

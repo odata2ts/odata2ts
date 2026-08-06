@@ -15,13 +15,13 @@ import { QPingCollection, QPingNumber, QPingString, qTestEntity, QTestEntityId }
 // @ts-ignore
 import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel.js";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
+export class TesterService extends ODataService {
   private _qPingString?: QPingString;
   private _qPingNumber?: QPingNumber;
   private _qPingCollection?: QPingCollection;
 
-  public tests(): TestEntityCollectionService<ClientType>;
-  public tests(id: TestEntityId): TestEntityService<ClientType>;
+  public tests(): TestEntityCollectionService;
+  public tests(id: TestEntityId): TestEntityService;
   public tests(id?: TestEntityId | undefined) {
     const fieldName = "tests";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -38,7 +38,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._qPingString.buildUrl());
 
-    return new UrlRequestCmd<ClientType, ODataValueResponseV4<string>>(client, ODataHttpMethods.Post, url, undefined, {
+    return new UrlRequestCmd<ODataValueResponseV4<string>>(client, ODataHttpMethods.Post, url, undefined, {
       headers: getDefaultHeaders(),
       mainResponseConverter: this._qPingString.getResponseConverter(),
     });
@@ -52,7 +52,7 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._qPingNumber.buildUrl());
 
-    return new UrlRequestCmd<ClientType, ODataValueResponseV4<number>>(client, ODataHttpMethods.Post, url, undefined, {
+    return new UrlRequestCmd<ODataValueResponseV4<number>>(client, ODataHttpMethods.Post, url, undefined, {
       headers: getDefaultHeaders(),
       mainResponseConverter: this._qPingNumber.getResponseConverter(),
     });
@@ -66,30 +66,32 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
     const { addFullPath, client, getDefaultHeaders } = this.__base;
     const url = addFullPath(this._qPingCollection.buildUrl());
 
-    return new UrlRequestCmd<ClientType, ODataCollectionResponseV4<string>>(
-      client,
-      ODataHttpMethods.Post,
-      url,
-      undefined,
-      { headers: getDefaultHeaders(), mainResponseConverter: this._qPingCollection.getResponseConverter() },
-    );
+    return new UrlRequestCmd<ODataCollectionResponseV4<string>>(client, ODataHttpMethods.Post, url, undefined, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: this._qPingCollection.getResponseConverter(),
+    });
   }
 }
 
-export class TestEntityService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<ClientType, TestEntity, EditableTestEntity, QTestEntity, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class TestEntityService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
+  TestEntity,
+  EditableTestEntity,
+  QTestEntity,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTestEntity, options);
   }
 }
 
-export class TestEntityCollectionService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, TestEntity, EditableTestEntity, QTestEntity, TestEntityId, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class TestEntityCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  TestEntity,
+  EditableTestEntity,
+  QTestEntity,
+  TestEntityId,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTestEntity, new QTestEntityId(name), options);
   }
 }

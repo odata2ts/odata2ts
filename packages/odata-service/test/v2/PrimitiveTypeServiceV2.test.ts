@@ -12,7 +12,7 @@ describe("PrimitiveTypeService V2 Test", () => {
   const PROPERTY_NAME = "UserName";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}/${PROPERTY_NAME}`;
 
-  let testService: PrimitiveTypeServiceV2<MockClient, string>;
+  let testService: PrimitiveTypeServiceV2<string>;
 
   beforeEach(() => {
     testService = new PersonModelV2Service(odataClient, BASE_URL, NAME).userName();
@@ -30,20 +30,14 @@ describe("PrimitiveTypeService V2 Test", () => {
   });
 
   test("primitiveType V2: internal converter without mapped name falls back to name", () => {
-    const noMappedNameService = new PrimitiveTypeServiceV2<MockClient, string>(odataClient, BASE_URL, NAME);
+    const noMappedNameService = new PrimitiveTypeServiceV2<string>(odataClient, BASE_URL, NAME);
     const converter = (noMappedNameService as any).__converter;
 
     expect(converter.getMappedName()).toBe(NAME);
   });
 
   test("primitiveType V2: internal converter with explicit mapped name", () => {
-    const mappedService = new PrimitiveTypeServiceV2<MockClient, string>(
-      odataClient,
-      BASE_URL,
-      NAME,
-      undefined,
-      "mappedUserName",
-    );
+    const mappedService = new PrimitiveTypeServiceV2<string>(odataClient, BASE_URL, NAME, undefined, "mappedUserName");
     const converter = (mappedService as any).__converter;
 
     expect(converter.getName()).toBe(NAME);
@@ -70,13 +64,7 @@ describe("PrimitiveTypeService V2 Test", () => {
       }
     })();
 
-    const service = new PrimitiveTypeServiceV2<MockClient, string>(
-      odataClient,
-      BASE_URL,
-      NAME,
-      stateful as any,
-      PROPERTY_NAME,
-    );
+    const service = new PrimitiveTypeServiceV2<string>(odataClient, BASE_URL, NAME, stateful as any, PROPERTY_NAME);
     const converter = (service as any).__converter;
 
     expect(converter.convertFrom("value")).toBe("from!value");

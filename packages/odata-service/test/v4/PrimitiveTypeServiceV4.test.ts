@@ -11,9 +11,9 @@ describe("PrimitiveTypeService V4 Test", () => {
   const NAME = "test('tester')";
   const EXPECTED_PATH = `${BASE_URL}/${NAME}/UserName`;
 
-  let service: PrimitiveTypeServiceV4<MockClient, string>;
+  let service: PrimitiveTypeServiceV4<string>;
   // with number to string converter
-  let serviceConv: PrimitiveTypeServiceV4<MockClient, string>;
+  let serviceConv: PrimitiveTypeServiceV4<string>;
 
   beforeEach(() => {
     const personService = new PersonModelService(odataClient, BASE_URL, NAME);
@@ -26,7 +26,7 @@ describe("PrimitiveTypeService V4 Test", () => {
   });
 
   test("primitiveType V4: defaults to identity converter when none is given", async () => {
-    const defaultService = new PrimitiveTypeServiceV4<MockClient, string>(odataClient, BASE_URL, NAME);
+    const defaultService = new PrimitiveTypeServiceV4<string>(odataClient, BASE_URL, NAME);
 
     odataClient.setValueResponse("tester");
     const response = await defaultService.getValue().execute();

@@ -12,10 +12,10 @@ describe("MediaEntityService V4 Test", () => {
   const ENTITY_PATH = `${BASE_URL}/${NAME}`;
   const CONTENT_PATH = `${ENTITY_PATH}/$value`;
 
-  let service: MediaEntityServiceV4<MockClient, PersonModel, EditablePersonModel, QPersonV4>;
+  let service: MediaEntityServiceV4<PersonModel, EditablePersonModel, QPersonV4>;
 
   beforeEach(() => {
-    service = new MediaEntityServiceV4<MockClient, PersonModel, EditablePersonModel, QPersonV4>(
+    service = new MediaEntityServiceV4<PersonModel, EditablePersonModel, QPersonV4>(
       odataClient,
       BASE_URL,
       NAME,
@@ -85,7 +85,7 @@ describe("MediaEntityService V4 Test", () => {
     // `$value` addresses the entity, which its key already identifies - servers answer 404 for the
     // combination. A stream *property* declared on the derived type is the opposite case: it exists only
     // behind the cast, which is why the generated property getter keeps the segment.
-    const subtypeService = new MediaEntityServiceV4<MockClient, PersonModel, EditablePersonModel, QPersonV4>(
+    const subtypeService = new MediaEntityServiceV4<PersonModel, EditablePersonModel, QPersonV4>(
       odataClient,
       ENTITY_PATH,
       "Library.Catalog.EBook",

@@ -13,9 +13,9 @@ import { qEBook, QEBookId } from "./QTester.js";
 // @ts-ignore
 import type { EBook, EBookId, EditableEBook } from "./TesterModel.js";
 
-export class TesterService<in out ClientType extends ODataHttpClient> extends ODataService<ClientType> {
-  public eBooks(): EBookCollectionService<ClientType>;
-  public eBooks(id: EBookId): EBookService<ClientType>;
+export class TesterService extends ODataService {
+  public eBooks(): EBookCollectionService;
+  public eBooks(id: EBookId): EBookService;
   public eBooks(id?: EBookId | undefined) {
     const fieldName = "EBooks";
     const { client, path, options, isUrlNotEncoded } = this.__base;
@@ -25,20 +25,25 @@ export class TesterService<in out ClientType extends ODataHttpClient> extends OD
   }
 }
 
-export class EBookService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends MediaEntityServiceV4<ClientType, EBook, EditableEBook, QEBook, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class EBookService<V extends ODataVersionV4 = "4.0"> extends MediaEntityServiceV4<
+  EBook,
+  EditableEBook,
+  QEBook,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qEBook, options);
   }
 }
 
-export class EBookCollectionService<
-  in out ClientType extends ODataHttpClient,
-  V extends ODataVersionV4 = "4.0",
-> extends EntitySetServiceV4<ClientType, EBook, EditableEBook, QEBook, EBookId, V> {
-  constructor(client: ClientType, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
+export class EBookCollectionService<V extends ODataVersionV4 = "4.0"> extends EntitySetServiceV4<
+  EBook,
+  EditableEBook,
+  QEBook,
+  EBookId,
+  V
+> {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qEBook, new QEBookId(name), options);
   }
 }
