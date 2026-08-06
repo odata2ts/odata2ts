@@ -221,4 +221,61 @@ describe("ImportContainer tests", function () {
       expect(importDecls[0].moduleSpecifier).toBe("./QTest.js");
     });
   });
+
+  describe("custom types", () => {
+    const BIG_NUMBER = "bignumber.js";
+
+    test("a plain type name is imported as it is", async () => {
+      await createImportContainer();
+
+      expect(importContainer.addCustomType(BIG_NUMBER, "BigNumber", true)).toBe("BigNumber");
+      expect(importContainer.getImportDeclarations()).toStrictEqual([
+        { isTypeOnly: true, moduleSpecifier: BIG_NUMBER, namedImports: [{ name: "BigNumber", alias: undefined }] },
+      ]);
+    });
+
+    test("a qualified type name is imported by its root only", async () => {
+      /*
+       * A converter may target a type living in a namespace - bignumber.js' instance type really is
+       * `BigNumber.Instance`. Only the root of such a name is importable: `import { BigNumber.Instance }`
+       * does not compile, the qualifier belongs at the place the type is used.
+       */
+      await createImportContainer();
+
+      expect(importContainer.addCustomType(BIG_NUMBER, "BigNumber.Instance", true)).toBe("BigNumber.Instance");
+      expect(importContainer.getImportDeclarations()).toStrictEqual([
+        { isTypeOnly: true, moduleSpecifier: BIG_NUMBER, namedImports: [{ name: "BigNumber", alias: undefined }] },
+      ]);
+    });
+
+    test("more than one qualifier is kept", async () => {
+      await createImportContainer();
+
+      expect(importContainer.addCustomType("some-lib", "Outer.Middle.Inner", true)).toBe("Outer.Middle.Inner");
+      expect(importContainer.getImportDeclarations()[0].namedImports).toStrictEqual([
+        { name: "Outer", alias: undefined },
+      ]);
+    });
+
+    test("a root renamed to dodge a clash is carried into the qualified name", async () => {
+      // the returned name is what ends up in the generated code, so it has to follow the alias
+      await createImportContainer(DEFAULT_FILE_NAME, "", ["BigNumber"]);
+
+      expect(importContainer.addCustomType(BIG_NUMBER, "BigNumber.Instance", true)).toBe("BigNumber_1.Instance");
+      expect(importContainer.getImportDeclarations()).toStrictEqual([
+        { isTypeOnly: true, moduleSpecifier: BIG_NUMBER, namedImports: [{ name: "BigNumber", alias: "BigNumber_1" }] },
+      ]);
+    });
+
+    test("two types sharing a root produce a single import", async () => {
+      await createImportContainer();
+
+      expect(importContainer.addCustomType("luxon", "DateTime.Unit", true)).toBe("DateTime.Unit");
+      expect(importContainer.addCustomType("luxon", "DateTime", true)).toBe("DateTime");
+
+      expect(importContainer.getImportDeclarations()).toStrictEqual([
+        { isTypeOnly: true, moduleSpecifier: "luxon", namedImports: [{ name: "DateTime", alias: undefined }] },
+      ]);
+    });
+  });
 });

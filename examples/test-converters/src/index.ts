@@ -3,6 +3,7 @@ import { booleanToNumberConverter } from "./BooleanToNumberConverter";
 import { converterWithWrongId } from "./ConverterWithWrongId";
 import { guidToGuidStringConverter } from "./GuidToGuidStringConverter";
 import { numberToStringConverter } from "./NumberToStringConverter";
+import { stringToNamespacedModelConverter } from "./StringToNamespacedModelConverter";
 import { stringToPrefixModelConverter } from "./StringToPrefixModelConverter";
 
 const pkg: ConverterPackage = {
@@ -12,10 +13,12 @@ const pkg: ConverterPackage = {
 
 export default pkg;
 export * from "./FixedDateConverter";
+export * from "./StringToNamespacedModelConverter";
 export * from "./StringToPrefixModelConverter";
 export {
   booleanToNumberConverter,
   stringToPrefixModelConverter,
+  stringToNamespacedModelConverter,
   numberToStringConverter,
   converterWithWrongId,
   guidToGuidStringConverter,
