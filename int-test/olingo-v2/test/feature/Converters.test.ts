@@ -1,3 +1,4 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { BigNumber } from "bignumber.js";
 import { DateTime } from "luxon";
 import { describe, expect, expectTypeOf, test } from "vitest";
@@ -121,6 +122,23 @@ describe("Olingo Library: value converters", () => {
     expect(raw.data.d.PublicationDate).toBe(`/Date(${publicationDate.toMillis()})/`);
 
     await CONVERTED.Books(id).delete().execute();
+  });
+
+  test("a converted date reaches a function parameter as a V2 literal, not as ticks", async () => {
+    /*
+     * A function parameter goes into the URL just like a filter value does, so the converter has to be
+     * told that it is converting for a URL. Without that it produces V2's *body* format and the literal
+     * becomes `datetime'/Date(1766534400000)/'` - which no V2 server accepts. The filter side above was
+     * already covered; this is the same conversion reached through a QParam instead of a QPath.
+     */
+    const cmd = CONVERTED.ClosureDay({ Day: DateTime.fromISO("2026-12-24T00:00:00", { zone: "utc" }) });
+
+    expect(decodeURIComponent(cmd.getUrl())).toContain("datetime'2026-12-24T00:00:00'");
+
+    const result = await cmd.execute();
+    expect(result.status).toBe(204);
+    expect(result.data).toBeUndefined();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("a converted primitive property service converts too", async () => {
