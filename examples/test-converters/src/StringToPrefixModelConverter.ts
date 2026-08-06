@@ -8,7 +8,7 @@ export interface PrefixModel {
 export const stringToPrefixModelConverter: ValueConverter<string, PrefixModel> = {
   id: "stringToPrefixModelConverter",
   from: "Edm.String",
-  to: "@odata2ts/test-converters.PrefixModel",
+  to: { module: "@odata2ts/test-converters", type: "PrefixModel" },
 
   convertFrom(value: ParamValueModel<string>): ParamValueModel<PrefixModel> {
     return typeof value === "string" ? { prefix: "PREFIX_", value } : value;

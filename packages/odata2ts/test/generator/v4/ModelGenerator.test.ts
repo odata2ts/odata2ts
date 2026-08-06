@@ -187,6 +187,21 @@ describe("Model Generator Tests V4", () => {
     });
   });
 
+  test(`${TEST_SUITE_NAME}: convert to a type living in a namespace`, async () => {
+    /*
+     * A converter may target a type that only exists inside a namespace - bignumber.js' instance type
+     * really is `BigNumber.Instance`. Only the root of such a name can be imported, the qualifier has
+     * to stay at the use site, so the import and the property type differ here.
+     */
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder.addKeyProp("id", ODataTypesV4.Boolean).addProp("optional", ODataTypesV4.String, true),
+    );
+
+    await generateAndCompare("entity-converter-with-namespaced-model.ts", {
+      converters: [{ module: "@odata2ts/test-converters", use: ["stringToNamespacedModelConverter"] }],
+    });
+  });
+
   test(`${TEST_SUITE_NAME}: overloaded function params`, async () => {
     const testFunc = "testFunc";
 

@@ -42,7 +42,7 @@ describe("CAP Library: value converters", () => {
     expect(BigNumber.isBigNumber(member.Balance)).toBe(true);
     expect(member.Balance!.toFixed(2)).toBe("0.00");
 
-    expectTypeOf<Members["Balance"]>().toEqualTypeOf<BigNumber | null>();
+    expectTypeOf<Members["Balance"]>().toEqualTypeOf<BigNumber.Instance | null>();
   });
 
   test("Edm.Int64 becomes a bigint", async () => {
