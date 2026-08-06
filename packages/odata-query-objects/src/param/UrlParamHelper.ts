@@ -1,4 +1,4 @@
-import { ParamValueModel } from "@odata2ts/converter-api";
+import { ConverterOptions, ParamValueModel } from "@odata2ts/converter-api";
 import {
   CollectionFilterFunctions,
   DateTimeFilterFunctions,
@@ -10,6 +10,17 @@ import {
 import { QPathModel } from "../path/QPathModel";
 import { QFilterExpression } from "../QFilterExpression";
 import { UrlExpressionValueModel, UrlValueModel } from "./UrlParamModel";
+
+/**
+ * Handed to a converter whenever the value it converts belongs into a URL rather than into a
+ * request or response body. Some conversions differ between the two - `Edm.DateTime` for example
+ * is written as `/Date(<ticks>)/` in a V2 body, but never in a URL.
+ *
+ * Every place building a URL value has to pass this along: paths (`$filter`, `$orderby`) as well
+ * as params (entity keys, function parameters). Action parameters are exempt on purpose, they
+ * travel in the body.
+ */
+export const URL_CONVERSION_OPTIONS: ConverterOptions = { urlConversion: true };
 
 function parseNullValue(value: string | undefined): string | null | undefined {
   return value === "null" ? null : value;

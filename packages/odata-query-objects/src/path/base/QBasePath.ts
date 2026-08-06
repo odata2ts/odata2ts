@@ -1,6 +1,6 @@
-import { ConverterOptions, ValueConverter } from "@odata2ts/converter-api";
+import { ValueConverter } from "@odata2ts/converter-api";
 import { getIdentityConverter } from "../../IdentityConverter";
-import { isPathValue } from "../../param/UrlParamHelper";
+import { isPathValue, URL_CONVERSION_OPTIONS } from "../../param/UrlParamHelper";
 import { UrlExpressionValueModel } from "../../param/UrlParamModel";
 import { QValuePathModel } from "../QPathModel";
 import {
@@ -20,8 +20,6 @@ import {
 
 export type ExtractConverted<T> = T extends ValueConverter<any, infer Converted> ? Converted : never;
 export type InputModel<T> = QValuePathModel | ExtractConverted<T>;
-
-const CONVERSION_OPTIONS: ConverterOptions = { urlConversion: true };
 
 export abstract class QBasePath<ValueType extends UrlExpressionValueModel, ConvertedType> implements QValuePathModel {
   protected abstract formatValue(value: ValueType): string;
@@ -44,7 +42,7 @@ export abstract class QBasePath<ValueType extends UrlExpressionValueModel, Conve
       return value.getPath();
     }
 
-    const converted = this.converter.convertTo(value, CONVERSION_OPTIONS);
+    const converted = this.converter.convertTo(value, URL_CONVERSION_OPTIONS);
     if (converted === null || converted === undefined) {
       throw new Error(`Value "${value}" converted to ${converted}!`);
     }
