@@ -386,14 +386,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@odata2ts/converter-big-number@npm:^0.3.0":
-  version: 0.3.0
-  resolution: "@odata2ts/converter-big-number@npm:0.3.0"
+"@odata2ts/converter-big-number@npm:^0.3.1":
+  version: 0.3.1
+  resolution: "@odata2ts/converter-big-number@npm:0.3.1"
   dependencies:
     "@odata2ts/converter-api": "npm:^0.3.0"
   peerDependencies:
     bignumber.js: ">1"
-  checksum: 10/d34ddd8f17c8898215d916b56070f035edac9c2d3dc35aa2aff9e2faea8310388ece819bcac7b7cb7e6624e85f4a95e35aa006da56da2e4e7e355b788ab9b74d
+  checksum: 10/1f8052ab5e3a2841670d9772f43abf781b03f54aa23ce5672784e849cac0f9436da659001c27656745cf3afd9879a13054a3c69624e46154064bd84f058d9e57
   languageName: node
   linkType: hard
 
@@ -439,7 +439,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/example-main@workspace:examples/main"
   dependencies:
-    "@odata2ts/converter-big-number": "npm:^0.3.0"
+    "@odata2ts/converter-big-number": "npm:^0.3.1"
     "@odata2ts/converter-common": "npm:^0.4.0"
     "@odata2ts/converter-luxon": "npm:^0.3.0"
     "@odata2ts/converter-v2-to-v4": "npm:^0.5.8"
@@ -527,7 +527,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/int-test-cap@workspace:int-test/cap"
   dependencies:
-    "@odata2ts/converter-big-number": "npm:^0.3.0"
+    "@odata2ts/converter-big-number": "npm:^0.3.1"
     "@odata2ts/converter-common": "npm:^0.4.0"
     "@odata2ts/converter-luxon": "npm:^0.3.0"
     "@odata2ts/http-client-fetch": "npm:^0.11.0"
@@ -558,7 +558,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/int-test-olingo-v2@workspace:int-test/olingo-v2"
   dependencies:
-    "@odata2ts/converter-big-number": "npm:^0.3.0"
+    "@odata2ts/converter-big-number": "npm:^0.3.1"
     "@odata2ts/converter-common": "npm:^0.4.0"
     "@odata2ts/converter-luxon": "npm:^0.3.0"
     "@odata2ts/converter-v2-to-v4": "npm:^0.5.8"

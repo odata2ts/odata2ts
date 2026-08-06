@@ -14,7 +14,7 @@
     "test-compile": "tsc"
   },
   "dependencies": {
-    "@odata2ts/converter-big-number": "^0.3.0",
+    "@odata2ts/converter-big-number": "^0.3.1",
     "@odata2ts/converter-common": "^0.4.0",
     "@odata2ts/converter-luxon": "^0.3.0",
     "@odata2ts/http-client-fetch": "^0.11.0",

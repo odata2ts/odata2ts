@@ -42,7 +42,7 @@ describe("Olingo Library: value converters", () => {
     // Edm.Decimal - the one that must not become a number, or 0.00 stops being 0.00
     expect(BigNumber.isBigNumber(member.Balance)).toBe(true);
     expect(member.Balance!.toFixed(2)).toBe("0.00");
-    expectTypeOf<Member["Balance"]>().toEqualTypeOf<BigNumber.Instance | null>();
+    expectTypeOf<Member["Balance"]>().toEqualTypeOf<BigNumber | null>();
 
     const branch = (await CONVERTED.Branches(1).query().execute()).data.d;
     // Edm.Int64 - beyond a JS number's safe range in general, so a bigint
