@@ -5,6 +5,7 @@ import {
   QDateTimeOffsetPath,
   QEntityCollectionPath,
   QEntityPath,
+  QFlatComplexPath,
   QNumberPath,
   QNumericEnumCollectionPath,
   QNumericEnumPath,
@@ -24,9 +25,11 @@ export class QPerson extends QueryObject {
   public readonly likedFeatures = new QNumericEnumCollectionPath(this.withPrefix("likedFeatures"), Features);
   public readonly bestFriend = new QEntityPath(this.withPrefix("bestFriend"), () => QPerson);
   public readonly friends = new QEntityCollectionPath(this.withPrefix("friends"), () => QPerson);
+  /** the same complex type, but stated flat by the service - see `unflattenComplexTypes` */
+  public readonly flatAddress = new QFlatComplexPath<QFlatAddress>(this.withPrefix("FlatAddress"), () => QFlatAddress);
 
-  constructor(path?: string) {
-    super(path);
+  constructor(path?: string, separator?: string) {
+    super(path, separator);
   }
 }
 
@@ -37,8 +40,8 @@ export class QAddress extends QueryObject {
   public readonly responsible = new QEntityPath<QPerson>(this.withPrefix("responsible"), () => QPerson);
   public readonly geo = new QComplexPath<QGeoPosition>(this.withPrefix("geo"), () => QGeoPosition);
 
-  constructor(path?: string) {
-    super(path);
+  constructor(path?: string, separator?: string) {
+    super(path, separator);
   }
 }
 
@@ -48,9 +51,27 @@ export class QGeoPosition extends QueryObject {
   public readonly lat = new QNumberPath(this.withPrefix("lat"));
   public readonly lng = new QNumberPath(this.withPrefix("lng"));
 
-  constructor(path?: string) {
-    super(path);
+  constructor(path?: string, separator?: string) {
+    super(path, separator);
   }
 }
 
 export const qGeoPosition = new QGeoPosition();
+
+/**
+ * The flat counterpart of QAddress: no constructor of its own, exactly as generated query objects are
+ * emitted, so the separator handed down by QFlatComplexPath survives.
+ */
+export class QFlatAddress extends QueryObject {
+  public readonly street = new QStringPath(this.withPrefix("street"));
+  public readonly city = new QStringPath(this.withPrefix("city"));
+  public readonly geo = new QFlatComplexPath<QFlatGeoPosition>(this.withPrefix("geo"), () => QFlatGeoPosition);
+  public readonly responsible = new QEntityPath<QPerson>(this.withPrefix("responsible"), () => QPerson);
+}
+
+export const qFlatAddress = new QFlatAddress();
+
+export class QFlatGeoPosition extends QueryObject {
+  public readonly lat = new QNumberPath(this.withPrefix("lat"));
+  public readonly lng = new QNumberPath(this.withPrefix("lng"));
+}

@@ -23,6 +23,7 @@ describe("ServiceConfigHelper Tests", function () {
       bundledFileGeneration: false,
       enumType: "string",
       enableNativeInOperator: false,
+      unflattenComplexTypes: false,
     });
   }
 
@@ -41,6 +42,7 @@ describe("ServiceConfigHelper Tests", function () {
       bundledFileGeneration: false,
       enumType: "string",
       enableNativeInOperator: false,
+      unflattenComplexTypes: false,
     });
   }
 

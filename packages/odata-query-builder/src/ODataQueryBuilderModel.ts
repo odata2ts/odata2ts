@@ -4,6 +4,7 @@ import {
   QEntityCollectionPath,
   QEntityPath,
   QFilterExpression,
+  QFlatComplexPath,
   QOrderByExpression,
   QSearchTerm,
   QSelectExpression,
@@ -11,7 +12,8 @@ import {
 } from "@odata2ts/odata-query-objects";
 
 /**
- * Extracts the wrapped entity from QEntityPath, QEntityCollectionPath, QComplexPath or QComplexCollectionPath
+ * Extracts the wrapped entity from QEntityPath, QEntityCollectionPath, QComplexPath, QComplexCollectionPath
+ * or QFlatComplexPath
  */
 export type EntityExtractor<QProp> =
   QProp extends QEntityPath<infer ET>
@@ -22,7 +24,9 @@ export type EntityExtractor<QProp> =
         ? ET
         : QProp extends QComplexCollectionPath<infer ET>
           ? ET
-          : never;
+          : QProp extends QFlatComplexPath<infer ET>
+            ? ET
+            : never;
 
 /**
  * Extracts all keys from a property (Q*Path), but only for the given types
@@ -51,7 +55,11 @@ export type ExpandType<Q extends QueryObjectModel> = ExtractPropertyNamesOfType<
  */
 export type NestingType<Q extends QueryObjectModel> = ExtractPropertyNamesOfType<
   Q,
-  QEntityPath<any> | QEntityCollectionPath<any> | QComplexPath<any> | QComplexCollectionPath<any>
+  | QEntityPath<any>
+  | QEntityCollectionPath<any>
+  | QComplexPath<any>
+  | QComplexCollectionPath<any>
+  | QFlatComplexPath<any>
 >;
 
 /**

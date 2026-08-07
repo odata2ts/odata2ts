@@ -26,6 +26,7 @@ const defaultConfig: DefaultConfiguration = {
   v4BigNumberAsString: false,
   disableAutomaticNameClashResolution: false,
   bundledFileGeneration: false,
+  unflattenComplexTypes: false,
   enumType: "string",
   naming: {
     models: {

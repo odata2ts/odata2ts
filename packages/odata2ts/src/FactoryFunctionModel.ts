@@ -18,6 +18,7 @@ export type DigestionOptions = Pick<
   | "skipIdModels"
   | "disableAutomaticNameClashResolution"
   | "bundledFileGeneration"
+  | "unflattenComplexTypes"
   | "enumType"
   | "enableNativeInOperator"
 >;

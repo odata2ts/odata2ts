@@ -1,6 +1,7 @@
 import {
   QEntityPathModel,
   QFilterExpression,
+  QFlatComplexPath,
   QOrderByExpression,
   QSelectExpression,
   QueryObjectModel,
@@ -85,9 +86,12 @@ class ODataQueryBuilderV2<Q extends QueryObjectModel> implements ODataQueryBuild
     }
 
     const entityProp = this.builder.getEntityProp<QEntityPathModel<any>>(prop);
-    const entity = entityProp.getEntity();
+    // a complex property the service states flat is nothing to expand: its leaves are ordinary properties
+    // of this entity, so the nested builder works on prefixed paths and only contributes selects
+    const isFlat = entityProp instanceof QFlatComplexPath;
+    const entity = entityProp.getEntity(isFlat);
 
-    const expander = createExpandingQueryBuilderV2(entityProp.getPath(), entity);
+    const expander = createExpandingQueryBuilderV2(entityProp.getPath(), entity, isFlat);
 
     builderFn(expander, entity);
 

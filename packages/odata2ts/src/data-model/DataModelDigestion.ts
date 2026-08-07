@@ -7,6 +7,7 @@ import {
   Modes,
   PropertyGenerationOptions,
 } from "../OptionModel.js";
+import { ComplexTypeUnflattener } from "./ComplexTypeUnflattener.js";
 import { DataModel, NamespaceWithAlias, withNamespace } from "./DataModel.js";
 import {
   ComplexType as ComplexModelType,
@@ -57,6 +58,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    * Reverse mapping from fqName to data type: EntityType, ComplexType, EnumType, or Primitive Type.
    */
   private model2Type = new Map<string, DataTypes>();
+
+  /**
+   * The complex properties which `unflattenComplexTypes` formed from flat ones, as
+   * `<fully qualified model name>/<property name>`. They are the ones which still travel and are queried
+   * flat, hence they get a `QFlatComplexPath` instead of a `QComplexPath`.
+   */
+  private flattenedProps = new Set<string>();
 
   protected constructor(
     protected version: ODataVersion,
@@ -129,6 +137,14 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   }
 
   private digestEntityTypesAndOperations() {
+    // reshaping happens on the EDMX itself, before anything is digested: from here on the model looks like
+    // one the service stated in that shape to begin with
+    if (this.options.unflattenComplexTypes) {
+      this.flattenedProps = new ComplexTypeUnflattener<ET, CT>(this.schemas, (model) =>
+        this.getNavigationProps(model).map((np) => np.$.Name),
+      ).unflatten();
+    }
+
     this.schemas.forEach((schema) => {
       const ns: NamespaceWithAlias = [schema.$.Namespace, schema.$.Alias];
 
@@ -193,7 +209,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     // map properties respecting the config
     const props = [...(model.Property ?? []), ...this.getNavigationProps(model)].map((p) => {
       const epConfig = entityConfig?.properties?.find((ep) => ep.name === p.$.Name);
-      return this.mapProp(p, epConfig);
+      return this.mapProp(p, epConfig, fqName);
     });
     this.assertNoPropNameClash(props, fqName);
 
@@ -492,7 +508,18 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     );
   }
 
-  protected mapProp = (p: Property, entityPropConfig?: PropertyGenerationOptions | undefined): PropertyModel => {
+  /**
+   * @param p the property to map
+   * @param entityPropConfig the configuration for the prop
+   * @param fqOwnerName the fully qualified name of the model this property belongs to, where there is one -
+   *   operation parameters and return types have no owner. Only needed to recognise a property which
+   *   `unflattenComplexTypes` reshaped.
+   */
+  protected mapProp = (
+    p: Property,
+    entityPropConfig?: PropertyGenerationOptions | undefined,
+    fqOwnerName?: string,
+  ): PropertyModel => {
     if (!p.$.Type) {
       throw new Error(`No type information given for property [${p.$.Name}]!`);
     }
@@ -564,7 +591,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
               ? QueryObjectTypes.QComplexCollectionPath
               : QueryObjectTypes.QEntityCollectionPath
             : isComplexType
-              ? QueryObjectTypes.QComplexPath
+              ? this.flattenedProps.has(`${fqOwnerName}/${p.$.Name}`)
+                ? QueryObjectTypes.QFlatComplexPath
+                : QueryObjectTypes.QComplexPath
               : QueryObjectTypes.QEntityPath,
           qObject: this.namingHelper.getQName(typeName),
           qParam: "QComplexParam",
