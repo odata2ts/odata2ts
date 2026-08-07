@@ -96,13 +96,64 @@ function convertNavProp(
   }
 }
 
+/**
+ * What joins a flattened complex property to its leaves. SAP CAP uses the underscore and that is the only
+ * spelling in the field, hence it is fixed rather than configurable.
+ *
+ * Lives here rather than with {@link QFlatComplexPath} so that the dependency between the two runs one way
+ * only: the path knows the query object, not the other way round.
+ */
+export const FLAT_SEPARATOR = "_";
+
+/**
+ * A complex property which the service states flat, i.e. as one property per leaf joined by
+ * {@link FLAT_SEPARATOR}. Such a property owns several keys of the payload instead of one.
+ */
+function isFlatComplex(prop: any): prop is QEntityPathModel<QueryObject> {
+  return prop?.discriminator === "FlatComplexType";
+}
+
+/**
+ * Every path a flattened complex property occupies, which is what addressing the property as a whole comes
+ * down to: it has no representation of its own, neither in a payload nor in a query, so selecting it means
+ * selecting its leaves and clearing it means nulling them.
+ */
+export function flatLeafPaths(entity: QueryObject): Array<string> {
+  const result: Array<string> = [];
+  for (const key in entity) {
+    // @ts-ignore - getters live on the prototype, hence the for-in loop
+    const prop = entity[key];
+    if (typeof prop?.getPath !== "function") {
+      continue;
+    }
+    if (isFlatComplex(prop)) {
+      result.push(...flatLeafPaths(prop.getEntity(true)));
+    } else if (typeof prop.getEntity !== "function") {
+      result.push(prop.getPath());
+    }
+    // anything else reached from here - a navigation property, a collection - is not a leaf of this
+    // property: it is addressed in its own right and needs an $expand rather than a path
+  }
+  return result;
+}
+
 export const ENUMERABLE_PROP_DEFINITION = { enumerable: true };
 
 export class QueryObject<T extends object = any> implements QueryObjectModel<T> {
   private __propMapping?: Map<string, string>;
   protected readonly __subtypeMapping?: Record<string, string>;
 
-  constructor(private __prefix?: string) {}
+  /**
+   * @param __prefix the path this query object is reached by, if it is a nested one
+   * @param __separator what joins that prefix to the paths of the own properties. The slash of OData by
+   *   default; an underscore where the service flattened this complex type into the entity carrying it,
+   *   so `Address/City` is stated as the `Address_City` such a service actually knows. Set by
+   *   {@link QFlatComplexPath}, never by generated code.
+   */
+  constructor(
+    private __prefix?: string,
+    private __separator: string = "/",
+  ) {}
 
   private __getPropMapping(): Map<string, string> {
     if (!this.__propMapping) {
@@ -112,14 +163,14 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T> 
   }
 
   /**
-   * Adds the prefix of this QueryObject including a separating slash in front of the given path.
+   * Adds the prefix of this QueryObject including its separator in front of the given path.
    * Only applies, if this QueryObject has a prefix.
    *
    * @param path the path to be prefixed
    * @protected
    */
   protected withPrefix(path: string) {
-    return this.__prefix ? `${this.__prefix}/${path}` : path;
+    return this.__prefix ? `${this.__prefix}${this.__separator}${path}` : path;
   }
 
   /**
@@ -155,7 +206,11 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T> 
 
     const result = models.map((model) => {
       const typeByCi = getTypeControlInfo(model);
-      return Object.entries(model).reduce((collector, [key, value]) => {
+      // a flattened complex property owns several keys of the payload, so its value is assembled from all
+      // of them and can only be converted once the whole model has been walked
+      const flatBuckets = new Map<string, Record<string, any>>();
+
+      const converted = Object.entries(model).reduce((collector, [key, value]) => {
         let propKey = this.__getPropMapping().get(key);
         let finalKey: string = propKey as string;
 
@@ -193,14 +248,50 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T> 
         }
         // be permissive here to allow passing unknown values as they are
         else {
-          collector[key] = value;
+          const flat = this.__findFlatComplexProp(key);
+          if (flat) {
+            const bucket = flatBuckets.get(flat.propKey) ?? {};
+            bucket[key.substring(flat.path.length + FLAT_SEPARATOR.length)] = value;
+            flatBuckets.set(flat.propKey, bucket);
+          } else {
+            collector[key] = value;
+          }
         }
 
         return collector;
       }, {} as any) as T;
+
+      for (const [propKey, bucket] of flatBuckets) {
+        const prop = this[propKey as keyof this] as unknown as QEntityPathModel<any>;
+        // the entity is built without a prefix, so it reads the leaves by their bare names - and takes any
+        // nesting of its own apart in turn
+        (converted as any)[propKey] = prop.getEntity().convertFromOData(bucket);
+      }
+
+      return converted;
     });
 
     return isList ? result : result[0];
+  }
+
+  /**
+   * The flattened complex property a payload key belongs to, if any: `Address_City` belongs to `Address`.
+   * The longest match wins, so a nested group is preferred over the one enclosing it.
+   */
+  private __findFlatComplexProp(key: string): { propKey: string; path: string } | undefined {
+    let match: { propKey: string; path: string } | undefined;
+
+    for (const [path, propKey] of this.__getPropMapping()) {
+      if (
+        key.startsWith(`${path}${FLAT_SEPARATOR}`) &&
+        isFlatComplex(this[propKey as keyof this]) &&
+        (!match || path.length > match.path.length)
+      ) {
+        match = { propKey, path };
+      }
+    }
+
+    return match;
   }
 
   /**
@@ -253,7 +344,17 @@ export class QueryObject<T extends object = any> implements QueryObjectModel<T> 
         if (typeof asEntity?.getEntity === "function") {
           const entity = asEntity.getEntity();
           const binding = asEntity.getBinding?.();
-          if (binding) {
+          if (isFlatComplex(asEntity)) {
+            // the service knows no property of this name, only its leaves - so the converted object is
+            // spread into the payload instead of nested into it
+            if (value === null || value === undefined) {
+              flatLeafPaths(asEntity.getEntity(true)).forEach((leaf) => (collector[leaf] = value));
+            } else {
+              Object.entries(entity.convertToOData(value, failForUnknownProps)).forEach(
+                ([leafKey, leafValue]) => (collector[`${finalKey}${FLAT_SEPARATOR}${leafKey}`] = leafValue),
+              );
+            }
+          } else if (binding) {
             convertNavProp(collector, finalKey!, value, entity, binding);
           } else {
             collector[finalKey!] = entity.convertToOData(value);

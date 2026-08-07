@@ -51,6 +51,7 @@ export { QBooleanPath } from "./path/QBooleanPath";
 export { QBinaryPath } from "./path/QBinaryPath";
 export { QCollectionPath } from "./path/QCollectionPath";
 export { QComplexPath } from "./path/QComplexPath";
+export { QFlatComplexPath } from "./path/QFlatComplexPath";
 export { QComplexCollectionPath } from "./path/QComplexCollectionPath";
 export { QEntityPath } from "./path/QEntityPath";
 export { QEntityCollectionPath } from "./path/QEntityCollectionPath";

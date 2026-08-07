@@ -41,6 +41,33 @@ const config: ConfigFileOptions = {
       enableNativeInOperator: true,
     },
     /**
+     * The V4 model with `unflattenComplexTypes`, which is what this whole server is the case for:
+     * CAP states `Member.Address` as four flat properties and never as the `<ComplexType>` it declares
+     * elsewhere, so only a real CAP server settles whether odata2ts puts it back together correctly.
+     *
+     * Generated next to the raw client rather than replacing it, because both halves are the point: the raw
+     * one proves what the server actually sends and keeps the flat form covered, this one proves the
+     * reshaping. See test/feature/UnflattenComplexTypes.test.ts.
+     */
+    libraryShaped: {
+      serviceName: "LibraryShaped",
+      source: "resource/library.xml",
+      output: "src-generated/library-shaped",
+      unflattenComplexTypes: true,
+    },
+    /**
+     * The same option against the V2 rendition, since the adapter flattens exactly as the V4 endpoint does
+     * but the client builds different URLs and payloads for it. See test/v2/feature/UnflattenComplexTypes.test.ts.
+     */
+    libraryShapedV2: {
+      serviceName: "LibraryShapedV2",
+      source: "resource/library-v2.xml",
+      output: "src-generated/library-shaped-v2",
+      unflattenComplexTypes: true,
+      v2ResponseResultsWrapping: true,
+      v2PayloadResultsWrapping: false,
+    },
+    /**
      * The V4 model a second time, with converters switched on.
      *
      * Converters had only ever met a real server as V2, through `int-test/olingo-v2`, and V2 is a

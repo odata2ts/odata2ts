@@ -286,6 +286,34 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    */
   enumType?: "string" | "numeric" | "string-union";
   /**
+   * More or less a CAP feature. In newer versions SAP CAP unfolds `<ComplexType>` into one
+   * property per leaf, joined by an underscore: So instead of an `Address` object you get
+   * `Address_Street`, `Address_City`, `Address_PostalCode` and `Address_Country`.
+   * That is the shape CAP recommends, and its structured mode (`cds.odata.structs`) is deprecated.
+   *
+   * Switching this on groups such flat properties back into one complex property, so the models read
+   * `address: { street, city, ... }`. Off by default, which leaves the structure exactly as the metadata
+   * states it.
+   *
+   * The reshaping affects the whole surface, since the service still knows nothing but the flat
+   * properties: request and response payloads are converted in both directions, and query paths are
+   * rewritten, so `$select`, `$filter` and `$orderby` reach the service in the shape it understands -
+   * `address.city` is phrased as `Address_City`.
+   *
+   * Which flat properties form a group is decided from the metadata alone.
+   * The following are excluded:
+   * - a group named like a navigation property
+   * - a group consisting of nothing but an `Id`, which makes it a foreign key: CAP writes `Publisher_Id`
+   *   next to the navigation property `Publisher`. The price is that a complex type made up of a single
+   *   property named `Id` goes unrecognised. `Publisher_Id` next to `Publisher_Name` is a group again.
+   * - a key property, which every URL of the entity addresses by name
+   * - an empty segment, i.e. a name ending with the underscore: CAP's `Location_` sits right next to
+   *   `Location_Id` and neither is a structured element
+   * Where a `<ComplexType>` exists whose properties match the group exactly, it
+   * is used with its own name; otherwise one is synthesized.
+   */
+  unflattenComplexTypes?: boolean;
+  /**
    * By default, odata2ts emulates the in operator by rolling it out as a series of equals-or-expressions.
    * This allows for maximum compatibility with all V4 services, as well as V2 services.
    *

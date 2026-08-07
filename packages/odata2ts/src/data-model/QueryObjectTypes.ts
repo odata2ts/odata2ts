@@ -7,6 +7,7 @@ export enum QueryObjectTypes {
   QNumericEnumCollectionPath = "QNumericEnumCollectionPath",
   QCollectionPath = "QCollectionPath",
   QComplexPath = "QComplexPath",
+  QFlatComplexPath = "QFlatComplexPath",
   QEntityPath = "QEntityPath",
   QComplexCollectionPath = "QComplexCollectionPath",
   QEntityCollectionPath = "QEntityCollectionPath",

@@ -1,4 +1,4 @@
-import { QEntityPathModel, QSelectExpression, QueryObjectModel } from "@odata2ts/odata-query-objects";
+import { QEntityPathModel, QFlatComplexPath, QSelectExpression, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
   EntityExtractor,
@@ -12,9 +12,10 @@ import {
 export function createExpandingQueryBuilderV2<Q extends QueryObjectModel>(
   property: string,
   qEntity: Q,
+  flat: boolean = false,
 ): ExpandingODataQueryBuilderV2Model<Q> {
   // must never be encoded, since it is part of $expand
-  return new ExpandingODataQueryBuilderV2<Q>(property, qEntity);
+  return new ExpandingODataQueryBuilderV2<Q>(property, qEntity, flat);
 }
 
 /**
@@ -26,12 +27,23 @@ class ExpandingODataQueryBuilderV2<Q extends QueryObjectModel> implements Expand
 
   private builder: ODataQueryBuilder<Q>;
 
-  constructor(property: string, qEntity: Q) {
+  /**
+   * @param flat whether `property` is a complex property the service states flat. There is then nothing to
+   *   expand - the service knows no property of that name, only its leaves - and the query object handed in
+   *   already carries the prefix, so its paths need none of their own.
+   */
+  constructor(
+    property: string,
+    qEntity: Q,
+    private flat: boolean = false,
+  ) {
     this.builder = new ODataQueryBuilder(property, qEntity, { expandingBuilder: true });
-    this.expands.add(property);
+    if (!flat) {
+      this.expands.add(property);
+    }
   }
 
-  private getPrefixedPath = (path: string) => `${this.builder.getPath()}/${path}`;
+  private getPrefixedPath = (path: string) => (this.flat ? path : `${this.builder.getPath()}/${path}`);
 
   public select(...props: NullableParamList<SelectType<Q>>) {
     const filtered = this.builder.filterSelectAndMapPath(props);
@@ -61,8 +73,9 @@ class ExpandingODataQueryBuilderV2<Q extends QueryObjectModel> implements Expand
     }
 
     const entityProp = this.builder.getEntityProp<QEntityPathModel<any>>(prop);
-    const entity = entityProp.getEntity();
-    const expander = new ExpandingODataQueryBuilderV2<EntityExtractor<Q[Prop]>>(entityProp.getPath(), entity);
+    const isFlat = entityProp instanceof QFlatComplexPath;
+    const entity = entityProp.getEntity(isFlat);
+    const expander = new ExpandingODataQueryBuilderV2<EntityExtractor<Q[Prop]>>(entityProp.getPath(), entity, isFlat);
 
     builderFn(expander, entity);
 

@@ -3,6 +3,7 @@ import {
   QComplexPath,
   QEntityPathModel,
   QFilterExpression,
+  QFlatComplexPath,
   QOrderByExpression,
   QPathModel,
   QSearchTerm,
@@ -135,7 +136,7 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
   public filterSelectAndMapPath(props: NullableParamList<SelectType<Q>>): Array<string> {
     return props
       .filter((p): p is SelectType<Q> => !!p)
-      .map((p): string => {
+      .flatMap((p): string | Array<string> => {
         if (p instanceof QSelectExpression) {
           return p.getPath();
         }
@@ -144,7 +145,9 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
         if (p === "*") {
           return "*";
         }
-        return this.getEntityProp(p as keyof Q).getPath();
+        const entityProp = this.getEntityProp(p as keyof Q);
+        // a flattened complex property is not a property the service knows, so it is selected by its leaves
+        return entityProp instanceof QFlatComplexPath ? entityProp.getLeafPaths() : entityProp.getPath();
       });
   }
 
@@ -201,7 +204,11 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
   ) {
     const entityProp = this.getEntityProp<QEntityPathModel<Q>>(prop);
     const path = entityProp.getPath();
-    const entity = entityProp.getEntity();
+    const isFlat = entityProp instanceof QFlatComplexPath;
+    // a flattened complex property is not nested on the wire at all - its leaves are ordinary properties of
+    // this very entity - so the nested builder works on already prefixed paths and everything it collected
+    // is merged in here instead of being embedded
+    const entity = entityProp.getEntity(isFlat);
     const isComplex = entityProp instanceof QComplexPath || entityProp instanceof QComplexCollectionPath;
 
     const facade = creator(path, entity);
@@ -209,6 +216,12 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     builderFn(facade, entity);
 
     const nestedEngine = facade.getEngine() as ODataQueryBuilder<any>;
+
+    if (isFlat) {
+      this.absorbFlat(nestedEngine);
+      return;
+    }
+
     const { content, hoistedExpands } = nestedEngine.buildNested(isComplex);
 
     if (isComplex) {
@@ -218,6 +231,25 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     }
     if (hoistedExpands.length) {
       this.getHoistedExpandsBucket().push(...hoistedExpands.map((fragment) => `${path}/${fragment}`));
+    }
+  }
+
+  /**
+   * Takes over what a nested builder collected for a flattened complex property. Since that property has no
+   * representation of its own, there is no clause to embed the content in - its selects are paths of this
+   * very entity and simply become this builder's own.
+   *
+   * The nested builder was handed a query object which already carries the prefix, so everything it
+   * produced is fully qualified and none of it is prefixed again here. That also holds for a navigation
+   * property reached through it, which still cannot be embedded and is relayed on like any other expand
+   * reached through a complex hop.
+   */
+  private absorbFlat(nested: ODataQueryBuilder<any>) {
+    this.addSelects(...(nested.selects ?? []));
+
+    const expands = [...(nested.expands ?? []), ...(nested.hoistedExpandsBucket ?? [])];
+    if (expands.length) {
+      this.getHoistedExpandsBucket().push(...expands);
     }
   }
 

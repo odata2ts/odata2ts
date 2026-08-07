@@ -3,9 +3,15 @@ import { QBinding } from "./QBinding";
 import { QEntityPathModel } from "./QPathModel";
 
 export class QModelBasePath<Q extends QueryObject> implements QEntityPathModel<Q> {
+  /**
+   * What joins this path to the paths of the nested properties. The slash of OData, unless a subclass
+   * states otherwise - see {@link QFlatComplexPath}.
+   */
+  protected readonly separator: string = "/";
+
   constructor(
     protected path: string,
-    protected qEntityFn: () => new (prefix?: string) => Q,
+    protected qEntityFn: () => new (prefix?: string, separator?: string) => Q,
     protected binding?: QBinding<any>,
   ) {
     if (!path || !path.trim()) {
@@ -25,7 +31,7 @@ export class QModelBasePath<Q extends QueryObject> implements QEntityPathModel<Q
   }
 
   public getEntity(withPrefix: boolean = false): Q {
-    return new (this.qEntityFn())(withPrefix ? this.path : undefined);
+    return new (this.qEntityFn())(withPrefix ? this.path : undefined, this.separator);
   }
 
   public isCollectionType() {
@@ -33,6 +39,6 @@ export class QModelBasePath<Q extends QueryObject> implements QEntityPathModel<Q
   }
 
   public get props(): Q {
-    return new (this.qEntityFn())(this.path);
+    return new (this.qEntityFn())(this.path, this.separator);
   }
 }
