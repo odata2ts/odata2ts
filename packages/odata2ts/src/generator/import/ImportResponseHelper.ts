@@ -49,7 +49,11 @@ function importReturnTypeV2(imports: ImportContainer, returnType: ReturnTypeMode
  * unlike {@link importReturnType}: the caller appends the literal `true` to the constructor call itself
  * where the operation's owning service was generated with `v2ResponseAsV4`.
  */
-export function importMainResponseConverter(version: ODataVersions, imports: ImportContainer, returnType: ReturnTypeModel) {
+export function importMainResponseConverter(
+  version: ODataVersions,
+  imports: ImportContainer,
+  returnType: ReturnTypeModel,
+) {
   return version === ODataVersions.V2
     ? importMainResponseConverterV2(imports, returnType)
     : importMainResponseConverterV4(imports, returnType);

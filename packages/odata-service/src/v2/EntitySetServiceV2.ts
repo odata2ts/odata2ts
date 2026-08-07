@@ -1,5 +1,10 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataCollectionResponseV2, ODataCollectionResponseV4, ODataEntityModelResponseV2, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import {
+  ODataCollectionResponseV2,
+  ODataCollectionResponseV4,
+  ODataEntityModelResponseV2,
+  ODataModelResponseV4,
+} from "@odata2ts/odata-core";
 import { CollectionQueryBuilderV2, ModelQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import {
   CollectionResponseConverterV2,
@@ -78,7 +83,8 @@ export abstract class EntitySetServiceV2<
    *
    * The service should respond with 201 (Created) and the newly created model.
    *
-   * @param model
+   * @param model the entity to create
+   * @param queryFn additional query after the entity has been created, only $select and $expand apply here
    * @return
    */
   public create(model: EditableT, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
