@@ -1,11 +1,14 @@
 import { FetchClient } from "@odata2ts/http-client-fetch";
 import { inject } from "vitest";
-import { LibraryService } from "../src-generated/library/LibraryService.js";
+import { LibraryAsV4Service } from "../src-generated/library-as-v4/index.js";
+import { LibraryService } from "../src-generated/library/index.js";
 
 /** Base URL of the running server, provided by `globalSetup` (container or external server). */
 export const BASE_URL = inject("libraryBaseUrl");
 export const ODATA_CLIENT = new FetchClient();
 export const LIBRARY = new LibraryService(ODATA_CLIENT, BASE_URL);
+/** Same server, same model, but every response reshaped as V4 - see `feature/V2ResponseAsV4.test.ts`. */
+export const LIBRARY_AS_V4 = new LibraryAsV4Service(ODATA_CLIENT, BASE_URL);
 
 // Fixed keys from the server's in-memory seed data (`data/SeedData.java` in test-server-olingo-v2).
 // They deliberately match test-server-cap wherever the same entity exists in both.

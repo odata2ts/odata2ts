@@ -49,6 +49,10 @@ class QueryObjectGenerator {
     private namingHelper: NamingHelper,
   ) {}
 
+  private isV2AsV4() {
+    return this.options.v2ResponseAsV4 && this.version === ODataVersions.V2;
+  }
+
   public async generate(): Promise<void> {
     this.project.initQObjects();
 
@@ -456,20 +460,24 @@ class QueryObjectGenerator {
           returnType.typeModule
           ? imports.addCustomType(returnType.typeModule, returnType.type, true)
           : returnType.type;
-    const responseStructure = returnType ? importReturnType(this.version, imports, returnType) : undefined;
+    const responseStructure = returnType
+      ? importReturnType(this.version, imports, returnType, this.isV2AsV4())
+      : undefined;
     const completeResponseStructure = responseStructure && rtType ? `${responseStructure}<${rtType}>` : undefined;
+
+    const asV4Arg = this.isV2AsV4() ? ", true" : "";
 
     let returnTypeOpStmt: string = "";
     if (returnType) {
       if (returnType.dataType === DataTypes.ComplexType || returnType.dataType === DataTypes.ModelType) {
         // without converter no conversion
         if (returnType.qObject) {
-          returnTypeOpStmt = `new ${importMainResponseConverter(this.version, imports, returnType)}(new ${imports.addGeneratedQObject(returnType.fqType, returnType.qObject)})`;
+          returnTypeOpStmt = `new ${importMainResponseConverter(this.version, imports, returnType)}(new ${imports.addGeneratedQObject(returnType.fqType, returnType.qObject)}${asV4Arg})`;
         }
       }
       // Primitive Types: without converter no conversion
       else if (returnType.converters) {
-        returnTypeOpStmt = `new ${importMainResponseConverter(this.version, imports, returnType)}(${this.generateConverterStmt(imports, returnType.converters)})`;
+        returnTypeOpStmt = `new ${importMainResponseConverter(this.version, imports, returnType)}(${this.generateConverterStmt(imports, returnType.converters)}${asV4Arg})`;
       }
     }
 

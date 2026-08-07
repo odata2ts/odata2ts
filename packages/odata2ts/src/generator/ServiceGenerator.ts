@@ -34,7 +34,7 @@ export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "p
 
 export interface ServiceGeneratorOptions extends Pick<
   ConfigFileOptions,
-  "enablePrimitivePropertyServices" | "v4BigNumberAsString" | "enumType" | "odataVersionV4"
+  "enablePrimitivePropertyServices" | "v4BigNumberAsString" | "enumType" | "odataVersionV4" | "v2ResponseAsV4"
 > {}
 
 export async function generateServices(
@@ -65,24 +65,53 @@ class ServiceGenerator {
     return this.options.odataVersionV4 === "4.01" && this.version === ODataVersions.V4;
   }
 
+  private isV2AsV4() {
+    return !!this.options.v2ResponseAsV4 && this.version === ODataVersions.V2;
+  }
+
   /**
    * The version type argument list as seen from the main service, which pins it: the main service does not
-   * declare V itself, everything it hands out infers the version from the options.
+   * declare the extra type parameter itself, everything it hands out infers it from the options.
    *
-   * Empty unless the version is actually pinned, since V defaults to 4.0.
+   * Empty unless something is actually pinned, since both V4's `V` and V2's `AsV4` default appropriately
+   * on their own (`"4.0"`, `false`).
    */
   private getMainVersionArg() {
+    if (this.isV401()) {
+      return `<"4.01">`;
+    }
+    if (this.isV2AsV4()) {
+      return `<true>`;
+    }
+    return "";
+  }
+
+  /**
+   * {@link getMainVersionArg} for the one place it must not be used: the main service's own `extends`
+   * clause. `ODataService` is the single, unversioned base class every main service extends, V2 and V4
+   * alike, and it is generic only over the V4 minor version - there is no `AsV4` for it to accept.
+   * `v2ResponseAsV4` still reaches every sub-service, just via the runtime option
+   * ({@link getRuntimeOptions}) rather than this type argument.
+   */
+  private getRootServiceVersionArg() {
     return this.isV401() ? `<"4.01">` : "";
   }
 
   /**
-   * The version type argument list as seen from a generated service class, which declares V itself and
-   * passes it on, so that nested services keep the version of the client they belong to.
+   * The version type argument list as seen from a generated service class, which declares the extra type
+   * parameter itself and passes it on, so that nested services keep the shape of the client they belong to:
+   * `V` for a V4 service (4.0 vs 4.01), `AsV4` for a V2 service generated with `v2ResponseAsV4`.
    *
-   * Empty for V2, which knows no such type parameter.
+   * Empty for a plain V2 service, which knows no such type parameter.
    */
   private getServiceVersionArg() {
-    return this.version === ODataVersions.V4 ? "<V>" : "";
+    if (this.version === ODataVersions.V4) {
+      return "<V>";
+    }
+    if (this.isV2AsV4()) {
+      return "<AsV4>";
+    }
+    return "";
   }
 
   /**
@@ -90,17 +119,28 @@ class ServiceGenerator {
    * version reads as the last argument instead of the only one.
    */
   private getServiceVersionArgSuffix() {
-    return this.version === ODataVersions.V4 ? ", V" : "";
+    if (this.version === ODataVersions.V4) {
+      return ", V";
+    }
+    if (this.isV2AsV4()) {
+      return ", AsV4";
+    }
+    return "";
   }
 
   /**
-   * Type parameters of a generated service class. V4 services are generic over the OData version; V2
-   * services have no type parameter at all.
+   * Type parameters of a generated service class: V4 services are generic over the OData version, a V2
+   * service generated with `v2ResponseAsV4` over whether it reshapes its response as V4. A plain V2 service
+   * has no type parameter at all.
    */
   private getServiceTypeParams(imports: ImportContainer) {
-    return this.version === ODataVersions.V4
-      ? [`V extends ${imports.addCoreLib(ODataVersions.V4, CoreImports.ODataVersionV4)} = "4.0"`]
-      : [];
+    if (this.version === ODataVersions.V4) {
+      return [`V extends ${imports.addCoreLib(ODataVersions.V4, CoreImports.ODataVersionV4)} = "4.0"`];
+    }
+    if (this.isV2AsV4()) {
+      return [`AsV4 extends boolean = false`];
+    }
+    return [];
   }
 
   /**
@@ -115,7 +155,27 @@ class ServiceGenerator {
     if (this.isV401()) {
       options.push(`odataVersionV4: "4.01"`);
     }
+    if (this.isV2AsV4()) {
+      options.push("v2ResponseAsV4: true");
+    }
     return options;
+  }
+
+  /**
+   * The runtime options type of a generated service class - the counterpart of {@link getServiceTypeParams}.
+   * V4 always uses `ODataServiceOptionsInternal<V>`, generic over the very type parameter the class itself
+   * declares, since it already needs it for the 4.0/4.01 axis regardless. A plain V2 service has nothing
+   * of the sort to declare, so it keeps the public `ODataServiceOptions` unless `v2ResponseAsV4` actually
+   * introduces the `AsV4` type parameter, in which case the options type has to keep up with it too.
+   */
+  private getServiceOptionsType(imports: ImportContainer) {
+    if (this.version === ODataVersions.V4) {
+      return imports.addServiceObject(this.version, ServiceImports.ODataServiceOptionsInternal);
+    }
+    return imports.addServiceObject(
+      this.version,
+      this.isV2AsV4() ? ServiceImports.ODataServiceOptionsInternalV2 : ServiceImports.ODataServiceOptions,
+    );
   }
 
   public async generate(): Promise<void> {
@@ -152,7 +212,7 @@ class ServiceGenerator {
     mainServiceFile.getFile().addClass({
       isExported: true,
       name: mainServiceName,
-      extends: `${rootService}${this.getMainVersionArg()}`,
+      extends: `${rootService}${this.getRootServiceVersionArg()}`,
       ctors: runtimeOptions.length
         ? [
             {
@@ -161,11 +221,18 @@ class ServiceGenerator {
                 { name: "basePath", type: "string" },
                 {
                   name: "options",
+                  // deliberately the public type, not getServiceOptionsType(): the fields merged in below
+                  // are internal, decided by the generator - a caller of the main service never states them
                   type: importContainer.addServiceObject(this.version, ServiceImports.ODataServiceOptions),
                   hasQuestionToken: true,
                 },
               ],
-              statements: [`super(client, basePath, { ...options, ${runtimeOptions.join(", ")} });`],
+              statements: [
+                // ODataService itself knows nothing about v2ResponseAsV4 - it is generic only over the V4
+                // minor version, shared as it is between V2 and V4 main services - so passing it on to
+                // every sub-service via this merge needs a cast where it is the field actually set
+                `super(client, basePath, { ...options, ${runtimeOptions.join(", ")} }${this.isV2AsV4() ? " as any" : ""});`,
+              ],
             },
           ]
         : [],
@@ -254,8 +321,12 @@ class ServiceGenerator {
         `const fieldName = "${odataPropName}";`,
         `const { client, path, options, isUrlNotEncoded } = this.__base;`,
         'return typeof id === "undefined" || id === null',
-        `? new ${collectionName}(client, path, fieldName, options)`,
-        `: new ${serviceName}(client, path, new ${idFunctionName}(fieldName).buildUrl(id, isUrlNotEncoded()), options);`,
+        // the version argument is only spelled out on the constructor call for v2ResponseAsV4: without it,
+        // "new Type(...)" infers AsV4's default (false), which mismatches the declared return type above
+        // wherever it isn't itself the abstract AsV4 - concretely, on every getter of the main service,
+        // which pins the literal true rather than passing an abstract type parameter along
+        `? new ${collectionName}${this.isV2AsV4() ? versionArg : ""}(client, path, fieldName, options)`,
+        `: new ${serviceName}${this.isV2AsV4() ? versionArg : ""}(client, path, new ${idFunctionName}(fieldName).buildUrl(id, isUrlNotEncoded()), options);`,
       ],
     };
   }
@@ -329,12 +400,7 @@ class ServiceGenerator {
     const editableModelName = importContainer.addGeneratedModel(model.fqName, model.editableName);
     const qName = importContainer.addGeneratedQObject(model.fqName, model.qName, true);
     const qObjectName = importContainer.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName));
-    const serviceOptions = importContainer.addServiceObject(
-      this.version,
-      this.version === ODataVersions.V4
-        ? ServiceImports.ODataServiceOptionsInternal
-        : ServiceImports.ODataServiceOptions,
-    );
+    const serviceOptions = this.getServiceOptionsType(importContainer);
 
     const { properties, methods }: PropsAndOps = deepmerge(
       deepmerge(
@@ -646,12 +712,7 @@ class ServiceGenerator {
     const entitySetServiceType = importContainer.addServiceObject(this.version, ServiceImports.EntitySetService);
     const paramsModelName = importContainer.addGeneratedModel(model.id.fqName, model.id.modelName);
     const qIdFunctionName = importContainer.addGeneratedQObject(model.id.fqName, model.id.qName);
-    const serviceOptions = importContainer.addServiceObject(
-      this.version,
-      this.version === ODataVersions.V4
-        ? ServiceImports.ODataServiceOptionsInternal
-        : ServiceImports.ODataServiceOptions,
-    );
+    const serviceOptions = this.getServiceOptionsType(importContainer);
 
     const collectionOperations = this.dataModel.getEntitySetOperations(model.fqName);
 
@@ -754,7 +815,9 @@ class ServiceGenerator {
           ? ServiceImports.UrlGetRequestCmd
           : ServiceImports.UrlRequestCmd,
     );
-    const responseStructure = returnType ? importReturnType(this.version, importContainer, returnType) : undefined;
+    const responseStructure = returnType
+      ? importReturnType(this.version, importContainer, returnType, this.isV2AsV4())
+      : undefined;
     const responseService = responseServiceName
       ? importContainer.addGeneratedService(returnType!.fqType, responseServiceName)
       : undefined;

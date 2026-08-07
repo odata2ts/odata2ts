@@ -1,5 +1,10 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
+import {
+  ODataCollectionResponseV2,
+  ODataCollectionResponseV4,
+  ODataEntityModelResponseV2,
+  ODataModelResponseV4,
+} from "@odata2ts/odata-core";
 import { CollectionQueryBuilderV2, ModelQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import {
   CollectionResponseConverterV2,
@@ -7,12 +12,18 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { ODataServiceOptions } from "../ODataServiceOptions";
+import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV2 } from "../request";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
-export abstract class EntitySetServiceV2<T, EditableT, Q extends QueryObjectModel, EIdType> {
-  protected readonly __base: ServiceStateHelperV2<Q>;
+export abstract class EntitySetServiceV2<
+  T,
+  EditableT,
+  Q extends QueryObjectModel,
+  EIdType,
+  AsV4 extends boolean = false,
+> {
+  protected readonly __base: ServiceStateHelperV2<Q, AsV4>;
   protected readonly __idFunction: QId<EIdType>;
 
   protected constructor(
@@ -21,7 +32,7 @@ export abstract class EntitySetServiceV2<T, EditableT, Q extends QueryObjectMode
     name: string,
     qModel: Q,
     idFunction: QId<EIdType>,
-    options?: ODataServiceOptions,
+    options?: ODataServiceOptionsInternalV2<AsV4>,
   ) {
     this.__base = new ServiceStateHelperV2(client, basePath, name, qModel, options);
     this.__idFunction = idFunction;
@@ -72,24 +83,23 @@ export abstract class EntitySetServiceV2<T, EditableT, Q extends QueryObjectMode
    *
    * The service should respond with 201 (Created) and the newly created model.
    *
-   * @param model
+   * @param model the entity to create
+   * @param queryFn additional query after the entity has been created, only $select and $expand apply here
    * @return
    */
   public create(model: EditableT, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
-    return new UrlBuilderRequestCmdV2<ODataEntityModelResponseV2<T>, Q, ModelQueryBuilderV2<Q>, EditableT>(
-      client,
-      ODataHttpMethods.Post,
-      createModelQueryBuilder(queryFn),
-      qModel,
-      model,
-      {
-        headers: getDefaultHeaders(),
-        mainRequestConverter: qModel,
-        mainResponseConverter: new EntityResponseConverterV2(qModel),
-      },
-    );
+    return new UrlBuilderRequestCmdV2<
+      AsV4 extends true ? ODataModelResponseV4<T> : ODataEntityModelResponseV2<T>,
+      Q,
+      ModelQueryBuilderV2<Q>,
+      EditableT
+    >(client, ODataHttpMethods.Post, createModelQueryBuilder(queryFn), qModel, model, {
+      headers: getDefaultHeaders(),
+      mainRequestConverter: qModel,
+      mainResponseConverter: new EntityResponseConverterV2<T, AsV4>(qModel, this.__base.isAsV4()),
+    });
   }
 
   /**
@@ -102,16 +112,12 @@ export abstract class EntitySetServiceV2<T, EditableT, Q extends QueryObjectMode
   ) {
     const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
-    return new UrlBuilderRequestCmdV2<ODataCollectionResponseV2<ReturnType>, Q>(
-      client,
-      ODataHttpMethods.Get,
-      createQueryBuilder(queryFn),
-      qModel,
-      undefined,
-      {
-        headers: getDefaultHeaders(),
-        mainResponseConverter: new CollectionResponseConverterV2(qModel),
-      },
-    );
+    return new UrlBuilderRequestCmdV2<
+      AsV4 extends true ? ODataCollectionResponseV4<ReturnType> : ODataCollectionResponseV2<ReturnType>,
+      Q
+    >(client, ODataHttpMethods.Get, createQueryBuilder(queryFn), qModel, undefined, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: new CollectionResponseConverterV2<ReturnType, AsV4>(qModel, this.__base.isAsV4()),
+    });
   }
 }

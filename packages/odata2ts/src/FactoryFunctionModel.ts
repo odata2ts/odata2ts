@@ -47,6 +47,7 @@ export type GeneratorFunctionOptions = Pick<
   | "disableBindingProps"
   | "disableDeepInsertProps"
   | "v2PayloadResultsWrapping"
+  | "v2ResponseAsV4"
 >;
 
 export type EntityBasedGeneratorFunction = (

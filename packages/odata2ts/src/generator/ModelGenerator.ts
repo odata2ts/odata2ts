@@ -217,9 +217,10 @@ class ModelGenerator {
   }
 
   private getPropType(imports: ImportContainer, prop: PropertyModel): string {
-    // V2 entity special: deferred content
+    // V2 entity special: deferred content - not for v2ResponseAsV4, which reshapes a V2 response as V4,
+    // and V4 has no equivalent placeholder: an unexpanded navigation property is simply absent
     let suffix = "";
-    if (this.dataModel.isV2() && prop.dataType == DataTypes.ModelType) {
+    if (this.dataModel.isV2() && !this.options.v2ResponseAsV4 && prop.dataType == DataTypes.ModelType) {
       const defContent = imports.addCoreLib(this.version, CoreImports.DeferredContent);
       suffix = ` | ${defContent}`;
     }

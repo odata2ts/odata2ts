@@ -42,4 +42,32 @@ describe("ValueResponseConverterV2 tests", () => {
       expect(result.data).toStrictEqual(nm);
     });
   });
+
+  describe("asV4", () => {
+    const AS_V4_CONVERTER = new ValueResponseConverterV2(qValueParam, true);
+
+    test("convert into V4 shaped { value: ... }", () => {
+      const converter2 = new ValueResponseConverterV2(booleanToNumberConverter, true);
+
+      const result = AS_V4_CONVERTER.convert(createResponse({ d: { myResult: VALUE_INPUT } }));
+      const result2 = converter2.convert(createResponse({ d: { myResult: VALUE_INPUT } }));
+
+      expect(result.data).toStrictEqual({ value: VALUE_CONVERTED });
+      expect(result2).toStrictEqual(result);
+    });
+
+    test("convert with attribute mapping", () => {
+      const result = AS_V4_CONVERTER.convert(createResponse({ d: { TEST: VALUE_INPUT } }));
+      expect(result.data).toStrictEqual({ value: VALUE_CONVERTED });
+    });
+
+    test("return non matching input unchanged", () => {
+      const nonMatching = [{ d: { x: VALUE_INPUT, y: VALUE_INPUT } }, { d: "test" }, { test: 123 }, undefined];
+
+      nonMatching.forEach((nm) => {
+        const result = AS_V4_CONVERTER.convert(createResponse(nm));
+        expect(result.data).toStrictEqual(nm);
+      });
+    });
+  });
 });

@@ -240,6 +240,40 @@ describe("Service Generator Tests V2", () => {
     await compareMainService("abstract-and-open-types.ts");
   });
 
+  test("Service Generator: one EntitySet with v2ResponseAsV4", async () => {
+    // given one EntitySet, same as the plain "one EntitySet" test
+    odataBuilder
+      .addEntityType("TestEntity", undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV2.Guid).addProp("test", ODataTypesV2.String),
+      )
+      .addEntitySet("Ents", withNs("TestEntity"));
+
+    // when generating with v2ResponseAsV4 turned on
+    runOptions.enablePrimitivePropertyServices = true;
+    runOptions.v2ResponseAsV4 = true;
+    await doGenerate();
+
+    // then the generated service classes are the *V2AsV4 siblings, reshaping every response as V4
+    await compareMainService("one-entityset-v2-response-as-v4.ts");
+  });
+
+  test("Service Generator: Complex Type with v2ResponseAsV4", async () => {
+    // given one EntitySet with a complex-type property, same as the plain "Complex Type" test
+    odataBuilder
+      .addComplexType("Reviewer", undefined, (builder) => builder.addProp("name", ODataTypesV2.String, false))
+      .addEntityType("Book", undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV2.String).addProp("lector", withNs("Reviewer")),
+      )
+      .addEntitySet("Books", withNs("Book"));
+
+    // when generating with v2ResponseAsV4 turned on
+    runOptions.v2ResponseAsV4 = true;
+    await doGenerate();
+
+    // then the complex-typed property's service is ComplexTypeServiceV2AsV4
+    await compareMainService("complex-type-v2-response-as-v4.ts");
+  });
+
   test("Service Generator: media link entry", async () => {
     // given a media link entry, i.e. an entity pointing at the binary content which is its own
     odataBuilder

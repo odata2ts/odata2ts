@@ -7,7 +7,12 @@ export function importReturnType(
   version: ODataVersions,
   imports: ImportContainer,
   returnType: ReturnTypeModel,
+  asV4 = false,
 ): string {
+  // the V4 response shape is identical whether it actually came from a V4 service or was reshaped from V2,
+  // so a V2 service opting into v2ResponseAsV4 simply takes the V4 branch
+  const effectiveVersion = asV4 && version === ODataVersions.V2 ? ODataVersions.V4 : version;
+
   const typeToImport: CoreImports | undefined = returnType.isCollection
     ? CoreImports.ODataCollectionResponse
     : returnType.dataType === DataTypes.PrimitiveType
@@ -15,10 +20,10 @@ export function importReturnType(
       : undefined;
 
   if (typeToImport) {
-    return imports.addCoreLib(version, typeToImport);
+    return imports.addCoreLib(effectiveVersion, typeToImport);
   }
 
-  return version === ODataVersions.V2 ? importReturnTypeV2(imports, returnType) : importReturnTypeV4(imports);
+  return effectiveVersion === ODataVersions.V2 ? importReturnTypeV2(imports, returnType) : importReturnTypeV4(imports);
 }
 
 function importReturnTypeV4(imports: ImportContainer) {
@@ -37,6 +42,13 @@ function importReturnTypeV2(imports: ImportContainer, returnType: ReturnTypeMode
   );
 }
 
+/**
+ * The main response converter class for an operation's return type. The very same class serves a plain V2
+ * response and one reshaped as V4 (see {@link CollectionResponseConverterV2} & co.) - which of the two a
+ * given instance produces is a constructor argument, not a different import, so this needs no `asV4` flag
+ * unlike {@link importReturnType}: the caller appends the literal `true` to the constructor call itself
+ * where the operation's owning service was generated with `v2ResponseAsV4`.
+ */
 export function importMainResponseConverter(
   version: ODataVersions,
   imports: ImportContainer,

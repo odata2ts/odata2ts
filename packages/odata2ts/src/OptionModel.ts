@@ -245,6 +245,31 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    */
   v2PayloadResultsWrapping?: boolean;
   /**
+   * A V2 service answers in its own JSON verbose shape: collections come wrapped as
+   * <code>{d: {results: [...], __count?, __next?}}</code>, entities as
+   * <code>{d: {...entity, __metadata: {uri, type, etag}}}</code>, and unexpanded navigation properties carry
+   * a <code>{__deferred: {uri}}</code> placeholder instead of simply being absent.
+   *
+   * Setting this option to <code>true</code> (default: false) reshapes every response of that service as its
+   * V4 equivalent instead: collections become <code>{value: [...], "@odata.count"?, "@odata.nextLink"?}</code>,
+   * entities are returned bare with <code>__metadata</code> turned into <code>@odata.id</code> /
+   * <code>@odata.type</code> / <code>@odata.etag</code>, and a navigation property that hasn't been expanded
+   * is simply left out - exactly as a real V4 service would send it. Applies recursively to expanded
+   * navigation properties of any depth.
+   *
+   * The generated response types change accordingly (`ODataCollectionResponseV4` / `ODataModelResponseV4` /
+   * `ODataValueResponseV4` instead of their V2 counterparts), so a consumer of the generated client only ever
+   * deals with the V4 shape, regardless of which OData version the actual service speaks.
+   *
+   * Only relevant for V2 services and ignored for V4, where the response is already in that shape.
+   *
+   * Turned on, this option reshapes an expanded collection valued navigation property as a plain array
+   * regardless of <code>v2ResponseResultsWrapping</code> / <code>v2PayloadResultsWrapping</code> - stating
+   * the `results` wrapping in the generated types would describe traffic this client no longer sends or
+   * receives. Leave both of those off (the default) when turning this on.
+   */
+  v2ResponseAsV4?: boolean;
+  /**
    * Numbers of type `Edm.Int64` and `Edm.Decimal` are represented as `number` in V4.
    * However, these numbers might not fit into JS' number type, which might result in precision loss.
    *
