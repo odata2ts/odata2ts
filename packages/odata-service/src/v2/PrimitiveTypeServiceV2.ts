@@ -1,6 +1,6 @@
 import { ConverterOptions, ValueConverter } from "@odata2ts/converter-api";
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataValueResponseV2 } from "@odata2ts/odata-core";
+import { ODataValueResponseV2, ODataValueResponseV4 } from "@odata2ts/odata-core";
 import {
   FlexibleConversionModel,
   getIdentityConverter,
@@ -8,7 +8,7 @@ import {
   ResponseValueConverterV2,
   ValueResponseConverterV2,
 } from "@odata2ts/odata-query-objects";
-import { ODataServiceOptions } from "../ODataServiceOptions";
+import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
 import { UrlRequestCmd } from "../request";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
 
@@ -27,9 +27,10 @@ class ValueRequestConverter<T> {
   }
 }
 
-export class PrimitiveTypeServiceV2<T> {
+export class PrimitiveTypeServiceV2<T, AsV4 extends boolean = false> {
   protected readonly __base: ServiceStateHelper;
   protected readonly __converter: RequestResponseConverter<T>;
+  private readonly __asV4?: AsV4;
 
   public constructor(
     client: ODataHttpClient,
@@ -37,9 +38,10 @@ export class PrimitiveTypeServiceV2<T> {
     name: string,
     converter: ValueConverter<any, T> = getIdentityConverter(),
     mappedName?: string,
-    options?: ODataServiceOptions,
+    options?: ODataServiceOptionsInternalV2<AsV4>,
   ) {
     this.__base = new ServiceStateHelper(client, basePath, name, options);
+    this.__asV4 = options?.v2ResponseAsV4;
     /*
      * The two conversion methods are delegated to rather than pulled off the converter, because a
      * converter may be a class with instance state: destructuring `{ convertFrom, convertTo }` strips
@@ -73,10 +75,16 @@ export class PrimitiveTypeServiceV2<T> {
     const { client, path, getDefaultHeaders } = this.__base;
     const converter = this.__converter;
 
-    return new UrlRequestCmd<ODataValueResponseV2<T>>(client, ODataHttpMethods.Get, path, undefined, {
-      headers: getDefaultHeaders(),
-      mainResponseConverter: new ValueResponseConverterV2(converter),
-    });
+    return new UrlRequestCmd<AsV4 extends true ? ODataValueResponseV4<T> : ODataValueResponseV2<T>>(
+      client,
+      ODataHttpMethods.Get,
+      path,
+      undefined,
+      {
+        headers: getDefaultHeaders(),
+        mainResponseConverter: new ValueResponseConverterV2<T, AsV4>(converter, this.__asV4 as AsV4),
+      },
+    );
   }
 
   /**

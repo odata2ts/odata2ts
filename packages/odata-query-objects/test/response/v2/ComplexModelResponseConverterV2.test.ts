@@ -52,4 +52,23 @@ describe("ComplexModelResponseConverterV2 tests", () => {
       expect(result.data).toStrictEqual(nm);
     });
   });
+
+  describe("asV4", () => {
+    const AS_V4_CONVERTER = new ComplexResponseConverterV2(TYPE_CONVERTER, true);
+
+    test("convert into the bare value, keyed by the arbitrary V2 property name", () => {
+      const result = AS_V4_CONVERTER.convert(createResponse({ d: { Address: MODEL_INPUT } }));
+
+      expect(result.data).toStrictEqual(MODEL_CONVERTED);
+    });
+
+    test("return non matching input unchanged", () => {
+      const nonMatching = [{ d: { x: 3, y: "hey" } }, { d: "test" }, { test: 123 }, null];
+
+      nonMatching.forEach((nm) => {
+        const result = AS_V4_CONVERTER.convert(createResponse(nm));
+        expect(result.data).toStrictEqual(nm);
+      });
+    });
+  });
 });

@@ -97,6 +97,30 @@ const config: ConfigFileOptions = {
         },
       ],
     },
+    /**
+     * The same model a fourth time, with `v2ResponseAsV4` switched on: every response is reshaped as its
+     * V4 equivalent (`{value: [...]}` instead of `{d: {results: [...]}}`, the bare entity plus `@odata.*`
+     * control information instead of `{d: {...entity, __metadata}}`, expanded navigation properties
+     * unwrapped instead of `results`-wrapped, unexpanded ones simply absent instead of `__deferred`). See
+     * `test/feature/V2ResponseAsV4.test.ts`.
+     *
+     * Generated separately rather than replacing the raw client, for the same reason as `libraryRenamed`
+     * and `libraryConverted`: the raw V2 shape is worth pinning in its own right (`ResultsWrapping.test.ts`,
+     * `core/CrudOperations.test.ts`), so the reshaped one needs its own client to be observable at all.
+     */
+    libraryAsV4: {
+      serviceName: "LibraryAsV4",
+      source: "resource/library-v2.xml",
+      output: "src-generated/library-as-v4",
+      enablePrimitivePropertyServices: true,
+      v2ResponseAsV4: true,
+      // override the top-level wrapping options: v2ResponseAsV4 already reshapes an expanded collection
+      // valued nav prop as a plain array (dropping the `results` envelope entirely) and Olingo accepts an
+      // unwrapped deep-insert payload just as well (see ResultsWrapping.test.ts) - stating the wrapping in
+      // the generated types here would describe traffic this client no longer sends or receives
+      v2ResponseResultsWrapping: false,
+      v2PayloadResultsWrapping: false,
+    },
   },
 };
 

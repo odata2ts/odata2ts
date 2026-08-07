@@ -1,18 +1,31 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { CollectionQueryBuilderV2, createQueryBuilderV2, ModelQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { QueryObjectModel } from "@odata2ts/odata-query-objects";
-import { ODataServiceOptions } from "../ODataServiceOptions";
+import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
 import { ServiceStateHelper } from "../ServiceStateHelper";
 
-export class ServiceStateHelperV2<Q extends QueryObjectModel> extends ServiceStateHelper {
+export class ServiceStateHelperV2<Q extends QueryObjectModel, AsV4 extends boolean = false> extends ServiceStateHelper {
+  /**
+   * Whether every response of this service is reshaped as V4 - see {@link ODataServiceOptionsInternalV2}.
+   *
+   * Kept as its own field rather than widening the inherited (V4-shaped) {@link ServiceStateHelper.options},
+   * since `v2ResponseAsV4` has no place in that type.
+   */
+  private readonly asV4: AsV4;
+
   public constructor(
     client: ODataHttpClient,
     basePath: string,
     name: string,
     public qModel: Q,
-    options?: ODataServiceOptions,
+    options?: ODataServiceOptionsInternalV2<AsV4>,
   ) {
     super(client, basePath, name, options);
+    this.asV4 = !!options?.v2ResponseAsV4 as AsV4;
+  }
+
+  public isAsV4(): AsV4 {
+    return this.asV4;
   }
 
   public createQueryBuilder = (

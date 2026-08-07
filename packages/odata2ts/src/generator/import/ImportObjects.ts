@@ -50,6 +50,7 @@ export enum QueryObjectImports {
   ModelResponseConverterV4 = "ModelResponseConverterV4",
   EntityResponseConverterV2 = "EntityResponseConverterV2",
   ComplexResponseConverterV2 = "ComplexResponseConverterV2",
+  ComplexResponseConverterV2AsV4 = "ComplexResponseConverterV2AsV4",
 }
 
 /**
@@ -69,6 +70,7 @@ export enum ServiceImports {
   ODataService,
   ODataServiceOptions,
   ODataServiceOptionsInternal,
+  ODataServiceOptionsInternalV2,
   EntityTypeService,
   PrimitiveTypeService,
   CollectionService,

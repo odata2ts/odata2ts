@@ -85,6 +85,8 @@ export * from "./response/v2/ValueResponseConverterV2";
 export * from "./response/v2/ComplexResponseConverterV2";
 export * from "./response/v2/EntityResponseConverterV2";
 export * from "./response/v2/CollectionResponseConverterV2";
+export * from "./response/v2/toV4ControlInfo";
+export * from "./response/v2/reshapeV2ResponseAsV4";
 export * from "./response/v4/ValueResponseConverterV4";
 export * from "./response/v4/ModelResponseConverterV4";
 export * from "./response/v4/CollectionResponseConverterV4";

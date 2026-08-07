@@ -1,21 +1,21 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
-import { ODataComplexModelResponseV2 } from "@odata2ts/odata-core";
+import { ODataComplexModelResponseV2, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ModelQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { ComplexResponseConverterV2, QueryObjectModel } from "@odata2ts/odata-query-objects";
-import { ODataServiceOptions } from "../ODataServiceOptions";
+import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV2, UrlRequestCmd } from "../request";
 import { MERGE_HEADERS } from "../RequestHeaders.js";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
-export class ComplexTypeServiceV2<T, EditableT, Q extends QueryObjectModel> {
-  protected readonly __base: ServiceStateHelperV2<Q>;
+export class ComplexTypeServiceV2<T, EditableT, Q extends QueryObjectModel, AsV4 extends boolean = false> {
+  protected readonly __base: ServiceStateHelperV2<Q, AsV4>;
 
   protected constructor(
     client: ODataHttpClient,
     basePath: string,
     name: string,
     qModel: Q,
-    options?: ODataServiceOptions,
+    options?: ODataServiceOptionsInternalV2<AsV4>,
   ) {
     this.__base = new ServiceStateHelperV2(client, basePath, name, qModel, options);
   }
@@ -66,16 +66,13 @@ export class ComplexTypeServiceV2<T, EditableT, Q extends QueryObjectModel> {
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
-    return new UrlBuilderRequestCmdV2<ODataComplexModelResponseV2<ReturnType>, Q, ModelQueryBuilderV2<Q>>(
-      client,
-      ODataHttpMethods.Get,
-      createModelQueryBuilder(queryFn),
-      qModel,
-      undefined,
-      {
-        headers: getDefaultHeaders(),
-        mainResponseConverter: new ComplexResponseConverterV2(qModel),
-      },
-    );
+    return new UrlBuilderRequestCmdV2<
+      AsV4 extends true ? ODataModelResponseV4<ReturnType> : ODataComplexModelResponseV2<ReturnType>,
+      Q,
+      ModelQueryBuilderV2<Q>
+    >(client, ODataHttpMethods.Get, createModelQueryBuilder(queryFn), qModel, undefined, {
+      headers: getDefaultHeaders(),
+      mainResponseConverter: new ComplexResponseConverterV2<ReturnType, AsV4>(qModel, this.__base.isAsV4()),
+    });
   }
 }

@@ -16,13 +16,16 @@ const VALUE_SEGMENT = "$value";
  * which is what makes the URL predictable enough to build without asking first.
  *
  * Everything an ordinary entity service does stays available - the media link entry still has regular
- * properties, which are read and written as JSON; only its content is separate.
+ * properties, which are read and written as JSON; only its content is separate. Its own response reshaping
+ * (`AsV4`) is inherited from {@link EntityTypeServiceV2}; the binary content itself is untouched by any
+ * response shaping, so {@link content} keeps using the very same {@link StreamServiceV2} regardless.
  */
-export class MediaEntityServiceV2<T, EditableT, Q extends QueryObjectModel> extends EntityTypeServiceV2<
+export class MediaEntityServiceV2<
   T,
   EditableT,
-  Q
-> {
+  Q extends QueryObjectModel,
+  AsV4 extends boolean = false,
+> extends EntityTypeServiceV2<T, EditableT, Q, AsV4> {
   private _content?: StreamServiceV2;
 
   /**

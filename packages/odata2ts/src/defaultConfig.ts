@@ -107,6 +107,7 @@ const defaultConfig: DefaultConfiguration = {
   disableBindingProps: false,
   disableDeepInsertProps: false,
   v2PayloadResultsWrapping: false,
+  v2ResponseAsV4: false,
 };
 
 const { models, queryObjects, services } = defaultConfig.naming;
