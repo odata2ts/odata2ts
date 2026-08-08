@@ -1,7 +1,7 @@
 {
-  "packages/odata2ts": "0.42.0",
+  "packages/odata2ts": "0.43.0",
   "packages/odata-core": "0.7.0",
-  "packages/odata-query-builder": "0.19.1",
-  "packages/odata-query-objects": "0.30.0",
-  "packages/odata-service": "0.25.0"
+  "packages/odata-query-builder": "0.19.2",
+  "packages/odata-query-objects": "0.30.1",
+  "packages/odata-service": "0.26.0"
 }

@@ -13,6 +13,37 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-objects bumped from ^0.28.0 to ^0.28.1
     * @odata2ts/odata-service bumped from ^0.23.0 to ^0.23.1
 
+## [0.43.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.42.0...@odata2ts/odata2ts-v0.43.0) (2026-08-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* **odata2ts:** v2ResponseResultsWrapping, v2PayloadResultsWrapping, v2ResponseAsV4 are now under prop "v2" and renamed to "responseResultsWrapping", "payloadResultsWrapping", "responseAsV4"; v4BigNumberAsString, enableNativeInOperator, odataVersionV4 are now under prop "v4" and renamed to "bigNumberAsString", "odataVersion" and still "enableNativeInOperator"
+* **odata-service:** `ODataService`, all `EntityTypeService*`, `EntitySetService*`, `CollectionService*`, `ComplexTypeServiceV2`, `PrimitiveTypeService*`, `MediaEntityService*`, `StreamService*` and every `RequestCmd` lost their `ClientType` type parameter, and so did every generated service. Where the parameter was inferred - which is any `new XyzService(client, baseUrl)` - nothing changes; written-out types such as `TrippinService<FetchClient>` become `TrippinService`. Client specific request config now needs its type on the call: `execute<FetchRequestConfig>({ credentials: "include" })`.
+
+### Features
+
+* **odata-service:** services are no longer generic over the HTTP client ([57d7c67](https://github.com/odata2ts/odata2ts/commit/57d7c6752751ee4d59aa7e3de35d06d9901dfe12))
+* **odata2ts:** import a qualified custom type by its root ([#472](https://github.com/odata2ts/odata2ts/issues/472)) ([2726479](https://github.com/odata2ts/odata2ts/commit/2726479ec368ef0a710e24a3b901ed56424a49eb))
+* **odata2ts:** reconstruct complex types which a service states flat ([#473](https://github.com/odata2ts/odata2ts/issues/473)) ([d427d60](https://github.com/odata2ts/odata2ts/commit/d427d605edb96625f9f91150a4dfc67155ba6ffb))
+* reshape V2 responses as V4 via v2ResponseAsV4 ([#476](https://github.com/odata2ts/odata2ts/issues/476)) ([31f741f](https://github.com/odata2ts/odata2ts/commit/31f741f59881cf10ec547f7f220bed9be0f90599))
+
+
+### Code Refactoring
+
+* **odata2ts:** bundle v2 and v4 options ([#478](https://github.com/odata2ts/odata2ts/issues/478)) ([7095909](https://github.com/odata2ts/odata2ts/commit/709590965735717902368546967e1a4fd5bd469d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.30.0 to ^0.30.1
+    * @odata2ts/odata-service bumped from ^0.25.0 to ^0.26.0
+  * peerDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.30.0 to ^0.30.1
+    * @odata2ts/odata-service bumped from ^0.25.0 to ^0.26.0
+
 ## [0.42.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.41.0...@odata2ts/odata2ts-v0.42.0) (2026-08-05)
 
 

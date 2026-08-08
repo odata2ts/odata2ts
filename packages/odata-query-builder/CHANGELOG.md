@@ -9,6 +9,20 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
   * dependencies
     * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
 
+## [0.19.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.19.1...@odata2ts/odata-query-builder-v0.19.2) (2026-08-08)
+
+
+### Features
+
+* **odata2ts:** reconstruct complex types which a service states flat ([#473](https://github.com/odata2ts/odata2ts/issues/473)) ([d427d60](https://github.com/odata2ts/odata2ts/commit/d427d605edb96625f9f91150a4dfc67155ba6ffb))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-objects bumped from ^0.30.0 to ^0.30.1
+
 ## [0.19.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.19.0...@odata2ts/odata-query-builder-v0.19.1) (2026-08-05)
 
 
