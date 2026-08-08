@@ -34,8 +34,11 @@ export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "p
 
 export interface ServiceGeneratorOptions extends Pick<
   ConfigFileOptions,
-  "enablePrimitivePropertyServices" | "v4BigNumberAsString" | "enumType" | "odataVersionV4" | "v2ResponseAsV4"
-> {}
+  "enablePrimitivePropertyServices" | "enumType"
+> {
+  v2: Pick<NonNullable<ConfigFileOptions["v2"]>, "responseAsV4">;
+  v4: Pick<NonNullable<ConfigFileOptions["v4"]>, "bigNumberAsString" | "odataVersion">;
+}
 
 export async function generateServices(
   project: ProjectManager,
@@ -54,19 +57,19 @@ class ServiceGenerator {
     private dataModel: DataModel,
     private version: ODataVersions,
     private namingHelper: NamingHelper,
-    private options: ServiceGeneratorOptions = {},
+    private options: ServiceGeneratorOptions = { v2: {}, v4: {} },
   ) {}
 
   private isV4BigNumber() {
-    return this.options.v4BigNumberAsString && this.version === ODataVersions.V4;
+    return this.options.v4.bigNumberAsString && this.version === ODataVersions.V4;
   }
 
   private isV401() {
-    return this.options.odataVersionV4 === "4.01" && this.version === ODataVersions.V4;
+    return this.options.v4.odataVersion === "4.01" && this.version === ODataVersions.V4;
   }
 
   private isV2AsV4() {
-    return !!this.options.v2ResponseAsV4 && this.version === ODataVersions.V2;
+    return !!this.options.v2.responseAsV4 && this.version === ODataVersions.V2;
   }
 
   /**

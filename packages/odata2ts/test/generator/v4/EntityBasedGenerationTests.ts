@@ -1,8 +1,7 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
-import { ConfigFileOptions, NamingStrategies } from "../../../src/index.js";
-import { TypeModel } from "../../../src/TypeModel.js";
+import { ConfigFileOptions, NamingStrategies, TypeModel } from "../../../src/index.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
 import {
   createHelper,
@@ -396,7 +395,7 @@ export function createEntityBasedGenerationTests(
     // when generating model
     // then match fixture text
     await generateAndCompare("entity-big-number-v4.ts", {
-      v4BigNumberAsString: true,
+      v4: { bigNumberAsString: true },
     });
   });
 

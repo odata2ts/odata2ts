@@ -250,7 +250,7 @@ describe("Service Generator Tests V2", () => {
 
     // when generating with v2ResponseAsV4 turned on
     runOptions.enablePrimitivePropertyServices = true;
-    runOptions.v2ResponseAsV4 = true;
+    runOptions.v2.responseAsV4 = true;
     await doGenerate();
 
     // then the generated service classes are the *V2AsV4 siblings, reshaping every response as V4
@@ -267,7 +267,7 @@ describe("Service Generator Tests V2", () => {
       .addEntitySet("Books", withNs("Book"));
 
     // when generating with v2ResponseAsV4 turned on
-    runOptions.v2ResponseAsV4 = true;
+    runOptions.v2.responseAsV4 = true;
     await doGenerate();
 
     // then the complex-typed property's service is ComplexTypeServiceV2AsV4

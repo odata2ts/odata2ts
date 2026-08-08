@@ -161,7 +161,7 @@ describe("Model Generator Tests V4", () => {
     await generateAndCompare("entity-relationships.ts", {
       disableBindingProps: true,
       disableDeepInsertProps: true,
-      v2ResponseResultsWrapping: true,
+      v2: { responseResultsWrapping: true },
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -269,7 +269,7 @@ describe("Model Generator Tests V4", () => {
     await generateAndCompare("entity-relationships-v401.ts", {
       disableDeepInsertProps: true,
       mode: Modes.models,
-      odataVersionV4: "4.01",
+      v4: { odataVersion: "4.01" },
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -294,7 +294,7 @@ describe("Model Generator Tests V4", () => {
     // then no binding prop at all: in 4.01 it goes by the name of the navigation property itself,
     // so it must be absent rather than show up with the binding type
     await generateAndCompare("entity-relationships.ts", {
-      odataVersionV4: "4.01",
+      v4: { odataVersion: "4.01" },
       disableBindingProps: true,
       disableDeepInsertProps: true,
       skipEditableModels: false,
@@ -439,7 +439,7 @@ describe("Model Generator Tests V4", () => {
     // because 4.01 addresses a binding by the very name of the navigation property
     await generateAndCompare("entity-relationships-deep-insert-binding-v401.ts", {
       mode: Modes.models,
-      odataVersionV4: "4.01",
+      v4: { odataVersion: "4.01" },
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -454,7 +454,7 @@ describe("Model Generator Tests V4", () => {
     // then it has no effect at all - the wrapping is a V2 speciality
     await generateAndCompare("entity-relationships-deep-insert.ts", {
       disableBindingProps: true,
-      v2PayloadResultsWrapping: true,
+      v2: { payloadResultsWrapping: true },
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,

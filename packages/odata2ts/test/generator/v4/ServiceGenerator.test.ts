@@ -75,7 +75,7 @@ describe("Service Generator Tests V4", () => {
 
   test("Service Generator: Min Big Number", async () => {
     // given big numbers setting
-    const options: ConfigFileOptions = { v4BigNumberAsString: true };
+    const options: ConfigFileOptions = { v4: { bigNumberAsString: true } };
 
     // when generating
     await doGenerate(options);
@@ -86,7 +86,7 @@ describe("Service Generator Tests V4", () => {
 
   test("Service Generator: Min OData 4.01", async () => {
     // given the 4.01 setting
-    const options: ConfigFileOptions = { odataVersionV4: "4.01" };
+    const options: ConfigFileOptions = { v4: { odataVersion: "4.01" } };
 
     // when generating
     await doGenerate(options);
@@ -275,7 +275,7 @@ describe("Service Generator Tests V4", () => {
       .addActionImport("pingDecimalCollection", withNs("pingDecimalCollection"));
 
     // when generating
-    await doGenerate({ v4BigNumberAsString: true });
+    await doGenerate({ v4: { bigNumberAsString: true } });
 
     await compareMainService("big-number-return-types.ts");
   });
@@ -415,7 +415,7 @@ describe("Service Generator Tests V4", () => {
       .addEntitySet("Ents", withNs("TestEntity"));
 
     // when generating
-    await doGenerate({ v4BigNumberAsString: true });
+    await doGenerate({ v4: { bigNumberAsString: true } });
 
     // then we get one additional service file
     await compareMainService("big-numbers.ts");

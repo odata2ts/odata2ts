@@ -218,70 +218,15 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
   naming?: OverridableNamingOptions;
 
   /**
-   * OData V2 services wrap an entity collection into an extra object carrying the property "results":
-   * <code>trips: {results: [...]}</code>. So instead of an array of entities you receive an object which
-   * holds that array.
-   *
-   * Setting this configuration option to <code>true</code> (default: false) states that structure in
-   * the generated models, so that they describe what the service actually sends.
-   *
-   * It applies to navigation properties only, because that wrapping is how V2 serialises a feed: a
-   * collection of a primitive or of a complex type is a plain array either way.
-   *
-   * The option applies to every generation mode. The client passes the response structure through
-   * untouched, so with the option turned off the generated models will not match the response of a
-   * service which wraps.
+   * Special generation options targeting only V2 services, ignored for V4.
    */
-  v2ResponseResultsWrapping?: boolean;
+  v2?: V2GenerationOptions;
+
   /**
-   * The counterpart of <code>v2ResponseResultsWrapping</code> for the editable models: collection
-   * valued navigation properties of a deep insert are wrapped into an extra object with the property
-   * "results", as some V2 services expect it.
-   *
-   * Deliberately its own option, since a service which answers with the extra wrapping does not
-   * necessarily expect it in a request payload - see odata2ts issue #237.
-   *
-   * Like its counterpart the option applies to every generation mode.
+   * Special generation options targeting only V4 services, ignored for V2.
    */
-  v2PayloadResultsWrapping?: boolean;
-  /**
-   * A V2 service answers in its own JSON verbose shape: collections come wrapped as
-   * <code>{d: {results: [...], __count?, __next?}}</code>, entities as
-   * <code>{d: {...entity, __metadata: {uri, type, etag}}}</code>, and unexpanded navigation properties carry
-   * a <code>{__deferred: {uri}}</code> placeholder instead of simply being absent.
-   *
-   * Setting this option to <code>true</code> (default: false) reshapes every response of that service as its
-   * V4 equivalent instead: collections become <code>{value: [...], "@odata.count"?, "@odata.nextLink"?}</code>,
-   * entities are returned bare with <code>__metadata</code> turned into <code>@odata.id</code> /
-   * <code>@odata.type</code> / <code>@odata.etag</code>, and a navigation property that hasn't been expanded
-   * is simply left out - exactly as a real V4 service would send it. Applies recursively to expanded
-   * navigation properties of any depth.
-   *
-   * The generated response types change accordingly (`ODataCollectionResponseV4` / `ODataModelResponseV4` /
-   * `ODataValueResponseV4` instead of their V2 counterparts), so a consumer of the generated client only ever
-   * deals with the V4 shape, regardless of which OData version the actual service speaks.
-   *
-   * Only relevant for V2 services and ignored for V4, where the response is already in that shape.
-   *
-   * Turned on, this option reshapes an expanded collection valued navigation property as a plain array
-   * regardless of <code>v2ResponseResultsWrapping</code> / <code>v2PayloadResultsWrapping</code> - stating
-   * the `results` wrapping in the generated types would describe traffic this client no longer sends or
-   * receives. Leave both of those off (the default) when turning this on.
-   */
-  v2ResponseAsV4?: boolean;
-  /**
-   * Numbers of type `Edm.Int64` and `Edm.Decimal` are represented as `number` in V4.
-   * However, these numbers might not fit into JS' number type, which might result in precision loss.
-   *
-   * OData offers a special IEEE754 format option to get those types as `string` instead to prevent any
-   * precision loss. So if you're handling very large or very small numbers (JS roughly supports 15 digits),
-   * then you should use this option and, probably, also an appropriate converter (see available converters).
-   *
-   * Activating this option affects the type generation and will use `string` for both mentioned types.
-   * All requests are executed with the "accept" header set to "application/json;IEEE754Compatible=true".
-   * Additionally, when sending data the very same value will be set for the "content-type" header.
-   */
-  v4BigNumberAsString?: boolean;
+  v4?: V4GenerationOptions;
+
   /**
    * OData allows for namespaces so any entity is unique by virtue of it's name within a namespace.
    * odata2ts works with these fully qualified names internally, but only uses the plain name when generating
@@ -339,24 +284,6 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    */
   unflattenComplexTypes?: boolean;
   /**
-   * By default, odata2ts emulates the in operator by rolling it out as a series of equals-or-expressions.
-   * This allows for maximum compatibility with all V4 services, as well as V2 services.
-   *
-   * Setting this value to true will instead use the native in operator, resulting in smaller queries
-   * on V4 services that support it.
-   */
-  enableNativeInOperator?: boolean;
-  /**
-   * The OData version to target. It is declared via the OData-Version header on each request carrying a body,
-   * which governs how the service interprets the request payload, and it selects the response types to generate:
-   * 4.0 payloads must use the "odata." prefix for control information, while 4.01 and greater use the short form
-   * ("@count" instead of "@odata.count").
-   *
-   * Only relevant for V4 services and ignored for V2. Defaults to "4.0", the more widely deployed and more
-   * compatible version.
-   */
-  odataVersionV4?: "4.0" | "4.01";
-  /**
    * Allows to bind an already existing entity to a navigation property of the editable models.
    *
    * Where a service is generated (mode {@code service} or {@code all}), the binding goes by the
@@ -393,6 +320,98 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * Opt-out, so the editable models carry the navigation properties unless this is switched off.
    */
   disableDeepInsertProps?: boolean;
+}
+
+/**
+ * Special generation options targeting only V2 services.
+ */
+export interface V2GenerationOptions {
+  /**
+   * OData V2 services wrap an entity collection into an extra object carrying the property "results":
+   * `trips: {results: [...]}`. So instead of an array of entities you receive an object which
+   * holds that array.
+   *
+   * Setting this configuration option to `true` (default: false) states that structure in
+   * the generated models, so that they describe what the service actually sends.
+   *
+   * It applies to navigation properties only, because that wrapping is how V2 serialises a feed: a
+   * collection of a primitive or of a complex type is a plain array either way.
+   *
+   * The option applies to every generation mode. The client passes the response structure through
+   * untouched, so with the option turned off the generated models will not match the response of a
+   * service which wraps.
+   */
+  responseResultsWrapping?: boolean;
+  /**
+   * The counterpart of `responseResultsWrapping` for the editable models: collection
+   * valued navigation properties of a deep insert are wrapped into an extra object with the property
+   * "results", as some V2 services expect it.
+   *
+   * Deliberately its own option, since a service which answers with the extra wrapping does not
+   * necessarily expect it in a request payload - see odata2ts issue #237.
+   *
+   * Like its counterpart the option applies to every generation mode.
+   */
+  payloadResultsWrapping?: boolean;
+  /**
+   * A V2 service answers in its own JSON verbose shape: collections come wrapped as
+   * `{d: {results: [...], __count?, __next?}}`, entities as
+   * `{d: {...entity, __metadata: {uri, type, etag}}}`, and unexpanded navigation properties carry
+   * a `{__deferred: {uri}}` placeholder instead of simply being absent.
+   *
+   * Setting this option to `true` (default: false) reshapes every response of that service as its
+   * V4 equivalent instead: collections become `{value: [...], "@odata.count"?, "@odata.nextLink"?}`,
+   * entities are returned bare with `__metadata` turned into `@odata.id` /
+   * `@odata.type` / `@odata.etag`, and a navigation property that hasn't been expanded
+   * is simply left out - exactly as a real V4 service would send it. Applies recursively to expanded
+   * navigation properties of any depth.
+   *
+   * The generated response types change accordingly (`ODataCollectionResponseV4` / `ODataModelResponseV4` /
+   * `ODataValueResponseV4` instead of their V2 counterparts), so a consumer of the generated client only ever
+   * deals with the V4 shape, regardless of which OData version the actual service speaks.
+   *
+   * Turned on, this option reshapes an expanded collection valued navigation property as a plain array
+   * regardless of `responseResultsWrapping` / `payloadResultsWrapping` - stating
+   * the `results` wrapping in the generated types would describe traffic this client no longer sends or
+   * receives. Leave both of those off (the default) when turning this on.
+   */
+  responseAsV4?: boolean;
+}
+
+/**
+ * Special generation options targeting only V4 services.
+ */
+export interface V4GenerationOptions {
+  /**
+   * Numbers of type `Edm.Int64` and `Edm.Decimal` are represented as `number` in V4.
+   * However, these numbers might not fit into JS' number type, which might result in precision loss.
+   *
+   * OData offers a special IEEE754 format option to get those types as `string` instead to prevent any
+   * precision loss. So if you're handling very large or very small numbers (JS roughly supports 15 digits),
+   * then you should use this option and, probably, also an appropriate converter (see available converters).
+   *
+   * Activating this option affects the type generation and will use `string` for both mentioned types.
+   * All requests are executed with the "accept" header set to "application/json;IEEE754Compatible=true".
+   * Additionally, when sending data the very same value will be set for the "content-type" header.
+   */
+  bigNumberAsString?: boolean;
+  /**
+   * The OData version to target. It is declared via the OData-Version header on each request carrying a body,
+   * which governs how the service interprets the request payload, and it selects the response types to generate:
+   * 4.0 payloads must use the "odata." prefix for control information, while 4.01 and greater use the short form
+   * ("@count" instead of "@odata.count").
+   *
+   * Defaults to "4.0", the more widely deployed and more compatible version.
+   */
+  odataVersion?: "4.0" | "4.01";
+  /**
+   * By default, odata2ts emulates the in operator by rolling it out as a series of equals-or-expressions.
+   * This allows for maximum compatibility with all V4 services, as well as V2 services.
+   *
+   * Setting this value to true will instead use the native in operator, resulting in smaller queries
+   * on V4 services that support it.
+   */
+  enableNativeInOperator?: boolean;
 }
 
 /**

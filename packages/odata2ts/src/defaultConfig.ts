@@ -22,8 +22,16 @@ const defaultConfig: DefaultConfiguration = {
   enablePrimitivePropertyServices: false,
   disableAutoManagedKey: false,
   allowRenaming: false,
-  v2ResponseResultsWrapping: false,
-  v4BigNumberAsString: false,
+  v2: {
+    responseResultsWrapping: false,
+    payloadResultsWrapping: false,
+    responseAsV4: false,
+  },
+  v4: {
+    bigNumberAsString: false,
+    odataVersion: "4.0",
+    enableNativeInOperator: false,
+  },
   disableAutomaticNameClashResolution: false,
   bundledFileGeneration: false,
   unflattenComplexTypes: false,
@@ -102,12 +110,8 @@ const defaultConfig: DefaultConfiguration = {
   },
   propertiesByName: [],
   byTypeAndName: [],
-  enableNativeInOperator: false,
-  odataVersionV4: "4.0",
   disableBindingProps: false,
   disableDeepInsertProps: false,
-  v2PayloadResultsWrapping: false,
-  v2ResponseAsV4: false,
 };
 
 const { models, queryObjects, services } = defaultConfig.naming;

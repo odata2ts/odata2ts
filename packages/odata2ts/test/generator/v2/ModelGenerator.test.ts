@@ -90,7 +90,7 @@ describe("Model Generator Tests V2", () => {
     // when generating model
     // then match fixture text
     await generateAndCompare("entity-relationships-v2-extra-wrapping.ts", {
-      v2ResponseResultsWrapping: true,
+      v2: { responseResultsWrapping: true },
     });
   });
 
@@ -110,8 +110,7 @@ describe("Model Generator Tests V2", () => {
     // entity collection alone - CAP's V2 adapter wraps an expanded navigation property and hands over a
     // primitive or complex collection bare
     await generateAndCompare("entity-collections-v2-extra-wrapping.ts", {
-      v2ResponseResultsWrapping: true,
-      v2PayloadResultsWrapping: true,
+      v2: { responseResultsWrapping: true, payloadResultsWrapping: true },
       skipEditableModels: false,
     });
   });
@@ -170,7 +169,7 @@ describe("Model Generator Tests V2", () => {
     // when opting into the extra wrapping for editable models
     // then only the collection valued navigation property carries the extra results object
     await generateAndCompare("entity-relationships-deep-insert-v2-extra-wrapping.ts", {
-      v2PayloadResultsWrapping: true,
+      v2: { payloadResultsWrapping: true },
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,
@@ -185,7 +184,7 @@ describe("Model Generator Tests V2", () => {
     // then the deep insert props stay unwrapped: a service answering with the wrapping does not
     // necessarily expect it in a request payload, see issue #237
     await generateAndCompare("entity-relationships-deep-insert-v2-response-wrapping.ts", {
-      v2ResponseResultsWrapping: true,
+      v2: { responseResultsWrapping: true },
       skipEditableModels: false,
       skipIdModels: false,
       disableAutoManagedKey: true,

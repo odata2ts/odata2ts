@@ -15,14 +15,13 @@ describe("ServiceConfigHelper Tests", function () {
       byTypeAndName: [],
       propertiesByName: propsSetting || [],
       skipEditableModels: false,
-      v2ResponseResultsWrapping: false,
-      v4BigNumberAsString: false,
+      v2: { responseResultsWrapping: false },
+      v4: { bigNumberAsString: false, enableNativeInOperator: false },
       skipComments: true,
       skipIdModels: true,
       disableAutomaticNameClashResolution: false,
       bundledFileGeneration: false,
       enumType: "string",
-      enableNativeInOperator: false,
       unflattenComplexTypes: false,
     });
   }
@@ -34,14 +33,13 @@ describe("ServiceConfigHelper Tests", function () {
       byTypeAndName: entsSetting || [],
       propertiesByName: [],
       skipEditableModels: false,
-      v2ResponseResultsWrapping: false,
-      v4BigNumberAsString: false,
+      v2: { responseResultsWrapping: false },
+      v4: { bigNumberAsString: false, enableNativeInOperator: false },
       skipComments: true,
       skipIdModels: true,
       disableAutomaticNameClashResolution: false,
       bundledFileGeneration: false,
       enumType: "string",
-      enableNativeInOperator: false,
       unflattenComplexTypes: false,
     });
   }

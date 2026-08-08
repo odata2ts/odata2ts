@@ -11,8 +11,8 @@ export type DigestionOptions = Pick<
   | "disableAutoManagedKey"
   | "propertiesByName"
   | "byTypeAndName"
-  | "v2ResponseResultsWrapping"
-  | "v4BigNumberAsString"
+  | "v2"
+  | "v4"
   | "skipEditableModels"
   | "skipComments"
   | "skipIdModels"
@@ -20,7 +20,6 @@ export type DigestionOptions = Pick<
   | "bundledFileGeneration"
   | "unflattenComplexTypes"
   | "enumType"
-  | "enableNativeInOperator"
 >;
 
 /**
@@ -40,14 +39,11 @@ export type GeneratorFunctionOptions = Pick<
   | "skipIdModels"
   | "skipOperations"
   | "skipComments"
-  | "v2ResponseResultsWrapping"
   | "enumType"
-  | "enableNativeInOperator"
-  | "odataVersionV4"
   | "disableBindingProps"
   | "disableDeepInsertProps"
-  | "v2PayloadResultsWrapping"
-  | "v2ResponseAsV4"
+  | "v2"
+  | "v4"
 >;
 
 export type EntityBasedGeneratorFunction = (
