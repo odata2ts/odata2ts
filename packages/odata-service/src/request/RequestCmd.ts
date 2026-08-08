@@ -67,7 +67,7 @@ export abstract class RequestCmd<
    * All request converters get applied.
    *
    * With regard to data (if any), it gets converted from the user facing model
-   * to the OData facing model, for which we don't have any typings, so we use <code>any</code>.
+   * to the OData facing model, for which we don't have any typings, so we use `any`.
    *
    */
   public getInfoConverted(): RequestInfo<any> {
@@ -98,7 +98,7 @@ export abstract class RequestCmd<
   /**
    * Add a new request converter at the end of the converter chain.
    * This converter can then handle the OData facing data structures.
-   * Since we don't have any typings for this we use <code>any</code>.
+   * Since we don't have any typings for this we use `any`.
    *
    * @param converter
    * @returns itself in builder fashion
@@ -112,7 +112,7 @@ export abstract class RequestCmd<
   /**
    * Add a response converter to the beginning of the converter chain.
    * This converter can then handle the data structures as they are returned from OData.
-   * Since we don't have any typings for this we use <code>any</code>.
+   * Since we don't have any typings for this we use `any`.
    *
    * @param converter
    * @returns itself in builder fashion
@@ -147,7 +147,7 @@ export abstract class RequestCmd<
    *
    * The config type defaults to what every HTTP client understands - headers and URL params. Anything a
    * specific client adds on top of that is opted into by naming its config type, e.g.
-   * <code>execute&lt;FetchRequestConfig&gt;({ credentials: "include" })</code>.
+   * `execute<FetchRequestConfig>({ credentials: "include" })`.
    *
    * @param requestConfig optional configuration
    */
