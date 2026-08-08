@@ -90,24 +90,25 @@ Modules without unit tests:
 
 ### Running Integration Tests
 
-By calling `yarn int-test` from the root folder all integration tests are executed.
+By calling `yarn int-test` from the root folder all integration tests are executed. You also have the option
+to call a specif integration test suite, e.g. `yarn int-test:asp-net`.
 
-You need to start one server first though:
+The integration tests are all to be found within folder `int-test` at the root level of the project. It contains:
 
-```shell
-yarn start-cap
-```
+- `cli`: tests regarding the command line interface
+- `ts-floor-check`: ensures that the specified min TS version holds true in spite of using a higher version within the project
+- `config-variants`: type checks the generation output for the multitude of configuration options
+- `asp-net`: ASPNet Core implementation of our reference model (V4)
+- `cap`: SAP CAP implementation of our reference model (V4)
+  - also allows for V2 by using an adapter
+  - for odata2ts not a proper V2 service: V4 under the hood & some essential divergencies to V2
+  - also V2 is intended for a different purpose: mediator to other services which are V2
+- `olingo-v2`: Olingo 2 implementation of our reference model (V2)
+  - already archived Java framework
+  - but runs in a simple container in contrast to old Microsoft stacks which produced V2
 
-While the CAP server is running, you can start the integration tests from a different terminal:
-
-```shell
-yarn int-test
-```
-
-Modules which come with integration tests store them in folder `test`.
-You execute them by changing to the module and calling `yarn int-test` from there.
-
-Nearly all integration tests are to be found in the [example projects](https://github.com/odata2ts/odata2ts/tree/main/examples).
+Each server comes from its own repository and publishes an image to the github registry. Each integration test
+package then pulls this image, starts the container and runs the tests.
 
 ### Commits & Pull Requests
 
@@ -116,25 +117,23 @@ our semantic versioning. Try to adhere to these conventions. `odata2ts` uses the
 
 - `fix`: Bug fixes, fixing typos, etc.
 - `feat`: New features
-- `chore`:
+- `chore`: minor dependency updates, boy scout stuff, small maintenance tasks
 - `doc`: Documentation changes
 - `refactor`: Refactoring code
 - `build`: changes to the build process
 
+Try to scope the commit message when it belongs to only one package, e.g. `fix(odata-query-objects): ...`.
+Use the package name as scope without the `@odata2ts/` prefix.
+
+Breaking changes are announced via an exclamation mark after the scope, e.g. `feat(odata-service)!: ...` or
+`feat!: ...` without scope. Also add an own paragraph in the body starting with "BREAKING CHANGE:".
+
 We will probably squash your commits before merging them into the `main` branch.
 So also adhere to conventional commits within the title of your pull request.
-Examples:
 
-- fix(odata-query-builder): typo in README
-- feat: my new feature
-- ...
+## Release
 
-## Maintaining
+We use [release-please](https://github.com/googleapis/release-please) which has the following workflow:
 
-Only available for maintainers.
-
-### Release
-
-```shell
-yarn release
-```
+- create PR's against `main`
+- after merging into `main`, release-please will create an own PR which will execute the release, when merged.
