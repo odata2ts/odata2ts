@@ -13,6 +13,178 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-objects bumped from ^0.28.0 to ^0.28.1
     * @odata2ts/odata-service bumped from ^0.23.0 to ^0.23.1
 
+## [0.44.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.43.0...@odata2ts/odata2ts-v0.44.0) (2026-08-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* **odata2ts:** v2ResponseResultsWrapping, v2PayloadResultsWrapping, v2ResponseAsV4 are now under prop "v2" and renamed to "responseResultsWrapping", "payloadResultsWrapping", "responseAsV4"; v4BigNumberAsString, enableNativeInOperator, odataVersionV4 are now under prop "v4" and renamed to "bigNumberAsString", "odataVersion" and still "enableNativeInOperator"
+* **odata-service:** `ODataService`, all `EntityTypeService*`, `EntitySetService*`, `CollectionService*`, `ComplexTypeServiceV2`, `PrimitiveTypeService*`, `MediaEntityService*`, `StreamService*` and every `RequestCmd` lost their `ClientType` type parameter, and so did every generated service. Where the parameter was inferred - which is any `new XyzService(client, baseUrl)` - nothing changes; written-out types such as `TrippinService<FetchClient>` become `TrippinService`. Client specific request config now needs its type on the call: `execute<FetchRequestConfig>({ credentials: "include" })`.
+* both options are renamed, with no alias for the old names. A V2 client generated without `v2ResponseResultsWrapping` no longer has the extra wrapping removed from expanded collection valued navigation properties - services which wrap need the option turned on.
+* **odata2ts:** options `enableBindingProps` and `enableDeepInsertProps` are gone, replaced by `disableBindingProps` and `disableDeepInsertProps` with inverted meaning. Editable models now carry the navigation properties, and query objects the bindings, unless you switch them off. Rename the options in your config; if you relied on the previous default, set both to `true`.
+* **odata2ts:** the default `bundledFileGeneration` changes from `true` to `false` and will break your imports. The transition should be eased by using the generated index files. Set `bundledFileGeneration` to "true" to get back the old behaviour, especially when cyclic dependencies in the generated artefacts might be a problem. This is the case for UI5 in constellation with the TS Babel plugin.
+* **odata2ts:** a configuration whose renaming makes two names collapse no longer generates. It used to produce code which does not compile - or compiles by virtue of `@ts-nocheck` and silently drops one of the two properties. Resolve it via `propertiesByName` or `byTypeAndName`.
+* **odata2ts:** state a binding by the key of the entity, not by its URL ([#437](https://github.com/odata2ts/odata2ts/issues/437))
+* **odata2ts:** Edm.Stream properties are no longer part of the generated models or q-objects. Binary content is not part of the JSON payload, so the property could never carry a value; it is now read and written through the generated stream service instead.
+* **odata2ts:** Q-objects and params models of collection-bound operations are renamed from `<Type>_Q<Operation>` to `<Type>Collection_Q<Operation>`. Only collection-bound operations are affected; operations bound to a single instance and unbound operations keep their names.
+* CollectionServiceV4.add and update take the primitive value directly instead of a model payload, since control information on a primitive collection member has no meaning in OData.
+* **odata2ts:** the undocumented `-name` shorthand for --service-name is removed. It never worked as a real short flag (multi-character short flags are invalid; only the long form was ever reliably parsed) and only appeared to work due to commander's previous lenient validation. Use --service-name <serviceName> instead.
+* **qobject:** removing OperationReturnType, ResponseHelper and ResponseTypes
+* **qobject:** QAction & QFunction with different constructor signatures; intro of QFunctionV2 & QFunctionV4
+* use command pattern to allow users to retrieve request info (URL, method, data, headers) and add request and response converters before performing the request via the new `execute()` method
+* **service:** introduce RequestCmd as intermediary command object including converters
+* **service:** adapt operations to UrlRequestCmd
+* **odata2ts:** config option `numericEnum` has been refactored to `enumType`; use `enumType: "numeric"` if you previously used `numericEnum: true`.
+* **service:** dedicated options parameter for all services
+* as there is no generated index file all file paths must be fixed.
+* ESM tends to break stuff
+* **generator:** generated code won't be type checked anymore. Use `debug: true` to get type checking back.
+* Config options `entitiesByName` and `operationsByName` have been dropped. You must use `byTypeAndName` instead and provide the new type property for each configuration.
+* **generator:** regular expressions must now match against the fully qualified name (e.g. "Trippin.Person") instead of the simple name (e.g. "Person").
+* removed the public method "getQObject"
+* **odata2ts:** 
+* **odata2ts:** option `service.fileNames` was removed in favour of `service.main`, so that the main service can be configured individually; the underlying bug was that file names SHOULD NOT be configurable for services
+* **odata2ts:** changed default: uses "navToX" instead of "getXSrv" to navigate to other services; old behaviour can be restored via naming configuration prefix: "get", suffix: "Srv"
+* rename module odata-uri-builder to odata-query-builder; API completely refactored by renaming all models, classes, functions, props from "uri" to "query"
+* rename odata2model to odata2ts; affects import in `odata2ts.config`, affects scripts in `package.json` or any scripts which use to call `odata2model` command directly
+
+### Features
+
+* allow GET request to be POSTed ([#388](https://github.com/odata2ts/odata2ts/issues/388)) ([bbdce8f](https://github.com/odata2ts/odata2ts/commit/bbdce8f5e90cdfd4e59330861e258584dc804158))
+* compile src & test folders as sanity check ([12607f0](https://github.com/odata2ts/odata2ts/commit/12607f04a4ec1142d750318cab5964f3d9a513c4))
+* composable functions ([#386](https://github.com/odata2ts/odata2ts/issues/386)) ([2eac7c1](https://github.com/odata2ts/odata2ts/commit/2eac7c1b8049e8cf7d6ee6be2e465f8e9ef0464d))
+* force new minor for new http-client-api ([5628666](https://github.com/odata2ts/odata2ts/commit/56286668abf6fe5f3c0639f07a4a9f99cc549068))
+* **generator:** add cast operations to base type services ([#327](https://github.com/odata2ts/odata2ts/issues/327)) ([df52284](https://github.com/odata2ts/odata2ts/commit/df522846e275c160266c02d5c5b49c8be995b3fb))
+* **generator:** add ts-nocheck to each generated file by default ([#284](https://github.com/odata2ts/odata2ts/issues/284)) ([655a3ab](https://github.com/odata2ts/odata2ts/commit/655a3ab801c79e34841f35b1a72cf7d02064f3b8))
+* **generator:** allow for numeric enums ([#308](https://github.com/odata2ts/odata2ts/issues/308)) ([a5c36e6](https://github.com/odata2ts/odata2ts/commit/a5c36e6433bb5d793d5f970b12d6ebb8a4c5270d))
+* **generator:** allow for renaming of operations ([#231](https://github.com/odata2ts/odata2ts/issues/231)) ([8bff901](https://github.com/odata2ts/odata2ts/commit/8bff901c71522e9b7d48f49908e515e7812766f0))
+* **generator:** auto detected service names are run through pascalCase to ensure valid class names ([#250](https://github.com/odata2ts/odata2ts/issues/250)) ([04fcf49](https://github.com/odata2ts/odata2ts/commit/04fcf490aee43dc1c2bc70af394fe9d1d8ce3249))
+* **generator:** conversion of subtype by control info ([#331](https://github.com/odata2ts/odata2ts/issues/331)) ([a8a8a50](https://github.com/odata2ts/odata2ts/commit/a8a8a50c5a619cfe7e32bf6fa399e2f5b1f55ffa))
+* **generator:** entity config supporting namespaces ([#226](https://github.com/odata2ts/odata2ts/issues/226)) ([ff52dc0](https://github.com/odata2ts/odata2ts/commit/ff52dc0f4b9aa0f255d3ec75506657c3f26709bc))
+* **generator:** generate services based on API reference chain ([#275](https://github.com/odata2ts/odata2ts/issues/275)) ([8fd415b](https://github.com/odata2ts/odata2ts/commit/8fd415bd0a49144e14da08cd5e32d44e947c7f23))
+* **generator:** no collection services for entity types without keys ([#248](https://github.com/odata2ts/odata2ts/issues/248)) ([56540b2](https://github.com/odata2ts/odata2ts/commit/56540b22aa92a7a8c929b4088c69d8af30b63364))
+* **generator:** qobjects with casted subtype props ([#328](https://github.com/odata2ts/odata2ts/issues/328)) ([88eb9bd](https://github.com/odata2ts/odata2ts/commit/88eb9bdedf02fa4d74ebfc638f89aca583f1852d))
+* **generator:** support abstract entities ([#247](https://github.com/odata2ts/odata2ts/issues/247)) ([cbf5121](https://github.com/odata2ts/odata2ts/commit/cbf51214da0fdbccba7fff5a3c0b770f73ed06bd))
+* **generator:** support function overloads for different parameter sets ([#282](https://github.com/odata2ts/odata2ts/issues/282)) ([0b53271](https://github.com/odata2ts/odata2ts/commit/0b532710499d975155c21984a62707ecf4789439))
+* **generator:** support type-only imports ([#290](https://github.com/odata2ts/odata2ts/issues/290)) ([dea381e](https://github.com/odata2ts/odata2ts/commit/dea381e7c31f84e03acbaafc15ede58aa9041c13))
+* improved handling of multiple schemas ([#133](https://github.com/odata2ts/odata2ts/issues/133)) ([9c7733f](https://github.com/odata2ts/odata2ts/commit/9c7733f5f95e8f65df52ed13889d352cc9c7f4fb))
+* Intermediary RequestCmd ([#384](https://github.com/odata2ts/odata2ts/issues/384)) ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
+* invariant client type ([#272](https://github.com/odata2ts/odata2ts/issues/272)) ([0ee3c94](https://github.com/odata2ts/odata2ts/commit/0ee3c94d3bf34e7774e1be8dad657ed5e64e597e))
+* keep the V2 results wrapping in every mode and rename both options ([ba7eccd](https://github.com/odata2ts/odata2ts/commit/ba7eccd3bc2716080e3cfcbd8038be972f8bcd0b))
+* let the odataVersionV4 option govern requests and responses ([#416](https://github.com/odata2ts/odata2ts/issues/416)) ([5e8f6fe](https://github.com/odata2ts/odata2ts/commit/5e8f6feb2e39ab76132fd25b44e1923281daeb06))
+* model files always get type checked (no [@ts-nocheck](https://github.com/ts-nocheck)) ([#288](https://github.com/odata2ts/odata2ts/issues/288)) ([43ca58b](https://github.com/odata2ts/odata2ts/commit/43ca58bf72bb8e783b80798eaa73d5fd19676627))
+* **odat2ts:** v4 big number generation ([#195](https://github.com/odata2ts/odata2ts/issues/195)) ([3e5fdcd](https://github.com/odata2ts/odata2ts/commit/3e5fdcda42f893ed7d069489faa2ad10da8d7837))
+* **odata-service:** introduce entity service resolver ([#100](https://github.com/odata2ts/odata2ts/issues/100)) ([66dd853](https://github.com/odata2ts/odata2ts/commit/66dd853bbc28a0758fae04abd5e8885689aeabc2))
+* **odata-service:** services are no longer generic over the HTTP client ([57d7c67](https://github.com/odata2ts/odata2ts/commit/57d7c6752751ee4d59aa7e3de35d06d9901dfe12))
+* **odata-service:** transfer binary content as a stream ([#429](https://github.com/odata2ts/odata2ts/issues/429)) ([6f2208a](https://github.com/odata2ts/odata2ts/commit/6f2208a8d4d692ef805a2bc15eff154eba6c8eb2))
+* **odata2ts:** add snakeCase as new renaming strategy ([#101](https://github.com/odata2ts/odata2ts/issues/101)) ([09f9bfb](https://github.com/odata2ts/odata2ts/commit/09f9bfbde7f1e75c9a29ff774f7d771cfab7106b))
+* **odata2ts:** allow for native in-operator (V4 only) ([b7ddbf0](https://github.com/odata2ts/odata2ts/commit/b7ddbf0f87c9ed20f8c52611988a3f133bce5b2f))
+* **odata2ts:** allow property configuration via entity ([#188](https://github.com/odata2ts/odata2ts/issues/188)) ([bdb5bef](https://github.com/odata2ts/odata2ts/commit/bdb5bef6d70827e4cc06d8a8b73c6a31edb92a2e))
+* **odata2ts:** bind existing entities to navigation properties ([#419](https://github.com/odata2ts/odata2ts/issues/419)) ([70ed99a](https://github.com/odata2ts/odata2ts/commit/70ed99aeabe0d705e4215a86cc18ca6f0a16e196))
+* **odata2ts:** Entity configuration options ([#145](https://github.com/odata2ts/odata2ts/issues/145)) ([03264c5](https://github.com/odata2ts/odata2ts/commit/03264c5f31a758f9b8d854630cf2c90632e9d8d8))
+* **odata2ts:** ESM support for the generator ([#198](https://github.com/odata2ts/odata2ts/issues/198)) ([6956b9c](https://github.com/odata2ts/odata2ts/commit/6956b9c8321707f04b7109653de50de0b739df3e))
+* **odata2ts:** fail generation on unresolvable name clashes ([#440](https://github.com/odata2ts/odata2ts/issues/440)) ([3c1a582](https://github.com/odata2ts/odata2ts/commit/3c1a582c8dd61004adeede14e6962518d4b97653))
+* **odata2ts:** generate binding and deep insert props by default ([6cc7533](https://github.com/odata2ts/odata2ts/commit/6cc7533a7787acc9a74909285b74af6b684ed171))
+* **odata2ts:** generate blob services for streams and media entities ([564d4c7](https://github.com/odata2ts/odata2ts/commit/564d4c72576c0e093a3350c39118a0363aedb053))
+* **odata2ts:** generate comments for model properties ([#173](https://github.com/odata2ts/odata2ts/issues/173)) ([b218297](https://github.com/odata2ts/odata2ts/commit/b2182974637499060d7d0c8d358da17ca03608e0))
+* **odata2ts:** generate enums as string union type ([#367](https://github.com/odata2ts/odata2ts/issues/367)) ([22a5516](https://github.com/odata2ts/odata2ts/commit/22a551671d660fbf915fb4542b62551cf070a260))
+* **odata2ts:** generate index files for every build ([#439](https://github.com/odata2ts/odata2ts/issues/439)) ([63f23bb](https://github.com/odata2ts/odata2ts/commit/63f23bbd7eb0efaf312a2273738cb28c12874115))
+* **odata2ts:** generate one folder per model by default ([#447](https://github.com/odata2ts/odata2ts/issues/447)) ([05eb08f](https://github.com/odata2ts/odata2ts/commit/05eb08fc2f0d59131bfa9493afc5d027d121b171))
+* **odata2ts:** import a qualified custom type by its root ([#472](https://github.com/odata2ts/odata2ts/issues/472)) ([2726479](https://github.com/odata2ts/odata2ts/commit/2726479ec368ef0a710e24a3b901ed56424a49eb))
+* **odata2ts:** metadata download ([#191](https://github.com/odata2ts/odata2ts/issues/191)) ([718058d](https://github.com/odata2ts/odata2ts/commit/718058d4fa93884212ca7e3fe12ac5385a36fecb))
+* **odata2ts:** minimal naming options ([#104](https://github.com/odata2ts/odata2ts/issues/104)) ([67ddfa7](https://github.com/odata2ts/odata2ts/commit/67ddfa74f977e164892c2953dc8c5459a92c11d4))
+* **odata2ts:** navigation properties in editable models for deep insert and deep update ([#431](https://github.com/odata2ts/odata2ts/issues/431)) ([cc17d3a](https://github.com/odata2ts/odata2ts/commit/cc17d3a9482891c9929434972044f35c2740c520))
+* **odata2ts:** recognize IsComposable attribute & generate composable request commands ([2eac7c1](https://github.com/odata2ts/odata2ts/commit/2eac7c1b8049e8cf7d6ee6be2e465f8e9ef0464d))
+* **odata2ts:** reconstruct complex types which a service states flat ([#473](https://github.com/odata2ts/odata2ts/issues/473)) ([d427d60](https://github.com/odata2ts/odata2ts/commit/d427d605edb96625f9f91150a4dfc67155ba6ffb))
+* **odata2ts:** resolve V2 navigation property bindings from AssociationSet ([#418](https://github.com/odata2ts/odata2ts/issues/418)) ([18feab7](https://github.com/odata2ts/odata2ts/commit/18feab7c1e48a8a197246532a832b96714e3286c))
+* **odata2ts:** state a binding by the key of the entity, not by its URL ([#437](https://github.com/odata2ts/odata2ts/issues/437)) ([71e7413](https://github.com/odata2ts/odata2ts/commit/71e7413164a40245238509dd306eb386e099bdcf))
+* **odata2ts:** support binary params ([#267](https://github.com/odata2ts/odata2ts/issues/267)) ([483603f](https://github.com/odata2ts/odata2ts/commit/483603f267618c07a1ec3d39433ad2157a1854bd))
+* **odata2ts:** support for multiple namespaces by merging ([#175](https://github.com/odata2ts/odata2ts/issues/175)) ([db8fd61](https://github.com/odata2ts/odata2ts/commit/db8fd6165c57ceb9e04488789a62f2a5467ecc68))
+* **odata2ts:** support schema alias ([#181](https://github.com/odata2ts/odata2ts/issues/181)) ([e0c04a8](https://github.com/odata2ts/odata2ts/commit/e0c04a83e32d99187652966bb9cc32f36ead3df2))
+* **odata2ts:** support TypeDefinition elements ([#183](https://github.com/odata2ts/odata2ts/issues/183)) ([d77d2cb](https://github.com/odata2ts/odata2ts/commit/d77d2cbf17383dab50d35bb7374e08a83d264db2))
+* **odata2ts:** use navToX instead of getXSrv ([#99](https://github.com/odata2ts/odata2ts/issues/99)) ([4aafcb0](https://github.com/odata2ts/odata2ts/commit/4aafcb0cd307748feed4df075459e17e83876f3b))
+* one file for all services ([#223](https://github.com/odata2ts/odata2ts/issues/223)) ([f48bf5a](https://github.com/odata2ts/odata2ts/commit/f48bf5ab36aa09ddc7760cc078d952c79b7a2185))
+* option for extra-results-wrapping for V2 services and model generation only ([#155](https://github.com/odata2ts/odata2ts/issues/155)) ([795a04c](https://github.com/odata2ts/odata2ts/commit/795a04c42b9e2485975b85b70bc72772bd4bf25a))
+* read and write binary content over OData V2 ([#436](https://github.com/odata2ts/odata2ts/issues/436)) ([5aa46c2](https://github.com/odata2ts/odata2ts/commit/5aa46c2eaa3e8c180e3b14faceadedb6b6027eaf))
+* report name clashes & introduce auto name clash resolution ([#239](https://github.com/odata2ts/odata2ts/issues/239)) ([28b38dc](https://github.com/odata2ts/odata2ts/commit/28b38dc7945dcc4b66744f0b8474625702331b50))
+* reshape V2 responses as V4 via v2ResponseAsV4 ([#476](https://github.com/odata2ts/odata2ts/issues/476)) ([31f741f](https://github.com/odata2ts/odata2ts/commit/31f741f59881cf10ec547f7f220bed9be0f90599))
+* service generation for primitive types ([#201](https://github.com/odata2ts/odata2ts/issues/201)) ([ea9e645](https://github.com/odata2ts/odata2ts/commit/ea9e6452f6b4033c489fbceaf6b75591b550a3f1))
+* **service:** introduce ComposableUrlRequestCmd ([2eac7c1](https://github.com/odata2ts/odata2ts/commit/2eac7c1b8049e8cf7d6ee6be2e465f8e9ef0464d))
+* **service:** subtype services ([#332](https://github.com/odata2ts/odata2ts/issues/332)) ([6918735](https://github.com/odata2ts/odata2ts/commit/691873557d21418561f017189fe896d544ffcba5))
+* **service:** support no url encoding ([#326](https://github.com/odata2ts/odata2ts/issues/326)) ([304bc62](https://github.com/odata2ts/odata2ts/commit/304bc627199766f7a930bffe28e39bb24eea39b1))
+* use kebap-case for folder names (unbundledFileGeneration) ([9f26e1f](https://github.com/odata2ts/odata2ts/commit/9f26e1f2e49fbe32a61a43ba2dd29be85a3561c3))
+
+
+### Bug Fixes
+
+* auto name clash resolution for v4 actions ([#315](https://github.com/odata2ts/odata2ts/issues/315)) ([3366843](https://github.com/odata2ts/odata2ts/commit/3366843dc227f9c8edd5b4660d63c564cc82f121))
+* build ([2a54611](https://github.com/odata2ts/odata2ts/commit/2a54611ff0dbad14621743361307c261785ca62a))
+* **build:** run unit tests of examples ([#232](https://github.com/odata2ts/odata2ts/issues/232)) ([9e70481](https://github.com/odata2ts/odata2ts/commit/9e70481aec5fad29c63b93586ba73b1ea4e9d414))
+* **deps:** update dependency cosmiconfig to v10 ([d10de23](https://github.com/odata2ts/odata2ts/commit/d10de23d09055c3d9cdc029537f2441a3f23e00b))
+* **deps:** update dependency upper-case-first to v3 ([1d90b42](https://github.com/odata2ts/odata2ts/commit/1d90b4223ea45191fb6d2d105fda39e276fb239d))
+* empty enum ([#270](https://github.com/odata2ts/odata2ts/issues/270)) ([32eeb1e](https://github.com/odata2ts/odata2ts/commit/32eeb1e587f507a138ca96d81c7ab3da4c0bdba8))
+* **example:** use new execute method ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
+* fully qualified name for EntitySet, Singleton & FunctionImport by EntityContainer name instead of namespace ([#245](https://github.com/odata2ts/odata2ts/issues/245)) ([6047122](https://github.com/odata2ts/odata2ts/commit/60471223deac8b14b2d3cfc0946acde7d33d2d64))
+* **generator:** add rimraf as dependency ([9f08ccd](https://github.com/odata2ts/odata2ts/commit/9f08ccd5fc68b1de381ea1cb711c6e667ca5be98))
+* **generator:** add special logic for bound operation name clas resolution (gets prefixed by bound entity) ([#259](https://github.com/odata2ts/odata2ts/issues/259)) ([2a0f9ff](https://github.com/odata2ts/odata2ts/commit/2a0f9ff4cf7222db86af396e00859ae47d426eac))
+* **generator:** api usage analysis must respect alias ([#317](https://github.com/odata2ts/odata2ts/issues/317)) ([5877161](https://github.com/odata2ts/odata2ts/commit/5877161317d09c5ded9b44ce4a7ecd0f65e65235))
+* **generator:** apply type-only imports for q-objects in bundled mode ([#294](https://github.com/odata2ts/odata2ts/issues/294)) ([a439d0a](https://github.com/odata2ts/odata2ts/commit/a439d0a16dabc772287aa5f50ee7cd1b722df724))
+* **generator:** await ensureDir calls ([99c679d](https://github.com/odata2ts/odata2ts/commit/99c679d8ad989dae65e9366b3018d86a867ecae8))
+* **generator:** collection operations are not generated ([#235](https://github.com/odata2ts/odata2ts/issues/235)) ([5157ded](https://github.com/odata2ts/odata2ts/commit/5157dede1438f6551e0762eeaa1b82f1c7e06e7f))
+* **generator:** enumerate generated files for emit mode ts ([#249](https://github.com/odata2ts/odata2ts/issues/249)) ([e58e3d5](https://github.com/odata2ts/odata2ts/commit/e58e3d5c6a9f73ec8eb9c011b9b42747d0576fc4))
+* **generator:** in unbundled mode unbound action models should go into main files ([#264](https://github.com/odata2ts/odata2ts/issues/264)) ([5dd52ec](https://github.com/odata2ts/odata2ts/commit/5dd52eceae1982f5e48a57ea08649ada5e11d190))
+* **generator:** more type-only imports depending on usage ([#292](https://github.com/odata2ts/odata2ts/issues/292)) ([c0b06f9](https://github.com/odata2ts/odata2ts/commit/c0b06f9bf86cb9060612a36f122ee0f41dccdcdb))
+* **generator:** set peer dependency of TS to &gt;= 4.7 ([949d874](https://github.com/odata2ts/odata2ts/commit/949d8749828dda06a2072d4153556c53d0adb3cf))
+* **generator:** too many imports for services with entity nav props ([1cae569](https://github.com/odata2ts/odata2ts/commit/1cae5694a2794173d8ec31698dc1601f29322382))
+* **generator:** use typeof when using enums as types ([baf784f](https://github.com/odata2ts/odata2ts/commit/baf784f76f119c2394ba4f1c3cd93359dc31171e))
+* **generator:** v4 types like Edm.Date, Edm.TimeOfDay and Emd.Duration are not recognized ([#295](https://github.com/odata2ts/odata2ts/issues/295)) ([3b63969](https://github.com/odata2ts/odata2ts/commit/3b639699217ba234cf9e5508f24a64c4d6f3d3dd))
+* **generator:** write main service file only once ([74e39a0](https://github.com/odata2ts/odata2ts/commit/74e39a0cafa584b06f1fdace41d6636fbbc59942))
+* **generator:** wrong namespace prefix calculated ([2ad5a56](https://github.com/odata2ts/odata2ts/commit/2ad5a568c8fa64bc5f3db0bf07f28c3cb25b815c))
+* keep package coverage reports out of the aggregate coverage run ([4441e15](https://github.com/odata2ts/odata2ts/commit/4441e15e12a5810db2cf00c6feace7b58ad0c820))
+* local fixture imports must be ignored ([d3266dc](https://github.com/odata2ts/odata2ts/commit/d3266dccf06ec1adef450fccb18cf5365a881357))
+* migrate to nodenext module resolution for TypeScript 6.0 ([e58d95f](https://github.com/odata2ts/odata2ts/commit/e58d95f4bcfa673753c6fdd5495040222c710edb))
+* **odata-query-objects:** let QEnumPath take a plain member list ([225eb61](https://github.com/odata2ts/odata2ts/commit/225eb619a08a3c34d822ee5dbb74ca7848421cdc))
+* **odata-service:** keep the converter object in PrimitiveTypeServiceV2 ([62a4893](https://github.com/odata2ts/odata2ts/commit/62a489353c8253773341cbb32a229da7ca94d3c5))
+* **odata2ts:** add Accept header for metadata downloads ([#340](https://github.com/odata2ts/odata2ts/issues/340)) ([dcdd997](https://github.com/odata2ts/odata2ts/commit/dcdd9975ee9f34bf0474c22372db39fcb80e9bae))
+* **odata2ts:** add empty array as type for empty params ([#154](https://github.com/odata2ts/odata2ts/issues/154)) ([fbdd000](https://github.com/odata2ts/odata2ts/commit/fbdd0005d46d7d402d8039bec3ea4aecdb593b88))
+* **odata2ts:** bound operations with namespace as part of the name ([#187](https://github.com/odata2ts/odata2ts/issues/187)) ([68209f2](https://github.com/odata2ts/odata2ts/commit/68209f2bb5bc16fdaa36e5a3ddef21d72ce8f273))
+* **odata2ts:** commander 15 + cosmiconfig 9 ([51e7eb9](https://github.com/odata2ts/odata2ts/commit/51e7eb9c843d7b89671f4c3dc3824e1503e1a35e))
+* **odata2ts:** configurable naming of main service ([c2bdeeb](https://github.com/odata2ts/odata2ts/commit/c2bdeeb9e35f8a4ed31e35c41e4f01ddef9bd9a6))
+* **odata2ts:** correct fieldName for nav props ([#189](https://github.com/odata2ts/odata2ts/issues/189)) ([ec198d4](https://github.com/odata2ts/odata2ts/commit/ec198d48f6770d2c203be2f4e640370170d87f6e))
+* **odata2ts:** distinguish bound operations by the cardinality they bind to ([#423](https://github.com/odata2ts/odata2ts/issues/423)) ([ee485c1](https://github.com/odata2ts/odata2ts/commit/ee485c118febda118020fd242909f43a6385709b))
+* **odata2ts:** don't generate main model & q-object file in unbundled mode if empty ([#268](https://github.com/odata2ts/odata2ts/issues/268)) ([e5e69a5](https://github.com/odata2ts/odata2ts/commit/e5e69a5826814d3848f9eba0c4e808cd61dae580))
+* **odata2ts:** don't hand query object options to a binary path ([b43105a](https://github.com/odata2ts/odata2ts/commit/b43105a039392d67debf2717a1262e75a86ce222))
+* **odata2ts:** downgrade prettier plugin xml to 2.2.0 ([36525f9](https://github.com/odata2ts/odata2ts/commit/36525f90e03199a0a4cce197df4662e8288493a6))
+* **odata2ts:** duplicate output paths ([#184](https://github.com/odata2ts/odata2ts/issues/184)) ([b55366d](https://github.com/odata2ts/odata2ts/commit/b55366dab8d331ace3c766b4279b5b0cc575aa03))
+* **odata2ts:** entity resolver uses wrong Q-Id function when id is inherited ([e05f4eb](https://github.com/odata2ts/odata2ts/commit/e05f4ebd8afd472cdad0194f899159d2a60c3d92))
+* **odata2ts:** fix subclass import for unbundled generation ([#378](https://github.com/odata2ts/odata2ts/issues/378)) ([537db36](https://github.com/odata2ts/odata2ts/commit/537db369e04b972ab473b0ef2cf4c8d8d858120a))
+* **odata2ts:** move CLI smoke test to its own examples package ([94753ba](https://github.com/odata2ts/odata2ts/commit/94753ba68bfb4f0742c734c378d46797d737c904))
+* **odata2ts:** no model param and no q operation generation for collection bound operations ([#110](https://github.com/odata2ts/odata2ts/issues/110)) ([71769c2](https://github.com/odata2ts/odata2ts/commit/71769c22affa37c3a443e91f5070fa07f90d03d6))
+* **odata2ts:** peer dep versions did not get auto upated ([#120](https://github.com/odata2ts/odata2ts/issues/120)) ([586627e](https://github.com/odata2ts/odata2ts/commit/586627e354c03ed36135d0b7f21a05b97a11072f))
+* **odata2ts:** properly check for bundled file generation ([#376](https://github.com/odata2ts/odata2ts/issues/376)) ([3e09fc8](https://github.com/odata2ts/odata2ts/commit/3e09fc8aace4f3dc599d1eabdebb52142c1bc779))
+* **odata2ts:** semantically wrong unit test ([541a687](https://github.com/odata2ts/odata2ts/commit/541a6874517ef6444fe6f428b64dc894158b066b))
+* **odata2ts:** ts-node as proper dep instead of peer-dep ([2050524](https://github.com/odata2ts/odata2ts/commit/2050524e8102549f2fca3911d55834892f0caf94))
+* **odata2ts:** use qualified name for bound operations ([#182](https://github.com/odata2ts/odata2ts/issues/182)) ([120c9b8](https://github.com/odata2ts/odata2ts/commit/120c9b807ac209a8eb82b389bc7c21d7df7fe876))
+* **odata2ts:** wrong generation of complex and enum params for q operations ([#111](https://github.com/odata2ts/odata2ts/issues/111)) ([f69aadf](https://github.com/odata2ts/odata2ts/commit/f69aadf52201fbf854d00103f763f465c7557de4))
+* prevent idModel and qIdFunction from baseclass to be overwritten in digester which breaks multiple inheritance ([#150](https://github.com/odata2ts/odata2ts/issues/150)) ([e17038e](https://github.com/odata2ts/odata2ts/commit/e17038ee0e924101f9dd6ed97e10da5847cb8857))
+* Reorder models and qobjects by inheritance (base types first) ([#151](https://github.com/odata2ts/odata2ts/issues/151)) ([7d456fe](https://github.com/odata2ts/odata2ts/commit/7d456fe3fd28b246721a170cd878d04c3dbc2d80))
+* restrict-expand ([#379](https://github.com/odata2ts/odata2ts/issues/379)) ([8624b2d](https://github.com/odata2ts/odata2ts/commit/8624b2d80e6f91f5ce0dcedf53a2e22a20713de3))
+* unpack & convert returned complex types in V2 ([#362](https://github.com/odata2ts/odata2ts/issues/362)) ([2072ed6](https://github.com/odata2ts/odata2ts/commit/2072ed6583f704074b255992374458a96c1954a2))
+
+
+### Code Refactoring
+
+* byTypeAndName option ([#238](https://github.com/odata2ts/odata2ts/issues/238)) ([e15f7a6](https://github.com/odata2ts/odata2ts/commit/e15f7a615e0cdf3865fbfce4dee08cdae60b46ad))
+* odata2model =&gt; odata2ts ([#97](https://github.com/odata2ts/odata2ts/issues/97)) ([4085c7c](https://github.com/odata2ts/odata2ts/commit/4085c7ccf173c6712c5238f8b43e86842eecb19a))
+* **odata2ts:** bundle v2 and v4 options ([#478](https://github.com/odata2ts/odata2ts/issues/478)) ([7095909](https://github.com/odata2ts/odata2ts/commit/709590965735717902368546967e1a4fd5bd469d))
+* **odata2ts:** dispense with resolver & directly implement related services as getter ([9b49501](https://github.com/odata2ts/odata2ts/commit/9b49501e279b6c5869cbc5ac2fd246577780b81f))
+* **qobject:** QAction & QFunction with different constructor signatures; intro of QFunctionV2 & QFunctionV4 ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
+* **qobject:** removing OperationReturnType, ResponseHelper and ResponseTypes ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
+* rename odata-uri-builder to odata-query-builder ([#98](https://github.com/odata2ts/odata2ts/issues/98)) ([e0de825](https://github.com/odata2ts/odata2ts/commit/e0de825663fab15c37854ae08f75ab8df761cd3e))
+* **service:** adapt operations to UrlRequestCmd ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
+* **service:** introduce RequestCmd as intermediary command object including converters ([113fdf4](https://github.com/odata2ts/odata2ts/commit/113fdf41041e69c922023cc91ce0d374ebb1073d))
+* vitest instead of jest & switch to ESM ([#300](https://github.com/odata2ts/odata2ts/issues/300)) ([7bc8888](https://github.com/odata2ts/odata2ts/commit/7bc88884317b6fc269729cf4eb08602571b69a2d))
+
 ## [0.43.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.42.0...@odata2ts/odata2ts-v0.43.0) (2026-08-08)
 
 
