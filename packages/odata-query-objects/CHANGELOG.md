@@ -33,6 +33,20 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * ESM tends to break stuff
 
+## [0.30.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.30.0...@odata2ts/odata-query-objects-v0.30.1) (2026-08-08)
+
+
+### Features
+
+* **odata2ts:** import a qualified custom type by its root ([#472](https://github.com/odata2ts/odata2ts/issues/472)) ([2726479](https://github.com/odata2ts/odata2ts/commit/2726479ec368ef0a710e24a3b901ed56424a49eb))
+* **odata2ts:** reconstruct complex types which a service states flat ([#473](https://github.com/odata2ts/odata2ts/issues/473)) ([d427d60](https://github.com/odata2ts/odata2ts/commit/d427d605edb96625f9f91150a4dfc67155ba6ffb))
+* reshape V2 responses as V4 via v2ResponseAsV4 ([#476](https://github.com/odata2ts/odata2ts/issues/476)) ([31f741f](https://github.com/odata2ts/odata2ts/commit/31f741f59881cf10ec547f7f220bed9be0f90599))
+
+
+### Bug Fixes
+
+* **odata-query-objects:** pass URL conversion options to param converters ([1daec60](https://github.com/odata2ts/odata2ts/commit/1daec6062f72c95cc1cc4f028ed5c62a9014908e))
+
 ## [0.30.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.29.0...@odata2ts/odata-query-objects-v0.30.0) (2026-08-05)
 
 
