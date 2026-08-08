@@ -5,7 +5,7 @@ export interface MockRequestConfig extends ODataRequestConfig {
 }
 /**
  * Mock for an ODataHttpClient.
- * Use <code>client.lastUrl</code> or <code>client.lastData</code> to acces passed data.
+ * Use `client.lastUrl` or `client.lastData` to acces passed data.
  */
 export class MockClient implements ODataHttpClient<MockRequestConfig> {
   public lastUrl?: string;

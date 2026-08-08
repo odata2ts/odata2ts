@@ -14,7 +14,7 @@ export type StringEnumMember<EnumType> = EnumType[keyof EnumType] | keyof EnumTy
 /**
  * The members of a string enum as a plain list.
  *
- * This is what stands in for the enum object where there is none: with <code>enumType: "string-union"</code>
+ * This is what stands in for the enum object where there is none: with `enumType: "string-union"`
  * the generated type is a union of string literals, which exists only in the type system. The query objects
  * need something at runtime, so the generator emits the member list next to it.
  */
