@@ -50,7 +50,7 @@ class QueryObjectGenerator {
   ) {}
 
   private isV2AsV4() {
-    return this.options.v2ResponseAsV4 && this.version === ODataVersions.V2;
+    return this.options.v2.responseAsV4 && this.version === ODataVersions.V2;
   }
 
   public async generate(): Promise<void> {
@@ -74,7 +74,7 @@ class QueryObjectGenerator {
     const file = this.project.createOrGetMainQObjectFile();
 
     // for now assume only enableNativeInOperator requires options to be processed
-    if (!this.options.enableNativeInOperator) {
+    if (!this.options.v4.enableNativeInOperator) {
       return;
     }
 
@@ -256,7 +256,7 @@ class QueryObjectGenerator {
     // there would be no point either: there is no `in` to render natively.
     const takesOptions = (prop: PropertyModel) =>
       !prop.isCollection && !isModelType(prop) && !isEnumType(prop) && prop.qPath !== "QBinaryPath";
-    const addOptions = this.options.enableNativeInOperator; // limited to hardcoded enableNativeIn for now
+    const addOptions = this.options.v4.enableNativeInOperator; // limited to hardcoded enableNativeIn for now
 
     if (addOptions && props.some(takesOptions)) {
       importContainer.addFromMainQObject(OPTIONS_STATEMENT);
@@ -342,7 +342,8 @@ class QueryObjectGenerator {
 
     const qBinding = importContainer.addQObject(QueryObjectImports.QBinding);
     const qId = importContainer.addGeneratedQObject(target.id.fqName, target.id.qName);
-    const notation = this.version === ODataVersions.V2 ? "V2" : this.options.odataVersionV4 === "4.01" ? "4.01" : "4.0";
+    const notation =
+      this.version === ODataVersions.V2 ? "V2" : this.options.v4.odataVersion === "4.01" ? "4.01" : "4.0";
 
     return `, new ${qBinding}(() => new ${qId}("${targetSet.odataName}"), "${notation}")`;
   }
@@ -439,7 +440,7 @@ class QueryObjectGenerator {
     const isV2 = this.version === ODataVersions.V2;
     const returnType = operation.returnType;
     const hasParams = operation.parameters.length > 0 || operation.overrides?.length;
-    const isParamsOptional = !![operation.parameters, ...(operation.overrides ?? [])].find((pSet) => pSet.length === 0);
+    //const isParamsOptional = !![operation.parameters, ...(operation.overrides ?? [])].find((pSet) => pSet.length === 0);
 
     // imports
     const qOp =

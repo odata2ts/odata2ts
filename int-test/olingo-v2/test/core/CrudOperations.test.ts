@@ -1,7 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { Book, EditableBook } from "../../src-generated/library/LibraryModel.js";
+import { Book, EditableBook } from "../../src-generated/library/index.js";
 import { expectODataError } from "../expectODataError.js";
 import { BASE_URL, BOOK_DER_PROZESS, COPY_KEY, LIBRARY, UNKNOWN_ID } from "../LibraryTestConstants.js";
 

@@ -220,7 +220,7 @@ class ModelGenerator {
     // V2 entity special: deferred content - not for v2ResponseAsV4, which reshapes a V2 response as V4,
     // and V4 has no equivalent placeholder: an unexpanded navigation property is simply absent
     let suffix = "";
-    if (this.dataModel.isV2() && !this.options.v2ResponseAsV4 && prop.dataType == DataTypes.ModelType) {
+    if (this.dataModel.isV2() && !this.options.v2.responseAsV4 && prop.dataType == DataTypes.ModelType) {
       const defContent = imports.addCoreLib(this.version, CoreImports.DeferredContent);
       suffix = ` | ${defContent}`;
     }
@@ -239,7 +239,7 @@ class ModelGenerator {
       // the extra results object is how V2 serialises a *feed*, so it is an entity collection's business
       // alone - a collection of a complex or primitive type arrives as a plain array (verified against
       // CAP's V2 adapter, which wraps `Copies` and hands over `PreviousAddresses` and `Keywords` bare)
-      if (this.dataModel.isV2() && this.options.v2ResponseResultsWrapping && prop.dataType === DataTypes.ModelType) {
+      if (this.dataModel.isV2() && this.options.v2.responseResultsWrapping && prop.dataType === DataTypes.ModelType) {
         return `{ results: ${type} }` + suffix;
       } else {
         return type + suffix;
@@ -367,7 +367,7 @@ class ModelGenerator {
     props: Array<PropertyModel>,
   ): Array<OptionalKind<PropertySignatureStructure>> {
     const isV2 = this.version === ODataVersions.V2;
-    const isV401 = !isV2 && this.options.odataVersionV4 === "4.01";
+    const isV401 = !isV2 && this.options.v4.odataVersion === "4.01";
     // in these versions a binding has no name of its own, so it shares the property with a deep insert
     const bindingByPropName = isV2 || isV401;
     const byKey = this.bindsByKey();
@@ -442,7 +442,7 @@ class ModelGenerator {
     if (prop.isCollection) {
       const collectionType = `Array<${singleType}>`;
       // some V2 services expect the extra results wrapping in the payload as well, see issue #237
-      return this.version === ODataVersions.V2 && this.options.v2PayloadResultsWrapping
+      return this.version === ODataVersions.V2 && this.options.v2.payloadResultsWrapping
         ? `{ results: ${collectionType} }`
         : collectionType;
     }

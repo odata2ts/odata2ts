@@ -133,7 +133,7 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
         };
       case ODataTypesV4.Int64:
       case ODataTypesV4.Decimal:
-        if (this.options.v4BigNumberAsString) {
+        if (this.options.v4.bigNumberAsString) {
           return {
             outputType: "string",
             qPath: "QBigNumberPath",

@@ -38,7 +38,7 @@ const config: ConfigFileOptions = {
       // option has exactly two states and both are worth having against a real server, so they are split
       // across the two V4 packages instead of duplicating a suite. `test/core/QueryFunctionality.test.ts`
       // covers it on either side - the assertion differs only in the URL that reaches the server.
-      enableNativeInOperator: true,
+      v4: { enableNativeInOperator: true },
     },
     /**
      * The V4 model with `unflattenComplexTypes`, which is what this whole server is the case for:
@@ -64,8 +64,10 @@ const config: ConfigFileOptions = {
       source: "resource/library-v2.xml",
       output: "src-generated/library-shaped-v2",
       unflattenComplexTypes: true,
-      v2ResponseResultsWrapping: true,
-      v2PayloadResultsWrapping: false,
+      v2: {
+        responseResultsWrapping: true,
+        payloadResultsWrapping: false,
+      },
     },
     /**
      * The V4 model a second time, with converters switched on.
@@ -89,7 +91,7 @@ const config: ConfigFileOptions = {
       serviceName: "LibraryConverted",
       source: "resource/library.xml",
       output: "src-generated/library-converted",
-      v4BigNumberAsString: true,
+      v4: { bigNumberAsString: true },
       converters: [
         "@odata2ts/converter-luxon",
         "@odata2ts/converter-big-number",
@@ -110,8 +112,10 @@ const config: ConfigFileOptions = {
        * `{"Keywords": {"results": [...]}}` comes back as 400 "Value must be an array". Olingo accepts
        * either, so only this side settles the question - see test/v2/feature/ResultsWrapping.test.ts.
        */
-      v2ResponseResultsWrapping: true,
-      v2PayloadResultsWrapping: false,
+      v2: {
+        responseResultsWrapping: true,
+        payloadResultsWrapping: false,
+      },
     },
   },
 };

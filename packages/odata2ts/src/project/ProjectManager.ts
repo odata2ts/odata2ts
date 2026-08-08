@@ -303,7 +303,7 @@ export class ProjectManager {
    * Generates the barrel files, re-exporting everything that has been generated: one index file per
    * namespace and one at the root of the output directory.
    *
-   * The files of a folder are always re-exported by the index of its <em>parent</em> - the namespace level
+   * The files of a folder are always re-exported by the index of its *parent* - the namespace level
    * for the model folders, the output root for everything else. Model folders therefore get no index of
    * their own, which means no generated artefact can ever collide with one: a model literally named "index"
    * is simply re-exported like any other.

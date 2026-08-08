@@ -212,7 +212,7 @@ describe("Query Object Generator Tests V4", () => {
     // when generating model
     // then match fixture text
     await generateAndCompare("entity-with-native-in.ts", {
-      enableNativeInOperator: true,
+      v4: { enableNativeInOperator: true },
     });
   });
 
@@ -224,7 +224,7 @@ describe("Query Object Generator Tests V4", () => {
     // when generating model
     // then match fixture text of main qobject
     await generateAndCompare("unbundled-main-native-in.ts", {
-      enableNativeInOperator: true,
+      v4: { enableNativeInOperator: true },
       bundledFileGeneration: false,
     });
     // when generating model
@@ -232,7 +232,7 @@ describe("Query Object Generator Tests V4", () => {
     await generateAndCompare(
       "unbundled-file-native-in.ts",
       {
-        enableNativeInOperator: true,
+        v4: { enableNativeInOperator: true },
         bundledFileGeneration: false,
       },
       `${SERVICE_NAME.toLowerCase()}/${ENTITY_NAME.toLowerCase()}/Q${ENTITY_NAME}`,

@@ -34,8 +34,7 @@ const config: ConfigFileOptions = {
    * necessarily expect it (odata2ts#237); Olingo happens to accept both, which is exactly why the option
    * cannot be derived from the response side.
    */
-  v2ResponseResultsWrapping: true,
-  v2PayloadResultsWrapping: true,
+  v2: { responseResultsWrapping: true, payloadResultsWrapping: true },
   services: {
     library: {
       serviceName: "Library",
@@ -113,13 +112,11 @@ const config: ConfigFileOptions = {
       source: "resource/library-v2.xml",
       output: "src-generated/library-as-v4",
       enablePrimitivePropertyServices: true,
-      v2ResponseAsV4: true,
-      // override the top-level wrapping options: v2ResponseAsV4 already reshapes an expanded collection
+      // override the top-level wrapping options: responseAsV4 already reshapes an expanded collection
       // valued nav prop as a plain array (dropping the `results` envelope entirely) and Olingo accepts an
       // unwrapped deep-insert payload just as well (see ResultsWrapping.test.ts) - stating the wrapping in
       // the generated types here would describe traffic this client no longer sends or receives
-      v2ResponseResultsWrapping: false,
-      v2PayloadResultsWrapping: false,
+      v2: { responseAsV4: true, responseResultsWrapping: false, payloadResultsWrapping: false },
     },
   },
 };
