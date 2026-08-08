@@ -55,7 +55,7 @@ const config: ConfigFileOptions = {
       serviceName: "Library401",
       source: "resource/library.xml",
       output: "src-generated/library-401",
-      odataVersionV4: "4.01",
+      v4: { odataVersion: "4.01" },
     },
     /**
      * The same model a second time, with renaming switched on.

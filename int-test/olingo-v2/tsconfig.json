@@ -5,5 +5,5 @@
     "noEmit": true,
     "lib": ["ESNext", "DOM"]
   },
-  "include": ["src-generated", "test"]
+  "include": ["src-generated", "test", "odata2ts.config.ts"]
 }

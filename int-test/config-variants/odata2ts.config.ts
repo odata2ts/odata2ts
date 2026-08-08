@@ -182,8 +182,10 @@ const config: ConfigFileOptions = {
       source: V2_SOURCE,
       output: "src-generated/v2-wrapping",
       mode: Modes.models,
-      v2ResponseResultsWrapping: true,
-      v2PayloadResultsWrapping: true,
+      v2: {
+        responseResultsWrapping: true,
+        payloadResultsWrapping: true,
+      },
     },
 
     /**
@@ -204,9 +206,11 @@ const config: ConfigFileOptions = {
       byTypeAndName: [{ name: "PublisherRegistry.Branch", type: TypeModel.EntityType, mappedName: "PublisherBranch" }],
       enumType: "numeric",
       enablePrimitivePropertyServices: true,
-      enableNativeInOperator: true,
-      v4BigNumberAsString: true,
-      odataVersionV4: "4.01",
+      v4: {
+        enableNativeInOperator: true,
+        bigNumberAsString: true,
+        odataVersion: "4.01",
+      },
       disableAutoManagedKey: true,
       skipComments: true,
     },

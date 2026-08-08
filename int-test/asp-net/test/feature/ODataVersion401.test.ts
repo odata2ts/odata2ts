@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
-import { qCopy } from "../../src-generated/library-401/library-circulation/copy/QCopy.js";
-import { qCopy as qCopy40 } from "../../src-generated/library/library-circulation/copy/QCopy.js";
+import { qCopy } from "../../src-generated/library-401/library-circulation/index.js";
+import { qCopy as qCopy40 } from "../../src-generated/library/library-circulation/index.js";
 import { LIBRARY_401 } from "../Library401Constants.js";
 import { BOOK_DER_PROZESS, BRANCH_CENTRAL, LIBRARY } from "../LibraryTestConstants.js";
 

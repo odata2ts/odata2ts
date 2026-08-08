@@ -1,4 +1,4 @@
-import { LibraryRenamedService } from "../src-generated/library-renamed/LibraryRenamedService.js";
+import { LibraryRenamedService } from "../src-generated/library-renamed/index.js";
 import { BASE_URL, ODATA_CLIENT } from "./LibraryTestConstants.js";
 
 /**

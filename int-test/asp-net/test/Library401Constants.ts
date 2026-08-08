@@ -1,4 +1,4 @@
-import { Library401Service } from "../src-generated/library-401/Library401Service.js";
+import { Library401Service } from "../src-generated/library-401/index.js";
 import { BASE_URL, ODATA_CLIENT } from "./LibraryTestConstants.js";
 
 /**

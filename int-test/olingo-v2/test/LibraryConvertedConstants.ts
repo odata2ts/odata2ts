@@ -1,6 +1,6 @@
 import { FetchClient } from "@odata2ts/http-client-fetch";
 import { inject } from "vitest";
-import { LibraryConvertedService } from "../src-generated/library-converted/LibraryConvertedService.js";
+import { LibraryConvertedService } from "../src-generated/library-converted/index.js";
 
 /**
  * The same server through the converter-enabled client.
