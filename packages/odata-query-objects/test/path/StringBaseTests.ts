@@ -218,6 +218,37 @@ export function createStringTests<T extends QStringPath | QStringV2Path>(toTest:
     expect(result.toString()).toBe("length(Country) eq 6");
   });
 
+  test("substring", () => {
+    const result = toTest.substring(3).equals("nce");
+
+    expect(result.toString()).toBe("substring(Country,3) eq 'nce'");
+  });
+
+  test("substring from the very first character", () => {
+    // a start of 0 is the one position which is falsy in JS - it still has to reach the URL
+    const result = toTest.substring(0).equals("France");
+
+    expect(result.toString()).toBe("substring(Country,0) eq 'France'");
+  });
+
+  test("substring with length", () => {
+    const result = toTest.substring(1, 2).equals("ra");
+
+    expect(result.toString()).toBe("substring(Country,1,2) eq 'ra'");
+  });
+
+  test("substring with positions taken from a property", () => {
+    const result = toTest.substring(otherProp.length()).equals("ce");
+
+    expect(result.toString()).toBe("substring(Country,length(Language)) eq 'ce'");
+  });
+
+  test("substring is chainable, being a manipulation function", () => {
+    const result = toTest.substring(0, 3).toLower().startsWith("fr");
+
+    expect(result.toString()).toBe("startswith(tolower(substring(Country,0,3)),'fr')");
+  });
+
   test("toLower", () => {
     const result = toTest.toLower().equals("france");
 

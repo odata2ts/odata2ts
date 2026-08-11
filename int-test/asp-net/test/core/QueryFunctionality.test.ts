@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { Amenities } from "../../src-generated/library/library-catalog/index.js";
 import { expectODataError } from "../expectODataError.js";
 import { BASE_URL, BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
@@ -139,6 +140,92 @@ describe("ASP.NET Library: query functionality", () => {
     expect(result.status).toBe(200);
     // every medium qualifies, since no keyword has that value - the point is that the server evaluates it
     expect(result.data.value.length).toBeGreaterThan(0);
+  });
+
+  test("$filter with substring", async () => {
+    // `substring` counts characters, and a server that counted from 1 or read the third argument as an
+    // end position would answer with a different row - so the expectation is derived from the titles the
+    // server itself delivers, applying the OData semantics (start, length) client-side.
+    const all = await LIBRARY.Media()
+      .query((builder) => builder.select("Title"))
+      .execute();
+    const expectedTitles = all.data.value
+      .map((medium) => medium.Title)
+      .filter((title) => title.substring(0, 3) === "Der")
+      .sort();
+    expect(expectedTitles.length).toBeGreaterThan(0);
+    expect(expectedTitles.length).toBeLessThan(all.data.value.length);
+
+    const request = LIBRARY.Media().query((builder, qMedium) => {
+      builder.select("Title").filter(qMedium.Title.substring(0, 3).eq("Der"));
+    });
+
+    expect(decodeURIComponent(request.getUrl())).toContain("$filter=substring(Title,0,3) eq 'Der'");
+
+    const result = await request.execute();
+
+    expect(result.status).toBe(200);
+    expect(result.data.value.map((medium) => medium.Title).sort()).toStrictEqual(expectedTitles);
+  });
+
+  test("$filter with substring without a length, running to the end of the value", async () => {
+    const request = LIBRARY.Media().query((builder, qMedium) => {
+      builder.select("Title").filter(qMedium.Title.substring(4).eq("Prozess"));
+    });
+
+    expect(decodeURIComponent(request.getUrl())).toContain("$filter=substring(Title,4) eq 'Prozess'");
+
+    const result = await request.execute();
+
+    expect(result.status).toBe(200);
+    expect(result.data.value.map((medium) => medium.Title)).toStrictEqual(["Der Prozess"]);
+  });
+
+  test("$filter with has on a flag enum", async () => {
+    // `Amenities` is the one `IsFlags="true"` enum in the model, and this is the only server which offers
+    // an enum type at all: CAP emits none, and V2 has no such thing - so `has` is out of reach in
+    // int-test/cap and int-test/olingo-v2.
+    const all = await LIBRARY.Branches()
+      .query((builder) => builder.select("Name", "Amenities"))
+      .execute();
+    // a flag value arrives as the comma-separated list of its members
+    const expectedNames = all.data.value
+      .filter((branch) => branch.Amenities?.split(", ").includes(Amenities.Parking))
+      .map((branch) => branch.Name)
+      .sort();
+    expect(expectedNames.length).toBeGreaterThan(0);
+    expect(expectedNames.length).toBeLessThan(all.data.value.length);
+
+    const request = LIBRARY.Branches().query((builder, qBranch) => {
+      builder.select("Name").filter(qBranch.Amenities.has(Amenities.Parking));
+    });
+
+    // the bare member name, exactly as `eq` spells it - the server infers the enum type from the property
+    // and does not need the qualified `Library.Catalog.Amenities'Parking'` literal
+    expect(decodeURIComponent(request.getUrl())).toContain("$filter=Amenities has 'Parking'");
+
+    const result = await request.execute();
+
+    expect(result.status).toBe(200);
+    expect(result.data.value.map((branch) => branch.Name).sort()).toStrictEqual(expectedNames);
+  });
+
+  test("has against a non-flag enum is not refused, it just does bit arithmetic", async () => {
+    // Nothing in the metadata carries `IsFlags` into the generated code, so `has` is offered on every enum
+    // path - and this is what a caller gets when using it where it does not belong. `AvailabilityStatus`
+    // has no flags, but the server still evaluates `has` bitwise over the underlying `Edm.Byte` values,
+    // and `Available` is 0: every row matches, silently and without an error to react to.
+    const all = await LIBRARY.Copies()
+      .query((builder) => builder.select("Status"))
+      .execute();
+
+    const result = await LIBRARY.Copies()
+      .query((builder, qCopy) => builder.select("Status").filter(qCopy.Status.has("Available")))
+      .execute();
+
+    expect(result.status).toBe(200);
+    expect(result.data.value.length).toBe(all.data.value.length);
+    expect(result.data.value.some((copy) => copy.Status !== "Available")).toBe(true);
   });
 
   test("an invalid query option is refused with 400, and the message says why", async () => {

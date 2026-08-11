@@ -77,6 +77,13 @@ describe("QNumericEnumPath test", () => {
     expect(result).toBe(`(feature eq 'Feature1' or feature eq 'Feature2')`);
   });
 
+  test("has", () => {
+    // the member name goes on the wire, not its number - same as for equals
+    const result = toTest.has(FeatureEnum.Feature2);
+
+    expect(result.toString()).toBe("feature has 'Feature2'");
+  });
+
   test("fails with non enum values", () => {
     // @ts-expect-error
     toTest.eq(99);

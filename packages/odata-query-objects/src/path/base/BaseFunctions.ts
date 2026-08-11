@@ -93,6 +93,19 @@ export function filterGreaterEquals<T>(path: string, mapValue: MapValue<T>) {
   };
 }
 
+export function filterHas<T>(path: string, mapValue: MapValue<T>) {
+  /**
+   * Base filter function (V4): the flag enum property must contain the given member.
+   *
+   * Only meaningful for an enum declared `IsFlags="true"`. Elsewhere a service will not necessarily
+   * refuse it - it may just do bit arithmetic on the underlying numbers and answer with something the
+   * caller did not ask for.
+   */
+  return (value: T) => {
+    return buildQFilterOperation(path, StandardFilterOperators.HAS, mapValue(value));
+  };
+}
+
 export function filterInEmulated<T>(path: string, mapValue: MapValue<T>) {
   /**
    * Base filter function: property must equal one of the given values.

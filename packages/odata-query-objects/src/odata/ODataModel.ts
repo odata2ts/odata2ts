@@ -5,7 +5,7 @@ export const enum StandardFilterOperators {
   LOWER_EQUALS = "le",
   GREATER_THAN = "gt",
   GREATER_EQUALS = "ge",
-  // HAS = "has",
+  HAS = "has", // v4 only; tests a flag enum for a member
   IN = "in",
 }
 
@@ -17,7 +17,7 @@ export const enum StringFilterFunctions {
   INDEX_OF = "indexof",
   LENGTH = "length",
   STARTS_WITH = "startswith",
-  // SUBSTRING = "substring"
+  SUBSTRING = "substring",
   MATCHES_PATTERN = "matchesPattern", // v4 only; introduced in 4.01, but we don't differentiate 4.0 and 4.01
   TO_LOWER = "tolower",
   TO_UPPER = "toupper",

@@ -157,6 +157,7 @@ describe("UrlParamHelper Tests", () => {
   test("buildFunctionExpression", () => {
     expect(buildFunctionExpression(StringFilterFunctions.LENGTH, "test")).toBe("length(test)");
     expect(buildFunctionExpression(StringFilterFunctions.CONTAINS, "Test", "ttt")).toBe("contains(Test,ttt)");
+    expect(buildFunctionExpression(StringFilterFunctions.SUBSTRING, "Test", "0", "3")).toBe("substring(Test,0,3)");
   });
 
   test("buildQFilterOperation", () => {
