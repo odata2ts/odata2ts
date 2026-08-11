@@ -84,4 +84,17 @@ describe("QEnumPath test", () => {
 
     expect(result).toBe(`(feature eq 'Feature2' or feature eq 'Feature3')`);
   });
+
+  test("has", () => {
+    const result = toTest.has(FeatureEnum.Feature2);
+
+    expect(result.toString()).toBe("feature has 'Feature2'");
+    expect(result.toString()).toBe(toTest.has("Feature2").toString());
+  });
+
+  test("has combines with the logical operators like any other expression", () => {
+    const result = toTest.has(FeatureEnum.Feature1).and(toTest.has(FeatureEnum.Feature3));
+
+    expect(result.toString()).toBe("feature has 'Feature1' and feature has 'Feature3'");
+  });
 });

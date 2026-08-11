@@ -72,6 +72,29 @@ describe("CAP Library V2: query functionality", () => {
     expect(result.data.d.results.map((book) => book.Title)).toStrictEqual(["Der Prozess"]);
   });
 
+  test("$filter with substring", async () => {
+    // `substring` is one of the few string functions V2 and V4 spell identically, so the same call renders
+    // the same URL here as in the V4 file - and the olingo-v2 twin of this test shows that a native V2
+    // server accepting that URL is no guarantee of it computing the same answer.
+    const cmd = LIBRARY_V2.Books().query((b, q) => b.select("Title").filter(q.Title.substring(0, 3).eq("Der")));
+    expect(decodeURIComponent(cmd.getUrl())).toContain("$filter=substring(Title,0,3) eq 'Der'");
+
+    const result = await cmd.execute();
+
+    expect(result.status).toBe(200);
+    expect(result.data.d.results.map((book) => book.Title)).toStrictEqual(["Der Prozess"]);
+  });
+
+  test("$filter with substring without a length, running to the end of the value", async () => {
+    const cmd = LIBRARY_V2.Books().query((b, q) => b.select("Title").filter(q.Title.substring(4).eq("Prozess")));
+    expect(decodeURIComponent(cmd.getUrl())).toContain("$filter=substring(Title,4) eq 'Prozess'");
+
+    const result = await cmd.execute();
+
+    expect(result.status).toBe(200);
+    expect(result.data.d.results.map((book) => book.Title)).toStrictEqual(["Der Prozess"]);
+  });
+
   test("$top and $skip", async () => {
     const all = await LIBRARY_V2.Books()
       .query((b, q) => b.orderBy(q.Title.asc()))

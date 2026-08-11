@@ -134,10 +134,9 @@ export function buildOperatorExpression(
 
 export function buildFunctionExpression(
   functionName: CollectionFilterFunctions | StringFilterFunctions | NumberFilterFunctions | DateTimeFilterFunctions,
-  param1: string,
-  param2?: string,
+  ...params: Array<string>
 ) {
-  return `${functionName}(${param1}${param2 ? `,${param2}` : ""})`;
+  return `${functionName}(${params.join(",")})`;
 }
 
 export function buildQFilterOperation(

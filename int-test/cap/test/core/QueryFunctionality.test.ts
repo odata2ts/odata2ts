@@ -135,6 +135,42 @@ describe("CAP Library: query functionality", () => {
     expect(result.status).toBe(200);
   });
 
+  test("$filter with substring", async () => {
+    const all = await LIBRARY.Books()
+      .query((b) => b.select("Title"))
+      .execute();
+    const expectedTitles = all.data.value
+      .map((book) => book.Title)
+      .filter((title) => title.substring(0, 3) === "Der")
+      .sort();
+    expect(expectedTitles.length).toBeGreaterThan(0);
+    expect(expectedTitles.length).toBeLessThan(all.data.value.length);
+
+    const request = LIBRARY.Books().query((builder, qBook) => {
+      builder.select("Title").filter(qBook.Title.substring(0, 3).eq("Der"));
+    });
+
+    expect(decodeURIComponent(request.getUrl())).toContain("$filter=substring(Title,0,3) eq 'Der'");
+
+    const result = await request.execute();
+
+    expect(result.status).toBe(200);
+    expect(result.data.value.map((book) => book.Title).sort()).toStrictEqual(expectedTitles);
+  });
+
+  test("$filter with substring without a length, running to the end of the value", async () => {
+    const request = LIBRARY.Books().query((builder, qBook) => {
+      builder.select("Title").filter(qBook.Title.substring(4).eq("Prozess"));
+    });
+
+    expect(decodeURIComponent(request.getUrl())).toContain("$filter=substring(Title,4) eq 'Prozess'");
+
+    const result = await request.execute();
+
+    expect(result.status).toBe(200);
+    expect(result.data.value.map((book) => book.Title)).toStrictEqual(["Der Prozess"]);
+  });
+
   test("an invalid query option is silently ignored here", async () => {
     // A negative $top is refused with 400 by ASP.NET; CAP accepts the request and answers with the
     // unrestricted set. Asserted because the difference matters to a client: there is no error to react

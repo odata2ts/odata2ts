@@ -61,6 +61,51 @@ describe("Olingo Library: query functionality", () => {
     expect(result.data.d.results.map((book) => book.Title)).toStrictEqual(["Der Prozess"]);
   });
 
+  /**
+   * `substring` is spelled the same in V2 and V4, so the client sends the identical URL to all three
+   * servers - and this is the one that answers differently. ASP.NET and the CAP V2 adapter both return
+   * "Der Prozess"; Olingo accepts the request with 200 and matches nothing.
+   *
+   * The defect is Olingo's expression evaluator, not the URL. Measured against constants on this server:
+   *
+   * - `substring('abcdef',2,4)` yields `cd`, `substring('abcdef',3,5)` yields `def` - the third argument
+   *   is ignored and the **start doubles as the length**, so the result is `n` characters from position
+   *   `n` instead of `length` characters
+   * - the two-argument form always yields the empty string
+   *
+   * Asserted rather than skipped, because a client cannot distinguish this from an empty result set: there
+   * is no error, so these two tests are what makes the difference visible at all.
+   */
+  test("$filter with substring is accepted but evaluated wrongly by this server", async () => {
+    const cmd = LIBRARY.Books().query((b, q) => b.select("Title").filter(q.Title.substring(0, 3).eq("Der")));
+    expect(decodeURIComponent(cmd.getUrl())).toContain("$filter=substring(Title,0,3) eq 'Der'");
+
+    const result = await cmd.execute();
+
+    expect(result.status).toBe(200);
+    // "Der Prozess" is in the data and every other server returns it here
+    expect(result.data.d.results).toStrictEqual([]);
+  });
+
+  test("what this server computes for substring instead", async () => {
+    // start 3 with any length gives three characters from position 3: "Der Prozess" -> " Pr"
+    const threeFromThree = await LIBRARY.Books()
+      .query((b, q) => b.select("Title").filter(q.Title.substring(3, 99).eq(" Pr")))
+      .execute();
+    expect(threeFromThree.data.d.results.map((book) => book.Title)).toStrictEqual(["Der Prozess"]);
+
+    // and without a length there is nothing left at all - the empty string, for every row
+    const all = await LIBRARY.Books()
+      .query((b) => b.select("Title"))
+      .execute();
+    const withoutLength = await LIBRARY.Books()
+      .query((b, q) => b.select("Title").filter(q.Title.substring(4).eq("")))
+      .execute();
+
+    expect(all.data.d.results.length).toBeGreaterThan(0);
+    expect(withoutLength.data.d.results.length).toBe(all.data.d.results.length);
+  });
+
   test("$top and $skip", async () => {
     const all = await LIBRARY.Books()
       .query((b, q) => b.orderBy(q.Title.asc()))
