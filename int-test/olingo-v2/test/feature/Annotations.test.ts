@@ -1,27 +1,48 @@
 import { describe, expectTypeOf, test } from "vitest";
-import type { EditableBook } from "../../src-generated/library/index.js";
+import type { EditableBook, EditableLoan, EditableMember } from "../../src-generated/library/index.js";
 
 /**
- * Where the `Org.OData.Core.V1` terms are *not*, which is the boundary the annotation evaluation has to
- * respect.
+ * The `Org.OData.Core.V1` terms as a V2 service states them - which is never as a vocabulary term.
  *
- * Olingo 2 emits a CSDL 1.1 document without a single annotation - the vocabularies are a V4 affair, and
- * this server states none of them. Nothing in the digestion is V4-only though: a V2 document may well
- * carry annotations, and CAP's V2 rendition does, which is what `int-test/cap/test/v2` covers. So the
- * question here is only whether an unannotated service still behaves the way it always did.
+ * V2 has no vocabularies at all: the mechanism arrives in 3.0 and the standard terms in V4. What a V4
+ * service writes as `<Annotation Term="Core.Computed"/>` therefore reaches a V2 client as an attribute in
+ * a foreign namespace, and this server emits both dialects that got produced widely enough to matter -
+ * Microsoft's `annotation:StoreGeneratedPattern` from WCF Data Services and SAP Gateway's
+ * `sap:creatable`/`sap:updatable` pair. They are translated into the V4 terms before digestion, so
+ * everything downstream sees one set of annotations regardless of version.
  *
- * It does, through `managedPropertyDetection: "auto"`: with no annotation to go by, the single-key heuristic
- * decides, exactly as before this feature existed. Anything else would have been a silent breaking change
- * for every service that never adopted the vocabularies.
+ * The counterpart is `int-test/cap/test/v2`, where a V2 service states the terms the V4 way, because
+ * CAP's V2 rendition carries the very same `<Annotations>` blocks its V4 endpoint does. Between the two,
+ * both ways a V2 document can say this are covered.
  */
-describe("Olingo V2 Library: no Core annotations", () => {
-  test("an unannotated single key is managed by the heuristic", () => {
+describe("Olingo V2 Library: Core annotations in their V2 spelling", () => {
+  test("Computed: PopularityScore is stated by both dialects and drops out", () => {
+    // annotation:StoreGeneratedPattern="Computed" plus sap:creatable="false" sap:updatable="false"
+    expectTypeOf<EditableBook>().not.toHaveProperty("PopularityScore");
+  });
+
+  test("Immutable: LoanedAt survives but turns optional", () => {
+    // sap:updatable="false" with creatable at its default - settable on insert, fixed from then on. It is
+    // `Nullable="false"` in the model, so without the term it would be required here, as DueDate still is.
+    expectTypeOf<EditableLoan["LoanedAt"]>().toEqualTypeOf<string | undefined>();
+    expectTypeOf<EditableLoan["DueDate"]>().toEqualTypeOf<string>();
+  });
+
+  test("an unannotated single key is still managed by the heuristic", () => {
+    // nothing about this changed: `Medium.Id` carries no annotation in either dialect
     expectTypeOf<EditableBook>().not.toHaveProperty("Id");
   });
 
   test("no other property is taken for managed", () => {
-    // the flip side: without annotations nothing else may drop out of the editable model
     expectTypeOf<EditableBook>().toHaveProperty("Title");
     expectTypeOf<EditableBook>().toHaveProperty("PublicationDate");
+  });
+
+  test("the two terms V2 cannot express leave their properties alone", () => {
+    // `Core.ComputedDefaultValue` on Member.ActiveSince and `Core.Permissions` (Read) on Member.Balance
+    // have no V2 form whatsoever - not in either dialect - so the V4 model annotates them and this one
+    // cannot. Both stay ordinary editable properties, which is the boundary of what V2 can carry.
+    expectTypeOf<EditableMember>().toHaveProperty("ActiveSince");
+    expectTypeOf<EditableMember>().toHaveProperty("Balance");
   });
 });

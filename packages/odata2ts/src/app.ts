@@ -7,6 +7,7 @@ import { ODataEdmxModelBase } from "./data-model/edmx/ODataEdmxModelBase.js";
 import { SchemaV3 } from "./data-model/edmx/ODataEdmxModelV3.js";
 import { SchemaV4 } from "./data-model/edmx/ODataEdmxModelV4.js";
 import { NamingHelper } from "./data-model/NamingHelper.js";
+import { resolveV2Annotations } from "./data-model/V2AnnotationResolver.js";
 import { generateModels, generateQueryObjects, generateServices } from "./generator/index.js";
 import { Modes, RunOptions } from "./OptionModel.js";
 import { createProjectManager } from "./project/ProjectManager.js";
@@ -46,6 +47,12 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
 
   // the vocabularies the document draws annotation terms from; they sit outside of the schemas
   const references = metadataJson["edmx:Edmx"]["edmx:Reference"];
+
+  // V2 states what V4 says with a vocabulary term as an attribute in a foreign namespace; translated
+  // here, against the whole document, because resolving those namespaces needs the root element
+  if (version === ODataVersions.V2) {
+    resolveV2Annotations(metadataJson);
+  }
 
   const serviceName = getServiceName(options, schemas);
 
