@@ -1,14 +1,32 @@
 import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
 
+/** The running server to refresh from, or `undefined` to read the committed snapshots - see below. */
+const SOURCE_URL = process.env.LIBRARY_BASE_URL;
+/** One server, two endpoints: the V2 adapter sits on the same host under `/v2/`. */
+const SOURCE_URL_V2 = SOURCE_URL?.replace(/\/v4\//, "/v2/");
+const SOURCE = "resource/library.xml";
+const SOURCE_V2 = "resource/library-v2.xml";
+
 /**
  * Generates the odata2ts clients for the standardized "Library" test model, as served by the SAP CAP
  * implementation (repo `odata2ts/test-server-cap`) - once as OData V4 and once as OData V2.
  *
  * The sources are committed snapshots of the server's actual `$metadata` (`resource/library.xml` and
- * `resource/library-v2.xml`), so generation stays offline and server-independent - odata2ts is
- * deliberately tested against the metadata CAP really emits (flat mode, aspect-based media hierarchy,
- * alternate keys only in metadata, ...), not against the idealized reference model. Refresh the
- * snapshots from the running server (or the server repo's `npm run metadata`) whenever the model changes.
+ * `resource/library-v2.xml`) - odata2ts is deliberately tested against the metadata CAP really emits
+ * (flat mode, aspect-based media hierarchy, alternate keys only in metadata, ...), not against the
+ * idealized reference model.
+ *
+ * The snapshots refresh themselves from a running server: point `LIBRARY_BASE_URL` at one and the first
+ * service on each endpoint downloads `$metadata` and overwrites its file, which the services after it
+ * then read, so a model change never has to be copied in by hand. It is the same variable the test setup takes an externally started server from,
+ * and the V2 path is derived from it exactly as the setup derives it:
+ *
+ * ```
+ * LIBRARY_BASE_URL=http://localhost:4004/odata/v4/library yarn build
+ * ```
+ *
+ * Unset - which is how CI runs, where the container only comes up for the test run and `yarn build`
+ * happens before it - the committed snapshots are used as-is and generation stays offline.
  *
  * The V2 model is not a second model: it is the very same service, translated on the fly by the
  * `@cap-js-community/odata-v2-adapter` middleware that CAP runs in front of its V4 endpoint. Everything
@@ -19,6 +37,7 @@ import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
 const config: ConfigFileOptions = {
   mode: Modes.service,
   emitMode: EmitModes.ts,
+  // also pretty-prints the downloaded metadata before it is stored
   prettier: true,
   // we definitely want to type check the generated artifacts
   debug: true,
@@ -32,7 +51,11 @@ const config: ConfigFileOptions = {
   services: {
     library: {
       serviceName: "Library",
-      source: "resource/library.xml",
+      // the one service that refreshes the snapshot; the others below read the file it leaves behind,
+      // so this entry has to stay first
+      sourceUrl: SOURCE_URL,
+      source: SOURCE,
+      refreshFile: true,
       output: "src-generated/library",
       // V4 only, and on here rather than in `int-test/asp-net`, which keeps the emulating default: the
       // option has exactly two states and both are worth having against a real server, so they are split
@@ -51,7 +74,7 @@ const config: ConfigFileOptions = {
      */
     libraryShaped: {
       serviceName: "LibraryShaped",
-      source: "resource/library.xml",
+      source: SOURCE,
       output: "src-generated/library-shaped",
       unflattenComplexTypes: true,
     },
@@ -61,7 +84,10 @@ const config: ConfigFileOptions = {
      */
     libraryShapedV2: {
       serviceName: "LibraryShapedV2",
-      source: "resource/library-v2.xml",
+      // as above, the first service on the V2 endpoint is the one that refreshes its snapshot
+      sourceUrl: SOURCE_URL_V2,
+      source: SOURCE_V2,
+      refreshFile: true,
       output: "src-generated/library-shaped-v2",
       unflattenComplexTypes: true,
       v2: {
@@ -89,7 +115,7 @@ const config: ConfigFileOptions = {
      */
     libraryConverted: {
       serviceName: "LibraryConverted",
-      source: "resource/library.xml",
+      source: SOURCE,
       output: "src-generated/library-converted",
       v4: { bigNumberAsString: true },
       converters: [
@@ -100,7 +126,7 @@ const config: ConfigFileOptions = {
     },
     libraryV2: {
       serviceName: "LibraryV2",
-      source: "resource/library-v2.xml",
+      source: SOURCE_V2,
       output: "src-generated/library-v2",
       /**
        * Response wrapped, payload not - and this server is the reason the two are separate options

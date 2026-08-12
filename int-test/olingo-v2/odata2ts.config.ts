@@ -1,18 +1,34 @@
 import { ConfigFileOptions, EmitModes, Modes, TypeModel } from "@odata2ts/odata2ts";
 
+/** The running server to refresh from, or `undefined` to read the committed snapshot - see below. */
+const SOURCE_URL = process.env.LIBRARY_BASE_URL;
+const SOURCE = "resource/library-v2.xml";
+
 /**
  * Generates the odata2ts client for the "Library" OData V2 test model, as served by the Apache Olingo 2
  * implementation (repo `odata2ts/test-server-olingo-v2`).
  *
- * The source is a committed snapshot of the server's actual `$metadata` (`resource/library-v2.xml`), so
- * generation stays offline and server-independent. odata2ts is deliberately tested against the metadata
- * Olingo really emits - one entity set per concrete media type, the full inheritance hierarchy it renders
- * but cannot serialize, `ConcurrencyMode` as a facet - rather than against the idealized reference model.
- * Refresh the snapshot from the running server whenever the model changes.
+ * The source is a committed snapshot of the server's actual `$metadata` (`resource/library-v2.xml`).
+ * odata2ts is deliberately tested against the metadata Olingo really emits - one entity set per concrete
+ * media type, the full inheritance hierarchy it renders but cannot serialize, `ConcurrencyMode` as a
+ * facet - rather than against the idealized reference model.
+ *
+ * The snapshot refreshes itself from a running server: point `LIBRARY_BASE_URL` at one and the first
+ * service downloads `$metadata` and overwrites the file, which the services after it then read, so a
+ * model change never has to be copied in by hand. It is the same variable the test setup takes an externally started server from, so
+ * one export covers both halves:
+ *
+ * ```
+ * LIBRARY_BASE_URL=http://localhost:4004/odata/v2/library yarn build
+ * ```
+ *
+ * Unset - which is how CI runs, where the container only comes up for the test run and `yarn build`
+ * happens before it - the committed snapshot is used as-is and generation stays offline.
  */
 const config: ConfigFileOptions = {
   mode: Modes.service,
   emitMode: EmitModes.ts,
+  // also pretty-prints the downloaded metadata before it is stored
   prettier: true,
   // we definitely want to type check the generated artifacts
   debug: true,
@@ -38,7 +54,11 @@ const config: ConfigFileOptions = {
   services: {
     library: {
       serviceName: "Library",
-      source: "resource/library-v2.xml",
+      // the one service that refreshes the snapshot; the others below read the file it leaves behind,
+      // so this entry has to stay first
+      sourceUrl: SOURCE_URL,
+      source: SOURCE,
+      refreshFile: true,
       output: "src-generated/library",
     },
     /**
@@ -57,7 +77,7 @@ const config: ConfigFileOptions = {
      */
     libraryRenamed: {
       serviceName: "LibraryRenamed",
-      source: "resource/library-v2.xml",
+      source: SOURCE,
       output: "src-generated/library-renamed",
       allowRenaming: true,
       // `Location_` (the shelf mark) and `Location` (the branch an item sits in) both become `location`
@@ -81,7 +101,7 @@ const config: ConfigFileOptions = {
      */
     libraryConverted: {
       serviceName: "LibraryConverted",
-      source: "resource/library-v2.xml",
+      source: SOURCE,
       output: "src-generated/library-converted",
       enablePrimitivePropertyServices: true,
       converters: [
@@ -109,7 +129,7 @@ const config: ConfigFileOptions = {
      */
     libraryAsV4: {
       serviceName: "LibraryAsV4",
-      source: "resource/library-v2.xml",
+      source: SOURCE,
       output: "src-generated/library-as-v4",
       enablePrimitivePropertyServices: true,
       // override the top-level wrapping options: responseAsV4 already reshapes an expanded collection
