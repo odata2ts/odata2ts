@@ -1,7 +1,7 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
-import { ConfigFileOptions, NamingStrategies, TypeModel } from "../../../src/index.js";
+import { ConfigFileOptions, ManagedPropertyDetection, NamingStrategies, TypeModel } from "../../../src/index.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
 import {
   createHelper,
@@ -154,7 +154,7 @@ export function createEntityBasedGenerationTests(
       disableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -179,7 +179,7 @@ export function createEntityBasedGenerationTests(
       disableBindingProps: true,
       disableDeepInsertProps: true,
       skipEditableModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
       skipIdModels: false,
     });
   });
@@ -198,7 +198,7 @@ export function createEntityBasedGenerationTests(
     // then match fixture text
     await generateAndCompare("entity-hierarchy.ts", {
       ...USE_ID_AND_EDITABLE_MODEL,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -303,7 +303,7 @@ export function createEntityBasedGenerationTests(
     await generateAndCompare("model-naming.ts", {
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
       naming: {
         models: {
           suffix: "model",
@@ -350,7 +350,7 @@ export function createEntityBasedGenerationTests(
     await generateAndCompare("model-naming-min.ts", {
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
       naming: {
         minimalDefaults: true,
       },
@@ -373,7 +373,7 @@ export function createEntityBasedGenerationTests(
     await generateAndCompare("entity-prop-manipulation.ts", {
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
       allowRenaming: false,
       propertiesByName: [{ name: "ID", mappedName: "id" }],
       byTypeAndName: [

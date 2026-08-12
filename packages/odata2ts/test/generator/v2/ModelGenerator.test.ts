@@ -2,7 +2,7 @@ import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV2.js";
 import { generateModels } from "../../../src/generator/index.js";
-import { EmitModes, Modes } from "../../../src/index.js";
+import { EmitModes, ManagedPropertyDetection, Modes } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2.js";
 import {
@@ -133,7 +133,7 @@ describe("Model Generator Tests V2", () => {
       mode: Modes.models,
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -158,7 +158,7 @@ describe("Model Generator Tests V2", () => {
     await generateAndCompare("entity-relationships-deep-insert-v2.ts", {
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -172,7 +172,7 @@ describe("Model Generator Tests V2", () => {
       v2: { payloadResultsWrapping: true },
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -187,7 +187,7 @@ describe("Model Generator Tests V2", () => {
       v2: { responseResultsWrapping: true },
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -202,7 +202,7 @@ describe("Model Generator Tests V2", () => {
       mode: Modes.models,
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
   /**
@@ -236,7 +236,7 @@ describe("Model Generator Tests V2", () => {
       disableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -251,7 +251,7 @@ describe("Model Generator Tests V2", () => {
     await generateAndCompare("entity-relationships-deep-insert-binding-by-key-v2.ts", {
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 });

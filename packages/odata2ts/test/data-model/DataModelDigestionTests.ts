@@ -5,7 +5,7 @@ import { NamespaceWithAlias, withNamespace } from "../../src/data-model/DataMode
 import { ODataVersion } from "../../src/data-model/DataTypeModel.js";
 import { NamingHelper } from "../../src/data-model/NamingHelper.js";
 import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel.js";
-import { Modes, NamingStrategies, TypeModel } from "../../src/index.js";
+import { ManagedState, Modes, NamingStrategies, TypeModel } from "../../src/index.js";
 import { TestOptions, TestSettings } from "../generator/TestTypes.js";
 import { getTestConfig } from "../test.config.js";
 import { ODataModelBuilder } from "./builder/ODataModelBuilder.js";
@@ -311,7 +311,7 @@ export function createDataModelTests(
     let toTest = result.getEntityTypes()[0].props[0];
     expect(toTest.odataName).toBe("ID");
     expect(toTest.name).toBe("newId");
-    expect(toTest.managed).toBe(true);
+    expect(toTest.managed).toBe(ManagedState.readOnly);
 
     toTest = result.getComplexTypes()[0].props[0];
     expect(toTest.odataName).toBe("ageOfEmpire");

@@ -4,10 +4,14 @@ import type { DigestionOptions } from "../FactoryFunctionModel.js";
 import {
   ComplexTypeGenerationOptions,
   EntityTypeGenerationOptions,
+  ManagedPropertyDetection,
+  ManagedState,
   Modes,
   PropertyGenerationOptions,
 } from "../OptionModel.js";
+import { AnnotationResolver } from "./AnnotationResolver.js";
 import { ComplexTypeUnflattener } from "./ComplexTypeUnflattener.js";
+import { getManagedState } from "./CoreAnnotations.js";
 import { DataModel, NamespaceWithAlias, withNamespace } from "./DataModel.js";
 import {
   ComplexType as ComplexModelType,
@@ -16,7 +20,15 @@ import {
   ODataVersion,
   PropertyModel,
 } from "./DataTypeModel.js";
-import { ComplexType, EntityType, EnumType, Property, Schema, TypeDefinition } from "./edmx/ODataEdmxModelBase.js";
+import {
+  ComplexType,
+  EntityType,
+  EnumType,
+  Property,
+  Reference,
+  Schema,
+  TypeDefinition,
+} from "./edmx/ODataEdmxModelBase.js";
 import { EntityContainerV3, SchemaV3 } from "./edmx/ODataEdmxModelV3.js";
 import { EntityContainerV4, SchemaV4 } from "./edmx/ODataEdmxModelV4.js";
 import { NamingHelper } from "./NamingHelper.js";
@@ -38,6 +50,17 @@ function ifTrue(value: string | undefined): boolean {
 
 function ifFalse(value: string | undefined): boolean {
   return value === "false";
+}
+
+/**
+ * The configured managed state, where the booleans are shorthands for the two states one would want to
+ * state most often.
+ */
+function toManagedState(configured: boolean | ManagedState | undefined): ManagedState | undefined {
+  if (typeof configured === "boolean") {
+    return configured ? ManagedState.readOnly : ManagedState.off;
+  }
+  return configured;
 }
 
 export interface TypeModel {
@@ -66,12 +89,23 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    */
   private flattenedProps = new Set<string>();
 
+  /**
+   * The managed state the annotations of the service state for a property, as
+   * `<fully qualified model name>/<property name>`.
+   *
+   * Collected while mapping the properties, but applied only once inheritance has been resolved, since it
+   * takes knowing the keys of an entity to settle the state. Keyed by name rather than by property object,
+   * because {@link postProcessModel} clones the inherited ones.
+   */
+  private annotatedManagedStates = new Map<string, ManagedState>();
+
   protected constructor(
     protected version: ODataVersion,
     protected schemas: Array<S>,
     protected options: DigestionOptions,
     protected namingHelper: NamingHelper,
     converters?: MappedConverterChains,
+    protected references?: Array<Reference>,
   ) {
     const namespaces = schemas.map<NamespaceWithAlias>((s) => [s.$.Namespace, s.$.Alias]);
     this.dataModel = new DataModel(namespaces, version, converters);
@@ -137,6 +171,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   }
 
   private digestEntityTypesAndOperations() {
+    // annotations first: from here on every term is fully qualified and sits on the element it applies to,
+    // which also means the reshaping below carries them along without knowing about them
+    new AnnotationResolver(this.schemas, this.references).resolve();
+
     // reshaping happens on the EDMX itself, before anything is digested: from here on the model looks like
     // one the service stated in that shape to begin with
     if (this.options.unflattenComplexTypes) {
@@ -165,7 +203,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     });
 
     this.postProcessModel();
-    this.postProcessKeys();
+    this.deriveManagedState();
 
     this.schemas.forEach((schema) => {
       this.analyzeModelUsage(schema.EntityContainer?.length ? schema.EntityContainer[0] : undefined);
@@ -431,25 +469,85 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     });
   }
 
-  private postProcessKeys() {
+  /**
+   * Settles the managed state of every property, now that inheritance has been resolved and it is known
+   * which of them are keys.
+   *
+   * Configuration has already been applied by {@link mapProp} and wins; everything else is decided here,
+   * from the sources which `managedPropertyDetection` admits.
+   */
+  private deriveManagedState() {
+    const complexTypes = this.dataModel.getComplexTypes();
+    complexTypes.forEach((ct) => {
+      [...ct.baseProps, ...ct.props].forEach((prop) => this.deriveManagedStateOfProp(prop, ct, false, false));
+    });
+
     const entityTypes = this.dataModel.getEntityTypes();
     entityTypes.forEach((et) => {
       const isSingleKey = et.keyNames.length === 1;
       const props = [...et.baseProps, ...et.props];
+      props.forEach((prop) =>
+        this.deriveManagedStateOfProp(prop, et, et.keyNames.includes(prop.odataName), isSingleKey),
+      );
+
       et.keys = et.keyNames.map((keyName) => {
         const prop = props.find((p) => p.odataName === keyName);
         if (!prop) {
           throw new Error(`Key with name [${keyName}] not found in props!`);
         }
-
-        // automatically set key prop to managed, if this is the only key of the given entity
-        if (prop.managed === undefined) {
-          prop.managed = !this.options.disableAutoManagedKey && isSingleKey;
-        }
-
         return prop;
       });
     });
+  }
+
+  /**
+   * The state the service annotated a property with, looked up in the model that declares it: an inherited
+   * property is annotated on the base type, and reaches its subtypes as a clone.
+   */
+  private findAnnotatedState(model: ComplexModelType, propName: string): ManagedState | undefined {
+    const own = this.annotatedManagedStates.get(`${model.fqName}/${propName}`);
+    if (own) {
+      return own;
+    }
+
+    for (const baseClass of model.baseClasses) {
+      const baseModel = this.dataModel.getEntityType(baseClass) || this.dataModel.getComplexType(baseClass);
+      const inherited = baseModel && this.findAnnotatedState(baseModel, propName);
+      if (inherited) {
+        return inherited;
+      }
+    }
+
+    return undefined;
+  }
+
+  private deriveManagedStateOfProp(prop: PropertyModel, model: ComplexModelType, isKey: boolean, isSingleKey: boolean) {
+    // the configuration has spoken, which beats every source this could derive a state from
+    if (prop.managed !== undefined) {
+      return;
+    }
+
+    const detection = this.options.managedPropertyDetection;
+    const useAnnotations =
+      detection === ManagedPropertyDetection.auto || detection === ManagedPropertyDetection.annotation;
+    const useHeuristic =
+      detection === ManagedPropertyDetection.auto || detection === ManagedPropertyDetection.simpleHeuristic;
+
+    let byAnnotation = useAnnotations ? this.findAnnotatedState(model, prop.odataName) : undefined;
+    if (isKey && byAnnotation === ManagedState.createOnly) {
+      // `Core.Immutable` states what a key is anyway, so it says nothing about how the key is managed
+      byAnnotation = undefined;
+    }
+    if (byAnnotation) {
+      prop.managed = byAnnotation;
+      return;
+    }
+
+    // the heuristic knows nothing but keys: a single key prop - as opposed to one part of a composite
+    // key - is the kind of id a server generates
+    if (useHeuristic && isKey && isSingleKey) {
+      prop.managed = ManagedState.readOnly;
+    }
   }
 
   private collectBaseClassPropsAndKeys(model: ComplexModelType, visitedModels: string[]): CollectorTuple {
@@ -522,6 +620,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   ): PropertyModel => {
     if (!p.$.Type) {
       throw new Error(`No type information given for property [${p.$.Name}]!`);
+    }
+
+    if (fqOwnerName) {
+      const annotated = getManagedState(p.Annotation);
+      if (annotated) {
+        this.annotatedManagedStates.set(`${fqOwnerName}/${p.$.Name}`, annotated);
+      }
     }
 
     const configProp = this.serviceConfigHelper.findPropConfigByName(p.$.Name);
@@ -631,7 +736,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       isCollection: isCollection,
       // only set when it applies: a flag on every single property would be noise
       ...(odataDataType === ODataTypesV4.Stream ? { isStream: true } : undefined),
-      managed: typeof entityPropConfig?.managed !== "undefined" ? entityPropConfig.managed : configProp?.managed,
+      managed: toManagedState(
+        typeof entityPropConfig?.managed !== "undefined" ? entityPropConfig.managed : configProp?.managed,
+      ),
       ...result,
     };
   };

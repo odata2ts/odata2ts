@@ -4,7 +4,7 @@ import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel.js";
 import { withNamespace } from "./DataModel.js";
 import { Digester, TypeModel } from "./DataModelDigestion.js";
 import { NavPropBindingType, ODataVersion, OperationTypes, PropertyModel } from "./DataTypeModel.js";
-import { ComplexType, Property } from "./edmx/ODataEdmxModelBase.js";
+import { ComplexType, Property, Reference } from "./edmx/ODataEdmxModelBase.js";
 import {
   AssociationEnd,
   ComplexTypeV3,
@@ -22,10 +22,10 @@ import { NamingHelper } from "./NamingHelper.js";
  * @param options
  * @param namingHelper
  */
-export const digest: DigesterFunction<SchemaV3> = async (schemas, options, namingHelper) => {
+export const digest: DigesterFunction<SchemaV3> = async (schemas, options, namingHelper, references) => {
   const converters = await loadConverters(ODataVersions.V2, options.converters);
 
-  const digester = new DigesterV3(schemas, options, namingHelper, converters);
+  const digester = new DigesterV3(schemas, options, namingHelper, converters, references);
   return digester.digest();
 };
 
@@ -35,8 +35,9 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
     options: DigestionOptions,
     namingHelper: NamingHelper,
     converters: MappedConverterChains | undefined,
+    references: Array<Reference> | undefined,
   ) {
-    super(ODataVersion.V2, schemas, options, namingHelper, converters);
+    super(ODataVersion.V2, schemas, options, namingHelper, converters, references);
   }
 
   private findAssociationEnd(np: NavigationProperty): AssociationEnd {

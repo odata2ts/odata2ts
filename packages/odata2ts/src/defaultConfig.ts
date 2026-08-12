@@ -1,6 +1,6 @@
 import deepmerge from "deepmerge";
 import { NameSettings, NamingStrategies } from "./NamingModel.js";
-import { EmitModes, Modes, RunOptions } from "./OptionModel.js";
+import { EmitModes, ManagedPropertyDetection, Modes, RunOptions } from "./OptionModel.js";
 
 export type DefaultConfiguration = Omit<RunOptions, "sourceUrl" | "source" | "output" | "serviceName">;
 /**
@@ -20,7 +20,7 @@ const defaultConfig: DefaultConfiguration = {
   skipOperations: false,
   skipComments: false,
   enablePrimitivePropertyServices: false,
-  disableAutoManagedKey: false,
+  managedPropertyDetection: ManagedPropertyDetection.auto,
   allowRenaming: false,
   v2: {
     responseResultsWrapping: false,

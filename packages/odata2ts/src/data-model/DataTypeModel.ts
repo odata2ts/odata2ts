@@ -1,5 +1,5 @@
 import { ValueConverterImport } from "@odata2ts/converter-runtime";
-import { Modes } from "../OptionModel.js";
+import { ManagedState, Modes } from "../OptionModel.js";
 
 export enum ODataVersion {
   V2 = "2.0",
@@ -32,7 +32,15 @@ export interface PropertyModel {
   isCollection: boolean;
   dataType: DataTypes;
   converters?: Array<ValueConverterImport>;
-  managed?: boolean;
+  /**
+   * In which way the server manages this property, which decides where it shows up: a property the client
+   * may not write is absent from the editable model, one it may not read from the model itself.
+   *
+   * Undefined means that nobody has spoken: neither the configuration, nor an annotation of the service,
+   * nor the key detection. That is different from {@link ManagedState.off}, which is the explicit
+   * statement that the property is not managed.
+   */
+  managed?: ManagedState;
   /**
    * An `Edm.Stream` property: binary content which never travels in the entity's JSON payload, but is
    * addressed by its own URL. Such a property is therefore absent from the models and the q-object and

@@ -49,7 +49,10 @@ describe("Integration Testing of Service Generation", () => {
   });
 
   test("create derived entity", async () => {
-    const model: EditableEventModel & { "@odata.type"?: string } = {
+    // TripPin annotates `PlanItemId` with `Core.Permissions` granting nothing but `Read`, so odata2ts keeps
+    // it out of the editable model - yet the service happily takes it on a POST and the test relies on
+    // knowing the id. Sending it anyway is the point here, hence the widened type.
+    const model: EditableEventModel & { "@odata.type"?: string; planItemId: number } = {
       "@odata.type": "#Microsoft.OData.SampleService.Models.TripPin.Event",
       planItemId: 33,
       confirmationCode: "4372899DD",

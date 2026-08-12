@@ -4,8 +4,66 @@ export interface ODataEdmxModelBase<VersionedSchema> {
       Version: string;
       "xmlns:edmx": string;
     };
-    // "edmx:Reference": Array<any>;
+    "edmx:Reference"?: Array<Reference>;
     "edmx:DataServices": Array<DataService<VersionedSchema>>;
+  };
+}
+
+/**
+ * A vocabulary the document draws terms from. The alias declared here is what annotation terms are
+ * prefixed with, and it is freely chosen per document: the very same term reads `Core.Computed` in
+ * CAP's metadata and `Org.OData.Core.V1.Computed` in ASP.NET's.
+ */
+export interface Reference {
+  $: {
+    Uri: string;
+  };
+  "edmx:Include"?: Array<Include>;
+}
+
+export interface Include {
+  $: {
+    Namespace: string;
+    Alias?: string;
+  };
+}
+
+/**
+ * An annotation applying a vocabulary term to the element it is attached to.
+ *
+ * Only constant values are of use at generation time, and only the ones we actually evaluate are
+ * typed here: an annotation may just as well hold a dynamic expression (`Path`, `If`, `Apply`, ...)
+ * which resolves per instance or per request, and those are ignored.
+ */
+export interface Annotation {
+  $: {
+    Term: string;
+    Qualifier?: string;
+    Bool?: "true" | "false";
+    String?: string;
+    EnumMember?: string;
+  };
+  Bool?: Array<string>;
+  String?: Array<string>;
+  EnumMember?: Array<string>;
+}
+
+/**
+ * Any model element an annotation may be attached to directly, as a child element.
+ */
+export interface Annotatable {
+  Annotation?: Array<Annotation>;
+}
+
+/**
+ * The external form of annotating: a block naming its target by path instead of sitting inside it.
+ * Means exactly the same as the inline form - CAP states `Core.Computed` this way, the reference
+ * model states it inline.
+ */
+export interface Annotations extends Annotatable {
+  $: {
+    Target: string;
+    Qualifier?: string;
   };
 }
 
@@ -13,7 +71,7 @@ export interface DataService<VersionedSchema> {
   Schema: Array<VersionedSchema>;
 }
 
-export interface Schema<ET extends EntityType, CT extends ComplexType> {
+export interface Schema<ET extends EntityType, CT extends ComplexType> extends Annotatable {
   $: {
     Namespace: string;
     xmlns: string;
@@ -24,6 +82,7 @@ export interface Schema<ET extends EntityType, CT extends ComplexType> {
   EnumType?: Array<EnumType>;
   EntityContainer?: Array<any>;
   TypeDefinition?: Array<TypeDefinition>;
+  Annotations?: Array<Annotations>;
 }
 
 export interface EntityContainer<ES = EntitySet> {
@@ -40,7 +99,7 @@ export interface EntitySet {
   };
 }
 
-export interface EntityType {
+export interface EntityType extends Annotatable {
   $: {
     Name: string;
     BaseType?: string;
@@ -64,7 +123,7 @@ export interface PropertyRef {
   PropertyRef: Array<{ $: { Name: string } }>;
 }
 
-export interface Property {
+export interface Property extends Annotatable {
   $: {
     Name: string;
     Type: string;

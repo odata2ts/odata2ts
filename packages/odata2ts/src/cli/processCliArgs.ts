@@ -1,5 +1,5 @@
 import { Command, Option } from "commander";
-import { CliOptions, EmitModes, Modes } from "../OptionModel.js";
+import { CliOptions, EmitModes, ManagedPropertyDetection, Modes } from "../OptionModel.js";
 
 function parseMode(value: string, dummyPrevious: Modes | undefined) {
   switch (value) {
@@ -29,6 +29,14 @@ function parseEmitMode(value: string, dummyPrevious: EmitModes) {
     default:
       throw new Error(`Not a valid EmitMode: ${value}`);
   }
+}
+
+function parseManagedPropertyDetection(value: string, dummyPrevious: ManagedPropertyDetection | undefined) {
+  const detection = ManagedPropertyDetection[value as keyof typeof ManagedPropertyDetection];
+  if (!detection) {
+    throw new Error(`Not a valid ManagedPropertyDetection: ${value}`);
+  }
+  return detection;
 }
 
 export function processCliArgs(argv: Array<string>) {
@@ -63,9 +71,13 @@ export function processCliArgs(argv: Array<string>) {
     )
     .option("-d, --debug", "Verbose debug infos")
     .option("--service-name <serviceName>", "Give the service your own name")
-    .option(
-      "-n, --disable-auto-managed-key",
-      "Don't mark single key props as managed by the server side (not editable)",
+    .addOption(
+      new Option(
+        "--managed-property-detection <mode>",
+        "Which sources to derive from whether a prop is managed by the server side (not editable)",
+      )
+        .choices(Object.values(ManagedPropertyDetection))
+        .argParser<ManagedPropertyDetection>(parseManagedPropertyDetection),
     )
     .option("-r, --allow-renaming", "Allow that property and entity names may be changed by configured casing")
     .parse(argv);

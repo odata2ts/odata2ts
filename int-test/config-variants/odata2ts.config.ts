@@ -1,4 +1,11 @@
-import { ConfigFileOptions, EmitModes, Modes, NamingStrategies, TypeModel } from "@odata2ts/odata2ts";
+import {
+  ConfigFileOptions,
+  EmitModes,
+  ManagedPropertyDetection,
+  Modes,
+  NamingStrategies,
+  TypeModel,
+} from "@odata2ts/odata2ts";
 
 /**
  * The compile gate for odata2ts' configuration surface.
@@ -211,7 +218,7 @@ const config: ConfigFileOptions = {
         bigNumberAsString: true,
         odataVersion: "4.01",
       },
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
       skipComments: true,
     },
   },

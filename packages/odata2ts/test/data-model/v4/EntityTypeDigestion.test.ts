@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { DataTypes } from "../../../src/data-model/DataTypeModel.js";
 import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
+import { ManagedState } from "../../../src/index.js";
 import { getTestConfig } from "../../test.config.js";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4.js";
 
@@ -50,7 +51,7 @@ describe("V4: EntityTypeDigestion Test", () => {
     const expectedProp = {
       dataType: DataTypes.PrimitiveType,
       isCollection: false,
-      managed: true,
+      managed: ManagedState.readOnly,
       name: "id",
       odataName: "id",
       odataType: ODataTypesV4.String,

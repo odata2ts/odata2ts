@@ -4,14 +4,14 @@ import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel.js";
 import { NamespaceWithAlias, withNamespace } from "./DataModel.js";
 import { Digester, TypeModel } from "./DataModelDigestion.js";
 import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel.js";
-import { ComplexType, Property } from "./edmx/ODataEdmxModelBase.js";
+import { ComplexType, Property, Reference } from "./edmx/ODataEdmxModelBase.js";
 import { ComplexTypeV4, EntityTypeV4, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4.js";
 import { NamingHelper } from "./NamingHelper.js";
 
-export const digest: DigesterFunction<SchemaV4> = async (schemas, options, namingHelper) => {
+export const digest: DigesterFunction<SchemaV4> = async (schemas, options, namingHelper, references) => {
   const converters = await loadConverters(ODataVersions.V4, options.converters);
 
-  const digester = new DigesterV4(schemas, options, namingHelper, converters);
+  const digester = new DigesterV4(schemas, options, namingHelper, converters, references);
   return digester.digest();
 };
 
@@ -21,8 +21,9 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     options: DigestionOptions,
     namingHelper: NamingHelper,
     converters?: MappedConverterChains,
+    references?: Array<Reference>,
   ) {
-    super(ODataVersion.V4, schemas, options, namingHelper, converters);
+    super(ODataVersion.V4, schemas, options, namingHelper, converters, references);
   }
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV4): Array<Property> {

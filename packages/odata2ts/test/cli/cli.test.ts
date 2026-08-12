@@ -6,7 +6,15 @@ import { afterAll, beforeAll, beforeEach, describe, expect, MockInstance, test, 
 import * as app from "../../src/app.js";
 import { run } from "../../src/cli/index.js";
 import * as downloader from "../../src/download/index.js";
-import { CliOptions, ConfigFileOptions, EmitModes, getDefaultConfig, Modes, RunOptions } from "../../src/index.js";
+import {
+  CliOptions,
+  ConfigFileOptions,
+  EmitModes,
+  getDefaultConfig,
+  ManagedPropertyDetection,
+  Modes,
+  RunOptions,
+} from "../../src/index.js";
 
 vi.mock("rimraf");
 vi.mock("mkdirp");
@@ -261,12 +269,12 @@ describe("Cli Test", () => {
     await testDebug(false);
   });
 
-  async function testNoAuto(noAuto: boolean) {
+  async function testManagedPropertyDetection(detection: ManagedPropertyDetection | undefined) {
     const args = [...defaultArgs];
-    if (noAuto) {
-      args.push("-n");
+    if (detection) {
+      args.push("--managed-property-detection", detection);
     }
-    runOptions.disableAutoManagedKey = noAuto;
+    runOptions.managedPropertyDetection = detection ?? ManagedPropertyDetection.auto;
 
     await testCli(args);
   }
@@ -283,9 +291,10 @@ describe("Cli Test", () => {
     await testServiceName("none");
   });
 
-  test("Test DisableAutoManagedKey option", async () => {
-    await testNoAuto(false);
-    await testNoAuto(true);
+  test("Test managedPropertyDetection option", async () => {
+    await testManagedPropertyDetection(undefined);
+    await testManagedPropertyDetection(ManagedPropertyDetection.simpleHeuristic);
+    await testManagedPropertyDetection(ManagedPropertyDetection.annotation);
   });
 
   async function testAllowRenaming(allow: boolean) {

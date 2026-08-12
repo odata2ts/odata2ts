@@ -1,6 +1,6 @@
 import { ODataVersions } from "@odata2ts/odata-core";
 import { DataModel } from "./data-model/DataModel.js";
-import { Schema } from "./data-model/edmx/ODataEdmxModelBase.js";
+import { Reference, Schema } from "./data-model/edmx/ODataEdmxModelBase.js";
 import { NamingHelper } from "./data-model/NamingHelper.js";
 import { RunOptions } from "./OptionModel.js";
 import { ProjectManager } from "./project/ProjectManager.js";
@@ -8,7 +8,7 @@ import { ProjectManager } from "./project/ProjectManager.js";
 export type DigestionOptions = Pick<
   RunOptions,
   | "converters"
-  | "disableAutoManagedKey"
+  | "managedPropertyDetection"
   | "propertiesByName"
   | "byTypeAndName"
   | "v2"
@@ -24,11 +24,15 @@ export type DigestionOptions = Pick<
 
 /**
  * Takes an EdmxSchema plus the run options and creates a DataModel.
+ *
+ * The references are the vocabularies the document includes, which sit outside of the schemas and are
+ * needed to resolve the aliases that annotation terms are written with.
  */
 export type DigesterFunction<S extends Schema<any, any>> = (
   schema: Array<S>,
   options: DigestionOptions,
   namingHelper: NamingHelper,
+  references?: Array<Reference>,
 ) => Promise<DataModel>;
 
 export type GeneratorFunctionOptions = Pick<

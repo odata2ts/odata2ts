@@ -1,4 +1,4 @@
-import { ComplexType, EntityType } from "../../../src/data-model/edmx/ODataEdmxModelBase.js";
+import { Annotatable, Annotation, ComplexType, EntityType } from "../../../src/data-model/edmx/ODataEdmxModelBase.js";
 
 export interface EntityOrComplexBuilderOptions {
   baseType?: string;
@@ -37,5 +37,13 @@ export abstract class CommonEntityAndComplexBuilderBase {
       },
       Key: [{ PropertyRef: [] }],
     };
+  }
+
+  /**
+   * Annotates an element inline, i.e. as a child of the element itself - the form the reference model
+   * uses, as opposed to the external one of the model builder.
+   */
+  protected annotate(element: Annotatable, annotations: Array<Annotation>) {
+    element.Annotation = [...(element.Annotation ?? []), ...annotations];
   }
 }
