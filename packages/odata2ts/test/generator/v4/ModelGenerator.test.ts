@@ -2,8 +2,9 @@ import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { generateModels } from "../../../src/generator/index.js";
-import { EmitModes, Modes } from "../../../src/index.js";
+import { EmitModes, ManagedPropertyDetection, Modes } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
+import { core, corePermissions } from "../../data-model/builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
 import {
   createHelper,
@@ -164,7 +165,7 @@ describe("Model Generator Tests V4", () => {
       v2: { responseResultsWrapping: true },
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -184,6 +185,35 @@ describe("Model Generator Tests V4", () => {
       skipComments: false,
       converters: [{ module: "@odata2ts/test-converters", use: ["booleanToNumberConverter"] }],
       propertiesByName: [...["id"].map((name) => ({ name, managed: true }))],
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: managed states from Core annotations`, async () => {
+    /*
+     * What each of the `Org.OData.Core.V1` terms does to the two models: `Computed` takes the property out
+     * of the editable one, `Permissions` granting only `Write` out of the model itself, while
+     * `ComputedDefaultValue` and `Immutable` leave it in both but never require it. The terms are spelled
+     * out in full here, the way ASP.NET states them - aliases are the digester's business, not the
+     * generator's.
+     */
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Guid)
+        .addProp("title", ODataTypesV4.String, false)
+        .addProp("popularityScore", ODataTypesV4.Double, true)
+        .addProp("createdAt", ODataTypesV4.DateTimeOffset, false)
+        .addProp("isbnCode", ODataTypesV4.String, false)
+        .addProp("secret", ODataTypesV4.String, false)
+        .addPropAnnotations("popularityScore", [core("Computed", { bool: true, fullyQualified: true })])
+        .addPropAnnotations("createdAt", [core("ComputedDefaultValue", { bool: true, fullyQualified: true })])
+        .addPropAnnotations("isbnCode", [core("Immutable", { bool: true, fullyQualified: true })])
+        .addPropAnnotations("secret", [corePermissions(["Write"], { fullyQualified: true })]),
+    );
+
+    await generateAndCompare("entity-managed-states.ts", {
+      skipComments: false,
+      skipEditableModels: false,
+      skipIdModels: false,
     });
   });
 
@@ -272,7 +302,7 @@ describe("Model Generator Tests V4", () => {
       v4: { odataVersion: "4.01" },
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -299,7 +329,7 @@ describe("Model Generator Tests V4", () => {
       disableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -324,7 +354,7 @@ describe("Model Generator Tests V4", () => {
       mode: Modes.models,
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -367,7 +397,7 @@ describe("Model Generator Tests V4", () => {
       disableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -382,7 +412,7 @@ describe("Model Generator Tests V4", () => {
     await generateAndCompare("entity-relationships-deep-insert-binding-by-key.ts", {
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -397,7 +427,7 @@ describe("Model Generator Tests V4", () => {
       disableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -412,7 +442,7 @@ describe("Model Generator Tests V4", () => {
       disableBindingProps: true,
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -426,7 +456,7 @@ describe("Model Generator Tests V4", () => {
       mode: Modes.models,
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -442,7 +472,7 @@ describe("Model Generator Tests V4", () => {
       v4: { odataVersion: "4.01" },
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -457,7 +487,7 @@ describe("Model Generator Tests V4", () => {
       v2: { payloadResultsWrapping: true },
       skipEditableModels: false,
       skipIdModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 

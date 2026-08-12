@@ -1,6 +1,7 @@
 import { ODataTypesV2 } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV2.js";
+import { ManagedPropertyDetection } from "../../../src/index.js";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2.js";
 import {
   createHelper,
@@ -175,7 +176,7 @@ export function createEntityBasedGenerationTests(
     await generateAndCompare("entity-hierarchy.ts", {
       skipIdModels: false,
       skipEditableModels: false,
-      disableAutoManagedKey: true,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 

@@ -100,14 +100,13 @@ describe("ASP.NET Library: data types", () => {
     await LIBRARY.Members(created.data.Id).delete().execute();
   });
 
-  test("guid, date and decimal round trip on a book", async () => {
+  test("guid and date round trip on a book", async () => {
     const created = await LIBRARY.Media()
       .asBookCollectionService()
       .create({
         Title: "Data Type Book",
         Language: "de",
         PublicationDate: "2026-08-02",
-        PopularityScore: 4.25,
         PageCount: 10,
         AgeRating: 0,
         ISBN: "9780000000002",
@@ -120,7 +119,6 @@ describe("ASP.NET Library: data types", () => {
 
     const read = await LIBRARY.Media(created.data.Id).query().execute();
     expect(read.data.PublicationDate).toBe("2026-08-02");
-    expect(read.data.PopularityScore).toBe(4.25);
 
     await LIBRARY.Media(created.data.Id).delete().execute();
   });

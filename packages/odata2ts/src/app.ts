@@ -44,6 +44,9 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   const dataService = metadataJson["edmx:Edmx"]["edmx:DataServices"][0];
   const schemas = dataService.Schema as Array<SchemaV3 | SchemaV4>;
 
+  // the vocabularies the document draws annotation terms from; they sit outside of the schemas
+  const references = metadataJson["edmx:Edmx"]["edmx:Reference"];
+
   const serviceName = getServiceName(options, schemas);
 
   const namespaces = schemas.map<NamespaceWithAlias>((schema) => [schema.$.Namespace, schema.$.Alias]);
@@ -54,8 +57,8 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
   // => that stuff is called dataModel!
   const dataModel =
     version === ODataVersions.V2
-      ? await digestV2(dataService.Schema as Array<SchemaV3>, options, namingHelper)
-      : await digestV4(dataService.Schema as Array<SchemaV4>, options, namingHelper);
+      ? await digestV2(dataService.Schema as Array<SchemaV3>, options, namingHelper, references)
+      : await digestV4(dataService.Schema as Array<SchemaV4>, options, namingHelper, references);
 
   // Validation of entity names: the same name might be used across different namespaces
   const validationErrors = dataModel.getNameValidation();

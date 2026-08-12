@@ -1,7 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { NamespaceWithAlias } from "../../src/data-model/DataModel.js";
 import { ServiceConfigHelper } from "../../src/data-model/ServiceConfigHelper.js";
-import { PropertyGenerationOptions, TypeBasedGenerationOptions, TypeModel } from "../../src/index.js";
+import {
+  ManagedPropertyDetection,
+  PropertyGenerationOptions,
+  TypeBasedGenerationOptions,
+  TypeModel,
+} from "../../src/index.js";
 
 describe("ServiceConfigHelper Tests", function () {
   const DEFAULT_NAMESPACES: NamespaceWithAlias = ["NS1", "self"];
@@ -11,7 +16,7 @@ describe("ServiceConfigHelper Tests", function () {
   function createHelperWithProps(...propsSetting: Array<PropertyGenerationOptions>) {
     toTest = new ServiceConfigHelper({
       converters: [],
-      disableAutoManagedKey: false,
+      managedPropertyDetection: ManagedPropertyDetection.auto,
       byTypeAndName: [],
       propertiesByName: propsSetting || [],
       skipEditableModels: false,
@@ -29,7 +34,7 @@ describe("ServiceConfigHelper Tests", function () {
   function createHelperWithEntities(...entsSetting: Array<TypeBasedGenerationOptions>) {
     toTest = new ServiceConfigHelper({
       converters: [],
-      disableAutoManagedKey: false,
+      managedPropertyDetection: ManagedPropertyDetection.auto,
       byTypeAndName: entsSetting || [],
       propertiesByName: [],
       skipEditableModels: false,

@@ -1,4 +1,5 @@
 import type {
+  Annotatable,
   ComplexType,
   EntityContainer,
   EntitySet,
@@ -25,7 +26,7 @@ export interface ComplexTypeV4 extends ComplexType {
   NavigationProperty?: Array<NavigationProperty>;
 }
 
-export interface NavigationProperty {
+export interface NavigationProperty extends Annotatable {
   $: {
     Name: string;
     Type: string;

@@ -1,11 +1,13 @@
 import { ODataTypesV2, ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import {
+  Annotation,
   ComplexType,
   EntityType,
   EnumType,
   ODataEdmxModelBase,
   Schema,
 } from "../../../src/data-model/edmx/ODataEdmxModelBase.js";
+import { VOCABULARIES } from "./ODataAnnotationBuilder.js";
 import { ODataComplexTypeBuilderBase } from "./ODataComplexTypeBuilderBase.js";
 import { ODataEntityTypeBuilderBase } from "./ODataEntityTypeBuilderBase.js";
 
@@ -37,6 +39,40 @@ export abstract class ODataModelBuilder<
 
   public addSchema(name: string, alias?: string) {
     this.currentSchema = this.createSchema(name, alias);
+    return this;
+  }
+
+  /**
+   * Declares the OASIS vocabularies, so that annotation terms may be written with their aliases.
+   *
+   * A document is free to include a vocabulary under any alias it likes, or to state no reference at all
+   * and write every term fully qualified - which is why the builder makes this a deliberate step rather
+   * than something that is always there.
+   */
+  public enableAnnotations() {
+    this.model["edmx:Edmx"]["edmx:Reference"] = Object.values(VOCABULARIES).map(({ alias, namespace }) => ({
+      $: { Uri: `https://oasis-tcs.github.io/odata-vocabularies/vocabularies/${namespace}.xml` },
+      "edmx:Include": [{ $: { Namespace: namespace, Alias: alias } }],
+    }));
+
+    return this;
+  }
+
+  /**
+   * Annotates a target of the current schema with terms of the `Org.OData.Core.V1` vocabulary, stated
+   * externally - the form CAP uses, as opposed to the inline one of the entity and complex type builders.
+   *
+   * @param target the annotation path, e.g. `Tester.Book/Id`
+   */
+  public addCoreAnnotations(target: string, annotations: Array<Annotation>, qualifier?: string) {
+    if (!this.currentSchema.Annotations) {
+      this.currentSchema.Annotations = [];
+    }
+    this.currentSchema.Annotations.push({
+      $: { Target: target, ...(qualifier ? { Qualifier: qualifier } : {}) },
+      Annotation: annotations,
+    });
+
     return this;
   }
 
@@ -94,6 +130,10 @@ export abstract class ODataModelBuilder<
 
   public getSchemas() {
     return this.schemas;
+  }
+
+  public getReferences() {
+    return this.model["edmx:Edmx"]["edmx:Reference"];
   }
 
   protected getEntityContainer() {

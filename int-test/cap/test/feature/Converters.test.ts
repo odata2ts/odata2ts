@@ -60,7 +60,6 @@ describe("CAP Library: value converters", () => {
         Title: "Converter Round Trip",
         Language: "de",
         PublicationDate: DateTime.fromISO("2001-02-03"),
-        PopularityScore: 1,
         Keywords: [],
       })
       .execute();

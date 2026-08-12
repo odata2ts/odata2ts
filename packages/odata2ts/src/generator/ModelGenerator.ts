@@ -10,7 +10,7 @@ import { DataModel } from "../data-model/DataModel.js";
 import { ComplexType, DataTypes, EntityType, OperationType, PropertyModel } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel.js";
-import { Modes } from "../OptionModel.js";
+import { ManagedState, Modes } from "../OptionModel.js";
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
 import { CoreImports } from "./import/ImportObjects.js";
@@ -23,6 +23,41 @@ import { ImportContainer } from "./ImportContainer.js";
  */
 function notStream(prop: PropertyModel): boolean {
   return !prop.isStream;
+}
+
+/**
+ * What each managed state means for the user of the generated model. {@link ManagedState.off} has nothing
+ * to say - it is the absence of management.
+ */
+const MANAGED_DOCS: Partial<Record<ManagedState, string>> = {
+  [ManagedState.readOnly]: "**Managed**: This property is managed on the server side and cannot be edited.",
+  [ManagedState.writeOnly]:
+    "**Write-Only**: The server never returns this property, hence it is part of the editable model only.",
+  [ManagedState.createOnly]:
+    "**Immutable**: This property can be set when creating the entity, but not changed afterwards.",
+  [ManagedState.optionalWithDefault]:
+    "**Server Default**: The server generates a value for this property if none is supplied.",
+};
+
+/**
+ * A write-only property never travels in a response, so the model must not promise it. It is known to the
+ * editable model alone - the mirror image of a read-only property, which only the model knows.
+ */
+function isReadable(prop: PropertyModel): boolean {
+  return prop.managed !== ManagedState.writeOnly;
+}
+
+function isEditable(prop: PropertyModel): boolean {
+  return prop.managed !== ManagedState.readOnly;
+}
+
+/**
+ * Whether a property has to be supplied when editing. Being non-nullable is not enough: the server fills
+ * in a value of its own where the client leaves out a `Core.ComputedDefaultValue` property, and a
+ * `Core.Immutable` one is left out on every update.
+ */
+function isEditableRequired(prop: PropertyModel): boolean {
+  return prop.required && prop.managed !== ManagedState.optionalWithDefault && prop.managed !== ManagedState.createOnly;
 }
 
 export const generateModels: EntityBasedGeneratorFunction = (
@@ -172,16 +207,19 @@ class ModelGenerator {
       isExported: true,
       // stream properties are absent on purpose: binary content never travels in the JSON payload, it
       // is addressed by its own URL - see the stream service the ServiceGenerator emits for them
-      properties: model.props.filter(notStream).map((p) => {
-        const isEntity = p.dataType == DataTypes.ModelType;
-        return {
-          name: p.name,
-          type: this.getPropType(file.getImports(), p),
-          // props for entities or entity collections are not added in V4 if not explicitly expanded
-          hasQuestionToken: this.dataModel.isV4() && isEntity,
-          docs: this.options.skipComments ? undefined : [this.generatePropDoc(p, model)],
-        };
-      }),
+      properties: model.props
+        .filter(notStream)
+        .filter(isReadable)
+        .map((p) => {
+          const isEntity = p.dataType == DataTypes.ModelType;
+          return {
+            name: p.name,
+            type: this.getPropType(file.getImports(), p),
+            // props for entities or entity collections are not added in V4 if not explicitly expanded
+            hasQuestionToken: this.dataModel.isV4() && isEntity,
+            docs: this.options.skipComments ? undefined : [this.generatePropDoc(p, model)],
+          };
+        }),
       extends: extendsClause,
     });
   }
@@ -192,8 +230,9 @@ class ModelGenerator {
     if (isKeyProp) {
       baseAttribs.push("**Key Property**: This is a key property used to identify the entity.");
     }
-    if (prop.managed) {
-      baseAttribs.push("**Managed**: This property is managed on the server side and cannot be edited.");
+    const managedDoc = MANAGED_DOCS[prop.managed!];
+    if (managedDoc) {
+      baseAttribs.push(managedDoc);
     }
     if (prop.converters?.length) {
       baseAttribs.push(`**Applied Converters**: ${prop.converters.map((c) => c.converterId).join(",")}.`);
@@ -267,14 +306,19 @@ class ModelGenerator {
   private generateEditableModel(file: FileHandler, model: ComplexType) {
     const entityTypes = [DataTypes.ModelType, DataTypes.ComplexType];
     // stream props are not writable through the payload either - the stream service is the only way in
-    const allProps = [...model.baseProps, ...model.props].filter((p) => !p.managed && notStream(p));
+    const allProps = [...model.baseProps, ...model.props].filter((p) => isEditable(p) && notStream(p));
 
-    const requiredProps = allProps
-      .filter((p) => p.required && !entityTypes.includes(p.dataType))
+    const plainProps = allProps.filter((p) => !entityTypes.includes(p.dataType));
+    // a write-only prop cannot be picked from the model, which doesn't know it - it is declared here
+    const pickedProps = plainProps.filter(isReadable);
+    const ownProps = plainProps.filter((p) => !isReadable(p));
+
+    const requiredProps = pickedProps
+      .filter(isEditableRequired)
       .map((p) => `"${p.name}"`)
       .join(" | ");
-    const optionalProps = allProps
-      .filter((p) => !p.required && !entityTypes.includes(p.dataType))
+    const optionalProps = pickedProps
+      .filter((p) => !isEditableRequired(p))
       .map((p) => `"${p.name}"`)
       .join(" | ");
     const complexProps = allProps.filter((p) => p.dataType === DataTypes.ComplexType);
@@ -294,13 +338,20 @@ class ModelGenerator {
       isExported: true,
       extends: extendsClause,
       properties: [
+        ...ownProps.map((p) => ({
+          name: p.name,
+          type: this.getEditablePropType(file.getImports(), p),
+          hasQuestionToken: !isEditableRequired(p),
+          // the only place left to say why this property shows up here and nowhere else
+          docs: this.options.skipComments ? undefined : [this.generatePropDoc(p, model)],
+        })),
         ...complexProps.map((p) => {
           return {
             name: p.name,
             type: this.getEditablePropType(file.getImports(), p),
             // optional props don't need to be specified in editable model
             // also, entities would require deep insert func => we make it optional for now
-            hasQuestionToken: !p.required || p.dataType === DataTypes.ModelType,
+            hasQuestionToken: !isEditableRequired(p) || p.dataType === DataTypes.ModelType,
           };
         }),
         ...navProps,
