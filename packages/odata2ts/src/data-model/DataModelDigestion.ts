@@ -99,6 +99,12 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    */
   private annotatedManagedStates = new Map<string, ManagedState>();
 
+  /**
+   * The enums declared `IsFlags="true"`, by fully qualified name and by alias. Their members are bits and
+   * may be combined, which is what makes the `has` operator applicable to them and to nothing else.
+   */
+  private flagsEnums = new Set<string>();
+
   protected constructor(
     protected version: ODataVersion,
     protected schemas: Array<S>,
@@ -121,6 +127,12 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
       schema.EnumType?.forEach((et) => {
         this.addModel2Type(ns, alias, et.$.Name, DataTypes.EnumType);
+        if (ifTrue(et.$.IsFlags)) {
+          this.flagsEnums.add(withNamespace(ns, et.$.Name));
+          if (alias) {
+            this.flagsEnums.add(withNamespace(alias, et.$.Name));
+          }
+        }
       });
       schema.ComplexType?.forEach((ct) => {
         this.addModel2Type(ns, alias, ct.$.Name, DataTypes.ComplexType);
@@ -312,6 +324,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         modelName: this.namingHelper.getEnumName(enumName),
         folderPath: filePath,
         members: et.Member?.length ? et.Member.map((m) => ({ name: m.$.Name, value: m.$.Value })) : [],
+        isFlags: ifTrue(et.$.IsFlags),
       });
     }
   }
@@ -663,6 +676,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       if (modelType === DataTypes.EnumType) {
         const isNumericEnum = this.options.enumType === "numeric";
         const enumConfig = this.serviceConfigHelper.findEnumTypeConfig(dataTypeNamespace, dataTypeName);
+        // `has` is defined for a flag set and for nothing else, so only a flags enum gets the path which
+        // offers it. Collections keep the plain path: `has` applies to the property, not to its items.
+        const isFlags = this.flagsEnums.has(odataDataType);
         result = {
           dataType: modelType,
           type: this.namingHelper.getEnumName(enumConfig?.mappedName ?? odataDataType),
@@ -671,8 +687,12 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
               ? QueryObjectTypes.QNumericEnumCollectionPath
               : QueryObjectTypes.QEnumCollectionPath
             : isNumericEnum
-              ? QueryObjectTypes.QNumericEnumPath
-              : QueryObjectTypes.QEnumPath,
+              ? isFlags
+                ? QueryObjectTypes.QNumericFlagsEnumPath
+                : QueryObjectTypes.QNumericEnumPath
+              : isFlags
+                ? QueryObjectTypes.QFlagsEnumPath
+                : QueryObjectTypes.QEnumPath,
           qObject: isCollection
             ? isNumericEnum
               ? QueryObjectTypes.QNumericEnumCollection

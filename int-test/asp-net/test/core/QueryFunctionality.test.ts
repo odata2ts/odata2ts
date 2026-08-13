@@ -1,5 +1,7 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, expectTypeOf, test } from "vitest";
 import { Amenities } from "../../src-generated/library/library-catalog/index.js";
+import { qBranch } from "../../src-generated/library/library-circulation/branch/QBranch.js";
+import { qCopy } from "../../src-generated/library/library-circulation/copy/QCopy.js";
 import { expectODataError } from "../expectODataError.js";
 import { BASE_URL, BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
@@ -210,22 +212,17 @@ describe("ASP.NET Library: query functionality", () => {
     expect(result.data.value.map((branch) => branch.Name).sort()).toStrictEqual(expectedNames);
   });
 
-  test("has against a non-flag enum is not refused, it just does bit arithmetic", async () => {
-    // Nothing in the metadata carries `IsFlags` into the generated code, so `has` is offered on every enum
-    // path - and this is what a caller gets when using it where it does not belong. `AvailabilityStatus`
-    // has no flags, but the server still evaluates `has` bitwise over the underlying `Edm.Byte` values,
-    // and `Available` is 0: every row matches, silently and without an error to react to.
-    const all = await LIBRARY.Copies()
-      .query((builder) => builder.select("Status"))
-      .execute();
-
-    const result = await LIBRARY.Copies()
-      .query((builder, qCopy) => builder.select("Status").filter(qCopy.Status.has("Available")))
-      .execute();
-
-    expect(result.status).toBe(200);
-    expect(result.data.value.length).toBe(all.data.value.length);
-    expect(result.data.value.some((copy) => copy.Status !== "Available")).toBe(true);
+  test("has is not offered on an enum which is no flag set", () => {
+    /*
+     * `AvailabilityStatus` carries no `IsFlags`, so its path has no `has` - and this is the reason it must
+     * not: the server would not refuse the operator, it would evaluate it bitwise over the underlying
+     * `Edm.Byte` values. `Available` is 0, so every row would match, silently and with no error to react
+     * to. That trap is now a compile error, which is what this asserts; `Amenities` above shows the
+     * operator where it belongs.
+     */
+    expectTypeOf(qCopy.Status).not.toHaveProperty("has");
+    // where the metadata does declare the flag, the operator is there
+    expectTypeOf(qBranch.Amenities).toHaveProperty("has");
   });
 
   test("an invalid query option is refused with 400, and the message says why", async () => {

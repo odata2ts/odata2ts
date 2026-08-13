@@ -49,6 +49,31 @@ describe("Query Object Generator Tests V4", () => {
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
   });
 
+  test(`${TEST_SUITE_NAME}: flags enum offers has, the collection of it does not`, async () => {
+    /*
+     * `IsFlags="true"` is the one thing in an `<EnumType>` that reaches the generated code: it decides
+     * which path the property gets, and only that path offers `has`. A collection keeps the plain path,
+     * since `has` applies to the property rather than to its items.
+     */
+    odataBuilder
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Guid)
+          .addProp("amenities", withNs("Amenities"))
+          .addProp("otherAmenities", `Collection(${withNs("Amenities")})`),
+      )
+      .addEnumType(
+        "Amenities",
+        [
+          { name: "Parking", value: 1 },
+          { name: "Cafe", value: 2 },
+        ],
+        true,
+      );
+
+    await generateAndCompare("entity-enum-flags.ts");
+  });
+
   test(`QFunction: min`, async () => {
     // given a simple function
     odataBuilder.addFunction("MinFunction", ODataTypesV4.String, false);

@@ -101,6 +101,11 @@ export interface EnumType {
   modelName: string;
   folderPath: string;
   members: Array<{ name: string; value: number }>;
+  /**
+   * `IsFlags="true"`: the members are bits and may be combined. The one thing that follows for the
+   * generated code is the `has` operator, which only the flags query paths offer.
+   */
+  isFlags: boolean;
 }
 
 export interface OperationType {

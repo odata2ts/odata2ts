@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { QNumericEnumPath } from "../../../src";
+import { QNumericEnumPath, QNumericFlagsEnumPath } from "../../../src";
 
 describe("QNumericEnumPath test", () => {
   enum FeatureEnum {
@@ -77,9 +77,14 @@ describe("QNumericEnumPath test", () => {
     expect(result).toBe(`(feature eq 'Feature1' or feature eq 'Feature2')`);
   });
 
-  test("has", () => {
+  test("has is not offered, since the enum is no flag set", () => {
+    // @ts-expect-error - `has` lives on QNumericFlagsEnumPath
+    toTest.has;
+  });
+
+  test("has, where the enum is declared IsFlags", () => {
     // the member name goes on the wire, not its number - same as for equals
-    const result = toTest.has(FeatureEnum.Feature2);
+    const result = new QNumericFlagsEnumPath("feature", FeatureEnum).has(FeatureEnum.Feature2);
 
     expect(result.toString()).toBe("feature has 'Feature2'");
   });

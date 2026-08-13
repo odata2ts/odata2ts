@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { QEnumPath } from "../../../src";
+import { QEnumPath, QFlagsEnumPath } from "../../../src";
 
 describe("QEnumPath test", () => {
   enum FeatureEnum {
@@ -85,6 +85,24 @@ describe("QEnumPath test", () => {
     expect(result).toBe(`(feature eq 'Feature2' or feature eq 'Feature3')`);
   });
 
+  test("has is not offered, since the enum is no flag set", () => {
+    // @ts-expect-error - `has` lives on QFlagsEnumPath, see below
+    toTest.has;
+  });
+});
+
+/**
+ * The `has` operator, which V4 defines for flag sets alone. It is reachable only through this path, which
+ * the generator picks exactly where the metadata declares `IsFlags="true"`.
+ */
+describe("QFlagsEnumPath test", () => {
+  enum FeatureEnum {
+    Feature1 = "Feature1",
+    Feature2 = "Feature2",
+    Feature3 = "Feature3",
+  }
+  const toTest = new QFlagsEnumPath("feature", FeatureEnum);
+
   test("has", () => {
     const result = toTest.has(FeatureEnum.Feature2);
 
@@ -96,5 +114,10 @@ describe("QEnumPath test", () => {
     const result = toTest.has(FeatureEnum.Feature1).and(toTest.has(FeatureEnum.Feature3));
 
     expect(result.toString()).toBe("feature has 'Feature1' and feature has 'Feature3'");
+  });
+
+  test("everything the plain path offers is still there", () => {
+    expect(toTest.eq(FeatureEnum.Feature2).toString()).toBe("feature eq 'Feature2'");
+    expect(toTest.asc().toString()).toBe("feature asc");
   });
 });

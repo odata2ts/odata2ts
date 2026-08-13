@@ -60,6 +60,8 @@ export * from "./path/QPathModel";
 
 export { QEnumPath } from "./path/enum/QEnumPath";
 export { QNumericEnumPath } from "./path/enum/QNumericEnumPath";
+export { QFlagsEnumPath } from "./path/enum/QFlagsEnumPath";
+export { QNumericFlagsEnumPath } from "./path/enum/QNumericFlagsEnumPath";
 export { QEnumCollectionPath } from "./path/enum/QEnumCollectionPath";
 export { QNumericEnumCollectionPath } from "./path/enum/QNumericEnumCollectionPath";
 

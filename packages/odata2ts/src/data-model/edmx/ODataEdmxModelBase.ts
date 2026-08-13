@@ -137,6 +137,11 @@ export interface Property extends Annotatable {
 export interface EnumType {
   $: {
     Name: string;
+    /**
+     * Declares the members to be bits which may be combined, which is what makes the `has` operator
+     * applicable - V4 defines it for no other type.
+     */
+    IsFlags?: "true" | "false";
   };
   Member?: Array<Member>;
 }
