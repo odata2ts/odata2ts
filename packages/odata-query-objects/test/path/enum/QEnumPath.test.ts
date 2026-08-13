@@ -160,10 +160,16 @@ describe("QEnumPath with a converter test", () => {
     expect(toTest.converter).toBe(converter);
   });
 
-  test("in, has and ordering go by the value as well", () => {
+  test("in and ordering go by the value as well", () => {
     expect(toTest.in(Status.OnLoan, Status.Missing).toString()).toBe("(status eq 1 or status eq 2)");
-    expect(toTest.has(Status.OnLoan).toString()).toBe("status has 1");
     expect(toTest.asc().toString()).toBe("status asc");
+  });
+
+  test("has is out of reach, as it must be", () => {
+    // an enumeration a service only describes can never be a flag set: `AllowedValues` cannot say that
+    // values may be combined, and there is no `IsFlags` here to say it either
+    // @ts-expect-error
+    toTest.has;
   });
 
   test("null is not converted", () => {

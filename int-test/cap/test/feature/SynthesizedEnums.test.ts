@@ -6,11 +6,12 @@ import { LibraryEnumsService } from "../../src-generated/library-enums/LibraryEn
 import { BASE_URL, BOOK_DER_PROZESS, LIBRARY, ODATA_CLIENT } from "../LibraryTestConstants.js";
 
 /**
- * `enumByAllowedValues` against the server it exists for.
+ * `enumSynthesized` against the server it exists for, with the one strategy there is:
+ * `allowedValuesAndSymbolicName`.
  *
  * A CDS enum is a constraint on a value rather than a type of its own, so CAP emits no `<EnumType>`:
  * `Copies/Status` is a plain `Edm.Byte` carrying a `Validation.AllowedValues` annotation whose records
- * hold the symbolic names. The option turns that into an enum - which only a running server can settle,
+ * hold the symbolic names. Naming the strategy turns that into an enum - which only a running server can settle,
  * since the number behind a member is what has to travel in either direction while the models read as the
  * enum.
  *
@@ -26,7 +27,7 @@ const COPY_ON_LOAN = { MediumId: BOOK_DER_PROZESS, InventoryNumber: 1002 };
 /** A branch seeded with `Amenities = 2`, i.e. `Parking` - and the one written to below. */
 const BRANCH_PARKING = 3;
 
-describe("CAP Library: enumByAllowedValues", () => {
+describe("CAP Library: synthesized enums", () => {
   // the seed data is the contract other files assert against, so anything written here is put back
   afterAll(async () => {
     await LIBRARY.Branches(BRANCH_PARKING).patch({ Amenities: 2 }).execute();
@@ -104,7 +105,8 @@ describe("CAP Library: enumByAllowedValues", () => {
     /*
      * `Branches/Amenities` lists `1, 2, 4, 8, 16` and the combination `31` - it is a flags enum, which
      * `AllowedValues` has no way of saying. The generated enum therefore covers exactly the values the
-     * annotation lists and nothing else, which is the documented reason the option is off by default.
+     * annotation lists and nothing else - and unlike a declared flags enum there is no `IsFlags` to state
+     * otherwise, so the synthesized enum does not even offer `has`.
      */
     test("a listed combination is a member like any other", async () => {
       const result = await ENUMS.Branches(1).query().execute();

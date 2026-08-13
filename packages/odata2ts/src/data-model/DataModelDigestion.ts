@@ -4,6 +4,7 @@ import type { DigestionOptions } from "../FactoryFunctionModel.js";
 import {
   ComplexTypeGenerationOptions,
   EntityTypeGenerationOptions,
+  EnumSynthesis,
   ManagedPropertyDetection,
   ManagedState,
   Modes,
@@ -143,7 +144,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     // types the service describes rather than declares become declared ones, before anything - including
     // the collection of model types right below - gets to look at the document
-    if (options.enumByAllowedValues) {
+    if (options.enumSynthesized === EnumSynthesis.allowedValuesAndSymbolicName) {
       this.synthesizedEnums = new AllowedValuesEnumSynthesizer<ET, CT>(this.schemas).synthesize();
     }
 

@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, EnumSynthesis, Modes } from "@odata2ts/odata2ts";
 
 /** The running server to refresh from, or `undefined` to read the committed snapshots - see below. */
 const SOURCE_URL = process.env.LIBRARY_BASE_URL;
@@ -125,7 +125,7 @@ const config: ConfigFileOptions = {
       ],
     },
     /**
-     * The V4 model with `enumByAllowedValues`, the second option this server is the case for: a CDS enum
+     * The V4 model with `enumSynthesized`, the second option this server is the case for: a CDS enum
      * is a constraint on a value rather than a type of its own, so CAP emits no `<EnumType>` at all -
      * `Copies/Status` is an `Edm.Byte` carrying a `Validation.AllowedValues` annotation, and only a real
      * CAP server settles whether the client still puts the *value* on the wire while its models read as
@@ -134,24 +134,24 @@ const config: ConfigFileOptions = {
      * Generated next to the raw client rather than replacing it, as with the shaped one above: the raw
      * client shows the bare number the server really transmits. `Branches/Amenities` is deliberately in
      * scope here as well - it is a bit mask, which the annotation cannot express and the generated enum
-     * therefore gets wrong. See test/feature/EnumByAllowedValues.test.ts.
+     * therefore gets wrong. See test/feature/SynthesizedEnums.test.ts.
      */
     libraryEnums: {
       serviceName: "LibraryEnums",
       source: SOURCE,
       output: "src-generated/library-enums",
-      enumByAllowedValues: true,
+      enumSynthesized: EnumSynthesis.allowedValuesAndSymbolicName,
     },
     /**
      * The same option against the V2 rendition, which carries the very same annotations - the adapter
      * passes them through untouched - but builds different URLs and payloads from them.
-     * See test/v2/feature/EnumByAllowedValues.test.ts.
+     * See test/v2/feature/SynthesizedEnums.test.ts.
      */
     libraryEnumsV2: {
       serviceName: "LibraryEnumsV2",
       source: SOURCE_V2,
       output: "src-generated/library-enums-v2",
-      enumByAllowedValues: true,
+      enumSynthesized: EnumSynthesis.allowedValuesAndSymbolicName,
       v2: {
         responseResultsWrapping: true,
         payloadResultsWrapping: false,

@@ -4,7 +4,7 @@ import { LibraryEnumsV2Service } from "../../../src-generated/library-enums-v2/L
 import { BASE_URL, BOOK_DER_PROZESS, LIBRARY_V2, ODATA_CLIENT } from "../LibraryV2TestConstants.js";
 
 /**
- * `enumByAllowedValues` through the V2 adapter.
+ * `enumSynthesized` through the V2 adapter.
  *
  * The annotation reaches the V2 rendition untouched - the adapter passes the `<Annotations>` blocks
  * through - so the very same enums are derived. What differs is everything around them: the client builds
@@ -18,7 +18,7 @@ const COPY = { MediumId: BOOK_DER_PROZESS, InventoryNumber: 1001 };
 /** A branch seeded with `Amenities = 2`, i.e. `Parking` - and the one written to below. */
 const BRANCH_PARKING = 3;
 
-describe("CAP Library V2: enumByAllowedValues", () => {
+describe("CAP Library V2: synthesized enums", () => {
   // the seed data is the contract other files assert against, so anything written here is put back
   afterAll(async () => {
     await LIBRARY_V2.Branches(BRANCH_PARKING).patch({ Amenities: 2 }).execute();

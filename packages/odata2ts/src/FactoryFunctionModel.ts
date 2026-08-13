@@ -20,7 +20,7 @@ export type DigestionOptions = Pick<
   | "bundledFileGeneration"
   | "unflattenComplexTypes"
   | "enumType"
-  | "enumByAllowedValues"
+  | "enumSynthesized"
 >;
 
 /**
