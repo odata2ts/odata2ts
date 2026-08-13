@@ -12,6 +12,7 @@ import {
   DataTypes,
   EntityType,
   EnumType,
+  hasNumericMembers,
   needsEnumConverter,
   OperationType,
   PropertyModel,
@@ -113,7 +114,7 @@ class ModelGenerator {
       const enumType = this.options.enumType;
       // an enum derived from `Validation.AllowedValues` may state string values; a numeric enum cannot
       // carry those, so it stays a string enum and the converter below bridges the two
-      const numericMembers = enumType === "numeric" && et.members.every((mem) => typeof mem.value === "number");
+      const numericMembers = enumType === "numeric" && hasNumericMembers(et);
       if (enumType === "string-union") {
         file.getFile().addTypeAlias({
           name: et.modelName,

@@ -179,7 +179,8 @@ export abstract class ODataModelBuilder<
       theEnum.Member = values.map((v) => ({
         $: {
           Name: v.name,
-          Value: v.value,
+          // as the parsed EDMX hands it over: an attribute is a string, whatever it holds
+          Value: String(v.value),
         },
       }));
     }

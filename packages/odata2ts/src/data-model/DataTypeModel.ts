@@ -118,6 +118,17 @@ export interface EnumType {
 }
 
 /**
+ * Whether the members of an enum can be generated as the numbers they stand for.
+ *
+ * A declared enum always can, since it numbers its members. One derived from `Validation.AllowedValues`
+ * takes its values from the annotation instead, and those may be genuine strings, which no numeric enum
+ * can carry.
+ */
+export function hasNumericMembers(enumType: EnumType): boolean {
+  return enumType.members.every((mem) => typeof mem.value === "number");
+}
+
+/**
  * Whether an enum needs a converter between its members and what the service transmits for them.
  *
  * Only an enum derived from `Validation.AllowedValues` ever does - a declared one puts the name of a
