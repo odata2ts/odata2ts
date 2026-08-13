@@ -2,7 +2,6 @@ import {
   filterEquals,
   filterGreaterEquals,
   filterGreaterThan,
-  filterHas,
   filterInEmulated,
   filterIsNotNull,
   filterIsNull,
@@ -58,11 +57,4 @@ export abstract class BaseEnumPath<EnumMemberType> implements QPathModel {
   public ge = this.greaterEquals;
 
   public in = filterInEmulated<EnumMemberType>(this.path, this.mapValue.bind(this));
-
-  /**
-   * V4 only, and only for an enum declared `IsFlags="true"`. Nothing in the metadata carries that flag
-   * into the generated code, so the method exists on every enum path and it is on the caller to use it
-   * where the enum actually is a flag set.
-   */
-  public has = filterHas<EnumMemberType>(this.path, this.mapValue.bind(this));
 }

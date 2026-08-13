@@ -165,7 +165,7 @@ export abstract class ODataModelBuilder<
     return this;
   }
 
-  public addEnumType(name: string, values?: Array<{ name: string; value: number }>) {
+  public addEnumType(name: string, values?: Array<{ name: string; value: number }>, isFlags?: boolean) {
     if (!this.currentSchema.EnumType) {
       this.currentSchema.EnumType = [];
     }
@@ -173,6 +173,7 @@ export abstract class ODataModelBuilder<
     const theEnum: EnumType = {
       $: {
         Name: name,
+        ...(isFlags ? { IsFlags: "true" as const } : {}),
       },
     };
     if (values?.length) {

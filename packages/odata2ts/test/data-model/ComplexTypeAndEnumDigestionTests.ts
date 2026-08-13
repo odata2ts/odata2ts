@@ -112,6 +112,77 @@ export function createComplexAndEnumTests() {
     });
   });
 
+  test("EnumType: flags enum gets the path which offers has", async () => {
+    odataBuilder
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoice", withNs("Choice")),
+      )
+      .addEnumType(
+        "Choice",
+        [
+          { name: "A", value: 1 },
+          { name: "B", value: 2 },
+        ],
+        true,
+      );
+
+    const result = await doDigest();
+
+    expect(result.getEnums()[0].isFlags).toBe(true);
+    expect(result.getEntityType(FQ_ENTITY_NAME)!.props[1]).toMatchObject({
+      dataType: DataTypes.EnumType,
+      qPath: "QFlagsEnumPath",
+      qParam: "QEnumParam",
+    });
+  });
+
+  test("EnumType: numeric flags enum", async () => {
+    odataBuilder
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoice", withNs("Choice")),
+      )
+      .addEnumType(
+        "Choice",
+        [
+          { name: "A", value: 1 },
+          { name: "B", value: 2 },
+        ],
+        true,
+      );
+
+    runOpts.enumType = "numeric";
+    const result = await doDigest();
+
+    expect(result.getEntityType(FQ_ENTITY_NAME)!.props[1]).toMatchObject({
+      qPath: "QNumericFlagsEnumPath",
+      qParam: "QNumericEnumParam",
+    });
+  });
+
+  test("EnumType: a collection of a flags enum keeps the plain collection path", async () => {
+    // `has` applies to the property, not to the items of a collection, so there is no flags variant of
+    // the collection path to pick
+    odataBuilder
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.String).addProp("myChoices", `Collection(${withNs("Choice")})`),
+      )
+      .addEnumType(
+        "Choice",
+        [
+          { name: "A", value: 1 },
+          { name: "B", value: 2 },
+        ],
+        true,
+      );
+
+    const result = await doDigest();
+
+    expect(result.getEntityType(FQ_ENTITY_NAME)!.props[1]).toMatchObject({
+      isCollection: true,
+      qPath: "QEnumCollectionPath",
+    });
+  });
+
   test("EnumType: enum collection", async () => {
     odataBuilder
       .addEntityType(ENTITY_NAME, undefined, (builder) =>
