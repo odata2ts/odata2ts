@@ -97,7 +97,7 @@ export function createAnnotationTests(
       .addEntityType(ENTITY_NAME, undefined, (builder: any) =>
         builder.addKeyProp("Id", ODataTypesV4.Guid).addProp("PopularityScore", ODataTypesV4.Double),
       )
-      .addCoreAnnotations(`${withNs(ENTITY_NAME)}/PopularityScore`, [core("Computed", { bool: true })]);
+      .addExternalAnnotations(`${withNs(ENTITY_NAME)}/PopularityScore`, [core("Computed", { bool: true })]);
 
     expect(await managedStateOf("PopularityScore")).toBe(ManagedState.readOnly);
   });

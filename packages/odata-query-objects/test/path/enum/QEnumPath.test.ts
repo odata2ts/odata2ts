@@ -121,3 +121,65 @@ describe("QFlagsEnumPath test", () => {
     expect(toTest.asc().toString()).toBe("feature asc");
   });
 });
+
+/**
+ * The shape `enumByAllowedValues` generates: the members are symbolic names taken from a
+ * `Validation.AllowedValues` annotation, while the property itself stayed the `Edm.Byte` it was declared
+ * as. So the value behind a member is what goes into the URL, and it goes there as the number it is.
+ */
+describe("QEnumPath with a converter test", () => {
+  enum Status {
+    Available = "Available",
+    OnLoan = "OnLoan",
+    Missing = "Missing",
+  }
+
+  const values: Record<Status, number> = { [Status.Available]: 0, [Status.OnLoan]: 1, [Status.Missing]: 2 };
+  const members: Record<number, Status> = { 0: Status.Available, 1: Status.OnLoan, 2: Status.Missing };
+
+  const converter = {
+    id: "StatusConverter",
+    from: "Edm.Byte",
+    to: "Status",
+    convertFrom(value: number | null | undefined): Status | null | undefined {
+      return value === null || value === undefined ? value : members[value];
+    },
+    convertTo(value: Status | null | undefined): number | null | undefined {
+      return value === null || value === undefined ? value : values[value];
+    },
+  };
+
+  const toTest = new QEnumPath<typeof Status, number>("status", Status, converter);
+
+  test("the value goes into the URL unquoted", () => {
+    expect(toTest.eq(Status.Available).toString()).toBe("status eq 0");
+    expect(toTest.ne(Status.Missing).toString()).toBe("status ne 2");
+  });
+
+  test("the query object picks the converter up for the payload", () => {
+    expect(toTest.converter).toBe(converter);
+  });
+
+  test("in, has and ordering go by the value as well", () => {
+    expect(toTest.in(Status.OnLoan, Status.Missing).toString()).toBe("(status eq 1 or status eq 2)");
+    expect(toTest.has(Status.OnLoan).toString()).toBe("status has 1");
+    expect(toTest.asc().toString()).toBe("status asc");
+  });
+
+  test("null is not converted", () => {
+    expect(toTest.isNull().toString()).toBe("status eq null");
+  });
+
+  test("a string valued conversion is quoted", () => {
+    const stringConverter = {
+      id: "BindingConverter",
+      from: "Edm.String",
+      to: "Status",
+      convertFrom: (value: string | null | undefined) => value as Status | null | undefined,
+      convertTo: (value: Status | null | undefined) => (value === Status.Available ? "AVAIL" : "OTHER"),
+    };
+    const path = new QEnumPath<typeof Status, string>("status", Status, stringConverter);
+
+    expect(path.eq(Status.Available).toString()).toBe("status eq 'AVAIL'");
+  });
+});

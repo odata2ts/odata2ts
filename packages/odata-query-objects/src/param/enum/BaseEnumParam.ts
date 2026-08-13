@@ -2,8 +2,9 @@ import { ParamValueModel } from "@odata2ts/converter-api";
 import { FlexibleConversionModel } from "../../QueryObjectModel";
 import { QParamModel } from "../QParamModel";
 import { formatParamWithQuotes, parseWithQuotes } from "../UrlParamHelper";
+import { UrlValueModel } from "../UrlParamModel";
 
-export abstract class BaseEnumParam<EnumParam> implements QParamModel<string, EnumParam> {
+export abstract class BaseEnumParam<EnumParam, WireType = string> implements QParamModel<WireType, EnumParam> {
   public constructor(
     protected name: string,
     protected mappedName?: string,
@@ -13,8 +14,21 @@ export abstract class BaseEnumParam<EnumParam> implements QParamModel<string, En
     }
   }
 
-  protected abstract mapValue(value: string): EnumParam;
-  protected abstract mapValueBack(value: EnumParam): string;
+  protected abstract mapValue(value: WireType): EnumParam;
+  protected abstract mapValueBack(value: EnumParam): WireType;
+
+  /**
+   * The literal form a wire value takes in a URL. An enum member goes there quoted, which is why this is
+   * the default - an enumeration the service never declared is the case where it is not, see
+   * {@link QEnumParam}.
+   */
+  protected formatWireValue(value: ParamValueModel<WireType>): UrlValueModel {
+    return formatParamWithQuotes(value as ParamValueModel<any>);
+  }
+
+  protected parseWireValue(value: UrlValueModel): ParamValueModel<WireType> {
+    return parseWithQuotes(value) as ParamValueModel<WireType>;
+  }
 
   public getName() {
     return this.name;
@@ -24,15 +38,17 @@ export abstract class BaseEnumParam<EnumParam> implements QParamModel<string, En
     return this.mappedName ?? this.getName();
   }
 
-  public convertFrom(value: FlexibleConversionModel<string>): FlexibleConversionModel<EnumParam> {
+  public convertFrom(value: FlexibleConversionModel<WireType>): FlexibleConversionModel<EnumParam> {
     return Array.isArray(value)
-      ? value.map((v) => (v === null || v === undefined ? v : this.mapValue(v)))
+      ? value.map((v) =>
+          v === null || v === undefined ? (v as ParamValueModel<EnumParam>) : this.mapValue(v as WireType),
+        )
       : value === null || value === undefined
-        ? value
-        : this.mapValue(value);
+        ? (value as ParamValueModel<EnumParam>)
+        : this.mapValue(value as WireType);
   }
 
-  public convertTo(value: FlexibleConversionModel<EnumParam>): FlexibleConversionModel<string> {
+  public convertTo(value: FlexibleConversionModel<EnumParam>): FlexibleConversionModel<WireType> {
     if (value === null) {
       return null;
     }
@@ -48,11 +64,11 @@ export abstract class BaseEnumParam<EnumParam> implements QParamModel<string, En
   public formatUrlValue(value: FlexibleConversionModel<EnumParam>): string | undefined {
     return Array.isArray(value)
       ? JSON.stringify(this.convertTo(value))
-      : formatParamWithQuotes(this.convertTo(value) as ParamValueModel<any>);
+      : this.formatWireValue(this.convertTo(value) as ParamValueModel<WireType>);
   }
 
   public parseUrlValue(value: string | undefined): FlexibleConversionModel<EnumParam> {
-    const parsed = parseWithQuotes(value);
+    const parsed = this.parseWireValue(value);
     if (value && parsed === undefined) {
       try {
         const jsonParsed = JSON.parse(value);

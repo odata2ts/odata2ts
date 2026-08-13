@@ -1,3 +1,4 @@
+import { ValueConverter } from "@odata2ts/converter-api";
 import { NumericEnumLike, NumericEnumMember, StringEnumSource, StringEnumSourceMember } from "../enum/EnumModel";
 import { QEnumPath } from "../path/enum/QEnumPath";
 import { QNumericEnumPath } from "../path/enum/QNumericEnumPath";
@@ -147,16 +148,20 @@ export class QDateTimeOffsetV2Collection<ConvertedType = string> extends QPrimit
   public readonly it = new QDateTimeOffsetV2Path<ConvertedType>(this.withPrefix(), this.converter);
 }
 
-export class QEnumCollection<EnumType extends StringEnumSource> extends QPrimitiveCollection<
-  string,
+export class QEnumCollection<EnumType extends StringEnumSource, WireType = string> extends QPrimitiveCollection<
+  WireType,
   StringEnumSourceMember<EnumType>,
-  QEnumPath<EnumType>
+  QEnumPath<EnumType, WireType>
 > {
-  readonly it: QEnumPath<EnumType>;
+  readonly it: QEnumPath<EnumType, WireType>;
 
-  constructor(theEnum: EnumType, prefix?: string) {
-    super(prefix, undefined);
-    this.it = new QEnumPath<EnumType>(this.withPrefix(), theEnum);
+  constructor(
+    theEnum: EnumType,
+    prefix?: string,
+    converter?: ValueConverter<WireType, StringEnumSourceMember<EnumType>>,
+  ) {
+    super(prefix, converter);
+    this.it = new QEnumPath<EnumType, WireType>(this.withPrefix(), theEnum, converter);
   }
 }
 

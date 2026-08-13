@@ -4,6 +4,7 @@ import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { generateQueryObjects } from "../../../src/generator/index.js";
 import { EmitModes } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
+import { allowedValues } from "../../data-model/builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
 import {
   createHelper,
@@ -72,6 +73,43 @@ describe("Query Object Generator Tests V4", () => {
       );
 
     await generateAndCompare("entity-enum-flags.ts");
+  test(`${TEST_SUITE_NAME}: enums derived from allowed values`, async () => {
+    /*
+     * An enum the service never declared takes the same path as a declared one, but with the converter the
+     * model generator emits next to it: what goes into the URL is the value behind a member, not its name.
+     * That holds whatever `enumType` says - the numeric variants transmit names and are therefore no
+     * option here.
+     */
+    /*
+     * Rebuilt for each variant: the digester derives the enum by rewriting the metadata, exactly as it
+     * unflattens complex types, so a model that has been through it once already carries the result.
+     */
+    const buildModel = () => {
+      odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
+      odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Guid)
+          .addProp("status", ODataTypesV4.Byte, false)
+          .addPropAnnotations("status", [
+            allowedValues(
+              [
+                { name: "Available", value: 0 },
+                { name: "OnLoan", value: 1 },
+                { name: "Missing", value: 2 },
+              ],
+              { fullyQualified: true },
+            ),
+          ]),
+      );
+    };
+
+    buildModel();
+    await generateAndCompare("entity-enum-allowed-values.ts", { enumByAllowedValues: true });
+    buildModel();
+    await generateAndCompare("entity-enum-allowed-values-numeric.ts", {
+      enumByAllowedValues: true,
+      enumType: "numeric",
+    });
   });
 
   test(`QFunction: min`, async () => {

@@ -107,6 +107,33 @@ export function formatWithQuotes(value: UrlExpressionValueModel): string {
   return `'${value}'`;
 }
 
+/**
+ * Parses a value whose literal form follows its type rather than a fixed spelling: a quoted string, or a
+ * bare literal for anything else.
+ *
+ * This is what an enumeration a service never declared needs. Its members are symbolic names, so only the
+ * value behind a name reaches the URL - and whether that value is written `'Available'` or `1` is decided
+ * by the annotated property's type, which the URL itself still reveals.
+ */
+export function parseLiteralOrQuoted(value: UrlValueModel): ParamValueModel<string | number> {
+  const cleanedValue = parseNullValue(value);
+  if (typeof cleanedValue !== "string") {
+    return cleanedValue;
+  }
+  if (cleanedValue.startsWith("'") && cleanedValue.endsWith("'")) {
+    return cleanedValue.substring(1, cleanedValue.length - 1);
+  }
+  const asNumber = Number(cleanedValue);
+  return cleanedValue.trim() === "" || Number.isNaN(asNumber) ? cleanedValue : asNumber;
+}
+
+/**
+ * Counterpart of {@link parseLiteralOrQuoted}: quotes a string, leaves any other value bare.
+ */
+export function formatLiteralOrQuoted(value: ParamValueModel<UrlExpressionValueModel>): UrlValueModel {
+  return typeof value === "string" ? formatParamWithQuotes(value) : formatLiteralParam(value);
+}
+
 export function parseWithQuotes(value: UrlValueModel) {
   const cleanedValue = parseNullValue(value);
   if (typeof cleanedValue === "string") {

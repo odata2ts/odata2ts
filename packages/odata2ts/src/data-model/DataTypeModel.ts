@@ -100,12 +100,33 @@ export interface EnumType {
   name: string;
   modelName: string;
   folderPath: string;
-  members: Array<{ name: string; value: number }>;
+  members: Array<{ name: string; value: number | string }>;
   /**
    * `IsFlags="true"`: the members are bits and may be combined. The one thing that follows for the
    * generated code is the `has` operator, which only the flags query paths offer.
    */
   isFlags: boolean;
+  /**
+   * The primitive type the values of this enum travel as - set only for an enum the service never
+   * declared, derived from `Validation.AllowedValues` instead.
+   *
+   * A declared enum puts the *name* of a member on the wire, so model and service agree without further
+   * ado. Here the property kept its primitive type and the members are symbolic names the service has
+   * never heard of, so the value behind a name is what has to be sent and received.
+   */
+  wireType?: string;
+}
+
+/**
+ * Whether an enum needs a converter between its members and what the service transmits for them.
+ *
+ * Only an enum derived from `Validation.AllowedValues` ever does - a declared one puts the name of a
+ * member on the wire, which is what the query objects assume without further ado. And even a derived one
+ * does not where each value is spelled exactly like the name it stands for, which leaves nothing to
+ * convert and nothing to format differently.
+ */
+export function needsEnumConverter(enumType: EnumType): boolean {
+  return !!enumType.wireType && enumType.members.some((mem) => mem.value !== mem.name);
 }
 
 export interface OperationType {
