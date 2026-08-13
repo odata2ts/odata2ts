@@ -45,6 +45,18 @@ type CollectorTuple = [
   { fqIdName: string; idName: string; qIdName: string; open: boolean; hasStream: boolean },
 ];
 
+/**
+ * The value of an enum member, as a number wherever it is one.
+ *
+ * A declared enum numbers its members, but the parsed EDMX hands every attribute over as the string it is
+ * written as - so without this, `members[].value` would be a number only for the enums
+ * {@link AllowedValuesEnumSynthesizer} derives, and a string for every declared one. Anything that has to
+ * tell numbers from names would then have to know which of the two it is looking at.
+ */
+function memberValue(value: number | string): number | string {
+  return typeof value === "string" && /^[+-]?\d+$/.test(value) ? Number(value) : value;
+}
+
 function ifTrue(value: string | undefined): boolean {
   return value === "true";
 }
@@ -336,7 +348,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         name: enumName,
         modelName: this.namingHelper.getEnumName(enumName),
         folderPath: filePath,
-        members: et.Member?.length ? et.Member.map((m) => ({ name: m.$.Name, value: m.$.Value })) : [],
+        members: et.Member?.length ? et.Member.map((m) => ({ name: m.$.Name, value: memberValue(m.$.Value) })) : [],
         isFlags: ifTrue(et.$.IsFlags),
         wireType: this.synthesizedEnums.get(fqName)?.wireType,
       });
