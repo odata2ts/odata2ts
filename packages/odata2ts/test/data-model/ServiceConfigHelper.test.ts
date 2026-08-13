@@ -27,7 +27,6 @@ describe("ServiceConfigHelper Tests", function () {
       disableAutomaticNameClashResolution: false,
       bundledFileGeneration: false,
       enumType: "string",
-      enumByAllowedValues: false,
       unflattenComplexTypes: false,
     });
   }
@@ -46,7 +45,6 @@ describe("ServiceConfigHelper Tests", function () {
       disableAutomaticNameClashResolution: false,
       bundledFileGeneration: false,
       enumType: "string",
-      enumByAllowedValues: false,
       unflattenComplexTypes: false,
     });
   }

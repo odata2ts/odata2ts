@@ -89,6 +89,31 @@ export enum ManagedPropertyDetection {
 }
 
 /**
+ * How odata2ts may recognise an enumeration in a service which declares none, and synthesize it.
+ *
+ * A strategy is a statement about the shape a particular kind of service puts its enums in, so naming one
+ * is deliberate: it says which convention the service follows, not merely that enums would be nice.
+ */
+export enum EnumSynthesis {
+  /**
+   * The shape SAP CAP emits. A CDS enum is a constraint on a value rather than a type of its own, so CAP
+   * emits no `<EnumType>` at all: the property keeps its underlying primitive - `Edm.Byte`, `Edm.Int32`,
+   * ... - and the members turn into a `Validation.AllowedValues` annotation, each allowed value carrying
+   * its symbolic name in a nested `Core.SymbolicName`.
+   *
+   * The synthesized enum is named after the property and shared by every property describing the same
+   * members. A property is converted only if *every* allowed value carries a symbolic name, since an enum
+   * missing one of its values would reject a value the service accepts.
+   *
+   * Bit masks are out of reach: `AllowedValues` says nothing about whether values may be combined, and
+   * unlike a declared enum there is no `IsFlags` to state it. Where the values are flags - CAP's
+   * `Amenities` is, with `1, 2, 4, 8, 16` and the combination `31` - the synthesized enum covers the
+   * values listed and nothing else, so a combination of two flags is a value its type does not know.
+   */
+  allowedValuesAndSymbolicName = "allowedValuesAndSymbolicName",
+}
+
+/**
  * Config options for CLI.
  */
 export interface CliOptions {
@@ -321,21 +346,19 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    */
   enumType?: "string" | "numeric" | "string-union";
   /**
-   * Another CAP feature. A CDS enum is a constraint on a value rather than a type of its own, so CAP
-   * emits no `<EnumType>` at all: the property keeps its underlying primitive - `Edm.Byte`, `Edm.Int32`,
-   * ... - and the members turn into a `Validation.AllowedValues` annotation, each value carrying its
-   * symbolic name in a nested `Core.SymbolicName`. What the generated client sees of an enum is then a
-   * bare `number`.
+   * Not every service which has enums declares them. Where one only *describes* an enumeration - by
+   * annotating a property which keeps its primitive type - this option names the strategy by which
+   * odata2ts recognises that and synthesizes the enum the service left out.
    *
-   * Switching this on generates an enum from such an annotation, named after the property, and the
-   * property is typed with it as if the service had declared it. Since the service knows nothing of the
-   * enum, the value behind a member - not its name - is what request and response payloads as well as
-   * `$filter` and `$orderby` carry; the generated client converts between the two.
+   * Undefined, the default, synthesizes nothing: such a property stays the primitive it was declared as.
+   * There is one strategy so far, {@link EnumSynthesis.allowedValuesAndSymbolicName}, and naming it is how
+   * you opt in.
    *
-   * A property is converted only if *every* allowed value carries a symbolic name, since an enum missing
-   * one of its values would reject a value the service accepts.
+   * Since the service knows nothing of a synthesized enum, the value behind a member - not its name - is
+   * what request and response payloads as well as `$filter` and `$orderby` carry; the generated client
+   * converts between the two.
    */
-  enumByAllowedValues?: boolean;
+  enumSynthesized?: EnumSynthesis;
   /**
    * More or less a CAP feature. In newer versions SAP CAP unfolds `<ComplexType>` into one
    * property per leaf, joined by an underscore: So instead of an `Address` object you get
@@ -526,8 +549,18 @@ export interface ServiceGenerationOptions
  */
 export interface RunOptions
   extends
-    Required<Omit<ServiceGenerationOptions, "serviceName" | "sourceUrl" | "sourceUrlConfig" | "refreshFile">>,
-    Pick<ServiceGenerationOptions, "serviceName" | "sourceUrl" | "sourceUrlConfig" | "refreshFile"> {
+    Required<
+      Omit<
+        ServiceGenerationOptions,
+        "serviceName" | "sourceUrl" | "sourceUrlConfig" | "refreshFile" | "enumSynthesized"
+      >
+    >,
+    // `enumSynthesized` stays optional: naming no strategy is what synthesizes nothing, so unlike every
+    // other option it has no default value to fall back to
+    Pick<
+      ServiceGenerationOptions,
+      "serviceName" | "sourceUrl" | "sourceUrlConfig" | "refreshFile" | "enumSynthesized"
+    > {
   naming: NameSettings;
 }
 

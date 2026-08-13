@@ -2,7 +2,7 @@ import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { generateModels } from "../../../src/generator/index.js";
-import { EmitModes, ManagedPropertyDetection, Modes } from "../../../src/index.js";
+import { EmitModes, EnumSynthesis, ManagedPropertyDetection, Modes } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
 import { allowedValues, core, corePermissions } from "../../data-model/builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
@@ -248,15 +248,18 @@ describe("Model Generator Tests V4", () => {
     };
 
     buildModel();
-    await generateAndCompare("entity-enum-allowed-values.ts", { enumByAllowedValues: true, skipComments: false });
+    await generateAndCompare("entity-enum-allowed-values.ts", {
+      enumSynthesized: EnumSynthesis.allowedValuesAndSymbolicName,
+      skipComments: false,
+    });
     buildModel();
     await generateAndCompare("entity-enum-allowed-values-numeric.ts", {
-      enumByAllowedValues: true,
+      enumSynthesized: EnumSynthesis.allowedValuesAndSymbolicName,
       enumType: "numeric",
     });
     buildModel();
     await generateAndCompare("entity-enum-allowed-values-string-union.ts", {
-      enumByAllowedValues: true,
+      enumSynthesized: EnumSynthesis.allowedValuesAndSymbolicName,
       enumType: "string-union",
     });
   });

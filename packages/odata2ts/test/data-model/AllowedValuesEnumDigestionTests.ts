@@ -5,6 +5,7 @@ import { DataModel } from "../../src/data-model/DataModel.js";
 import { DataTypes, EnumType } from "../../src/data-model/DataTypeModel.js";
 import { NamingHelper } from "../../src/data-model/NamingHelper.js";
 import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel.js";
+import { EnumSynthesis } from "../../src/index.js";
 import { TestSettings } from "../generator/TestTypes.js";
 import { getTestConfig } from "../test.config.js";
 import { AllowedValue, allowedValues, core } from "./builder/ODataAnnotationBuilder.js";
@@ -70,7 +71,7 @@ export function createAllowedValuesEnumTests(
 
   beforeEach(() => {
     odataBuilder = new ODataBuilderConstructor(SERVICE_NAME);
-    digestionOptions = { enumByAllowedValues: true };
+    digestionOptions = { enumSynthesized: EnumSynthesis.allowedValuesAndSymbolicName };
   });
 
   /**
@@ -102,6 +103,17 @@ export function createAllowedValuesEnumTests(
     expect(prop.qParam).toBe("QEnumParam");
   });
 
+  test("a synthesized enum is no flag set, so it does not offer has", async () => {
+    // `AllowedValues` cannot say that values may be combined - only `IsFlags` on a declared enum can, and
+    // there is none here. So the plain path is the right one, and `has` is out of reach by construction.
+    buildModel(STATUS_VALUES);
+
+    const result = await doDigest();
+
+    expect(result.getEnums()[0].isFlags).toBe(false);
+    expect(propOf(result, "Status").qPath).toBe("QEnumPath");
+  });
+
   test("the enum is named after the property and knows its wire type", async () => {
     buildModel(STATUS_VALUES);
 
@@ -112,6 +124,7 @@ export function createAllowedValuesEnumTests(
       modelName: "Status",
       fqName: withNs("Status"),
       wireType: ODataTypesV4.Byte,
+      isFlags: false,
       members: [
         { name: "Available", value: 0 },
         { name: "OnLoan", value: 1 },

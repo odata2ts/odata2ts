@@ -19,7 +19,8 @@ export interface SynthesizedEnum {
 }
 
 /**
- * Turns properties which merely *describe* an enumeration into one.
+ * Turns properties which merely *describe* an enumeration into one - the strategy
+ * {@link EnumSynthesis.allowedValuesAndSymbolicName}, which `enumSynthesized` opts in to by name.
  *
  * A service may state the values a property accepts as `Validation.AllowedValues`, each with a symbolic
  * name in a nested `Core.SymbolicName` - SAP CAP does exactly this, because a CDS enum is a constraint on
@@ -35,8 +36,9 @@ export interface SynthesizedEnum {
  * - A record without a `Core.SymbolicName` has no name to generate, and an enum missing one of its values
  *   would reject a value the service accepts. So a property is converted only if *every* record carries
  *   one, and otherwise left exactly as it was.
- * - `AllowedValues` says nothing about whether values may be combined. A bit mask therefore becomes an
- *   ordinary enum here, and any combination of its members is a value the generated type does not know.
+ * - `AllowedValues` says nothing about whether values may be combined, and unlike a declared enum there is
+ *   no `IsFlags` to state it. A bit mask therefore becomes an ordinary enum here - one which does not even
+ *   offer `has` - and any combination of its members is a value the generated type does not know.
  */
 export class AllowedValuesEnumSynthesizer<ET extends EntityType, CT extends ComplexType> {
   private readonly synthesized = new Map<string, SynthesizedEnum>();

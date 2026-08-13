@@ -2,7 +2,7 @@ import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { generateQueryObjects } from "../../../src/generator/index.js";
-import { EmitModes } from "../../../src/index.js";
+import { EmitModes, EnumSynthesis } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
 import { allowedValues } from "../../data-model/builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
@@ -73,6 +73,8 @@ describe("Query Object Generator Tests V4", () => {
       );
 
     await generateAndCompare("entity-enum-flags.ts");
+  });
+
   test(`${TEST_SUITE_NAME}: enums derived from allowed values`, async () => {
     /*
      * An enum the service never declared takes the same path as a declared one, but with the converter the
@@ -104,10 +106,12 @@ describe("Query Object Generator Tests V4", () => {
     };
 
     buildModel();
-    await generateAndCompare("entity-enum-allowed-values.ts", { enumByAllowedValues: true });
+    await generateAndCompare("entity-enum-allowed-values.ts", {
+      enumSynthesized: EnumSynthesis.allowedValuesAndSymbolicName,
+    });
     buildModel();
     await generateAndCompare("entity-enum-allowed-values-numeric.ts", {
-      enumByAllowedValues: true,
+      enumSynthesized: EnumSynthesis.allowedValuesAndSymbolicName,
       enumType: "numeric",
     });
   });
