@@ -1,5 +1,6 @@
+import { ValueConverter } from "@odata2ts/converter-api";
 import { StringEnumSource, StringEnumSourceMember } from "../../enum/EnumModel";
-import { formatWithQuotes } from "../../param/UrlParamHelper";
+import { formatLiteral, formatWithQuotes, URL_CONVERSION_OPTIONS } from "../../param/UrlParamHelper";
 import { BaseEnumPath } from "./BaseEnumPath";
 
 /**
@@ -10,11 +11,19 @@ import { BaseEnumPath } from "./BaseEnumPath";
  * accepts the plain member list just as well as the enum object, which is what makes
  * `enumType: "string-union"` workable at all - a union of string literals exists only in the
  * type system, so the generator hands over the list of members instead.
+ *
+ * Unless a converter says otherwise: a service may well describe an enumeration without declaring one, by
+ * annotating a plain property with the values it accepts and the symbolic name of each. The members are
+ * then names the service never sees, and the converter is what turns them back into the values it does -
+ * a number, usually, which is why the wire value decides the literal form rather than this class.
  */
-export class QEnumPath<EnumType extends StringEnumSource> extends BaseEnumPath<StringEnumSourceMember<EnumType>> {
+export class QEnumPath<EnumType extends StringEnumSource, WireType = string> extends BaseEnumPath<
+  StringEnumSourceMember<EnumType>
+> {
   public constructor(
     path: string,
     protected theEnum: EnumType,
+    public readonly converter?: ValueConverter<WireType, StringEnumSourceMember<EnumType>>,
   ) {
     super(path);
     if (!theEnum) {
@@ -23,6 +32,10 @@ export class QEnumPath<EnumType extends StringEnumSource> extends BaseEnumPath<S
   }
 
   protected mapValue(value: StringEnumSourceMember<EnumType>): string {
-    return formatWithQuotes(value as string);
+    if (!this.converter) {
+      return formatWithQuotes(value as string);
+    }
+    const wireValue = this.converter.convertTo(value, URL_CONVERSION_OPTIONS);
+    return typeof wireValue === "string" ? formatWithQuotes(wireValue) : formatLiteral(wireValue as any);
   }
 }

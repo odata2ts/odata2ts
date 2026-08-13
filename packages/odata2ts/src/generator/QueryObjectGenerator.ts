@@ -14,6 +14,8 @@ import {
   ComplexType,
   DataTypes,
   EntityType,
+  EnumType,
+  needsEnumConverter,
   OperationType,
   OperationTypes,
   PropertyModel,
@@ -39,6 +41,13 @@ export const generateQueryObjects: EntityBasedGeneratorFunction = (
 };
 
 const OPTIONS_STATEMENT = "OPTS";
+
+/**
+ * An optional further constructor argument, or nothing at all.
+ */
+function withComma(statement: string | undefined): string {
+  return statement ? `, ${statement}` : "";
+}
 
 class QueryObjectGenerator {
   constructor(
@@ -277,7 +286,9 @@ class QueryObjectGenerator {
             ? importContainer.addGeneratedModel(prop.fqType, prop.type, false)
             : importContainer.addQObject(prop.qObject!);
 
-        const binding = isEnumType(prop) ? "" : this.generateBindingStmt(importContainer, ownerFqName, prop);
+        const binding = isEnumType(prop)
+          ? withComma(this.generateEnumConverterStmt(importContainer, prop))
+          : this.generateBindingStmt(importContainer, ownerFqName, prop);
         qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${isEnumType(prop) ? qObject : `() => ${qObject}`}${binding})`;
       } else {
         // add import for data type
@@ -288,7 +299,8 @@ class QueryObjectGenerator {
           qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), () => ${qObject}${binding})`;
         } else if (isEnumType(prop)) {
           const qObject = importContainer.addGeneratedModel(prop.fqType, prop.type, false);
-          qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${qObject})`;
+          const converter = withComma(this.generateEnumConverterStmt(importContainer, prop));
+          qPathInit = `new ${qPath}(this.withPrefix("${odataName}"), ${qObject}${converter})`;
         } else {
           let converterStmt = this.generateConverterStmt(importContainer, prop.converters);
           const addConverter = !!converterStmt;
@@ -346,6 +358,20 @@ class QueryObjectGenerator {
       this.version === ODataVersions.V2 ? "V2" : this.options.v4.odataVersion === "4.01" ? "4.01" : "4.0";
 
     return `, new ${qBinding}(() => new ${qId}("${targetSet.odataName}"), "${notation}")`;
+  }
+
+  /**
+   * The converter of an enum the service never declared - undefined for a declared one, whose members are
+   * the values the service transmits.
+   *
+   * @see ModelGenerator#generateEnumConverter
+   */
+  private generateEnumConverterStmt(importContainer: ImportContainer, prop: PropertyModel): string | undefined {
+    const enumType = this.dataModel.getModel(prop.fqType) as EnumType | undefined;
+    if (!enumType || !needsEnumConverter(enumType)) {
+      return undefined;
+    }
+    return importContainer.addGeneratedModel(prop.fqType, `${enumType.modelName}Converter`, false);
   }
 
   private generateConverterStmt(importContainer: ImportContainer, converters: Array<ValueConverterImport> | undefined) {
@@ -407,13 +433,11 @@ class QueryObjectGenerator {
           }
 
           const qParam = importContainer.addQObject(prop.qParam!);
+          const converterStmt =
+            this.generateConverterStmt(importContainer, prop.converters) ||
+            this.generateEnumConverterStmt(importContainer, prop);
           const isMappedNameNecessary = prop.odataName !== prop.name;
-          const mappedName = isMappedNameNecessary
-            ? `"${prop.name}"`
-            : prop.converters?.length
-              ? "undefined"
-              : undefined;
-          const converterStmt = this.generateConverterStmt(importContainer, prop.converters);
+          const mappedName = isMappedNameNecessary ? `"${prop.name}"` : converterStmt ? "undefined" : undefined;
           const mappedNameParam = mappedName ? `, ${mappedName}` : "";
           const converterParam = converterStmt ? `, ${converterStmt}` : "";
           return `new ${qParam}("${prop.odataName}"${complexQParam}${mappedNameParam}${converterParam})`;

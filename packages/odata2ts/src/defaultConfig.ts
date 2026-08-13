@@ -36,6 +36,7 @@ const defaultConfig: DefaultConfiguration = {
   bundledFileGeneration: false,
   unflattenComplexTypes: false,
   enumType: "string",
+  enumByAllowedValues: false,
   naming: {
     models: {
       namingStrategy: NamingStrategies.PASCAL_CASE,

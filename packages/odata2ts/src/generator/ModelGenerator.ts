@@ -7,7 +7,15 @@ import {
   VariableDeclarationKind,
 } from "ts-morph";
 import { DataModel } from "../data-model/DataModel.js";
-import { ComplexType, DataTypes, EntityType, OperationType, PropertyModel } from "../data-model/DataTypeModel.js";
+import {
+  ComplexType,
+  DataTypes,
+  EntityType,
+  EnumType,
+  needsEnumConverter,
+  OperationType,
+  PropertyModel,
+} from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel.js";
 import { ManagedState, Modes } from "../OptionModel.js";
@@ -103,6 +111,9 @@ class ModelGenerator {
       const file = this.project.createOrGetModelFile(et.folderPath, et.modelName);
 
       const enumType = this.options.enumType;
+      // an enum derived from `Validation.AllowedValues` may state string values; a numeric enum cannot
+      // carry those, so it stays a string enum and the converter below bridges the two
+      const numericMembers = enumType === "numeric" && et.members.every((mem) => typeof mem.value === "number");
       if (enumType === "string-union") {
         file.getFile().addTypeAlias({
           name: et.modelName,
@@ -128,13 +139,85 @@ class ModelGenerator {
           isExported: true,
           members: et.members.map((mem) => ({
             name: mem.name,
-            initializer: enumType === "numeric" ? String(mem.value) : `"${mem.name}"`,
+            initializer: numericMembers ? String(mem.value) : `"${mem.name}"`,
           })),
         });
       }
 
+      this.generateEnumConverter(file, et, enumType === "string-union");
+
       return this.project.finalizeFile(file);
     });
+  }
+
+  /**
+   * The conversion an enum needs which the service never declared: its members are symbolic names taken
+   * from a `Validation.AllowedValues` annotation, while the property they belong to kept its primitive
+   * type, so the value behind a name is what actually travels.
+   *
+   * Nothing is generated where name and value coincide - a declared enum, or one whose members are
+   * already spelled the way the service transmits them.
+   */
+  private generateEnumConverter(file: FileHandler, et: EnumType, unionType: boolean) {
+    if (!needsEnumConverter(et)) {
+      return;
+    }
+    const { modelName, members } = et;
+    // the member of a string enum has to be addressed through the enum, its name alone is a different type
+    const asMember = (name: string) => (unionType ? `"${name}"` : `${modelName}.${name}`);
+    const asKey = (name: string) => (unionType ? `"${name}"` : `[${modelName}.${name}]`);
+    const asValue = (value: number | string) => (typeof value === "number" ? String(value) : `"${value}"`);
+    const wireType = typeof members[0]?.value === "number" ? "number" : "string";
+
+    file.getFile().addVariableStatements([
+      {
+        declarationKind: VariableDeclarationKind.Const,
+        declarations: [
+          {
+            name: `${modelName}Values`,
+            type: `Record<${modelName}, ${wireType}>`,
+            initializer: `{ ${members.map((mem) => `${asKey(mem.name)}: ${asValue(mem.value)}`).join(", ")} }`,
+          },
+        ],
+      },
+      {
+        declarationKind: VariableDeclarationKind.Const,
+        declarations: [
+          {
+            name: `${modelName}Members`,
+            type: `Record<${wireType}, ${modelName}>`,
+            initializer: `{ ${members.map((mem) => `${asValue(mem.value)}: ${asMember(mem.name)}`).join(", ")} }`,
+          },
+        ],
+      },
+      {
+        declarationKind: VariableDeclarationKind.Const,
+        isExported: true,
+        docs: this.options.skipComments
+          ? undefined
+          : [
+              `Converts between the members of {@link ${modelName}} and the \`${et.wireType}\` values the ` +
+                `service transmits for them, as stated by its \`Validation.AllowedValues\` annotation.`,
+            ],
+        declarations: [
+          {
+            name: `${modelName}Converter`,
+            initializer:
+              `{\n` +
+              `  id: "${modelName}Converter",\n` +
+              `  from: "${et.wireType}",\n` +
+              `  to: "${modelName}",\n` +
+              `  convertFrom(value: ${wireType} | null | undefined): ${modelName} | null | undefined {\n` +
+              `    return value === null || value === undefined ? value : ${modelName}Members[value];\n` +
+              `  },\n` +
+              `  convertTo(value: ${modelName} | null | undefined): ${wireType} | null | undefined {\n` +
+              `    return value === null || value === undefined ? value : ${modelName}Values[value];\n` +
+              `  },\n` +
+              `}`,
+          },
+        ],
+      },
+    ]);
   }
 
   private generateEntityTypeModels() {

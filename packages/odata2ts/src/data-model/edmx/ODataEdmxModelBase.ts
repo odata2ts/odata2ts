@@ -46,6 +46,41 @@ export interface Annotation {
   Bool?: Array<string>;
   String?: Array<string>;
   EnumMember?: Array<string>;
+  Collection?: Array<Collection>;
+}
+
+/**
+ * A collection valued annotation. Its entries are records where the term declares a structured type,
+ * which is the only form we read.
+ */
+export interface Collection {
+  Record?: Array<AnnotationRecord>;
+}
+
+/**
+ * One entry of a collection valued annotation: a set of property values, and possibly annotations of
+ * its own - `Validation.AllowedValue` carries the value it allows as a property and the symbolic name
+ * of that value as a nested `Core.SymbolicName`.
+ */
+export interface AnnotationRecord extends Annotatable {
+  $?: {
+    Type?: string;
+  };
+  PropertyValue?: Array<PropertyValue>;
+}
+
+/**
+ * One property of a record. The value sits in an attribute named after its type; as everywhere else in
+ * the parsed EDMX it arrives as a string, whatever that type says.
+ */
+export interface PropertyValue {
+  $: {
+    Property: string;
+    Bool?: string;
+    String?: string;
+    Int?: string;
+    EnumMember?: string;
+  };
 }
 
 /**
@@ -137,6 +172,7 @@ export interface Property extends Annotatable {
 export interface EnumType {
   $: {
     Name: string;
+    UnderlyingType?: string;
     /**
      * Declares the members to be bits which may be combined, which is what makes the `has` operator
      * applicable - V4 defines it for no other type.
@@ -149,7 +185,12 @@ export interface EnumType {
 export interface Member {
   $: {
     Name: string;
-    Value: number;
+    /**
+     * A declared enum numbers its members, and the parsed EDMX hands the number over as the string it is
+     * written as. An enum derived from `Validation.AllowedValues` takes the values from the annotation
+     * instead, which may just as well be strings.
+     */
+    Value: number | string;
   };
 }
 

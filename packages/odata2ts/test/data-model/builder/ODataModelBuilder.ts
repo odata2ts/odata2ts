@@ -59,12 +59,11 @@ export abstract class ODataModelBuilder<
   }
 
   /**
-   * Annotates a target of the current schema with terms of the `Org.OData.Core.V1` vocabulary, stated
-   * externally - the form CAP uses, as opposed to the inline one of the entity and complex type builders.
+   * Annotates a target of the current schema, stated externally - the form CAP uses, as opposed to the inline one of the entity and complex type builders.
    *
    * @param target the annotation path, e.g. `Tester.Book/Id`
    */
-  public addCoreAnnotations(target: string, annotations: Array<Annotation>, qualifier?: string) {
+  public addExternalAnnotations(target: string, annotations: Array<Annotation>, qualifier?: string) {
     if (!this.currentSchema.Annotations) {
       this.currentSchema.Annotations = [];
     }

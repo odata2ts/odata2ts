@@ -4,7 +4,7 @@ import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { generateModels } from "../../../src/generator/index.js";
 import { EmitModes, ManagedPropertyDetection, Modes } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
-import { core, corePermissions } from "../../data-model/builder/ODataAnnotationBuilder.js";
+import { allowedValues, core, corePermissions } from "../../data-model/builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
 import {
   createHelper,
@@ -214,6 +214,50 @@ describe("Model Generator Tests V4", () => {
       skipComments: false,
       skipEditableModels: false,
       skipIdModels: false,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: enums derived from allowed values`, async () => {
+    /*
+     * The shape CAP puts an enum in: the property keeps its primitive type and the members sit in a
+     * `Validation.AllowedValues` annotation, each with its name in a nested `Core.SymbolicName`. Since the
+     * service transmits the value rather than the name, a converter is generated next to the enum - unless
+     * the members are generated as those very values, which `enumType: "numeric"` does.
+     */
+    /*
+     * Rebuilt for each variant: the digester derives the enum by rewriting the metadata, exactly as it
+     * unflattens complex types, so a model that has been through it once already carries the result.
+     */
+    const buildModel = () => {
+      odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
+      odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Guid)
+          .addProp("status", ODataTypesV4.Byte, false)
+          .addPropAnnotations("status", [
+            allowedValues(
+              [
+                { name: "Available", value: 0 },
+                { name: "OnLoan", value: 1 },
+                { name: "Missing", value: 2 },
+              ],
+              { fullyQualified: true },
+            ),
+          ]),
+      );
+    };
+
+    buildModel();
+    await generateAndCompare("entity-enum-allowed-values.ts", { enumByAllowedValues: true, skipComments: false });
+    buildModel();
+    await generateAndCompare("entity-enum-allowed-values-numeric.ts", {
+      enumByAllowedValues: true,
+      enumType: "numeric",
+    });
+    buildModel();
+    await generateAndCompare("entity-enum-allowed-values-string-union.ts", {
+      enumByAllowedValues: true,
+      enumType: "string-union",
     });
   });
 

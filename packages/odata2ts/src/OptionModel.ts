@@ -321,6 +321,22 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    */
   enumType?: "string" | "numeric" | "string-union";
   /**
+   * Another CAP feature. A CDS enum is a constraint on a value rather than a type of its own, so CAP
+   * emits no `<EnumType>` at all: the property keeps its underlying primitive - `Edm.Byte`, `Edm.Int32`,
+   * ... - and the members turn into a `Validation.AllowedValues` annotation, each value carrying its
+   * symbolic name in a nested `Core.SymbolicName`. What the generated client sees of an enum is then a
+   * bare `number`.
+   *
+   * Switching this on generates an enum from such an annotation, named after the property, and the
+   * property is typed with it as if the service had declared it. Since the service knows nothing of the
+   * enum, the value behind a member - not its name - is what request and response payloads as well as
+   * `$filter` and `$orderby` carry; the generated client converts between the two.
+   *
+   * A property is converted only if *every* allowed value carries a symbolic name, since an enum missing
+   * one of its values would reject a value the service accepts.
+   */
+  enumByAllowedValues?: boolean;
+  /**
    * More or less a CAP feature. In newer versions SAP CAP unfolds `<ComplexType>` into one
    * property per leaf, joined by an underscore: So instead of an `Address` object you get
    * `Address_Street`, `Address_City`, `Address_PostalCode` and `Address_Country`.

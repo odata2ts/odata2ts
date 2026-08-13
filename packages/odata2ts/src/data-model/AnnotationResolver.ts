@@ -115,6 +115,18 @@ export class AnnotationResolver {
         if (result.EnumMember) {
           result.EnumMember = result.EnumMember.map((members) => this.qualifyMembers(members));
         }
+        // a record is annotatable in turn, and the aliases of those terms are the same aliases:
+        // `Validation.AllowedValue` states the name of the value it allows as a nested `Core.SymbolicName`
+        if (result.Collection) {
+          result.Collection = result.Collection.map((collection) => ({
+            ...collection,
+            Record: collection.Record?.map((record) => ({
+              ...record,
+              $: record.$?.Type ? { ...record.$, Type: this.qualifyName(record.$.Type) } : record.$,
+              Annotation: record.Annotation ? this.qualify(record.Annotation) : undefined,
+            })),
+          }));
+        }
         return result;
       });
   }

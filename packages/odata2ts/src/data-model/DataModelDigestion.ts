@@ -9,6 +9,7 @@ import {
   Modes,
   PropertyGenerationOptions,
 } from "../OptionModel.js";
+import { AllowedValuesEnumSynthesizer, SynthesizedEnum } from "./AllowedValuesEnumSynthesizer.js";
 import { AnnotationResolver } from "./AnnotationResolver.js";
 import { ComplexTypeUnflattener } from "./ComplexTypeUnflattener.js";
 import { getManagedState } from "./CoreAnnotations.js";
@@ -105,6 +106,12 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    */
   private flagsEnums = new Set<string>();
 
+  /**
+   * The enums {@link AllowedValuesEnumSynthesizer} derived from annotations, by fully qualified name.
+   * Indistinguishable from a declared one in the EDMX by then, but they need a conversion of their own.
+   */
+  private synthesizedEnums = new Map<string, SynthesizedEnum>();
+
   protected constructor(
     protected version: ODataVersion,
     protected schemas: Array<S>,
@@ -117,6 +124,16 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     this.dataModel = new DataModel(namespaces, version, converters);
     this.serviceConfigHelper = new ServiceConfigHelper(options);
     this.nameValidator = options.bundledFileGeneration ? new NameClashValidator(options) : new NamespaceNameValidator();
+
+    // annotations first: from here on every term is fully qualified and sits on the element it applies to,
+    // which also means the reshaping below carries them along without knowing about them
+    new AnnotationResolver(this.schemas, this.references).resolve();
+
+    // types the service describes rather than declares become declared ones, before anything - including
+    // the collection of model types right below - gets to look at the document
+    if (options.enumByAllowedValues) {
+      this.synthesizedEnums = new AllowedValuesEnumSynthesizer<ET, CT>(this.schemas).synthesize();
+    }
 
     this.collectModelTypes(schemas);
   }
@@ -183,10 +200,6 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   }
 
   private digestEntityTypesAndOperations() {
-    // annotations first: from here on every term is fully qualified and sits on the element it applies to,
-    // which also means the reshaping below carries them along without knowing about them
-    new AnnotationResolver(this.schemas, this.references).resolve();
-
     // reshaping happens on the EDMX itself, before anything is digested: from here on the model looks like
     // one the service stated in that shape to begin with
     if (this.options.unflattenComplexTypes) {
@@ -325,6 +338,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         folderPath: filePath,
         members: et.Member?.length ? et.Member.map((m) => ({ name: m.$.Name, value: m.$.Value })) : [],
         isFlags: ifTrue(et.$.IsFlags),
+        wireType: this.synthesizedEnums.get(fqName)?.wireType,
       });
     }
   }
@@ -674,7 +688,10 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
       // special handling for enums
       if (modelType === DataTypes.EnumType) {
-        const isNumericEnum = this.options.enumType === "numeric";
+        // the numeric variants transmit the name of a member, which is what a declared enum does. An enum
+        // derived from `Validation.AllowedValues` is not one, so the value goes on the wire and the
+        // conversion happens through the converter the model generator emits next to it
+        const isNumericEnum = this.options.enumType === "numeric" && !this.synthesizedEnums.has(odataDataType);
         const enumConfig = this.serviceConfigHelper.findEnumTypeConfig(dataTypeNamespace, dataTypeName);
         // `has` is defined for a flag set and for nothing else, so only a flags enum gets the path which
         // offers it. Collections keep the plain path: `has` applies to the property, not to its items.

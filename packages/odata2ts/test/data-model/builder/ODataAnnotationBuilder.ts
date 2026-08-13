@@ -33,6 +33,10 @@ export interface AnnotationOptions {
    * Writes the term with its full namespace instead of the alias, the way ASP.NET states it.
    */
   fullyQualified?: boolean;
+  /**
+   * The string value of the term.
+   */
+  string?: string;
 }
 
 /**
@@ -60,6 +64,14 @@ export function annotation(
     }
   }
 
+  if (options.string !== undefined) {
+    if (options.asChildElement) {
+      result.String = [options.string];
+    } else {
+      result.$.String = options.string;
+    }
+  }
+
   if (options.enumMembers) {
     const value = options.enumMembers.map((member) => `${prefix}.${member}`).join(" ");
     if (options.asChildElement) {
@@ -77,6 +89,46 @@ export function annotation(
  */
 export function core(term: string, options?: AnnotationOptions): Annotation {
   return annotation("core", term, options);
+}
+
+/**
+ * One entry of a `Validation.AllowedValues` collection: a value the property accepts, and the symbolic
+ * name of that value where it has one. A record without a name is what a service states when it merely
+ * restricts a value rather than enumerating it.
+ */
+export interface AllowedValue {
+  value: number | string;
+  name?: string;
+}
+
+/**
+ * `Validation.AllowedValues` in the shape CAP emits it: a collection of records, each stating the value
+ * as a property and its name as a nested `Core.SymbolicName`.
+ */
+export function allowedValues(values: Array<AllowedValue>, options: AnnotationOptions = {}): Annotation {
+  const prefix = options.fullyQualified ? VOCABULARIES.validation.namespace : VOCABULARIES.validation.alias;
+
+  return {
+    ...annotation("validation", "AllowedValues", options),
+    Collection: [
+      {
+        Record: values.map(({ value, name }) => ({
+          $: { Type: `${prefix}.AllowedValue` },
+          ...(name
+            ? { Annotation: [core("SymbolicName", { fullyQualified: options.fullyQualified, string: name })] }
+            : {}),
+          PropertyValue: [
+            {
+              $: {
+                Property: "Value",
+                ...(typeof value === "number" ? { Int: String(value) } : { String: value }),
+              },
+            },
+          ],
+        })),
+      },
+    ],
+  };
 }
 
 /**
