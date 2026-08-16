@@ -1,4 +1,4 @@
-import { EitherOr } from "./EitherOr";
+import { EitherOr } from "../helper/EitherOr";
 import { ModelPayloadControlInfoV4 } from "./ODataModelPayloadV4";
 import { ModelPayloadControlInfoV401 } from "./ODataModelPayloadV401";
 
