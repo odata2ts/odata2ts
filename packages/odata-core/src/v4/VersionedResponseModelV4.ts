@@ -1,4 +1,4 @@
-import { ODataVersionV4 } from "./ODataVersions";
+import { ODataVersionV4 } from "../ODataVersions";
 import { ODataCollectionResponseV4, ODataModelResponseV4, ODataValueResponseV4 } from "./ResponseModelV4";
 import { ODataCollectionResponseV401, ODataModelResponseV401, ODataValueResponseV401 } from "./ResponseModelV401";
 

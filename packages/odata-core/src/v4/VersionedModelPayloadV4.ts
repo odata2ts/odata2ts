@@ -1,6 +1,6 @@
+import { ODataVersionV4 } from "../ODataVersions";
 import { ODataModelPayloadV4 } from "./ODataModelPayloadV4";
 import { ODataModelPayloadV401 } from "./ODataModelPayloadV401";
-import { ODataVersionV4 } from "./ODataVersions";
 
 /*
  * Selects the request payload by the OData version which is targeted. In contrast to responses we do control

@@ -1,4 +1,4 @@
-import { EitherOr } from "./EitherOr";
+import { EitherOr } from "../helper/EitherOr";
 import { CollectionControlInfoV4, ModelControlInfoV4, ValueControlInfoV4 } from "./ResponseModelV4";
 import { CollectionControlInfoV401, ModelControlInfoV401, ValueControlInfoV401 } from "./ResponseModelV401";
 
