@@ -577,9 +577,11 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     }
 
     // a key without an annotation of its own is immutable: it may be supplied on create, per
-    // `nullable`, but never changes afterwards
+    // `nullable`, but never changes afterwards. Recorded as derived, because that is a guess about a
+    // key nobody described - `interoperable` is the one mode which treats it differently for that.
     if (useKeys && isKey) {
       prop.managed = ManagedState.createOnly;
+      prop.managedByKeyRule = true;
     }
   }
 

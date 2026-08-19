@@ -1,5 +1,4 @@
 import { QEnumCollectionPath, QFlagsEnumPath, QGuidPath, QueryObject } from "@odata2ts/odata-query-objects";
-// @ts-ignore
 import { Amenities } from "./TesterModel.js";
 
 export class QBook extends QueryObject {

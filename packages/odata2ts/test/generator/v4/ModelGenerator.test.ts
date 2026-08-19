@@ -251,6 +251,70 @@ describe("Model Generator Tests V4", () => {
     });
   });
 
+  test(`${TEST_SUITE_NAME}: lenient keeps immutable props on update, but never required`, async () => {
+    // given a key (createOnly via the key rule) and an annotated immutable prop, both non-nullable
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Guid)
+        .addProp("title", ODataTypesV4.String, false)
+        .addProp("isbnCode", ODataTypesV4.String, false)
+        .addPropAnnotations("isbnCode", [core("Immutable", { bool: true, fullyQualified: true })]),
+    );
+
+    // when generating in the default mode
+    // then both immutable props are required on create, per nullable like any other property, while the
+    // UpdatableModel still carries them - the spec lets an update state them, the server ignores them
+    await generateAndCompare("entity-lenient.ts", {
+      skipComments: false,
+      skipEditableModels: false,
+      skipIdModels: false,
+      managedPropertyMode: ManagedPropertyMode.lenient,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: interoperable leaves an unannotated key optional on create`, async () => {
+    // the same entity again: one key nobody described, one property the service annotates itself
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Guid)
+        .addProp("title", ODataTypesV4.String, false)
+        .addProp("isbnCode", ODataTypesV4.String, false)
+        .addPropAnnotations("isbnCode", [core("Immutable", { bool: true, fullyQualified: true })]),
+    );
+
+    // when generating for a service which generates its keys without saying so
+    // then `id` is optional on create although it is non-nullable - the one place odata2ts knowingly
+    // departs from the spec - while the annotated `isbnCode` still follows nullable
+    await generateAndCompare("entity-interoperable.ts", {
+      skipComments: false,
+      skipEditableModels: false,
+      skipIdModels: false,
+      managedPropertyMode: ManagedPropertyMode.interoperable,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: no UpdatableModel where it would say nothing the EditableModel does not`, async () => {
+    // given an entity whose only immutable property is *nullable*, and detection which ignores keys - so
+    // nothing here is required on create that an update would then have to relax
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Guid)
+        .addProp("title", ODataTypesV4.String, false)
+        .addProp("note", ODataTypesV4.String, true)
+        .addPropAnnotations("note", [core("Immutable", { bool: true, fullyQualified: true })]),
+    );
+
+    // then no UpdatableModel is generated: it would be identical to the EditableModel, and a second name
+    // for one shape is noise. `strictOmit` is the mode which would still produce one, by dropping `note`.
+    await generateAndCompare("entity-no-updatable.ts", {
+      skipComments: false,
+      skipEditableModels: false,
+      skipIdModels: false,
+      managedPropertyDetection: ManagedPropertyDetection.annotation,
+      managedPropertyMode: ManagedPropertyMode.lenient,
+    });
+  });
+
   test(`${TEST_SUITE_NAME}: strictOmit - EditableModel required per nullable, UpdatableModel drops immutable props`, async () => {
     // given a key (createOnly via detection) and an annotated immutable prop, both non-nullable
     odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>

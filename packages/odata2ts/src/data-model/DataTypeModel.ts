@@ -1,5 +1,5 @@
 import { ValueConverterImport } from "@odata2ts/converter-runtime";
-import { ManagedState, Modes } from "../OptionModel.js";
+import { ManagedPropertyMode, ManagedState, Modes } from "../OptionModel.js";
 
 export enum ODataVersion {
   V2 = "2.0",
@@ -41,6 +41,13 @@ export interface PropertyModel {
    * statement that the property is not managed.
    */
   managed?: ManagedState;
+  /**
+   * Whether {@link managed} came from the key rule rather than from an annotation or the configuration -
+   * that is, whether it is a guess about a key nobody described. Only
+   * {@link ManagedPropertyMode.interoperable} acts on the difference, and only to keep such a key
+   * optional on create; everywhere else a derived state is as good as a stated one.
+   */
+  managedByKeyRule?: boolean;
   /**
    * An `Edm.Stream` property: binary content which never travels in the entity's JSON payload, but is
    * addressed by its own URL. Such a property is therefore absent from the models and the q-object and
@@ -95,12 +102,39 @@ export interface ComplexType {
 }
 
 /**
- * Whether this type has at least one immutable property of its own - not counting one a nested complex
- * or navigation property might have - which is what decides whether it gets its own UpdatableModel
- * under {@link ManagedPropertyMode.strictOmit}.
+ * Whether a property is required when creating the entity. Being non-nullable is not enough: the server
+ * fills in a value of its own where the client leaves out a `Core.ComputedDefaultValue` property, and
+ * {@link ManagedPropertyMode.interoperable} deliberately ignores `nullable` for a key nobody annotated.
  */
-export function hasImmutableProps(model: ComplexType): boolean {
-  return [...model.baseProps, ...model.props].some((p) => p.managed === ManagedState.createOnly);
+export function isRequiredOnCreate(prop: PropertyModel, mode: ManagedPropertyMode): boolean {
+  if (prop.managed === ManagedState.createOnly) {
+    return mode === ManagedPropertyMode.interoperable && prop.managedByKeyRule ? false : prop.required;
+  }
+  return prop.required && prop.managed !== ManagedState.optionalWithDefault;
+}
+
+/**
+ * Whether a property is required when updating the entity. An immutable one never is: the server will
+ * not change it whatever the payload says, so demanding it would only make the caller repeat a value
+ * that goes nowhere. Under {@link ManagedPropertyMode.strictOmit} it is not in the model at all.
+ */
+export function isRequiredOnUpdate(prop: PropertyModel, mode: ManagedPropertyMode): boolean {
+  return prop.managed === ManagedState.createOnly ? false : isRequiredOnCreate(prop, mode);
+}
+
+/**
+ * Whether this type gets an UpdatableModel of its own, which it does exactly where that model would
+ * differ from its EditableModel - a second, identical type would be noise. Only an immutable property
+ * of the type's own level counts; one reached through a nested complex or navigation property does not.
+ *
+ * Under {@link ManagedPropertyMode.strictOmit} any immutable property makes the two differ, since it is
+ * dropped. Otherwise only one that is *required* on create does, by becoming optional on update.
+ */
+export function hasUpdatableModel(model: ComplexType, mode: ManagedPropertyMode): boolean {
+  return [...model.baseProps, ...model.props].some(
+    (p) =>
+      p.managed === ManagedState.createOnly && (mode === ManagedPropertyMode.strictOmit || isRequiredOnCreate(p, mode)),
+  );
 }
 
 export interface EnumType {

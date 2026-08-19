@@ -1,6 +1,5 @@
 import type { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { QFunctionV4, QGuidParam, QStringParam } from "@odata2ts/odata-query-objects";
-// @ts-ignore
 import type { OverloadedFunctionParams } from "./TesterModel.js";
 
 export class QOverloadedFunction extends QFunctionV4<OverloadedFunctionParams, ODataValueResponseV4<string>> {

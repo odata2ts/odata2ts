@@ -56,7 +56,21 @@ export interface Book {
 
 export type BookId = string | { id: string };
 
-export interface EditableBook extends Pick<Book, "title">, Partial<Pick<Book, "id" | "createdAt" | "isbnCode">> {
+export interface EditableBook extends Pick<Book, "id" | "title" | "isbnCode">, Partial<Pick<Book, "createdAt">> {
+  /**
+   * **Write-Only**: The server never returns this property, hence it is part of the editable model only.
+   *
+   * OData Attributes:
+   * |Attribute Name | Attribute Value |
+   * | --- | ---|
+   * | Name | `secret` |
+   * | Type | `Edm.String` |
+   * | Nullable | `false` |
+   */
+  secret: string;
+}
+
+export interface UpdatableBook extends Pick<Book, "title">, Partial<Pick<Book, "id" | "createdAt" | "isbnCode">> {
   /**
    * **Write-Only**: The server never returns this property, hence it is part of the editable model only.
    *

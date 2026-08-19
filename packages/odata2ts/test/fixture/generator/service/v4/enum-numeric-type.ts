@@ -10,13 +10,9 @@ import {
   ODataServiceOptionsInternal,
   PrimitiveExtractor,
 } from "@odata2ts/odata-service";
-// @ts-ignore
 import type { QBook } from "./QTester.js";
-// @ts-ignore
 import { qBook, QBookId } from "./QTester.js";
-// @ts-ignore
-import type { Book, BookId, EditableBook } from "./TesterModel.js";
-// @ts-ignore
+import type { Book, BookId, EditableBook, UpdatableBook } from "./TesterModel.js";
 import { Choice } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
@@ -31,7 +27,7 @@ export class TesterService extends ODataService {
   }
 }
 
-export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<Book, EditableBook, QBook, V> {
+export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<Book, UpdatableBook, QBook, V> {
   private _altChoices?: CollectionServiceV4<
     EnumCollection<typeof Choice>,
     QNumericEnumCollection<typeof Choice>,

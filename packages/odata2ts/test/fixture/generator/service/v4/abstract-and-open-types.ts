@@ -6,7 +6,6 @@ import {
   ODataService,
   ODataServiceOptionsInternal,
 } from "@odata2ts/odata-service";
-// @ts-ignore
 import type { QAbstractEntity, QExtendedFromAbstract, QExtendedFromOpen, QOpenEntity } from "./QTester.js";
 import {
   qAbstractEntity,
@@ -15,7 +14,6 @@ import {
   qExtendedFromOpen,
   QExtendedFromOpenId,
   qOpenEntity,
-  // @ts-ignore
 } from "./QTester.js";
 import type {
   AbstractEntity,
@@ -28,7 +26,8 @@ import type {
   ExtendedFromOpen,
   ExtendedFromOpenId,
   OpenEntity,
-  // @ts-ignore
+  UpdatableExtendedFromAbstract,
+  UpdatableExtendedFromOpen,
 } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
@@ -107,7 +106,7 @@ export class OpenEntityService<V extends ODataVersionV4 = "4.0"> extends EntityT
 
 export class ExtendedFromAbstractService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
   ExtendedFromAbstract,
-  EditableExtendedFromAbstract,
+  UpdatableExtendedFromAbstract,
   QExtendedFromAbstract,
   V
 > {
@@ -130,7 +129,7 @@ export class ExtendedFromAbstractCollectionService<V extends ODataVersionV4 = "4
 
 export class ExtendedFromOpenService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
   ExtendedFromOpen,
-  EditableExtendedFromOpen,
+  UpdatableExtendedFromOpen,
   QExtendedFromOpen,
   V
 > {

@@ -6,12 +6,9 @@ import {
   ODataServiceOptions,
   PrimitiveTypeServiceV2,
 } from "@odata2ts/odata-service";
-// @ts-ignore
 import type { QTestEntity } from "./QTester.js";
-// @ts-ignore
 import { qTestEntity, QTestEntityId } from "./QTester.js";
-// @ts-ignore
-import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel.js";
+import type { EditableTestEntity, TestEntity, TestEntityId, UpdatableTestEntity } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
   public ents(): TestEntityCollectionService;
@@ -25,7 +22,7 @@ export class TesterService extends ODataService {
   }
 }
 
-export class TestEntityService extends EntityTypeServiceV2<TestEntity, EditableTestEntity, QTestEntity> {
+export class TestEntityService extends EntityTypeServiceV2<TestEntity, UpdatableTestEntity, QTestEntity> {
   private _id?: PrimitiveTypeServiceV2<string>;
   private _age?: PrimitiveTypeServiceV2<number>;
   private _deceased?: PrimitiveTypeServiceV2<boolean>;

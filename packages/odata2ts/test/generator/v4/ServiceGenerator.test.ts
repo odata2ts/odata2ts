@@ -531,7 +531,7 @@ describe("Service Generator Tests V4", () => {
     await compareMainService("media-entity.ts");
   });
 
-  test("Service Generator: the entity service writes with the UpdatableModel under strictOmit", async () => {
+  test("Service Generator: the entity service writes with the UpdatableModel", async () => {
     function getEntityServiceText() {
       const file = [...projectManager.getCachedFiles().values()].find((f) =>
         f.getFullText().includes("class TestEntityService"),
@@ -542,37 +542,36 @@ describe("Service Generator Tests V4", () => {
       return file.getFullText();
     }
 
-    function buildTestEntity() {
+    async function generateTestEntity(options?: Parameters<typeof doGenerate>[0]) {
+      odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
       odataBuilder
+        // a non-nullable key with no annotation of its own: createOnly under the default detection
         .addEntityType("TestEntity", undefined, (builder) =>
           builder.addKeyProp("id", ODataTypesV4.Guid).addProp("title", ODataTypesV4.String, false),
         )
         .addEntitySet("TestEntities", withNs("TestEntity"));
+      await doGenerate(options);
+      return getEntityServiceText();
     }
 
-    // given an entity with an unannotated key, which under default (auto) detection is createOnly
-    buildTestEntity();
-
-    // when generating in the default (lenient) mode
-    // then the entity service writes with the EditableModel, exactly as before this option existed
-    await doGenerate();
-    expect(getEntityServiceText()).toContain(
-      "extends EntityTypeServiceV4<TestEntity, EditableTestEntity, QTestEntity, V>",
-    );
-
-    // when generating in strictOmit mode instead
-    odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
-    buildTestEntity();
-    await doGenerate({ managedPropertyMode: ManagedPropertyMode.strictOmit });
-
-    // then update and patch both write with the UpdatableModel, which replaces the EditableModel rather
-    // than joining it: this service never creates an entity, so it has no use for the editable shape
-    const serviceText = getEntityServiceText();
+    // in the default (lenient) mode the key is required on create and optional on update, so the two
+    // write models differ and the entity service takes the updatable one
+    let serviceText = await generateTestEntity();
     expect(serviceText).toContain("extends EntityTypeServiceV4<TestEntity, UpdatableTestEntity, QTestEntity, V>");
-
     // while the collection service, which is where creation happens, keeps the EditableModel
     expect(serviceText).toContain(
       "extends EntitySetServiceV4<TestEntity, EditableTestEntity, QTestEntity, TestEntityId, V>",
     );
+
+    // strictOmit drops the key from the updatable model rather than making it optional - a different
+    // model, but the same wiring
+    serviceText = await generateTestEntity({ managedPropertyMode: ManagedPropertyMode.strictOmit });
+    expect(serviceText).toContain("extends EntityTypeServiceV4<TestEntity, UpdatableTestEntity, QTestEntity, V>");
+
+    // interoperable leaves an unannotated key optional on create too, so there is nothing left for an
+    // updatable model to say and none is generated - the entity service falls back to the editable one
+    serviceText = await generateTestEntity({ managedPropertyMode: ManagedPropertyMode.interoperable });
+    expect(serviceText).toContain("extends EntityTypeServiceV4<TestEntity, EditableTestEntity, QTestEntity, V>");
+    expect(serviceText).not.toContain("UpdatableTestEntity");
   });
 });

@@ -214,6 +214,21 @@ const config: ConfigFileOptions = {
     },
 
     /**
+     * `managedPropertyMode: "interoperable"`, the deliberate departure from the spec.
+     *
+     * Its whole effect is a *negative* one - an unannotated key stays optional on create where the other
+     * two modes make it required - which is exactly the kind of thing a type check judges well and a
+     * server cannot judge at all: the request the mode prevents is one no client would send anyway. Held
+     * against `managedStrict` above, the pair pins both ends of what the option does to one model.
+     */
+    managedInteroperable: {
+      serviceName: "ManagedInteroperable",
+      source: V4_SOURCE,
+      output: "src-generated/managed-interoperable",
+      managedPropertyMode: ManagedPropertyMode.interoperable,
+    },
+
+    /**
      * Everything at once - the interaction catcher of the n+1 scheme.
      *
      * Each variant above isolates a single axis, which is what makes a failure attributable. That leaves

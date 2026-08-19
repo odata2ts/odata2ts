@@ -7,12 +7,15 @@ import {
   ODataServiceOptionsInternal,
   UrlGetRequestCmd,
 } from "@odata2ts/odata-service";
-// @ts-ignore
 import type { QTestEntity } from "./QTester.js";
-// @ts-ignore
 import { QFirstBook, QGetBestsellers, qTestEntity, QTestEntityId } from "./QTester.js";
-// @ts-ignore
-import type { EditableTestEntity, FirstBookParams, TestEntity, TestEntityId } from "./TesterModel.js";
+import type {
+  EditableTestEntity,
+  FirstBookParams,
+  TestEntity,
+  TestEntityId,
+  UpdatableTestEntity,
+} from "./TesterModel.js";
 
 export class TesterService extends ODataService {
   private _qGetBestsellers?: QGetBestsellers;
@@ -59,7 +62,7 @@ export class TesterService extends ODataService {
 
 export class TestEntityService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
   TestEntity,
-  EditableTestEntity,
+  UpdatableTestEntity,
   QTestEntity,
   V
 > {

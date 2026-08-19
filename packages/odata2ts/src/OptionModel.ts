@@ -92,25 +92,41 @@ export enum ManagedPropertyDetection {
  * How odata2ts represents an immutable property - one whose {@link ManagedState} is
  * {@link ManagedState.createOnly}, whether from a `Core.Immutable` annotation or from
  * {@link ManagedPropertyDetection.keys} - in the generated write models.
+ *
+ * In every mode, create and update get a write model each wherever the two would differ: `create()`
+ * takes the EditableModel, while `update()` (PUT) and `patch()` (PATCH) take the UpdatableModel. What
+ * the modes differ in is what each of those says about an immutable property.
  */
 export enum ManagedPropertyMode {
   /**
-   * A single EditableModel covers both create and update; an immutable property is always optional
-   * there, regardless of `nullable`. The default - today's shape, unchanged.
+   * Spec-conformant, and the default. The EditableModel follows `nullable` here as it does for any
+   * other property, so an immutable property the service declares non-nullable is required on create.
+   * The UpdatableModel still carries it, but always optional: the spec permits an update payload to
+   * state such a property and obliges the server to leave it alone.
    */
   lenient = "lenient",
   /**
-   * EditableModel's immutable properties follow `nullable` for required/optional instead of always
-   * being optional, and an UpdatableModel is additionally generated for the type, with those properties
-   * dropped entirely. That UpdatableModel is what the generated entity service writes with: `update()`
-   * (PUT) and `patch()` (PATCH) both take it, since neither can change an immutable property. Only
-   * `create()` on the collection service keeps the EditableModel.
-   *
-   * Under the default `managedPropertyDetection: "auto"`, this also makes every unannotated key
-   * required in EditableModel instead of always optional - `create()` stops compiling wherever a
-   * server-generated key was previously omitted from the payload.
+   * Spec-conformant as well, and stricter. The EditableModel is exactly as under
+   * {@link ManagedPropertyMode.lenient}; the UpdatableModel drops every immutable property entirely
+   * rather than leaving it optional. Stating one is permitted but pointless, and servers disagree on
+   * what they do with it - from ignoring it, as the spec says, to applying it after all.
    */
   strictOmit = "strictOmit",
+  /**
+   * **Not** spec-conformant - an escape hatch rather than a matter of style. A key property which the
+   * service annotates in no way at all is left optional on create, `nullable` notwithstanding; the
+   * UpdatableModel is as under {@link ManagedPropertyMode.lenient}.
+   *
+   * It exists for services which generate their keys server-side but never say so. Under the other two
+   * modes the key rule ({@link ManagedPropertyDetection.keys}) reads such a key as client-assigned and
+   * demands it on create, which no client can satisfy. Prefer fixing the service - `Core.Computed`
+   * states this properly - or configuring the property by hand, and reach for this only where neither
+   * is possible.
+   *
+   * Only unannotated keys are affected. A property carrying `Core.Immutable` follows `nullable` here
+   * as everywhere else: there the service has spoken for itself.
+   */
+  interoperable = "interoperable",
 }
 
 /**

@@ -1,8 +1,6 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EntitySetServiceV2, EntityTypeServiceV2, ODataService, ODataServiceOptions } from "@odata2ts/odata-service";
-// @ts-ignore
 import type { QChild, QGrandParent, QParent } from "./QTester.js";
-// @ts-ignore
 import { qChild, QChildId, qGrandParent, QGrandParentId, qParent } from "./QTester.js";
 import type {
   Child,
@@ -13,7 +11,9 @@ import type {
   GrandParent,
   GrandParentId,
   Parent,
-  // @ts-ignore
+  UpdatableChild,
+  UpdatableGrandParent,
+  UpdatableParent,
 } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
@@ -28,7 +28,7 @@ export class TesterService extends ODataService {
   }
 }
 
-export class GrandParentService extends EntityTypeServiceV2<GrandParent, EditableGrandParent, QGrandParent> {
+export class GrandParentService extends EntityTypeServiceV2<GrandParent, UpdatableGrandParent, QGrandParent> {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qGrandParent, options);
   }
@@ -45,7 +45,7 @@ export class GrandParentCollectionService extends EntitySetServiceV2<
   }
 }
 
-export class ParentService extends EntityTypeServiceV2<Parent, EditableParent, QParent> {
+export class ParentService extends EntityTypeServiceV2<Parent, UpdatableParent, QParent> {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qParent, options);
   }
@@ -57,7 +57,7 @@ export class ParentCollectionService extends EntitySetServiceV2<Parent, Editable
   }
 }
 
-export class ChildService extends EntityTypeServiceV2<Child, EditableChild, QChild> {
+export class ChildService extends EntityTypeServiceV2<Child, UpdatableChild, QChild> {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qChild, options);
   }

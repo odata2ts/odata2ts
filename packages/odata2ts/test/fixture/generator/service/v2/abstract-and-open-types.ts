@@ -1,6 +1,5 @@
 import type { ODataHttpClient } from "@odata2ts/http-client-api";
 import { EntitySetServiceV2, EntityTypeServiceV2, ODataService, ODataServiceOptions } from "@odata2ts/odata-service";
-// @ts-ignore
 import type { QAbstractEntity, QExtendedFromAbstract, QExtendedFromOpen, QOpenEntity } from "./QTester.js";
 import {
   qAbstractEntity,
@@ -9,7 +8,6 @@ import {
   qExtendedFromOpen,
   QExtendedFromOpenId,
   qOpenEntity,
-  // @ts-ignore
 } from "./QTester.js";
 import type {
   AbstractEntity,
@@ -22,7 +20,8 @@ import type {
   ExtendedFromOpen,
   ExtendedFromOpenId,
   OpenEntity,
-  // @ts-ignore
+  UpdatableExtendedFromAbstract,
+  UpdatableExtendedFromOpen,
 } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
@@ -75,7 +74,7 @@ export class OpenEntityService extends EntityTypeServiceV2<OpenEntity, EditableO
 
 export class ExtendedFromAbstractService extends EntityTypeServiceV2<
   ExtendedFromAbstract,
-  EditableExtendedFromAbstract,
+  UpdatableExtendedFromAbstract,
   QExtendedFromAbstract
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
@@ -96,7 +95,7 @@ export class ExtendedFromAbstractCollectionService extends EntitySetServiceV2<
 
 export class ExtendedFromOpenService extends EntityTypeServiceV2<
   ExtendedFromOpen,
-  EditableExtendedFromOpen,
+  UpdatableExtendedFromOpen,
   QExtendedFromOpen
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {

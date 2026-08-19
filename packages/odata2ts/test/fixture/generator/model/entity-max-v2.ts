@@ -31,6 +31,36 @@ export type BookId = { id: string; id2: number; id3: boolean };
 
 export interface EditableBook
   extends
+    Pick<Book, "id3" | "truth">,
+    Partial<
+      Pick<
+        Book,
+        | "time"
+        | "optionalDate"
+        | "dateTimeOffset"
+        | "testByte"
+        | "testSByte"
+        | "testInt16"
+        | "testInt32"
+        | "testInt64"
+        | "testSingle"
+        | "testDouble"
+        | "testDecimal"
+        | "testBinary"
+        | "testAny"
+        | "multipleStrings"
+        | "multipleBooleans"
+        | "multipleTimes"
+        | "multipleDateTimes"
+        | "multipleDateTimeOffsets"
+        | "multipleInt16"
+        | "multipleDecimals"
+        | "multipleBinaries"
+      >
+    > {}
+
+export interface UpdatableBook
+  extends
     Pick<Book, "truth">,
     Partial<
       Pick<

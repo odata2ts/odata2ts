@@ -5,22 +5,11 @@ export interface Book {
    * OData Attributes:
    * |Attribute Name | Attribute Value |
    * | --- | ---|
-   * | Name | `tenantId` |
-   * | Type | `Edm.String` |
+   * | Name | `id` |
+   * | Type | `Edm.Guid` |
    * | Nullable | `false` |
    */
-  tenantId: string;
-  /**
-   * **Key Property**: This is a key property used to identify the entity.<br/>**Immutable**: This property can be set when creating the entity, but not changed afterwards.
-   *
-   * OData Attributes:
-   * |Attribute Name | Attribute Value |
-   * | --- | ---|
-   * | Name | `localId` |
-   * | Type | `Edm.String` |
-   * | Nullable | `false` |
-   */
-  localId: string;
+  id: string;
   /**
    *
    * OData Attributes:
@@ -31,10 +20,21 @@ export interface Book {
    * | Nullable | `false` |
    */
   title: string;
+  /**
+   * **Immutable**: This property can be set when creating the entity, but not changed afterwards.
+   *
+   * OData Attributes:
+   * |Attribute Name | Attribute Value |
+   * | --- | ---|
+   * | Name | `isbnCode` |
+   * | Type | `Edm.String` |
+   * | Nullable | `false` |
+   */
+  isbnCode: string;
 }
 
-export type BookId = { tenantId: string; localId: string };
+export type BookId = string | { id: string };
 
-export interface EditableBook extends Pick<Book, "tenantId" | "localId" | "title"> {}
+export interface EditableBook extends Pick<Book, "title" | "isbnCode">, Partial<Pick<Book, "id">> {}
 
-export interface UpdatableBook extends Pick<Book, "title">, Partial<Pick<Book, "tenantId" | "localId">> {}
+export interface UpdatableBook extends Pick<Book, "title">, Partial<Pick<Book, "id" | "isbnCode">> {}

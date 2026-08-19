@@ -47,17 +47,18 @@ One variant per axis against the baseline, plus a single "everything on" one - `
 matrix would not only be expensive, it would be unreadable: with a failure, nobody could tell which axis
 caused it.
 
-| Variant           | Axis                                                                                                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `baseline`        | plain defaults, so the others have something to be a variant _of_                                                                           |
-| `modelsOnly`      | `mode: models` with `skipEditableModels`, `skipIdModels`, `skipOperations`, `skipComments` - the skip options only take effect in this mode |
-| `qObjectsOnly`    | `mode: qobjects` - query objects standing on their own, without the service layer which normally consumes them                              |
-| `namingCustom`    | every naming knob turned away from its default: another strategy per artefact kind, own prefixes and suffixes, `allowRenaming`              |
-| `enumStringUnion` | `enumType: "string-union"`                                                                                                                  |
-| `enumNumeric`     | `enumType: "numeric"`                                                                                                                       |
-| `v2Wrapping`      | `v2ResponseResultsWrapping` and `v2PayloadResultsWrapping` on bare models - with a service they meet a server in `int-test/olingo-v2`       |
-| `managedStrict`   | `managedPropertyMode: "strictOmit"` - the second write model and the services which switch to it                                            |
-| `everythingOn`    | all of it at once - the interaction catcher                                                                                                 |
+| Variant                | Axis                                                                                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `baseline`             | plain defaults, so the others have something to be a variant _of_                                                                           |
+| `modelsOnly`           | `mode: models` with `skipEditableModels`, `skipIdModels`, `skipOperations`, `skipComments` - the skip options only take effect in this mode |
+| `qObjectsOnly`         | `mode: qobjects` - query objects standing on their own, without the service layer which normally consumes them                              |
+| `namingCustom`         | every naming knob turned away from its default: another strategy per artefact kind, own prefixes and suffixes, `allowRenaming`              |
+| `enumStringUnion`      | `enumType: "string-union"`                                                                                                                  |
+| `enumNumeric`          | `enumType: "numeric"`                                                                                                                       |
+| `v2Wrapping`           | `v2ResponseResultsWrapping` and `v2PayloadResultsWrapping` on bare models - with a service they meet a server in `int-test/olingo-v2`       |
+| `managedStrict`        | `managedPropertyMode: "strictOmit"` - the second write model and the services which switch to it                                            |
+| `managedInteroperable` | `managedPropertyMode: "interoperable"` - an unannotated key stays optional on create                                                        |
+| `everythingOn`         | all of it at once - the interaction catcher                                                                                                 |
 
 The sources are the committed metadata snapshots of `int-test/asp-net` and `int-test/olingo-v2`, referenced
 rather than copied so they cannot drift apart.

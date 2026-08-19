@@ -1,5 +1,4 @@
 import { QNumberPath, QueryObject } from "@odata2ts/odata-query-objects";
-// @ts-ignore
 import { OPTS } from "../../QTester.js";
 
 export class QBook extends QueryObject {

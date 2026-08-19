@@ -12,8 +12,10 @@ import {
   DataTypes,
   EntityType,
   EnumType,
-  hasImmutableProps,
   hasNumericMembers,
+  hasUpdatableModel,
+  isRequiredOnCreate,
+  isRequiredOnUpdate,
   needsEnumConverter,
   OperationType,
   PropertyModel,
@@ -81,26 +83,23 @@ class ModelGenerator {
     private namingHelper: NamingHelper,
   ) {}
 
-  /**
-   * Whether a property has to be supplied when editing. Being non-nullable is not enough: the server
-   * fills in a value of its own where the client leaves out a `Core.ComputedDefaultValue` property.
-   * A `Core.Immutable` one follows `nullable` like any other property under `strictOmit`, but is
-   * always left optional under `lenient` - the property still travels in the payload, per the OData
-   * spec, but nothing forces the client to state it.
-   */
+  /** Whether a property has to be supplied on create - see {@link isRequiredOnCreate}. */
   private isEditableRequired(prop: PropertyModel): boolean {
-    if (prop.managed === ManagedState.createOnly) {
-      return this.options.managedPropertyMode === ManagedPropertyMode.strictOmit && prop.required;
-    }
-    return prop.required && prop.managed !== ManagedState.optionalWithDefault;
+    return isRequiredOnCreate(prop, this.options.managedPropertyMode!);
   }
 
-  /**
-   * Whether this type gets its own UpdatableModel: only under `strictOmit`, and only where it has an
-   * immutable property of its own to actually strip.
-   */
-  private hasStrictUpdatableModel(model: ComplexType): boolean {
-    return this.options.managedPropertyMode === ManagedPropertyMode.strictOmit && hasImmutableProps(model);
+  private isUpdatableRequired(prop: PropertyModel): boolean {
+    return isRequiredOnUpdate(prop, this.options.managedPropertyMode!);
+  }
+
+  /** Whether this type gets its own UpdatableModel - see {@link hasUpdatableModel}. */
+  private hasOwnUpdatableModel(model: ComplexType): boolean {
+    return hasUpdatableModel(model, this.options.managedPropertyMode!);
+  }
+
+  /** Whether the UpdatableModel leaves an immutable property out rather than merely making it optional. */
+  private omitsImmutableProps(): boolean {
+    return this.options.managedPropertyMode === ManagedPropertyMode.strictOmit;
   }
 
   public async generate(): Promise<void> {
@@ -255,7 +254,7 @@ class ModelGenerator {
       // editable model
       if (!this.options.skipEditableModels) {
         this.generateEditableModel(file, model);
-        if (this.hasStrictUpdatableModel(model)) {
+        if (this.hasOwnUpdatableModel(model)) {
           this.generateUpdatableModel(file, model);
         }
       }
@@ -288,7 +287,7 @@ class ModelGenerator {
       // editable model
       if (!this.options.skipEditableModels) {
         this.generateEditableModel(file, model);
-        if (this.hasStrictUpdatableModel(model)) {
+        if (this.hasOwnUpdatableModel(model)) {
           this.generateUpdatableModel(file, model);
         }
       }
@@ -466,17 +465,20 @@ class ModelGenerator {
   }
 
   /**
-   * The Updatable counterpart of the Editable model: everything it has, minus every property that's
-   * immutable at this type's own level - dropped entirely, not merely optional. A complex-type property
-   * recurses into the nested type's own Updatable/Editable model (computed here, at generation time, not
-   * via a TypeScript-level recursive type). A navigation property is deliberately excluded from that
-   * recursion and always resolves to Editable, via the very same {@link generateNavProps} the editable
-   * model uses - see {@link getUpdatablePropType} for why.
+   * The Updatable counterpart of the Editable model, which differs from it in what it says about the
+   * immutable properties of this type's own level: under `strictOmit` they are gone, otherwise they are
+   * present but never required - the server will not change them, so demanding one would only make the
+   * caller repeat a value that goes nowhere.
+   *
+   * A complex-type property recurses into the nested type's own Updatable/Editable model (computed here,
+   * at generation time, not via a TypeScript-level recursive type). A navigation property is deliberately
+   * excluded from that recursion and always resolves to Editable, via the very same
+   * {@link generateNavProps} the editable model uses - see {@link getUpdatablePropType} for why.
    */
   private generateUpdatableModel(file: FileHandler, model: ComplexType) {
     const entityTypes = [DataTypes.ModelType, DataTypes.ComplexType];
     const allProps = [...model.baseProps, ...model.props].filter(
-      (p) => isEditable(p) && notStream(p) && p.managed !== ManagedState.createOnly,
+      (p) => isEditable(p) && notStream(p) && !(this.omitsImmutableProps() && p.managed === ManagedState.createOnly),
     );
 
     const plainProps = allProps.filter((p) => !entityTypes.includes(p.dataType));
@@ -484,11 +486,11 @@ class ModelGenerator {
     const ownProps = plainProps.filter((p) => !isReadable(p));
 
     const requiredProps = pickedProps
-      .filter((p) => this.isEditableRequired(p))
+      .filter((p) => this.isUpdatableRequired(p))
       .map((p) => `"${p.name}"`)
       .join(" | ");
     const optionalProps = pickedProps
-      .filter((p) => !this.isEditableRequired(p))
+      .filter((p) => !this.isUpdatableRequired(p))
       .map((p) => `"${p.name}"`)
       .join(" | ");
     const complexProps = allProps.filter((p) => p.dataType === DataTypes.ComplexType);
@@ -511,13 +513,13 @@ class ModelGenerator {
         ...ownProps.map((p) => ({
           name: p.name,
           type: this.getUpdatablePropType(file.getImports(), p),
-          hasQuestionToken: !this.isEditableRequired(p),
+          hasQuestionToken: !this.isUpdatableRequired(p),
           docs: this.options.skipComments ? undefined : [this.generatePropDoc(p, model)],
         })),
         ...complexProps.map((p) => ({
           name: p.name,
           type: this.getUpdatablePropType(file.getImports(), p),
-          hasQuestionToken: !this.isEditableRequired(p),
+          hasQuestionToken: !this.isUpdatableRequired(p),
         })),
         ...navProps,
       ],
@@ -536,7 +538,7 @@ class ModelGenerator {
     let updatableType = prop.type;
     if (prop.dataType === DataTypes.ComplexType) {
       const nested = this.dataModel.getComplexType(prop.fqType)!;
-      const targetName = this.hasStrictUpdatableModel(nested) ? nested.updatableName : nested.editableName;
+      const targetName = this.hasOwnUpdatableModel(nested) ? nested.updatableName : nested.editableName;
       updatableType = imports.addGeneratedModel(prop.fqType, targetName);
     }
 

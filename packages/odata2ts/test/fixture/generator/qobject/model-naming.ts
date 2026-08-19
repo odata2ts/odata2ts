@@ -7,9 +7,7 @@ import {
   QId,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
-// @ts-ignore
 import type { BOOK_KEY, PARENT_KEY } from "./TesterModel.js";
-// @ts-ignore
 import { CHOICE_MODEL } from "./TesterModel.js";
 
 export class PARENT_BASE_TYPE_Q_OBJ extends QueryObject {

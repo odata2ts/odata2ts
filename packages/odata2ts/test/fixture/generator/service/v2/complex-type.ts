@@ -7,12 +7,9 @@ import {
   ODataService,
   ODataServiceOptions,
 } from "@odata2ts/odata-service";
-// @ts-ignore
 import type { QBook, QReviewer } from "./QTester.js";
-// @ts-ignore
 import { qBook, QBookId, qReviewer } from "./QTester.js";
-// @ts-ignore
-import type { Book, BookId, EditableBook, EditableReviewer, Reviewer } from "./TesterModel.js";
+import type { Book, BookId, EditableBook, EditableReviewer, Reviewer, UpdatableBook } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
   public books(): BookCollectionService;
@@ -26,7 +23,7 @@ export class TesterService extends ODataService {
   }
 }
 
-export class BookService extends EntityTypeServiceV2<Book, EditableBook, QBook> {
+export class BookService extends EntityTypeServiceV2<Book, UpdatableBook, QBook> {
   private _lector?: ReviewerService;
   private _reviewers?: CollectionServiceV2<Reviewer, QReviewer, EditableReviewer>;
 

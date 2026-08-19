@@ -1,5 +1,4 @@
 import { QAction, QStringParam } from "@odata2ts/odata-query-objects";
-// @ts-ignore
 import type { TestActionParams } from "./TesterModel.js";
 
 export class QTestAction extends QAction<TestActionParams> {

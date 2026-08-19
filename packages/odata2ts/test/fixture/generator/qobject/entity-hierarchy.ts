@@ -5,7 +5,6 @@ import {
   QId,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
-// @ts-ignore
 import type { ChildId, GrandParentId } from "./TesterModel.js";
 
 export class QGrandParentBaseType extends QueryObject {

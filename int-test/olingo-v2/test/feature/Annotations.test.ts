@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, test } from "vitest";
-import type { EditableBook, EditableLoan, EditableMember } from "../../src-generated/library/index.js";
+import type { EditableBook, EditableLoan, EditableMember, UpdatableLoan } from "../../src-generated/library/index.js";
 
 /**
  * The `Org.OData.Core.V1` terms as a V2 service states them - which is never as a vocabulary term.
@@ -21,16 +21,22 @@ describe("Olingo V2 Library: Core annotations in their V2 spelling", () => {
     expectTypeOf<EditableBook>().not.toHaveProperty("PopularityScore");
   });
 
-  test("Immutable: LoanedAt survives but turns optional", () => {
+  test("Immutable: LoanedAt is required on create and optional afterwards", () => {
     // sap:updatable="false" with creatable at its default - settable on insert, fixed from then on. It is
-    // `Nullable="false"` in the model, so without the term it would be required here, as DueDate still is.
-    expectTypeOf<EditableLoan["LoanedAt"]>().toEqualTypeOf<string | undefined>();
+    // `Nullable="false"`, and an annotated immutable property follows that like any other, so create
+    // demands it just as it demands DueDate. `interoperable` does not touch this: it only relaxes keys
+    // nobody described, and here the service has spoken.
+    expectTypeOf<EditableLoan["LoanedAt"]>().toEqualTypeOf<string>();
     expectTypeOf<EditableLoan["DueDate"]>().toEqualTypeOf<string>();
+
+    // the update model is where it turns optional - the server will not change it either way
+    expectTypeOf<UpdatableLoan["LoanedAt"]>().toEqualTypeOf<string | undefined>();
   });
 
-  test("an unannotated key falls back to the key rule", () => {
-    // `Medium.Id` carries no annotation in either dialect, so the key rule decides - createOnly, which
-    // under the default `lenient` mode means present and optional rather than absent
+  test("an unannotated key falls back to the key rule, and interoperable keeps it optional", () => {
+    // `Medium.Id` carries no annotation in either dialect, so the key rule decides - createOnly. This
+    // server generates the value regardless, which is why this package generates under `interoperable`:
+    // it leaves such a key optional on create instead of demanding one the client cannot know.
     expectTypeOf<EditableBook["Id"]>().toEqualTypeOf<string | undefined>();
   });
 

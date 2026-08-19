@@ -17,14 +17,14 @@ import {
   EntityContainerModel,
   EntityType,
   FunctionImportType,
-  hasImmutableProps,
+  hasUpdatableModel,
   OperationType,
   OperationTypes,
   PropertyModel,
   SingletonType,
 } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
-import { ConfigFileOptions, ManagedPropertyMode, Modes } from "../OptionModel.js";
+import { ConfigFileOptions, Modes } from "../OptionModel.js";
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
 import { ClientApiImports, CoreImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects.js";
@@ -134,14 +134,11 @@ class ServiceGenerator {
 
   /**
    * The name of the model an entity service writes with. That service never creates an entity, so it is
-   * the UpdatableModel wherever the type has one - under strictOmit, for a type with an immutable
-   * property of its own - and the EditableModel everywhere else, which is what every type had before
-   * this option existed.
+   * the UpdatableModel wherever the type has one of its own, and the EditableModel everywhere else -
+   * for a type with nothing immutable about it the two would say the same thing anyway.
    */
   private resolveUpdatableModelName(model: ComplexType): string {
-    return this.options.managedPropertyMode === ManagedPropertyMode.strictOmit && hasImmutableProps(model)
-      ? model.updatableName
-      : model.editableName;
+    return hasUpdatableModel(model, this.options.managedPropertyMode!) ? model.updatableName : model.editableName;
   }
 
   /**
