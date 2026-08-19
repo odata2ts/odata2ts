@@ -4,7 +4,7 @@ export interface Book {
   previousAddresses: Array<Address>;
 }
 
-export interface EditableBook extends Partial<Pick<Book, "keywords">> {
+export interface EditableBook extends Partial<Pick<Book, "id" | "keywords">> {
   previousAddresses?: Array<EditableAddress>;
 }
 

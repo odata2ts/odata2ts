@@ -1,6 +1,6 @@
 export interface Book {
   /**
-   * **Key Property**: This is a key property used to identify the entity.<br/>**Managed**: This property is managed on the server side and cannot be edited.
+   * **Key Property**: This is a key property used to identify the entity.<br/>**Immutable**: This property can be set when creating the entity, but not changed afterwards.
    *
    * OData Attributes:
    * |Attribute Name | Attribute Value |
@@ -56,7 +56,7 @@ export interface Book {
 
 export type BookId = string | { id: string };
 
-export interface EditableBook extends Pick<Book, "title">, Partial<Pick<Book, "createdAt" | "isbnCode">> {
+export interface EditableBook extends Pick<Book, "title">, Partial<Pick<Book, "id" | "createdAt" | "isbnCode">> {
   /**
    * **Write-Only**: The server never returns this property, hence it is part of the editable model only.
    *

@@ -8,7 +8,7 @@ export interface ExtendsFromEntity extends Book {
 
 export type ExtendsFromEntityId = boolean | { id: boolean };
 
-export interface EditableExtendsFromEntity {}
+export interface EditableExtendsFromEntity extends Partial<Pick<ExtendsFromEntity, "id">> {}
 
 export interface Complex {}
 

@@ -217,6 +217,40 @@ describe("Model Generator Tests V4", () => {
     });
   });
 
+  test(`${TEST_SUITE_NAME}: composite key defaults to createOnly`, async () => {
+    // given an entity with a composite key, no annotations
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("tenantId", ODataTypesV4.String)
+        .addKeyProp("localId", ODataTypesV4.String)
+        .addProp("title", ODataTypesV4.String, false),
+    );
+
+    // when generating with the default (auto) detection
+    // then both key props are createOnly: present in the editable model, forced optional (lenient default)
+    await generateAndCompare("entity-composite-key.ts", {
+      skipComments: false,
+      skipEditableModels: false,
+      skipIdModels: false,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: managedPropertyDetection none leaves an unannotated key untouched`, async () => {
+    // given an entity with a single key, no annotations
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder.addKeyProp("id", ODataTypesV4.Guid).addProp("title", ODataTypesV4.String, false),
+    );
+
+    // when generation is told to derive nothing at all
+    // then the key stays a plain, fully mutable, required prop
+    await generateAndCompare("entity-detection-none.ts", {
+      skipComments: false,
+      skipEditableModels: false,
+      skipIdModels: false,
+      managedPropertyDetection: ManagedPropertyDetection.none,
+    });
+  });
+
   test(`${TEST_SUITE_NAME}: enums derived from allowed values`, async () => {
     /*
      * The shape CAP puts an enum in: the property keeps its primitive type and the members sit in a

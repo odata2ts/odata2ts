@@ -21,7 +21,7 @@ export const StatusConverter = {
 
 export interface Book {
   /**
-   * **Key Property**: This is a key property used to identify the entity.<br/>**Managed**: This property is managed on the server side and cannot be edited.
+   * **Key Property**: This is a key property used to identify the entity.<br/>**Immutable**: This property can be set when creating the entity, but not changed afterwards.
    *
    * OData Attributes:
    * |Attribute Name | Attribute Value |

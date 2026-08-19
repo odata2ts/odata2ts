@@ -64,7 +64,7 @@ export function createAnnotationTests(
 
     expect(await managedStateOf("Title")).toBeUndefined();
     // the single key falls to the heuristic, which the default lets through
-    expect(await managedStateOf("Id")).toBe(ManagedState.readOnly);
+    expect(await managedStateOf("Id")).toBe(ManagedState.createOnly);
   });
 
   test("Computed: inline, with alias", async () => {
@@ -181,7 +181,7 @@ export function createAnnotationTests(
     expect(await managedStateOf("IsbnCode")).toBe(ManagedState.createOnly);
   });
 
-  test("Immutable: says nothing about a key, which is unchangeable anyway", async () => {
+  test("Immutable on a key is honored just like on any other property", async () => {
     digestionOptions = { managedPropertyDetection: ManagedPropertyDetection.annotation };
     odataBuilder
       .enableAnnotations()
@@ -189,7 +189,7 @@ export function createAnnotationTests(
         builder.addKeyProp("Id", ODataTypesV4.Guid).addPropAnnotations("Id", [core("Immutable", { bool: true })]),
       );
 
-    expect(await managedStateOf("Id")).toBeUndefined();
+    expect(await managedStateOf("Id")).toBe(ManagedState.createOnly);
   });
 
   test("Permissions: read only", async () => {
@@ -337,7 +337,7 @@ export function createAnnotationTests(
       digestionOptions = { managedPropertyDetection: ManagedPropertyDetection.auto };
       buildModel(false);
 
-      expect(await managedStateOf("Id")).toBe(ManagedState.readOnly);
+      expect(await managedStateOf("Id")).toBe(ManagedState.createOnly);
       expect(await managedStateOf("PopularityScore")).toBeUndefined();
     });
 
@@ -354,7 +354,7 @@ export function createAnnotationTests(
       buildModel(true);
 
       // keys detection knows nothing but keys, so the annotated non-key prop stays fully editable
-      expect(await managedStateOf("Id")).toBe(ManagedState.readOnly);
+      expect(await managedStateOf("Id")).toBe(ManagedState.createOnly);
       expect(await managedStateOf("PopularityScore")).toBeUndefined();
     });
 
@@ -376,14 +376,14 @@ export function createAnnotationTests(
       expect(await managedStateOf("PopularityScore")).toBe(ManagedState.readOnly);
     });
 
-    test("a composite key is never managed by the heuristic", async () => {
+    test("a composite key is managed by the heuristic too, same as a single key", async () => {
       digestionOptions = { managedPropertyDetection: ManagedPropertyDetection.auto };
       odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder: any) =>
         builder.addKeyProp("Id", ODataTypesV4.Guid).addKeyProp("Edition", ODataTypesV4.Int16),
       );
 
-      expect(await managedStateOf("Id")).toBeUndefined();
-      expect(await managedStateOf("Edition")).toBeUndefined();
+      expect(await managedStateOf("Id")).toBe(ManagedState.createOnly);
+      expect(await managedStateOf("Edition")).toBe(ManagedState.createOnly);
     });
   }
 }

@@ -78,6 +78,7 @@ export interface ComplexType {
   name: string;
   modelName: string;
   editableName: string;
+  updatableName: string;
   qName: string;
   qBaseName?: string;
   serviceName: string;
@@ -91,6 +92,15 @@ export interface ComplexType {
   open: boolean;
   genMode: Modes;
   subtypes: Set<string>;
+}
+
+/**
+ * Whether this type has at least one immutable property of its own - not counting one a nested complex
+ * or navigation property might have - which is what decides whether it gets its own UpdatableModel
+ * under {@link ManagedPropertyMode.strictOmit}.
+ */
+export function hasImmutableProps(model: ComplexType): boolean {
+  return [...model.baseProps, ...model.props].some((p) => p.managed === ManagedState.createOnly);
 }
 
 export interface EnumType {

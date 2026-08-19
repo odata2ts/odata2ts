@@ -308,6 +308,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       modelName: this.namingHelper.getModelName(name),
       qName: this.namingHelper.getQName(name),
       editableName: this.namingHelper.getEditableModelName(name),
+      updatableName: this.namingHelper.getUpdatableModelName(name),
       serviceName: this.namingHelper.getServiceName(name),
       serviceCollectionName: this.namingHelper.getCollectionServiceName(name),
       folderPath: this.namingHelper.getFolderPath(namespace, name),
@@ -519,16 +520,13 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   private deriveManagedState() {
     const complexTypes = this.dataModel.getComplexTypes();
     complexTypes.forEach((ct) => {
-      [...ct.baseProps, ...ct.props].forEach((prop) => this.deriveManagedStateOfProp(prop, ct, false, false));
+      [...ct.baseProps, ...ct.props].forEach((prop) => this.deriveManagedStateOfProp(prop, ct, false));
     });
 
     const entityTypes = this.dataModel.getEntityTypes();
     entityTypes.forEach((et) => {
-      const isSingleKey = et.keyNames.length === 1;
       const props = [...et.baseProps, ...et.props];
-      props.forEach((prop) =>
-        this.deriveManagedStateOfProp(prop, et, et.keyNames.includes(prop.odataName), isSingleKey),
-      );
+      props.forEach((prop) => this.deriveManagedStateOfProp(prop, et, et.keyNames.includes(prop.odataName)));
 
       et.keys = et.keyNames.map((keyName) => {
         const prop = props.find((p) => p.odataName === keyName);
@@ -561,7 +559,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     return undefined;
   }
 
-  private deriveManagedStateOfProp(prop: PropertyModel, model: ComplexModelType, isKey: boolean, isSingleKey: boolean) {
+  private deriveManagedStateOfProp(prop: PropertyModel, model: ComplexModelType, isKey: boolean) {
     // the configuration has spoken, which beats every source this could derive a state from
     if (prop.managed !== undefined) {
       return;
@@ -570,23 +568,18 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     const detection = this.options.managedPropertyDetection;
     const useAnnotations =
       detection === ManagedPropertyDetection.auto || detection === ManagedPropertyDetection.annotation;
-    const useHeuristic =
-      detection === ManagedPropertyDetection.auto || detection === ManagedPropertyDetection.keys;
+    const useKeys = detection === ManagedPropertyDetection.auto || detection === ManagedPropertyDetection.keys;
 
-    let byAnnotation = useAnnotations ? this.findAnnotatedState(model, prop.odataName) : undefined;
-    if (isKey && byAnnotation === ManagedState.createOnly) {
-      // `Core.Immutable` states what a key is anyway, so it says nothing about how the key is managed
-      byAnnotation = undefined;
-    }
+    const byAnnotation = useAnnotations ? this.findAnnotatedState(model, prop.odataName) : undefined;
     if (byAnnotation) {
       prop.managed = byAnnotation;
       return;
     }
 
-    // the heuristic knows nothing but keys: a single key prop - as opposed to one part of a composite
-    // key - is the kind of id a server generates
-    if (useHeuristic && isKey && isSingleKey) {
-      prop.managed = ManagedState.readOnly;
+    // a key without an annotation of its own is immutable: it may be supplied on create, per
+    // `nullable`, but never changes afterwards
+    if (useKeys && isKey) {
+      prop.managed = ManagedState.createOnly;
     }
   }
 

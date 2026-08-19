@@ -3,4 +3,4 @@ export interface Audiobook {
   title: string;
 }
 
-export interface EditableAudiobook extends Pick<Audiobook, "title"> {}
+export interface EditableAudiobook extends Pick<Audiobook, "title">, Partial<Pick<Audiobook, "id">> {}
