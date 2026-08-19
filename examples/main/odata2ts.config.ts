@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, KeyProperties, Modes } from "@odata2ts/odata2ts";
 
 function srcFolder(name: string, isSpecial = false) {
   return `resource/${isSpecial ? "specials/" : ""}${name}`;
@@ -9,6 +9,16 @@ function outputFolder(name: string, isSpecial = false) {
 }
 
 const config: ConfigFileOptions = {
+  /**
+   * These examples assign their keys themselves - `horst.user` is written by the test, not by the
+   * server - so a key belongs in the create payload and is required there, `nullable` being `false`.
+   * That is `strict`, the spec's own reading.
+   *
+   * Not the default, which assumes the opposite: `interoperable` leaves an unannotated key optional,
+   * because most services generate one and say so nowhere. Trippin does say nothing either, but here
+   * we happen to know better, which is exactly what this option is for.
+   */
+  keyProperties: KeyProperties.strict,
   mode: Modes.service,
   emitMode: EmitModes.ts,
   prettier: true,
