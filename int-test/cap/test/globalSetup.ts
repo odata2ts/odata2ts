@@ -1,4 +1,4 @@
-import { GenericContainer, PullPolicy, StartedTestContainer, Wait } from "testcontainers";
+import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import type { TestProject } from "vitest/node";
 
 /**
@@ -21,7 +21,10 @@ import type { TestProject } from "vitest/node";
  * from the V4 one rather than configured separately - there is only ever one server, see test/v2/.
  */
 const CUSTOM_IMAGE = process.env.CAP_SERVER_IMAGE;
-const IMAGE = CUSTOM_IMAGE ?? "ghcr.io/odata2ts/test-server-cap:latest";
+// Pinned to an exact version, never `latest`: a run is then reproducible, and a new server release
+// arrives as a Renovate PR that CI runs these tests against - merging it is what accepts the new
+// server. Renovate keeps this line current, see `customManagers` in the repo's renovate.json.
+const IMAGE = CUSTOM_IMAGE ?? "ghcr.io/odata2ts/test-server-cap:0.1.0";
 const SERVICE_PATH = "/odata/v4/library";
 const SERVICE_PATH_V2 = "/odata/v2/library";
 const CONTAINER_PORT = 4004;
@@ -42,19 +45,10 @@ export default async function setup(project: TestProject) {
 
   let container: StartedTestContainer;
   try {
-    let candidate = new GenericContainer(IMAGE)
+    container = await new GenericContainer(IMAGE)
       .withExposedPorts(CONTAINER_PORT)
-      .withWaitStrategy(Wait.forHttp(`${SERVICE_PATH}/`, CONTAINER_PORT).forStatusCode(200));
-
-    // Testcontainers keeps a locally present image, and `latest` moves - so once the tag has been pulled,
-    // every later run silently tests against that old server. The failures this produces look exactly
-    // like client bugs, which costs far more than the digest check this saves. An image named explicitly
-    // is left alone: that one may well have been built locally and not exist in any registry.
-    if (!CUSTOM_IMAGE) {
-      candidate = candidate.withPullPolicy(PullPolicy.alwaysPull());
-    }
-
-    container = await candidate.start();
+      .withWaitStrategy(Wait.forHttp(`${SERVICE_PATH}/`, CONTAINER_PORT).forStatusCode(200))
+      .start();
   } catch (e) {
     throw new Error(
       `Could not start the test server container "${IMAGE}".\n` +

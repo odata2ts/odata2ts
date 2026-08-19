@@ -1,4 +1,4 @@
-import { GenericContainer, PullPolicy, StartedTestContainer, Wait } from "testcontainers";
+import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import type { TestProject } from "vitest/node";
 
 /**
@@ -15,7 +15,10 @@ import type { TestProject } from "vitest/node";
  * process, so a restart is a full reset.
  */
 const CUSTOM_IMAGE = process.env.OLINGO_SERVER_IMAGE;
-const IMAGE = CUSTOM_IMAGE ?? "ghcr.io/odata2ts/test-server-olingo-v2:latest";
+// Pinned to an exact version, never `latest`: a run is then reproducible, and a new server release
+// arrives as a Renovate PR that CI runs these tests against - merging it is what accepts the new
+// server. Renovate keeps this line current, see `customManagers` in the repo's renovate.json.
+const IMAGE = CUSTOM_IMAGE ?? "ghcr.io/odata2ts/test-server-olingo-v2:0.1.0";
 const SERVICE_PATH = "/odata/v2/library";
 const CONTAINER_PORT = 4004;
 
@@ -28,17 +31,10 @@ export default async function setup(project: TestProject) {
 
   let container: StartedTestContainer;
   try {
-    let candidate = new GenericContainer(IMAGE)
+    container = await new GenericContainer(IMAGE)
       .withExposedPorts(CONTAINER_PORT)
-      .withWaitStrategy(Wait.forHttp(`${SERVICE_PATH}/`, CONTAINER_PORT).forStatusCode(200));
-
-    // `latest` moves, and testcontainers keeps a locally present image - so without this every later
-    // run would silently test against whatever was pulled first. See int-test/cap for the full reasoning.
-    if (!CUSTOM_IMAGE) {
-      candidate = candidate.withPullPolicy(PullPolicy.alwaysPull());
-    }
-
-    container = await candidate.start();
+      .withWaitStrategy(Wait.forHttp(`${SERVICE_PATH}/`, CONTAINER_PORT).forStatusCode(200))
+      .start();
   } catch (e) {
     throw new Error(
       `Could not start the test server container "${IMAGE}".\n` +

@@ -37,9 +37,10 @@ while odata2ts types it as a string; that settles where the bug is.
 
 `globalSetup` has the same two modes as the other server packages:
 
-- **managed container** (default): pulls `ghcr.io/odata2ts/test-server-olingo-v2:latest`, waits for the
-  service, maps a dynamic port and removes the container afterwards. Override the image with
-  `OLINGO_SERVER_IMAGE`.
+- **managed container** (default): pulls the exact version of `ghcr.io/odata2ts/test-server-olingo-v2`
+  pinned in `test/globalSetup.ts`, waits for the service, maps a dynamic port and removes the container
+  afterwards. Renovate raises a PR when the server publishes a new release, so the version moves only
+  with a green integration-test run behind it. Override the image with `OLINGO_SERVER_IMAGE`.
 - **external server**: if `LIBRARY_BASE_URL` is set, that URL is used as-is:
 
   ```bash
