@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, EnumSynthesis, Modes } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, EnumSynthesis, ManagedPropertyMode, Modes } from "@odata2ts/odata2ts";
 
 /** The running server to refresh from, or `undefined` to read the committed snapshots - see below. */
 const SOURCE_URL = process.env.LIBRARY_BASE_URL;
@@ -156,6 +156,23 @@ const config: ConfigFileOptions = {
         responseResultsWrapping: true,
         payloadResultsWrapping: false,
       },
+    },
+    /**
+     * The V4 model under `managedPropertyMode: "strictOmit"`, the counterpart of the same service in
+     * `int-test/asp-net`.
+     *
+     * The spelling is again what makes it worth running twice: CAP states `Core.Immutable` externally,
+     * under a vocabulary alias, while ASP.NET writes it out in full on the property. But this server adds
+     * something that one cannot show - `Loans/Id` carries `Core.ComputedDefaultValue`, so the key is
+     * writable on create while `LoanedAt` next to it is immutable. Two different managed states on one
+     * entity, which is where a mode that reshapes write models by managed state can most easily come apart.
+     * See test/feature/ImmutableProperties.test.ts.
+     */
+    libraryStrict: {
+      serviceName: "LibraryStrict",
+      source: SOURCE,
+      output: "src-generated/library-strict",
+      managedPropertyMode: ManagedPropertyMode.strictOmit,
     },
     libraryV2: {
       serviceName: "LibraryV2",

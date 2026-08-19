@@ -2,6 +2,7 @@ import {
   ConfigFileOptions,
   EmitModes,
   ManagedPropertyDetection,
+  ManagedPropertyMode,
   Modes,
   NamingStrategies,
   TypeModel,
@@ -193,6 +194,23 @@ const config: ConfigFileOptions = {
         responseResultsWrapping: true,
         payloadResultsWrapping: true,
       },
+    },
+
+    /**
+     * `managedPropertyMode: "strictOmit"`, the axis that adds a whole artefact kind.
+     *
+     * The three server packages judge whether the reshaped payloads are the right ones to send. What only
+     * a wide type check catches is the reshaping applied to the *whole* model rather than to the one
+     * entity a suite happens to write: every type with an immutable property of its own gets a second
+     * write model, every entity service switches to it, and complex properties inside those models resolve
+     * to the nested Updatable or Editable type depending on whether the nested type has anything to drop.
+     * A model this size exercises all of that at once, which no hand-written suite would.
+     */
+    managedStrict: {
+      serviceName: "ManagedStrict",
+      source: V4_SOURCE,
+      output: "src-generated/managed-strict",
+      managedPropertyMode: ManagedPropertyMode.strictOmit,
     },
 
     /**

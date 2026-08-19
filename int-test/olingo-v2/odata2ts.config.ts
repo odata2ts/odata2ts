@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, Modes, TypeModel } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, ManagedPropertyMode, Modes, TypeModel } from "@odata2ts/odata2ts";
 
 /** The running server to refresh from, or `undefined` to read the committed snapshot - see below. */
 const SOURCE_URL = process.env.LIBRARY_BASE_URL;
@@ -137,6 +137,25 @@ const config: ConfigFileOptions = {
       // unwrapped deep-insert payload just as well (see ResultsWrapping.test.ts) - stating the wrapping in
       // the generated types here would describe traffic this client no longer sends or receives
       v2: { responseAsV4: true, responseResultsWrapping: false, payloadResultsWrapping: false },
+    },
+    /**
+     * The same model a fifth time, under `managedPropertyMode: "strictOmit"` - the V2 half of what
+     * `int-test/asp-net` and `int-test/cap` do for V4.
+     *
+     * The mode reshapes write models by managed state, and on this server that state does not come from a
+     * vocabulary term at all: `Loan.LoanedAt` is marked by `sap:updatable="false"`, which the digester
+     * normalizes to `Core.Immutable` before anything downstream sees it. So this is the one place that
+     * shows the V2 dialects actually reaching the option, rather than the option working on a V4 term.
+     *
+     * V2 also puts a different question to `update()`: it has no `Prefer: return=representation`, so a PUT
+     * answers 204 and what the server kept of an immutable property is only visible on the read after it.
+     * See test/feature/ImmutableProperties.test.ts.
+     */
+    libraryStrict: {
+      serviceName: "LibraryStrict",
+      source: SOURCE,
+      output: "src-generated/library-strict",
+      managedPropertyMode: ManagedPropertyMode.strictOmit,
     },
   },
 };

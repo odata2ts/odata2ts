@@ -11,8 +11,8 @@ import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
  * vocabulary under the alias `Core` and writes `Core.Computed`. A generator that only resolved aliases
  * would fail here, one that only compared bare names would fail there.
  *
- * The boundary is visible in the same model: only `Medium/PopularityScore` is annotated, so every key of
- * this service still gets its managed state from the "a single key prop is server-generated" heuristic.
+ * The boundary is visible in the same model: the keys carry no annotation of their own, so they get their
+ * managed state from the key rule `managedPropertyDetection: "auto"` falls back to.
  */
 describe("ASP.NET Library: Core annotations", () => {
   test("Core.Computed is understood without a vocabulary reference", async () => {
@@ -46,10 +46,28 @@ describe("ASP.NET Library: Core annotations", () => {
     }
   });
 
-  test("an unannotated key stays with the heuristic", async () => {
-    // Nothing in this model says anything about `Id`, so the single-key rule still decides - which is
-    // exactly what `managedPropertyDetection: "auto"` is for.
-    expectTypeOf<EditableMedium>().not.toHaveProperty("Id");
-    expectTypeOf<EditableBook>().not.toHaveProperty("Id");
+  test("an unannotated key falls back to the key rule and stays writable", async () => {
+    /*
+     * Nothing in this model says anything about `Id`, so `managedPropertyDetection: "auto"` falls through
+     * to the key rule - which now makes it createOnly rather than readOnly. The property is therefore part
+     * of the editable model, optional under the default `lenient` mode.
+     */
+    expectTypeOf<EditableMedium["Id"]>().toEqualTypeOf<string | undefined>();
+    expectTypeOf<EditableBook["Id"]>().toEqualTypeOf<string | undefined>();
+
+    // and the decisive half a type check cannot give: the server takes the key the client chose, so
+    // keeping it in the payload is right. Under the old readOnly default this was not expressible at all.
+    const Id = "44444444-4444-4444-4444-444444444401";
+    const created = await LIBRARY.Media()
+      .asBookCollectionService()
+      .create({ Id, Title: "Client Assigned Key", PageCount: 1, AgeRating: 0 })
+      .execute();
+
+    try {
+      expect(created.status).toBe(201);
+      expect(created.data.Id).toBe(Id);
+    } finally {
+      await LIBRARY.Media(Id).delete().execute();
+    }
   });
 });

@@ -39,9 +39,7 @@ describe("ASP.NET Library: CRUD", () => {
   });
 
   test("create, read, patch and delete an entity", async () => {
-    const created = await LIBRARY.Members()
-      .create({ Name: "Integration Test", Balance: 0, PreviousAddresses: [] })
-      .execute();
+    const created = await LIBRARY.Members().create({ Name: "Integration Test", PreviousAddresses: [] }).execute();
     expect(created.status).toBe(201);
     expectTypeOf(created).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Member>>>();
 
@@ -65,24 +63,22 @@ describe("ASP.NET Library: CRUD", () => {
   });
 
   test("patch answers with the entity when asked to", async () => {
-    const created = await LIBRARY.Members()
-      .create({ Name: "Prefer Test", Balance: 0, PreviousAddresses: [] })
-      .execute();
+    const created = await LIBRARY.Members().create({ Name: "Prefer Test", PreviousAddresses: [] }).execute();
     const member = LIBRARY.Members(created.data.Id);
 
     // Two separate things, and mixing them up is easy: `Prefer: return=representation` is what makes the
     // server send a body, while `<true>` only tells the compiler to expect one. odata2ts never adds the
     // header on its own, so the caller has to - which is exactly what this pins down.
     const patched = await member
-      .patch<true>({ Balance: 12.5 })
+      .patch<true>({ Name: "Prefer Test (patched)" })
       .execute({ headers: { Prefer: "return=representation" } });
 
     expect(patched.status).toBe(200);
-    expect(patched.data.Balance).toBe(12.5);
+    expect(patched.data.Name).toBe("Prefer Test (patched)");
     expectTypeOf(patched).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Member>>>();
 
     // ... and without the header the very same call answers 204, hence the default typing
-    const withoutHeader = await member.patch({ Balance: 13.5 }).execute();
+    const withoutHeader = await member.patch({ Name: "Prefer Test (patched again)" }).execute();
     expect(withoutHeader.status).toBe(204);
 
     await member.delete().execute();
@@ -98,7 +94,6 @@ describe("ASP.NET Library: CRUD", () => {
     const created = await LIBRARY.Members()
       .create({
         Name: "Deep Insert",
-        Balance: 0,
         PreviousAddresses: [],
         Loans: [{ LoanedAt: "2026-08-01T10:00:00Z", DueDate: "2026-09-01" }],
       } as never)

@@ -28,9 +28,10 @@ describe("Olingo V2 Library: Core annotations in their V2 spelling", () => {
     expectTypeOf<EditableLoan["DueDate"]>().toEqualTypeOf<string>();
   });
 
-  test("an unannotated single key is still managed by the heuristic", () => {
-    // nothing about this changed: `Medium.Id` carries no annotation in either dialect
-    expectTypeOf<EditableBook>().not.toHaveProperty("Id");
+  test("an unannotated key falls back to the key rule", () => {
+    // `Medium.Id` carries no annotation in either dialect, so the key rule decides - createOnly, which
+    // under the default `lenient` mode means present and optional rather than absent
+    expectTypeOf<EditableBook["Id"]>().toEqualTypeOf<string | undefined>();
   });
 
   test("no other property is taken for managed", () => {

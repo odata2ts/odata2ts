@@ -32,7 +32,6 @@ describe("ASP.NET Library: deep insert", () => {
     const created = await LIBRARY.Members()
       .create({
         Name: "Deep Insert Member",
-        Balance: 0,
         PreviousAddresses: [],
         // no key: it is generated on the server side and therefore no part of the editable model
         IdDocument: { UploadedAt: uploadedAt },

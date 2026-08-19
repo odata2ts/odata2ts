@@ -4,6 +4,15 @@ import type { Branch as NumericBranch } from "../src-generated/enum-numeric/libr
 import { Amenities as unionAmenityMembers } from "../src-generated/enum-string-union/library-catalog/index.js";
 import type { Amenities as UnionAmenities } from "../src-generated/enum-string-union/library-catalog/index.js";
 import type { Branch as UnionBranch } from "../src-generated/enum-string-union/library-circulation/index.js";
+import type { EditablePostalAddress as StrictEditablePostalAddress } from "../src-generated/managed-strict/library-catalog/index.js";
+import type {
+  CopyCollectionService as StrictCopyCollectionService,
+  CopyService as StrictCopyService,
+  EditableCopy as StrictEditableCopy,
+  EditableIdDocument as StrictEditableIdDocument,
+  UpdatableCopy as StrictUpdatableCopy,
+  UpdatableMember as StrictUpdatableMember,
+} from "../src-generated/managed-strict/library-circulation/index.js";
 import type { Medium as ModelsOnlyMedium } from "../src-generated/models-only/library-catalog/index.js";
 import type {
   BookDto,
@@ -76,3 +85,35 @@ expectTypeOf<NumericBranch["Amenities"]>().toEqualTypeOf<NumericAmenities | null
 // Only observable in `mode: models` - the option is ignored otherwise, which is why no service exists here
 // which could ever send a request.
 expectTypeOf<V2Member["Loans"]>().toExtend<{ results: Array<unknown> } | unknown>();
+
+/* --- managedStrict: a second write model, and the services which switch to it ---------------------- */
+
+// A key without an annotation of its own is createOnly, so under strictOmit it follows `nullable` in the
+// editable model - required here, where `lenient` would have made it optional regardless.
+expectTypeOf<StrictEditableCopy["MediumId"]>().toEqualTypeOf<string>();
+expectTypeOf<StrictEditableCopy["InventoryNumber"]>().toEqualTypeOf<number>();
+
+// ... and is dropped from the update model entirely. A composite key, so both parts go: the old heuristic
+// looked at single keys only and left this entity with no managed property at all.
+expectTypeOf<StrictUpdatableCopy>().not.toHaveProperty("MediumId");
+expectTypeOf<StrictUpdatableCopy>().not.toHaveProperty("InventoryNumber");
+// everything not createOnly is untouched by the mode
+expectTypeOf<StrictUpdatableCopy["IsLoanable"]>().toEqualTypeOf<boolean>();
+
+// A complex property resolves to the nested type's *editable* model, since `PostalAddress` has no
+// immutable property of its own and a second, identical type for it would be noise.
+expectTypeOf<StrictUpdatableMember["PreviousAddresses"]>().toEqualTypeOf<Array<StrictEditablePostalAddress>>();
+
+// A navigation property always resolves to the referenced entity's editable model, in both write models
+// alike - a binding names an entity that exists in its own right, so the create/update split does not
+// apply to it. This is also what keeps a self-referential entity graph from ever reaching Updatable.
+expectTypeOf<StrictUpdatableMember["IdDocument"]>().toExtend<
+  StrictEditableIdDocument | { "@id": unknown } | null | undefined
+>();
+
+// The entity service writes with the updatable model, while the collection service, where creation
+// happens, keeps the editable one. Both `update` and `patch` take it: neither can change an immutable
+// property, so there is no reason for PUT to keep offering one.
+expectTypeOf<StrictCopyService["update"]>().parameter(0).toExtend<StrictUpdatableCopy>();
+expectTypeOf<StrictCopyService["patch"]>().parameter(0).toExtend<Partial<StrictUpdatableCopy>>();
+expectTypeOf<StrictCopyCollectionService["create"]>().parameter(0).toExtend<StrictEditableCopy>();

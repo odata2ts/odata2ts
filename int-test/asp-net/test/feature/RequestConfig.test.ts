@@ -29,17 +29,15 @@ describe("ASP.NET Library: request configuration", () => {
   });
 
   test("headers from the config reach the server", async () => {
-    const created = await LIBRARY.Members()
-      .create({ Name: "RequestConfig Test", Balance: 3, PreviousAddresses: [] })
-      .execute();
+    const created = await LIBRARY.Members().create({ Name: "RequestConfig Test", PreviousAddresses: [] }).execute();
 
     // a patch answers 204 unless the representation is asked for, and here that header travels via the config
     const patched = await LIBRARY.Members(created.data.Id)
-      .patch<true>({ Balance: 4 })
+      .patch<true>({ Name: "RequestConfig Patched" })
       .execute({ headers: { Prefer: "return=representation" } });
 
     expect(patched.status).toBe(200);
-    expect(patched.data.Balance).toBe(4);
+    expect(patched.data.Name).toBe("RequestConfig Patched");
 
     await LIBRARY.Members(created.data.Id).delete().execute();
   });

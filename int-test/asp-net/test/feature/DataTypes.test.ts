@@ -72,11 +72,9 @@ describe("ASP.NET Library: data types", () => {
     expect(deleted.status).toBe(204);
   });
 
-  test("decimal, dateTimeOffset and a complex collection round trip on a member", async () => {
+  test("dateTimeOffset and a complex collection round trip on a member", async () => {
     const member: EditableMember = {
       Name: "Data Type Member",
-      // Edm.Decimal, as a number - the V4 default unless v4BigNumberAsString is set
-      Balance: 12.34,
       // Edm.DateTimeOffset
       ActiveSince: "2026-01-15T08:30:00Z",
       // Collection of a complex type
@@ -91,13 +89,44 @@ describe("ASP.NET Library: data types", () => {
 
     const read = await LIBRARY.Members(created.data.Id).query().execute();
 
-    expect(read.data.Balance).toBe(12.34);
+    expect(read.data.ActiveSince).toContain("2026-01-15T08:30:00");
     expect(read.data.PreviousAddresses).toHaveLength(2);
     // including the non-ASCII characters, which is a question of encoding all the way through
     expect(read.data.PreviousAddresses?.[1].Street).toBe("Ältere Gasse 2");
+
+    // `Balance` is Edm.Decimal but carries `Core.Permissions: Read`, so it is readable and nothing else -
+    // the decimal *write* is round tripped on `Loan.LateFee` below instead
     expectTypeOf(read.data.Balance).toEqualTypeOf<number>();
 
     await LIBRARY.Members(created.data.Id).delete().execute();
+  });
+
+  test("decimal round trips on a loan's late fee", async () => {
+    // a loan is created through its member: this server answers a POST to `/Loans` with 405
+    const loanId = "77777777-7777-7777-7777-777777777701";
+    const member = await LIBRARY.Members()
+      .create({
+        Name: "Late Fee Member",
+        PreviousAddresses: [],
+        Loans: [
+          {
+            Id: loanId,
+            LoanedAt: "2026-03-01T09:00:00Z",
+            DueDate: "2026-04-01",
+            // Edm.Decimal, as a number - the V4 default unless v4BigNumberAsString is set
+            LateFee: 12.34,
+          },
+        ],
+      })
+      .execute();
+    expect(member.status).toBe(201);
+
+    const read = await LIBRARY.Loans(loanId).query().execute();
+    expect(read.data.LateFee).toBe(12.34);
+    expectTypeOf(read.data.LateFee).toEqualTypeOf<number | null>();
+
+    // deleting the member takes its loans with it - `Member.Loans` cascades, and `/Loans(…)` has no DELETE
+    await LIBRARY.Members(member.data.Id).delete().execute();
   });
 
   test("guid and date round trip on a book", async () => {

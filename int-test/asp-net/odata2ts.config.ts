@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, Modes, TypeModel } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, ManagedPropertyMode, Modes, TypeModel } from "@odata2ts/odata2ts";
 
 /** The running server to refresh from, or `undefined` to read the committed snapshot - see below. */
 const SOURCE_URL = process.env.LIBRARY_BASE_URL;
@@ -110,6 +110,25 @@ const config: ConfigFileOptions = {
           mappedName: "PublisherBranch",
         },
       ],
+    },
+    /**
+     * The same model once more under `managedPropertyMode: "strictOmit"`, where an immutable property is
+     * dropped from an update payload instead of merely being optional in it.
+     *
+     * Generated separately rather than replacing the raw client, as with the renamed one above: the
+     * default (`lenient`) shape is what most users get and is worth pinning in its own right, and the two
+     * modes only mean anything held against each other - the same property is optional in one client's
+     * write model and absent from the other's.
+     *
+     * A server is what settles this, because the mode is an assertion about the *server's* behaviour: that
+     * `Loan.LoanedAt`, which `Core.Immutable` marks, is genuinely fixed after creation, and that leaving
+     * it out of a PUT is therefore not a loss of data. See test/feature/ImmutableProperties.test.ts.
+     */
+    libraryStrict: {
+      serviceName: "LibraryStrict",
+      source: SOURCE,
+      output: "src-generated/library-strict",
+      managedPropertyMode: ManagedPropertyMode.strictOmit,
     },
   },
 };
