@@ -571,7 +571,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     const useAnnotations =
       detection === ManagedPropertyDetection.auto || detection === ManagedPropertyDetection.annotation;
     const useHeuristic =
-      detection === ManagedPropertyDetection.auto || detection === ManagedPropertyDetection.simpleHeuristic;
+      detection === ManagedPropertyDetection.auto || detection === ManagedPropertyDetection.keys;
 
     let byAnnotation = useAnnotations ? this.findAnnotatedState(model, prop.odataName) : undefined;
     if (isKey && byAnnotation === ManagedState.createOnly) {

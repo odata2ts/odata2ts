@@ -1,5 +1,5 @@
 import { Command, Option } from "commander";
-import { CliOptions, EmitModes, ManagedPropertyDetection, Modes } from "../OptionModel.js";
+import { CliOptions, EmitModes, ManagedPropertyDetection, ManagedPropertyMode, Modes } from "../OptionModel.js";
 
 function parseMode(value: string, dummyPrevious: Modes | undefined) {
   switch (value) {
@@ -37,6 +37,14 @@ function parseManagedPropertyDetection(value: string, dummyPrevious: ManagedProp
     throw new Error(`Not a valid ManagedPropertyDetection: ${value}`);
   }
   return detection;
+}
+
+function parseManagedPropertyMode(value: string, dummyPrevious: ManagedPropertyMode | undefined) {
+  const mode = ManagedPropertyMode[value as keyof typeof ManagedPropertyMode];
+  if (!mode) {
+    throw new Error(`Not a valid ManagedPropertyMode: ${value}`);
+  }
+  return mode;
 }
 
 export function processCliArgs(argv: Array<string>) {
@@ -78,6 +86,14 @@ export function processCliArgs(argv: Array<string>) {
       )
         .choices(Object.values(ManagedPropertyDetection))
         .argParser<ManagedPropertyDetection>(parseManagedPropertyDetection),
+    )
+    .addOption(
+      new Option(
+        "--managed-property-mode <mode>",
+        "How an immutable property shows up in the generated write models",
+      )
+        .choices(Object.values(ManagedPropertyMode))
+        .argParser<ManagedPropertyMode>(parseManagedPropertyMode),
     )
     .option("-r, --allow-renaming", "Allow that property and entity names may be changed by configured casing")
     .parse(argv);

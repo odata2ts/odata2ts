@@ -349,11 +349,11 @@ export function createAnnotationTests(
       expect(await managedStateOf("PopularityScore")).toBeUndefined();
     });
 
-    test("simpleHeuristic: annotations are ignored, whatever they state", async () => {
-      digestionOptions = { managedPropertyDetection: ManagedPropertyDetection.simpleHeuristic };
+    test("keys: annotations are ignored, whatever they state", async () => {
+      digestionOptions = { managedPropertyDetection: ManagedPropertyDetection.keys };
       buildModel(true);
 
-      // the heuristic knows nothing but keys, so the annotated non-key prop stays fully editable
+      // keys detection knows nothing but keys, so the annotated non-key prop stays fully editable
       expect(await managedStateOf("Id")).toBe(ManagedState.readOnly);
       expect(await managedStateOf("PopularityScore")).toBeUndefined();
     });

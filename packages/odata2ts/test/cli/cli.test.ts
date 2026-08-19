@@ -293,7 +293,7 @@ describe("Cli Test", () => {
 
   test("Test managedPropertyDetection option", async () => {
     await testManagedPropertyDetection(undefined);
-    await testManagedPropertyDetection(ManagedPropertyDetection.simpleHeuristic);
+    await testManagedPropertyDetection(ManagedPropertyDetection.keys);
     await testManagedPropertyDetection(ManagedPropertyDetection.annotation);
   });
 

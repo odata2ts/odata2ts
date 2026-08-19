@@ -34,7 +34,7 @@ export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "p
 
 export interface ServiceGeneratorOptions extends Pick<
   ConfigFileOptions,
-  "enablePrimitivePropertyServices" | "enumType"
+  "enablePrimitivePropertyServices" | "enumType" | "managedPropertyMode"
 > {
   v2: Pick<NonNullable<ConfigFileOptions["v2"]>, "responseAsV4">;
   v4: Pick<NonNullable<ConfigFileOptions["v4"]>, "bigNumberAsString" | "odataVersion">;

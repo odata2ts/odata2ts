@@ -70,6 +70,15 @@ export interface ModelNamingOptions extends NamingStrategyOption, StandardNaming
   editableModels: EntityDerivedNamingOptions;
 
   /**
+   * Under managedPropertyMode: "strictOmit", a type with its own immutable properties additionally gets
+   * an Updatable version of the Editable model, with those properties dropped.
+   *
+   * You can override the naming options here.
+   * By default, prefix = "Updatable"
+   */
+  updatableModels: EntityDerivedNamingOptions;
+
+  /**
    * ID models are generated from entity id parameters.
    *
    * You can configure the naming options here.
