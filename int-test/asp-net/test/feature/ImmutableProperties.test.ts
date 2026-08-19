@@ -17,11 +17,11 @@ import { LIBRARY_STRICT } from "../LibraryTestConstants.js";
  * 1. it belongs in a create payload, required or optional per `nullable`, and
  * 2. it belongs in no update payload at all.
  *
- * Only the first is a type-level statement, and the second turns out to be the interesting one here.
- * `Core.Immutable` is a *declaration*, not an enforcement, and this server does not enforce it: a PATCH
- * carrying `LoanedAt` changes it. So the last test deliberately casts past the model to record that - the
- * generated type is not a convenience here, it is the only thing standing between a caller and a silently
- * corrupted value.
+ * Only the first is a type-level statement. The second is a claim about the *server*, and the pinned
+ * version does not yet keep it: it applies a `LoanedAt` sent on a PATCH. That is a gap in our own server
+ * rather than a trait of ASP.NET Core OData - the spec is unambiguous that such a value MUST be ignored -
+ * and it is fixed in test-server-asp-net#16. The last test pins what the pinned image really does, so
+ * raising the version makes it fail and the expectation gets corrected as a reviewed step.
  *
  * The split between which entity carries which test is the server's doing: `LoansController` implements
  * GET and PATCH only (deliberately - see its own source), so PUT is asked of `Members`, whose key is
@@ -128,19 +128,21 @@ describe("ASP.NET Library: immutable properties under strictOmit", () => {
     }
   });
 
-  test("the server does not enforce Core.Immutable, so only the model does", async () => {
+  test("the pinned server still applies a changed immutable property", async () => {
     const Id = "55555555-5555-5555-5555-555555555504";
     const { memberId } = await givenLoan(Id, 9904);
 
     try {
       /*
        * Casting past `UpdatableLoan` is the only way to ask this question, and the answer is why the type
-       * is worth generating. ASP.NET applies the value: `Core.Immutable` reaches the client as a promise
-       * about the property, and the server keeps no part of it. 204, no warning, and the loan now claims
-       * to have been made in 2020.
+       * is worth generating at all. Protocol 11.4.3 leaves no room - "the service MUST ignore that value
+       * when applying the update" - and the pinned image does not: it stores 2020 and answers 204, so a
+       * caller reading the response cannot tell that a value was overwritten.
        *
-       * The counterpart in `int-test/cap` records the other way a server can behave - accepting the
-       * request and quietly declining the value. Neither of them tells the caller anything.
+       * Recorded rather than worked around: the fix is test-server-asp-net#16, and when the image pin
+       * moves to a release carrying it this expectation inverts to the value staying put. Its counterpart
+       * in `int-test/cap` already shows the correct behaviour, which is what makes this one a defect and
+       * not a difference.
        */
       const payload = { LoanedAt: "2020-01-01T00:00:00Z" } as unknown as UpdatableLoan;
       const patched = await LIBRARY_STRICT.Loans(Id).patch(payload).execute();
