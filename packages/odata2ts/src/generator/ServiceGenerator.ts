@@ -17,13 +17,14 @@ import {
   EntityContainerModel,
   EntityType,
   FunctionImportType,
+  hasImmutableProps,
   OperationType,
   OperationTypes,
   PropertyModel,
   SingletonType,
 } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
-import { ConfigFileOptions, Modes } from "../OptionModel.js";
+import { ConfigFileOptions, ManagedPropertyMode, Modes } from "../OptionModel.js";
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
 import { ClientApiImports, CoreImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects.js";
@@ -129,6 +130,18 @@ class ServiceGenerator {
       return ", AsV4";
     }
     return "";
+  }
+
+  /**
+   * The name of the model an entity service writes with. That service never creates an entity, so it is
+   * the UpdatableModel wherever the type has one - under strictOmit, for a type with an immutable
+   * property of its own - and the EditableModel everywhere else, which is what every type had before
+   * this option existed.
+   */
+  private resolveUpdatableModelName(model: ComplexType): string {
+    return this.options.managedPropertyMode === ManagedPropertyMode.strictOmit && hasImmutableProps(model)
+      ? model.updatableName
+      : model.editableName;
   }
 
   /**
@@ -400,7 +413,7 @@ class ServiceGenerator {
 
     // note: predictable first imports => no need to take renaming into account
     const modelName = importContainer.addGeneratedModel(model.fqName, model.modelName);
-    const editableModelName = importContainer.addGeneratedModel(model.fqName, model.editableName);
+    const updatableModelName = importContainer.addGeneratedModel(model.fqName, this.resolveUpdatableModelName(model));
     const qName = importContainer.addGeneratedQObject(model.fqName, model.qName, true);
     const qObjectName = importContainer.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName));
     const serviceOptions = this.getServiceOptionsType(importContainer);
@@ -418,7 +431,8 @@ class ServiceGenerator {
       isExported: true,
       name: model.serviceName,
       typeParameters: this.getServiceTypeParams(importContainer),
-      extends: entityServiceType + `<${modelName}, ${editableModelName}, ${qName}${this.getServiceVersionArgSuffix()}>`,
+      extends:
+        entityServiceType + `<${modelName}, ${updatableModelName}, ${qName}${this.getServiceVersionArgSuffix()}>`,
       ctors: [
         {
           parameters: [
@@ -709,7 +723,10 @@ class ServiceGenerator {
 
   private generateEntityCollectionService(file: FileHandler, model: EntityType) {
     const importContainer = file.getImports();
-    const editableModelName = model.editableName;
+    // creation lives here, so this is the one service still typed on the EditableModel - and the one place
+    // that registers its import: under strictOmit the entity service next to it imports the UpdatableModel
+    // instead, so relying on that one to have pulled the name in leaves this class referencing nothing.
+    const editableModelName = importContainer.addGeneratedModel(model.fqName, model.editableName);
     const qObjectName = firstCharLowerCase(model.qName);
 
     const entitySetServiceType = importContainer.addServiceObject(this.version, ServiceImports.EntitySetService);

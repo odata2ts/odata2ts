@@ -1,12 +1,13 @@
 import path from "path";
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
-import { beforeAll, beforeEach, describe, test } from "vitest";
+import { beforeAll, beforeEach, describe, expect, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
 import {
   ConfigFileOptions,
   EmitModes,
+  ManagedPropertyMode,
   NamingStrategies,
   OverridableNamingOptions,
   RunOptions,
@@ -528,5 +529,50 @@ describe("Service Generator Tests V4", () => {
 
     // then its service extends the media entity service, which adds the $value access
     await compareMainService("media-entity.ts");
+  });
+
+  test("Service Generator: the entity service writes with the UpdatableModel under strictOmit", async () => {
+    function getEntityServiceText() {
+      const file = [...projectManager.getCachedFiles().values()].find((f) =>
+        f.getFullText().includes("class TestEntityService"),
+      );
+      if (!file) {
+        throw new Error("TestEntityService file was not generated!");
+      }
+      return file.getFullText();
+    }
+
+    function buildTestEntity() {
+      odataBuilder
+        .addEntityType("TestEntity", undefined, (builder) =>
+          builder.addKeyProp("id", ODataTypesV4.Guid).addProp("title", ODataTypesV4.String, false),
+        )
+        .addEntitySet("TestEntities", withNs("TestEntity"));
+    }
+
+    // given an entity with an unannotated key, which under default (auto) detection is createOnly
+    buildTestEntity();
+
+    // when generating in the default (lenient) mode
+    // then the entity service writes with the EditableModel, exactly as before this option existed
+    await doGenerate();
+    expect(getEntityServiceText()).toContain(
+      "extends EntityTypeServiceV4<TestEntity, EditableTestEntity, QTestEntity, V>",
+    );
+
+    // when generating in strictOmit mode instead
+    odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
+    buildTestEntity();
+    await doGenerate({ managedPropertyMode: ManagedPropertyMode.strictOmit });
+
+    // then update and patch both write with the UpdatableModel, which replaces the EditableModel rather
+    // than joining it: this service never creates an entity, so it has no use for the editable shape
+    const serviceText = getEntityServiceText();
+    expect(serviceText).toContain("extends EntityTypeServiceV4<TestEntity, UpdatableTestEntity, QTestEntity, V>");
+
+    // while the collection service, which is where creation happens, keeps the EditableModel
+    expect(serviceText).toContain(
+      "extends EntitySetServiceV4<TestEntity, EditableTestEntity, QTestEntity, TestEntityId, V>",
+    );
   });
 });

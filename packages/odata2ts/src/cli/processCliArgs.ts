@@ -88,10 +88,7 @@ export function processCliArgs(argv: Array<string>) {
         .argParser<ManagedPropertyDetection>(parseManagedPropertyDetection),
     )
     .addOption(
-      new Option(
-        "--managed-property-mode <mode>",
-        "How an immutable property shows up in the generated write models",
-      )
+      new Option("--managed-property-mode <mode>", "How an immutable property shows up in the generated write models")
         .choices(Object.values(ManagedPropertyMode))
         .argParser<ManagedPropertyMode>(parseManagedPropertyMode),
     )
