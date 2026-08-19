@@ -16,6 +16,7 @@ import {
   QTimeV2Param,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
+// @ts-ignore
 import type { MaxFunctionParams } from "./TesterModel.js";
 
 export class QTheEntity extends QueryObject {

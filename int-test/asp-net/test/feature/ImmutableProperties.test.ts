@@ -53,13 +53,15 @@ describe("ASP.NET Library: immutable properties under strictOmit", () => {
     await LIBRARY_STRICT.Members(memberId).delete().execute();
   }
 
-  test("the create model keeps immutable properties and follows nullable", () => {
-    // both are `Nullable="false"`, so under strictOmit they are required rather than optional - which is
-    // the whole difference to `lenient`, where an immutable property is always optional
-    expectTypeOf<EditableLoan["Id"]>().toEqualTypeOf<string>();
+  test("the create model keeps immutable properties, and the annotated one follows nullable", () => {
+    // `LoanedAt` carries `Core.Immutable` and is `Nullable="false"`, so the service itself says it is
+    // required on create
     expectTypeOf<EditableLoan["LoanedAt"]>().toEqualTypeOf<string>();
-    // the same for a key which is createOnly by the key rule rather than by annotation
-    expectTypeOf<EditableMember["Id"]>().toEqualTypeOf<number>();
+
+    // the keys are non-nullable too, but nothing describes them - and this package generates under the
+    // default `keyProperties`, which will not demand a key the server may well be generating
+    expectTypeOf<EditableLoan["Id"]>().toEqualTypeOf<string | undefined>();
+    expectTypeOf<EditableMember["Id"]>().toEqualTypeOf<number | undefined>();
   });
 
   test("the update model drops them entirely", () => {

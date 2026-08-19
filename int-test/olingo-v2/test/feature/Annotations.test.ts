@@ -1,4 +1,5 @@
 import { describe, expectTypeOf, test } from "vitest";
+import type { EditableBook as StrictEditableBook } from "../../src-generated/library-strict/index.js";
 import type { EditableBook, EditableLoan, EditableMember, UpdatableLoan } from "../../src-generated/library/index.js";
 
 /**
@@ -16,9 +17,12 @@ import type { EditableBook, EditableLoan, EditableMember, UpdatableLoan } from "
  * both ways a V2 document can say this are covered.
  */
 describe("Olingo V2 Library: Core annotations in their V2 spelling", () => {
-  test("Computed: PopularityScore is stated by both dialects and drops out", () => {
-    // annotation:StoreGeneratedPattern="Computed" plus sap:creatable="false" sap:updatable="false"
-    expectTypeOf<EditableBook>().not.toHaveProperty("PopularityScore");
+  test("Computed: PopularityScore is stated by both dialects", () => {
+    // annotation:StoreGeneratedPattern="Computed" plus sap:creatable="false" sap:updatable="false", both
+    // normalized to `Core.Computed` - readOnly, so present but never required under the default mode
+    expectTypeOf<EditableBook["PopularityScore"]>().toEqualTypeOf<string | null | undefined>();
+    // ... and gone altogether from the client generated with strictOmit
+    expectTypeOf<StrictEditableBook>().not.toHaveProperty("PopularityScore");
   });
 
   test("Immutable: LoanedAt is required on create and optional afterwards", () => {

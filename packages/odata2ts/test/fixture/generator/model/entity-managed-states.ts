@@ -56,7 +56,8 @@ export interface Book {
 
 export type BookId = string | { id: string };
 
-export interface EditableBook extends Pick<Book, "id" | "title" | "isbnCode">, Partial<Pick<Book, "createdAt">> {
+export interface EditableBook
+  extends Pick<Book, "title" | "isbnCode">, Partial<Pick<Book, "id" | "popularityScore" | "createdAt">> {
   /**
    * **Write-Only**: The server never returns this property, hence it is part of the editable model only.
    *
@@ -70,7 +71,8 @@ export interface EditableBook extends Pick<Book, "id" | "title" | "isbnCode">, P
   secret: string;
 }
 
-export interface UpdatableBook extends Pick<Book, "title">, Partial<Pick<Book, "id" | "createdAt" | "isbnCode">> {
+export interface UpdatableBook
+  extends Pick<Book, "title">, Partial<Pick<Book, "id" | "popularityScore" | "createdAt" | "isbnCode">> {
   /**
    * **Write-Only**: The server never returns this property, hence it is part of the editable model only.
    *

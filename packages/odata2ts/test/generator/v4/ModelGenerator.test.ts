@@ -2,7 +2,7 @@ import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { generateModels } from "../../../src/generator/index.js";
-import { EmitModes, EnumSynthesis, ManagedPropertyDetection, ManagedPropertyMode, Modes } from "../../../src/index.js";
+import { EmitModes, EnumSynthesis, KeyProperties, ManagedPropertyMode, Modes } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
 import { allowedValues, core, corePermissions } from "../../data-model/builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
@@ -165,7 +165,6 @@ describe("Model Generator Tests V4", () => {
       v2: { responseResultsWrapping: true },
       skipEditableModels: false,
       skipIdModels: false,
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -235,67 +234,80 @@ describe("Model Generator Tests V4", () => {
     });
   });
 
-  test(`${TEST_SUITE_NAME}: managedPropertyDetection none leaves an unannotated key untouched`, async () => {
-    // given an entity with a single key, no annotations
+  /** The options every write-model test needs: the models in full, so the write models are there to compare. */
+  const MODEL_ONLY = { skipComments: false, skipEditableModels: false, skipIdModels: false };
+
+  /**
+   * One key nobody described and one property the service annotates itself, both non-nullable - the two
+   * halves `keyProperties` tells apart.
+   */
+  function buildKeyAndImmutable() {
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Guid)
+        .addProp("title", ODataTypesV4.String, false)
+        .addProp("isbnCode", ODataTypesV4.String, false)
+        .addPropAnnotations("isbnCode", [core("Immutable", { bool: true, fullyQualified: true })]),
+    );
+  }
+
+  test(`${TEST_SUITE_NAME}: keyProperties strict - an unannotated key is required on create`, async () => {
+    // given a key nobody annotated and an annotated immutable prop, both non-nullable
+    buildKeyAndImmutable();
+
+    // then both follow `nullable` on create, as the spec has it, while the update model relaxes both -
+    // the server changes neither, so demanding one there would only make the caller repeat a value
+    await generateAndCompare("entity-key-strict.ts", {
+      ...MODEL_ONLY,
+      keyProperties: KeyProperties.strict,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: keyProperties interoperable - the key stays optional on create`, async () => {
+    // the very same model under the default
+    buildKeyAndImmutable();
+
+    // then `id` is optional on create although it is non-nullable - the one place odata2ts knowingly
+    // departs from the spec - while the annotated `isbnCode` still follows nullable
+    await generateAndCompare("entity-key-interoperable.ts", {
+      ...MODEL_ONLY,
+      keyProperties: KeyProperties.interoperable,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: keyProperties singleComputed - the key is the server's, and lenient lets it travel`, async () => {
     odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
       builder.addKeyProp("id", ODataTypesV4.Guid).addProp("title", ODataTypesV4.String, false),
     );
 
-    // when generation is told to derive nothing at all
-    // then the key stays a plain, fully mutable, required prop
-    await generateAndCompare("entity-detection-none.ts", {
-      skipComments: false,
-      skipEditableModels: false,
-      skipIdModels: false,
-      managedPropertyDetection: ManagedPropertyDetection.none,
+    // readOnly, so never required - but `lenient` keeps it in both write models, which is what the spec
+    // permits: a payload may carry it and the service is obliged to leave it alone
+    await generateAndCompare("entity-key-single-computed.ts", {
+      ...MODEL_ONLY,
+      keyProperties: KeyProperties.singleComputed,
     });
   });
 
-  test(`${TEST_SUITE_NAME}: lenient keeps immutable props on update, but never required`, async () => {
-    // given a key (createOnly via the key rule) and an annotated immutable prop, both non-nullable
+  test(`${TEST_SUITE_NAME}: keyProperties allComputed with strictOmit - the keys are gone entirely`, async () => {
     odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
       builder
         .addKeyProp("id", ODataTypesV4.Guid)
-        .addProp("title", ODataTypesV4.String, false)
-        .addProp("isbnCode", ODataTypesV4.String, false)
-        .addPropAnnotations("isbnCode", [core("Immutable", { bool: true, fullyQualified: true })]),
+        .addKeyProp("edition", ODataTypesV4.Int16)
+        .addProp("title", ODataTypesV4.String, false),
     );
 
-    // when generating in the default mode
-    // then both immutable props are required on create, per nullable like any other property, while the
-    // UpdatableModel still carries them - the spec lets an update state them, the server ignores them
-    await generateAndCompare("entity-lenient.ts", {
-      skipComments: false,
-      skipEditableModels: false,
-      skipIdModels: false,
-      managedPropertyMode: ManagedPropertyMode.lenient,
-    });
-  });
-
-  test(`${TEST_SUITE_NAME}: interoperable leaves an unannotated key optional on create`, async () => {
-    // the same entity again: one key nobody described, one property the service annotates itself
-    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
-      builder
-        .addKeyProp("id", ODataTypesV4.Guid)
-        .addProp("title", ODataTypesV4.String, false)
-        .addProp("isbnCode", ODataTypesV4.String, false)
-        .addPropAnnotations("isbnCode", [core("Immutable", { bool: true, fullyQualified: true })]),
-    );
-
-    // when generating for a service which generates its keys without saying so
-    // then `id` is optional on create although it is non-nullable - the one place odata2ts knowingly
-    // departs from the spec - while the annotated `isbnCode` still follows nullable
-    await generateAndCompare("entity-interoperable.ts", {
-      skipComments: false,
-      skipEditableModels: false,
-      skipIdModels: false,
-      managedPropertyMode: ManagedPropertyMode.interoperable,
+    // the two options meeting: `allComputed` makes every key the server's, and `strictOmit` takes what
+    // the server owns out of the write models instead of leaving it there optional
+    await generateAndCompare("entity-key-all-computed.ts", {
+      ...MODEL_ONLY,
+      keyProperties: KeyProperties.allComputed,
+      managedPropertyMode: ManagedPropertyMode.strictOmit,
     });
   });
 
   test(`${TEST_SUITE_NAME}: no UpdatableModel where it would say nothing the EditableModel does not`, async () => {
-    // given an entity whose only immutable property is *nullable*, and detection which ignores keys - so
-    // nothing here is required on create that an update would then have to relax
+    // given an entity whose only immutable property is *nullable*, and a key the default leaves optional
+    // on create - so nothing here is required on create that an update would then have to relax
     odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
       builder
         .addKeyProp("id", ODataTypesV4.Guid)
@@ -306,31 +318,15 @@ describe("Model Generator Tests V4", () => {
 
     // then no UpdatableModel is generated: it would be identical to the EditableModel, and a second name
     // for one shape is noise. `strictOmit` is the mode which would still produce one, by dropping `note`.
-    await generateAndCompare("entity-no-updatable.ts", {
-      skipComments: false,
-      skipEditableModels: false,
-      skipIdModels: false,
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
-      managedPropertyMode: ManagedPropertyMode.lenient,
-    });
+    await generateAndCompare("entity-no-updatable.ts", MODEL_ONLY);
   });
 
   test(`${TEST_SUITE_NAME}: strictOmit - EditableModel required per nullable, UpdatableModel drops immutable props`, async () => {
-    // given a key (createOnly via detection) and an annotated immutable prop, both non-nullable
-    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
-      builder
-        .addKeyProp("id", ODataTypesV4.Guid)
-        .addProp("title", ODataTypesV4.String, false)
-        .addProp("isbnCode", ODataTypesV4.String, false)
-        .addPropAnnotations("isbnCode", [core("Immutable", { bool: true, fullyQualified: true })]),
-    );
+    buildKeyAndImmutable();
 
-    // when generating in strictOmit mode
-    // then both immutable props are required (matching their nullable), and UpdatableTestModel drops them
     await generateAndCompare("entity-strict-omit.ts", {
-      skipComments: false,
-      skipEditableModels: false,
-      skipIdModels: false,
+      ...MODEL_ONLY,
+      keyProperties: KeyProperties.strict,
       managedPropertyMode: ManagedPropertyMode.strictOmit,
     });
   });
@@ -531,7 +527,6 @@ describe("Model Generator Tests V4", () => {
       v4: { odataVersion: "4.01" },
       skipEditableModels: false,
       skipIdModels: false,
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -558,7 +553,6 @@ describe("Model Generator Tests V4", () => {
       disableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -583,7 +577,6 @@ describe("Model Generator Tests V4", () => {
       mode: Modes.models,
       skipEditableModels: false,
       skipIdModels: false,
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -626,7 +619,6 @@ describe("Model Generator Tests V4", () => {
       disableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -641,7 +633,6 @@ describe("Model Generator Tests V4", () => {
     await generateAndCompare("entity-relationships-deep-insert-binding-by-key.ts", {
       skipEditableModels: false,
       skipIdModels: false,
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -656,7 +647,6 @@ describe("Model Generator Tests V4", () => {
       disableDeepInsertProps: true,
       skipEditableModels: false,
       skipIdModels: false,
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -671,7 +661,6 @@ describe("Model Generator Tests V4", () => {
       disableBindingProps: true,
       skipEditableModels: false,
       skipIdModels: false,
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -685,7 +674,6 @@ describe("Model Generator Tests V4", () => {
       mode: Modes.models,
       skipEditableModels: false,
       skipIdModels: false,
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -701,7 +689,6 @@ describe("Model Generator Tests V4", () => {
       v4: { odataVersion: "4.01" },
       skipEditableModels: false,
       skipIdModels: false,
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 
@@ -716,7 +703,6 @@ describe("Model Generator Tests V4", () => {
       v2: { payloadResultsWrapping: true },
       skipEditableModels: false,
       skipIdModels: false,
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
     });
   });
 

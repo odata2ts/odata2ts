@@ -4,6 +4,12 @@ import type { Branch as NumericBranch } from "../src-generated/enum-numeric/libr
 import { Amenities as unionAmenityMembers } from "../src-generated/enum-string-union/library-catalog/index.js";
 import type { Amenities as UnionAmenities } from "../src-generated/enum-string-union/library-catalog/index.js";
 import type { Branch as UnionBranch } from "../src-generated/enum-string-union/library-circulation/index.js";
+import type { EditableMedium as AllComputedEditableMedium } from "../src-generated/key-all-computed/library-catalog/index.js";
+import type { EditableCopy as AllComputedEditableCopy } from "../src-generated/key-all-computed/library-circulation/index.js";
+import type {
+  EditableCopy as KeyStrictEditableCopy,
+  UpdatableCopy as KeyStrictUpdatableCopy,
+} from "../src-generated/key-strict/library-circulation/index.js";
 import type { EditablePostalAddress as StrictEditablePostalAddress } from "../src-generated/managed-strict/library-catalog/index.js";
 import type {
   CopyCollectionService as StrictCopyCollectionService,
@@ -88,13 +94,13 @@ expectTypeOf<V2Member["Loans"]>().toExtend<{ results: Array<unknown> } | unknown
 
 /* --- managedStrict: a second write model, and the services which switch to it ---------------------- */
 
-// A key without an annotation of its own is createOnly, so under strictOmit it follows `nullable` in the
-// editable model - required here, where `lenient` would have made it optional regardless.
-expectTypeOf<StrictEditableCopy["MediumId"]>().toEqualTypeOf<string>();
-expectTypeOf<StrictEditableCopy["InventoryNumber"]>().toEqualTypeOf<number>();
+// A key without an annotation of its own is createOnly, but the default `keyProperties` will not demand
+// one on create - `managedPropertyMode` says nothing about that half, so both parts stay optional here.
+expectTypeOf<StrictEditableCopy["MediumId"]>().toEqualTypeOf<string | undefined>();
+expectTypeOf<StrictEditableCopy["InventoryNumber"]>().toEqualTypeOf<number | undefined>();
 
-// ... and is dropped from the update model entirely. A composite key, so both parts go: the old heuristic
-// looked at single keys only and left this entity with no managed property at all.
+// ... while the update model drops them entirely, which is what `strictOmit` is for. A composite key, so
+// both parts go - `keyProperties` treats every part of one alike.
 expectTypeOf<StrictUpdatableCopy>().not.toHaveProperty("MediumId");
 expectTypeOf<StrictUpdatableCopy>().not.toHaveProperty("InventoryNumber");
 // everything not createOnly is untouched by the mode
@@ -117,3 +123,21 @@ expectTypeOf<StrictUpdatableMember["IdDocument"]>().toExtend<
 expectTypeOf<StrictCopyService["update"]>().parameter(0).toExtend<StrictUpdatableCopy>();
 expectTypeOf<StrictCopyService["patch"]>().parameter(0).toExtend<Partial<StrictUpdatableCopy>>();
 expectTypeOf<StrictCopyCollectionService["create"]>().parameter(0).toExtend<StrictEditableCopy>();
+
+/* --- keyStrict: the spec-conformant reading of an unannotated key ---------------------------------- */
+
+// `strict` is the other half of the pair: the very same key, now required on create because it is
+// non-nullable and nothing says the server supplies it.
+expectTypeOf<KeyStrictEditableCopy["MediumId"]>().toEqualTypeOf<string>();
+expectTypeOf<KeyStrictEditableCopy["InventoryNumber"]>().toEqualTypeOf<number>();
+// and relaxed again on update, since the server will not change a key whatever the payload says
+expectTypeOf<KeyStrictUpdatableCopy["MediumId"]>().toEqualTypeOf<string | undefined>();
+
+/* --- keyAllComputed + strictOmit: the key disappears from the write models ------------------------- */
+
+// The two options meeting: `allComputed` makes every key the server's, `strictOmit` takes what the server
+// owns out of the models rather than leaving it there optional. Under `lenient` it would still be present.
+expectTypeOf<AllComputedEditableCopy>().not.toHaveProperty("MediumId");
+expectTypeOf<AllComputedEditableCopy>().not.toHaveProperty("InventoryNumber");
+// a `Core.Computed` property goes the same way, being readOnly for the same reason
+expectTypeOf<AllComputedEditableMedium>().not.toHaveProperty("PopularityScore");

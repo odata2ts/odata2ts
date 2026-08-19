@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, ManagedPropertyDetection, Modes } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, Modes } from "@odata2ts/odata2ts";
 
 function srcFolder(name: string, isSpecial = false) {
   return `resource/${isSpecial ? "specials/" : ""}${name}`;
@@ -20,7 +20,6 @@ const config: ConfigFileOptions = {
       source: srcFolder("trippin.xml"),
       output: outputFolder("trippin"),
       // TrippinService does not generate IDs on the server, but the client side => demo service
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
       allowRenaming: true,
       naming: {
         models: {
@@ -45,7 +44,6 @@ const config: ConfigFileOptions = {
       source: srcFolder("trippin-rw.xml"),
       output: outputFolder("trippin-rw"),
       // TrippinService does not generate IDs on the server, but the client side => demo service
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
       allowRenaming: true,
       bundledFileGeneration: false,
       naming: {
@@ -60,7 +58,6 @@ const config: ConfigFileOptions = {
       output: outputFolder("odataV2"),
       allowRenaming: true,
       // this demo service does not generate IDs, but requires the client to create new IDs
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
       enablePrimitivePropertyServices: true,
       naming: {
         models: {

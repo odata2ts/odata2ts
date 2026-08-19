@@ -7,9 +7,12 @@ import {
   ODataServiceOptionsInternalV2,
   PrimitiveTypeServiceV2,
 } from "@odata2ts/odata-service";
+// @ts-ignore
 import type { QTestEntity } from "./QTester.js";
+// @ts-ignore
 import { qTestEntity, QTestEntityId } from "./QTester.js";
-import type { EditableTestEntity, TestEntity, TestEntityId, UpdatableTestEntity } from "./TesterModel.js";
+// @ts-ignore
+import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
   constructor(client: ODataHttpClient, basePath: string, options?: ODataServiceOptions) {
@@ -34,7 +37,7 @@ export class TesterService extends ODataService {
 
 export class TestEntityService<AsV4 extends boolean = false> extends EntityTypeServiceV2<
   TestEntity,
-  UpdatableTestEntity,
+  EditableTestEntity,
   QTestEntity,
   AsV4
 > {

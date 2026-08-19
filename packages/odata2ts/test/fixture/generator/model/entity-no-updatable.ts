@@ -1,6 +1,6 @@
 export interface Book {
   /**
-   * **Key Property**: This is a key property used to identify the entity.
+   * **Key Property**: This is a key property used to identify the entity.<br/>**Immutable**: This property can be set when creating the entity, but not changed afterwards.
    *
    * OData Attributes:
    * |Attribute Name | Attribute Value |
@@ -34,4 +34,4 @@ export interface Book {
 
 export type BookId = string | { id: string };
 
-export interface EditableBook extends Pick<Book, "id" | "title">, Partial<Pick<Book, "note">> {}
+export interface EditableBook extends Pick<Book, "title">, Partial<Pick<Book, "id" | "note">> {}

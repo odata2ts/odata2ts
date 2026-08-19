@@ -8,7 +8,9 @@ import {
   ODataServiceOptions,
   UrlRequestCmd,
 } from "@odata2ts/odata-service";
+// @ts-ignore
 import type { QTestEntity } from "./QTester.js";
+// @ts-ignore
 import { QBestBook, QMostPop, QPostBestBook, qTestEntity, QTestEntityId } from "./QTester.js";
 import type {
   BestBookParams,
@@ -16,7 +18,7 @@ import type {
   PostBestBookParams,
   TestEntity,
   TestEntityId,
-  UpdatableTestEntity,
+  // @ts-ignore
 } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
@@ -77,7 +79,7 @@ export class TesterService extends ODataService {
   }
 }
 
-export class TestEntityService extends EntityTypeServiceV2<TestEntity, UpdatableTestEntity, QTestEntity> {
+export class TestEntityService extends EntityTypeServiceV2<TestEntity, EditableTestEntity, QTestEntity> {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qTestEntity, options);
   }

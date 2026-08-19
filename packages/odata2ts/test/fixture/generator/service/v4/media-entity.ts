@@ -6,9 +6,12 @@ import {
   ODataService,
   ODataServiceOptionsInternal,
 } from "@odata2ts/odata-service";
+// @ts-ignore
 import type { QEBook } from "./QTester.js";
+// @ts-ignore
 import { qEBook, QEBookId } from "./QTester.js";
-import type { EBook, EBookId, EditableEBook, UpdatableEBook } from "./TesterModel.js";
+// @ts-ignore
+import type { EBook, EBookId, EditableEBook } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
   public eBooks(): EBookCollectionService;
@@ -24,7 +27,7 @@ export class TesterService extends ODataService {
 
 export class EBookService<V extends ODataVersionV4 = "4.0"> extends MediaEntityServiceV4<
   EBook,
-  UpdatableEBook,
+  EditableEBook,
   QEBook,
   V
 > {

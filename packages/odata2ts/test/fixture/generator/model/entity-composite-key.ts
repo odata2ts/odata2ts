@@ -35,6 +35,4 @@ export interface Book {
 
 export type BookId = { tenantId: string; localId: string };
 
-export interface EditableBook extends Pick<Book, "tenantId" | "localId" | "title"> {}
-
-export interface UpdatableBook extends Pick<Book, "title">, Partial<Pick<Book, "tenantId" | "localId">> {}
+export interface EditableBook extends Pick<Book, "title">, Partial<Pick<Book, "tenantId" | "localId">> {}

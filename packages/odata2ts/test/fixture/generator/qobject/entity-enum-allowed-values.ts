@@ -1,4 +1,5 @@
 import { QEnumPath, QGuidPath, QueryObject } from "@odata2ts/odata-query-objects";
+// @ts-ignore
 import { Status, StatusConverter } from "./TesterModel.js";
 
 export class QBook extends QueryObject {

@@ -1,7 +1,7 @@
 import {
   ConfigFileOptions,
   EmitModes,
-  ManagedPropertyDetection,
+  KeyProperties,
   ManagedPropertyMode,
   Modes,
   NamingStrategies,
@@ -214,18 +214,29 @@ const config: ConfigFileOptions = {
     },
 
     /**
-     * `managedPropertyMode: "interoperable"`, the deliberate departure from the spec.
+     * `keyProperties: "strict"`, the spec-conformant reading of a key nobody annotated.
      *
-     * Its whole effect is a *negative* one - an unannotated key stays optional on create where the other
-     * two modes make it required - which is exactly the kind of thing a type check judges well and a
-     * server cannot judge at all: the request the mode prevents is one no client would send anyway. Held
-     * against `managedStrict` above, the pair pins both ends of what the option does to one model.
+     * Its whole effect is that an unannotated non-nullable key becomes *required* on create, where the
+     * default leaves it optional - which is exactly the kind of thing a type check judges well and a
+     * server cannot judge at all. Held against the baseline, the pair pins both ends of the option.
      */
-    managedInteroperable: {
-      serviceName: "ManagedInteroperable",
+    keyStrict: {
+      serviceName: "KeyStrict",
       source: V4_SOURCE,
-      output: "src-generated/managed-interoperable",
-      managedPropertyMode: ManagedPropertyMode.interoperable,
+      output: "src-generated/key-strict",
+      keyProperties: KeyProperties.strict,
+    },
+
+    /**
+     * `keyProperties: "allComputed"` together with `managedPropertyMode: "strictOmit"` - the combination
+     * in which a key disappears from the write models altogether, rather than merely turning optional.
+     */
+    keyAllComputed: {
+      serviceName: "KeyAllComputed",
+      source: V4_SOURCE,
+      output: "src-generated/key-all-computed",
+      keyProperties: KeyProperties.allComputed,
+      managedPropertyMode: ManagedPropertyMode.strictOmit,
     },
 
     /**
@@ -251,7 +262,7 @@ const config: ConfigFileOptions = {
         bigNumberAsString: true,
         odataVersion: "4.01",
       },
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
+      annotations: { disableManagedProperties: true },
       skipComments: true,
     },
   },

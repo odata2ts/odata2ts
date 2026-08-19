@@ -24,6 +24,7 @@ import {
   QTimeV2Path,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
+// @ts-ignore
 import type { BookId } from "./TesterModel.js";
 
 export class QBook extends QueryObject {

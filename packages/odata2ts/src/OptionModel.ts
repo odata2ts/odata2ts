@@ -61,72 +61,98 @@ export enum ManagedState {
 }
 
 /**
- * Which sources odata2ts may derive the {@link ManagedState} of a property from. Explicit configuration
- * is not one of them: it always applies, whatever this setting says.
+ * What odata2ts makes of a key property which no annotation and no configuration describes.
+ *
+ * A key is the one property odata2ts can say something about without being told: it identifies the
+ * entity, so it cannot change once the entity exists. What it cannot know is who supplies the value -
+ * the client on create, or the server. Only an annotation settles that, and most services state none.
  */
-export enum ManagedPropertyDetection {
+export enum KeyProperties {
   /**
-   * Evaluate the annotations of the service, and fall back to {@link keys} where they say nothing. The
-   * default, and the best of both worlds: authoritative wherever the service is explicit, still
-   * convenient for the many services which state no annotations at all.
+   * Treat the key as {@link ManagedState.createOnly}, but never require it on create - `nullable` is
+   * deliberately ignored there. The default, because a client cannot supply what the server generates,
+   * and a server that generates keys without saying so is the common case: CAP is the only
+   * implementation known to annotate them out of the box, and even there only for UUIDs, integer keys
+   * needing an explicit annotation.
+   *
+   * Not spec-conformant, and knowingly so - see {@link strict} for the reading the spec actually asks
+   * for. What it buys is a client that compiles against the services people really have.
    */
-  auto = "auto",
+  interoperable = "interoperable",
   /**
-   * Evaluate the annotations of the service and nothing else. A service which states none ends up with
-   * no managed properties at all.
+   * Treat the key as {@link ManagedState.createOnly} and let it follow `nullable` like any other
+   * property, so a non-nullable key is required on create. This is what the spec asks for: a key the
+   * service does not describe as computed is the client's to supply.
    */
-  annotation = "annotation",
+  strict = "strict",
   /**
-   * Ignore the annotations of the service: any key - single or composite alike - without a managed state
-   * of its own defaults to {@link ManagedState.createOnly}. It may be supplied on create, per `nullable`,
-   * but never changes afterwards - the common case for a key the client assigns rather than the server.
+   * Treat a *single* key property as {@link ManagedState.readOnly} - the server generates it, so no
+   * write model offers it. The parts of a composite key are left alone entirely and follow `nullable`
+   * like any other property, on the grounds that a composite key is rarely server-generated.
    */
-  keys = "keys",
+  singleComputed = "singleComputed",
   /**
-   * Derive nothing at all, not even from keys: a property is managed only where the configuration says so.
+   * {@link singleComputed} for the single-key case, and {@link ManagedState.optionalWithDefault} for
+   * every part of a composite key: still offered on create, never required.
    */
-  none = "none",
+  singleComputedComplexOptional = "singleComputedComplexOptional",
+  /**
+   * Treat every key property as {@link ManagedState.readOnly}, single and composite alike: the server
+   * owns the key, and no write model offers it.
+   */
+  allComputed = "allComputed",
 }
 
 /**
- * How odata2ts represents an immutable property - one whose {@link ManagedState} is
- * {@link ManagedState.createOnly}, whether from a `Core.Immutable` annotation or from
- * {@link ManagedPropertyDetection.keys} - in the generated write models.
+ * How a **managed** property - one the server looks after in some way, whatever its
+ * {@link ManagedState} - shows up in the generated write models.
  *
- * In every mode, create and update get a write model each wherever the two would differ: `create()`
- * takes the EditableModel, while `update()` (PUT) and `patch()` (PATCH) take the UpdatableModel. What
- * the modes differ in is what each of those says about an immutable property.
+ * A type gets a write model for each operation wherever the two differ: `create()` takes the
+ * EditableModel, `update()` (PUT) and `patch()` (PATCH) take the UpdatableModel. One rule decides both,
+ * for every managed state alike:
+ *
+ * **`strictOmit` removes a property wherever the server will not honour it; `lenient` leaves it there,
+ * optional.**
+ *
+ * So a `readOnly` property is absent from both write models under `strictOmit` and optional in both
+ * under `lenient`; a `createOnly` one is absent from the UpdatableModel under `strictOmit` and optional
+ * there under `lenient`, following `nullable` in the EditableModel either way. `optionalWithDefault` and
+ * `writeOnly` are unaffected by the mode: the server honours a value the client sends for both
+ * operations, so there is nothing to remove.
  */
 export enum ManagedPropertyMode {
   /**
-   * Spec-conformant, and the default. The EditableModel follows `nullable` here as it does for any
-   * other property, so an immutable property the service declares non-nullable is required on create.
-   * The UpdatableModel still carries it, but always optional: the spec permits an update payload to
-   * state such a property and obliges the server to leave it alone.
+   * Keep the property in the write model the server will not honour it in, but never require it there.
+   * The default, and what the spec allows: a payload may carry such a property, and the service is
+   * obliged to leave it alone.
    */
   lenient = "lenient",
   /**
-   * Spec-conformant as well, and stricter. The EditableModel is exactly as under
-   * {@link ManagedPropertyMode.lenient}; the UpdatableModel drops every immutable property entirely
-   * rather than leaving it optional. Stating one is permitted but pointless, and servers disagree on
-   * what they do with it - from ignoring it, as the spec says, to applying it after all.
+   * Take the property out of the write model the server will not honour it in. Stating it is permitted
+   * but pointless, and servers disagree on what they do with it - from ignoring it, as the spec says,
+   * to applying it after all. This is the mode that makes the compiler say so.
    */
   strictOmit = "strictOmit",
+}
+
+/**
+ * What odata2ts reads out of the annotations a service states about itself.
+ *
+ * One object rather than a flat option because annotations are a whole surface - the `Org.OData.Core.V1`
+ * terms about managed properties are only the first of them - and each use of that surface deserves its
+ * own switch.
+ */
+export interface AnnotationOptions {
   /**
-   * **Not** spec-conformant - an escape hatch rather than a matter of style. A key property which the
-   * service annotates in no way at all is left optional on create, `nullable` notwithstanding; the
-   * UpdatableModel is as under {@link ManagedPropertyMode.lenient}.
+   * Stop deriving the {@link ManagedState} of a property from the annotations of the service. Off by
+   * default: `Core.Computed`, `Core.Immutable`, `Core.ComputedDefaultValue` and `Core.Permissions` are
+   * evaluated, and a service which states them properly needs nothing else.
    *
-   * It exists for services which generate their keys server-side but never say so. Under the other two
-   * modes the key rule ({@link ManagedPropertyDetection.keys}) reads such a key as client-assigned and
-   * demands it on create, which no client can satisfy. Prefer fixing the service - `Core.Computed`
-   * states this properly - or configuring the property by hand, and reach for this only where neither
-   * is possible.
-   *
-   * Only unannotated keys are affected. A property carrying `Core.Immutable` follows `nullable` here
-   * as everywhere else: there the service has spoken for itself.
+   * Turn it on where the annotations are wrong or unwanted, and state what is managed by hand instead -
+   * through `managed` in the property options, and through {@link KeyProperties} for the keys, neither
+   * of which this switch touches.
    */
-  interoperable = "interoperable",
+  disableManagedProperties?: boolean;
 }
 
 /**
@@ -233,19 +259,22 @@ export interface CliOptions {
    */
   serviceName?: string;
   /**
-   * Which sources odata2ts derives the managed state of a property from, i.e. in which way it is not
-   * editable. By default, the annotations of the service are evaluated and any unannotated key - single
-   * or composite - defaults to immutable (`Core.Immutable`-like: settable on create, per `nullable`,
-   * never afterwards) wherever they say nothing.
-   *
-   * Configuring a property explicitly always wins over this setting.
+   * What odata2ts reads out of the annotations of the service. See {@link AnnotationOptions}.
    */
-  managedPropertyDetection?: ManagedPropertyDetection;
+  annotations?: AnnotationOptions;
   /**
-   * How an immutable property - one whose managed state is {@link ManagedState.createOnly} - shows up
-   * in the generated write models. By default, lenient: it stays part of the one EditableModel, always
-   * optional. Set to "strictOmit" to have EditableModel's required/optional split follow `nullable` for
-   * it instead, and to additionally generate an UpdatableModel with it dropped entirely.
+   * What odata2ts makes of a key property which neither an annotation nor the configuration describes.
+   * By default `interoperable`: the key is immutable, but never demanded on create, since a server
+   * which generates its keys without saying so is the common case.
+   *
+   * Configuring a property explicitly - via `managed` in `propertiesByName` or `byTypeAndName` - always
+   * wins over this setting, which is how a single key is given a different treatment from the rest.
+   */
+  keyProperties?: KeyProperties;
+  /**
+   * How a managed property shows up in the generated write models - kept but never required
+   * (`lenient`, the default), or taken out of the model the server would not honour it in
+   * (`strictOmit`). See {@link ManagedPropertyMode}.
    */
   managedPropertyMode?: ManagedPropertyMode;
   /**

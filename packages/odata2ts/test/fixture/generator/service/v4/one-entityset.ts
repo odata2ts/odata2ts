@@ -7,9 +7,12 @@ import {
   ODataServiceOptionsInternal,
   PrimitiveTypeServiceV4,
 } from "@odata2ts/odata-service";
+// @ts-ignore
 import type { QTestEntity } from "./QTester.js";
+// @ts-ignore
 import { qTestEntity, QTestEntityId } from "./QTester.js";
-import type { EditableTestEntity, TestEntity, TestEntityId, UpdatableTestEntity } from "./TesterModel.js";
+// @ts-ignore
+import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
   public ents(): TestEntityCollectionService;
@@ -25,7 +28,7 @@ export class TesterService extends ODataService {
 
 export class TestEntityService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
   TestEntity,
-  UpdatableTestEntity,
+  EditableTestEntity,
   QTestEntity,
   V
 > {

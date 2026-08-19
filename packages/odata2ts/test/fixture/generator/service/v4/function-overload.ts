@@ -1,6 +1,8 @@
 import type { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { ODataService, UrlGetRequestCmd } from "@odata2ts/odata-service";
+// @ts-ignore
 import { QBestReview } from "./QTester.js";
+// @ts-ignore
 import type { BestReviewParams } from "./TesterModel.js";
 
 export class TesterService extends ODataService {

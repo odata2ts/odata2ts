@@ -1,4 +1,8 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
+import type {
+  EditableBook as StrictEditableBook,
+  EditableMedium as StrictEditableMedium,
+} from "../../src-generated/library-strict/library-catalog/index.js";
 import type { EditableBook, EditableMedium } from "../../src-generated/library/library-catalog/index.js";
 import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
@@ -11,14 +15,18 @@ import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
  * vocabulary under the alias `Core` and writes `Core.Computed`. A generator that only resolved aliases
  * would fail here, one that only compared bare names would fail there.
  *
- * The boundary is visible in the same model: the keys carry no annotation of their own, so they get their
- * managed state from the key rule `managedPropertyDetection: "auto"` falls back to.
+ * The boundary is visible in the same model: the keys carry no annotation of their own, so what becomes
+ * of them is `keyProperties`' business rather than the annotations'.
  */
 describe("ASP.NET Library: Core annotations", () => {
   test("Core.Computed is understood without a vocabulary reference", async () => {
-    expectTypeOf<EditableMedium>().not.toHaveProperty("PopularityScore");
+    // `Core.Computed` makes it readOnly, and under the default `lenient` mode a readOnly property stays
+    // in the write model, optional: the spec lets a payload carry one, obliging the server to ignore it
+    expectTypeOf<EditableMedium["PopularityScore"]>().toEqualTypeOf<number | null | undefined>();
+    // ... while `strictOmit` takes it out, since sending it achieves nothing
+    expectTypeOf<StrictEditableMedium>().not.toHaveProperty("PopularityScore");
 
-    // readable all the same: the term keeps a property out of the payload, not out of the model
+    // readable either way: the term says who writes the property, not who reads it
     const read = await LIBRARY.Media(BOOK_DER_PROZESS).query().execute();
     expect(read.status).toBe(200);
     expectTypeOf(read.data.PopularityScore).toEqualTypeOf<number | null>();
@@ -31,7 +39,8 @@ describe("ASP.NET Library: Core annotations", () => {
      * (`Medium` -> `PrintMedium` -> `Book`), which is where an implementation keyed on the entity that
      * happens to be generated would come apart.
      */
-    expectTypeOf<EditableBook>().not.toHaveProperty("PopularityScore");
+    expectTypeOf<EditableBook["PopularityScore"]>().toEqualTypeOf<number | null | undefined>();
+    expectTypeOf<StrictEditableBook>().not.toHaveProperty("PopularityScore");
 
     const created = await LIBRARY.Media()
       .asBookCollectionService()

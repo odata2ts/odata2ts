@@ -4,7 +4,7 @@ export interface Author {
 
 export type AuthorId = number | { id: number };
 
-export interface EditableAuthor extends Pick<Author, "id"> {}
+export interface EditableAuthor extends Partial<Pick<Author, "id">> {}
 
 export interface Book {
   id: number;
@@ -15,7 +15,7 @@ export interface Book {
 
 export type BookId = number | { id: number };
 
-export interface EditableBook extends Pick<Book, "id"> {
+export interface EditableBook extends Partial<Pick<Book, "id">> {
   author?: { "@id": string };
   altAuthor?: { "@id": string } | null;
   relatedAuthors?: Array<{ "@id": string }>;

@@ -1,5 +1,5 @@
 import { Command, Option } from "commander";
-import { CliOptions, EmitModes, ManagedPropertyDetection, ManagedPropertyMode, Modes } from "../OptionModel.js";
+import { CliOptions, EmitModes, KeyProperties, ManagedPropertyMode, Modes } from "../OptionModel.js";
 
 function parseMode(value: string, dummyPrevious: Modes | undefined) {
   switch (value) {
@@ -31,12 +31,12 @@ function parseEmitMode(value: string, dummyPrevious: EmitModes) {
   }
 }
 
-function parseManagedPropertyDetection(value: string, dummyPrevious: ManagedPropertyDetection | undefined) {
-  const detection = ManagedPropertyDetection[value as keyof typeof ManagedPropertyDetection];
-  if (!detection) {
-    throw new Error(`Not a valid ManagedPropertyDetection: ${value}`);
+function parseKeyProperties(value: string, dummyPrevious: KeyProperties | undefined) {
+  const keyProperties = KeyProperties[value as keyof typeof KeyProperties];
+  if (!keyProperties) {
+    throw new Error(`Not a valid KeyProperties value: ${value}`);
   }
-  return detection;
+  return keyProperties;
 }
 
 function parseManagedPropertyMode(value: string, dummyPrevious: ManagedPropertyMode | undefined) {
@@ -80,15 +80,12 @@ export function processCliArgs(argv: Array<string>) {
     .option("-d, --debug", "Verbose debug infos")
     .option("--service-name <serviceName>", "Give the service your own name")
     .addOption(
-      new Option(
-        "--managed-property-detection <mode>",
-        "Which sources to derive from whether a prop is managed by the server side (not editable)",
-      )
-        .choices(Object.values(ManagedPropertyDetection))
-        .argParser<ManagedPropertyDetection>(parseManagedPropertyDetection),
+      new Option("--key-properties <mode>", "What an unannotated key property is taken to be")
+        .choices(Object.values(KeyProperties))
+        .argParser<KeyProperties>(parseKeyProperties),
     )
     .addOption(
-      new Option("--managed-property-mode <mode>", "How an immutable property shows up in the generated write models")
+      new Option("--managed-property-mode <mode>", "How a managed property shows up in the generated write models")
         .choices(Object.values(ManagedPropertyMode))
         .argParser<ManagedPropertyMode>(parseManagedPropertyMode),
     )

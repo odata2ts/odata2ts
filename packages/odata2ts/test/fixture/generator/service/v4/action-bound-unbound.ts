@@ -8,9 +8,12 @@ import {
   ODataServiceOptionsInternal,
   UrlRequestCmd,
 } from "@odata2ts/odata-service";
+// @ts-ignore
 import type { QTestEntity } from "./QTester.js";
+// @ts-ignore
 import { QPing, qTestEntity, QTestEntityId, QVote } from "./QTester.js";
-import type { EditableTestEntity, TestEntity, TestEntityId, UpdatableTestEntity, VoteParams } from "./TesterModel.js";
+// @ts-ignore
+import type { EditableTestEntity, TestEntity, TestEntityId, VoteParams } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
   private _qPing?: QPing;
@@ -57,7 +60,7 @@ export class TesterService extends ODataService {
 
 export class TestEntityService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
   TestEntity,
-  UpdatableTestEntity,
+  EditableTestEntity,
   QTestEntity,
   V
 > {

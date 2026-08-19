@@ -26,10 +26,11 @@ describe("Olingo V2 Library: immutable properties under strictOmit", () => {
   }
 
   test("the create model keeps the immutable properties, the update model drops them", () => {
-    // `LoanedAt` from `sap:updatable="false"`, `Id` from the key rule - both createOnly, both
-    // `Nullable="false"`, so both required on create under strictOmit
-    expectTypeOf<EditableLoan["Id"]>().toEqualTypeOf<string>();
+    // `LoanedAt` comes from `sap:updatable="false"` and is `Nullable="false"`, so the service itself
+    // says it is required on create; the key is non-nullable too but nothing describes it, and the
+    // default `keyProperties` will not demand one the server may be generating
     expectTypeOf<EditableLoan["LoanedAt"]>().toEqualTypeOf<string>();
+    expectTypeOf<EditableLoan["Id"]>().toEqualTypeOf<string | undefined>();
 
     expectTypeOf<UpdatableLoan>().not.toHaveProperty("Id");
     expectTypeOf<UpdatableLoan>().not.toHaveProperty("LoanedAt");

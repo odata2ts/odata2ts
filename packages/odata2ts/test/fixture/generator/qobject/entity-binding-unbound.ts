@@ -6,6 +6,7 @@ import {
   QNumberPath,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
+// @ts-ignore
 import type { AuthorId, BookId } from "./TesterModel.js";
 
 export class QAuthor extends QueryObject {

@@ -7,9 +7,12 @@ import {
   ODataServiceOptionsInternal,
   StreamServiceV4,
 } from "@odata2ts/odata-service";
+// @ts-ignore
 import type { QAudiobook } from "./QTester.js";
+// @ts-ignore
 import { qAudiobook, QAudiobookId } from "./QTester.js";
-import type { Audiobook, AudiobookId, EditableAudiobook, UpdatableAudiobook } from "./TesterModel.js";
+// @ts-ignore
+import type { Audiobook, AudiobookId, EditableAudiobook } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
   public audiobooks(): AudiobookCollectionService;
@@ -25,7 +28,7 @@ export class TesterService extends ODataService {
 
 export class AudiobookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
   Audiobook,
-  UpdatableAudiobook,
+  EditableAudiobook,
   QAudiobook,
   V
 > {

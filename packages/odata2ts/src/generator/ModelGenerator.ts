@@ -14,6 +14,8 @@ import {
   EnumType,
   hasNumericMembers,
   hasUpdatableModel,
+  isInCreateModel,
+  isInUpdateModel,
   isRequiredOnCreate,
   isRequiredOnUpdate,
   needsEnumConverter,
@@ -59,10 +61,6 @@ function isReadable(prop: PropertyModel): boolean {
   return prop.managed !== ManagedState.writeOnly;
 }
 
-function isEditable(prop: PropertyModel): boolean {
-  return prop.managed !== ManagedState.readOnly;
-}
-
 export const generateModels: EntityBasedGeneratorFunction = (
   project: ProjectManager,
   dataModel,
@@ -83,23 +81,22 @@ class ModelGenerator {
     private namingHelper: NamingHelper,
   ) {}
 
+  private mode(): ManagedPropertyMode {
+    return this.options.managedPropertyMode!;
+  }
+
   /** Whether a property has to be supplied on create - see {@link isRequiredOnCreate}. */
   private isEditableRequired(prop: PropertyModel): boolean {
-    return isRequiredOnCreate(prop, this.options.managedPropertyMode!);
+    return isRequiredOnCreate(prop);
   }
 
   private isUpdatableRequired(prop: PropertyModel): boolean {
-    return isRequiredOnUpdate(prop, this.options.managedPropertyMode!);
+    return isRequiredOnUpdate(prop);
   }
 
   /** Whether this type gets its own UpdatableModel - see {@link hasUpdatableModel}. */
   private hasOwnUpdatableModel(model: ComplexType): boolean {
-    return hasUpdatableModel(model, this.options.managedPropertyMode!);
-  }
-
-  /** Whether the UpdatableModel leaves an immutable property out rather than merely making it optional. */
-  private omitsImmutableProps(): boolean {
-    return this.options.managedPropertyMode === ManagedPropertyMode.strictOmit;
+    return hasUpdatableModel(model, this.mode());
   }
 
   public async generate(): Promise<void> {
@@ -411,7 +408,9 @@ class ModelGenerator {
   private generateEditableModel(file: FileHandler, model: ComplexType) {
     const entityTypes = [DataTypes.ModelType, DataTypes.ComplexType];
     // stream props are not writable through the payload either - the stream service is the only way in
-    const allProps = [...model.baseProps, ...model.props].filter((p) => isEditable(p) && notStream(p));
+    const allProps = [...model.baseProps, ...model.props].filter(
+      (p) => isInCreateModel(p, this.mode()) && notStream(p),
+    );
 
     const plainProps = allProps.filter((p) => !entityTypes.includes(p.dataType));
     // a write-only prop cannot be picked from the model, which doesn't know it - it is declared here
@@ -478,7 +477,7 @@ class ModelGenerator {
   private generateUpdatableModel(file: FileHandler, model: ComplexType) {
     const entityTypes = [DataTypes.ModelType, DataTypes.ComplexType];
     const allProps = [...model.baseProps, ...model.props].filter(
-      (p) => isEditable(p) && notStream(p) && !(this.omitsImmutableProps() && p.managed === ManagedState.createOnly),
+      (p) => isInUpdateModel(p, this.mode()) && notStream(p),
     );
 
     const plainProps = allProps.filter((p) => !entityTypes.includes(p.dataType));

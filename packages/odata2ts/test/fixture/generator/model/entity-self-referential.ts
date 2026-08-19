@@ -42,7 +42,7 @@ export interface Book {
 
 export type BookId = string | { id: string };
 
-export interface EditableBook extends Pick<Book, "id" | "name"> {
+export interface EditableBook extends Pick<Book, "name">, Partial<Pick<Book, "id">> {
   /** Create "friends" along with this entity (deep insert), or update it along with it (deep update). */
   friends?: Array<EditableBook>;
   /** Create "bestFriend" along with this entity (deep insert), or update it along with it (deep update). */

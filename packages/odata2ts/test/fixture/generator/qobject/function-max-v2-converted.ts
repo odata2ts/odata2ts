@@ -23,6 +23,7 @@ import {
   numberToStringConverter,
   stringToPrefixModelConverter,
 } from "@odata2ts/test-converters";
+// @ts-ignore
 import type { MaxFunctionParams } from "./TesterModel.js";
 
 export class QTheEntity extends QueryObject {

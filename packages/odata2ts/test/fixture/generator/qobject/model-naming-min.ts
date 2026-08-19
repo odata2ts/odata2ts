@@ -7,7 +7,9 @@ import {
   QId,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
+// @ts-ignore
 import type { BookId, parentId } from "./TesterModel.js";
+// @ts-ignore
 import { Choice } from "./TesterModel.js";
 
 export class parentBaseType extends QueryObject {

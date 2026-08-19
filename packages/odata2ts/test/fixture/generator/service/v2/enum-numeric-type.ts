@@ -8,9 +8,13 @@ import {
   ODataService,
   ODataServiceOptions,
 } from "@odata2ts/odata-service";
+// @ts-ignore
 import type { QBook } from "./QTester.js";
+// @ts-ignore
 import { qBook, QBookId } from "./QTester.js";
-import type { Book, BookId, EditableBook, UpdatableBook } from "./TesterModel.js";
+// @ts-ignore
+import type { Book, BookId, EditableBook } from "./TesterModel.js";
+// @ts-ignore
 import { Choice } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
@@ -25,7 +29,7 @@ export class TesterService extends ODataService {
   }
 }
 
-export class BookService extends EntityTypeServiceV2<Book, UpdatableBook, QBook> {
+export class BookService extends EntityTypeServiceV2<Book, EditableBook, QBook> {
   private _altChoices?: CollectionServiceV2<EnumCollection<typeof Choice>, QNumericEnumCollection<typeof Choice>>;
 
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {

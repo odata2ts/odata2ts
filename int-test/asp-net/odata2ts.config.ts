@@ -46,18 +46,6 @@ const config: ConfigFileOptions = {
   // on, because the property services are a generator feature of their own and otherwise never
   // meet a real server: see test/feature/PropertyServices.test.ts
   enablePrimitivePropertyServices: true,
-  /**
-   * This server is the case `interoperable` exists for: it generates `Medium.Id` and `Member.Id` itself
-   * and says so nowhere - no `Core.Computed`, no `Core.ComputedDefaultValue`. The key rule therefore
-   * reads them as client-assigned, and the other modes would demand them on create, which no caller can
-   * satisfy.
-   *
-   * The proper fix belongs in the server, and `int-test/cap` shows what it looks like: CAP annotates its
-   * generated keys, so it stays on the default mode and gives that mode its server coverage. Until this
-   * one follows, every suite here would be writing keys the server discards. Set at the base level so it
-   * reaches every client below; `libraryStrict` overrides it, being about a different question.
-   */
-  managedPropertyMode: ManagedPropertyMode.interoperable,
   services: {
     library: {
       serviceName: "Library",

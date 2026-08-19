@@ -5,7 +5,7 @@ export interface Category {
 
 export type CategoryId = { id: boolean; version: number | null };
 
-export interface EditableCategory extends Pick<Category, "id">, Partial<Pick<Category, "version">> {}
+export interface EditableCategory extends Partial<Pick<Category, "id" | "version">> {}
 
 export interface Book {
   id: boolean;
@@ -14,7 +14,7 @@ export interface Book {
 
 export type BookId = boolean | { id: boolean };
 
-export interface EditableBook {
+export interface EditableBook extends Partial<Pick<Book, "id">> {
   address?: EditableLOCATION | null;
 }
 

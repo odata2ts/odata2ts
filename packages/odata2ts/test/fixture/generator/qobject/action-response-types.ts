@@ -6,6 +6,7 @@ import {
   QStringPath,
   QueryObject,
 } from "@odata2ts/odata-query-objects";
+// @ts-ignore
 import type { Person } from "./TesterModel.js";
 
 export class QPerson extends QueryObject {

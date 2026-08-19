@@ -34,7 +34,7 @@ export interface Book {
 
 export type BookId = string | { id: string };
 
-export interface EditableBook extends Pick<Book, "id"> {
+export interface EditableBook extends Partial<Pick<Book, "id">> {
   address: EditableAddress;
   coordinates: EditableCoordinates;
 }

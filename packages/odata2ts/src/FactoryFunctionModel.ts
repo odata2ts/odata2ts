@@ -8,7 +8,8 @@ import { ProjectManager } from "./project/ProjectManager.js";
 export type DigestionOptions = Pick<
   RunOptions,
   | "converters"
-  | "managedPropertyDetection"
+  | "annotations"
+  | "keyProperties"
   | "propertiesByName"
   | "byTypeAndName"
   | "v2"

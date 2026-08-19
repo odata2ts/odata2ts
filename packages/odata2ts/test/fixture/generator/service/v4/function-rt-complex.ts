@@ -7,16 +7,12 @@ import {
   ODataServiceOptionsInternal,
   UrlGetRequestCmd,
 } from "@odata2ts/odata-service";
+// @ts-ignore
 import type { QBook } from "./QTester.js";
+// @ts-ignore
 import { Book_QBestReview, BookCollection_QFilterReviews, qBook, QBookId } from "./QTester.js";
-import type {
-  Book,
-  BookCollection_FilterReviewsParams,
-  BookId,
-  EditableBook,
-  Review,
-  UpdatableBook,
-} from "./TesterModel.js";
+// @ts-ignore
+import type { Book, BookCollection_FilterReviewsParams, BookId, EditableBook, Review } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
   public books(): BookCollectionService;
@@ -30,7 +26,7 @@ export class TesterService extends ODataService {
   }
 }
 
-export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<Book, UpdatableBook, QBook, V> {
+export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<Book, EditableBook, QBook, V> {
   private _bookQBestReview?: Book_QBestReview;
 
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {

@@ -7,18 +7,12 @@ import {
   ODataServiceOptionsInternal,
   PrimitiveTypeServiceV4,
 } from "@odata2ts/odata-service";
+// @ts-ignore
 import type { QAuthor, QBook } from "./QTester.js";
+// @ts-ignore
 import { qAuthor, QAuthorId, qBook, QBookId } from "./QTester.js";
-import type {
-  Author,
-  AuthorId,
-  Book,
-  BookId,
-  EditableAuthor,
-  EditableBook,
-  UpdatableAuthor,
-  UpdatableBook,
-} from "./TesterModel.js";
+// @ts-ignore
+import type { Author, AuthorId, Book, BookId, EditableAuthor, EditableBook } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
   public books(): BookCollectionService;
@@ -34,7 +28,7 @@ export class TesterService extends ODataService {
 
 export class AuthorService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<
   Author,
-  UpdatableAuthor,
+  EditableAuthor,
   QAuthor,
   V
 > {
@@ -76,7 +70,7 @@ export class AuthorCollectionService<V extends ODataVersionV4 = "4.0"> extends E
   }
 }
 
-export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<Book, UpdatableBook, QBook, V> {
+export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeServiceV4<Book, EditableBook, QBook, V> {
   private _id?: PrimitiveTypeServiceV4<string, V>;
   private _author?: AuthorService<V>;
 

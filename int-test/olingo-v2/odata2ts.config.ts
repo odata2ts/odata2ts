@@ -51,13 +51,6 @@ const config: ConfigFileOptions = {
    * cannot be derived from the response side.
    */
   v2: { responseResultsWrapping: true, payloadResultsWrapping: true },
-  /**
-   * As in `int-test/asp-net`: this server generates `Medium.Id` without annotating it, in either V2
-   * dialect. `sap:creatable="false"` would state it - the digester maps that pair onto `Core.Computed` -
-   * but the model does not use it on its keys, so the key rule reads them as client-assigned.
-   * `interoperable` is what keeps that from demanding a key on create. `libraryStrict` overrides it.
-   */
-  managedPropertyMode: ManagedPropertyMode.interoperable,
   services: {
     library: {
       serviceName: "Library",

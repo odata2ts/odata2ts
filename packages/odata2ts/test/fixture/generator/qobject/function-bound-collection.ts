@@ -1,5 +1,6 @@
 import type { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { QBooleanParam, QBooleanPath, QFunctionV4, QStringParam, QueryObject } from "@odata2ts/odata-query-objects";
+// @ts-ignore
 import type { BookCollection_MinFunctionParams } from "./TesterModel.js";
 
 export class QBook extends QueryObject {
