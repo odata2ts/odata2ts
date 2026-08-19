@@ -7,7 +7,13 @@ import { UrlBuilderRequestCmdV2, UrlRequestCmd } from "../request";
 import { MERGE_HEADERS } from "../RequestHeaders.js";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
-export class ComplexTypeServiceV2<T, EditableT, Q extends QueryObjectModel, AsV4 extends boolean = false> {
+/**
+ * Service for a complex property of an entity, addressed through its owner. Like
+ * {@link EntityTypeServiceV2} it only ever writes to something that already exists - the owning entity
+ * was created elsewhere - so `UpdatableT`, the model without the properties that cannot change after
+ * creation, is the only write shape it needs.
+ */
+export class ComplexTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4 extends boolean = false> {
   protected readonly __base: ServiceStateHelperV2<Q, AsV4>;
 
   protected constructor(
@@ -24,11 +30,11 @@ export class ComplexTypeServiceV2<T, EditableT, Q extends QueryObjectModel, AsV4
     return this.__base.path;
   }
 
-  public patch(model: Partial<EditableT>, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
+  public patch(model: Partial<UpdatableT>, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
     const headers = { ...getDefaultHeaders(), ...MERGE_HEADERS };
 
-    return new UrlBuilderRequestCmdV2<undefined, Q, ModelQueryBuilderV2<Q>, Partial<EditableT>>(
+    return new UrlBuilderRequestCmdV2<undefined, Q, ModelQueryBuilderV2<Q>, Partial<UpdatableT>>(
       client,
       ODataHttpMethods.Post,
       createModelQueryBuilder(queryFn),
@@ -41,10 +47,10 @@ export class ComplexTypeServiceV2<T, EditableT, Q extends QueryObjectModel, AsV4
     );
   }
 
-  public update(model: EditableT, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
+  public update(model: UpdatableT, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
-    return new UrlBuilderRequestCmdV2<undefined, Q, ModelQueryBuilderV2<Q>, EditableT>(
+    return new UrlBuilderRequestCmdV2<undefined, Q, ModelQueryBuilderV2<Q>, UpdatableT>(
       client,
       ODataHttpMethods.Put,
       createModelQueryBuilder(queryFn),

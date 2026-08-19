@@ -16,6 +16,12 @@ import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV2 } from "../request";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
+/**
+ * Service for an entity set: it queries the collection and creates entities in it. Creation is the one
+ * write that may supply properties which can never change afterwards, so this is the only entity service
+ * still typed on `EditableT`. Everything that writes to an entity which already exists -
+ * {@link EntityTypeServiceV2} and friends - takes the updatable model instead.
+ */
 export abstract class EntitySetServiceV2<
   T,
   EditableT,

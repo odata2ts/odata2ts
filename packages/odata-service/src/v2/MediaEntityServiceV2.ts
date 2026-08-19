@@ -22,10 +22,10 @@ const VALUE_SEGMENT = "$value";
  */
 export class MediaEntityServiceV2<
   T,
-  EditableT,
+  UpdatableT,
   Q extends QueryObjectModel,
   AsV4 extends boolean = false,
-> extends EntityTypeServiceV2<T, EditableT, Q, AsV4> {
+> extends EntityTypeServiceV2<T, UpdatableT, Q, AsV4> {
   private _content?: StreamServiceV2;
 
   /**

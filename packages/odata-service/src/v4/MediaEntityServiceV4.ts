@@ -16,10 +16,10 @@ const VALUE_SEGMENT = "$value";
  */
 export class MediaEntityServiceV4<
   T,
-  EditableT,
+  UpdatableT,
   Q extends QueryObjectModel,
   V extends ODataVersionV4 = "4.0",
-> extends EntityTypeServiceV4<T, EditableT, Q, V> {
+> extends EntityTypeServiceV4<T, UpdatableT, Q, V> {
   private _content?: StreamServiceV4<V>;
 
   /**

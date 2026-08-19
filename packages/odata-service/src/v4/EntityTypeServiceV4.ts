@@ -7,7 +7,13 @@ import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
 import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
-export class EntityTypeServiceV4<T, EditableT, Q extends QueryObjectModel, V extends ODataVersionV4 = "4.0"> {
+/**
+ * Service for a single, already addressed entity: it updates, patches, deletes and reads it, but never
+ * creates one - that is the entity set's business. So the only write shape it needs is `UpdatableT`,
+ * the model without the properties that cannot change after creation. Creating an entity goes through
+ * {@link EntitySetServiceV4}, which takes the editable model instead.
+ */
+export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V extends ODataVersionV4 = "4.0"> {
   protected readonly __base: ServiceStateHelperV4<Q, V>;
 
   public constructor(
@@ -41,7 +47,7 @@ export class EntityTypeServiceV4<T, EditableT, Q extends QueryObjectModel, V ext
    * @param queryFn
    */
   public patch<Response extends boolean = false>(
-    model: ODataModelPayloadFor<V, Partial<EditableT>>,
+    model: ODataModelPayloadFor<V, Partial<UpdatableT>>,
     patchOptions?: SubtypeOptions,
     queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
@@ -57,7 +63,7 @@ export class EntityTypeServiceV4<T, EditableT, Q extends QueryObjectModel, V ext
       EntityModificationResponseV4<Response, T, V>,
       Q,
       ModelQueryBuilderV4<Q>,
-      ODataModelPayloadFor<V, Partial<EditableT>>
+      ODataModelPayloadFor<V, Partial<UpdatableT>>
     >(client, ODataHttpMethods.Patch, createModelQueryBuilder(queryFn, actualPath), qModel, data, {
       headers: { ...getDefaultHeaders(), ...getVersionHeaders() },
       mainRequestConverter: qModel,
@@ -82,7 +88,7 @@ export class EntityTypeServiceV4<T, EditableT, Q extends QueryObjectModel, V ext
    * @param queryFn
    */
   public update<Response extends boolean = false>(
-    model: ODataModelPayloadFor<V, EditableT>,
+    model: ODataModelPayloadFor<V, UpdatableT>,
     updateOptions?: SubtypeOptions,
     queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
@@ -98,7 +104,7 @@ export class EntityTypeServiceV4<T, EditableT, Q extends QueryObjectModel, V ext
       EntityModificationResponseV4<Response, T, V>,
       Q,
       ModelQueryBuilderV4<Q>,
-      ODataModelPayloadFor<V, EditableT>
+      ODataModelPayloadFor<V, UpdatableT>
     >(client, ODataHttpMethods.Put, createModelQueryBuilder(queryFn, actualPath), qModel, data, {
       headers: { ...getDefaultHeaders(), ...getVersionHeaders() },
       mainRequestConverter: qModel,
