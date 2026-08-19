@@ -2,7 +2,7 @@ import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { generateModels } from "../../../src/generator/index.js";
-import { EmitModes, EnumSynthesis, ManagedPropertyDetection, Modes } from "../../../src/index.js";
+import { EmitModes, EnumSynthesis, ManagedPropertyDetection, ManagedPropertyMode, Modes } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
 import { allowedValues, core, corePermissions } from "../../data-model/builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
@@ -248,6 +248,90 @@ describe("Model Generator Tests V4", () => {
       skipEditableModels: false,
       skipIdModels: false,
       managedPropertyDetection: ManagedPropertyDetection.none,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: strictOmit - EditableModel required per nullable, UpdatableModel drops immutable props`, async () => {
+    // given a key (createOnly via detection) and an annotated immutable prop, both non-nullable
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Guid)
+        .addProp("title", ODataTypesV4.String, false)
+        .addProp("isbnCode", ODataTypesV4.String, false)
+        .addPropAnnotations("isbnCode", [core("Immutable", { bool: true, fullyQualified: true })]),
+    );
+
+    // when generating in strictOmit mode
+    // then both immutable props are required (matching their nullable), and UpdatableTestModel drops them
+    await generateAndCompare("entity-strict-omit.ts", {
+      skipComments: false,
+      skipEditableModels: false,
+      skipIdModels: false,
+      managedPropertyMode: ManagedPropertyMode.strictOmit,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: strictOmit - nested complex type resolves to its own Updatable or Editable model`, async () => {
+    // given a complex type with an immutable prop, one without, and an entity nesting both plus its own key
+    odataBuilder
+      .addComplexType("Address", undefined, (builder) =>
+        builder
+          .addProp("street", ODataTypesV4.String, false)
+          .addProp("city", ODataTypesV4.String, false)
+          .addPropAnnotations("street", [core("Immutable", { bool: true, fullyQualified: true })]),
+      )
+      .addComplexType("Coordinates", undefined, (builder) =>
+        builder.addProp("lat", ODataTypesV4.Double, false).addProp("lon", ODataTypesV4.Double, false),
+      )
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Guid)
+          .addProp("address", withNs("Address"), false)
+          .addProp("coordinates", withNs("Coordinates"), false),
+      );
+
+    // when generating in strictOmit mode
+    // then UpdatableTestModel.address points at UpdatableAddress (Address has its own immutable prop),
+    // while UpdatableTestModel.coordinates points at EditableCoordinates (nothing to strip there)
+    await generateAndCompare("entity-nested-complex.ts", {
+      skipComments: false,
+      skipEditableModels: false,
+      skipIdModels: false,
+      managedPropertyMode: ManagedPropertyMode.strictOmit,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: strictOmit - self-referential navigation property always stays Editable`, async () => {
+    // given an entity whose own key is immutable, with a self-referential nav prop and collection
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Guid)
+        .addProp("name", ODataTypesV4.String, false)
+        .addProp("friends", `Collection(${withNs(ENTITY_NAME)})`)
+        .addProp("bestFriend", withNs(ENTITY_NAME), true),
+    );
+
+    // when generating in strictOmit mode
+    // then UpdatableTestModel.friends/bestFriend still reference EditableTestModel, never
+    // UpdatableTestModel - the one thing that keeps this from cycling into itself
+    await generateAndCompare("entity-self-referential.ts", {
+      skipComments: false,
+      skipEditableModels: false,
+      skipIdModels: false,
+      managedPropertyMode: ManagedPropertyMode.strictOmit,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: strictOmit - skipEditableModels also skips UpdatableModel`, async () => {
+    odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder.addKeyProp("id", ODataTypesV4.Guid).addProp("title", ODataTypesV4.String, false),
+    );
+
+    await generateAndCompare("entity-skip-editable.ts", {
+      skipComments: false,
+      skipEditableModels: true,
+      skipIdModels: false,
+      managedPropertyMode: ManagedPropertyMode.strictOmit,
     });
   });
 
