@@ -1,51 +1,47 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
 import type {
+  EditableBranch,
   EditableLoan,
   EditableMember,
+  UpdatableBranch,
   UpdatableLoan,
-  UpdatableMember,
 } from "../../src-generated/library-strict/library-circulation/index.js";
 import { LIBRARY_STRICT } from "../LibraryTestConstants.js";
 
 /**
- * `managedPropertyMode: "strictOmit"` against ASP.NET, the counterpart of the same file in `int-test/cap`
- * and `int-test/olingo-v2`.
+ * `managedPropertyMode: "strictOmit"` with `keyProperties: "strict"` against ASP.NET, the counterpart of
+ * the same file in `int-test/cap` and `int-test/olingo-v2`.
  *
- * The mode makes two claims about a `createOnly` property - `Loan.LoanedAt`, which carries
- * `Core.Immutable`, and every key without an annotation of its own, which the key rule makes createOnly:
+ * Since 0.2.0 the server declares who owns every key: nine carry `Core.Computed` and `Branch/Id` carries
+ * nothing, because a branch code is the organisation's to allocate. That is what makes `strict` usable
+ * here at all - it demands a non-nullable key on create, which is only right once a bare key genuinely
+ * means "yours to supply". Before, it would have demanded nine keys no client can know.
  *
- * 1. it belongs in a create payload, required or optional per `nullable`, and
- * 2. it belongs in no update payload at all.
- *
- * Only the first is a type-level statement. The second is a claim about the *server*, and the pinned
- * version does not yet keep it: it applies a `LoanedAt` sent on a PATCH. That is a gap in our own server
- * rather than a trait of ASP.NET Core OData - the spec is unambiguous that such a value MUST be ignored -
- * and it is fixed in test-server-asp-net#16. The last test pins what the pinned image really does, so
- * raising the version makes it fail and the expectation gets corrected as a reviewed step.
- *
- * The split between which entity carries which test is the server's doing: `LoansController` implements
- * GET and PATCH only (deliberately - see its own source), so PUT is asked of `Members`, whose key is
- * createOnly by the key rule rather than by annotation.
+ * So both halves of the story sit side by side in one client: a **generated** key is absent from both
+ * write models and discarded if sent anyway, while the **client-assigned** one is required on create and
+ * absent from the update model, since it cannot change once the entity exists.
  */
-describe("ASP.NET Library: immutable properties under strictOmit", () => {
+describe("ASP.NET Library: managed keys and immutable properties", () => {
   const LOANED_AT = "2026-05-01T10:00:00Z";
 
   /**
-   * A loan comes into existence through its member: this server answers a POST to `/Loans` with 405, so a
-   * deep insert is the only way to create one. Which suits the question here - the point is what the loan
-   * looks like *afterwards*, and its key is the client's to choose either way.
+   * A loan comes into existence through its member: this server answers a POST to `/Loans` with 405. Its
+   * key is generated now, so nothing here supplies one and the loan is read back to find it.
    */
-  async function givenLoan(Id: string, memberId: number) {
+  async function givenLoan() {
     const member = await LIBRARY_STRICT.Members()
       .create({
-        Id: memberId,
         Name: "Immutable Test",
         PreviousAddresses: [],
-        Loans: [{ Id, LoanedAt: LOANED_AT, DueDate: "2026-06-01" }],
+        Loans: [{ LoanedAt: LOANED_AT, DueDate: "2026-06-01" }],
       })
       .execute();
     expect(member.status).toBe(201);
-    return { memberId: member.data.Id };
+
+    const loans = await LIBRARY_STRICT.Members(member.data.Id)
+      .query((builder) => builder.expanding("Loans", (loan) => loan))
+      .execute();
+    return { memberId: member.data.Id, loanId: loans.data.Loans![0].Id };
   }
 
   /** Deleting the member takes its loans with it - `Member.Loans` cascades, and `/Loans(…)` has no DELETE. */
@@ -53,48 +49,54 @@ describe("ASP.NET Library: immutable properties under strictOmit", () => {
     await LIBRARY_STRICT.Members(memberId).delete().execute();
   }
 
-  test("the create model keeps immutable properties, and the annotated one follows nullable", () => {
-    // `LoanedAt` carries `Core.Immutable` and is `Nullable="false"`, so the service itself says it is
-    // required on create
-    expectTypeOf<EditableLoan["LoanedAt"]>().toEqualTypeOf<string>();
-
-    // the keys are non-nullable too, but nothing describes them - and this package generates under the
-    // default `keyProperties`, which will not demand a key the server may well be generating
-    expectTypeOf<EditableLoan["Id"]>().toEqualTypeOf<string | undefined>();
-    expectTypeOf<EditableMember["Id"]>().toEqualTypeOf<number | undefined>();
-  });
-
-  test("the update model drops them entirely", () => {
-    // absent, not optional: there is no value the caller could put here that the server would honour
+  test("a generated key is in no write model at all", () => {
+    // `Core.Computed` makes it readOnly, and strictOmit takes a readOnly property out of both - there is
+    // no operation in which a value the client sends would count for anything
+    expectTypeOf<EditableLoan>().not.toHaveProperty("Id");
     expectTypeOf<UpdatableLoan>().not.toHaveProperty("Id");
-    expectTypeOf<UpdatableLoan>().not.toHaveProperty("LoanedAt");
-    expectTypeOf<UpdatableMember>().not.toHaveProperty("Id");
-    // everything else stays exactly as it is in the create model
-    expectTypeOf<UpdatableLoan["DueDate"]>().toEqualTypeOf<string>();
-    expectTypeOf<UpdatableLoan["LateFee"]>().toEqualTypeOf<number | null | undefined>();
+    expectTypeOf<EditableMember>().not.toHaveProperty("Id");
   });
 
-  test("a client-assigned key really is taken by the server", async () => {
-    const Id = "55555555-5555-5555-5555-555555555501";
-    const { memberId } = await givenLoan(Id, 9901);
+  test("the client-assigned key is required on create and gone from the update model", () => {
+    // `Branch/Id` carries no annotation, which after 0.2.0 is a statement rather than a silence: every
+    // key the server generates says so, so what stays bare is the client's. `strict` therefore requires
+    // it - the property is non-nullable, and nothing else will supply it.
+    expectTypeOf<EditableBranch["Id"]>().toEqualTypeOf<number>();
+
+    // and it cannot change afterwards, so the update model has no place for it
+    expectTypeOf<UpdatableBranch>().not.toHaveProperty("Id");
+    expectTypeOf<UpdatableBranch["Name"]>().toEqualTypeOf<string>();
+  });
+
+  test("an annotated immutable property follows nullable on create", () => {
+    // `Loan.LoanedAt` carries `Core.Immutable` and is non-nullable, so the service itself says it is
+    // required on create - and `strictOmit` drops it from the update model
+    expectTypeOf<EditableLoan["LoanedAt"]>().toEqualTypeOf<string>();
+    expectTypeOf<UpdatableLoan>().not.toHaveProperty("LoanedAt");
+  });
+
+  test("the client-assigned key really is stored as sent", async () => {
+    const Id = 4201;
+    const created = await LIBRARY_STRICT.Branches()
+      .create({ Id, Name: "Client Assigned Branch", LowestFloor: 0, Population: 1000 })
+      .execute();
 
     try {
-      // the point of createOnly rather than readOnly: the key was the client's to choose, and requiring it
-      // in the create payload is only right if the server actually stores what was sent
-      const read = await LIBRARY_STRICT.Loans(Id).query().execute();
-      expect(read.data.Id).toBe(Id);
-      expect(read.data.LoanedAt).toContain("2026-05-01T10:00:00");
+      // the point of leaving the key bare: requiring it in the create payload is only right if the
+      // server actually stores what was sent, rather than generating over it
+      expect(created.status).toBe(201);
+      expect(created.data.Id).toBe(Id);
+      expect((await LIBRARY_STRICT.Branches(Id).query().execute()).data.Name).toBe("Client Assigned Branch");
     } finally {
-      await cleanUp(memberId);
+      await LIBRARY_STRICT.Branches(Id).delete().execute();
     }
   });
 
   test("PATCH without the immutable properties changes only what it names", async () => {
-    const Id = "55555555-5555-5555-5555-555555555503";
-    const { memberId } = await givenLoan(Id, 9903);
+    const { memberId, loanId } = await givenLoan();
 
     try {
-      const patched = await LIBRARY_STRICT.Loans(Id)
+      const patched = await LIBRARY_STRICT.Loans(loanId)
         .patch<true>({ ReturnedAt: "2026-05-20T14:00:00Z" })
         .execute({ headers: { Prefer: "return=representation" } });
 
@@ -106,52 +108,45 @@ describe("ASP.NET Library: immutable properties under strictOmit", () => {
     }
   });
 
-  test("PUT without the key replaces the rest and keeps it", async () => {
-    const memberId = 9905;
-    const member = await LIBRARY_STRICT.Members()
-      .create({ Id: memberId, Name: "Put Target", PreviousAddresses: [] })
-      .execute();
-
-    try {
-      // `update` takes UpdatableMember, so the key cannot be written here at all. A PUT is a full replace,
-      // and this pins that the entity keeps the identity it was created with regardless.
-      const updated = await LIBRARY_STRICT.Members(member.data.Id)
-        .update({ Name: "Replaced", PreviousAddresses: [] })
-        .execute();
-      expect(updated.status).toBe(204);
-
-      const read = await LIBRARY_STRICT.Members(member.data.Id).query().execute();
-      expect(read.data.Name).toBe("Replaced");
-      expect(read.data.Id).toBe(member.data.Id);
-    } finally {
-      await cleanUp(member.data.Id);
-    }
-  });
-
-  test("the pinned server still applies a changed immutable property", async () => {
-    const Id = "55555555-5555-5555-5555-555555555504";
-    const { memberId } = await givenLoan(Id, 9904);
+  test("a changed immutable property sent anyway is disregarded", async () => {
+    const { memberId, loanId } = await givenLoan();
 
     try {
       /*
-       * Casting past `UpdatableLoan` is the only way to ask this question, and the answer is why the type
-       * is worth generating at all. Protocol 11.4.3 leaves no room - "the service MUST ignore that value
-       * when applying the update" - and the pinned image does not: it stores 2020 and answers 204, so a
-       * caller reading the response cannot tell that a value was overwritten.
+       * Casting past `UpdatableLoan` is the only way to ask this, and 0.2.0 is the release where the
+       * answer became the right one: the server ignores the value, as Protocol 11.4.3 requires of a
+       * property it declares managed. It used to apply it.
        *
-       * Recorded rather than worked around: the fix is test-server-asp-net#16, and when the image pin
-       * moves to a release carrying it this expectation inverts to the value staying put. Its counterpart
-       * in `int-test/cap` already shows the correct behaviour, which is what makes this one a defect and
-       * not a difference.
+       * The response says nothing either way - 204, exactly as a request that changed everything it
+       * asked for. Which is the whole argument for keeping the property out of the payload: a caller
+       * reading only the response cannot tell a discarded value from an applied one.
        */
       const payload = { LoanedAt: "2020-01-01T00:00:00Z" } as unknown as UpdatableLoan;
-      const patched = await LIBRARY_STRICT.Loans(Id).patch(payload).execute();
+      const patched = await LIBRARY_STRICT.Loans(loanId).patch(payload).execute();
       expect(patched.status).toBe(204);
 
-      const read = await LIBRARY_STRICT.Loans(Id).query().execute();
-      expect(read.data.LoanedAt).toContain("2020-01-01T00:00:00");
+      const read = await LIBRARY_STRICT.Loans(loanId).query().execute();
+      expect(read.data.LoanedAt).toContain("2026-05-01T10:00:00");
     } finally {
       await cleanUp(memberId);
+    }
+  });
+
+  test("a generated key sent anyway is disregarded too", async () => {
+    /*
+     * The same rule reaching the other kind of managed property. `Medium.Id` is `Core.Computed` since
+     * 0.2.0, so the Guid below goes nowhere and the server assigns its own - which is what the type was
+     * saying by not offering the property at all.
+     */
+    const wanted = "12121212-1212-1212-1212-121212121212";
+    const payload = { Title: "Key Probe", PageCount: 1, AgeRating: 0, Id: wanted } as never;
+    const created = await LIBRARY_STRICT.Media().asBookCollectionService().create(payload).execute();
+
+    try {
+      expect(created.status).toBe(201);
+      expect(created.data.Id).not.toBe(wanted);
+    } finally {
+      await LIBRARY_STRICT.Media(created.data.Id).delete().execute();
     }
   });
 });

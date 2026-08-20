@@ -1,4 +1,4 @@
-import { ConfigFileOptions, EmitModes, ManagedPropertyMode, Modes, TypeModel } from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, KeyProperties, ManagedPropertyMode, Modes, TypeModel } from "@odata2ts/odata2ts";
 
 /** The running server to refresh from, or `undefined` to read the committed snapshot - see below. */
 const SOURCE_URL = process.env.LIBRARY_BASE_URL;
@@ -156,6 +156,10 @@ const config: ConfigFileOptions = {
       source: SOURCE,
       output: "src-generated/library-strict",
       managedPropertyMode: ManagedPropertyMode.strictOmit,
+      // The servers now declare every generated key, so a key left bare really is the client's - which
+      // is what makes `strict` safe here and pointless anywhere else: it demands a non-nullable key on
+      // create, and after this release only `Branch` and `Copy` still are one.
+      keyProperties: KeyProperties.strict,
     },
   },
 };

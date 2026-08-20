@@ -14,10 +14,10 @@ import type { EditablePostalAddress as StrictEditablePostalAddress } from "../sr
 import type {
   CopyCollectionService as StrictCopyCollectionService,
   CopyService as StrictCopyService,
+  EditableBranch as StrictEditableBranch,
   EditableCopy as StrictEditableCopy,
-  EditableIdDocument as StrictEditableIdDocument,
+  UpdatableBranch as StrictUpdatableBranch,
   UpdatableCopy as StrictUpdatableCopy,
-  UpdatableMember as StrictUpdatableMember,
 } from "../src-generated/managed-strict/library-circulation/index.js";
 import type { Medium as ModelsOnlyMedium } from "../src-generated/models-only/library-catalog/index.js";
 import type {
@@ -106,15 +106,19 @@ expectTypeOf<StrictUpdatableCopy>().not.toHaveProperty("InventoryNumber");
 // everything not createOnly is untouched by the mode
 expectTypeOf<StrictUpdatableCopy["IsLoanable"]>().toEqualTypeOf<boolean>();
 
+// Only three types have an updatable model at all, and that is the point: `Branch` and `Copy` because
+// their keys are the client's and therefore immutable, `Loan` because of `Core.Immutable` on LoanedAt.
+// Every other key is `Core.Computed` - readOnly, dropped from both write models, so nothing differs.
+
 // A complex property resolves to the nested type's *editable* model, since `PostalAddress` has no
 // immutable property of its own and a second, identical type for it would be noise.
-expectTypeOf<StrictUpdatableMember["PreviousAddresses"]>().toEqualTypeOf<Array<StrictEditablePostalAddress>>();
+expectTypeOf<StrictUpdatableBranch["Address"]>().toEqualTypeOf<StrictEditablePostalAddress | null | undefined>();
 
 // A navigation property always resolves to the referenced entity's editable model, in both write models
 // alike - a binding names an entity that exists in its own right, so the create/update split does not
 // apply to it. This is also what keeps a self-referential entity graph from ever reaching Updatable.
-expectTypeOf<StrictUpdatableMember["IdDocument"]>().toExtend<
-  StrictEditableIdDocument | { "@id": unknown } | null | undefined
+expectTypeOf<StrictUpdatableCopy["Location"]>().toExtend<
+  StrictEditableBranch | { "@id": unknown } | null | undefined
 >();
 
 // The entity service writes with the updatable model, while the collection service, where creation

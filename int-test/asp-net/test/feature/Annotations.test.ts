@@ -4,6 +4,7 @@ import type {
   EditableMedium as StrictEditableMedium,
 } from "../../src-generated/library-strict/library-catalog/index.js";
 import type { EditableBook, EditableMedium } from "../../src-generated/library/library-catalog/index.js";
+import type { EditableBranch } from "../../src-generated/library/library-circulation/index.js";
 import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
@@ -55,28 +56,27 @@ describe("ASP.NET Library: Core annotations", () => {
     }
   });
 
-  test("an unannotated key falls back to the key rule and stays writable", async () => {
+  test("a key the service declares computed is the server's", () => {
     /*
-     * Nothing in this model says anything about `Id`, so `managedPropertyDetection: "auto"` falls through
-     * to the key rule - which now makes it createOnly rather than readOnly. The property is therefore part
-     * of the editable model, optional under the default `lenient` mode.
+     * Since 0.2.0 the keys are annotated, so nothing here falls through to `keyProperties` any more.
+     * `Core.Computed` makes `Medium.Id` readOnly, and under the default `lenient` mode a readOnly
+     * property stays in the write model but is never required - the client may send one, and the server
+     * is obliged to disregard it.
      */
     expectTypeOf<EditableMedium["Id"]>().toEqualTypeOf<string | undefined>();
     expectTypeOf<EditableBook["Id"]>().toEqualTypeOf<string | undefined>();
+    // ... and `strictOmit` takes it out altogether, since sending it achieves nothing
+    expectTypeOf<StrictEditableBook>().not.toHaveProperty("Id");
+  });
 
-    // and the decisive half a type check cannot give: the server takes the key the client chose, so
-    // keeping it in the payload is right. Under the old readOnly default this was not expressible at all.
-    const Id = "44444444-4444-4444-4444-444444444401";
-    const created = await LIBRARY.Media()
-      .asBookCollectionService()
-      .create({ Id, Title: "Client Assigned Key", PageCount: 1, AgeRating: 0 })
-      .execute();
-
-    try {
-      expect(created.status).toBe(201);
-      expect(created.data.Id).toBe(Id);
-    } finally {
-      await LIBRARY.Media(Id).delete().execute();
-    }
+  test("the one key left bare is the one the client owns", () => {
+    // `Branch/Id` is a code the organisation allocates, so the service says nothing about it - which,
+    // now that every generated key does say something, is itself the statement.
+    //
+    // What the *client* makes of that silence is its own choice. This client runs the default
+    // `keyProperties: "interoperable"`, which will not demand a key it cannot be sure of, so the
+    // property is optional here. The strict client requires it - see feature/ImmutableProperties.test.ts,
+    // which is the pairing that gives the two settings their meaning.
+    expectTypeOf<EditableBranch["Id"]>().toEqualTypeOf<number | undefined>();
   });
 });
