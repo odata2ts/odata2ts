@@ -1,5 +1,6 @@
 import { GenericContainer, StartedTestContainer, Wait } from "testcontainers";
 import type { TestProject } from "vitest/node";
+import serverImage from "../server-image.json" with { type: "json" };
 
 /**
  * Provisions the ASP.NET Core "Library" OData server for the integration tests and tears it down afterwards.
@@ -18,9 +19,10 @@ import type { TestProject } from "vitest/node";
  */
 const CUSTOM_IMAGE = process.env.ASPNET_SERVER_IMAGE;
 // Pinned to an exact version, never `latest`: a run is then reproducible, and a new server release
-// arrives as a Renovate PR that CI runs these tests against - merging it is what accepts the new
-// server. Renovate keeps this line current, see `customManagers` in the repo's renovate.json.
-const IMAGE = CUSTOM_IMAGE ?? "ghcr.io/odata2ts/test-server-asp-net:0.2.1";
+// arrives as a PR that CI runs these tests against - merging it is what accepts the new server. The pin
+// lives in its own JSON file because a bot maintains it: the server repo dispatches its release here and
+// `.github/workflows/bump-test-server.yml` edits that file. Nothing parses this expression.
+const IMAGE = CUSTOM_IMAGE ?? `${serverImage.image}:${serverImage.version}`;
 const SERVICE_PATH = "/odata/v4/library";
 const CONTAINER_PORT = 4004;
 

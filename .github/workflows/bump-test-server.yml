@@ -1,0 +1,96 @@
+name: Bump Test Server Pin
+
+# Raises the pinned test server version in int-test/<server>/server-image.json and opens a PR for it.
+#
+# Push, not poll: the server repo dispatches this the moment its release is published, so the PR exists
+# within seconds instead of whenever a scheduled scan happens to come round. See `notify-odata2ts` in
+# publish-image.yml over in test-server-asp-net / -cap / -olingo-v2.
+#
+# The PR is opened with a GitHub App token rather than GITHUB_TOKEN, and that is not incidental: GitHub
+# does not start workflows from GITHUB_TOKEN events, so a PR opened with it would never run the
+# integration tests - and running them against the new server is the only reason the PR exists.
+# merge-test-server-bump.yml merges it once they pass.
+
+on:
+  repository_dispatch:
+    types: [test-server-released]
+
+concurrency:
+  # Two releases of the same server in quick succession: let the newer one supersede the older.
+  group: bump-test-server-${{ github.event.client_payload.server }}
+  cancel-in-progress: true
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+
+    steps:
+      # The payload comes from another repository, so it is checked before it reaches a shell or a path.
+      # Sending a dispatch needs write access here, so this is a guard against a mistake rather than an
+      # attacker - but the server name becomes a file path and the version becomes a branch name.
+      - name: Validate the payload
+        env:
+          SERVER: ${{ github.event.client_payload.server }}
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
+          set -euo pipefail
+          case "$SERVER" in
+            asp-net | cap | olingo-v2) ;;
+            *)
+              echo "::error::Unknown test server '$SERVER'."
+              exit 1
+              ;;
+          esac
+          if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::'$VERSION' is not a release version."
+            exit 1
+          fi
+
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.ODATA2TS_PR_BOT_APP_ID }}
+          private-key: ${{ secrets.ODATA2TS_PR_BOT_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Raise the pin and open the pull request
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          SERVER: ${{ github.event.client_payload.server }}
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
+          set -euo pipefail
+          file="int-test/$SERVER/server-image.json"
+
+          current=$(jq -r .version "$file")
+          if [ "$current" = "$VERSION" ]; then
+            echo "int-test/$SERVER already runs against $VERSION - nothing to do." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          branch="chore/test-server-$SERVER-$VERSION"
+          git switch -c "$branch"
+
+          jq --arg version "$VERSION" '.version = $version' "$file" > "$file.tmp"
+          mv "$file.tmp" "$file"
+
+          git config user.name "odata2ts-bot[bot]"
+          git config user.email "odata2ts-bot[bot]@users.noreply.github.com"
+          git commit -am "test(int-test-$SERVER): run against test-server-$SERVER $VERSION"
+          git push --force -u origin "$branch"
+
+          # A rerun for the same version updates the branch rather than failing on an existing PR.
+          if ! gh pr view "$branch" --json number > /dev/null 2>&1; then
+            gh pr create \
+              --title "test(int-test-$SERVER): run against test-server-$SERVER $VERSION" \
+              --body "$(printf '%s\n' \
+                "\`test-server-$SERVER\` released **$VERSION**, up from \`$current\`." \
+                "" \
+                "The integration tests in \`int-test/$SERVER\` run against it here. Merging accepts the new server;" \
+                "a red run means the release changed behaviour this client depends on, and the PR is the place to see it." \
+                "" \
+                "Opened automatically from the server repo's release - see \`.github/workflows/bump-test-server.yml\`.")"
+          fi
