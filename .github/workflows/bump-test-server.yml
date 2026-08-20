@@ -56,6 +56,50 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
 
+      # The release carries the `$metadata` its image served when it was smoke-tested - see
+      # `publish-image.yml` in the server repo. Taking it from there is what keeps the committed
+      # snapshots describing the server the tests then run against, and costs no container: the file was
+      # captured from the very image being released.
+      #
+      # Downloaded with GITHUB_TOKEN rather than the app token: the server repos are public, so this
+      # needs no privileges beyond the default, and the app token stays scoped to opening the PR.
+      #
+      # Absent assets are normal and not an error - a server released before this existed has none, and
+      # the bump then stays the pure version change it always was.
+      - name: Fetch the metadata the release published
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SERVER: ${{ github.event.client_payload.server }}
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
+          set -euo pipefail
+          if gh release download "v$VERSION" \
+               --repo "odata2ts/test-server-$SERVER" \
+               --pattern '*.xml' \
+               --dir "int-test/$SERVER/resource" \
+               --clobber; then
+            echo "refreshed=true" >> "$GITHUB_ENV"
+          else
+            echo "::notice::Release v$VERSION of test-server-$SERVER publishes no metadata - keeping the committed snapshot."
+          fi
+
+      # The snapshots are stored pretty-printed, which is what odata2ts itself does when it downloads
+      # metadata (`storeMetadata.ts`, prettier with @prettier/plugin-xml). Formatting the fetched files
+      # the same way keeps the diff to what actually changed in the model, and keeps a later local
+      # refresh via LIBRARY_BASE_URL from reformatting the whole file again.
+      - uses: actions/setup-node@v7
+        if: env.refreshed == 'true'
+        with:
+          node-version: 24
+      - name: Format the fetched metadata
+        if: env.refreshed == 'true'
+        env:
+          SERVER: ${{ github.event.client_payload.server }}
+        run: |
+          set -euo pipefail
+          yarn --immutable
+          yarn prettier --write "int-test/$SERVER/resource/*.xml"
+
       - name: Raise the pin and open the pull request
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -77,6 +121,14 @@ jobs:
           jq --arg version "$VERSION" '.version = $version' "$file" > "$file.tmp"
           mv "$file.tmp" "$file"
 
+          # A snapshot refreshed to identical content leaves no diff and is simply not mentioned; only a
+          # real change is worth pointing the reviewer at. `git commit -am` below picks up whichever it is.
+          if git diff --quiet -- "int-test/$SERVER/resource"; then
+            metadata_note="Its \`\$metadata\` is unchanged."
+          else
+            metadata_note="**Its \`\$metadata\` changed** - the diff is what the release altered about the server's contract, and the client in this PR is generated from it."
+          fi
+
           git config user.name "odata2ts-bot[bot]"
           git config user.email "odata2ts-bot[bot]@users.noreply.github.com"
           git commit -am "test(int-test-$SERVER): run against test-server-$SERVER $VERSION"
@@ -87,10 +139,11 @@ jobs:
             gh pr create \
               --title "test(int-test-$SERVER): run against test-server-$SERVER $VERSION" \
               --body "$(printf '%s\n' \
-                "\`test-server-$SERVER\` released **$VERSION**, up from \`$current\`." \
+                "\`test-server-$SERVER\` released **$VERSION**, up from \`$current\`. $metadata_note" \
                 "" \
-                "The integration tests in \`int-test/$SERVER\` run against it here. Merging accepts the new server;" \
-                "a red run means the release changed behaviour this client depends on, and the PR is the place to see it." \
+                "The integration tests in \`int-test/$SERVER\` run against it here, with the client generated from the" \
+                "snapshot in this branch. Merging accepts the new server; a red run means the release changed behaviour" \
+                "this client depends on, and the PR is the place to see it." \
                 "" \
                 "Opened automatically from the server repo's release - see \`.github/workflows/bump-test-server.yml\`.")"
           fi
