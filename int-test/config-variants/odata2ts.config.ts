@@ -1,5 +1,6 @@
 import {
   ConfigFileOptions,
+  DeepInsertProps,
   EmitModes,
   KeyProperties,
   ManagedPropertyMode,
@@ -237,6 +238,39 @@ const config: ConfigFileOptions = {
       output: "src-generated/key-all-computed",
       keyProperties: KeyProperties.allComputed,
       managedPropertyMode: ManagedPropertyMode.strictOmit,
+    },
+
+    /**
+     * `deepInsertProps: "composition-only"`, which narrows the deep insert props to the navigation
+     * properties marked `ContainsTarget="true"`.
+     *
+     * The V4 source is the right one to judge it: ASP.NET Core OData states containment faithfully, so the
+     * model carries exactly one contained navigation property - `Audiobook.Chapters`, whose target has no
+     * entity set of its own - against a dozen plain ones. That asymmetry is the whole point of the option,
+     * and it is invisible to a server: nothing about the request changes, only which properties the
+     * editable models offer in the first place.
+     */
+    deepInsertComposition: {
+      serviceName: "DeepInsertComposition",
+      source: V4_SOURCE,
+      output: "src-generated/deep-insert-composition",
+      deepInsertProps: DeepInsertProps.compositionOnly,
+    },
+
+    /**
+     * The same value against a V2 service, where it must do nothing at all.
+     *
+     * V2 has no containment to state, so the narrow reading would find nothing contained and take the deep
+     * insert props away wholesale - the opposite of narrowing them. Held against `v2Wrapping`, which
+     * generates the same model without the option, this pins that a V2 service keeps every navigation
+     * property.
+     */
+    deepInsertCompositionV2: {
+      serviceName: "DeepInsertCompositionV2",
+      source: V2_SOURCE,
+      output: "src-generated/deep-insert-composition-v2",
+      mode: Modes.models,
+      deepInsertProps: DeepInsertProps.compositionOnly,
     },
 
     /**

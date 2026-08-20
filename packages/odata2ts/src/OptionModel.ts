@@ -136,6 +136,39 @@ export enum ManagedPropertyMode {
 }
 
 /**
+ * Which navigation properties of an editable model accept a related entity within the payload - a deep
+ * insert (POST) or a deep update (PATCH / PUT).
+ *
+ * The protocol permits this on **any** navigation property: §11.4.2.2 states that each included related
+ * entity is processed "as if it was posted against the original target URL extended with the navigation
+ * path to this related entity", and attaches no further condition. Hence {@link all} is the default.
+ */
+export enum DeepInsertProps {
+  /** Every navigation property carries the deep-insert shape - what the protocol allows. */
+  all = "all",
+  /**
+   * Only a navigation property marked {@code ContainsTarget="true"} carries it.
+   *
+   * **This value exists for SAP CAP**, which performs deep writes along *compositions* only: an
+   * association is a plain reference, and a nested entity sent for one is answered with a 400 or, worse,
+   * accepted and silently dropped. CAP has to be told to say which is which - either
+   * {@code cds.odata.containment: true} for all compositions, or {@code @odata.contained} on a single
+   * one - because it emits no {@code ContainsTarget} by default.
+   *
+   * **On any other server this is likely to take away more than it should.** Containment is an addressing
+   * statement, not a write permission: CSDL §8.4 makes a contained entity reachable through its container
+   * and nothing more. A server such as ASP.NET Core OData marks containment faithfully *and* accepts a
+   * deep insert on plain associations, so this value removes properties for writes that would have
+   * succeeded.
+   *
+   * V2 has no containment at all, so a V2 service is unaffected and keeps every navigation property.
+   */
+  compositionOnly = "composition-only",
+  /** No navigation property carries it. */
+  none = "none",
+}
+
+/**
  * What odata2ts reads out of the annotations a service states about itself.
  *
  * One object rather than a flat option because annotations are a whole surface - the `Org.OData.Core.V1`
@@ -488,20 +521,18 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    */
   disableBindingProps?: boolean;
   /**
-   * Adds the navigation properties to the editable models, typed as the editable model of the related
-   * entity, which is what a deep insert (POST) or a deep update (PATCH / PUT) sends: the related entities
+   * Which navigation properties the editable models carry, typed as the editable model of the related
+   * entity - which is what a deep insert (POST) or a deep update (PATCH / PUT) sends: the related entities
    * travel within the payload of the entity they belong to, instead of being created by requests of their
-   * own.
+   * own. See {@link DeepInsertProps}; {@code all} by default.
    *
    * Together with the binding props a navigation property accepts either shape - a new
    * entity or a reference to an existing one. Where a service is generated both go by the navigation
    * property itself and the {@code "@id"} property tells them apart; without one, the binding is spelled
    * as it goes on the wire, which shares the property in V2 and OData 4.01 but keeps it apart in 4.0
    * ({@code "Author@odata.bind"}).
-   *
-   * Opt-out, so the editable models carry the navigation properties unless this is switched off.
    */
-  disableDeepInsertProps?: boolean;
+  deepInsertProps?: DeepInsertProps;
 }
 
 /**

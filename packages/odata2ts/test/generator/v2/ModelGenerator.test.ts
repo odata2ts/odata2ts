@@ -2,7 +2,7 @@ import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV2.js";
 import { generateModels } from "../../../src/generator/index.js";
-import { EmitModes, Modes } from "../../../src/index.js";
+import { DeepInsertProps, EmitModes, Modes } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
 import { ODataModelBuilderV2 } from "../../data-model/builder/v2/ODataModelBuilderV2.js";
 import {
@@ -129,7 +129,7 @@ describe("Model Generator Tests V2", () => {
     // when generating without a service
     // then the editable model uses the __metadata uri notation
     await generateAndCompare("entity-relationships-binding-v2.ts", {
-      disableDeepInsertProps: true,
+      deepInsertProps: DeepInsertProps.none,
       mode: Modes.models,
       skipEditableModels: false,
       skipIdModels: false,
@@ -155,6 +155,20 @@ describe("Model Generator Tests V2", () => {
     // then the navigation properties show up on the editable model, typed as the editable model of the
     // related entity
     await generateAndCompare("entity-relationships-deep-insert-v2.ts", {
+      skipEditableModels: false,
+      skipIdModels: false,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: composition-only leaves a V2 service alone`, async () => {
+    // given entities related to each other
+    addRelatedEntities();
+
+    // when narrowing the deep insert props to containment, which V2 cannot state at all
+    // then every navigation property keeps it: the narrow reading would find nothing contained and take
+    // the feature away wholesale, so a V2 service is exempt rather than emptied
+    await generateAndCompare("entity-relationships-deep-insert-v2.ts", {
+      deepInsertProps: DeepInsertProps.compositionOnly,
       skipEditableModels: false,
       skipIdModels: false,
     });
@@ -228,7 +242,7 @@ describe("Model Generator Tests V2", () => {
     // then the binding goes by the navigation property itself and carries the key of the entity to bind,
     // which the query objects turn into the __metadata uri notation
     await generateAndCompare("entity-relationships-binding-by-key-v2.ts", {
-      disableDeepInsertProps: true,
+      deepInsertProps: DeepInsertProps.none,
       skipEditableModels: false,
       skipIdModels: false,
     });

@@ -2,7 +2,14 @@ import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, describe, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { generateModels } from "../../../src/generator/index.js";
-import { EmitModes, EnumSynthesis, KeyProperties, ManagedPropertyMode, Modes } from "../../../src/index.js";
+import {
+  DeepInsertProps,
+  EmitModes,
+  EnumSynthesis,
+  KeyProperties,
+  ManagedPropertyMode,
+  Modes,
+} from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
 import { allowedValues, core, corePermissions } from "../../data-model/builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
@@ -161,7 +168,7 @@ describe("Model Generator Tests V4", () => {
     // then match original fixture => config option has no effect
     await generateAndCompare("entity-relationships.ts", {
       disableBindingProps: true,
-      disableDeepInsertProps: true,
+      deepInsertProps: DeepInsertProps.none,
       v2: { responseResultsWrapping: true },
       skipEditableModels: false,
       skipIdModels: false,
@@ -522,7 +529,7 @@ describe("Model Generator Tests V4", () => {
     // when generating for 4.01 without a service
     // then the editable model uses the short form instead of the @odata.bind notation
     await generateAndCompare("entity-relationships-v401.ts", {
-      disableDeepInsertProps: true,
+      deepInsertProps: DeepInsertProps.none,
       mode: Modes.models,
       v4: { odataVersion: "4.01" },
       skipEditableModels: false,
@@ -550,7 +557,7 @@ describe("Model Generator Tests V4", () => {
     await generateAndCompare("entity-relationships.ts", {
       v4: { odataVersion: "4.01" },
       disableBindingProps: true,
-      disableDeepInsertProps: true,
+      deepInsertProps: DeepInsertProps.none,
       skipEditableModels: false,
       skipIdModels: false,
     });
@@ -573,7 +580,7 @@ describe("Model Generator Tests V4", () => {
     // when opting into the binding props without a service
     // then the editable model allows to bind an existing entity via the @odata.bind notation
     await generateAndCompare("entity-relationships-binding.ts", {
-      disableDeepInsertProps: true,
+      deepInsertProps: DeepInsertProps.none,
       mode: Modes.models,
       skipEditableModels: false,
       skipIdModels: false,
@@ -616,7 +623,7 @@ describe("Model Generator Tests V4", () => {
     // then the binding goes by the navigation property itself and carries the key of the entity to bind,
     // which the query objects turn into the URL the wire notation asks for
     await generateAndCompare("entity-relationships-binding-by-key.ts", {
-      disableDeepInsertProps: true,
+      deepInsertProps: DeepInsertProps.none,
       skipEditableModels: false,
       skipIdModels: false,
     });
@@ -644,7 +651,7 @@ describe("Model Generator Tests V4", () => {
     // then no binding prop at all: the URL of the referenced entity could not be built
     await generateAndCompare("entity-relationships.ts", {
       disableBindingProps: true,
-      disableDeepInsertProps: true,
+      deepInsertProps: DeepInsertProps.none,
       skipEditableModels: false,
       skipIdModels: false,
     });
@@ -659,6 +666,55 @@ describe("Model Generator Tests V4", () => {
     // related entity - which is what travels within the payload of a deep insert or deep update
     await generateAndCompare("entity-relationships-deep-insert.ts", {
       disableBindingProps: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+    });
+  });
+
+  /**
+   * Both kinds of relation a V4 service can state, declared as real navigation properties, since only
+   * those carry `ContainsTarget`: `chapters` is contained - part of the book - while `author` points at
+   * an entity standing on its own.
+   */
+  function addContainedAndPlainNavProps() {
+    odataBuilder
+      .addEntityType("Author", undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.Int32).addProp("name", ODataTypesV4.Boolean, true),
+      )
+      .addEntityType("Chapter", undefined, (builder) =>
+        builder.addKeyProp("id", ODataTypesV4.Int32).addProp("title", ODataTypesV4.String, true),
+      )
+      .addEntityType(ENTITY_NAME, undefined, (builder) =>
+        builder
+          .addKeyProp("id", ODataTypesV4.Int32)
+          .addNavProp("author", withNs("Author"), undefined, true)
+          .addNavProp("chapters", `Collection(${withNs("Chapter")})`, undefined, undefined, true),
+      );
+  }
+
+  test(`${TEST_SUITE_NAME}: containment changes nothing by default`, async () => {
+    // given a contained and a plain navigation property
+    addContainedAndPlainNavProps();
+
+    // when leaving the deep insert props alone
+    // then both carry it - the protocol permits a deep insert on any navigation property
+    await generateAndCompare("entity-relationships-containment.ts", {
+      disableBindingProps: true,
+      skipEditableModels: false,
+      skipIdModels: false,
+    });
+  });
+
+  test(`${TEST_SUITE_NAME}: composition-only leaves it to the contained navigation property`, async () => {
+    // given a contained and a plain navigation property
+    addContainedAndPlainNavProps();
+
+    // when narrowing the deep insert props to containment
+    // then only the contained one accepts a related entity within the payload; the plain one is gone
+    // from the editable model entirely
+    await generateAndCompare("entity-relationships-composition-only.ts", {
+      disableBindingProps: true,
+      deepInsertProps: DeepInsertProps.compositionOnly,
       skipEditableModels: false,
       skipIdModels: false,
     });

@@ -47,7 +47,7 @@ export type GeneratorFunctionOptions = Pick<
   | "skipComments"
   | "enumType"
   | "disableBindingProps"
-  | "disableDeepInsertProps"
+  | "deepInsertProps"
   | "managedPropertyMode"
   | "v2"
   | "v4"

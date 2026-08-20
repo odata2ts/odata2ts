@@ -1,6 +1,6 @@
 import { NavigationProperty } from "../../../../src/data-model/edmx/ODataEdmxModelV4.js";
 
-export function createNavProp(name: string, type: string, partner?: string, nullable?: boolean) {
+export function createNavProp(name: string, type: string, partner?: string, nullable?: boolean, contained?: boolean) {
   const navProp: NavigationProperty = {
     $: {
       Name: name,
@@ -12,6 +12,9 @@ export function createNavProp(name: string, type: string, partner?: string, null
   }
   if (typeof nullable === "boolean") {
     navProp.$.Nullable = nullable ? "true" : "false";
+  }
+  if (contained) {
+    navProp.$.ContainsTarget = "true";
   }
 
   return navProp;

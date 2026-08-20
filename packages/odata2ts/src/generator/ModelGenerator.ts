@@ -24,7 +24,7 @@ import {
 } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel.js";
-import { ManagedPropertyMode, ManagedState, Modes } from "../OptionModel.js";
+import { DeepInsertProps, ManagedPropertyMode, ManagedState, Modes } from "../OptionModel.js";
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
 import { CoreImports } from "./import/ImportObjects.js";
@@ -583,6 +583,25 @@ class ModelGenerator {
   }
 
   /**
+   * Whether a navigation property accepts a related entity within the payload - see
+   * {@link DeepInsertProps}.
+   *
+   * {@code compositionOnly} asks for containment, which only V4 states and only some services state at
+   * all. A V2 service is therefore exempt from it rather than emptied by it: nothing there is contained,
+   * so the narrow reading would take the feature away wholesale instead of narrowing it.
+   */
+  private carriesDeepInsert(prop: PropertyModel): boolean {
+    switch (this.options.deepInsertProps) {
+      case DeepInsertProps.none:
+        return false;
+      case DeepInsertProps.compositionOnly:
+        return this.version === ODataVersions.V2 || !!prop.contained;
+      default:
+        return true;
+    }
+  }
+
+  /**
    * The navigation properties of an editable model, which carry two independent, opt-in features:
    *
    * - binding an existing entity to the navigation property (issue #38)
@@ -612,7 +631,7 @@ class ModelGenerator {
     const byKey = this.bindsByKey();
 
     return props.flatMap((prop) => {
-      const deepInsert = !this.options.disableDeepInsertProps;
+      const deepInsert = this.carriesDeepInsert(prop);
       const bindable = this.isBindableNavProp(ownerFqName, prop);
 
       // one entry per resulting property name, so that renaming cannot merge what belongs apart

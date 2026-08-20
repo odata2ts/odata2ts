@@ -182,6 +182,15 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
   protected abstract getNavigationProps(entityType: ET | ComplexType): Array<Property>;
 
+  /**
+   * Whether a navigation property contains its targets, which is stated by `ContainsTarget="true"`.
+   *
+   * Answered here for V2, which has no notion of containment at all, so nothing is ever contained.
+   */
+  protected isContained(p: Property): boolean {
+    return false;
+  }
+
   protected abstract digestOperations(schema: SchemaV3 | SchemaV4): void;
 
   protected abstract digestEntityContainer(schema: SchemaV3 | SchemaV4): void;
@@ -805,6 +814,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       isCollection: isCollection,
       // only set when it applies: a flag on every single property would be noise
       ...(odataDataType === ODataTypesV4.Stream ? { isStream: true } : undefined),
+      ...(this.isContained(p) ? { contained: true } : undefined),
       managed: toManagedState(
         typeof entityPropConfig?.managed !== "undefined" ? entityPropConfig.managed : configProp?.managed,
       ),
