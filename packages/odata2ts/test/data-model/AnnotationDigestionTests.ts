@@ -3,7 +3,7 @@ import deepmerge from "deepmerge";
 import { beforeEach, expect, test } from "vitest";
 import { NamingHelper } from "../../src/data-model/NamingHelper.js";
 import { DigesterFunction, DigestionOptions } from "../../src/FactoryFunctionModel.js";
-import { ManagedPropertyDetection, ManagedState, TypeModel } from "../../src/index.js";
+import { KeyProperties, ManagedState, TypeModel } from "../../src/index.js";
 import { TestSettings } from "../generator/TestTypes.js";
 import { getTestConfig } from "../test.config.js";
 import { core, corePermissions } from "./builder/ODataAnnotationBuilder.js";
@@ -44,12 +44,16 @@ export function createAnnotationTests(
   /**
    * The state the digester derived for a property of the test entity.
    */
-  async function managedStateOf(propName: string) {
+  async function propOf(propName: string) {
     const result = await doDigest();
     const model = result.getEntityType(withNs(ENTITY_NAME))!;
     const prop = [...model.baseProps, ...model.props].find((p) => p.odataName === propName);
     expect(prop, `property [${propName}] not found!`).toBeTruthy();
-    return prop!.managed;
+    return prop!;
+  }
+
+  async function managedStateOf(propName: string) {
+    return (await propOf(propName)).managed;
   }
 
   beforeEach(() => {
@@ -64,7 +68,7 @@ export function createAnnotationTests(
 
     expect(await managedStateOf("Title")).toBeUndefined();
     // the single key falls to the heuristic, which the default lets through
-    expect(await managedStateOf("Id")).toBe(ManagedState.readOnly);
+    expect(await managedStateOf("Id")).toBe(ManagedState.createOnly);
   });
 
   test("Computed: inline, with alias", async () => {
@@ -181,15 +185,15 @@ export function createAnnotationTests(
     expect(await managedStateOf("IsbnCode")).toBe(ManagedState.createOnly);
   });
 
-  test("Immutable: says nothing about a key, which is unchangeable anyway", async () => {
-    digestionOptions = { managedPropertyDetection: ManagedPropertyDetection.annotation };
+  test("Immutable on a key is honored just like on any other property", async () => {
+    digestionOptions = { keyProperties: KeyProperties.strict };
     odataBuilder
       .enableAnnotations()
       .addEntityType(ENTITY_NAME, undefined, (builder: any) =>
         builder.addKeyProp("Id", ODataTypesV4.Guid).addPropAnnotations("Id", [core("Immutable", { bool: true })]),
       );
 
-    expect(await managedStateOf("Id")).toBeUndefined();
+    expect(await managedStateOf("Id")).toBe(ManagedState.createOnly);
   });
 
   test("Permissions: read only", async () => {
@@ -325,50 +329,80 @@ export function createAnnotationTests(
       });
     }
 
-    test("auto: the annotation has the final word on a key", async () => {
-      digestionOptions = { managedPropertyDetection: ManagedPropertyDetection.auto };
+    function buildCompositeKey() {
+      odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder: any) =>
+        builder.addKeyProp("Id", ODataTypesV4.Guid).addKeyProp("Edition", ODataTypesV4.Int16),
+      );
+    }
+
+    test("an annotation has the final word on a key", async () => {
       buildModel(true);
 
+      // `keyProperties` only ever fills a silence - it never overrules what the service states
       expect(await managedStateOf("Id")).toBe(ManagedState.optionalWithDefault);
       expect(await managedStateOf("PopularityScore")).toBe(ManagedState.readOnly);
     });
 
-    test("auto: the heuristic fills the silence", async () => {
-      digestionOptions = { managedPropertyDetection: ManagedPropertyDetection.auto };
+    test("interoperable: immutable, but not to be demanded on create", async () => {
       buildModel(false);
 
-      expect(await managedStateOf("Id")).toBe(ManagedState.readOnly);
+      // the default. Nothing describes this key, and a server which generates one silently is the common
+      // case, so it is immutable all the same but never required in a create payload
+      expect(await managedStateOf("Id")).toBe(ManagedState.createOnly);
+      expect(await propOf("Id")).toMatchObject({ optionalOnCreate: true });
       expect(await managedStateOf("PopularityScore")).toBeUndefined();
     });
 
-    test("annotation: no heuristic to fall back on", async () => {
-      digestionOptions = { managedPropertyDetection: ManagedPropertyDetection.annotation };
+    test("strict: immutable and following nullable, as the spec has it", async () => {
+      digestionOptions = { keyProperties: KeyProperties.strict };
       buildModel(false);
 
-      expect(await managedStateOf("Id")).toBeUndefined();
-      expect(await managedStateOf("PopularityScore")).toBeUndefined();
+      expect(await managedStateOf("Id")).toBe(ManagedState.createOnly);
+      expect(await propOf("Id")).not.toMatchObject({ optionalOnCreate: true });
     });
 
-    test("simpleHeuristic: annotations are ignored, whatever they state", async () => {
-      digestionOptions = { managedPropertyDetection: ManagedPropertyDetection.simpleHeuristic };
-      buildModel(true);
-
-      // the heuristic knows nothing but keys, so the annotated non-key prop stays fully editable
+    test("singleComputed: a single key is the server's, a composite one is not", async () => {
+      digestionOptions = { keyProperties: KeyProperties.singleComputed };
+      buildModel(false);
       expect(await managedStateOf("Id")).toBe(ManagedState.readOnly);
-      expect(await managedStateOf("PopularityScore")).toBeUndefined();
+
+      odataBuilder = new ODataBuilderConstructor(SERVICE_NAME);
+      buildCompositeKey();
+      // left alone entirely: a composite key is rarely generated, so its parts follow `nullable`
+      expect(await managedStateOf("Id")).toBeUndefined();
+      expect(await managedStateOf("Edition")).toBeUndefined();
     });
 
-    test("none: nothing is derived at all", async () => {
-      digestionOptions = { managedPropertyDetection: ManagedPropertyDetection.none };
+    test("singleComputedComplexOptional: the parts of a composite key turn optional", async () => {
+      digestionOptions = { keyProperties: KeyProperties.singleComputedComplexOptional };
+      buildCompositeKey();
+
+      expect(await managedStateOf("Id")).toBe(ManagedState.optionalWithDefault);
+      expect(await managedStateOf("Edition")).toBe(ManagedState.optionalWithDefault);
+    });
+
+    test("allComputed: every key is the server's, single or composite", async () => {
+      digestionOptions = { keyProperties: KeyProperties.allComputed };
+      buildCompositeKey();
+
+      expect(await managedStateOf("Id")).toBe(ManagedState.readOnly);
+      expect(await managedStateOf("Edition")).toBe(ManagedState.readOnly);
+    });
+
+    test("disableManagedProperties: the annotations stop being read", async () => {
+      digestionOptions = { annotations: { disableManagedProperties: true } };
       buildModel(true);
 
-      expect(await managedStateOf("Id")).toBeUndefined();
+      // the key still gets its state - `keyProperties` is a separate axis and untouched by this switch
+      expect(await managedStateOf("Id")).toBe(ManagedState.createOnly);
+      // while the annotated non-key property is left entirely alone
       expect(await managedStateOf("PopularityScore")).toBeUndefined();
     });
 
-    test("none: only the configuration is left", async () => {
+    test("disableManagedProperties: only the configuration is left", async () => {
       digestionOptions = {
-        managedPropertyDetection: ManagedPropertyDetection.none,
+        annotations: { disableManagedProperties: true },
+        keyProperties: KeyProperties.strict,
         propertiesByName: [{ name: "PopularityScore", managed: true }],
       };
       buildModel(true);
@@ -376,14 +410,15 @@ export function createAnnotationTests(
       expect(await managedStateOf("PopularityScore")).toBe(ManagedState.readOnly);
     });
 
-    test("a composite key is never managed by the heuristic", async () => {
-      digestionOptions = { managedPropertyDetection: ManagedPropertyDetection.auto };
-      odataBuilder.addEntityType(ENTITY_NAME, undefined, (builder: any) =>
-        builder.addKeyProp("Id", ODataTypesV4.Guid).addKeyProp("Edition", ODataTypesV4.Int16),
-      );
+    test("configuration beats keyProperties, so one key can differ from the rest", async () => {
+      digestionOptions = {
+        keyProperties: KeyProperties.allComputed,
+        propertiesByName: [{ name: "Edition", managed: ManagedState.createOnly }],
+      };
+      buildCompositeKey();
 
-      expect(await managedStateOf("Id")).toBeUndefined();
-      expect(await managedStateOf("Edition")).toBeUndefined();
+      expect(await managedStateOf("Id")).toBe(ManagedState.readOnly);
+      expect(await managedStateOf("Edition")).toBe(ManagedState.createOnly);
     });
   }
 }

@@ -1,11 +1,12 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { FlexibleODataModelPayloadV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, getODataVersionHeaders, RequestInfo } from "../../src";
+import { DEFAULT_HEADERS, EntityTypeServiceV4, getODataVersionHeaders, RequestInfo } from "../../src";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { EditableFlightModel, PlanItemService } from "../fixture/v4/BaseTypeModel";
 import { PersonModelService } from "../fixture/v4/PersonModelService";
+import { QPersonV4 } from "../fixture/v4/QPersonV4";
 import { MockClient } from "../mock/MockClient";
 
 describe("EntityTypeService V4 Tests", () => {
@@ -88,6 +89,23 @@ describe("EntityTypeService V4 Tests", () => {
 
     expect(response.data).toStrictEqual(model);
     expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
+  });
+
+  test("entityType V4: update and patch both take the updatable model, not the editable one", () => {
+    type UpdateBody<Svc> = Svc extends { update: (model: infer M, ...args: any[]) => any } ? M : never;
+    type PatchBody<Svc> = Svc extends { patch: (model: infer M, ...args: any[]) => any } ? M : never;
+
+    // this service never creates an entity, so its 2nd type argument is the updatable model outright -
+    // a generator not producing a separate one passes the editable model here, which is the old behaviour
+    type Service = EntityTypeServiceV4<PersonModel, EditablePersonModel, QPersonV4, "4.0">;
+    expectTypeOf<UpdateBody<Service>>().toEqualTypeOf<ODataModelPayloadV4<EditablePersonModel>>();
+    expectTypeOf<PatchBody<Service>>().toEqualTypeOf<ODataModelPayloadV4<Partial<EditablePersonModel>>>();
+
+    // where a type does have immutable properties, PUT drops them just as PATCH does
+    interface UpdatablePerson extends Omit<EditablePersonModel, "userName"> {}
+    type NarrowedService = EntityTypeServiceV4<PersonModel, UpdatablePerson, QPersonV4, "4.0">;
+    expectTypeOf<UpdateBody<NarrowedService>>().toEqualTypeOf<ODataModelPayloadV4<UpdatablePerson>>();
+    expectTypeOf<PatchBody<NarrowedService>>().toEqualTypeOf<ODataModelPayloadV4<Partial<UpdatablePerson>>>();
   });
 
   test("entityType V4: patch with select/expand", async () => {

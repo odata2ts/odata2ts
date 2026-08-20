@@ -1,5 +1,5 @@
 import { ValueConverterImport } from "@odata2ts/converter-runtime";
-import { ManagedState, Modes } from "../OptionModel.js";
+import { KeyProperties, ManagedPropertyMode, ManagedState, Modes } from "../OptionModel.js";
 
 export enum ODataVersion {
   V2 = "2.0",
@@ -42,6 +42,12 @@ export interface PropertyModel {
    */
   managed?: ManagedState;
   /**
+   * Whether this property is left optional on create even where `nullable` says otherwise. Set by
+   * {@link KeyProperties.interoperable} for a key no annotation describes: the client cannot supply what
+   * the server generates, and nothing in the metadata says which of the two happens.
+   */
+  optionalOnCreate?: boolean;
+  /**
    * An `Edm.Stream` property: binary content which never travels in the entity's JSON payload, but is
    * addressed by its own URL. Such a property is therefore absent from the models and the q-object and
    * gets its own service instead.
@@ -78,6 +84,7 @@ export interface ComplexType {
   name: string;
   modelName: string;
   editableName: string;
+  updatableName: string;
   qName: string;
   qBaseName?: string;
   serviceName: string;
@@ -91,6 +98,66 @@ export interface ComplexType {
   open: boolean;
   genMode: Modes;
   subtypes: Set<string>;
+}
+
+/**
+ * Whether a property appears in the model for creating the entity.
+ *
+ * Under {@link ManagedPropertyMode.strictOmit} a `readOnly` property does not: the server owns it on
+ * insert as much as on update, so there is no value the client could usefully send. Under `lenient` it
+ * is there but never required, which is what the spec allows - a payload may carry it, and the service
+ * is obliged to leave it alone.
+ */
+export function isInCreateModel(prop: PropertyModel, mode: ManagedPropertyMode): boolean {
+  return prop.managed !== ManagedState.readOnly || mode !== ManagedPropertyMode.strictOmit;
+}
+
+/**
+ * Whether a property appears in the model for updating the entity. {@link isInCreateModel} minus the
+ * immutable properties, which under {@link ManagedPropertyMode.strictOmit} the server will not change
+ * either.
+ */
+export function isInUpdateModel(prop: PropertyModel, mode: ManagedPropertyMode): boolean {
+  if (prop.managed === ManagedState.createOnly) {
+    return mode !== ManagedPropertyMode.strictOmit;
+  }
+  return isInCreateModel(prop, mode);
+}
+
+/**
+ * Whether a property is required when creating the entity. Being non-nullable is not enough: the server
+ * fills in a value of its own where the client leaves out a `Core.ComputedDefaultValue` property, owns a
+ * `readOnly` one outright, and {@link KeyProperties.interoperable} ignores `nullable` for a key nobody
+ * annotated.
+ */
+export function isRequiredOnCreate(prop: PropertyModel): boolean {
+  if (prop.optionalOnCreate || prop.managed === ManagedState.readOnly) {
+    return false;
+  }
+  return prop.required && prop.managed !== ManagedState.optionalWithDefault;
+}
+
+/**
+ * Whether a property is required when updating the entity. An immutable one never is: the server will
+ * not change it whatever the payload says, so demanding it would only make the caller repeat a value
+ * that goes nowhere. Under {@link ManagedPropertyMode.strictOmit} it is not in the model at all.
+ */
+export function isRequiredOnUpdate(prop: PropertyModel): boolean {
+  return prop.managed === ManagedState.createOnly ? false : isRequiredOnCreate(prop);
+}
+
+/**
+ * Whether this type gets an UpdatableModel of its own, which it does exactly where that model would
+ * differ from its EditableModel - a second, identical type would be noise. Only an immutable property
+ * of the type's own level counts; one reached through a nested complex or navigation property does not.
+ *
+ * Under {@link ManagedPropertyMode.strictOmit} any immutable property makes the two differ, since it is
+ * dropped. Otherwise only one that is *required* on create does, by becoming optional on update.
+ */
+export function hasUpdatableModel(model: ComplexType, mode: ManagedPropertyMode): boolean {
+  return [...model.baseProps, ...model.props].some(
+    (p) => p.managed === ManagedState.createOnly && (mode === ManagedPropertyMode.strictOmit || isRequiredOnCreate(p)),
+  );
 }
 
 export interface EnumType {

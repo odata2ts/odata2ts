@@ -1,7 +1,8 @@
 import {
   ConfigFileOptions,
   EmitModes,
-  ManagedPropertyDetection,
+  KeyProperties,
+  ManagedPropertyMode,
   Modes,
   NamingStrategies,
   TypeModel,
@@ -196,6 +197,49 @@ const config: ConfigFileOptions = {
     },
 
     /**
+     * `managedPropertyMode: "strictOmit"`, the axis that adds a whole artefact kind.
+     *
+     * The three server packages judge whether the reshaped payloads are the right ones to send. What only
+     * a wide type check catches is the reshaping applied to the *whole* model rather than to the one
+     * entity a suite happens to write: every type with an immutable property of its own gets a second
+     * write model, every entity service switches to it, and complex properties inside those models resolve
+     * to the nested Updatable or Editable type depending on whether the nested type has anything to drop.
+     * A model this size exercises all of that at once, which no hand-written suite would.
+     */
+    managedStrict: {
+      serviceName: "ManagedStrict",
+      source: V4_SOURCE,
+      output: "src-generated/managed-strict",
+      managedPropertyMode: ManagedPropertyMode.strictOmit,
+    },
+
+    /**
+     * `keyProperties: "strict"`, the spec-conformant reading of a key nobody annotated.
+     *
+     * Its whole effect is that an unannotated non-nullable key becomes *required* on create, where the
+     * default leaves it optional - which is exactly the kind of thing a type check judges well and a
+     * server cannot judge at all. Held against the baseline, the pair pins both ends of the option.
+     */
+    keyStrict: {
+      serviceName: "KeyStrict",
+      source: V4_SOURCE,
+      output: "src-generated/key-strict",
+      keyProperties: KeyProperties.strict,
+    },
+
+    /**
+     * `keyProperties: "allComputed"` together with `managedPropertyMode: "strictOmit"` - the combination
+     * in which a key disappears from the write models altogether, rather than merely turning optional.
+     */
+    keyAllComputed: {
+      serviceName: "KeyAllComputed",
+      source: V4_SOURCE,
+      output: "src-generated/key-all-computed",
+      keyProperties: KeyProperties.allComputed,
+      managedPropertyMode: ManagedPropertyMode.strictOmit,
+    },
+
+    /**
      * Everything at once - the interaction catcher of the n+1 scheme.
      *
      * Each variant above isolates a single axis, which is what makes a failure attributable. That leaves
@@ -218,7 +262,7 @@ const config: ConfigFileOptions = {
         bigNumberAsString: true,
         odataVersion: "4.01",
       },
-      managedPropertyDetection: ManagedPropertyDetection.annotation,
+      annotations: { disableManagedProperties: true },
       skipComments: true,
     },
   },

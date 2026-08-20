@@ -8,7 +8,8 @@ import { ProjectManager } from "./project/ProjectManager.js";
 export type DigestionOptions = Pick<
   RunOptions,
   | "converters"
-  | "managedPropertyDetection"
+  | "annotations"
+  | "keyProperties"
   | "propertiesByName"
   | "byTypeAndName"
   | "v2"
@@ -47,6 +48,7 @@ export type GeneratorFunctionOptions = Pick<
   | "enumType"
   | "disableBindingProps"
   | "disableDeepInsertProps"
+  | "managedPropertyMode"
   | "v2"
   | "v4"
 >;

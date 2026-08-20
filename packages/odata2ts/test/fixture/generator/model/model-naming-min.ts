@@ -9,7 +9,7 @@ export interface parent {
 
 export type parentId = boolean | { parentId: boolean };
 
-export interface Editableparent extends Pick<parent, "parentId"> {}
+export interface Editableparent extends Partial<Pick<parent, "parentId">> {}
 
 export interface Book extends parent {
   id: boolean;
@@ -19,7 +19,7 @@ export interface Book extends parent {
 
 export type BookId = { parentId: boolean; id: boolean };
 
-export interface EditableBook extends Pick<Book, "parentId" | "id" | "my_Choice"> {
+export interface EditableBook extends Pick<Book, "my_Choice">, Partial<Pick<Book, "parentId" | "id">> {
   Address?: EditableLOCATION | null;
 }
 

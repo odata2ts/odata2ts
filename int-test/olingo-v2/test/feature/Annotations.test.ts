@@ -1,5 +1,6 @@
 import { describe, expectTypeOf, test } from "vitest";
-import type { EditableBook, EditableLoan, EditableMember } from "../../src-generated/library/index.js";
+import type { EditableBook as StrictEditableBook } from "../../src-generated/library-strict/index.js";
+import type { EditableBook, EditableLoan, EditableMember, UpdatableLoan } from "../../src-generated/library/index.js";
 
 /**
  * The `Org.OData.Core.V1` terms as a V2 service states them - which is never as a vocabulary term.
@@ -16,21 +17,31 @@ import type { EditableBook, EditableLoan, EditableMember } from "../../src-gener
  * both ways a V2 document can say this are covered.
  */
 describe("Olingo V2 Library: Core annotations in their V2 spelling", () => {
-  test("Computed: PopularityScore is stated by both dialects and drops out", () => {
-    // annotation:StoreGeneratedPattern="Computed" plus sap:creatable="false" sap:updatable="false"
-    expectTypeOf<EditableBook>().not.toHaveProperty("PopularityScore");
+  test("Computed: PopularityScore is stated by both dialects", () => {
+    // annotation:StoreGeneratedPattern="Computed" plus sap:creatable="false" sap:updatable="false", both
+    // normalized to `Core.Computed` - readOnly, so present but never required under the default mode
+    expectTypeOf<EditableBook["PopularityScore"]>().toEqualTypeOf<string | null | undefined>();
+    // ... and gone altogether from the client generated with strictOmit
+    expectTypeOf<StrictEditableBook>().not.toHaveProperty("PopularityScore");
   });
 
-  test("Immutable: LoanedAt survives but turns optional", () => {
+  test("Immutable: LoanedAt is required on create and optional afterwards", () => {
     // sap:updatable="false" with creatable at its default - settable on insert, fixed from then on. It is
-    // `Nullable="false"` in the model, so without the term it would be required here, as DueDate still is.
-    expectTypeOf<EditableLoan["LoanedAt"]>().toEqualTypeOf<string | undefined>();
+    // `Nullable="false"`, and an annotated immutable property follows that like any other, so create
+    // demands it just as it demands DueDate. `interoperable` does not touch this: it only relaxes keys
+    // nobody described, and here the service has spoken.
+    expectTypeOf<EditableLoan["LoanedAt"]>().toEqualTypeOf<string>();
     expectTypeOf<EditableLoan["DueDate"]>().toEqualTypeOf<string>();
+
+    // the update model is where it turns optional - the server will not change it either way
+    expectTypeOf<UpdatableLoan["LoanedAt"]>().toEqualTypeOf<string | undefined>();
   });
 
-  test("an unannotated single key is still managed by the heuristic", () => {
-    // nothing about this changed: `Medium.Id` carries no annotation in either dialect
-    expectTypeOf<EditableBook>().not.toHaveProperty("Id");
+  test("an unannotated key falls back to the key rule, and interoperable keeps it optional", () => {
+    // `Medium.Id` carries no annotation in either dialect, so the key rule decides - createOnly. This
+    // server generates the value regardless, which is why this package generates under `interoperable`:
+    // it leaves such a key optional on create instead of demanding one the client cannot know.
+    expectTypeOf<EditableBook["Id"]>().toEqualTypeOf<string | undefined>();
   });
 
   test("no other property is taken for managed", () => {

@@ -5,7 +5,7 @@ import {
   ComplexTypeGenerationOptions,
   EntityTypeGenerationOptions,
   EnumSynthesis,
-  ManagedPropertyDetection,
+  KeyProperties,
   ManagedState,
   Modes,
   PropertyGenerationOptions,
@@ -308,6 +308,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       modelName: this.namingHelper.getModelName(name),
       qName: this.namingHelper.getQName(name),
       editableName: this.namingHelper.getEditableModelName(name),
+      updatableName: this.namingHelper.getUpdatableModelName(name),
       serviceName: this.namingHelper.getServiceName(name),
       serviceCollectionName: this.namingHelper.getCollectionServiceName(name),
       folderPath: this.namingHelper.getFolderPath(namespace, name),
@@ -514,18 +515,19 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    * which of them are keys.
    *
    * Configuration has already been applied by {@link mapProp} and wins; everything else is decided here,
-   * from the sources which `managedPropertyDetection` admits.
+   * from the annotations of the service and, for a key, from `keyProperties`.
    */
   private deriveManagedState() {
     const complexTypes = this.dataModel.getComplexTypes();
     complexTypes.forEach((ct) => {
+      // a complex type has no key, so the key branch never applies to one of its properties
       [...ct.baseProps, ...ct.props].forEach((prop) => this.deriveManagedStateOfProp(prop, ct, false, false));
     });
 
     const entityTypes = this.dataModel.getEntityTypes();
     entityTypes.forEach((et) => {
-      const isSingleKey = et.keyNames.length === 1;
       const props = [...et.baseProps, ...et.props];
+      const isSingleKey = et.keyNames.length === 1;
       props.forEach((prop) =>
         this.deriveManagedStateOfProp(prop, et, et.keyNames.includes(prop.odataName), isSingleKey),
       );
@@ -567,26 +569,43 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       return;
     }
 
-    const detection = this.options.managedPropertyDetection;
-    const useAnnotations =
-      detection === ManagedPropertyDetection.auto || detection === ManagedPropertyDetection.annotation;
-    const useHeuristic =
-      detection === ManagedPropertyDetection.auto || detection === ManagedPropertyDetection.simpleHeuristic;
-
-    let byAnnotation = useAnnotations ? this.findAnnotatedState(model, prop.odataName) : undefined;
-    if (isKey && byAnnotation === ManagedState.createOnly) {
-      // `Core.Immutable` states what a key is anyway, so it says nothing about how the key is managed
-      byAnnotation = undefined;
-    }
+    const byAnnotation = this.options.annotations?.disableManagedProperties
+      ? undefined
+      : this.findAnnotatedState(model, prop.odataName);
     if (byAnnotation) {
       prop.managed = byAnnotation;
       return;
     }
 
-    // the heuristic knows nothing but keys: a single key prop - as opposed to one part of a composite
-    // key - is the kind of id a server generates
-    if (useHeuristic && isKey && isSingleKey) {
-      prop.managed = ManagedState.readOnly;
+    // nothing but a key can be derived without being told: it identifies the entity, so it cannot change
+    // once the entity exists. Who supplies the value is the part no metadata reveals - hence the option.
+    if (!isKey) {
+      return;
+    }
+
+    switch (this.options.keyProperties) {
+      case KeyProperties.strict:
+        prop.managed = ManagedState.createOnly;
+        break;
+      case KeyProperties.singleComputed:
+        // a composite key is rarely server-generated, so its parts are left entirely alone
+        if (isSingleKey) {
+          prop.managed = ManagedState.readOnly;
+        }
+        break;
+      case KeyProperties.singleComputedComplexOptional:
+        prop.managed = isSingleKey ? ManagedState.readOnly : ManagedState.optionalWithDefault;
+        break;
+      case KeyProperties.allComputed:
+        prop.managed = ManagedState.readOnly;
+        break;
+      case KeyProperties.interoperable:
+      default:
+        // immutable like `strict`, but not demanded on create: the client cannot supply what the server
+        // generates, and a server which generates keys silently is the case this default exists for
+        prop.managed = ManagedState.createOnly;
+        prop.optionalOnCreate = true;
+        break;
     }
   }
 

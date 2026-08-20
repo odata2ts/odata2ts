@@ -1,691 +1,1062 @@
-<?xml version="1.0" encoding="utf-8"?>
-<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData">
-  <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Capabilities.V1.xml" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-    <edmx:Include Alias="Capabilities" Namespace="Org.OData.Capabilities.V1"/>
+<?xml version="1.0" encoding="utf-8" ?>
+<edmx:Edmx
+  Version="1.0"
+  xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx"
+  xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"
+  xmlns:sap="http://www.sap.com/Protocols/SAPData"
+>
+  <edmx:Reference
+    Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Capabilities.V1.xml"
+    xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx"
+  >
+    <edmx:Include Alias="Capabilities" Namespace="Org.OData.Capabilities.V1" />
   </edmx:Reference>
-  <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-    <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
+  <edmx:Reference
+    Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml"
+    xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx"
+  >
+    <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1" />
   </edmx:Reference>
-  <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Core.V1.xml" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-    <edmx:Include Alias="Core" Namespace="Org.OData.Core.V1"/>
+  <edmx:Reference
+    Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Core.V1.xml"
+    xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx"
+  >
+    <edmx:Include Alias="Core" Namespace="Org.OData.Core.V1" />
   </edmx:Reference>
-  <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Validation.V1.xml" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-    <edmx:Include Alias="Validation" Namespace="Org.OData.Validation.V1"/>
+  <edmx:Reference
+    Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Validation.V1.xml"
+    xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx"
+  >
+    <edmx:Include Alias="Validation" Namespace="Org.OData.Validation.V1" />
   </edmx:Reference>
   <edmx:DataServices m:DataServiceVersion="2.0">
     <Schema Namespace="Library.Service" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
       <Annotation Term="Core.Links" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Collection>
           <Record>
-            <PropertyValue Property="rel" String="author"/>
-            <PropertyValue Property="href" String="https://cap.cloud.sap"/>
+            <PropertyValue Property="rel" String="author" />
+            <PropertyValue Property="href" String="https://cap.cloud.sap" />
           </Record>
         </Collection>
       </Annotation>
       <EntityContainer Name="EntityContainer" m:IsDefaultEntityContainer="true">
-        <EntitySet Name="Books" EntityType="Library.Service.Books"/>
-        <FunctionImport Name="Books_LoanMetrics" ReturnType="Library.Service.Library_Catalog_MediumStats" m:HttpMethod="GET" sap:action-for="Library.Service.Books">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <EntitySet Name="Books" EntityType="Library.Service.Books" />
+        <FunctionImport
+          Name="Books_LoanMetrics"
+          ReturnType="Library.Service.Library_Catalog_MediumStats"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Books"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Books_AvailableLanguages" ReturnType="Collection(Edm.String)" m:HttpMethod="GET" sap:action-for="Library.Service.Books">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="Books_AvailableLanguages"
+          ReturnType="Collection(Edm.String)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Books"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Books_AvailableCopies" EntitySet="Copies" ReturnType="Collection(Library.Service.Copies)" m:HttpMethod="GET" sap:action-for="Library.Service.Books">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="Books_AvailableCopies"
+          EntitySet="Copies"
+          ReturnType="Collection(Library.Service.Copies)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Books"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Books_AvailableCopy" EntitySet="Copies" ReturnType="Library.Service.Copies" m:HttpMethod="GET" sap:action-for="Library.Service.Books">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="Books_AvailableCopy"
+          EntitySet="Copies"
+          ReturnType="Library.Service.Copies"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Books"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Books_Reserve" ReturnType="Edm.Int32" m:HttpMethod="POST" sap:action-for="Library.Service.Books">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
-          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true"/>
+        <FunctionImport
+          Name="Books_Reserve"
+          ReturnType="Edm.Int32"
+          m:HttpMethod="POST"
+          sap:action-for="Library.Service.Books"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
+          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true" />
         </FunctionImport>
-        <EntitySet Name="Copies" EntityType="Library.Service.Copies"/>
+        <EntitySet Name="Copies" EntityType="Library.Service.Copies" />
         <FunctionImport Name="Copies_CheckOut" m:HttpMethod="POST" sap:action-for="Library.Service.Copies">
-          <Parameter Name="MediumId" Type="Edm.Guid" Nullable="false" Mode="In"/>
-          <Parameter Name="InventoryNumber" Type="Edm.Int32" Nullable="false" Mode="In"/>
-          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true"/>
+          <Parameter Name="MediumId" Type="Edm.Guid" Nullable="false" Mode="In" />
+          <Parameter Name="InventoryNumber" Type="Edm.Int32" Nullable="false" Mode="In" />
+          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true" />
         </FunctionImport>
-        <FunctionImport Name="Copies_AssessCondition" ReturnType="Library.Service.Library_Catalog_ConditionReport" m:HttpMethod="POST" sap:action-for="Library.Service.Copies">
-          <Parameter Name="MediumId" Type="Edm.Guid" Nullable="false" Mode="In"/>
-          <Parameter Name="InventoryNumber" Type="Edm.Int32" Nullable="false" Mode="In"/>
-          <Parameter Name="NewCondition" Type="Edm.Byte" Mode="In" Nullable="true"/>
-          <Parameter Name="Remark" Type="Edm.String" Mode="In" Nullable="true"/>
+        <FunctionImport
+          Name="Copies_AssessCondition"
+          ReturnType="Library.Service.Library_Catalog_ConditionReport"
+          m:HttpMethod="POST"
+          sap:action-for="Library.Service.Copies"
+        >
+          <Parameter Name="MediumId" Type="Edm.Guid" Nullable="false" Mode="In" />
+          <Parameter Name="InventoryNumber" Type="Edm.Int32" Nullable="false" Mode="In" />
+          <Parameter Name="NewCondition" Type="Edm.Byte" Mode="In" Nullable="true" />
+          <Parameter Name="Remark" Type="Edm.String" Mode="In" Nullable="true" />
         </FunctionImport>
-        <EntitySet Name="Branches" EntityType="Library.Service.Branches"/>
-        <EntitySet Name="Publishers" EntityType="Library.Service.Publishers"/>
-        <EntitySet Name="Magazines" EntityType="Library.Service.Magazines"/>
-        <FunctionImport Name="Magazines_LoanMetrics" ReturnType="Library.Service.Library_Catalog_MediumStats" m:HttpMethod="GET" sap:action-for="Library.Service.Magazines">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <EntitySet Name="Branches" EntityType="Library.Service.Branches" />
+        <EntitySet Name="Publishers" EntityType="Library.Service.Publishers" />
+        <EntitySet Name="Magazines" EntityType="Library.Service.Magazines" />
+        <FunctionImport
+          Name="Magazines_LoanMetrics"
+          ReturnType="Library.Service.Library_Catalog_MediumStats"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Magazines"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Magazines_AvailableLanguages" ReturnType="Collection(Edm.String)" m:HttpMethod="GET" sap:action-for="Library.Service.Magazines">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="Magazines_AvailableLanguages"
+          ReturnType="Collection(Edm.String)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Magazines"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Magazines_AvailableCopies" EntitySet="Copies" ReturnType="Collection(Library.Service.Copies)" m:HttpMethod="GET" sap:action-for="Library.Service.Magazines">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="Magazines_AvailableCopies"
+          EntitySet="Copies"
+          ReturnType="Collection(Library.Service.Copies)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Magazines"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Magazines_AvailableCopy" EntitySet="Copies" ReturnType="Library.Service.Copies" m:HttpMethod="GET" sap:action-for="Library.Service.Magazines">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="Magazines_AvailableCopy"
+          EntitySet="Copies"
+          ReturnType="Library.Service.Copies"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Magazines"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Magazines_Reserve" ReturnType="Edm.Int32" m:HttpMethod="POST" sap:action-for="Library.Service.Magazines">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
-          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true"/>
+        <FunctionImport
+          Name="Magazines_Reserve"
+          ReturnType="Edm.Int32"
+          m:HttpMethod="POST"
+          sap:action-for="Library.Service.Magazines"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
+          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true" />
         </FunctionImport>
-        <EntitySet Name="TradeJournals" EntityType="Library.Service.TradeJournals"/>
-        <FunctionImport Name="TradeJournals_LoanMetrics" ReturnType="Library.Service.Library_Catalog_MediumStats" m:HttpMethod="GET" sap:action-for="Library.Service.TradeJournals">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <EntitySet Name="TradeJournals" EntityType="Library.Service.TradeJournals" />
+        <FunctionImport
+          Name="TradeJournals_LoanMetrics"
+          ReturnType="Library.Service.Library_Catalog_MediumStats"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.TradeJournals"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="TradeJournals_AvailableLanguages" ReturnType="Collection(Edm.String)" m:HttpMethod="GET" sap:action-for="Library.Service.TradeJournals">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="TradeJournals_AvailableLanguages"
+          ReturnType="Collection(Edm.String)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.TradeJournals"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="TradeJournals_AvailableCopies" EntitySet="Copies" ReturnType="Collection(Library.Service.Copies)" m:HttpMethod="GET" sap:action-for="Library.Service.TradeJournals">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="TradeJournals_AvailableCopies"
+          EntitySet="Copies"
+          ReturnType="Collection(Library.Service.Copies)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.TradeJournals"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="TradeJournals_AvailableCopy" EntitySet="Copies" ReturnType="Library.Service.Copies" m:HttpMethod="GET" sap:action-for="Library.Service.TradeJournals">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="TradeJournals_AvailableCopy"
+          EntitySet="Copies"
+          ReturnType="Library.Service.Copies"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.TradeJournals"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="TradeJournals_Reserve" ReturnType="Edm.Int32" m:HttpMethod="POST" sap:action-for="Library.Service.TradeJournals">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
-          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true"/>
+        <FunctionImport
+          Name="TradeJournals_Reserve"
+          ReturnType="Edm.Int32"
+          m:HttpMethod="POST"
+          sap:action-for="Library.Service.TradeJournals"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
+          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true" />
         </FunctionImport>
-        <EntitySet Name="Audiobooks" EntityType="Library.Service.Audiobooks"/>
-        <FunctionImport Name="Audiobooks_LoanMetrics" ReturnType="Library.Service.Library_Catalog_MediumStats" m:HttpMethod="GET" sap:action-for="Library.Service.Audiobooks">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <EntitySet Name="Audiobooks" EntityType="Library.Service.Audiobooks" />
+        <FunctionImport
+          Name="Audiobooks_LoanMetrics"
+          ReturnType="Library.Service.Library_Catalog_MediumStats"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Audiobooks"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Audiobooks_AvailableLanguages" ReturnType="Collection(Edm.String)" m:HttpMethod="GET" sap:action-for="Library.Service.Audiobooks">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="Audiobooks_AvailableLanguages"
+          ReturnType="Collection(Edm.String)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Audiobooks"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Audiobooks_AvailableCopies" EntitySet="Copies" ReturnType="Collection(Library.Service.Copies)" m:HttpMethod="GET" sap:action-for="Library.Service.Audiobooks">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="Audiobooks_AvailableCopies"
+          EntitySet="Copies"
+          ReturnType="Collection(Library.Service.Copies)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Audiobooks"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Audiobooks_AvailableCopy" EntitySet="Copies" ReturnType="Library.Service.Copies" m:HttpMethod="GET" sap:action-for="Library.Service.Audiobooks">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="Audiobooks_AvailableCopy"
+          EntitySet="Copies"
+          ReturnType="Library.Service.Copies"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Audiobooks"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Audiobooks_Reserve" ReturnType="Edm.Int32" m:HttpMethod="POST" sap:action-for="Library.Service.Audiobooks">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
-          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true"/>
+        <FunctionImport
+          Name="Audiobooks_Reserve"
+          ReturnType="Edm.Int32"
+          m:HttpMethod="POST"
+          sap:action-for="Library.Service.Audiobooks"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
+          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true" />
         </FunctionImport>
-        <EntitySet Name="AudiobookChapters" EntityType="Library.Service.AudiobookChapters"/>
-        <EntitySet Name="DVDs" EntityType="Library.Service.DVDs"/>
-        <FunctionImport Name="DVDs_LoanMetrics" ReturnType="Library.Service.Library_Catalog_MediumStats" m:HttpMethod="GET" sap:action-for="Library.Service.DVDs">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <EntitySet Name="AudiobookChapters" EntityType="Library.Service.AudiobookChapters" />
+        <EntitySet Name="DVDs" EntityType="Library.Service.DVDs" />
+        <FunctionImport
+          Name="DVDs_LoanMetrics"
+          ReturnType="Library.Service.Library_Catalog_MediumStats"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.DVDs"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="DVDs_AvailableLanguages" ReturnType="Collection(Edm.String)" m:HttpMethod="GET" sap:action-for="Library.Service.DVDs">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="DVDs_AvailableLanguages"
+          ReturnType="Collection(Edm.String)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.DVDs"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="DVDs_AvailableCopies" EntitySet="Copies" ReturnType="Collection(Library.Service.Copies)" m:HttpMethod="GET" sap:action-for="Library.Service.DVDs">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="DVDs_AvailableCopies"
+          EntitySet="Copies"
+          ReturnType="Collection(Library.Service.Copies)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.DVDs"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="DVDs_AvailableCopy" EntitySet="Copies" ReturnType="Library.Service.Copies" m:HttpMethod="GET" sap:action-for="Library.Service.DVDs">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="DVDs_AvailableCopy"
+          EntitySet="Copies"
+          ReturnType="Library.Service.Copies"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.DVDs"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="DVDs_Reserve" ReturnType="Edm.Int32" m:HttpMethod="POST" sap:action-for="Library.Service.DVDs">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
-          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true"/>
+        <FunctionImport
+          Name="DVDs_Reserve"
+          ReturnType="Edm.Int32"
+          m:HttpMethod="POST"
+          sap:action-for="Library.Service.DVDs"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
+          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true" />
         </FunctionImport>
-        <EntitySet Name="EBooks" EntityType="Library.Service.EBooks"/>
-        <FunctionImport Name="EBooks_LoanMetrics" ReturnType="Library.Service.Library_Catalog_MediumStats" m:HttpMethod="GET" sap:action-for="Library.Service.EBooks">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <EntitySet Name="EBooks" EntityType="Library.Service.EBooks" />
+        <FunctionImport
+          Name="EBooks_LoanMetrics"
+          ReturnType="Library.Service.Library_Catalog_MediumStats"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.EBooks"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="EBooks_AvailableLanguages" ReturnType="Collection(Edm.String)" m:HttpMethod="GET" sap:action-for="Library.Service.EBooks">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="EBooks_AvailableLanguages"
+          ReturnType="Collection(Edm.String)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.EBooks"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="EBooks_AvailableCopies" EntitySet="Copies" ReturnType="Collection(Library.Service.Copies)" m:HttpMethod="GET" sap:action-for="Library.Service.EBooks">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="EBooks_AvailableCopies"
+          EntitySet="Copies"
+          ReturnType="Collection(Library.Service.Copies)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.EBooks"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="EBooks_AvailableCopy" EntitySet="Copies" ReturnType="Library.Service.Copies" m:HttpMethod="GET" sap:action-for="Library.Service.EBooks">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="EBooks_AvailableCopy"
+          EntitySet="Copies"
+          ReturnType="Library.Service.Copies"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.EBooks"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="EBooks_Reserve" ReturnType="Edm.Int32" m:HttpMethod="POST" sap:action-for="Library.Service.EBooks">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
-          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true"/>
+        <FunctionImport
+          Name="EBooks_Reserve"
+          ReturnType="Edm.Int32"
+          m:HttpMethod="POST"
+          sap:action-for="Library.Service.EBooks"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
+          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true" />
         </FunctionImport>
-        <EntitySet Name="CollectorsItems" EntityType="Library.Service.CollectorsItems"/>
-        <FunctionImport Name="CollectorsItems_LoanMetrics" ReturnType="Library.Service.Library_Catalog_MediumStats" m:HttpMethod="GET" sap:action-for="Library.Service.CollectorsItems">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <EntitySet Name="CollectorsItems" EntityType="Library.Service.CollectorsItems" />
+        <FunctionImport
+          Name="CollectorsItems_LoanMetrics"
+          ReturnType="Library.Service.Library_Catalog_MediumStats"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.CollectorsItems"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="CollectorsItems_AvailableLanguages" ReturnType="Collection(Edm.String)" m:HttpMethod="GET" sap:action-for="Library.Service.CollectorsItems">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="CollectorsItems_AvailableLanguages"
+          ReturnType="Collection(Edm.String)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.CollectorsItems"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="CollectorsItems_AvailableCopies" EntitySet="Copies" ReturnType="Collection(Library.Service.Copies)" m:HttpMethod="GET" sap:action-for="Library.Service.CollectorsItems">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="CollectorsItems_AvailableCopies"
+          EntitySet="Copies"
+          ReturnType="Collection(Library.Service.Copies)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.CollectorsItems"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="CollectorsItems_AvailableCopy" EntitySet="Copies" ReturnType="Library.Service.Copies" m:HttpMethod="GET" sap:action-for="Library.Service.CollectorsItems">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="CollectorsItems_AvailableCopy"
+          EntitySet="Copies"
+          ReturnType="Library.Service.Copies"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.CollectorsItems"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="CollectorsItems_Reserve" ReturnType="Edm.Int32" m:HttpMethod="POST" sap:action-for="Library.Service.CollectorsItems">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
-          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true"/>
+        <FunctionImport
+          Name="CollectorsItems_Reserve"
+          ReturnType="Edm.Int32"
+          m:HttpMethod="POST"
+          sap:action-for="Library.Service.CollectorsItems"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
+          <Parameter Name="MemberId" Type="Edm.Int32" Mode="In" Nullable="true" />
         </FunctionImport>
-        <EntitySet Name="Members" EntityType="Library.Service.Members"/>
-        <FunctionImport Name="Members_OutstandingBalance" ReturnType="Edm.Decimal" m:HttpMethod="GET" sap:action-for="Library.Service.Members">
-          <Parameter Name="Id" Type="Edm.Int32" Nullable="false" Mode="In"/>
+        <EntitySet Name="Members" EntityType="Library.Service.Members" />
+        <FunctionImport
+          Name="Members_OutstandingBalance"
+          ReturnType="Edm.Decimal"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Members"
+        >
+          <Parameter Name="Id" Type="Edm.Int32" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Members_NoticeHistory" ReturnType="Collection(Library.Service.Library_Circulation_OverdueNotice)" m:HttpMethod="GET" sap:action-for="Library.Service.Members">
-          <Parameter Name="Id" Type="Edm.Int32" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="Members_NoticeHistory"
+          ReturnType="Collection(Library.Service.Library_Circulation_OverdueNotice)"
+          m:HttpMethod="GET"
+          sap:action-for="Library.Service.Members"
+        >
+          <Parameter Name="Id" Type="Edm.Int32" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Members_RunReminders" ReturnType="Collection(Library.Service.Library_Circulation_OverdueNotice)" m:HttpMethod="POST" sap:action-for="Library.Service.Members">
-          <Parameter Name="Id" Type="Edm.Int32" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="Members_RunReminders"
+          ReturnType="Collection(Library.Service.Library_Circulation_OverdueNotice)"
+          m:HttpMethod="POST"
+          sap:action-for="Library.Service.Members"
+        >
+          <Parameter Name="Id" Type="Edm.Int32" Nullable="false" Mode="In" />
         </FunctionImport>
-        <EntitySet Name="Loans" EntityType="Library.Service.Loans"/>
-        <FunctionImport Name="Loans_Renew" EntitySet="Loans" ReturnType="Library.Service.Loans" m:HttpMethod="POST" sap:action-for="Library.Service.Loans">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <EntitySet Name="Loans" EntityType="Library.Service.Loans" />
+        <FunctionImport
+          Name="Loans_Renew"
+          EntitySet="Loans"
+          ReturnType="Library.Service.Loans"
+          m:HttpMethod="POST"
+          sap:action-for="Library.Service.Loans"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Loans_RenewAll" EntitySet="Loans" ReturnType="Collection(Library.Service.Loans)" m:HttpMethod="POST" sap:action-for="Library.Service.Loans">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="Loans_RenewAll"
+          EntitySet="Loans"
+          ReturnType="Collection(Library.Service.Loans)"
+          m:HttpMethod="POST"
+          sap:action-for="Library.Service.Loans"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="Loans_BulkRenew" ReturnType="Collection(Edm.String)" m:HttpMethod="POST" sap:action-for="Library.Service.Loans">
-          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="Loans_BulkRenew"
+          ReturnType="Collection(Edm.String)"
+          m:HttpMethod="POST"
+          sap:action-for="Library.Service.Loans"
+        >
+          <Parameter Name="Id" Type="Edm.Guid" Nullable="false" Mode="In" />
         </FunctionImport>
-        <EntitySet Name="Reservations" EntityType="Library.Service.Reservations"/>
-        <EntitySet Name="IdDocuments" EntityType="Library.Service.IdDocuments"/>
-        <EntitySet Name="Bookmobiles" EntityType="Library.Service.Bookmobiles"/>
-        <EntitySet Name="MainBranch" EntityType="Library.Service.MainBranch"/>
-        <EntitySet Name="PublisherBranches" EntityType="Library.Service.PublisherBranches"/>
-        <FunctionImport Name="TotalMediaCount" ReturnType="Edm.Int64" m:HttpMethod="GET"/>
-        <FunctionImport Name="AllLanguages" ReturnType="Collection(Edm.String)" m:HttpMethod="GET"/>
-        <FunctionImport Name="LoanStatistics" ReturnType="Library.Service.Library_Circulation_LoanStats" m:HttpMethod="GET">
-          <Parameter Name="Period" Type="Library.Service.Library_Circulation_DateRange" Mode="In" Nullable="true"/>
+        <EntitySet Name="Reservations" EntityType="Library.Service.Reservations" />
+        <EntitySet Name="IdDocuments" EntityType="Library.Service.IdDocuments" />
+        <EntitySet Name="Bookmobiles" EntityType="Library.Service.Bookmobiles" />
+        <EntitySet Name="MainBranch" EntityType="Library.Service.MainBranch" />
+        <EntitySet Name="PublisherBranches" EntityType="Library.Service.PublisherBranches" />
+        <FunctionImport Name="TotalMediaCount" ReturnType="Edm.Int64" m:HttpMethod="GET" />
+        <FunctionImport Name="AllLanguages" ReturnType="Collection(Edm.String)" m:HttpMethod="GET" />
+        <FunctionImport
+          Name="LoanStatistics"
+          ReturnType="Library.Service.Library_Circulation_LoanStats"
+          m:HttpMethod="GET"
+        >
+          <Parameter Name="Period" Type="Library.Service.Library_Circulation_DateRange" Mode="In" Nullable="true" />
         </FunctionImport>
-        <FunctionImport Name="StatsPerBranch" ReturnType="Collection(Library.Service.Library_Circulation_BranchStats)" m:HttpMethod="GET"/>
-        <FunctionImport Name="MostReadMedium" EntitySet="Books" ReturnType="Library.Service.Books" m:HttpMethod="GET"/>
-        <FunctionImport Name="NewReleases" EntitySet="Books" ReturnType="Collection(Library.Service.Books)" m:HttpMethod="GET"/>
-        <FunctionImport Name="Search" EntitySet="Books" ReturnType="Collection(Library.Service.Books)" m:HttpMethod="GET">
-          <Parameter Name="Term" Type="Edm.String" Nullable="false" Mode="In"/>
-          <Parameter Name="MaxResults" Type="Edm.Int32" Mode="In" Nullable="true"/>
+        <FunctionImport
+          Name="StatsPerBranch"
+          ReturnType="Collection(Library.Service.Library_Circulation_BranchStats)"
+          m:HttpMethod="GET"
+        />
+        <FunctionImport Name="MostReadMedium" EntitySet="Books" ReturnType="Library.Service.Books" m:HttpMethod="GET" />
+        <FunctionImport
+          Name="NewReleases"
+          EntitySet="Books"
+          ReturnType="Collection(Library.Service.Books)"
+          m:HttpMethod="GET"
+        />
+        <FunctionImport
+          Name="Search"
+          EntitySet="Books"
+          ReturnType="Collection(Library.Service.Books)"
+          m:HttpMethod="GET"
+        >
+          <Parameter Name="Term" Type="Edm.String" Nullable="false" Mode="In" />
+          <Parameter Name="MaxResults" Type="Edm.Int32" Mode="In" Nullable="true" />
         </FunctionImport>
         <FunctionImport Name="ClosureDay" m:HttpMethod="POST">
-          <Parameter Name="Day" Type="Edm.DateTime" Nullable="false" Mode="In" sap:display-format="Date"/>
+          <Parameter Name="Day" Type="Edm.DateTime" Nullable="false" Mode="In" sap:display-format="Date" />
         </FunctionImport>
-        <FunctionImport Name="NextInventoryNumber" ReturnType="Edm.Int32" m:HttpMethod="POST"/>
+        <FunctionImport Name="NextInventoryNumber" ReturnType="Edm.Int32" m:HttpMethod="POST" />
         <FunctionImport Name="CleanUpKeywords" ReturnType="Collection(Edm.String)" m:HttpMethod="POST">
-          <Parameter Name="Obsolete" Type="Collection(Edm.String)" Nullable="true" Mode="In"/>
+          <Parameter Name="Obsolete" Type="Collection(Edm.String)" Nullable="true" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="YearEndClosing" ReturnType="Library.Service.Library_Circulation_AnnualReport" m:HttpMethod="POST">
-          <Parameter Name="Year" Type="Edm.Int32" Nullable="false" Mode="In"/>
+        <FunctionImport
+          Name="YearEndClosing"
+          ReturnType="Library.Service.Library_Circulation_AnnualReport"
+          m:HttpMethod="POST"
+        >
+          <Parameter Name="Year" Type="Edm.Int32" Nullable="false" Mode="In" />
         </FunctionImport>
-        <FunctionImport Name="RunOverdueNotices" ReturnType="Collection(Library.Service.Library_Circulation_OverdueNotice)" m:HttpMethod="POST"/>
-        <FunctionImport Name="AcquireCollectorsItem" EntitySet="CollectorsItems" ReturnType="Library.Service.CollectorsItems" m:HttpMethod="POST">
-          <Parameter Name="Title" Type="Edm.String" Nullable="false" Mode="In"/>
-          <Parameter Name="Description" Type="Edm.String" Mode="In" Nullable="true"/>
+        <FunctionImport
+          Name="RunOverdueNotices"
+          ReturnType="Collection(Library.Service.Library_Circulation_OverdueNotice)"
+          m:HttpMethod="POST"
+        />
+        <FunctionImport
+          Name="AcquireCollectorsItem"
+          EntitySet="CollectorsItems"
+          ReturnType="Library.Service.CollectorsItems"
+          m:HttpMethod="POST"
+        >
+          <Parameter Name="Title" Type="Edm.String" Nullable="false" Mode="In" />
+          <Parameter Name="Description" Type="Edm.String" Mode="In" Nullable="true" />
         </FunctionImport>
-        <FunctionImport Name="RunStockCheck" EntitySet="Books" ReturnType="Collection(Library.Service.Books)" m:HttpMethod="POST"/>
+        <FunctionImport
+          Name="RunStockCheck"
+          EntitySet="Books"
+          ReturnType="Collection(Library.Service.Books)"
+          m:HttpMethod="POST"
+        />
         <AssociationSet Name="Books_Copies" Association="Library.Service.Books_Copies">
-          <End Role="Books" EntitySet="Books"/>
-          <End Role="Copies" EntitySet="Copies"/>
+          <End Role="Books" EntitySet="Books" />
+          <End Role="Copies" EntitySet="Copies" />
         </AssociationSet>
         <AssociationSet Name="Books_Publisher" Association="Library.Service.Books_Publisher">
-          <End Role="Books" EntitySet="Books"/>
-          <End Role="Publishers" EntitySet="Publishers"/>
+          <End Role="Books" EntitySet="Books" />
+          <End Role="Publishers" EntitySet="Publishers" />
         </AssociationSet>
         <AssociationSet Name="Copies_Location" Association="Library.Service.Copies_Location">
-          <End Role="Copies" EntitySet="Copies"/>
-          <End Role="Branches" EntitySet="Branches"/>
+          <End Role="Copies" EntitySet="Copies" />
+          <End Role="Branches" EntitySet="Branches" />
         </AssociationSet>
         <AssociationSet Name="Magazines_Copies" Association="Library.Service.Magazines_Copies">
-          <End Role="Magazines" EntitySet="Magazines"/>
-          <End Role="Copies" EntitySet="Copies"/>
+          <End Role="Magazines" EntitySet="Magazines" />
+          <End Role="Copies" EntitySet="Copies" />
         </AssociationSet>
         <AssociationSet Name="TradeJournals_Copies" Association="Library.Service.TradeJournals_Copies">
-          <End Role="TradeJournals" EntitySet="TradeJournals"/>
-          <End Role="Copies" EntitySet="Copies"/>
+          <End Role="TradeJournals" EntitySet="TradeJournals" />
+          <End Role="Copies" EntitySet="Copies" />
         </AssociationSet>
         <AssociationSet Name="Audiobooks_Copies" Association="Library.Service.Audiobooks_Copies">
-          <End Role="Audiobooks" EntitySet="Audiobooks"/>
-          <End Role="Copies" EntitySet="Copies"/>
+          <End Role="Audiobooks" EntitySet="Audiobooks" />
+          <End Role="Copies" EntitySet="Copies" />
         </AssociationSet>
         <AssociationSet Name="AudiobookChapters_up_" Association="Library.Service.AudiobookChapters_up_">
-          <End Role="AudiobookChapters" EntitySet="AudiobookChapters"/>
-          <End Role="Audiobooks" EntitySet="Audiobooks"/>
+          <End Role="AudiobookChapters" EntitySet="AudiobookChapters" />
+          <End Role="Audiobooks" EntitySet="Audiobooks" />
         </AssociationSet>
         <AssociationSet Name="DVDs_Copies" Association="Library.Service.DVDs_Copies">
-          <End Role="DVDs" EntitySet="DVDs"/>
-          <End Role="Copies" EntitySet="Copies"/>
+          <End Role="DVDs" EntitySet="DVDs" />
+          <End Role="Copies" EntitySet="Copies" />
         </AssociationSet>
         <AssociationSet Name="EBooks_Copies" Association="Library.Service.EBooks_Copies">
-          <End Role="EBooks" EntitySet="EBooks"/>
-          <End Role="Copies" EntitySet="Copies"/>
+          <End Role="EBooks" EntitySet="EBooks" />
+          <End Role="Copies" EntitySet="Copies" />
         </AssociationSet>
         <AssociationSet Name="CollectorsItems_Copies" Association="Library.Service.CollectorsItems_Copies">
-          <End Role="CollectorsItems" EntitySet="CollectorsItems"/>
-          <End Role="Copies" EntitySet="Copies"/>
+          <End Role="CollectorsItems" EntitySet="CollectorsItems" />
+          <End Role="Copies" EntitySet="Copies" />
         </AssociationSet>
-        <AssociationSet Name="CollectorsItems_StorageLocation" Association="Library.Service.CollectorsItems_StorageLocation">
-          <End Role="CollectorsItems" EntitySet="CollectorsItems"/>
-          <End Role="Branches" EntitySet="Branches"/>
+        <AssociationSet
+          Name="CollectorsItems_StorageLocation"
+          Association="Library.Service.CollectorsItems_StorageLocation"
+        >
+          <End Role="CollectorsItems" EntitySet="CollectorsItems" />
+          <End Role="Branches" EntitySet="Branches" />
         </AssociationSet>
         <AssociationSet Name="Members_IdDocument" Association="Library.Service.Members_IdDocument">
-          <End Role="Members" EntitySet="Members"/>
-          <End Role="IdDocuments" EntitySet="IdDocuments"/>
+          <End Role="Members" EntitySet="Members" />
+          <End Role="IdDocuments" EntitySet="IdDocuments" />
         </AssociationSet>
         <AssociationSet Name="Loans_Member" Association="Library.Service.Loans_Member">
-          <End Role="Loans" EntitySet="Loans"/>
-          <End Role="Members" EntitySet="Members"/>
+          <End Role="Loans" EntitySet="Loans" />
+          <End Role="Members" EntitySet="Members" />
         </AssociationSet>
         <AssociationSet Name="Loans_Copy" Association="Library.Service.Loans_Copy">
-          <End Role="Loans" EntitySet="Loans"/>
-          <End Role="Copies" EntitySet="Copies"/>
+          <End Role="Loans" EntitySet="Loans" />
+          <End Role="Copies" EntitySet="Copies" />
         </AssociationSet>
         <AssociationSet Name="Reservations_Member" Association="Library.Service.Reservations_Member">
-          <End Role="Reservations" EntitySet="Reservations"/>
-          <End Role="Members" EntitySet="Members"/>
+          <End Role="Reservations" EntitySet="Reservations" />
+          <End Role="Members" EntitySet="Members" />
         </AssociationSet>
       </EntityContainer>
       <EntityType Name="Books">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
-        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
-        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date"/>
-        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
-        <Property Name="PopularityScore" Type="Edm.Double"/>
-        <NavigationProperty Name="Copies" Relationship="Library.Service.Books_Copies" FromRole="Books" ToRole="Copies"/>
-        <Property Name="ISBN" Type="Edm.String" MaxLength="13"/>
-        <Property Name="PageCount" Type="Edm.Int16"/>
-        <Property Name="AgeRating" Type="Edm.Byte"/>
-        <NavigationProperty Name="Publisher" Relationship="Library.Service.Books_Publisher" FromRole="Books" ToRole="Publishers"/>
-        <Property Name="Publisher_Id" Type="Edm.Int32"/>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false" />
+        <Property Name="Language" Type="Edm.String" MaxLength="40" />
+        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date" />
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true" />
+        <Property Name="PopularityScore" Type="Edm.Double" />
+        <NavigationProperty
+          Name="Copies"
+          Relationship="Library.Service.Books_Copies"
+          FromRole="Books"
+          ToRole="Copies"
+        />
+        <Property Name="ISBN" Type="Edm.String" MaxLength="13" />
+        <Property Name="PageCount" Type="Edm.Int16" />
+        <Property Name="AgeRating" Type="Edm.Byte" />
+        <NavigationProperty
+          Name="Publisher"
+          Relationship="Library.Service.Books_Publisher"
+          FromRole="Books"
+          ToRole="Publishers"
+        />
+        <Property Name="Publisher_Id" Type="Edm.Int32" />
       </EntityType>
       <EntityType Name="Copies">
         <Key>
-          <PropertyRef Name="MediumId"/>
-          <PropertyRef Name="InventoryNumber"/>
+          <PropertyRef Name="MediumId" />
+          <PropertyRef Name="InventoryNumber" />
         </Key>
-        <Property Name="MediumId" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="InventoryNumber" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="Condition" Type="Edm.Byte" ConcurrencyMode="Fixed"/>
-        <Property Name="IsLoanable" Type="Edm.Boolean" Nullable="false"/>
-        <Property Name="Status" Type="Edm.Byte"/>
-        <Property Name="AcquisitionDate" Type="Edm.DateTime" sap:display-format="Date"/>
-        <Property Name="WeightKg" Type="Edm.Single"/>
-        <Property Name="Location_" Type="Edm.String" MaxLength="10"/>
-        <NavigationProperty Name="Location" Relationship="Library.Service.Copies_Location" FromRole="Copies" ToRole="Branches"/>
-        <Property Name="Location_Id" Type="Edm.Int32"/>
+        <Property Name="MediumId" Type="Edm.Guid" Nullable="false" />
+        <Property Name="InventoryNumber" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Condition" Type="Edm.Byte" ConcurrencyMode="Fixed" />
+        <Property Name="IsLoanable" Type="Edm.Boolean" Nullable="false" />
+        <Property Name="Status" Type="Edm.Byte" />
+        <Property Name="AcquisitionDate" Type="Edm.DateTime" sap:display-format="Date" />
+        <Property Name="WeightKg" Type="Edm.Single" />
+        <Property Name="Location_" Type="Edm.String" MaxLength="10" />
+        <NavigationProperty
+          Name="Location"
+          Relationship="Library.Service.Copies_Location"
+          FromRole="Copies"
+          ToRole="Branches"
+        />
+        <Property Name="Location_Id" Type="Edm.Int32" />
       </EntityType>
       <EntityType Name="Branches">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="Name" Type="Edm.String" MaxLength="100" Nullable="false"/>
-        <Property Name="Address_Street" Type="Edm.String" MaxLength="120"/>
-        <Property Name="Address_City" Type="Edm.String" MaxLength="80"/>
-        <Property Name="Address_PostalCode" Type="Edm.String" MaxLength="10"/>
-        <Property Name="Address_Country" Type="Edm.String" MaxLength="60"/>
-        <Property Name="Location" Type="Edm.String"/>
-        <Property Name="CatchmentArea" Type="Edm.String"/>
-        <Property Name="LowestFloor" Type="Edm.SByte"/>
-        <Property Name="FloorPlanOrigin" Type="Edm.String"/>
-        <Property Name="FloorPlanShapes" Type="Edm.String"/>
-        <Property Name="OpensAt" Type="Edm.Time"/>
-        <Property Name="ClosesAt" Type="Edm.Time"/>
-        <Property Name="Amenities" Type="Edm.Int32"/>
-        <Property Name="Population" Type="Edm.Int64"/>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Name" Type="Edm.String" MaxLength="100" Nullable="false" />
+        <Property Name="Address_Street" Type="Edm.String" MaxLength="120" />
+        <Property Name="Address_City" Type="Edm.String" MaxLength="80" />
+        <Property Name="Address_PostalCode" Type="Edm.String" MaxLength="10" />
+        <Property Name="Address_Country" Type="Edm.String" MaxLength="60" />
+        <Property Name="Location" Type="Edm.String" />
+        <Property Name="CatchmentArea" Type="Edm.String" />
+        <Property Name="LowestFloor" Type="Edm.SByte" />
+        <Property Name="FloorPlanOrigin" Type="Edm.String" />
+        <Property Name="FloorPlanShapes" Type="Edm.String" />
+        <Property Name="OpensAt" Type="Edm.Time" />
+        <Property Name="ClosesAt" Type="Edm.Time" />
+        <Property Name="Amenities" Type="Edm.Int32" />
+        <Property Name="Population" Type="Edm.Int64" />
       </EntityType>
       <EntityType Name="Publishers">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="Name" Type="Edm.String" MaxLength="100" Nullable="false"/>
-        <Property Name="Country" Type="Edm.String" MaxLength="60"/>
-        <Property Name="Founded" Type="Edm.DateTime" sap:display-format="Date"/>
-        <NavigationProperty Name="Books" Relationship="Library.Service.Books_Publisher" FromRole="Publishers" ToRole="Books"/>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Name" Type="Edm.String" MaxLength="100" Nullable="false" />
+        <Property Name="Country" Type="Edm.String" MaxLength="60" />
+        <Property Name="Founded" Type="Edm.DateTime" sap:display-format="Date" />
+        <NavigationProperty
+          Name="Books"
+          Relationship="Library.Service.Books_Publisher"
+          FromRole="Publishers"
+          ToRole="Books"
+        />
       </EntityType>
       <EntityType Name="Magazines">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
-        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
-        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date"/>
-        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
-        <Property Name="PopularityScore" Type="Edm.Double"/>
-        <NavigationProperty Name="Copies" Relationship="Library.Service.Magazines_Copies" FromRole="Magazines" ToRole="Copies"/>
-        <Property Name="ISBN" Type="Edm.String" MaxLength="13"/>
-        <Property Name="IssueNumber" Type="Edm.Int32"/>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false" />
+        <Property Name="Language" Type="Edm.String" MaxLength="40" />
+        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date" />
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true" />
+        <Property Name="PopularityScore" Type="Edm.Double" />
+        <NavigationProperty
+          Name="Copies"
+          Relationship="Library.Service.Magazines_Copies"
+          FromRole="Magazines"
+          ToRole="Copies"
+        />
+        <Property Name="ISBN" Type="Edm.String" MaxLength="13" />
+        <Property Name="IssueNumber" Type="Edm.Int32" />
       </EntityType>
       <EntityType Name="TradeJournals">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
-        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
-        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date"/>
-        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
-        <Property Name="PopularityScore" Type="Edm.Double"/>
-        <NavigationProperty Name="Copies" Relationship="Library.Service.TradeJournals_Copies" FromRole="TradeJournals" ToRole="Copies"/>
-        <Property Name="ISBN" Type="Edm.String" MaxLength="13"/>
-        <Property Name="IssueNumber" Type="Edm.Int32"/>
-        <Property Name="Field" Type="Edm.String"/>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false" />
+        <Property Name="Language" Type="Edm.String" MaxLength="40" />
+        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date" />
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true" />
+        <Property Name="PopularityScore" Type="Edm.Double" />
+        <NavigationProperty
+          Name="Copies"
+          Relationship="Library.Service.TradeJournals_Copies"
+          FromRole="TradeJournals"
+          ToRole="Copies"
+        />
+        <Property Name="ISBN" Type="Edm.String" MaxLength="13" />
+        <Property Name="IssueNumber" Type="Edm.Int32" />
+        <Property Name="Field" Type="Edm.String" />
       </EntityType>
       <EntityType Name="Audiobooks" m:HasStream="true">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
-        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
-        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date"/>
-        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
-        <Property Name="PopularityScore" Type="Edm.Double"/>
-        <NavigationProperty Name="Copies" Relationship="Library.Service.Audiobooks_Copies" FromRole="Audiobooks" ToRole="Copies"/>
-        <Property Name="Duration" Type="Edm.String"/>
-        <Property Name="Narrator" Type="Edm.String"/>
-        <NavigationProperty Name="Chapters" Relationship="Library.Service.AudiobookChapters_up_" FromRole="Audiobooks" ToRole="AudiobookChapters"/>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false" />
+        <Property Name="Language" Type="Edm.String" MaxLength="40" />
+        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date" />
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true" />
+        <Property Name="PopularityScore" Type="Edm.Double" />
+        <NavigationProperty
+          Name="Copies"
+          Relationship="Library.Service.Audiobooks_Copies"
+          FromRole="Audiobooks"
+          ToRole="Copies"
+        />
+        <Property Name="Duration" Type="Edm.String" />
+        <Property Name="Narrator" Type="Edm.String" />
+        <NavigationProperty
+          Name="Chapters"
+          Relationship="Library.Service.AudiobookChapters_up_"
+          FromRole="Audiobooks"
+          ToRole="AudiobookChapters"
+        />
       </EntityType>
       <EntityType Name="AudiobookChapters" m:HasStream="true">
         <Key>
-          <PropertyRef Name="Id"/>
-          <PropertyRef Name="up__Id"/>
+          <PropertyRef Name="Id" />
+          <PropertyRef Name="up__Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
-        <NavigationProperty Name="up_" Relationship="Library.Service.AudiobookChapters_up_" FromRole="AudiobookChapters" ToRole="Audiobooks"/>
-        <Property Name="up__Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="Title" Type="Edm.String"/>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+        <NavigationProperty
+          Name="up_"
+          Relationship="Library.Service.AudiobookChapters_up_"
+          FromRole="AudiobookChapters"
+          ToRole="Audiobooks"
+        />
+        <Property Name="up__Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Title" Type="Edm.String" />
       </EntityType>
       <EntityType Name="DVDs">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
-        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
-        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date"/>
-        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
-        <Property Name="PopularityScore" Type="Edm.Double"/>
-        <NavigationProperty Name="Copies" Relationship="Library.Service.DVDs_Copies" FromRole="DVDs" ToRole="Copies"/>
-        <Property Name="Duration" Type="Edm.String"/>
-        <Property Name="RegionCode" Type="Edm.Byte"/>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false" />
+        <Property Name="Language" Type="Edm.String" MaxLength="40" />
+        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date" />
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true" />
+        <Property Name="PopularityScore" Type="Edm.Double" />
+        <NavigationProperty Name="Copies" Relationship="Library.Service.DVDs_Copies" FromRole="DVDs" ToRole="Copies" />
+        <Property Name="Duration" Type="Edm.String" />
+        <Property Name="RegionCode" Type="Edm.Byte" />
       </EntityType>
       <EntityType Name="EBooks" m:HasStream="true">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
-        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
-        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date"/>
-        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
-        <Property Name="PopularityScore" Type="Edm.Double"/>
-        <NavigationProperty Name="Copies" Relationship="Library.Service.EBooks_Copies" FromRole="EBooks" ToRole="Copies"/>
-        <Property Name="FileFormat" Type="Edm.String" MaxLength="20"/>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false" />
+        <Property Name="Language" Type="Edm.String" MaxLength="40" />
+        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date" />
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true" />
+        <Property Name="PopularityScore" Type="Edm.Double" />
+        <NavigationProperty
+          Name="Copies"
+          Relationship="Library.Service.EBooks_Copies"
+          FromRole="EBooks"
+          ToRole="Copies"
+        />
+        <Property Name="FileFormat" Type="Edm.String" MaxLength="20" />
       </EntityType>
       <EntityType Name="CollectorsItems">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false"/>
-        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
-        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date"/>
-        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true"/>
-        <Property Name="PopularityScore" Type="Edm.Double"/>
-        <NavigationProperty Name="Copies" Relationship="Library.Service.CollectorsItems_Copies" FromRole="CollectorsItems" ToRole="Copies"/>
-        <Property Name="ExtraData" Type="Edm.String"/>
-        <NavigationProperty Name="StorageLocation" Relationship="Library.Service.CollectorsItems_StorageLocation" FromRole="CollectorsItems" ToRole="Branches"/>
-        <Property Name="StorageLocation_Id" Type="Edm.Int32"/>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Title" Type="Edm.String" MaxLength="200" Nullable="false" />
+        <Property Name="Language" Type="Edm.String" MaxLength="40" />
+        <Property Name="PublicationDate" Type="Edm.DateTime" sap:display-format="Date" />
+        <Property Name="Keywords" Type="Collection(Edm.String)" Nullable="true" />
+        <Property Name="PopularityScore" Type="Edm.Double" />
+        <NavigationProperty
+          Name="Copies"
+          Relationship="Library.Service.CollectorsItems_Copies"
+          FromRole="CollectorsItems"
+          ToRole="Copies"
+        />
+        <Property Name="ExtraData" Type="Edm.String" />
+        <NavigationProperty
+          Name="StorageLocation"
+          Relationship="Library.Service.CollectorsItems_StorageLocation"
+          FromRole="CollectorsItems"
+          ToRole="Branches"
+        />
+        <Property Name="StorageLocation_Id" Type="Edm.Int32" />
       </EntityType>
       <EntityType Name="Members">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="Name" Type="Edm.String" MaxLength="100" Nullable="false"/>
-        <Property Name="DateOfBirth" Type="Edm.DateTime" sap:display-format="Date"/>
-        <Property Name="Address_Street" Type="Edm.String" MaxLength="120"/>
-        <Property Name="Address_City" Type="Edm.String" MaxLength="80"/>
-        <Property Name="Address_PostalCode" Type="Edm.String" MaxLength="10"/>
-        <Property Name="Address_Country" Type="Edm.String" MaxLength="60"/>
-        <Property Name="PreviousAddresses" Type="Collection(Library.Service.Library_Catalog_PostalAddress)" Nullable="true"/>
-        <Property Name="ActiveSince" Type="Edm.DateTimeOffset" Precision="7"/>
-        <Property Name="Balance" Type="Edm.Decimal" Precision="9" Scale="2"/>
-        <NavigationProperty Name="Loans" Relationship="Library.Service.Loans_Member" FromRole="Members" ToRole="Loans"/>
-        <NavigationProperty Name="Reservations" Relationship="Library.Service.Reservations_Member" FromRole="Members" ToRole="Reservations"/>
-        <NavigationProperty Name="IdDocument" Relationship="Library.Service.Members_IdDocument" FromRole="Members" ToRole="IdDocuments"/>
-        <Property Name="IdDocument_Id" Type="Edm.Guid"/>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Name" Type="Edm.String" MaxLength="100" Nullable="false" />
+        <Property Name="DateOfBirth" Type="Edm.DateTime" sap:display-format="Date" />
+        <Property Name="Address_Street" Type="Edm.String" MaxLength="120" />
+        <Property Name="Address_City" Type="Edm.String" MaxLength="80" />
+        <Property Name="Address_PostalCode" Type="Edm.String" MaxLength="10" />
+        <Property Name="Address_Country" Type="Edm.String" MaxLength="60" />
+        <Property
+          Name="PreviousAddresses"
+          Type="Collection(Library.Service.Library_Catalog_PostalAddress)"
+          Nullable="true"
+        />
+        <Property Name="ActiveSince" Type="Edm.DateTimeOffset" Precision="7" />
+        <Property Name="Balance" Type="Edm.Decimal" Precision="9" Scale="2" />
+        <NavigationProperty
+          Name="Loans"
+          Relationship="Library.Service.Loans_Member"
+          FromRole="Members"
+          ToRole="Loans"
+        />
+        <NavigationProperty
+          Name="Reservations"
+          Relationship="Library.Service.Reservations_Member"
+          FromRole="Members"
+          ToRole="Reservations"
+        />
+        <NavigationProperty
+          Name="IdDocument"
+          Relationship="Library.Service.Members_IdDocument"
+          FromRole="Members"
+          ToRole="IdDocuments"
+        />
+        <Property Name="IdDocument_Id" Type="Edm.Guid" />
       </EntityType>
       <EntityType Name="Loans">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="LoanedAt" Type="Edm.DateTimeOffset" Precision="7" Nullable="false"/>
-        <Property Name="DueDate" Type="Edm.DateTime" Nullable="false" sap:display-format="Date"/>
-        <Property Name="ReturnedAt" Type="Edm.DateTimeOffset" Precision="7"/>
-        <Property Name="LateFee" Type="Edm.Decimal" Precision="5" Scale="2"/>
-        <NavigationProperty Name="Member" Relationship="Library.Service.Loans_Member" FromRole="Loans" ToRole="Members"/>
-        <Property Name="Member_Id" Type="Edm.Int32" Nullable="false"/>
-        <NavigationProperty Name="Copy" Relationship="Library.Service.Loans_Copy" FromRole="Loans" ToRole="Copies"/>
-        <Property Name="Copy_MediumId" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="Copy_InventoryNumber" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="LoanedAt" Type="Edm.DateTimeOffset" Precision="7" Nullable="false" />
+        <Property Name="DueDate" Type="Edm.DateTime" Nullable="false" sap:display-format="Date" />
+        <Property Name="ReturnedAt" Type="Edm.DateTimeOffset" Precision="7" />
+        <Property Name="LateFee" Type="Edm.Decimal" Precision="5" Scale="2" />
+        <NavigationProperty
+          Name="Member"
+          Relationship="Library.Service.Loans_Member"
+          FromRole="Loans"
+          ToRole="Members"
+        />
+        <Property Name="Member_Id" Type="Edm.Int32" Nullable="false" />
+        <NavigationProperty Name="Copy" Relationship="Library.Service.Loans_Copy" FromRole="Loans" ToRole="Copies" />
+        <Property Name="Copy_MediumId" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Copy_InventoryNumber" Type="Edm.Int32" Nullable="false" />
       </EntityType>
       <EntityType Name="Reservations">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="ReservedAt" Type="Edm.DateTimeOffset" Precision="7"/>
-        <NavigationProperty Name="Member" Relationship="Library.Service.Reservations_Member" FromRole="Reservations" ToRole="Members"/>
-        <Property Name="Member_Id" Type="Edm.Int32"/>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="ReservedAt" Type="Edm.DateTimeOffset" Precision="7" />
+        <NavigationProperty
+          Name="Member"
+          Relationship="Library.Service.Reservations_Member"
+          FromRole="Reservations"
+          ToRole="Members"
+        />
+        <Property Name="Member_Id" Type="Edm.Int32" />
       </EntityType>
       <EntityType Name="IdDocuments">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="Scan" Type="Edm.Binary"/>
-        <Property Name="UploadedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="Id" Type="Edm.Guid" Nullable="false" />
+        <Property Name="Scan" Type="Edm.Binary" />
+        <Property Name="UploadedAt" Type="Edm.DateTimeOffset" Precision="7" />
       </EntityType>
       <EntityType Name="Bookmobiles">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="LicensePlate" Type="Edm.String" MaxLength="12"/>
-        <Property Name="Route" Type="Edm.String"/>
-        <Property Name="CurrentPosition" Type="Edm.String"/>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="LicensePlate" Type="Edm.String" MaxLength="12" />
+        <Property Name="Route" Type="Edm.String" />
+        <Property Name="CurrentPosition" Type="Edm.String" />
       </EntityType>
       <EntityType Name="MainBranch">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="Name" Type="Edm.String" MaxLength="100" Nullable="false"/>
-        <Property Name="Address_Street" Type="Edm.String" MaxLength="120"/>
-        <Property Name="Address_City" Type="Edm.String" MaxLength="80"/>
-        <Property Name="Address_PostalCode" Type="Edm.String" MaxLength="10"/>
-        <Property Name="Address_Country" Type="Edm.String" MaxLength="60"/>
-        <Property Name="Location" Type="Edm.String"/>
-        <Property Name="CatchmentArea" Type="Edm.String"/>
-        <Property Name="LowestFloor" Type="Edm.SByte"/>
-        <Property Name="FloorPlanOrigin" Type="Edm.String"/>
-        <Property Name="FloorPlanShapes" Type="Edm.String"/>
-        <Property Name="OpensAt" Type="Edm.Time"/>
-        <Property Name="ClosesAt" Type="Edm.Time"/>
-        <Property Name="Amenities" Type="Edm.Int32"/>
-        <Property Name="Population" Type="Edm.Int64"/>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="Name" Type="Edm.String" MaxLength="100" Nullable="false" />
+        <Property Name="Address_Street" Type="Edm.String" MaxLength="120" />
+        <Property Name="Address_City" Type="Edm.String" MaxLength="80" />
+        <Property Name="Address_PostalCode" Type="Edm.String" MaxLength="10" />
+        <Property Name="Address_Country" Type="Edm.String" MaxLength="60" />
+        <Property Name="Location" Type="Edm.String" />
+        <Property Name="CatchmentArea" Type="Edm.String" />
+        <Property Name="LowestFloor" Type="Edm.SByte" />
+        <Property Name="FloorPlanOrigin" Type="Edm.String" />
+        <Property Name="FloorPlanShapes" Type="Edm.String" />
+        <Property Name="OpensAt" Type="Edm.Time" />
+        <Property Name="ClosesAt" Type="Edm.Time" />
+        <Property Name="Amenities" Type="Edm.Int32" />
+        <Property Name="Population" Type="Edm.Int64" />
       </EntityType>
       <EntityType Name="PublisherBranches">
         <Key>
-          <PropertyRef Name="Id"/>
+          <PropertyRef Name="Id" />
         </Key>
-        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="City" Type="Edm.String" MaxLength="80"/>
-        <Property Name="Country" Type="Edm.String" MaxLength="60"/>
+        <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+        <Property Name="City" Type="Edm.String" MaxLength="80" />
+        <Property Name="Country" Type="Edm.String" MaxLength="60" />
       </EntityType>
       <ComplexType Name="Library_Catalog_MediumStats">
-        <Property Name="TotalLoanCount" Type="Edm.Int64"/>
-        <Property Name="AverageLoanDuration" Type="Edm.String"/>
+        <Property Name="TotalLoanCount" Type="Edm.Int64" />
+        <Property Name="AverageLoanDuration" Type="Edm.String" />
       </ComplexType>
       <ComplexType Name="Library_Catalog_ConditionReport">
-        <Property Name="ConditionBefore" Type="Edm.Byte"/>
-        <Property Name="ConditionAfter" Type="Edm.Byte"/>
-        <Property Name="Remark" Type="Edm.String"/>
+        <Property Name="ConditionBefore" Type="Edm.Byte" />
+        <Property Name="ConditionAfter" Type="Edm.Byte" />
+        <Property Name="Remark" Type="Edm.String" />
       </ComplexType>
       <ComplexType Name="Library_Catalog_PostalAddress">
-        <Property Name="Street" Type="Edm.String" MaxLength="120"/>
-        <Property Name="City" Type="Edm.String" MaxLength="80"/>
-        <Property Name="PostalCode" Type="Edm.String" MaxLength="10"/>
-        <Property Name="Country" Type="Edm.String" MaxLength="60"/>
+        <Property Name="Street" Type="Edm.String" MaxLength="120" />
+        <Property Name="City" Type="Edm.String" MaxLength="80" />
+        <Property Name="PostalCode" Type="Edm.String" MaxLength="10" />
+        <Property Name="Country" Type="Edm.String" MaxLength="60" />
       </ComplexType>
       <ComplexType Name="Library_Circulation_OverdueNotice">
-        <Property Name="Reason" Type="Edm.String"/>
-        <Property Name="Amount" Type="Edm.Decimal" Precision="5" Scale="2"/>
-        <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7"/>
+        <Property Name="Reason" Type="Edm.String" />
+        <Property Name="Amount" Type="Edm.Decimal" Precision="5" Scale="2" />
+        <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" />
       </ComplexType>
       <ComplexType Name="Library_Circulation_LoanStats">
-        <Property Name="TotalLoans" Type="Edm.Int64"/>
-        <Property Name="AverageLoanDuration" Type="Edm.String"/>
+        <Property Name="TotalLoans" Type="Edm.Int64" />
+        <Property Name="AverageLoanDuration" Type="Edm.String" />
       </ComplexType>
       <ComplexType Name="Library_Circulation_DateRange">
-        <Property Name="From" Type="Edm.DateTime" sap:display-format="Date"/>
-        <Property Name="To" Type="Edm.DateTime" sap:display-format="Date"/>
+        <Property Name="From" Type="Edm.DateTime" sap:display-format="Date" />
+        <Property Name="To" Type="Edm.DateTime" sap:display-format="Date" />
       </ComplexType>
       <ComplexType Name="Library_Circulation_BranchStats">
-        <Property Name="BranchId" Type="Edm.Int32"/>
-        <Property Name="LoanCount" Type="Edm.Int64"/>
+        <Property Name="BranchId" Type="Edm.Int32" />
+        <Property Name="LoanCount" Type="Edm.Int64" />
       </ComplexType>
       <ComplexType Name="Library_Circulation_AnnualReport">
-        <Property Name="Year" Type="Edm.Int32"/>
-        <Property Name="TotalLoans" Type="Edm.Int64"/>
-        <Property Name="TotalLateFees" Type="Edm.Decimal" Precision="12" Scale="2"/>
+        <Property Name="Year" Type="Edm.Int32" />
+        <Property Name="TotalLoans" Type="Edm.Int64" />
+        <Property Name="TotalLateFees" Type="Edm.Decimal" Precision="12" Scale="2" />
       </ComplexType>
       <Association Name="Books_Copies">
-        <End Role="Books" Type="Library.Service.Books" Multiplicity="*"/>
-        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*"/>
+        <End Role="Books" Type="Library.Service.Books" Multiplicity="*" />
+        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*" />
       </Association>
       <Association Name="Books_Publisher">
-        <End Role="Books" Type="Library.Service.Books" Multiplicity="*"/>
-        <End Role="Publishers" Type="Library.Service.Publishers" Multiplicity="0..1"/>
+        <End Role="Books" Type="Library.Service.Books" Multiplicity="*" />
+        <End Role="Publishers" Type="Library.Service.Publishers" Multiplicity="0..1" />
         <ReferentialConstraint>
           <Principal Role="Publishers">
-            <PropertyRef Name="Id"/>
+            <PropertyRef Name="Id" />
           </Principal>
           <Dependent Role="Books">
-            <PropertyRef Name="Publisher_Id"/>
+            <PropertyRef Name="Publisher_Id" />
           </Dependent>
         </ReferentialConstraint>
       </Association>
       <Association Name="Copies_Location">
-        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*"/>
-        <End Role="Branches" Type="Library.Service.Branches" Multiplicity="0..1"/>
+        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*" />
+        <End Role="Branches" Type="Library.Service.Branches" Multiplicity="0..1" />
         <ReferentialConstraint>
           <Principal Role="Branches">
-            <PropertyRef Name="Id"/>
+            <PropertyRef Name="Id" />
           </Principal>
           <Dependent Role="Copies">
-            <PropertyRef Name="Location_Id"/>
+            <PropertyRef Name="Location_Id" />
           </Dependent>
         </ReferentialConstraint>
       </Association>
       <Association Name="Magazines_Copies">
-        <End Role="Magazines" Type="Library.Service.Magazines" Multiplicity="*"/>
-        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*"/>
+        <End Role="Magazines" Type="Library.Service.Magazines" Multiplicity="*" />
+        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*" />
       </Association>
       <Association Name="TradeJournals_Copies">
-        <End Role="TradeJournals" Type="Library.Service.TradeJournals" Multiplicity="*"/>
-        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*"/>
+        <End Role="TradeJournals" Type="Library.Service.TradeJournals" Multiplicity="*" />
+        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*" />
       </Association>
       <Association Name="Audiobooks_Copies">
-        <End Role="Audiobooks" Type="Library.Service.Audiobooks" Multiplicity="*"/>
-        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*"/>
+        <End Role="Audiobooks" Type="Library.Service.Audiobooks" Multiplicity="*" />
+        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*" />
       </Association>
       <Association Name="AudiobookChapters_up_">
-        <End Role="AudiobookChapters" Type="Library.Service.AudiobookChapters" Multiplicity="*"/>
+        <End Role="AudiobookChapters" Type="Library.Service.AudiobookChapters" Multiplicity="*" />
         <End Role="Audiobooks" Type="Library.Service.Audiobooks" Multiplicity="0..1">
-          <OnDelete Action="Cascade"/>
+          <OnDelete Action="Cascade" />
         </End>
         <ReferentialConstraint>
           <Principal Role="Audiobooks">
-            <PropertyRef Name="Id"/>
+            <PropertyRef Name="Id" />
           </Principal>
           <Dependent Role="AudiobookChapters">
-            <PropertyRef Name="up__Id"/>
+            <PropertyRef Name="up__Id" />
           </Dependent>
         </ReferentialConstraint>
       </Association>
       <Association Name="DVDs_Copies">
-        <End Role="DVDs" Type="Library.Service.DVDs" Multiplicity="*"/>
-        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*"/>
+        <End Role="DVDs" Type="Library.Service.DVDs" Multiplicity="*" />
+        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*" />
       </Association>
       <Association Name="EBooks_Copies">
-        <End Role="EBooks" Type="Library.Service.EBooks" Multiplicity="*"/>
-        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*"/>
+        <End Role="EBooks" Type="Library.Service.EBooks" Multiplicity="*" />
+        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*" />
       </Association>
       <Association Name="CollectorsItems_Copies">
-        <End Role="CollectorsItems" Type="Library.Service.CollectorsItems" Multiplicity="*"/>
-        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*"/>
+        <End Role="CollectorsItems" Type="Library.Service.CollectorsItems" Multiplicity="*" />
+        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="*" />
       </Association>
       <Association Name="CollectorsItems_StorageLocation">
-        <End Role="CollectorsItems" Type="Library.Service.CollectorsItems" Multiplicity="*"/>
-        <End Role="Branches" Type="Library.Service.Branches" Multiplicity="0..1"/>
+        <End Role="CollectorsItems" Type="Library.Service.CollectorsItems" Multiplicity="*" />
+        <End Role="Branches" Type="Library.Service.Branches" Multiplicity="0..1" />
         <ReferentialConstraint>
           <Principal Role="Branches">
-            <PropertyRef Name="Id"/>
+            <PropertyRef Name="Id" />
           </Principal>
           <Dependent Role="CollectorsItems">
-            <PropertyRef Name="StorageLocation_Id"/>
+            <PropertyRef Name="StorageLocation_Id" />
           </Dependent>
         </ReferentialConstraint>
       </Association>
       <Association Name="Members_IdDocument">
         <End Role="Members" Type="Library.Service.Members" Multiplicity="1">
-          <OnDelete Action="Cascade"/>
+          <OnDelete Action="Cascade" />
         </End>
-        <End Role="IdDocuments" Type="Library.Service.IdDocuments" Multiplicity="0..1"/>
+        <End Role="IdDocuments" Type="Library.Service.IdDocuments" Multiplicity="0..1" />
         <ReferentialConstraint>
           <Principal Role="IdDocuments">
-            <PropertyRef Name="Id"/>
+            <PropertyRef Name="Id" />
           </Principal>
           <Dependent Role="Members">
-            <PropertyRef Name="IdDocument_Id"/>
+            <PropertyRef Name="IdDocument_Id" />
           </Dependent>
         </ReferentialConstraint>
       </Association>
       <Association Name="Loans_Member">
-        <End Role="Loans" Type="Library.Service.Loans" Multiplicity="*"/>
+        <End Role="Loans" Type="Library.Service.Loans" Multiplicity="*" />
         <End Role="Members" Type="Library.Service.Members" Multiplicity="1">
-          <OnDelete Action="Cascade"/>
+          <OnDelete Action="Cascade" />
         </End>
         <ReferentialConstraint>
           <Principal Role="Members">
-            <PropertyRef Name="Id"/>
+            <PropertyRef Name="Id" />
           </Principal>
           <Dependent Role="Loans">
-            <PropertyRef Name="Member_Id"/>
+            <PropertyRef Name="Member_Id" />
           </Dependent>
         </ReferentialConstraint>
       </Association>
       <Association Name="Loans_Copy">
-        <End Role="Loans" Type="Library.Service.Loans" Multiplicity="*"/>
-        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="1"/>
+        <End Role="Loans" Type="Library.Service.Loans" Multiplicity="*" />
+        <End Role="Copies" Type="Library.Service.Copies" Multiplicity="1" />
         <ReferentialConstraint>
           <Principal Role="Copies">
-            <PropertyRef Name="MediumId"/>
-            <PropertyRef Name="InventoryNumber"/>
+            <PropertyRef Name="MediumId" />
+            <PropertyRef Name="InventoryNumber" />
           </Principal>
           <Dependent Role="Loans">
-            <PropertyRef Name="Copy_MediumId"/>
-            <PropertyRef Name="Copy_InventoryNumber"/>
+            <PropertyRef Name="Copy_MediumId" />
+            <PropertyRef Name="Copy_InventoryNumber" />
           </Dependent>
         </ReferentialConstraint>
       </Association>
       <Association Name="Reservations_Member">
-        <End Role="Reservations" Type="Library.Service.Reservations" Multiplicity="*"/>
+        <End Role="Reservations" Type="Library.Service.Reservations" Multiplicity="*" />
         <End Role="Members" Type="Library.Service.Members" Multiplicity="0..1">
-          <OnDelete Action="Cascade"/>
+          <OnDelete Action="Cascade" />
         </End>
         <ReferentialConstraint>
           <Principal Role="Members">
-            <PropertyRef Name="Id"/>
+            <PropertyRef Name="Id" />
           </Principal>
           <Dependent Role="Reservations">
-            <PropertyRef Name="Member_Id"/>
+            <PropertyRef Name="Member_Id" />
           </Dependent>
         </ReferentialConstraint>
       </Association>
@@ -696,7 +1067,7 @@
               <PropertyValue Property="Key">
                 <Collection>
                   <Record Type="Core.PropertyRef">
-                    <PropertyValue Property="Name" PropertyPath="ISBN"/>
+                    <PropertyValue Property="Name" PropertyPath="ISBN" />
                   </Record>
                 </Collection>
               </PropertyValue>
@@ -707,7 +1078,7 @@
       <Annotations Target="Library.Service.EntityContainer/Books" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Capabilities.SearchRestrictions">
           <Record Type="Capabilities.SearchRestrictionsType">
-            <PropertyValue Property="Searchable" Bool="true"/>
+            <PropertyValue Property="Searchable" Bool="true" />
           </Record>
         </Annotation>
         <Annotation Term="Core.AlternateKeys">
@@ -716,7 +1087,7 @@
               <PropertyValue Property="Key">
                 <Collection>
                   <Record Type="Core.PropertyRef">
-                    <PropertyValue Property="Name" PropertyPath="ISBN"/>
+                    <PropertyValue Property="Name" PropertyPath="ISBN" />
                   </Record>
                 </Collection>
               </PropertyValue>
@@ -725,32 +1096,32 @@
         </Annotation>
       </Annotations>
       <Annotations Target="Library.Service.Books/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.Books/PopularityScore" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.Copies/MediumId" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.Copies/Status" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Validation.AllowedValues">
           <Collection>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="Available"/>
-              <PropertyValue Property="Value" Int="0"/>
+              <Annotation Term="Core.SymbolicName" String="Available" />
+              <PropertyValue Property="Value" Int="0" />
             </Record>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="OnLoan"/>
-              <PropertyValue Property="Value" Int="1"/>
+              <Annotation Term="Core.SymbolicName" String="OnLoan" />
+              <PropertyValue Property="Value" Int="1" />
             </Record>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="InRepair"/>
-              <PropertyValue Property="Value" Int="2"/>
+              <Annotation Term="Core.SymbolicName" String="InRepair" />
+              <PropertyValue Property="Value" Int="2" />
             </Record>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="Missing"/>
-              <PropertyValue Property="Value" Int="3"/>
+              <Annotation Term="Core.SymbolicName" String="Missing" />
+              <PropertyValue Property="Value" Int="3" />
             </Record>
           </Collection>
         </Annotation>
@@ -759,28 +1130,28 @@
         <Annotation Term="Validation.AllowedValues">
           <Collection>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="WheelchairAccessible"/>
-              <PropertyValue Property="Value" Int="1"/>
+              <Annotation Term="Core.SymbolicName" String="WheelchairAccessible" />
+              <PropertyValue Property="Value" Int="1" />
             </Record>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="Parking"/>
-              <PropertyValue Property="Value" Int="2"/>
+              <Annotation Term="Core.SymbolicName" String="Parking" />
+              <PropertyValue Property="Value" Int="2" />
             </Record>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="Café"/>
-              <PropertyValue Property="Value" Int="4"/>
+              <Annotation Term="Core.SymbolicName" String="Café" />
+              <PropertyValue Property="Value" Int="4" />
             </Record>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="KidsArea"/>
-              <PropertyValue Property="Value" Int="8"/>
+              <Annotation Term="Core.SymbolicName" String="KidsArea" />
+              <PropertyValue Property="Value" Int="8" />
             </Record>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="StudyRoom"/>
-              <PropertyValue Property="Value" Int="16"/>
+              <Annotation Term="Core.SymbolicName" String="StudyRoom" />
+              <PropertyValue Property="Value" Int="16" />
             </Record>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="FullService"/>
-              <PropertyValue Property="Value" Int="31"/>
+              <Annotation Term="Core.SymbolicName" String="FullService" />
+              <PropertyValue Property="Value" Int="31" />
             </Record>
           </Collection>
         </Annotation>
@@ -792,7 +1163,7 @@
               <PropertyValue Property="Key">
                 <Collection>
                   <Record Type="Core.PropertyRef">
-                    <PropertyValue Property="Name" PropertyPath="ISBN"/>
+                    <PropertyValue Property="Name" PropertyPath="ISBN" />
                   </Record>
                 </Collection>
               </PropertyValue>
@@ -803,7 +1174,7 @@
       <Annotations Target="Library.Service.EntityContainer/Magazines" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Capabilities.SearchRestrictions">
           <Record Type="Capabilities.SearchRestrictionsType">
-            <PropertyValue Property="Searchable" Bool="true"/>
+            <PropertyValue Property="Searchable" Bool="true" />
           </Record>
         </Annotation>
         <Annotation Term="Core.AlternateKeys">
@@ -812,7 +1183,7 @@
               <PropertyValue Property="Key">
                 <Collection>
                   <Record Type="Core.PropertyRef">
-                    <PropertyValue Property="Name" PropertyPath="ISBN"/>
+                    <PropertyValue Property="Name" PropertyPath="ISBN" />
                   </Record>
                 </Collection>
               </PropertyValue>
@@ -821,10 +1192,10 @@
         </Annotation>
       </Annotations>
       <Annotations Target="Library.Service.Magazines/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.Magazines/PopularityScore" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.TradeJournals" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Core.AlternateKeys">
@@ -833,7 +1204,7 @@
               <PropertyValue Property="Key">
                 <Collection>
                   <Record Type="Core.PropertyRef">
-                    <PropertyValue Property="Name" PropertyPath="ISBN"/>
+                    <PropertyValue Property="Name" PropertyPath="ISBN" />
                   </Record>
                 </Collection>
               </PropertyValue>
@@ -841,10 +1212,13 @@
           </Collection>
         </Annotation>
       </Annotations>
-      <Annotations Target="Library.Service.EntityContainer/TradeJournals" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <Annotations
+        Target="Library.Service.EntityContainer/TradeJournals"
+        xmlns="http://docs.oasis-open.org/odata/ns/edm"
+      >
         <Annotation Term="Capabilities.SearchRestrictions">
           <Record Type="Capabilities.SearchRestrictionsType">
-            <PropertyValue Property="Searchable" Bool="true"/>
+            <PropertyValue Property="Searchable" Bool="true" />
           </Record>
         </Annotation>
         <Annotation Term="Core.AlternateKeys">
@@ -853,7 +1227,7 @@
               <PropertyValue Property="Key">
                 <Collection>
                   <Record Type="Core.PropertyRef">
-                    <PropertyValue Property="Name" PropertyPath="ISBN"/>
+                    <PropertyValue Property="Name" PropertyPath="ISBN" />
                   </Record>
                 </Collection>
               </PropertyValue>
@@ -862,107 +1236,125 @@
         </Annotation>
       </Annotations>
       <Annotations Target="Library.Service.TradeJournals/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
-      <Annotations Target="Library.Service.TradeJournals/PopularityScore" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.Computed" Bool="true"/>
+      <Annotations
+        Target="Library.Service.TradeJournals/PopularityScore"
+        xmlns="http://docs.oasis-open.org/odata/ns/edm"
+      >
+        <Annotation Term="Core.Computed" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.Audiobooks" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.MediaType" String="audio/mpeg"/>
+        <Annotation Term="Core.MediaType" String="audio/mpeg" />
       </Annotations>
       <Annotations Target="Library.Service.EntityContainer/Audiobooks" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Capabilities.SearchRestrictions">
           <Record Type="Capabilities.SearchRestrictionsType">
-            <PropertyValue Property="Searchable" Bool="true"/>
+            <PropertyValue Property="Searchable" Bool="true" />
           </Record>
         </Annotation>
       </Annotations>
       <Annotations Target="Library.Service.Audiobooks/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.Audiobooks/PopularityScore" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.AudiobookChapters" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.MediaType" String="audio/mpeg"/>
+        <Annotation Term="Core.MediaType" String="audio/mpeg" />
       </Annotations>
       <Annotations Target="Library.Service.EntityContainer/DVDs" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Capabilities.SearchRestrictions">
           <Record Type="Capabilities.SearchRestrictionsType">
-            <PropertyValue Property="Searchable" Bool="true"/>
+            <PropertyValue Property="Searchable" Bool="true" />
           </Record>
         </Annotation>
       </Annotations>
       <Annotations Target="Library.Service.DVDs/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.DVDs/PopularityScore" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.EBooks" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.MediaType" String="application/epub+zip"/>
+        <Annotation Term="Core.MediaType" String="application/epub+zip" />
       </Annotations>
       <Annotations Target="Library.Service.EntityContainer/EBooks" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Capabilities.SearchRestrictions">
           <Record Type="Capabilities.SearchRestrictionsType">
-            <PropertyValue Property="Searchable" Bool="true"/>
+            <PropertyValue Property="Searchable" Bool="true" />
           </Record>
         </Annotation>
       </Annotations>
       <Annotations Target="Library.Service.EBooks/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.EBooks/PopularityScore" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.Computed" Bool="true"/>
+        <Annotation Term="Core.Computed" Bool="true" />
       </Annotations>
-      <Annotations Target="Library.Service.EntityContainer/CollectorsItems" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <Annotations
+        Target="Library.Service.EntityContainer/CollectorsItems"
+        xmlns="http://docs.oasis-open.org/odata/ns/edm"
+      >
         <Annotation Term="Capabilities.SearchRestrictions">
           <Record Type="Capabilities.SearchRestrictionsType">
-            <PropertyValue Property="Searchable" Bool="true"/>
+            <PropertyValue Property="Searchable" Bool="true" />
           </Record>
         </Annotation>
       </Annotations>
       <Annotations Target="Library.Service.CollectorsItems/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
-      <Annotations Target="Library.Service.CollectorsItems/PopularityScore" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.Computed" Bool="true"/>
+      <Annotations
+        Target="Library.Service.CollectorsItems/PopularityScore"
+        xmlns="http://docs.oasis-open.org/odata/ns/edm"
+      >
+        <Annotation Term="Core.Computed" Bool="true" />
+      </Annotations>
+      <Annotations Target="Library.Service.Members/ActiveSince" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
+      </Annotations>
+      <Annotations Target="Library.Service.Members/Balance" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Core.Permissions" EnumMember="Core.Permission/Read" />
       </Annotations>
       <Annotations Target="Library.Service.Loans/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
+      </Annotations>
+      <Annotations Target="Library.Service.Loans/LoanedAt" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Core.Immutable" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.Reservations/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.IdDocuments/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-        <Annotation Term="Core.ComputedDefaultValue" Bool="true"/>
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.MainBranch/Amenities" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Validation.AllowedValues">
           <Collection>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="WheelchairAccessible"/>
-              <PropertyValue Property="Value" Int="1"/>
+              <Annotation Term="Core.SymbolicName" String="WheelchairAccessible" />
+              <PropertyValue Property="Value" Int="1" />
             </Record>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="Parking"/>
-              <PropertyValue Property="Value" Int="2"/>
+              <Annotation Term="Core.SymbolicName" String="Parking" />
+              <PropertyValue Property="Value" Int="2" />
             </Record>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="Café"/>
-              <PropertyValue Property="Value" Int="4"/>
+              <Annotation Term="Core.SymbolicName" String="Café" />
+              <PropertyValue Property="Value" Int="4" />
             </Record>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="KidsArea"/>
-              <PropertyValue Property="Value" Int="8"/>
+              <Annotation Term="Core.SymbolicName" String="KidsArea" />
+              <PropertyValue Property="Value" Int="8" />
             </Record>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="StudyRoom"/>
-              <PropertyValue Property="Value" Int="16"/>
+              <Annotation Term="Core.SymbolicName" String="StudyRoom" />
+              <PropertyValue Property="Value" Int="16" />
             </Record>
             <Record Type="Validation.AllowedValue">
-              <Annotation Term="Core.SymbolicName" String="FullService"/>
-              <PropertyValue Property="Value" Int="31"/>
+              <Annotation Term="Core.SymbolicName" String="FullService" />
+              <PropertyValue Property="Value" Int="31" />
             </Record>
           </Collection>
         </Annotation>

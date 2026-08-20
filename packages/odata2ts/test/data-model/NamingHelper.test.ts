@@ -50,6 +50,7 @@ describe("NamingHelper Tests", function () {
     expect(toTest.getModelPropName("Test_Test")).toBe("testTest");
     expect(toTest.getEnumName("my_test")).toBe("MyTest");
     expect(toTest.getEditableModelName("test")).toBe("EditableTest");
+    expect(toTest.getUpdatableModelName("test")).toBe("UpdatableTest");
     expect(toTest.getIdModelName("test")).toBe("TestId");
     expect(toTest.getOperationParamsModelName("TEST")).toBe("TestParams");
     expect(toTest.getQName("test")).toBe("QTest");
@@ -212,6 +213,24 @@ describe("NamingHelper Tests", function () {
     createHelper();
 
     expect(toTest.getEditableModelName("test")).toBe("TEST_EDIT_SUFFIX");
+  });
+
+  test("UpdatableModel settings", () => {
+    options.naming = {
+      models: {
+        prefix: "PREF",
+        suffix: "suf",
+        namingStrategy: NamingStrategies.CONSTANT_CASE,
+        updatableModels: {
+          prefix: "",
+          suffix: "UpdateSuffix",
+          applyModelNaming: false,
+        },
+      },
+    };
+    createHelper();
+
+    expect(toTest.getUpdatableModelName("test")).toBe("TEST_UPDATE_SUFFIX");
   });
 
   test("IdModel settings", () => {

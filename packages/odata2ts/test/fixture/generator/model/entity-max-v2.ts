@@ -31,10 +31,13 @@ export type BookId = { id: string; id2: number; id3: boolean };
 
 export interface EditableBook
   extends
-    Pick<Book, "id3" | "truth">,
+    Pick<Book, "truth">,
     Partial<
       Pick<
         Book,
+        | "id"
+        | "id2"
+        | "id3"
         | "time"
         | "optionalDate"
         | "dateTimeOffset"
@@ -48,6 +51,7 @@ export interface EditableBook
         | "testDecimal"
         | "testBinary"
         | "testAny"
+        | "multipleIds"
         | "multipleStrings"
         | "multipleBooleans"
         | "multipleTimes"

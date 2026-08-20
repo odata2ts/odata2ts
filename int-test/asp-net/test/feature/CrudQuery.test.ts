@@ -16,15 +16,13 @@ describe("ASP.NET Library: query options on write requests", () => {
   const REPRESENTATION = { headers: { Prefer: "return=representation" } };
 
   async function givenMember() {
-    const created = await LIBRARY.Members()
-      .create({ Name: "CrudQuery Test", Balance: 5, PreviousAddresses: [] })
-      .execute();
+    const created = await LIBRARY.Members().create({ Name: "CrudQuery Test", PreviousAddresses: [] }).execute();
     return created.data.Id;
   }
 
   test("$select on create", async () => {
     const created = await LIBRARY.Members()
-      .create({ Name: "CrudQuery Create", Balance: 1, PreviousAddresses: [] }, undefined, (builder) =>
+      .create({ Name: "CrudQuery Create", DateOfBirth: "1980-01-01", PreviousAddresses: [] }, undefined, (builder) =>
         builder.select("Name"),
       )
       .execute();
@@ -32,7 +30,7 @@ describe("ASP.NET Library: query options on write requests", () => {
     expect(created.status).toBe(201);
     expect(created.data.Name).toBe("CrudQuery Create");
     // not honoured: the option travels, and the server answers with the whole entity anyway
-    expect(created.data.Balance).toBe(1);
+    expect(created.data.DateOfBirth).toBe("1980-01-01");
 
     await LIBRARY.Members(created.data.Id).delete().execute();
   });
@@ -41,11 +39,11 @@ describe("ASP.NET Library: query options on write requests", () => {
     const id = await givenMember();
 
     const patched = await LIBRARY.Members(id)
-      .patch<true>({ Balance: 42 }, undefined, (builder) => builder.select("Balance"))
+      .patch<true>({ DateOfBirth: "1990-02-02" }, undefined, (builder) => builder.select("DateOfBirth"))
       .execute(REPRESENTATION);
 
     expect(patched.status).toBe(200);
-    expect(patched.data.Balance).toBe(42);
+    expect(patched.data.DateOfBirth).toBe("1990-02-02");
     // again the full entity, so `$select` made no difference - only `Prefer` did
     expect(patched.data.Name).toBe("CrudQuery Test");
 
@@ -56,14 +54,16 @@ describe("ASP.NET Library: query options on write requests", () => {
     const id = await givenMember();
 
     const updated = await LIBRARY.Members(id)
-      .update<true>({ Name: "CrudQuery Updated", Balance: 7, PreviousAddresses: [] }, undefined, (builder) =>
-        builder.select("Name"),
+      .update<true>(
+        { Name: "CrudQuery Updated", DateOfBirth: "1991-03-03", PreviousAddresses: [] },
+        undefined,
+        (builder) => builder.select("Name"),
       )
       .execute(REPRESENTATION);
 
     expect(updated.status).toBe(200);
     expect(updated.data.Name).toBe("CrudQuery Updated");
-    expect(updated.data.Balance).toBe(7);
+    expect(updated.data.DateOfBirth).toBe("1991-03-03");
 
     await LIBRARY.Members(id).delete().execute();
   });
@@ -74,7 +74,7 @@ describe("ASP.NET Library: query options on write requests", () => {
     const id = await givenMember();
 
     const patched = await LIBRARY.Members(id)
-      .patch({ Balance: 9 }, undefined, (builder) => builder.select("Balance"))
+      .patch({ DateOfBirth: "1992-04-04" }, undefined, (builder) => builder.select("DateOfBirth"))
       .execute();
 
     expect(patched.status).toBe(204);

@@ -12,6 +12,12 @@ import { UrlBuilderRequestCmdV4 } from "../request";
 import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
+/**
+ * Service for an entity set: it queries the collection and creates entities in it. Creation is the one
+ * write that may supply properties which can never change afterwards, so this is the only entity service
+ * still typed on `EditableT`. Everything that writes to an entity which already exists -
+ * {@link EntityTypeServiceV4} and friends - takes the updatable model instead.
+ */
 export abstract class EntitySetServiceV4<
   T,
   EditableT,

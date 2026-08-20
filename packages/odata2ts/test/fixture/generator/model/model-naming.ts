@@ -9,7 +9,7 @@ export interface PARENT_MODEL {
 
 export type PARENT_KEY = boolean | { PARENT_ID: boolean };
 
-export interface EDIT_PARENT_MODEL extends Pick<PARENT_MODEL, "PARENT_ID"> {}
+export interface EDIT_PARENT_MODEL extends Partial<Pick<PARENT_MODEL, "PARENT_ID">> {}
 
 export interface BOOK_MODEL extends PARENT_MODEL {
   ID: boolean;
@@ -19,7 +19,7 @@ export interface BOOK_MODEL extends PARENT_MODEL {
 
 export type BOOK_KEY = { PARENT_ID: boolean; ID: boolean };
 
-export interface EDIT_BOOK_MODEL extends Pick<BOOK_MODEL, "PARENT_ID" | "ID" | "MY_CHOICE"> {
+export interface EDIT_BOOK_MODEL extends Pick<BOOK_MODEL, "MY_CHOICE">, Partial<Pick<BOOK_MODEL, "PARENT_ID" | "ID">> {
   ADDRESS?: EDIT_LOCATION_MODEL | null;
 }
 

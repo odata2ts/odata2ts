@@ -35,8 +35,11 @@ describe("CAP Library: deep insert", () => {
 
     const created = await LIBRARY.Members()
       .create({
+        // `Members/Id` is one of the two keys CAP leaves unannotated - it generates the value all the
+        // same, but says so nowhere, so the key rule reads it as client-assigned and asks for it here
+        Id: 9801,
         Name: "Deep Insert Member",
-        // no key: the server generates it, so it is no part of the editable model
+        // the nested key stays out: `IdDocuments/Id` carries `Core.ComputedDefaultValue`
         IdDocument: { UploadedAt: uploadedAt },
       })
       .execute();
@@ -129,7 +132,7 @@ describe("CAP Library: deep insert", () => {
           MediumId: "00000000-0000-0000-0000-000000000000",
           InventoryNumber: 9802,
           IsLoanable: true,
-          Location: { Name: "Branch Created On The Fly" },
+          Location: { Id: 9899, Name: "Branch Created On The Fly" },
         })
         .execute(),
       // CAP names the navigation property here, not the entity behind it

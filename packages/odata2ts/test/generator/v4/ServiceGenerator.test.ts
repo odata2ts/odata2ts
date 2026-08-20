@@ -1,12 +1,14 @@
 import path from "path";
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import deepmerge from "deepmerge";
-import { beforeAll, beforeEach, describe, test } from "vitest";
+import { beforeAll, beforeEach, describe, expect, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
 import {
   ConfigFileOptions,
   EmitModes,
+  KeyProperties,
+  ManagedPropertyMode,
   NamingStrategies,
   OverridableNamingOptions,
   RunOptions,
@@ -528,5 +530,49 @@ describe("Service Generator Tests V4", () => {
 
     // then its service extends the media entity service, which adds the $value access
     await compareMainService("media-entity.ts");
+  });
+
+  test("Service Generator: the entity service writes with the UpdatableModel", async () => {
+    function getEntityServiceText() {
+      const file = [...projectManager.getCachedFiles().values()].find((f) =>
+        f.getFullText().includes("class TestEntityService"),
+      );
+      if (!file) {
+        throw new Error("TestEntityService file was not generated!");
+      }
+      return file.getFullText();
+    }
+
+    async function generateTestEntity(options?: Parameters<typeof doGenerate>[0]) {
+      odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
+      odataBuilder
+        // a non-nullable key with no annotation of its own
+        .addEntityType("TestEntity", undefined, (builder) =>
+          builder.addKeyProp("id", ODataTypesV4.Guid).addProp("title", ODataTypesV4.String, false),
+        )
+        .addEntitySet("TestEntities", withNs("TestEntity"));
+      await doGenerate(options);
+      return getEntityServiceText();
+    }
+
+    // by default an unannotated key is optional on create already, so an updatable model would say
+    // nothing new and none is generated - the entity service keeps the editable one
+    let serviceText = await generateTestEntity();
+    expect(serviceText).toContain("extends EntityTypeServiceV4<TestEntity, EditableTestEntity, QTestEntity, V>");
+    expect(serviceText).not.toContain("UpdatableTestEntity");
+
+    // under `strict` the key follows nullable and is required on create, which the update model then
+    // relaxes - so the two differ and the entity service takes the updatable one
+    serviceText = await generateTestEntity({ keyProperties: KeyProperties.strict });
+    expect(serviceText).toContain("extends EntityTypeServiceV4<TestEntity, UpdatableTestEntity, QTestEntity, V>");
+    // while the collection service, which is where creation happens, keeps the EditableModel
+    expect(serviceText).toContain(
+      "extends EntitySetServiceV4<TestEntity, EditableTestEntity, QTestEntity, TestEntityId, V>",
+    );
+
+    // `strictOmit` drops the key from the update model instead of relaxing it - a different model, the
+    // same wiring, and it applies to the default key handling too
+    serviceText = await generateTestEntity({ managedPropertyMode: ManagedPropertyMode.strictOmit });
+    expect(serviceText).toContain("extends EntityTypeServiceV4<TestEntity, UpdatableTestEntity, QTestEntity, V>");
   });
 });

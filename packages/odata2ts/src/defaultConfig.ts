@@ -1,6 +1,6 @@
 import deepmerge from "deepmerge";
 import { NameSettings, NamingStrategies } from "./NamingModel.js";
-import { EmitModes, ManagedPropertyDetection, Modes, RunOptions } from "./OptionModel.js";
+import { EmitModes, KeyProperties, ManagedPropertyMode, Modes, RunOptions } from "./OptionModel.js";
 
 export type DefaultConfiguration = Omit<RunOptions, "sourceUrl" | "source" | "output" | "serviceName">;
 /**
@@ -20,7 +20,9 @@ const defaultConfig: DefaultConfiguration = {
   skipOperations: false,
   skipComments: false,
   enablePrimitivePropertyServices: false,
-  managedPropertyDetection: ManagedPropertyDetection.auto,
+  annotations: { disableManagedProperties: false },
+  keyProperties: KeyProperties.interoperable,
+  managedPropertyMode: ManagedPropertyMode.lenient,
   allowRenaming: false,
   v2: {
     responseResultsWrapping: false,
@@ -42,6 +44,11 @@ const defaultConfig: DefaultConfiguration = {
       propNamingStrategy: NamingStrategies.CAMEL_CASE,
       editableModels: {
         prefix: "Editable",
+        suffix: "",
+        applyModelNaming: true,
+      },
+      updatableModels: {
+        prefix: "Updatable",
         suffix: "",
         applyModelNaming: true,
       },
@@ -130,6 +137,11 @@ const minimalNamingConfig: NameSettings = {
       applyModelNaming: true,
       prefix: models.editableModels.prefix,
       suffix: models.editableModels.suffix,
+    },
+    updatableModels: {
+      applyModelNaming: true,
+      prefix: models.updatableModels.prefix,
+      suffix: models.updatableModels.suffix,
     },
     operationParamModels: {
       applyModelNaming: true,

@@ -5,7 +5,7 @@ export interface Author {
 
 export type AuthorId = number | { id: number };
 
-export interface EditableAuthor extends Pick<Author, "id">, Partial<Pick<Author, "name">> {}
+export interface EditableAuthor extends Partial<Pick<Author, "id" | "name">> {}
 
 export interface Book {
   id: number;
@@ -16,7 +16,7 @@ export interface Book {
 
 export type BookId = number | { id: number };
 
-export interface EditableBook extends Pick<Book, "id"> {
+export interface EditableBook extends Partial<Pick<Book, "id">> {
   author?: EditableAuthor;
   "author@odata.bind"?: string;
   altAuthor?: EditableAuthor;

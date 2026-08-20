@@ -41,19 +41,20 @@ Scripts: `build`/`generate` (offline codegen), `test` (the integration tests), `
 
 Test files follow the same scheme in every package, one concern per file:
 
-| file                                  | covers                                                                         |
-| ------------------------------------- | ------------------------------------------------------------------------------ |
-| `core/CrudOperations.test.ts`         | create, read, update, patch, delete - reading **without** system query options |
-| `core/QueryFunctionality.test.ts`     | the system query options on read requests                                      |
-| `core/Operations.test.ts`             | functions and actions, bound and unbound                                       |
-| `core/Singleton.test.ts`              | the singleton: addressed by name, read and written like an entity              |
-| `feature/CrudQuery.test.ts`           | system query options on `create`/`add`/`update`/`patch`                        |
-| `feature/Blobs.test.ts`               | binary content: stream properties, media entities, V2's media link entries     |
-| `feature/Subtypes.test.ts`            | type cast segment and derived types' properties (ASP.NET only - CAP is flat)   |
-| `feature/PropertyServices.test.ts`    | services for individual properties (`enablePrimitivePropertyServices`)         |
-| `feature/DataTypes.test.ts`           | data types round tripped through the server (ASP.NET, and CAP's V2 suite)      |
-| `feature/DeepSelect.test.ts`          | `expanding()` into complex properties (ASP.NET only - CAP flattens them)       |
-| `feature/ComposableFunctions.test.ts` | composable functions (ASP.NET only - CAP has none)                             |
+| file                                  | covers                                                                          |
+| ------------------------------------- | ------------------------------------------------------------------------------- |
+| `core/CrudOperations.test.ts`         | create, read, update, patch, delete - reading **without** system query options  |
+| `core/QueryFunctionality.test.ts`     | the system query options on read requests                                       |
+| `core/Operations.test.ts`             | functions and actions, bound and unbound                                        |
+| `core/Singleton.test.ts`              | the singleton: addressed by name, read and written like an entity               |
+| `feature/CrudQuery.test.ts`           | system query options on `create`/`add`/`update`/`patch`                         |
+| `feature/Blobs.test.ts`               | binary content: stream properties, media entities, V2's media link entries      |
+| `feature/Subtypes.test.ts`            | type cast segment and derived types' properties (ASP.NET only - CAP is flat)    |
+| `feature/PropertyServices.test.ts`    | services for individual properties (`enablePrimitivePropertyServices`)          |
+| `feature/DataTypes.test.ts`           | data types round tripped through the server (ASP.NET, and CAP's V2 suite)       |
+| `feature/DeepSelect.test.ts`          | `expanding()` into complex properties (ASP.NET only - CAP flattens them)        |
+| `feature/ComposableFunctions.test.ts` | composable functions (ASP.NET only - CAP has none)                              |
+| `feature/ImmutableProperties.test.ts` | `managedPropertyMode: "strictOmit"` - what a server does with an immutable prop |
 
 Where a server does not support something, the test asserts the rejection rather than being dropped -
 that keeps the limitation visible instead of silently untested.

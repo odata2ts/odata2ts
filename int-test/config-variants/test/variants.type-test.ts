@@ -4,6 +4,21 @@ import type { Branch as NumericBranch } from "../src-generated/enum-numeric/libr
 import { Amenities as unionAmenityMembers } from "../src-generated/enum-string-union/library-catalog/index.js";
 import type { Amenities as UnionAmenities } from "../src-generated/enum-string-union/library-catalog/index.js";
 import type { Branch as UnionBranch } from "../src-generated/enum-string-union/library-circulation/index.js";
+import type { EditableMedium as AllComputedEditableMedium } from "../src-generated/key-all-computed/library-catalog/index.js";
+import type { EditableCopy as AllComputedEditableCopy } from "../src-generated/key-all-computed/library-circulation/index.js";
+import type {
+  EditableCopy as KeyStrictEditableCopy,
+  UpdatableCopy as KeyStrictUpdatableCopy,
+} from "../src-generated/key-strict/library-circulation/index.js";
+import type { EditablePostalAddress as StrictEditablePostalAddress } from "../src-generated/managed-strict/library-catalog/index.js";
+import type {
+  CopyCollectionService as StrictCopyCollectionService,
+  CopyService as StrictCopyService,
+  EditableCopy as StrictEditableCopy,
+  EditableIdDocument as StrictEditableIdDocument,
+  UpdatableCopy as StrictUpdatableCopy,
+  UpdatableMember as StrictUpdatableMember,
+} from "../src-generated/managed-strict/library-circulation/index.js";
 import type { Medium as ModelsOnlyMedium } from "../src-generated/models-only/library-catalog/index.js";
 import type {
   BookDto,
@@ -76,3 +91,53 @@ expectTypeOf<NumericBranch["Amenities"]>().toEqualTypeOf<NumericAmenities | null
 // Only observable in `mode: models` - the option is ignored otherwise, which is why no service exists here
 // which could ever send a request.
 expectTypeOf<V2Member["Loans"]>().toExtend<{ results: Array<unknown> } | unknown>();
+
+/* --- managedStrict: a second write model, and the services which switch to it ---------------------- */
+
+// A key without an annotation of its own is createOnly, but the default `keyProperties` will not demand
+// one on create - `managedPropertyMode` says nothing about that half, so both parts stay optional here.
+expectTypeOf<StrictEditableCopy["MediumId"]>().toEqualTypeOf<string | undefined>();
+expectTypeOf<StrictEditableCopy["InventoryNumber"]>().toEqualTypeOf<number | undefined>();
+
+// ... while the update model drops them entirely, which is what `strictOmit` is for. A composite key, so
+// both parts go - `keyProperties` treats every part of one alike.
+expectTypeOf<StrictUpdatableCopy>().not.toHaveProperty("MediumId");
+expectTypeOf<StrictUpdatableCopy>().not.toHaveProperty("InventoryNumber");
+// everything not createOnly is untouched by the mode
+expectTypeOf<StrictUpdatableCopy["IsLoanable"]>().toEqualTypeOf<boolean>();
+
+// A complex property resolves to the nested type's *editable* model, since `PostalAddress` has no
+// immutable property of its own and a second, identical type for it would be noise.
+expectTypeOf<StrictUpdatableMember["PreviousAddresses"]>().toEqualTypeOf<Array<StrictEditablePostalAddress>>();
+
+// A navigation property always resolves to the referenced entity's editable model, in both write models
+// alike - a binding names an entity that exists in its own right, so the create/update split does not
+// apply to it. This is also what keeps a self-referential entity graph from ever reaching Updatable.
+expectTypeOf<StrictUpdatableMember["IdDocument"]>().toExtend<
+  StrictEditableIdDocument | { "@id": unknown } | null | undefined
+>();
+
+// The entity service writes with the updatable model, while the collection service, where creation
+// happens, keeps the editable one. Both `update` and `patch` take it: neither can change an immutable
+// property, so there is no reason for PUT to keep offering one.
+expectTypeOf<StrictCopyService["update"]>().parameter(0).toExtend<StrictUpdatableCopy>();
+expectTypeOf<StrictCopyService["patch"]>().parameter(0).toExtend<Partial<StrictUpdatableCopy>>();
+expectTypeOf<StrictCopyCollectionService["create"]>().parameter(0).toExtend<StrictEditableCopy>();
+
+/* --- keyStrict: the spec-conformant reading of an unannotated key ---------------------------------- */
+
+// `strict` is the other half of the pair: the very same key, now required on create because it is
+// non-nullable and nothing says the server supplies it.
+expectTypeOf<KeyStrictEditableCopy["MediumId"]>().toEqualTypeOf<string>();
+expectTypeOf<KeyStrictEditableCopy["InventoryNumber"]>().toEqualTypeOf<number>();
+// and relaxed again on update, since the server will not change a key whatever the payload says
+expectTypeOf<KeyStrictUpdatableCopy["MediumId"]>().toEqualTypeOf<string | undefined>();
+
+/* --- keyAllComputed + strictOmit: the key disappears from the write models ------------------------- */
+
+// The two options meeting: `allComputed` makes every key the server's, `strictOmit` takes what the server
+// owns out of the models rather than leaving it there optional. Under `lenient` it would still be present.
+expectTypeOf<AllComputedEditableCopy>().not.toHaveProperty("MediumId");
+expectTypeOf<AllComputedEditableCopy>().not.toHaveProperty("InventoryNumber");
+// a `Core.Computed` property goes the same way, being readOnly for the same reason
+expectTypeOf<AllComputedEditableMedium>().not.toHaveProperty("PopularityScore");

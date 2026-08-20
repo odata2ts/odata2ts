@@ -1,4 +1,5 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
+import type { EditableBooks as StrictEditableBooks } from "../../src-generated/library-strict/index.js";
 import type { EditableBooks } from "../../src-generated/library/index.js";
 import { LIBRARY } from "../LibraryTestConstants.js";
 
@@ -50,9 +51,11 @@ describe("CAP Library: Core annotations", () => {
     }
   });
 
-  test("Core.Computed takes the property out of the editable model", async () => {
-    // `Books/PopularityScore` is computed on insert and update alike, so there is no way to send it
-    expectTypeOf<EditableBooks>().not.toHaveProperty("PopularityScore");
+  test("Core.Computed marks the property as the server's", async () => {
+    // `Books/PopularityScore` is computed on insert and update alike - readOnly, so the default mode
+    // keeps it in the write model but never requires it, while strictOmit takes it out entirely
+    expectTypeOf<EditableBooks["PopularityScore"]>().toEqualTypeOf<number | null | undefined>();
+    expectTypeOf<StrictEditableBooks>().not.toHaveProperty("PopularityScore");
 
     const Id = "0195ba49-11b1-7ba0-9f4b-2fa5e0d1c002";
     const created = await LIBRARY.Books().create({ Id, Title: "Computed Book" }).execute();

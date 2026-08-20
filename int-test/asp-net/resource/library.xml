@@ -1,386 +1,591 @@
-<?xml version="1.0" encoding="utf-8"?>
-<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
-  <edmx:DataServices>
-    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Library.Catalog">
-      <ComplexType Name="Address" Abstract="true">
-        <Property Name="Street" Type="Edm.String" MaxLength="120"/>
-        <Property Name="City" Type="Edm.String" MaxLength="80"/>
-      </ComplexType>
-      <ComplexType Name="PostalAddress" BaseType="Library.Catalog.Address">
-        <Property Name="PostalCode" Type="Edm.String" MaxLength="10"/>
-        <Property Name="Country" Type="Edm.String" MaxLength="60"/>
-      </ComplexType>
-      <EntityType Name="Medium" Abstract="true">
-        <Key>
-          <PropertyRef Name="Id"/>
-        </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="PopularityScore" Type="Edm.Double"/>
-        <Property Name="Title" Type="Edm.String" Nullable="false" MaxLength="200"/>
-        <Property Name="Language" Type="Edm.String" MaxLength="40"/>
-        <Property Name="PublicationDate" Type="Edm.Date"/>
-        <Property Name="Keywords" Type="Collection(Edm.String)"/>
-        <NavigationProperty Name="Copies" Type="Collection(Library.Circulation.Copy)"/>
-      </EntityType>
-      <EntityType Name="PrintMedium" BaseType="Library.Catalog.Medium" Abstract="true">
-        <Property Name="ISBN" Type="Edm.String" MaxLength="13"/>
-      </EntityType>
-      <EntityType Name="Book" BaseType="Library.Catalog.PrintMedium">
-        <Property Name="PageCount" Type="Edm.Int16" Nullable="false"/>
-        <Property Name="AgeRating" Type="Edm.Byte" Nullable="false"/>
-        <NavigationProperty Name="Publisher" Type="PublisherRegistry.Publisher"/>
-      </EntityType>
-      <EntityType Name="Magazine" BaseType="Library.Catalog.PrintMedium">
-        <Property Name="IssueNumber" Type="Edm.Int32" Nullable="false"/>
-      </EntityType>
-      <EntityType Name="TradeJournal" BaseType="Library.Catalog.Magazine">
-        <Property Name="Field" Type="Edm.String"/>
-      </EntityType>
-      <EntityType Name="AudioMedium" BaseType="Library.Catalog.Medium" Abstract="true">
-        <Property Name="Duration" Type="Edm.Duration"/>
-      </EntityType>
-      <EntityType Name="DVD" BaseType="Library.Catalog.AudioMedium">
-        <Property Name="RegionCode" Type="Edm.Byte" Nullable="false"/>
-      </EntityType>
-      <EntityType Name="Audiobook" BaseType="Library.Catalog.AudioMedium">
-        <Property Name="Narrator" Type="Edm.String"/>
-        <Property Name="Sample" Type="Edm.Stream"/>
-        <NavigationProperty Name="Chapters" Type="Collection(Library.Catalog.AudiobookChapter)" ContainsTarget="true"/>
-      </EntityType>
-      <EntityType Name="AudiobookChapter" HasStream="true">
-        <Key>
-          <PropertyRef Name="Id"/>
-        </Key>
-        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="Title" Type="Edm.String"/>
-      </EntityType>
-      <EntityType Name="EBook" BaseType="Library.Catalog.Medium" HasStream="true">
-        <Property Name="FileFormat" Type="Edm.String" MaxLength="20"/>
-      </EntityType>
-      <EntityType Name="CollectorsItem" BaseType="Library.Catalog.Medium" OpenType="true">
-        <Property Name="ExtraData" Type="Edm.Untyped"/>
-        <NavigationProperty Name="StorageLocation" Type="Library.Circulation.Branch"/>
-      </EntityType>
-      <ComplexType Name="MediumStats">
-        <Property Name="TotalLoanCount" Type="Edm.Int64" Nullable="false"/>
-        <Property Name="AverageLoanDuration" Type="Edm.Duration" Nullable="false"/>
-      </ComplexType>
-      <ComplexType Name="ConditionReport">
-        <Property Name="ConditionBefore" Type="Edm.Byte" Nullable="false"/>
-        <Property Name="ConditionAfter" Type="Edm.Byte" Nullable="false"/>
-        <Property Name="Remark" Type="Edm.String"/>
-      </ComplexType>
-      <EnumType Name="Amenities" IsFlags="true">
-        <Member Name="WheelchairAccessible" Value="1"/>
-        <Member Name="Parking" Value="2"/>
-        <Member Name="Café" Value="4"/>
-        <Member Name="KidsArea" Value="8"/>
-        <Member Name="StudyRoom" Value="16"/>
-        <Member Name="FullService" Value="31"/>
-      </EnumType>
-      <EnumType Name="AvailabilityStatus" UnderlyingType="Edm.Byte">
-        <Member Name="Available" Value="0"/>
-        <Member Name="OnLoan" Value="1"/>
-        <Member Name="InRepair" Value="2"/>
-        <Member Name="Missing" Value="3"/>
-      </EnumType>
-      <Annotations Target="Library.Catalog.Medium/PopularityScore">
-        <Annotation Term="Org.OData.Core.V1.Computed" Bool="true"/>
-      </Annotations>
-    </Schema>
-    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Library.Circulation">
-      <EntityType Name="Member">
-        <Key>
-          <PropertyRef Name="Id"/>
-        </Key>
-        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="ActiveSince" Type="Edm.DateTimeOffset" Precision="7"/>
-        <Property Name="Balance" Type="Edm.Decimal" Nullable="false" Precision="9" Scale="2"/>
-        <Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="100"/>
-        <Property Name="DateOfBirth" Type="Edm.Date"/>
-        <Property Name="Address" Type="Library.Catalog.PostalAddress"/>
-        <Property Name="PreviousAddresses" Type="Collection(Library.Catalog.PostalAddress)" Nullable="false"/>
-        <NavigationProperty Name="Loans" Type="Collection(Library.Circulation.Loan)">
-          <OnDelete Action="Cascade"/>
-        </NavigationProperty>
-        <NavigationProperty Name="Reservations" Type="Collection(Library.Circulation.Reservation)"/>
-        <NavigationProperty Name="IdDocument" Type="Library.Circulation.IdDocument"/>
-      </EntityType>
-      <EntityType Name="Loan">
-        <Key>
-          <PropertyRef Name="Id"/>
-        </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="LoanedAt" Type="Edm.DateTimeOffset" Nullable="false" Precision="7"/>
-        <Property Name="ReturnedAt" Type="Edm.DateTimeOffset" Precision="7"/>
-        <Property Name="LateFee" Type="Edm.Decimal" Precision="5" Scale="2"/>
-        <Property Name="DueDate" Type="Edm.Date" Nullable="false"/>
-        <NavigationProperty Name="Member" Type="Library.Circulation.Member" Nullable="false"/>
-        <NavigationProperty Name="Copy" Type="Library.Circulation.Copy" Nullable="false"/>
-      </EntityType>
-      <EntityType Name="Reservation">
-        <Key>
-          <PropertyRef Name="Id"/>
-        </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="ReservedAt" Type="Edm.DateTimeOffset" Nullable="false" Precision="7"/>
-      </EntityType>
-      <EntityType Name="IdDocument">
-        <Key>
-          <PropertyRef Name="Id"/>
-        </Key>
-        <Property Name="Id" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="UploadedAt" Type="Edm.DateTimeOffset" Nullable="false" Precision="7"/>
-        <Property Name="Scan" Type="Edm.Binary"/>
-      </EntityType>
-      <EntityType Name="Branch">
-        <Key>
-          <PropertyRef Name="Id"/>
-        </Key>
-        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="100"/>
-        <Property Name="Address" Type="Library.Catalog.PostalAddress"/>
-        <Property Name="Location" Type="Edm.GeographyPoint"/>
-        <Property Name="CatchmentArea" Type="Edm.GeographyPolygon"/>
-        <Property Name="LowestFloor" Type="Edm.SByte" Nullable="false"/>
-        <Property Name="FloorPlanOrigin" Type="Edm.GeometryPoint"/>
-        <Property Name="FloorPlanShapes" Type="Edm.GeometryCollection"/>
-        <Property Name="OpensAt" Type="Edm.TimeOfDay"/>
-        <Property Name="ClosesAt" Type="Edm.TimeOfDay"/>
-        <Property Name="Amenities" Type="Library.Catalog.Amenities"/>
-        <Property Name="Population" Type="Edm.Int64" Nullable="false"/>
-      </EntityType>
-      <EntityType Name="Bookmobile">
-        <Key>
-          <PropertyRef Name="Id"/>
-        </Key>
-        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="LicensePlate" Type="Edm.String" MaxLength="12"/>
-        <Property Name="Route" Type="Edm.GeographyLineString"/>
-        <Property Name="CurrentPosition" Type="Edm.GeographyPoint"/>
-      </EntityType>
-      <EntityType Name="Copy">
-        <Key>
-          <PropertyRef Name="InventoryNumber"/>
-          <PropertyRef Name="MediumId"/>
-        </Key>
-        <Property Name="MediumId" Type="Edm.Guid" Nullable="false"/>
-        <Property Name="InventoryNumber" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="IsLoanable" Type="Edm.Boolean" DefaultValue="true" Nullable="false"/>
-        <Property Name="Condition" Type="Edm.Byte" Nullable="false"/>
-        <Property Name="Status" Type="Library.Catalog.AvailabilityStatus"/>
-        <Property Name="AcquisitionDate" Type="Edm.Date"/>
-        <Property Name="WeightKg" Type="Edm.Single" Nullable="false"/>
-        <Property Name="Location_" Type="Edm.String" MaxLength="10"/>
-        <NavigationProperty Name="Medium" Type="Library.Catalog.Medium" Nullable="false">
-          <ReferentialConstraint Property="MediumId" ReferencedProperty="Id"/>
-        </NavigationProperty>
-        <NavigationProperty Name="Location" Type="Library.Circulation.Branch"/>
-      </EntityType>
-      <ComplexType Name="OverdueNotice">
-        <Property Name="Amount" Type="Edm.Decimal" Nullable="false" Precision="5" Scale="2"/>
-        <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Nullable="false" Precision="7"/>
-        <Property Name="Reason" Type="Edm.String"/>
-      </ComplexType>
-      <ComplexType Name="AnnualReport">
-        <Property Name="TotalLateFees" Type="Edm.Decimal" Nullable="false" Precision="12" Scale="2"/>
-        <Property Name="Year" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="TotalLoans" Type="Edm.Int64" Nullable="false"/>
-      </ComplexType>
-      <ComplexType Name="DateRange">
-        <Property Name="From" Type="Edm.Date"/>
-        <Property Name="To" Type="Edm.Date"/>
-      </ComplexType>
-      <ComplexType Name="LoanStats">
-        <Property Name="TotalLoans" Type="Edm.Int64" Nullable="false"/>
-        <Property Name="AverageLoanDuration" Type="Edm.Duration" Nullable="false"/>
-      </ComplexType>
-      <ComplexType Name="BranchStats">
-        <Property Name="BranchId" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="LoanCount" Type="Edm.Int64" Nullable="false"/>
-      </ComplexType>
-      <Function Name="TotalMediaCount">
-        <ReturnType Type="Edm.Int64" Nullable="false"/>
-      </Function>
-      <Function Name="AllLanguages">
-        <ReturnType Type="Collection(Edm.String)"/>
-      </Function>
-      <Function Name="LoanStatistics">
-        <Parameter Name="Period" Type="Library.Circulation.DateRange"/>
-        <ReturnType Type="Library.Circulation.LoanStats"/>
-      </Function>
-      <Function Name="StatsPerBranch">
-        <ReturnType Type="Collection(Library.Circulation.BranchStats)"/>
-      </Function>
-      <Function Name="MostReadMedium">
-        <ReturnType Type="Library.Catalog.Medium"/>
-      </Function>
-      <Function Name="NewReleases" IsComposable="true">
-        <ReturnType Type="Collection(Library.Catalog.Medium)"/>
-      </Function>
-      <Function Name="Search">
-        <Parameter Name="Term" Type="Edm.String"/>
-        <ReturnType Type="Collection(Library.Catalog.Medium)"/>
-      </Function>
-      <Function Name="Search">
-        <Parameter Name="Term" Type="Edm.String"/>
-        <Parameter Name="MaxResults" Type="Edm.Int32" Nullable="false"/>
-        <ReturnType Type="Collection(Library.Catalog.Medium)"/>
-      </Function>
-      <Action Name="ClosureDay">
-        <Parameter Name="Date" Type="Edm.Date" Nullable="false"/>
-      </Action>
-      <Action Name="NextInventoryNumber">
-        <ReturnType Type="Edm.Int32" Nullable="false"/>
-      </Action>
-      <Action Name="CleanUpKeywords">
-        <Parameter Name="Obsolete" Type="Collection(Edm.String)"/>
-        <ReturnType Type="Collection(Edm.String)"/>
-      </Action>
-      <Action Name="YearEndClosing">
-        <Parameter Name="Year" Type="Edm.Int32" Nullable="false"/>
-        <ReturnType Type="Library.Circulation.AnnualReport"/>
-      </Action>
-      <Action Name="RunOverdueNotices">
-        <ReturnType Type="Collection(Library.Circulation.OverdueNotice)"/>
-      </Action>
-      <Action Name="AcquireCollectorsItem">
-        <Parameter Name="Title" Type="Edm.String"/>
-        <Parameter Name="Description" Type="Edm.String"/>
-        <ReturnType Type="Library.Catalog.Medium"/>
-      </Action>
-      <Action Name="RunStockCheck">
-        <ReturnType Type="Collection(Library.Catalog.Medium)"/>
-      </Action>
-      <Function Name="OutstandingBalance" IsBound="true">
-        <Parameter Name="member" Type="Library.Circulation.Member"/>
-        <ReturnType Type="Edm.Decimal" Nullable="false" Scale="variable"/>
-      </Function>
-      <Function Name="AvailableLanguages" IsBound="true">
-        <Parameter Name="media" Type="Collection(Library.Catalog.Medium)"/>
-        <ReturnType Type="Collection(Edm.String)"/>
-      </Function>
-      <Function Name="LoanMetrics" IsBound="true">
-        <Parameter Name="medium" Type="Library.Catalog.Medium"/>
-        <ReturnType Type="Library.Catalog.MediumStats"/>
-      </Function>
-      <Function Name="NoticeHistory" IsBound="true">
-        <Parameter Name="member" Type="Library.Circulation.Member"/>
-        <ReturnType Type="Collection(Library.Circulation.OverdueNotice)"/>
-      </Function>
-      <Function Name="AvailableCopy" IsBound="true">
-        <Parameter Name="medium" Type="Library.Catalog.Medium"/>
-        <ReturnType Type="Library.Circulation.Copy"/>
-      </Function>
-      <Function Name="AvailableCopies" IsBound="true" IsComposable="true">
-        <Parameter Name="medium" Type="Library.Catalog.Medium"/>
-        <ReturnType Type="Collection(Library.Circulation.Copy)"/>
-      </Function>
-      <Function Name="AvailableCopies" IsBound="true" IsComposable="true">
-        <Parameter Name="media" Type="Collection(Library.Catalog.Medium)"/>
-        <ReturnType Type="Collection(Library.Circulation.Copy)"/>
-      </Function>
-      <Action Name="CheckOut" IsBound="true">
-        <Parameter Name="copy" Type="Library.Circulation.Copy"/>
-        <Parameter Name="MemberId" Type="Edm.Int32" Nullable="false"/>
-      </Action>
-      <Action Name="Reserve" IsBound="true">
-        <Parameter Name="medium" Type="Library.Catalog.Medium"/>
-        <Parameter Name="MemberId" Type="Edm.Int32" Nullable="false"/>
-        <ReturnType Type="Edm.Int32"/>
-      </Action>
-      <Action Name="BulkRenew" IsBound="true">
-        <Parameter Name="loans" Type="Collection(Library.Circulation.Loan)"/>
-        <ReturnType Type="Collection(Edm.String)"/>
-      </Action>
-      <Action Name="AssessCondition" IsBound="true">
-        <Parameter Name="copy" Type="Library.Circulation.Copy"/>
-        <Parameter Name="NewCondition" Type="Edm.Byte" Nullable="false"/>
-        <Parameter Name="Remark" Type="Edm.String"/>
-        <ReturnType Type="Library.Catalog.ConditionReport"/>
-      </Action>
-      <Action Name="RunReminders" IsBound="true">
-        <Parameter Name="member" Type="Library.Circulation.Member"/>
-        <ReturnType Type="Collection(Library.Circulation.OverdueNotice)"/>
-      </Action>
-      <Action Name="Renew" IsBound="true">
-        <Parameter Name="loan" Type="Library.Circulation.Loan"/>
-        <ReturnType Type="Library.Circulation.Loan"/>
-      </Action>
-      <Action Name="RenewAll" IsBound="true">
-        <Parameter Name="loans" Type="Collection(Library.Circulation.Loan)"/>
-        <ReturnType Type="Collection(Library.Circulation.Loan)"/>
-      </Action>
-    </Schema>
-    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="PublisherRegistry">
-      <EntityType Name="Publisher">
-        <Key>
-          <PropertyRef Name="Id"/>
-        </Key>
-        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="100"/>
-        <Property Name="Country" Type="Edm.String" MaxLength="60"/>
-        <Property Name="Founded" Type="Edm.Date"/>
-        <NavigationProperty Name="Books" Type="Collection(Library.Catalog.Book)"/>
-      </EntityType>
-      <EntityType Name="Branch">
-        <Key>
-          <PropertyRef Name="Id"/>
-        </Key>
-        <Property Name="Id" Type="Edm.Int32" Nullable="false"/>
-        <Property Name="City" Type="Edm.String" MaxLength="80"/>
-        <Property Name="Country" Type="Edm.String" MaxLength="60"/>
-      </EntityType>
-    </Schema>
-    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="Library.Service">
-      <EntityContainer Name="LibraryService">
-        <EntitySet Name="Media" EntityType="Library.Catalog.Medium">
-          <NavigationPropertyBinding Path="Copies" Target="Copies"/>
-          <NavigationPropertyBinding Path="Library.Catalog.Book/Publisher" Target="Publishers"/>
-          <NavigationPropertyBinding Path="Library.Catalog.CollectorsItem/StorageLocation" Target="Branches"/>
-        </EntitySet>
-        <EntitySet Name="Copies" EntityType="Library.Circulation.Copy">
-          <NavigationPropertyBinding Path="Location" Target="Branches"/>
-          <NavigationPropertyBinding Path="Medium" Target="Media"/>
-          <Annotation Term="Org.OData.Core.V1.OptimisticConcurrency">
-            <Collection>
-              <PropertyPath>Condition</PropertyPath>
-            </Collection>
-          </Annotation>
-        </EntitySet>
-        <EntitySet Name="Members" EntityType="Library.Circulation.Member">
-          <NavigationPropertyBinding Path="IdDocument" Target="IdDocuments"/>
-          <NavigationPropertyBinding Path="Loans" Target="Loans"/>
-          <NavigationPropertyBinding Path="Reservations" Target="Reservations"/>
-        </EntitySet>
-        <EntitySet Name="Loans" EntityType="Library.Circulation.Loan">
-          <NavigationPropertyBinding Path="Copy" Target="Copies"/>
-          <NavigationPropertyBinding Path="Member" Target="Members"/>
-        </EntitySet>
-        <EntitySet Name="Reservations" EntityType="Library.Circulation.Reservation"/>
-        <EntitySet Name="IdDocuments" EntityType="Library.Circulation.IdDocument"/>
-        <EntitySet Name="Branches" EntityType="Library.Circulation.Branch"/>
-        <EntitySet Name="Bookmobiles" EntityType="Library.Circulation.Bookmobile"/>
-        <EntitySet Name="Publishers" EntityType="PublisherRegistry.Publisher">
-          <NavigationPropertyBinding Path="Books" Target="Media"/>
-        </EntitySet>
-        <EntitySet Name="PublisherBranches" EntityType="PublisherRegistry.Branch"/>
-        <Singleton Name="MainBranch" Type="Library.Circulation.Branch"/>
-        <FunctionImport Name="TotalMediaCount" Function="Library.Circulation.TotalMediaCount" IncludeInServiceDocument="true"/>
-        <FunctionImport Name="AllLanguages" Function="Library.Circulation.AllLanguages" IncludeInServiceDocument="true"/>
-        <FunctionImport Name="LoanStatistics" Function="Library.Circulation.LoanStatistics" IncludeInServiceDocument="true"/>
-        <FunctionImport Name="StatsPerBranch" Function="Library.Circulation.StatsPerBranch" IncludeInServiceDocument="true"/>
-        <FunctionImport Name="MostReadMedium" Function="Library.Circulation.MostReadMedium" EntitySet="Media" IncludeInServiceDocument="true"/>
-        <FunctionImport Name="NewReleases" Function="Library.Circulation.NewReleases" EntitySet="Media" IncludeInServiceDocument="true"/>
-        <FunctionImport Name="Search" Function="Library.Circulation.Search" EntitySet="Media" IncludeInServiceDocument="true"/>
-        <ActionImport Name="ClosureDay" Action="Library.Circulation.ClosureDay"/>
-        <ActionImport Name="NextInventoryNumber" Action="Library.Circulation.NextInventoryNumber"/>
-        <ActionImport Name="CleanUpKeywords" Action="Library.Circulation.CleanUpKeywords"/>
-        <ActionImport Name="YearEndClosing" Action="Library.Circulation.YearEndClosing"/>
-        <ActionImport Name="RunOverdueNotices" Action="Library.Circulation.RunOverdueNotices"/>
-        <ActionImport Name="AcquireCollectorsItem" Action="Library.Circulation.AcquireCollectorsItem" EntitySet="Media"/>
-        <ActionImport Name="RunStockCheck" Action="Library.Circulation.RunStockCheck" EntitySet="Media"/>
-      </EntityContainer>
-    </Schema>
-  </edmx:DataServices>
-</edmx:Edmx>
+<?xml version="1.0" encoding="utf-8" ?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx"><edmx:DataServices><Schema
+      Namespace="Library.Catalog"
+      xmlns="http://docs.oasis-open.org/odata/ns/edm"
+    ><ComplexType Name="Address" Abstract="true"><Property Name="Street" Type="Edm.String" MaxLength="120" /><Property
+          Name="City"
+          Type="Edm.String"
+          MaxLength="80"
+        /></ComplexType><ComplexType Name="PostalAddress" BaseType="Library.Catalog.Address"><Property
+          Name="PostalCode"
+          Type="Edm.String"
+          MaxLength="10"
+        /><Property Name="Country" Type="Edm.String" MaxLength="60" /></ComplexType><EntityType
+        Name="Medium"
+        Abstract="true"
+      ><Key><PropertyRef Name="Id" /></Key><Property Name="Id" Type="Edm.Guid" Nullable="false" /><Property
+          Name="Title"
+          Type="Edm.String"
+          Nullable="false"
+          MaxLength="200"
+        /><Property Name="Language" Type="Edm.String" MaxLength="40"><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Language of the medium itself, as an ISO 639-1 code."
+          /></Property><Property Name="PublicationDate" Type="Edm.Date" /><Property
+          Name="Keywords"
+          Type="Collection(Edm.String)"
+        ><Annotation Term="Org.OData.Validation.V1.MaxItems" Int="20" /><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Free-text subject keywords for cataloguing."
+          /></Property><Property Name="PopularityScore" Type="Edm.Double"><Annotation
+            Term="Org.OData.Core.V1.Computed"
+            Bool="true"
+          /><Annotation Term="Org.OData.Validation.V1.Minimum" Float="0" /><Annotation
+            Term="Org.OData.Validation.V1.Maximum"
+            Float="10"
+          /><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="How often the medium is borrowed, on a 0-10 scale."
+          /></Property><NavigationProperty
+          Name="Copies"
+          Type="Collection(Library.Circulation.Copy)"
+          Partner="Medium"
+        ><OnDelete Action="Cascade" /></NavigationProperty><Annotation
+          Term="Org.OData.Core.V1.Description"
+          String="Anything the library holds and lends out, in any form."
+        /></EntityType><EntityType Name="PrintMedium" BaseType="Library.Catalog.Medium" Abstract="true"><Property
+          Name="ISBN"
+          Type="Edm.String"
+          MaxLength="13"
+        ><Annotation Term="Org.OData.Validation.V1.Pattern" String="^[0-9]{13}$" /><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="ISBN-13, digits only and without separators."
+          /></Property></EntityType><EntityType Name="Book" BaseType="Library.Catalog.PrintMedium"><Property
+          Name="PageCount"
+          Type="Edm.Int16"
+          Nullable="false"
+        ><Annotation Term="Org.OData.Validation.V1.Minimum" Int="1" /></Property><Property
+          Name="AgeRating"
+          Type="Edm.Byte"
+          Nullable="false"
+        ><Annotation Term="Org.OData.Validation.V1.Minimum" Int="0" /><Annotation
+            Term="Org.OData.Validation.V1.Maximum"
+            Int="18"
+          /><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Lowest age in years the book is released for; 0 means no restriction."
+          /></Property><NavigationProperty
+          Name="Publisher"
+          Type="PublisherRegistry.Publisher"
+          Partner="Books"
+        /></EntityType><EntityType Name="Magazine" BaseType="Library.Catalog.PrintMedium"><Property
+          Name="IssueNumber"
+          Type="Edm.Int32"
+          Nullable="false"
+        /></EntityType><EntityType Name="TradeJournal" BaseType="Library.Catalog.Magazine"><Property
+          Name="Field"
+          Type="Edm.String"
+        /></EntityType><EntityType Name="AudioMedium" BaseType="Library.Catalog.Medium" Abstract="true"><Property
+          Name="Duration"
+          Type="Edm.Duration"
+        ><Annotation
+            Term="Org.OData.Measures.V1.DurationGranularity"
+            String="minutes"
+          /></Property></EntityType><EntityType Name="DVD" BaseType="Library.Catalog.AudioMedium"><Property
+          Name="RegionCode"
+          Type="Edm.Byte"
+          Nullable="false"
+        /></EntityType><EntityType Name="Audiobook" BaseType="Library.Catalog.AudioMedium"><Property
+          Name="Narrator"
+          Type="Edm.String"
+        /><Property Name="Sample" Type="Edm.Stream"><Annotation
+            Term="Org.OData.Core.V1.AcceptableMediaTypes"
+          ><Collection><String>audio/mpeg</String></Collection></Annotation></Property><NavigationProperty
+          Name="Chapters"
+          Type="Collection(Library.Catalog.AudiobookChapter)"
+          ContainsTarget="true"
+        ><OnDelete Action="Cascade" /></NavigationProperty></EntityType><EntityType
+        Name="AudiobookChapter"
+        HasStream="true"
+      ><Key><PropertyRef Name="Id" /></Key><Property Name="Id" Type="Edm.Int32" Nullable="false" /><Property
+          Name="Title"
+          Type="Edm.String"
+        /><Annotation Term="Org.OData.Core.V1.AcceptableMediaTypes"><Collection><String
+            >audio/mpeg</String></Collection></Annotation></EntityType><EntityType
+        Name="EBook"
+        BaseType="Library.Catalog.Medium"
+        HasStream="true"
+      ><Property Name="FileFormat" Type="Edm.String" MaxLength="20" /><Annotation
+          Term="Org.OData.Core.V1.AcceptableMediaTypes"
+        ><Collection><String>application/epub+zip</String></Collection></Annotation></EntityType><EntityType
+        Name="CollectorsItem"
+        BaseType="Library.Catalog.Medium"
+        OpenType="true"
+      ><Property Name="ExtraData" Type="Edm.Untyped" /><NavigationProperty
+          Name="StorageLocation"
+          Type="Library.Circulation.Branch"
+        /><Annotation Term="Org.OData.Core.V1.AdditionalProperties" Bool="true" /><Annotation
+          Term="Org.OData.Core.V1.Description"
+          String="A rarity whose describing properties are not known in advance."
+        /></EntityType><ComplexType Name="MediumStats"><Property
+          Name="TotalLoanCount"
+          Type="Edm.Int64"
+          Nullable="false"
+        /><Property Name="AverageLoanDuration" Type="Edm.Duration" Nullable="false" /></ComplexType><ComplexType
+        Name="ConditionReport"
+      ><Property Name="ConditionBefore" Type="Edm.Byte" Nullable="false" /><Property
+          Name="ConditionAfter"
+          Type="Edm.Byte"
+          Nullable="false"
+        /><Property Name="Remark" Type="Edm.String" /></ComplexType><EnumType Name="Amenities" IsFlags="true"><Member
+          Name="WheelchairAccessible"
+          Value="1"
+        ><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Step-free access to every public area."
+          /></Member><Member Name="Parking" Value="2" /><Member Name="Café" Value="4" /><Member
+          Name="KidsArea"
+          Value="8"
+        /><Member Name="StudyRoom" Value="16" /><Member Name="FullService" Value="31"><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="All of the above - every amenity this library records."
+          /></Member></EnumType><EnumType Name="AvailabilityStatus" UnderlyingType="Edm.Byte"><Member
+          Name="Available"
+          Value="0"
+        ><Annotation Term="Org.OData.Core.V1.Description" String="On the shelf and loanable." /></Member><Member
+          Name="OnLoan"
+          Value="1"
+        ><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Borrowed; due back on the loan's due date."
+          /></Member><Member Name="InRepair" Value="2"><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="With the bindery or the repair desk."
+          /></Member><Member Name="Missing" Value="3"><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Not found at the last inventory."
+          /></Member><Annotation
+          Term="Org.OData.Core.V1.Description"
+          String="Whether a copy can be borrowed right now, and if not, why not."
+        /></EnumType><Annotations Target="Library.Catalog.PrintMedium"><Annotation
+          Term="Org.OData.Core.V1.AlternateKeys"
+        ><Collection><Record><PropertyValue Property="Key"><Collection><Record><PropertyValue
+                      Property="Name"
+                      PropertyPath="ISBN"
+                    /><PropertyValue
+                      Property="Alias"
+                      String="ISBN"
+                    /></Record></Collection></PropertyValue></Record></Collection></Annotation></Annotations><Annotations
+        Target="Library.Service.LibraryService/Media"
+      ><Annotation Term="Org.OData.Capabilities.V1.SearchRestrictions"><Record><PropertyValue
+              Property="Searchable"
+              Bool="true"
+            /></Record></Annotation></Annotations></Schema><Schema
+      Namespace="Library.Circulation"
+      xmlns="http://docs.oasis-open.org/odata/ns/edm"
+    ><EntityType Name="Member"><Key><PropertyRef Name="Id" /></Key><Property
+          Name="Id"
+          Type="Edm.Int32"
+          Nullable="false"
+        /><Property Name="ActiveSince" Type="Edm.DateTimeOffset" Precision="7"><Annotation
+            Term="Org.OData.Core.V1.ComputedDefaultValue"
+            Bool="true"
+          /></Property><Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="100" /><Property
+          Name="DateOfBirth"
+          Type="Edm.Date"
+        /><Property Name="Address" Type="Library.Catalog.PostalAddress" /><Property
+          Name="PreviousAddresses"
+          Type="Collection(Library.Catalog.PostalAddress)"
+          Nullable="false"
+        /><Property Name="Balance" Type="Edm.Decimal" Nullable="false" Precision="9" Scale="2"><Annotation
+            Term="Org.OData.Core.V1.Permissions"
+          ><EnumMember>Org.OData.Core.V1.Permission/Read</EnumMember></Annotation><Annotation
+            Term="Org.OData.Measures.V1.ISOCurrency"
+            String="EUR"
+          /><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Outstanding late fees; settled at the desk, never through this service."
+          /></Property><NavigationProperty
+          Name="Reservations"
+          Type="Collection(Library.Circulation.Reservation)"
+        ><OnDelete Action="Cascade" /></NavigationProperty><NavigationProperty
+          Name="IdDocument"
+          Type="Library.Circulation.IdDocument"
+        /><NavigationProperty Name="Loans" Type="Collection(Library.Circulation.Loan)" Partner="Member"><OnDelete
+            Action="Cascade"
+          /></NavigationProperty><Annotation
+          Term="Org.OData.Core.V1.Description"
+          String="A person registered with the library, with their loans and reservations."
+        /></EntityType><EntityType Name="Loan"><Key><PropertyRef Name="Id" /></Key><Property
+          Name="Id"
+          Type="Edm.Guid"
+          Nullable="false"
+        /><Property Name="LoanedAt" Type="Edm.DateTimeOffset" Nullable="false" Precision="7"><Annotation
+            Term="Org.OData.Core.V1.Immutable"
+            Bool="true"
+          /></Property><Property Name="ReturnedAt" Type="Edm.DateTimeOffset" Precision="7" /><Property
+          Name="DueDate"
+          Type="Edm.Date"
+          Nullable="false"
+        /><Property Name="LateFee" Type="Edm.Decimal" Precision="5" Scale="2"><Annotation
+            Term="Org.OData.Measures.V1.ISOCurrency"
+            String="EUR"
+          /></Property><NavigationProperty
+          Name="Member"
+          Type="Library.Circulation.Member"
+          Nullable="false"
+          Partner="Loans"
+        /><NavigationProperty Name="Copy" Type="Library.Circulation.Copy" Nullable="false" /></EntityType><EntityType
+        Name="Reservation"
+      ><Key><PropertyRef Name="Id" /></Key><Property Name="Id" Type="Edm.Guid" Nullable="false" /><Property
+          Name="ReservedAt"
+          Type="Edm.DateTimeOffset"
+          Nullable="false"
+          Precision="7"
+        /></EntityType><EntityType Name="IdDocument"><Key><PropertyRef Name="Id" /></Key><Property
+          Name="Id"
+          Type="Edm.Guid"
+          Nullable="false"
+        /><Property Name="UploadedAt" Type="Edm.DateTimeOffset" Nullable="false" Precision="7" /><Property
+          Name="Scan"
+          Type="Edm.Binary"
+        /></EntityType><EntityType Name="Branch"><Key><PropertyRef Name="Id" /></Key><Property
+          Name="Id"
+          Type="Edm.Int32"
+          Nullable="false"
+        /><Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="100" /><Property
+          Name="Address"
+          Type="Library.Catalog.PostalAddress"
+        /><Property Name="Location" Type="Edm.GeographyPoint" /><Property
+          Name="CatchmentArea"
+          Type="Edm.GeographyPolygon"
+        /><Property Name="LowestFloor" Type="Edm.SByte" Nullable="false" /><Property
+          Name="FloorPlanOrigin"
+          Type="Edm.GeometryPoint"
+        /><Property Name="FloorPlanShapes" Type="Edm.GeometryCollection" /><Property
+          Name="OpensAt"
+          Type="Edm.TimeOfDay"
+        /><Property Name="ClosesAt" Type="Edm.TimeOfDay" /><Property
+          Name="Amenities"
+          Type="Library.Catalog.Amenities"
+        /><Property Name="Population" Type="Edm.Int64" Nullable="false"><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Inhabitants of the area the branch serves."
+          /></Property></EntityType><EntityType Name="Bookmobile"><Key><PropertyRef Name="Id" /></Key><Property
+          Name="Id"
+          Type="Edm.Int32"
+          Nullable="false"
+        /><Property Name="LicensePlate" Type="Edm.String" MaxLength="12" /><Property
+          Name="Route"
+          Type="Edm.GeographyLineString"
+        /><Property Name="CurrentPosition" Type="Edm.GeographyPoint" /></EntityType><EntityType Name="Copy"><Key
+        ><PropertyRef Name="InventoryNumber" /><PropertyRef Name="MediumId" /></Key><Property
+          Name="MediumId"
+          Type="Edm.Guid"
+          Nullable="false"
+        /><Property Name="InventoryNumber" Type="Edm.Int32" Nullable="false" /><Property
+          Name="IsLoanable"
+          Type="Edm.Boolean"
+          DefaultValue="true"
+          Nullable="false"
+        /><Property Name="Condition" Type="Edm.Byte" Nullable="false"><Annotation
+            Term="Org.OData.Validation.V1.Minimum"
+            Int="0"
+          /><Annotation Term="Org.OData.Validation.V1.Maximum" Int="5" /><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Physical condition on a 0-5 scale, 5 being as new. Doubles as the ETag."
+          /></Property><Property Name="Status" Type="Library.Catalog.AvailabilityStatus" /><Property
+          Name="AcquisitionDate"
+          Type="Edm.Date"
+        /><Property Name="WeightKg" Type="Edm.Single" Nullable="false"><Annotation
+            Term="Org.OData.Measures.V1.Unit"
+            String="kg"
+          /><Annotation Term="Org.OData.Measures.V1.Scale" Int="2" /></Property><Property
+          Name="Location_"
+          Type="Edm.String"
+          MaxLength="10"
+        ><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Shelf mark within the branch."
+          /></Property><NavigationProperty
+          Name="Medium"
+          Type="Library.Catalog.Medium"
+          Nullable="false"
+          Partner="Copies"
+        ><ReferentialConstraint Property="MediumId" ReferencedProperty="Id" /></NavigationProperty><NavigationProperty
+          Name="Location"
+          Type="Library.Circulation.Branch"
+        /></EntityType><ComplexType Name="OverdueNotice"><Property
+          Name="Amount"
+          Type="Edm.Decimal"
+          Nullable="false"
+          Precision="5"
+          Scale="2"
+        ><Annotation Term="Org.OData.Measures.V1.ISOCurrency" String="EUR" /></Property><Property
+          Name="CreatedAt"
+          Type="Edm.DateTimeOffset"
+          Nullable="false"
+          Precision="7"
+        /><Property Name="Reason" Type="Edm.String" /></ComplexType><ComplexType Name="AnnualReport"><Property
+          Name="TotalLateFees"
+          Type="Edm.Decimal"
+          Nullable="false"
+          Precision="12"
+          Scale="2"
+        ><Annotation Term="Org.OData.Measures.V1.ISOCurrency" String="EUR" /></Property><Property
+          Name="Year"
+          Type="Edm.Int32"
+          Nullable="false"
+        /><Property Name="TotalLoans" Type="Edm.Int64" Nullable="false" /></ComplexType><ComplexType
+        Name="DateRange"
+      ><Property Name="From" Type="Edm.Date" /><Property Name="To" Type="Edm.Date" /></ComplexType><ComplexType
+        Name="LoanStats"
+      ><Property Name="TotalLoans" Type="Edm.Int64" Nullable="false" /><Property
+          Name="AverageLoanDuration"
+          Type="Edm.Duration"
+          Nullable="false"
+        /></ComplexType><ComplexType Name="BranchStats"><Property
+          Name="BranchId"
+          Type="Edm.Int32"
+          Nullable="false"
+        /><Property Name="LoanCount" Type="Edm.Int64" Nullable="false" /></ComplexType><Function
+        Name="TotalMediaCount"
+      ><ReturnType Type="Edm.Int64" Nullable="false" /><Annotation
+          Term="Org.OData.Core.V1.Description"
+          String="How many media the library holds, all types together."
+        /></Function><Function Name="AllLanguages"><ReturnType Type="Collection(Edm.String)" /></Function><Function
+        Name="LoanStatistics"
+      ><Parameter Name="Period" Type="Library.Circulation.DateRange"><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Restricts the statistics to a period; omit it for all time."
+          /></Parameter><ReturnType Type="Library.Circulation.LoanStats" /></Function><Function
+        Name="StatsPerBranch"
+      ><ReturnType Type="Collection(Library.Circulation.BranchStats)" /></Function><Function
+        Name="MostReadMedium"
+      ><ReturnType Type="Library.Catalog.Medium" /></Function><Function
+        Name="NewReleases"
+        IsComposable="true"
+      ><ReturnType Type="Collection(Library.Catalog.Medium)" /></Function><Function Name="Search"><Parameter
+          Name="Term"
+          Type="Edm.String"
+        ><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Matched against title and keywords."
+          /></Parameter><ReturnType Type="Collection(Library.Catalog.Medium)" /><Annotation
+          Term="Org.OData.Core.V1.Description"
+          String="Media whose title or keywords match the term."
+        /></Function><Function Name="Search"><Parameter Name="Term" Type="Edm.String"><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Matched against title and keywords."
+          /></Parameter><Parameter Name="MaxResults" Type="Edm.Int32" Nullable="false"><Annotation
+            Term="Org.OData.Validation.V1.Minimum"
+            Int="1"
+          /></Parameter><ReturnType Type="Collection(Library.Catalog.Medium)" /><Annotation
+          Term="Org.OData.Core.V1.Description"
+          String="As Search(Term), but returns at most MaxResults media."
+        /></Function><Action Name="ClosureDay"><Parameter Name="Date" Type="Edm.Date" Nullable="false"><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="The day the library stays shut."
+          /></Parameter><Annotation
+          Term="Org.OData.Core.V1.Description"
+          String="Marks a day as a closure day; due dates move past it."
+        /></Action><Action Name="NextInventoryNumber"><ReturnType Type="Edm.Int32" Nullable="false" /></Action><Action
+        Name="CleanUpKeywords"
+      ><Parameter Name="Obsolete" Type="Collection(Edm.String)" /><ReturnType
+          Type="Collection(Edm.String)"
+        /></Action><Action Name="YearEndClosing"><Parameter Name="Year" Type="Edm.Int32" Nullable="false" /><ReturnType
+          Type="Library.Circulation.AnnualReport"
+        /></Action><Action Name="RunOverdueNotices"><ReturnType
+          Type="Collection(Library.Circulation.OverdueNotice)"
+        /></Action><Action Name="AcquireCollectorsItem"><Parameter Name="Title" Type="Edm.String" /><Parameter
+          Name="Description"
+          Type="Edm.String"
+        /><ReturnType Type="Library.Catalog.Medium" /></Action><Action Name="RunStockCheck"><ReturnType
+          Type="Collection(Library.Catalog.Medium)"
+        /></Action><Function Name="OutstandingBalance" IsBound="true"><Parameter
+          Name="member"
+          Type="Library.Circulation.Member"
+        /><ReturnType Type="Edm.Decimal" Nullable="false" Scale="variable" /></Function><Function
+        Name="AvailableLanguages"
+        IsBound="true"
+      ><Parameter Name="media" Type="Collection(Library.Catalog.Medium)" /><ReturnType
+          Type="Collection(Edm.String)"
+        /></Function><Function Name="LoanMetrics" IsBound="true"><Parameter
+          Name="medium"
+          Type="Library.Catalog.Medium"
+        /><ReturnType Type="Library.Catalog.MediumStats" /></Function><Function
+        Name="NoticeHistory"
+        IsBound="true"
+      ><Parameter Name="member" Type="Library.Circulation.Member" /><ReturnType
+          Type="Collection(Library.Circulation.OverdueNotice)"
+        /></Function><Function Name="AvailableCopy" IsBound="true"><Parameter
+          Name="medium"
+          Type="Library.Catalog.Medium"
+        /><ReturnType Type="Library.Circulation.Copy" /></Function><Function
+        Name="AvailableCopies"
+        IsBound="true"
+        IsComposable="true"
+      ><Parameter Name="medium" Type="Library.Catalog.Medium" /><ReturnType
+          Type="Collection(Library.Circulation.Copy)"
+        /></Function><Function Name="AvailableCopies" IsBound="true" IsComposable="true"><Parameter
+          Name="media"
+          Type="Collection(Library.Catalog.Medium)"
+        /><ReturnType Type="Collection(Library.Circulation.Copy)" /></Function><Action
+        Name="CheckOut"
+        IsBound="true"
+      ><Parameter Name="copy" Type="Library.Circulation.Copy" /><Parameter
+          Name="MemberId"
+          Type="Edm.Int32"
+          Nullable="false"
+        /></Action><Action Name="Reserve" IsBound="true"><Parameter
+          Name="medium"
+          Type="Library.Catalog.Medium"
+        /><Parameter Name="MemberId" Type="Edm.Int32" Nullable="false" /><ReturnType Type="Edm.Int32" /></Action><Action
+        Name="BulkRenew"
+        IsBound="true"
+      ><Parameter Name="loans" Type="Collection(Library.Circulation.Loan)" /><ReturnType
+          Type="Collection(Edm.String)"
+        /></Action><Action Name="AssessCondition" IsBound="true"><Parameter
+          Name="copy"
+          Type="Library.Circulation.Copy"
+        /><Parameter Name="NewCondition" Type="Edm.Byte" Nullable="false" /><Parameter
+          Name="Remark"
+          Type="Edm.String"
+        /><ReturnType Type="Library.Catalog.ConditionReport" /></Action><Action
+        Name="RunReminders"
+        IsBound="true"
+      ><Parameter Name="member" Type="Library.Circulation.Member" /><ReturnType
+          Type="Collection(Library.Circulation.OverdueNotice)"
+        /></Action><Action Name="Renew" IsBound="true"><Parameter
+          Name="loan"
+          Type="Library.Circulation.Loan"
+        /><ReturnType Type="Library.Circulation.Loan" /><Annotation
+          Term="Org.OData.Core.V1.Description"
+          String="Extends the loan's due date and returns the updated loan."
+        /></Action><Action Name="RenewAll" IsBound="true"><Parameter
+          Name="loans"
+          Type="Collection(Library.Circulation.Loan)"
+        /><ReturnType Type="Collection(Library.Circulation.Loan)" /></Action></Schema><Schema
+      Namespace="PublisherRegistry"
+      xmlns="http://docs.oasis-open.org/odata/ns/edm"
+    ><EntityType Name="Publisher"><Key><PropertyRef Name="Id" /></Key><Property
+          Name="Id"
+          Type="Edm.Int32"
+          Nullable="false"
+        /><Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="100" /><Property
+          Name="Country"
+          Type="Edm.String"
+          MaxLength="60"
+        /><Property Name="Founded" Type="Edm.Date" /><NavigationProperty
+          Name="Books"
+          Type="Collection(Library.Catalog.Book)"
+          Partner="Publisher"
+        /></EntityType><EntityType Name="Branch"><Key><PropertyRef Name="Id" /></Key><Property
+          Name="Id"
+          Type="Edm.Int32"
+          Nullable="false"
+        /><Property Name="City" Type="Edm.String" MaxLength="80" /><Property
+          Name="Country"
+          Type="Edm.String"
+          MaxLength="60"
+        /></EntityType></Schema><Schema
+      Namespace="Library.Service"
+      xmlns="http://docs.oasis-open.org/odata/ns/edm"
+    ><EntityContainer Name="LibraryService"><EntitySet
+          Name="Media"
+          EntityType="Library.Catalog.Medium"
+        ><NavigationPropertyBinding Path="Copies" Target="Copies" /><NavigationPropertyBinding
+            Path="Library.Catalog.Book/Publisher"
+            Target="Publishers"
+          /><NavigationPropertyBinding
+            Path="Library.Catalog.CollectorsItem/StorageLocation"
+            Target="Branches"
+          /><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Everything the library holds, across all media types."
+          /></EntitySet><EntitySet Name="Copies" EntityType="Library.Circulation.Copy"><NavigationPropertyBinding
+            Path="Location"
+            Target="Branches"
+          /><NavigationPropertyBinding Path="Medium" Target="Media" /><Annotation
+            Term="Org.OData.Core.V1.OptimisticConcurrency"
+          ><Collection><PropertyPath>Condition</PropertyPath></Collection></Annotation><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="The physical or licensed copies of a medium; what is borrowed."
+          /></EntitySet><EntitySet Name="Members" EntityType="Library.Circulation.Member"><NavigationPropertyBinding
+            Path="IdDocument"
+            Target="IdDocuments"
+          /><NavigationPropertyBinding Path="Loans" Target="Loans" /><NavigationPropertyBinding
+            Path="Reservations"
+            Target="Reservations"
+          /><Annotation Term="Org.OData.Core.V1.Description" String="Registered members." /></EntitySet><EntitySet
+          Name="Loans"
+          EntityType="Library.Circulation.Loan"
+        ><NavigationPropertyBinding Path="Copy" Target="Copies" /><NavigationPropertyBinding
+            Path="Member"
+            Target="Members"
+          /><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Loans, open and returned alike."
+          /></EntitySet><EntitySet Name="Reservations" EntityType="Library.Circulation.Reservation" /><EntitySet
+          Name="IdDocuments"
+          EntityType="Library.Circulation.IdDocument"
+        /><EntitySet Name="Branches" EntityType="Library.Circulation.Branch" /><EntitySet
+          Name="Bookmobiles"
+          EntityType="Library.Circulation.Bookmobile"
+        ><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="Mobile branches, with their route and current position."
+          /></EntitySet><EntitySet Name="Publishers" EntityType="PublisherRegistry.Publisher"><NavigationPropertyBinding
+            Path="Books"
+            Target="Media"
+          /></EntitySet><EntitySet Name="PublisherBranches" EntityType="PublisherRegistry.Branch" /><Singleton
+          Name="MainBranch"
+          Type="Library.Circulation.Branch"
+        ><Annotation
+            Term="Org.OData.Core.V1.Description"
+            String="The central branch - the one that is always there."
+          /></Singleton><FunctionImport
+          Name="TotalMediaCount"
+          Function="Library.Circulation.TotalMediaCount"
+          IncludeInServiceDocument="true"
+        /><FunctionImport
+          Name="AllLanguages"
+          Function="Library.Circulation.AllLanguages"
+          IncludeInServiceDocument="true"
+        /><FunctionImport
+          Name="LoanStatistics"
+          Function="Library.Circulation.LoanStatistics"
+          IncludeInServiceDocument="true"
+        /><FunctionImport
+          Name="StatsPerBranch"
+          Function="Library.Circulation.StatsPerBranch"
+          IncludeInServiceDocument="true"
+        /><FunctionImport
+          Name="MostReadMedium"
+          Function="Library.Circulation.MostReadMedium"
+          EntitySet="Media"
+          IncludeInServiceDocument="true"
+        /><FunctionImport
+          Name="NewReleases"
+          Function="Library.Circulation.NewReleases"
+          EntitySet="Media"
+          IncludeInServiceDocument="true"
+        /><FunctionImport
+          Name="Search"
+          Function="Library.Circulation.Search"
+          EntitySet="Media"
+          IncludeInServiceDocument="true"
+        /><ActionImport Name="ClosureDay" Action="Library.Circulation.ClosureDay" /><ActionImport
+          Name="NextInventoryNumber"
+          Action="Library.Circulation.NextInventoryNumber"
+        /><ActionImport Name="CleanUpKeywords" Action="Library.Circulation.CleanUpKeywords" /><ActionImport
+          Name="YearEndClosing"
+          Action="Library.Circulation.YearEndClosing"
+        /><ActionImport Name="RunOverdueNotices" Action="Library.Circulation.RunOverdueNotices" /><ActionImport
+          Name="AcquireCollectorsItem"
+          Action="Library.Circulation.AcquireCollectorsItem"
+          EntitySet="Media"
+        /><ActionImport Name="RunStockCheck" Action="Library.Circulation.RunStockCheck" EntitySet="Media" /><Annotation
+          Term="Org.OData.Core.V1.Description"
+          String="The odata2ts &quot;Library&quot; reference model, served by ASP.NET Core OData."
+        /><Annotation Term="Org.OData.Capabilities.V1.SupportedFormats"><Collection><String
+            >application/json</String></Collection></Annotation><Annotation
+          Term="Org.OData.Capabilities.V1.BatchSupported"
+          Bool="true"
+        /><Annotation Term="Org.OData.Capabilities.V1.KeyAsSegmentSupported" Bool="true" /><Annotation
+          Term="Org.OData.Capabilities.V1.QuerySegmentSupported"
+          Bool="true"
+        /><Annotation Term="Org.OData.Capabilities.V1.AsynchronousRequestsSupported" Bool="false" /><Annotation
+          Term="Org.OData.Capabilities.V1.CrossJoinSupported"
+          Bool="false"
+        /></EntityContainer></Schema></edmx:DataServices></edmx:Edmx>

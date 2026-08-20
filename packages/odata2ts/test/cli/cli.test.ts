@@ -11,7 +11,7 @@ import {
   ConfigFileOptions,
   EmitModes,
   getDefaultConfig,
-  ManagedPropertyDetection,
+  KeyProperties,
   Modes,
   RunOptions,
 } from "../../src/index.js";
@@ -269,12 +269,12 @@ describe("Cli Test", () => {
     await testDebug(false);
   });
 
-  async function testManagedPropertyDetection(detection: ManagedPropertyDetection | undefined) {
+  async function testKeyProperties(keyProperties: KeyProperties | undefined) {
     const args = [...defaultArgs];
-    if (detection) {
-      args.push("--managed-property-detection", detection);
+    if (keyProperties) {
+      args.push("--key-properties", keyProperties);
     }
-    runOptions.managedPropertyDetection = detection ?? ManagedPropertyDetection.auto;
+    runOptions.keyProperties = keyProperties ?? KeyProperties.interoperable;
 
     await testCli(args);
   }
@@ -291,10 +291,11 @@ describe("Cli Test", () => {
     await testServiceName("none");
   });
 
-  test("Test managedPropertyDetection option", async () => {
-    await testManagedPropertyDetection(undefined);
-    await testManagedPropertyDetection(ManagedPropertyDetection.simpleHeuristic);
-    await testManagedPropertyDetection(ManagedPropertyDetection.annotation);
+  test("Test keyProperties option", async () => {
+    await testKeyProperties(undefined);
+    await testKeyProperties(KeyProperties.strict);
+    await testKeyProperties(KeyProperties.singleComputed);
+    await testKeyProperties(KeyProperties.allComputed);
   });
 
   async function testAllowRenaming(allow: boolean) {

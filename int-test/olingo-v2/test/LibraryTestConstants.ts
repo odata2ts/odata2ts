@@ -1,6 +1,7 @@
 import { FetchClient } from "@odata2ts/http-client-fetch";
 import { inject } from "vitest";
 import { LibraryAsV4Service } from "../src-generated/library-as-v4/index.js";
+import { LibraryStrictService } from "../src-generated/library-strict/index.js";
 import { LibraryService } from "../src-generated/library/index.js";
 
 /** Base URL of the running server, provided by `globalSetup` (container or external server). */
@@ -9,6 +10,13 @@ export const ODATA_CLIENT = new FetchClient();
 export const LIBRARY = new LibraryService(ODATA_CLIENT, BASE_URL);
 /** Same server, same model, but every response reshaped as V4 - see `feature/V2ResponseAsV4.test.ts`. */
 export const LIBRARY_AS_V4 = new LibraryAsV4Service(ODATA_CLIENT, BASE_URL);
+
+/**
+ * The same service through the client generated with `managedPropertyMode: "strictOmit"`. Only
+ * `feature/ImmutableProperties.test.ts` uses it: everywhere else the default `lenient` shape applies,
+ * which is what makes the difference between the two observable at all.
+ */
+export const LIBRARY_STRICT = new LibraryStrictService(ODATA_CLIENT, BASE_URL);
 
 // Fixed keys from the server's in-memory seed data (`data/SeedData.java` in test-server-olingo-v2).
 // They deliberately match test-server-cap wherever the same entity exists in both.

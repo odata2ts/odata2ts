@@ -13,13 +13,18 @@ import {
   EntityType,
   EnumType,
   hasNumericMembers,
+  hasUpdatableModel,
+  isInCreateModel,
+  isInUpdateModel,
+  isRequiredOnCreate,
+  isRequiredOnUpdate,
   needsEnumConverter,
   OperationType,
   PropertyModel,
 } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel.js";
-import { ManagedState, Modes } from "../OptionModel.js";
+import { ManagedPropertyMode, ManagedState, Modes } from "../OptionModel.js";
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
 import { CoreImports } from "./import/ImportObjects.js";
@@ -56,19 +61,6 @@ function isReadable(prop: PropertyModel): boolean {
   return prop.managed !== ManagedState.writeOnly;
 }
 
-function isEditable(prop: PropertyModel): boolean {
-  return prop.managed !== ManagedState.readOnly;
-}
-
-/**
- * Whether a property has to be supplied when editing. Being non-nullable is not enough: the server fills
- * in a value of its own where the client leaves out a `Core.ComputedDefaultValue` property, and a
- * `Core.Immutable` one is left out on every update.
- */
-function isEditableRequired(prop: PropertyModel): boolean {
-  return prop.required && prop.managed !== ManagedState.optionalWithDefault && prop.managed !== ManagedState.createOnly;
-}
-
 export const generateModels: EntityBasedGeneratorFunction = (
   project: ProjectManager,
   dataModel,
@@ -88,6 +80,24 @@ class ModelGenerator {
     private options: GeneratorFunctionOptions,
     private namingHelper: NamingHelper,
   ) {}
+
+  private mode(): ManagedPropertyMode {
+    return this.options.managedPropertyMode!;
+  }
+
+  /** Whether a property has to be supplied on create - see {@link isRequiredOnCreate}. */
+  private isEditableRequired(prop: PropertyModel): boolean {
+    return isRequiredOnCreate(prop);
+  }
+
+  private isUpdatableRequired(prop: PropertyModel): boolean {
+    return isRequiredOnUpdate(prop);
+  }
+
+  /** Whether this type gets its own UpdatableModel - see {@link hasUpdatableModel}. */
+  private hasOwnUpdatableModel(model: ComplexType): boolean {
+    return hasUpdatableModel(model, this.mode());
+  }
 
   public async generate(): Promise<void> {
     this.project.initModels();
@@ -227,6 +237,7 @@ class ModelGenerator {
         model.modelName,
         model.id.modelName,
         model.editableName,
+        model.updatableName,
       ]);
 
       // query model
@@ -240,6 +251,9 @@ class ModelGenerator {
       // editable model
       if (!this.options.skipEditableModels) {
         this.generateEditableModel(file, model);
+        if (this.hasOwnUpdatableModel(model)) {
+          this.generateUpdatableModel(file, model);
+        }
       }
 
       // param models for bound operations
@@ -261,6 +275,7 @@ class ModelGenerator {
       const file = this.project.createOrGetModelFile(model.folderPath, model.modelName, [
         model.modelName,
         model.editableName,
+        model.updatableName,
       ]);
 
       // query model
@@ -269,6 +284,9 @@ class ModelGenerator {
       // editable model
       if (!this.options.skipEditableModels) {
         this.generateEditableModel(file, model);
+        if (this.hasOwnUpdatableModel(model)) {
+          this.generateUpdatableModel(file, model);
+        }
       }
 
       return this.project.finalizeFile(file);
@@ -390,7 +408,9 @@ class ModelGenerator {
   private generateEditableModel(file: FileHandler, model: ComplexType) {
     const entityTypes = [DataTypes.ModelType, DataTypes.ComplexType];
     // stream props are not writable through the payload either - the stream service is the only way in
-    const allProps = [...model.baseProps, ...model.props].filter((p) => isEditable(p) && notStream(p));
+    const allProps = [...model.baseProps, ...model.props].filter(
+      (p) => isInCreateModel(p, this.mode()) && notStream(p),
+    );
 
     const plainProps = allProps.filter((p) => !entityTypes.includes(p.dataType));
     // a write-only prop cannot be picked from the model, which doesn't know it - it is declared here
@@ -398,11 +418,11 @@ class ModelGenerator {
     const ownProps = plainProps.filter((p) => !isReadable(p));
 
     const requiredProps = pickedProps
-      .filter(isEditableRequired)
+      .filter((p) => this.isEditableRequired(p))
       .map((p) => `"${p.name}"`)
       .join(" | ");
     const optionalProps = pickedProps
-      .filter((p) => !isEditableRequired(p))
+      .filter((p) => !this.isEditableRequired(p))
       .map((p) => `"${p.name}"`)
       .join(" | ");
     const complexProps = allProps.filter((p) => p.dataType === DataTypes.ComplexType);
@@ -425,7 +445,7 @@ class ModelGenerator {
         ...ownProps.map((p) => ({
           name: p.name,
           type: this.getEditablePropType(file.getImports(), p),
-          hasQuestionToken: !isEditableRequired(p),
+          hasQuestionToken: !this.isEditableRequired(p),
           // the only place left to say why this property shows up here and nowhere else
           docs: this.options.skipComments ? undefined : [this.generatePropDoc(p, model)],
         })),
@@ -435,12 +455,96 @@ class ModelGenerator {
             type: this.getEditablePropType(file.getImports(), p),
             // optional props don't need to be specified in editable model
             // also, entities would require deep insert func => we make it optional for now
-            hasQuestionToken: !isEditableRequired(p) || p.dataType === DataTypes.ModelType,
+            hasQuestionToken: !this.isEditableRequired(p) || p.dataType === DataTypes.ModelType,
           };
         }),
         ...navProps,
       ],
     });
+  }
+
+  /**
+   * The Updatable counterpart of the Editable model, which differs from it in what it says about the
+   * immutable properties of this type's own level: under `strictOmit` they are gone, otherwise they are
+   * present but never required - the server will not change them, so demanding one would only make the
+   * caller repeat a value that goes nowhere.
+   *
+   * A complex-type property recurses into the nested type's own Updatable/Editable model (computed here,
+   * at generation time, not via a TypeScript-level recursive type). A navigation property is deliberately
+   * excluded from that recursion and always resolves to Editable, via the very same
+   * {@link generateNavProps} the editable model uses - see {@link getUpdatablePropType} for why.
+   */
+  private generateUpdatableModel(file: FileHandler, model: ComplexType) {
+    const entityTypes = [DataTypes.ModelType, DataTypes.ComplexType];
+    const allProps = [...model.baseProps, ...model.props].filter(
+      (p) => isInUpdateModel(p, this.mode()) && notStream(p),
+    );
+
+    const plainProps = allProps.filter((p) => !entityTypes.includes(p.dataType));
+    const pickedProps = plainProps.filter(isReadable);
+    const ownProps = plainProps.filter((p) => !isReadable(p));
+
+    const requiredProps = pickedProps
+      .filter((p) => this.isUpdatableRequired(p))
+      .map((p) => `"${p.name}"`)
+      .join(" | ");
+    const optionalProps = pickedProps
+      .filter((p) => !this.isUpdatableRequired(p))
+      .map((p) => `"${p.name}"`)
+      .join(" | ");
+    const complexProps = allProps.filter((p) => p.dataType === DataTypes.ComplexType);
+    const navProps = this.generateNavProps(
+      file.getImports(),
+      model.fqName,
+      allProps.filter((p) => p.dataType === DataTypes.ModelType),
+    );
+
+    const extendsClause = [
+      requiredProps ? `Pick<${model.modelName}, ${requiredProps}>` : null,
+      optionalProps ? `Partial<Pick<${model.modelName}, ${optionalProps}>>` : null,
+    ].filter((e): e is string => !!e);
+
+    file.getFile().addInterface({
+      name: model.updatableName,
+      isExported: true,
+      extends: extendsClause,
+      properties: [
+        ...ownProps.map((p) => ({
+          name: p.name,
+          type: this.getUpdatablePropType(file.getImports(), p),
+          hasQuestionToken: !this.isUpdatableRequired(p),
+          docs: this.options.skipComments ? undefined : [this.generatePropDoc(p, model)],
+        })),
+        ...complexProps.map((p) => ({
+          name: p.name,
+          type: this.getUpdatablePropType(file.getImports(), p),
+          hasQuestionToken: !this.isUpdatableRequired(p),
+        })),
+        ...navProps,
+      ],
+    });
+  }
+
+  /**
+   * Resolves a complex-type property's type for the Updatable model: the nested type's own
+   * UpdatableModel where it has immutable properties of its own, otherwise its plain EditableModel -
+   * there's nothing to strip from the latter, so a redundant identical type isn't generated for it.
+   * Never called for a navigation property - those go through {@link generateNavProps} instead, which
+   * always resolves to EditableModel regardless of context; that's what keeps a self-referential entity
+   * graph from ever cycling through this model.
+   */
+  private getUpdatablePropType(imports: ImportContainer, prop: PropertyModel): string {
+    let updatableType = prop.type;
+    if (prop.dataType === DataTypes.ComplexType) {
+      const nested = this.dataModel.getComplexType(prop.fqType)!;
+      const targetName = this.hasOwnUpdatableModel(nested) ? nested.updatableName : nested.editableName;
+      updatableType = imports.addGeneratedModel(prop.fqType, targetName);
+    }
+
+    if (prop.isCollection) {
+      return `Array<${updatableType}>`;
+    }
+    return updatableType + (prop.required ? "" : " | null");
   }
 
   /**

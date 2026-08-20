@@ -179,6 +179,14 @@ export class NamingHelper {
       : result;
   }
 
+  public getUpdatableModelName(name: string) {
+    let options = this.options.models?.updatableModels;
+    const result = this.getName(name, this.getModelNamingStrategy(), options);
+    return options?.applyModelNaming
+      ? this.getName(result, this.getModelNamingStrategy(), this.options.models)
+      : result;
+  }
+
   public getIdModelName(name: string) {
     let options = this.options.models?.idModels;
     const result = this.getName(name, this.getModelNamingStrategy(), options);

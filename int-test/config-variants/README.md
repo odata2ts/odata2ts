@@ -56,6 +56,9 @@ caused it.
 | `enumStringUnion` | `enumType: "string-union"`                                                                                                                  |
 | `enumNumeric`     | `enumType: "numeric"`                                                                                                                       |
 | `v2Wrapping`      | `v2ResponseResultsWrapping` and `v2PayloadResultsWrapping` on bare models - with a service they meet a server in `int-test/olingo-v2`       |
+| `managedStrict`   | `managedPropertyMode: "strictOmit"` - the second write model and the services which switch to it                                            |
+| `keyStrict`       | `keyProperties: "strict"` - an unannotated non-nullable key becomes required on create                                                      |
+| `keyAllComputed`  | `keyProperties: "allComputed"` with `strictOmit` - the keys vanish from the write models entirely                                           |
 | `everythingOn`    | all of it at once - the interaction catcher                                                                                                 |
 
 The sources are the committed metadata snapshots of `int-test/asp-net` and `int-test/olingo-v2`, referenced
