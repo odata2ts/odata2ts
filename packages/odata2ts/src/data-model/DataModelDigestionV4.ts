@@ -5,7 +5,7 @@ import { NamespaceWithAlias, withNamespace } from "./DataModel.js";
 import { Digester, TypeModel } from "./DataModelDigestion.js";
 import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel.js";
 import { ComplexType, Property, Reference } from "./edmx/ODataEdmxModelBase.js";
-import { ComplexTypeV4, EntityTypeV4, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4.js";
+import { ComplexTypeV4, EntityTypeV4, NavigationProperty, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4.js";
 import { NamingHelper } from "./NamingHelper.js";
 
 export const digest: DigesterFunction<SchemaV4> = async (schemas, options, namingHelper, references) => {
@@ -28,6 +28,10 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
 
   protected getNavigationProps(entityType: ComplexType | EntityTypeV4): Array<Property> {
     return (entityType as EntityTypeV4).NavigationProperty || [];
+  }
+
+  protected isContained(p: Property): boolean {
+    return (p as NavigationProperty).$.ContainsTarget === "true";
   }
 
   protected digestOperations(schema: SchemaV4) {

@@ -1,7 +1,7 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import { beforeAll, beforeEach, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
-import { ConfigFileOptions, NamingStrategies, TypeModel } from "../../../src/index.js";
+import { ConfigFileOptions, DeepInsertProps, NamingStrategies, TypeModel } from "../../../src/index.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
 import {
   createHelper,
@@ -151,7 +151,7 @@ export function createEntityBasedGenerationTests(
     // then match fixture text
     await generateAndCompare("entity-relationships.ts", {
       disableBindingProps: true,
-      disableDeepInsertProps: true,
+      deepInsertProps: DeepInsertProps.none,
       skipEditableModels: false,
       skipIdModels: false,
     });
@@ -176,7 +176,7 @@ export function createEntityBasedGenerationTests(
     // then match fixture text
     await generateAndCompare("entity-relationships.ts", {
       disableBindingProps: true,
-      disableDeepInsertProps: true,
+      deepInsertProps: DeepInsertProps.none,
       skipEditableModels: false,
       skipIdModels: false,
     });

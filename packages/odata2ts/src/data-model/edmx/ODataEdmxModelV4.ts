@@ -32,6 +32,11 @@ export interface NavigationProperty extends Annotatable {
     Type: string;
     Nullable?: "true" | "false";
     Partner?: string;
+    /**
+     * Marks a containment navigation property: the declaring type contains the targets, which are
+     * addressed through it and have no entity set of their own (CSDL §8.4). Absence means false.
+     */
+    ContainsTarget?: "true" | "false";
   };
   // TODO: OnDelete, ReferentialConstraint, etc.
 }

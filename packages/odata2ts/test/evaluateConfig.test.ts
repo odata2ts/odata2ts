@@ -1,6 +1,14 @@
 import { describe, expect, test } from "vitest";
 import { evaluateConfigOptions } from "../src/evaluateConfig.js";
-import { CliOptions, ConfigFileOptions, EmitModes, getDefaultConfig, Modes, NamingStrategies } from "../src/index.js";
+import {
+  CliOptions,
+  ConfigFileOptions,
+  DeepInsertProps,
+  EmitModes,
+  getDefaultConfig,
+  Modes,
+  NamingStrategies,
+} from "../src/index.js";
 
 describe("Config Evaluation Tests", () => {
   const defaultConfig = getDefaultConfig();
@@ -298,9 +306,9 @@ describe("Config Evaluation Tests", () => {
     const cliOpts: CliOptions = { source: "source", output: "output" };
 
     [Modes.service, Modes.qobjects, Modes.all, Modes.models].forEach((mode) => {
-      const result = evaluateConfigOptions(cliOpts, { mode, disableDeepInsertProps: true });
+      const result = evaluateConfigOptions(cliOpts, { mode, deepInsertProps: DeepInsertProps.compositionOnly });
 
-      expect(result[0], `mode ${mode}`).toMatchObject({ disableDeepInsertProps: true });
+      expect(result[0], `mode ${mode}`).toMatchObject({ deepInsertProps: DeepInsertProps.compositionOnly });
     });
   });
 });

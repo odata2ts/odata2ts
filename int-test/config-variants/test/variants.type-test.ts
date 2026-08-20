@@ -1,4 +1,11 @@
 import { expectTypeOf } from "vitest";
+import type { EditableMember as CompositionV2EditableMember } from "../src-generated/deep-insert-composition-v2/library-circulation/index.js";
+import type {
+  Audiobook as CompositionAudiobook,
+  EditableAudiobook as CompositionEditableAudiobook,
+  EditableAudiobookChapter as CompositionEditableAudiobookChapter,
+  EditableBook as CompositionEditableBook,
+} from "../src-generated/deep-insert-composition/library-catalog/index.js";
 import type { Amenities as NumericAmenities } from "../src-generated/enum-numeric/library-catalog/index.js";
 import type { Branch as NumericBranch } from "../src-generated/enum-numeric/library-circulation/index.js";
 import { Amenities as unionAmenityMembers } from "../src-generated/enum-string-union/library-catalog/index.js";
@@ -145,3 +152,27 @@ expectTypeOf<AllComputedEditableCopy>().not.toHaveProperty("MediumId");
 expectTypeOf<AllComputedEditableCopy>().not.toHaveProperty("InventoryNumber");
 // a `Core.Computed` property goes the same way, being readOnly for the same reason
 expectTypeOf<AllComputedEditableMedium>().not.toHaveProperty("PopularityScore");
+
+/* --- deepInsertComposition: containment decides which navigation property carries a deep insert ---- */
+
+// `Audiobook` is the one entity in the model with both kinds of relation, which is what makes it the
+// case worth pinning: `Chapters` is contained - the target has no entity set of its own - while `Copies`
+// is a plain navigation property to an entity standing on its own.
+expectTypeOf<CompositionEditableAudiobook["Chapters"]>().toEqualTypeOf<
+  Array<CompositionEditableAudiobookChapter> | undefined
+>();
+expectTypeOf<CompositionEditableAudiobook>().not.toHaveProperty("Copies");
+// nothing is contained anywhere else, so no editable model offers a deep insert at all
+expectTypeOf<CompositionEditableBook>().not.toHaveProperty("Copies");
+expectTypeOf<CompositionEditableBook>().not.toHaveProperty("Publisher");
+
+// The read model is untouched: containment says how an entity is addressed, not how it is read, and this
+// option speaks about write payloads alone.
+expectTypeOf<CompositionAudiobook["Copies"]>().toExtend<Array<unknown> | undefined>();
+
+/* --- deepInsertCompositionV2: the same value, doing nothing at all -------------------------------- */
+
+// V2 states no containment, so the narrow reading would find nothing contained and take the feature away
+// wholesale. A V2 service is exempt from the option instead, and keeps every navigation property.
+expectTypeOf<CompositionV2EditableMember["Loans"]>().toExtend<Array<unknown> | undefined>();
+expectTypeOf<CompositionV2EditableMember["Reservations"]>().toExtend<Array<unknown> | undefined>();

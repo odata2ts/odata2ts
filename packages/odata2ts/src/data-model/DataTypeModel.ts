@@ -53,6 +53,12 @@ export interface PropertyModel {
    * gets its own service instead.
    */
   isStream?: boolean;
+  /**
+   * A containment navigation property (`ContainsTarget="true"`): the declaring type contains the targets,
+   * which are reachable through it and have no entity set of their own (CSDL §8.4). V4 only - V2 knows no
+   * containment - and never set for anything but a navigation property.
+   */
+  contained?: boolean;
 }
 
 export type ModelType = EntityType | ComplexType | EnumType;
