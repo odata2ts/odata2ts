@@ -5,15 +5,20 @@
   ><Schema Namespace="Library.Catalog" xmlns="http://schemas.microsoft.com/ado/2008/09/edm"><EntityType
         Name="Medium"
         Abstract="true"
-      ><Key><PropertyRef Name="Id" /></Key><Property Name="Id" Type="Edm.Guid" Nullable="false" /><Property
-          Name="Title"
-          Type="Edm.String"
+      ><Key><PropertyRef Name="Id" /></Key><Property
+          Name="Id"
+          Type="Edm.Guid"
           Nullable="false"
-          MaxLength="200"
-        /><Property Name="Language" Type="Edm.String" MaxLength="40" /><Property
-          Name="PublicationDate"
-          Type="Edm.DateTime"
-        /><Property
+          annotation:StoreGeneratedPattern="Identity"
+          xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation"
+          sap:creatable="false"
+          xmlns:sap="http://www.sap.com/Protocols/SAPData"
+          sap:updatable="false"
+        /><Property Name="Title" Type="Edm.String" Nullable="false" MaxLength="200" /><Property
+          Name="Language"
+          Type="Edm.String"
+          MaxLength="40"
+        /><Property Name="PublicationDate" Type="Edm.DateTime" /><Property
           Name="PopularityScore"
           Type="Edm.Double"
           annotation:StoreGeneratedPattern="Computed"
@@ -57,10 +62,16 @@
           ToRole="Chapter"
         /></EntityType><EntityType Name="AudiobookChapter" m:HasStream="true"><Key><PropertyRef
             Name="Id"
-          /></Key><Property Name="Id" Type="Edm.Int32" Nullable="false" /><Property
-          Name="Title"
-          Type="Edm.String"
-        /><NavigationProperty
+          /></Key><Property
+          Name="Id"
+          Type="Edm.Int32"
+          Nullable="false"
+          annotation:StoreGeneratedPattern="Identity"
+          xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation"
+          sap:creatable="false"
+          xmlns:sap="http://www.sap.com/Protocols/SAPData"
+          sap:updatable="false"
+        /><Property Name="Title" Type="Edm.String" /><NavigationProperty
           Name="Audiobook"
           Relationship="Library.Catalog.Audiobook_Chapters"
           FromRole="Chapter"
@@ -106,6 +117,11 @@
           Name="Id"
           Type="Edm.Int32"
           Nullable="false"
+          annotation:StoreGeneratedPattern="Identity"
+          xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation"
+          sap:creatable="false"
+          xmlns:sap="http://www.sap.com/Protocols/SAPData"
+          sap:updatable="false"
         /><Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="100" /><Property
           Name="DateOfBirth"
           Type="Edm.DateTime"
@@ -156,6 +172,11 @@
           Name="Id"
           Type="Edm.Guid"
           Nullable="false"
+          annotation:StoreGeneratedPattern="Identity"
+          xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation"
+          sap:creatable="false"
+          xmlns:sap="http://www.sap.com/Protocols/SAPData"
+          sap:updatable="false"
         /><Property
           Name="LoanedAt"
           Type="Edm.DateTimeOffset"
@@ -181,32 +202,47 @@
           Name="Id"
           Type="Edm.Guid"
           Nullable="false"
+          annotation:StoreGeneratedPattern="Identity"
+          xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation"
+          sap:creatable="false"
+          xmlns:sap="http://www.sap.com/Protocols/SAPData"
+          sap:updatable="false"
         /><Property Name="ReservedAt" Type="Edm.DateTimeOffset" Precision="7" /></EntityType><EntityType
         Name="IdDocument"
-      ><Key><PropertyRef Name="Id" /></Key><Property Name="Id" Type="Edm.Guid" Nullable="false" /><Property
-          Name="Scan"
-          Type="Edm.Binary"
-        /><Property Name="UploadedAt" Type="Edm.DateTimeOffset" Precision="7" /></EntityType><EntityType
-        Name="Branch"
-      ><Key><PropertyRef Name="Id" /></Key><Property Name="Id" Type="Edm.Int32" Nullable="false" /><Property
-          Name="Name"
-          Type="Edm.String"
+      ><Key><PropertyRef Name="Id" /></Key><Property
+          Name="Id"
+          Type="Edm.Guid"
           Nullable="false"
-          MaxLength="100"
-        /><Property Name="Address" Type="Library.Catalog.PostalAddress" /><Property
-          Name="LowestFloor"
-          Type="Edm.SByte"
-        /><Property Name="OpensAt" Type="Edm.Time" /><Property Name="ClosesAt" Type="Edm.Time" /><Property
-          Name="Amenities"
-          Type="Edm.Int32"
-        /><Property Name="Population" Type="Edm.Int64" /></EntityType><ComplexType Name="OverdueNotice"><Property
-          Name="Reason"
-          Type="Edm.String"
-        /><Property Name="Amount" Type="Edm.Decimal" Precision="5" Scale="2" /><Property
-          Name="CreatedAt"
+          annotation:StoreGeneratedPattern="Identity"
+          xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation"
+          sap:creatable="false"
+          xmlns:sap="http://www.sap.com/Protocols/SAPData"
+          sap:updatable="false"
+        /><Property Name="Scan" Type="Edm.Binary" /><Property
+          Name="UploadedAt"
           Type="Edm.DateTimeOffset"
           Precision="7"
-        /></ComplexType><ComplexType Name="LoanStats"><Property Name="TotalLoans" Type="Edm.Int64" /><Property
+        /></EntityType><EntityType Name="Branch"><Key><PropertyRef Name="Id" /></Key><Property
+          Name="Id"
+          Type="Edm.Int32"
+          Nullable="false"
+        /><Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="100" /><Property
+          Name="Address"
+          Type="Library.Catalog.PostalAddress"
+        /><Property Name="LowestFloor" Type="Edm.SByte" /><Property Name="OpensAt" Type="Edm.Time" /><Property
+          Name="ClosesAt"
+          Type="Edm.Time"
+        /><Property Name="Amenities" Type="Edm.Int32" /><Property
+          Name="Population"
+          Type="Edm.Int64"
+        /></EntityType><ComplexType Name="OverdueNotice"><Property Name="Reason" Type="Edm.String" /><Property
+          Name="Amount"
+          Type="Edm.Decimal"
+          Precision="5"
+          Scale="2"
+        /><Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" /></ComplexType><ComplexType
+        Name="LoanStats"
+      ><Property Name="TotalLoans" Type="Edm.Int64" /><Property
           Name="AverageLoanDuration"
           Type="Edm.Time"
         /></ComplexType><ComplexType Name="BranchStats"><Property Name="BranchId" Type="Edm.Int32" /><Property
@@ -256,6 +292,11 @@
           Name="Id"
           Type="Edm.Int32"
           Nullable="false"
+          annotation:StoreGeneratedPattern="Identity"
+          xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation"
+          sap:creatable="false"
+          xmlns:sap="http://www.sap.com/Protocols/SAPData"
+          sap:updatable="false"
         /><Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="100" /><Property
           Name="Country"
           Type="Edm.String"
@@ -269,6 +310,11 @@
           Name="Id"
           Type="Edm.Int32"
           Nullable="false"
+          annotation:StoreGeneratedPattern="Identity"
+          xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation"
+          sap:creatable="false"
+          xmlns:sap="http://www.sap.com/Protocols/SAPData"
+          sap:updatable="false"
         /><Property Name="City" Type="Edm.String" MaxLength="80" /><Property
           Name="Country"
           Type="Edm.String"

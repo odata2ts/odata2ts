@@ -738,6 +738,9 @@
           </Collection>
         </Annotation>
       </Annotations>
+      <Annotations Target="Library.Service.Publishers/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
+      </Annotations>
       <Annotations Target="Library.Service.Magazines">
         <Annotation Term="Core.AlternateKeys">
           <Collection>
@@ -836,6 +839,9 @@
       <Annotations Target="Library.Service.Audiobooks/Sample">
         <Annotation Term="Core.MediaType" String="audio/mpeg" />
       </Annotations>
+      <Annotations Target="Library.Service.AudiobookChapters/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
+      </Annotations>
       <Annotations Target="Library.Service.AudiobookChapters/content">
         <Annotation Term="Core.MediaType" String="audio/mpeg" />
       </Annotations>
@@ -881,6 +887,9 @@
       <Annotations Target="Library.Service.CollectorsItems/PopularityScore">
         <Annotation Term="Core.Computed" Bool="true" />
       </Annotations>
+      <Annotations Target="Library.Service.Members/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
+      </Annotations>
       <Annotations Target="Library.Service.Members/ActiveSince">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
@@ -897,6 +906,9 @@
         <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.IdDocuments/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
+      </Annotations>
+      <Annotations Target="Library.Service.Bookmobiles/Id">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.MainBranch/Amenities">
@@ -928,6 +940,9 @@
             </Record>
           </Collection>
         </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.PublisherBranches/Id">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.LoanStatistics(Library.Service.Library_Circulation_DateRange)/Period">
         <Annotation Term="Core.OptionalParameter">

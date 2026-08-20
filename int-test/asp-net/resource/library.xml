@@ -13,12 +13,14 @@
         /><Property Name="Country" Type="Edm.String" MaxLength="60" /></ComplexType><EntityType
         Name="Medium"
         Abstract="true"
-      ><Key><PropertyRef Name="Id" /></Key><Property Name="Id" Type="Edm.Guid" Nullable="false" /><Property
-          Name="Title"
+      ><Key><PropertyRef Name="Id" /></Key><Property Name="Id" Type="Edm.Guid" Nullable="false"><Annotation
+            Term="Org.OData.Core.V1.Computed"
+            Bool="true"
+          /></Property><Property Name="Title" Type="Edm.String" Nullable="false" MaxLength="200" /><Property
+          Name="Language"
           Type="Edm.String"
-          Nullable="false"
-          MaxLength="200"
-        /><Property Name="Language" Type="Edm.String" MaxLength="40"><Annotation
+          MaxLength="40"
+        ><Annotation
             Term="Org.OData.Core.V1.Description"
             String="Language of the medium itself, as an ISO 639-1 code."
           /></Property><Property Name="PublicationDate" Type="Edm.Date" /><Property
@@ -97,11 +99,12 @@
         ><OnDelete Action="Cascade" /></NavigationProperty></EntityType><EntityType
         Name="AudiobookChapter"
         HasStream="true"
-      ><Key><PropertyRef Name="Id" /></Key><Property Name="Id" Type="Edm.Int32" Nullable="false" /><Property
-          Name="Title"
-          Type="Edm.String"
-        /><Annotation Term="Org.OData.Core.V1.AcceptableMediaTypes"><Collection><String
-            >audio/mpeg</String></Collection></Annotation></EntityType><EntityType
+      ><Key><PropertyRef Name="Id" /></Key><Property Name="Id" Type="Edm.Int32" Nullable="false"><Annotation
+            Term="Org.OData.Core.V1.Computed"
+            Bool="true"
+          /></Property><Property Name="Title" Type="Edm.String" /><Annotation
+          Term="Org.OData.Core.V1.AcceptableMediaTypes"
+        ><Collection><String>audio/mpeg</String></Collection></Annotation></EntityType><EntityType
         Name="EBook"
         BaseType="Library.Catalog.Medium"
         HasStream="true"
@@ -177,13 +180,19 @@
           Name="Id"
           Type="Edm.Int32"
           Nullable="false"
-        /><Property Name="ActiveSince" Type="Edm.DateTimeOffset" Precision="7"><Annotation
-            Term="Org.OData.Core.V1.ComputedDefaultValue"
-            Bool="true"
-          /></Property><Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="100" /><Property
-          Name="DateOfBirth"
-          Type="Edm.Date"
-        /><Property Name="Address" Type="Library.Catalog.PostalAddress" /><Property
+        ><Annotation Term="Org.OData.Core.V1.Computed" Bool="true" /></Property><Property
+          Name="ActiveSince"
+          Type="Edm.DateTimeOffset"
+          Precision="7"
+        ><Annotation Term="Org.OData.Core.V1.ComputedDefaultValue" Bool="true" /></Property><Property
+          Name="Name"
+          Type="Edm.String"
+          Nullable="false"
+          MaxLength="100"
+        /><Property Name="DateOfBirth" Type="Edm.Date" /><Property
+          Name="Address"
+          Type="Library.Catalog.PostalAddress"
+        /><Property
           Name="PreviousAddresses"
           Type="Collection(Library.Catalog.PostalAddress)"
           Nullable="false"
@@ -210,24 +219,31 @@
           Name="Id"
           Type="Edm.Guid"
           Nullable="false"
-        /><Property Name="LoanedAt" Type="Edm.DateTimeOffset" Nullable="false" Precision="7"><Annotation
-            Term="Org.OData.Core.V1.Immutable"
-            Bool="true"
-          /></Property><Property Name="ReturnedAt" Type="Edm.DateTimeOffset" Precision="7" /><Property
-          Name="DueDate"
-          Type="Edm.Date"
+        ><Annotation Term="Org.OData.Core.V1.Computed" Bool="true" /></Property><Property
+          Name="LoanedAt"
+          Type="Edm.DateTimeOffset"
           Nullable="false"
-        /><Property Name="LateFee" Type="Edm.Decimal" Precision="5" Scale="2"><Annotation
-            Term="Org.OData.Measures.V1.ISOCurrency"
-            String="EUR"
-          /></Property><NavigationProperty
+          Precision="7"
+        ><Annotation Term="Org.OData.Core.V1.Immutable" Bool="true" /></Property><Property
+          Name="ReturnedAt"
+          Type="Edm.DateTimeOffset"
+          Precision="7"
+        /><Property Name="DueDate" Type="Edm.Date" Nullable="false" /><Property
+          Name="LateFee"
+          Type="Edm.Decimal"
+          Precision="5"
+          Scale="2"
+        ><Annotation Term="Org.OData.Measures.V1.ISOCurrency" String="EUR" /></Property><NavigationProperty
           Name="Member"
           Type="Library.Circulation.Member"
           Nullable="false"
           Partner="Loans"
         /><NavigationProperty Name="Copy" Type="Library.Circulation.Copy" Nullable="false" /></EntityType><EntityType
         Name="Reservation"
-      ><Key><PropertyRef Name="Id" /></Key><Property Name="Id" Type="Edm.Guid" Nullable="false" /><Property
+      ><Key><PropertyRef Name="Id" /></Key><Property Name="Id" Type="Edm.Guid" Nullable="false"><Annotation
+            Term="Org.OData.Core.V1.Computed"
+            Bool="true"
+          /></Property><Property
           Name="ReservedAt"
           Type="Edm.DateTimeOffset"
           Nullable="false"
@@ -236,26 +252,29 @@
           Name="Id"
           Type="Edm.Guid"
           Nullable="false"
-        /><Property Name="UploadedAt" Type="Edm.DateTimeOffset" Nullable="false" Precision="7" /><Property
-          Name="Scan"
-          Type="Edm.Binary"
-        /></EntityType><EntityType Name="Branch"><Key><PropertyRef Name="Id" /></Key><Property
-          Name="Id"
-          Type="Edm.Int32"
+        ><Annotation Term="Org.OData.Core.V1.Computed" Bool="true" /></Property><Property
+          Name="UploadedAt"
+          Type="Edm.DateTimeOffset"
           Nullable="false"
-        /><Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="100" /><Property
-          Name="Address"
-          Type="Library.Catalog.PostalAddress"
-        /><Property Name="Location" Type="Edm.GeographyPoint" /><Property
-          Name="CatchmentArea"
-          Type="Edm.GeographyPolygon"
-        /><Property Name="LowestFloor" Type="Edm.SByte" Nullable="false" /><Property
-          Name="FloorPlanOrigin"
-          Type="Edm.GeometryPoint"
-        /><Property Name="FloorPlanShapes" Type="Edm.GeometryCollection" /><Property
-          Name="OpensAt"
-          Type="Edm.TimeOfDay"
-        /><Property Name="ClosesAt" Type="Edm.TimeOfDay" /><Property
+          Precision="7"
+        /><Property Name="Scan" Type="Edm.Binary" /></EntityType><EntityType Name="Branch"><Key><PropertyRef
+            Name="Id"
+          /></Key><Property Name="Id" Type="Edm.Int32" Nullable="false" /><Property
+          Name="Name"
+          Type="Edm.String"
+          Nullable="false"
+          MaxLength="100"
+        /><Property Name="Address" Type="Library.Catalog.PostalAddress" /><Property
+          Name="Location"
+          Type="Edm.GeographyPoint"
+        /><Property Name="CatchmentArea" Type="Edm.GeographyPolygon" /><Property
+          Name="LowestFloor"
+          Type="Edm.SByte"
+          Nullable="false"
+        /><Property Name="FloorPlanOrigin" Type="Edm.GeometryPoint" /><Property
+          Name="FloorPlanShapes"
+          Type="Edm.GeometryCollection"
+        /><Property Name="OpensAt" Type="Edm.TimeOfDay" /><Property Name="ClosesAt" Type="Edm.TimeOfDay" /><Property
           Name="Amenities"
           Type="Library.Catalog.Amenities"
         /><Property Name="Population" Type="Edm.Int64" Nullable="false"><Annotation
@@ -265,23 +284,27 @@
           Name="Id"
           Type="Edm.Int32"
           Nullable="false"
-        /><Property Name="LicensePlate" Type="Edm.String" MaxLength="12" /><Property
-          Name="Route"
-          Type="Edm.GeographyLineString"
-        /><Property Name="CurrentPosition" Type="Edm.GeographyPoint" /></EntityType><EntityType Name="Copy"><Key
-        ><PropertyRef Name="InventoryNumber" /><PropertyRef Name="MediumId" /></Key><Property
-          Name="MediumId"
-          Type="Edm.Guid"
+        ><Annotation Term="Org.OData.Core.V1.Computed" Bool="true" /></Property><Property
+          Name="LicensePlate"
+          Type="Edm.String"
+          MaxLength="12"
+        /><Property Name="Route" Type="Edm.GeographyLineString" /><Property
+          Name="CurrentPosition"
+          Type="Edm.GeographyPoint"
+        /></EntityType><EntityType Name="Copy"><Key><PropertyRef Name="InventoryNumber" /><PropertyRef
+            Name="MediumId"
+          /></Key><Property Name="MediumId" Type="Edm.Guid" Nullable="false" /><Property
+          Name="InventoryNumber"
+          Type="Edm.Int32"
           Nullable="false"
-        /><Property Name="InventoryNumber" Type="Edm.Int32" Nullable="false" /><Property
-          Name="IsLoanable"
-          Type="Edm.Boolean"
-          DefaultValue="true"
+        /><Property Name="IsLoanable" Type="Edm.Boolean" DefaultValue="true" Nullable="false" /><Property
+          Name="Condition"
+          Type="Edm.Byte"
           Nullable="false"
-        /><Property Name="Condition" Type="Edm.Byte" Nullable="false"><Annotation
-            Term="Org.OData.Validation.V1.Minimum"
-            Int="0"
-          /><Annotation Term="Org.OData.Validation.V1.Maximum" Int="5" /><Annotation
+        ><Annotation Term="Org.OData.Validation.V1.Minimum" Int="0" /><Annotation
+            Term="Org.OData.Validation.V1.Maximum"
+            Int="5"
+          /><Annotation
             Term="Org.OData.Core.V1.Description"
             String="Physical condition on a 0-5 scale, 5 being as new. Doubles as the ETag."
           /></Property><Property Name="Status" Type="Library.Catalog.AvailabilityStatus" /><Property
@@ -462,11 +485,15 @@
           Name="Id"
           Type="Edm.Int32"
           Nullable="false"
-        /><Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="100" /><Property
-          Name="Country"
+        ><Annotation Term="Org.OData.Core.V1.Computed" Bool="true" /></Property><Property
+          Name="Name"
           Type="Edm.String"
-          MaxLength="60"
-        /><Property Name="Founded" Type="Edm.Date" /><NavigationProperty
+          Nullable="false"
+          MaxLength="100"
+        /><Property Name="Country" Type="Edm.String" MaxLength="60" /><Property
+          Name="Founded"
+          Type="Edm.Date"
+        /><NavigationProperty
           Name="Books"
           Type="Collection(Library.Catalog.Book)"
           Partner="Publisher"
@@ -474,11 +501,11 @@
           Name="Id"
           Type="Edm.Int32"
           Nullable="false"
-        /><Property Name="City" Type="Edm.String" MaxLength="80" /><Property
-          Name="Country"
+        ><Annotation Term="Org.OData.Core.V1.Computed" Bool="true" /></Property><Property
+          Name="City"
           Type="Edm.String"
-          MaxLength="60"
-        /></EntityType></Schema><Schema
+          MaxLength="80"
+        /><Property Name="Country" Type="Edm.String" MaxLength="60" /></EntityType></Schema><Schema
       Namespace="Library.Service"
       xmlns="http://docs.oasis-open.org/odata/ns/edm"
     ><EntityContainer Name="LibraryService"><EntitySet

@@ -1156,6 +1156,9 @@
           </Collection>
         </Annotation>
       </Annotations>
+      <Annotations Target="Library.Service.Publishers/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
+      </Annotations>
       <Annotations Target="Library.Service.Magazines" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Core.AlternateKeys">
           <Collection>
@@ -1263,6 +1266,9 @@
       <Annotations Target="Library.Service.AudiobookChapters" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Core.MediaType" String="audio/mpeg" />
       </Annotations>
+      <Annotations Target="Library.Service.AudiobookChapters/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
+      </Annotations>
       <Annotations Target="Library.Service.EntityContainer/DVDs" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Capabilities.SearchRestrictions">
           <Record Type="Capabilities.SearchRestrictionsType">
@@ -1311,6 +1317,9 @@
       >
         <Annotation Term="Core.Computed" Bool="true" />
       </Annotations>
+      <Annotations Target="Library.Service.Members/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
+      </Annotations>
       <Annotations Target="Library.Service.Members/ActiveSince" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
@@ -1327,6 +1336,9 @@
         <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.IdDocuments/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
+      </Annotations>
+      <Annotations Target="Library.Service.Bookmobiles/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
         <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
       <Annotations Target="Library.Service.MainBranch/Amenities" xmlns="http://docs.oasis-open.org/odata/ns/edm">
@@ -1358,6 +1370,9 @@
             </Record>
           </Collection>
         </Annotation>
+      </Annotations>
+      <Annotations Target="Library.Service.PublisherBranches/Id" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <Annotation Term="Core.ComputedDefaultValue" Bool="true" />
       </Annotations>
     </Schema>
   </edmx:DataServices>

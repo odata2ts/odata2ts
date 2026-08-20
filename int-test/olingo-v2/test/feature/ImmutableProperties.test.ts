@@ -1,5 +1,10 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
-import type { EditableLoan, UpdatableLoan } from "../../src-generated/library-strict/index.js";
+import type {
+  EditableBranch,
+  EditableLoan,
+  UpdatableBranch,
+  UpdatableLoan,
+} from "../../src-generated/library-strict/index.js";
 import { LIBRARY_STRICT } from "../LibraryTestConstants.js";
 
 /**
@@ -18,27 +23,48 @@ import { LIBRARY_STRICT } from "../LibraryTestConstants.js";
 describe("Olingo V2 Library: immutable properties under strictOmit", () => {
   const LOANED_AT = "/Date(1777622400000)/";
 
-  async function givenLoan(Id: string) {
+  /** The key is generated since 0.2.0, so the loan is found by what the create answers with. */
+  async function givenLoan() {
     const created = await LIBRARY_STRICT.Loans()
-      .create({ Id, LoanedAt: LOANED_AT, DueDate: "/Date(1780214400000)/" })
+      .create({ LoanedAt: LOANED_AT, DueDate: "/Date(1780214400000)/" })
       .execute();
     expect(created.status).toBe(201);
+    return created.data.d.Id;
   }
 
-  test("the create model keeps the immutable properties, the update model drops them", () => {
+  test("the create model keeps the immutable property, the update model drops it", () => {
     // `LoanedAt` comes from `sap:updatable="false"` and is `Nullable="false"`, so the service itself
-    // says it is required on create; the key is non-nullable too but nothing describes it, and the
-    // default `keyProperties` will not demand one the server may be generating
+    // says it is required on create - and `strictOmit` takes it out of the update model
     expectTypeOf<EditableLoan["LoanedAt"]>().toEqualTypeOf<string>();
-    expectTypeOf<EditableLoan["Id"]>().toEqualTypeOf<string | undefined>();
-
-    expectTypeOf<UpdatableLoan>().not.toHaveProperty("Id");
     expectTypeOf<UpdatableLoan>().not.toHaveProperty("LoanedAt");
   });
 
+  test("a generated key is in no write model, a client-assigned one is required on create", () => {
+    // `Loan.Id` carries StoreGeneratedPattern="Identity" and the SAP pair since 0.2.0, both of which
+    // normalize to `Core.Computed` - so it is readOnly and strictOmit drops it from both models
+    expectTypeOf<EditableLoan>().not.toHaveProperty("Id");
+    expectTypeOf<UpdatableLoan>().not.toHaveProperty("Id");
+
+    // `Branch/Id` is the one key left bare, which after 0.2.0 says it is the client's. V2 cannot express
+    // "may be supplied, otherwise generated" at all, so a bare key here is the only way to say this.
+    expectTypeOf<EditableBranch["Id"]>().toEqualTypeOf<number>();
+    expectTypeOf<UpdatableBranch>().not.toHaveProperty("Id");
+  });
+
+  test("the client-assigned key really is stored as sent", async () => {
+    const Id = 4203;
+    const created = await LIBRARY_STRICT.Branches().create({ Id, Name: "Client Assigned Branch" }).execute();
+
+    try {
+      expect(created.status).toBe(201);
+      expect(created.data.d.Id).toBe(Id);
+    } finally {
+      await LIBRARY_STRICT.Branches(Id).delete().execute();
+    }
+  });
+
   test("a client-assigned key really is taken by the server", async () => {
-    const Id = "bbbbbbbb-0000-0000-0000-0000000009c1";
-    await givenLoan(Id);
+    const Id = await givenLoan();
 
     try {
       const read = await LIBRARY_STRICT.Loans(Id).query().execute();
@@ -50,8 +76,7 @@ describe("Olingo V2 Library: immutable properties under strictOmit", () => {
   });
 
   test("PUT without the immutable properties replaces the rest and keeps them", async () => {
-    const Id = "bbbbbbbb-0000-0000-0000-0000000009c2";
-    await givenLoan(Id);
+    const Id = await givenLoan();
 
     try {
       // `update` takes UpdatableLoan, so `LoanedAt` cannot be written here at all
@@ -69,8 +94,7 @@ describe("Olingo V2 Library: immutable properties under strictOmit", () => {
   });
 
   test("MERGE without the immutable properties changes only what it names", async () => {
-    const Id = "bbbbbbbb-0000-0000-0000-0000000009c3";
-    await givenLoan(Id);
+    const Id = await givenLoan();
 
     try {
       // V2 has no PATCH: `patch()` sends MERGE, which is the same question put a different way
@@ -86,8 +110,7 @@ describe("Olingo V2 Library: immutable properties under strictOmit", () => {
   });
 
   test("a changed immutable property sent anyway is silently dropped", async () => {
-    const Id = "bbbbbbbb-0000-0000-0000-0000000009c4";
-    await givenLoan(Id);
+    const Id = await givenLoan();
 
     try {
       /*
