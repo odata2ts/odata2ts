@@ -5,16 +5,6 @@
   "lockFileMaintenance": {
     "enabled": true
   },
-  "customManagers": [
-    {
-      "description": "The int-test packages pin the test server image they run against inside their globalSetup.ts. Renovate has no manager for TypeScript, so the image reference is matched directly - deliberately without depending on the surrounding code, which would break the match silently if the file were refactored.",
-      "customType": "regex",
-      "managerFilePatterns": ["int-test/*/test/globalSetup.ts"],
-      "matchStrings": ["\"(?<depName>ghcr\\.io/odata2ts/test-server-[a-z0-9-]+):(?<currentValue>[^\"]+)\""],
-      "datasourceTemplate": "docker",
-      "versioningTemplate": "semver"
-    }
-  ],
   "packageRules": [
     {
       "description": "Internal @odata2ts/* sibling packages are managed via release-please and the other odata2ts repos, not Renovate",
@@ -59,13 +49,6 @@
       "matchPackageNames": ["typescript", "ts-morph", "@ts-morph/common"],
       "groupName": "typescript & ts-morph (core, manual)",
       "dependencyDashboardApproval": true,
-      "automerge": false
-    },
-    {
-      "description": "A new release of a test server becomes its own PR, which CI runs that server's integration tests against - merging it is what accepts the new server. Deliberately not grouped: one server regressing must not hold back the other two. The schedule overrides the repo-wide weekly window, since a server release should reach the integration tests promptly, and automerge stays off because accepting a server is a review decision.",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": ["ghcr.io/odata2ts/test-server-**"],
-      "schedule": ["at any time"],
       "automerge": false
     }
   ]

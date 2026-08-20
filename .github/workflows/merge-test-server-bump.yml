@@ -1,0 +1,53 @@
+name: Merge Test Server Bump
+
+# Merges a bump PR from bump-test-server.yml once "Build & Test" has passed on it - the integration
+# tests are what accept the new server, so a green run is the acceptance.
+#
+# `workflow_run` rather than GitHub's own auto-merge: auto-merge waits for *required* status checks, and
+# with no branch protection on main there are none, so it would merge the PR immediately - before a single
+# integration test had run. Reacting to the finished run instead keeps the gate real without imposing
+# branch protection on every other pull request in this repo.
+
+on:
+  workflow_run:
+    workflows: ["Build & Test"]
+    types: [completed]
+
+jobs:
+  merge:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      startsWith(github.event.workflow_run.head_branch, 'chore/test-server-')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.ODATA2TS_PR_BOT_APP_ID }}
+          private-key: ${{ secrets.ODATA2TS_PR_BOT_PRIVATE_KEY }}
+
+      - name: Merge the bump
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # The branch name alone is not proof of origin - anyone able to push could pick that prefix.
+          # Only a pull request opened by an app is merged unreviewed. Tested by `is_bot` rather than by
+          # login, so renaming the app does not silently turn this job into a no-op.
+          pr=$(gh pr view "$BRANCH" --repo "$REPO" --json author,number 2>/dev/null || true)
+          if [ -z "$pr" ]; then
+            echo "No open pull request for $BRANCH - nothing to merge."
+            exit 0
+          fi
+          if [ "$(printf '%s' "$pr" | jq -r .author.is_bot)" != "true" ]; then
+            echo "::notice::$BRANCH was opened by $(printf '%s' "$pr" | jq -r .author.login), not by the bot - leaving it to be merged by hand."
+            exit 0
+          fi
+
+          gh pr merge "$BRANCH" --repo "$REPO" --squash --delete-branch
+          echo "Merged $BRANCH after a green Build & Test." >> "$GITHUB_STEP_SUMMARY"
