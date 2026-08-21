@@ -53,6 +53,12 @@ import {
 const V4_SOURCE = "../asp-net/resource/library.xml";
 /** V2: the same model as Apache Olingo 2 emits it. */
 const V2_SOURCE = "../olingo-v2/resource/library-v2.xml";
+/**
+ * V4 again, as SAP CAP emits it - a second shape of the same model, not a second model. Used where a
+ * variant is about something CAP states differently, which is why `deepInsertCompositionCap` reads this
+ * one: `@odata.contained` on `Audiobook.Chapters` is CAP's, and the option that acts on it exists for CAP.
+ */
+const V4_SOURCE_CAP = "../cap/resource/library.xml";
 
 /**
  * `Location_` (a shelf mark) and `Location` (the branch an item sits in) are distinct OData names which
@@ -254,6 +260,25 @@ const config: ConfigFileOptions = {
       serviceName: "DeepInsertComposition",
       source: V4_SOURCE,
       output: "src-generated/deep-insert-composition",
+      deepInsertProps: DeepInsertProps.compositionOnly,
+    },
+
+    /**
+     * The same value against the metadata of the server it exists for.
+     *
+     * The ASP.NET variant above proves the rule; this one proves it where it is meant to bite. CAP states
+     * containment for `Audiobook.Chapters` alone - it is the one composition annotated `@odata.contained`
+     * - while `Copies` and `Publisher` are associations along which CAP performs no deep write at all.
+     * The narrowing therefore removes exactly the properties whose payload that server answers with a 400
+     * or drops in silence, which is the entire reason the value exists.
+     *
+     * Containment reshapes the contained type as well, and that is worth having compiled: a contained
+     * entity is identified within its container, so CAP leaves the foreign key out of the model.
+     */
+    deepInsertCompositionCap: {
+      serviceName: "DeepInsertCompositionCap",
+      source: V4_SOURCE_CAP,
+      output: "src-generated/deep-insert-composition-cap",
       deepInsertProps: DeepInsertProps.compositionOnly,
     },
 
