@@ -13,6 +13,53 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-objects bumped from ^0.28.0 to ^0.28.1
     * @odata2ts/odata-service bumped from ^0.23.0 to ^0.23.1
 
+## [0.44.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.43.0...@odata2ts/odata2ts-v0.44.0) (2026-08-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **odata2ts:** `disableDeepInsertProps` is gone. `disableDeepInsertProps: true` becomes
+* previously we had the simple key heuristic, which removed single keys from the writing models; now those properties are there as optional properties (max interop); via `keyProperties: singleComputed` you get the previous behaviour; CAP users can try `keyProperties: strict` (works for all UUIDs OOTB)
+* **odata2ts:** the second type parameter of `EntityTypeServiceV2`/`V4`, `ComplexTypeServiceV2` and `MediaEntityServiceV2`/`V4` is the updatable model rather than the editable one. The arity is unchanged, so existing code compiles; only under `managedPropertyMode: "strictOmit"` do the two differ. `EntitySetServiceV2`/`V4` keeps the editable model for `create()`.
+* **odata2ts:** `enumByAllowedValues: true` becomes
+* **odata-query-objects:** `has` is gone from `QEnumPath` and `QNumericEnumPath`. Calling it on an enum which is not declared `IsFlags="true"` no longer compiles - regenerate, and the properties whose enum does carry the flag keep the operator.
+* **odata2ts:** the option `disableAutoManagedKey` and the CLI flag `-n, --disable-auto-managed-key` are gone, replaced by `managedPropertyDetection` resp. `--managed-property-detection <mode>`; use `simpleHeuristic` for the old behaviour. Properties a service annotates now drop out of the editable models, which may reject payloads that used to compile.
+
+### Features
+
+* add Updatable models if needed, add `keyProperties` & `managedPropertyMode`options ([#497](https://github.com/odata2ts/odata2ts/issues/497)) ([d9910f5](https://github.com/odata2ts/odata2ts/commit/d9910f58a4ceb5c6fb1d664a0239111ed3973e7a))
+* **odata-query-objects:** offer has only for flags enums ([3c40393](https://github.com/odata2ts/odata2ts/commit/3c40393bcea45d59bd30b9faf74b193a8258789a))
+* **odata2ts:** evaluate Core annotations for managed properties ([361daa6](https://github.com/odata2ts/odata2ts/commit/361daa6b757757a8ef636cfa7989907a0e3492f6))
+* **odata2ts:** generate enums from Validation.AllowedValues ([7c0d5dc](https://github.com/odata2ts/odata2ts/commit/7c0d5dc8358e7c30bbaab0d212dd256efc8c965d))
+* **odata2ts:** restrain the deep insert props to containment on demand ([f34f58d](https://github.com/odata2ts/odata2ts/commit/f34f58d89fcafe30003f2ca33ccef80616cebbae))
+* **odata2ts:** translate the V2 annotation dialects to Core terms ([0099736](https://github.com/odata2ts/odata2ts/commit/00997367f98bf7ed13393aa071e03acf33b1b769))
+
+
+### Bug Fixes
+
+* **odata2ts:** import the service class a singleton instantiates ([459f573](https://github.com/odata2ts/odata2ts/commit/459f57316f37355e686091778b6584fa05e571db))
+* **odata2ts:** keep numeric enums numeric ([b4f90ca](https://github.com/odata2ts/odata2ts/commit/b4f90ca829920cafb8d584ee6f9edc2fbd48f4b4))
+* **odata2ts:** pin examples/main to strict key handling ([d9910f5](https://github.com/odata2ts/odata2ts/commit/d9910f58a4ceb5c6fb1d664a0239111ed3973e7a))
+
+
+### Code Refactoring
+
+* **odata2ts:** name the enum synthesis strategy instead of switching it on ([87b9e94](https://github.com/odata2ts/odata2ts/commit/87b9e9454b518450c49d3fc9f410709363895a26))
+* **odata2ts:** option `managedPropertyDetection` is gone, never saw the light of a release ([d9910f5](https://github.com/odata2ts/odata2ts/commit/d9910f58a4ceb5c6fb1d664a0239111ed3973e7a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-core bumped from ^0.7.0 to ^0.7.1
+  * devDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.30.1 to ^0.31.0
+    * @odata2ts/odata-service bumped from ^0.26.0 to ^0.27.0
+  * peerDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.30.1 to ^0.31.0
+    * @odata2ts/odata-service bumped from ^0.26.0 to ^0.27.0
+
 ## [0.43.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.42.0...@odata2ts/odata2ts-v0.43.0) (2026-08-08)
 
 
