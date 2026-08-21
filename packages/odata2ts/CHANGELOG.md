@@ -13,6 +13,27 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-objects bumped from ^0.28.0 to ^0.28.1
     * @odata2ts/odata-service bumped from ^0.23.0 to ^0.23.1
 
+## [0.44.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.44.0...@odata2ts/odata2ts-v0.44.1) (2026-08-21)
+
+
+### Features
+
+* **odata-service:** accept the concurrencyControlled flag from the generator ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** discover optimistic concurrency from the service metadata ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** mark the generated services of concurrency-controlled resources ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** read Core.OptimisticConcurrency from entity sets and singletons ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** read the V2 concurrency token as optimistic concurrency ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** resolve annotations targeting the entity container ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @odata2ts/odata-service bumped from ^0.27.0 to ^0.27.1
+  * peerDependencies
+    * @odata2ts/odata-service bumped from ^0.27.0 to ^0.27.1
+
 ## [0.44.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.43.0...@odata2ts/odata2ts-v0.44.0) (2026-08-21)
 
 

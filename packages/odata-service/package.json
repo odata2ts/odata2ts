@@ -1,6 +1,6 @@
 {
   "name": "@odata2ts/odata-service",
-  "version": "0.27.0",
+  "version": "0.27.1",
   "description": "Main runtime dependency of odata2ts for generated odata client services",
   "keywords": [
     "odata client",
