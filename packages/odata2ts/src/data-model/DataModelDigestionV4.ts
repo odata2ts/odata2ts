@@ -3,8 +3,9 @@ import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel.js";
 import { NamespaceWithAlias, withNamespace } from "./DataModel.js";
 import { Digester, TypeModel } from "./DataModelDigestion.js";
+import { isOptimisticConcurrency } from "./CoreAnnotations.js";
 import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel.js";
-import { ComplexType, Property, Reference } from "./edmx/ODataEdmxModelBase.js";
+import { Annotatable, ComplexType, Property, Reference } from "./edmx/ODataEdmxModelBase.js";
 import { ComplexTypeV4, EntityTypeV4, NavigationProperty, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4.js";
 import { NamingHelper } from "./NamingHelper.js";
 
@@ -39,6 +40,14 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     // functions & actions
     this.addOperations(nsWithAlias, schema.Function, OperationTypes.Function);
     this.addOperations(nsWithAlias, schema.Action, OperationTypes.Action);
+  }
+
+  /**
+   * Whether this container child states that modifying it requires an ETag - unless the option switches
+   * the evaluation off, in which case nothing does.
+   */
+  private isConcurrencyControlled(element: Annotatable): boolean {
+    return !this.options.annotations?.disableOptimisticConcurrency && isOptimisticConcurrency(element.Annotation);
   }
 
   protected digestEntityContainer(schema: SchemaV4) {
@@ -90,11 +99,17 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
           throw new Error(`Entity type "${singleton.$.Type}" not found!`);
         }
 
+        const singletonConcurrency = this.isConcurrencyControlled(singleton);
+        if (singletonConcurrency) {
+          entityType.concurrencyControlled = true;
+        }
+
         this.dataModel.addSingleton(fqName, {
           fqName,
           odataName,
           name,
           entityType,
+          concurrencyControlled: singletonConcurrency,
           navPropBinding: navPropBindings.map((binding) => ({
             path: this.namingHelper.stripServicePrefix(binding.$.Path),
             target: binding.$.Target,
@@ -113,11 +128,17 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
           throw new Error(`Entity type "${entitySet.$.EntityType}" not found!`);
         }
 
+        const entitySetConcurrency = this.isConcurrencyControlled(entitySet);
+        if (entitySetConcurrency) {
+          entityType.concurrencyControlled = true;
+        }
+
         this.dataModel.addEntitySet(fqName, {
           fqName,
           odataName,
           name,
           entityType,
+          concurrencyControlled: entitySetConcurrency,
           navPropBinding: navPropBindings.map((binding) => ({
             path: this.namingHelper.stripServicePrefix(binding.$.Path),
             target: binding.$.Target,

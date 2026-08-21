@@ -3,6 +3,7 @@ import { ODataTypesV2, ODataVersions } from "@odata2ts/odata-core";
 import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel.js";
 import { withNamespace } from "./DataModel.js";
 import { Digester, TypeModel } from "./DataModelDigestion.js";
+import { isOptimisticConcurrency } from "./CoreAnnotations.js";
 import { NavPropBindingType, ODataVersion, OperationTypes, PropertyModel } from "./DataTypeModel.js";
 import { ComplexType, Property, Reference } from "./edmx/ODataEdmxModelBase.js";
 import {
@@ -184,11 +185,21 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
           throw new Error(`Entity type "${entitySet.$.EntityType}" not found!`);
         }
 
+        // V2 states the concurrency token as a schema facet rather than as an annotation; the
+        // V2AnnotationResolver has normalized it into `Core.OptimisticConcurrency` by now, so this reads
+        // exactly like its V4 counterpart
+        const concurrencyControlled =
+          !this.options.annotations?.disableOptimisticConcurrency && isOptimisticConcurrency(entitySet.Annotation);
+        if (concurrencyControlled) {
+          entityType.concurrencyControlled = true;
+        }
+
         this.dataModel.addEntitySet(fqName, {
           fqName,
           odataName,
           name,
           entityType,
+          concurrencyControlled,
           navPropBinding: this.getNavPropBindings(container, odataName, entitySet.$.EntityType),
         });
       });
