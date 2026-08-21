@@ -418,6 +418,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         subtypes: new Set(),
         // postprocess required as well: the media entity marker is inherited from base types
         hasStream: this.isMediaEntity(model),
+        // set while digesting the entity container, which is where the entity sets and singletons
+        // exposing this type - and their `Core.OptimisticConcurrency` - are read
+        concurrencyControlled: false,
       });
     }
   }

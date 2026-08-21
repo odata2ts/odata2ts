@@ -8,6 +8,8 @@ const COMPUTED_DEFAULT_VALUE = `${CORE}.ComputedDefaultValue`;
 const IMMUTABLE = `${CORE}.Immutable`;
 const PERMISSIONS = `${CORE}.Permissions`;
 
+const OPTIMISTIC_CONCURRENCY = `${CORE}.OptimisticConcurrency`;
+
 const PERMISSION_READ = `${CORE}.Permission/Read`;
 const PERMISSION_WRITE = `${CORE}.Permission/Write`;
 
@@ -84,4 +86,19 @@ export function getManagedState(allAnnotations: Array<Annotation> | undefined): 
   }
 
   return undefined;
+}
+
+/**
+ * Whether the service states that modifying this resource requires an ETag.
+ *
+ * Presence of the term is the whole statement. It is declared as `Collection(Edm.PropertyPath)` naming
+ * the properties the ETag is computed from, but a client never needs them: the value always arrives in
+ * the response. An empty collection is therefore just as good, and a legitimate form - the vocabulary
+ * documents it as "the service won't tell how it computes the ETag", and CAP emits exactly that.
+ *
+ * Unlike {@link getManagedState} this does not filter for constant annotations: a collection of property
+ * paths is none of the constant forms that check recognises.
+ */
+export function isOptimisticConcurrency(annotations: Array<Annotation> | undefined): boolean {
+  return !!annotations?.some((a) => a.$.Term === OPTIMISTIC_CONCURRENCY);
 }

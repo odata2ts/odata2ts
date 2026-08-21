@@ -14,6 +14,7 @@ import {
   RunOptions,
 } from "../../../src/index.js";
 import { createProjectManager, ProjectManager } from "../../../src/project/ProjectManager.js";
+import { propertyPaths } from "../../data-model/builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
 import { getTestConfig } from "../../test.config.js";
 import { createServiceHelper } from "../comparator/FixtureComparatorHelper.js";
@@ -69,6 +70,66 @@ describe("Service Generator Tests V4", () => {
       projectManager.getMainServiceFile().getFile(),
     );
   }
+
+  describe("Optimistic concurrency", () => {
+    /**
+     * The flag is per entity type rather than per service run, so it is emitted into the individual
+     * `super` call rather than into the shared runtime options. Asserted on the generated text directly:
+     * a fixture would pin the whole file, and what matters here is one argument in two constructors.
+     */
+    function generatedText() {
+      return projectManager.getMainServiceFile().getFile().getFullText();
+    }
+
+    function addCopy(concurrencyControlled: boolean) {
+      // fully qualified, the way ASP.NET states it: the fixture helper digests without the document's
+      // references, so an aliased term would have nothing to resolve against
+      odataBuilder
+        .addEntityType("Copy", undefined, (builder) => {
+          builder.addKeyProp("id", ODataTypesV4.String);
+          builder.addProp("condition", ODataTypesV4.Byte);
+        })
+        .addEntitySet(
+          "Copies",
+          withNs("Copy"),
+          [],
+          concurrencyControlled
+            ? [propertyPaths("core", "OptimisticConcurrency", [], { fullyQualified: true })]
+            : undefined,
+        );
+    }
+
+    test("a controlled type states the flag in both of its services", async () => {
+      addCopy(true);
+
+      await doGenerate();
+
+      const text = generatedText();
+      expect(text).toContain("super(client, basePath, name, qCopy, { ...options, concurrencyControlled: true });");
+      expect(text).toContain(
+        "super(client, basePath, name, qCopy, new QCopyId(name), { ...options, concurrencyControlled: true });",
+      );
+    });
+
+    test("an uncontrolled type hands its options straight through", async () => {
+      addCopy(false);
+
+      await doGenerate();
+
+      const text = generatedText();
+      expect(text).toContain("super(client, basePath, name, qCopy, options);");
+      expect(text).toContain("super(client, basePath, name, qCopy, new QCopyId(name), options);");
+      expect(text).not.toContain("concurrencyControlled");
+    });
+
+    test("the disable switch takes the flag away again", async () => {
+      addCopy(true);
+
+      await doGenerate({ annotations: { disableOptimisticConcurrency: true } });
+
+      expect(generatedText()).not.toContain("concurrencyControlled");
+    });
+  });
 
   test("Service Generator: Min Case", async () => {
     // given nothing in particular

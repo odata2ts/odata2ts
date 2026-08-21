@@ -186,6 +186,16 @@ export interface AnnotationOptions {
    * of which this switch touches.
    */
   disableManagedProperties?: boolean;
+  /**
+   * Stop deriving optimistic concurrency control from the annotations of the service. Off by default:
+   * `Core.OptimisticConcurrency` on an entity set or singleton - and, in V2, a `ConcurrencyMode="Fixed"`
+   * property - makes the generated service send `If-Match` on every write to that resource, and fail
+   * before the request where no ETag is known.
+   *
+   * Turn it on to get the previous behaviour back: no `If-Match` is ever sent, and a service which
+   * demands one answers `428 Precondition Required`.
+   */
+  disableOptimisticConcurrency?: boolean;
 }
 
 /**

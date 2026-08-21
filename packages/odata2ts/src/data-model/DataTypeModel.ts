@@ -81,6 +81,14 @@ export interface EntityType extends ComplexType {
    * appending `$value` to its URL. Inherited from base types.
    */
   hasStream: boolean;
+  /**
+   * Whether modifying an entity of this type requires an ETag, derived from the entity sets and
+   * singletons exposing it.
+   *
+   * Generated services are per type rather than per set, so where several sets of one type disagree,
+   * controlled wins: failing to send `If-Match` where it is required is the worse of the two errors.
+   */
+  concurrencyControlled: boolean;
 }
 
 export interface ComplexType {
@@ -242,6 +250,10 @@ export interface SingletonType {
   name: string;
   entityType: EntityType;
   navPropBinding?: Array<NavPropBindingType>;
+  /**
+   * The service states `Core.OptimisticConcurrency` for this resource: modifying it requires an ETag.
+   */
+  concurrencyControlled: boolean;
 }
 
 export interface EntitySetType {
@@ -250,6 +262,10 @@ export interface EntitySetType {
   name: string;
   entityType: EntityType;
   navPropBinding?: Array<NavPropBindingType>;
+  /**
+   * The service states `Core.OptimisticConcurrency` for this set: modifying its entities requires an ETag.
+   */
+  concurrencyControlled: boolean;
 }
 
 export interface NavPropBindingType {

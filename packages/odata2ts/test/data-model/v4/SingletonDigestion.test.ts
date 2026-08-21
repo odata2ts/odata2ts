@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
 import { getTestConfig } from "../../test.config.js";
+import { propertyPaths } from "../builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4.js";
 
 describe("Singleton Digestion Test", () => {
@@ -20,7 +21,9 @@ describe("Singleton Digestion Test", () => {
   }
 
   function doDigest() {
-    return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
+    // the references carry the vocabulary aliases; without them an annotation written as `Core.X`
+    // never resolves to its fully qualified term
+    return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER, odataBuilder.getReferences());
   }
 
   beforeEach(() => {
@@ -68,6 +71,52 @@ describe("Singleton Digestion Test", () => {
         entityType: { name: "User" },
         navPropBinding: navProps,
       },
+    });
+  });
+
+  describe("Optimistic concurrency", () => {
+    /**
+     * `Core.OptimisticConcurrency` declares `AppliesTo="EntitySet"`, but that attribute states intent
+     * rather than a restriction - CSDL 14.1.2 asks clients to "be prepared for any term to be applied to
+     * any model element", and `Singleton` is a listed symbolic value there. A singleton is a resource
+     * with an ETag like any other, so the term is read here too.
+     */
+    function addUser() {
+      return odataBuilder.enableAnnotations().addEntityType("User", undefined, (builder) => {
+        builder.addKeyProp("id", ODataTypesV4.String);
+      });
+    }
+
+    async function singleton(name: string) {
+      return (await doDigest()).getEntityContainer().singletons[withEc(name)];
+    }
+
+    test("no annotation means not controlled", async () => {
+      addUser().addSingleton("Me", withNs("User"));
+
+      expect((await singleton("Me")).concurrencyControlled).toBe(false);
+    });
+
+    test("the term makes the singleton controlled", async () => {
+      addUser().addSingleton("Me", withNs("User"), [], [propertyPaths("core", "OptimisticConcurrency", [])]);
+
+      expect((await singleton("Me")).concurrencyControlled).toBe(true);
+    });
+
+    test("stated externally against the container", async () => {
+      addUser()
+        .addSingleton("Me", withNs("User"))
+        .addExternalAnnotations(`${SERVICE_NAME}.ENTITY_CONTAINER/Me`, [
+          propertyPaths("core", "OptimisticConcurrency", []),
+        ]);
+
+      expect((await singleton("Me")).concurrencyControlled).toBe(true);
+    });
+
+    test("the entity type learns it from its singleton", async () => {
+      addUser().addSingleton("Me", withNs("User"), [], [propertyPaths("core", "OptimisticConcurrency", [])]);
+
+      expect((await doDigest()).getEntityType(withNs("User"))!.concurrencyControlled).toBe(true);
     });
   });
 });

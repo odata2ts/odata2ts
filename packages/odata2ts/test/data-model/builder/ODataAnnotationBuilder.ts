@@ -85,6 +85,23 @@ export function annotation(
 }
 
 /**
+ * An annotation of type `Collection(Edm.PropertyPath)`, e.g. `Core.OptimisticConcurrency`.
+ *
+ * An empty list yields an empty collection, which is what CAP emits and what the vocabulary documents as
+ * "the service won't tell how it computes the ETag" - as valid a statement as one naming the properties.
+ */
+export function propertyPaths(
+  vocabulary: keyof typeof VOCABULARIES,
+  term: string,
+  paths: Array<string>,
+  options: Pick<AnnotationOptions, "fullyQualified" | "qualifier"> = {},
+): Annotation {
+  const result = annotation(vocabulary, term, options);
+  result.Collection = [paths.length ? { PropertyPath: paths } : {}];
+  return result;
+}
+
+/**
  * Shorthand for the vocabulary all currently evaluated terms come from.
  */
 export function core(term: string, options?: AnnotationOptions): Annotation {
