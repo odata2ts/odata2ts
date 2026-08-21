@@ -90,6 +90,7 @@ export abstract class ODataModelBuilder<
     name: string,
     entityType: string,
     navProps?: Array<{ path: string; target: string }>,
+    annotations?: Array<Annotation>,
   ): this;
 
   protected createSchema(name: string, alias?: string) {
