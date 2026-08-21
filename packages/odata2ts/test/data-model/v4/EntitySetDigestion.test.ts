@@ -90,17 +90,23 @@ describe("EntitySet Digestion Test", () => {
     });
 
     test("the term makes the set controlled", async () => {
-      addProduct().addEntitySet("Products", withNs("Product"), [], [
-        propertyPaths("core", "OptimisticConcurrency", ["condition"]),
-      ]);
+      addProduct().addEntitySet(
+        "Products",
+        withNs("Product"),
+        [],
+        [propertyPaths("core", "OptimisticConcurrency", ["condition"])],
+      );
 
       expect((await entitySet("Products")).concurrencyControlled).toBe(true);
     });
 
     test("an empty collection is still the term - CAP's form", async () => {
-      addProduct().addEntitySet("Products", withNs("Product"), [], [
-        propertyPaths("core", "OptimisticConcurrency", []),
-      ]);
+      addProduct().addEntitySet(
+        "Products",
+        withNs("Product"),
+        [],
+        [propertyPaths("core", "OptimisticConcurrency", [])],
+      );
 
       expect((await entitySet("Products")).concurrencyControlled).toBe(true);
     });
@@ -116,9 +122,12 @@ describe("EntitySet Digestion Test", () => {
     });
 
     test("the entity type learns it from its set", async () => {
-      addProduct().addEntitySet("Products", withNs("Product"), [], [
-        propertyPaths("core", "OptimisticConcurrency", []),
-      ]);
+      addProduct().addEntitySet(
+        "Products",
+        withNs("Product"),
+        [],
+        [propertyPaths("core", "OptimisticConcurrency", [])],
+      );
 
       expect((await doDigest()).getEntityType(withNs("Product"))!.concurrencyControlled).toBe(true);
     });
@@ -126,9 +135,7 @@ describe("EntitySet Digestion Test", () => {
     test("of two sets of one type, a single controlled one is enough", async () => {
       addProduct()
         .addEntitySet("Products", withNs("Product"))
-        .addEntitySet("ArchivedProducts", withNs("Product"), [], [
-          propertyPaths("core", "OptimisticConcurrency", []),
-        ]);
+        .addEntitySet("ArchivedProducts", withNs("Product"), [], [propertyPaths("core", "OptimisticConcurrency", [])]);
 
       expect((await entitySet("Products")).concurrencyControlled).toBe(false);
       expect((await entitySet("ArchivedProducts")).concurrencyControlled).toBe(true);
@@ -137,9 +144,12 @@ describe("EntitySet Digestion Test", () => {
     });
 
     test("the switch turns the evaluation off", async () => {
-      addProduct().addEntitySet("Products", withNs("Product"), [], [
-        propertyPaths("core", "OptimisticConcurrency", []),
-      ]);
+      addProduct().addEntitySet(
+        "Products",
+        withNs("Product"),
+        [],
+        [propertyPaths("core", "OptimisticConcurrency", [])],
+      );
 
       const config = { ...CONFIG, annotations: { disableOptimisticConcurrency: true } };
       const result = await digest(odataBuilder.getSchemas(), config, NAMING_HELPER, odataBuilder.getReferences());

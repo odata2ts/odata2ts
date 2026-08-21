@@ -78,6 +78,7 @@ export function resolveV2Annotations(model: ODataEdmxModelBase<any>): void {
   }
 
   const rootScope = extendScope(new Map(), root);
+  annotateConcurrencyControlledSets(root);
   for (const dataService of asArray(root["edmx:DataServices"])) {
     const dataServiceScope = extendScope(rootScope, dataService);
     for (const schema of asArray(dataService.Schema)) {
@@ -88,7 +89,6 @@ export function resolveV2Annotations(model: ODataEdmxModelBase<any>): void {
           annotate(property, extendScope(modelScope, property));
         }
       }
-      annotateConcurrencyControlledSets(schema);
     }
   }
 }
@@ -193,33 +193,41 @@ function asArray(value: unknown): Array<XmlElement> {
  * Unlike the attribute dialects, `ConcurrencyMode` carries no namespace - it is part of the schema
  * language, so no scope has to be threaded through here.
  */
-function annotateConcurrencyControlledSets(schema: XmlElement): void {
-  const namespace = schema.$?.Namespace;
-  const alias = schema.$?.Alias;
+function annotateConcurrencyControlledSets(root: XmlElement): void {
+  const schemas = asArray(root["edmx:DataServices"]).flatMap((dataService) => asArray(dataService.Schema));
 
+  // collected across the whole document before anything is annotated: an entity container may expose
+  // types from any schema, and regularly does - Olingo declares `Copy` in `Library.Circulation` and the
+  // container in `Library.Service`
   const controlledTypes = new Set<string>();
-  for (const entityType of asArray(schema.EntityType)) {
-    const name = entityType.$?.Name;
-    if (!name || !asArray(entityType.Property).some((prop) => prop.$?.ConcurrencyMode === "Fixed")) {
-      continue;
-    }
-    // an entity set names its type either fully qualified or through the schema alias
-    controlledTypes.add(`${namespace}.${name}`);
-    if (alias) {
-      controlledTypes.add(`${alias}.${name}`);
+  for (const schema of schemas) {
+    const namespace = schema.$?.Namespace;
+    const alias = schema.$?.Alias;
+    for (const entityType of asArray(schema.EntityType)) {
+      const name = entityType.$?.Name;
+      if (!name || !asArray(entityType.Property).some((prop) => prop.$?.ConcurrencyMode === "Fixed")) {
+        continue;
+      }
+      // an entity set names its type either fully qualified or through the schema alias
+      controlledTypes.add(`${namespace}.${name}`);
+      if (alias) {
+        controlledTypes.add(`${alias}.${name}`);
+      }
     }
   }
   if (!controlledTypes.size) {
     return;
   }
 
-  for (const container of asArray(schema.EntityContainer)) {
-    for (const entitySet of asArray(container.EntitySet)) {
-      const entityType = entitySet.$?.EntityType;
-      if (!entityType || !controlledTypes.has(entityType)) {
-        continue;
+  for (const schema of schemas) {
+    for (const container of asArray(schema.EntityContainer)) {
+      for (const entitySet of asArray(container.EntitySet)) {
+        const entityType = entitySet.$?.EntityType;
+        if (!entityType || !controlledTypes.has(entityType)) {
+          continue;
+        }
+        entitySet.Annotation = [...asArray(entitySet.Annotation), { $: { Term: OPTIMISTIC_CONCURRENCY } }];
       }
-      entitySet.Annotation = [...asArray(entitySet.Annotation), { $: { Term: OPTIMISTIC_CONCURRENCY } }];
     }
   }
 }

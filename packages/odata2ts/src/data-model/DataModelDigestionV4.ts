@@ -1,9 +1,9 @@
 import { loadConverters, MappedConverterChains } from "@odata2ts/converter-runtime";
 import { ODataTypesV4, ODataVersions } from "@odata2ts/odata-core";
 import { DigesterFunction, DigestionOptions } from "../FactoryFunctionModel.js";
+import { isOptimisticConcurrency } from "./CoreAnnotations.js";
 import { NamespaceWithAlias, withNamespace } from "./DataModel.js";
 import { Digester, TypeModel } from "./DataModelDigestion.js";
-import { isOptimisticConcurrency } from "./CoreAnnotations.js";
 import { ODataVersion, OperationType, OperationTypes, PropertyModel } from "./DataTypeModel.js";
 import { Annotatable, ComplexType, Property, Reference } from "./edmx/ODataEdmxModelBase.js";
 import { ComplexTypeV4, EntityTypeV4, NavigationProperty, Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4.js";

@@ -169,7 +169,6 @@ describe("V2AnnotationResolver Test", () => {
   });
 });
 
-
 describe("V2AnnotationResolver: the concurrency token", () => {
   /**
    * V2 has no vocabulary annotation for optimistic concurrency. It states the concurrency token as a
@@ -288,6 +287,41 @@ describe("V2AnnotationResolver: the concurrency token", () => {
     resolveV2Annotations(model);
 
     expect(setTermsOf(model)).toEqual([CONCURRENCY]);
+  });
+
+  test("the container may live in another schema than the type - Olingo does exactly that", () => {
+    const model = {
+      "edmx:Edmx": {
+        $: { Version: "1.0", "xmlns:edmx": "http://schemas.microsoft.com/ado/2007/06/edmx" },
+        "edmx:DataServices": [
+          {
+            Schema: [
+              {
+                $: { Namespace: "Library.Circulation" },
+                EntityType: [
+                  { $: { Name: "Copy" }, Property: [{ $: { Name: "Condition", ConcurrencyMode: "Fixed" } }] },
+                ],
+              },
+              {
+                $: { Namespace: "Library.Service" },
+                EntityContainer: [
+                  {
+                    $: { Name: "LibraryService" },
+                    EntitySet: [{ $: { Name: "Copies", EntityType: "Library.Circulation.Copy" } }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    } as unknown as ODataEdmxModelBase<any>;
+
+    resolveV2Annotations(model);
+
+    const dataService = model["edmx:Edmx"]["edmx:DataServices"][0] as any;
+    const entitySet = dataService.Schema[1].EntityContainer[0].EntitySet[0];
+    expect((entitySet.Annotation ?? []).map((a: Annotation) => a.$.Term)).toEqual([CONCURRENCY]);
   });
 
   test("a document without an entity container is left alone", () => {
