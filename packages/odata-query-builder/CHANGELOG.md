@@ -9,6 +9,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
   * dependencies
     * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
 
+## [0.19.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.19.2...@odata2ts/odata-query-builder-v0.19.3) (2026-08-21)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-objects bumped from ^0.30.1 to ^0.31.0
+
 ## [0.19.2](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.19.1...@odata2ts/odata-query-builder-v0.19.2) (2026-08-08)
 
 

@@ -17,6 +17,25 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-builder bumped from ^0.18.5 to ^0.18.6
     * @odata2ts/odata-query-objects bumped from ^0.28.1 to ^0.28.2
 
+## [0.27.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service-v0.26.0...@odata2ts/odata-service-v0.27.0) (2026-08-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **odata-service:** the second type parameter of `EntityTypeServiceV2`/`V4`, `ComplexTypeServiceV2` and `MediaEntityServiceV2`/`V4` is the updatable model rather than the editable one. The arity is unchanged, so existing code compiles; only under `managedPropertyMode: "strictOmit"` do the two differ. `EntitySetServiceV2`/`V4` keeps the editable model for `create()`.
+
+### Features
+
+* add Updatable models if needed, add `keyProperties` & `managedPropertyMode` options ([#497](https://github.com/odata2ts/odata2ts/issues/497)) ([d9910f5](https://github.com/odata2ts/odata2ts/commit/d9910f58a4ceb5c6fb1d664a0239111ed3973e7a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-builder bumped from ^0.19.2 to ^0.19.3
+    * @odata2ts/odata-query-objects bumped from ^0.30.1 to ^0.31.0
+
 ## [0.26.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service-v0.25.0...@odata2ts/odata-service-v0.26.0) (2026-08-08)
 
 

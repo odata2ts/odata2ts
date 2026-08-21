@@ -33,6 +33,22 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * ESM tends to break stuff
 
+## [0.31.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.30.1...@odata2ts/odata-query-objects-v0.31.0) (2026-08-21)
+
+
+### Features
+
+* **odata-query-objects:** add `substring` for strings ([754fdf0](https://github.com/odata2ts/odata2ts/commit/754fdf00465afd91c113bf2ffb3b28459be7d6cf))
+* **odata-query-objects:** add `has` for flags enums - `QFlagsEnumPath` and `QNumericFlagsEnumPath`, which the generator picks where the metadata declares `IsFlags="true"` ([754fdf0](https://github.com/odata2ts/odata2ts/commit/754fdf00465afd91c113bf2ffb3b28459be7d6cf), [3c40393](https://github.com/odata2ts/odata2ts/commit/3c40393bcea45d59bd30b9faf74b193a8258789a))
+* **odata2ts:** generate enums from `Validation.AllowedValues` ([7c0d5dc](https://github.com/odata2ts/odata2ts/commit/7c0d5dc8358e7c30bbaab0d212dd256efc8c965d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-core bumped from ^0.7.0 to ^0.7.1
+
 ## [0.30.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.30.0...@odata2ts/odata-query-objects-v0.30.1) (2026-08-08)
 
 
