@@ -50,11 +50,14 @@ export interface Annotation {
 }
 
 /**
- * A collection valued annotation. Its entries are records where the term declares a structured type,
- * which is the only form we read.
+ * A collection valued annotation. Its entries are records where the term declares a structured type, and
+ * bare property paths where it declares `Collection(Edm.PropertyPath)` - `Core.OptimisticConcurrency`
+ * being the one we read, which may also state an empty collection, meaning that the service does not say
+ * how it computes the ETag.
  */
 export interface Collection {
   Record?: Array<AnnotationRecord>;
+  PropertyPath?: Array<string>;
 }
 
 /**
@@ -127,7 +130,7 @@ export interface EntityContainer<ES = EntitySet> {
   EntitySet?: Array<ES>;
 }
 
-export interface EntitySet {
+export interface EntitySet extends Annotatable {
   $: {
     Name: string;
     EntityType: string;

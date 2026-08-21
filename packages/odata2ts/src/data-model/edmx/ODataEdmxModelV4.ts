@@ -51,7 +51,7 @@ export interface EntitySetV4 extends EntitySet {
   NavigationPropertyBinding?: Array<NavigationPropertyBinding>;
 }
 
-export interface Singleton {
+export interface Singleton extends Annotatable {
   $: {
     Name: string;
     Type: string;

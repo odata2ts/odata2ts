@@ -8,6 +8,7 @@ const NS_SAP = "http://www.sap.com/Protocols/SAPData";
 const CORE = "Org.OData.Core.V1";
 const COMPUTED = `${CORE}.Computed`;
 const IMMUTABLE = `${CORE}.Immutable`;
+const OPTIMISTIC_CONCURRENCY = `${CORE}.OptimisticConcurrency`;
 
 /**
  * The local names of the terms this produces, to recognize a document which states them itself.
@@ -77,6 +78,7 @@ export function resolveV2Annotations(model: ODataEdmxModelBase<any>): void {
   }
 
   const rootScope = extendScope(new Map(), root);
+  annotateConcurrencyControlledSets(root);
   for (const dataService of asArray(root["edmx:DataServices"])) {
     const dataServiceScope = extendScope(rootScope, dataService);
     for (const schema of asArray(dataService.Schema)) {
@@ -174,4 +176,58 @@ function tag(term: string): Annotation {
 
 function asArray(value: unknown): Array<XmlElement> {
   return Array.isArray(value) ? (value as Array<XmlElement>) : [];
+}
+
+/**
+ * Turns the V2 concurrency token into the V4 term stating the same thing.
+ *
+ * V2 has no vocabulary annotation for optimistic concurrency: the token is a facet of the schema
+ * language itself, `ConcurrencyMode="Fixed"` on the property it is computed from. V4 has to say it as a
+ * `Core.OptimisticConcurrency` annotation on the entity set instead - a different element entirely, which
+ * is why this cannot be handled by the per-property translation above.
+ *
+ * The term is synthesized without content, which is the form meaning "the service won't tell how it
+ * computes the ETag". Naming the properties would be more faithful, and entirely pointless: the value
+ * always arrives in the response.
+ *
+ * Unlike the attribute dialects, `ConcurrencyMode` carries no namespace - it is part of the schema
+ * language, so no scope has to be threaded through here.
+ */
+function annotateConcurrencyControlledSets(root: XmlElement): void {
+  const schemas = asArray(root["edmx:DataServices"]).flatMap((dataService) => asArray(dataService.Schema));
+
+  // collected across the whole document before anything is annotated: an entity container may expose
+  // types from any schema, and regularly does - Olingo declares `Copy` in `Library.Circulation` and the
+  // container in `Library.Service`
+  const controlledTypes = new Set<string>();
+  for (const schema of schemas) {
+    const namespace = schema.$?.Namespace;
+    const alias = schema.$?.Alias;
+    for (const entityType of asArray(schema.EntityType)) {
+      const name = entityType.$?.Name;
+      if (!name || !asArray(entityType.Property).some((prop) => prop.$?.ConcurrencyMode === "Fixed")) {
+        continue;
+      }
+      // an entity set names its type either fully qualified or through the schema alias
+      controlledTypes.add(`${namespace}.${name}`);
+      if (alias) {
+        controlledTypes.add(`${alias}.${name}`);
+      }
+    }
+  }
+  if (!controlledTypes.size) {
+    return;
+  }
+
+  for (const schema of schemas) {
+    for (const container of asArray(schema.EntityContainer)) {
+      for (const entitySet of asArray(container.EntitySet)) {
+        const entityType = entitySet.$?.EntityType;
+        if (!entityType || !controlledTypes.has(entityType)) {
+          continue;
+        }
+        entitySet.Annotation = [...asArray(entitySet.Annotation), { $: { Term: OPTIMISTIC_CONCURRENCY } }];
+      }
+    }
+  }
 }

@@ -450,7 +450,9 @@ class ServiceGenerator {
               hasQuestionToken: true,
             },
           ],
-          statements: [`super(client, basePath, name, ${qObjectName}, options);`],
+          statements: [
+            `super(client, basePath, name, ${qObjectName}, ${this.getServiceRuntimeOptions(model, isComplexType)});`,
+          ],
         },
       ],
       properties,
@@ -726,6 +728,18 @@ class ServiceGenerator {
     };
   }
 
+  /**
+   * The runtime options a generated service hands to its base class.
+   *
+   * Almost always just `options`, the argument its own constructor took. A type under optimistic
+   * concurrency control adds a flag of its own, since that is decided per entity type rather than for the
+   * service as a whole - the same shape `generateCastOperations` uses to pass `subtype: true`.
+   */
+  private getServiceRuntimeOptions(model: ComplexType, isComplexType = false): string {
+    const isConcurrencyControlled = !isComplexType && (model as EntityType).concurrencyControlled;
+    return isConcurrencyControlled ? "{ ...options, concurrencyControlled: true }" : "options";
+  }
+
   private generateEntityCollectionService(file: FileHandler, model: EntityType) {
     const importContainer = file.getImports();
     // creation lives here, so this is the one service still typed on the EditableModel - and the one place
@@ -765,7 +779,9 @@ class ServiceGenerator {
               hasQuestionToken: true,
             },
           ],
-          statements: [`super(client, basePath, name, ${qObjectName}, new ${qIdFunctionName}(name), options);`],
+          statements: [
+            `super(client, basePath, name, ${qObjectName}, new ${qIdFunctionName}(name), ${this.getServiceRuntimeOptions(model)});`,
+          ],
         },
       ],
       properties,

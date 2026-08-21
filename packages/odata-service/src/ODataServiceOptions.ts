@@ -27,6 +27,14 @@ export interface ODataServiceOptionsInternal<V extends ODataVersionV4 = "4.0"> e
    * Just like bigNumbersAsString this is set internally, since it is decided by the generator.
    */
   odataVersionV4?: V;
+  /**
+   * Modifying this resource requires an ETag: the service states `Core.OptimisticConcurrency` for the
+   * entity set or singleton exposing this type - or, in V2, a `ConcurrencyMode="Fixed"` property.
+   *
+   * Set by the generator per entity type, hence internal: it is a statement about the service, not
+   * something an application chooses.
+   */
+  concurrencyControlled?: boolean;
 }
 
 export interface ODataServiceOptionsInternalV2<AsV4 extends boolean = false> extends ODataServiceOptions {
@@ -40,4 +48,12 @@ export interface ODataServiceOptionsInternalV2<AsV4 extends boolean = false> ext
    * what actually picks the converter behaviour.
    */
   v2ResponseAsV4?: AsV4;
+  /**
+   * Modifying this resource requires an ETag: the service states `Core.OptimisticConcurrency` for the
+   * entity set or singleton exposing this type - or, in V2, a `ConcurrencyMode="Fixed"` property.
+   *
+   * Set by the generator per entity type, hence internal: it is a statement about the service, not
+   * something an application chooses.
+   */
+  concurrencyControlled?: boolean;
 }

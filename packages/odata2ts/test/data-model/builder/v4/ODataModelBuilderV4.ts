@@ -1,4 +1,5 @@
 import { ODataVersions } from "@odata2ts/odata-core";
+import { Annotation } from "../../../../src/data-model/edmx/ODataEdmxModelBase.js";
 import {
   ComplexTypeV4,
   EntitySetV4,
@@ -38,7 +39,7 @@ export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, Sch
     }
   }
 
-  public addEntitySet(name: string, entityType: string, navProps: NavProps = []) {
+  public addEntitySet(name: string, entityType: string, navProps: NavProps = [], annotations?: Array<Annotation>) {
     const container = this.getEntityContainer();
     if (!container.EntitySet) {
       container.EntitySet = [];
@@ -51,12 +52,15 @@ export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, Sch
       },
     };
     this.addNavProps(entitySet, navProps);
+    if (annotations?.length) {
+      entitySet.Annotation = annotations;
+    }
     container.EntitySet.push(entitySet);
 
     return this;
   }
 
-  public addSingleton(name: string, type: string, navProps: NavProps = []) {
+  public addSingleton(name: string, type: string, navProps: NavProps = [], annotations?: Array<Annotation>) {
     const container = this.getEntityContainer();
     if (!container.Singleton) {
       container.Singleton = [];
@@ -69,6 +73,9 @@ export class ODataModelBuilderV4 extends ODataModelBuilder<ODataEdmxModelV4, Sch
       },
     };
     this.addNavProps(singleton, navProps);
+    if (annotations?.length) {
+      singleton.Annotation = annotations;
+    }
     container.Singleton.push(singleton);
 
     return this;

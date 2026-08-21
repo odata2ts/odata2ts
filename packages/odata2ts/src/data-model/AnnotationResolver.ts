@@ -14,6 +14,21 @@ interface WithNavigationProps {
 }
 
 /**
+ * An element of the entity container which an annotation may address: an entity set, or - in V4 - a
+ * singleton. The base schema types its container as `any`, since the two versions declare rather
+ * different things in it; both name their children, which is all that matters here.
+ */
+interface ContainerChild extends Annotatable {
+  $: { Name: string };
+}
+
+interface EntityContainerLike {
+  $: { Name: string };
+  EntitySet?: Array<ContainerChild>;
+  Singleton?: Array<ContainerChild>;
+}
+
+/**
  * Brings the annotations of a document into one shape before anything is digested: every term name fully
  * qualified, and every externally stated annotation moved to the element it targets.
  *
@@ -37,6 +52,16 @@ export class AnnotationResolver {
    */
   private readonly targets = new Map<string, EntityType | ComplexType>();
 
+  /**
+   * Every entity set and singleton by the path an annotation addresses it with -
+   * `<namespace>.<containerName>/<name>` - under the namespace of its schema as well as under its alias.
+   *
+   * Kept apart from {@link targets} because such a path has two segments just like a property path does,
+   * and a container is not a type: looking here first is what keeps `Library.Service.EntityContainer/Copies`
+   * from being read as "property Copies of type Library.Service.EntityContainer".
+   */
+  private readonly containerChildren = new Map<string, Annotatable>();
+
   constructor(
     private readonly schemas: Array<Schema<EntityType, ComplexType>>,
     references: Array<Reference> | undefined,
@@ -57,7 +82,28 @@ export class AnnotationResolver {
           this.targets.set(withNamespace(alias, model.$.Name), model);
         }
       }
+
+      // an annotation may address a set or a singleton through the container declaring it, e.g.
+      // `Library.Service.EntityContainer/Copies` - the container's own name is whatever it was given,
+      // `EntityContainer` in CAP's metadata and `LibraryService` in the reference model's
+      for (const container of this.containersOf(schema)) {
+        for (const child of AnnotationResolver.childrenOf(container)) {
+          const path = `${container.$.Name}/${child.$.Name}`;
+          this.containerChildren.set(withNamespace(ns, path), child);
+          if (alias) {
+            this.containerChildren.set(withNamespace(alias, path), child);
+          }
+        }
+      }
     }
+  }
+
+  private containersOf(schema: Schema<EntityType, ComplexType>): Array<EntityContainerLike> {
+    return (schema.EntityContainer ?? []) as Array<EntityContainerLike>;
+  }
+
+  private static childrenOf(container: EntityContainerLike): Array<ContainerChild> {
+    return [...(container.EntitySet ?? []), ...(container.Singleton ?? [])];
   }
 
   /**
@@ -69,6 +115,11 @@ export class AnnotationResolver {
         this.qualifyTerms(model);
         for (const prop of [...(model.Property ?? []), ...((model as WithNavigationProps).NavigationProperty ?? [])]) {
           this.qualifyTerms(prop);
+        }
+      }
+      for (const container of this.containersOf(schema)) {
+        for (const child of AnnotationResolver.childrenOf(container)) {
+          this.qualifyTerms(child);
         }
       }
       this.qualifyTerms(schema);
@@ -163,6 +214,11 @@ export class AnnotationResolver {
    * deeper path yields nothing and is therefore left alone.
    */
   private findTarget(target: string): Annotatable | undefined {
+    const containerChild = this.containerChildren.get(target);
+    if (containerChild) {
+      return containerChild;
+    }
+
     const [typeName, ...path] = target.split("/");
     const model = this.targets.get(typeName);
     if (!model) {
