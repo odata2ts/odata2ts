@@ -7,6 +7,7 @@ const NS_SAP = "http://www.sap.com/Protocols/SAPData";
 
 const COMPUTED = "Org.OData.Core.V1.Computed";
 const IMMUTABLE = "Org.OData.Core.V1.Immutable";
+const CONCURRENCY = "Org.OData.Core.V1.OptimisticConcurrency";
 
 type Attributes = Record<string, string>;
 
@@ -165,5 +166,134 @@ describe("V2AnnotationResolver Test", () => {
         IMMUTABLE,
       ]);
     });
+  });
+});
+
+
+describe("V2AnnotationResolver: the concurrency token", () => {
+  /**
+   * V2 has no vocabulary annotation for optimistic concurrency. It states the concurrency token as a
+   * facet of the schema language itself - `ConcurrencyMode="Fixed"` on the property computing it - which
+   * is normalized here into the V4 term, so that nothing downstream learns that V2 said it differently.
+   */
+  function buildContainerModel(
+    types: Array<{ name: string; concurrencyModes: Array<string | undefined> }>,
+    sets: Array<{ name: string; entityType: string }>,
+    schemaAttributes: Record<string, string> = {},
+  ): ODataEdmxModelBase<any> {
+    return {
+      "edmx:Edmx": {
+        $: { Version: "1.0", "xmlns:edmx": "http://schemas.microsoft.com/ado/2007/06/edmx" },
+        "edmx:DataServices": [
+          {
+            Schema: [
+              {
+                $: { Namespace: "Tester", ...schemaAttributes },
+                EntityType: types.map((type) => ({
+                  $: { Name: type.name },
+                  Property: type.concurrencyModes.map((mode, index) => ({
+                    $: {
+                      Name: `Prop${index}`,
+                      Type: "Edm.String",
+                      ...(mode ? { ConcurrencyMode: mode } : {}),
+                    },
+                  })),
+                })),
+                EntityContainer: [
+                  {
+                    $: { Name: "Container" },
+                    EntitySet: sets.map((set) => ({ $: { Name: set.name, EntityType: set.entityType } })),
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    } as unknown as ODataEdmxModelBase<any>;
+  }
+
+  function setTermsOf(model: ODataEdmxModelBase<any>, index = 0): Array<string> {
+    const dataService = model["edmx:Edmx"]["edmx:DataServices"][0] as any;
+    const entitySet = dataService.Schema[0].EntityContainer[0].EntitySet[index];
+    return (entitySet.Annotation ?? []).map((annotation: Annotation) => annotation.$.Term);
+  }
+
+  test("a Fixed property makes every set of its type concurrency-controlled", () => {
+    const model = buildContainerModel(
+      [{ name: "Copy", concurrencyModes: ["Fixed"] }],
+      [{ name: "Copies", entityType: "Tester.Copy" }],
+    );
+    resolveV2Annotations(model);
+
+    expect(setTermsOf(model)).toEqual([CONCURRENCY]);
+  });
+
+  test("ConcurrencyMode=None states the opposite", () => {
+    const model = buildContainerModel(
+      [{ name: "Copy", concurrencyModes: ["None"] }],
+      [{ name: "Copies", entityType: "Tester.Copy" }],
+    );
+    resolveV2Annotations(model);
+
+    expect(setTermsOf(model)).toEqual([]);
+  });
+
+  test("no ConcurrencyMode at all changes nothing", () => {
+    const model = buildContainerModel(
+      [{ name: "Copy", concurrencyModes: [undefined] }],
+      [{ name: "Copies", entityType: "Tester.Copy" }],
+    );
+    resolveV2Annotations(model);
+
+    expect(setTermsOf(model)).toEqual([]);
+  });
+
+  test("several Fixed properties are still one statement", () => {
+    // Olingo joins every Fixed property into a single token; for us it stays a single yes
+    const model = buildContainerModel(
+      [{ name: "Copy", concurrencyModes: ["Fixed", "Fixed"] }],
+      [{ name: "Copies", entityType: "Tester.Copy" }],
+    );
+    resolveV2Annotations(model);
+
+    expect(setTermsOf(model)).toEqual([CONCURRENCY]);
+  });
+
+  test("every set of the type is marked, and no other", () => {
+    const model = buildContainerModel(
+      [
+        { name: "Copy", concurrencyModes: ["Fixed"] },
+        { name: "Book", concurrencyModes: [undefined] },
+      ],
+      [
+        { name: "Copies", entityType: "Tester.Copy" },
+        { name: "ArchivedCopies", entityType: "Tester.Copy" },
+        { name: "Books", entityType: "Tester.Book" },
+      ],
+    );
+    resolveV2Annotations(model);
+
+    expect(setTermsOf(model, 0)).toEqual([CONCURRENCY]);
+    expect(setTermsOf(model, 1)).toEqual([CONCURRENCY]);
+    expect(setTermsOf(model, 2)).toEqual([]);
+  });
+
+  test("a set naming its type through the schema alias is marked too", () => {
+    const model = buildContainerModel(
+      [{ name: "Copy", concurrencyModes: ["Fixed"] }],
+      [{ name: "Copies", entityType: "Self.Copy" }],
+      { Alias: "Self" },
+    );
+    resolveV2Annotations(model);
+
+    expect(setTermsOf(model)).toEqual([CONCURRENCY]);
+  });
+
+  test("a document without an entity container is left alone", () => {
+    const model = buildContainerModel([{ name: "Copy", concurrencyModes: ["Fixed"] }], []);
+    delete (model["edmx:Edmx"]["edmx:DataServices"][0] as any).Schema[0].EntityContainer;
+
+    expect(() => resolveV2Annotations(model)).not.toThrow();
   });
 });
