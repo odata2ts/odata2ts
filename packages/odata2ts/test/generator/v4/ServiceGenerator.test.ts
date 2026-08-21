@@ -41,7 +41,12 @@ describe("Service Generator Tests V4", () => {
     runOptions = getTestConfig();
   });
 
-  async function doGenerate(options?: ConfigFileOptions) {
+  /**
+   * The fixtures are bundled output, where every service class sits in the file being compared and no
+   * import is needed to reach it. `bundled: false` is for the cases where that is precisely what hides
+   * the thing under test - see the unbundled singleton case below.
+   */
+  async function doGenerate(options?: ConfigFileOptions, { bundled = true }: { bundled?: boolean } = {}) {
     runOptions = options ? deepmerge(runOptions, options) : runOptions;
     const namingHelper = new NamingHelper(runOptions, SERVICE_NAME);
     const dataModel = await fixtureComparatorHelper.createDataModel(
@@ -50,7 +55,7 @@ describe("Service Generator Tests V4", () => {
       runOptions,
     );
     projectManager = await createProjectManager("build", EmitModes.ts, namingHelper, dataModel, {
-      bundledFileGeneration: true,
+      bundledFileGeneration: bundled,
       noOutput: true,
       allowTypeChecking: true,
     });
@@ -130,6 +135,20 @@ describe("Service Generator Tests V4", () => {
 
     // then main service file encompasses a singleton
     await compareMainService("singleton.ts");
+  });
+
+  test("Service Generator: unbundled, a singleton brings in its own service", async () => {
+    // given a singleton whose entity type has no entity set, so nothing else refers to that service
+    odataBuilder
+      .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.String))
+      .addSingleton("CURRENT_USER", withNs("TestEntity"));
+
+    // when generating one file per model instead of one bundle
+    await doGenerate(undefined, { bundled: false });
+
+    // then the main service imports the service class it instantiates. Bundled output cannot show this:
+    // the class is declared in the very file, so a missing import is invisible there.
+    await compareMainService("singleton-unbundled.ts");
   });
 
   test("Service Generator: bound & unbound functions", async () => {

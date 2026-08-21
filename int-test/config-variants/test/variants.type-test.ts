@@ -1,4 +1,11 @@
 import { expectTypeOf } from "vitest";
+import type {
+  CopiesId as CapCopiesId,
+  EditableAudiobookChapters as CapEditableAudiobookChapters,
+  EditableAudiobooks as CapEditableAudiobooks,
+  EditableBooks as CapEditableBooks,
+  PublishersId as CapPublishersId,
+} from "../src-generated/deep-insert-composition-cap/library-service/index.js";
 import type { EditableMember as CompositionV2EditableMember } from "../src-generated/deep-insert-composition-v2/library-circulation/index.js";
 import type {
   Audiobook as CompositionAudiobook,
@@ -176,3 +183,20 @@ expectTypeOf<CompositionAudiobook["Copies"]>().toExtend<Array<unknown> | undefin
 // wholesale. A V2 service is exempt from the option instead, and keeps every navigation property.
 expectTypeOf<CompositionV2EditableMember["Loans"]>().toExtend<Array<unknown> | undefined>();
 expectTypeOf<CompositionV2EditableMember["Reservations"]>().toExtend<Array<unknown> | undefined>();
+
+/* --- deepInsertCompositionCap: the same value against the server it exists for -------------------- */
+
+// The composition CAP marks `@odata.contained` keeps the deep insert shape, because that is the one
+// relationship CAP writes deeply.
+expectTypeOf<CapEditableAudiobooks["Chapters"]>().toEqualTypeOf<Array<CapEditableAudiobookChapters> | undefined>();
+
+// The associations keep their binding and lose the nested entity - which is the point of the option
+// here: a nested payload on `Copies` is answered by CAP with a silent no-op and one on `Publisher` with a
+// 400, while binding an existing entity works on both. The type now permits only the half that works.
+expectTypeOf<CapEditableAudiobooks["Copies"]>().toEqualTypeOf<Array<{ "@id": CapCopiesId }> | undefined>();
+expectTypeOf<CapEditableBooks["Publisher"]>().toEqualTypeOf<{ "@id": CapPublishersId } | null | undefined>();
+
+// Containment reshapes the contained type as well: a chapter is identified within its audiobook, so CAP
+// drops the foreign key to the parent. Before the composition was annotated, the editable model demanded
+// an `up__Id` for an audiobook that did not exist yet.
+expectTypeOf<CapEditableAudiobookChapters>().not.toHaveProperty("up__Id");

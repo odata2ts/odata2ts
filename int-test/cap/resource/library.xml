@@ -42,10 +42,7 @@
         </EntitySet>
         <EntitySet Name="Audiobooks" EntityType="Library.Service.Audiobooks">
           <NavigationPropertyBinding Path="Copies" Target="Copies" />
-          <NavigationPropertyBinding Path="Chapters" Target="AudiobookChapters" />
-        </EntitySet>
-        <EntitySet Name="AudiobookChapters" EntityType="Library.Service.AudiobookChapters">
-          <NavigationPropertyBinding Path="up_" Target="Audiobooks" />
+          <NavigationPropertyBinding Path="Chapters/up_" Target="Audiobooks" />
         </EntitySet>
         <EntitySet Name="DVDs" EntityType="Library.Service.DVDs">
           <NavigationPropertyBinding Path="Copies" Target="Copies" />
@@ -202,20 +199,19 @@
         <Property Name="Duration" Type="Edm.Duration" />
         <Property Name="Narrator" Type="Edm.String" />
         <Property Name="Sample" Type="Edm.Stream" />
-        <NavigationProperty Name="Chapters" Type="Collection(Library.Service.AudiobookChapters)" Partner="up_">
-          <OnDelete Action="Cascade" />
-        </NavigationProperty>
+        <NavigationProperty
+          Name="Chapters"
+          Type="Collection(Library.Service.AudiobookChapters)"
+          Partner="up_"
+          ContainsTarget="true"
+        />
       </EntityType>
       <EntityType Name="AudiobookChapters">
         <Key>
           <PropertyRef Name="Id" />
-          <PropertyRef Name="up__Id" />
         </Key>
         <Property Name="Id" Type="Edm.Int32" Nullable="false" />
-        <NavigationProperty Name="up_" Type="Library.Service.Audiobooks" Partner="Chapters">
-          <ReferentialConstraint Property="up__Id" ReferencedProperty="Id" />
-        </NavigationProperty>
-        <Property Name="up__Id" Type="Edm.Guid" Nullable="false" />
+        <NavigationProperty Name="up_" Type="Library.Service.Audiobooks" Partner="Chapters" />
         <Property Name="Title" Type="Edm.String" />
         <Property Name="content" Type="Edm.Stream" />
       </EntityType>

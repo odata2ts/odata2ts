@@ -65,9 +65,11 @@ describe("CAP Library: deep insert", () => {
         // Edm.Duration, so a string - not a number
         Duration: "PT1H",
         Narrator: "Some Narrator",
-        // up__Id is the backlink to the parent, which does not exist yet - CAP fills it in and overwrites
-        // whatever was sent, but the editable model demands it, since it is a plain required property
-        Chapters: [{ Id: chapterId, up__Id: "00000000-0000-0000-0000-000000000000", Title: "First chapter" }],
+        // No backlink to the parent here: `Chapters` is a containment navigation property, so a chapter
+        // is identified within its audiobook and CAP keeps the foreign key out of the model entirely.
+        // Before `@odata.contained` the editable model demanded a `up__Id` for an audiobook that does
+        // not exist yet, and the value was overwritten the moment the parent was created.
+        Chapters: [{ Id: chapterId, Title: "First chapter" }],
       })
       .execute();
 
@@ -79,8 +81,6 @@ describe("CAP Library: deep insert", () => {
 
     expect(read.data.Chapters).toHaveLength(1);
     expect(read.data.Chapters?.[0].Title).toBe("First chapter");
-    // the backlink CAP maintains for a composition, filled in from the parent
-    expect(read.data.Chapters?.[0].up__Id).toBe(created.data.Id);
   });
 
   test("an association is accepted and then dropped", async () => {

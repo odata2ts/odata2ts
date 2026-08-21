@@ -268,7 +268,7 @@ class ServiceGenerator {
 
     Object.values(container.singletons).forEach((singleton) => {
       result.properties.push(this.generateSingletonProp(importContainer, singleton));
-      result.methods.push(this.generateSingletonGetter(singleton));
+      result.methods.push(this.generateSingletonGetter(importContainer, singleton));
     });
 
     return result;
@@ -349,7 +349,10 @@ class ServiceGenerator {
     singleton: SingletonType,
   ): OptionalKind<PropertyDeclarationStructure> {
     const { name, entityType } = singleton;
-    const type = entityType.serviceName;
+    // Registered rather than merely named: where the singleton's type has an entity set of its own, the
+    // import is already there from the entity set's getter, but a type reachable *only* as a singleton
+    // has nothing else to bring it in - and unbundled output then references a class it never imported.
+    const type = importContainer.addGeneratedService(entityType.fqName, entityType.serviceName);
 
     return {
       scope: Scope.Private,
@@ -368,10 +371,15 @@ class ServiceGenerator {
     };
   };
 
-  private generateSingletonGetter(singleton: SingletonType): OptionalKind<MethodDeclarationStructure> {
+  private generateSingletonGetter(
+    importContainer: ImportContainer,
+    singleton: SingletonType,
+  ): OptionalKind<MethodDeclarationStructure> {
     const { name, odataName, entityType } = singleton;
     const propName = "this." + this.namingHelper.getPrivatePropName(name);
-    const serviceType = entityType.serviceName;
+    // the registered name rather than the plain one: an import may have been aliased to avoid a clash,
+    // and the property declaration above went through the same call, so the two agree
+    const serviceType = importContainer.addGeneratedService(entityType.fqName, entityType.serviceName);
 
     return {
       scope: Scope.Public,
