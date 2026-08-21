@@ -22,22 +22,11 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ### ⚠ BREAKING CHANGES
 
-* previously we had the simple key heuristic, which removed single keys from the writing models; now those properties are there as optional properties (max interop); via `keyProperties: singleComputed` you get the previous behaviour; CAP users can try `keyProperties: strict` (works for all UUIDs OOTB)
-* **odata2ts:** the second type parameter of `EntityTypeServiceV2`/`V4`, `ComplexTypeServiceV2` and `MediaEntityServiceV2`/`V4` is the updatable model rather than the editable one. The arity is unchanged, so existing code compiles; only under `managedPropertyMode: "strictOmit"` do the two differ. `EntitySetServiceV2`/`V4` keeps the editable model for `create()`.
+* **odata-service:** the second type parameter of `EntityTypeServiceV2`/`V4`, `ComplexTypeServiceV2` and `MediaEntityServiceV2`/`V4` is the updatable model rather than the editable one. The arity is unchanged, so existing code compiles; only under `managedPropertyMode: "strictOmit"` do the two differ. `EntitySetServiceV2`/`V4` keeps the editable model for `create()`.
 
 ### Features
 
-* add Updatable models if needed, add `keyProperties` & `managedPropertyMode`options ([#497](https://github.com/odata2ts/odata2ts/issues/497)) ([d9910f5](https://github.com/odata2ts/odata2ts/commit/d9910f58a4ceb5c6fb1d664a0239111ed3973e7a))
-
-
-### Bug Fixes
-
-* **odata2ts:** pin examples/main to strict key handling ([d9910f5](https://github.com/odata2ts/odata2ts/commit/d9910f58a4ceb5c6fb1d664a0239111ed3973e7a))
-
-
-### Code Refactoring
-
-* **odata2ts:** option `managedPropertyDetection` is gone, never saw the light of a release ([d9910f5](https://github.com/odata2ts/odata2ts/commit/d9910f58a4ceb5c6fb1d664a0239111ed3973e7a))
+* add Updatable models if needed, add `keyProperties` & `managedPropertyMode` options ([#497](https://github.com/odata2ts/odata2ts/issues/497)) ([d9910f5](https://github.com/odata2ts/odata2ts/commit/d9910f58a4ceb5c6fb1d664a0239111ed3973e7a))
 
 
 ### Dependencies

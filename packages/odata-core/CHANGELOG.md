@@ -40,9 +40,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ## [0.7.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-core-v0.7.0...@odata2ts/odata-core-v0.7.1) (2026-08-21)
 
 
-### Features
+### Code Refactoring
 
-* **odata-core:** add helper to handle immutable props ([#496](https://github.com/odata2ts/odata2ts/issues/496)) ([320a96c](https://github.com/odata2ts/odata2ts/commit/320a96c36e29832978463483cd019f20a35862d5))
+* **odata-core:** split source files into folders ([9b2b689](https://github.com/odata2ts/odata2ts/commit/9b2b689))
+
+No change to the public API: the same names are exported from the package barrel, only their source files
+moved into `v2/` and `v4/`. The immutable-props helper added during this cycle
+([#496](https://github.com/odata2ts/odata2ts/issues/496)) was dropped again before release
+([6f5ddb6](https://github.com/odata2ts/odata2ts/commit/6f5ddb6)) and never existed in a published version.
 
 ## [0.7.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-core-v0.6.1...@odata2ts/odata-core-v0.7.0) (2026-08-05)
 
