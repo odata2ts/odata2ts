@@ -3,7 +3,7 @@ import { ODataModelPayloadFor, ODataModelResponseFor, ODataVersionV4 } from "@od
 import { ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { ModelResponseConverterV4, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
-import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
+import { UrlBuilderRequestCmdV4, UrlBuilderWriteRequestCmdV4, UrlWriteRequestCmd } from "../request";
 import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
@@ -51,15 +51,23 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
     patchOptions?: SubtypeOptions,
     queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
-    const { client, qModel, basePath, path, getDefaultHeaders, getVersionHeaders, createModelQueryBuilder } =
-      this.__base;
+    const {
+      client,
+      qModel,
+      basePath,
+      path,
+      getDefaultHeaders,
+      getVersionHeaders,
+      createModelQueryBuilder,
+      getConcurrencyOptions,
+    } = this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(patchOptions);
 
     // add control info automatically, if required
     const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
     const actualPath = dontUseCastPathSegment ? basePath : path;
 
-    return new UrlBuilderRequestCmdV4<
+    return new UrlBuilderWriteRequestCmdV4<
       EntityModificationResponseV4<Response, T, V>,
       Q,
       ModelQueryBuilderV4<Q>,
@@ -68,6 +76,7 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
       headers: { ...getDefaultHeaders(), ...getVersionHeaders() },
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
+      concurrency: getConcurrencyOptions(),
     });
   }
 
@@ -92,15 +101,23 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
     updateOptions?: SubtypeOptions,
     queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
-    const { client, basePath, path, getDefaultHeaders, getVersionHeaders, qModel, createModelQueryBuilder } =
-      this.__base;
+    const {
+      client,
+      basePath,
+      path,
+      getDefaultHeaders,
+      getVersionHeaders,
+      qModel,
+      createModelQueryBuilder,
+      getConcurrencyOptions,
+    } = this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(updateOptions);
 
     // add control info automatically, if required
     const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
     const actualPath = dontUseCastPathSegment ? basePath : path;
 
-    return new UrlBuilderRequestCmdV4<
+    return new UrlBuilderWriteRequestCmdV4<
       EntityModificationResponseV4<Response, T, V>,
       Q,
       ModelQueryBuilderV4<Q>,
@@ -109,6 +126,7 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
       headers: { ...getDefaultHeaders(), ...getVersionHeaders() },
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
+      concurrency: getConcurrencyOptions(),
     });
   }
 
@@ -120,8 +138,11 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
    * Spec: {@link https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_DeleteanEntity}
    */
   public delete() {
-    const { client, path } = this.__base;
-    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path);
+    const { client, path, getDefaultHeaders, getConcurrencyOptions } = this.__base;
+    return new UrlWriteRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined, {
+      headers: getDefaultHeaders(),
+      concurrency: getConcurrencyOptions(),
+    });
   }
 
   /**
@@ -132,7 +153,7 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
    * @param queryFn provide the query logic with the help of the builder and the query-object
    */
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void) {
-    const { client, qModel, createModelQueryBuilder, getDefaultHeaders } = this.__base;
+    const { client, qModel, createModelQueryBuilder, getDefaultHeaders, getConcurrencyOptions } = this.__base;
 
     return new UrlBuilderRequestCmdV4<ODataModelResponseFor<V, ReturnType>, Q, ModelQueryBuilderV4<Q>>(
       client,
@@ -143,6 +164,7 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new ModelResponseConverterV4(qModel),
+        concurrency: getConcurrencyOptions(),
       },
     );
   }

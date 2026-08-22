@@ -3,7 +3,7 @@ import { ODataEntityModelResponseV2, ODataModelResponseV4 } from "@odata2ts/odat
 import { ModelQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { EntityResponseConverterV2, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
-import { UrlBuilderRequestCmdV2, UrlRequestCmd } from "../request";
+import { UrlBuilderRequestCmdV2, UrlWriteRequestCmd } from "../request";
 import { MERGE_HEADERS } from "../RequestHeaders.js";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
@@ -87,8 +87,11 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
    * The service should respond with status 204 and no data.
    */
   public delete() {
-    const { client, path } = this.__base;
-    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined);
+    const { client, path, getDefaultHeaders, getConcurrencyOptions } = this.__base;
+    return new UrlWriteRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined, {
+      headers: getDefaultHeaders(),
+      concurrency: getConcurrencyOptions(),
+    });
   }
 
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {

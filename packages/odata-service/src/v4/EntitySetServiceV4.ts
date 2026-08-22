@@ -7,8 +7,9 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
+import { getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
-import { UrlBuilderRequestCmdV4 } from "../request";
+import { ConcurrencyOptions, UrlBuilderRequestCmdV4 } from "../request";
 import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
 
@@ -92,6 +93,47 @@ export abstract class EntitySetServiceV4<
   }
 
   /**
+   * The URL of one entity of this set - the very string the entity service of that entity builds for
+   * itself, which is what lets a collection read fill the store for entities nobody has read singly.
+   *
+   * Built from the mapped, user-facing property names, so it only works on a converted response.
+   */
+  private entityKeyOf(entry: any): string | undefined {
+    const params = this.__idFunction.getParams();
+    if (!params.length || params.some((p) => entry?.[p.getMappedName()] === undefined)) {
+      return undefined;
+    }
+    // a single key travels as the bare value, which is what yields the short form `People('russell')`;
+    // handing over an object would build `People(UserName='russell')` instead - a valid URL, and not the
+    // one the entity service addressing that entity uses, so the two would never meet in the store
+    const id =
+      params.length === 1
+        ? entry[params[0].getMappedName()]
+        : Object.fromEntries(params.map((p) => [p.getMappedName(), entry[p.getMappedName()]]));
+    return `${this.__base.basePath}/${this.__idFunction.buildUrl(id as EIdType, this.__base.isUrlNotEncoded())}`;
+  }
+
+  /**
+   * The concurrency options of a command over this collection: every row states its own ETag, and each is
+   * stored under the URL of the entity it describes - which is what makes "read the list, then patch one
+   * row" work without reading that row again.
+   *
+   * A single object is handled too, since a create answers with the entity it made.
+   */
+  protected getCollectionConcurrencyOptions(): ConcurrencyOptions {
+    return {
+      key: this.__base.path,
+      controlled: this.__base.isConcurrencyControlled(),
+      harvest: (data: any) => {
+        const rows: Array<any> = Array.isArray(data?.value) ? data.value : data ? [data] : [];
+        return rows
+          .map((entry) => [this.entityKeyOf(entry), getBodyETagV4(entry)])
+          .filter((pair): pair is [string, string] => !!pair[0] && !!pair[1]);
+      },
+    };
+  }
+
+  /**
    * Create a new model.
    * Spec: {@link https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_CreateanEntity}).
    *
@@ -132,6 +174,9 @@ export abstract class EntitySetServiceV4<
       headers: { ...getDefaultHeaders(), ...getVersionHeaders() },
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
+      // an entity that does not exist yet cannot require its own ETag, so a create is never gated - it
+      // only harvests, storing the ETag of what it just made
+      concurrency: { ...this.getCollectionConcurrencyOptions(), controlled: false },
     });
   }
 
@@ -155,6 +200,7 @@ export abstract class EntitySetServiceV4<
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new CollectionResponseConverterV4(qModel),
+        concurrency: this.getCollectionConcurrencyOptions(),
       },
     );
   }
