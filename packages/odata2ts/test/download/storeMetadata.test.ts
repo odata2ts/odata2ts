@@ -51,4 +51,12 @@ describe("StoreMetadata Test", () => {
     expect(resolveConfig).toHaveBeenCalled();
     expect(format).toHaveBeenCalledWith(DEFAULT_INPUT, { parser: "xml", plugins: ["@prettier/plugin-xml"] });
   });
+
+  test("resolve the config for the file, not its directory", async () => {
+    await storeMetadata(DEFAULT_SOURCE, DEFAULT_INPUT, true);
+
+    // prettier matches `overrides` against the path it is given, so a directory silently drops every
+    // override the user wrote for `*.xml` - which is where options like xmlWhitespaceSensitivity live
+    expect(resolveConfig).toHaveBeenCalledWith(DEFAULT_SOURCE);
+  });
 });
