@@ -147,16 +147,14 @@ describe("CAP Library V2: CRUD operations", () => {
     await expectODataError(LIBRARY_V2.Books(UNKNOWN_ID).delete().execute(), { status: 404, message: /Not Found/ });
   });
 
-  test("an entity with a concurrency token can be created, and then never changed again", async () => {
+  test("an entity with a concurrency token round-trips", async () => {
     /*
-     * `Copy.Condition` carries `@odata.etag`, so every write against a copy needs `If-Match`. That holds
-     * over V4 just as much - odata2ts has no ETag handling in either version, so `Copies` is create-only
-     * for this client, full stop.
+     * `Copy.Condition` carries `@odata.etag`, so every write against a copy needs `If-Match`. This used to
+     * be where the client stopped: `Copies` was create-only, in both versions.
      *
-     * What V2 adds is that the metadata finally *says* so: `ConcurrencyMode="Fixed"` on the property, where
-     * the V4 document emits an empty `Core.OptimisticConcurrency` annotation that names nothing. The
-     * information a client would need to implement this is present here and absent there - which makes the
-     * gap odata2ts', not the server's.
+     * What V2 adds is that the metadata finally *says* so - `ConcurrencyMode="Fixed"` on the property,
+     * where the V4 document emits an empty `Core.OptimisticConcurrency` annotation naming nothing. Both
+     * are enough, since the value a client needs always arrives in the response rather than in the model.
      */
     const copy = await LIBRARY_V2.Copies()
       .create({ MediumId: UNKNOWN_ID, InventoryNumber: 9821, IsLoanable: true, Condition: "1" })
@@ -164,17 +162,15 @@ describe("CAP Library V2: CRUD operations", () => {
     expect(copy.status).toBe(201);
 
     const key = { MediumId: UNKNOWN_ID, InventoryNumber: 9821 };
-    // the token the client would have to echo, and the only trace of it in the payload
     expect((await LIBRARY_V2.Copies(key).query().execute()).data.d.__metadata.etag).toMatch(/^W\//);
 
-    await expectODataError(LIBRARY_V2.Copies(key).patch({ IsLoanable: false }).execute(), {
-      status: 428,
-      message: /Precondition Required/,
-    });
-    await expectODataError(LIBRARY_V2.Copies(key).delete().execute(), {
-      status: 428,
-      message: /Precondition Required/,
-    });
+    const patched = await LIBRARY_V2.Copies(key).patch({ IsLoanable: false }).execute();
+    expect(patched.status).toBe(204);
+
+    // the patch made the old token stale, so the delete needs a fresh read of its own
+    await LIBRARY_V2.Copies(key).query().execute();
+    const deleted = await LIBRARY_V2.Copies(key).delete().execute();
+    expect(deleted.status).toBe(204);
   });
 
   test("a navigation property is addressable as a sub-resource", async () => {

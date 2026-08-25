@@ -1,7 +1,9 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { FetchClient } from "@odata2ts/http-client-fetch";
 import { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
+import { ODataConcurrencyError } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { Book, EditableBook } from "../../src-generated/library/index.js";
+import { Book, EditableBook, LibraryService } from "../../src-generated/library/index.js";
 import { expectODataError } from "../expectODataError.js";
 import { BASE_URL, BOOK_DER_PROZESS, COPY_KEY, LIBRARY, UNKNOWN_ID } from "../LibraryTestConstants.js";
 
@@ -134,23 +136,35 @@ describe("Olingo Library: CRUD operations", () => {
     await LIBRARY.Books(created.data.d.Id).delete().execute();
   });
 
-  test("an entity with a concurrency token demands a precondition odata2ts cannot send", async () => {
+  test("an entity with a concurrency token round-trips", async () => {
     /*
      * `Copy.Condition` is `ConcurrencyMode="Fixed"`, so every copy carries an ETag and Olingo refuses a
-     * write without `If-Match`. odata2ts has no ETag handling in its V2 services - nothing reads
-     * `__metadata.etag`, nothing sends the header - so `Copies` is read-only for this client.
-     *
-     * Note what the server does *not* do: it never compares the token it insists on, so 412 is
-     * unreachable and the 428 is the only part of optimistic concurrency that actually works. That is
-     * the server's gap, recorded in its FEATURE-COVERAGE.md §3.1; from here only the 428 is observable.
+     * write without `If-Match`. This used to be the end of the story - odata2ts read no `__metadata.etag`
+     * and sent no header, so `Copies` was read-only through the generated client. The V2 concurrency
+     * facet is now normalized into `Core.OptimisticConcurrency`, so the client does both.
      */
     const copy = await LIBRARY.Copies(COPY_KEY).query().execute();
     expect(copy.data.d.__metadata.etag).toMatch(/^W\//);
 
-    await expectODataError(LIBRARY.Copies(COPY_KEY).patch({ Status: "1" }).execute(), {
-      status: 428,
-      message: /[Pp]recondition required/,
+    // the read filled the ETag store, so the write carries `If-Match` without being told
+    const patched = await LIBRARY.Copies(COPY_KEY).patch({ Status: "1" }).execute();
+    expect(patched.status).toBe(204);
+  });
+
+  test("a stale concurrency token is refused", async () => {
+    // this server compares the token, unlike Olingo itself - see its FEATURE-COVERAGE.md §3.1
+    await LIBRARY.Copies(COPY_KEY).query().execute();
+
+    await expectODataError(LIBRARY.Copies(COPY_KEY).patch({ Status: "2" }).withETag('W/"stale"').execute(), {
+      status: 412,
+      message: /.*/,
     });
+  });
+
+  test("writing without reading first is refused before a request is sent", async () => {
+    const untouched = new LibraryService(new FetchClient(), BASE_URL);
+
+    await expect(untouched.Copies(COPY_KEY).patch({ Status: "3" }).execute()).rejects.toThrow(ODataConcurrencyError);
   });
 
   test("a navigation property is addressable as a sub-resource", async () => {
