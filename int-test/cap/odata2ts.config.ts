@@ -184,6 +184,12 @@ const config: ConfigFileOptions = {
       // is what makes `strict` safe here and pointless anywhere else: it demands a non-nullable key on
       // create, and after this release only `Branch` and `Copy` still are one.
       keyProperties: KeyProperties.strict,
+      // the one client generated with optimistic concurrency switched off, so that the escape hatch is
+      // exercised against a real server rather than only in the generator's unit tests: writing to
+      // `Copies` through this client reaches CAP without `If-Match` and is answered with 428
+      annotations: {
+        disableOptimisticConcurrency: true,
+      },
     },
     libraryV2: {
       serviceName: "LibraryV2",

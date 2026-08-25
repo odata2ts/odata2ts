@@ -90,12 +90,12 @@ describe("CAP Library V2: binary content", () => {
     });
 
     test("an unknown entity has no content either", async () => {
-      // 404 rather than the 204 of an entity without content. The message is the client's fallback: it
-      // reads the response of a binary request as a blob, error responses included, so the server's
-      // `{"error":{"message":{"value":"Not Found"}}}` is never looked into - same as against Olingo.
+      // 404 rather than the 204 of an entity without content. Since http-client-fetch 0.12 the error
+      // document of a binary request is decoded rather than handed on as an unread blob, so the server's
+      // own message arrives instead of the client's fallback.
       await expectODataError(LIBRARY_V2.EBooks(UNKNOWN_ID).getBlob().execute(), {
         status: 404,
-        message: /No error message/,
+        message: /Not Found/i,
       });
     });
   });

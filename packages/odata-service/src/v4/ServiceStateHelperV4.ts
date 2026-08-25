@@ -2,7 +2,9 @@ import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { ODataModelPayloadFor, ODataVersionV4 } from "@odata2ts/odata-core";
 import { CollectionQueryBuilderV4, createQueryBuilderV4, ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { QueryObjectModel } from "@odata2ts/odata-query-objects";
+import { getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
+import { ConcurrencyOptions } from "../request/RequestCmd.js";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
 
 export interface SubtypeOptions {
@@ -46,6 +48,27 @@ export class ServiceStateHelperV4<
     }
 
     return builder;
+  };
+
+  /**
+   * The concurrency options for a command addressing this very entity.
+   *
+   * An arrow-function property rather than a method, like everything else on the state helper the
+   * services reach for: they destructure it off `this.__base`, and a method would lose its `this` the
+   * moment it is pulled off the object.
+   *
+   * Reading the body's ETag goes through {@link getBodyETagV4}, which knows both the 4.0 and the 4.01
+   * spelling - never hard-code either here.
+   */
+  public getConcurrencyOptions = (): ConcurrencyOptions => {
+    return {
+      key: this.path,
+      controlled: this.isConcurrencyControlled(),
+      harvest: (data: any) => {
+        const etag = getBodyETagV4(data);
+        return etag ? [[this.path, etag] as [string, string]] : [];
+      },
+    };
   };
 
   public evaluateSubtypeOptions(options: SubtypeOptions | undefined) {

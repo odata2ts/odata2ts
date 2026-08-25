@@ -1,7 +1,38 @@
-import { ODataHttpClient, ODataHttpMethods, ODataRequestConfig, ODataResponse } from "@odata2ts/http-client-api";
+import {
+  ConcurrencyHandler,
+  ODataHttpClient,
+  ODataHttpMethods,
+  ODataRequestConfig,
+  ODataResponse,
+} from "@odata2ts/http-client-api";
 
 export interface MockRequestConfig extends ODataRequestConfig {
   test: string;
+}
+
+/**
+ * The ETag store of a {@link MockClient}, with its contents exposed so a test can arrange and assert it.
+ *
+ * Hand-rolled rather than borrowed from `@odata2ts/http-client-common`: what is under test here is
+ * `odata-service` against the {@link ConcurrencyHandler} *contract*, and depending on one particular
+ * implementation of it would blur that - besides making a client package a dependency of this one.
+ */
+export class MockConcurrencyHandler implements ConcurrencyHandler {
+  public readonly store = new Map<string, string>();
+  /** Resolve an unknown key to `*` instead of nothing - see `blindConcurrencyWrites`. */
+  public blindWrites = false;
+
+  public set(key: string, etag: string): void {
+    this.store.set(key, etag);
+  }
+
+  public evict(key: string): void {
+    this.store.delete(key);
+  }
+
+  public resolve(key: string): string | undefined {
+    return this.store.get(key) ?? (this.blindWrites ? "*" : undefined);
+  }
 }
 /**
  * Mock for an ODataHttpClient.
@@ -17,6 +48,15 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
   public additionalHeaders?: Record<string, string>;
 
   public responseData?: any;
+
+  /** How many requests actually reached this client - a write refused before sending must add none. */
+  public requestCount = 0;
+  /** The status the next response carries; 204 is the interesting one for optimistic concurrency. */
+  public responseStatus = 200;
+  /** The headers the next response carries, e.g. `{ etag: 'W/"7"' }`. */
+  public responseHeaders: Record<string, string> = {};
+
+  public readonly concurrency = new MockConcurrencyHandler();
 
   constructor(public isV2: boolean) {}
 
@@ -233,10 +273,11 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
   }
 
   private respond() {
+    this.requestCount++;
     const result = Promise.resolve({
-      status: 200,
+      status: this.responseStatus,
       statusText: "OK",
-      headers: {},
+      headers: this.responseHeaders,
       data: this.responseData ?? null,
     });
 

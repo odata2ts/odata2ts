@@ -43,4 +43,12 @@ export class ServiceStateHelper<V extends ODataVersionV4 = "4.0"> {
   public isUrlNotEncoded = () => {
     return !!this.options.noUrlEncoding;
   };
+
+  /**
+   * Whether modifying this resource requires an ETag - the generator writes the flag into the options of
+   * a service whose entity set states `Core.OptimisticConcurrency`.
+   */
+  public isConcurrencyControlled = () => {
+    return !!this.options.concurrencyControlled;
+  };
 }
