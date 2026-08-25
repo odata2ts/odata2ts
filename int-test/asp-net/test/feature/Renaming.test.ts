@@ -25,7 +25,7 @@ describe("ASP.NET Library: renaming", () => {
   const copyKey = (inventoryNumber: number) => ({ mediumId: BOOK_DER_PROZESS, inventoryNumber });
 
   afterAll(async () => {
-    await LIBRARY_RENAMED.copies(copyKey(RENAMED_COPY)).delete().execute();
+    await LIBRARY_RENAMED.copies(copyKey(RENAMED_COPY)).delete().ignoreETag().execute();
   });
 
   test("the response is read back into the renamed properties", async () => {

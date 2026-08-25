@@ -30,7 +30,7 @@ describe("ASP.NET Library: binding existing entities", () => {
   // refused with 409, which would make a re-run against the same server fail on the first test.
   afterAll(async () => {
     for (const inventoryNumber of [BOUND_ON_CREATE, BOUND_TO_CONSTRAINED_NAV, BOUND_WITH_401_NOTATION]) {
-      await LIBRARY.Copies(copyKey(inventoryNumber)).delete().execute();
+      await LIBRARY.Copies(copyKey(inventoryNumber)).delete().ignoreETag().execute();
     }
   });
 
@@ -57,7 +57,12 @@ describe("ASP.NET Library: binding existing entities", () => {
   test("patching the binding re-points the link", async () => {
     const copy = LIBRARY.Copies(copyKey(BOUND_ON_CREATE));
 
-    const patched = await copy.patch({ Location: { "@id": BRANCH_SUBURBAN } }).execute();
+    // `Copies` is concurrency-controlled and ASP.NET states no ETag on a create, so this write - which
+    // is about binding, not about concurrency - says so rather than reading the copy again first
+    const patched = await copy
+      .patch({ Location: { "@id": BRANCH_SUBURBAN } })
+      .ignoreETag()
+      .execute();
     expect(patched.status).toBe(204);
 
     const location = await copy.Location().query().execute();
@@ -84,7 +89,7 @@ describe("ASP.NET Library: binding existing entities", () => {
   test("binding to null clears the link", async () => {
     const copy = LIBRARY.Copies(copyKey(BOUND_ON_CREATE));
 
-    const patched = await copy.patch({ Location: null }).execute();
+    const patched = await copy.patch({ Location: null }).ignoreETag().execute();
     expect(patched.status).toBe(204);
 
     // the link is gone, so the navigation target is not there any more - and this server sends no error

@@ -90,7 +90,9 @@ export function commonEntityTypeServiceTests(
     expect(result.method).toBe("DELETE");
     expect(result.data).toBeUndefined();
     expect(odataClient.lastRequestConfig).toBeUndefined();
-    expect(result.headers).toBeUndefined();
+    // delete carried no headers at all until optimistic concurrency arrived; it now states what it
+    // accepts like every other operation, which is also what lets it carry `If-Match`
+    expect(result.headers).toStrictEqual(DEFAULT_HEADERS);
 
     expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });

@@ -1,5 +1,7 @@
 import { HttpResponseModel, ODataHttpClient, ODataHttpMethods, ODataRequestConfig } from "@odata2ts/http-client-api";
 import { MainResponseConverter } from "@odata2ts/odata-query-objects";
+import { getHeaderETag } from "../ETagExtraction";
+import { ODataConcurrencyError } from "../ODataConcurrencyError";
 import { MainRequestConverter, RequestConverter } from "./converter/RequestConverter";
 import { RequestConverterChain } from "./converter/RequestConverterChain";
 import { ResponseConverter } from "./converter/ResponseConverter";
@@ -7,11 +9,34 @@ import { ResponseConverterChain } from "./converter/ResponseConverterChain";
 import { NoInferConfig } from "./NoInferConfig";
 import { RequestInfo } from "./RequestInfo";
 
+/**
+ * What a command needs in order to take part in optimistic concurrency control.
+ *
+ * Filled in by the service which creates the command, because only that service knows which resource is
+ * addressed, whether it is under concurrency control, and how to read an ETag out of a response body of
+ * its own OData version.
+ */
+export interface ConcurrencyOptions {
+  /** The resource this command addresses; the key its ETag is stored under. */
+  key: string;
+  /** Whether the service states `Core.OptimisticConcurrency` for this resource. */
+  controlled: boolean;
+  /**
+   * Every (key, ETag) pair the response body yields: at most one for an entity, one per row for a
+   * collection. Left out where the body cannot carry one.
+   */
+  harvest?: (data: any) => Array<[string, string]>;
+}
+
 export interface RequestCmdOptions<ResponseStructure, DataStructure> {
   /**
    * Set headers for the request.
    */
   headers?: Record<string, string>;
+  /**
+   * Optimistic concurrency control for this request - see {@link ConcurrencyOptions}.
+   */
+  concurrency?: ConcurrencyOptions;
   /**
    * Sets the main request converter which converts from the user facing model
    * to the OData facing model.
@@ -34,6 +59,12 @@ export abstract class RequestCmd<
 > {
   private readonly requestConverter: RequestConverterChain<DataStructure>;
   private readonly responseConverter: ResponseConverterChain<ResponseStructure, FinalResponseStructure>;
+
+  /**
+   * An ETag the caller stated, or `"*"` where the caller chose to write past whatever is current. Set
+   * through the write command classes; when present it wins over the store.
+   */
+  protected etagOverride?: string;
 
   public constructor(
     protected client: ODataHttpClient,
@@ -155,13 +186,78 @@ export abstract class RequestCmd<
     requestConfig?: NoInferConfig<RequestConfig>,
   ) {
     // apply request converters
-    const request = this.getInfoConverted();
+    const request = this.applyConcurrency(this.getInfoConverted());
 
     // execute the request
     const response = await this.sendRequest(request, requestConfig);
 
     // apply response converters
-    return this.convertResponse(response);
+    const converted = this.convertResponse(response);
+
+    // harvest afterwards, deliberately: the property names a collection service builds its keys from are
+    // the mapped, user-facing ones, which only exist once the converters have run
+    this.updateConcurrency(response);
+
+    return converted;
+  }
+
+  /**
+   * Adds the `If-Match` header a write to a concurrency-controlled resource requires (OData V4.01 Part 1,
+   * §8.3.1), or refuses the write where nothing is known: the service would answer `428` and change
+   * nothing, so there is nothing to gain from sending it.
+   */
+  private applyConcurrency(request: RequestInfo<any>): RequestInfo<any> {
+    const { concurrency } = this.options;
+    if (!concurrency || this.method === ODataHttpMethods.Get) {
+      return request;
+    }
+
+    // the store is consulted only where the service says an ETag is required. An ETag alone is no licence
+    // to send `If-Match` - §11.4.1.1 is explicit that a service may hand one out purely for caching, and
+    // sending it anyway would turn writes that succeed today into 412s. An ETag the caller stated is a
+    // different matter: that is a decision, and it is honoured whatever the metadata says.
+    const etag =
+      this.etagOverride ?? (concurrency.controlled ? this.client.concurrency?.resolve(concurrency.key) : undefined);
+    if (!etag) {
+      if (concurrency.controlled) {
+        throw new ODataConcurrencyError(concurrency.key);
+      }
+      return request;
+    }
+
+    return new RequestInfo(request.method, request.url, { ...request.headers, "If-Match": etag }, request.data);
+  }
+
+  /**
+   * Keeps the ETag store in step with what the service just said.
+   *
+   * A read stores what it learned. A write takes the new ETag where the service handed one back and
+   * forgets the old one otherwise - keeping it would fail the next write with a `412` although nobody
+   * else had touched the resource. A delete forgets it either way.
+   */
+  private updateConcurrency(response: HttpResponseModel<any>): void {
+    const { concurrency } = this.options;
+    const handler = this.client.concurrency;
+    if (!concurrency || !handler) {
+      return;
+    }
+
+    if (this.method === ODataHttpMethods.Delete) {
+      handler.evict(concurrency.key);
+      return;
+    }
+
+    const headerETag = getHeaderETag(response.headers);
+    if (headerETag) {
+      handler.set(concurrency.key, headerETag);
+    } else if (this.method !== ODataHttpMethods.Get) {
+      handler.evict(concurrency.key);
+    }
+
+    // the body may say more than the header does - a collection states one ETag per row
+    for (const [key, etag] of concurrency.harvest?.(response.data) ?? []) {
+      handler.set(key, etag);
+    }
   }
 
   /**

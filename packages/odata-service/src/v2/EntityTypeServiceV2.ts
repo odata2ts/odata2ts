@@ -3,7 +3,7 @@ import { ODataEntityModelResponseV2, ODataModelResponseV4 } from "@odata2ts/odat
 import { ModelQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { EntityResponseConverterV2, QueryObjectModel } from "@odata2ts/odata-query-objects";
 import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
-import { UrlBuilderRequestCmdV2, UrlRequestCmd } from "../request";
+import { UrlBuilderRequestCmdV2, UrlBuilderWriteRequestCmdV2, UrlWriteRequestCmd } from "../request";
 import { MERGE_HEADERS } from "../RequestHeaders.js";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
@@ -40,10 +40,11 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
    * @param model
    */
   public patch(model: Partial<UpdatableT>, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
-    const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
+    const { client, qModel, getDefaultHeaders, createModelQueryBuilder, getConcurrencyOptions } = this.__base;
+    // the If-Match header rides alongside the X-Http-Method one: a V2 patch travels as MERGE
     const headers = { ...getDefaultHeaders(), ...MERGE_HEADERS };
 
-    return new UrlBuilderRequestCmdV2<undefined, Q, ModelQueryBuilderV2<Q>, Partial<UpdatableT>>(
+    return new UrlBuilderWriteRequestCmdV2<undefined, Q, ModelQueryBuilderV2<Q>, Partial<UpdatableT>>(
       client,
       ODataHttpMethods.Post,
       createModelQueryBuilder(queryFn),
@@ -52,6 +53,7 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
       {
         headers,
         mainRequestConverter: qModel,
+        concurrency: getConcurrencyOptions(),
       },
     );
   }
@@ -65,9 +67,9 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
    * @param model
    */
   public update(model: UpdatableT, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
-    const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
+    const { client, qModel, getDefaultHeaders, createModelQueryBuilder, getConcurrencyOptions } = this.__base;
 
-    return new UrlBuilderRequestCmdV2<undefined, Q, ModelQueryBuilderV2<Q>, UpdatableT>(
+    return new UrlBuilderWriteRequestCmdV2<undefined, Q, ModelQueryBuilderV2<Q>, UpdatableT>(
       client,
       ODataHttpMethods.Put,
       createModelQueryBuilder(queryFn),
@@ -76,6 +78,7 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
       {
         headers: getDefaultHeaders(),
         mainRequestConverter: qModel,
+        concurrency: getConcurrencyOptions(),
       },
     );
   }
@@ -87,12 +90,15 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
    * The service should respond with status 204 and no data.
    */
   public delete() {
-    const { client, path } = this.__base;
-    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined);
+    const { client, path, getDefaultHeaders, getConcurrencyOptions } = this.__base;
+    return new UrlWriteRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined, {
+      headers: getDefaultHeaders(),
+      concurrency: getConcurrencyOptions(),
+    });
   }
 
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
-    const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
+    const { client, qModel, getDefaultHeaders, createModelQueryBuilder, getConcurrencyOptions } = this.__base;
 
     return new UrlBuilderRequestCmdV2<
       AsV4 extends true ? ODataModelResponseV4<ReturnType> : ODataEntityModelResponseV2<ReturnType>,
@@ -101,6 +107,7 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
     >(client, ODataHttpMethods.Get, createModelQueryBuilder(queryFn), qModel, undefined, {
       headers: getDefaultHeaders(),
       mainResponseConverter: new EntityResponseConverterV2<ReturnType, AsV4>(qModel, this.__base.isAsV4()),
+      concurrency: getConcurrencyOptions(),
     });
   }
 }
