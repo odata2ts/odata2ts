@@ -1,8 +1,9 @@
 import { FetchClient } from "@odata2ts/http-client-fetch";
-import { ODataConcurrencyError } from "@odata2ts/odata-service";
+import { isConcurrencyConflict, isConcurrencyRequired, ODataConcurrencyError } from "@odata2ts/odata-service";
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "vitest";
 import { LibraryService } from "../../src-generated/library/index.js";
 import { AvailabilityStatus } from "../../src-generated/library/library-catalog/index.js";
+import { expectODataError } from "../expectODataError.js";
 import { BASE_URL, BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
@@ -69,16 +70,16 @@ describe("ASP.NET Library: optimistic concurrency", () => {
     await expect(untouched.Copies(COPY).patch({ Condition: 7 }).execute()).rejects.toThrow(ODataConcurrencyError);
   });
 
-  test("a stale ETag is accepted - this server does not compare the token", async () => {
-    /*
-     * ASP.NET announces `Core.OptimisticConcurrency` for `Copies` and then does not enforce it: a write
-     * carrying a token that cannot be current succeeds anyway. That is a gap in `test-server-asp-net`,
-     * not in the client - CAP and Olingo both answer 412 here, and the same assertion is made against
-     * them. Pinned rather than skipped, so that fixing the server turns this test red.
-     */
-    const result = await LIBRARY.Copies(COPY).patch({ Condition: 8 }).withETag('W/"stale"').execute();
+  test("a stale ETag is refused by the server", async () => {
+    // the 412 carries no error payload here, so there is no message to pin - unlike the status, which
+    // is what the client turns into a concurrency conflict
+    const error = await expectODataError(LIBRARY.Copies(COPY).patch({ Condition: 8 }).withETag('W/"stale"').execute(), {
+      status: 412,
+      message: /.*/,
+    });
 
-    expect([200, 204]).toContain(result.status);
+    expect(isConcurrencyConflict(error)).toBe(true);
+    expect(isConcurrencyRequired(error)).toBe(false);
   });
 
   test("ignoreETag writes past whatever is current", async () => {
