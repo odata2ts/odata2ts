@@ -7,6 +7,7 @@ import {
   EntityTypeServiceV2,
   MediaEntityServiceV2,
   ODataServiceOptions,
+  ODataServiceOptionsInternalV2,
   PrimitiveTypeServiceV2,
   UrlRequestCmd,
 } from "../../../src";
@@ -38,7 +39,7 @@ export class PersonModelV2Service extends EntityTypeServiceV2<PersonModel, Edita
     return new PersonModelV2CollectionService(client, path, "Friends", options);
   }
 
-  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternalV2) {
     super(client, basePath, name, new QPersonV2(), options);
   }
 
@@ -53,7 +54,7 @@ export class PersonModelV2Service extends EntityTypeServiceV2<PersonModel, Edita
 
 /** Same entity, only declared `m:HasStream="true"` - which is all the generator does differently. */
 export class PersonModelV2MediaService extends MediaEntityServiceV2<PersonModel, EditablePersonModel, QPersonV2> {
-  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternalV2) {
     super(client, basePath, name, new QPersonV2(), options);
   }
 }
@@ -64,7 +65,7 @@ export class PersonModelV2CollectionService extends EntitySetServiceV2<
   QPersonV2,
   PersonId
 > {
-  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
+  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternalV2) {
     super(client, basePath, name, qPersonV2, new QPersonIdFunction(name), options);
   }
 }

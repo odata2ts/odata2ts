@@ -12,8 +12,9 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
+import { getBodyETagV2, getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
-import { UrlBuilderRequestCmdV2 } from "../request";
+import { ConcurrencyOptions, UrlBuilderRequestCmdV2 } from "../request";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
 /**
@@ -93,6 +94,51 @@ export abstract class EntitySetServiceV2<
    * @param queryFn additional query after the entity has been created, only $select and $expand apply here
    * @return
    */
+  /**
+   * The URL of one entity of this set - the very string the entity service of that entity builds for
+   * itself, which is what lets a collection read fill the store for entities nobody read singly.
+   */
+  private entityKeyOf(entry: any): string | undefined {
+    const params = this.__idFunction.getParams();
+    if (!params.length || params.some((p) => entry?.[p.getMappedName()] === undefined)) {
+      return undefined;
+    }
+    // a single key travels as the bare value, which is what yields the short form the entity service uses
+    const id =
+      params.length === 1
+        ? entry[params[0].getMappedName()]
+        : Object.fromEntries(params.map((p) => [p.getMappedName(), entry[p.getMappedName()]]));
+    return `${this.__base.basePath}/${this.__idFunction.buildUrl(id as EIdType, this.__base.isUrlNotEncoded())}`;
+  }
+
+  /**
+   * The concurrency options of a command over this collection.
+   *
+   * A raw V2 collection arrives as `{ d: { results: [...] } }` and states each ETag in `__metadata`; one
+   * reshaped as V4 has had the envelope removed and the control information rewritten, so the reader is
+   * chosen here rather than by a helper trying every spelling.
+   */
+  protected getCollectionConcurrencyOptions(): ConcurrencyOptions {
+    const asV4 = this.__base.isAsV4();
+    return {
+      key: this.__base.path,
+      controlled: this.__base.isConcurrencyControlled(),
+      harvest: (data: any) => {
+        const payload = asV4 ? data : data?.d;
+        const rows: Array<any> = Array.isArray(payload?.value)
+          ? payload.value
+          : Array.isArray(payload?.results)
+            ? payload.results
+            : payload
+              ? [payload]
+              : [];
+        return rows
+          .map((entry) => [this.entityKeyOf(entry), asV4 ? getBodyETagV4(entry) : getBodyETagV2(entry)])
+          .filter((pair): pair is [string, string] => !!pair[0] && !!pair[1]);
+      },
+    };
+  }
+
   public create(model: EditableT, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
@@ -122,6 +168,7 @@ export abstract class EntitySetServiceV2<
       AsV4 extends true ? ODataCollectionResponseV4<ReturnType> : ODataCollectionResponseV2<ReturnType>,
       Q
     >(client, ODataHttpMethods.Get, createQueryBuilder(queryFn), qModel, undefined, {
+      concurrency: this.getCollectionConcurrencyOptions(),
       headers: getDefaultHeaders(),
       mainResponseConverter: new CollectionResponseConverterV2<ReturnType, AsV4>(qModel, this.__base.isAsV4()),
     });

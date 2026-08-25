@@ -68,7 +68,7 @@ describe("ASP.NET Library: data types", () => {
       { status: 409, message: /exists for this medium/ },
     );
 
-    const deleted = await LIBRARY.Copies(key).delete().execute();
+    const deleted = await LIBRARY.Copies(key).delete().ignoreETag().execute();
     expect(deleted.status).toBe(204);
   });
 
