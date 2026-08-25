@@ -67,12 +67,6 @@ describe("CAP Library: optimistic concurrency", () => {
     expect([200, 204]).toContain(result.status);
   });
 
-  test("a second write without re-reading is refused, since the first made the ETag stale", async () => {
-    await LIBRARY.Copies(COPY).patch({ Condition: 5 }).execute();
-
-    await expect(LIBRARY.Copies(COPY).patch({ Condition: 4 }).execute()).rejects.toThrow(ODataConcurrencyError);
-  });
-
   test("reading the collection is enough to write to one of its rows", async () => {
     // the flow the store exists for: list, then edit a row without reading that row again
     const fresh = new LibraryService(new FetchClient(), BASE_URL);

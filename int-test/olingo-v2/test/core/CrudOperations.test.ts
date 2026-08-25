@@ -147,7 +147,7 @@ describe("Olingo Library: CRUD operations", () => {
     expect(copy.data.d.__metadata.etag).toMatch(/^W\//);
 
     // the read filled the ETag store, so the write carries `If-Match` without being told
-    const patched = await LIBRARY.Copies(COPY_KEY).patch({ Status: "1" }).execute();
+    const patched = await LIBRARY.Copies(COPY_KEY).patch({ IsLoanable: false }).execute();
     expect([200, 204]).toContain(patched.status);
   });
 
@@ -155,7 +155,7 @@ describe("Olingo Library: CRUD operations", () => {
     // this server compares the token, unlike Olingo itself - see its FEATURE-COVERAGE.md §3.1
     await LIBRARY.Copies(COPY_KEY).query().execute();
 
-    await expectODataError(LIBRARY.Copies(COPY_KEY).patch({ Status: "2" }).withETag('W/"stale"').execute(), {
+    await expectODataError(LIBRARY.Copies(COPY_KEY).patch({ IsLoanable: true }).withETag('W/"stale"').execute(), {
       status: 412,
       message: /.*/,
     });
@@ -164,7 +164,9 @@ describe("Olingo Library: CRUD operations", () => {
   test("writing without reading first is refused before a request is sent", async () => {
     const untouched = new LibraryService(new FetchClient(), BASE_URL);
 
-    await expect(untouched.Copies(COPY_KEY).patch({ Status: "3" }).execute()).rejects.toThrow(ODataConcurrencyError);
+    await expect(untouched.Copies(COPY_KEY).patch({ IsLoanable: true }).execute()).rejects.toThrow(
+      ODataConcurrencyError,
+    );
   });
 
   test("a navigation property is addressable as a sub-resource", async () => {
