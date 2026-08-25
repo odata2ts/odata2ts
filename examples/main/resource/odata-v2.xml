@@ -1,38 +1,94 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
-  <edmx:DataServices xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" m:DataServiceVersion="2.0">
-    <Schema Namespace="ODataDemo" xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns="http://schemas.microsoft.com/ado/2007/05/edm">
+  <edmx:DataServices
+    xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"
+    m:DataServiceVersion="2.0"
+  >
+    <Schema
+      Namespace="ODataDemo"
+      xmlns:d="http://schemas.microsoft.com/ado/2007/08/dataservices"
+      xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"
+      xmlns="http://schemas.microsoft.com/ado/2007/05/edm"
+    >
       <EntityType Name="Product">
         <Key>
           <PropertyRef Name="ID" />
         </Key>
         <Property Name="ID" Type="Edm.Int32" Nullable="false" />
-        <Property Name="Name" Type="Edm.String" Nullable="true" m:FC_TargetPath="SyndicationTitle" m:FC_ContentKind="text" m:FC_KeepInContent="false" />
-        <Property Name="Description" Type="Edm.String" Nullable="true" m:FC_TargetPath="SyndicationSummary" m:FC_ContentKind="text" m:FC_KeepInContent="false" />
+        <Property
+          Name="Name"
+          Type="Edm.String"
+          Nullable="true"
+          m:FC_TargetPath="SyndicationTitle"
+          m:FC_ContentKind="text"
+          m:FC_KeepInContent="false"
+        />
+        <Property
+          Name="Description"
+          Type="Edm.String"
+          Nullable="true"
+          m:FC_TargetPath="SyndicationSummary"
+          m:FC_ContentKind="text"
+          m:FC_KeepInContent="false"
+        />
         <Property Name="ReleaseDate" Type="Edm.DateTime" Nullable="false" />
         <Property Name="DiscontinuedDate" Type="Edm.DateTime" Nullable="true" />
         <Property Name="Rating" Type="Edm.Int32" Nullable="false" />
         <Property Name="Price" Type="Edm.Decimal" Nullable="false" />
-        <NavigationProperty Name="Category" Relationship="ODataDemo.Product_Category_Category_Products" FromRole="Product_Category" ToRole="Category_Products" />
-        <NavigationProperty Name="Supplier" Relationship="ODataDemo.Product_Supplier_Supplier_Products" FromRole="Product_Supplier" ToRole="Supplier_Products" />
+        <NavigationProperty
+          Name="Category"
+          Relationship="ODataDemo.Product_Category_Category_Products"
+          FromRole="Product_Category"
+          ToRole="Category_Products"
+        />
+        <NavigationProperty
+          Name="Supplier"
+          Relationship="ODataDemo.Product_Supplier_Supplier_Products"
+          FromRole="Product_Supplier"
+          ToRole="Supplier_Products"
+        />
       </EntityType>
       <EntityType Name="Category">
         <Key>
           <PropertyRef Name="ID" />
         </Key>
         <Property Name="ID" Type="Edm.Int32" Nullable="false" />
-        <Property Name="Name" Type="Edm.String" Nullable="true" m:FC_TargetPath="SyndicationTitle" m:FC_ContentKind="text" m:FC_KeepInContent="true" />
-        <NavigationProperty Name="Products" Relationship="ODataDemo.Product_Category_Category_Products" FromRole="Category_Products" ToRole="Product_Category" />
+        <Property
+          Name="Name"
+          Type="Edm.String"
+          Nullable="true"
+          m:FC_TargetPath="SyndicationTitle"
+          m:FC_ContentKind="text"
+          m:FC_KeepInContent="true"
+        />
+        <NavigationProperty
+          Name="Products"
+          Relationship="ODataDemo.Product_Category_Category_Products"
+          FromRole="Category_Products"
+          ToRole="Product_Category"
+        />
       </EntityType>
       <EntityType Name="Supplier">
         <Key>
           <PropertyRef Name="ID" />
         </Key>
         <Property Name="ID" Type="Edm.Int32" Nullable="false" />
-        <Property Name="Name" Type="Edm.String" Nullable="true" m:FC_TargetPath="SyndicationTitle" m:FC_ContentKind="text" m:FC_KeepInContent="true" />
+        <Property
+          Name="Name"
+          Type="Edm.String"
+          Nullable="true"
+          m:FC_TargetPath="SyndicationTitle"
+          m:FC_ContentKind="text"
+          m:FC_KeepInContent="true"
+        />
         <Property Name="Address" Type="ODataDemo.Address" Nullable="false" />
         <Property Name="Concurrency" Type="Edm.Int32" Nullable="false" ConcurrencyMode="Fixed" />
-        <NavigationProperty Name="Products" Relationship="ODataDemo.Product_Supplier_Supplier_Products" FromRole="Supplier_Products" ToRole="Product_Supplier" />
+        <NavigationProperty
+          Name="Products"
+          Relationship="ODataDemo.Product_Supplier_Supplier_Products"
+          FromRole="Supplier_Products"
+          ToRole="Product_Supplier"
+        />
       </EntityType>
       <ComplexType Name="Address">
         <Property Name="Street" Type="Edm.String" Nullable="true" />
@@ -61,7 +117,12 @@
           <End Role="Product_Supplier" EntitySet="Products" />
           <End Role="Supplier_Products" EntitySet="Suppliers" />
         </AssociationSet>
-        <FunctionImport Name="GetProductsByRating" EntitySet="Products" ReturnType="Collection(ODataDemo.Product)" m:HttpMethod="GET">
+        <FunctionImport
+          Name="GetProductsByRating"
+          EntitySet="Products"
+          ReturnType="Collection(ODataDemo.Product)"
+          m:HttpMethod="GET"
+        >
           <Parameter Name="rating" Type="Edm.Int32" Mode="In" />
         </FunctionImport>
       </EntityContainer>
