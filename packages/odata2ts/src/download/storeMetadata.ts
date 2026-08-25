@@ -15,7 +15,9 @@ export async function storeMetadata(filePath: string, metadataXml: string, prett
 
   let prettified = metadataXml;
   if (prettify) {
-    const prettierConfig = await resolveConfig(outDir);
+    // the file rather than its directory: prettier matches `overrides` against the path it is given,
+    // and the options for XML - xmlWhitespaceSensitivity above all - only ever live in such an override
+    const prettierConfig = await resolveConfig(filePath);
     prettified = await format(
       metadataXml,
       // @ts-ignore: xmlWhitespaceSensitivity is an option of the plugin
