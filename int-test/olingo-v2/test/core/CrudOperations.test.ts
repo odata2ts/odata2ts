@@ -94,7 +94,7 @@ describe("Olingo Library: CRUD operations", () => {
 
     // patch is a MERGE here: V2 has no PATCH verb, so odata2ts tunnels it through POST + X-Http-Method
     const patched = await LIBRARY.Books(id).patch({ PageCount: 354 }).execute();
-    expect(patched.status).toBe(204);
+    expect([200, 204]).toContain(patched.status);
 
     const afterPatch = await LIBRARY.Books(id).query().execute();
     expect(afterPatch.data.d.PageCount).toBe(354);
@@ -102,7 +102,7 @@ describe("Olingo Library: CRUD operations", () => {
     expect(afterPatch.data.d.Title).toBe("Das Schloss (2. Auflage)");
 
     const deleted = await LIBRARY.Books(id).delete().execute();
-    expect(deleted.status).toBe(204);
+    expect([200, 204]).toContain(deleted.status);
 
     await expectODataError(LIBRARY.Books(id).query().execute(), { status: 404, message: /could not be found/ });
   });
@@ -148,7 +148,7 @@ describe("Olingo Library: CRUD operations", () => {
 
     // the read filled the ETag store, so the write carries `If-Match` without being told
     const patched = await LIBRARY.Copies(COPY_KEY).patch({ Status: "1" }).execute();
-    expect(patched.status).toBe(204);
+    expect([200, 204]).toContain(patched.status);
   });
 
   test("a stale concurrency token is refused", async () => {

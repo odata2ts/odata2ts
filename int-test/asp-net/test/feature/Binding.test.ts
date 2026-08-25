@@ -30,7 +30,7 @@ describe("ASP.NET Library: binding existing entities", () => {
   // refused with 409, which would make a re-run against the same server fail on the first test.
   afterAll(async () => {
     for (const inventoryNumber of [BOUND_ON_CREATE, BOUND_TO_CONSTRAINED_NAV, BOUND_WITH_401_NOTATION]) {
-      await LIBRARY.Copies(copyKey(inventoryNumber)).delete().execute();
+      await LIBRARY.Copies(copyKey(inventoryNumber)).delete().ignoreETag().execute();
     }
   });
 

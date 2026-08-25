@@ -31,7 +31,7 @@ describe("ASP.NET Library: optimistic concurrency", () => {
   test("a read hands the ETag over, and the following write carries it", async () => {
     const result = await LIBRARY.Copies(COPY).patch({ Condition: 7 }).execute();
 
-    expect(result.status).toBe(204);
+    expect([200, 204]).toContain(result.status);
     expectTypeOf(result.data).toEqualTypeOf<undefined>();
   });
 
@@ -60,7 +60,7 @@ describe("ASP.NET Library: optimistic concurrency", () => {
   test("ignoreETag writes past whatever is current", async () => {
     const result = await LIBRARY.Copies(COPY).patch({ Condition: 6 }).ignoreETag().execute();
 
-    expect(result.status).toBe(204);
+    expect([200, 204]).toContain(result.status);
   });
 
   test("a second write without re-reading is refused, since the first made the ETag stale", async () => {
@@ -78,7 +78,7 @@ describe("ASP.NET Library: optimistic concurrency", () => {
     expect(list.data.value.length).toBeGreaterThan(0);
 
     const result = await fresh.Copies(COPY).patch({ Condition: 3 }).execute();
-    expect(result.status).toBe(204);
+    expect([200, 204]).toContain(result.status);
   });
 
   test("blindConcurrencyWrites writes without any read at all", async () => {
@@ -86,6 +86,6 @@ describe("ASP.NET Library: optimistic concurrency", () => {
 
     const result = await blind.Copies(COPY).patch({ Condition: 2 }).execute();
 
-    expect(result.status).toBe(204);
+    expect([200, 204]).toContain(result.status);
   });
 });

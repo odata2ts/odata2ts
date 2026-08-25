@@ -25,7 +25,7 @@ describe("ASP.NET Library: OData 4.01", () => {
   const copyKey = (inventoryNumber: number) => ({ MediumId: BOOK_DER_PROZESS, InventoryNumber: inventoryNumber });
 
   afterAll(async () => {
-    await LIBRARY_401.Copies(copyKey(BOUND_BY_401_CLIENT)).delete().execute();
+    await LIBRARY_401.Copies(copyKey(BOUND_BY_401_CLIENT)).delete().ignoreETag().execute();
   });
 
   test("the two versions spell a binding differently", () => {

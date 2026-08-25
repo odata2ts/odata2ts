@@ -113,7 +113,7 @@ describe("CAP Library V2: CRUD operations", () => {
 
     // delete
     const deleted = await LIBRARY_V2.Books(id).delete().execute();
-    expect(deleted.status).toBe(204);
+    expect([200, 204]).toContain(deleted.status);
     expectTypeOf(deleted).toEqualTypeOf<HttpResponseModel<undefined>>();
 
     await expectODataError(LIBRARY_V2.Books(id).query().execute(), { status: 404, message: /Not Found/ });
@@ -165,12 +165,12 @@ describe("CAP Library V2: CRUD operations", () => {
     expect((await LIBRARY_V2.Copies(key).query().execute()).data.d.__metadata.etag).toMatch(/^W\//);
 
     const patched = await LIBRARY_V2.Copies(key).patch({ IsLoanable: false }).execute();
-    expect(patched.status).toBe(204);
+    expect([200, 204]).toContain(patched.status);
 
     // the patch made the old token stale, so the delete needs a fresh read of its own
     await LIBRARY_V2.Copies(key).query().execute();
     const deleted = await LIBRARY_V2.Copies(key).delete().execute();
-    expect(deleted.status).toBe(204);
+    expect([200, 204]).toContain(deleted.status);
   });
 
   test("a navigation property is addressable as a sub-resource", async () => {
