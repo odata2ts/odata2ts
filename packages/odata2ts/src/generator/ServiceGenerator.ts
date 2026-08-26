@@ -879,22 +879,21 @@ class ServiceGenerator {
       (!isFunc && hasParams ? `, mainRequestConverter: ${qOpProp}.getRequestConverter()` : "") +
       (returnType ? `, mainResponseConverter: ${qOpProp}.getResponseConverter()` : "") +
       `}`;
-    const requestCmdStmt = isComposable
-      ? `return new ${requestCmd}<${responseService}${versionArg}, ${responseStructure}<${rtType}>>(` +
-        `client,` +
-        `url,` +
-        `(finalUrl: string) => new ${responseService}${versionArg}(client, finalUrl, "", options),` +
-        optionStmt +
-        `);`
-      : `return new ${requestCmd}<${responseStructure ? `${responseStructure}<${rtType}>` : "undefined"}${!isFunc && hasParams ? ", " + paramsModelName : ""}>(` +
-        `client,` +
-        `${useUrlGetCmd ? "" : `${importContainer.addClientApi(ClientApiImports.ODataHttpMethods)}.${!isFunc || operation.usePost ? "Post" : "Get"},`}` +
-        `url, ` +
-        `${useUrlGetCmd ? "" : !isFunc && hasParams ? "params," : "undefined,"}` +
-        optionStmt +
-        `);`;
+    
+    // Check if this is a bound action that belongs to an entity with concurrencyControlled = true
+    const isBoundActionWithConcurrency = 
+      baseFqName && operation.type === OperationTypes.Action && 
+      (this.dataModel.getEntityType(baseFqName) || this.dataModel.getComplexType(baseFqName))?.concurrencyControlled;
 
-    return {
+    if (isBoundActionWithConcurrency) {
+      optionStmt =
+        `{ ` +
+        `headers: getDefaultHeaders()` +
+        (!isFunc && hasParams ? `, mainRequestConverter: ${qOpProp}.getRequestConverter()` : "") +
+        (returnType ? `, mainResponseConverter: ${qOpProp}.getResponseConverter()` : "") +
+        `, concurrency: getConcurrencyOptions()` +
+        `}`;
+    }
       scope: Scope.Public,
       name,
       parameters: hasParams
@@ -904,7 +903,7 @@ class ServiceGenerator {
         `if(!${qOpProp}) {`,
         `  ${qOpProp} = new ${qOperationName}()`,
         "}",
-
+        ``,
         `const { addFullPath, client, getDefaultHeaders${isFunc ? `, isUrlNotEncoded${isComposable ? ", options" : ""}` : ""} } = this.__base;`,
         `const url = addFullPath(${qOpProp}.buildUrl(${!isFunc ? "" : hasParams ? "params, isUrlNotEncoded()" : "isUrlNotEncoded()"}));`,
         ``,
