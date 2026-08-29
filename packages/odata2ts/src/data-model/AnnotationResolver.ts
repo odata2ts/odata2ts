@@ -1,5 +1,6 @@
 import { withNamespace } from "./DataModel.js";
 import { Annotatable, Annotation, ComplexType, EntityType, Reference, Schema } from "./edmx/ODataEdmxModelBase.js";
+import { Operation, SchemaV4 } from "./edmx/ODataEdmxModelV4.js";
 
 /**
  * A navigation property, of either version: the base EDMX types don't know the element - V4 declares it
@@ -62,6 +63,20 @@ export class AnnotationResolver {
    */
   private readonly containerChildren = new Map<string, Annotatable>();
 
+  /**
+   * Every Function and Action overload by its fully qualified name, under the namespace of its schema
+   * as well as under its alias - an annotation may address it either way, just like a type. Several
+   * overloads may share one name, which is why each entry is an array; disambiguating one from another
+   * is {@link findOperationParameterTarget}'s job, using the parameter-type signature the target path
+   * carries.
+   *
+   * V4 only: `Function`/`Action` are declared on {@link SchemaV4}, absent from the base {@link Schema}
+   * this class is typed against, so every access here reads a V4-only field through a cast - the same
+   * idiom `DataModelDigestion` and `DataModelDigestionV4` already use for other V4-only elements. A V2/V3
+   * schema simply contributes nothing to this map.
+   */
+  private readonly operations = new Map<string, Array<Operation>>();
+
   constructor(
     private readonly schemas: Array<Schema<EntityType, ComplexType>>,
     references: Array<Reference> | undefined,
@@ -80,6 +95,14 @@ export class AnnotationResolver {
         this.targets.set(withNamespace(ns, model.$.Name), model);
         if (alias) {
           this.targets.set(withNamespace(alias, model.$.Name), model);
+        }
+      }
+
+      const schemaV4 = schema as SchemaV4;
+      for (const operation of [...(schemaV4.Function ?? []), ...(schemaV4.Action ?? [])]) {
+        this.pushOperation(withNamespace(ns, operation.$.Name), operation);
+        if (alias) {
+          this.pushOperation(withNamespace(alias, operation.$.Name), operation);
         }
       }
 
@@ -106,6 +129,15 @@ export class AnnotationResolver {
     return [...(container.EntitySet ?? []), ...(container.Singleton ?? [])];
   }
 
+  private pushOperation(fqName: string, operation: Operation): void {
+    const overloads = this.operations.get(fqName);
+    if (overloads) {
+      overloads.push(operation);
+    } else {
+      this.operations.set(fqName, [operation]);
+    }
+  }
+
   /**
    * Normalizes the annotations of all schemas in place.
    */
@@ -123,6 +155,15 @@ export class AnnotationResolver {
         }
       }
       this.qualifyTerms(schema);
+    }
+
+    // each overload is indexed under both its namespace and its alias, so the same `Operation` object
+    // may appear twice in `this.operations` - qualify each one's parameters only once
+    const uniqueOperations = new Set<Operation>([...this.operations.values()].flat());
+    for (const operation of uniqueOperations) {
+      for (const param of operation.Parameter ?? []) {
+        this.qualifyTerms(param);
+      }
     }
 
     for (const schema of this.schemas) {
@@ -214,6 +255,12 @@ export class AnnotationResolver {
    * deeper path yields nothing and is therefore left alone.
    */
   private findTarget(target: string): Annotatable | undefined {
+    // a type or container-child name never carries parentheses, so this is unambiguously the signature
+    // form addressing a Function/Action parameter, e.g. `Ns.Search(Edm.String,Edm.Int32)/MaxResults`
+    if (target.includes("(")) {
+      return this.findOperationParameterTarget(target);
+    }
+
     const containerChild = this.containerChildren.get(target);
     if (containerChild) {
       return containerChild;
@@ -236,6 +283,32 @@ export class AnnotationResolver {
       model.Property?.find((p) => p.$.Name === propName) ??
       (model as WithNavigationProps).NavigationProperty?.find((p) => p.$.Name === propName)
     );
+  }
+
+  /**
+   * Resolves a target addressing a parameter of a Function/Action overload, e.g.
+   * `Ns.Search(Edm.String,Edm.Int32)/MaxResults`. The parenthesized, comma-separated parameter types -
+   * in declaration order, binding parameter included - disambiguate the overload, since several may
+   * share one name; there is no other resolvable path onto a parameter. Both sides of the comparison
+   * come from the same document, so the types are compared as literally written, without normalizing
+   * aliases or namespaces.
+   */
+  private findOperationParameterTarget(target: string): Annotatable | undefined {
+    const match = target.match(/^([^()]+)\(([^)]*)\)\/(.+)$/);
+    if (!match) {
+      return undefined;
+    }
+    const [, operationName, signature, paramName] = match;
+    const types = signature
+      .split(",")
+      .map((type) => type.trim())
+      .filter((type) => !!type);
+
+    const overload = this.operations.get(operationName)?.find((op) => {
+      const paramTypes = (op.Parameter ?? []).map((p) => p.$.Type.trim());
+      return paramTypes.length === types.length && paramTypes.every((type, i) => type === types[i]);
+    });
+    return overload?.Parameter?.find((p) => p.$.Name === paramName);
   }
 
   /**

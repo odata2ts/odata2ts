@@ -80,6 +80,22 @@ describe("Model Generator Tests V4", () => {
     await generateAndCompare("operation-min.ts");
   });
 
+  test(`${TEST_SUITE_NAME}: Core.OptionalParameter param model`, async () => {
+    // given a function with a required param, a nullable param, and a non-nullable-but-omittable one
+    odataBuilder.addFunction("OptionalParamOperation", ODataTypesV4.String, false, (builder) =>
+      builder
+        .addParam("test", ODataTypesV4.String, false)
+        .addParam("optTest", ODataTypesV4.String, true)
+        .addParam("omittableTest", ODataTypesV4.String, false)
+        .addParamAnnotations("omittableTest", [core("OptionalParameter", { fullyQualified: true })]),
+    );
+
+    // when generating model
+    // then match fixture text: omittableTest gets "?" but, unlike optTest, no "| null" - it rejects an
+    // explicit null, it may just be left out of the call entirely
+    await generateAndCompare("operation-optional-param.ts");
+  });
+
   test(`${TEST_SUITE_NAME}: max function param model`, async () => {
     // given a function
     odataBuilder.addFunction("maxOperation", ODataTypesV4.String, false, (builder) =>
