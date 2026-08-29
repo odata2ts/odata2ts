@@ -13,7 +13,7 @@ import {
 import { AllowedValuesEnumSynthesizer, SynthesizedEnum } from "./AllowedValuesEnumSynthesizer.js";
 import { AnnotationResolver } from "./AnnotationResolver.js";
 import { ComplexTypeUnflattener } from "./ComplexTypeUnflattener.js";
-import { getManagedState } from "./CoreAnnotations.js";
+import { getManagedState, isOptionalParameter } from "./CoreAnnotations.js";
 import { DataModel, NamespaceWithAlias, withNamespace } from "./DataModel.js";
 import {
   ComplexType as ComplexModelType,
@@ -818,6 +818,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       // only set when it applies: a flag on every single property would be noise
       ...(odataDataType === ODataTypesV4.Stream ? { isStream: true } : undefined),
       ...(this.isContained(p) ? { contained: true } : undefined),
+      ...(isOptionalParameter(p.Annotation) ? { omittable: true } : undefined),
       managed: toManagedState(
         typeof entityPropConfig?.managed !== "undefined" ? entityPropConfig.managed : configProp?.managed,
       ),
