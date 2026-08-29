@@ -748,7 +748,7 @@ class ModelGenerator {
           return {
             name: p.name,
             type: this.getPropType(file.getImports(), p),
-            hasQuestionToken: !p.required,
+            hasQuestionToken: !p.required || !!p.omittable,
           };
         }),
       });
@@ -763,7 +763,7 @@ class ModelGenerator {
             writer.block(() => {
               pSet.forEach((param, index) => {
                 const paramType = this.getPropType(file.getImports(), param);
-                writer.write(`${param.name}${param.required ? "" : "?"}: ${paramType}`);
+                writer.write(`${param.name}${param.required && !param.omittable ? "" : "?"}: ${paramType}`);
                 if (index < pSet.length - 1) {
                   writer.write(",");
                 }

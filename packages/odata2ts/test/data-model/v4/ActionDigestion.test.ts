@@ -4,6 +4,7 @@ import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { DataTypes, OperationType, OperationTypes } from "../../../src/data-model/DataTypeModel.js";
 import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
 import { getTestConfig } from "../../test.config.js";
+import { core } from "../builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4.js";
 
 describe("Action Digestion Test", () => {
@@ -21,7 +22,7 @@ describe("Action Digestion Test", () => {
   }
 
   function doDigest() {
-    return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER);
+    return digest(odataBuilder.getSchemas(), CONFIG, NAMING_HELPER, odataBuilder.getReferences());
   }
 
   beforeEach(() => {
@@ -92,6 +93,48 @@ describe("Action Digestion Test", () => {
           required: false,
           isCollection: false,
         },
+      },
+    ]);
+  });
+
+  test("Action: Core.OptionalParameter, inline on the parameter", async () => {
+    odataBuilder.enableAnnotations().addAction("Search", ODataTypesV4.String, false, (builder) => {
+      builder
+        .addParam("term", ODataTypesV4.String, false)
+        .addParam("maxResults", ODataTypesV4.Int32, false)
+        .addParamAnnotations("maxResults", [core("OptionalParameter")]);
+    });
+
+    const result = await doDigest();
+
+    expect(result.getUnboundOperationTypes()).toMatchObject([
+      {
+        odataName: "Search",
+        parameters: [
+          { name: "term", required: true },
+          { name: "maxResults", required: true, omittable: true },
+        ],
+      },
+    ]);
+  });
+
+  test("Action: Core.OptionalParameter, external via operation-signature target", async () => {
+    odataBuilder
+      .enableAnnotations()
+      .addAction("Search", ODataTypesV4.String, false, (builder) => {
+        builder.addParam("term", ODataTypesV4.String, false).addParam("maxResults", ODataTypesV4.Int32, false);
+      })
+      .addExternalAnnotations(`${withNs("Search")}(Edm.String,Edm.Int32)/maxResults`, [core("OptionalParameter")]);
+
+    const result = await doDigest();
+
+    expect(result.getUnboundOperationTypes()).toMatchObject([
+      {
+        odataName: "Search",
+        parameters: [
+          { name: "term", required: true },
+          { name: "maxResults", required: true, omittable: true },
+        ],
       },
     ]);
   });
