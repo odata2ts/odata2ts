@@ -9,6 +9,7 @@ const IMMUTABLE = `${CORE}.Immutable`;
 const PERMISSIONS = `${CORE}.Permissions`;
 
 const OPTIMISTIC_CONCURRENCY = `${CORE}.OptimisticConcurrency`;
+const OPTIONAL_PARAMETER = `${CORE}.OptionalParameter`;
 
 const PERMISSION_READ = `${CORE}.Permission/Read`;
 const PERMISSION_WRITE = `${CORE}.Permission/Write`;
@@ -101,4 +102,15 @@ export function getManagedState(allAnnotations: Array<Annotation> | undefined): 
  */
 export function isOptimisticConcurrency(annotations: Array<Annotation> | undefined): boolean {
   return !!annotations?.some((a) => a.$.Term === OPTIMISTIC_CONCURRENCY);
+}
+
+/**
+ * Whether the service states that this operation parameter may be omitted from the call, regardless of
+ * what `Nullable` says: the two facets answer different questions - whether the parameter accepts
+ * `null` when supplied, and whether it may be left out at all. `Core.OptionalParameter` carries a
+ * `DefaultValue` in principle, but that is server-side substitution semantics with nothing for a client
+ * to mirror, so presence of the term is the whole statement, like {@link isOptimisticConcurrency}.
+ */
+export function isOptionalParameter(annotations: Array<Annotation> | undefined): boolean {
+  return !!annotations?.some((a) => a.$.Term === OPTIONAL_PARAMETER);
 }

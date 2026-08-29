@@ -1,3 +1,4 @@
+import { Annotation } from "../../../../src/data-model/edmx/ODataEdmxModelBase.js";
 import { Operation } from "../../../../src/data-model/edmx/ODataEdmxModelV4.js";
 import { createProperty } from "../ODataBuilderHelper.js";
 
@@ -38,6 +39,14 @@ export class ODataOperationBuilderV4 {
 
     const prop = createProperty(name, type, nullable, maxLength, precision);
     this.operation.Parameter.push(prop);
+    return this;
+  }
+
+  public addParamAnnotations(paramName: string, annotations: Array<Annotation>) {
+    const param = this.operation.Parameter?.find((p) => p.$.Name === paramName);
+    if (param) {
+      param.Annotation = [...(param.Annotation ?? []), ...annotations];
+    }
     return this;
   }
 }

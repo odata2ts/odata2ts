@@ -8,6 +8,7 @@ import { DigestionOptions } from "../../../src/FactoryFunctionModel.js";
 import { TypeModel } from "../../../src/index.js";
 import { TestOptions, TestSettings } from "../../generator/TestTypes.js";
 import { getTestConfig } from "../../test.config.js";
+import { core } from "../builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4.js";
 
 describe("Function Digestion Test", () => {
@@ -27,7 +28,7 @@ describe("Function Digestion Test", () => {
 
   function doDigest() {
     const opts = digestionOptions ? (deepmerge(CONFIG, digestionOptions) as TestSettings) : CONFIG;
-    return digest(odataBuilder.getSchemas(), opts, new NamingHelper(opts, NAMESPACE));
+    return digest(odataBuilder.getSchemas(), opts, new NamingHelper(opts, NAMESPACE), odataBuilder.getReferences());
   }
 
   beforeEach(() => {
@@ -113,6 +114,59 @@ describe("Function Digestion Test", () => {
           required: false,
           isCollection: false,
         },
+      },
+    ]);
+  });
+
+  test("Function: no Core.OptionalParameter means omittable stays unset", async () => {
+    odataBuilder.addFunction("GetBestFriend", ODataTypesV4.String, false, (builder) => {
+      builder.addParam("test", ODataTypesV4.String, false);
+    });
+
+    const result = await doDigest();
+
+    const [op] = result.getUnboundOperationTypes();
+    expect(op.parameters[0].omittable).toBeUndefined();
+  });
+
+  test("Function: Core.OptionalParameter, inline on the parameter", async () => {
+    odataBuilder.enableAnnotations().addFunction("Search", ODataTypesV4.String, false, (builder) => {
+      builder
+        .addParam("term", ODataTypesV4.String, false)
+        .addParam("maxResults", ODataTypesV4.Int32, false)
+        .addParamAnnotations("maxResults", [core("OptionalParameter")]);
+    });
+
+    const result = await doDigest();
+
+    expect(result.getUnboundOperationTypes()).toMatchObject([
+      {
+        odataName: "Search",
+        parameters: [
+          { name: "term", required: true },
+          { name: "maxResults", required: true, omittable: true },
+        ],
+      },
+    ]);
+  });
+
+  test("Function: Core.OptionalParameter, external via operation-signature target", async () => {
+    odataBuilder
+      .enableAnnotations()
+      .addFunction("Search", ODataTypesV4.String, false, (builder) => {
+        builder.addParam("term", ODataTypesV4.String, false).addParam("maxResults", ODataTypesV4.Int32, false);
+      })
+      .addExternalAnnotations(`${withNs("Search")}(Edm.String,Edm.Int32)/maxResults`, [core("OptionalParameter")]);
+
+    const result = await doDigest();
+
+    expect(result.getUnboundOperationTypes()).toMatchObject([
+      {
+        odataName: "Search",
+        parameters: [
+          { name: "term", required: true },
+          { name: "maxResults", required: true, omittable: true },
+        ],
       },
     ]);
   });

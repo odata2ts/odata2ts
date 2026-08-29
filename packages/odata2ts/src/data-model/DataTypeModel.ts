@@ -59,6 +59,13 @@ export interface PropertyModel {
    * containment - and never set for anything but a navigation property.
    */
   contained?: boolean;
+  /**
+   * `Core.OptionalParameter`: the client may omit this operation parameter from the call even though
+   * `required` (from `Nullable`) says otherwise - the server applies a default of its own. Independent
+   * of `required`: unlike `Nullable`, it says nothing about whether the parameter accepts `null` when
+   * it *is* supplied. V4 operation parameters only - the annotation's `AppliesTo` is `Parameter`.
+   */
+  omittable?: boolean;
 }
 
 export type ModelType = EntityType | ComplexType | EnumType;
