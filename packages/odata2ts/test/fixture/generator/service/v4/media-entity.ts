@@ -18,10 +18,9 @@ export class TesterService extends ODataService {
   public eBooks(id: EBookId): EBookService;
   public eBooks(id?: EBookId | undefined) {
     const fieldName = "EBooks";
-    const { client, path, options, isUrlNotEncoded } = this.__base;
-    return typeof id === "undefined" || id === null
-      ? new EBookCollectionService(client, path, fieldName, options)
-      : new EBookService(client, path, new QEBookId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
+    const { client, path, options } = this.__base;
+    const collection = new EBookCollectionService(client, path, fieldName, options);
+    return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }
 
@@ -41,9 +40,19 @@ export class EBookCollectionService<V extends ODataVersionV4 = "4.0"> extends En
   EditableEBook,
   QEBook,
   EBookId,
+  EBookService<V>,
   V
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qEBook, new QEBookId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternal<V> | undefined,
+  ) {
+    return new EBookService<V>(client, path, name, options);
   }
 }

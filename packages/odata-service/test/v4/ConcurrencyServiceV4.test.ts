@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { DEFAULT_HEADERS, ODataConcurrencyError } from "../../src";
 import { PersonModelCollectionService, PersonModelService } from "../fixture/v4/PersonModelService";
+import { TestCollectionServiceWithAlternateKey } from "../fixture/v4/TypingModelService";
 import { MockClient } from "../mock/MockClient";
 
 const BASE_URL = "test";
@@ -188,6 +189,19 @@ describe("Optimistic concurrency in the V4 services", () => {
         .execute();
 
       expect(client.concurrency.store.get(`${COLLECTION_PATH}('russell')`)).toBe('W/"1"');
+    });
+
+    test("a row is keyed by the primary key alone, even where the entity also declares an alternate one", async () => {
+      // before entityKeyOf was fixed to always use the primary param set, this threw instead of storing
+      // anything: it read the 2D params array as if it were flat
+      client.setCollectionResponse([{ ID: 7, NAME: "russell", "@odata.etag": 'W/"1"' }]);
+
+      const withAlternateKey = new TestCollectionServiceWithAlternateKey(client, BASE_URL, "Tests", {
+        concurrencyControlled: true,
+      });
+      await withAlternateKey.query().execute();
+
+      expect(client.concurrency.store.get(`${BASE_URL}/Tests(7)`)).toBe('W/"1"');
     });
   });
 });

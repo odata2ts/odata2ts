@@ -7,11 +7,12 @@ import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonMode
 import {
   EditableFlightModel,
   FlightModel,
+  FlightService,
   PlanItemCollectionService,
   PlanItemModel,
 } from "../fixture/v4/BaseTypeModel";
-import { PersonModelCollectionService } from "../fixture/v4/PersonModelService";
-import { TestCollectionService } from "../fixture/v4/TypingModelService";
+import { PersonModelCollectionService, PersonModelService } from "../fixture/v4/PersonModelService";
+import { TestCollectionService, TestCollectionServiceWithAlternateKey } from "../fixture/v4/TypingModelService";
 import { MockClient } from "../mock/MockClient";
 
 describe("V4 EntitySetService Test", () => {
@@ -124,6 +125,21 @@ describe("V4 EntitySetService Test", () => {
     expectTypeOf(await cmd.execute()).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<FlightModel>>>();
   });
 
+  /**
+   * The scenario `byId` exists for: a key that only a subtype's own property identifies (e.g. an
+   * alternate key declared on that subtype alone) needs the cast segment in the URL - unlike `create`,
+   * which can address the base collection directly, a key predicate belonging to the subtype cannot be
+   * built without it.
+   */
+  test("entitySet: byId after a subtype cast keys through the cast segment", () => {
+    const serviceToTest = new PlanItemCollectionService(odataClient, BASE_URL, NAME).asFlightCollectionService();
+
+    const entityService = serviceToTest.byId(123);
+
+    expectTypeOf(entityService).toEqualTypeOf<FlightService>();
+    expect(entityService.getPath()).toBe(`${EXPECTED_PATH}/Tester.Flight(123)`);
+  });
+
   test("entitySet: create subtype from base type", async () => {
     const serviceToTest = new PlanItemCollectionService(odataClient, BASE_URL, NAME);
     // control information belongs to the payload, not to the model
@@ -225,5 +241,49 @@ describe("V4 EntitySetService Test", () => {
 
     expect(toTest.parseKey(`${NAME}(123)`)).toBe("123");
     expect(toTest.parseKey(`${NAME}(ID=456)`)).toStrictEqual({ id: "456" });
+  });
+
+  test("byId builds the entity-type service addressed by the given key", () => {
+    const entityService = testService.byId("tester");
+
+    expectTypeOf(entityService).toEqualTypeOf<PersonModelService>();
+    expect(entityService.getPath()).toBe(`${EXPECTED_PATH}('tester')`);
+  });
+
+  describe("alternate keys", () => {
+    let toTest: TestCollectionServiceWithAlternateKey;
+
+    beforeEach(() => {
+      toTest = new TestCollectionServiceWithAlternateKey(odataClient, "", NAME);
+    });
+
+    test("getKeySpec returns the primary key's param spec only", () => {
+      const spec = toTest.getKeySpec();
+      expect(spec).toHaveLength(1);
+      expect(spec[0].getName()).toBe("ID");
+    });
+
+    test("getAlternateKeySpecs returns every alternate key's param spec", () => {
+      const specs = toTest.getAlternateKeySpecs();
+      expect(specs).toHaveLength(1);
+      expect(specs[0]).toHaveLength(1);
+      expect(specs[0][0].getName()).toBe("NAME");
+    });
+
+    test("createKey builds the primary or the alternate key's URL depending on the shape given", () => {
+      expect(toTest.createKey("7")).toBe(`${NAME}(7)`);
+      expect(toTest.createKey({ id: "7" })).toBe(`${NAME}(ID=7)`);
+      expect(toTest.createKey({ name: "russell" })).toBe(`${NAME}(NAME='russell')`);
+    });
+
+    test("parseKey resolves either shape from the URL", () => {
+      expect(toTest.parseKey(`${NAME}(ID=7)`)).toStrictEqual({ id: "7" });
+      expect(toTest.parseKey(`${NAME}(NAME='russell')`)).toStrictEqual({ name: "russell" });
+    });
+
+    test("byId builds the entity-type service for the alternate key just as well as for the primary one", () => {
+      expect(toTest.byId("7").getPath()).toBe(`${NAME}(7)`);
+      expect(toTest.byId({ name: "russell" }).getPath()).toBe(`${NAME}(NAME='russell')`);
+    });
   });
 });

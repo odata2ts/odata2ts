@@ -1,9 +1,10 @@
 import { ODataTypesV4 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
+import { Annotation } from "../../../src/data-model/edmx/ODataEdmxModelBase.js";
 import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
 import { getTestConfig } from "../../test.config.js";
-import { propertyPaths } from "../builder/ODataAnnotationBuilder.js";
+import { alternateKeys, propertyPaths } from "../builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4.js";
 
 describe("EntitySet Digestion Test", () => {
@@ -156,6 +157,114 @@ describe("EntitySet Digestion Test", () => {
 
       expect(result.getEntityContainer().entitySets[withEc("Products")].concurrencyControlled).toBe(false);
       expect(result.getEntityType(withNs("Product"))!.concurrencyControlled).toBe(false);
+    });
+  });
+
+  describe("Alternate keys", () => {
+    function addProduct(entityTypeAnnotations?: Array<Annotation>) {
+      return odataBuilder.enableAnnotations().addEntityType("Product", undefined, (builder) => {
+        builder.addKeyProp("id", ODataTypesV4.String);
+        builder.addProp("isbn", ODataTypesV4.String);
+        builder.addProp("title", ODataTypesV4.String);
+        builder.addProp("author", ODataTypesV4.String);
+        if (entityTypeAnnotations) {
+          builder.addTypeAnnotations(entityTypeAnnotations);
+        }
+      });
+    }
+
+    async function productType() {
+      return (await doDigest()).getEntityType(withNs("Product"))!;
+    }
+
+    test("no annotation means no alternate keys", async () => {
+      addProduct().addEntitySet("Products", withNs("Product"));
+
+      expect((await productType()).alternateKeys).toEqual([]);
+    });
+
+    test("single-property alternate key from the entity type", async () => {
+      addProduct([alternateKeys([[{ name: "isbn" }]])]).addEntitySet("Products", withNs("Product"));
+
+      const result = await productType();
+      expect(result.alternateKeys).toHaveLength(1);
+      expect(result.alternateKeys[0]).toHaveLength(1);
+      expect(result.alternateKeys[0][0].property.odataName).toBe("isbn");
+      expect(result.alternateKeys[0][0].alias).toBeUndefined();
+    });
+
+    test("alias is carried through", async () => {
+      addProduct([alternateKeys([[{ name: "isbn", alias: "ISBN" }]])]).addEntitySet("Products", withNs("Product"));
+
+      const result = await productType();
+      expect(result.alternateKeys[0][0].alias).toBe("ISBN");
+    });
+
+    test("composite alternate key", async () => {
+      addProduct([alternateKeys([[{ name: "title" }, { name: "author" }]])]).addEntitySet(
+        "Products",
+        withNs("Product"),
+      );
+
+      const result = await productType();
+      expect(result.alternateKeys[0].map((ref) => ref.property.odataName)).toEqual(["title", "author"]);
+    });
+
+    test("multiple alternate keys", async () => {
+      addProduct([alternateKeys([[{ name: "isbn" }], [{ name: "title" }, { name: "author" }]])]).addEntitySet(
+        "Products",
+        withNs("Product"),
+      );
+
+      const result = await productType();
+      expect(result.alternateKeys).toHaveLength(2);
+      expect(result.alternateKeys[0].map((r) => r.property.odataName)).toEqual(["isbn"]);
+      expect(result.alternateKeys[1].map((r) => r.property.odataName)).toEqual(["title", "author"]);
+    });
+
+    test("an entity-set-only annotation is ignored - only the EntityType target is read", async () => {
+      // Core.AlternateKeys' AppliesTo also lists EntitySet and NavigationProperty, but odata2ts
+      // generates one Q*Id shared by every access path (the entity set, every navigation property,
+      // every subtype cast) - only a statement that applies to the type itself can be represented there
+      addProduct().addEntitySet(
+        "Products",
+        withNs("Product"),
+        [],
+        [alternateKeys([[{ name: "title" }, { name: "author" }]])],
+      );
+
+      const result = await productType();
+      expect(result.alternateKeys).toEqual([]);
+    });
+
+    test("the entity type's own annotation applies regardless of what the entity set additionally states", async () => {
+      addProduct([alternateKeys([[{ name: "isbn" }]])]).addEntitySet(
+        "Products",
+        withNs("Product"),
+        [],
+        [alternateKeys([[{ name: "title" }, { name: "author" }]])],
+      );
+
+      const result = await productType();
+      expect(result.alternateKeys).toHaveLength(1);
+      expect(result.alternateKeys[0].map((r) => r.property.odataName)).toEqual(["isbn"]);
+    });
+
+    test("the switch turns the evaluation off", async () => {
+      addProduct([alternateKeys([[{ name: "isbn" }]])]).addEntitySet("Products", withNs("Product"));
+
+      const config = { ...CONFIG, annotations: { disableAlternateKeys: true } };
+      const result = await digest(odataBuilder.getSchemas(), config, NAMING_HELPER, odataBuilder.getReferences());
+
+      expect(result.getEntityType(withNs("Product"))!.alternateKeys).toEqual([]);
+    });
+
+    test("an unresolvable property name throws", async () => {
+      addProduct([alternateKeys([[{ name: "doesNotExist" }]])]).addEntitySet("Products", withNs("Product"));
+
+      await expect(() => doDigest()).rejects.toThrow(
+        "Core.AlternateKeys: property [doesNotExist] not found among the properties of entity type [EntitySetTest.Product]!",
+      );
     });
   });
 });

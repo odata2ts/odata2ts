@@ -196,6 +196,15 @@ export interface AnnotationOptions {
    * demands one answers `428 Precondition Required`.
    */
   disableOptimisticConcurrency?: boolean;
+  /**
+   * Stop deriving additional identification options from `Core.AlternateKeys`. Off by default: a
+   * declared alternate key widens the generated `*Id` type with another option, and the generated
+   * service accepts it wherever the primary key is accepted today.
+   *
+   * Turn it on where the annotation is wrong, unwanted, or the service does not actually support
+   * addressing by it.
+   */
+  disableAlternateKeys?: boolean;
 }
 
 /**

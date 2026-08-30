@@ -49,3 +49,17 @@ export class ComplexBookIdFunction extends QId<ComplexBookIdModel> {
     return this.params;
   }
 }
+
+/**
+ * An id with one alternate key alongside the primary key - the shape `Core.AlternateKeys` codegen
+ * produces: one flat param set per key, primary first.
+ */
+export type BookIdWithAlternateKeyModel = string | { id: string } | { isbn: string };
+
+export class BookIdWithAlternateKeyFunction extends QId<BookIdWithAlternateKeyModel> {
+  private readonly params = [[new QGuidParam("id")], [new QStringParam("ISBN", "isbn")]];
+
+  public getParams() {
+    return this.params;
+  }
+}

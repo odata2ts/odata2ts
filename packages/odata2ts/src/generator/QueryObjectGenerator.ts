@@ -397,6 +397,13 @@ class QueryObjectGenerator {
     const qFunc = importContainer.addQObject(QueryObjectImports.QId);
     const idModelName = importContainer.addGeneratedModel(model.fqName, model.id.modelName);
 
+    // an alternate key's wire name is its alias where stated - achieved by feeding getParamInitString
+    // a property clone with `odataName` swapped for the alias; the mapped name it derives from that
+    // (`odataName !== name`) then still resolves to the property's own, unaltered TS name
+    const alternateKeyOverloads = model.alternateKeys.map((altKey) =>
+      altKey.map(({ property, alias }) => (alias ? { ...property, odataName: alias } : property)),
+    );
+
     file.getFile().addClass({
       name: model.id.qName,
       isExported: true,
@@ -406,7 +413,11 @@ class QueryObjectGenerator {
           name: "params",
           scope: Scope.Private,
           isReadonly: true,
-          initializer: this.getParamInitString(importContainer, model.keys),
+          initializer: this.getParamInitString(
+            importContainer,
+            model.keys,
+            alternateKeyOverloads.length ? alternateKeyOverloads : undefined,
+          ),
         },
       ],
       methods: [

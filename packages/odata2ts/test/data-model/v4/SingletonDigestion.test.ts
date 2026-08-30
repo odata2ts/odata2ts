@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
 import { getTestConfig } from "../../test.config.js";
-import { propertyPaths } from "../builder/ODataAnnotationBuilder.js";
+import { alternateKeys, propertyPaths } from "../builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../builder/v4/ODataModelBuilderV4.js";
 
 describe("Singleton Digestion Test", () => {
@@ -118,5 +118,24 @@ describe("Singleton Digestion Test", () => {
 
       expect((await doDigest()).getEntityType(withNs("User"))!.concurrencyControlled).toBe(true);
     });
+  });
+
+  test("Alternate keys: a singleton's own annotation is ignored - only the EntityType target is read", async () => {
+    // Core.AlternateKeys' AppliesTo doesn't even list Singleton (only EntityType, EntitySet,
+    // NavigationProperty) - and regardless, odata2ts generates one Q*Id shared by every access path, so
+    // only a statement that applies to the type itself can be represented there
+    odataBuilder
+      .enableAnnotations()
+      .addEntityType("User", undefined, (builder) => {
+        builder.addKeyProp("id", ODataTypesV4.String);
+        builder.addProp("email", ODataTypesV4.String);
+        builder.addTypeAnnotations([alternateKeys([[{ name: "email", alias: "Email" }]])]);
+      })
+      .addSingleton("Me", withNs("User"), [], [alternateKeys([[{ name: "id" }]])]);
+
+    const result = (await doDigest()).getEntityType(withNs("User"))!;
+
+    expect(result.alternateKeys).toHaveLength(1);
+    expect(result.alternateKeys[0].map((r) => r.property.odataName)).toEqual(["email"]);
   });
 });

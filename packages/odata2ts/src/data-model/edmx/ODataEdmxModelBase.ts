@@ -74,7 +74,11 @@ export interface AnnotationRecord extends Annotatable {
 
 /**
  * One property of a record. The value sits in an attribute named after its type; as everywhere else in
- * the parsed EDMX it arrives as a string, whatever that type says.
+ * the parsed EDMX it arrives as a string, whatever that type says - `PropertyPath` is the exception,
+ * used by `Core.AlternateKeys`' `PropertyRef.Name` (declared `Edm.PropertyPath`).
+ *
+ * A property may also carry its value as a nested `Collection` rather than an attribute -
+ * `Core.AlternateKey.Key` (`Collection(Core.PropertyRef)`) is the one we read that way.
  */
 export interface PropertyValue {
   $: {
@@ -83,7 +87,9 @@ export interface PropertyValue {
     String?: string;
     Int?: string;
     EnumMember?: string;
+    PropertyPath?: string;
   };
+  Collection?: Array<Collection>;
 }
 
 /**

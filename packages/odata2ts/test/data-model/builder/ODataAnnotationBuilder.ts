@@ -149,6 +149,54 @@ export function allowedValues(values: Array<AllowedValue>, options: AnnotationOp
 }
 
 /**
+ * One `Core.PropertyRef` of an alternate key: the entity's own property name, and optionally the name
+ * to use for it in the URL instead (`Alias`).
+ */
+export interface AlternateKeyPropertyRef {
+  name: string;
+  alias?: string;
+}
+
+/**
+ * `Core.AlternateKeys`, in the shape both ASP.NET and CAP emit it: a collection of `Core.AlternateKey`
+ * records, each naming its own properties via a nested `Key` collection of `Core.PropertyRef` records.
+ * One entry in `keys` is one alternate key; an entry with more than one ref is a composite one.
+ */
+export function alternateKeys(
+  keys: Array<Array<AlternateKeyPropertyRef>>,
+  options: AnnotationOptions = {},
+): Annotation {
+  const prefix = options.fullyQualified ? VOCABULARIES.core.namespace : VOCABULARIES.core.alias;
+
+  return {
+    ...annotation("core", "AlternateKeys", options),
+    Collection: [
+      {
+        Record: keys.map((refs) => ({
+          $: { Type: `${prefix}.AlternateKey` },
+          PropertyValue: [
+            {
+              $: { Property: "Key" },
+              Collection: [
+                {
+                  Record: refs.map(({ name, alias }) => ({
+                    $: { Type: `${prefix}.PropertyRef` },
+                    PropertyValue: [
+                      { $: { Property: "Name", PropertyPath: name } },
+                      ...(alias ? [{ $: { Property: "Alias", String: alias } }] : []),
+                    ],
+                  })),
+                },
+              ],
+            },
+          ],
+        })),
+      },
+    ],
+  };
+}
+
+/**
  * `Core.Permissions`, whose value is a flags enum: several members may be granted at once.
  */
 export function corePermissions(members: Array<string>, options?: AnnotationOptions): Annotation {

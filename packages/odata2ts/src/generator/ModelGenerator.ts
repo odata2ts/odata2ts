@@ -392,17 +392,33 @@ class ModelGenerator {
   }
 
   private generateIdModel(file: FileHandler, model: EntityType) {
-    const singleType = model.keys.length === 1 ? `${model.keys[0].type} | ` : "";
-    const keyTypes = model.keys
-      .map((keyProp) => `${keyProp.name}: ${this.getPropType(file.getImports(), keyProp)}`)
-      .join(",");
-    const type = `${singleType}{${keyTypes}}`;
+    const alternateKeyTypes = model.alternateKeys.map((altKey) =>
+      this.getIdKeyType(
+        file,
+        altKey.map((ref) => ref.property),
+      ),
+    );
+    const type = [this.getIdKeyType(file, model.keys), ...alternateKeyTypes].join(" | ");
 
     file.getFile().addTypeAlias({
       name: model.id.modelName,
       isExported: true,
       type,
     });
+  }
+
+  /**
+   * The type for one key or alternate key: the bare scalar type where it is a single property, plus -
+   * always - the object type over all its properties. The object's field names are always the
+   * properties' own TS names, never an alternate key's `alias`: the alias is a URL-addressing detail,
+   * not a payload/field rename.
+   */
+  private getIdKeyType(file: FileHandler, keyProps: Array<PropertyModel>): string {
+    const singleType = keyProps.length === 1 ? `${keyProps[0].type} | ` : "";
+    const keyTypes = keyProps
+      .map((keyProp) => `${keyProp.name}: ${this.getPropType(file.getImports(), keyProp)}`)
+      .join(",");
+    return `${singleType}{${keyTypes}}`;
   }
 
   private generateEditableModel(file: FileHandler, model: ComplexType) {

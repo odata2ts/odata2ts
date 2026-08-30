@@ -11,7 +11,12 @@ import {
   Modes,
 } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
-import { allowedValues, core, corePermissions } from "../../data-model/builder/ODataAnnotationBuilder.js";
+import {
+  allowedValues,
+  alternateKeys,
+  core,
+  corePermissions,
+} from "../../data-model/builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
 import {
   createHelper,
@@ -237,6 +242,34 @@ describe("Model Generator Tests V4", () => {
       skipEditableModels: false,
       skipIdModels: false,
     });
+  });
+
+  test(`${TEST_SUITE_NAME}: single alternate key widens the id model`, async () => {
+    odataBuilder.enableAnnotations().addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.String)
+        .addProp("isbn", ODataTypesV4.String, false)
+        .addTypeAnnotations([alternateKeys([[{ name: "isbn" }]], { fullyQualified: true })]),
+    );
+
+    await generateAndCompare("entity-alternate-key.ts", { skipIdModels: false });
+  });
+
+  test(`${TEST_SUITE_NAME}: composite and aliased alternate keys widen the id model`, async () => {
+    odataBuilder.enableAnnotations().addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.String)
+        .addProp("isbn", ODataTypesV4.String, false)
+        .addProp("title", ODataTypesV4.String, false)
+        .addProp("author", ODataTypesV4.String, false)
+        .addTypeAnnotations([
+          alternateKeys([[{ name: "isbn", alias: "ISBN" }], [{ name: "title" }, { name: "author" }]], {
+            fullyQualified: true,
+          }),
+        ]),
+    );
+
+    await generateAndCompare("entity-alternate-key-composite.ts", { skipIdModels: false });
   });
 
   test(`${TEST_SUITE_NAME}: composite key defaults to createOnly`, async () => {

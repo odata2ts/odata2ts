@@ -647,7 +647,7 @@ describe("Service Generator Tests V4", () => {
     expect(serviceText).toContain("extends EntityTypeServiceV4<TestEntity, UpdatableTestEntity, QTestEntity, V>");
     // while the collection service, which is where creation happens, keeps the EditableModel
     expect(serviceText).toContain(
-      "extends EntitySetServiceV4<TestEntity, EditableTestEntity, QTestEntity, TestEntityId, V>",
+      "extends EntitySetServiceV4<TestEntity, EditableTestEntity, QTestEntity, TestEntityId, TestEntityService<V>, V>",
     );
 
     // `strictOmit` drops the key from the update model instead of relaxing it - a different model, the
