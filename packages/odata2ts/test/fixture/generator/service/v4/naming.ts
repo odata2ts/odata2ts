@@ -18,10 +18,9 @@ export class tester extends ODataService {
   public NAVIGATE_TO_LIST(id: TEST_ENTITY_ID): TEST_ENTITY_SRV;
   public NAVIGATE_TO_LIST(id?: TEST_ENTITY_ID | undefined) {
     const fieldName = "list";
-    const { client, path, options, isUrlNotEncoded } = this.__base;
-    return typeof id === "undefined" || id === null
-      ? new TEST_ENTITY_COLLECTION_SRV(client, path, fieldName, options)
-      : new TEST_ENTITY_SRV(client, path, new Q_TEST_ENTITY_ID(fieldName).buildUrl(id, isUrlNotEncoded()), options);
+    const { client, path, options } = this.__base;
+    const collection = new TEST_ENTITY_COLLECTION_SRV(client, path, fieldName, options);
+    return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }
 
@@ -41,9 +40,19 @@ export class TEST_ENTITY_COLLECTION_SRV<V extends ODataVersionV4 = "4.0"> extend
   EDITABLE_TEST_ENTITY,
   Q_TEST_ENTITY,
   TEST_ENTITY_ID,
+  TEST_ENTITY_SRV<V>,
   V
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, q_TEST_ENTITY, new Q_TEST_ENTITY_ID(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternal<V> | undefined,
+  ) {
+    return new TEST_ENTITY_SRV<V>(client, path, name, options);
   }
 }

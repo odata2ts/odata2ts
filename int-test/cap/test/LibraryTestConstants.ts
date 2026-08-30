@@ -19,6 +19,8 @@ export const LIBRARY_STRICT = new LibraryStrictService(ODATA_CLIENT, BASE_URL);
 
 /** "Der Prozess" - a book with fixed, well-known values. */
 export const BOOK_DER_PROZESS = "11111111-1111-1111-1111-111111111111";
+/** Its ISBN, declared as `Core.AlternateKeys` on `Books` - see feature/Annotations.test.ts. */
+export const BOOK_DER_PROZESS_ISBN = "9783150094440";
 export const UNKNOWN_ID = "00000000-0000-0000-0000-000000000000";
 
 /** Carriers of binary content: a named stream property (`Sample`) and CAP's take on a media entity. */

@@ -21,10 +21,9 @@ export class TesterService extends ODataService {
   public tests(id: ChildId): ChildService;
   public tests(id?: ChildId | undefined) {
     const fieldName = "tests";
-    const { client, path, options, isUrlNotEncoded } = this.__base;
-    return typeof id === "undefined" || id === null
-      ? new ChildCollectionService(client, path, fieldName, options)
-      : new ChildService(client, path, new QChildId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
+    const { client, path, options } = this.__base;
+    const collection = new ChildCollectionService(client, path, fieldName, options);
+    return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }
 
@@ -38,10 +37,20 @@ export class GrandParentCollectionService extends EntitySetServiceV2<
   GrandParent,
   EditableGrandParent,
   QGrandParent,
-  GrandParentId
+  GrandParentId,
+  GrandParentService
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qGrandParent, new QGrandParentId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptions | undefined,
+  ) {
+    return new GrandParentService(client, path, name, options);
   }
 }
 
@@ -51,9 +60,24 @@ export class ParentService extends EntityTypeServiceV2<Parent, EditableParent, Q
   }
 }
 
-export class ParentCollectionService extends EntitySetServiceV2<Parent, EditableParent, QParent, GrandParentId> {
+export class ParentCollectionService extends EntitySetServiceV2<
+  Parent,
+  EditableParent,
+  QParent,
+  GrandParentId,
+  ParentService
+> {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qParent, new QGrandParentId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptions | undefined,
+  ) {
+    return new ParentService(client, path, name, options);
   }
 }
 
@@ -63,8 +87,17 @@ export class ChildService extends EntityTypeServiceV2<Child, EditableChild, QChi
   }
 }
 
-export class ChildCollectionService extends EntitySetServiceV2<Child, EditableChild, QChild, ChildId> {
+export class ChildCollectionService extends EntitySetServiceV2<Child, EditableChild, QChild, ChildId, ChildService> {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qChild, new QChildId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptions | undefined,
+  ) {
+    return new ChildService(client, path, name, options);
   }
 }

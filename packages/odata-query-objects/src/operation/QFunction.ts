@@ -49,7 +49,7 @@ export abstract class QFunction<ParamModel, ResponseStructure = undefined> {
 
   public abstract getParams(): Array<QParamModel<any, any>> | Array<Array<QParamModel<any, any>>>;
 
-  private getParamSets(): Array<Array<QParamModel<any, any>>> {
+  protected getParamSets(): Array<Array<QParamModel<any, any>>> {
     const params = this.getParams();
     if (params.length) {
       const elemZero = params[0];

@@ -24,10 +24,9 @@ export class TesterService extends ODataService {
   public testing(id: AbstractEntityId): TestEntityService;
   public testing(id?: AbstractEntityId | undefined) {
     const fieldName = "Testing";
-    const { client, path, options, isUrlNotEncoded } = this.__base;
-    return typeof id === "undefined" || id === null
-      ? new TestEntityCollectionService(client, path, fieldName, options)
-      : new TestEntityService(client, path, new QAbstractEntityId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
+    const { client, path, options } = this.__base;
+    const collection = new TestEntityCollectionService(client, path, fieldName, options);
+    return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }
 
@@ -52,6 +51,7 @@ export class AbstractEntityCollectionService<V extends ODataVersionV4 = "4.0"> e
   EditableAbstractEntity,
   QAbstractEntity,
   AbstractEntityId,
+  AbstractEntityService<V>,
   V
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
@@ -61,6 +61,15 @@ export class AbstractEntityCollectionService<V extends ODataVersionV4 = "4.0"> e
   public asTestEntityCollectionService() {
     const { client, path, options } = this.__base;
     return new TestEntityCollectionService(client, path, "Tester.TestEntity", { ...options, subtype: true });
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternal<V> | undefined,
+  ) {
+    return new AbstractEntityService<V>(client, path, name, options);
   }
 }
 
@@ -80,9 +89,19 @@ export class TestEntityCollectionService<V extends ODataVersionV4 = "4.0"> exten
   EditableTestEntity,
   QTestEntity,
   AbstractEntityId,
+  TestEntityService<V>,
   V
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTestEntity, new QAbstractEntityId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternal<V> | undefined,
+  ) {
+    return new TestEntityService<V>(client, path, name, options);
   }
 }

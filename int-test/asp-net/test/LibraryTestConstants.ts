@@ -26,6 +26,8 @@ export const LIBRARY_STRICT = new LibraryStrictService(ODATA_CLIENT, BASE_URL);
 
 /** "Der Prozess" - a book with fixed, well-known values. */
 export const BOOK_DER_PROZESS = "11111111-1111-1111-1111-111111111111";
+/** Its ISBN, declared as `Core.AlternateKeys` on `PrintMedium` - see feature/Annotations.test.ts. */
+export const BOOK_DER_PROZESS_ISBN = "9783518188002";
 export const AUDIOBOOK = "22222222-2222-2222-2222-222222222222";
 export const EBOOK = "33333333-3333-3333-3333-333333333333";
 export const UNKNOWN_ID = "00000000-0000-0000-0000-000000000000";

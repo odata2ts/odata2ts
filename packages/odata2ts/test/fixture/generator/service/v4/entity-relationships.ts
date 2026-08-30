@@ -19,10 +19,9 @@ export class TesterService extends ODataService {
   public books(id: BookId): BookService;
   public books(id?: BookId | undefined) {
     const fieldName = "books";
-    const { client, path, options, isUrlNotEncoded } = this.__base;
-    return typeof id === "undefined" || id === null
-      ? new BookCollectionService(client, path, fieldName, options)
-      : new BookService(client, path, new QBookId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
+    const { client, path, options } = this.__base;
+    const collection = new BookCollectionService(client, path, fieldName, options);
+    return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }
 
@@ -63,10 +62,20 @@ export class AuthorCollectionService<V extends ODataVersionV4 = "4.0"> extends E
   EditableAuthor,
   QAuthor,
   AuthorId,
+  AuthorService<V>,
   V
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qAuthor, new QAuthorId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternal<V> | undefined,
+  ) {
+    return new AuthorService<V>(client, path, name, options);
   }
 }
 
@@ -100,10 +109,9 @@ export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeSer
   public relatedAuthors(id: AuthorId): AuthorService<V>;
   public relatedAuthors(id?: AuthorId | undefined) {
     const fieldName = "RelatedAuthors";
-    const { client, path, options, isUrlNotEncoded } = this.__base;
-    return typeof id === "undefined" || id === null
-      ? new AuthorCollectionService(client, path, fieldName, options)
-      : new AuthorService(client, path, new QAuthorId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
+    const { client, path, options } = this.__base;
+    const collection = new AuthorCollectionService(client, path, fieldName, options);
+    return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }
 
@@ -112,9 +120,19 @@ export class BookCollectionService<V extends ODataVersionV4 = "4.0"> extends Ent
   EditableBook,
   QBook,
   BookId,
+  BookService<V>,
   V
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qBook, new QBookId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternal<V> | undefined,
+  ) {
+    return new BookService<V>(client, path, name, options);
   }
 }

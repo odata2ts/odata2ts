@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV2.js";
 import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
 import { getTestConfig } from "../../test.config.js";
+import { alternateKeys } from "../builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV2 } from "../builder/v2/ODataModelBuilderV2.js";
 
 describe("EntitySet Digestion Test", () => {
@@ -144,5 +145,21 @@ describe("EntitySet Digestion Test", () => {
     const result = await doDigest();
 
     expect(result.getEntityContainer().entitySets[withEc("Products")]).toMatchObject({ navPropBinding: [] });
+  });
+
+  test("Core.AlternateKeys is a V4 concept - a V2 service stating it anyway is ignored", async () => {
+    // CAP does state this term on V2 metadata too, but it is odata2ts' own decision to read it for V4 only
+    odataBuilder
+      .enableAnnotations()
+      .addEntityType("Product", undefined, (builder) => {
+        builder.addKeyProp("id", ODataTypesV2.String);
+        builder.addProp("isbn", ODataTypesV2.String);
+        builder.addTypeAnnotations([alternateKeys([[{ name: "isbn" }]])]);
+      })
+      .addEntitySet("Products", withNs("Product"));
+
+    const result = await doDigest();
+
+    expect(result.getEntityType(withNs("Product"))!.alternateKeys).toEqual([]);
   });
 });
