@@ -3,6 +3,7 @@ import {
   BookIdFunction,
   BookIdFunctionWithConversion,
   BookIdV2Function,
+  BookIdWithAlternateKeyFunction,
   ComplexBookIdFunction,
 } from "../fixture/operation/IdFunction";
 
@@ -83,5 +84,40 @@ describe("QId Tests", () => {
     expect(() => exampleFunction.parseUrl("EntityXy(tiger=xxx)")).toThrow(
       "not part of this function's method signature",
     );
+  });
+
+  describe("alternate keys", () => {
+    test("getPrimaryParams always returns the first param set", () => {
+      const exampleFunction = new BookIdWithAlternateKeyFunction("EntityXy");
+
+      expect(exampleFunction.getPrimaryParams()).toHaveLength(1);
+      expect(exampleFunction.getPrimaryParams()[0].getName()).toBe("id");
+    });
+
+    test("getAlternateParams returns every param set but the first", () => {
+      const exampleFunction = new BookIdWithAlternateKeyFunction("EntityXy");
+
+      const alternateParams = exampleFunction.getAlternateParams();
+      expect(alternateParams).toHaveLength(1);
+      expect(alternateParams[0]).toHaveLength(1);
+      expect(alternateParams[0][0].getName()).toBe("ISBN");
+      expect(alternateParams[0][0].getMappedName()).toBe("isbn");
+    });
+
+    test("buildUrl picks the primary key for a bare scalar value", () => {
+      const exampleFunction = new BookIdWithAlternateKeyFunction("EntityXy");
+      expect(exampleFunction.buildUrl("some-guid")).toBe("EntityXy(some-guid)");
+    });
+
+    test("buildUrl picks the matching alternate key by its object shape", () => {
+      const exampleFunction = new BookIdWithAlternateKeyFunction("EntityXy");
+      expect(exampleFunction.buildUrl({ isbn: "123" })).toBe("EntityXy(ISBN='123')");
+    });
+
+    test("parseUrl picks the matching param set by the wire names actually present", () => {
+      const exampleFunction = new BookIdWithAlternateKeyFunction("EntityXy");
+      expect(exampleFunction.parseUrl("EntityXy(id=abc)")).toMatchObject({ id: "abc" });
+      expect(exampleFunction.parseUrl("EntityXy(ISBN='123')")).toMatchObject({ isbn: "123" });
+    });
   });
 });

@@ -19,10 +19,9 @@ export class TesterService extends ODataService {
   public audiobooks(id: AudiobookId): AudiobookService;
   public audiobooks(id?: AudiobookId | undefined) {
     const fieldName = "Audiobooks";
-    const { client, path, options, isUrlNotEncoded } = this.__base;
-    return typeof id === "undefined" || id === null
-      ? new AudiobookCollectionService(client, path, fieldName, options)
-      : new AudiobookService(client, path, new QAudiobookId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
+    const { client, path, options } = this.__base;
+    const collection = new AudiobookCollectionService(client, path, fieldName, options);
+    return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }
 
@@ -53,9 +52,19 @@ export class AudiobookCollectionService<V extends ODataVersionV4 = "4.0"> extend
   EditableAudiobook,
   QAudiobook,
   AudiobookId,
+  AudiobookService<V>,
   V
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qAudiobook, new QAudiobookId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternal<V> | undefined,
+  ) {
+    return new AudiobookService<V>(client, path, name, options);
   }
 }

@@ -107,10 +107,20 @@ export class PlanItemCollectionService<V extends ODataVersionV4 = "4.0"> extends
   EditablePlanItemModel,
   QPlanItem,
   PlanItemIdModel,
+  PlanItemService<V>,
   V
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QPlanItem(), new QPlanItemId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternal<V> | undefined,
+  ) {
+    return new PlanItemService<V>(client, path, name, options);
   }
 
   public asFlightCollectionService() {
@@ -142,10 +152,20 @@ export class FlightCollectionService<V extends ODataVersionV4 = "4.0"> extends E
   EditableFlightModel,
   QFlight,
   PlanItemIdModel,
+  FlightService<V>,
   V
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QFlight(), new QPlanItemId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternal<V> | undefined,
+  ) {
+    return new FlightService<V>(client, path, name, options!);
   }
 }
 
@@ -165,9 +185,19 @@ export class EventCollectionService<V extends ODataVersionV4 = "4.0"> extends En
   EditableEventModel,
   QEvent,
   PlanItemIdModel,
+  EventService<V>,
   V
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, new QEvent(), new QPlanItemId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternal<V> | undefined,
+  ) {
+    return new EventService<V>(client, path, name, options!);
   }
 }

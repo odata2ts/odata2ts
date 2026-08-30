@@ -30,30 +30,18 @@ export class TesterService extends ODataService {
   public fromAbstract(id: ExtendedFromAbstractId): ExtendedFromAbstractService;
   public fromAbstract(id?: ExtendedFromAbstractId | undefined) {
     const fieldName = "FromAbstract";
-    const { client, path, options, isUrlNotEncoded } = this.__base;
-    return typeof id === "undefined" || id === null
-      ? new ExtendedFromAbstractCollectionService(client, path, fieldName, options)
-      : new ExtendedFromAbstractService(
-          client,
-          path,
-          new QExtendedFromAbstractId(fieldName).buildUrl(id, isUrlNotEncoded()),
-          options,
-        );
+    const { client, path, options } = this.__base;
+    const collection = new ExtendedFromAbstractCollectionService(client, path, fieldName, options);
+    return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 
   public fromOpen(): ExtendedFromOpenCollectionService;
   public fromOpen(id: ExtendedFromOpenId): ExtendedFromOpenService;
   public fromOpen(id?: ExtendedFromOpenId | undefined) {
     const fieldName = "FromOpen";
-    const { client, path, options, isUrlNotEncoded } = this.__base;
-    return typeof id === "undefined" || id === null
-      ? new ExtendedFromOpenCollectionService(client, path, fieldName, options)
-      : new ExtendedFromOpenService(
-          client,
-          path,
-          new QExtendedFromOpenId(fieldName).buildUrl(id, isUrlNotEncoded()),
-          options,
-        );
+    const { client, path, options } = this.__base;
+    const collection = new ExtendedFromOpenCollectionService(client, path, fieldName, options);
+    return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }
 
@@ -87,10 +75,20 @@ export class ExtendedFromAbstractCollectionService extends EntitySetServiceV2<
   ExtendedFromAbstract,
   EditableExtendedFromAbstract,
   QExtendedFromAbstract,
-  ExtendedFromAbstractId
+  ExtendedFromAbstractId,
+  ExtendedFromAbstractService
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qExtendedFromAbstract, new QExtendedFromAbstractId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptions | undefined,
+  ) {
+    return new ExtendedFromAbstractService(client, path, name, options);
   }
 }
 
@@ -108,9 +106,19 @@ export class ExtendedFromOpenCollectionService extends EntitySetServiceV2<
   ExtendedFromOpen,
   EditableExtendedFromOpen,
   QExtendedFromOpen,
-  ExtendedFromOpenId
+  ExtendedFromOpenId,
+  ExtendedFromOpenService
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qExtendedFromOpen, new QExtendedFromOpenId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptions | undefined,
+  ) {
+    return new ExtendedFromOpenService(client, path, name, options);
   }
 }

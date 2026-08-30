@@ -4,7 +4,7 @@ import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { generateQueryObjects } from "../../../src/generator/index.js";
 import { EmitModes, EnumSynthesis } from "../../../src/index.js";
 import { createProjectManager } from "../../../src/project/ProjectManager.js";
-import { allowedValues } from "../../data-model/builder/ODataAnnotationBuilder.js";
+import { allowedValues, alternateKeys } from "../../data-model/builder/ODataAnnotationBuilder.js";
 import { ODataModelBuilderV4 } from "../../data-model/builder/v4/ODataModelBuilderV4.js";
 import {
   createHelper,
@@ -48,6 +48,17 @@ describe("Query Object Generator Tests V4", () => {
 
   beforeEach(() => {
     odataBuilder = new ODataModelBuilderV4(SERVICE_NAME);
+  });
+
+  test(`${TEST_SUITE_NAME}: an aliased alternate key adds an overloaded param set to QId`, async () => {
+    odataBuilder.enableAnnotations().addEntityType(ENTITY_NAME, undefined, (builder) =>
+      builder
+        .addKeyProp("id", ODataTypesV4.Guid)
+        .addProp("isbn", ODataTypesV4.String, false)
+        .addTypeAnnotations([alternateKeys([[{ name: "isbn", alias: "ISBN" }]], { fullyQualified: true })]),
+    );
+
+    await generateAndCompare("entity-alternate-key.ts", { skipIdModels: false });
   });
 
   test(`${TEST_SUITE_NAME}: flags enum offers has, the collection of it does not`, async () => {

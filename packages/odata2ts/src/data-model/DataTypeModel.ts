@@ -70,6 +70,19 @@ export interface PropertyModel {
 
 export type ModelType = EntityType | ComplexType | EnumType;
 
+/**
+ * One property of one alternate key, resolved against the entity's own properties - see
+ * {@link CoreAnnotations.AlternateKeyRef}, which this is resolved from.
+ *
+ * Kept separate from {@link PropertyModel} rather than folded into it: the alias belongs to the
+ * annotation stating the alternate key, not to the property itself, which in principle could appear in
+ * more than one alternate key under different aliases.
+ */
+export interface AlternateKeyPropertyRef {
+  property: PropertyModel;
+  alias?: string;
+}
+
 export interface EntityType extends ComplexType {
   id: {
     // fully qualified name of entity to which this id belongs (might have been inherited)
@@ -82,6 +95,13 @@ export interface EntityType extends ComplexType {
   generateId: boolean;
   keyNames: Array<string>;
   keys: Array<PropertyModel>;
+  /**
+   * The alternate keys declared via `Core.AlternateKeys`, one entry per alternate key - empty where
+   * none are declared, or where `annotations.disableAlternateKeys` is set. Widens the generated `*Id`
+   * type with one more option per entry, and the generated service accepts any of them wherever the
+   * primary key (`keys`) is accepted.
+   */
+  alternateKeys: Array<Array<AlternateKeyPropertyRef>>;
   getKeyUnion(): string;
   /**
    * Media entity (`HasStream="true"`): the entity's own representation is binary content, reachable by
