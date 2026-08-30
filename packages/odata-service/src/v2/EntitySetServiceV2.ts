@@ -28,6 +28,7 @@ export abstract class EntitySetServiceV2<
   EditableT,
   Q extends QueryObjectModel,
   EIdType,
+  ES = unknown,
   AsV4 extends boolean = false,
 > {
   protected readonly __base: ServiceStateHelperV2<Q, AsV4>;
@@ -50,11 +51,32 @@ export abstract class EntitySetServiceV2<
   }
 
   /**
+   * Build the entity-type service for a specific entity of this set - the concrete class differs per
+   * generated entity type, so each generated collection service supplies its own construction here.
+   */
+  protected abstract createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternalV2<AsV4> | undefined,
+  ): ES;
+
+  /**
+   * The entity-type service addressed by the given id.
+   */
+  public byId(id: EIdType): ES {
+    // basePath, not path: __idFunction already builds the key predicate under this set's own name -
+    // path would double that segment
+    const { client, basePath, options, isUrlNotEncoded } = this.__base;
+    return this.createEntityService(client, basePath, this.__idFunction.buildUrl(id, isUrlNotEncoded()), options);
+  }
+
+  /**
    * The key specification for the given entity type.
    * Supports composite keys.
    */
   public getKeySpec() {
-    return this.__idFunction.getParams();
+    return this.__idFunction.getPrimaryParams();
   }
 
   /**
@@ -99,7 +121,7 @@ export abstract class EntitySetServiceV2<
    * itself, which is what lets a collection read fill the store for entities nobody read singly.
    */
   private entityKeyOf(entry: any): string | undefined {
-    const params = this.__idFunction.getParams();
+    const params = this.__idFunction.getPrimaryParams();
     if (!params.length || params.some((p) => entry?.[p.getMappedName()] === undefined)) {
       return undefined;
     }

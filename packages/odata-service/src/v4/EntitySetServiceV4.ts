@@ -24,6 +24,7 @@ export abstract class EntitySetServiceV4<
   EditableT,
   Q extends QueryObjectModel,
   EIdType,
+  ES = unknown,
   V extends ODataVersionV4 = "4.0",
 > {
   protected readonly __base: ServiceStateHelperV4<Q, V>;
@@ -58,11 +59,47 @@ export abstract class EntitySetServiceV4<
   }
 
   /**
-   * The key specification for the given entity type.
+   * Build the entity-type service for a specific entity of this set - the concrete class differs per
+   * generated entity type (e.g. `MediumService` vs. `PrintMediumService`), so each generated collection
+   * service supplies its own construction here.
+   */
+  protected abstract createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternal<V> | undefined,
+  ): ES;
+
+  /**
+   * The entity-type service addressed by the given id - primary or, where declared, an alternate key.
+   *
+   * Works the same after a subtype cast (e.g. {@link asPrintMediumCollectionService}-style getters):
+   * the cast segment is already part of this service's path, so the id only ever needs to add the key
+   * predicate - which is what makes addressing by a subtype's own alternate key possible at all, since
+   * the entity set's own id type never carries a subtype's alternate key.
+   */
+  public byId(id: EIdType): ES {
+    // basePath, not path: __idFunction already builds the key predicate under this set's own name (or,
+    // after a subtype cast, the cast segment's name) - path would double that segment
+    const { client, basePath, options, isUrlNotEncoded } = this.__base;
+    return this.createEntityService(client, basePath, this.__idFunction.buildUrl(id, isUrlNotEncoded()), options);
+  }
+
+  /**
+   * The key specification for the given entity type, i.e. the primary key.
    * Supports composite keys.
    */
   public getKeySpec() {
-    return this.__idFunction.getParams();
+    return this.__idFunction.getPrimaryParams();
+  }
+
+  /**
+   * The key specification of every alternate key declared for this entity type
+   * (`Core.AlternateKeys`) - empty where none are declared. One entry per alternate key, in the same
+   * order {@link createKey}/{@link parseKey} try them in after the primary key.
+   */
+  public getAlternateKeySpecs() {
+    return this.__idFunction.getAlternateParams();
   }
 
   /**
@@ -99,7 +136,9 @@ export abstract class EntitySetServiceV4<
    * Built from the mapped, user-facing property names, so it only works on a converted response.
    */
   private entityKeyOf(entry: any): string | undefined {
-    const params = this.__idFunction.getParams();
+    // always the primary key: the entity's real identity for cache purposes, regardless of which key
+    // shape it was originally fetched by
+    const params = this.__idFunction.getPrimaryParams();
     if (!params.length || params.some((p) => entry?.[p.getMappedName()] === undefined)) {
       return undefined;
     }

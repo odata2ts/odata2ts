@@ -23,15 +23,9 @@ export class TesterService extends ODataService {
   public ents(id: TestEntityId): TestEntityService<true>;
   public ents(id?: TestEntityId | undefined) {
     const fieldName = "Ents";
-    const { client, path, options, isUrlNotEncoded } = this.__base;
-    return typeof id === "undefined" || id === null
-      ? new TestEntityCollectionService<true>(client, path, fieldName, options)
-      : new TestEntityService<true>(
-          client,
-          path,
-          new QTestEntityId(fieldName).buildUrl(id, isUrlNotEncoded()),
-          options,
-        );
+    const { client, path, options } = this.__base;
+    const collection = new TestEntityCollectionService<true>(client, path, fieldName, options);
+    return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }
 
@@ -72,9 +66,19 @@ export class TestEntityCollectionService<AsV4 extends boolean = false> extends E
   EditableTestEntity,
   QTestEntity,
   TestEntityId,
+  TestEntityService<AsV4>,
   AsV4
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternalV2<AsV4>) {
     super(client, basePath, name, qTestEntity, new QTestEntityId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternalV2<AsV4> | undefined,
+  ) {
+    return new TestEntityService<AsV4>(client, path, name, options);
   }
 }

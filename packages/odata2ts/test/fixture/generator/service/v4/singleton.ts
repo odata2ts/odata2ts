@@ -42,9 +42,19 @@ export class TestEntityCollectionService<V extends ODataVersionV4 = "4.0"> exten
   EditableTestEntity,
   QTestEntity,
   TestEntityId,
+  TestEntityService<V>,
   V
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qTestEntity, new QTestEntityId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternal<V> | undefined,
+  ) {
+    return new TestEntityService<V>(client, path, name, options);
   }
 }

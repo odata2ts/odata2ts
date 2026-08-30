@@ -13,7 +13,7 @@ import {
 import { AllowedValuesEnumSynthesizer, SynthesizedEnum } from "./AllowedValuesEnumSynthesizer.js";
 import { AnnotationResolver } from "./AnnotationResolver.js";
 import { ComplexTypeUnflattener } from "./ComplexTypeUnflattener.js";
-import { getManagedState, isOptionalParameter } from "./CoreAnnotations.js";
+import { AlternateKeyRef, getAlternateKeys, getManagedState, isOptionalParameter } from "./CoreAnnotations.js";
 import { DataModel, NamespaceWithAlias, withNamespace } from "./DataModel.js";
 import {
   ComplexType as ComplexModelType,
@@ -112,6 +112,16 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    * because {@link postProcessModel} clones the inherited ones.
    */
   private annotatedManagedStates = new Map<string, ManagedState>();
+
+  /**
+   * The alternate keys stated on an entity type, by its fully qualified name, as raw name/alias pairs -
+   * not yet resolved to {@link PropertyModel}s. `Core.AlternateKeys` may also apply to an `EntitySet` or
+   * `NavigationProperty`, but only the `EntityType` target is read: the generated `Q*Id` is one artifact
+   * shared by every access path (the entity set, every navigation property, every subtype cast), so only
+   * a statement that itself applies to the type - not to one particular way of reaching it - can be
+   * represented there. See {@link resolveAlternateKeys}.
+   */
+  private alternateKeyRefs = new Map<string, Array<Array<AlternateKeyRef>>>();
 
   /**
    * The enums declared `IsFlags="true"`, by fully qualified name and by alias. Their members are bits and
@@ -221,6 +231,67 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     return this.dataModel;
   }
 
+  /**
+   * Resolves every entity type's raw {@link alternateKeyRefs} against its own properties, now that
+   * inheritance has been resolved.
+   */
+  private resolveAlternateKeys() {
+    const entityTypes = this.dataModel.getEntityTypes();
+
+    // phase 1: a type with alternate keys of its own must generate its own id - never fold them into an
+    // ancestor's, which every other subtype sharing that ancestor's id would then appear to support too
+    // (e.g. Medium's other subtypes have no ISBN, even though PrintMedium/Book do)
+    entityTypes.forEach((et) => {
+      const refs = this.alternateKeyRefs.get(et.fqName);
+      if (!refs) {
+        return;
+      }
+
+      const props = [...et.baseProps, ...et.props];
+      et.alternateKeys = refs.map((altKey) =>
+        altKey.map(({ name, alias }) => {
+          const property = props.find((p) => p.odataName === name);
+          if (!property) {
+            throw new Error(
+              `Core.AlternateKeys: property [${name}] not found among the properties of entity type [${et.fqName}]!`,
+            );
+          }
+          return { property, alias };
+        }),
+      );
+
+      if (!et.generateId) {
+        et.generateId = true;
+        et.id = {
+          fqName: et.fqName,
+          modelName: this.namingHelper.getIdModelName(et.name),
+          qName: this.namingHelper.getQIdFunctionName(et.name),
+        };
+      }
+    });
+
+    // phase 2: a type that still shares another type's id (no key, no alternate key of its own) has to
+    // point at the *nearest* id-generating ancestor - which phase 1 may just have moved closer, e.g. Book
+    // (no key, no alternate key of its own) now shares PrintMedium's id instead of skipping past it to
+    // Medium's
+    entityTypes.forEach((et) => {
+      if (et.generateId) {
+        return;
+      }
+      let owner = et;
+      while (!owner.generateId && owner.baseClasses.length) {
+        const parent = this.dataModel.getEntityType(owner.baseClasses[0]);
+        if (!parent) {
+          break;
+        }
+        owner = parent;
+      }
+      if (owner !== et && owner.generateId) {
+        et.id = { fqName: owner.fqName, modelName: owner.id.modelName, qName: owner.id.qName };
+      }
+    });
+  }
+
   private digestEntityTypesAndOperations() {
     // reshaping happens on the EDMX itself, before anything is digested: from here on the model looks like
     // one the service stated in that shape to begin with
@@ -251,6 +322,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
 
     this.postProcessModel();
     this.deriveManagedState();
+    this.resolveAlternateKeys();
 
     this.schemas.forEach((schema) => {
       this.analyzeModelUsage(schema.EntityContainer?.length ? schema.EntityContainer[0] : undefined);
@@ -404,6 +476,15 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         }
       }
 
+      // Core.AlternateKeys is a V4/Core-vocabulary concept - V2 is left untouched by this, even where
+      // a service (CAP does) states the term on V2 metadata too
+      if (this.version === ODataVersion.V4 && !this.options.annotations?.disableAlternateKeys) {
+        const alternateKeyRefs = getAlternateKeys(model.Annotation);
+        if (alternateKeyRefs) {
+          this.alternateKeyRefs.set(fqName, alternateKeyRefs);
+        }
+      }
+
       this.dataModel.addEntityType(namespace[0], baseModel.odataName, {
         ...baseModel,
         id: {
@@ -414,6 +495,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
         generateId: !!keyNames.length,
         keyNames: keyNames, // postprocess required to include key specs from base classes
         keys: [], // postprocess required to include props from base classes
+        // postprocess required as well: resolveAlternateKeys resolves the raw refs read below into this
+        alternateKeys: [],
         getKeyUnion: () => keyNames.join(" | "),
         subtypes: new Set(),
         // postprocess required as well: the media entity marker is inherited from base types

@@ -107,12 +107,22 @@ export class PersonModelCollectionService<V extends ODataVersionV4 = "4.0"> exte
   EditablePersonModel,
   QPersonV4,
   PersonId,
+  PersonModelService<V>,
   V
 > {
   private _qGetSomething = new QGetSomethingFunction();
 
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
     super(client, basePath, name, qPersonV4, new QPersonIdFunction(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternal<V> | undefined,
+  ) {
+    return new PersonModelService<V>(client, path, name, options);
   }
 
   /**

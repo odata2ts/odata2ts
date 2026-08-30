@@ -1,7 +1,8 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
 import type { EditableBooks as StrictEditableBooks } from "../../src-generated/library-strict/index.js";
-import type { EditableBooks } from "../../src-generated/library/index.js";
-import { LIBRARY } from "../LibraryTestConstants.js";
+import type { BooksId, EditableBooks } from "../../src-generated/library/index.js";
+import { expectODataError } from "../expectODataError.js";
+import { BASE_URL, BOOK_DER_PROZESS_ISBN, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
  * Evaluation of the `Org.OData.Core.V1` terms which say how the server manages a property, against the
@@ -86,5 +87,24 @@ describe("CAP Library: Core annotations", () => {
     } finally {
       await LIBRARY.Books(Id).delete().execute();
     }
+  });
+
+  /**
+   * `Core.AlternateKeys` on `Books` (`ISBN`) - the client builds the URL the annotation promises
+   * (`Books(ISBN='...')`, no cast segment needed here since `Books` is the entity set's own declared
+   * type, not a subtype), but CAP does not actually resolve an entity by it: it always requires the
+   * real key, `Id`. Pinned here as a server limitation, the counterpart of `int-test/asp-net`'s
+   * `Annotations.test.ts`, where the very same annotation does work (there via a cast collection's
+   * `byId`, since ASP.NET's `ISBN` belongs to a subtype of the entity set's type).
+   */
+  test("Core.AlternateKeys is declared but not honoured - CAP still demands the real key", async () => {
+    const isbnKey: BooksId = { ISBN: BOOK_DER_PROZESS_ISBN };
+
+    expect(LIBRARY.Books(isbnKey).getPath()).toBe(`${BASE_URL}/Books(ISBN='${BOOK_DER_PROZESS_ISBN}')`);
+
+    await expectODataError(LIBRARY.Books(isbnKey).query().execute(), {
+      status: 400,
+      message: /Key "Id" is missing for entity "Library\.Service\.Books"/,
+    });
   });
 });

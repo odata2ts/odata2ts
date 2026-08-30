@@ -301,7 +301,6 @@ class ServiceGenerator {
     versionArg: string,
   ): OptionalKind<MethodDeclarationStructure> {
     const idName = imports.addGeneratedModel(entityType.id.fqName, entityType.id.modelName);
-    const idFunctionName = imports.addGeneratedQObject(entityType.id.fqName, entityType.id.qName);
     const serviceName = imports.addGeneratedService(entityType.fqName, entityType.serviceName);
     const collectionName = imports.addGeneratedService(entityType.fqName, entityType.serviceCollectionName);
 
@@ -332,14 +331,13 @@ class ServiceGenerator {
       ],
       statements: [
         `const fieldName = "${odataPropName}";`,
-        `const { client, path, options, isUrlNotEncoded } = this.__base;`,
-        'return typeof id === "undefined" || id === null',
+        `const { client, path, options } = this.__base;`,
         // the version argument is only spelled out on the constructor call for v2ResponseAsV4: without it,
         // "new Type(...)" infers AsV4's default (false), which mismatches the declared return type above
         // wherever it isn't itself the abstract AsV4 - concretely, on every getter of the main service,
         // which pins the literal true rather than passing an abstract type parameter along
-        `? new ${collectionName}${this.isV2AsV4() ? versionArg : ""}(client, path, fieldName, options)`,
-        `: new ${serviceName}${this.isV2AsV4() ? versionArg : ""}(client, path, new ${idFunctionName}(fieldName).buildUrl(id, isUrlNotEncoded()), options);`,
+        `const collection = new ${collectionName}${this.isV2AsV4() ? versionArg : ""}(client, path, fieldName, options);`,
+        'return typeof id === "undefined" || id === null ? collection : collection.byId(id);',
       ],
     };
   }
@@ -752,6 +750,8 @@ class ServiceGenerator {
     const paramsModelName = importContainer.addGeneratedModel(model.id.fqName, model.id.modelName);
     const qIdFunctionName = importContainer.addGeneratedQObject(model.id.fqName, model.id.qName);
     const serviceOptions = this.getServiceOptionsType(importContainer);
+    const entityServiceName = importContainer.addGeneratedService(model.fqName, model.serviceName);
+    const httpClient = importContainer.addClientApi(ClientApiImports.ODataHttpClient);
 
     const collectionOperations = this.dataModel.getEntitySetOperations(model.fqName);
 
@@ -766,11 +766,11 @@ class ServiceGenerator {
       typeParameters: this.getServiceTypeParams(importContainer),
       extends:
         entitySetServiceType +
-        `<${model.modelName}, ${editableModelName}, ${model.qName}, ${paramsModelName}${this.getServiceVersionArgSuffix()}>`,
+        `<${model.modelName}, ${editableModelName}, ${model.qName}, ${paramsModelName}, ${entityServiceName}${this.getServiceVersionArg()}${this.getServiceVersionArgSuffix()}>`,
       ctors: [
         {
           parameters: [
-            { name: "client", type: importContainer.addClientApi(ClientApiImports.ODataHttpClient) },
+            { name: "client", type: httpClient },
             { name: "basePath", type: "string" },
             { name: "name", type: "string" },
             {
@@ -785,7 +785,20 @@ class ServiceGenerator {
         },
       ],
       properties,
-      methods,
+      methods: [
+        ...methods,
+        {
+          scope: Scope.Protected,
+          name: "createEntityService",
+          parameters: [
+            { name: "client", type: httpClient },
+            { name: "path", type: "string" },
+            { name: "name", type: "string" },
+            { name: "options", type: `${serviceOptions}${this.getServiceVersionArg()} | undefined` },
+          ],
+          statements: [`return new ${entityServiceName}${this.getServiceVersionArg()}(client, path, name, options);`],
+        },
+      ],
     });
   }
 

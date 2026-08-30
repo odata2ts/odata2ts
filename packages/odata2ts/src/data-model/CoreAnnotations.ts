@@ -10,6 +10,7 @@ const PERMISSIONS = `${CORE}.Permissions`;
 
 const OPTIMISTIC_CONCURRENCY = `${CORE}.OptimisticConcurrency`;
 const OPTIONAL_PARAMETER = `${CORE}.OptionalParameter`;
+const ALTERNATE_KEYS = `${CORE}.AlternateKeys`;
 
 const PERMISSION_READ = `${CORE}.Permission/Read`;
 const PERMISSION_WRITE = `${CORE}.Permission/Write`;
@@ -113,4 +114,57 @@ export function isOptimisticConcurrency(annotations: Array<Annotation> | undefin
  */
 export function isOptionalParameter(annotations: Array<Annotation> | undefined): boolean {
   return !!annotations?.some((a) => a.$.Term === OPTIONAL_PARAMETER);
+}
+
+/**
+ * One property of one alternate key, as `Core.PropertyRef` states it: the entity's own property name
+ * (`Name`, declared `Edm.PropertyPath` - only a direct property is supported, not a nested one), and
+ * the name to use in the URL instead of it, if the service states one (`Alias`).
+ */
+export interface AlternateKeyRef {
+  name: string;
+  alias?: string;
+}
+
+/**
+ * The alternate keys a service declares for an entity via `Core.AlternateKeys`
+ * (`Collection(Core.AlternateKey)`): one entry per alternate key, itself one or more
+ * {@link AlternateKeyRef} for a composite one.
+ *
+ * Unlike {@link getManagedState} or {@link isOptimisticConcurrency} this term is neither a scalar
+ * constant nor a bare tag - it is a `Collection(Record)` nested two levels deep
+ * (`AlternateKey.Key` is itself `Collection(PropertyRef)`), so it gets its own structural walk rather
+ * than reusing {@link isConstant}/{@link getConstantValue}.
+ */
+export function getAlternateKeys(
+  annotations: Array<Annotation> | undefined,
+): Array<Array<AlternateKeyRef>> | undefined {
+  const annotation = annotations?.find((a) => a.$.Term === ALTERNATE_KEYS);
+  const alternateKeyRecords = annotation?.Collection?.[0]?.Record;
+  if (!alternateKeyRecords?.length) {
+    return undefined;
+  }
+
+  return alternateKeyRecords.map((record) => {
+    const keyPropertyValue = record.PropertyValue?.find((pv) => pv.$.Property === "Key");
+    const propertyRefRecords = keyPropertyValue?.Collection?.[0]?.Record ?? [];
+
+    return propertyRefRecords.map((propertyRef) => {
+      const nameValue = propertyRef.PropertyValue?.find((pv) => pv.$.Property === "Name");
+      const aliasValue = propertyRef.PropertyValue?.find((pv) => pv.$.Property === "Alias");
+      const name = nameValue?.$.PropertyPath ?? nameValue?.$.String;
+
+      if (!name) {
+        throw new Error(`${ALTERNATE_KEYS}: a PropertyRef without a Name/PropertyPath was found!`);
+      }
+      if (name.includes("/")) {
+        throw new Error(
+          `${ALTERNATE_KEYS}: nested property path "${name}" is not supported - only a direct property` +
+            ` of the entity type may form an alternate key.`,
+        );
+      }
+
+      return { name, alias: aliasValue?.$.String };
+    });
+  });
 }

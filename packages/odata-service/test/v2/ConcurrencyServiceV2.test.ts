@@ -22,9 +22,25 @@ class PersonServiceAsV4 extends EntityTypeServiceV2<PersonModel, EditablePersonM
   }
 }
 
-class PersonCollectionAsV4 extends EntitySetServiceV2<PersonModel, EditablePersonModel, QPersonV2, PersonId, true> {
+class PersonCollectionAsV4 extends EntitySetServiceV2<
+  PersonModel,
+  EditablePersonModel,
+  QPersonV2,
+  PersonId,
+  PersonServiceAsV4,
+  true
+> {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternalV2<true>) {
     super(client, basePath, name, qPersonV2, new QPersonIdFunction(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternalV2<true> | undefined,
+  ) {
+    return new PersonServiceAsV4(client, path, name, options);
   }
 }
 

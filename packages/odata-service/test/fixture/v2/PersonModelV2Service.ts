@@ -63,9 +63,19 @@ export class PersonModelV2CollectionService extends EntitySetServiceV2<
   PersonModel,
   EditablePersonModel,
   QPersonV2,
-  PersonId
+  PersonId,
+  PersonModelV2Service
 > {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternalV2) {
     super(client, basePath, name, qPersonV2, new QPersonIdFunction(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptionsInternalV2 | undefined,
+  ) {
+    return new PersonModelV2Service(client, path, name, options);
   }
 }

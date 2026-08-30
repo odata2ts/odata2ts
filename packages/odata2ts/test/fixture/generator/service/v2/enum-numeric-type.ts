@@ -22,10 +22,9 @@ export class TesterService extends ODataService {
   public books(id: BookId): BookService;
   public books(id?: BookId | undefined) {
     const fieldName = "books";
-    const { client, path, options, isUrlNotEncoded } = this.__base;
-    return typeof id === "undefined" || id === null
-      ? new BookCollectionService(client, path, fieldName, options)
-      : new BookService(client, path, new QBookId(fieldName).buildUrl(id, isUrlNotEncoded()), options);
+    const { client, path, options } = this.__base;
+    const collection = new BookCollectionService(client, path, fieldName, options);
+    return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }
 
@@ -52,8 +51,17 @@ export class BookService extends EntityTypeServiceV2<Book, EditableBook, QBook> 
   }
 }
 
-export class BookCollectionService extends EntitySetServiceV2<Book, EditableBook, QBook, BookId> {
+export class BookCollectionService extends EntitySetServiceV2<Book, EditableBook, QBook, BookId, BookService> {
   constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
     super(client, basePath, name, qBook, new QBookId(name), options);
+  }
+
+  protected createEntityService(
+    client: ODataHttpClient,
+    path: string,
+    name: string,
+    options: ODataServiceOptions | undefined,
+  ) {
+    return new BookService(client, path, name, options);
   }
 }
