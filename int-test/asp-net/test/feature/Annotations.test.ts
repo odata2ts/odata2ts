@@ -1,11 +1,13 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import type {
   EditableBook as StrictEditableBook,
   EditableMedium as StrictEditableMedium,
 } from "../../src-generated/library-strict/library-catalog/index.js";
-import type { EditableBook, EditableMedium } from "../../src-generated/library/library-catalog/index.js";
+import type { EditableBook, EditableMedium, PrintMedium } from "../../src-generated/library/library-catalog/index.js";
 import type { EditableBranch } from "../../src-generated/library/library-circulation/index.js";
-import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
+import { BASE_URL, BOOK_DER_PROZESS, BOOK_DER_PROZESS_ISBN, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
  * Evaluation of the `Org.OData.Core.V1` terms against ASP.NET, the counterpart of the same file in
@@ -78,5 +80,40 @@ describe("ASP.NET Library: Core annotations", () => {
     // property is optional here. The strict client requires it - see feature/ImmutableProperties.test.ts,
     // which is the pairing that gives the two settings their meaning.
     expectTypeOf<EditableBranch["Id"]>().toEqualTypeOf<number | undefined>();
+  });
+
+  /**
+   * `Core.AlternateKeys` on `PrintMedium` (`ISBN`, `AppliesTo=EntityType`).
+   *
+   * `ISBN` is a property of the subtype `PrintMedium`, not of the entity set's declared type `Medium` -
+   * so, unlike the primary key, addressing by it needs the type-cast segment in the URL. That is exactly
+   * what {@link EntitySetServiceV4.byId} is for: cast the collection first
+   * (`asPrintMediumCollectionService()`), then key it - `byId` is the general accessor a subtype cast
+   * gets automatically, not something built one-off for this annotation.
+   */
+  test("Core.AlternateKeys lets ISBN address a PrintMedium, through the cast collection's byId", async () => {
+    const printMedium = LIBRARY.Media().asPrintMediumCollectionService().byId({ ISBN: BOOK_DER_PROZESS_ISBN });
+
+    expect(printMedium.getPath()).toBe(
+      `${BASE_URL}/Media/Library.Catalog.PrintMedium(ISBN='${BOOK_DER_PROZESS_ISBN}')`,
+    );
+
+    const result = await printMedium.query().execute();
+
+    expect(result.status).toBe(200);
+    expect(result.data.Title).toBe("Der Prozess");
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PrintMedium>>>();
+  });
+
+  test("Core.AlternateKeys: the primary key still addresses the very same entity", async () => {
+    const byPrimaryKey = await LIBRARY.Media(BOOK_DER_PROZESS).query().execute();
+    const byAlternateKey = await LIBRARY.Media()
+      .asPrintMediumCollectionService()
+      .byId({ ISBN: BOOK_DER_PROZESS_ISBN })
+      .query()
+      .execute();
+
+    expect(byAlternateKey.data.Id).toBe(byPrimaryKey.data.Id);
+    expect(byAlternateKey.data.Title).toBe(byPrimaryKey.data.Title);
   });
 });
