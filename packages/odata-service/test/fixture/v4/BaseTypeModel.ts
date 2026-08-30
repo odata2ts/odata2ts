@@ -18,7 +18,7 @@ export interface PlanItemModel {
 
 export interface EditablePlanItemModel extends Pick<PlanItemModel, "id">, Partial<Pick<PlanItemModel, "name">> {}
 
-export type PlanItemIdModel = string | { id: number };
+export type PlanItemIdModel = number | { id: number };
 
 export interface EventModel extends PlanItemModel {
   "@odata.type"?: "#Tester.Event";
