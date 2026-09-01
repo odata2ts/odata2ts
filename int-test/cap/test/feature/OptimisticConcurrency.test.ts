@@ -104,4 +104,18 @@ describe("CAP Library: optimistic concurrency", () => {
 
     await expect(other.Copies(COPY).delete().execute()).rejects.toThrow(ODataConcurrencyError);
   });
+
+  test("AssessCondition, an action bound to the entity, carries the ETag the preceding read filled in", async () => {
+    const result = await LIBRARY.Copies(COPY).AssessCondition({ NewCondition: 5 }).execute();
+
+    expect(result.status).toBe(200);
+  });
+
+  test("without a prior read, the bound action is refused before a request is sent", async () => {
+    const untouched = new LibraryService(new FetchClient(), BASE_URL);
+
+    await expect(untouched.Copies(COPY).AssessCondition({ NewCondition: 5 }).execute()).rejects.toThrow(
+      ODataConcurrencyError,
+    );
+  });
 });

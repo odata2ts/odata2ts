@@ -134,11 +134,13 @@ describe("CAP Library V2: operations", () => {
     });
   });
 
-  test("an operation on an ETag-carrying entity demands a precondition odata2ts cannot send", async () => {
+  test("an operation on an ETag-carrying entity demands a precondition V2 has no way to send", async () => {
     // `Copy.Condition` carries `@odata.etag`, so every write against a copy - this action included - needs
-    // `If-Match`. odata2ts sends none, in either version, so the operation stays unreachable over V4 as
-    // well. See core/CrudOperations.test.ts for what V2 does differently: it declares the token in the
-    // metadata, where V4 leaves the annotation empty.
+    // `If-Match`. Over V4 odata2ts sends it for an action bound to the entity (odata2ts#514); V2 has no
+    // notion of a bound operation at all - every operation is a container-level import - so there is no
+    // entity whose ETag store it could consult, and the call stays unreachable here regardless. See
+    // core/CrudOperations.test.ts for what V2 does differently for plain writes: it declares the token in
+    // the metadata, where V4 leaves the annotation empty.
     await expectODataError(
       LIBRARY_V2.Copies_CheckOut({ MediumId: BOOK_DER_PROZESS, InventoryNumber: 1001, MemberId: 1 }).execute(),
       { status: 428, message: /Precondition Required/ },
