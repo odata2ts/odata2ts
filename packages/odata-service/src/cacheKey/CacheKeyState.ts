@@ -14,6 +14,13 @@ export interface CacheKeyState {
   readonly typeName: string;
   /** Hops and kind markers accumulated so far. */
   readonly steps: ReadonlyArray<unknown>;
+  /**
+   * Where in {@link steps} the current resource's kind marker sits, so `byId` can flip it to
+   * `"detail"` without having to guess. A root and a re-rooting put it at 0; a hierarchical hop appends
+   * `[type, kind, name]` and so puts it two from the end. Guessing from the array's shape silently
+   * overwrote the hop's name and collided two sibling navigations onto one key.
+   */
+  readonly kindIndex: number;
   /** Restrictions contributed by the resource itself: cast, singleton, operation, derived filter. */
   readonly params?: Readonly<Record<string, unknown>>;
   /** FQ type of the addressed resource, where it belongs to an entity set. Feeds `invalidates`. */
@@ -65,6 +72,7 @@ export function rootState(
   return {
     typeName,
     steps: [kind],
+    kindIndex: 0,
     ...(options?.params ? { params: options.params } : {}),
     // an operation with no entity set behind it has no type to head with and no resource type either
     ...(typeName === OPERATION_ROOT ? {} : { resourceType: options?.entitySetType ?? typeName }),
@@ -84,7 +92,7 @@ export function withKey(
   keyValues: Readonly<Record<string, unknown>>,
 ): CacheKeyState {
   const steps = [...state.steps];
-  steps[steps.length - 1] = "detail";
+  steps[state.kindIndex] = "detail";
   steps.push(key);
 
   const params = state.params && omit(state.params, "filter");
@@ -121,6 +129,7 @@ export function hopState(state: CacheKeyState, hop: HopDescriptor): CacheKeyStat
     return {
       typeName: hop.reRoot.typeName,
       steps: [hop.kind ?? "list"],
+      kindIndex: 0,
       ...(Object.keys(params).length ? { params } : {}),
       ancestors,
       ...(hop.entitySetType ? { resourceType: hop.entitySetType } : {}),
@@ -131,9 +140,14 @@ export function hopState(state: CacheKeyState, hop: HopDescriptor): CacheKeyStat
     ? [...state.steps, hop.typeName, hop.kind ?? "detail", hop.name]
     : [...state.steps, hop.name];
 
+  // a structured hop becomes a resource with its own kind marker, two from the end; a primitive hop
+  // (bare name, e.g. a stream or a property) appends only a name and stays on its parent's resource
+  const kindIndex = hop.typeName ? steps.length - 2 : state.kindIndex;
+
   return {
     typeName: state.typeName,
     steps,
+    kindIndex,
     ancestors,
     ...(hop.entitySetType ? { resourceType: hop.entitySetType } : {}),
   };
@@ -160,6 +174,7 @@ export function reRootToEntity(
   return {
     typeName: targetType,
     steps: ["detail", key],
+    kindIndex: 0,
     keyValues,
     resourceType: targetType,
     ancestors: [...(state.ancestors ?? []), [state.typeName, ...state.steps]],

@@ -7,7 +7,12 @@ const CHAPTER = "Library.Catalog.AudiobookChapter";
 
 describe("CacheKeyState", () => {
   test("a root is the entity set's type plus a kind marker", () => {
-    expect(rootState(MEDIUM, "list")).toEqual({ typeName: MEDIUM, steps: ["list"], resourceType: MEDIUM });
+    expect(rootState(MEDIUM, "list")).toEqual({
+      typeName: MEDIUM,
+      steps: ["list"],
+      kindIndex: 0,
+      resourceType: MEDIUM,
+    });
   });
 
   test("withKey rewrites the trailing kind marker and appends the typed key", () => {
@@ -162,5 +167,55 @@ describe("CacheKeyState", () => {
     const parent = withKey(rootState("Library.Circulation.IdDocument", "list"), "x", { Id: "x" });
     const state = hopState(hopState(parent, { name: "Scan" }), { name: "$value" });
     expect(state.steps).toEqual(["detail", "x", "Scan", "$value"]);
+  });
+
+  test("withKey after a hierarchical hop keeps the navigation property name", () => {
+    const parent = withKey(rootState(MEDIUM, "list"), 5, { Id: 5 });
+    const copies = hopState(parent, { typeName: COPY, kind: "list", name: "Copies", entitySetType: COPY });
+    const state = withKey(copies, 7, { InventoryNumber: 7 });
+    expect(state.steps).toEqual(["detail", 5, COPY, "detail", "Copies", 7]);
+  });
+
+  test("two sibling navigations of the same target type do not collide", () => {
+    const parent = withKey(rootState(MEDIUM, "list"), 5, { Id: 5 });
+    const primary = withKey(
+      hopState(parent, { typeName: COPY, kind: "list", name: "Copies", entitySetType: COPY }),
+      3,
+      { InventoryNumber: 3 },
+    );
+    const backup = withKey(
+      hopState(parent, { typeName: COPY, kind: "list", name: "BackupCopies", entitySetType: COPY }),
+      3,
+      { InventoryNumber: 3 },
+    );
+    expect(primary.steps).not.toEqual(backup.steps);
+  });
+
+  test("a route that re-roots and then takes a key still puts the marker at 0", () => {
+    const parent = withKey(rootState(MEDIUM, "list"), 5, { Id: 5 });
+    const copies = hopState(parent, {
+      typeName: COPY,
+      kind: "list",
+      name: "Copies",
+      entitySetType: COPY,
+      reRoot: { typeName: COPY, filter: { MediumId: 5 } },
+    });
+    const copy = withKey(copies, { MediumId: 5, InventoryNumber: 7 }, { MediumId: 5, InventoryNumber: 7 });
+    expect(copy.steps).toEqual(["detail", { MediumId: 5, InventoryNumber: 7 }]);
+  });
+
+  test("a primitive hop does not move the kind index", () => {
+    const parent = withKey(rootState("Library.Circulation.IdDocument", "list"), "x", { Id: "x" });
+    const state = hopState(parent, { name: "Scan" });
+    expect(state.kindIndex).toBe(parent.kindIndex);
+  });
+
+  test("withKey drops a derived filter but keeps a sibling params entry", () => {
+    const flattened = withParams(rootState(COPY, "list"), {
+      filter: { MediumId: 5 },
+      cast: "Library.Catalog.Book",
+    });
+    const state = withKey(flattened, { MediumId: 5, InventoryNumber: 7 }, { MediumId: 5, InventoryNumber: 7 });
+    expect(state.params).toEqual({ cast: "Library.Catalog.Book" });
   });
 });
