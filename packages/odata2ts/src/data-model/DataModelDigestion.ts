@@ -204,9 +204,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   /**
    * The inverse navigation property on the related type, where the model declares one.
    *
-   * Answered here for V2, which resolves partners from the `<Association>` a navigation property points
-   * at, not from an attribute of its own - that is Task 11's job, overriding this in
-   * `DataModelDigestionV2.ts`.
+   * Undefined here, because a navigation property only states its partner outright in V4. V2 has to
+   * resolve it from the `<Association>` the navigation property points at and overrides this
+   * accordingly.
    */
   protected getPartner(p: Property, fqOwnerName?: string): string | undefined {
     return undefined;
@@ -216,9 +216,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    * The foreign key a navigation property is realized by: the dependent property and the principal
    * property it references, one entry per property of a composite key.
    *
-   * Answered here for V2, which resolves referential constraints from the `<Association>` a navigation
-   * property points at, not from an element of its own - that is Task 11's job, overriding this in
-   * `DataModelDigestionV2.ts`.
+   * Undefined here, because only V4 states the constraint on the navigation property itself. V2 states
+   * it once on the `<Association>` instead and overrides this to resolve it from there.
    */
   protected getReferentialConstraints(
     p: Property,
