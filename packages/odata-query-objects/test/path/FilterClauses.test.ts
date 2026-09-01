@@ -1,5 +1,14 @@
 import { describe, expect, test } from "vitest";
-import { QDateTimeOffsetPath, QGuidPath, QNumberPath, QStringPath } from "../../src";
+import {
+  QDateTimeOffsetPath,
+  QEnumPath,
+  QFlagsEnumPath,
+  QGuidPath,
+  QNumberPath,
+  QNumericEnumPath,
+  QNumericFlagsEnumPath,
+  QStringPath,
+} from "../../src";
 
 describe("filter clauses", () => {
   const id = new QNumberPath("MediumId");
@@ -76,5 +85,62 @@ describe("filter clauses", () => {
     expect(at.eq("2026-01-01T00:00:00Z").getClauses()).toEqual([
       { path: "LoanedAt", operator: "eq", value: "2026-01-01T00:00:00Z" },
     ]);
+  });
+
+  enum FeatureEnum {
+    Feature1 = "Feature1",
+    Feature2 = "Feature2",
+  }
+  enum NumericFeatureEnum {
+    Feature1,
+    Feature2,
+  }
+
+  test("a string enum comparison records the bare symbolic name, while toString() still quotes it", () => {
+    const feature = new QEnumPath("Feature", FeatureEnum);
+    const expression = feature.eq(FeatureEnum.Feature1);
+    expect(expression.getClauses()).toEqual([{ path: "Feature", operator: "eq", value: "Feature1" }]);
+    expect(expression.toString()).toBe("Feature eq 'Feature1'");
+  });
+
+  test("a numeric enum comparison records the symbolic name as a string, not the number", () => {
+    const feature = new QNumericEnumPath("Feature", NumericFeatureEnum);
+    const expression = feature.eq(NumericFeatureEnum.Feature1);
+    expect(expression.getClauses()).toEqual([{ path: "Feature", operator: "eq", value: "Feature1" }]);
+  });
+
+  test("a string enum with a wire-value converter records that value as a string", () => {
+    const converter = {
+      id: "test",
+      from: "Edm.Byte",
+      to: "FeatureEnum",
+      convertFrom: (v: number | null | undefined) => (v == null ? v : FeatureEnum.Feature1),
+      convertTo: (v: FeatureEnum | null | undefined) => (v == null ? v : 0),
+    };
+    const feature = new QEnumPath<typeof FeatureEnum, number>("Feature", FeatureEnum, converter);
+    const expression = feature.eq(FeatureEnum.Feature1);
+    expect(expression.getClauses()).toEqual([{ path: "Feature", operator: "eq", value: "0" }]);
+  });
+
+  test("has() on both flags variants records a clause", () => {
+    const stringFlags = new QFlagsEnumPath("Feature", FeatureEnum);
+    expect(stringFlags.has(FeatureEnum.Feature2).getClauses()).toEqual([
+      { path: "Feature", operator: "has", value: "Feature2" },
+    ]);
+
+    const numericFlags = new QNumericFlagsEnumPath("Feature", NumericFeatureEnum);
+    expect(numericFlags.has(NumericFeatureEnum.Feature2).getClauses()).toEqual([
+      { path: "Feature", operator: "has", value: "Feature2" },
+    ]);
+  });
+
+  test("in() on an enum path still records nothing", () => {
+    const feature = new QEnumPath("Feature", FeatureEnum);
+    expect(feature.in(FeatureEnum.Feature1, FeatureEnum.Feature2).getClauses()).toEqual([]);
+  });
+
+  test("isNull() on an enum path still records value null", () => {
+    const feature = new QEnumPath("Feature", FeatureEnum);
+    expect(feature.isNull().getClauses()).toEqual([{ path: "Feature", operator: "eq", value: null }]);
   });
 });
