@@ -1,6 +1,7 @@
 export { ODataService } from "./ODataService";
 export * from "./ETagExtraction";
 export * from "./ODataConcurrencyError";
+export * from "./ODataResponseModel";
 export * from "./ODataServiceOptions";
 
 export * from "./v2/index";

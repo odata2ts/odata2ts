@@ -1,7 +1,9 @@
 import { HttpResponseModel, ODataHttpClient, ODataHttpMethods, ODataRequestConfig } from "@odata2ts/http-client-api";
 import { MainResponseConverter } from "@odata2ts/odata-query-objects";
+import { buildCacheKey, buildInvalidates, CacheKeyState } from "../cacheKey/index.js";
 import { getHeaderETag } from "../ETagExtraction";
 import { ODataConcurrencyError } from "../ODataConcurrencyError";
+import { ODataResponseModel } from "../ODataResponseModel";
 import { MainRequestConverter, RequestConverter } from "./converter/RequestConverter";
 import { RequestConverterChain } from "./converter/RequestConverterChain";
 import { ResponseConverter } from "./converter/ResponseConverter";
@@ -47,6 +49,16 @@ export interface RequestCmdOptions<ResponseStructure, DataStructure> {
    * to the user facing model.
    */
   mainResponseConverter?: MainResponseConverter<ResponseStructure, any>;
+  /**
+   * What resource this request addresses - see {@link CacheKeyState}. Absent where the client was
+   * generated without `cacheKeys`, which is what makes {@link RequestCmd.cacheKey} optional.
+   */
+  cacheKeyState?: CacheKeyState;
+  /**
+   * The query's own restrictions, snapshotted off the query builder rather than parsed back out of the
+   * URL. Absent for methods with no builder - `patch`, `update`, `delete`, stream access.
+   */
+  queryParams?: Record<string, unknown>;
 }
 
 /**
@@ -65,6 +77,8 @@ export abstract class RequestCmd<
    * through the write command classes; when present it wins over the store.
    */
   protected etagOverride?: string;
+
+  private cachedCacheKey?: ReadonlyArray<unknown>;
 
   public constructor(
     protected client: ODataHttpClient,
@@ -88,9 +102,9 @@ export abstract class RequestCmd<
    * The data (if any) is presented with user facing typings.
    */
   public getInfo(): RequestInfo<DataStructure> {
-    const { headers } = this.options;
+    const { headers, cacheKeyState } = this.options;
 
-    return new RequestInfo<DataStructure>(this.method, this.getUrl(), headers, this.data);
+    return new RequestInfo<DataStructure>(this.method, this.getUrl(), headers, this.data, cacheKeyState);
   }
 
   /**
@@ -111,6 +125,26 @@ export abstract class RequestCmd<
     }
 
     return converter.convert(request);
+  }
+
+  /**
+   * The key this request's resource should be cached under - available before the request goes out, which
+   * is when a cache needs it.
+   *
+   * Read through the converter chain, so any converter's effect on the resource identity is visible
+   * without a second call. Lazy is required rather than stylistic: `getUrl()` cannot run from the base
+   * constructor, because subclasses overriding it read parameter-property fields TypeScript assigns only
+   * after `super()` returns.
+   *
+   * `undefined` means this client was not generated with `cacheKeys` - which a consuming application has
+   * to handle anyway when it is shared across services.
+   */
+  public get cacheKey(): ReadonlyArray<unknown> | undefined {
+    if (this.cachedCacheKey === undefined) {
+      const state = this.getInfoConverted().cacheKeyState;
+      this.cachedCacheKey = state && buildCacheKey(state, this.options.queryParams);
+    }
+    return this.cachedCacheKey;
   }
 
   /**
@@ -184,7 +218,7 @@ export abstract class RequestCmd<
    */
   public async execute<RequestConfig extends ODataRequestConfig = ODataRequestConfig>(
     requestConfig?: NoInferConfig<RequestConfig>,
-  ) {
+  ): Promise<ODataResponseModel<FinalResponseStructure>> {
     // apply request converters
     const request = this.applyConcurrency(this.getInfoConverted());
 
@@ -198,7 +232,22 @@ export abstract class RequestCmd<
     // the mapped, user-facing ones, which only exist once the converters have run
     this.updateConcurrency(response);
 
-    return converted;
+    return this.withInvalidates(converted, request.cacheKeyState);
+  }
+
+  /**
+   * Attaches what this write makes stale - from the very same state the key is built from, so key and
+   * invalidation set cannot drift apart. A read adds nothing: what it should be stored under is
+   * {@link cacheKey}.
+   */
+  private withInvalidates(
+    response: HttpResponseModel<FinalResponseStructure>,
+    state: CacheKeyState | undefined,
+  ): ODataResponseModel<FinalResponseStructure> {
+    if (!state || this.method === ODataHttpMethods.Get) {
+      return response;
+    }
+    return { ...response, invalidates: buildInvalidates(state) };
   }
 
   /**
@@ -225,7 +274,13 @@ export abstract class RequestCmd<
       return request;
     }
 
-    return new RequestInfo(request.method, request.url, { ...request.headers, "If-Match": etag }, request.data);
+    return new RequestInfo(
+      request.method,
+      request.url,
+      { ...request.headers, "If-Match": etag },
+      request.data,
+      request.cacheKeyState,
+    );
   }
 
   /**

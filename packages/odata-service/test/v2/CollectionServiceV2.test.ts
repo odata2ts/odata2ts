@@ -1,4 +1,3 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2 } from "@odata2ts/odata-core";
 import {
   EnumCollection,
@@ -7,7 +6,7 @@ import {
   StringCollection,
 } from "@odata2ts/odata-query-objects";
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { CollectionServiceV2, DEFAULT_HEADERS, ODataServiceOptions } from "../../src";
+import { CollectionServiceV2, DEFAULT_HEADERS, ODataResponseModel, ODataServiceOptions } from "../../src";
 import { commonCollectionTests, getParams } from "../CollectionServiceTests";
 import { MockClient } from "../mock/MockClient";
 
@@ -17,9 +16,9 @@ export enum NumericTestEnum {
   ZEBRA = 99,
 }
 
-type RESPONSE_TYPE_DEFAULT = HttpResponseModel<undefined>;
-type RESPONSE_TYPE_ENUM = HttpResponseModel<ODataCollectionResponseV2<NumericTestEnum>>;
-type RESPONSE_TYPE_STRING = HttpResponseModel<ODataCollectionResponseV2<string>>;
+type RESPONSE_TYPE_DEFAULT = ODataResponseModel<undefined>;
+type RESPONSE_TYPE_ENUM = ODataResponseModel<ODataCollectionResponseV2<NumericTestEnum>>;
+type RESPONSE_TYPE_STRING = ODataResponseModel<ODataCollectionResponseV2<string>>;
 
 describe("CollectionService V2 Tests", () => {
   const odataClient = new MockClient(true);

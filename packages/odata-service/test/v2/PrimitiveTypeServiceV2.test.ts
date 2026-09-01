@@ -1,7 +1,6 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataValueResponseV2 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { PrimitiveTypeServiceV2, RequestInfo } from "../../src";
+import { ODataResponseModel, PrimitiveTypeServiceV2, RequestInfo } from "../../src";
 import { PersonModelV2Service } from "../fixture/v2/PersonModelV2Service";
 import { MockClient } from "../mock/MockClient";
 
@@ -82,7 +81,7 @@ describe("PrimitiveTypeService V2 Test", () => {
     expect(result.method).toBe("GET");
     expect(result).toStrictEqual(request.getInfoConverted());
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<ODataValueResponseV2<string>>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<ODataValueResponseV2<string>>>();
   });
 
   test("primitiveType V2: update value", async () => {
@@ -97,7 +96,7 @@ describe("PrimitiveTypeService V2 Test", () => {
     expect(request.getInfoConverted().data).toEqual({ UserName: "test" });
     expect(result.method).toBe("PUT");
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
   });
 
   test("primitiveType V2: delete value", async () => {
@@ -110,6 +109,6 @@ describe("PrimitiveTypeService V2 Test", () => {
     expect(result.data).toBeUndefined();
     expect(result.method).toBe("DELETE");
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
   });
 });

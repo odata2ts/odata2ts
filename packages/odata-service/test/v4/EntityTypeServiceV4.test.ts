@@ -1,7 +1,12 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { FlexibleODataModelPayloadV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, EntityTypeServiceV4, getODataVersionHeaders, RequestInfo } from "../../src";
+import {
+  DEFAULT_HEADERS,
+  EntityTypeServiceV4,
+  getODataVersionHeaders,
+  ODataResponseModel,
+  RequestInfo,
+} from "../../src";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { EditableFlightModel, PlanItemService } from "../fixture/v4/BaseTypeModel";
@@ -38,15 +43,15 @@ describe("EntityTypeService V4 Tests", () => {
     expect(result.data).toEqual(model);
     expect(request.getInfoConverted().data).toEqual(requestModel);
 
-    expectTypeOf(await testService.patch(model).execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
-    expectTypeOf(await testService.patch<false>(model).execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
+    expectTypeOf(await testService.patch(model).execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(await testService.patch<false>(model).execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
 
     // check response conversion
     odataClient.setModelResponse(requestModel);
     const response = await testService.patch<true>(model).execute();
 
     expect(response.data).toStrictEqual(model);
-    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
+    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<PersonModel>>>();
 
     // subtype options won't take any effect
     const request2 = testService
@@ -80,15 +85,15 @@ describe("EntityTypeService V4 Tests", () => {
     expect(result.data).toEqual(model);
     expect(request.getInfoConverted().data).toEqual(requestModel);
 
-    expectTypeOf(await testService.update(model).execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
-    expectTypeOf(await testService.update<false>(model).execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
+    expectTypeOf(await testService.update(model).execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(await testService.update<false>(model).execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
 
     // check response conversion
     odataClient.setModelResponse(requestModel);
     const response = await testService.update<true>(model).execute();
 
     expect(response.data).toStrictEqual(model);
-    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
+    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<PersonModel>>>();
   });
 
   test("entityType V4: update and patch both take the updatable model, not the editable one", () => {
@@ -340,7 +345,7 @@ describe("EntityTypeService V4 Tests", () => {
 
     expect(response.data).toStrictEqual(expected);
     // operations keep the response type the generator emitted, here 4.0
-    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
+    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<PersonModel>>>();
   });
 
   test("operation V4: value return type is run through the response converter", async () => {

@@ -1,6 +1,5 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { RequestInfo, StreamServiceV4 } from "../../src/";
+import { ODataResponseModel, RequestInfo, StreamServiceV4 } from "../../src/";
 import { MockClient } from "../mock/MockClient";
 
 describe("StreamService V4 Test", () => {
@@ -39,7 +38,7 @@ describe("StreamService V4 Test", () => {
     expect(odataClient.lastUrl).toBe(EXPECTED_PATH);
     expect(odataClient.lastOperation).toBe("GET");
     expect(response.data).toBe(blob);
-    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<Blob | undefined>>();
+    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<Blob | undefined>>();
   });
 
   test("stream V4: an empty stream answers 204, so no blob", async () => {
@@ -48,7 +47,7 @@ describe("StreamService V4 Test", () => {
     const response = await service.getBlob().execute();
 
     expect(response.data).toBeNull();
-    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<Blob | undefined>>();
+    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<Blob | undefined>>();
   });
 
   test("stream V4: update blob", async () => {
@@ -103,7 +102,7 @@ describe("StreamService V4 Test", () => {
     expect(odataClient.lastOperation).toBe("GET");
     // the stream itself, not a buffered copy of it
     expect(response.data).toBe(stream);
-    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ReadableStream | undefined>>();
+    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<ReadableStream | undefined>>();
   });
 
   test("stream V4: update stream", async () => {
@@ -140,7 +139,7 @@ describe("StreamService V4 Test", () => {
     expect(result.data).toBeUndefined();
     expect(result.method).toBe("DELETE");
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
     expect(odataClient.lastOperation).toBe("DELETE");
   });
 });
