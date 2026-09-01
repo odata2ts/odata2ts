@@ -46,11 +46,12 @@ export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeSer
       this._bookQLike = new Book_QLike();
     }
 
-    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const { addFullPath, client, getDefaultHeaders, getConcurrencyOptions } = this.__base;
     const url = addFullPath(this._bookQLike.buildUrl());
 
     return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Post, url, undefined, {
       headers: getDefaultHeaders(),
+      concurrency: getConcurrencyOptions(),
     });
   }
 
@@ -59,7 +60,7 @@ export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeSer
       this._bookQRate = new Book_QRate();
     }
 
-    const { addFullPath, client, getDefaultHeaders } = this.__base;
+    const { addFullPath, client, getDefaultHeaders, getConcurrencyOptions } = this.__base;
     const url = addFullPath(this._bookQRate.buildUrl());
 
     return new UrlRequestCmd<ODataModelResponseV4<Rating>, Book_RateParams>(
@@ -71,6 +72,7 @@ export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeSer
         headers: getDefaultHeaders(),
         mainRequestConverter: this._bookQRate.getRequestConverter(),
         mainResponseConverter: this._bookQRate.getResponseConverter(),
+        concurrency: getConcurrencyOptions(),
       },
     );
   }
