@@ -8,8 +8,8 @@ import {
   QNumberPath,
   QNumericEnumPath,
   QNumericFlagsEnumPath,
-  QStringPath,
   QStringCollection,
+  QStringPath,
   QStringV2Path,
 } from "../../src";
 
