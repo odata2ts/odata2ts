@@ -50,4 +50,20 @@ describe("touchesType", () => {
   test("an empty key matches nothing", () => {
     expect(touchesType(MEDIUM, [])).toBe(false);
   });
+
+  test("a search term with no dot cannot be a type and never matches", () => {
+    // this is what makes "a property name never matches" true for any input rather than only for
+    // well-formed input: without the guard, the scan would find the hop's own name
+    const key = [MEMBER, "detail", 42, RESERVATION, "list", "Reservations"];
+    expect(touchesType("Reservations", key)).toBe(false);
+    expect(touchesType("detail", key)).toBe(false);
+    expect(touchesType("", key)).toBe(false);
+  });
+
+  test("only the cast entry of the params object is inspected, not other params values", () => {
+    const key = [MEDIUM, "list", { filter: { Title: "Library.Catalog.Book" }, cast: "Library.Catalog.Book" }];
+    expect(touchesType("Library.Catalog.Book", key)).toBe(true);
+    const noCast = [MEDIUM, "list", { filter: { Title: "Library.Catalog.Book" } }];
+    expect(touchesType("Library.Catalog.Book", noCast)).toBe(false);
+  });
 });

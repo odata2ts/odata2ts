@@ -7,7 +7,10 @@
  * generated alongside it.
  *
  * A property name cannot produce a false positive: an OData identifier cannot contain a dot, an FQN always
- * does. A bound operation's FQ name can, which is a harmless imprecision - nothing asks about operation
+ * does. **A search term without a dot cannot be a type name.** Without this guard, a bare hop name like
+ * `"Reservations"` would match the hop's own name in the key, even though it is not a type. The guard can
+ * never change the answer for a real fully qualified name, since no FQN lacks a dot.
+ * A bound operation's FQ name can match, which is a harmless imprecision - nothing asks about operation
  * names, and no type name can collide with one that is actually in a key.
  *
  * **Matching is exact; there is no inheritance.** A key carrying `Library.Catalog.Book` does not match
