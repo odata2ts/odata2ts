@@ -11,6 +11,7 @@ import {
   QueryObjectModel,
   searchTerm,
 } from "@odata2ts/odata-query-objects";
+import { CacheKeyParams, foldFilterClauses, normalizeCacheKeyParams } from "./CacheKeyParams.js";
 import { ODataOperators } from "./ODataModel";
 import {
   ExpandingCollectionQueryBuilderV4,
@@ -405,5 +406,35 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     const hoistedExpands = [...(this.expands ?? []), ...(this.hoistedExpandsBucket ?? [])];
 
     return { content, hoistedExpands };
+  }
+
+  /**
+   * The restrictions this builder puts on the resource, as a cache key carries them.
+   *
+   * Read off this builder's own fields, never off the URL it builds: the values in `filter` are the
+   * OData-side ones the query objects recorded, which a rendered `$filter` string has already escaped and
+   * quoted beyond recovery.
+   *
+   * `hoistedExpandsBucket` is deliberately ignored - it is folded into `expands` by `build()`, and a cache
+   * key is asked for before or after that without the answer being allowed to differ.
+   *
+   * `groupBys` is deliberately ignored too: `$apply` reshapes the response into something that is not the
+   * resource any more, so keying it as that resource would be wrong.
+   */
+  public getCacheKeyParams(): CacheKeyParams | undefined {
+    const expands = [...(this.expands ?? []), ...(this.hoistedExpandsBucket ?? [])];
+
+    return normalizeCacheKeyParams({
+      filter: this.filters?.length ? foldFilterClauses(this.filters) : undefined,
+      select: this.selects?.length ? [...this.selects].sort() : undefined,
+      expand: expands.length ? [...expands].sort() : undefined,
+      orderBy: this.orderBys?.length ? this.orderBys.map((exp) => exp.toString()) : undefined,
+      top: this.itemsTop,
+      skip: this.itemsToSkip,
+      // `count(false)` still assigns itemsCount, so a bare truthiness check would report a count
+      // nobody asked for - and would key `?$count=false` differently from the same query without it
+      count: this.itemsCount && this.itemsCount[1] !== "false" ? true : undefined,
+      search: this.searchTerms?.length ? this.searchTerms.map((st) => st.toString()).join(" AND ") : undefined,
+    });
   }
 }
