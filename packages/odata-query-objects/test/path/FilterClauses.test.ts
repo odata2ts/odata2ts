@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
+  QCollectionPath,
   QDateTimeOffsetPath,
   QEnumPath,
   QFlagsEnumPath,
@@ -8,6 +9,8 @@ import {
   QNumericEnumPath,
   QNumericFlagsEnumPath,
   QStringPath,
+  QStringCollection,
+  QStringV2Path,
 } from "../../src";
 
 describe("filter clauses", () => {
@@ -142,5 +145,29 @@ describe("filter clauses", () => {
   test("isNull() on an enum path still records value null", () => {
     const feature = new QEnumPath("Feature", FeatureEnum);
     expect(feature.isNull().getClauses()).toEqual([{ path: "Feature", operator: "eq", value: null }]);
+  });
+});
+
+describe("expressions that cannot be decomposed", () => {
+  test("a lambda operator over a collection is raw only", () => {
+    const keywords = new QCollectionPath("Keywords", () => QStringCollection);
+    const expression = keywords.any((q) => q.it.eq("ai"));
+    expect(expression.getClauses()).toEqual([]);
+    expect(expression.getRaw()).toHaveLength(1);
+    expect(expression.getRaw()[0]).toBe(expression.toString());
+  });
+
+  test("an empty lambda is raw only", () => {
+    const keywords = new QCollectionPath("Keywords", () => QStringCollection);
+    const expression = keywords.any();
+    expect(expression.getClauses()).toEqual([]);
+    expect(expression.getRaw()).toEqual(["Keywords/any()"]);
+  });
+
+  test("a V2 string function is raw only", () => {
+    const title = new QStringV2Path("Title");
+    const expression = title.startsWith("a");
+    expect(expression.getClauses()).toEqual([]);
+    expect(expression.getRaw()).toHaveLength(1);
   });
 });
