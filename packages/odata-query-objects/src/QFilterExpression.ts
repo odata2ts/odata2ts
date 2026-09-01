@@ -27,7 +27,7 @@ export class QFilterExpression {
   constructor(
     private expression?: string,
     private clauses: ReadonlyArray<FilterClause> = [],
-    private raw: ReadonlyArray<string> = expression && !clauses.length ? [expression] : [],
+    private raw: ReadonlyArray<string> = expression?.trim() && !clauses.length ? [expression] : [],
   ) {}
 
   public toString(): string {
