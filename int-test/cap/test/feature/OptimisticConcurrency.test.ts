@@ -61,6 +61,33 @@ describe("CAP Library: optimistic concurrency", () => {
     expect(isConcurrencyRequired(error)).toBe(false);
   });
 
+  test("a real 412 forgets the ETag it disproved, so the next write is refused instead of failing again", async () => {
+    // two clients of their own, so the ETag store under test is not the one the rest of the suite shares
+    const mine = new LibraryService(new FetchClient(), BASE_URL);
+    const someoneElse = new LibraryService(new FetchClient(), BASE_URL);
+
+    // I read the copy, which fills my store with the ETag current at that moment
+    expect((await mine.Copies(COPY).query().execute()).status).toBe(200);
+
+    // somebody else changes it behind my back, so my ETag is now stale
+    const theirWrite = await someoneElse.Copies(COPY).patch({ Condition: 4 }).ignoreETag().execute();
+    expect([200, 204]).toContain(theirWrite.status);
+
+    // my write carries the stale ETag and the server refuses it
+    const conflict = await expectODataError(mine.Copies(COPY).patch({ Condition: 5 }).execute(), {
+      status: 412,
+      message: /.*/,
+    });
+    expect(isConcurrencyConflict(conflict)).toBe(true);
+
+    // and now the point: the disproved ETag is gone, so the retry never reaches the server
+    await expect(mine.Copies(COPY).patch({ Condition: 5 }).execute()).rejects.toThrow(ODataConcurrencyError);
+
+    // reading again is what makes writing possible once more
+    expect((await mine.Copies(COPY).query().execute()).status).toBe(200);
+    expect([200, 204]).toContain((await mine.Copies(COPY).patch({ Condition: 5 }).execute()).status);
+  });
+
   test("ignoreETag writes past whatever is current", async () => {
     const result = await LIBRARY.Copies(COPY).patch({ Condition: 6 }).ignoreETag().execute();
 

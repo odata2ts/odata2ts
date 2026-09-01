@@ -55,6 +55,11 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
   public responseStatus = 200;
   /** The headers the next response carries, e.g. `{ etag: 'W/"7"' }`. */
   public responseHeaders: Record<string, string> = {};
+  /**
+   * Makes the next request fail the way every real client does: a non-2xx answer is not returned, it is
+   * thrown as an error carrying the status. Set to a status to arm it, `undefined` to respond normally.
+   */
+  public failWithStatus?: number;
 
   public readonly concurrency = new MockConcurrencyHandler();
 
@@ -274,6 +279,11 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
 
   private respond() {
     this.requestCount++;
+    if (this.failWithStatus !== undefined) {
+      const error = new Error(`Mock failure with status ${this.failWithStatus}`) as Error & { status: number };
+      error.status = this.failWithStatus;
+      return Promise.reject(error);
+    }
     const result = Promise.resolve({
       status: this.responseStatus,
       statusText: "OK",
