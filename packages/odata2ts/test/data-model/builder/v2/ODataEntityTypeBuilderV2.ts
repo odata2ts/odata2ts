@@ -22,6 +22,12 @@ export class ODataEntityTypeBuilderV2 extends ODataEntityTypeBuilderBase<EntityT
   /**
    * @param roles the association roles; by default they are derived from the two type names, which is not
    * unique as soon as one entity type points at another one more than once - specify them in that case
+   * @param referentialConstraint the foreign key realizing this association, stated from this navigation
+   * property's own side: `property` names one of this entity type's own properties, `referencedProperty`
+   * the property of the target type it references. V2 states the constraint once per association rather
+   * than per end, so this is only meaningful on the call for the side that actually points at the
+   * principal - the merge in {@link ODataModelBuilderV2.addEntityType} carries it onto the shared
+   * `<Association>` regardless of which of the two `addNavProp` calls supplies it.
    */
   public addNavProp(
     name: string,
@@ -29,6 +35,7 @@ export class ODataEntityTypeBuilderV2 extends ODataEntityTypeBuilderBase<EntityT
     relationship: string,
     multiplicity: string,
     roles?: { fromRole: string; toRole: string },
+    referentialConstraint?: Array<{ property: string; referencedProperty: string }>,
   ) {
     if (!this.entityType.NavigationProperty) {
       this.entityType.NavigationProperty = [];
@@ -50,6 +57,26 @@ export class ODataEntityTypeBuilderV2 extends ODataEntityTypeBuilderBase<EntityT
           },
         },
       ],
+      ...(referentialConstraint
+        ? {
+            ReferentialConstraint: [
+              {
+                Principal: [
+                  {
+                    $: { Role: toRole },
+                    PropertyRef: referentialConstraint.map((rc) => ({ $: { Name: rc.referencedProperty } })),
+                  },
+                ],
+                Dependent: [
+                  {
+                    $: { Role: fromRole },
+                    PropertyRef: referentialConstraint.map((rc) => ({ $: { Name: rc.property } })),
+                  },
+                ],
+              },
+            ],
+          }
+        : undefined),
     });
 
     this.entityType.NavigationProperty.push({
