@@ -1,4 +1,4 @@
-import { QFilterExpression } from "@odata2ts/odata-query-objects";
+import { QFilterExpression, QStringPath } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, test } from "vitest";
 import { ODataQueryBuilder } from "../src/ODataQueryBuilder";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
@@ -90,6 +90,13 @@ describe("CacheKeyParams", () => {
     expect(builder.getCacheKeyParams()).toEqual({
       filter: { name: "russell", $raw: "(A eq 1 or B eq 2)" },
     });
+  });
+
+  test("the clause path is the OData name, not a mapped TypeScript name", () => {
+    // the whole convergence claim rests on this: a derived relation produces OData names, so a
+    // hand-written filter has to produce the same spelling or the two key separately
+    builder.filter([new QStringPath("User_Name").eq("russell")]);
+    expect(builder.getCacheKeyParams()).toEqual({ filter: { User_Name: "russell" } });
   });
 
   test("an empty filter expression contributes nothing", () => {
