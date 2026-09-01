@@ -47,6 +47,7 @@ describe("RequestCmd: optimistic concurrency", () => {
     client.responseStatus = 200;
     client.responseHeaders = {};
     client.requestCount = 0;
+    client.failWithStatus = undefined;
   });
 
   describe("sending If-Match", () => {
@@ -210,6 +211,94 @@ describe("RequestCmd: optimistic concurrency", () => {
       await cmd(ODataHttpMethods.Patch, controlled(false)).execute();
 
       expect(client.concurrency.store.has(KEY)).toBe(false);
+    });
+  });
+
+  describe("keeping the store in step after a failed write", () => {
+    test("a 412 evicts the ETag it has just disproved", async () => {
+      client.concurrency.set(KEY, 'W/"1"');
+      client.failWithStatus = 412;
+
+      await expect(cmd(ODataHttpMethods.Patch, controlled()).execute()).rejects.toThrow();
+
+      expect(client.concurrency.store.has(KEY)).toBe(false);
+    });
+
+    test("the original error still travels on unchanged", async () => {
+      client.concurrency.set(KEY, 'W/"1"');
+      client.failWithStatus = 412;
+
+      const error = await cmd(ODataHttpMethods.Patch, controlled())
+        .execute()
+        .then(
+          () => undefined,
+          (e: any) => e,
+        );
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error.status).toBe(412);
+      expect(error).not.toBeInstanceOf(ODataConcurrencyError);
+      expect(error.message).toBe("Mock failure with status 412");
+    });
+
+    test("the write after a 412 is refused before a request is sent", async () => {
+      // the point of evicting: what follows is the actionable "read it first", not another silent 412
+      client.concurrency.set(KEY, 'W/"1"');
+      client.failWithStatus = 412;
+      await expect(cmd(ODataHttpMethods.Patch, controlled()).execute()).rejects.toThrow();
+
+      client.failWithStatus = undefined;
+      client.requestCount = 0;
+
+      await expect(cmd(ODataHttpMethods.Patch, controlled()).execute()).rejects.toThrow(ODataConcurrencyError);
+      expect(client.requestCount).toBe(0);
+    });
+
+    test("a 404 leaves the store alone - it says nothing about the ETag", async () => {
+      client.concurrency.set(KEY, 'W/"1"');
+      client.failWithStatus = 404;
+
+      await expect(cmd(ODataHttpMethods.Patch, controlled()).execute()).rejects.toThrow();
+
+      expect(client.concurrency.store.get(KEY)).toBe('W/"1"');
+    });
+
+    test("a 500 leaves the store alone as well", async () => {
+      client.concurrency.set(KEY, 'W/"1"');
+      client.failWithStatus = 500;
+
+      await expect(cmd(ODataHttpMethods.Patch, controlled()).execute()).rejects.toThrow();
+
+      expect(client.concurrency.store.get(KEY)).toBe('W/"1"');
+    });
+
+    test("a 412 on a delete evicts too", async () => {
+      client.concurrency.set(KEY, 'W/"1"');
+      client.failWithStatus = 412;
+
+      await expect(cmd(ODataHttpMethods.Delete, controlled()).execute()).rejects.toThrow();
+
+      expect(client.concurrency.store.has(KEY)).toBe(false);
+    });
+
+    test("a 412 on a command without concurrency options evicts nothing", async () => {
+      client.concurrency.set(KEY, 'W/"1"');
+      client.failWithStatus = 412;
+
+      await expect(cmd(ODataHttpMethods.Patch).execute()).rejects.toThrow();
+
+      expect(client.concurrency.store.get(KEY)).toBe('W/"1"');
+    });
+
+    test("a 412 against a client without a store is simply rethrown", async () => {
+      const bare = new MockClient(false);
+      delete (bare as unknown as { concurrency?: unknown }).concurrency;
+      client = bare;
+      client.failWithStatus = 412;
+
+      await expect(cmd(ODataHttpMethods.Patch, controlled(false)).execute()).rejects.toThrow(
+        "Mock failure with status 412",
+      );
     });
   });
 
