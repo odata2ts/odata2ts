@@ -113,4 +113,22 @@ describe("ASP.NET Library: optimistic concurrency", () => {
 
     expect([200, 204]).toContain(result.status);
   });
+
+  test("AssessCondition, an action bound to the entity, carries the ETag the preceding read filled in", async () => {
+    // this call succeeds whether or not the client sends `If-Match`: ASP.NET's action controllers, unlike
+    // its PATCH/DELETE pipeline, never check the header (IMPLEMENTATION.md, "What the database gained"),
+    // so what actually proves the fix on this server is the client-side test below, which never reaches
+    // the network in the first place
+    const result = await LIBRARY.Copies(COPY).AssessCondition({ NewCondition: 5 }).execute();
+
+    expect(result.status).toBe(200);
+  });
+
+  test("without a prior read, the bound action is refused before a request is sent", async () => {
+    const untouched = new LibraryService(new FetchClient(), BASE_URL);
+
+    await expect(untouched.Copies(COPY).AssessCondition({ NewCondition: 5 }).execute()).rejects.toThrow(
+      ODataConcurrencyError,
+    );
+  });
 });

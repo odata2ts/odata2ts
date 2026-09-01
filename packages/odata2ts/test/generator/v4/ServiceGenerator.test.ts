@@ -129,6 +129,48 @@ describe("Service Generator Tests V4", () => {
 
       expect(generatedText()).not.toContain("concurrencyControlled");
     });
+
+    test("an action bound to the entity carries the entity's concurrency options", async () => {
+      addCopy(true);
+      odataBuilder.addAction("checkOut", undefined, true, (builder) =>
+        builder.addParam("copy", withNs("Copy")).addParam("memberId", ODataTypesV4.Int32),
+      );
+
+      await doGenerate();
+
+      expect(generatedText()).toContain("concurrency: getConcurrencyOptions()");
+    });
+
+    test("an action bound to the collection carries no concurrency options - it addresses no single entity", async () => {
+      addCopy(true);
+      odataBuilder.addAction("bulkAssess", undefined, true, (builder) =>
+        builder.addParam("copies", `Collection(${withNs("Copy")})`),
+      );
+
+      await doGenerate();
+
+      expect(generatedText()).not.toContain("getConcurrencyOptions");
+    });
+
+    test("an unbound action carries no concurrency options - it addresses no resource", async () => {
+      addCopy(true);
+      odataBuilder.addAction("ping", undefined, false);
+
+      await doGenerate();
+
+      expect(generatedText()).not.toContain("getConcurrencyOptions");
+    });
+
+    test("a function bound to the entity carries no concurrency options - it is a read", async () => {
+      addCopy(true);
+      odataBuilder.addFunction("currentCondition", ODataTypesV4.Byte, true, (builder) =>
+        builder.addParam("copy", withNs("Copy")),
+      );
+
+      await doGenerate();
+
+      expect(generatedText()).not.toContain("getConcurrencyOptions");
+    });
   });
 
   test("Service Generator: Min Case", async () => {

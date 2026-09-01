@@ -287,7 +287,7 @@ class ServiceGenerator {
       }
 
       result.properties.push(this.generateQOperationProp(op));
-      result.methods.push(this.generateMethod(name, op, importContainer, "", this.getMainVersionArg()));
+      result.methods.push(this.generateMethod(name, op, importContainer, "", this.getMainVersionArg(), false));
     });
 
     return result;
@@ -424,7 +424,7 @@ class ServiceGenerator {
     const { properties, methods }: PropsAndOps = deepmerge(
       deepmerge(
         this.generateServiceProperties(importContainer, model.serviceName, props),
-        this.generateServiceOperations(importContainer, model, operations),
+        this.generateServiceOperations(importContainer, model, operations, true),
       ),
       this.generateCastOperations(importContainer, model, false),
     );
@@ -518,13 +518,21 @@ class ServiceGenerator {
     importContainer: ImportContainer,
     model: ComplexType,
     operations: Array<OperationType>,
+    isEntityBound: boolean,
   ): PropsAndOps {
     const result: PropsAndOps = { properties: [], methods: [] };
 
     operations.forEach((operation) => {
       result.properties.push(this.generateQOperationProp(operation));
       result.methods.push(
-        this.generateMethod(operation.name, operation, importContainer, model.fqName, this.getServiceVersionArg()),
+        this.generateMethod(
+          operation.name,
+          operation,
+          importContainer,
+          model.fqName,
+          this.getServiceVersionArg(),
+          isEntityBound,
+        ),
       );
     });
 
@@ -756,7 +764,7 @@ class ServiceGenerator {
     const collectionOperations = this.dataModel.getEntitySetOperations(model.fqName);
 
     const { properties, methods } = deepmerge(
-      this.generateServiceOperations(importContainer, model, collectionOperations),
+      this.generateServiceOperations(importContainer, model, collectionOperations, false),
       this.generateCastOperations(importContainer, model, true),
     );
 
@@ -845,9 +853,15 @@ class ServiceGenerator {
     importContainer: ImportContainer,
     baseFqName: string,
     versionArg: string,
+    isEntityBound = false,
   ): OptionalKind<MethodDeclarationStructure> {
     const isFunc = operation.type === OperationTypes.Function;
     const returnType = operation.returnType;
+    // OData V4.01 Part 1, §8.3.1: an action bound to a resource carries `If-Match` for that resource,
+    // just like patch, update and delete do (see ServiceStateHelperV4/V2#getConcurrencyOptions). A
+    // function reads rather than writes, and a collection-bound or unbound operation addresses no
+    // single resource, so neither carries the precondition.
+    const withConcurrency = !isFunc && isEntityBound;
     const hasParams = operation.parameters.length > 0 || operation.overrides?.length;
     const isParamsOptional = !![operation.parameters, ...(operation.overrides ?? [])].find((pSet) => pSet.length === 0);
     const isComposable =
@@ -891,6 +905,7 @@ class ServiceGenerator {
       `headers: getDefaultHeaders()` +
       (!isFunc && hasParams ? `, mainRequestConverter: ${qOpProp}.getRequestConverter()` : "") +
       (returnType ? `, mainResponseConverter: ${qOpProp}.getResponseConverter()` : "") +
+      (withConcurrency ? `, concurrency: getConcurrencyOptions()` : "") +
       `}`;
     const requestCmdStmt = isComposable
       ? `return new ${requestCmd}<${responseService}${versionArg}, ${responseStructure}<${rtType}>>(` +
@@ -918,7 +933,7 @@ class ServiceGenerator {
         `  ${qOpProp} = new ${qOperationName}()`,
         "}",
 
-        `const { addFullPath, client, getDefaultHeaders${isFunc ? `, isUrlNotEncoded${isComposable ? ", options" : ""}` : ""} } = this.__base;`,
+        `const { addFullPath, client, getDefaultHeaders${isFunc ? `, isUrlNotEncoded${isComposable ? ", options" : ""}` : ""}${withConcurrency ? ", getConcurrencyOptions" : ""} } = this.__base;`,
         `const url = addFullPath(${qOpProp}.buildUrl(${!isFunc ? "" : hasParams ? "params, isUrlNotEncoded()" : "isUrlNotEncoded()"}));`,
         ``,
         requestCmdStmt,
