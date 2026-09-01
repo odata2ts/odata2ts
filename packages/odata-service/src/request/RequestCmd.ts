@@ -56,7 +56,11 @@ export interface RequestCmdOptions<ResponseStructure, DataStructure> {
   cacheKeyState?: CacheKeyState;
   /**
    * The query's own restrictions, snapshotted off the query builder rather than parsed back out of the
-   * URL. Absent for methods with no builder - `patch`, `update`, `delete`, stream access.
+   * URL. Set only by a read: these are what the *query* restricts the resource by, so a read is keyed
+   * by them, while a write's builder - where it has one at all - only shapes the response it asks back,
+   * never the identity of the resource it changes. `buildInvalidates` strips a resource's own params from
+   * its key for the same reason, so a write folding its `$select`/`$expand` in here would buy nothing but
+   * a mismatch between two identical writes that differ only in what they ask back.
    */
   queryParams?: Record<string, unknown>;
 }

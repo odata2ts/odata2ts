@@ -203,7 +203,6 @@ export abstract class EntitySetServiceV2<
       mainRequestConverter: qModel,
       mainResponseConverter: new EntityResponseConverterV2<T, AsV4>(qModel, this.__base.isAsV4()),
       cacheKeyState,
-      queryParams: builder.getCacheKeyParams(),
     });
   }
 
