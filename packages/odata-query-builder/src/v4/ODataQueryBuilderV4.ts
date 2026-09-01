@@ -120,4 +120,8 @@ class ODataQueryBuilderV4<Q extends QueryObjectModel> implements ODataQueryBuild
   public build() {
     return this.builder.build();
   }
+
+  public getCacheKeyParams() {
+    return this.builder.getCacheKeyParams();
+  }
 }
