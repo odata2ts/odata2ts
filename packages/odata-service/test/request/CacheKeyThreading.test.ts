@@ -111,4 +111,29 @@ describe("cache key threading", () => {
     const response = await cmd.execute();
     expect(response.invalidates).toBeUndefined();
   });
+
+  test("a command with no state computes its (undefined) key once, not on every access", () => {
+    // `undefined` is both "not computed yet" and the legitimate answer for a client generated without
+    // `cacheKeys` - the memo must tell those apart, or every access re-runs the whole converter chain,
+    // which for a write means re-converting the entire request payload on every read of `.cacheKey`.
+    let calls = 0;
+    const cmd = new UrlWriteRequestCmd(
+      client,
+      ODataHttpMethods.Patch,
+      "Media(5)",
+      { title: "x" },
+      {
+        mainRequestConverter: {
+          convertToOData: (data: any) => {
+            calls++;
+            return data;
+          },
+        },
+      },
+    );
+
+    expect(cmd.cacheKey).toBeUndefined();
+    expect(cmd.cacheKey).toBeUndefined();
+    expect(calls).toBe(1);
+  });
 });

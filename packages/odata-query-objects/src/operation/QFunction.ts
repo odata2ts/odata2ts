@@ -6,7 +6,7 @@ type FilteredParamModel = [string, string];
 const REGEXP_PARAMS = /.*\(([^)]+)\)/;
 const REGEXP_V2_PARAMS = /.*\?(.+)/;
 
-const SINGLE_VALUE_TYPES = ["string", "number", "boolean"];
+export const SINGLE_VALUE_TYPES = ["string", "number", "boolean"];
 
 function compileUrlParams(params: FunctionParams | undefined, notEncoded: boolean = false) {
   if (!params || !Object.keys(params).length) {
@@ -166,13 +166,16 @@ export abstract class QFunction<ParamModel, ResponseStructure = undefined> {
     }, {} as ParamModel);
   }
 
-  private findSingleParam() {
+  protected findSingleParam() {
     const result = this.getParamSets().find((pSet) => pSet.length === 1);
 
     return result ? result[0] : undefined;
   }
 
-  private findBestMatchingParamSet(paramKeys: Array<string>, findByMappedName: boolean): Array<QParamModel<any, any>> {
+  protected findBestMatchingParamSet(
+    paramKeys: Array<string>,
+    findByMappedName: boolean,
+  ): Array<QParamModel<any, any>> {
     const paramSets = this.getParamSets();
     if (!paramKeys.length || !paramSets.length) {
       return [];

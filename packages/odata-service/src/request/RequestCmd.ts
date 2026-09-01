@@ -79,6 +79,7 @@ export abstract class RequestCmd<
   protected etagOverride?: string;
 
   private cachedCacheKey?: ReadonlyArray<unknown>;
+  private cacheKeyComputed = false;
 
   public constructor(
     protected client: ODataHttpClient,
@@ -140,9 +141,10 @@ export abstract class RequestCmd<
    * to handle anyway when it is shared across services.
    */
   public get cacheKey(): ReadonlyArray<unknown> | undefined {
-    if (this.cachedCacheKey === undefined) {
+    if (!this.cacheKeyComputed) {
       const state = this.getInfoConverted().cacheKeyState;
       this.cachedCacheKey = state && buildCacheKey(state, this.options.queryParams);
+      this.cacheKeyComputed = true;
     }
     return this.cachedCacheKey;
   }

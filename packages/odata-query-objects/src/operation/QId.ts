@@ -1,4 +1,5 @@
 import { QParamModel } from "../param/QParamModel";
+import { SINGLE_VALUE_TYPES } from "./QFunction";
 import { QFunctionV4 } from "./QFunctionV4";
 
 /**
@@ -35,5 +36,19 @@ export abstract class QId<ParamModel> extends QFunctionV4<ParamModel, void> {
    */
   public getAlternateParams(): Array<Array<QParamModel<any, any>>> {
     return this.getParamSets().slice(1);
+  }
+
+  /**
+   * The param set this id's value would resolve to in {@link buildUrl}/{@link parseUrl} - the same
+   * matching, reused rather than duplicated, so a cache key is always built from the very param set the
+   * URL was built from.
+   */
+  public getParamsFor(id: unknown): Array<QParamModel<any, any>> {
+    // the same resolution buildUrl performs, so a cache key is built from the very param set the URL was
+    if (SINGLE_VALUE_TYPES.includes(typeof id)) {
+      const single = this.findSingleParam();
+      return single ? [single] : [];
+    }
+    return this.findBestMatchingParamSet(Object.keys(id as object), true);
   }
 }

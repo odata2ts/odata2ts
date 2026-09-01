@@ -12,6 +12,7 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
+import { CacheKeyState, withKey } from "../cacheKey/index.js";
 import { getBodyETagV2, getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
 import { ConcurrencyOptions, UrlBuilderRequestCmdV2 } from "../request";
@@ -41,13 +42,18 @@ export abstract class EntitySetServiceV2<
     qModel: Q,
     idFunction: QId<EIdType>,
     options?: ODataServiceOptionsInternalV2<AsV4>,
+    cacheKeyState?: CacheKeyState,
   ) {
-    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel, options);
+    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel, options, cacheKeyState);
     this.__idFunction = idFunction;
   }
 
   public getPath() {
     return this.__base.path;
+  }
+
+  public getCacheKeyState() {
+    return this.__base.cacheKeyState;
   }
 
   /**
@@ -59,6 +65,7 @@ export abstract class EntitySetServiceV2<
     path: string,
     name: string,
     options: ODataServiceOptionsInternalV2<AsV4> | undefined,
+    cacheKeyState?: CacheKeyState,
   ): ES;
 
   /**
@@ -67,8 +74,29 @@ export abstract class EntitySetServiceV2<
   public byId(id: EIdType): ES {
     // basePath, not path: __idFunction already builds the key predicate under this set's own name -
     // path would double that segment
-    const { client, basePath, options, isUrlNotEncoded } = this.__base;
-    return this.createEntityService(client, basePath, this.__idFunction.buildUrl(id, isUrlNotEncoded()), options);
+    const { client, basePath, options, isUrlNotEncoded, cacheKeyState } = this.__base;
+    return this.createEntityService(
+      client,
+      basePath,
+      this.__idFunction.buildUrl(id, isUrlNotEncoded()),
+      options,
+      cacheKeyState && withKey(cacheKeyState, ...this.cacheKeyOf(id)),
+    );
+  }
+
+  /**
+   * The key of the addressed entity as a cache key carries it, plus the same values by OData name - see
+   * {@link EntitySetServiceV4.cacheKeyOf}, whose reasoning applies unchanged here.
+   */
+  private cacheKeyOf(id: EIdType): [unknown, Record<string, unknown>] {
+    const params = this.__idFunction.getParamsFor(id);
+    const primary = this.__idFunction.getPrimaryParams();
+    const isPrimarySingle = params.length === 1 && primary.length === 1 && primary[0].getName() === params[0].getName();
+
+    const values = Object.fromEntries(
+      params.map((param) => [param.getName(), param.convertTo((id as any)?.[param.getMappedName()] ?? id)]),
+    );
+    return [isPrimarySingle ? Object.values(values)[0] : values, values];
   }
 
   /**
@@ -162,17 +190,20 @@ export abstract class EntitySetServiceV2<
   }
 
   public create(model: EditableT, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
-    const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
+    const { client, qModel, getDefaultHeaders, createModelQueryBuilder, cacheKeyState } = this.__base;
+    const builder = createModelQueryBuilder(queryFn);
 
     return new UrlBuilderRequestCmdV2<
       AsV4 extends true ? ODataModelResponseV4<T> : ODataEntityModelResponseV2<T>,
       Q,
       ModelQueryBuilderV2<Q>,
       EditableT
-    >(client, ODataHttpMethods.Post, createModelQueryBuilder(queryFn), qModel, model, {
+    >(client, ODataHttpMethods.Post, builder, qModel, model, {
       headers: getDefaultHeaders(),
       mainRequestConverter: qModel,
       mainResponseConverter: new EntityResponseConverterV2<T, AsV4>(qModel, this.__base.isAsV4()),
+      cacheKeyState,
+      queryParams: builder.getCacheKeyParams(),
     });
   }
 
@@ -184,15 +215,18 @@ export abstract class EntitySetServiceV2<
   public query<ReturnType extends Partial<T> = T>(
     queryFn?: (builder: CollectionQueryBuilderV2<Q>, qObject: Q) => void,
   ) {
-    const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
+    const { client, qModel, getDefaultHeaders, createQueryBuilder, cacheKeyState } = this.__base;
+    const builder = createQueryBuilder(queryFn);
 
     return new UrlBuilderRequestCmdV2<
       AsV4 extends true ? ODataCollectionResponseV4<ReturnType> : ODataCollectionResponseV2<ReturnType>,
       Q
-    >(client, ODataHttpMethods.Get, createQueryBuilder(queryFn), qModel, undefined, {
+    >(client, ODataHttpMethods.Get, builder, qModel, undefined, {
       concurrency: this.getCollectionConcurrencyOptions(),
       headers: getDefaultHeaders(),
       mainResponseConverter: new CollectionResponseConverterV2<ReturnType, AsV4>(qModel, this.__base.isAsV4()),
+      cacheKeyState,
+      queryParams: builder.getCacheKeyParams(),
     });
   }
 }

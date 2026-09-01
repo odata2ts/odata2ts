@@ -1,4 +1,5 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
+import { CacheKeyState } from "../cacheKey/index.js";
 import { ODataServiceOptions } from "../ODataServiceOptions";
 import { StreamServiceBase } from "../StreamServiceBase.js";
 
@@ -12,7 +13,13 @@ import { StreamServiceBase } from "../StreamServiceBase.js";
  * That is also why it is not generated for any property - a V2 model has no way of declaring one.
  */
 export class StreamServiceV2 extends StreamServiceBase {
-  public constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptions) {
-    super(client, basePath, name, options);
+  public constructor(
+    client: ODataHttpClient,
+    basePath: string,
+    name: string,
+    options?: ODataServiceOptions,
+    cacheKeyState?: CacheKeyState,
+  ) {
+    super(client, basePath, name, options, cacheKeyState);
   }
 }
