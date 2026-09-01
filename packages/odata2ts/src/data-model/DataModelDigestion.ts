@@ -201,6 +201,32 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     return false;
   }
 
+  /**
+   * The inverse navigation property on the related type, where the model declares one.
+   *
+   * Answered here for V2, which resolves partners from the `<Association>` a navigation property points
+   * at, not from an attribute of its own - that is Task 11's job, overriding this in
+   * `DataModelDigestionV2.ts`.
+   */
+  protected getPartner(p: Property, fqOwnerName?: string): string | undefined {
+    return undefined;
+  }
+
+  /**
+   * The foreign key a navigation property is realized by: the dependent property and the principal
+   * property it references, one entry per property of a composite key.
+   *
+   * Answered here for V2, which resolves referential constraints from the `<Association>` a navigation
+   * property points at, not from an element of its own - that is Task 11's job, overriding this in
+   * `DataModelDigestionV2.ts`.
+   */
+  protected getReferentialConstraints(
+    p: Property,
+    fqOwnerName?: string,
+  ): ReadonlyArray<{ property: string; referencedProperty: string }> | undefined {
+    return undefined;
+  }
+
   protected abstract digestOperations(schema: SchemaV3 | SchemaV4): void;
 
   protected abstract digestEntityContainer(schema: SchemaV3 | SchemaV4): void;
@@ -891,6 +917,9 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       );
     }
 
+    const partner = this.getPartner(p, fqOwnerName);
+    const referentialConstraints = this.getReferentialConstraints(p, fqOwnerName);
+
     return {
       odataName: p.$.Name,
       name: modelName,
@@ -901,6 +930,8 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       // only set when it applies: a flag on every single property would be noise
       ...(odataDataType === ODataTypesV4.Stream ? { isStream: true } : undefined),
       ...(this.isContained(p) ? { contained: true } : undefined),
+      ...(partner ? { partner } : undefined),
+      ...(referentialConstraints?.length ? { referentialConstraints } : undefined),
       ...(isOptionalParameter(p.Annotation) ? { omittable: true } : undefined),
       managed: toManagedState(
         typeof entityPropConfig?.managed !== "undefined" ? entityPropConfig.managed : configProp?.managed,

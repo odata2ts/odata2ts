@@ -60,6 +60,19 @@ export interface PropertyModel {
    */
   contained?: boolean;
   /**
+   * The inverse navigation property on the related type, where the model declares one (V4's `Partner`
+   * attribute) - the name of the navigation property on the other side that points back to this one.
+   * Never set for anything but a navigation property.
+   */
+  partner?: string;
+  /**
+   * The foreign key this navigation property is realized by: each entry pairs a dependent property on
+   * this side with the principal property it references on the related type (V4's
+   * `<ReferentialConstraint>`), one entry per property of a composite key. Never set for anything but a
+   * navigation property.
+   */
+  referentialConstraints?: ReadonlyArray<{ property: string; referencedProperty: string }>;
+  /**
    * `Core.OptionalParameter`: the client may omit this operation parameter from the call even though
    * `required` (from `Nullable`) says otherwise - the server applies a default of its own. Independent
    * of `required`: unlike `Nullable`, it says nothing about whether the parameter accepts `null` when

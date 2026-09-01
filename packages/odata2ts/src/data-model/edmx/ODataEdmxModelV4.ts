@@ -38,7 +38,13 @@ export interface NavigationProperty extends Annotatable {
      */
     ContainsTarget?: "true" | "false";
   };
-  // TODO: OnDelete, ReferentialConstraint, etc.
+  /**
+   * The foreign key this navigation is realized by, as stated on the dependent side: `Property` is the
+   * dependent property, `ReferencedProperty` the principal one it refers to. Repeatable, one element per
+   * property pair of a composite key.
+   */
+  ReferentialConstraint?: Array<{ $: { Property: string; ReferencedProperty: string } }>;
+  // TODO: OnDelete
 }
 
 export interface EntityContainerV4 extends EntityContainer<EntitySetV4> {

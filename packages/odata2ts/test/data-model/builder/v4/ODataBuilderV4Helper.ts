@@ -1,6 +1,13 @@
 import { NavigationProperty } from "../../../../src/data-model/edmx/ODataEdmxModelV4.js";
 
-export function createNavProp(name: string, type: string, partner?: string, nullable?: boolean, contained?: boolean) {
+export function createNavProp(
+  name: string,
+  type: string,
+  partner?: string,
+  nullable?: boolean,
+  contained?: boolean,
+  referentialConstraints?: Array<{ property: string; referencedProperty: string }>,
+) {
   const navProp: NavigationProperty = {
     $: {
       Name: name,
@@ -15,6 +22,11 @@ export function createNavProp(name: string, type: string, partner?: string, null
   }
   if (contained) {
     navProp.$.ContainsTarget = "true";
+  }
+  if (referentialConstraints?.length) {
+    navProp.ReferentialConstraint = referentialConstraints.map((rc) => ({
+      $: { Property: rc.property, ReferencedProperty: rc.referencedProperty },
+    }));
   }
 
   return navProp;
