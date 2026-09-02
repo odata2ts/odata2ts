@@ -1,6 +1,6 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { StringCollection } from "@odata2ts/odata-query-objects";
+import { ODataResponseModel } from "@odata2ts/odata-service";
 import { afterAll, beforeAll, describe, expect, expectTypeOf, test } from "vitest";
 import { expectODataError } from "../expectODataError.js";
 import { BASE_URL, BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
@@ -37,7 +37,7 @@ describe("CAP Library: property services", () => {
       expect(result.data?.value).toBe("Der Prozess");
 
       // a value response wraps the raw value in `value` - not the model, not a collection
-      expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataValueResponseV4<string> | undefined>>();
+      expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataValueResponseV4<string> | undefined>>();
     });
 
     test("update a single value", async () => {
@@ -53,7 +53,7 @@ describe("CAP Library: property services", () => {
     test("delete a nullable value", async () => {
       const deleted = await book().Language().deleteValue().execute();
       expect(deleted.status).toBe(204);
-      expectTypeOf(deleted).toEqualTypeOf<HttpResponseModel<undefined>>();
+      expectTypeOf(deleted).toEqualTypeOf<ODataResponseModel<undefined>>();
 
       // reading a null value answers 204, so there is no `value` wrapper to unpack - which is exactly
       // what makes the `| undefined` in the response type of getValue() necessary
@@ -91,7 +91,7 @@ describe("CAP Library: property services", () => {
        * the generated service is typed on `StringCollection` - the same shape the q-object uses. Pinned
        * because it is a stumbling block for callers, who reasonably expect a plain string array.
        */
-      expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV4<StringCollection>>>();
+      expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV4<StringCollection>>>();
     });
 
     test("replace the whole collection", async () => {

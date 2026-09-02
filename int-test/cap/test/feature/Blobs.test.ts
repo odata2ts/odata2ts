@@ -1,4 +1,4 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { AUDIOBOOK, BASE_URL, EBOOK, LIBRARY } from "../LibraryTestConstants.js";
 
@@ -128,7 +128,7 @@ describe("CAP Library: binary content", () => {
 
       expect(read.status).toBe(200);
       expect(await textOfStream(read.data)).toBe(content);
-      expectTypeOf(read).toEqualTypeOf<HttpResponseModel<ReadableStream | undefined>>();
+      expectTypeOf(read).toEqualTypeOf<ODataResponseModel<ReadableStream | undefined>>();
     });
 
     test("what was streamed up can be read as a blob and vice versa", async () => {

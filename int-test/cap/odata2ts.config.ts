@@ -1,4 +1,5 @@
 import {
+  CacheKeyMode,
   ConfigFileOptions,
   EmitModes,
   EnumSynthesis,
@@ -69,6 +70,11 @@ const config: ConfigFileOptions = {
       // across the two V4 packages instead of duplicating a suite. `test/core/QueryFunctionality.test.ts`
       // covers it on either side - the assertion differs only in the URL that reaches the server.
       v4: { enableNativeInOperator: true },
+      // hierarchical, deliberately: CAP declares more than the reference model asks (Partner and a real
+      // Member_Id foreign key for Reservations), and under this mode that must make no difference - the
+      // same relations key exactly as they do against ASP.NET's leaner metadata. That is the claim this
+      // client exists to prove.
+      cacheKeys: { mode: CacheKeyMode.hierarchical },
     },
     /**
      * The V4 model with `unflattenComplexTypes`, which is what this whole server is the case for:
@@ -209,6 +215,11 @@ const config: ConfigFileOptions = {
         responseResultsWrapping: true,
         payloadResultsWrapping: false,
       },
+      // typeFlattening against V2 metadata: <Association>-derived grades reaching the key, V2 filter
+      // literals inside the derived filter, and Member/Reservations re-rooting here because CAP declares
+      // the backlink. Next to the V4 client above, which is hierarchical - two services of one project may
+      // legitimately be generated differently, and that is worth pinning too.
+      cacheKeys: { mode: CacheKeyMode.typeFlattening },
     },
   },
 };

@@ -1,5 +1,5 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataResponseModel } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
 import { Library_Catalog_PostalAddress, Members } from "../../src-generated/library-shaped/LibraryShapedModel.js";
 import { LibraryShapedService } from "../../src-generated/library-shaped/LibraryShapedService.js";
@@ -41,7 +41,7 @@ describe("CAP Library: unflattenComplexTypes", () => {
       expect(result.status).toBe(200);
       expect(result.data.Address).toStrictEqual(ANNA_ADDRESS);
       // the model states the reshaped property as the complex type, not as four strings
-      expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Members>>>();
+      expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Members>>>();
       expectTypeOf(result.data.Address).toEqualTypeOf<Library_Catalog_PostalAddress | null>();
     });
 

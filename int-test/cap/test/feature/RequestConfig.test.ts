@@ -1,6 +1,6 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { FetchRequestConfig } from "@odata2ts/http-client-fetch";
 import { ODataCollectionResponseV4 } from "@odata2ts/odata-core";
+import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { Books, EditableBooks } from "../../src-generated/library/LibraryModel.js";
 import { LIBRARY } from "../LibraryTestConstants.js";
@@ -22,7 +22,7 @@ describe("CAP Library: request configuration", () => {
       .query()
       .execute({ params: { $top: 1 } });
 
-    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV4<Books>>>();
+    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV4<Books>>>();
     expect(result.status).toBe(200);
     // the extra param reached the URL: without it the seed data holds more than one book
     expect(result.data.value).toHaveLength(1);

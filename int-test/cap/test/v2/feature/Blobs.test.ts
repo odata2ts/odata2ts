@@ -1,4 +1,4 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { expectODataError } from "../../expectODataError.js";
 import { LIBRARY, AUDIOBOOK as V4_AUDIOBOOK, EBOOK as V4_EBOOK } from "../../LibraryTestConstants.js";
@@ -57,7 +57,7 @@ describe("CAP Library V2: binary content", () => {
       expect(read.status).toBe(200);
       expect(await textOf(read.data)).toBe(content);
       expect(read.data?.type).toBe("application/epub+zip");
-      expectTypeOf(read).toEqualTypeOf<HttpResponseModel<Blob | undefined>>();
+      expectTypeOf(read).toEqualTypeOf<ODataResponseModel<Blob | undefined>>();
     });
 
     test("deleting the content leaves the entity in place", async () => {
@@ -166,7 +166,7 @@ describe("CAP Library V2: binary content", () => {
 
       expect(read.status).toBe(200);
       expect(await textOfStream(read.data)).toBe(content);
-      expectTypeOf(read).toEqualTypeOf<HttpResponseModel<ReadableStream | undefined>>();
+      expectTypeOf(read).toEqualTypeOf<ODataResponseModel<ReadableStream | undefined>>();
     });
 
     test("what was streamed up can be read as a blob and vice versa", async () => {
