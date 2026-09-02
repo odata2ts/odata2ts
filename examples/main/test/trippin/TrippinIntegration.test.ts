@@ -1,6 +1,6 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { AxiosClient, AxiosClientError } from "@odata2ts/http-client-axios";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import type { LocationModel, PersonIdModel, PersonModel, TripModel } from "../../src-generated/trippin/index.js";
 import { FeatureModel, PersonGenderModel, TrippinService } from "../../src-generated/trippin/index.js";
@@ -64,7 +64,7 @@ describe("Integration Testing of Service Generation", () => {
 
     const result = await trippinService.people("russellwhyte").query().execute();
 
-    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
+    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<PersonModel>>>();
     expect(result.status).toBe(200);
     expect(result.data).toMatchObject(expected);
   });
