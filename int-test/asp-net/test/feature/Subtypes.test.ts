@@ -1,5 +1,5 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { Book, Medium } from "../../src-generated/library/library-catalog/index.js";
 import { expectODataError } from "../expectODataError.js";
@@ -30,7 +30,7 @@ describe("ASP.NET Library: subtypes", () => {
     expect(result.data.value.length).toBeGreaterThan(0);
     // narrowed to the derived type, so every entry carries its properties
     expect(result.data.value.every((book) => typeof book.PageCount === "number")).toBe(true);
-    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV4<Book>>>();
+    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV4<Book>>>();
   });
 
   test("cast segment on a single entity is not served here", async () => {
@@ -40,7 +40,7 @@ describe("ASP.NET Library: subtypes", () => {
     const book = LIBRARY.Media(BOOK_DER_PROZESS).asBookService();
 
     expect(book.getPath()).toBe(`${BASE_URL}/Media(${BOOK_DER_PROZESS})/Library.Catalog.Book`);
-    expectTypeOf(book.query().execute).returns.resolves.toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Book>>>();
+    expectTypeOf(book.query().execute).returns.resolves.toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Book>>>();
 
     await expectODataError(book.query().execute(), { status: 404, message: /No error message/ });
   });
@@ -78,7 +78,7 @@ describe("ASP.NET Library: subtypes", () => {
     expect(result.data.value.length).toBeGreaterThan(0);
     expect(result.data.value.map((medium) => medium.Title)).toContain("Der Prozess");
     // the request stayed on the base set, so that is what the response is typed as
-    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV4<Medium>>>();
+    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV4<Medium>>>();
   });
 
   test("expand a navigation property that only the derived type has", async () => {
@@ -105,7 +105,7 @@ describe("ASP.NET Library: subtypes", () => {
 
     expect(created.status).toBe(201);
     expect(created.data.PageCount).toBe(100);
-    expectTypeOf(created).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Book>>>();
+    expectTypeOf(created).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Book>>>();
 
     await LIBRARY.Media(created.data.Id).delete().execute();
   });

@@ -1,5 +1,5 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { ODataResponseModel } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
 import { Medium } from "../../src-generated/library-renamed/library-catalog/index.js";
 import { Branch, Copy } from "../../src-generated/library-renamed/library-circulation/index.js";
@@ -36,7 +36,7 @@ describe("ASP.NET Library: renaming", () => {
     expect(result.data.title).toBe("Der Prozess");
     expect(result.data.language).toBe("de");
 
-    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Medium>>>();
+    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Medium>>>();
   });
 
   test("the URL keeps the OData names", async () => {
@@ -70,7 +70,7 @@ describe("ASP.NET Library: renaming", () => {
     const titles = result.data.value.map((medium) => medium.title);
     expect(titles).toStrictEqual([...titles].sort());
 
-    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV4<Medium>>>();
+    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV4<Medium>>>();
   });
 
   test("a payload is written with the OData names", async () => {

@@ -1,5 +1,5 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4 } from "@odata2ts/odata-core";
+import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { Medium } from "../../src-generated/library/library-catalog/index.js";
 import { expectODataError } from "../expectODataError.js";
@@ -23,7 +23,7 @@ describe("ASP.NET Library: composable functions", () => {
 
     expect(result.status).toBe(200);
     expect(result.data.value.length).toBeGreaterThan(0);
-    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV4<Medium>>>();
+    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV4<Medium>>>();
   });
 
   test("query options apply to the function result", async () => {

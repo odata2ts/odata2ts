@@ -1,4 +1,12 @@
-import { ConfigFileOptions, EmitModes, KeyProperties, ManagedPropertyMode, Modes, TypeModel } from "@odata2ts/odata2ts";
+import {
+  CacheKeyMode,
+  ConfigFileOptions,
+  EmitModes,
+  KeyProperties,
+  ManagedPropertyMode,
+  Modes,
+  TypeModel,
+} from "@odata2ts/odata2ts";
 
 /** The running server to refresh from, or `undefined` to read the committed snapshot - see below. */
 const SOURCE_URL = process.env.LIBRARY_BASE_URL;
@@ -57,6 +65,12 @@ const config: ConfigFileOptions = {
       source: SOURCE,
       refreshFile: true,
       output: "src-generated/library",
+      // typeFlattening rather than hierarchical, and here rather than anywhere else: this metadata
+      // reproduces the reference model exactly, which puts all four hop outcomes into one client - grade A
+      // to-many and to-one, grade B, grade C and containment. So this is the one package that can show
+      // grade C and containment staying hierarchical *inside* a flattened client, and it is where the
+      // convergence claim is held against a real server.
+      cacheKeys: { mode: CacheKeyMode.typeFlattening },
     },
     /**
      * The same model once more, targeting OData 4.01 instead of the default 4.0.

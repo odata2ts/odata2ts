@@ -1,5 +1,5 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataValueResponseV4 } from "@odata2ts/odata-core";
+import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { expectODataError } from "../expectODataError.js";
 import { BASE_URL, BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
@@ -21,7 +21,7 @@ describe("ASP.NET Library: property services", () => {
 
     // the method, not a call: `expectTypeOf` evaluates its argument
     expectTypeOf(book().Title().getValue().execute).returns.resolves.toEqualTypeOf<
-      HttpResponseModel<ODataValueResponseV4<string> | undefined>
+      ODataResponseModel<ODataValueResponseV4<string> | undefined>
     >();
   });
 
