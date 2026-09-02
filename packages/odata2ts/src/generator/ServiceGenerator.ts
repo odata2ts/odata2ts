@@ -24,7 +24,7 @@ import {
   SingletonType,
 } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
-import { ConfigFileOptions, Modes } from "../OptionModel.js";
+import { CacheKeyMode, ConfigFileOptions, Modes, resolveCacheKeyMode } from "../OptionModel.js";
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
 import { ClientApiImports, CoreImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects.js";
@@ -35,7 +35,7 @@ export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "p
 
 export interface ServiceGeneratorOptions extends Pick<
   ConfigFileOptions,
-  "enablePrimitivePropertyServices" | "enumType" | "managedPropertyMode"
+  "enablePrimitivePropertyServices" | "enumType" | "managedPropertyMode" | "cacheKeys"
 > {
   v2: Pick<NonNullable<ConfigFileOptions["v2"]>, "responseAsV4">;
   v4: Pick<NonNullable<ConfigFileOptions["v4"]>, "bigNumberAsString" | "odataVersion">;
@@ -60,6 +60,8 @@ class ServiceGenerator {
     private namingHelper: NamingHelper,
     private options: ServiceGeneratorOptions = { v2: {}, v4: {} },
   ) {}
+
+  private readonly cacheKeyMode = resolveCacheKeyMode(this.options.cacheKeys);
 
   private isV4BigNumber() {
     return this.options.v4.bigNumberAsString && this.version === ODataVersions.V4;
@@ -767,6 +769,18 @@ class ServiceGenerator {
       this.generateServiceOperations(importContainer, model, collectionOperations, false),
       this.generateCastOperations(importContainer, model, true),
     );
+
+    // Emitted whenever the feature is on: `invalidateQueries(["Library.Catalog.Medium"])` needs the FQN
+    // *without* issuing a request, and hand-writing namespace strings across an application is exactly the
+    // kind of typo no compiler catches.
+    if (this.cacheKeyMode !== CacheKeyMode.off) {
+      properties.push({
+        scope: Scope.Public,
+        isReadonly: true,
+        name: "entityTypeName",
+        initializer: `"${model.fqName}"`,
+      });
+    }
 
     file.getFile().addClass({
       isExported: true,

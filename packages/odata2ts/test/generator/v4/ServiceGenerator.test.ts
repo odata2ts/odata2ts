@@ -5,6 +5,7 @@ import { beforeAll, beforeEach, describe, expect, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
 import {
+  CacheKeyMode,
   ConfigFileOptions,
   EmitModes,
   KeyProperties,
@@ -170,6 +171,42 @@ describe("Service Generator Tests V4", () => {
       await doGenerate();
 
       expect(generatedText()).not.toContain("getConcurrencyOptions");
+    });
+  });
+
+  describe("cacheKeys: entityTypeName", () => {
+    function generatedText() {
+      return projectManager.getMainServiceFile().getFile().getFullText();
+    }
+
+    function addEntity() {
+      odataBuilder
+        .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Guid))
+        .addEntitySet("Ents", withNs("TestEntity"));
+    }
+
+    test("a collection service carries entityTypeName when the feature is on", async () => {
+      addEntity();
+
+      await doGenerate({ cacheKeys: { mode: CacheKeyMode.hierarchical } });
+
+      expect(generatedText()).toContain(`public readonly entityTypeName = "${withNs("TestEntity")}";`);
+    });
+
+    test("nothing is emitted when cacheKeys is absent", async () => {
+      addEntity();
+
+      await doGenerate();
+
+      expect(generatedText()).not.toContain("entityTypeName");
+    });
+
+    test("nothing is emitted under mode: off - identical to cacheKeys being absent", async () => {
+      addEntity();
+
+      await doGenerate({ cacheKeys: { mode: CacheKeyMode.off } });
+
+      expect(generatedText()).not.toContain("entityTypeName");
     });
   });
 
