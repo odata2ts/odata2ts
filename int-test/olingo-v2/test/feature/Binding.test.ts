@@ -1,5 +1,5 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
+import { ODataResponseModel } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
 import { Book } from "../../src-generated/library/LibraryModel.js";
 import { expectODataError } from "../expectODataError.js";
@@ -53,7 +53,7 @@ describe("Olingo Library: binding existing entities", () => {
     const created = await createBook("Bound On Create", publisherId);
 
     expect(created.status).toBe(201);
-    expectTypeOf(created).toEqualTypeOf<HttpResponseModel<ODataEntityModelResponseV2<Book>>>();
+    expectTypeOf(created).toEqualTypeOf<ODataResponseModel<ODataEntityModelResponseV2<Book>>>();
     expect((await publisherOf(created.data.d.Id)).Id).toBe(publisherId);
   });
 

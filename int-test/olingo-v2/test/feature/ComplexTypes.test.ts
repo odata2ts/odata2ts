@@ -1,5 +1,5 @@
-import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataValueResponseV2 } from "@odata2ts/odata-core";
+import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { PostalAddress } from "../../src-generated/library/LibraryModel.js";
 import { expectODataError } from "../expectODataError.js";
@@ -47,7 +47,7 @@ describe("Olingo Library: complex types", () => {
 
     expect(result.status).toBe(200);
     expect(result.data.d.City).toBe("Hamburg");
-    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataValueResponseV2<string>>>();
+    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataValueResponseV2<string>>>();
   });
 
   test("the complex value arrives inline without being asked for", async () => {
