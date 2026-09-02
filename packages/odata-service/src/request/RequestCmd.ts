@@ -2,7 +2,7 @@ import { HttpResponseModel, ODataHttpClient, ODataHttpMethods, ODataRequestConfi
 import { MainResponseConverter } from "@odata2ts/odata-query-objects";
 import { buildCacheKey, buildInvalidates, CacheKeyState } from "../cacheKey/index.js";
 import { getHeaderETag } from "../ETagExtraction";
-import { ODataConcurrencyError } from "../ODataConcurrencyError";
+import { isConcurrencyConflict, ODataConcurrencyError } from "../ODataConcurrencyError";
 import { ODataResponseModel } from "../ODataResponseModel";
 import { MainRequestConverter, RequestConverter } from "./converter/RequestConverter";
 import { RequestConverterChain } from "./converter/RequestConverterChain";
@@ -229,7 +229,13 @@ export abstract class RequestCmd<
     const request = this.applyConcurrency(this.getInfoConverted());
 
     // execute the request
-    const response = await this.sendRequest(request, requestConfig);
+    let response: HttpResponseModel<any>;
+    try {
+      response = await this.sendRequest(request, requestConfig);
+    } catch (error) {
+      this.evictOnConflict(error);
+      throw error;
+    }
 
     // apply response converters
     const converted = this.convertResponse(response);
@@ -287,6 +293,27 @@ export abstract class RequestCmd<
       request.data,
       request.cacheKeyState,
     );
+  }
+
+  /**
+   * Forgets an ETag the service has just disproved.
+   *
+   * A `412` is the one answer that says something about the stored ETag itself: the resource has moved on,
+   * so the token is stale for good. Keeping it would send the very same `If-Match` on the next write and
+   * earn the very same `412` - silently, forever, until something happens to re-read the resource. After
+   * eviction that next write instead hits the pre-send {@link ODataConcurrencyError} ("nothing known, read
+   * it first"), which names the resource and says what to do about it.
+   *
+   * No other status evicts: a `404`, a `500` or a broken connection say nothing about whether the token
+   * was still current, and throwing it away would turn a passing write into a needless error.
+   *
+   * The error itself travels on untouched - resolving a conflict is the application's business.
+   */
+  private evictOnConflict(error: unknown): void {
+    const { concurrency } = this.options;
+    if (concurrency && isConcurrencyConflict(error)) {
+      this.client.concurrency?.evict(concurrency.key);
+    }
   }
 
   /**
