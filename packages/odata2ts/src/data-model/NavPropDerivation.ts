@@ -1,5 +1,14 @@
-import type { DataModel } from "./DataModel.js";
-import { ComplexType, EntitySetType, PropertyModel } from "./DataTypeModel.js";
+import { ComplexType, EntitySetType, EntityType, PropertyModel } from "./DataTypeModel.js";
+
+/**
+ * The slice of `DataModel` the resolver actually reads - an interface rather than the class itself, so
+ * this file has nothing to import from `DataModel.ts` and the two stay free of a circular dependency
+ * (`DataModel` already imports this file for `resolveNavPropDerivation`).
+ */
+export interface NavPropDataModel {
+  getEntityType(fqName: string): EntityType | undefined;
+  getNavPropBindingTarget(fqEntityTypeName: string, navPropOdataName: string): EntitySetType | undefined;
+}
 
 export type DerivationGrade = "A" | "B" | "C";
 
@@ -48,7 +57,7 @@ function findProp(type: ComplexType, odataName: string): PropertyModel | undefin
  * thin, memoized entry point the generator actually calls.
  */
 export function resolveNavPropDerivation(
-  dataModel: DataModel,
+  dataModel: NavPropDataModel,
   ownerType: string,
   navPropOdataName: string,
 ): NavPropDerivation {
