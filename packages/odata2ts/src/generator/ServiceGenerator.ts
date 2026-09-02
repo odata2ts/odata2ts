@@ -137,7 +137,7 @@ class ServiceGenerator {
         const keyEntries = derivation.targetKeyPairs
           .map((pair) => `${pair.targetKeyProperty}: cacheKeyState.keyValues!["${pair.sourceKeyProperty}"]`)
           .join(", ");
-        return `${reRootToEntityFn}(cacheKeyState, "${derivation.rootType}", { ${keyEntries} })`;
+        return `cacheKeyState && ${reRootToEntityFn}(cacheKeyState, "${derivation.rootType}", { ${keyEntries} })`;
       }
 
       // grade A or B, to-many: a derived filter, re-rooted at the target entity set's own type.
@@ -148,14 +148,14 @@ class ServiceGenerator {
           .join(", ");
         const castEntry = derivation.cast ? `, cast: "${derivation.cast}"` : "";
         return (
-          `${hopStateFn}(cacheKeyState, { name: "${navPropOdataName}", kind: "${kind}", ` +
+          `cacheKeyState && ${hopStateFn}(cacheKeyState, { name: "${navPropOdataName}", kind: "${kind}", ` +
           `reRoot: { typeName: "${derivation.rootType}", filter: { ${filterEntries} }${castEntry} }${entitySetTypeEntry} })`
         );
       }
     }
 
     const hopStateFn = imports.addServiceFunction("hopState");
-    return `${hopStateFn}(cacheKeyState, { typeName: "${elementType.fqName}", kind: "${kind}", name: "${navPropOdataName}"${entitySetTypeEntry} })`;
+    return `cacheKeyState && ${hopStateFn}(cacheKeyState, { typeName: "${elementType.fqName}", kind: "${kind}", name: "${navPropOdataName}"${entitySetTypeEntry} })`;
   }
 
   /** A complex property hop: the same shape as a navigation hop, but never re-rooted - a complex value is never a navigation property. */
@@ -164,7 +164,7 @@ class ServiceGenerator {
       return "";
     }
     const hopStateFn = imports.addServiceFunction("hopState");
-    return `${hopStateFn}(cacheKeyState, { typeName: "${typeName}", kind: "${isCollection ? "list" : "detail"}", name: "${name}" })`;
+    return `cacheKeyState && ${hopStateFn}(cacheKeyState, { typeName: "${typeName}", kind: "${isCollection ? "list" : "detail"}", name: "${name}" })`;
   }
 
   /** A primitive property, primitive collection or stream property hop: bare name, no type. */
@@ -173,7 +173,7 @@ class ServiceGenerator {
       return "";
     }
     const hopStateFn = imports.addServiceFunction("hopState");
-    return `${hopStateFn}(cacheKeyState, { name: "${name}" })`;
+    return `cacheKeyState && ${hopStateFn}(cacheKeyState, { name: "${name}" })`;
   }
 
   /** A stream property's raw value: the property hop, then a further hop appending `$value`. */
@@ -182,7 +182,7 @@ class ServiceGenerator {
       return "";
     }
     const hopStateFn = imports.addServiceFunction("hopState");
-    return `${hopStateFn}(${hopStateFn}(cacheKeyState, { name: "${odataName}" }), { name: "$value" })`;
+    return `cacheKeyState && ${hopStateFn}(${hopStateFn}(cacheKeyState, { name: "${odataName}" }), { name: "$value" })`;
   }
 
   /** A subtype cast: a restriction on the very same resource, not a hop away from it. */
@@ -191,7 +191,7 @@ class ServiceGenerator {
       return "";
     }
     const withParamsFn = imports.addServiceFunction("withParams");
-    return `${withParamsFn}(cacheKeyState, { cast: "${castFqName}" })`;
+    return `cacheKeyState && ${withParamsFn}(cacheKeyState, { cast: "${castFqName}" })`;
   }
 
   /**
@@ -238,7 +238,7 @@ class ServiceGenerator {
     const typeNameEntry = isStructured
       ? `typeName: "${returnType!.fqType}", kind: "${returnType!.isCollection ? "list" : "detail"}", `
       : "";
-    return `${hopStateFn}(cacheKeyState, { ${typeNameEntry}name: "${fqOperationName}" })`;
+    return `cacheKeyState && ${hopStateFn}(cacheKeyState, { ${typeNameEntry}name: "${fqOperationName}" })`;
   }
 
   /**
@@ -640,9 +640,21 @@ class ServiceGenerator {
               type: `${serviceOptions}${this.getServiceVersionArg()}`,
               hasQuestionToken: true,
             },
+            // a getter elsewhere constructs this very class as a hop off its own state (see emitNavHopExpr
+            // et al.) - without this parameter that hop's cache-key state would have nowhere to go, and the
+            // base class's own trailing parameter would sit unreachable behind a narrower constructor
+            ...(this.cacheKeyMode !== CacheKeyMode.off
+              ? [
+                  {
+                    name: "cacheKeyState",
+                    type: importContainer.addServiceFunction("CacheKeyState", true),
+                    hasQuestionToken: true,
+                  },
+                ]
+              : []),
           ],
           statements: [
-            `super(client, basePath, name, ${qObjectName}, ${this.getServiceRuntimeOptions(model, isComplexType)});`,
+            `super(client, basePath, name, ${qObjectName}, ${this.getServiceRuntimeOptions(model, isComplexType)}${this.cacheKeyMode !== CacheKeyMode.off ? ", cacheKeyState" : ""});`,
           ],
         },
       ],
@@ -1008,9 +1020,22 @@ class ServiceGenerator {
               type: `${serviceOptions}${this.getServiceVersionArg()}`,
               hasQuestionToken: true,
             },
+            // a getter elsewhere constructs this very class as a hop off its own state (see
+            // emitNavHopExpr et al.) - without this parameter that hop's cache-key state would have
+            // nowhere to go, and the base class's own trailing parameter would sit unreachable behind a
+            // narrower constructor
+            ...(this.cacheKeyMode !== CacheKeyMode.off
+              ? [
+                  {
+                    name: "cacheKeyState",
+                    type: importContainer.addServiceFunction("CacheKeyState", true),
+                    hasQuestionToken: true,
+                  },
+                ]
+              : []),
           ],
           statements: [
-            `super(client, basePath, name, ${qObjectName}, new ${qIdFunctionName}(name), ${this.getServiceRuntimeOptions(model)});`,
+            `super(client, basePath, name, ${qObjectName}, new ${qIdFunctionName}(name), ${this.getServiceRuntimeOptions(model)}${this.cacheKeyMode !== CacheKeyMode.off ? ", cacheKeyState" : ""});`,
           ],
         },
       ],
