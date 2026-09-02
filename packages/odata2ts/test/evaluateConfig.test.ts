@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { evaluateConfigOptions } from "../src/evaluateConfig.js";
 import {
+  CacheKeyMode,
   CliOptions,
   ConfigFileOptions,
   DeepInsertProps,
@@ -8,6 +9,7 @@ import {
   getDefaultConfig,
   Modes,
   NamingStrategies,
+  resolveCacheKeyMode,
 } from "../src/index.js";
 
 describe("Config Evaluation Tests", () => {
@@ -309,6 +311,52 @@ describe("Config Evaluation Tests", () => {
       const result = evaluateConfigOptions(cliOpts, { mode, deepInsertProps: DeepInsertProps.compositionOnly });
 
       expect(result[0], `mode ${mode}`).toMatchObject({ deepInsertProps: DeepInsertProps.compositionOnly });
+    });
+  });
+
+  describe("cacheKeys option", () => {
+    test("absent means off", () => {
+      expect(resolveCacheKeyMode(undefined)).toBe(CacheKeyMode.off);
+    });
+
+    test("auto resolves to hierarchical", () => {
+      expect(resolveCacheKeyMode({ mode: CacheKeyMode.auto })).toBe(CacheKeyMode.hierarchical);
+    });
+
+    test("a named mode is passed through", () => {
+      expect(resolveCacheKeyMode({ mode: CacheKeyMode.typeFlattening })).toBe(CacheKeyMode.typeFlattening);
+      expect(resolveCacheKeyMode({ mode: CacheKeyMode.hierarchical })).toBe(CacheKeyMode.hierarchical);
+      expect(resolveCacheKeyMode({ mode: CacheKeyMode.off })).toBe(CacheKeyMode.off);
+    });
+
+    test("the default is off, so a config saying nothing generates nothing", () => {
+      const [only] = evaluateConfigOptions({}, { services: { a: { source: "a.xml", output: "a" } } });
+      expect(only.cacheKeys).toEqual({ mode: CacheKeyMode.off });
+      expect(resolveCacheKeyMode(only.cacheKeys)).toBe(CacheKeyMode.off);
+    });
+
+    test("it is a per-service option, overridable from the base settings", () => {
+      const [first, second] = evaluateConfigOptions(
+        {},
+        {
+          cacheKeys: { mode: CacheKeyMode.hierarchical },
+          services: {
+            a: { source: "a.xml", output: "a" },
+            b: { source: "b.xml", output: "b", cacheKeys: { mode: CacheKeyMode.typeFlattening } },
+          },
+        },
+      );
+      expect(first.cacheKeys).toEqual({ mode: CacheKeyMode.hierarchical });
+      expect(second.cacheKeys).toEqual({ mode: CacheKeyMode.typeFlattening });
+    });
+
+    test("a service overrides the default rather than merging with it", () => {
+      // deepmerge folds the default {mode:"off"} under the service's own entry; the service must win
+      const [only] = evaluateConfigOptions(
+        {},
+        { services: { a: { source: "a.xml", output: "a", cacheKeys: { mode: CacheKeyMode.typeFlattening } } } },
+      );
+      expect(only.cacheKeys).toEqual({ mode: CacheKeyMode.typeFlattening });
     });
   });
 });

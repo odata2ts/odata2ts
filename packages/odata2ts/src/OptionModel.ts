@@ -233,6 +233,56 @@ export enum EnumSynthesis {
 }
 
 /**
+ * How a generated client builds `RequestCmd.cacheKey` - see the docs on `cacheKeys`.
+ */
+export enum CacheKeyMode {
+  /**
+   * Whatever odata2ts considers best in general - today {@link hierarchical}.
+   *
+   * Exists so the recommended default can move without every project having to follow: a project that
+   * wants today's behaviour pinned names it explicitly, one that wants to track odata2ts's recommendation
+   * says `auto`. Changing what `auto` resolves to is therefore *not* a breaking change; changing what a
+   * named mode produces is.
+   */
+  auto = "auto",
+  /**
+   * The key from the route taken. Depends on nothing the server declares, so it produces the same cache
+   * layout against every implementation of a model, and prefix invalidation through the parent works
+   * without any help.
+   */
+  hierarchical = "hierarchical",
+  /**
+   * The key re-rooted at the resource's own type wherever the relation is derivable from the metadata,
+   * hierarchical elsewhere. This is where convergence is won - `/Media(5)/Copies` and a hand-written
+   * `/Copies?$filter=MediumId eq 5` produce the same key - at the price that the key's shape now depends
+   * on how much the *server* declares.
+   */
+  typeFlattening = "typeFlattening",
+  /** Nothing is generated - identical to omitting `cacheKeys` entirely. */
+  off = "off",
+}
+
+export interface CacheKeysOptions {
+  /**
+   * Required: naming the object is not itself a decision, and a silently defaulted mode would make the
+   * shape of every generated key depend on a value nobody wrote down. A project that wants to track
+   * odata2ts's recommendation says {@link CacheKeyMode.auto} and means it.
+   */
+  mode: CacheKeyMode;
+}
+
+/**
+ * The mode actually in force. The one place `auto` is resolved, so that the recommendation lives in
+ * exactly one line.
+ */
+export function resolveCacheKeyMode(options: CacheKeysOptions | undefined): CacheKeyMode {
+  if (!options) {
+    return CacheKeyMode.off;
+  }
+  return options.mode === CacheKeyMode.auto ? CacheKeyMode.hierarchical : options.mode;
+}
+
+/**
  * Config options for CLI.
  */
 export interface CliOptions {
@@ -552,6 +602,16 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * ({@code "Author@odata.bind"}).
    */
   deepInsertProps?: DeepInsertProps;
+  /**
+   * Generate `RequestCmd.cacheKey`: a structured, typed key identifying the *resource* a request
+   * addresses, for a cache built on top of the generated client (TanStack Query is the motivating case,
+   * hence the array shape).
+   *
+   * Off by default. An object rather than a bare string, because the shape has to have room for the
+   * further switches this will attract - which properties become key segments, whether operations are
+   * keyed at all - without a second top-level option.
+   */
+  cacheKeys?: CacheKeysOptions;
 }
 
 /**
