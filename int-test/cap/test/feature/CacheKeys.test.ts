@@ -1,5 +1,6 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { ODataResponseModel, touchesType } from "@odata2ts/odata-service";
+import { touchesType } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
 import { Books } from "../../src-generated/library/LibraryModel.js";
 import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
@@ -115,7 +116,7 @@ describe("CAP Library: cache keys (V4, hierarchical)", () => {
     const created = await LIBRARY.Books().create({ Title: "CacheKeys Probe", Language: "de" }).execute();
     expect(created.status).toBe(201);
     expect(created.invalidates).toEqual([["Library.Service.Books", "list"]]);
-    expectTypeOf(created).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Books>>>();
+    expectTypeOf(created).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Books>>>();
     const bookId = created.data.Id;
 
     // CAP's V4 endpoint answers a patch with 200 and the full entity, unlike ASP.NET's 204

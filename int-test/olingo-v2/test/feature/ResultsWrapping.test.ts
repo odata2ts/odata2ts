@@ -1,5 +1,5 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { DeferredContent, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
-import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { Book, Copy, EditableBook } from "../../src-generated/library/LibraryModel.js";
 import { BOOK_DER_PROZESS, LIBRARY, UNKNOWN_ID } from "../LibraryTestConstants.js";
@@ -21,7 +21,7 @@ describe("Olingo Library: extra results wrapping", () => {
       .execute();
 
     expect(result.status).toBe(200);
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataEntityModelResponseV2<Book>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataEntityModelResponseV2<Book>>>();
 
     // the wrapping is the response, not something the client invents or removes
     const copies = result.data.d.Copies as { results: Array<Copy> };

@@ -1,5 +1,5 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import type {
   EditableBook as StrictEditableBook,
@@ -102,7 +102,7 @@ describe("ASP.NET Library: Core annotations", () => {
 
     expect(result.status).toBe(200);
     expect(result.data.Title).toBe("Der Prozess");
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<PrintMedium>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PrintMedium>>>();
   });
 
   test("Core.AlternateKeys: the primary key still addresses the very same entity", async () => {

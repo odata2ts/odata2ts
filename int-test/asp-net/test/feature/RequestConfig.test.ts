@@ -1,6 +1,6 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { FetchRequestConfig } from "@odata2ts/http-client-fetch";
 import { ODataCollectionResponseV4 } from "@odata2ts/odata-core";
-import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { Medium } from "../../src-generated/library/library-catalog/index.js";
 import { LIBRARY } from "../LibraryTestConstants.js";
@@ -22,7 +22,7 @@ describe("ASP.NET Library: request configuration", () => {
       .query()
       .execute({ params: { $top: 1 } });
 
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV4<Medium>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV4<Medium>>>();
     expect(result.status).toBe(200);
     // the extra param reached the URL: without it the seed data holds more than one medium
     expect(result.data.value).toHaveLength(1);

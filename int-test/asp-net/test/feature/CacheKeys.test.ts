@@ -1,5 +1,6 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { ODataResponseModel, touchesType } from "@odata2ts/odata-service";
+import { touchesType } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
 import { Medium } from "../../src-generated/library/library-catalog/index.js";
 import { expectODataError } from "../expectODataError.js";
@@ -65,7 +66,7 @@ describe("ASP.NET Library: cache keys", () => {
     const result = await request.execute();
     expect(result.status).toBe(200);
     expect(result.data.Title).toBe("Der Prozess");
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Medium>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Medium>>>();
   });
 
   test("grade B: /Members(...)/Loans re-roots through the navigation path", async () => {

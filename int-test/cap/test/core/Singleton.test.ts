@@ -1,5 +1,5 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { MainBranch } from "../../src-generated/library/LibraryModel.js";
 import { BASE_URL, LIBRARY } from "../LibraryTestConstants.js";
@@ -26,7 +26,7 @@ describe("CAP Library: singleton", () => {
     expect(result.data.Name).toBeDefined();
 
     // a singleton is a single entity, so the response is the model, not a collection
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<MainBranch>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<MainBranch>>>();
   });
 
   test("query options work on it", async () => {

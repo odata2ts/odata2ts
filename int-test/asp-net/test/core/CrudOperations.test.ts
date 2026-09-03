@@ -1,5 +1,5 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { Medium } from "../../src-generated/library/library-catalog/index.js";
 import { Member } from "../../src-generated/library/library-circulation/index.js";
@@ -16,7 +16,7 @@ describe("ASP.NET Library: CRUD", () => {
 
     // The response structure is generated, so it is worth pinning: a single entity arrives unwrapped,
     // and the nullability of the model comes from the metadata.
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Medium>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Medium>>>();
   });
 
   test("read entity collection", async () => {
@@ -26,7 +26,7 @@ describe("ASP.NET Library: CRUD", () => {
     expect(result.data.value.length).toBeGreaterThan(0);
 
     // A collection is wrapped in `value` - that is the difference to the single entity above
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV4<Medium>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV4<Medium>>>();
   });
 
   test("read with unknown key yields 404", async () => {
@@ -41,7 +41,7 @@ describe("ASP.NET Library: CRUD", () => {
   test("create, read, patch and delete an entity", async () => {
     const created = await LIBRARY.Members().create({ Name: "Integration Test", PreviousAddresses: [] }).execute();
     expect(created.status).toBe(201);
-    expectTypeOf(created).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Member>>>();
+    expectTypeOf(created).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Member>>>();
 
     const id = created.data.Id;
     const member = LIBRARY.Members(id);
@@ -52,12 +52,12 @@ describe("ASP.NET Library: CRUD", () => {
     const patched = await member.patch({ Name: "Integration Test (patched)" }).execute();
     expect(patched.status).toBe(204);
     // no body by default, and the typing says so
-    expectTypeOf(patched).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(patched).toEqualTypeOf<HttpResponseModel<undefined>>();
     expect((await member.query().execute()).data.Name).toBe("Integration Test (patched)");
 
     const deleted = await member.delete().execute();
     expect(deleted.status).toBe(204);
-    expectTypeOf(deleted).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(deleted).toEqualTypeOf<HttpResponseModel<undefined>>();
 
     await expectODataError(member.query().execute(), { status: 404, message: /No error message/ });
   });
@@ -75,7 +75,7 @@ describe("ASP.NET Library: CRUD", () => {
 
     expect(patched.status).toBe(200);
     expect(patched.data.Name).toBe("Prefer Test (patched)");
-    expectTypeOf(patched).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Member>>>();
+    expectTypeOf(patched).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Member>>>();
 
     // ... and without the header the very same call answers 204, hence the default typing
     const withoutHeader = await member.patch({ Name: "Prefer Test (patched again)" }).execute();

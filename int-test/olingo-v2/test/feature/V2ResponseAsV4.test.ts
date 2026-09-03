@@ -1,5 +1,5 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { Book, Copy, EditableBook } from "../../src-generated/library-as-v4/index.js";
 import { BOOK_DER_PROZESS, COPY_KEY, LIBRARY_AS_V4 } from "../LibraryTestConstants.js";
@@ -26,7 +26,7 @@ describe("Olingo Library: v2ResponseAsV4", () => {
     expect((result.data as any).d).toBeUndefined();
     expect(result.data["@odata.id"]).toContain(`Books(guid'${BOOK_DER_PROZESS}')`);
 
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Book>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Book>>>();
   });
 
   test("an entity carrying a concurrency token maps it to @odata.etag", async () => {
@@ -44,7 +44,7 @@ describe("Olingo Library: v2ResponseAsV4", () => {
     expect(result.data.value.length).toBeGreaterThan(0);
     expect(result.data.value.map((book) => book.Title)).toContain("Der Prozess");
 
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV4<Book>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV4<Book>>>();
   });
 
   test("$count maps __count to @odata.count", async () => {
@@ -84,7 +84,7 @@ describe("Olingo Library: v2ResponseAsV4", () => {
     expect(created.status).toBe(201);
     expect(created.data).toMatchObject(newBook);
     expect((created.data as any).d).toBeUndefined();
-    expectTypeOf(created).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Book>>>();
+    expectTypeOf(created).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Book>>>();
 
     const id = created.data.Id;
     const read = await LIBRARY_AS_V4.Books(id).query().execute();

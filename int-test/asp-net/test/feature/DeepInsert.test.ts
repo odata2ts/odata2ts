@@ -1,5 +1,5 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { Book } from "../../src-generated/library/library-catalog/index.js";
 import { Member } from "../../src-generated/library/library-circulation/index.js";
@@ -39,7 +39,7 @@ describe("ASP.NET Library: deep insert", () => {
       .execute();
 
     expect(created.status).toBe(201);
-    expectTypeOf(created).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Member>>>();
+    expectTypeOf(created).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Member>>>();
 
     // the decisive part: the nested entity exists on the other side and is linked to its parent
     const read = await LIBRARY.Members(created.data.Id)
@@ -77,7 +77,7 @@ describe("ASP.NET Library: deep insert", () => {
       .execute();
 
     expect(created.status).toBe(201);
-    expectTypeOf(created).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Book>>>();
+    expectTypeOf(created).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Book>>>();
 
     const copies = await copiesOf(created.data.Id);
 

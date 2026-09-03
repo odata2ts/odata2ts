@@ -1,5 +1,5 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { ODataResponseModel } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
 import { Amenities, Copies, Status } from "../../src-generated/library-enums/LibraryEnumsModel.js";
 import { LibraryEnumsService } from "../../src-generated/library-enums/LibraryEnumsService.js";
@@ -39,7 +39,7 @@ describe("CAP Library: synthesized enums", () => {
 
       expect(result.status).toBe(200);
       expect(result.data.Status).toBe(Status.Available);
-      expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Copies>>>();
+      expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Copies>>>();
       expectTypeOf(result.data.Status).toEqualTypeOf<Status | null>();
     });
 

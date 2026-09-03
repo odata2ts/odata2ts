@@ -1,6 +1,6 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2, ODataValueResponseV2 } from "@odata2ts/odata-core";
 import { StringCollection } from "@odata2ts/odata-query-objects";
-import { ODataResponseModel } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
 import { expectODataError } from "../../expectODataError.js";
 import { BASE_URL, BOOK_DER_PROZESS, LIBRARY_V2 } from "../LibraryV2TestConstants.js";
@@ -46,7 +46,7 @@ describe("CAP Library V2: property services", () => {
       // V2 keys the value by the property name inside `d`, where V4 uses a fixed `value` field
       expect(result.data.d.Title).toBe("Der Prozess");
 
-      expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataValueResponseV2<string>>>();
+      expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataValueResponseV2<string>>>();
     });
 
     test("updating a single value reports success and deletes it", async () => {
@@ -73,7 +73,7 @@ describe("CAP Library V2: property services", () => {
     test("delete a nullable value", async () => {
       const deleted = await book().Language().deleteValue().execute();
       expect(deleted.status).toBe(204);
-      expectTypeOf(deleted).toEqualTypeOf<ODataResponseModel<undefined>>();
+      expectTypeOf(deleted).toEqualTypeOf<HttpResponseModel<undefined>>();
 
       const read = await book().Language().getValue().execute();
       expect(read.status).toBe(204);
@@ -100,7 +100,7 @@ describe("CAP Library V2: property services", () => {
       const result = await book().Keywords().query().execute();
 
       expect(result.status).toBe(200);
-      expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV2<StringCollection>>>();
+      expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV2<StringCollection>>>();
 
       expect(result.data.d.results).toBeUndefined();
       expect((result.data.d as unknown as { Keywords: Array<string> }).Keywords).toStrictEqual(SEED_KEYWORDS);

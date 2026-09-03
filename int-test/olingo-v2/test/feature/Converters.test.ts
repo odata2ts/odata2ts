@@ -1,4 +1,4 @@
-import { ODataResponseModel } from "@odata2ts/odata-service";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { BigNumber } from "bignumber.js";
 import { DateTime } from "luxon";
 import { describe, expect, expectTypeOf, test } from "vitest";
@@ -138,7 +138,7 @@ describe("Olingo Library: value converters", () => {
     const result = await cmd.execute();
     expect(result.status).toBe(204);
     expect(result.data).toBeUndefined();
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("a converted primitive property service converts too", async () => {

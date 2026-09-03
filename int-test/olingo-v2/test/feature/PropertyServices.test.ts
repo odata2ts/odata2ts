@@ -1,5 +1,5 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataValueResponseV2 } from "@odata2ts/odata-core";
-import { ODataResponseModel } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
 import { expectODataError } from "../expectODataError.js";
 import { BASE_URL, BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
@@ -31,7 +31,7 @@ describe("Olingo Library: property services", () => {
     // V2 keys the value by the property name inside `d`, where V4 uses a fixed `value` field
     expect(result.data.d.Title).toBe("Der Prozess");
 
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataValueResponseV2<string>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataValueResponseV2<string>>>();
   });
 
   test("read an inherited property", async () => {
@@ -45,7 +45,7 @@ describe("Olingo Library: property services", () => {
   test("updating a single value actually updates it", async () => {
     const updated = await book().Language().updateValue("en").execute();
     expect(updated.status).toBe(204);
-    expectTypeOf(updated).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(updated).toEqualTypeOf<HttpResponseModel<undefined>>();
 
     // the value that was sent is the value that is there - and the entity agrees
     expect((await book().Language().getValue().execute()).data.d.Language).toBe("en");

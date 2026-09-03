@@ -1,5 +1,5 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
-import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { Books, EditableBooks } from "../../../src-generated/library-v2/LibraryV2Model.js";
 import { expectODataError } from "../../expectODataError.js";
@@ -43,7 +43,7 @@ describe("CAP Library V2: CRUD operations", () => {
     expect(result.data.d.__metadata.uri).toBe(`${BASE_URL}/Books(guid'${BOOK_DER_PROZESS}')`);
     expect(result.data.d.__metadata.type).toBe("Library.Service.Books");
 
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataEntityModelResponseV2<Books>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataEntityModelResponseV2<Books>>>();
     expectTypeOf(result.data.d.Title).toEqualTypeOf<string>();
     expectTypeOf(result.data.d.PageCount).toEqualTypeOf<number | null>();
   });
@@ -56,7 +56,7 @@ describe("CAP Library V2: CRUD operations", () => {
     expect(result.data.d.results.map((book) => book.Title)).toContain("Der Prozess");
 
     // `d.results` rather than V4's `value`
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV2<Books>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV2<Books>>>();
     expectTypeOf(result.data.d.results).toEqualTypeOf<Array<Books>>();
   });
 
@@ -85,7 +85,7 @@ describe("CAP Library V2: CRUD operations", () => {
     const created = await LIBRARY_V2.Books().create(newBook).execute();
     expect(created.status).toBe(201);
     expect(created.data.d).toMatchObject(newBook);
-    expectTypeOf(created).toEqualTypeOf<ODataResponseModel<ODataEntityModelResponseV2<Books>>>();
+    expectTypeOf(created).toEqualTypeOf<HttpResponseModel<ODataEntityModelResponseV2<Books>>>();
 
     const id = created.data.d.Id;
     expect(id).toBeDefined();
@@ -114,7 +114,7 @@ describe("CAP Library V2: CRUD operations", () => {
     // delete
     const deleted = await LIBRARY_V2.Books(id).delete().execute();
     expect([200, 204]).toContain(deleted.status);
-    expectTypeOf(deleted).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(deleted).toEqualTypeOf<HttpResponseModel<undefined>>();
 
     await expectODataError(LIBRARY_V2.Books(id).query().execute(), { status: 404, message: /Not Found/ });
   });
@@ -122,7 +122,7 @@ describe("CAP Library V2: CRUD operations", () => {
   test("the adapter answers a write with a body that the V2 typing does not admit", async () => {
     /*
      * V2 prescribes 204 and no content for `update` and `patch`, and odata2ts types both as
-     * `ODataResponseModel<undefined>` accordingly - there is no `<true>` switch in V2 as there is in V4.
+     * `HttpResponseModel<undefined>` accordingly - there is no `<true>` switch in V2 as there is in V4.
      * This server answers 200 with the full entity instead, because that is what the V4 endpoint behind
      * the adapter does. So the data is there at runtime while the compiler says it cannot be, and a caller
      * who wants it has to re-read the entity or cast.
@@ -136,7 +136,7 @@ describe("CAP Library V2: CRUD operations", () => {
     const patched = await LIBRARY_V2.Books(id).patch({ PageCount: 42 }).execute();
 
     expect(patched.status).toBe(200);
-    expectTypeOf(patched).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(patched).toEqualTypeOf<HttpResponseModel<undefined>>();
     // ... and yet:
     expect(patched.data).toBeDefined();
 

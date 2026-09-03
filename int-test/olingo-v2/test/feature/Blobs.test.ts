@@ -1,4 +1,4 @@
-import { ODataResponseModel } from "@odata2ts/odata-service";
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { expectODataError } from "../expectODataError.js";
 import { AUDIOBOOK_CHAPTER, BASE_URL, EBOOK_CLEAN_CODE, LIBRARY, UNKNOWN_ID } from "../LibraryTestConstants.js";
@@ -56,7 +56,7 @@ describe("Olingo Library: binary content", () => {
       expect(await textOf(read.data)).toBe(content);
       // this server returns the MIME type it was given
       expect(read.data?.type).toBe("application/epub+zip");
-      expectTypeOf(read).toEqualTypeOf<ODataResponseModel<Blob | undefined>>();
+      expectTypeOf(read).toEqualTypeOf<HttpResponseModel<Blob | undefined>>();
     });
 
     test("the MIME type can be overridden", async () => {
@@ -153,7 +153,7 @@ describe("Olingo Library: binary content", () => {
 
       expect(read.status).toBe(200);
       expect(await textOfStream(read.data)).toBe(content);
-      expectTypeOf(read).toEqualTypeOf<ODataResponseModel<ReadableStream | undefined>>();
+      expectTypeOf(read).toEqualTypeOf<HttpResponseModel<ReadableStream | undefined>>();
     });
 
     test("what was streamed up can be read as a blob and vice versa", async () => {

@@ -1,5 +1,5 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { PostalAddress } from "../../src-generated/library/library-catalog/index.js";
 import { Branch } from "../../src-generated/library/library-circulation/index.js";
@@ -25,7 +25,7 @@ describe("ASP.NET Library: singleton", () => {
     expect(result.data.Name).toBeDefined();
 
     // a singleton is a single entity, so the response is the model, not a collection
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<Branch>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Branch>>>();
     expectTypeOf(result.data.Id).toEqualTypeOf<number>();
   });
 
@@ -43,7 +43,7 @@ describe("ASP.NET Library: singleton", () => {
 
     const patched = await LIBRARY.MainBranch().patch({ Name: "Main Branch (patched)" }).execute();
     expect(patched.status).toBe(204);
-    expectTypeOf(patched).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(patched).toEqualTypeOf<HttpResponseModel<undefined>>();
 
     expect((await LIBRARY.MainBranch().query().execute()).data.Name).toBe("Main Branch (patched)");
 
@@ -59,7 +59,7 @@ describe("ASP.NET Library: singleton", () => {
     // the method, not a call: `expectTypeOf` evaluates its argument, and a stray request would reject
     // into nowhere
     expectTypeOf(address.query().execute).returns.resolves.toEqualTypeOf<
-      ODataResponseModel<ODataModelResponseV4<PostalAddress>>
+      HttpResponseModel<ODataModelResponseV4<PostalAddress>>
     >();
 
     // The server does not serve a complex property as a resource of its own, on a singleton or anywhere

@@ -14,7 +14,8 @@
     "test-compile": "tsc"
   },
   "dependencies": {
-    "@odata2ts/http-client-fetch": "^0.12.1",
+    "@odata2ts/http-client-api": "^0.7.0",
+    "@odata2ts/http-client-fetch": "^0.13.0",
     "@odata2ts/odata-service": "workspace:^"
   },
   "devDependencies": {

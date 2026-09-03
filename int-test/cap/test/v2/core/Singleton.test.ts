@@ -1,5 +1,5 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV2, ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
-import { ODataResponseModel } from "@odata2ts/odata-service";
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { MainBranch } from "../../../src-generated/library-v2/LibraryV2Model.js";
 import { BASE_URL, LIBRARY_V2 } from "../LibraryV2TestConstants.js";
@@ -29,7 +29,7 @@ describe("CAP Library V2: what was the singleton", () => {
     expect(result.data.d.Name).toBeDefined();
     expect(result.data.d.__metadata.uri).toBe(`${BASE_URL}/MainBranch(1)`);
 
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataEntityModelResponseV2<MainBranch>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataEntityModelResponseV2<MainBranch>>>();
   });
 
   test("reading it without a key answers as a singleton, not as a collection", async () => {
@@ -39,7 +39,7 @@ describe("CAP Library V2: what was the singleton", () => {
     const result = await LIBRARY_V2.MainBranch().query().execute();
 
     expect(result.status).toBe(200);
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV2<MainBranch>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV2<MainBranch>>>();
 
     expect(result.data.d.results).toBeUndefined();
     expect((result.data.d as unknown as MainBranch).Name).toBeDefined();
