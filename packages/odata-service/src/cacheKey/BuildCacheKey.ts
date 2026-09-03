@@ -1,4 +1,5 @@
 import { CacheKeyState } from "./CacheKeyState";
+import { sameElement } from "./KeyElementEquality";
 
 /**
  * The key a resource is stored under: the root type, a hop per traversal step, then at most one params
@@ -82,26 +83,4 @@ export function buildInvalidates(state: CacheKeyState): ReadonlyArray<ReadonlyAr
 
 function isPrefixOf(prefix: ReadonlyArray<unknown>, key: ReadonlyArray<unknown>): boolean {
   return prefix.length <= key.length && prefix.every((element, index) => sameElement(element, key[index]));
-}
-
-/**
- * Element equality for a key: primitives compare by value, a key object (a composite key, a params entry)
- * by its serialisation - which is exactly how a cache hashes them, and every value in a key is
- * JSON-serialisable by construction.
- */
-function sameElement(a: unknown, b: unknown): boolean {
-  if (a === b) {
-    return true;
-  }
-  if (typeof a === "object" && a !== null && typeof b === "object" && b !== null) {
-    return JSON.stringify(sortRecord(a)) === JSON.stringify(sortRecord(b));
-  }
-  return false;
-}
-
-function sortRecord(value: object): unknown {
-  if (Array.isArray(value)) {
-    return value;
-  }
-  return Object.fromEntries(Object.entries(value).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
 }
