@@ -1,12 +1,7 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataValueResponseV4 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import {
-  DEFAULT_HEADERS,
-  getODataVersionHeaders,
-  ODataResponseModel,
-  PrimitiveTypeServiceV4,
-  RequestInfo,
-} from "../../src/";
+import { DEFAULT_HEADERS, getODataVersionHeaders, PrimitiveTypeServiceV4, RequestInfo } from "../../src/";
 import { PersonModelService } from "../fixture/v4/PersonModelService";
 import { MockClient } from "../mock/MockClient";
 
@@ -50,7 +45,7 @@ describe("PrimitiveTypeService V4 Test", () => {
     expect(result.method).toBe("GET");
     expect(odataClient.lastRequestConfig).toBeUndefined();
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<ODataValueResponseV4<string> | undefined>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<ODataValueResponseV4<string> | undefined>>();
   });
 
   test("primitiveType V4: get value with converter", async () => {
@@ -60,7 +55,7 @@ describe("PrimitiveTypeService V4 Test", () => {
     const response = await request.execute();
 
     expect(response.data?.value).toBe("3");
-    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<ODataValueResponseV4<string> | undefined>>();
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataValueResponseV4<string> | undefined>>();
   });
 
   test("primitiveType V4: update value", async () => {
@@ -76,15 +71,15 @@ describe("PrimitiveTypeService V4 Test", () => {
 
     expectTypeOf(request.getInfo()).toEqualTypeOf<RequestInfo<string>>();
 
-    expectTypeOf(await service.updateValue(value).execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
-    expectTypeOf(await service.updateValue<false>(value).execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(await service.updateValue(value).execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
+    expectTypeOf(await service.updateValue<false>(value).execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
 
     // check response
     odataClient.setValueResponse(value);
     const response = await service.updateValue<true>(value).execute();
 
     expect(response.data).toStrictEqual({ value });
-    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<ODataValueResponseV4<string>>>();
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataValueResponseV4<string>>>();
   });
 
   test("primitiveType V4: update value with converter", async () => {
@@ -98,7 +93,7 @@ describe("PrimitiveTypeService V4 Test", () => {
     const response = await serviceConv.updateValue<true>(value).execute();
 
     expect(response.data).toStrictEqual({ value });
-    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<ODataValueResponseV4<string>>>();
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataValueResponseV4<string>>>();
   });
 
   test("primitiveType V4: delete value", async () => {
@@ -112,6 +107,6 @@ describe("PrimitiveTypeService V4 Test", () => {
     expect(result.method).toBe("DELETE");
     expect(odataClient.lastRequestConfig).toBeUndefined();
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 });

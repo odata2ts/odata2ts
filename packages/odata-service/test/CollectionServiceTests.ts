@@ -1,5 +1,6 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { beforeEach, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, ODataResponseModel } from "../src";
+import { DEFAULT_HEADERS } from "../src";
 import {
   EnumCollectionService,
   EnumCollectionServiceConstructor,
@@ -48,7 +49,7 @@ export function commonCollectionTests(
     expect(result.method).toBe("DELETE");
     expect(result.data).toBeUndefined();
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("collection: query", async () => {

@@ -1,8 +1,9 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { CollectionQueryBuilderV4, ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { ModelResponseConverterV4 } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { ComposableUrlRequestCmd, ODataResponseModel, UrlBuilderRequestCmdV4 } from "../../src";
+import { ComposableUrlRequestCmd, UrlBuilderRequestCmdV4 } from "../../src";
 import { Feature, PersonModel } from "../fixture/PersonModel";
 import { PersonModelService } from "../fixture/v4/PersonModelService";
 import { QPersonV4 } from "../fixture/v4/QPersonV4";
@@ -69,7 +70,7 @@ describe("ComposableUrlRequestCmd tests", () => {
     const requestConfig = { headers: { x: "y" }, test: "ing" };
     const result = await candidate.appendRequestConverter((info) => info.withData("test")).execute(requestConfig);
 
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<PersonModel>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
 
     expect(client.lastUrl).toBe(DEFAULT_URL);
     expect(client.lastData).toBe("test");

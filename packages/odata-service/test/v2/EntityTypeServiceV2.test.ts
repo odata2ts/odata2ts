@@ -1,5 +1,6 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, EntityTypeServiceV2, MERGE_HEADERS, ODataResponseModel, RequestInfo } from "../../src";
+import { DEFAULT_HEADERS, EntityTypeServiceV2, MERGE_HEADERS, RequestInfo } from "../../src";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { PersonModelV2Service } from "../fixture/v2/PersonModelV2Service";
@@ -34,7 +35,7 @@ describe("EntityTypeService V2 Test", () => {
     expect(request.getInfoConverted().data).toStrictEqual(odataModel);
     expectTypeOf(result).toEqualTypeOf<RequestInfo<Partial<EditablePersonModel>>>();
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("entityType: update", async () => {
@@ -61,7 +62,7 @@ describe("EntityTypeService V2 Test", () => {
     expect(request.getInfoConverted().data).toEqual(odataModel);
     expectTypeOf(result).toEqualTypeOf<RequestInfo<EditablePersonModel>>();
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("entityType V2: update and patch both take the updatable model, not the editable one", () => {

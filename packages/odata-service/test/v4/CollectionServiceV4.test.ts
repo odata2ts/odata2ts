@@ -1,3 +1,4 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4 } from "@odata2ts/odata-core";
 import {
   BooleanCollection,
@@ -13,7 +14,6 @@ import {
   CollectionServiceV4,
   DEFAULT_HEADERS,
   getODataVersionHeaders,
-  ODataResponseModel,
   ODataServiceOptions,
   RequestInfo,
 } from "../../src";
@@ -26,8 +26,8 @@ export enum StringTestEnum {
   ZEBRA = "ZEBRA",
 }
 
-type RESPONSE_TYPE_DEFAULT = ODataResponseModel<undefined>;
-type RESPONSE_TYPE_ENUM = ODataResponseModel<ODataCollectionResponseV4<StringTestEnum>>;
+type RESPONSE_TYPE_DEFAULT = HttpResponseModel<undefined>;
+type RESPONSE_TYPE_ENUM = HttpResponseModel<ODataCollectionResponseV4<StringTestEnum>>;
 
 describe("CollectionService V4 Tests", () => {
   const odataClient = new MockClient(false);
@@ -74,7 +74,7 @@ describe("CollectionService V4 Tests", () => {
     expectTypeOf(await enumService.add<false>(StringTestEnum.A).execute()).toEqualTypeOf<RESPONSE_TYPE_DEFAULT>();
 
     expectTypeOf(await enumService.add<true>(StringTestEnum.A).execute()).toEqualTypeOf<
-      ODataResponseModel<ODataCollectionResponseV4<StringTestEnum>>
+      HttpResponseModel<ODataCollectionResponseV4<StringTestEnum>>
     >();
 
     // check response conversion
@@ -106,7 +106,7 @@ describe("CollectionService V4 Tests", () => {
     odataClient.setValueResponse([false]);
     const response = await request.execute();
 
-    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV4<number>>>();
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV4<number>>>();
     expect(response.data).toStrictEqual({ value: [0] });
   });
 
@@ -133,7 +133,7 @@ describe("CollectionService V4 Tests", () => {
     const response = await service.update<true>(userModel).execute();
     expect(response.data).toStrictEqual({ value: userModel });
 
-    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<ODataCollectionResponseV4<number>>>();
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataCollectionResponseV4<number>>>();
   });
 
   test("collection: update with select/expand and addToQuery", async () => {
@@ -177,7 +177,7 @@ describe("CollectionService V4 Tests", () => {
     });
 
     expectTypeOf(await request.execute()).toEqualTypeOf<
-      ODataResponseModel<ODataCollectionResponseV4<StringCollection>>
+      HttpResponseModel<ODataCollectionResponseV4<StringCollection>>
     >();
   });
 

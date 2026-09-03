@@ -1,6 +1,7 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, ODataResponseModel, RequestInfo } from "../../src";
+import { DEFAULT_HEADERS, RequestInfo } from "../../src";
 import { commonEntitySetTests } from "../EntitySetServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { PersonModelV2CollectionService } from "../fixture/v2/PersonModelV2Service";
@@ -50,7 +51,7 @@ describe("V2 EntitySetService Test", () => {
     const response = await request.execute();
 
     expect(response.data).toStrictEqual({ d: model });
-    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<ODataEntityModelResponseV2<PersonModel>>>();
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataEntityModelResponseV2<PersonModel>>>();
   });
 
   test("entitySet: create with select/expand", async () => {

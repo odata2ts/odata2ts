@@ -1,8 +1,8 @@
-import { ODataHttpMethods } from "@odata2ts/http-client-api";
+import { HttpResponseModel, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataCollectionResponseV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { CollectionResponseConverterV4, ModelResponseConverterV4 } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { ODataResponseModel, RequestInfo, UrlRequestCmd } from "../../src";
+import { RequestInfo, UrlRequestCmd } from "../../src";
 import type { RequestCmd } from "../../src";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { qPersonV4 } from "../fixture/v4/QPersonV4";
@@ -99,7 +99,7 @@ describe("UrlRequestCmd tests", () => {
 
     const result = await candidate.execute();
 
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<void>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<void>>();
 
     expect(client.lastUrl).toBe(DEFAULT_URL);
     expect(client.lastOperation).toBe("GET");
@@ -132,7 +132,7 @@ describe("UrlRequestCmd tests", () => {
 
     const result = await candidate.execute();
 
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<void>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<void>>();
 
     expect(client.lastOperation).toBe("POST");
     expect(client.lastData).toStrictEqual(DEFAULT_USER_DATA);
@@ -202,7 +202,7 @@ describe("UrlRequestCmd tests", () => {
     client.responseData = DEFAULT_USER_DATA;
     const result = await candidate.execute();
 
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<PersonModel>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
 
     expect(client.lastOperation).toBe("PATCH");
     expect(result.data).toStrictEqual(DEFAULT_USER_DATA);
@@ -225,7 +225,7 @@ describe("UrlRequestCmd tests", () => {
     const result = await candidate.execute();
 
     // and expect the converted model back
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<PersonModel>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
 
     expect(result.data).toStrictEqual({ ...DEFAULT_USER_DATA, ...metadata });
   });
@@ -246,7 +246,7 @@ describe("UrlRequestCmd tests", () => {
     const result = await candidate.execute();
 
     // and expect the converted model back
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<PersonModel>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
 
     expect(result.status).toBe(666);
     expect(result.data).toStrictEqual(DEFAULT_USER_DATA);
@@ -264,7 +264,7 @@ describe("UrlRequestCmd tests", () => {
     const result = await candidate.execute();
 
     // and expect the converted model back
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<{ x: PersonModel }>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<{ x: PersonModel }>>();
 
     expect(result.data).toStrictEqual({ x: DEFAULT_ODATA_DATA });
   });
@@ -307,7 +307,7 @@ describe("UrlRequestCmd tests", () => {
     client.responseData = { value: [DEFAULT_ODATA_DATA, DEFAULT_ODATA_DATA] };
     const result = await candidate.execute();
 
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<{ x: ODataCollectionResponseV4<PersonModel> }>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<{ x: ODataCollectionResponseV4<PersonModel> }>>();
 
     expect(result).toStrictEqual({
       status: 999,

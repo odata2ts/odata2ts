@@ -1,6 +1,7 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { FlexibleODataModelPayloadV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, getODataVersionHeaders, ODataResponseModel, RequestInfo } from "../../src";
+import { DEFAULT_HEADERS, getODataVersionHeaders, RequestInfo } from "../../src";
 import { commonEntitySetTests } from "../EntitySetServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import {
@@ -58,8 +59,8 @@ describe("V4 EntitySetService Test", () => {
     const response = await testService.create(model).execute();
     expect(response.data).toStrictEqual(model);
 
-    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<PersonModel>>>();
-    expectTypeOf(await testService.create<false>(model).execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
+    expectTypeOf(await testService.create<false>(model).execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
 
     // subtype options won't take effect
     result = testService.create(model, { withTypeControlInfo: true, withCastPathSegment: true }).getInfoConverted();
@@ -121,7 +122,7 @@ describe("V4 EntitySetService Test", () => {
     expect(request.data).toStrictEqual(expectedModel);
     expect(cmd.getInfoConverted().data).toStrictEqual(odataModel);
 
-    expectTypeOf(await cmd.execute()).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<FlightModel>>>();
+    expectTypeOf(await cmd.execute()).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<FlightModel>>>();
   });
 
   /**
@@ -161,7 +162,7 @@ describe("V4 EntitySetService Test", () => {
     expect(result.data).toStrictEqual(inputModel);
     expect(request.getInfoConverted().data).toStrictEqual(odataModel);
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<PlanItemModel>>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PlanItemModel>>>();
   });
 
   test("entitySet: create subtype with options", async () => {
@@ -184,7 +185,7 @@ describe("V4 EntitySetService Test", () => {
     expect(result.url).toBe(EXPECTED_PATH);
     expect(result.data).toStrictEqual(odataModelTyped);
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<FlightModel>>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<FlightModel>>>();
 
     // don't add control info about type
     result = serviceToTest.create(inputModel, { withTypeControlInfo: false }).getInfoConverted();

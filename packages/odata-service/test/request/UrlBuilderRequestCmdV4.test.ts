@@ -1,9 +1,9 @@
-import { ODataHttpMethods } from "@odata2ts/http-client-api";
+import { HttpResponseModel, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { CollectionQueryBuilderV4, createQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { ModelResponseConverterV4 } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, ODataResponseModel, UrlBuilderRequestCmdV4 } from "../../src";
+import { DEFAULT_HEADERS, UrlBuilderRequestCmdV4 } from "../../src";
 import { Feature, PersonModel } from "../fixture/PersonModel";
 import { QPersonV4, qPersonV4 } from "../fixture/v4/QPersonV4";
 import { MockClient } from "../mock/MockClient";
@@ -110,7 +110,7 @@ describe("UrlBuilderRequestCmdV4 tests", () => {
       .appendRequestConverter((info) => info.withData("test"))
       .execute(requestConfig);
 
-    expectTypeOf(result).toEqualTypeOf<ODataResponseModel<ODataModelResponseV4<PersonModel>>>();
+    expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<PersonModel>>>();
 
     expect(client.lastUrl).toBe(DEFAULT_URL + "?$filter=Age gt 40");
     expect(client.lastData).toBe("test");

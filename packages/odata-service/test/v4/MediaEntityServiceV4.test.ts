@@ -1,5 +1,6 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { MediaEntityServiceV4, ODataResponseModel } from "../../src/";
+import { MediaEntityServiceV4 } from "../../src/";
 import { EditablePersonModel, PersonModel } from "../fixture/PersonModel";
 import { QPersonV4 } from "../fixture/v4/QPersonV4";
 import { MockClient } from "../mock/MockClient";
@@ -36,7 +37,7 @@ describe("MediaEntityService V4 Test", () => {
     expect(odataClient.lastUrl).toBe(CONTENT_PATH);
     expect(odataClient.lastOperation).toBe("GET");
     expect(response.data).toBe(blob);
-    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<Blob | undefined>>();
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<Blob | undefined>>();
   });
 
   test("mediaEntity V4: write the content", async () => {
@@ -59,7 +60,7 @@ describe("MediaEntityService V4 Test", () => {
     expect(odataClient.lastUrl).toBe(CONTENT_PATH);
     expect(odataClient.lastOperation).toBe("GET");
     expect(response.data).toBe(stream);
-    expectTypeOf(response).toEqualTypeOf<ODataResponseModel<ReadableStream | undefined>>();
+    expectTypeOf(response).toEqualTypeOf<HttpResponseModel<ReadableStream | undefined>>();
   });
 
   test("mediaEntity V4: write the content from a stream", async () => {

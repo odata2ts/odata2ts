@@ -1,4 +1,7 @@
 import {
+  BatchClientOptions,
+  BatchRequestBody,
+  BatchResponseBody,
   ConcurrencyHandler,
   ODataHttpClient,
   ODataHttpMethods,
@@ -186,6 +189,16 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
 
     // @ts-ignore
     return this.respond();
+  }
+
+  batch(
+    url: string,
+    body: BatchRequestBody,
+    options?: BatchClientOptions,
+    requestConfig?: MockRequestConfig,
+    additionalHeaders?: Record<string, string>,
+  ): ODataResponse<BatchResponseBody> {
+    throw new Error("Operation batch not supported!");
   }
 
   createBlob(

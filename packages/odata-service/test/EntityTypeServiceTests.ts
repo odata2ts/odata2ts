@@ -1,5 +1,6 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { beforeEach, expect, expectTypeOf, test } from "vitest";
-import { ODataResponseModel, ODataServiceOptions } from "../src";
+import { ODataServiceOptions } from "../src";
 import { PersonModelServiceVersion } from "./fixture/PersonModel";
 import { MockClient } from "./mock/MockClient";
 
@@ -93,7 +94,7 @@ export function commonEntityTypeServiceTests(
     // accepts like every other operation, which is also what lets it carry `If-Match`
     expect(result.headers).toStrictEqual(DEFAULT_HEADERS);
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("entityType: no url encoding", async () => {

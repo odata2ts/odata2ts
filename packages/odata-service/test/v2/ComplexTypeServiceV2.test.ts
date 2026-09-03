@@ -1,6 +1,7 @@
+import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataComplexModelResponseV2 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, MERGE_HEADERS, ODataResponseModel } from "../../src";
+import { DEFAULT_HEADERS, MERGE_HEADERS } from "../../src";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { FakedComplexServiceV2 } from "../fixture/v2/FakedComplexServiceV2";
 import { MockClient } from "../mock/MockClient";
@@ -29,7 +30,7 @@ describe("ComplexTypeService V2 Test", () => {
     expect(result.method).toBe("DELETE");
     expect(result.data).toBeUndefined();
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("complexType: query", async () => {
@@ -40,7 +41,7 @@ describe("ComplexTypeService V2 Test", () => {
     expect(result.method).toBe("GET");
     expect(result.data).toBeUndefined();
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<ODataComplexModelResponseV2<PersonModel>>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<ODataComplexModelResponseV2<PersonModel>>>();
   });
 
   test("complexType: query with select", async () => {
@@ -65,7 +66,7 @@ describe("ComplexTypeService V2 Test", () => {
     expect(request.getInfoConverted().data).toStrictEqual(odataModel);
     expect(result.headers).toStrictEqual({ ...DEFAULT_HEADERS, ...MERGE_HEADERS });
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("entityType: update", async () => {
@@ -91,7 +92,7 @@ describe("ComplexTypeService V2 Test", () => {
     expect(result.data).toEqual(model);
     expect(request.getInfoConverted().data).toEqual(odataModel);
 
-    expectTypeOf(await request.execute()).toEqualTypeOf<ODataResponseModel<undefined>>();
+    expectTypeOf(await request.execute()).toEqualTypeOf<HttpResponseModel<undefined>>();
   });
 
   test("complexType: patch with select/expand", async () => {

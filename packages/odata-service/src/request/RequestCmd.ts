@@ -3,7 +3,6 @@ import { MainResponseConverter } from "@odata2ts/odata-query-objects";
 import { buildCacheKey, buildInvalidates, CacheKeyState } from "../cacheKey/index.js";
 import { getHeaderETag } from "../ETagExtraction";
 import { isConcurrencyConflict, ODataConcurrencyError } from "../ODataConcurrencyError";
-import { ODataResponseModel } from "../ODataResponseModel";
 import { MainRequestConverter, RequestConverter } from "./converter/RequestConverter";
 import { RequestConverterChain } from "./converter/RequestConverterChain";
 import { ResponseConverter } from "./converter/ResponseConverter";
@@ -224,7 +223,7 @@ export abstract class RequestCmd<
    */
   public async execute<RequestConfig extends ODataRequestConfig = ODataRequestConfig>(
     requestConfig?: NoInferConfig<RequestConfig>,
-  ): Promise<ODataResponseModel<FinalResponseStructure>> {
+  ): Promise<HttpResponseModel<FinalResponseStructure>> {
     // apply request converters
     const request = this.applyConcurrency(this.getInfoConverted());
 
@@ -255,7 +254,7 @@ export abstract class RequestCmd<
   private withInvalidates(
     response: HttpResponseModel<FinalResponseStructure>,
     state: CacheKeyState | undefined,
-  ): ODataResponseModel<FinalResponseStructure> {
+  ): HttpResponseModel<FinalResponseStructure> {
     if (!state || this.method === ODataHttpMethods.Get) {
       return response;
     }
