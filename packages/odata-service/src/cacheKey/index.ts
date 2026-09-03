@@ -1,3 +1,3 @@
 export * from "./CacheKeyState";
 export * from "./BuildCacheKey";
-export * from "./TouchesType";
+export * from "./TouchesResource";

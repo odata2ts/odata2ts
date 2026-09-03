@@ -1,4 +1,4 @@
-import { touchesType } from "@odata2ts/odata-service";
+import { touchesResource } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, test } from "vitest";
 import { BOOK_DER_PROZESS, LIBRARY_V2 } from "../LibraryV2TestConstants.js";
 
@@ -81,10 +81,10 @@ describe("CAP Library: cache keys (V2, typeFlattening)", () => {
     expect(result.status).toBe(200);
   });
 
-  test("touchesType reaches a re-rooted key by its own type, not the ancestor it left", () => {
+  test("touchesResource reaches a re-rooted key by its own type, not the ancestor it left", () => {
     const key = LIBRARY_V2.Members(MEMBER_ID).Reservations().query().cacheKey!;
-    expect(touchesType("Library.Service.Reservations", key)).toBe(true);
-    expect(touchesType("Library.Service.Members", key)).toBe(false);
+    expect(touchesResource("Library.Service.Reservations", key)).toBe(true);
+    expect(touchesResource("Library.Service.Members", key)).toBe(false);
   });
 
   test("invalidates on a write reaches through the re-rooted key's ancestor", async () => {

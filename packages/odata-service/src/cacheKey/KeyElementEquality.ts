@@ -3,7 +3,7 @@
  * entry) by its serialisation - which is exactly how a cache hashes them, and every value in a key is
  * JSON-serialisable by construction.
  *
- * Shared by {@link buildInvalidates}'s prefix/dedup logic and {@link touchesType}'s array-needle matching -
+ * Shared by {@link buildInvalidates}'s prefix/dedup logic and {@link touchesResource}'s array-needle matching -
  * both need the same notion of "the same element", not just `===`.
  */
 export function sameElement(a: unknown, b: unknown): boolean {

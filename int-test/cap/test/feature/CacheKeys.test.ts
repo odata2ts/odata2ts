@@ -1,6 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { touchesType } from "@odata2ts/odata-service";
+import { touchesResource } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
 import { Books } from "../../src-generated/library/LibraryModel.js";
 import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
@@ -105,11 +105,11 @@ describe("CAP Library: cache keys (V4, hierarchical)", () => {
     expect(result.status).toBe(204);
   });
 
-  test("touchesType reaches a hierarchical key by type", () => {
+  test("touchesResource reaches a hierarchical key by type", () => {
     const key = LIBRARY.Members(MEMBER_ID).Loans().query().cacheKey!;
-    expect(touchesType("Library.Service.Members", key)).toBe(true);
-    expect(touchesType("Library.Service.Loans", key)).toBe(true);
-    expect(touchesType("Library.Service.Reservations", key)).toBe(false);
+    expect(touchesResource("Library.Service.Members", key)).toBe(true);
+    expect(touchesResource("Library.Service.Loans", key)).toBe(true);
+    expect(touchesResource("Library.Service.Reservations", key)).toBe(false);
   });
 
   test("invalidates on a PATCH, a POST and a DELETE", async () => {

@@ -1,6 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
-import { touchesType } from "@odata2ts/odata-service";
+import { touchesResource } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
 import { Medium } from "../../src-generated/library/library-catalog/index.js";
 import { expectODataError } from "../expectODataError.js";
@@ -150,16 +150,16 @@ describe("ASP.NET Library: cache keys", () => {
     expect([200, 204]).toContain(result.status);
   });
 
-  test("touchesType reaches a hierarchical key by type, but not a re-rooted one's ancestor", () => {
+  test("touchesResource reaches a hierarchical key by type, but not a re-rooted one's ancestor", () => {
     const hierarchicalKey = LIBRARY.Members(1).Reservations().query().cacheKey!;
-    expect(touchesType("Library.Circulation.Member", hierarchicalKey)).toBe(true);
-    expect(touchesType("Library.Circulation.Reservation", hierarchicalKey)).toBe(true);
-    expect(touchesType("Library.Catalog.Medium", hierarchicalKey)).toBe(false);
+    expect(touchesResource("Library.Circulation.Member", hierarchicalKey)).toBe(true);
+    expect(touchesResource("Library.Circulation.Reservation", hierarchicalKey)).toBe(true);
+    expect(touchesResource("Library.Catalog.Medium", hierarchicalKey)).toBe(false);
 
     const reRootedKey = LIBRARY.Media(BOOK_DER_PROZESS).Copies().query().cacheKey!;
-    expect(touchesType("Library.Circulation.Copy", reRootedKey)).toBe(true);
+    expect(touchesResource("Library.Circulation.Copy", reRootedKey)).toBe(true);
     // the ancestor is not part of the key array itself under typeFlattening - only `invalidates` carries it
-    expect(touchesType("Library.Catalog.Medium", reRootedKey)).toBe(false);
+    expect(touchesResource("Library.Catalog.Medium", reRootedKey)).toBe(false);
   });
 
   test("invalidates on a PATCH, a POST and a DELETE", async () => {

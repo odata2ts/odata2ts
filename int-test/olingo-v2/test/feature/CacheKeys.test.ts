@@ -1,4 +1,4 @@
-import { touchesType } from "@odata2ts/odata-service";
+import { touchesResource } from "@odata2ts/odata-service";
 import { describe, expect, test } from "vitest";
 import { CONVERTED } from "../LibraryConvertedConstants.js";
 import { BOOK_DER_PROZESS, COPY_KEY, LIBRARY } from "../LibraryTestConstants.js";
@@ -60,11 +60,11 @@ describe("Olingo Library: cache keys", () => {
     expect(request.cacheKey).toEqual(["Library.Circulation.Copy", "list", { filter: { MediumId: BOOK_DER_PROZESS } }]);
   });
 
-  test("touchesType reaches a hierarchical key by type", () => {
+  test("touchesResource reaches a hierarchical key by type", () => {
     const key = LIBRARY.Books(BOOK_DER_PROZESS).Copies().query().cacheKey!;
-    expect(touchesType("Library.Catalog.Book", key)).toBe(true);
-    expect(touchesType("Library.Circulation.Copy", key)).toBe(true);
-    expect(touchesType("Library.Circulation.Member", key)).toBe(false);
+    expect(touchesResource("Library.Catalog.Book", key)).toBe(true);
+    expect(touchesResource("Library.Circulation.Copy", key)).toBe(true);
+    expect(touchesResource("Library.Circulation.Member", key)).toBe(false);
   });
 
   test("invalidates on a write", async () => {
