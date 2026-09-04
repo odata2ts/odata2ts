@@ -141,3 +141,47 @@ describe("touchesResource - array needle: an invalidates entry, wherever it occu
     expect(touchesResource([MEDIUM, "detail", 5], [])).toBe(false);
   });
 });
+
+describe("touchesResource - expand entries, buried inside the trailing params object", () => {
+  const COPY = "Library.Circulation.Copy";
+
+  test("the array form finds a hop-shaped expand entry", () => {
+    const key = [MEDIUM, "detail", 5, { expand: [[COPY, "list", "Copies"]] }];
+    expect(touchesResource([COPY, "list", "Copies"], key)).toBe(true);
+    expect(touchesResource([COPY, "list"], key)).toBe(true);
+  });
+
+  test("the string form finds an expand entry's type too", () => {
+    const key = [MEDIUM, "detail", 5, { expand: [[COPY, "list", "Copies"]] }];
+    expect(touchesResource(COPY, key)).toBe(true);
+  });
+
+  test("a bare, unenriched expand path contributes nothing to search - there is no type in a plain string", () => {
+    const key = [MEDIUM, "detail", 5, { expand: ["address"] }];
+    expect(touchesResource(COPY, key)).toBe(false);
+    expect(touchesResource([COPY, "list"], key)).toBe(false);
+  });
+
+  test("recurses into a nested expanding()'s own nested params", () => {
+    const RESERVATION = "Library.Circulation.Reservation";
+    const key = [
+      MEDIUM,
+      "detail",
+      5,
+      { expand: [[COPY, "list", "Copies", { expand: [[RESERVATION, "list", "Reservations"]] }]] },
+    ];
+    expect(touchesResource(RESERVATION, key)).toBe(true);
+    expect(touchesResource([RESERVATION, "list"], key)).toBe(true);
+  });
+
+  test("an unrelated type inside an unrelated expand entry does not match", () => {
+    const key = [MEDIUM, "detail", 5, { expand: [[COPY, "list", "Copies"]] }];
+    expect(touchesResource("Library.Circulation.Member", key)).toBe(false);
+    expect(touchesResource(["Library.Circulation.Member", "list"], key)).toBe(false);
+  });
+
+  test("a key with no params object at all is unaffected - nothing to recurse into", () => {
+    const key = [MEDIUM, "detail", 5];
+    expect(touchesResource(COPY, key)).toBe(false);
+  });
+});

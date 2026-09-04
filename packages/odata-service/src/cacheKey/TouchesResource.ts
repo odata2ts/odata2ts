@@ -2,7 +2,8 @@ import { sameElement } from "./KeyElementEquality";
 
 /**
  * Whether the given cache key touches the given type, or - the array form - a specific `(type, kind,
- * key?)` triple, wherever it occurs in the key.
+ * key?)` triple, wherever it occurs in the key - including inside an `expand` entry of its params object,
+ * however deeply `expanding()` nested those.
  *
  * A hierarchical key is rooted at the type of the entity set the route started at, so a prefix match on a
  * type or resource reached further down the route can never reach it - one array has one prefix. This is
@@ -27,6 +28,11 @@ import { sameElement } from "./KeyElementEquality";
  * that same entry: every match a prefix would have found, it still finds (the no-skip path degenerates to
  * exactly that), plus the same resource or type reached through a route the write itself never took.
  *
+ * **`expand` entries are searched too, recursively.** They live inside the trailing params object, not as
+ * top-level elements, so neither form above finds them without help - a hop hidden two objects deep is
+ * still exactly the same `[type, kind, name]` shape, so the very same matching logic applies to it once
+ * found; only *finding* it needs an extra step, which is what this does.
+ *
  * Kept library-neutral - it takes a key, not a cache-library query object:
  * `invalidateQueries({predicate: (q) => touchesResource(entry, q.queryKey)})`.
  *
@@ -38,8 +44,17 @@ export function touchesResource(needle: string | ReadonlyArray<unknown>, key: Re
   if (typeof needle === "string") {
     return touchesBareType(needle, key);
   }
-  for (let start = 0; start < key.length; start++) {
-    if (matchesFrom(needle, key, 0, start)) {
+
+  if (scanArray(needle, key)) {
+    return true;
+  }
+  return expandHopsOf(key).some((hop) => scanArray(needle, hop));
+}
+
+/** Tries every starting offset in `haystack` for `needle` - the same "anywhere" reach for any array. */
+function scanArray(needle: ReadonlyArray<unknown>, haystack: ReadonlyArray<unknown>): boolean {
+  for (let start = 0; start < haystack.length; start++) {
+    if (matchesFrom(needle, haystack, 0, start)) {
       return true;
     }
   }
@@ -62,7 +77,40 @@ function touchesBareType(type: string, key: ReadonlyArray<unknown>): boolean {
       }
     }
   }
-  return false;
+  return expandHopsOf(key).some((hop) => hop[0] === type);
+}
+
+/**
+ * Every `(type, kind, name)` hop reachable through an `expand` entry of any params object among `key`'s
+ * own elements - recursively, since a hop's own 4th element may carry further nested params with an
+ * `expand` of its own. A bare (unenriched) expand entry is just a rendered path string and contributes
+ * nothing here - there is no type to find in it.
+ */
+function expandHopsOf(key: ReadonlyArray<unknown>): Array<ReadonlyArray<unknown>> {
+  const hops: Array<ReadonlyArray<unknown>> = [];
+  for (const element of key) {
+    if (typeof element === "object" && element !== null && !Array.isArray(element)) {
+      collectExpandHops(element as Record<string, unknown>, hops);
+    }
+  }
+  return hops;
+}
+
+function collectExpandHops(params: Record<string, unknown>, out: Array<ReadonlyArray<unknown>>): void {
+  const expand = params.expand;
+  if (!Array.isArray(expand)) {
+    return;
+  }
+  for (const entry of expand) {
+    if (!Array.isArray(entry)) {
+      continue;
+    }
+    out.push(entry);
+    const nestedParams = entry[3];
+    if (typeof nestedParams === "object" && nestedParams !== null) {
+      collectExpandHops(nestedParams as Record<string, unknown>, out);
+    }
+  }
 }
 
 const KIND_MARKERS = new Set(["list", "detail"]);
