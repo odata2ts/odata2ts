@@ -32,6 +32,7 @@ import { ProjectManager } from "../project/ProjectManager.js";
 import { ClientApiImports, CoreImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects.js";
 import { importReturnType } from "./import/ImportResponseHelper.js";
 import { ImportContainer } from "./ImportContainer.js";
+import { buildNavHopsTableSource } from "./NavHopsGenerator.js";
 
 export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "properties" | "methods">> {}
 
@@ -98,8 +99,11 @@ class ServiceGenerator {
       return "";
     }
     const rootStateFn = imports.addServiceFunction("rootState");
-    const optionsArg = paramsSource ? `, { params: ${paramsSource} }` : "";
-    return `${rootStateFn}("${typeName}", "${kind}"${optionsArg})`;
+    const navHopsRef = imports.addGeneratedNavHopsTable();
+    const optionsEntries = [paramsSource ? `params: ${paramsSource}` : "", `navHops: ${navHopsRef}`]
+      .filter(Boolean)
+      .join(", ");
+    return `${rootStateFn}("${typeName}", "${kind}", { ${optionsEntries} })`;
   }
 
   /**
@@ -212,16 +216,20 @@ class ServiceGenerator {
     const entitySet = entitySetOdataName
       ? Object.values(this.dataModel.getEntityContainer().entitySets).find((es) => es.odataName === entitySetOdataName)
       : undefined;
+    const navHopsRef = imports.addGeneratedNavHopsTable();
 
     if (entitySet) {
       const rootStateFn = imports.addServiceFunction("rootState");
       const kind = op.returnType?.isCollection ? "list" : "detail";
       const operationParams = hasParams ? ", params" : "";
-      return `${rootStateFn}("${entitySet.entityType.fqName}", "${kind}", { params: { operation: "${op.fqName}"${operationParams} } })`;
+      return (
+        `${rootStateFn}("${entitySet.entityType.fqName}", "${kind}", ` +
+        `{ params: { operation: "${op.fqName}"${operationParams} }, navHops: ${navHopsRef} })`
+      );
     }
 
     const operationRootConst = imports.addServiceFunction("OPERATION_ROOT");
-    return `{ typeName: ${operationRootConst}, steps: ["${op.fqName}"], kindIndex: 0 }`;
+    return `{ typeName: ${operationRootConst}, steps: ["${op.fqName}"], kindIndex: 0, navHops: ${navHopsRef} }`;
   }
 
   /** A bound function/action: a hop off the resource it is bound to, with its return type where structured. */
@@ -363,12 +371,18 @@ class ServiceGenerator {
     const mainServiceName = this.namingHelper.getMainServiceName();
     this.project.initServices();
 
+    if (this.cacheKeyMode !== CacheKeyMode.off) {
+      const navHopsFile = this.project.createNavHopsFile();
+      navHopsFile.getFile().addStatements(buildNavHopsTableSource(this.dataModel));
+    }
+
     await Promise.all([
       this.generateMainService(mainServiceName),
       ...this.generateEntityTypeServices(),
       ...this.generateComplexTypeServices(),
     ]);
 
+    await this.project.finalizeNavHopsFile();
     return this.project.finalizeServices();
   }
 

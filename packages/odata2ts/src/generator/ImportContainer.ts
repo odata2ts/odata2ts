@@ -254,6 +254,14 @@ export class ImportContainer {
     }
   }
 
+  /**
+   * The one generated file the whole client shares, holding every navigation property's own hop triple -
+   * `folderPath: ""` places it at the output root, the same way a bundled client's own root files resolve.
+   */
+  public addGeneratedNavHopsTable(): string {
+    return this.addGeneratedImport("", "CacheKeyNavHops", "CACHE_KEY_NAV_HOPS");
+  }
+
   private createImportDecl(
     module: string,
     toImport: Map<string, string>,

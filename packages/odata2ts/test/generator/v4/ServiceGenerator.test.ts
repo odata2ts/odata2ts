@@ -278,6 +278,8 @@ describe("Service Generator Tests V4", () => {
       expect(text).not.toContain("withParams");
       expect(text).not.toContain("reRootToEntity");
       expect(text).not.toContain("cacheKeyState");
+      expect(text).not.toContain("CacheKeyNavHops");
+      expect(text).not.toContain("CACHE_KEY_NAV_HOPS");
     });
 
     test.each([CacheKeyMode.hierarchical, CacheKeyMode.typeFlattening])(
@@ -286,9 +288,11 @@ describe("Service Generator Tests V4", () => {
         const text = await generateWith(mode);
 
         // root: entity set getter on the main service
-        expect(text).toContain(`rootState("${withNs("Medium")}", "list")`);
+        expect(text).toContain(`rootState("${withNs("Medium")}", "list", { navHops: CACHE_KEY_NAV_HOPS })`);
         // root: singleton getter
-        expect(text).toContain(`rootState("${withNs("Medium")}", "detail", { params: { singleton: "MainBranch" } })`);
+        expect(text).toContain(
+          `rootState("${withNs("Medium")}", "detail", { params: { singleton: "MainBranch" }, navHops: CACHE_KEY_NAV_HOPS })`,
+        );
         // grade C: no Partner, no ReferentialConstraint - stays hierarchical under both modes
         expect(text).toContain(
           `hopState(cacheKeyState, { typeName: "${withNs("Review")}", kind: "list", name: "reviews", entitySetType: "${withNs("Review")}" })`,
@@ -312,12 +316,14 @@ describe("Service Generator Tests V4", () => {
         expect(text).toContain(`hopState(cacheKeyState, { name: "${withNs("checkOut")}" })`);
         // unbound function with a declared EntitySet: rooted at that set's type
         expect(text).toContain(
-          `rootState("${withNs("Medium")}", "list", { params: { operation: "${withNs("newReleases")}" } })`,
+          `rootState("${withNs("Medium")}", "list", { params: { operation: "${withNs("newReleases")}" }, navHops: CACHE_KEY_NAV_HOPS })`,
         );
         // unbound function with no EntitySet: the "$operation" root, built as a plain object literal
         expect(text).toContain(`steps: ["${withNs("totalCount")}"]`);
         expect(text).toMatch(/typeName:\s*OPERATION_ROOT/);
         expect(text).toContain("OPERATION_ROOT");
+        // the nav-hops table is imported exactly once and threaded into every root
+        expect(text).toContain('import { CACHE_KEY_NAV_HOPS } from "./CacheKeyNavHops.js";');
       },
     );
 
