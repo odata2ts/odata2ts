@@ -75,13 +75,20 @@ SSR→client boundary, or persisted across sessions — no new data shape, mirro
 door.
 
 **`ResourceIdentityHandler`**:
-A runtime store (client-held, like `ConcurrencyHandler`) recording which cache keys were observed, via
-`@odata.context`, to resolve to which canonical id. Lets a write on one route invalidate a cache key reached
-via a *different* route to the same resource — replacing the old generation-time "type flattening" /
-re-rooting prediction with a runtime-observed mapping.
+A runtime store (client-held, like `ConcurrencyHandler`) recording which cache keys were observed to resolve
+to which canonical id — one entry per entity actually present in a response, at every level (the directly
+addressed resource and every `$expand`'d entity, however deep), not just the top. Recording is gated by a
+**static, generator/Q-object-forwarded** signal (each hop's own entity-set name, present only for
+non-contained navigation — `@odata.context` was tried and rejected, see [[Convergence]]), never by response
+inspection. Lets a write on one route invalidate a cache key reached via a *different* route to the same
+resource — replacing the old generation-time "type flattening" / re-rooting prediction with a
+runtime-observed mapping.
 
 **Convergence**:
 The general problem this whole feature keeps returning to: two different routes (a navigated hop vs a
 direct query) reaching the same resource should produce cache keys (or at least an invalidation path) that
 recognize each other. Previously attempted at generation time via `ReferentialConstraint`/`Partner` grading
-(removed); now attempted at runtime via [[ResourceIdentityHandler]].
+(removed); now attempted at runtime via [[ResourceIdentityHandler]]. `@odata.context`/`@odata.id` were also
+tried and rejected as the runtime signal (unreliable across servers, and `@odata.context` can't reach
+`$expand`'d entities at all) in favor of a static entity-set-name signal the generator/Q-objects forward
+directly.
