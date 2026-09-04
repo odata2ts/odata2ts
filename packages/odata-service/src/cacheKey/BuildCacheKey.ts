@@ -1,4 +1,3 @@
-import type { HopTriple } from "@odata2ts/odata-query-builder";
 import { CacheKeyState } from "./CacheKeyState";
 import { sameElement } from "./KeyElementEquality";
 
@@ -17,7 +16,7 @@ export function buildCacheKey(
   queryParams?: Readonly<Record<string, unknown>>,
 ): ReadonlyArray<unknown> {
   const params = mergeParams(queryParams, state.params);
-  return params ? [state.typeName, ...state.steps, params] : [state.typeName, ...state.steps];
+  return params ? [state.name, ...state.steps, params] : [state.name, ...state.steps];
 }
 
 function mergeParams(
@@ -46,36 +45,36 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * The keys a write makes stale.
  *
  * Four rules: the addressed resource's own key without its params object (a write invalidates the
- * resource however it was filtered, sorted or paged), the resource's own type as a bare list key where it
- * belongs to an entity set, the key of every ancestor hop - which is what catches a parent that was
- * fetched with `$expand` - and a bare list-key entry per type the write's own payload deep-inserted
- * (`state.params.deepEdit`, populated by `buildDeepEditHops` at the write's own call site). Entries another
- * entry is a prefix of are dropped; what is left is coarsest first.
+ * resource however it was filtered, sorted or paged), the resource's own entity set as a bare list key
+ * where it belongs to one, the key of every ancestor hop - which is what catches a parent that was
+ * fetched with `$expand` - and a bare list-key entry per entity set the write's own payload deep-inserted
+ * into (`state.params.deepEdit`, populated by `buildDeepEditHops` at the write's own call site). Entries
+ * another entry is a prefix of are dropped; what is left is coarsest first.
  *
- * Rule 2 is skipped where the resource has no entity set of its own - a contained entity, a complex value:
- * nothing is ever registered under such a key. `deepEdit` hops read straight off `state.params`, unlike
- * every other params entry: they are not a restriction on the addressed resource the way `filter`/`cast`
- * are, so there is nothing to drop them for - they name additional, unrelated types this same write also
- * touched, each with no key of its own yet since the entity is freshly created.
+ * Rule 2 is skipped where the resource has no entity set of its own - a contained entity, a complex value,
+ * a singleton: nothing is ever registered under such a key. `deepEdit` hops read straight off
+ * `state.params`, unlike every other params entry: they are not a restriction on the addressed resource
+ * the way `filter`/`cast` are, so there is nothing to drop them for - they name additional, unrelated
+ * entity sets this same write also touched, each with no key of its own yet since the entity is freshly
+ * created.
  *
- * Deliberately does **not** name the resource's children. Under `hierarchical` the ancestor entry covers
- * them by prefix; under `typeFlattening` it does not, and an application that needs it invalidates the
- * child type itself. Enumerating derivable children would mean a generated relation table and
- * exact-object matching, which prefix invalidation cannot do anyway.
+ * Deliberately does **not** name the resource's children: the ancestor entry covers them by prefix for a
+ * hierarchical route, and an application reaching the same resource by some other route it never took
+ * invalidates that route's own key, via `ResourceIdentityHandler` - see the cache-key design docs.
  */
 export function buildInvalidates(state: CacheKeyState): ReadonlyArray<ReadonlyArray<unknown>> {
-  const deepEditHops = (state.params?.deepEdit as ReadonlyArray<HopTriple> | undefined) ?? [];
+  const deepEditHops = (state.params?.deepEdit as ReadonlyArray<string> | undefined) ?? [];
 
-  // ancestors in route order (coarsest first), then the resource itself, then its type, then whatever it deep-inserted
+  // ancestors in route order (coarsest first), then the resource itself, then its entity set, then whatever it deep-inserted into
   const candidates: Array<ReadonlyArray<unknown>> = [
     ...(state.ancestors ?? []),
-    [state.typeName, ...state.steps],
-    ...(state.resourceType ? [[state.resourceType, "list"]] : []),
-    ...deepEditHops.map((hop) => [hop[0], "list"]),
+    [state.name, ...state.steps],
+    ...(state.entitySetName ? [[state.entitySetName, "list"]] : []),
+    ...deepEditHops.map((entitySetName) => [entitySetName, "list"]),
   ];
 
   // an entry another entry properly prefixes is redundant - invalidating the prefix reaches it
-  // anyway. A POST to a re-rooted collection makes the own key and the type entry identical, which
+  // anyway. A POST to a collection whose own key equals its bare entity-set entry, which
   // the same pass deduplicates.
   return candidates.filter(
     (candidate, index) =>

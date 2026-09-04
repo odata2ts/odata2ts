@@ -7,7 +7,7 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { buildDeepEditHops, CacheKeyState, ownFqNameOf, withKey, withParams } from "../cacheKey/index.js";
+import { buildDeepEditHops, CacheKeyState, withKey, withParams } from "../cacheKey/index.js";
 import { getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { ConcurrencyOptions, UrlBuilderRequestCmdV4 } from "../request";
@@ -253,7 +253,7 @@ export abstract class EntitySetServiceV4<
     const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
     const actualPath = dontUseCastPathSegment ? basePath : path;
 
-    const deepEditHops = cacheKeyState && buildDeepEditHops(cacheKeyState.navHops, ownFqNameOf(cacheKeyState), model);
+    const deepEditHops = cacheKeyState && buildDeepEditHops(cacheKeyState.qEntityFn, model);
     const stateForRequest =
       deepEditHops && cacheKeyState ? withParams(cacheKeyState, { deepEdit: deepEditHops }) : cacheKeyState;
 
@@ -284,7 +284,6 @@ export abstract class EntitySetServiceV4<
   ) {
     const { client, qModel, createQueryBuilder, getDefaultHeaders, cacheKeyState } = this.__base;
     const builder = createQueryBuilder(queryFn);
-    const ownFqName = cacheKeyState && ownFqNameOf(cacheKeyState);
 
     return new UrlBuilderRequestCmdV4<ODataCollectionResponseFor<V, ReturnType>, Q>(
       client,
@@ -297,7 +296,7 @@ export abstract class EntitySetServiceV4<
         mainResponseConverter: new CollectionResponseConverterV4(qModel),
         concurrency: this.getCollectionConcurrencyOptions(),
         cacheKeyState,
-        queryParams: builder.getCacheKeyParams(cacheKeyState?.navHops, ownFqName),
+        queryParams: builder.getCacheKeyParams(),
       },
     );
   }

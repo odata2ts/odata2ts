@@ -90,7 +90,7 @@ describe("cache key threading", () => {
       "Media(5)",
       { title: "x" },
       {
-        cacheKeyState: withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }),
+        cacheKeyState: withKey(rootState(MEDIUM, "list", { entitySetName: MEDIUM }), 5, { Id: 5 }),
       },
     );
     const response = await cmd.execute();

@@ -1,200 +1,180 @@
 import { describe, expect, test } from "vitest";
-import { buildCacheKey, buildInvalidates, hopState, rootState, withKey, withParams } from "../../src/cacheKey";
+import {
+  buildCacheKey,
+  buildInvalidates,
+  hopState,
+  OPERATION_ROOT,
+  rootState,
+  withKey,
+  withParams,
+} from "../../src/cacheKey";
 
-const MEDIUM = "Library.Catalog.Medium";
-const COPY = "Library.Circulation.Copy";
-const MEMBER = "Library.Circulation.Member";
-const RESERVATION = "Library.Circulation.Reservation";
-const CHAPTER = "Library.Catalog.AudiobookChapter";
+const MEDIA = "Media";
+const COPIES = "Copies";
+const MEMBERS = "Members";
+const RESERVATIONS = "Reservations";
+const LOANS = "Loans";
 
 describe("buildCacheKey", () => {
   test("an entity set collection", () => {
-    expect(buildCacheKey(rootState(MEDIUM, "list"))).toEqual([MEDIUM, "list"]);
+    expect(buildCacheKey(rootState(MEDIA, "list"))).toEqual([MEDIA, "list"]);
   });
 
   test("query params become the trailing object", () => {
-    expect(buildCacheKey(rootState(MEDIUM, "list"), { top: 10, select: ["Title"] })).toEqual([
-      MEDIUM,
+    expect(buildCacheKey(rootState(MEDIA, "list"), { top: 10, select: ["Title"] })).toEqual([
+      MEDIA,
       "list",
       { top: 10, select: ["Title"] },
     ]);
   });
 
   test("an empty params object is dropped entirely", () => {
-    expect(buildCacheKey(rootState(MEDIUM, "list"), {})).toEqual([MEDIUM, "list"]);
-    expect(buildCacheKey(rootState(MEDIUM, "list"), undefined)).toEqual([MEDIUM, "list"]);
+    expect(buildCacheKey(rootState(MEDIA, "list"), {})).toEqual([MEDIA, "list"]);
+    expect(buildCacheKey(rootState(MEDIA, "list"), undefined)).toEqual([MEDIA, "list"]);
   });
 
   test("an entity by key", () => {
-    expect(buildCacheKey(withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }))).toEqual([MEDIUM, "detail", 5]);
+    expect(buildCacheKey(withKey(rootState(MEDIA, "list"), 5, { Id: 5 }))).toEqual([MEDIA, "detail", 5]);
   });
 
   test("a composite key travels as an object", () => {
     const key = { MediumId: 5, InventoryNumber: 7 };
-    expect(buildCacheKey(withKey(rootState(COPY, "list"), key, key))).toEqual([COPY, "detail", key]);
+    expect(buildCacheKey(withKey(rootState(COPIES, "list"), key, key))).toEqual([COPIES, "detail", key]);
   });
 
-  test("a singleton", () => {
-    const state = withParams(rootState("Library.Circulation.Branch", "detail"), { singleton: "MainBranch" });
-    expect(buildCacheKey(state)).toEqual(["Library.Circulation.Branch", "detail", { singleton: "MainBranch" }]);
+  test("a singleton - its own name is the root directly, no params marker needed", () => {
+    expect(buildCacheKey(rootState("MainBranch", "detail"))).toEqual(["MainBranch", "detail"]);
   });
 
-  test("a cast is a params entry, the root stays the entity set's type", () => {
-    const state = withParams(rootState(MEDIUM, "list"), { cast: "Library.Catalog.Book" });
-    expect(buildCacheKey(state)).toEqual([MEDIUM, "list", { cast: "Library.Catalog.Book" }]);
+  test("a cast is a params entry - the one place a type still legitimately appears, since it is a real URL segment", () => {
+    const state = withParams(rootState(MEDIA, "list"), { cast: "Library.Catalog.Book" });
+    expect(buildCacheKey(state)).toEqual([MEDIA, "list", { cast: "Library.Catalog.Book" }]);
   });
 
-  test("a navigation hop", () => {
-    const state = hopState(withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }), {
-      typeName: COPY,
+  test("a navigation hop is named by the property's own OData name, never a type", () => {
+    const state = hopState(withKey(rootState(MEDIA, "list"), 5, { Id: 5 }), {
+      name: "copies",
       kind: "list",
-      name: "Copies",
-      entitySetType: COPY,
+      entitySetName: COPIES,
     });
-    expect(buildCacheKey(state)).toEqual([MEDIUM, "detail", 5, COPY, "list", "Copies"]);
+    expect(buildCacheKey(state)).toEqual([MEDIA, "detail", 5, "copies", "list"]);
   });
 
   test("the state's own params and the query params merge", () => {
-    const state = withParams(rootState(MEDIUM, "list"), { cast: "Library.Catalog.Book" });
-    expect(buildCacheKey(state, { top: 10 })).toEqual([MEDIUM, "list", { cast: "Library.Catalog.Book", top: 10 }]);
+    const state = withParams(rootState(MEDIA, "list"), { cast: "Library.Catalog.Book" });
+    expect(buildCacheKey(state, { top: 10 })).toEqual([MEDIA, "list", { cast: "Library.Catalog.Book", top: 10 }]);
   });
 
-  test("a derived filter is applied last and replaces a same-path query filter", () => {
-    const state = hopState(withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }), {
-      typeName: COPY,
-      kind: "list",
-      name: "Copies",
-      entitySetType: COPY,
-      reRoot: { typeName: COPY, filter: { MediumId: 5 } },
-    });
-    expect(buildCacheKey(state, { filter: { MediumId: 9, Condition: 3 } })).toEqual([
-      COPY,
-      "list",
-      { filter: { Condition: 3, MediumId: 5 } },
-    ]);
-  });
-
-  test("an unbound operation with no entity set", () => {
-    const state = withParams(rootState("$operation", "detail"), {});
-    const key = buildCacheKey({ ...state, steps: ["Library.Circulation.TotalMediaCount"] });
-    expect(key).toEqual(["$operation", "Library.Circulation.TotalMediaCount"]);
+  test("an unbound operation with no entity set is rooted at the sentinel, never a type", () => {
+    const key = buildCacheKey({ name: OPERATION_ROOT, steps: ["Library.Circulation.TotalMediaCount"], kindIndex: 0 });
+    expect(key).toEqual([OPERATION_ROOT, "Library.Circulation.TotalMediaCount"]);
   });
 });
 
 describe("buildInvalidates", () => {
-  test("a write to an entity: own key and own type, coarsest first", () => {
-    const state = withKey(rootState(MEDIUM, "list"), 5, { Id: 5 });
+  test("a write to a root entity: own key and own entity set, coarsest first", () => {
+    const state = withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 });
     expect(buildInvalidates(state)).toEqual([
-      [MEDIUM, "detail", 5],
-      [MEDIUM, "list"],
+      [MEDIA, "detail", 5],
+      [MEDIA, "list"],
     ]);
   });
 
   test("the own key is taken without its params object", () => {
-    const state = withParams(withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }), { cast: "Library.Catalog.Book" });
-    expect(buildInvalidates(state)).toContainEqual([MEDIUM, "detail", 5]);
+    const state = withParams(withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 }), {
+      cast: "Library.Catalog.Book",
+    });
+    expect(buildInvalidates(state)).toContainEqual([MEDIA, "detail", 5]);
   });
 
-  test("a re-rooted write names the ancestor, the own key and the own type", () => {
-    const copies = hopState(withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }), {
-      typeName: COPY,
+  test("a hierarchical write's own key is a prefix-redundant with its ancestor, and drops out - the ancestor and the entity-set list entry are what remain", () => {
+    const copies = hopState(withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 }), {
+      name: "copies",
       kind: "list",
-      name: "Copies",
-      entitySetType: COPY,
-      reRoot: { typeName: COPY, filter: { MediumId: 5 } },
+      entitySetName: COPIES,
     });
     const key = { MediumId: 5, InventoryNumber: 7 };
     expect(buildInvalidates(withKey(copies, key, key))).toEqual([
-      [MEDIUM, "detail", 5],
-      [COPY, "detail", key],
-      [COPY, "list"],
+      [MEDIA, "detail", 5],
+      [COPIES, "list"],
     ]);
   });
 
-  test("a POST to a re-rooted collection: the own key without params is the own type", () => {
-    const copies = hopState(withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }), {
-      typeName: COPY,
+  test("a POST to a hierarchical collection: the own key without a key value is the ancestor plus the entity-set list", () => {
+    const copies = hopState(withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 }), {
+      name: "copies",
       kind: "list",
-      name: "Copies",
-      entitySetType: COPY,
-      reRoot: { typeName: COPY, filter: { MediumId: 5 } },
+      entitySetName: COPIES,
     });
     expect(buildInvalidates(copies)).toEqual([
-      [MEDIUM, "detail", 5],
-      [COPY, "list"],
+      [MEDIA, "detail", 5],
+      [COPIES, "list"],
     ]);
   });
 
   test("an entry another entry is a prefix of is dropped", () => {
-    const reservations = hopState(withKey(rootState(MEMBER, "list"), 42, { Id: 42 }), {
-      typeName: RESERVATION,
+    const reservations = hopState(withKey(rootState(MEMBERS, "list", { entitySetName: MEMBERS }), 42, { Id: 42 }), {
+      name: "reservations",
       kind: "list",
-      name: "Reservations",
-      entitySetType: RESERVATION,
+      entitySetName: RESERVATIONS,
     });
     expect(buildInvalidates(withKey(reservations, 9, { Id: 9 }))).toEqual([
-      [MEMBER, "detail", 42],
-      [RESERVATION, "list"],
+      [MEMBERS, "detail", 42],
+      [RESERVATIONS, "list"],
     ]);
   });
 
-  test("a contained resource contributes no type entry", () => {
-    const chapters = hopState(withKey(rootState(MEDIUM, "list"), 1, { Id: 1 }), {
-      typeName: CHAPTER,
+  test("a contained resource contributes no entity-set entry", () => {
+    const chapters = hopState(withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 1, { Id: 1 }), {
+      name: "chapters",
       kind: "list",
-      name: "Chapters",
     });
-    expect(buildInvalidates(withKey(chapters, 3, { Id: 3 }))).toEqual([[MEDIUM, "detail", 1]]);
+    expect(buildInvalidates(withKey(chapters, 3, { Id: 3 }))).toEqual([[MEDIA, "detail", 1]]);
   });
 
   test("two structurally equal key objects built independently compare as one entry", () => {
     // the prefix/dedup rule compares key elements by value, not by reference - two objects with the
     // same entries in a different insertion order are the same key
     const state = withKey(
-      rootState(COPY, "list"),
+      rootState(COPIES, "list", { entitySetName: COPIES }),
       { MediumId: 5, InventoryNumber: 7 },
       { MediumId: 5, InventoryNumber: 7 },
     );
-    const withOtherOrder = { ...state, ancestors: [[COPY, "detail", { InventoryNumber: 7, MediumId: 5 }]] };
+    const withOtherOrder = { ...state, ancestors: [[COPIES, "detail", { InventoryNumber: 7, MediumId: 5 }]] };
     expect(buildInvalidates(withOtherOrder as typeof state)).toEqual([
-      [COPY, "detail", { InventoryNumber: 7, MediumId: 5 }],
-      [COPY, "list"],
+      [COPIES, "detail", { InventoryNumber: 7, MediumId: 5 }],
+      [COPIES, "list"],
     ]);
   });
 
-  test("deepEdit params contribute an additional bare type entry per deep-inserted type", () => {
-    const LOAN = "Library.Circulation.Loan";
-    const state = withParams(rootState(MEMBER, "list"), {
-      deepEdit: [[LOAN, "list", "Loans"]],
+  test("deepEdit params contribute an additional bare entity-set entry per deep-inserted set", () => {
+    const state = withParams(rootState(MEMBERS, "list", { entitySetName: MEMBERS }), {
+      deepEdit: [LOANS],
     });
     expect(buildInvalidates(state)).toEqual([
-      [MEMBER, "list"],
-      [LOAN, "list"],
+      [MEMBERS, "list"],
+      [LOANS, "list"],
     ]);
   });
 
-  test("a deepEdit hop matching the write's own type collapses via the existing redundancy pass", () => {
-    const state = withParams(rootState(MEMBER, "list"), {
-      deepEdit: [[MEMBER, "list", "Members"]],
+  test("a deepEdit hop matching the write's own entity set collapses via the existing redundancy pass", () => {
+    const state = withParams(rootState(MEMBERS, "list", { entitySetName: MEMBERS }), {
+      deepEdit: [MEMBERS],
     });
-    expect(buildInvalidates(state)).toEqual([[MEMBER, "list"]]);
+    expect(buildInvalidates(state)).toEqual([[MEMBERS, "list"]]);
   });
 
   test("multiple different deepEdit hops each contribute their own entry", () => {
-    const LOAN = "Library.Circulation.Loan";
     expect(
       buildInvalidates(
-        withParams(rootState(MEMBER, "list"), {
-          deepEdit: [
-            [LOAN, "list", "Loans"],
-            [RESERVATION, "list", "Reservations"],
-          ],
+        withParams(rootState(MEMBERS, "list", { entitySetName: MEMBERS }), {
+          deepEdit: [LOANS, RESERVATIONS],
         }),
       ),
     ).toEqual([
-      [MEMBER, "list"],
-      [LOAN, "list"],
-      [RESERVATION, "list"],
+      [MEMBERS, "list"],
+      [LOANS, "list"],
+      [RESERVATIONS, "list"],
     ]);
   });
 });

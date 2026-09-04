@@ -1,301 +1,170 @@
 import { describe, expect, test } from "vitest";
-import { hopState, ownFqNameOf, reRootToEntity, rootState, withKey, withParams } from "../../src/cacheKey";
+import { hopState, QEntityFn, rootState, withKey, withParams } from "../../src/cacheKey";
 
-const MEDIUM = "Library.Catalog.Medium";
-const COPY = "Library.Circulation.Copy";
-const CHAPTER = "Library.Catalog.AudiobookChapter";
+const MEDIA = "Media";
+const COPIES = "Copies";
+const CHAPTERS = "chapters";
+
+// a stand-in for a real Q-object factory: CacheKeyState never inspects its contents, only threads it
+// forward, so identity comparison (toBe) is all any test here needs
+const qMedium = (() => class {}) as unknown as QEntityFn;
+const qCopy = (() => class {}) as unknown as QEntityFn;
 
 describe("CacheKeyState", () => {
-  test("a root is the entity set's type plus a kind marker", () => {
-    expect(rootState(MEDIUM, "list")).toEqual({
-      typeName: MEDIUM,
+  test("a bare root has no entity set and no Q-object factory of its own - the singleton shape", () => {
+    expect(rootState(MEDIA, "list")).toEqual({
+      name: MEDIA,
       steps: ["list"],
       kindIndex: 0,
-      navHops: {},
-      resourceType: MEDIUM,
     });
   });
 
+  test("a root carries the entity set name and Q-object factory it is given", () => {
+    expect(rootState(MEDIA, "list", { entitySetName: MEDIA, qEntityFn: qMedium })).toEqual({
+      name: MEDIA,
+      steps: ["list"],
+      kindIndex: 0,
+      entitySetName: MEDIA,
+      qEntityFn: qMedium,
+    });
+  });
+
+  test("a root carries params where given", () => {
+    const state = rootState(MEDIA, "detail", { params: { singleton: "MainBranch" } });
+    expect(state.params).toEqual({ singleton: "MainBranch" });
+  });
+
   test("withKey rewrites the trailing kind marker and appends the typed key", () => {
-    const state = withKey(rootState(MEDIUM, "list"), 5, { Id: 5 });
+    const state = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
     expect(state.steps).toEqual(["detail", 5]);
     expect(state.keyValues).toEqual({ Id: 5 });
   });
 
   test("withKey on a composite key appends the object", () => {
     const key = { MediumId: 5, InventoryNumber: 7 };
-    const state = withKey(rootState(COPY, "list"), key, key);
+    const state = withKey(rootState(COPIES, "list"), key, key);
     expect(state.steps).toEqual(["detail", key]);
   });
 
   test("withKey pushes no ancestor - it refines the resource, it does not leave it", () => {
-    expect(withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }).ancestors).toBeUndefined();
+    expect(withKey(rootState(MEDIA, "list"), 5, { Id: 5 }).ancestors).toBeUndefined();
   });
 
-  test("withKey drops a derived filter, since the key supersedes it", () => {
-    const flattened = withParams(rootState(COPY, "list"), { filter: { MediumId: 5 } });
-    const state = withKey(flattened, { MediumId: 5, InventoryNumber: 7 }, { MediumId: 5, InventoryNumber: 7 });
-    expect(state.params).toBeUndefined();
+  test("withKey carries params forward unchanged - there is no derived filter to drop any more", () => {
+    const cast = withParams(rootState(COPIES, "list"), { cast: "Library.Catalog.Book" });
+    const state = withKey(cast, { MediumId: 5, InventoryNumber: 7 }, { MediumId: 5, InventoryNumber: 7 });
+    expect(state.params).toEqual({ cast: "Library.Catalog.Book" });
   });
 
   test("withParams merges into the resource's own params and pushes no ancestor", () => {
-    const state = withParams(rootState(MEDIUM, "list"), { cast: "Library.Catalog.Book" });
+    const state = withParams(rootState(MEDIA, "list"), { cast: "Library.Catalog.Book" });
     expect(state.params).toEqual({ cast: "Library.Catalog.Book" });
     expect(state.ancestors).toBeUndefined();
   });
 
-  test("a hierarchical hop appends and pushes the resource it leaves as an ancestor", () => {
-    const parent = withKey(rootState(MEDIUM, "list"), 5, { Id: 5 });
-    const state = hopState(parent, { typeName: COPY, kind: "list", name: "Copies", entitySetType: COPY });
+  test("a hop appends its own name and kind, and pushes the resource it leaves as an ancestor", () => {
+    const parent = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
+    const state = hopState(parent, {
+      name: COPIES.toLowerCase(),
+      kind: "list",
+      entitySetName: COPIES,
+      qEntityFn: qCopy,
+    });
 
-    expect(state.typeName).toBe(MEDIUM);
-    expect(state.steps).toEqual(["detail", 5, COPY, "list", "Copies"]);
-    expect(state.ancestors).toEqual([[MEDIUM, "detail", 5]]);
-    expect(state.resourceType).toBe(COPY);
+    expect(state.name).toBe(MEDIA);
+    expect(state.steps).toEqual(["detail", 5, "copies", "list"]);
+    expect(state.ancestors).toEqual([[MEDIA, "detail", 5]]);
+    expect(state.entitySetName).toBe(COPIES);
+    expect(state.qEntityFn).toBe(qCopy);
     expect(state.keyValues).toBeUndefined();
   });
 
   test("an ancestor is pushed without its params object", () => {
-    const parent = withParams(withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }), { cast: "Library.Catalog.Book" });
-    const state = hopState(parent, { typeName: COPY, kind: "list", name: "Copies", entitySetType: COPY });
-    expect(state.ancestors).toEqual([[MEDIUM, "detail", 5]]);
+    const parent = withParams(withKey(rootState(MEDIA, "list"), 5, { Id: 5 }), { cast: "Library.Catalog.Book" });
+    const state = hopState(parent, { name: "copies", kind: "list", entitySetName: COPIES });
+    expect(state.ancestors).toEqual([[MEDIA, "detail", 5]]);
   });
 
-  test("a re-rooted hop resets type, steps and params but keeps ancestors", () => {
-    const parent = withKey(rootState(MEDIUM, "list"), 5, { Id: 5 });
-    const state = hopState(parent, {
-      typeName: COPY,
-      kind: "list",
-      name: "Copies",
-      entitySetType: COPY,
-      reRoot: { typeName: COPY, filter: { MediumId: 5 } },
-    });
-
-    expect(state.typeName).toBe(COPY);
-    expect(state.steps).toEqual(["list"]);
-    expect(state.params).toEqual({ filter: { MediumId: 5 } });
-    expect(state.ancestors).toEqual([[MEDIUM, "detail", 5]]);
+  test("a hop to a contained property has no entity set, so entitySetName stays undefined", () => {
+    const parent = withKey(rootState(MEDIA, "list"), 1, { Id: 1 });
+    const state = hopState(parent, { name: CHAPTERS, kind: "list" });
+    expect(state.entitySetName).toBeUndefined();
   });
 
-  test("a re-rooted hop carries a cast where the nav property is narrower than its entity set", () => {
-    const parent = withKey(rootState("PublisherRegistry.Publisher", "list"), 7, { Id: 7 });
-    const state = hopState(parent, {
-      typeName: "Library.Catalog.Book",
-      kind: "list",
-      name: "Books",
-      entitySetType: MEDIUM,
-      reRoot: { typeName: MEDIUM, filter: { "Publisher/Id": 7 }, cast: "Library.Catalog.Book" },
-    });
-
-    expect(state.typeName).toBe(MEDIUM);
-    expect(state.params).toEqual({ filter: { "Publisher/Id": 7 }, cast: "Library.Catalog.Book" });
+  test("a hop without a Q-object factory carries the parent's forward - it stays inert unless something reads it", () => {
+    const parent = withKey(rootState(MEDIA, "list", { qEntityFn: qMedium }), 5, { Id: 5 });
+    const state = hopState(parent, { name: "details", kind: "detail" });
+    expect(state.qEntityFn).toBe(qMedium);
   });
 
-  test("a contained hop has no entity set, so resourceType stays undefined", () => {
-    const parent = withKey(rootState(MEDIUM, "list"), 1, { Id: 1 });
-    const state = hopState(parent, { typeName: CHAPTER, kind: "list", name: "Chapters" });
-    expect(state.resourceType).toBeUndefined();
+  test("a hop's own Q-object factory replaces the parent's", () => {
+    const parent = withKey(rootState(MEDIA, "list", { qEntityFn: qMedium }), 5, { Id: 5 });
+    const state = hopState(parent, { name: "copies", kind: "list", qEntityFn: qCopy });
+    expect(state.qEntityFn).toBe(qCopy);
   });
 
-  test("a route may re-root, then continue hierarchically", () => {
-    const medium = withKey(rootState(MEDIUM, "list"), 5, { Id: 5 });
-    const copies = hopState(medium, {
-      typeName: COPY,
-      kind: "list",
-      name: "Copies",
-      entitySetType: COPY,
-      reRoot: { typeName: COPY, filter: { MediumId: 5 } },
-    });
+  test("a route continues hierarchically through several hops", () => {
+    const media = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
+    const copies = hopState(media, { name: "copies", kind: "list", entitySetName: COPIES });
     const copy = withKey(copies, { MediumId: 5, InventoryNumber: 7 }, { MediumId: 5, InventoryNumber: 7 });
-    const condition = hopState(copy, {
-      typeName: "Library.Catalog.AvailabilityStatus",
-      kind: "detail",
-      name: "Condition",
-    });
+    const condition = hopState(copy, { name: "condition", kind: "detail" });
 
-    expect(condition.typeName).toBe(COPY);
+    expect(condition.name).toBe(MEDIA);
     expect(condition.steps).toEqual([
       "detail",
-      { MediumId: 5, InventoryNumber: 7 },
-      "Library.Catalog.AvailabilityStatus",
+      5,
+      "copies",
       "detail",
-      "Condition",
+      { MediumId: 5, InventoryNumber: 7 },
+      "condition",
+      "detail",
     ]);
     expect(condition.ancestors).toEqual([
-      [MEDIUM, "detail", 5],
-      [COPY, "detail", { MediumId: 5, InventoryNumber: 7 }],
+      [MEDIA, "detail", 5],
+      [MEDIA, "detail", 5, "copies", "detail", { MediumId: 5, InventoryNumber: 7 }],
     ]);
   });
 
-  test("reRootToEntity re-roots at a fully known target key, not at a filtered collection", () => {
-    const copy = withKey(
-      rootState(COPY, "list"),
-      { MediumId: 5, InventoryNumber: 7 },
-      { MediumId: 5, InventoryNumber: 7 },
-    );
-    const state = reRootToEntity(copy, MEDIUM, { Id: 5 });
-
-    expect(state.typeName).toBe(MEDIUM);
-    expect(state.steps).toEqual(["detail", 5]);
-    expect(state.keyValues).toEqual({ Id: 5 });
-    expect(state.params).toBeUndefined();
-    expect(state.resourceType).toBe(MEDIUM);
-  });
-
-  test("reRootToEntity keeps ancestors and pushes the resource it leaves", () => {
-    const copy = withKey(
-      rootState(COPY, "list"),
-      { MediumId: 5, InventoryNumber: 7 },
-      { MediumId: 5, InventoryNumber: 7 },
-    );
-    const state = reRootToEntity(copy, MEDIUM, { Id: 5 });
-    expect(state.ancestors).toEqual([[COPY, "detail", { MediumId: 5, InventoryNumber: 7 }]]);
-  });
-
-  test("reRootToEntity wraps a composite target key as an object", () => {
-    const loan = withKey(rootState("Library.Circulation.Loan", "list"), 1, { Id: 1 });
-    const state = reRootToEntity(loan, COPY, { MediumId: 5, InventoryNumber: 7 });
-    expect(state.steps).toEqual(["detail", { MediumId: 5, InventoryNumber: 7 }]);
-  });
-
-  test("a primitive hop is the bare name", () => {
-    const parent = withKey(rootState("Library.Circulation.IdDocument", "list"), "x", { Id: "x" });
-    const state = hopState(parent, { name: "Scan" });
-    expect(state.steps).toEqual(["detail", "x", "Scan"]);
+  test("a primitive hop is the bare name, with no kind", () => {
+    const parent = withKey(rootState("IdDocuments", "list"), "x", { Id: "x" });
+    const state = hopState(parent, { name: "scan" });
+    expect(state.steps).toEqual(["detail", "x", "scan"]);
   });
 
   test("a stream value appends $value", () => {
-    const parent = withKey(rootState("Library.Circulation.IdDocument", "list"), "x", { Id: "x" });
-    const state = hopState(hopState(parent, { name: "Scan" }), { name: "$value" });
-    expect(state.steps).toEqual(["detail", "x", "Scan", "$value"]);
+    const parent = withKey(rootState("IdDocuments", "list"), "x", { Id: "x" });
+    const state = hopState(hopState(parent, { name: "scan" }), { name: "$value" });
+    expect(state.steps).toEqual(["detail", "x", "scan", "$value"]);
   });
 
-  test("withKey after a hierarchical hop keeps the navigation property name", () => {
-    const parent = withKey(rootState(MEDIUM, "list"), 5, { Id: 5 });
-    const copies = hopState(parent, { typeName: COPY, kind: "list", name: "Copies", entitySetType: COPY });
+  test("withKey after a hop keeps the navigation property's own name", () => {
+    const parent = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
+    const copies = hopState(parent, { name: "copies", kind: "list", entitySetName: COPIES });
     const state = withKey(copies, 7, { InventoryNumber: 7 });
-    expect(state.steps).toEqual(["detail", 5, COPY, "detail", "Copies", 7]);
+    expect(state.steps).toEqual(["detail", 5, "copies", "detail", 7]);
   });
 
-  test("two sibling navigations of the same target type do not collide", () => {
-    const parent = withKey(rootState(MEDIUM, "list"), 5, { Id: 5 });
-    const primary = withKey(
-      hopState(parent, { typeName: COPY, kind: "list", name: "Copies", entitySetType: COPY }),
-      3,
-      { InventoryNumber: 3 },
-    );
-    const backup = withKey(
-      hopState(parent, { typeName: COPY, kind: "list", name: "BackupCopies", entitySetType: COPY }),
-      3,
-      { InventoryNumber: 3 },
-    );
+  test("two sibling navigations of the same target entity set do not collide - each keeps its own name", () => {
+    const parent = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
+    const primary = withKey(hopState(parent, { name: "copies", kind: "list", entitySetName: COPIES }), 3, {
+      InventoryNumber: 3,
+    });
+    const backup = withKey(hopState(parent, { name: "backupCopies", kind: "list", entitySetName: COPIES }), 3, {
+      InventoryNumber: 3,
+    });
     expect(primary.steps).not.toEqual(backup.steps);
   });
 
-  test("a route that re-roots and then takes a key still puts the marker at 0", () => {
-    const parent = withKey(rootState(MEDIUM, "list"), 5, { Id: 5 });
-    const copies = hopState(parent, {
-      typeName: COPY,
-      kind: "list",
-      name: "Copies",
-      entitySetType: COPY,
-      reRoot: { typeName: COPY, filter: { MediumId: 5 } },
-    });
-    const copy = withKey(copies, { MediumId: 5, InventoryNumber: 7 }, { MediumId: 5, InventoryNumber: 7 });
-    expect(copy.steps).toEqual(["detail", { MediumId: 5, InventoryNumber: 7 }]);
-  });
-
   test("a primitive hop does not move the kind index", () => {
-    const parent = withKey(rootState("Library.Circulation.IdDocument", "list"), "x", { Id: "x" });
-    const state = hopState(parent, { name: "Scan" });
+    const parent = withKey(rootState("IdDocuments", "list"), "x", { Id: "x" });
+    const state = hopState(parent, { name: "scan" });
     expect(state.kindIndex).toBe(parent.kindIndex);
   });
 
-  test("withKey drops a derived filter but keeps a sibling params entry", () => {
-    const flattened = withParams(rootState(COPY, "list"), {
-      filter: { MediumId: 5 },
-      cast: "Library.Catalog.Book",
-    });
-    const state = withKey(flattened, { MediumId: 5, InventoryNumber: 7 }, { MediumId: 5, InventoryNumber: 7 });
-    expect(state.params).toEqual({ cast: "Library.Catalog.Book" });
-  });
-});
-
-describe("navHops", () => {
-  const HOPS = { [MEDIUM]: { copies: [COPY, "list", "Copies"] as const } };
-
-  test("rootState defaults navHops to an empty table", () => {
-    expect(rootState(MEDIUM, "list").navHops).toEqual({});
-  });
-
-  test("rootState carries the given table", () => {
-    expect(rootState(MEDIUM, "list", { navHops: HOPS }).navHops).toBe(HOPS);
-  });
-
-  test("withKey and withParams carry it forward unchanged", () => {
-    const root = rootState(MEDIUM, "list", { navHops: HOPS });
-    expect(withKey(root, 5, { Id: 5 }).navHops).toBe(HOPS);
-    expect(withParams(root, { cast: "x" }).navHops).toBe(HOPS);
-  });
-
-  test("hopState carries it forward, both the plain-hop and the re-rooted branch", () => {
-    const root = rootState(MEDIUM, "list", { navHops: HOPS });
-    const plainHop = hopState(withKey(root, 5, { Id: 5 }), { typeName: COPY, kind: "list", name: "Copies" });
-    expect(plainHop.navHops).toBe(HOPS);
-
-    const reRootedHop = hopState(withKey(root, 5, { Id: 5 }), {
-      typeName: COPY,
-      kind: "list",
-      name: "Copies",
-      reRoot: { typeName: COPY, filter: { MediumId: 5 } },
-    });
-    expect(reRootedHop.navHops).toBe(HOPS);
-  });
-
-  test("reRootToEntity carries it forward", () => {
-    const root = rootState(COPY, "list", { navHops: HOPS });
-    const state = withKey(root, { MediumId: 5, InventoryNumber: 7 }, { MediumId: 5, InventoryNumber: 7 });
-    expect(reRootToEntity(state, MEDIUM, { Id: 5 }).navHops).toBe(HOPS);
-  });
-});
-
-describe("ownFqNameOf", () => {
-  test("at the root, the type name is already correct", () => {
-    expect(ownFqNameOf(rootState(MEDIUM, "list"))).toBe(MEDIUM);
-  });
-
-  test("a cast wins over everything else", () => {
-    const state = withParams(rootState(MEDIUM, "list"), { cast: "Library.Catalog.Book" });
-    expect(ownFqNameOf(state)).toBe("Library.Catalog.Book");
-  });
-
-  test("after a hierarchical hop, the hop's own type wins - not the route's root", () => {
-    const state = hopState(withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }), {
-      typeName: COPY,
-      kind: "list",
-      name: "Copies",
-      entitySetType: COPY,
-    });
-    expect(ownFqNameOf(state)).toBe(COPY);
-  });
-
-  test("after a re-root, the new type name is already correct", () => {
-    const state = hopState(withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }), {
-      typeName: COPY,
-      kind: "list",
-      name: "Copies",
-      reRoot: { typeName: COPY, filter: { MediumId: 5 } },
-    });
-    expect(ownFqNameOf(state)).toBe(COPY);
-  });
-
-  test("a hop to a contained entity has no resourceType, but its own type is still findable", () => {
-    const state = hopState(withKey(rootState(MEDIUM, "list"), 1, { Id: 1 }), {
-      typeName: CHAPTER,
-      kind: "list",
-      name: "Chapters",
-    });
-    expect(state.resourceType).toBeUndefined();
-    expect(ownFqNameOf(state)).toBe(CHAPTER);
+  test("a structured hop puts the kind index at the end, not two-from-the-end - there is no name slot after it any more", () => {
+    const parent = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
+    const state = hopState(parent, { name: "copies", kind: "list", entitySetName: COPIES });
+    expect(state.kindIndex).toBe(state.steps.length - 1);
+    expect(state.steps[state.kindIndex]).toBe("list");
   });
 });
