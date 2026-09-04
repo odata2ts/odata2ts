@@ -1,0 +1,69 @@
+# odata2ts (generator + runtime)
+
+Generates a typed TypeScript client from an OData v4 (and v2) service's metadata (CSDL). This context
+covers the cache-key/invalidation feature: giving generated `RequestCmd`s a stable, collision-free identity
+so a consuming cache library (e.g. TanStack Query) can be told what to invalidate after a write.
+
+## Language
+
+**Resource**:
+The thing an OData URL addresses, per spec — identified by a chain of container- or property-scoped
+*names* terminated by a key, never by type. Two different resources (e.g. two entity sets) can share a
+type; sharing a type does not make them the same resource.
+_Avoid_: using "type" as a stand-in for resource identity — this was the bug the identity redesign fixes.
+
+**Entity set**:
+The named, top-level collection a non-contained entity actually lives in (e.g. `Authors`, `Editors`) — the
+anchor for a resource's canonical identity. Distinct from the entity's *type*, which only describes its
+shape and may be shared across multiple entity sets.
+_Avoid_: conflating with "entity type" — see [[Resource]].
+
+**Canonical URL**:
+The one spec-defined address for a resource: entity-set name + key predicate for a non-contained entity
+(no cast segment, ever — OData v4.01 Part 2 §4.3.1), or the parent's canonical URL + containment nav
+property's own name + [key] for a contained one (§4.3.2). Always name-anchored, never type-anchored.
+
+**Cache key**:
+The value `RequestCmd.cacheKey` produces for a read: a flat, ordered tuple identifying the exact route
+taken to reach a response, used as a cache library's query key. Distinct from a resource's canonical
+identity — a cache key describes *how the client got there* (route), not necessarily the resource's one
+true address.
+_Avoid_: "identity" alone — ambiguous between cache key (route-shaped) and canonical id (resource-shaped).
+
+**Root / hop**:
+The first element of a cache key (root) and each subsequent chained segment (hop), reached via navigation
+or containment. As of the identity redesign, root and hop share one uniform local shape: `(name, kind,
+key?)` — `name` is the entity set's own name at the root, or the navigation/containment property's own
+OData name at a hop.
+
+**Kind marker**:
+The `"list"` / `"detail"` tag carried at the root and every hop. Not part of identity — a deliberate,
+TanStack-Query-community-style granularity control (`todoKeys.lists()` vs `todoKeys.detail(id)`), kept even
+though the identity redesign removed type from the key.
+
+**`invalidates`**:
+The array `RequestCmd` produces for a *write*, listing cache keys (or `touchesResource`-style patterns) that
+became stale as a result of that write.
+
+**`touchesResource`**:
+A pattern-matching helper: does a given cache key fall under a given (partial) key prefix/pattern? Used to
+express "invalidate every list under this resource" without enumerating every concrete key.
+
+**Canonical id**:
+A runtime-only string, built from `(entitySetName, key)`, identifying one specific resource observed in an
+actual server response — the join key `ResourceIdentityHandler` uses to relate cache keys (route-shaped)
+that happen to point at the same resource (identity-shaped). Not the same as [[Canonical URL]] (a URL);
+`canonicalId` is an internal string encoding, not necessarily URL syntax. Exact serialization: open
+question, see spec `docs/superpowers/specs/2026-09-04-cache-key-identity-redesign.md`.
+
+**`ResourceIdentityHandler`**:
+A runtime store (client-held, like `ConcurrencyHandler`) recording which cache keys were observed, via
+`@odata.context`, to resolve to which canonical id. Lets a write on one route invalidate a cache key reached
+via a *different* route to the same resource — replacing the old generation-time "type flattening" /
+re-rooting prediction with a runtime-observed mapping.
+
+**Convergence**:
+The general problem this whole feature keeps returning to: two different routes (a navigated hop vs a
+direct query) reaching the same resource should produce cache keys (or at least an invalidation path) that
+recognize each other. Previously attempted at generation time via `ReferentialConstraint`/`Partner` grading
+(removed); now attempted at runtime via [[ResourceIdentityHandler]].
