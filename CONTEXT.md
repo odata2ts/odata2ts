@@ -8,13 +8,13 @@ so a consuming cache library (e.g. TanStack Query) can be told what to invalidat
 
 **Resource**:
 The thing an OData URL addresses, per spec — identified by a chain of container- or property-scoped
-*names* terminated by a key, never by type. Two different resources (e.g. two entity sets) can share a
+_names_ terminated by a key, never by type. Two different resources (e.g. two entity sets) can share a
 type; sharing a type does not make them the same resource.
 _Avoid_: using "type" as a stand-in for resource identity — this was the bug the identity redesign fixes.
 
 **Entity set**:
 The named, top-level collection a non-contained entity actually lives in (e.g. `Authors`, `Editors`) — the
-anchor for a resource's canonical identity. Distinct from the entity's *type*, which only describes its
+anchor for a resource's canonical identity. Distinct from the entity's _type_, which only describes its
 shape and may be shared across multiple entity sets.
 _Avoid_: conflating with "entity type" — see [[Resource]].
 
@@ -26,7 +26,7 @@ property's own name + [key] for a contained one (§4.3.2). Always name-anchored,
 **Cache key**:
 The value `RequestCmd.cacheKey` produces for a read: a flat, ordered tuple identifying the exact route
 taken to reach a response, used as a cache library's query key. Distinct from a resource's canonical
-identity — a cache key describes *how the client got there* (route), not necessarily the resource's one
+identity — a cache key describes _how the client got there_ (route), not necessarily the resource's one
 true address.
 _Avoid_: "identity" alone — ambiguous between cache key (route-shaped) and canonical id (resource-shaped).
 
@@ -42,7 +42,7 @@ TanStack-Query-community-style granularity control (`todoKeys.lists()` vs `todoK
 though the identity redesign removed type from the key.
 
 **`invalidates`**:
-The array `RequestCmd` produces for a *write*, listing cache keys (or `touchesResource`-style patterns) that
+The array `RequestCmd` produces for a _write_, listing cache keys (or `touchesResource`-style patterns) that
 became stale as a result of that write.
 
 **`touchesResource`**:
@@ -68,9 +68,9 @@ unmapped indefinitely, however long the app runs, unless it's seeded.
 `ResourceIdentityHandler` supports **hydration-style** seeding only: `dehydrate()`/`hydrate()` bulk-transfer
 the exact `(canonicalId, hierarchicalKey)` pairs `record()`/`resolve()` already traffic in — e.g. across an
 SSR→client boundary, or persisted across sessions — no new data shape, mirroring TanStack's own
-`dehydrate`/`hydrate`. It deliberately does *not* support **static** seeding (populating a mapping before
-*any* read has ever happened, anywhere): a canonical id needs a real key value, and reaching a resource's
-*other* routes without ever having observed them needs the referential-constraint reasoning
+`dehydrate`/`hydrate`. It deliberately does _not_ support **static** seeding (populating a mapping before
+_any_ read has ever happened, anywhere): a canonical id needs a real key value, and reaching a resource's
+_other_ routes without ever having observed them needs the referential-constraint reasoning
 [[Convergence]] deliberately dropped — reintroducing it here would just be that mechanism through a side
 door.
 
@@ -80,7 +80,7 @@ to which canonical id — one entry per entity actually present in a response, a
 addressed resource and every `$expand`'d entity, however deep), not just the top. Recording is gated by a
 **static, generator/Q-object-forwarded** signal (each hop's own entity-set name, present only for
 non-contained navigation — `@odata.context` was tried and rejected, see [[Convergence]]), never by response
-inspection. Lets a write on one route invalidate a cache key reached via a *different* route to the same
+inspection. Lets a write on one route invalidate a cache key reached via a _different_ route to the same
 resource — replacing the old generation-time "type flattening" / re-rooting prediction with a
 runtime-observed mapping.
 
