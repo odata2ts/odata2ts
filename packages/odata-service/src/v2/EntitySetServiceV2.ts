@@ -12,7 +12,7 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { CacheKeyState, withKey } from "../cacheKey/index.js";
+import { buildDeepEditHops, CacheKeyState, ownFqNameOf, withKey, withParams } from "../cacheKey/index.js";
 import { getBodyETagV2, getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
 import { ConcurrencyOptions, UrlBuilderRequestCmdV2 } from "../request";
@@ -193,6 +193,10 @@ export abstract class EntitySetServiceV2<
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder, cacheKeyState } = this.__base;
     const builder = createModelQueryBuilder(queryFn);
 
+    const deepEditHops = cacheKeyState && buildDeepEditHops(cacheKeyState.navHops, ownFqNameOf(cacheKeyState), model);
+    const stateForRequest =
+      deepEditHops && cacheKeyState ? withParams(cacheKeyState, { deepEdit: deepEditHops }) : cacheKeyState;
+
     return new UrlBuilderRequestCmdV2<
       AsV4 extends true ? ODataModelResponseV4<T> : ODataEntityModelResponseV2<T>,
       Q,
@@ -202,7 +206,7 @@ export abstract class EntitySetServiceV2<
       headers: getDefaultHeaders(),
       mainRequestConverter: qModel,
       mainResponseConverter: new EntityResponseConverterV2<T, AsV4>(qModel, this.__base.isAsV4()),
-      cacheKeyState,
+      cacheKeyState: stateForRequest,
     });
   }
 
@@ -216,6 +220,7 @@ export abstract class EntitySetServiceV2<
   ) {
     const { client, qModel, getDefaultHeaders, createQueryBuilder, cacheKeyState } = this.__base;
     const builder = createQueryBuilder(queryFn);
+    const ownFqName = cacheKeyState && ownFqNameOf(cacheKeyState);
 
     return new UrlBuilderRequestCmdV2<
       AsV4 extends true ? ODataCollectionResponseV4<ReturnType> : ODataCollectionResponseV2<ReturnType>,
@@ -225,7 +230,7 @@ export abstract class EntitySetServiceV2<
       headers: getDefaultHeaders(),
       mainResponseConverter: new CollectionResponseConverterV2<ReturnType, AsV4>(qModel, this.__base.isAsV4()),
       cacheKeyState,
-      queryParams: builder.getCacheKeyParams(),
+      queryParams: builder.getCacheKeyParams(cacheKeyState?.navHops, ownFqName),
     });
   }
 }

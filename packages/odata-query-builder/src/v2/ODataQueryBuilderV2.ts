@@ -6,6 +6,7 @@ import {
   QSelectExpression,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
+import type { NavHopsTable } from "../CacheKeyParams.js";
 import { ODataQueryBuilder } from "../ODataQueryBuilder";
 import {
   ExpandingFunctionV2,
@@ -130,7 +131,7 @@ class ODataQueryBuilderV2<Q extends QueryObjectModel> implements ODataQueryBuild
     return this.builder.build();
   }
 
-  public getCacheKeyParams() {
-    return this.builder.getCacheKeyParams();
+  public getCacheKeyParams(navHops?: NavHopsTable, ownFqName?: string) {
+    return this.builder.getCacheKeyParams(navHops, ownFqName);
   }
 }

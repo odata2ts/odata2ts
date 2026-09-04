@@ -1,6 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, EntityTypeServiceV2, MERGE_HEADERS, RequestInfo } from "../../src";
+import { DEFAULT_HEADERS, EntityTypeServiceV2, MERGE_HEADERS, RequestInfo, rootState } from "../../src";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { PersonModelV2Service } from "../fixture/v2/PersonModelV2Service";
@@ -150,5 +150,45 @@ describe("EntityTypeService V2 Test", () => {
     expect(request.url).toBe(expected);
     expect(request.data).toBeUndefined();
     expect(request.method).toBe("GET");
+  });
+
+  describe("cache keys: expand enrichment and deepEdit", () => {
+    const PERSON = "Test.Person";
+    const navHops = { [PERSON]: { friends: [PERSON, "list", "Friends"] as const } };
+
+    test("query() passes navHops/ownFqName into the builder for expand enrichment", async () => {
+      const service = new PersonModelV2Service(
+        odataClient,
+        BASE_URL,
+        NAME,
+        undefined,
+        rootState(PERSON, "detail", { navHops }),
+      );
+      const request = service.query((b) => b.expand("friends"));
+      expect(request.cacheKey).toEqual([PERSON, "detail", { expand: [[PERSON, "list", "Friends"]] }]);
+    });
+
+    test("patch() attaches deepEdit to invalidates when the payload deep-inserts a nav property", async () => {
+      const TRIP = "Test.Trip";
+      const deepEditHops = { [PERSON]: { friends: [TRIP, "list", "Friends"] as const } };
+      const service = new PersonModelV2Service(
+        odataClient,
+        BASE_URL,
+        NAME,
+        undefined,
+        rootState(PERSON, "detail", { navHops: deepEditHops }),
+      );
+      const model = {
+        age: "45",
+        friends: [{ userName: "buddy", age: "15", favFeature: Feature.Feature1, features: [] }],
+      } as unknown as Partial<EditablePersonModel>;
+
+      const response = await service.patch(model).ignoreETag().execute();
+      expect(response.invalidates).toEqual([
+        [PERSON, "detail"],
+        [PERSON, "list"],
+        [TRIP, "list"],
+      ]);
+    });
   });
 });

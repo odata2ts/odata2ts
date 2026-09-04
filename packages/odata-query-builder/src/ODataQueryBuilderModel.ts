@@ -327,7 +327,7 @@ export interface CollectionQueryBuilderV2<Q extends QueryObjectModel>
    * {@link CacheKeyParams}. Not one of the ordinary query operations, so it lives here rather than in
    * {@link ODataQueryBuilderModel}, which several unrelated expanding/nested builder shapes also draw from.
    */
-  getCacheKeyParams: () => CacheKeyParams | undefined;
+  getCacheKeyParams: (navHops?: NavHopsTable, ownFqName?: string) => CacheKeyParams | undefined;
 }
 
 /**
@@ -345,7 +345,7 @@ export interface ModelQueryBuilderV2<Q extends QueryObjectModel>
   clone: () => ModelQueryBuilderV2<Q>;
 
   /** See {@link CollectionQueryBuilderV2.getCacheKeyParams}. */
-  getCacheKeyParams: () => CacheKeyParams | undefined;
+  getCacheKeyParams: (navHops?: NavHopsTable, ownFqName?: string) => CacheKeyParams | undefined;
 }
 
 export interface ExpandingQueryBuilderV2<Q extends QueryObjectModel>

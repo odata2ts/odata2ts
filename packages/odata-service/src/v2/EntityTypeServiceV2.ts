@@ -2,7 +2,7 @@ import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataEntityModelResponseV2, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { ModelQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { EntityResponseConverterV2, QueryObjectModel } from "@odata2ts/odata-query-objects";
-import { CacheKeyState } from "../cacheKey/index.js";
+import { buildDeepEditHops, CacheKeyState, ownFqNameOf, withParams } from "../cacheKey/index.js";
 import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV2, UrlBuilderWriteRequestCmdV2, UrlWriteRequestCmd } from "../request";
 import { MERGE_HEADERS } from "../RequestHeaders.js";
@@ -51,6 +51,10 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
     // the If-Match header rides alongside the X-Http-Method one: a V2 patch travels as MERGE
     const headers = { ...getDefaultHeaders(), ...MERGE_HEADERS };
 
+    const deepEditHops = cacheKeyState && buildDeepEditHops(cacheKeyState.navHops, ownFqNameOf(cacheKeyState), model);
+    const stateForRequest =
+      deepEditHops && cacheKeyState ? withParams(cacheKeyState, { deepEdit: deepEditHops }) : cacheKeyState;
+
     return new UrlBuilderWriteRequestCmdV2<undefined, Q, ModelQueryBuilderV2<Q>, Partial<UpdatableT>>(
       client,
       ODataHttpMethods.Post,
@@ -61,7 +65,7 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
         headers,
         mainRequestConverter: qModel,
         concurrency: getConcurrencyOptions(),
-        cacheKeyState,
+        cacheKeyState: stateForRequest,
       },
     );
   }
@@ -78,6 +82,10 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder, getConcurrencyOptions, cacheKeyState } =
       this.__base;
 
+    const deepEditHops = cacheKeyState && buildDeepEditHops(cacheKeyState.navHops, ownFqNameOf(cacheKeyState), model);
+    const stateForRequest =
+      deepEditHops && cacheKeyState ? withParams(cacheKeyState, { deepEdit: deepEditHops }) : cacheKeyState;
+
     return new UrlBuilderWriteRequestCmdV2<undefined, Q, ModelQueryBuilderV2<Q>, UpdatableT>(
       client,
       ODataHttpMethods.Put,
@@ -88,7 +96,7 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
         headers: getDefaultHeaders(),
         mainRequestConverter: qModel,
         concurrency: getConcurrencyOptions(),
-        cacheKeyState,
+        cacheKeyState: stateForRequest,
       },
     );
   }
@@ -112,6 +120,7 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder, getConcurrencyOptions, cacheKeyState } =
       this.__base;
     const builder = createModelQueryBuilder(queryFn);
+    const ownFqName = cacheKeyState && ownFqNameOf(cacheKeyState);
 
     return new UrlBuilderRequestCmdV2<
       AsV4 extends true ? ODataModelResponseV4<ReturnType> : ODataEntityModelResponseV2<ReturnType>,
@@ -122,7 +131,7 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
       mainResponseConverter: new EntityResponseConverterV2<ReturnType, AsV4>(qModel, this.__base.isAsV4()),
       concurrency: getConcurrencyOptions(),
       cacheKeyState,
-      queryParams: builder.getCacheKeyParams(),
+      queryParams: builder.getCacheKeyParams(cacheKeyState?.navHops, ownFqName),
     });
   }
 }
