@@ -111,4 +111,84 @@ describe("CacheKeyParams", () => {
     });
     expect(builder.build()).toBe("Persons?%24expand=friends(%24filter%3Dname%20eq%20'x')");
   });
+
+  test("a nav property reached through a complex property stays a bare, hoisted string - identically whether asked before or after build()", () => {
+    builder.expanding(createExpandingQueryBuilderV4, "address", (nested: any) => {
+      nested.expanding("responsible", () => {});
+    });
+    const before = builder.getCacheKeyParams();
+    builder.build();
+    const after = builder.getCacheKeyParams();
+
+    expect(before).toEqual({ select: ["Address"], expand: ["Address/responsible"] });
+    expect(after).toEqual(before);
+  });
+
+  describe("getCacheKeyParams: expand enrichment", () => {
+    const PERSON = "Trippin.Person";
+    const navHops = {
+      [PERSON]: {
+        friends: [PERSON, "list", "Friends"] as const,
+        bestFriend: [PERSON, "detail", "BestFriend"] as const,
+      },
+    };
+
+    test("without navHops, expand stays bare strings - unchanged, backward compatible", () => {
+      builder.addExpands("friends");
+      expect(builder.getCacheKeyParams()).toEqual({ expand: ["friends"] });
+    });
+
+    test("a hit turns the bare path into a hop triple", () => {
+      builder.addExpands("friends");
+      expect(builder.getCacheKeyParams(navHops, PERSON)).toEqual({ expand: [[PERSON, "list", "Friends"]] });
+    });
+
+    test("a miss - ownFqName not in the table, or navHops omitted - keeps the bare path", () => {
+      builder.addExpands("friends");
+      expect(builder.getCacheKeyParams(navHops, "Some.Other.Type")).toEqual({ expand: ["friends"] });
+      expect(builder.getCacheKeyParams(undefined, PERSON)).toEqual({ expand: ["friends"] });
+    });
+
+    test("a path with no table entry at all (e.g. a complex property) stays a bare string, mixed with hop entries", () => {
+      builder.addExpands("friends", "address");
+      expect(builder.getCacheKeyParams(navHops, PERSON)).toEqual({
+        expand: ["address", [PERSON, "list", "Friends"]],
+      });
+    });
+
+    test("sorting mixes bare paths and hop triples by path, order carries no meaning", () => {
+      builder.addExpands("friends", "bestFriend");
+      expect(builder.getCacheKeyParams(navHops, PERSON)).toEqual({
+        expand: [
+          [PERSON, "detail", "BestFriend"],
+          [PERSON, "list", "Friends"],
+        ],
+      });
+    });
+
+    test("a nested expanding() carries its own nested params as the hop's 4th element", () => {
+      builder.expanding(createExpandingQueryBuilderV4, "friends", (nested: any, qFriend: any) => {
+        nested.filter(qFriend.name.equals("x"));
+      });
+      expect(builder.getCacheKeyParams(navHops, PERSON)).toEqual({
+        expand: [[PERSON, "list", "Friends", { filter: { name: "x" } }]],
+      });
+    });
+
+    test("a nested expanding() with nothing to report contributes no 4th element", () => {
+      builder.expanding(createExpandingQueryBuilderV4, "friends", () => {});
+      expect(builder.getCacheKeyParams(navHops, PERSON)).toEqual({ expand: [[PERSON, "list", "Friends"]] });
+    });
+
+    test("a nested expanding() resolves its own further nested expands against the same flat table", () => {
+      builder.expanding(createExpandingQueryBuilderV4, "friends", (nested: any) => {
+        nested.expanding("bestFriend", () => {});
+      });
+      // bestFriend's own type (Person) is looked up via the hop found for "friends" (also Person, since
+      // friends is self-referential here) - one flat table serves both recursion depths
+      expect(builder.getCacheKeyParams(navHops, PERSON)).toEqual({
+        expand: [[PERSON, "list", "Friends", { expand: [[PERSON, "detail", "BestFriend"]] }]],
+      });
+    });
+  });
 });

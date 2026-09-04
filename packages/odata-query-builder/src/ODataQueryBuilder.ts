@@ -11,7 +11,13 @@ import {
   QueryObjectModel,
   searchTerm,
 } from "@odata2ts/odata-query-objects";
-import { CacheKeyParams, foldFilterClauses, normalizeCacheKeyParams } from "./CacheKeyParams.js";
+import {
+  CacheKeyParams,
+  ExpandHop,
+  foldFilterClauses,
+  NavHopsTable,
+  normalizeCacheKeyParams,
+} from "./CacheKeyParams.js";
 import { ODataOperators } from "./ODataModel";
 import {
   ExpandingCollectionQueryBuilderV4,
@@ -55,8 +61,12 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
    * entirely separate from `expands`/`hoistedExpandsBucket`, which hold whatever `build()` renders onto
    * the wire (a bare path for `expand()`, a fully rendered sub-query string for `expanding()`) and must
    * stay untouched by anything cache-key related.
+   *
+   * `rawForm` is exactly what this same call also pushed into `expands` - needed to tell a direct entry
+   * apart from a hoisted one reconciled back from `expands` after `build()` has folded
+   * `hoistedExpandsBucket` into it, without depending on whether that fold has happened yet.
    */
-  private expandEntries: Array<{ path: string; nestedBuilder?: ODataQueryBuilder<any> }> | undefined;
+  private expandEntries: Array<{ path: string; rawForm: string; nestedBuilder?: ODataQueryBuilder<any> }> | undefined;
 
   private getExpandEntries() {
     if (!this.expandEntries) {
@@ -127,7 +137,7 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     const filteredPaths = paths.filter((p): p is string => !!p);
     if (filteredPaths.length) {
       this.getExpands().push(...filteredPaths);
-      this.getExpandEntries().push(...filteredPaths.map((path) => ({ path })));
+      this.getExpandEntries().push(...filteredPaths.map((path) => ({ path, rawForm: path })));
     }
   };
 
@@ -195,7 +205,7 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     const filteredPaths = this.filterSelectAndMapPath(props);
     if (filteredPaths.length) {
       this.getExpands().push(...filteredPaths);
-      this.getExpandEntries().push(...filteredPaths.map((path) => ({ path })));
+      this.getExpandEntries().push(...filteredPaths.map((path) => ({ path, rawForm: path })));
     }
   }
 
@@ -248,7 +258,7 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
       this.getExpands().push(content);
       // navigation only - a complex property has no entity set and cannot be written to independently,
       // so there is nothing for touchesResource to reach through it; only the entity case is tracked here
-      this.getExpandEntries().push({ path, nestedBuilder: nestedEngine });
+      this.getExpandEntries().push({ path, rawForm: content, nestedBuilder: nestedEngine });
     }
     if (hoistedExpands.length) {
       this.getHoistedExpandsBucket().push(...hoistedExpands.map((fragment) => `${path}/${fragment}`));
@@ -435,19 +445,53 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
    * OData-side ones the query objects recorded, which a rendered `$filter` string has already escaped and
    * quoted beyond recovery.
    *
-   * `hoistedExpandsBucket` is deliberately ignored - it is folded into `expands` by `build()`, and a cache
-   * key is asked for before or after that without the answer being allowed to differ.
+   * `hoistedExpandsBucket`/`expands` are reconciled by `rawForm`, not read as a bare union - see the
+   * `expandItems` computation below for why: `build()` folds `hoistedExpandsBucket` into `expands`, and a
+   * cache key asked for before or after that fold must answer identically.
    *
    * `groupBys` is deliberately ignored too: `$apply` reshapes the response into something that is not the
    * resource any more, so keying it as that resource would be wrong.
    */
-  public getCacheKeyParams(): CacheKeyParams | undefined {
-    const expands = [...(this.expands ?? []), ...(this.hoistedExpandsBucket ?? [])];
+  public getCacheKeyParams(navHops?: NavHopsTable, ownFqName?: string): CacheKeyParams | undefined {
+    const ownHops = navHops && ownFqName ? navHops[ownFqName] : undefined;
+    const entries = this.expandEntries ?? [];
+
+    // expand()/expanding()/addExpands() are the only ways to populate `expands`, and every one of them
+    // also pushes onto expandEntries in the same call - so expandEntries alone is a complete, structured
+    // account of every *direct* expand target on this builder.
+    const expandItems: Array<{ sortKey: string; entry: string | ExpandHop }> = entries.map(
+      ({ path, nestedBuilder }) => {
+        const hop = ownHops?.[path];
+        if (!hop) {
+          return { sortKey: path, entry: path };
+        }
+        const nestedParams = nestedBuilder ? nestedBuilder.getCacheKeyParams(navHops, hop[0]) : undefined;
+        const expandHop: ExpandHop = nestedParams ? [...hop, nestedParams] : hop;
+        return { sortKey: path, entry: expandHop };
+      },
+    );
+
+    // A fragment relayed from a complex-typed descendant (a navigation property reached *through* a
+    // complex property) is never pushed to expandEntries at all - navigation-only hop-shaping (already
+    // decided) does not reach through a complex hop, so it always stays a bare string. It lives in
+    // hoistedExpandsBucket before build() folds it into expands, and in expands afterwards - reconciled
+    // here by rawForm (not path, which a nested expanding()'s rendered content never matches) so the
+    // answer does not depend on whether getCacheKeyParams() is asked before or after a request's URL was
+    // built.
+    const accountedForRawForms = new Set(entries.map((e) => e.rawForm));
+    const hoisted = [...(this.expands ?? []), ...(this.hoistedExpandsBucket ?? [])].filter(
+      (raw) => !accountedForRawForms.has(raw),
+    );
+    for (const raw of hoisted) {
+      expandItems.push({ sortKey: raw, entry: raw });
+    }
+
+    expandItems.sort((a, b) => (a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0));
 
     return normalizeCacheKeyParams({
       filter: this.filters?.length ? foldFilterClauses(this.filters) : undefined,
       select: this.selects?.length ? [...this.selects].sort() : undefined,
-      expand: expands.length ? [...expands].sort() : undefined,
+      expand: expandItems.length ? expandItems.map((i) => i.entry) : undefined,
       orderBy: this.orderBys?.length ? this.orderBys.map((exp) => exp.toString()) : undefined,
       top: this.itemsTop,
       skip: this.itemsToSkip,
