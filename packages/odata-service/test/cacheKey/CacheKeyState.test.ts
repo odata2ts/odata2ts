@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { hopState, reRootToEntity, rootState, withKey, withParams } from "../../src/cacheKey";
+import { hopState, ownFqNameOf, reRootToEntity, rootState, withKey, withParams } from "../../src/cacheKey";
 
 const MEDIUM = "Library.Catalog.Medium";
 const COPY = "Library.Circulation.Copy";
@@ -11,6 +11,7 @@ describe("CacheKeyState", () => {
       typeName: MEDIUM,
       steps: ["list"],
       kindIndex: 0,
+      navHops: {},
       resourceType: MEDIUM,
     });
   });
@@ -217,5 +218,84 @@ describe("CacheKeyState", () => {
     });
     const state = withKey(flattened, { MediumId: 5, InventoryNumber: 7 }, { MediumId: 5, InventoryNumber: 7 });
     expect(state.params).toEqual({ cast: "Library.Catalog.Book" });
+  });
+});
+
+describe("navHops", () => {
+  const HOPS = { [MEDIUM]: { copies: [COPY, "list", "Copies"] as const } };
+
+  test("rootState defaults navHops to an empty table", () => {
+    expect(rootState(MEDIUM, "list").navHops).toEqual({});
+  });
+
+  test("rootState carries the given table", () => {
+    expect(rootState(MEDIUM, "list", { navHops: HOPS }).navHops).toBe(HOPS);
+  });
+
+  test("withKey and withParams carry it forward unchanged", () => {
+    const root = rootState(MEDIUM, "list", { navHops: HOPS });
+    expect(withKey(root, 5, { Id: 5 }).navHops).toBe(HOPS);
+    expect(withParams(root, { cast: "x" }).navHops).toBe(HOPS);
+  });
+
+  test("hopState carries it forward, both the plain-hop and the re-rooted branch", () => {
+    const root = rootState(MEDIUM, "list", { navHops: HOPS });
+    const plainHop = hopState(withKey(root, 5, { Id: 5 }), { typeName: COPY, kind: "list", name: "Copies" });
+    expect(plainHop.navHops).toBe(HOPS);
+
+    const reRootedHop = hopState(withKey(root, 5, { Id: 5 }), {
+      typeName: COPY,
+      kind: "list",
+      name: "Copies",
+      reRoot: { typeName: COPY, filter: { MediumId: 5 } },
+    });
+    expect(reRootedHop.navHops).toBe(HOPS);
+  });
+
+  test("reRootToEntity carries it forward", () => {
+    const root = rootState(COPY, "list", { navHops: HOPS });
+    const state = withKey(root, { MediumId: 5, InventoryNumber: 7 }, { MediumId: 5, InventoryNumber: 7 });
+    expect(reRootToEntity(state, MEDIUM, { Id: 5 }).navHops).toBe(HOPS);
+  });
+});
+
+describe("ownFqNameOf", () => {
+  test("at the root, the type name is already correct", () => {
+    expect(ownFqNameOf(rootState(MEDIUM, "list"))).toBe(MEDIUM);
+  });
+
+  test("a cast wins over everything else", () => {
+    const state = withParams(rootState(MEDIUM, "list"), { cast: "Library.Catalog.Book" });
+    expect(ownFqNameOf(state)).toBe("Library.Catalog.Book");
+  });
+
+  test("after a hierarchical hop, the hop's own type wins - not the route's root", () => {
+    const state = hopState(withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }), {
+      typeName: COPY,
+      kind: "list",
+      name: "Copies",
+      entitySetType: COPY,
+    });
+    expect(ownFqNameOf(state)).toBe(COPY);
+  });
+
+  test("after a re-root, the new type name is already correct", () => {
+    const state = hopState(withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }), {
+      typeName: COPY,
+      kind: "list",
+      name: "Copies",
+      reRoot: { typeName: COPY, filter: { MediumId: 5 } },
+    });
+    expect(ownFqNameOf(state)).toBe(COPY);
+  });
+
+  test("a hop to a contained entity has no resourceType, but its own type is still findable", () => {
+    const state = hopState(withKey(rootState(MEDIUM, "list"), 1, { Id: 1 }), {
+      typeName: CHAPTER,
+      kind: "list",
+      name: "Chapters",
+    });
+    expect(state.resourceType).toBeUndefined();
+    expect(ownFqNameOf(state)).toBe(CHAPTER);
   });
 });

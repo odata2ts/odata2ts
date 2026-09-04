@@ -1,3 +1,5 @@
+import type { NavHopsTable } from "@odata2ts/odata-query-builder";
+
 /** Whether a resource is a collection or a single entity / complex value. */
 export type CacheKeyKind = "list" | "detail";
 
@@ -35,6 +37,13 @@ export interface CacheKeyState {
    * route arrives at has no key until `byId` says so.
    */
   readonly keyValues?: Readonly<Record<string, unknown>>;
+  /**
+   * Every navigation property of every type the generator knows, computed once at generation time. Always
+   * present whenever a `CacheKeyState` exists at all - unlike `resourceType`/`ancestors`/`keyValues`, which
+   * are legitimately absent in some real states, every state originates from `rootState(...)`, which always
+   * sets this under the same `cacheKeys.mode !== "off"` gate that produces the table in the first place.
+   */
+  readonly navHops: NavHopsTable;
 }
 
 /**
@@ -67,12 +76,13 @@ export const OPERATION_ROOT = "$operation";
 export function rootState(
   typeName: string,
   kind: CacheKeyKind,
-  options?: { params?: Readonly<Record<string, unknown>>; entitySetType?: string },
+  options?: { params?: Readonly<Record<string, unknown>>; entitySetType?: string; navHops?: NavHopsTable },
 ): CacheKeyState {
   return {
     typeName,
     steps: [kind],
     kindIndex: 0,
+    navHops: options?.navHops ?? {},
     ...(options?.params ? { params: options.params } : {}),
     // an operation with no entity set behind it has no type to head with and no resource type either
     ...(typeName === OPERATION_ROOT ? {} : { resourceType: options?.entitySetType ?? typeName }),
@@ -130,6 +140,7 @@ export function hopState(state: CacheKeyState, hop: HopDescriptor): CacheKeyStat
       typeName: hop.reRoot.typeName,
       steps: [hop.kind ?? "list"],
       kindIndex: 0,
+      navHops: state.navHops,
       ...(Object.keys(params).length ? { params } : {}),
       ancestors,
       ...(hop.entitySetType ? { resourceType: hop.entitySetType } : {}),
@@ -148,6 +159,7 @@ export function hopState(state: CacheKeyState, hop: HopDescriptor): CacheKeyStat
     typeName: state.typeName,
     steps,
     kindIndex,
+    navHops: state.navHops,
     ancestors,
     ...(hop.entitySetType ? { resourceType: hop.entitySetType } : {}),
   };
@@ -175,10 +187,25 @@ export function reRootToEntity(
     typeName: targetType,
     steps: ["detail", key],
     kindIndex: 0,
+    navHops: state.navHops,
     keyValues,
     resourceType: targetType,
     ancestors: [...(state.ancestors ?? []), [state.typeName, ...state.steps]],
   };
+}
+
+/**
+ * The addressed resource's own declared FQ type - what to look up in `navHops`. Neither `typeName` (stays
+ * the route's root through a hierarchical hop) nor `resourceType` (absent for a contained entity) reliably
+ * names it in every case; the one place it always lives is the most recent structured hop's own type
+ * element in `steps`, found via `kindIndex - 1` - or `typeName` itself at the root or after a re-root,
+ * where `kindIndex` is 0. A subtype cast wins over either, since it narrows what is actually addressed.
+ */
+export function ownFqNameOf(state: CacheKeyState): string {
+  if (typeof state.params?.cast === "string") {
+    return state.params.cast;
+  }
+  return state.kindIndex > 0 ? (state.steps[state.kindIndex - 1] as string) : state.typeName;
 }
 
 function omit(source: Readonly<Record<string, unknown>>, key: string): Record<string, unknown> {
