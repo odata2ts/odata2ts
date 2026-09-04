@@ -1,6 +1,32 @@
 import { FilterClause, QFilterExpression } from "@odata2ts/odata-query-objects";
 
 /**
+ * A `(type, kind, name)` triple describing one navigation property - the same shape a structured hop in
+ * the main key already uses, minus any key value (an expand target is never addressed by a specific key,
+ * and a freshly deep-inserted entity has none of its own yet).
+ */
+export type HopTriple = readonly [type: string, kind: "list" | "detail", name: string];
+
+/**
+ * An expand entry once its navigation property is known: the hop triple, plus - only when a nested
+ * `expanding()` builder ran for this property - that nested builder's own `getCacheKeyParams()` output.
+ *
+ * This 4th slot is not the same thing as a hierarchical hop's `<key>?` in the main key format: an expand
+ * target is never addressed by an explicit key at all, so there is nothing that position could hold
+ * instead, and the two never coexist.
+ */
+export type ExpandHop = readonly [type: string, kind: "list" | "detail", name: string, nestedParams?: CacheKeyParams];
+
+/**
+ * Every navigation property of every entity/complex type the generator knows, keyed first by the owning
+ * type's FQN, then by the property's mapped (TypeScript-facing) name - the name actually present on a
+ * payload or a Q object. One flat object, computed once at generation time; not per-type modules
+ * referencing each other, so there is nothing to be circular about when a deep insert recurses into a
+ * different type's own entry.
+ */
+export type NavHopsTable = Readonly<Record<string, Readonly<Record<string, HopTriple>>>>;
+
+/**
  * The restrictions a query puts on a resource, as a cache key carries them: one flat object, always the
  * last element of the key.
  *
@@ -17,8 +43,8 @@ export type CacheKeyParams = {
   filter?: Record<string, unknown>;
   /** Rendered paths, sorted: their order carries no meaning. */
   select?: Array<string>;
-  /** Rendered paths, sorted: their order carries no meaning. */
-  expand?: Array<string>;
+  /** Rendered paths (bare) or hop-shaped entries where the target's own type is known, sorted by path. */
+  expand?: Array<string | ExpandHop>;
   /** Rendered clauses, in source order: their order does carry meaning. */
   orderBy?: Array<string>;
   top?: number;
