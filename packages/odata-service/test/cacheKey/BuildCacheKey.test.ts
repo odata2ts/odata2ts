@@ -161,4 +161,40 @@ describe("buildInvalidates", () => {
       [COPY, "list"],
     ]);
   });
+
+  test("deepEdit params contribute an additional bare type entry per deep-inserted type", () => {
+    const LOAN = "Library.Circulation.Loan";
+    const state = withParams(rootState(MEMBER, "list"), {
+      deepEdit: [[LOAN, "list", "Loans"]],
+    });
+    expect(buildInvalidates(state)).toEqual([
+      [MEMBER, "list"],
+      [LOAN, "list"],
+    ]);
+  });
+
+  test("a deepEdit hop matching the write's own type collapses via the existing redundancy pass", () => {
+    const state = withParams(rootState(MEMBER, "list"), {
+      deepEdit: [[MEMBER, "list", "Members"]],
+    });
+    expect(buildInvalidates(state)).toEqual([[MEMBER, "list"]]);
+  });
+
+  test("multiple different deepEdit hops each contribute their own entry", () => {
+    const LOAN = "Library.Circulation.Loan";
+    expect(
+      buildInvalidates(
+        withParams(rootState(MEMBER, "list"), {
+          deepEdit: [
+            [LOAN, "list", "Loans"],
+            [RESERVATION, "list", "Reservations"],
+          ],
+        }),
+      ),
+    ).toEqual([
+      [MEMBER, "list"],
+      [LOAN, "list"],
+      [RESERVATION, "list"],
+    ]);
+  });
 });

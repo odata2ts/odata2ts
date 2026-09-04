@@ -1,3 +1,4 @@
+import type { HopTriple } from "@odata2ts/odata-query-builder";
 import { CacheKeyState } from "./CacheKeyState";
 import { sameElement } from "./KeyElementEquality";
 
@@ -44,14 +45,18 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 /**
  * The keys a write makes stale.
  *
- * Three rules: the addressed resource's own key without its params object (a write invalidates the
+ * Four rules: the addressed resource's own key without its params object (a write invalidates the
  * resource however it was filtered, sorted or paged), the resource's own type as a bare list key where it
- * belongs to an entity set, and the key of every ancestor hop - which is what catches a parent that was
- * fetched with `$expand`. Entries another entry is a prefix of are dropped; what is left is coarsest
- * first.
+ * belongs to an entity set, the key of every ancestor hop - which is what catches a parent that was
+ * fetched with `$expand` - and a bare list-key entry per type the write's own payload deep-inserted
+ * (`state.params.deepEdit`, populated by `buildDeepEditHops` at the write's own call site). Entries another
+ * entry is a prefix of are dropped; what is left is coarsest first.
  *
  * Rule 2 is skipped where the resource has no entity set of its own - a contained entity, a complex value:
- * nothing is ever registered under such a key.
+ * nothing is ever registered under such a key. `deepEdit` hops read straight off `state.params`, unlike
+ * every other params entry: they are not a restriction on the addressed resource the way `filter`/`cast`
+ * are, so there is nothing to drop them for - they name additional, unrelated types this same write also
+ * touched, each with no key of its own yet since the entity is freshly created.
  *
  * Deliberately does **not** name the resource's children. Under `hierarchical` the ancestor entry covers
  * them by prefix; under `typeFlattening` it does not, and an application that needs it invalidates the
@@ -59,11 +64,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * exact-object matching, which prefix invalidation cannot do anyway.
  */
 export function buildInvalidates(state: CacheKeyState): ReadonlyArray<ReadonlyArray<unknown>> {
-  // ancestors in route order (coarsest first), then the resource itself, then its type
+  const deepEditHops = (state.params?.deepEdit as ReadonlyArray<HopTriple> | undefined) ?? [];
+
+  // ancestors in route order (coarsest first), then the resource itself, then its type, then whatever it deep-inserted
   const candidates: Array<ReadonlyArray<unknown>> = [
     ...(state.ancestors ?? []),
     [state.typeName, ...state.steps],
     ...(state.resourceType ? [[state.resourceType, "list"]] : []),
+    ...deepEditHops.map((hop) => [hop[0], "list"]),
   ];
 
   // an entry another entry properly prefixes is redundant - invalidating the prefix reaches it
