@@ -114,8 +114,23 @@ describe("cache key threading", () => {
 
   test("a command with no state computes its (undefined) key once, not on every access", () => {
     // `undefined` is both "not computed yet" and the legitimate answer for a client generated without
-    // `cacheKeys` - the memo must tell those apart, or every access re-runs the whole converter chain,
-    // which for a write means re-converting the entire request payload on every read of `.cacheKey`.
+    // `cacheKeys` - the memo must tell those apart, or every access re-runs the whole converter chain.
+    let calls = 0;
+    const cmd = new UrlGetRequestCmd(client, "Media", {
+      mainRequestConverter: {
+        convertToOData: (data: any) => {
+          calls++;
+          return data;
+        },
+      },
+    });
+
+    expect(cmd.cacheKey).toBeUndefined();
+    expect(cmd.cacheKey).toBeUndefined();
+    expect(calls).toBe(1);
+  });
+
+  test("a write's cacheKey is undefined even with a full cacheKeyState - and never touches the converter chain to find that out", () => {
     let calls = 0;
     const cmd = new UrlWriteRequestCmd(
       client,
@@ -123,6 +138,7 @@ describe("cache key threading", () => {
       "Media(5)",
       { title: "x" },
       {
+        cacheKeyState: withKey(rootState(MEDIUM, "list"), 5, { Id: 5 }),
         mainRequestConverter: {
           convertToOData: (data: any) => {
             calls++;
@@ -134,6 +150,8 @@ describe("cache key threading", () => {
 
     expect(cmd.cacheKey).toBeUndefined();
     expect(cmd.cacheKey).toBeUndefined();
-    expect(calls).toBe(1);
+    // a write has nothing to be stored under - only something to make stale, via `invalidates` on its
+    // response - so the getter never even runs the request converter chain to look
+    expect(calls).toBe(0);
   });
 });

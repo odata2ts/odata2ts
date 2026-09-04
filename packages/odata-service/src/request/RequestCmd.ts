@@ -135,17 +135,21 @@ export abstract class RequestCmd<
    * The key this request's resource should be cached under - available before the request goes out, which
    * is when a cache needs it.
    *
+   * `undefined` for any method but `GET`: a write has nothing to be stored under, only something to make
+   * stale - that is what {@link invalidates} on its response is for. Mirrors that asymmetry from the other
+   * side: a read never gets `invalidates`, a write never gets a `cacheKey`.
+   *
    * Read through the converter chain, so any converter's effect on the resource identity is visible
    * without a second call. Lazy is required rather than stylistic: `getUrl()` cannot run from the base
    * constructor, because subclasses overriding it read parameter-property fields TypeScript assigns only
    * after `super()` returns.
    *
-   * `undefined` means this client was not generated with `cacheKeys` - which a consuming application has
-   * to handle anyway when it is shared across services.
+   * `undefined` also means this client was not generated with `cacheKeys` - which a consuming application
+   * has to handle anyway when it is shared across services.
    */
   public get cacheKey(): ReadonlyArray<unknown> | undefined {
     if (!this.cacheKeyComputed) {
-      const state = this.getInfoConverted().cacheKeyState;
+      const state = this.method === ODataHttpMethods.Get ? this.getInfoConverted().cacheKeyState : undefined;
       this.cachedCacheKey = state && buildCacheKey(state, this.options.queryParams);
       this.cacheKeyComputed = true;
     }

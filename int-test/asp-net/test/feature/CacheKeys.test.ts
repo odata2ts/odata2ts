@@ -162,31 +162,35 @@ describe("ASP.NET Library: cache keys", () => {
     expect(touchesResource("Library.Catalog.Medium", reRootedKey)).toBe(false);
   });
 
-  test("invalidates on a PATCH, a POST and a DELETE", async () => {
+  test("invalidates on a PATCH, a POST and a DELETE - and none of the three has a cacheKey of its own", async () => {
     // created directly on the entity set (not navigated through Medium) - the server only accepts a POST
     // at an entity set's own URL, so this is also the shape with no ancestor: own key without params and
     // own type collapse onto the identical entry, and rule 3 contributes nothing without a navigation
-    const created = await LIBRARY.Copies()
-      .create({
-        MediumId: BOOK_DER_PROZESS,
-        InventoryNumber: CACHE_KEY_COPY + 1,
-        Condition: 4,
-        IsLoanable: true,
-        WeightKg: 0.6,
-      })
-      .execute();
+    const createRequest = LIBRARY.Copies().create({
+      MediumId: BOOK_DER_PROZESS,
+      InventoryNumber: CACHE_KEY_COPY + 1,
+      Condition: 4,
+      IsLoanable: true,
+      WeightKg: 0.6,
+    });
+    expect(createRequest.cacheKey).toBeUndefined();
+    const created = await createRequest.execute();
     expect(created.status).toBe(201);
     expect(created.invalidates).toEqual([["Library.Circulation.Copy", "list"]]);
 
     const patchKey = { MediumId: BOOK_DER_PROZESS, InventoryNumber: CACHE_KEY_COPY + 1 };
-    const patched = await LIBRARY.Copies(patchKey).patch({ Condition: 5 }).ignoreETag().execute();
+    const patchRequest = LIBRARY.Copies(patchKey).patch({ Condition: 5 }).ignoreETag();
+    expect(patchRequest.cacheKey).toBeUndefined();
+    const patched = await patchRequest.execute();
     expect(patched.status).toBe(204);
     expect(patched.invalidates).toEqual([
       ["Library.Circulation.Copy", "detail", patchKey],
       ["Library.Circulation.Copy", "list"],
     ]);
 
-    const deleted = await LIBRARY.Copies(patchKey).delete().ignoreETag().execute();
+    const deleteRequest = LIBRARY.Copies(patchKey).delete().ignoreETag();
+    expect(deleteRequest.cacheKey).toBeUndefined();
+    const deleted = await deleteRequest.execute();
     expect(deleted.status).toBe(204);
     expect(deleted.invalidates).toEqual([
       ["Library.Circulation.Copy", "detail", patchKey],
