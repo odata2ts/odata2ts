@@ -62,11 +62,18 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
    * the wire (a bare path for `expand()`, a fully rendered sub-query string for `expanding()`) and must
    * stay untouched by anything cache-key related.
    *
+   * `path` is the rendered OData path, used for sorting and for `rawForm`-based reconciliation with
+   * `expands`/`hoistedExpandsBucket`. `mappedName` is the TypeScript-facing property key `NavHopsTable` is
+   * actually keyed by - the same name a deep-insert payload uses - and is only known where the caller
+   * passed an actual `keyof Q` (never for `addExpands()`'s raw strings, and never for a `QSelectExpression`
+   * passed to `expand()`, neither of which name a property `NavHopsTable` could ever have an entry for).
+   *
    * `rawForm` is exactly what this same call also pushed into `expands` - needed to tell a direct entry
    * apart from a hoisted one reconciled back from `expands` after `build()` has folded
    * `hoistedExpandsBucket` into it, without depending on whether that fold has happened yet.
    */
-  private expandEntries: Array<{ path: string; rawForm: string; nestedBuilder?: ODataQueryBuilder<any> }> | undefined;
+  private expandEntries:
+    Array<{ path: string; mappedName?: string; rawForm: string; nestedBuilder?: ODataQueryBuilder<any> }> | undefined;
 
   private getExpandEntries() {
     if (!this.expandEntries) {
@@ -137,6 +144,8 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     const filteredPaths = paths.filter((p): p is string => !!p);
     if (filteredPaths.length) {
       this.getExpands().push(...filteredPaths);
+      // a raw path string, not a `keyof Q` - there is no mapped name to look up in NavHopsTable with, so
+      // an addExpands() entry can never be enriched, whatever string happens to be passed
       this.getExpandEntries().push(...filteredPaths.map((path) => ({ path, rawForm: path })));
     }
   };
@@ -202,10 +211,21 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
   } */
 
   public expand(props: NullableParamList<keyof Q | QSelectExpression>) {
+    // filterSelectAndMapPath's own first step is this identical filter, so filteredProps lines up
+    // position-for-position with filteredPaths below - and, since expand() rejects flat/complex properties
+    // at the type level (the one case that would expand one prop into several leaf paths), each valid
+    // entry here resolves to exactly one path, keeping the two arrays the same length too
+    const filteredProps = props.filter((p): p is keyof Q | QSelectExpression => !!p);
     const filteredPaths = this.filterSelectAndMapPath(props);
     if (filteredPaths.length) {
       this.getExpands().push(...filteredPaths);
-      this.getExpandEntries().push(...filteredPaths.map((path) => ({ path, rawForm: path })));
+      this.getExpandEntries().push(
+        ...filteredPaths.map((path, i) => ({
+          path,
+          rawForm: path,
+          mappedName: typeof filteredProps[i] === "string" ? (filteredProps[i] as string) : undefined,
+        })),
+      );
     }
   }
 
@@ -258,7 +278,12 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
       this.getExpands().push(content);
       // navigation only - a complex property has no entity set and cannot be written to independently,
       // so there is nothing for touchesResource to reach through it; only the entity case is tracked here
-      this.getExpandEntries().push({ path, rawForm: content, nestedBuilder: nestedEngine });
+      this.getExpandEntries().push({
+        path,
+        rawForm: content,
+        mappedName: typeof prop === "string" ? prop : undefined,
+        nestedBuilder: nestedEngine,
+      });
     }
     if (hoistedExpands.length) {
       this.getHoistedExpandsBucket().push(...hoistedExpands.map((fragment) => `${path}/${fragment}`));
@@ -458,10 +483,12 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
 
     // expand()/expanding()/addExpands() are the only ways to populate `expands`, and every one of them
     // also pushes onto expandEntries in the same call - so expandEntries alone is a complete, structured
-    // account of every *direct* expand target on this builder.
+    // account of every *direct* expand target on this builder. Looked up by mappedName, not path: that is
+    // the name NavHopsTable is keyed by, matching the TypeScript-facing property a deep-insert payload
+    // would also use it under - the rendered OData path only ever serves sorting and rawForm reconciliation.
     const expandItems: Array<{ sortKey: string; entry: string | ExpandHop }> = entries.map(
-      ({ path, nestedBuilder }) => {
-        const hop = ownHops?.[path];
+      ({ path, mappedName, nestedBuilder }) => {
+        const hop = mappedName ? ownHops?.[mappedName] : undefined;
         if (!hop) {
           return { sortKey: path, entry: path };
         }

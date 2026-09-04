@@ -2,7 +2,7 @@ import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataModelPayloadFor, ODataModelResponseFor, ODataVersionV4 } from "@odata2ts/odata-core";
 import { ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { ModelResponseConverterV4, QueryObjectModel } from "@odata2ts/odata-query-objects";
-import { CacheKeyState } from "../cacheKey/index.js";
+import { buildDeepEditHops, CacheKeyState, ownFqNameOf, withParams } from "../cacheKey/index.js";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV4, UrlBuilderWriteRequestCmdV4, UrlWriteRequestCmd } from "../request";
 import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
@@ -75,6 +75,10 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
     const actualPath = dontUseCastPathSegment ? basePath : path;
     const builder = createModelQueryBuilder(queryFn, actualPath);
 
+    const deepEditHops = cacheKeyState && buildDeepEditHops(cacheKeyState.navHops, ownFqNameOf(cacheKeyState), model);
+    const stateForRequest =
+      deepEditHops && cacheKeyState ? withParams(cacheKeyState, { deepEdit: deepEditHops }) : cacheKeyState;
+
     return new UrlBuilderWriteRequestCmdV4<
       EntityModificationResponseV4<Response, T, V>,
       Q,
@@ -85,7 +89,7 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
       concurrency: getConcurrencyOptions(),
-      cacheKeyState,
+      cacheKeyState: stateForRequest,
     });
   }
 
@@ -127,6 +131,10 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
     const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
     const actualPath = dontUseCastPathSegment ? basePath : path;
 
+    const deepEditHops = cacheKeyState && buildDeepEditHops(cacheKeyState.navHops, ownFqNameOf(cacheKeyState), model);
+    const stateForRequest =
+      deepEditHops && cacheKeyState ? withParams(cacheKeyState, { deepEdit: deepEditHops }) : cacheKeyState;
+
     return new UrlBuilderWriteRequestCmdV4<
       EntityModificationResponseV4<Response, T, V>,
       Q,
@@ -137,7 +145,7 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
       concurrency: getConcurrencyOptions(),
-      cacheKeyState,
+      cacheKeyState: stateForRequest,
     });
   }
 
@@ -168,6 +176,7 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
     const { client, qModel, createModelQueryBuilder, getDefaultHeaders, getConcurrencyOptions, cacheKeyState } =
       this.__base;
     const builder = createModelQueryBuilder(queryFn);
+    const ownFqName = cacheKeyState && ownFqNameOf(cacheKeyState);
 
     return new UrlBuilderRequestCmdV4<ODataModelResponseFor<V, ReturnType>, Q, ModelQueryBuilderV4<Q>>(
       client,
@@ -180,7 +189,7 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
         mainResponseConverter: new ModelResponseConverterV4(qModel),
         concurrency: getConcurrencyOptions(),
         cacheKeyState,
-        queryParams: builder.getCacheKeyParams(),
+        queryParams: builder.getCacheKeyParams(cacheKeyState?.navHops, ownFqName),
       },
     );
   }

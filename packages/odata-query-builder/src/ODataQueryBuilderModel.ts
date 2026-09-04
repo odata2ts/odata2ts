@@ -10,7 +10,7 @@ import {
   QSelectExpression,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { CacheKeyParams } from "./CacheKeyParams.js";
+import { CacheKeyParams, NavHopsTable } from "./CacheKeyParams.js";
 
 /**
  * Extracts the wrapped entity from QEntityPath, QEntityCollectionPath, QComplexPath, QComplexCollectionPath
@@ -374,7 +374,7 @@ export interface CollectionQueryBuilderV4<Q extends QueryObjectModel> extends Pi
   clone: () => CollectionQueryBuilderV4<Q>;
 
   /** See {@link CollectionQueryBuilderV2.getCacheKeyParams}. */
-  getCacheKeyParams: () => CacheKeyParams | undefined;
+  getCacheKeyParams: (navHops?: NavHopsTable, ownFqName?: string) => CacheKeyParams | undefined;
 }
 
 /**
@@ -391,7 +391,7 @@ export interface ModelQueryBuilderV4<Q extends QueryObjectModel> extends Pick<
   clone: () => ModelQueryBuilderV4<Q>;
 
   /** See {@link CollectionQueryBuilderV2.getCacheKeyParams}. */
-  getCacheKeyParams: () => CacheKeyParams | undefined;
+  getCacheKeyParams: (navHops?: NavHopsTable, ownFqName?: string) => CacheKeyParams | undefined;
 }
 
 export interface ExpandingCollectionQueryBuilderV4<Q extends QueryObjectModel> extends Pick<

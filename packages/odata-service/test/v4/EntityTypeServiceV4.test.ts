@@ -1,7 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { FlexibleODataModelPayloadV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, EntityTypeServiceV4, getODataVersionHeaders, RequestInfo } from "../../src";
+import { DEFAULT_HEADERS, EntityTypeServiceV4, getODataVersionHeaders, RequestInfo, rootState } from "../../src";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { EditableFlightModel, PlanItemService } from "../fixture/v4/BaseTypeModel";
@@ -349,5 +349,45 @@ describe("EntityTypeService V4 Tests", () => {
     const response = await testService.getScore().execute();
 
     expect(response.data?.value).toBe("45");
+  });
+
+  describe("cache keys: expand enrichment and deepEdit", () => {
+    const PERSON = "Test.Person";
+    const navHops = { [PERSON]: { friends: [PERSON, "list", "Friends"] as const } };
+
+    test("query() passes navHops/ownFqName into the builder for expand enrichment", async () => {
+      const service = new PersonModelService(
+        odataClient,
+        BASE_URL,
+        NAME,
+        undefined,
+        rootState(PERSON, "detail", { navHops }),
+      );
+      const request = service.query((b) => b.expand("friends"));
+      expect(request.cacheKey).toEqual([PERSON, "detail", { expand: [[PERSON, "list", "Friends"]] }]);
+    });
+
+    test("patch() attaches deepEdit to invalidates when the payload deep-inserts a nav property", async () => {
+      const TRIP = "Test.Trip";
+      const deepEditHops = { [PERSON]: { friends: [TRIP, "list", "Friends"] as const } };
+      const service = new PersonModelService(
+        odataClient,
+        BASE_URL,
+        NAME,
+        undefined,
+        rootState(PERSON, "detail", { navHops: deepEditHops }),
+      );
+      const model = {
+        age: "45",
+        friends: [{ userName: "buddy", age: "15", favFeature: Feature.Feature1, features: [] }],
+      } as unknown as Partial<EditablePersonModel>;
+
+      const response = await service.patch(model).ignoreETag().execute();
+      expect(response.invalidates).toEqual([
+        [PERSON, "detail"],
+        [PERSON, "list"],
+        [TRIP, "list"],
+      ]);
+    });
   });
 });

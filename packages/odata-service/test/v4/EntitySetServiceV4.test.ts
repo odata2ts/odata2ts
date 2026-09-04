@@ -1,7 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { FlexibleODataModelPayloadV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, getODataVersionHeaders, RequestInfo } from "../../src";
+import { DEFAULT_HEADERS, getODataVersionHeaders, RequestInfo, rootState } from "../../src";
 import { commonEntitySetTests } from "../EntitySetServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import {
@@ -284,6 +284,48 @@ describe("V4 EntitySetService Test", () => {
     test("byId builds the entity-type service for the alternate key just as well as for the primary one", () => {
       expect(toTest.byId("7").getPath()).toBe(`${NAME}(7)`);
       expect(toTest.byId({ name: "russell" }).getPath()).toBe(`${NAME}(NAME='russell')`);
+    });
+  });
+
+  describe("cache keys: expand enrichment and deepEdit", () => {
+    const PERSON = "Test.Person";
+    const navHops = { [PERSON]: { friends: [PERSON, "list", "Friends"] as const } };
+
+    test("query() passes navHops/ownFqName into the builder for expand enrichment", async () => {
+      const service = new PersonModelCollectionService(
+        odataClient,
+        BASE_URL,
+        NAME,
+        undefined,
+        rootState(PERSON, "list", { navHops }),
+      );
+      const request = service.query((b) => b.expand("friends"));
+      expect(request.cacheKey).toEqual([PERSON, "list", { expand: [[PERSON, "list", "Friends"]] }]);
+    });
+
+    test("create() attaches deepEdit to invalidates when the payload deep-inserts a nav property", async () => {
+      const TRIP = "Test.Trip";
+      const deepEditHops = { [PERSON]: { friends: [TRIP, "list", "Friends"] as const } };
+      const service = new PersonModelCollectionService(
+        odataClient,
+        BASE_URL,
+        NAME,
+        undefined,
+        rootState(PERSON, "list", { navHops: deepEditHops }),
+      );
+      const model = {
+        userName: "tester",
+        age: "14",
+        favFeature: Feature.Feature1,
+        features: [Feature.Feature1],
+        friends: [{ userName: "buddy", age: "15", favFeature: Feature.Feature1, features: [] }],
+      } as unknown as EditablePersonModel;
+
+      const response = await service.create(model).execute();
+      expect(response.invalidates).toEqual([
+        [PERSON, "list"],
+        [TRIP, "list"],
+      ]);
     });
   });
 });

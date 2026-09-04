@@ -134,30 +134,38 @@ describe("CacheKeyParams", () => {
     };
 
     test("without navHops, expand stays bare strings - unchanged, backward compatible", () => {
-      builder.addExpands("friends");
+      builder.expand(["friends"]);
       expect(builder.getCacheKeyParams()).toEqual({ expand: ["friends"] });
     });
 
     test("a hit turns the bare path into a hop triple", () => {
-      builder.addExpands("friends");
+      builder.expand(["friends"]);
       expect(builder.getCacheKeyParams(navHops, PERSON)).toEqual({ expand: [[PERSON, "list", "Friends"]] });
     });
 
     test("a miss - ownFqName not in the table, or navHops omitted - keeps the bare path", () => {
-      builder.addExpands("friends");
+      builder.expand(["friends"]);
       expect(builder.getCacheKeyParams(navHops, "Some.Other.Type")).toEqual({ expand: ["friends"] });
       expect(builder.getCacheKeyParams(undefined, PERSON)).toEqual({ expand: ["friends"] });
     });
 
+    test("addExpands() never enriches - it takes a raw path string, never a mapped keyof Q, so there is nothing to look up", () => {
+      // "friends" happens to be both the mapped name and the rendered path in this fixture, but
+      // addExpands() has no way to know that - it stays bare regardless of a coincidental string match
+      builder.addExpands("friends");
+      expect(builder.getCacheKeyParams(navHops, PERSON)).toEqual({ expand: ["friends"] });
+    });
+
     test("a path with no table entry at all (e.g. a complex property) stays a bare string, mixed with hop entries", () => {
-      builder.addExpands("friends", "address");
+      builder.expand(["friends"]);
+      builder.addExpands("address");
       expect(builder.getCacheKeyParams(navHops, PERSON)).toEqual({
         expand: ["address", [PERSON, "list", "Friends"]],
       });
     });
 
     test("sorting mixes bare paths and hop triples by path, order carries no meaning", () => {
-      builder.addExpands("friends", "bestFriend");
+      builder.expand(["friends", "bestFriend"]);
       expect(builder.getCacheKeyParams(navHops, PERSON)).toEqual({
         expand: [
           [PERSON, "detail", "BestFriend"],
