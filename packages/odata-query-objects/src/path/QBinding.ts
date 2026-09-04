@@ -40,6 +40,14 @@ export class QBinding<Id> {
   }
 
   /**
+   * The name of the entity set this binding's target belongs to - the same name {@link format} already
+   * builds every URL from, exposed on its own for a caller after the resource's identity rather than a URL.
+   */
+  public getEntitySetName(): string {
+    return this.idFunctionFn().getName();
+  }
+
+  /**
    * The property name the binding goes by, which is the navigation property itself in every version but
    * 4.0 - meaning that in those versions a binding and a deep insert share one property.
    */
