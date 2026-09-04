@@ -69,6 +69,20 @@ describe("ASP.NET Library: cache keys", () => {
     expectTypeOf(result).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Medium>>>();
   });
 
+  test("$expand produces a hop-shaped entry touchesResource can reach", async () => {
+    const request = LIBRARY.Media(BOOK_DER_PROZESS).query((builder) => builder.expand("Copies"));
+    expect(request.cacheKey).toEqual([
+      "Library.Catalog.Medium",
+      "detail",
+      BOOK_DER_PROZESS,
+      { expand: [["Library.Circulation.Copy", "list", "Copies"]] },
+    ]);
+    expect(touchesResource("Library.Circulation.Copy", request.cacheKey!)).toBe(true);
+
+    const result = await request.execute();
+    expect(result.status).toBe(200);
+  });
+
   test("grade B: /Members(...)/Loans re-roots through the navigation path", async () => {
     const member = await LIBRARY.Members()
       .create({
@@ -78,6 +92,12 @@ describe("ASP.NET Library: cache keys", () => {
       })
       .execute();
     expect(member.status).toBe(201);
+    // the deep-inserted Loan contributes its own bare-type entry, additionally to the write's own -
+    // this is what lets an application invalidate the Loan cache without knowing the new Loan's id
+    expect(member.invalidates).toEqual([
+      ["Library.Circulation.Member", "list"],
+      ["Library.Circulation.Loan", "list"],
+    ]);
     const memberId = member.data.Id;
 
     try {
