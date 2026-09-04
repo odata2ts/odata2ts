@@ -50,6 +50,21 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
    */
   private hoistedExpandsBucket: Array<string> | undefined;
 
+  /**
+   * Structured, per-property information `getCacheKeyParams()` needs to enrich an expand entry - kept
+   * entirely separate from `expands`/`hoistedExpandsBucket`, which hold whatever `build()` renders onto
+   * the wire (a bare path for `expand()`, a fully rendered sub-query string for `expanding()`) and must
+   * stay untouched by anything cache-key related.
+   */
+  private expandEntries: Array<{ path: string; nestedBuilder?: ODataQueryBuilder<any> }> | undefined;
+
+  private getExpandEntries() {
+    if (!this.expandEntries) {
+      this.expandEntries = [];
+    }
+    return this.expandEntries;
+  }
+
   constructor(path: string, qEntity: Q, config?: ODataQueryBuilderConfig) {
     if (!qEntity || !path || !path.trim()) {
       throw new Error("A valid collection name must be provided!");
@@ -112,6 +127,7 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     const filteredPaths = paths.filter((p): p is string => !!p);
     if (filteredPaths.length) {
       this.getExpands().push(...filteredPaths);
+      this.getExpandEntries().push(...filteredPaths.map((path) => ({ path })));
     }
   };
 
@@ -179,6 +195,7 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     const filteredPaths = this.filterSelectAndMapPath(props);
     if (filteredPaths.length) {
       this.getExpands().push(...filteredPaths);
+      this.getExpandEntries().push(...filteredPaths.map((path) => ({ path })));
     }
   }
 
@@ -229,6 +246,9 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
       this.getSelects().push(content);
     } else {
       this.getExpands().push(content);
+      // navigation only - a complex property has no entity set and cannot be written to independently,
+      // so there is nothing for touchesResource to reach through it; only the entity case is tracked here
+      this.getExpandEntries().push({ path, nestedBuilder: nestedEngine });
     }
     if (hoistedExpands.length) {
       this.getHoistedExpandsBucket().push(...hoistedExpands.map((fragment) => `${path}/${fragment}`));

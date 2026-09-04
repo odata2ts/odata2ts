@@ -1,5 +1,6 @@
 import { QFilterExpression, QStringPath } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, test } from "vitest";
+import { createExpandingQueryBuilderV4 } from "../src";
 import { ODataQueryBuilder } from "../src/ODataQueryBuilder";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 
@@ -102,5 +103,12 @@ describe("CacheKeyParams", () => {
   test("an empty filter expression contributes nothing", () => {
     builder.filter([new QFilterExpression()]);
     expect(builder.getCacheKeyParams()).toBeUndefined();
+  });
+
+  test("expanding() still renders exactly the same $expand content as before - tracking the structured entry alongside it changes nothing observable", () => {
+    builder.expanding(createExpandingQueryBuilderV4, "friends", (nested: any) => {
+      nested.filter(qPerson.friends.getEntity().name.equals("x"));
+    });
+    expect(builder.build()).toBe("Persons?%24expand=friends(%24filter%3Dname%20eq%20'x')");
   });
 });
