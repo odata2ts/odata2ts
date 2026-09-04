@@ -60,12 +60,19 @@ format.
 **Seeding**:
 Pre-populating a cache (or, here, `ResourceIdentityHandler`'s route↔canonical-resource map) with a value it
 has not itself fetched or observed — TkDodo's term (cited by the official TanStack Query docs' "Seeding the
-Query Cache"), the same source as [[Kind marker]]'s list/detail convention. `ResourceIdentityHandler`
-deliberately has none: every mapping is learned only from an actual observed response, never pre-declared
-statically or set manually.
+Query Cache"), the same source as [[Kind marker]]'s list/detail convention.
 _Avoid_: "cold start" — implies a temporary state that warms up with ordinary usage. The real shape is
 structural, not temporal: a route pair that's never read together in the same client instance stays
-unmapped indefinitely, however long the app runs, since there's no seeding mechanism to pre-establish it.
+unmapped indefinitely, however long the app runs, unless it's seeded.
+
+`ResourceIdentityHandler` supports **hydration-style** seeding only: `dehydrate()`/`hydrate()` bulk-transfer
+the exact `(canonicalId, hierarchicalKey)` pairs `record()`/`resolve()` already traffic in — e.g. across an
+SSR→client boundary, or persisted across sessions — no new data shape, mirroring TanStack's own
+`dehydrate`/`hydrate`. It deliberately does *not* support **static** seeding (populating a mapping before
+*any* read has ever happened, anywhere): a canonical id needs a real key value, and reaching a resource's
+*other* routes without ever having observed them needs the referential-constraint reasoning
+[[Convergence]] deliberately dropped — reintroducing it here would just be that mechanism through a side
+door.
 
 **`ResourceIdentityHandler`**:
 A runtime store (client-held, like `ConcurrencyHandler`) recording which cache keys were observed, via
