@@ -11,13 +11,7 @@ import {
   QueryObjectModel,
   searchTerm,
 } from "@odata2ts/odata-query-objects";
-import {
-  CacheKeyParams,
-  ExpandHop,
-  foldFilterClauses,
-  NavHopsTable,
-  normalizeCacheKeyParams,
-} from "./CacheKeyParams.js";
+import { CacheKeyParams, ExpandHop, foldFilterClauses, normalizeCacheKeyParams } from "./CacheKeyParams.js";
 import { ODataOperators } from "./ODataModel";
 import {
   ExpandingCollectionQueryBuilderV4,
@@ -62,18 +56,26 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
    * the wire (a bare path for `expand()`, a fully rendered sub-query string for `expanding()`) and must
    * stay untouched by anything cache-key related.
    *
-   * `path` is the rendered OData path, used for sorting and for `rawForm`-based reconciliation with
-   * `expands`/`hoistedExpandsBucket`. `mappedName` is the TypeScript-facing property key `NavHopsTable` is
-   * actually keyed by - the same name a deep-insert payload uses - and is only known where the caller
-   * passed an actual `keyof Q` (never for `addExpands()`'s raw strings, and never for a `QSelectExpression`
-   * passed to `expand()`, neither of which name a property `NavHopsTable` could ever have an entry for).
+   * `path` is the rendered OData path (a nav/complex property's own odataName, read directly off its
+   * Q-object wrapper - never a type, never looked up in a generated table), used both as the hop's own
+   * identity and for sorting and `rawForm`-based reconciliation with `expands`/`hoistedExpandsBucket`.
+   * `kind` is only known where the caller passed an actual `keyof Q` naming a nav/complex property (never
+   * for `addExpands()`'s raw strings, and never for a `QSelectExpression` passed to `expand()`, neither of
+   * which resolve to a Q-object property this could read a kind off) - its absence is exactly what marks
+   * an entry as a bare, unenriched path rather than a hop.
    *
    * `rawForm` is exactly what this same call also pushed into `expands` - needed to tell a direct entry
    * apart from a hoisted one reconciled back from `expands` after `build()` has folded
    * `hoistedExpandsBucket` into it, without depending on whether that fold has happened yet.
    */
   private expandEntries:
-    Array<{ path: string; mappedName?: string; rawForm: string; nestedBuilder?: ODataQueryBuilder<any> }> | undefined;
+    | Array<{
+        path: string;
+        kind?: "list" | "detail";
+        rawForm: string;
+        nestedBuilder?: ODataQueryBuilder<any>;
+      }>
+    | undefined;
 
   private getExpandEntries() {
     if (!this.expandEntries) {
@@ -144,8 +146,8 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     const filteredPaths = paths.filter((p): p is string => !!p);
     if (filteredPaths.length) {
       this.getExpands().push(...filteredPaths);
-      // a raw path string, not a `keyof Q` - there is no mapped name to look up in NavHopsTable with, so
-      // an addExpands() entry can never be enriched, whatever string happens to be passed
+      // a raw path string, not a `keyof Q` - there is no Q-object property to read a kind off, so an
+      // addExpands() entry can never be enriched, whatever string happens to be passed
       this.getExpandEntries().push(...filteredPaths.map((path) => ({ path, rawForm: path })));
     }
   };
@@ -220,11 +222,20 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     if (filteredPaths.length) {
       this.getExpands().push(...filteredPaths);
       this.getExpandEntries().push(
-        ...filteredPaths.map((path, i) => ({
-          path,
-          rawForm: path,
-          mappedName: typeof filteredProps[i] === "string" ? (filteredProps[i] as string) : undefined,
-        })),
+        ...filteredPaths.map((path, i) => {
+          const prop = filteredProps[i];
+          // "*" (a select()-only wildcard, occasionally passed here anyway despite the type system) names
+          // no real property of Q - guarded here rather than assumed away, since it resolves to `undefined`
+          // and has no `isCollectionType()` to read a kind off
+          const entityProp =
+            typeof prop === "string" ? this.getEntityProp<QEntityPathModel<Q>>(prop as keyof Q) : undefined;
+          const kind = entityProp
+            ? entityProp.isCollectionType()
+              ? ("list" as const)
+              : ("detail" as const)
+            : undefined;
+          return { path, rawForm: path, kind };
+        }),
       );
     }
   }
@@ -281,7 +292,7 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
       this.getExpandEntries().push({
         path,
         rawForm: content,
-        mappedName: typeof prop === "string" ? prop : undefined,
+        kind: entityProp.isCollectionType() ? "list" : "detail",
         nestedBuilder: nestedEngine,
       });
     }
@@ -477,23 +488,21 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
    * `groupBys` is deliberately ignored too: `$apply` reshapes the response into something that is not the
    * resource any more, so keying it as that resource would be wrong.
    */
-  public getCacheKeyParams(navHops?: NavHopsTable, ownFqName?: string): CacheKeyParams | undefined {
-    const ownHops = navHops && ownFqName ? navHops[ownFqName] : undefined;
+  public getCacheKeyParams(): CacheKeyParams | undefined {
     const entries = this.expandEntries ?? [];
 
     // expand()/expanding()/addExpands() are the only ways to populate `expands`, and every one of them
     // also pushes onto expandEntries in the same call - so expandEntries alone is a complete, structured
-    // account of every *direct* expand target on this builder. Looked up by mappedName, not path: that is
-    // the name NavHopsTable is keyed by, matching the TypeScript-facing property a deep-insert payload
-    // would also use it under - the rendered OData path only ever serves sorting and rawForm reconciliation.
+    // account of every *direct* expand target on this builder. `kind`'s presence is what marks a real hop:
+    // `path` is already the property's own odataName, read straight off its Q-object wrapper at the point
+    // expand()/expanding() was called - no generated table, no type, needed to enrich it further.
     const expandItems: Array<{ sortKey: string; entry: string | ExpandHop }> = entries.map(
-      ({ path, mappedName, nestedBuilder }) => {
-        const hop = mappedName ? ownHops?.[mappedName] : undefined;
-        if (!hop) {
+      ({ path, kind, nestedBuilder }) => {
+        if (!kind) {
           return { sortKey: path, entry: path };
         }
-        const nestedParams = nestedBuilder ? nestedBuilder.getCacheKeyParams(navHops, hop[0]) : undefined;
-        const expandHop: ExpandHop = nestedParams ? [...hop, nestedParams] : hop;
+        const nestedParams = nestedBuilder ? nestedBuilder.getCacheKeyParams() : undefined;
+        const expandHop: ExpandHop = nestedParams ? [path, kind, nestedParams] : [path, kind];
         return { sortKey: path, entry: expandHop };
       },
     );

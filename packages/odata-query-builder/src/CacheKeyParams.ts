@@ -1,30 +1,17 @@
 import { FilterClause, QFilterExpression } from "@odata2ts/odata-query-objects";
 
 /**
- * A `(type, kind, name)` triple describing one navigation property - the same shape a structured hop in
- * the main key already uses, minus any key value (an expand target is never addressed by a specific key,
- * and a freshly deep-inserted entity has none of its own yet).
- */
-export type HopTriple = readonly [type: string, kind: "list" | "detail", name: string];
-
-/**
- * An expand entry once its navigation property is known: the hop triple, plus - only when a nested
- * `expanding()` builder ran for this property - that nested builder's own `getCacheKeyParams()` output.
+ * An expand entry once its navigation property is known: the property's own OData name and kind - the same
+ * `(name, kind)` shape a structured hop in the main key already uses, minus any key value (an expand target
+ * is never addressed by a specific key, and a freshly deep-inserted entity has none of its own yet) - plus,
+ * only when a nested `expanding()` builder ran for this property, that nested builder's own
+ * `getCacheKeyParams()` output.
  *
- * This 4th slot is not the same thing as a hierarchical hop's `<key>?` in the main key format: an expand
+ * That 3rd slot is not the same thing as a hierarchical hop's `<key>?` in the main key format: an expand
  * target is never addressed by an explicit key at all, so there is nothing that position could hold
  * instead, and the two never coexist.
  */
-export type ExpandHop = readonly [type: string, kind: "list" | "detail", name: string, nestedParams?: CacheKeyParams];
-
-/**
- * Every navigation property of every entity/complex type the generator knows, keyed first by the owning
- * type's FQN, then by the property's mapped (TypeScript-facing) name - the name actually present on a
- * payload or a Q object. One flat object, computed once at generation time; not per-type modules
- * referencing each other, so there is nothing to be circular about when a deep insert recurses into a
- * different type's own entry.
- */
-export type NavHopsTable = Readonly<Record<string, Readonly<Record<string, HopTriple>>>>;
+export type ExpandHop = readonly [name: string, kind: "list" | "detail", nestedParams?: CacheKeyParams];
 
 /**
  * The restrictions a query puts on a resource, as a cache key carries them: one flat object, always the

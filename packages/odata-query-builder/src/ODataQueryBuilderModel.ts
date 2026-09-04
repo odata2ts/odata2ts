@@ -10,7 +10,7 @@ import {
   QSelectExpression,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { CacheKeyParams, NavHopsTable } from "./CacheKeyParams.js";
+import { CacheKeyParams } from "./CacheKeyParams.js";
 
 /**
  * Extracts the wrapped entity from QEntityPath, QEntityCollectionPath, QComplexPath, QComplexCollectionPath
@@ -327,7 +327,7 @@ export interface CollectionQueryBuilderV2<Q extends QueryObjectModel>
    * {@link CacheKeyParams}. Not one of the ordinary query operations, so it lives here rather than in
    * {@link ODataQueryBuilderModel}, which several unrelated expanding/nested builder shapes also draw from.
    */
-  getCacheKeyParams: (navHops?: NavHopsTable, ownFqName?: string) => CacheKeyParams | undefined;
+  getCacheKeyParams: () => CacheKeyParams | undefined;
 }
 
 /**
@@ -345,7 +345,7 @@ export interface ModelQueryBuilderV2<Q extends QueryObjectModel>
   clone: () => ModelQueryBuilderV2<Q>;
 
   /** See {@link CollectionQueryBuilderV2.getCacheKeyParams}. */
-  getCacheKeyParams: (navHops?: NavHopsTable, ownFqName?: string) => CacheKeyParams | undefined;
+  getCacheKeyParams: () => CacheKeyParams | undefined;
 }
 
 export interface ExpandingQueryBuilderV2<Q extends QueryObjectModel>
@@ -374,7 +374,7 @@ export interface CollectionQueryBuilderV4<Q extends QueryObjectModel> extends Pi
   clone: () => CollectionQueryBuilderV4<Q>;
 
   /** See {@link CollectionQueryBuilderV2.getCacheKeyParams}. */
-  getCacheKeyParams: (navHops?: NavHopsTable, ownFqName?: string) => CacheKeyParams | undefined;
+  getCacheKeyParams: () => CacheKeyParams | undefined;
 }
 
 /**
@@ -391,7 +391,7 @@ export interface ModelQueryBuilderV4<Q extends QueryObjectModel> extends Pick<
   clone: () => ModelQueryBuilderV4<Q>;
 
   /** See {@link CollectionQueryBuilderV2.getCacheKeyParams}. */
-  getCacheKeyParams: (navHops?: NavHopsTable, ownFqName?: string) => CacheKeyParams | undefined;
+  getCacheKeyParams: () => CacheKeyParams | undefined;
 }
 
 export interface ExpandingCollectionQueryBuilderV4<Q extends QueryObjectModel> extends Pick<
