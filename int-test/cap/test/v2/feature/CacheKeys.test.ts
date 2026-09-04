@@ -41,6 +41,12 @@ describe("CAP Library: cache keys (V2, typeFlattening)", () => {
       })
       .execute();
     expect(member.status).toBe(201);
+    // the deep-inserted Reservation contributes its own bare-type entry too - deepEdit is unaffected by
+    // typeFlattening, exactly like expand enrichment: neither depends on how a navigation hop itself keys
+    expect(member.invalidates).toEqual([
+      ["Library.Service.Members", "list"],
+      ["Library.Service.Reservations", "list"],
+    ]);
 
     const request = LIBRARY_V2.Members(MEMBER_ID).Reservations().query();
     // grade A, not B: Reservations' own "Member" nav carries a real ReferentialConstraint
@@ -106,5 +112,19 @@ describe("CAP Library: cache keys (V2, typeFlattening)", () => {
       ["Library.Service.Reservations", "detail", reservationId],
       ["Library.Service.Reservations", "list"],
     ]);
+  });
+
+  test("$expand produces a hop-shaped entry touchesResource can reach - unaffected by typeFlattening", async () => {
+    const request = LIBRARY_V2.Members(MEMBER_ID).query((builder) => builder.expand("Reservations"));
+    expect(request.cacheKey).toEqual([
+      "Library.Service.Members",
+      "detail",
+      MEMBER_ID,
+      { expand: [["Library.Service.Reservations", "list", "Reservations"]] },
+    ]);
+    expect(touchesResource("Library.Service.Reservations", request.cacheKey!)).toBe(true);
+
+    const result = await request.execute();
+    expect(result.status).toBe(200);
   });
 });
