@@ -234,52 +234,30 @@ export enum EnumSynthesis {
 
 /**
  * How a generated client builds `RequestCmd.cacheKey` - see the docs on `cacheKeys`.
+ *
+ * Purely hierarchical, always: the key is the literal, named route taken to reach a response, never
+ * re-rooted at a resource's own type - that used to be a second mode (`typeFlattening`), and is now what
+ * `ResourceIdentityHandler` does at runtime instead, from actual responses rather than a generation-time
+ * prediction. One behaviour, so a binary switch is all `mode` needs to be.
  */
 export enum CacheKeyMode {
-  /**
-   * Whatever odata2ts considers best in general - today {@link hierarchical}.
-   *
-   * Exists so the recommended default can move without every project having to follow: a project that
-   * wants today's behaviour pinned names it explicitly, one that wants to track odata2ts's recommendation
-   * says `auto`. Changing what `auto` resolves to is therefore *not* a breaking change; changing what a
-   * named mode produces is.
-   */
-  auto = "auto",
-  /**
-   * The key from the route taken. Depends on nothing the server declares, so it produces the same cache
-   * layout against every implementation of a model, and prefix invalidation through the parent works
-   * without any help.
-   */
-  hierarchical = "hierarchical",
-  /**
-   * The key re-rooted at the resource's own type wherever the relation is derivable from the metadata,
-   * hierarchical elsewhere. This is where convergence is won - `/Media(5)/Copies` and a hand-written
-   * `/Copies?$filter=MediumId eq 5` produce the same key - at the price that the key's shape now depends
-   * on how much the *server* declares.
-   */
-  typeFlattening = "typeFlattening",
+  /** Generate `cacheKey`/`invalidates` on every `RequestCmd`. */
+  on = "on",
   /** Nothing is generated - identical to omitting `cacheKeys` entirely. */
   off = "off",
 }
 
 export interface CacheKeysOptions {
   /**
-   * Required: naming the object is not itself a decision, and a silently defaulted mode would make the
-   * shape of every generated key depend on a value nobody wrote down. A project that wants to track
-   * odata2ts's recommendation says {@link CacheKeyMode.auto} and means it.
+   * Required: naming the object is not itself a decision, and a silently defaulted mode would make
+   * whether a generated key exists at all depend on a value nobody wrote down.
    */
   mode: CacheKeyMode;
 }
 
-/**
- * The mode actually in force. The one place `auto` is resolved, so that the recommendation lives in
- * exactly one line.
- */
+/** The mode actually in force - `off` where the whole `cacheKeys` object was never configured. */
 export function resolveCacheKeyMode(options: CacheKeysOptions | undefined): CacheKeyMode {
-  if (!options) {
-    return CacheKeyMode.off;
-  }
-  return options.mode === CacheKeyMode.auto ? CacheKeyMode.hierarchical : options.mode;
+  return options?.mode ?? CacheKeyMode.off;
 }
 
 /**

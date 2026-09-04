@@ -64,7 +64,6 @@ export class ProjectManager {
   private mainServiceFile: FileHandler | undefined;
   private mainModelFile: FileHandler | undefined;
   private mainQFile: FileHandler | undefined;
-  private navHopsFile: FileHandler | undefined;
 
   private readonly cachedFiles: Map<string, SourceFile> | undefined;
 
@@ -250,24 +249,6 @@ export class ProjectManager {
 
   public getMainServiceFile() {
     return this.mainServiceFile!;
-  }
-
-  /**
-   * The one file the whole client's `NavHopsTable` lives in - always its own file, never folded into the
-   * main service even under `bundledFileGeneration`, since it is one shared table the main service merely
-   * imports, not a service class of its own.
-   */
-  public createNavHopsFile() {
-    if (!this.navHopsFile) {
-      this.navHopsFile = this.createFile("CacheKeyNavHops");
-    }
-    return this.navHopsFile;
-  }
-
-  public async finalizeNavHopsFile() {
-    if (this.navHopsFile) {
-      await this.writeFile(this.navHopsFile);
-    }
   }
 
   public createOrGetMainModelFile(reservedNames?: Array<string>) {

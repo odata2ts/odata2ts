@@ -16,7 +16,6 @@ import {
   PropertyModel,
   SingletonType,
 } from "./DataTypeModel.js";
-import { NavPropDerivation, resolveNavPropDerivation } from "./NavPropDerivation.js";
 import { ValidationError } from "./validation/NameValidator.js";
 
 export interface ProjectFiles {
@@ -66,7 +65,6 @@ export class DataModel {
   private aliases: Record<string, string> = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
   private navPropBindings?: Map<string, EntitySetType>;
-  private navPropDerivations?: Map<string, NavPropDerivation>;
 
   constructor(
     namespaces: Array<NamespaceWithAlias>,
@@ -319,25 +317,6 @@ export class DataModel {
     }
 
     return this.navPropBindings.get(`${fqEntityTypeName}|${navPropOdataName}`);
-  }
-
-  /**
-   * How far a navigation property can be re-rooted at its own target type, from the metadata alone -
-   * see {@link resolveNavPropDerivation} for the rules. Just a memoized delegate: the actual logic lives
-   * there as a pure function so it stays testable on its own.
-   */
-  public getNavPropDerivation(fqEntityTypeName: string, navPropOdataName: string): NavPropDerivation {
-    if (!this.navPropDerivations) {
-      this.navPropDerivations = new Map();
-    }
-
-    const key = `${fqEntityTypeName}|${navPropOdataName}`;
-    let derivation = this.navPropDerivations.get(key);
-    if (!derivation) {
-      derivation = resolveNavPropDerivation(this, fqEntityTypeName, navPropOdataName);
-      this.navPropDerivations.set(key, derivation);
-    }
-    return derivation;
   }
 
   /**

@@ -174,7 +174,7 @@ describe("Service Generator Tests V4", () => {
     });
   });
 
-  describe("cacheKeys: entityTypeName", () => {
+  describe("cacheKeys: root", () => {
     function generatedText() {
       return projectManager.getMainServiceFile().getFile().getFullText();
     }
@@ -185,12 +185,15 @@ describe("Service Generator Tests V4", () => {
         .addEntitySet("Ents", withNs("TestEntity"));
     }
 
-    test("a collection service carries entityTypeName when the feature is on", async () => {
+    test("a collection getter roots the key at the entity set's own name, not its type, when the feature is on", async () => {
       addEntity();
 
-      await doGenerate({ cacheKeys: { mode: CacheKeyMode.hierarchical } });
+      await doGenerate({ cacheKeys: { mode: CacheKeyMode.on } });
 
-      expect(generatedText()).toContain(`public readonly entityTypeName = "${withNs("TestEntity")}";`);
+      // "Ents" - the entity set's own name - never the entity type's FQ name ("Tester.TestEntity")
+      expect(generatedText()).toContain(
+        `rootState("Ents", "list", { entitySetName: "Ents", qEntityFn: () => QTestEntity })`,
+      );
     });
 
     test("nothing is emitted when cacheKeys is absent", async () => {
@@ -198,7 +201,8 @@ describe("Service Generator Tests V4", () => {
 
       await doGenerate();
 
-      expect(generatedText()).not.toContain("entityTypeName");
+      expect(generatedText()).not.toContain("rootState");
+      expect(generatedText()).not.toContain("cacheKeyState");
     });
 
     test("nothing is emitted under mode: off - identical to cacheKeys being absent", async () => {
@@ -206,7 +210,8 @@ describe("Service Generator Tests V4", () => {
 
       await doGenerate({ cacheKeys: { mode: CacheKeyMode.off } });
 
-      expect(generatedText()).not.toContain("entityTypeName");
+      expect(generatedText()).not.toContain("rootState");
+      expect(generatedText()).not.toContain("cacheKeyState");
     });
   });
 
@@ -216,19 +221,16 @@ describe("Service Generator Tests V4", () => {
     }
 
     /**
-     * Media/Copies is a grade-A to-many relation (`Copy.medium` carries the `ReferentialConstraint`,
-     * `Medium.copies` names it as `Partner`) which doubles as a grade-A to-one relation read the other way
-     * (`Copy.medium`) - one pair of properties exercises both re-rooting shapes. `reviews` has neither
-     * `Partner` nor a constraint (grade C); `chapters` is contained, so it stays hierarchical under both
-     * modes regardless of grade.
+     * Every navigation property is handled identically now - purely hierarchical, named by its own OData
+     * name, no grade/derivation reasoning involved (that machinery, and `typeFlattening` itself, is gone).
+     * `chapters` is contained (no entity set of its own, so no `entitySetName`); every other navigation
+     * property targets a real one.
      */
     function buildModel() {
       odataBuilder
         .addComplexType("Details", undefined, (builder) => builder.addProp("note", ODataTypesV4.String))
         .addEntityType("Chapter", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Guid))
         .addEntityType("Review", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Guid))
-        // the composite key matters: the grade-A to-one constraint on `medium` is only usable when
-        // `mediumId` is part of Copy's own key predicate - a separate surrogate `id` would make it grade C
         .addEntityType("Copy", undefined, (builder) =>
           builder
             .addKeyProp("mediumId", ODataTypesV4.Guid)
@@ -276,101 +278,62 @@ describe("Service Generator Tests V4", () => {
       expect(text).not.toContain("rootState");
       expect(text).not.toContain("hopState");
       expect(text).not.toContain("withParams");
-      expect(text).not.toContain("reRootToEntity");
       expect(text).not.toContain("cacheKeyState");
       expect(text).not.toContain("CacheKeyNavHops");
       expect(text).not.toContain("CACHE_KEY_NAV_HOPS");
     });
 
-    test.each([CacheKeyMode.hierarchical, CacheKeyMode.typeFlattening])(
-      "root, grade-C, contained, complex, primitive, stream, cast and operation hops - same under %s",
-      async (mode) => {
-        const text = await generateWith(mode);
+    test("root, hop, complex, primitive, stream, cast and operation hops all name themselves - never a type", async () => {
+      const text = await generateWith(CacheKeyMode.on);
 
-        // root: entity set getter on the main service
-        expect(text).toContain(`rootState("${withNs("Medium")}", "list", { navHops: CACHE_KEY_NAV_HOPS })`);
-        // root: singleton getter
-        expect(text).toContain(
-          `rootState("${withNs("Medium")}", "detail", { params: { singleton: "MainBranch" }, navHops: CACHE_KEY_NAV_HOPS })`,
-        );
-        // grade C: no Partner, no ReferentialConstraint - stays hierarchical under both modes
-        expect(text).toContain(
-          `hopState(cacheKeyState, { typeName: "${withNs("Review")}", kind: "list", name: "reviews", entitySetType: "${withNs("Review")}" })`,
-        );
-        // contained: no entity set of its own, so no entitySetType - stays hierarchical under both modes
-        expect(text).toContain(
-          `hopState(cacheKeyState, { typeName: "${withNs("Chapter")}", kind: "list", name: "chapters" })`,
-        );
-        // complex property: never a navigation property, never re-rooted
-        expect(text).toContain(
-          `hopState(cacheKeyState, { typeName: "${withNs("Details")}", kind: "detail", name: "details" })`,
-        );
-        // primitive collection and primitive property: bare name, no type
-        expect(text).toContain(`hopState(cacheKeyState, { name: "keywords" })`);
-        expect(text).toContain(`hopState(cacheKeyState, { name: "rating" })`);
-        // stream property: the property hop, then a further hop appending $value
-        expect(text).toContain(`hopState(hopState(cacheKeyState, { name: "scan" }), { name: "$value" })`);
-        // subtype cast: a restriction on the same resource, not a hop away from it
-        expect(text).toContain(`withParams(cacheKeyState, { cast: "${withNs("Book")}" })`);
-        // bound action: a hop off the resource it is bound to, unstructured return -> bare name
-        expect(text).toContain(`hopState(cacheKeyState, { name: "${withNs("checkOut")}" })`);
-        // unbound function with a declared EntitySet: rooted at that set's type
-        expect(text).toContain(
-          `rootState("${withNs("Medium")}", "list", { params: { operation: "${withNs("newReleases")}" }, navHops: CACHE_KEY_NAV_HOPS })`,
-        );
-        // unbound function with no EntitySet: the "$operation" root, built as a plain object literal
-        expect(text).toContain(`steps: ["${withNs("totalCount")}"]`);
-        expect(text).toMatch(/typeName:\s*OPERATION_ROOT/);
-        expect(text).toContain("OPERATION_ROOT");
-        // the nav-hops table is imported exactly once and threaded into every root
-        expect(text).toContain('import { CACHE_KEY_NAV_HOPS } from "./CacheKeyNavHops.js";');
-      },
-    );
-
-    test("hierarchical: the grade-A relation stays a hop in both directions", async () => {
-      const text = await generateWith(CacheKeyMode.hierarchical);
-
+      // root: entity set getter on the main service - "Media", the entity SET's own name, never
+      // "Tester.Medium" (the type this used to, wrongly, be rooted at)
+      expect(text).toContain(`rootState("Media", "list", { entitySetName: "Media", qEntityFn: () => QMedium })`);
+      // root: singleton getter - its own name directly, no params marker needed, no entitySetName (a
+      // singleton has no "list" form for `invalidates` to ever name)
+      expect(text).toContain(`rootState("MainBranch", "detail", { qEntityFn: () => QMedium })`);
+      // navigation hop with no Partner/ReferentialConstraint - irrelevant now, every navigation property
+      // is handled the same way regardless of what metadata backs it
       expect(text).toContain(
-        `hopState(cacheKeyState, { typeName: "${withNs("Copy")}", kind: "list", name: "copies", entitySetType: "${withNs("Copy")}" })`,
+        `hopState(cacheKeyState, { name: "reviews", kind: "list", entitySetName: "Reviews", qEntityFn: () => QReview })`,
+      );
+      // contained: no entity set of its own
+      expect(text).toContain(`hopState(cacheKeyState, { name: "chapters", kind: "list", qEntityFn: () => QChapter })`);
+      // the old grade-A relation is just another hierarchical hop now, both directions, no re-rooting
+      expect(text).toContain(
+        `hopState(cacheKeyState, { name: "copies", kind: "list", entitySetName: "Copies", qEntityFn: () => QCopy })`,
       );
       expect(text).toContain(
-        `hopState(cacheKeyState, { typeName: "${withNs("Medium")}", kind: "detail", name: "medium", entitySetType: "${withNs("Medium")}" })`,
+        `hopState(cacheKeyState, { name: "medium", kind: "detail", entitySetName: "Media", qEntityFn: () => QMedium })`,
       );
       expect(text).not.toContain("reRoot");
-      expect(text).not.toContain("reRootToEntity");
-    });
-
-    test("typeFlattening: the to-many side re-roots at the target's own type with a derived filter", async () => {
-      const text = await generateWith(CacheKeyMode.typeFlattening);
-
+      // complex property: never a navigation property, no entity set, no Q-object factory of its own
+      expect(text).toContain(`hopState(cacheKeyState, { name: "details", kind: "detail" })`);
+      // primitive collection and primitive property: bare name, no kind - stays on its parent's resource
+      expect(text).toContain(`hopState(cacheKeyState, { name: "keywords" })`);
+      expect(text).toContain(`hopState(cacheKeyState, { name: "rating" })`);
+      // stream property: the property hop, then a further hop appending $value
+      expect(text).toContain(`hopState(hopState(cacheKeyState, { name: "scan" }), { name: "$value" })`);
+      // subtype cast: a restriction on the same resource, not a hop away from it - a genuine spec URL
+      // segment, so it stays a type here, unlike everything else
+      expect(text).toContain(`withParams(cacheKeyState, { cast: "${withNs("Book")}" })`);
+      // bound action: a hop off the resource it is bound to, unstructured return -> bare name
+      expect(text).toContain(`hopState(cacheKeyState, { name: "${withNs("checkOut")}" })`);
+      // unbound function with a declared EntitySet: rooted at that set's own name
       expect(text).toContain(
-        `hopState(cacheKeyState, { name: "copies", kind: "list", ` +
-          `reRoot: { typeName: "${withNs("Copy")}", filter: { "mediumId": cacheKeyState.keyValues!["id"] } }, ` +
-          `entitySetType: "${withNs("Copy")}" })`,
+        `rootState("Media", "list", { params: { operation: "${withNs("newReleases")}" }, entitySetName: "Media", qEntityFn: () => QMedium })`,
       );
-    });
-
-    test("typeFlattening: the to-one side re-roots onto a true canonical entity key", async () => {
-      const text = await generateWith(CacheKeyMode.typeFlattening);
-
-      expect(text).toContain(
-        `reRootToEntity(cacheKeyState, "${withNs("Medium")}", { id: cacheKeyState.keyValues!["mediumId"] })`,
-      );
-    });
-
-    test("typeFlattening: grade C and containment are untouched by the mode", async () => {
-      const text = await generateWith(CacheKeyMode.typeFlattening);
-
-      expect(text).toContain(
-        `hopState(cacheKeyState, { typeName: "${withNs("Review")}", kind: "list", name: "reviews", entitySetType: "${withNs("Review")}" })`,
-      );
-      expect(text).toContain(
-        `hopState(cacheKeyState, { typeName: "${withNs("Chapter")}", kind: "list", name: "chapters" })`,
-      );
+      // unbound function with no EntitySet: the "$operation" root, built as a plain object literal
+      expect(text).toContain(`steps: ["${withNs("totalCount")}"]`);
+      expect(text).toMatch(/name:\s*OPERATION_ROOT/);
+      expect(text).toContain("OPERATION_ROOT");
+      // no generated nav-hops table anywhere - removed along with type-rooted identity
+      expect(text).not.toContain("CacheKeyNavHops");
+      expect(text).not.toContain("CACHE_KEY_NAV_HOPS");
     });
 
     test("createEntityService forwards the cache-key state it is handed, without computing one", async () => {
-      const text = await generateWith(CacheKeyMode.hierarchical);
+      const text = await generateWith(CacheKeyMode.on);
 
       expect(text).toContain("new MediumService<V>(client, path, name, options, cacheKeyState);");
     });

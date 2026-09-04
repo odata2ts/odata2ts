@@ -319,13 +319,8 @@ describe("Config Evaluation Tests", () => {
       expect(resolveCacheKeyMode(undefined)).toBe(CacheKeyMode.off);
     });
 
-    test("auto resolves to hierarchical", () => {
-      expect(resolveCacheKeyMode({ mode: CacheKeyMode.auto })).toBe(CacheKeyMode.hierarchical);
-    });
-
     test("a named mode is passed through", () => {
-      expect(resolveCacheKeyMode({ mode: CacheKeyMode.typeFlattening })).toBe(CacheKeyMode.typeFlattening);
-      expect(resolveCacheKeyMode({ mode: CacheKeyMode.hierarchical })).toBe(CacheKeyMode.hierarchical);
+      expect(resolveCacheKeyMode({ mode: CacheKeyMode.on })).toBe(CacheKeyMode.on);
       expect(resolveCacheKeyMode({ mode: CacheKeyMode.off })).toBe(CacheKeyMode.off);
     });
 
@@ -339,24 +334,24 @@ describe("Config Evaluation Tests", () => {
       const [first, second] = evaluateConfigOptions(
         {},
         {
-          cacheKeys: { mode: CacheKeyMode.hierarchical },
+          cacheKeys: { mode: CacheKeyMode.on },
           services: {
             a: { source: "a.xml", output: "a" },
-            b: { source: "b.xml", output: "b", cacheKeys: { mode: CacheKeyMode.typeFlattening } },
+            b: { source: "b.xml", output: "b", cacheKeys: { mode: CacheKeyMode.off } },
           },
         },
       );
-      expect(first.cacheKeys).toEqual({ mode: CacheKeyMode.hierarchical });
-      expect(second.cacheKeys).toEqual({ mode: CacheKeyMode.typeFlattening });
+      expect(first.cacheKeys).toEqual({ mode: CacheKeyMode.on });
+      expect(second.cacheKeys).toEqual({ mode: CacheKeyMode.off });
     });
 
     test("a service overrides the default rather than merging with it", () => {
       // deepmerge folds the default {mode:"off"} under the service's own entry; the service must win
       const [only] = evaluateConfigOptions(
         {},
-        { services: { a: { source: "a.xml", output: "a", cacheKeys: { mode: CacheKeyMode.typeFlattening } } } },
+        { services: { a: { source: "a.xml", output: "a", cacheKeys: { mode: CacheKeyMode.on } } } },
       );
-      expect(only.cacheKeys).toEqual({ mode: CacheKeyMode.typeFlattening });
+      expect(only.cacheKeys).toEqual({ mode: CacheKeyMode.on });
     });
   });
 });
