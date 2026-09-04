@@ -50,11 +50,22 @@ A pattern-matching helper: does a given cache key fall under a given (partial) k
 express "invalidate every list under this resource" without enumerating every concrete key.
 
 **Canonical id**:
-A runtime-only string, built from `(entitySetName, key)`, identifying one specific resource observed in an
-actual server response — the join key `ResourceIdentityHandler` uses to relate cache keys (route-shaped)
-that happen to point at the same resource (identity-shaped). Not the same as [[Canonical URL]] (a URL);
-`canonicalId` is an internal string encoding, not necessarily URL syntax. Exact serialization: open
-question, see spec `docs/superpowers/specs/2026-09-04-cache-key-identity-redesign.md`.
+A runtime-only string identifying one specific resource observed in an actual server response — the join
+key `ResourceIdentityHandler` uses to relate cache keys (route-shaped) that happen to point at the same
+resource (identity-shaped). Serialized identically to `ConcurrencyHandler`'s existing ETag key: the
+resource's own canonical-URL segment, `entitySetName + QFunction.buildUrl(key)` (e.g. `Copies(3)`,
+`Copies(Id=1,Category='books')`) — deliberately the same encoding already proven for ETags, not a new
+format.
+
+**Seeding**:
+Pre-populating a cache (or, here, `ResourceIdentityHandler`'s route↔canonical-resource map) with a value it
+has not itself fetched or observed — TkDodo's term (cited by the official TanStack Query docs' "Seeding the
+Query Cache"), the same source as [[Kind marker]]'s list/detail convention. `ResourceIdentityHandler`
+deliberately has none: every mapping is learned only from an actual observed response, never pre-declared
+statically or set manually.
+_Avoid_: "cold start" — implies a temporary state that warms up with ordinary usage. The real shape is
+structural, not temporal: a route pair that's never read together in the same client instance stays
+unmapped indefinitely, however long the app runs, since there's no seeding mechanism to pre-establish it.
 
 **`ResourceIdentityHandler`**:
 A runtime store (client-held, like `ConcurrencyHandler`) recording which cache keys were observed, via
