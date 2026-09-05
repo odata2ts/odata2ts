@@ -71,9 +71,7 @@ function extractEntity(data: unknown): Record<string, unknown> | undefined {
     return undefined;
   }
   const body = data as { d?: unknown };
-  return (
-    body.d && typeof body.d === "object" && !Array.isArray(body.d) ? body.d : data
-  ) as Record<string, unknown>;
+  return (body.d && typeof body.d === "object" && !Array.isArray(body.d) ? body.d : data) as Record<string, unknown>;
 }
 
 function recordRow(

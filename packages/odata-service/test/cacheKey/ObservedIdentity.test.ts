@@ -148,9 +148,7 @@ describe("resolveCrossRouteInvalidates", () => {
     handler.record("Media(5)", otherRoute);
 
     const state = mediaState();
-    expect(resolveCrossRouteInvalidates(handler, state, { d: { id: 5, title: "The Trial" } })).toEqual([
-      otherRoute,
-    ]);
+    expect(resolveCrossRouteInvalidates(handler, state, { d: { id: 5, title: "The Trial" } })).toEqual([otherRoute]);
   });
 
   test("state.key wins over the response body when both are present", () => {
