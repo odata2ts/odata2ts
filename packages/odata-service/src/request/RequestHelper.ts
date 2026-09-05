@@ -20,5 +20,6 @@ export const GetToPostConverter: RequestConverter<any> = (request) => {
     url + GET_AS_POST_URL_SUFFIX,
     { ...request.headers, ...GET_AS_POST_HEADER },
     body,
+    request.cacheKeyState,
   );
 };

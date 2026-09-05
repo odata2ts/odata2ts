@@ -1,6 +1,7 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { CollectionQueryBuilderV2, createQueryBuilderV2, ModelQueryBuilderV2 } from "@odata2ts/odata-query-builder";
 import { QueryObjectModel } from "@odata2ts/odata-query-objects";
+import { CacheKeyState } from "../cacheKey/index.js";
 import { getBodyETagV2, getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
 import { ConcurrencyOptions } from "../request/RequestCmd.js";
@@ -21,8 +22,9 @@ export class ServiceStateHelperV2<Q extends QueryObjectModel, AsV4 extends boole
     name: string,
     public qModel: Q,
     options?: ODataServiceOptionsInternalV2<AsV4>,
+    cacheKeyState?: CacheKeyState,
   ) {
-    super(client, basePath, name, options);
+    super(client, basePath, name, options, cacheKeyState);
     this.asV4 = !!options?.v2ResponseAsV4 as AsV4;
   }
 

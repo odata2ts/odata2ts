@@ -1,7 +1,10 @@
 import { describe, expect, test } from "vitest";
+import { rootState } from "../src/cacheKey/index.js";
 import { BIG_NUMBERS_HEADERS, DEFAULT_HEADERS } from "../src/RequestHeaders.js";
 import { ServiceStateHelper } from "../src/ServiceStateHelper";
 import { MockClient } from "./mock/MockClient";
+
+const MEDIUM = "Library.Catalog.Medium";
 
 describe("ServiceStateHelper tests", () => {
   const client = new MockClient(false);
@@ -73,5 +76,22 @@ describe("ServiceStateHelper tests", () => {
   test("isUrlNotEncoded", () => {
     expect(new ServiceStateHelper(client, "base").isUrlNotEncoded()).toBe(false);
     expect(new ServiceStateHelper(client, "base", "name", { noUrlEncoding: true }).isUrlNotEncoded()).toBe(true);
+  });
+
+  describe("cacheKeyState", () => {
+    test("it stores the state verbatim", () => {
+      const state = rootState(MEDIUM, "list");
+      expect(new ServiceStateHelper(client, "/root", "Media", {}, state).cacheKeyState).toBe(state);
+    });
+
+    test("it defaults to undefined and computes nothing", () => {
+      expect(new ServiceStateHelper(client, "/root", "Media").cacheKeyState).toBeUndefined();
+    });
+
+    test("it never derives the state from name or path", () => {
+      // `name` for a byId-created service is the rendered key predicate, which must never reach a key
+      const helper = new ServiceStateHelper(client, "/root", "Media(5)");
+      expect(helper.cacheKeyState).toBeUndefined();
+    });
   });
 });
