@@ -38,4 +38,11 @@ export class QEnumPath<EnumType extends StringEnumSource, WireType = string> ext
     const wireValue = this.converter.convertTo(value, URL_CONVERSION_OPTIONS);
     return typeof wireValue === "string" ? formatWithQuotes(wireValue) : formatLiteral(wireValue as any);
   }
+
+  protected typedValue(value: StringEnumSourceMember<EnumType>): string {
+    if (!this.converter) {
+      return value as string;
+    }
+    return String(this.converter.convertTo(value, URL_CONVERSION_OPTIONS));
+  }
 }

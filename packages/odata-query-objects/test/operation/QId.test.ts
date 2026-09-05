@@ -86,6 +86,43 @@ describe("QId Tests", () => {
     );
   });
 
+  describe("buildCanonicalId", () => {
+    test("a bare value builds the same canonical id as buildUrl would", () => {
+      const exampleFunction = new BookIdFunction("EntityXy");
+      expect(exampleFunction.buildCanonicalId("123")).toBe("EntityXy(123)");
+    });
+
+    test("a clean single-key object collapses to the very same bare form - consistency is the point", () => {
+      const exampleFunction = new BookIdFunction("EntityXy");
+      expect(exampleFunction.buildCanonicalId({ isbn: "123" })).toBe(exampleFunction.buildCanonicalId("123"));
+      expect(exampleFunction.buildCanonicalId({ isbn: "123" })).toBe("EntityXy(123)");
+    });
+
+    test("a full entity representation with unrelated fields still resolves - only the key is read out of it", () => {
+      const exampleFunction = new BookIdFunction("EntityXy");
+      expect(exampleFunction.buildCanonicalId({ isbn: "123", title: "The Trial" })).toBe("EntityXy(123)");
+    });
+
+    test("a composite key builds the same as buildUrl, key by key", () => {
+      const exampleFunction = new ComplexBookIdFunction("EntityXy");
+      expect(exampleFunction.buildCanonicalId({ title: "test", author: "xxx" })).toBe(
+        "EntityXy(title='test',author='xxx')",
+      );
+    });
+
+    test("a composite key survives unrelated fields alongside it too", () => {
+      const exampleFunction = new ComplexBookIdFunction("EntityXy");
+      expect(exampleFunction.buildCanonicalId({ title: "test", author: "xxx", extra: true })).toBe(
+        "EntityXy(title='test',author='xxx')",
+      );
+    });
+
+    test("a missing key property resolves to undefined - never a partial or wrong id", () => {
+      const exampleFunction = new ComplexBookIdFunction("EntityXy");
+      expect(exampleFunction.buildCanonicalId({ title: "test" })).toBeUndefined();
+    });
+  });
+
   describe("alternate keys", () => {
     test("getPrimaryParams always returns the first param set", () => {
       const exampleFunction = new BookIdWithAlternateKeyFunction("EntityXy");
