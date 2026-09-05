@@ -321,14 +321,15 @@ describe("Service Generator Tests V4", () => {
       expect(text).toContain(`withParams(cacheKeyState, { cast: "${withNs("Book")}" })`);
       // bound action: a hop off the resource it is bound to, unstructured return -> bare name
       expect(text).toContain(`hopState(cacheKeyState, { name: "${withNs("checkOut")}" })`);
-      // unbound function with a declared EntitySet: rooted at that set's own name
+      // unbound function with a declared EntitySet: still rooted at the *import's* own name ("NewReleases"),
+      // never the entity set's ("Media") - entitySetName/canonicalIdFn/qEntityFn are attached alongside it
+      // only so ResourceIdentityHandler can record the actual Media entities the response carries
       expect(text).toContain(
-        `rootState("Media", "list", { params: { operation: "${withNs("newReleases")}" }, entitySetName: "Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
+        `rootState("NewReleases", "list", { entitySetName: "Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
       );
-      // unbound function with no EntitySet: the "$operation" root, built as a plain object literal
-      expect(text).toContain(`steps: ["${withNs("totalCount")}"]`);
-      expect(text).toMatch(/name:\s*OPERATION_ROOT/);
-      expect(text).toContain("OPERATION_ROOT");
+      // unbound function with no EntitySet: rooted at its own import name too, no sentinel needed
+      expect(text).toContain(`rootState("TotalCount", "detail")`);
+      expect(text).not.toContain("OPERATION_ROOT");
       // no generated nav-hops table anywhere - removed along with type-rooted identity
       expect(text).not.toContain("CacheKeyNavHops");
       expect(text).not.toContain("CACHE_KEY_NAV_HOPS");

@@ -193,13 +193,17 @@ class ServiceGenerator {
   }
 
   /**
-   * The root of an unbound function/action import: rooted at its declared `EntitySet`'s own name where one
-   * is declared, `$operation` otherwise - the one case with no type to head with, so no `rootState` call
-   * produces it: the state is built as a plain object literal instead.
+   * The root of an unbound function/action import: always the import's own OData name (OData v4.01 Part 1
+   * §11.5.4.1/§11.5.5.1 - the canonical URL is the service root plus the *import's* name, never the
+   * operation's own qualified name, and never its declared result `EntitySet`'s name either). Where the
+   * import does declare a result `EntitySet`, `entitySetName`/`canonicalIdFn`/`qEntityFn` are still attached
+   * so `ResourceIdentityHandler` can record the real entities the response carries - a separate concern from
+   * what the root's own identity in the key is.
    */
   private emitUnboundOperationRootExpr(
     imports: ImportContainer,
     op: OperationType,
+    importOdataName: string,
     entitySetOdataName: string | undefined,
     hasParams: boolean,
   ): string {
@@ -210,21 +214,25 @@ class ServiceGenerator {
     const entitySet = entitySetOdataName
       ? Object.values(this.dataModel.getEntityContainer().entitySets).find((es) => es.odataName === entitySetOdataName)
       : undefined;
+    const rootStateFn = imports.addServiceFunction("rootState");
+    const kind = op.returnType?.isCollection ? "list" : "detail";
+    // nested under its own "params" key, never spread directly - a composable operation's cache key later
+    // merges in real query params (select/filter/...) via buildCacheKey, and those must not collide with
+    // the operation's own invocation arguments
+    const paramsEntry = hasParams ? `params: { params }, ` : "";
 
     if (entitySet) {
-      const rootStateFn = imports.addServiceFunction("rootState");
-      const kind = op.returnType?.isCollection ? "list" : "detail";
-      const operationParams = hasParams ? ", params" : "";
-      const canonicalIdFnEntry = `, canonicalIdFn: ${this.canonicalIdFnExpr(imports, entitySet.entityType, entitySet.odataName)}`;
-      const qEntityFnEntry = `, qEntityFn: ${this.qEntityFnExpr(imports, entitySet.entityType)}`;
+      const canonicalIdFnEntry = `canonicalIdFn: ${this.canonicalIdFnExpr(imports, entitySet.entityType, entitySet.odataName)}, `;
+      const qEntityFnEntry = `qEntityFn: ${this.qEntityFnExpr(imports, entitySet.entityType)}`;
       return (
-        `${rootStateFn}("${entitySet.odataName}", "${kind}", ` +
-        `{ params: { operation: "${op.fqName}"${operationParams} }, entitySetName: "${entitySet.odataName}"${canonicalIdFnEntry}${qEntityFnEntry} })`
+        `${rootStateFn}("${importOdataName}", "${kind}", ` +
+        `{ ${paramsEntry}entitySetName: "${entitySet.odataName}", ${canonicalIdFnEntry}${qEntityFnEntry} })`
       );
     }
 
-    const operationRootConst = imports.addServiceFunction("OPERATION_ROOT");
-    return `{ name: ${operationRootConst}, steps: ["${op.fqName}"], kindIndex: 0 }`;
+    return hasParams
+      ? `${rootStateFn}("${importOdataName}", "${kind}", { params: { params } })`
+      : `${rootStateFn}("${importOdataName}", "${kind}")`;
   }
 
   /** A bound function/action: a hop off the resource it is bound to, with its own kind marker where the return type is structured - never a type, matching every other hop. */
@@ -450,7 +458,7 @@ class ServiceGenerator {
     const result: PropsAndOps = { properties: [], methods: [] };
 
     ops.forEach((funcOrActionImport) => {
-      const { operation, name } = funcOrActionImport;
+      const { operation, name, odataName } = funcOrActionImport;
       const op = this.dataModel.getUnboundOperationType(operation);
       if (!op) {
         throw new Error(`Operation "${operation}" not found!`);
@@ -460,7 +468,16 @@ class ServiceGenerator {
 
       result.properties.push(this.generateQOperationProp(op));
       result.methods.push(
-        this.generateMethod(name, op, importContainer, "", this.getMainVersionArg(), false, entitySetOdataName),
+        this.generateMethod(
+          name,
+          op,
+          importContainer,
+          "",
+          this.getMainVersionArg(),
+          false,
+          entitySetOdataName,
+          odataName,
+        ),
       );
     });
 
@@ -1101,6 +1118,7 @@ class ServiceGenerator {
     versionArg: string,
     isEntityBound = false,
     entitySetOdataName?: string,
+    importOdataName?: string,
   ): OptionalKind<MethodDeclarationStructure> {
     const isFunc = operation.type === OperationTypes.Function;
     const returnType = operation.returnType;
@@ -1147,10 +1165,10 @@ class ServiceGenerator {
 
     const qOpProp = "this." + this.namingHelper.getPrivatePropName(operation.qName);
 
-    // an unbound operation (baseFqName === "") roots the key at its declared EntitySet's type, or at
-    // "$operation" where none is declared; a bound one is a hop off the resource it hangs on
+    // an unbound operation (baseFqName === "") roots the key at its own import name; a bound one is a hop
+    // off the resource it hangs on
     const cacheKeyExpr = !baseFqName
-      ? this.emitUnboundOperationRootExpr(importContainer, operation, entitySetOdataName, !!hasParams)
+      ? this.emitUnboundOperationRootExpr(importContainer, operation, importOdataName!, entitySetOdataName, !!hasParams)
       : this.emitBoundOperationHopExpr(importContainer, operation.fqName, returnType);
     const needsCacheKeyState = !!baseFqName && !!cacheKeyExpr;
 
