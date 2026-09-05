@@ -44,11 +44,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 /**
  * The keys a write makes stale.
  *
- * Four rules: the addressed resource's own key without its params object (a write invalidates the
+ * Five rules: the addressed resource's own key without its params object (a write invalidates the
  * resource however it was filtered, sorted or paged), the resource's own entity set as a bare list key
  * where it belongs to one, the key of every ancestor hop - which is what catches a parent that was
- * fetched with `$expand` - and a bare list-key entry per entity set the write's own payload deep-inserted
- * into (`state.params.deepEdit`, populated by `buildDeepEditHops` at the write's own call site). Entries
+ * fetched with `$expand` - a bare list-key entry per entity set the write's own payload deep-inserted
+ * into (`state.params.deepEdit`, populated by `buildDeepEditHops` at the write's own call site), and
+ * whatever hierarchical keys `crossRouteKeys` names - a route to this same resource the write's own route
+ * never took, resolved via `ResourceIdentityHandler` from what an earlier response actually observed (see
+ * `resolveCrossRouteInvalidates`; empty, never computed here, for a client with no such store). Entries
  * another entry is a prefix of are dropped; what is left is coarsest first.
  *
  * Rule 2 is skipped where the resource has no entity set of its own - a contained entity, a complex value,
@@ -58,19 +61,23 @@ function isRecord(value: unknown): value is Record<string, unknown> {
  * entity sets this same write also touched, each with no key of its own yet since the entity is freshly
  * created.
  *
- * Deliberately does **not** name the resource's children: the ancestor entry covers them by prefix for a
- * hierarchical route, and an application reaching the same resource by some other route it never took
- * invalidates that route's own key, via `ResourceIdentityHandler` - see the cache-key design docs.
+ * Deliberately does **not** enumerate the resource's children on its own: the ancestor entry covers them
+ * by prefix for a hierarchical route, and `crossRouteKeys` is what reaches a route this write never took.
  */
-export function buildInvalidates(state: CacheKeyState): ReadonlyArray<ReadonlyArray<unknown>> {
+export function buildInvalidates(
+  state: CacheKeyState,
+  crossRouteKeys: ReadonlyArray<ReadonlyArray<unknown>> = [],
+): ReadonlyArray<ReadonlyArray<unknown>> {
   const deepEditHops = (state.params?.deepEdit as ReadonlyArray<string> | undefined) ?? [];
 
-  // ancestors in route order (coarsest first), then the resource itself, then its entity set, then whatever it deep-inserted into
+  // ancestors in route order (coarsest first), then the resource itself, then its entity set, then
+  // whatever it deep-inserted into, then whatever another route to this same resource already has cached
   const candidates: Array<ReadonlyArray<unknown>> = [
     ...(state.ancestors ?? []),
     [state.name, ...state.steps],
     ...(state.entitySetName ? [[state.entitySetName, "list"]] : []),
     ...deepEditHops.map((entitySetName) => [entitySetName, "list"]),
+    ...crossRouteKeys,
   ];
 
   // an entry another entry properly prefixes is redundant - invalidating the prefix reaches it

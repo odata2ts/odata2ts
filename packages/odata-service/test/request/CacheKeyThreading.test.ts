@@ -1,11 +1,17 @@
 import { ODataHttpMethods } from "@odata2ts/http-client-api";
 import { beforeEach, describe, expect, test } from "vitest";
-import { CacheKeyState, rootState, withKey } from "../../src/cacheKey";
+import { CacheKeyState, CanonicalIdFn, rootState, withKey } from "../../src/cacheKey";
 import { RequestInfo, UrlGetRequestCmd, UrlWriteRequestCmd } from "../../src/request";
 import { GetToPostConverter } from "../../src/request/RequestHelper";
 import { MockClient } from "../mock/MockClient";
 
 const MEDIUM = "Library.Catalog.Medium";
+
+/** A stand-in for a generated `(entity) => new QMediumId("Media").buildCanonicalId(entity)` closure. */
+const canonicalIdOfMedia: CanonicalIdFn = (entity) => {
+  const id = entity && typeof entity === "object" ? (entity as any).id : entity;
+  return id === undefined ? undefined : `Media(${id})`;
+};
 
 describe("cache key threading", () => {
   let client: MockClient;
@@ -153,5 +159,73 @@ describe("cache key threading", () => {
     // a write has nothing to be stored under - only something to make stale, via `invalidates` on its
     // response - so the getter never even runs the request converter chain to look
     expect(calls).toBe(0);
+  });
+
+  describe("response-observed identity", () => {
+    test("a read records the resource its response describes, against its own cache key", async () => {
+      const state = rootState("Media", "detail", { entitySetName: "Media", canonicalIdFn: canonicalIdOfMedia });
+      const cmd = new UrlGetRequestCmd(client, "Media(5)", { cacheKeyState: state });
+      client.setModelResponse({ id: 5, title: "The Trial" });
+
+      await cmd.execute();
+
+      expect(client.resourceIdentity.resolve("Media(5)")).toEqual([cmd.cacheKey]);
+    });
+
+    test("a read with no resourceIdentity-eligible state (no entitySetName) records nothing", async () => {
+      const cmd = new UrlGetRequestCmd(client, "Media(5)", { cacheKeyState: rootState(MEDIUM, "list") });
+      client.setModelResponse({ id: 5 });
+
+      await cmd.execute();
+
+      expect(client.resourceIdentity.dehydrate()).toEqual([]);
+    });
+
+    test("a write resolves a route to this same resource recorded via a different one, into invalidates", async () => {
+      const otherRoute = ["SomeOtherRoot", "detail", 9, "media", "detail", 5];
+      client.resourceIdentity.record("Media(5)", otherRoute);
+
+      const state = withKey(
+        rootState("Media", "list", { entitySetName: "Media", canonicalIdFn: canonicalIdOfMedia }),
+        5,
+        5,
+      );
+      const cmd = new UrlWriteRequestCmd(
+        client,
+        ODataHttpMethods.Patch,
+        "Media(5)",
+        { title: "x" },
+        {
+          cacheKeyState: state,
+        },
+      );
+
+      const response = await cmd.execute();
+
+      expect(response.invalidates).toEqual(
+        expect.arrayContaining([["Media", "detail", 5], ["Media", "list"], otherRoute]),
+      );
+    });
+
+    test("a create resolves the server-assigned id from its own response body", async () => {
+      const otherRoute = ["SomeOtherRoot", "detail", 9, "media", "list"];
+      client.resourceIdentity.record("Media(5)", otherRoute);
+
+      const state = rootState("Media", "list", { entitySetName: "Media", canonicalIdFn: canonicalIdOfMedia });
+      const cmd = new UrlWriteRequestCmd(
+        client,
+        ODataHttpMethods.Post,
+        "Media",
+        { title: "x" },
+        {
+          cacheKeyState: state,
+        },
+      );
+      client.setModelResponse({ id: 5, title: "x" });
+
+      const response = await cmd.execute();
+
+      expect(response.invalidates).toEqual(expect.arrayContaining([otherRoute]));
+    });
   });
 });

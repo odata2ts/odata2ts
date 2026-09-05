@@ -7,6 +7,19 @@ export type CacheKeyKind = "list" | "detail";
 export type QEntityFn = () => new (prefix?: string, separator?: string) => QueryObjectModel;
 
 /**
+ * Builds the addressed resource's own canonical id - entity-set name plus key predicate, e.g. `Copies(3)`.
+ * The same encoding `ConcurrencyHandler`'s ETag keys already use, from a fresh `QId` instance parametrized
+ * with the entity set's own name - never the route taken to reach it, which is exactly what makes it
+ * comparable across routes at all.
+ *
+ * See `QId.buildCanonicalId` for the shapes `entity` may take: a bare value, an already key-only object, or
+ * a full entity representation with unrelated fields alongside the key - the last is what a response row
+ * (this resource's own, or one reached through `$expand`) actually is. `undefined` where the key cannot be
+ * built from what was given - a required property missing from `entity`, most commonly.
+ */
+export type CanonicalIdFn = (entity: unknown) => string | undefined;
+
+/**
  * What a generated service knows about the resource it addresses, in the form a cache key is built from.
  *
  * Threaded downwards through construction and never derived from a URL: the typed key value exists one call
@@ -33,16 +46,21 @@ export interface CacheKeyState {
    * (which has no "list" form to invalidate), an operation with no declared result set.
    */
   readonly entitySetName?: string;
+  /** See {@link CanonicalIdFn}. Present exactly where {@link entitySetName} is - a resource with no entity set of its own has no canonical id to build either. */
+  readonly canonicalIdFn?: CanonicalIdFn;
   /** Key of every hop from the root down to the parent, params already dropped. Feeds `invalidates`. */
   readonly ancestors?: ReadonlyArray<ReadonlyArray<unknown>>;
   /**
-   * The addressed resource's key as an OData-name → value map, where it is addressed by one.
+   * The addressed resource's own key or id, exactly as given to `byId` - bare for a single primary key, an
+   * object keyed by the model's own mapped property names otherwise. The same shape {@link CanonicalIdFn}
+   * accepts, so a write's own canonical id can still be built even when its response carries no body to
+   * read one from (a `DELETE`, or a `PATCH`/`PUT` answered with `204 No Content`).
    *
-   * Not merely a convenience over `steps`: `steps` holds the key as one opaque element, and nothing else
-   * carries it by property name. Reset by a hop, since the resource the route arrives at has no key until
-   * `byId` says so.
+   * Not derivable from `steps`, which holds the key OData-name-keyed (the shape a hand-written `$filter`
+   * would use) - a different convention than `QId.buildUrl` accepts an object in. Reset by a hop, since the
+   * resource the route arrives at has no key until `byId` says so.
    */
-  readonly keyValues?: Readonly<Record<string, unknown>>;
+  readonly key?: unknown;
   /**
    * A factory for the addressed resource's own Q-object, where it is an entity or complex type - absent for
    * `"$operation"`, the one root with no type behind it at all. The one piece of type information this state
@@ -67,6 +85,8 @@ export interface HopDescriptor {
    * complex value, which have none.
    */
   readonly entitySetName?: string;
+  /** See {@link CacheKeyState.canonicalIdFn}. Present exactly where {@link entitySetName} is. */
+  readonly canonicalIdFn?: CanonicalIdFn;
   /** See {@link CacheKeyState.qEntityFn}. Absent where the hop's target has none of its own to offer (e.g. a primitive or stream property). */
   readonly qEntityFn?: QEntityFn;
 }
@@ -78,7 +98,12 @@ export const OPERATION_ROOT = "$operation";
 export function rootState(
   name: string,
   kind: CacheKeyKind,
-  options?: { params?: Readonly<Record<string, unknown>>; entitySetName?: string; qEntityFn?: QEntityFn },
+  options?: {
+    params?: Readonly<Record<string, unknown>>;
+    entitySetName?: string;
+    canonicalIdFn?: CanonicalIdFn;
+    qEntityFn?: QEntityFn;
+  },
 ): CacheKeyState {
   return {
     name,
@@ -86,6 +111,7 @@ export function rootState(
     kindIndex: 0,
     ...(options?.params ? { params: options.params } : {}),
     ...(options?.entitySetName ? { entitySetName: options.entitySetName } : {}),
+    ...(options?.canonicalIdFn ? { canonicalIdFn: options.canonicalIdFn } : {}),
     ...(options?.qEntityFn ? { qEntityFn: options.qEntityFn } : {}),
   };
 }
@@ -96,16 +122,12 @@ export function rootState(
  * Rewrites the trailing kind marker rather than appending one, and pushes no ancestor: `byId` refines the
  * resource the route is at, it does not leave it.
  */
-export function withKey(
-  state: CacheKeyState,
-  key: unknown,
-  keyValues: Readonly<Record<string, unknown>>,
-): CacheKeyState {
+export function withKey(state: CacheKeyState, stepKey: unknown, id: unknown): CacheKeyState {
   const steps = [...state.steps];
   steps[state.kindIndex] = "detail";
-  steps.push(key);
+  steps.push(stepKey);
 
-  return { ...state, steps, keyValues };
+  return { ...state, steps, key: id };
 }
 
 /** Adds a restriction the resource itself carries - a cast, a singleton marker, an operation. */
@@ -132,6 +154,7 @@ export function hopState(state: CacheKeyState, hop: HopDescriptor): CacheKeyStat
     kindIndex,
     ancestors,
     ...(hop.entitySetName ? { entitySetName: hop.entitySetName } : {}),
+    ...(hop.canonicalIdFn ? { canonicalIdFn: hop.canonicalIdFn } : {}),
     ...((hop.qEntityFn ?? state.qEntityFn) ? { qEntityFn: hop.qEntityFn ?? state.qEntityFn } : {}),
   };
 }

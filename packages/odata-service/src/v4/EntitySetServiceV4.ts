@@ -94,16 +94,13 @@ export abstract class EntitySetServiceV4<
       basePath,
       this.__idFunction.buildUrl(id, isUrlNotEncoded()),
       options,
-      cacheKeyState && withKey(cacheKeyState, ...this.cacheKeyOf(id)),
+      cacheKeyState && withKey(cacheKeyState, this.cacheKeyOf(id), id),
     );
   }
 
   /**
-   * The key of the addressed entity as a cache key carries it, plus the same values by OData name.
-   *
-   * Two forms, because two things need them: the key element itself is the bare value for a
-   * single-property key and an object for a composite or alternate one - the very shape a hand-written
-   * key would take - while a derived relation needs to look a value up by the property it belongs to.
+   * The key element a cache key carries for the addressed entity - the bare value for a single-property
+   * key and an object for a composite or alternate one, the very shape a hand-written key would take.
    *
    * "Single-property key" means the *primary* key and only the primary key: an alternate key never gets
    * the bare form, even where it too has just one property, because the bare form is what a bare
@@ -112,10 +109,13 @@ export abstract class EntitySetServiceV4<
    * it would collide with the primary key's own bare cache entry. Matched structurally, by name, since
    * `getParamsFor`/`getPrimaryParams` construct their param objects afresh on every call.
    *
-   * Values are OData-side: `convertTo` applied, `formatUrlValue` not. A caller-side value may be a
-   * `bigint`, which `JSON.stringify` refuses, and a cache hashes its keys with exactly that.
+   * OData-side: `convertTo` applied, `formatUrlValue` not. A caller-side value may be a `bigint`, which
+   * `JSON.stringify` refuses, and a cache hashes its keys with exactly that.
+   *
+   * `id` itself - not this - is what `withKey` stores for canonical-id purposes (`CacheKeyState.key`):
+   * `QId.buildCanonicalId` wants mapped names, this wants OData ones, and the two must not be confused.
    */
-  private cacheKeyOf(id: EIdType): [unknown, Record<string, unknown>] {
+  private cacheKeyOf(id: EIdType): unknown {
     const params = this.__idFunction.getParamsFor(id);
     const primary = this.__idFunction.getPrimaryParams();
     const isPrimarySingle = params.length === 1 && primary.length === 1 && primary[0].getName() === params[0].getName();
@@ -123,7 +123,7 @@ export abstract class EntitySetServiceV4<
     const values = Object.fromEntries(
       params.map((param) => [param.getName(), param.convertTo((id as any)?.[param.getMappedName()] ?? id)]),
     );
-    return [isPrimarySingle ? Object.values(values)[0] : values, values];
+    return isPrimarySingle ? Object.values(values)[0] : values;
   }
 
   /**

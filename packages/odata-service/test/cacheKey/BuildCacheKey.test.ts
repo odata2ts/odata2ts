@@ -177,4 +177,23 @@ describe("buildInvalidates", () => {
       [RESERVATIONS, "list"],
     ]);
   });
+
+  test("crossRouteKeys - a route to this same resource resolved via ResourceIdentityHandler - are added alongside the route-derived entries", () => {
+    const state = withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 });
+    const crossRoute = ["Library.Circulation.Loan", "detail", 1, "medium", "detail", 5];
+    expect(buildInvalidates(state, [crossRoute])).toEqual([[MEDIA, "detail", 5], [MEDIA, "list"], crossRoute]);
+  });
+
+  test("a crossRouteKey identical to an already-listed entry collapses via the same redundancy pass", () => {
+    const state = withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 });
+    expect(buildInvalidates(state, [[MEDIA, "list"]])).toEqual([
+      [MEDIA, "detail", 5],
+      [MEDIA, "list"],
+    ]);
+  });
+
+  test("no crossRouteKeys given: behaves exactly as before", () => {
+    const state = withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 });
+    expect(buildInvalidates(state)).toEqual(buildInvalidates(state, []));
+  });
 });

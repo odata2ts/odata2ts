@@ -80,15 +80,15 @@ export abstract class EntitySetServiceV2<
       basePath,
       this.__idFunction.buildUrl(id, isUrlNotEncoded()),
       options,
-      cacheKeyState && withKey(cacheKeyState, ...this.cacheKeyOf(id)),
+      cacheKeyState && withKey(cacheKeyState, this.cacheKeyOf(id), id),
     );
   }
 
   /**
-   * The key of the addressed entity as a cache key carries it, plus the same values by OData name - see
-   * {@link EntitySetServiceV4.cacheKeyOf}, whose reasoning applies unchanged here.
+   * The key of the addressed entity as a cache key carries it - see {@link EntitySetServiceV4.cacheKeyOf},
+   * whose reasoning applies unchanged here.
    */
-  private cacheKeyOf(id: EIdType): [unknown, Record<string, unknown>] {
+  private cacheKeyOf(id: EIdType): unknown {
     const params = this.__idFunction.getParamsFor(id);
     const primary = this.__idFunction.getPrimaryParams();
     const isPrimarySingle = params.length === 1 && primary.length === 1 && primary[0].getName() === params[0].getName();
@@ -96,7 +96,7 @@ export abstract class EntitySetServiceV2<
     const values = Object.fromEntries(
       params.map((param) => [param.getName(), param.convertTo((id as any)?.[param.getMappedName()] ?? id)]),
     );
-    return [isPrimarySingle ? Object.values(values)[0] : values, values];
+    return isPrimarySingle ? Object.values(values)[0] : values;
   }
 
   /**

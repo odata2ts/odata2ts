@@ -91,9 +91,12 @@ describe("byId produces the typed key, not the rendered predicate", () => {
       rootState(COPY, "list"),
     );
 
-    const state = service.byId({ mediumId: 5, inventoryNumber: 7 }).getCacheKeyState()!;
+    const id = { mediumId: 5, inventoryNumber: 7 };
+    const state = service.byId(id).getCacheKeyState()!;
     expect(state.steps).toEqual(["detail", { MediumId: 5, InventoryNumber: 7 }]);
-    expect(state.keyValues).toEqual({ MediumId: 5, InventoryNumber: 7 });
+    // .key stores the id exactly as byId received it - mapped names, for canonical-id purposes - not the
+    // OData-named form .steps carries
+    expect(state.key).toBe(id);
   });
 
   test("an alternate key travels as its own object", () => {

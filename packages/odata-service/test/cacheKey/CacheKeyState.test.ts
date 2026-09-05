@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { hopState, QEntityFn, rootState, withKey, withParams } from "../../src/cacheKey";
+import { CanonicalIdFn, hopState, QEntityFn, rootState, withKey, withParams } from "../../src/cacheKey";
 
 const MEDIA = "Media";
 const COPIES = "Copies";
@@ -10,6 +10,10 @@ const CHAPTERS = "chapters";
 const qMedium = (() => class {}) as unknown as QEntityFn;
 const qCopy = (() => class {}) as unknown as QEntityFn;
 
+// a stand-in for a generated `(key) => new QMediumId("Media").buildUrl(key)` closure
+const canonicalIdOfMedia: CanonicalIdFn = (key) => `Media(${key.Id})`;
+const canonicalIdOfCopies: CanonicalIdFn = (key) => `Copies(${key.Id})`;
+
 describe("CacheKeyState", () => {
   test("a bare root has no entity set and no Q-object factory of its own - the singleton shape", () => {
     expect(rootState(MEDIA, "list")).toEqual({
@@ -19,12 +23,15 @@ describe("CacheKeyState", () => {
     });
   });
 
-  test("a root carries the entity set name and Q-object factory it is given", () => {
-    expect(rootState(MEDIA, "list", { entitySetName: MEDIA, qEntityFn: qMedium })).toEqual({
+  test("a root carries the entity set name, canonical id builder and Q-object factory it is given", () => {
+    expect(
+      rootState(MEDIA, "list", { entitySetName: MEDIA, canonicalIdFn: canonicalIdOfMedia, qEntityFn: qMedium }),
+    ).toEqual({
       name: MEDIA,
       steps: ["list"],
       kindIndex: 0,
       entitySetName: MEDIA,
+      canonicalIdFn: canonicalIdOfMedia,
       qEntityFn: qMedium,
     });
   });
@@ -34,16 +41,17 @@ describe("CacheKeyState", () => {
     expect(state.params).toEqual({ singleton: "MainBranch" });
   });
 
-  test("withKey rewrites the trailing kind marker and appends the typed key", () => {
-    const state = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
+  test("withKey rewrites the trailing kind marker, appends the typed key, and stores the given id for canonical-id purposes", () => {
+    const state = withKey(rootState(MEDIA, "list"), 5, 5);
     expect(state.steps).toEqual(["detail", 5]);
-    expect(state.keyValues).toEqual({ Id: 5 });
+    expect(state.key).toBe(5);
   });
 
-  test("withKey on a composite key appends the object", () => {
-    const key = { MediumId: 5, InventoryNumber: 7 };
+  test("withKey on a composite key appends the object and stores it as the id too", () => {
+    const key = { mediumId: 5, inventoryNumber: 7 };
     const state = withKey(rootState(COPIES, "list"), key, key);
     expect(state.steps).toEqual(["detail", key]);
+    expect(state.key).toBe(key);
   });
 
   test("withKey pushes no ancestor - it refines the resource, it does not leave it", () => {
@@ -68,6 +76,7 @@ describe("CacheKeyState", () => {
       name: COPIES.toLowerCase(),
       kind: "list",
       entitySetName: COPIES,
+      canonicalIdFn: canonicalIdOfCopies,
       qEntityFn: qCopy,
     });
 
@@ -75,8 +84,9 @@ describe("CacheKeyState", () => {
     expect(state.steps).toEqual(["detail", 5, "copies", "list"]);
     expect(state.ancestors).toEqual([[MEDIA, "detail", 5]]);
     expect(state.entitySetName).toBe(COPIES);
+    expect(state.canonicalIdFn).toBe(canonicalIdOfCopies);
     expect(state.qEntityFn).toBe(qCopy);
-    expect(state.keyValues).toBeUndefined();
+    expect(state.key).toBeUndefined();
   });
 
   test("an ancestor is pushed without its params object", () => {
@@ -85,10 +95,11 @@ describe("CacheKeyState", () => {
     expect(state.ancestors).toEqual([[MEDIA, "detail", 5]]);
   });
 
-  test("a hop to a contained property has no entity set, so entitySetName stays undefined", () => {
+  test("a hop to a contained property has no entity set, so entitySetName and canonicalIdFn stay undefined", () => {
     const parent = withKey(rootState(MEDIA, "list"), 1, { Id: 1 });
     const state = hopState(parent, { name: CHAPTERS, kind: "list" });
     expect(state.entitySetName).toBeUndefined();
+    expect(state.canonicalIdFn).toBeUndefined();
   });
 
   test("a hop without a Q-object factory carries the parent's forward - it stays inert unless something reads it", () => {

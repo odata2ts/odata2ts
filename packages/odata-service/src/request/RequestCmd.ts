@@ -1,6 +1,12 @@
 import { HttpResponseModel, ODataHttpClient, ODataHttpMethods, ODataRequestConfig } from "@odata2ts/http-client-api";
 import { MainResponseConverter } from "@odata2ts/odata-query-objects";
-import { buildCacheKey, buildInvalidates, CacheKeyState } from "../cacheKey/index.js";
+import {
+  buildCacheKey,
+  buildInvalidates,
+  CacheKeyState,
+  recordObservedIdentities,
+  resolveCrossRouteInvalidates,
+} from "../cacheKey/index.js";
 import { getHeaderETag } from "../ETagExtraction";
 import { isConcurrencyConflict, ODataConcurrencyError } from "../ODataConcurrencyError";
 import { MainRequestConverter, RequestConverter } from "./converter/RequestConverter";
@@ -247,13 +253,21 @@ export abstract class RequestCmd<
     // the mapped, user-facing ones, which only exist once the converters have run
     this.updateConcurrency(response);
 
+    // same reasoning as concurrency harvesting: response-observed identity is read off the converted,
+    // mapped-name body too - a read only, by construction, since `this.cacheKey` is `undefined` for
+    // anything else (see ObservedIdentity.recordObservedIdentities)
+    if (request.cacheKeyState) {
+      recordObservedIdentities(this.client.resourceIdentity, this.cacheKey, request.cacheKeyState, converted.data);
+    }
+
     return this.withInvalidates(converted, request.cacheKeyState);
   }
 
   /**
    * Attaches what this write makes stale - from the very same state the key is built from, so key and
-   * invalidation set cannot drift apart. A read adds nothing: what it should be stored under is
-   * {@link cacheKey}.
+   * invalidation set cannot drift apart, plus whatever route to this same resource
+   * `resolveCrossRouteInvalidates` finds already cached under some other route. A read adds nothing: what
+   * it should be stored under is {@link cacheKey}.
    */
   private withInvalidates(
     response: HttpResponseModel<FinalResponseStructure>,
@@ -262,7 +276,8 @@ export abstract class RequestCmd<
     if (!state || this.method === ODataHttpMethods.Get) {
       return response;
     }
-    return { ...response, invalidates: buildInvalidates(state) };
+    const crossRouteKeys = resolveCrossRouteInvalidates(this.client.resourceIdentity, state, response.data);
+    return { ...response, invalidates: buildInvalidates(state, crossRouteKeys) };
   }
 
   /**
