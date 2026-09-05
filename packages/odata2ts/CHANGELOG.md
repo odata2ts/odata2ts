@@ -13,6 +13,45 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-objects bumped from ^0.28.0 to ^0.28.1
     * @odata2ts/odata-service bumped from ^0.23.0 to ^0.23.1
 
+## [0.44.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.44.0...@odata2ts/odata2ts-v0.44.1) (2026-09-05)
+
+
+### Features
+
+* **odata-service:** accept the concurrencyControlled flag from the generator ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata-service:** automatic ETag handling for optimistic concurrency ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** cache-key state, invalidates and response-observed identity ([#530](https://github.com/odata2ts/odata2ts/issues/530)) ([6134594](https://github.com/odata2ts/odata2ts/commit/6134594099f27f5ece50b91dfe5ee30ab953dbd4))
+* **odata-service:** let a write state its ETag or write past it ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** read and send ETags in the entity services ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** read and send ETags in the V2 entity services ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** report a missing ETag and identify a concurrency conflict ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** send If-Match and keep the ETag store in step ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata2ts:** discover optimistic concurrency from the service metadata ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** Evaluate OptionalParameter Annotation ([fac4cc0](https://github.com/odata2ts/odata2ts/commit/fac4cc02ca2bade51efb4d6ecc634b2bd65c1261))
+* **odata2ts:** generate name-rooted cache keys ([#533](https://github.com/odata2ts/odata2ts/issues/533)) ([cc1efea](https://github.com/odata2ts/odata2ts/commit/cc1efea5513248f72eae4986e8c8a61df5ef356c))
+* **odata2ts:** mark the generated services of concurrency-controlled resources ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** read Core.OptimisticConcurrency from entity sets and singletons ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** read the V2 concurrency token as optimistic concurrency ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** resolve annotations targeting the entity container ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* support alternate keys & EntitySetService gets `byId` method ([#521](https://github.com/odata2ts/odata2ts/issues/521)) ([36a48ca](https://github.com/odata2ts/odata2ts/commit/36a48ca748389e921c844a4316820c41de483ef4))
+
+
+### Bug Fixes
+
+* **odata2ts:** resolve the prettier config for the metadata file, not its directory ([037ed84](https://github.com/odata2ts/odata2ts/commit/037ed84283fba6bd806f34df74237d82693ed2f5))
+* **odata2ts:** send If-Match for actions bound to a concurrency-controlled entity ([5b023ba](https://github.com/odata2ts/odata2ts/commit/5b023ba6c77fb61123dcf96cb46a2ec3087f2939)), closes [#514](https://github.com/odata2ts/odata2ts/issues/514)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.31.0 to ^0.31.1
+    * @odata2ts/odata-service bumped from ^0.27.0 to ^0.27.1
+  * peerDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.31.0 to ^0.31.1
+    * @odata2ts/odata-service bumped from ^0.27.0 to ^0.27.1
+
 ## [0.44.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.43.0...@odata2ts/odata2ts-v0.44.0) (2026-08-21)
 
 
