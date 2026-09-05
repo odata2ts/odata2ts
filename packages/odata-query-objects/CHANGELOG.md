@@ -33,6 +33,20 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * ESM tends to break stuff
 
+## [0.31.1](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.31.0...@odata2ts/odata-query-objects-v0.31.1) (2026-09-05)
+
+
+### Features
+
+* **odata-query-objects:** cache-key foundations - structured filter clauses and canonical id construction ([f77ffcd](https://github.com/odata2ts/odata2ts/commit/f77ffcd2eeb55d519e9d2c2ae982748e27f2e817))
+* **odata-service:** automatic ETag handling for optimistic concurrency ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** let a write state its ETag or write past it ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** read and send ETags in the entity services ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** read and send ETags in the V2 entity services ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** report a missing ETag and identify a concurrency conflict ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** send If-Match and keep the ETag store in step ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* support alternate keys & EntitySetService gets `byId` method ([#521](https://github.com/odata2ts/odata2ts/issues/521)) ([36a48ca](https://github.com/odata2ts/odata2ts/commit/36a48ca748389e921c844a4316820c41de483ef4))
+
 ## [0.31.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.30.1...@odata2ts/odata-query-objects-v0.31.0) (2026-08-21)
 
 

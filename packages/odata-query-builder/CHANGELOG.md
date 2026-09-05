@@ -9,6 +9,20 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
   * dependencies
     * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
 
+## [0.19.4](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.19.3...@odata2ts/odata-query-builder-v0.19.4) (2026-09-05)
+
+
+### Features
+
+* **odata-query-builder:** snapshot the query state as structured cache-key params ([09f969a](https://github.com/odata2ts/odata2ts/commit/09f969ae02775054e7a6c6495a7563cb219807b4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-objects bumped from ^0.31.0 to ^0.31.1
+
 ## [0.19.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.19.2...@odata2ts/odata-query-builder-v0.19.3) (2026-08-21)
 
 
