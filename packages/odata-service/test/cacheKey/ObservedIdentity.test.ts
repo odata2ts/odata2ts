@@ -59,9 +59,12 @@ describe("recordObservedIdentities", () => {
   });
 
   test("records every row of a list response, against the same key", () => {
+    // a real V4/V2 collection response is `{value: [...]}`, never a bare array itself
     const handler = new MockResourceIdentityHandler();
     const key = ["Media", "list"];
-    recordObservedIdentities(handler, key, mediaState({ entitySetName: "Media" }), [{ id: 1 }, { id: 2 }]);
+    recordObservedIdentities(handler, key, mediaState({ entitySetName: "Media" }), {
+      value: [{ id: 1 }, { id: 2 }],
+    });
     expect(handler.resolve("Media(1)")).toEqual([key]);
     expect(handler.resolve("Media(2)")).toEqual([key]);
   });

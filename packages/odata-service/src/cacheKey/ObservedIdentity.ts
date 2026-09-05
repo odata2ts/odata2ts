@@ -26,7 +26,11 @@ export function recordObservedIdentities(
     return;
   }
 
-  const rows = Array.isArray(data) ? data : [data];
+  // a V4/V2-wrapped collection response is `{value: [...]}`, never a bare array itself - the same
+  // unwrapping `getCollectionConcurrencyOptions`'s own `harvest` already does for the identical reason
+  const rows: ReadonlyArray<unknown> = Array.isArray((data as { value?: unknown }).value)
+    ? ((data as { value: ReadonlyArray<unknown> }).value)
+    : [data];
   for (const row of rows) {
     recordRow(resourceIdentity, hierarchicalKey, state.canonicalIdFn, row);
 
