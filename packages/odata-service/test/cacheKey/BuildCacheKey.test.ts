@@ -1,13 +1,5 @@
 import { describe, expect, test } from "vitest";
-import {
-  buildCacheKey,
-  buildInvalidates,
-  hopState,
-  OPERATION_ROOT,
-  rootState,
-  withKey,
-  withParams,
-} from "../../src/cacheKey";
+import { buildCacheKey, buildInvalidates, hopState, rootState, withKey, withParams } from "../../src/cacheKey";
 
 const MEDIA = "Media";
 const COPIES = "Copies";
@@ -65,9 +57,14 @@ describe("buildCacheKey", () => {
     expect(buildCacheKey(state, { top: 10 })).toEqual([MEDIA, "list", { cast: "Library.Catalog.Book", top: 10 }]);
   });
 
-  test("an unbound operation with no entity set is rooted at the sentinel, never a type", () => {
-    const key = buildCacheKey({ name: OPERATION_ROOT, steps: ["Library.Circulation.TotalMediaCount"], kindIndex: 0 });
-    expect(key).toEqual([OPERATION_ROOT, "Library.Circulation.TotalMediaCount"]);
+  test("an unbound operation with no result entity set is rooted at the import's own name, never a type", () => {
+    const key = buildCacheKey(rootState("TotalMediaCount", "detail"));
+    expect(key).toEqual(["TotalMediaCount", "detail"]);
+  });
+
+  test("an unbound operation still carries its invocation params, nested under their own key", () => {
+    const key = buildCacheKey(rootState("Search", "list", { params: { params: { term: "Kafka" } } }));
+    expect(key).toEqual(["Search", "list", { params: { term: "Kafka" } }]);
   });
 });
 

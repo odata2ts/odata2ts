@@ -91,10 +91,13 @@ export interface HopDescriptor {
   readonly qEntityFn?: QEntityFn;
 }
 
-/** The root marker of an operation which returns no entities - `$` cannot occur in an OData identifier. */
-export const OPERATION_ROOT = "$operation";
-
-/** The state of an entity set or a singleton - the start of a route. An operation with no declared result set is built as a plain object literal instead, see `ServiceGenerator.emitUnboundOperationRootExpr`. */
+/**
+ * The state of an entity set, a singleton, or an unbound operation import - the start of a route. An
+ * unbound operation roots at its own import name (OData v4.01 Part 1 §11.5.4.1/§11.5.5.1: "the canonical
+ * URL for a function/action import is the service root, followed by the name of the function/action
+ * import") - import names share the container namespace with entity sets and singletons, so this is
+ * already a safe, unambiguous root with no sentinel needed.
+ */
 export function rootState(
   name: string,
   kind: CacheKeyKind,
