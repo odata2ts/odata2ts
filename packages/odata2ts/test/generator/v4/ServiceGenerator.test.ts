@@ -192,7 +192,7 @@ describe("Service Generator Tests V4", () => {
 
       // "Ents" - the entity set's own name - never the entity type's FQ name ("Tester.TestEntity")
       expect(generatedText()).toContain(
-        `rootState("Ents", "list", { entitySetName: "Ents", qEntityFn: () => QTestEntity })`,
+        `rootState("Ents", "list", { entitySetName: "Ents", canonicalIdFn: (entity: unknown) => new QTestEntityId("Ents").buildCanonicalId(entity), qEntityFn: () => QTestEntity })`,
       );
     });
 
@@ -288,23 +288,25 @@ describe("Service Generator Tests V4", () => {
 
       // root: entity set getter on the main service - "Media", the entity SET's own name, never
       // "Tester.Medium" (the type this used to, wrongly, be rooted at)
-      expect(text).toContain(`rootState("Media", "list", { entitySetName: "Media", qEntityFn: () => QMedium })`);
+      expect(text).toContain(
+        `rootState("Media", "list", { entitySetName: "Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
+      );
       // root: singleton getter - its own name directly, no params marker needed, no entitySetName (a
       // singleton has no "list" form for `invalidates` to ever name)
       expect(text).toContain(`rootState("MainBranch", "detail", { qEntityFn: () => QMedium })`);
       // navigation hop with no Partner/ReferentialConstraint - irrelevant now, every navigation property
       // is handled the same way regardless of what metadata backs it
       expect(text).toContain(
-        `hopState(cacheKeyState, { name: "reviews", kind: "list", entitySetName: "Reviews", qEntityFn: () => QReview })`,
+        `hopState(cacheKeyState, { name: "reviews", kind: "list", entitySetName: "Reviews", canonicalIdFn: (entity: unknown) => new QReviewId("Reviews").buildCanonicalId(entity), qEntityFn: () => QReview })`,
       );
       // contained: no entity set of its own
       expect(text).toContain(`hopState(cacheKeyState, { name: "chapters", kind: "list", qEntityFn: () => QChapter })`);
       // the old grade-A relation is just another hierarchical hop now, both directions, no re-rooting
       expect(text).toContain(
-        `hopState(cacheKeyState, { name: "copies", kind: "list", entitySetName: "Copies", qEntityFn: () => QCopy })`,
+        `hopState(cacheKeyState, { name: "copies", kind: "list", entitySetName: "Copies", canonicalIdFn: (entity: unknown) => new QCopyId("Copies").buildCanonicalId(entity), qEntityFn: () => QCopy })`,
       );
       expect(text).toContain(
-        `hopState(cacheKeyState, { name: "medium", kind: "detail", entitySetName: "Media", qEntityFn: () => QMedium })`,
+        `hopState(cacheKeyState, { name: "medium", kind: "detail", entitySetName: "Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
       );
       expect(text).not.toContain("reRoot");
       // complex property: never a navigation property, no entity set, no Q-object factory of its own
@@ -321,7 +323,7 @@ describe("Service Generator Tests V4", () => {
       expect(text).toContain(`hopState(cacheKeyState, { name: "${withNs("checkOut")}" })`);
       // unbound function with a declared EntitySet: rooted at that set's own name
       expect(text).toContain(
-        `rootState("Media", "list", { params: { operation: "${withNs("newReleases")}" }, entitySetName: "Media", qEntityFn: () => QMedium })`,
+        `rootState("Media", "list", { params: { operation: "${withNs("newReleases")}" }, entitySetName: "Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
       );
       // unbound function with no EntitySet: the "$operation" root, built as a plain object literal
       expect(text).toContain(`steps: ["${withNs("totalCount")}"]`);

@@ -92,6 +92,16 @@ class ServiceGenerator {
     return `() => ${imports.addGeneratedQObject(model.fqName, model.qName)}`;
   }
 
+  /**
+   * The runtime expression for `CacheKeyState.canonicalIdFn` - a fresh `QId` instance parametrized with the
+   * entity *set's* own name (never the route taken to reach it), so calling it with a response's own key
+   * values always produces the same canonical id regardless of which hop led here.
+   */
+  private canonicalIdFnExpr(imports: ImportContainer, entityType: EntityType, entitySetOdataName: string): string {
+    const qId = imports.addGeneratedQObject(entityType.id.fqName, entityType.id.qName);
+    return `(entity: unknown) => new ${qId}("${entitySetOdataName}").buildCanonicalId(entity)`;
+  }
+
   /** The root of a route: an entity set or a singleton. An operation with no declared result set is the one root with no type to head with - built as a plain object literal instead, see `emitUnboundOperationRootExpr`. */
   private emitRootStateExpr(
     imports: ImportContainer,
@@ -107,6 +117,7 @@ class ServiceGenerator {
     const optionsEntries = [
       options?.paramsSource ? `params: ${options.paramsSource}` : "",
       options?.isEntitySet ? `entitySetName: "${name}"` : "",
+      options?.isEntitySet ? `canonicalIdFn: ${this.canonicalIdFnExpr(imports, entityType, name)}` : "",
       `qEntityFn: ${this.qEntityFnExpr(imports, entityType)}`,
     ]
       .filter(Boolean)
@@ -117,9 +128,9 @@ class ServiceGenerator {
   /**
    * A navigation property hop - always hierarchical, named by the navigation property's own OData name,
    * never re-rooted at its target's type: that used to be a second mode (`typeFlattening`), and is now what
-   * `ResourceIdentityHandler` does at runtime instead, from actual responses. `entitySetName` (feeding
-   * `invalidates`) is the entity *set* the target belongs to, absent for a contained navigation property,
-   * which has none of its own.
+   * `ResourceIdentityHandler` does at runtime instead, from actual responses. `entitySetName`/`canonicalIdFn`
+   * (feeding `invalidates` and response-observed recording respectively) name the entity *set* the target
+   * belongs to, absent for a contained navigation property, which has none of its own.
    */
   private emitNavHopExpr(
     imports: ImportContainer,
@@ -136,10 +147,13 @@ class ServiceGenerator {
     const kind = isCollection ? "list" : "detail";
     const targetSet = !contained ? this.dataModel.getNavPropBindingTarget(ownerFqName, navPropOdataName) : undefined;
     const entitySetNameEntry = targetSet ? `, entitySetName: "${targetSet.odataName}"` : "";
+    const canonicalIdFnEntry = targetSet
+      ? `, canonicalIdFn: ${this.canonicalIdFnExpr(imports, targetSet.entityType, targetSet.odataName)}`
+      : "";
     const qEntityFnEntry = `, qEntityFn: ${this.qEntityFnExpr(imports, elementType)}`;
 
     const hopStateFn = imports.addServiceFunction("hopState");
-    return `cacheKeyState && ${hopStateFn}(cacheKeyState, { name: "${navPropOdataName}", kind: "${kind}"${entitySetNameEntry}${qEntityFnEntry} })`;
+    return `cacheKeyState && ${hopStateFn}(cacheKeyState, { name: "${navPropOdataName}", kind: "${kind}"${entitySetNameEntry}${canonicalIdFnEntry}${qEntityFnEntry} })`;
   }
 
   /** A complex property hop: the same shape as a navigation hop, minus any entity-set identity - a complex value is never a navigation property and belongs to no entity set. */
@@ -201,10 +215,11 @@ class ServiceGenerator {
       const rootStateFn = imports.addServiceFunction("rootState");
       const kind = op.returnType?.isCollection ? "list" : "detail";
       const operationParams = hasParams ? ", params" : "";
+      const canonicalIdFnEntry = `, canonicalIdFn: ${this.canonicalIdFnExpr(imports, entitySet.entityType, entitySet.odataName)}`;
       const qEntityFnEntry = `, qEntityFn: ${this.qEntityFnExpr(imports, entitySet.entityType)}`;
       return (
         `${rootStateFn}("${entitySet.odataName}", "${kind}", ` +
-        `{ params: { operation: "${op.fqName}"${operationParams} }, entitySetName: "${entitySet.odataName}"${qEntityFnEntry} })`
+        `{ params: { operation: "${op.fqName}"${operationParams} }, entitySetName: "${entitySet.odataName}"${canonicalIdFnEntry}${qEntityFnEntry} })`
       );
     }
 
