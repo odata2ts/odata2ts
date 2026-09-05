@@ -106,12 +106,7 @@ describe("CAP Library: cache keys (V2)", () => {
 
   test("$expand produces a hop-shaped entry touchesResource can reach", async () => {
     const request = LIBRARY_V2.Members(MEMBER_ID).query((builder) => builder.expand("Reservations"));
-    expect(request.cacheKey).toEqual([
-      "Members",
-      "detail",
-      MEMBER_ID,
-      { expand: [["Reservations", "list"]] },
-    ]);
+    expect(request.cacheKey).toEqual(["Members", "detail", MEMBER_ID, { expand: [["Reservations", "list"]] }]);
     expect(touchesResource(["Reservations", "list"], request.cacheKey!)).toBe(true);
 
     const result = await request.execute();
