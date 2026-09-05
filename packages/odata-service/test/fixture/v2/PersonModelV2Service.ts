@@ -2,6 +2,7 @@ import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
 import { EntityResponseConverterV2, QEnumCollection } from "@odata2ts/odata-query-objects";
 import {
+  CacheKeyState,
   CollectionServiceV2,
   EntitySetServiceV2,
   EntityTypeServiceV2,
@@ -39,8 +40,14 @@ export class PersonModelV2Service extends EntityTypeServiceV2<PersonModel, Edita
     return new PersonModelV2CollectionService(client, path, "Friends", options);
   }
 
-  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternalV2) {
-    super(client, basePath, name, new QPersonV2(), options);
+  constructor(
+    client: ODataHttpClient,
+    basePath: string,
+    name: string,
+    options?: ODataServiceOptionsInternalV2,
+    cacheKeyState?: CacheKeyState,
+  ) {
+    super(client, basePath, name, new QPersonV2(), options, cacheKeyState);
   }
 
   public getSomething(params: GetSomethingFunctionParams) {
@@ -66,8 +73,14 @@ export class PersonModelV2CollectionService extends EntitySetServiceV2<
   PersonId,
   PersonModelV2Service
 > {
-  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternalV2) {
-    super(client, basePath, name, qPersonV2, new QPersonIdFunction(name), options);
+  constructor(
+    client: ODataHttpClient,
+    basePath: string,
+    name: string,
+    options?: ODataServiceOptionsInternalV2,
+    cacheKeyState?: CacheKeyState,
+  ) {
+    super(client, basePath, name, qPersonV2, new QPersonIdFunction(name), options, cacheKeyState);
   }
 
   protected createEntityService(
@@ -75,7 +88,8 @@ export class PersonModelV2CollectionService extends EntitySetServiceV2<
     path: string,
     name: string,
     options: ODataServiceOptionsInternalV2 | undefined,
+    cacheKeyState?: CacheKeyState,
   ) {
-    return new PersonModelV2Service(client, path, name, options);
+    return new PersonModelV2Service(client, path, name, options, cacheKeyState);
   }
 }
