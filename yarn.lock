@@ -443,6 +443,7 @@ __metadata:
     "@odata2ts/converter-common": "npm:^0.4.0"
     "@odata2ts/converter-luxon": "npm:^0.3.0"
     "@odata2ts/converter-v2-to-v4": "npm:^0.5.8"
+    "@odata2ts/http-client-api": "npm:^0.7.1"
     "@odata2ts/http-client-axios": "npm:^0.16.1"
     "@odata2ts/http-client-fetch": "npm:^0.13.1"
     "@odata2ts/odata-service": "workspace:^"
@@ -526,6 +527,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@odata2ts/int-test-asp-net@workspace:int-test/asp-net"
   dependencies:
+    "@odata2ts/http-client-api": "npm:^0.7.1"
     "@odata2ts/http-client-fetch": "npm:^0.13.1"
     "@odata2ts/odata-service": "workspace:^"
     "@odata2ts/odata2ts": "workspace:^"
@@ -543,6 +545,7 @@ __metadata:
     "@odata2ts/converter-big-number": "npm:^0.3.1"
     "@odata2ts/converter-common": "npm:^0.4.0"
     "@odata2ts/converter-luxon": "npm:^0.3.0"
+    "@odata2ts/http-client-api": "npm:^0.7.1"
     "@odata2ts/http-client-fetch": "npm:^0.13.1"
     "@odata2ts/odata-service": "workspace:^"
     "@odata2ts/odata2ts": "workspace:^"
@@ -575,6 +578,7 @@ __metadata:
     "@odata2ts/converter-common": "npm:^0.4.0"
     "@odata2ts/converter-luxon": "npm:^0.3.0"
     "@odata2ts/converter-v2-to-v4": "npm:^0.5.8"
+    "@odata2ts/http-client-api": "npm:^0.7.1"
     "@odata2ts/http-client-fetch": "npm:^0.13.1"
     "@odata2ts/odata-service": "workspace:^"
     "@odata2ts/odata2ts": "workspace:^"
