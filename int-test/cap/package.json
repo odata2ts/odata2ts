@@ -17,7 +17,7 @@
     "@odata2ts/converter-big-number": "^0.3.1",
     "@odata2ts/converter-common": "^0.4.0",
     "@odata2ts/converter-luxon": "^0.3.0",
-    "@odata2ts/http-client-api": "^0.7.0",
+    "@odata2ts/http-client-api": "^0.7.1",
     "@odata2ts/http-client-fetch": "^0.13.0",
     "@odata2ts/odata-service": "workspace:^",
     "bignumber.js": "^11.0.0",

@@ -11,8 +11,8 @@ const qMedium = (() => class {}) as unknown as QEntityFn;
 const qCopy = (() => class {}) as unknown as QEntityFn;
 
 // a stand-in for a generated `(key) => new QMediumId("Media").buildUrl(key)` closure
-const canonicalIdOfMedia: CanonicalIdFn = (key) => `Media(${key.Id})`;
-const canonicalIdOfCopies: CanonicalIdFn = (key) => `Copies(${key.Id})`;
+const canonicalIdOfMedia: CanonicalIdFn = (key: any) => `Media(${key.Id})`;
+const canonicalIdOfCopies: CanonicalIdFn = (key: any) => `Copies(${key.Id})`;
 
 describe("CacheKeyState", () => {
   test("a bare root has no entity set and no Q-object factory of its own - the singleton shape", () => {
