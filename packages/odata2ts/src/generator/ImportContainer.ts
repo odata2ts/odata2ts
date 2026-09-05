@@ -138,6 +138,19 @@ export class ImportContainer {
     return importName;
   }
 
+  /**
+   * Imports an arbitrary named export from the service package by its exact name - the cache-key helpers
+   * (`rootState`, `hopState`, ...) are plain, version-neutral functions and constants, unlike the
+   * versioned classes {@link addServiceObject} resolves, so no `ServiceImports` entry fits them: that enum
+   * reverse-maps a numeric key to a PascalCase class name, which would mismatch a camelCase function.
+   */
+  public addServiceFunction(name: string, isTypeOnly = false) {
+    const importName = this.importedNameValidator.validateName(LIB_MODULES.service, name);
+    const imports = isTypeOnly ? this.libs.service.typeOnly : this.libs.service.regular;
+    imports.set(name, importName);
+    return importName;
+  }
+
   // TODO: make sure that regular imports win over additional typeOnly imports
   /**
    * Adds an import for a type coming from an arbitrary module, e.g. a converter's target type.

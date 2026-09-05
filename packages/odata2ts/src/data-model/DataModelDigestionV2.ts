@@ -7,6 +7,7 @@ import { Digester, TypeModel } from "./DataModelDigestion.js";
 import { NavPropBindingType, ODataVersion, OperationTypes, PropertyModel } from "./DataTypeModel.js";
 import { ComplexType, Property, Reference } from "./edmx/ODataEdmxModelBase.js";
 import {
+  Association,
   AssociationEnd,
   ComplexTypeV3,
   EntityContainerV3,
@@ -41,18 +42,30 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
     super(ODataVersion.V2, schemas, options, namingHelper, converters, references);
   }
 
-  private findAssociationEnd(np: NavigationProperty): AssociationEnd {
+  /**
+   * The `<Association>` a navigation property points at, found by its (unqualified) relationship name.
+   * Shared by {@link findAssociationEnd}, which additionally needs the specific end, and by
+   * {@link getPartner}/{@link getReferentialConstraints}, which need the association as a whole - the
+   * partner lookup for the other end's type, the constraint because it is stated once per association
+   * rather than per end.
+   */
+  private findAssociation(np: NavigationProperty): Association {
+    const relationship = this.namingHelper.stripServicePrefix(np.$.Relationship);
     for (let schema of this.schemas) {
-      if (schema.Association) {
-        const relationship = this.namingHelper.stripServicePrefix(np.$.Relationship);
-        const association = schema.Association?.find((a) => a.$.Name === relationship);
-        const result = association?.End.find((e) => e.$.Role === np.$.ToRole);
-        if (result) {
-          return result;
-        }
+      const association = schema.Association?.find((a) => a.$.Name === relationship);
+      if (association) {
+        return association;
       }
     }
     throw new Error(`Association end couldn't be determined for NavigationProperty [${np.$.Name}]`);
+  }
+
+  private findAssociationEnd(np: NavigationProperty): AssociationEnd {
+    const end = this.findAssociation(np).End.find((e) => e.$.Role === np.$.ToRole);
+    if (!end) {
+      throw new Error(`Association end couldn't be determined for NavigationProperty [${np.$.Name}]`);
+    }
+    return end;
   }
 
   private findEdmxEntityType(fqTypeName: string): EntityTypeV3 | undefined {
@@ -64,6 +77,79 @@ class DigesterV3 extends Digester<SchemaV3, EntityTypeV3, ComplexTypeV3> {
       }
     }
     return undefined;
+  }
+
+  /**
+   * The raw `<NavigationProperty>` a mapped {@link Property} was built from, resolved by declaring entity
+   * type and name. {@link getNavigationProps} reshapes navigation properties into the same `{ $: { Name,
+   * Type, Nullable } }` shape as a plain `<Property>`, so `Relationship`/`FromRole`/`ToRole` - everything
+   * {@link getPartner} and {@link getReferentialConstraints} need - are gone by the time `mapProp` sees it.
+   * Looking the original element back up by owner and name is what gets them back.
+   */
+  private findNavProp(fqOwnerName: string, name: string): NavigationProperty | undefined {
+    return this.findEdmxEntityType(fqOwnerName)?.NavigationProperty?.find((np) => np.$.Name === name);
+  }
+
+  /**
+   * The inverse navigation property, resolved from the association's other end: the entity type declared
+   * there, and on it the navigation property realizing the same association with `FromRole`/`ToRole`
+   * swapped. Undefined where no such navigation property exists - an association end nothing navigates
+   * back from is legal.
+   */
+  protected getPartner(p: Property, fqOwnerName?: string): string | undefined {
+    const np = fqOwnerName ? this.findNavProp(fqOwnerName, p.$.Name) : undefined;
+    if (!np) {
+      return undefined;
+    }
+
+    const association = this.findAssociation(np);
+    const targetEnd = association.End.find((e) => e.$.Role === np.$.ToRole);
+    const targetType = targetEnd && this.findEdmxEntityType(targetEnd.$.Type);
+    const relationship = this.namingHelper.stripServicePrefix(np.$.Relationship);
+
+    const partnerNavProp = targetType?.NavigationProperty?.find(
+      (candidate) =>
+        this.namingHelper.stripServicePrefix(candidate.$.Relationship) === relationship &&
+        candidate.$.FromRole === np.$.ToRole &&
+        candidate.$.ToRole === np.$.FromRole,
+    );
+    return partnerNavProp?.$.Name;
+  }
+
+  /**
+   * The foreign key stated on the `<Association>`'s `<ReferentialConstraint>`, resolved to the same shape
+   * V4 states directly on its navigation property. V2 states the constraint once, naming its two sides by
+   * role, so it applies only to the navigation property that points *at* the principal - that one's own
+   * declaring type is the dependent side, which is where the foreign key actually lives. The navigation
+   * property pointing at the dependent side gets nothing, mirroring V4 exactly and keeping the two versions
+   * indistinguishable from here on.
+   */
+  protected getReferentialConstraints(
+    p: Property,
+    fqOwnerName?: string,
+  ): ReadonlyArray<{ property: string; referencedProperty: string }> | undefined {
+    const np = fqOwnerName ? this.findNavProp(fqOwnerName, p.$.Name) : undefined;
+    if (!np) {
+      return undefined;
+    }
+
+    const constraint = this.findAssociation(np).ReferentialConstraint?.[0];
+    const principal = constraint?.Principal[0];
+    const dependent = constraint?.Dependent[0];
+    if (!principal || !dependent || np.$.ToRole !== principal.$.Role) {
+      return undefined;
+    }
+
+    // a composite key gone out of sync between the two sides would produce a half-derived constraint that
+    // is worse than none - so this is skipped rather than repaired by guesswork
+    if (dependent.PropertyRef.length !== principal.PropertyRef.length) {
+      return undefined;
+    }
+
+    return dependent.PropertyRef.map((ref, index) => ({
+      property: ref.$.Name,
+      referencedProperty: principal.PropertyRef[index].$.Name,
+    }));
   }
 
   /**
