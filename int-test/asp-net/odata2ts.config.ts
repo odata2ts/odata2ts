@@ -1,4 +1,12 @@
-import { ConfigFileOptions, EmitModes, KeyProperties, ManagedPropertyMode, Modes, TypeModel } from "@odata2ts/odata2ts";
+import {
+  CacheKeyMode,
+  ConfigFileOptions,
+  EmitModes,
+  KeyProperties,
+  ManagedPropertyMode,
+  Modes,
+  TypeModel,
+} from "@odata2ts/odata2ts";
 
 /** The running server to refresh from, or `undefined` to read the committed snapshot - see below. */
 const SOURCE_URL = process.env.LIBRARY_BASE_URL;
@@ -10,8 +18,10 @@ const SOURCE = "resource/library.xml";
  *
  * The source is a committed snapshot of the server's actual `$metadata` (`resource/library.xml`) -
  * odata2ts is tested against the metadata ASP.NET Core OData really emits, not against the idealized
- * reference model. Notably that metadata has no `TypeDefinition`, no `Partner` attributes and no `SRID`
- * facets, none of which the model builder can express; see FEATURE-COVERAGE.md in the server repo.
+ * reference model. Notably that metadata has no `TypeDefinition` and no `SRID` facets, neither of which
+ * the model builder can express; see FEATURE-COVERAGE.md in the server repo. `Partner` *is* declared on
+ * both sides of every relationship (6 attributes) - which is what puts grade A and grade B navigation
+ * properties into this client's `cacheKeys` derivation, see the `library` service below.
  *
  * The snapshot refreshes itself from a running server: point `LIBRARY_BASE_URL` at one and the first
  * service downloads `$metadata` and overwrites the file, which the services after it then read, so a
@@ -55,6 +65,10 @@ const config: ConfigFileOptions = {
       source: SOURCE,
       refreshFile: true,
       output: "src-generated/library",
+      // this metadata reproduces the reference model exactly, which puts every hop shape into one client -
+      // to-many and to-one navigation, grade-B/C-style relations, containment and a stream - so this is
+      // where the cache-key shape itself is held against a real server; see test/feature/CacheKeys.test.ts.
+      cacheKeys: { mode: CacheKeyMode.on },
     },
     /**
      * The same model once more, targeting OData 4.01 instead of the default 4.0.

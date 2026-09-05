@@ -1,4 +1,5 @@
 import {
+  CacheKeyMode,
   ConfigFileOptions,
   EmitModes,
   EnumSynthesis,
@@ -69,6 +70,11 @@ const config: ConfigFileOptions = {
       // across the two V4 packages instead of duplicating a suite. `test/core/QueryFunctionality.test.ts`
       // covers it on either side - the assertion differs only in the URL that reaches the server.
       v4: { enableNativeInOperator: true },
+      // CAP declares more than the reference model asks (Partner and a real Member_Id foreign key for
+      // Reservations) - since a cache key is now purely the route taken, named, that richer metadata makes
+      // no difference to the key shape at all, only to what the generator could once have inferred from it.
+      // See test/feature/CacheKeys.test.ts.
+      cacheKeys: { mode: CacheKeyMode.on },
     },
     /**
      * The V4 model with `unflattenComplexTypes`, which is what this whole server is the case for:
@@ -209,6 +215,8 @@ const config: ConfigFileOptions = {
         responseResultsWrapping: true,
         payloadResultsWrapping: false,
       },
+      // on, against V2 metadata and its own V2 URL/filter-literal building - see test/v2/feature/CacheKeys.test.ts.
+      cacheKeys: { mode: CacheKeyMode.on },
     },
   },
 };
