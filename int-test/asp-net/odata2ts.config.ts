@@ -65,12 +65,10 @@ const config: ConfigFileOptions = {
       source: SOURCE,
       refreshFile: true,
       output: "src-generated/library",
-      // typeFlattening rather than hierarchical, and here rather than anywhere else: this metadata
-      // reproduces the reference model exactly, which puts all four hop outcomes into one client - grade A
-      // to-many and to-one, grade B, grade C and containment. So this is the one package that can show
-      // grade C and containment staying hierarchical *inside* a flattened client, and it is where the
-      // convergence claim is held against a real server.
-      cacheKeys: { mode: CacheKeyMode.typeFlattening },
+      // this metadata reproduces the reference model exactly, which puts every hop shape into one client -
+      // to-many and to-one navigation, grade-B/C-style relations, containment and a stream - so this is
+      // where the cache-key shape itself is held against a real server; see test/feature/CacheKeys.test.ts.
+      cacheKeys: { mode: CacheKeyMode.on },
     },
     /**
      * The same model once more, targeting OData 4.01 instead of the default 4.0.
