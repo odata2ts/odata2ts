@@ -59,9 +59,7 @@ describe("ASP.NET Library: cache keys", () => {
       .patch({ Title: "Der Prozess" })
       .ignoreETag()
       .execute();
-    expect(patched.invalidates).toEqual(
-      expect.arrayContaining([["Copies", "detail", copyKey, "Medium", "detail"]]),
-    );
+    expect(patched.invalidates).toEqual(expect.arrayContaining([["Copies", "detail", copyKey, "Medium", "detail"]]));
   });
 
   test("$expand produces a hop-shaped entry touchesResource can reach", async () => {
@@ -188,11 +186,7 @@ describe("ASP.NET Library: cache keys", () => {
 
   test("an unbound function with a declared result entity set roots at its own import name too, never the entity set's - invocation params nested under their own key", async () => {
     const request = LIBRARY.Search({ Term: "Prozess" });
-    expect(request.cacheKey).toEqual([
-      "Search",
-      "list",
-      { params: { Term: "Prozess" } },
-    ]);
+    expect(request.cacheKey).toEqual(["Search", "list", { params: { Term: "Prozess" } }]);
 
     const result = await request.execute();
     expect(result.status).toBe(200);
