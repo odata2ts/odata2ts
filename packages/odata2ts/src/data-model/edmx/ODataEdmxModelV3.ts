@@ -77,6 +77,14 @@ export interface Association {
     Name: string;
   };
   End: Array<AssociationEnd>;
+  /**
+   * The foreign key this association is realized by. Unlike V4, where the constraint sits on the
+   * navigation property, V2 states it once on the association and names the two sides by role.
+   */
+  ReferentialConstraint?: Array<{
+    Principal: Array<AssociationConstraintEnd>;
+    Dependent: Array<AssociationConstraintEnd>;
+  }>;
 }
 
 export interface AssociationEnd {
@@ -85,4 +93,9 @@ export interface AssociationEnd {
     Multiplicity: string;
     Role?: string;
   };
+}
+
+export interface AssociationConstraintEnd {
+  $: { Role: string };
+  PropertyRef: Array<{ $: { Name: string } }>;
 }

@@ -5,6 +5,7 @@ import { beforeAll, beforeEach, describe, expect, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
 import {
+  CacheKeyMode,
   ConfigFileOptions,
   EmitModes,
   KeyProperties,
@@ -170,6 +171,174 @@ describe("Service Generator Tests V4", () => {
       await doGenerate();
 
       expect(generatedText()).not.toContain("getConcurrencyOptions");
+    });
+  });
+
+  describe("cacheKeys: root", () => {
+    function generatedText() {
+      return projectManager.getMainServiceFile().getFile().getFullText();
+    }
+
+    function addEntity() {
+      odataBuilder
+        .addEntityType("TestEntity", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Guid))
+        .addEntitySet("Ents", withNs("TestEntity"));
+    }
+
+    test("a collection getter roots the key at the entity set's own name, not its type, when the feature is on", async () => {
+      addEntity();
+
+      await doGenerate({ cacheKeys: { mode: CacheKeyMode.on } });
+
+      // "Ents" - the entity set's own name - never the entity type's FQ name ("Tester.TestEntity")
+      expect(generatedText()).toContain(
+        `rootState("Ents", "list", { entitySetName: "Ents", canonicalIdFn: (entity: unknown) => new QTestEntityId("Ents").buildCanonicalId(entity), qEntityFn: () => QTestEntity })`,
+      );
+    });
+
+    test("nothing is emitted when cacheKeys is absent", async () => {
+      addEntity();
+
+      await doGenerate();
+
+      expect(generatedText()).not.toContain("rootState");
+      expect(generatedText()).not.toContain("cacheKeyState");
+    });
+
+    test("nothing is emitted under mode: off - identical to cacheKeys being absent", async () => {
+      addEntity();
+
+      await doGenerate({ cacheKeys: { mode: CacheKeyMode.off } });
+
+      expect(generatedText()).not.toContain("rootState");
+      expect(generatedText()).not.toContain("cacheKeyState");
+    });
+  });
+
+  describe("cacheKeys: hops", () => {
+    function generatedText() {
+      return projectManager.getMainServiceFile().getFile().getFullText();
+    }
+
+    /**
+     * Every navigation property is handled identically now - purely hierarchical, named by its own OData
+     * name, no grade/derivation reasoning involved (that machinery, and `typeFlattening` itself, is gone).
+     * `chapters` is contained (no entity set of its own, so no `entitySetName`); every other navigation
+     * property targets a real one.
+     */
+    function buildModel() {
+      odataBuilder
+        .addComplexType("Details", undefined, (builder) => builder.addProp("note", ODataTypesV4.String))
+        .addEntityType("Chapter", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Guid))
+        .addEntityType("Review", undefined, (builder) => builder.addKeyProp("id", ODataTypesV4.Guid))
+        .addEntityType("Copy", undefined, (builder) =>
+          builder
+            .addKeyProp("mediumId", ODataTypesV4.Guid)
+            .addKeyProp("inventoryNumber", ODataTypesV4.Int32)
+            .addNavProp("medium", withNs("Medium"), "copies", false, false, [
+              { property: "mediumId", referencedProperty: "id" },
+            ]),
+        )
+        .addEntityType("Medium", undefined, (builder) =>
+          builder
+            .addKeyProp("id", ODataTypesV4.Guid)
+            .addProp("title", ODataTypesV4.String)
+            .addProp("rating", ODataTypesV4.Int32)
+            .addProp("scan", ODataTypesV4.Stream)
+            .addProp("keywords", `Collection(${ODataTypesV4.String})`)
+            .addProp("details", withNs("Details"))
+            .addNavProp("copies", `Collection(${withNs("Copy")})`, "medium")
+            .addNavProp("reviews", `Collection(${withNs("Review")})`)
+            .addNavProp("chapters", `Collection(${withNs("Chapter")})`, undefined, undefined, true),
+        )
+        .addEntityType("Book", { baseType: withNs("Medium") }, () => {})
+        .addEntitySet("Media", withNs("Medium"), [
+          { path: "copies", target: "Copies" },
+          { path: "reviews", target: "Reviews" },
+        ])
+        .addEntitySet("Copies", withNs("Copy"), [{ path: "medium", target: "Media" }])
+        .addEntitySet("Reviews", withNs("Review"))
+        .addSingleton("MainBranch", withNs("Medium"))
+        .addAction("checkOut", undefined, true, (builder) => builder.addParam("medium", withNs("Medium")))
+        .addFunction("newReleases", `Collection(${withNs("Medium")})`, false)
+        .addFunctionImport("NewReleases", withNs("newReleases"), "Media")
+        .addFunction("totalCount", ODataTypesV4.Int32, false)
+        .addFunctionImport("TotalCount", withNs("totalCount"));
+    }
+
+    async function generateWith(mode: CacheKeyMode) {
+      buildModel();
+      await doGenerate({ cacheKeys: { mode }, enablePrimitivePropertyServices: true });
+      return generatedText();
+    }
+
+    test("off: no cache-key expression is emitted anywhere", async () => {
+      const text = await generateWith(CacheKeyMode.off);
+
+      expect(text).not.toContain("rootState");
+      expect(text).not.toContain("hopState");
+      expect(text).not.toContain("withParams");
+      expect(text).not.toContain("cacheKeyState");
+      expect(text).not.toContain("CacheKeyNavHops");
+      expect(text).not.toContain("CACHE_KEY_NAV_HOPS");
+    });
+
+    test("root, hop, complex, primitive, stream, cast and operation hops all name themselves - never a type", async () => {
+      const text = await generateWith(CacheKeyMode.on);
+
+      // root: entity set getter on the main service - "Media", the entity SET's own name, never
+      // "Tester.Medium" (the type this used to, wrongly, be rooted at)
+      expect(text).toContain(
+        `rootState("Media", "list", { entitySetName: "Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
+      );
+      // root: singleton getter - its own name directly, no params marker needed, no entitySetName (a
+      // singleton has no "list" form for `invalidates` to ever name)
+      expect(text).toContain(`rootState("MainBranch", "detail", { qEntityFn: () => QMedium })`);
+      // navigation hop with no Partner/ReferentialConstraint - irrelevant now, every navigation property
+      // is handled the same way regardless of what metadata backs it
+      expect(text).toContain(
+        `hopState(cacheKeyState, { name: "reviews", kind: "list", entitySetName: "Reviews", canonicalIdFn: (entity: unknown) => new QReviewId("Reviews").buildCanonicalId(entity), qEntityFn: () => QReview })`,
+      );
+      // contained: no entity set of its own
+      expect(text).toContain(`hopState(cacheKeyState, { name: "chapters", kind: "list", qEntityFn: () => QChapter })`);
+      // the old grade-A relation is just another hierarchical hop now, both directions, no re-rooting
+      expect(text).toContain(
+        `hopState(cacheKeyState, { name: "copies", kind: "list", entitySetName: "Copies", canonicalIdFn: (entity: unknown) => new QCopyId("Copies").buildCanonicalId(entity), qEntityFn: () => QCopy })`,
+      );
+      expect(text).toContain(
+        `hopState(cacheKeyState, { name: "medium", kind: "detail", entitySetName: "Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
+      );
+      expect(text).not.toContain("reRoot");
+      // complex property: never a navigation property, no entity set, no Q-object factory of its own
+      expect(text).toContain(`hopState(cacheKeyState, { name: "details", kind: "detail" })`);
+      // primitive collection and primitive property: bare name, no kind - stays on its parent's resource
+      expect(text).toContain(`hopState(cacheKeyState, { name: "keywords" })`);
+      expect(text).toContain(`hopState(cacheKeyState, { name: "rating" })`);
+      // stream property: the property hop, then a further hop appending $value
+      expect(text).toContain(`hopState(hopState(cacheKeyState, { name: "scan" }), { name: "$value" })`);
+      // subtype cast: a restriction on the same resource, not a hop away from it - a genuine spec URL
+      // segment, so it stays a type here, unlike everything else
+      expect(text).toContain(`withParams(cacheKeyState, { cast: "${withNs("Book")}" })`);
+      // bound action: a hop off the resource it is bound to, unstructured return -> bare name
+      expect(text).toContain(`hopState(cacheKeyState, { name: "${withNs("checkOut")}" })`);
+      // unbound function with a declared EntitySet: still rooted at the *import's* own name ("NewReleases"),
+      // never the entity set's ("Media") - entitySetName/canonicalIdFn/qEntityFn are attached alongside it
+      // only so ResourceIdentityHandler can record the actual Media entities the response carries
+      expect(text).toContain(
+        `rootState("NewReleases", "list", { entitySetName: "Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
+      );
+      // unbound function with no EntitySet: rooted at its own import name too, no sentinel needed
+      expect(text).toContain(`rootState("TotalCount", "detail")`);
+      expect(text).not.toContain("OPERATION_ROOT");
+      // no generated nav-hops table anywhere - removed along with type-rooted identity
+      expect(text).not.toContain("CacheKeyNavHops");
+      expect(text).not.toContain("CACHE_KEY_NAV_HOPS");
+    });
+
+    test("createEntityService forwards the cache-key state it is handed, without computing one", async () => {
+      const text = await generateWith(CacheKeyMode.on);
+
+      expect(text).toContain("new MediumService<V>(client, path, name, options, cacheKeyState);");
     });
   });
 
