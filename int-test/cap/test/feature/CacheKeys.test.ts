@@ -6,24 +6,15 @@ import { Books } from "../../src-generated/library/LibraryModel.js";
 import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
- * `cacheKeys: { mode: "hierarchical" }`, against CAP's V4 endpoint.
+ * `cacheKeys: { mode: "on" }`, against CAP's V4 endpoint.
  *
- * CAP declares *more* than the reference model asks: `Members/Loans` and `Members/Reservations` both
- * carry a real `Member_Id` foreign key and a `Partner`, which makes them grade A here - richer than
- * ASP.NET's leaner metadata, where `Loans` is grade B and `Reservations` grade C (see
- * `int-test/asp-net/test/feature/CacheKeys.test.ts`). Under `hierarchical` that richness must make **no**
- * difference: the same relations key exactly the same shape either way. That is the one claim this file
- * exists to prove; the shape itself is already the general subject of the ASP.NET suite.
- *
- * Two of the plan's originally-cited "grade A" examples for this server turned out not to be, once checked
- * against `getNavPropDerivation` (Task 12's own resolver, tested against this exact metadata file):
- * `Members/IdDocument` and `Loans/Copy` each declare a `ReferentialConstraint`, but the constrained
- * property (`IdDocument_Id`, `Copy_MediumId`/`Copy_InventoryNumber`) is never part of the *source's* own
- * key - `Members`' key is bare `Id`, `Loans`' is bare `Id` too - so rule 4's usability check fails and both
- * stay grade C. `hierarchical` does not care either way, but the test comments below say what is actually
- * true rather than repeat the plan's premise.
+ * CAP declares *more* than the reference model asks: `Members/Loans` and `Members/Reservations` both carry
+ * a real `Member_Id` foreign key and a `Partner`, richer than ASP.NET's leaner metadata. Since a cache key
+ * is now purely the route taken, named, that richer metadata makes no difference to the key shape at all -
+ * the point this file exists to prove; the shape itself is already the general subject of the ASP.NET
+ * suite.
  */
-describe("CAP Library: cache keys (V4, hierarchical)", () => {
+describe("CAP Library: cache keys (V4)", () => {
   const MEMBER_ID = 9850;
   // a pre-seeded copy of BOOK_DER_PROZESS - Loans/Copy_* is non-nullable, so a loan must reference one
   const COPY = { MediumId: BOOK_DER_PROZESS, InventoryNumber: 1001 };
@@ -32,13 +23,7 @@ describe("CAP Library: cache keys (V4, hierarchical)", () => {
     await LIBRARY.Members(MEMBER_ID).delete().execute();
   });
 
-  test("entityTypeName is the entity set's FQ type", () => {
-    expect(LIBRARY.Books().entityTypeName).toBe("Library.Service.Books");
-    expect(LIBRARY.Members().entityTypeName).toBe("Library.Service.Members");
-    expect(LIBRARY.Loans().entityTypeName).toBe("Library.Service.Loans");
-  });
-
-  test("Members/Loans keys hierarchically despite being grade A here", async () => {
+  test("Members/Loans names itself by the navigation property, never by its richer metadata", async () => {
     const member = await LIBRARY.Members()
       .create({
         Id: MEMBER_ID,
@@ -57,65 +42,65 @@ describe("CAP Library: cache keys (V4, hierarchical)", () => {
     expect(member.status).toBe(201);
 
     const request = LIBRARY.Members(MEMBER_ID).Loans().query();
-    expect(request.cacheKey).toEqual([
-      "Library.Service.Members",
-      "detail",
-      MEMBER_ID,
-      "Library.Service.Loans",
-      "list",
-      "Loans",
-    ]);
+    expect(request.cacheKey).toEqual(["Members", "detail", MEMBER_ID, "Loans", "list"]);
 
     const result = await request.execute();
     expect(result.status).toBe(200);
     expect(result.data.value.length).toBe(1);
   });
 
-  test("Members/Reservations keys hierarchically despite being grade A here", async () => {
+  test("Members/Reservations names itself the same way", async () => {
     const request = LIBRARY.Members(MEMBER_ID).Reservations().query();
-    expect(request.cacheKey).toEqual([
-      "Library.Service.Members",
-      "detail",
-      MEMBER_ID,
-      "Library.Service.Reservations",
-      "list",
-      "Reservations",
-    ]);
+    expect(request.cacheKey).toEqual(["Members", "detail", MEMBER_ID, "Reservations", "list"]);
 
     const result = await request.execute();
     expect(result.status).toBe(200);
   });
 
-  test("Members/IdDocument: a real ReferentialConstraint that is not usable, staying grade C either way", async () => {
-    // IdDocument_Id is not part of Members' own key, so rule 4 never applies - proven against the real
-    // resolver in Task 12's own unit tests. Non-contained (a real "IdDocuments" entity set backs it), so
-    // it still carries an entitySetType, unlike a contained hop.
+  test("Members/IdDocument names itself by the navigation property, not by its target entity set's name", async () => {
     const request = LIBRARY.Members(MEMBER_ID).IdDocument().query();
-    expect(request.cacheKey).toEqual([
-      "Library.Service.Members",
-      "detail",
-      MEMBER_ID,
-      "Library.Service.IdDocuments",
-      "detail",
-      "IdDocument",
-    ]);
+    expect(request.cacheKey).toEqual(["Members", "detail", MEMBER_ID, "IdDocument", "detail"]);
 
     // 204: this member has no IdDocument at all - the request itself is still well-formed
     const result = await request.execute();
     expect(result.status).toBe(204);
   });
 
-  test("touchesResource reaches a hierarchical key by type", () => {
+  test("a read through a navigated route records the resource it served, so a later direct write to it also invalidates that route", async () => {
+    const navigated = await LIBRARY.Members(MEMBER_ID).Loans().query().execute();
+    expect(navigated.status).toBe(200);
+    const loanId = navigated.data.value[0].Id;
+
+    const patched = await LIBRARY.Loans(loanId).patch({ DueDate: "2026-07-01" }).execute();
+    expect(patched.invalidates).toEqual(
+      expect.arrayContaining([
+        ["Loans", "detail", loanId],
+        ["Loans", "list"],
+        ["Members", "detail", MEMBER_ID, "Loans", "list"],
+      ]),
+    );
+  });
+
+  test("touchesResource reaches a hierarchical key by its own name", () => {
     const key = LIBRARY.Members(MEMBER_ID).Loans().query().cacheKey!;
-    expect(touchesResource("Library.Service.Members", key)).toBe(true);
-    expect(touchesResource("Library.Service.Loans", key)).toBe(true);
-    expect(touchesResource("Library.Service.Reservations", key)).toBe(false);
+    expect(touchesResource(["Members", "detail", MEMBER_ID], key)).toBe(true);
+    expect(touchesResource(["Loans", "list"], key)).toBe(true);
+    expect(touchesResource(["Reservations", "list"], key)).toBe(false);
+  });
+
+  test("an unbound function roots at its own import name, never its declared result entity set's", async () => {
+    const request = LIBRARY.Search({ Term: "Prozess" });
+    expect(request.cacheKey).toEqual(["Search", "list", { params: { Term: "Prozess" } }]);
+
+    const result = await request.execute();
+    expect(result.status).toBe(200);
+    expect(result.data.value.some((book) => book.Title === "Der Prozess")).toBe(true);
   });
 
   test("invalidates on a PATCH, a POST and a DELETE", async () => {
     const created = await LIBRARY.Books().create({ Title: "CacheKeys Probe", Language: "de" }).execute();
     expect(created.status).toBe(201);
-    expect(created.invalidates).toEqual([["Library.Service.Books", "list"]]);
+    expect(created.invalidates).toEqual([["Books", "list"]]);
     expectTypeOf(created).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Books>>>();
     const bookId = created.data.Id;
 
@@ -123,15 +108,15 @@ describe("CAP Library: cache keys (V4, hierarchical)", () => {
     const patched = await LIBRARY.Books(bookId).patch({ Language: "en" }).execute();
     expect(patched.status).toBe(200);
     expect(patched.invalidates).toEqual([
-      ["Library.Service.Books", "detail", bookId],
-      ["Library.Service.Books", "list"],
+      ["Books", "detail", bookId],
+      ["Books", "list"],
     ]);
 
     const deleted = await LIBRARY.Books(bookId).delete().execute();
     expect(deleted.status).toBe(204);
     expect(deleted.invalidates).toEqual([
-      ["Library.Service.Books", "detail", bookId],
-      ["Library.Service.Books", "list"],
+      ["Books", "detail", bookId],
+      ["Books", "list"],
     ]);
 
     // a read carries nothing extra
