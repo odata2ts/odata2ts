@@ -69,6 +69,25 @@ describe("recordObservedIdentities", () => {
     expect(handler.resolve("Media(2)")).toEqual([key]);
   });
 
+  test("records every row of a V2-wrapped list response too (`{d: {results: [...]}}`)", () => {
+    const handler = new MockResourceIdentityHandler();
+    const key = ["Media", "list"];
+    recordObservedIdentities(handler, key, mediaState({ entitySetName: "Media" }), {
+      d: { results: [{ id: 1 }, { id: 2 }] },
+    });
+    expect(handler.resolve("Media(1)")).toEqual([key]);
+    expect(handler.resolve("Media(2)")).toEqual([key]);
+  });
+
+  test("records every row of a `{results: [...]}` list response too (V2 with the `d` envelope already stripped)", () => {
+    const handler = new MockResourceIdentityHandler();
+    const key = ["Media", "list"];
+    recordObservedIdentities(handler, key, mediaState({ entitySetName: "Media" }), {
+      results: [{ id: 1 }],
+    });
+    expect(handler.resolve("Media(1)")).toEqual([key]);
+  });
+
   test("records every $expand'd entity too, at the same outer key - not a synthesized one", () => {
     const handler = new MockResourceIdentityHandler();
     const key = ["Media", "detail", 5, { expand: [["copies", "list"]] }];
@@ -121,6 +140,17 @@ describe("resolveCrossRouteInvalidates", () => {
 
     const state = mediaState();
     expect(resolveCrossRouteInvalidates(handler, state, { id: 5, title: "The Trial" })).toEqual([otherRoute]);
+  });
+
+  test("unwraps a V2 `{d: {...}}` envelope before reading the response body's server-assigned id", () => {
+    const handler = new MockResourceIdentityHandler();
+    const otherRoute = ["SomeOther", "detail", 9, "media", "detail", 5];
+    handler.record("Media(5)", otherRoute);
+
+    const state = mediaState();
+    expect(resolveCrossRouteInvalidates(handler, state, { d: { id: 5, title: "The Trial" } })).toEqual([
+      otherRoute,
+    ]);
   });
 
   test("state.key wins over the response body when both are present", () => {

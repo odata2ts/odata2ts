@@ -26,11 +26,7 @@ export function recordObservedIdentities(
     return;
   }
 
-  // a V4/V2-wrapped collection response is `{value: [...]}`, never a bare array itself - the same
-  // unwrapping `getCollectionConcurrencyOptions`'s own `harvest` already does for the identical reason
-  const rows: ReadonlyArray<unknown> = Array.isArray((data as { value?: unknown }).value)
-    ? ((data as { value: ReadonlyArray<unknown> }).value)
-    : [data];
+  const rows = extractRows(data);
   for (const row of rows) {
     recordRow(resourceIdentity, hierarchicalKey, state.canonicalIdFn, row);
 
@@ -41,6 +37,43 @@ export function recordObservedIdentities(
       { skipBindings: false },
     );
   }
+}
+
+/**
+ * The rows a converted response body actually carries - a bare entity for a "detail" response, the
+ * elements of a collection otherwise, however that collection happens to be wrapped: `{value: [...]}` (V4,
+ * and V2 reshaped `v2ResponseAsV4`), `{d: {results: [...]}}` (V2, `responseResultsWrapping`) or
+ * `{results: [...]}` (V2 with the `d` envelope already stripped elsewhere). Same three shapes
+ * `getCollectionConcurrencyOptions`'s own `harvest` already unwraps, for the identical reason - none of
+ * `value`/`d`/`results` is a legal OData property name, so checking for them structurally, without needing
+ * to know which OData version or wrapping option produced this particular body, is safe.
+ */
+function extractRows(data: unknown): ReadonlyArray<unknown> {
+  const body = data as { value?: unknown; d?: { results?: unknown }; results?: unknown };
+  if (Array.isArray(body.value)) {
+    return body.value;
+  }
+  if (Array.isArray(body.d?.results)) {
+    return body.d!.results as ReadonlyArray<unknown>;
+  }
+  if (Array.isArray(body.results)) {
+    return body.results;
+  }
+  return [data];
+}
+
+/**
+ * A single-entity body's own fields, unwrapped from V2's `{d: {...}}` envelope where present - `d` is not a
+ * legal OData property name, so its presence is always the envelope, never real entity data.
+ */
+function extractEntity(data: unknown): Record<string, unknown> | undefined {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    return undefined;
+  }
+  const body = data as { d?: unknown };
+  return (
+    body.d && typeof body.d === "object" && !Array.isArray(body.d) ? body.d : data
+  ) as Record<string, unknown>;
 }
 
 function recordRow(
@@ -67,8 +100,9 @@ function recordRow(
  * The write's own canonical id is built from whichever of two sources is actually available: `state.key` -
  * the write's own address, always known, whatever the response says - wins where present (`PATCH`/`PUT`/
  * `DELETE`, already addressing one entity by key); the response body is the only source for a `POST` to a
- * collection, whose server-assigned key was never known beforehand. Never both at once, and never a list
- * body - a collection response names no single resource to resolve.
+ * collection, whose server-assigned key was never known beforehand - unwrapped from a V2 `{d: {...}}`
+ * envelope first, the same one `ServiceStateHelperV2.etagOf` already unwraps for the identical reason. Never
+ * both at once, and never a list body - a collection response names no single resource to resolve.
  *
  * Deliberately narrow: only the write's *own* resource is resolved here, never anything nested inside its
  * payload. A deep-inserted child is brand new - nothing could have cached a route to an entity that did not
@@ -83,7 +117,7 @@ export function resolveCrossRouteInvalidates(
     return [];
   }
 
-  const source = state.key ?? (data && typeof data === "object" && !Array.isArray(data) ? data : undefined);
+  const source = state.key ?? extractEntity(data);
   if (source === undefined) {
     return [];
   }
