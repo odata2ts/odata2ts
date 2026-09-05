@@ -1,9 +1,14 @@
 import { StandardFilterOperators } from "../../odata/ODataModel";
-import { buildQFilterOperation } from "../../param/UrlParamHelper";
+import { buildQFilterOperation, PATH_VALUE } from "../../param/UrlParamHelper";
 import { QFilterExpression } from "../../QFilterExpression";
 import { QOrderByExpression } from "../../QOrderByExpression";
 
 export type MapValue<T> = (value: T) => string;
+/**
+ * The OData-side value of what the caller passed - after the property's converter, before URL rendering.
+ * Returns {@link PATH_VALUE} where the "value" is another property path and nothing can be asserted.
+ */
+export type TypedValue<T> = (value: T) => unknown;
 
 export function orderAscending(path: string) {
   /**
@@ -27,73 +32,81 @@ export function filterIsNull(path: string) {
   /**
    * Base filter function: property must be null.
    */
-  return () => new QFilterExpression(`${path} eq null`);
+  return () =>
+    new QFilterExpression(`${path} eq null`, [{ path, operator: StandardFilterOperators.EQUALS, value: null }]);
 }
 
 export function filterIsNotNull(path: string) {
   /**
    * Base filter function: property must not be null.
    */
-  return () => new QFilterExpression(`${path} ne null`);
+  return () =>
+    new QFilterExpression(`${path} ne null`, [{ path, operator: StandardFilterOperators.NOT_EQUALS, value: null }]);
 }
 
-export function filterEquals<T>(path: string, mapValue: MapValue<T>) {
+export function filterEquals<T>(path: string, mapValue: MapValue<T>, typedValue?: TypedValue<T>) {
   /**
    * Base filter function: property must equal the given value.
    */
   return (value: T | null) => {
     const result = value === null ? "null" : mapValue(value);
-    return buildQFilterOperation(path, StandardFilterOperators.EQUALS, result);
+    const typed = value === null ? null : typedValue ? typedValue(value) : PATH_VALUE;
+    return buildQFilterOperation(path, StandardFilterOperators.EQUALS, result, typed);
   };
 }
 
-export function filterNotEquals<T>(path: string, mapValue: MapValue<T>) {
+export function filterNotEquals<T>(path: string, mapValue: MapValue<T>, typedValue?: TypedValue<T>) {
   /**
    * Base filter function: property must not equal the given value.
    */
   return (value: T | null) => {
     const result = value === null ? "null" : mapValue(value);
-    return buildQFilterOperation(path, StandardFilterOperators.NOT_EQUALS, result);
+    const typed = value === null ? null : typedValue ? typedValue(value) : PATH_VALUE;
+    return buildQFilterOperation(path, StandardFilterOperators.NOT_EQUALS, result, typed);
   };
 }
 
-export function filterLowerThan<T>(path: string, mapValue: MapValue<T>) {
+export function filterLowerThan<T>(path: string, mapValue: MapValue<T>, typedValue?: TypedValue<T>) {
   /**
    * Base filter function: property must be lower than the given value.
    */
   return (value: T) => {
-    return buildQFilterOperation(path, StandardFilterOperators.LOWER_THAN, mapValue(value));
+    const typed = typedValue ? typedValue(value) : PATH_VALUE;
+    return buildQFilterOperation(path, StandardFilterOperators.LOWER_THAN, mapValue(value), typed);
   };
 }
 
-export function filterLowerEquals<T>(path: string, mapValue: MapValue<T>) {
+export function filterLowerEquals<T>(path: string, mapValue: MapValue<T>, typedValue?: TypedValue<T>) {
   /**
    * Base filter function: property must be lower than or equal to the given value.
    */
   return (value: T) => {
-    return buildQFilterOperation(path, StandardFilterOperators.LOWER_EQUALS, mapValue(value));
+    const typed = typedValue ? typedValue(value) : PATH_VALUE;
+    return buildQFilterOperation(path, StandardFilterOperators.LOWER_EQUALS, mapValue(value), typed);
   };
 }
 
-export function filterGreaterThan<T>(path: string, mapValue: MapValue<T>) {
+export function filterGreaterThan<T>(path: string, mapValue: MapValue<T>, typedValue?: TypedValue<T>) {
   /**
    * Base filter function: property must be greater than the given value.
    */
   return (value: T) => {
-    return buildQFilterOperation(path, StandardFilterOperators.GREATER_THAN, mapValue(value));
+    const typed = typedValue ? typedValue(value) : PATH_VALUE;
+    return buildQFilterOperation(path, StandardFilterOperators.GREATER_THAN, mapValue(value), typed);
   };
 }
 
-export function filterGreaterEquals<T>(path: string, mapValue: MapValue<T>) {
+export function filterGreaterEquals<T>(path: string, mapValue: MapValue<T>, typedValue?: TypedValue<T>) {
   /**
    * Base filter function: property must be greater than or equal to the given value.
    */
   return (value: T) => {
-    return buildQFilterOperation(path, StandardFilterOperators.GREATER_EQUALS, mapValue(value));
+    const typed = typedValue ? typedValue(value) : PATH_VALUE;
+    return buildQFilterOperation(path, StandardFilterOperators.GREATER_EQUALS, mapValue(value), typed);
   };
 }
 
-export function filterHas<T>(path: string, mapValue: MapValue<T>) {
+export function filterHas<T>(path: string, mapValue: MapValue<T>, typedValue?: TypedValue<T>) {
   /**
    * Base filter function (V4): the flag enum property must contain the given member.
    *
@@ -102,7 +115,8 @@ export function filterHas<T>(path: string, mapValue: MapValue<T>) {
    * caller did not ask for.
    */
   return (value: T) => {
-    return buildQFilterOperation(path, StandardFilterOperators.HAS, mapValue(value));
+    const typed = typedValue ? typedValue(value) : PATH_VALUE;
+    return buildQFilterOperation(path, StandardFilterOperators.HAS, mapValue(value), typed);
   };
 }
 

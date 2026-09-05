@@ -11,5 +11,9 @@ import { QEnumPath } from "./QEnumPath";
  * where the service would evaluate it as bit arithmetic over values that are not bits.
  */
 export class QFlagsEnumPath<EnumType extends StringEnumSource> extends QEnumPath<EnumType> {
-  public has = filterHas<StringEnumSourceMember<EnumType>>(this.path, this.mapValue.bind(this));
+  public has = filterHas<StringEnumSourceMember<EnumType>>(
+    this.path,
+    this.mapValue.bind(this),
+    this.typedValue.bind(this),
+  );
 }

@@ -477,6 +477,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@odata2ts/http-client-api@npm:^0.7.1":
+  version: 0.7.1
+  resolution: "@odata2ts/http-client-api@npm:0.7.1"
+  dependencies:
+    tslib: "npm:^2.8.1"
+  checksum: 10/c9d53b75410beb93f70445e1ce91c56c1622dcb11c938df30cfbb49d83761f1ad59b79cffcf5501a40a2a92c342a61351befe562af0d9f848af8d2620002e28d
+  languageName: node
+  linkType: hard
+
 "@odata2ts/http-client-axios@npm:^0.14.0":
   version: 0.14.0
   resolution: "@odata2ts/http-client-axios@npm:0.14.0"
@@ -645,7 +654,7 @@ __metadata:
   resolution: "@odata2ts/odata-query-objects@workspace:packages/odata-query-objects"
   dependencies:
     "@odata2ts/converter-api": "npm:^0.3.0"
-    "@odata2ts/http-client-api": "npm:^0.6.8"
+    "@odata2ts/http-client-api": "npm:^0.7.1"
     "@odata2ts/odata-core": "npm:^0.7.1"
     "@vitest/coverage-istanbul": "npm:^4.1.10"
     madge: "npm:^8.0.0"

@@ -1,7 +1,7 @@
 export * from "./odata/ODataModel";
 export * from "./QueryObjectModel";
 export { QSelectExpression } from "./QSelectExpression";
-export { QFilterExpression } from "./QFilterExpression";
+export { QFilterExpression, type FilterClause } from "./QFilterExpression";
 export { QOrderByExpression } from "./QOrderByExpression";
 export { QSearchTerm, searchTerm } from "./QSearchTerm";
 export { QueryObject, ENUMERABLE_PROP_DEFINITION } from "./QueryObject";
