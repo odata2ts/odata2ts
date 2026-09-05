@@ -2,6 +2,7 @@ import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataModelResponseV4, ODataValueResponseV4, ODataVersionV4 } from "@odata2ts/odata-core";
 import { ModelResponseConverterV4, QEnumCollection } from "@odata2ts/odata-query-objects";
 import {
+  CacheKeyState,
   CollectionServiceV4,
   ComposableUrlRequestCmd,
   EntitySetServiceV4,
@@ -27,8 +28,14 @@ export class PersonModelService<V extends ODataVersionV4 = "4.0"> extends Entity
 
   private _qGetScore = new QGetScoreFunction();
 
-  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
-    super(client, basePath, name, new QPersonV4(), options);
+  constructor(
+    client: ODataHttpClient,
+    basePath: string,
+    name: string,
+    options?: ODataServiceOptionsInternal<V>,
+    cacheKeyState?: CacheKeyState,
+  ) {
+    super(client, basePath, name, new QPersonV4(), options, cacheKeyState);
   }
 
   public userName() {
@@ -112,8 +119,14 @@ export class PersonModelCollectionService<V extends ODataVersionV4 = "4.0"> exte
 > {
   private _qGetSomething = new QGetSomethingFunction();
 
-  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternal<V>) {
-    super(client, basePath, name, qPersonV4, new QPersonIdFunction(name), options);
+  constructor(
+    client: ODataHttpClient,
+    basePath: string,
+    name: string,
+    options?: ODataServiceOptionsInternal<V>,
+    cacheKeyState?: CacheKeyState,
+  ) {
+    super(client, basePath, name, qPersonV4, new QPersonIdFunction(name), options, cacheKeyState);
   }
 
   protected createEntityService(
@@ -121,8 +134,9 @@ export class PersonModelCollectionService<V extends ODataVersionV4 = "4.0"> exte
     path: string,
     name: string,
     options: ODataServiceOptionsInternal<V> | undefined,
+    cacheKeyState?: CacheKeyState,
   ) {
-    return new PersonModelService<V>(client, path, name, options);
+    return new PersonModelService<V>(client, path, name, options, cacheKeyState);
   }
 
   /**

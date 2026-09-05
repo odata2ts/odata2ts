@@ -33,8 +33,8 @@ export class MediaEntityServiceV2<
    */
   public content(): StreamServiceV2 {
     if (!this._content) {
-      const { client, path, options } = this.__base;
-      this._content = new StreamServiceV2(client, path, VALUE_SEGMENT, options);
+      const { client, path, options, cacheKeyState } = this.__base;
+      this._content = new StreamServiceV2(client, path, VALUE_SEGMENT, options, cacheKeyState);
     }
 
     return this._content;

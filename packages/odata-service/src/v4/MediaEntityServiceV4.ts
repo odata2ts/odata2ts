@@ -34,16 +34,16 @@ export class MediaEntityServiceV4<
    * @param subtypeOptions opt the cast path segment back in
    */
   public content(subtypeOptions?: SubtypeOptions): StreamServiceV4<V> {
-    const { client, basePath, path, options } = this.__base;
+    const { client, basePath, path, options, cacheKeyState } = this.__base;
     const { dontUseCastPathSegment } = this.__base.evaluateSubtypeOptions(subtypeOptions);
     const actualPath = dontUseCastPathSegment ? basePath : path;
 
     // only the default is worth caching; anything else is a one-off request shape
     if (subtypeOptions) {
-      return new StreamServiceV4<V>(client, actualPath, VALUE_SEGMENT, options);
+      return new StreamServiceV4<V>(client, actualPath, VALUE_SEGMENT, options, cacheKeyState);
     }
     if (!this._content) {
-      this._content = new StreamServiceV4<V>(client, actualPath, VALUE_SEGMENT, options);
+      this._content = new StreamServiceV4<V>(client, actualPath, VALUE_SEGMENT, options, cacheKeyState);
     }
 
     return this._content;

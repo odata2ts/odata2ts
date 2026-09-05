@@ -1,6 +1,7 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { QBinding, QEntityCollectionPath, QId, QueryObject } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, EntityTypeServiceV2, MERGE_HEADERS, RequestInfo } from "../../src";
+import { DEFAULT_HEADERS, EntityTypeServiceV2, MERGE_HEADERS, RequestInfo, rootState } from "../../src";
 import { commonEntityTypeServiceTests } from "../EntityTypeServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import { PersonModelV2Service } from "../fixture/v2/PersonModelV2Service";
@@ -150,5 +151,53 @@ describe("EntityTypeService V2 Test", () => {
     expect(request.url).toBe(expected);
     expect(request.data).toBeUndefined();
     expect(request.method).toBe("GET");
+  });
+
+  describe("cache keys: expand enrichment and deepEdit", () => {
+    const PERSON = "Test.Person";
+
+    /**
+     * The shared fixture's own `friends` has no `QBinding` at all, so it is unsuitable for proving deepEdit
+     * finds the *deep-inserted* entity set, not the parent's own - a distinct, purpose-built Q-object is
+     * used instead of reshaping the shared fixture. Its field is deliberately named "friends" (matching the
+     * payload's own TS-facing name) while its wire name ("Friends") and bound entity set ("Trips") both
+     * differ from it, exercising that indexing and identity are two separate lookups.
+     */
+    class QTrip extends QueryObject {}
+    class QPersonWithTripFriends extends QueryObject {
+      public readonly friends = new QEntityCollectionPath(
+        this.withPrefix("Friends"),
+        () => QTrip,
+        new QBinding(() => ({ getName: () => "Trips" }) as unknown as QId<any>, "4.0"),
+      );
+    }
+
+    test("query() enriches expand entries by reading the property's own name and kind directly off the Q-object - no table needed", async () => {
+      const service = new PersonModelV2Service(odataClient, BASE_URL, NAME, undefined, rootState(PERSON, "detail"));
+      const request = service.query((b) => b.expand("friends"));
+      expect(request.cacheKey).toEqual([PERSON, "detail", { expand: [["Friends", "list"]] }]);
+    });
+
+    test("patch() attaches deepEdit to invalidates when the payload deep-inserts a nav property", async () => {
+      const TRIPS = "Trips";
+      const service = new PersonModelV2Service(
+        odataClient,
+        BASE_URL,
+        NAME,
+        undefined,
+        rootState(PERSON, "detail", { entitySetName: PERSON, qEntityFn: () => QPersonWithTripFriends as any }),
+      );
+      const model = {
+        age: "45",
+        friends: [{ userName: "buddy", age: "15", favFeature: Feature.Feature1, features: [] }],
+      } as unknown as Partial<EditablePersonModel>;
+
+      const response = await service.patch(model).ignoreETag().execute();
+      expect(response.invalidates).toEqual([
+        [PERSON, "detail"],
+        [PERSON, "list"],
+        [TRIPS, "list"],
+      ]);
+    });
   });
 });
