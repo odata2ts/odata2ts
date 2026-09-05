@@ -10,6 +10,7 @@ import {
   QSelectExpression,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
+import { CacheKeyParams } from "./CacheKeyParams.js";
 
 /**
  * Extracts the wrapped entity from QEntityPath, QEntityCollectionPath, QComplexPath, QComplexCollectionPath
@@ -320,6 +321,13 @@ export interface CollectionQueryBuilderV2<Q extends QueryObjectModel>
    * Creates a new builder with the identical state (deep copy).
    */
   clone: () => CollectionQueryBuilderV2<Q>;
+
+  /**
+   * The restrictions this builder puts on the resource, as a cache key carries them - see
+   * {@link CacheKeyParams}. Not one of the ordinary query operations, so it lives here rather than in
+   * {@link ODataQueryBuilderModel}, which several unrelated expanding/nested builder shapes also draw from.
+   */
+  getCacheKeyParams: () => CacheKeyParams | undefined;
 }
 
 /**
@@ -335,6 +343,9 @@ export interface ModelQueryBuilderV2<Q extends QueryObjectModel>
    * Creates a new builder with the identical state (deep copy).
    */
   clone: () => ModelQueryBuilderV2<Q>;
+
+  /** See {@link CollectionQueryBuilderV2.getCacheKeyParams}. */
+  getCacheKeyParams: () => CacheKeyParams | undefined;
 }
 
 export interface ExpandingQueryBuilderV2<Q extends QueryObjectModel>
@@ -361,6 +372,9 @@ export interface CollectionQueryBuilderV4<Q extends QueryObjectModel> extends Pi
    * Creates a new builder with the identical state (deep copy).
    */
   clone: () => CollectionQueryBuilderV4<Q>;
+
+  /** See {@link CollectionQueryBuilderV2.getCacheKeyParams}. */
+  getCacheKeyParams: () => CacheKeyParams | undefined;
 }
 
 /**
@@ -375,6 +389,9 @@ export interface ModelQueryBuilderV4<Q extends QueryObjectModel> extends Pick<
    * Creates a new builder with the identical state (deep copy).
    */
   clone: () => ModelQueryBuilderV4<Q>;
+
+  /** See {@link CollectionQueryBuilderV2.getCacheKeyParams}. */
+  getCacheKeyParams: () => CacheKeyParams | undefined;
 }
 
 export interface ExpandingCollectionQueryBuilderV4<Q extends QueryObjectModel> extends Pick<
