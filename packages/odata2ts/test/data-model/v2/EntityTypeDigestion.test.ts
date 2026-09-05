@@ -456,6 +456,8 @@ describe("V2: EntityTypeDigestion Test", () => {
       dataType: DataTypes.ModelType,
       managed: undefined,
       required: true,
+      // a genuine pair: Category.products points back with FromRole/ToRole swapped
+      partner: "products",
     } as PropertyModel);
     expect(product.props[2]).toEqual({
       name: "supplier",
@@ -470,6 +472,8 @@ describe("V2: EntityTypeDigestion Test", () => {
       dataType: DataTypes.ModelType,
       managed: undefined,
       required: false,
+      // a genuine pair: Supplier.products points back with FromRole/ToRole swapped
+      partner: "products",
     } as PropertyModel);
 
     const category = result.getEntityTypes()[1];
@@ -487,6 +491,8 @@ describe("V2: EntityTypeDigestion Test", () => {
       dataType: DataTypes.ModelType,
       managed: undefined,
       required: false,
+      // a genuine pair: Product.Category points back with FromRole/ToRole swapped
+      partner: "Category",
     } as PropertyModel);
   });
 

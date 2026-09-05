@@ -93,6 +93,12 @@ export class ODataModelBuilderV2 extends ODataModelBuilder<ODataEdmxModelV3, Sch
         const existingAssoc = this.currentSchema.Association!.find((a) => a.$.Name === assoc.$.Name);
         if (existingAssoc) {
           existingAssoc.End.push(...assoc.End);
+          // the constraint is stated once per association, not per end, but addNavProp only ever
+          // supplies it from the side that carries the foreign key - so it is picked up on whichever of
+          // the two merged calls happens to have it
+          if (assoc.ReferentialConstraint) {
+            existingAssoc.ReferentialConstraint = assoc.ReferentialConstraint;
+          }
         } else {
           this.currentSchema.Association!.push(assoc);
         }

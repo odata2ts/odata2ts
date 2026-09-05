@@ -35,6 +35,22 @@ class DigesterV4 extends Digester<SchemaV4, EntityTypeV4, ComplexTypeV4> {
     return (p as NavigationProperty).$.ContainsTarget === "true";
   }
 
+  protected getPartner(p: Property): string | undefined {
+    return (p as NavigationProperty).$.Partner;
+  }
+
+  protected getReferentialConstraints(
+    p: Property,
+  ): ReadonlyArray<{ property: string; referencedProperty: string }> | undefined {
+    const referentialConstraint = (p as NavigationProperty).ReferentialConstraint;
+    return referentialConstraint?.length
+      ? referentialConstraint.map((rc) => ({
+          property: rc.$.Property,
+          referencedProperty: rc.$.ReferencedProperty,
+        }))
+      : undefined;
+  }
+
   protected digestOperations(schema: SchemaV4) {
     const nsWithAlias: NamespaceWithAlias = [schema.$.Namespace, schema.$.Alias];
     // functions & actions

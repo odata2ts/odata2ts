@@ -233,6 +233,34 @@ export enum EnumSynthesis {
 }
 
 /**
+ * How a generated client builds `RequestCmd.cacheKey` - see the docs on `cacheKeys`.
+ *
+ * Purely hierarchical, always: the key is the literal, named route taken to reach a response, never
+ * re-rooted at a resource's own type - that used to be a second mode (`typeFlattening`), and is now what
+ * `ResourceIdentityHandler` does at runtime instead, from actual responses rather than a generation-time
+ * prediction. One behaviour, so a binary switch is all `mode` needs to be.
+ */
+export enum CacheKeyMode {
+  /** Generate `cacheKey`/`invalidates` on every `RequestCmd`. */
+  on = "on",
+  /** Nothing is generated - identical to omitting `cacheKeys` entirely. */
+  off = "off",
+}
+
+export interface CacheKeysOptions {
+  /**
+   * Required: naming the object is not itself a decision, and a silently defaulted mode would make
+   * whether a generated key exists at all depend on a value nobody wrote down.
+   */
+  mode: CacheKeyMode;
+}
+
+/** The mode actually in force - `off` where the whole `cacheKeys` object was never configured. */
+export function resolveCacheKeyMode(options: CacheKeysOptions | undefined): CacheKeyMode {
+  return options?.mode ?? CacheKeyMode.off;
+}
+
+/**
  * Config options for CLI.
  */
 export interface CliOptions {
@@ -552,6 +580,16 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * ({@code "Author@odata.bind"}).
    */
   deepInsertProps?: DeepInsertProps;
+  /**
+   * Generate `RequestCmd.cacheKey`: a structured, typed key identifying the *resource* a request
+   * addresses, for a cache built on top of the generated client (TanStack Query is the motivating case,
+   * hence the array shape).
+   *
+   * Off by default. An object rather than a bare string, because the shape has to have room for the
+   * further switches this will attract - which properties become key segments, whether operations are
+   * keyed at all - without a second top-level option.
+   */
+  cacheKeys?: CacheKeysOptions;
 }
 
 /**

@@ -690,7 +690,7 @@ __metadata:
     "@odata2ts/converter-api": "npm:^0.3.0"
     "@odata2ts/converter-runtime": "npm:^0.6.0"
     "@odata2ts/converter-v2-to-v4": "npm:^0.5.8"
-    "@odata2ts/http-client-api": "npm:^0.6.8"
+    "@odata2ts/http-client-api": "npm:^0.7.1"
     "@odata2ts/odata-core": "npm:^0.7.1"
     "@odata2ts/odata-query-objects": "npm:^0.31.0"
     "@odata2ts/odata-service": "npm:^0.27.0"
