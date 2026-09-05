@@ -65,4 +65,9 @@ out/
 .project
 .settings/
 
+CLAUDE.md
+AGENTS.md
+.claude/
+.agents/
+CONTEXT.md
 

@@ -40,6 +40,24 @@ export class QBinding<Id> {
   }
 
   /**
+   * The name of the entity set this binding's target belongs to - the same name {@link format} already
+   * builds every URL from, exposed on its own for a caller after the resource's identity rather than a URL.
+   */
+  public getEntitySetName(): string {
+    return this.idFunctionFn().getName();
+  }
+
+  /**
+   * The target's own canonical id - entity-set name plus key predicate, e.g. `Copies(3)` or
+   * `Copies(Id=1,Category='books')` - built from the very same id function {@link format} uses, but without
+   * the notation-specific wrapping a binding property value needs. See {@link QId.buildCanonicalId} for the
+   * shapes `entity` may take.
+   */
+  public buildCanonicalId(entity: unknown): string | undefined {
+    return this.idFunctionFn().buildCanonicalId(entity);
+  }
+
+  /**
    * The property name the binding goes by, which is the navigation property itself in every version but
    * 4.0 - meaning that in those versions a binding and a deep insert share one property.
    */

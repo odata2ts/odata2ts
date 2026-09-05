@@ -151,6 +151,13 @@ export function isPathValue(value: QPathModel | any): value is QPathModel {
   return typeof value === "object" && typeof value?.getPath === "function";
 }
 
+/**
+ * Marks a comparison whose right-hand side is another property rather than a literal
+ * (`Title eq Subtitle`). There is no value to put in a structured filter map, so such an expression is
+ * raw. A dedicated sentinel rather than `undefined`, since `null` and `undefined` are legitimate values.
+ */
+export const PATH_VALUE: unique symbol = Symbol("pathValue");
+
 export function buildOperatorExpression(
   path: string,
   operator: StandardFilterOperators | NumberFilterOperators,
@@ -170,6 +177,10 @@ export function buildQFilterOperation(
   path: string,
   operator: StandardFilterOperators | NumberFilterOperators,
   value: string,
+  typedValue: unknown = PATH_VALUE,
 ) {
-  return new QFilterExpression(buildOperatorExpression(path, operator, value));
+  const expression = buildOperatorExpression(path, operator, value);
+  return typedValue === PATH_VALUE
+    ? new QFilterExpression(expression)
+    : new QFilterExpression(expression, [{ path, operator, value: typedValue }]);
 }

@@ -110,4 +110,21 @@ describe("QBinding: binding by key", () => {
   test("4.0 is the notation by default", () => {
     expect(new QBinding(() => new QAuthorId("Authors")).getNotation()).toBe("4.0");
   });
+
+  test("getEntitySetName returns the target entity set's own name", () => {
+    expect(new QBinding(() => new QAuthorId("Authors")).getEntitySetName()).toBe("Authors");
+  });
+
+  test("buildCanonicalId builds the entity set's own canonical URL segment, single key", () => {
+    expect(new QBinding(() => new QAuthorId("Authors")).buildCanonicalId(3)).toBe("Authors(3)");
+  });
+
+  test("buildCanonicalId delegates to QId.buildCanonicalId - a single-key object collapses to the same bare form", () => {
+    const qId = new QBinding(() => new QAuthorId("Authors"));
+    expect(qId.buildCanonicalId({ id: 3 })).toBe("Authors(3)");
+  });
+
+  test("buildCanonicalId is unaffected by the binding notation - it never wraps like format does", () => {
+    expect(new QBinding(() => new QAuthorId("Authors"), "4.01").buildCanonicalId(3)).toBe("Authors(3)");
+  });
 });

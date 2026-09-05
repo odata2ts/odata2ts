@@ -10,5 +10,5 @@ import { QNumericEnumPath } from "./QNumericEnumPath";
  * its flags variant just as the string one does.
  */
 export class QNumericFlagsEnumPath<EnumType extends NumericEnumLike> extends QNumericEnumPath<EnumType> {
-  public has = filterHas<NumericEnumMember<EnumType>>(this.path, this.mapValue.bind(this));
+  public has = filterHas<NumericEnumMember<EnumType>>(this.path, this.mapValue.bind(this), this.typedValue.bind(this));
 }
