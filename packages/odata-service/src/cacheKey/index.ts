@@ -4,3 +4,4 @@ export * from "./BuildDeepEdit";
 export * from "./EntityGraphWalk";
 export * from "./ObservedIdentity";
 export * from "./TouchesResource";
+export * from "./QueryStringCapture";
