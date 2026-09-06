@@ -11,7 +11,7 @@ import {
   QueryObjectModel,
   searchTerm,
 } from "@odata2ts/odata-query-objects";
-import { CacheKeyParams, ExpandHop, foldFilterClauses, normalizeCacheKeyParams } from "./CacheKeyParams.js";
+import { CacheKeyParams, ExpandHop, normalizeCacheKeyParams } from "./CacheKeyParams.js";
 import { ODataOperators } from "./ODataModel";
 import {
   ExpandingCollectionQueryBuilderV4,
@@ -475,18 +475,17 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
   }
 
   /**
-   * The restrictions this builder puts on the resource, as a cache key carries them.
-   *
-   * Read off this builder's own fields, never off the URL it builds: the values in `filter` are the
-   * OData-side ones the query objects recorded, which a rendered `$filter` string has already escaped and
-   * quoted beyond recovery.
+   * The `$expand`/`$select` structure this builder's resource needs a cache key to carry - not the query's
+   * full identity, which `RequestCmd.cacheKey` (odata-service) captures separately as one opaque string off
+   * the actual request. `$expand` stays hop-shaped because invalidation reach (`touchesResource`,
+   * `buildDeepEditHops`) needs to find a navigation property by name; `$select` stays a plain sorted array
+   * for a currently-nonexistent future consumer. Everything else this builder tracks - filters, orderBy,
+   * top, skip, count, search - was already never read by anything except identity, which the opaque capture
+   * now covers, so none of it is computed here any more.
    *
    * `hoistedExpandsBucket`/`expands` are reconciled by `rawForm`, not read as a bare union - see the
    * `expandItems` computation below for why: `build()` folds `hoistedExpandsBucket` into `expands`, and a
    * cache key asked for before or after that fold must answer identically.
-   *
-   * `groupBys` is deliberately ignored too: `$apply` reshapes the response into something that is not the
-   * resource any more, so keying it as that resource would be wrong.
    */
   public getCacheKeyParams(): CacheKeyParams | undefined {
     const entries = this.expandEntries ?? [];
@@ -501,8 +500,8 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
         if (!kind) {
           return { sortKey: path, entry: path };
         }
-        const nestedParams = nestedBuilder ? nestedBuilder.getCacheKeyParams() : undefined;
-        const expandHop: ExpandHop = nestedParams ? [path, kind, nestedParams] : [path, kind];
+        const nested = nestedBuilder?.getCacheKeyParams();
+        const expandHop: ExpandHop = nested?.expand ? [path, kind, { expand: nested.expand }] : [path, kind];
         return { sortKey: path, entry: expandHop };
       },
     );
@@ -525,16 +524,8 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     expandItems.sort((a, b) => (a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0));
 
     return normalizeCacheKeyParams({
-      filter: this.filters?.length ? foldFilterClauses(this.filters) : undefined,
       select: this.selects?.length ? [...this.selects].sort() : undefined,
       expand: expandItems.length ? expandItems.map((i) => i.entry) : undefined,
-      orderBy: this.orderBys?.length ? this.orderBys.map((exp) => exp.toString()) : undefined,
-      top: this.itemsTop,
-      skip: this.itemsToSkip,
-      // `count(false)` still assigns itemsCount, so a bare truthiness check would report a count
-      // nobody asked for - and would key `?$count=false` differently from the same query without it
-      count: this.itemsCount && this.itemsCount[1] !== "false" ? true : undefined,
-      search: this.searchTerms?.length ? this.searchTerms.map((st) => st.toString()).join(" AND ") : undefined,
     });
   }
 }
