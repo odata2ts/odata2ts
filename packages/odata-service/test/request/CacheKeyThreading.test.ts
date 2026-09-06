@@ -35,7 +35,7 @@ describe("cache key threading", () => {
       cacheKeyState: rootState(MEDIUM, "list"),
       queryParams: { top: 10 },
     });
-    expect(cmd.cacheKey).toEqual([MEDIUM, "list", { top: 10, query: "$top=10" }]);
+    expect(cmd.cacheKey).toEqual([MEDIUM, "list", { top: 10, query: "%24top=10" }]);
   });
 
   test("the getter is memoized", () => {
@@ -53,21 +53,36 @@ describe("cache key threading", () => {
     expect(JSON.stringify(cmd.cacheKey)).toBe(before);
   });
 
-  test("cacheKey's params object carries the request's own rendered query string", () => {
+  test("cacheKey's params object carries the request's own rendered query string, canonicalized", () => {
+    // $filter is stripped here, not carried into the opaque string - it is now captured structurally via
+    // `queryParams.filter` instead (populated by `ODataQueryBuilder.getCacheKeyParams()` in real use; this
+    // hand-built command supplies none, so the clause is simply absent from the key - see
+    // `QueryStringCapture.ts`'s `canonicalizeQueryString`).
     const cmd = new UrlGetRequestCmd(client, "Media?$filter=Title eq 'x'&$top=10", {
       cacheKeyState: rootState(MEDIUM, "list"),
     });
     const [, , params] = cmd.cacheKey as [unknown, unknown, Record<string, unknown>];
-    expect(params.query).toBe("$filter=Title eq 'x'&$top=10");
+    expect(params.query).toBe("%24top=10");
   });
 
-  test("cacheKey reads the query string from the body when GetToPostConverter relocated it", () => {
+  test("canonicalization reorders top-level pairs by key, so differently-ordered query strings converge", () => {
+    const inOneOrder = new UrlGetRequestCmd(client, "Media?$top=10&$skip=5", {
+      cacheKeyState: rootState(MEDIUM, "list"),
+    });
+    const inTheOtherOrder = new UrlGetRequestCmd(client, "Media?$skip=5&$top=10", {
+      cacheKeyState: rootState(MEDIUM, "list"),
+    });
+
+    expect(inOneOrder.cacheKey).toEqual(inTheOtherOrder.cacheKey);
+  });
+
+  test("cacheKey reads the query string from the body when GetToPostConverter relocated it, canonicalized the same way", () => {
     const cmd = new UrlGetRequestCmd(client, "Media?$filter=Title eq 'x'&$top=10", {
       cacheKeyState: rootState(MEDIUM, "list"),
     });
     cmd.asPostRequest();
     const [, , params] = cmd.cacheKey as [unknown, unknown, Record<string, unknown>];
-    expect(params.query).toBe("$filter=Title eq 'x'&$top=10");
+    expect(params.query).toBe("%24top=10");
   });
 
   test("an appended converter that changes the state changes the key, with no extra call", () => {

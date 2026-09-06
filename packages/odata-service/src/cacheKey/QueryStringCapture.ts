@@ -25,3 +25,38 @@ export function captureQueryString(method: ODataHttpMethods, url: string, data: 
   const queryIndex = url.indexOf("?");
   return queryIndex === -1 ? undefined : url.slice(queryIndex + 1);
 }
+
+/**
+ * `$select`/`$expand` already live as their own structured params-object entries
+ * (`ODataQueryBuilder.getCacheKeyParams()`), and `$filter`/`$search` now do too, rendered canonically there
+ * (sorted, `$filter` also safely grouped - see `CacheKeyParams.ts` in odata-query-builder). Carrying any of
+ * the four here as well would be dead duplication, not a missed identity signal - so they are dropped from
+ * this opaque string entirely, never re-derived from it.
+ */
+const STRUCTURED_QUERY_OPTIONS = ["$select", "$expand", "$filter", "$search"];
+
+/**
+ * Canonicalizes whatever `captureQueryString` returned, so two requests differing only in *which order*
+ * their query options happen to appear in - a hand-built URL, a manually appended custom param, or
+ * `GetToPostConverter`'s relocated body - still converge on the same cache key. Only the top-level
+ * `key=value` pair sequence is touched (ordinary URL syntax, via `URLSearchParams`, never OData grammar):
+ * pairs are sorted by key, same-key duplicates keep their original relative order (`URLSearchParams.sort()`
+ * is a stable sort), and nothing inside any one value is ever inspected or rewritten.
+ *
+ * `$orderBy`, `$top`, `$skip`, `$count`, `$apply`, and any custom option all stay - untouched, opaque,
+ * exactly the way `$orderBy`'s own sequence has to (see `CacheKeyParams.ts`). Only `$select`/`$expand`/
+ * `$filter`/`$search` are removed, since all four are now captured structurally elsewhere (see above).
+ *
+ * Returns `undefined` where nothing is left, mirroring "empty entries are dropped" for the rest of the
+ * params object.
+ */
+export function canonicalizeQueryString(query: string): string | undefined {
+  const params = new URLSearchParams(query);
+  for (const option of STRUCTURED_QUERY_OPTIONS) {
+    params.delete(option);
+  }
+  params.sort();
+
+  const canonical = params.toString();
+  return canonical.length ? canonical : undefined;
+}

@@ -4,6 +4,7 @@ import {
   buildCacheKey,
   buildInvalidates,
   CacheKeyState,
+  canonicalizeQueryString,
   captureQueryString,
   recordObservedIdentities,
   resolveCrossRouteInvalidates,
@@ -151,10 +152,11 @@ export abstract class RequestCmd<
    * constructor, because subclasses overriding it read parameter-property fields TypeScript assigns only
    * after `super()` returns.
    *
-   * The request's own rendered query string is captured off that same converted state and merged into the
-   * params object alongside `ODataQueryBuilder`'s `expand`/`select` output - for exactly the same reason
-   * `cacheKeyState` is read post-conversion: `GetToPostConverter` relocates the query string into the body,
-   * and only the converted state has it in the right place (see `QueryStringCapture.ts`).
+   * The request's own rendered query string is captured off that same converted state, canonicalized (see
+   * `canonicalizeQueryString`), and merged into the params object alongside `ODataQueryBuilder`'s
+   * `expand`/`select`/`filter`/`search` output - for exactly the same reason `cacheKeyState` is read
+   * post-conversion: `GetToPostConverter` relocates the query string into the body, and only the converted
+   * state has it in the right place (see `QueryStringCapture.ts`).
    *
    * `undefined` also means this client was not generated with `cacheKeys` - which a consuming application
    * has to handle anyway when it is shared across services.
@@ -164,7 +166,8 @@ export abstract class RequestCmd<
       if (this.method === ODataHttpMethods.Get) {
         const info = this.getInfoConverted();
         const state = info.cacheKeyState;
-        const query = captureQueryString(info.method, info.url, info.data);
+        const rawQuery = captureQueryString(info.method, info.url, info.data);
+        const query = rawQuery !== undefined ? canonicalizeQueryString(rawQuery) : undefined;
         const queryParams = query !== undefined ? { ...this.options.queryParams, query } : this.options.queryParams;
         this.cachedCacheKey = state && buildCacheKey(state, queryParams);
       }
