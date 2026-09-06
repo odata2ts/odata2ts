@@ -316,7 +316,7 @@ describe("V4 EntitySetService Test", () => {
         rootState(PERSON, "list"),
       );
       const request = service.query((b) => b.expand("friends"));
-      expect(request.cacheKey).toEqual([PERSON, "list", { expand: [["Friends", "list"]] }]);
+      expect(request.cacheKey).toEqual([PERSON, "list", { expand: [["Friends", "list"]], query: "%24expand=Friends" }]);
     });
 
     test("query() converges $filter cache keys regardless of call-site clause order, end to end - the real request is unaffected", () => {

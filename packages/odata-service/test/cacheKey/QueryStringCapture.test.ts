@@ -47,15 +47,25 @@ describe("canonicalizeQueryString", () => {
     expect(canonicalizeQueryString("custom=z&custom=a&$top=10")).toBe("%24top=10&custom=z&custom=a");
   });
 
-  test("$select/$expand/$filter/$search are stripped - captured structurally elsewhere, not as opaque text here", () => {
-    expect(canonicalizeQueryString("$select=Title&$expand=Copies&$filter=Id eq 1&$search=x&$top=10")).toBe("%24top=10");
+  test("$select/$filter/$search are stripped - captured structurally elsewhere, with no loss of information", () => {
+    expect(canonicalizeQueryString("$select=Title&$filter=Id eq 1&$search=x&$top=10")).toBe("%24top=10");
   });
 
   test("nothing left after stripping means undefined, not an empty string", () => {
-    expect(canonicalizeQueryString("$select=Title&$expand=Copies")).toBeUndefined();
+    expect(canonicalizeQueryString("$select=Title")).toBeUndefined();
   });
 
   test("$orderBy is never stripped or reordered - its own sequence is real, result-changing content", () => {
     expect(canonicalizeQueryString("$orderby=Name asc,Age desc")).toBe("%24orderby=Name+asc%2CAge+desc");
+  });
+
+  test("$expand is never stripped, unlike $select/$filter/$search - its structured entry is deliberately narrower than its full text (no nested restriction), so the raw text has to survive here or a nested restriction's identity is lost", () => {
+    expect(canonicalizeQueryString("$expand=Copies($filter=Condition eq 3)")).toBe(
+      "%24expand=Copies%28%24filter%3DCondition+eq+3%29",
+    );
+    // proof this matters: two different nested restrictions must not canonicalize to the same string
+    expect(canonicalizeQueryString("$expand=Copies($filter=Condition eq 3)")).not.toBe(
+      canonicalizeQueryString("$expand=Copies($filter=Condition eq 5)"),
+    );
   });
 });

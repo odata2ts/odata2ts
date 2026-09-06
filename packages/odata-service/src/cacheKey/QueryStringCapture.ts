@@ -27,13 +27,23 @@ export function captureQueryString(method: ODataHttpMethods, url: string, data: 
 }
 
 /**
- * `$select`/`$expand` already live as their own structured params-object entries
- * (`ODataQueryBuilder.getCacheKeyParams()`), and `$filter`/`$search` now do too, rendered canonically there
- * (sorted, `$filter` also safely grouped - see `CacheKeyParams.ts` in odata-query-builder). Carrying any of
- * the four here as well would be dead duplication, not a missed identity signal - so they are dropped from
- * this opaque string entirely, never re-derived from it.
+ * `$select`/`$filter`/`$search` are dropped from the opaque string entirely: each one's own structured
+ * params-object entry (`ODataQueryBuilder.getCacheKeyParams()` - `select` a sorted array, `filter`/`search`
+ * rendered canonically, sorted and `filter` also safely grouped, see `CacheKeyParams.ts`) already carries
+ * its **complete** restriction, so keeping the raw text here too would be dead duplication, never a missed
+ * identity signal.
+ *
+ * `$expand` is deliberately **not** in this list, even though it also gets a structured entry. That entry
+ * is narrower than its full text on purpose - it carries only `(name, kind)` hops, never a nested query's
+ * own `$filter`/`$select`/`$orderBy` (`CacheKeyParams.ts`'s `expand` doc comment). `$expand=Copies` and
+ * `$expand=Copies($filter=Condition eq 3)` both structurally enrich to the identical `[["Copies","list"]]`
+ * hop - so if `$expand`'s own text were also stripped from the opaque string, two requests that restrict a
+ * nested collection differently would collapse onto the same cache key, a real identity violation, not
+ * just weaker convergence. Keeping `$expand`'s full text here is what still tells them apart; the resulting
+ * duplication for a *bare* `$expand` (no nested restriction) is accepted as harmless, exactly as it always
+ * was for `$expand`/`$select` before this canonicalization existed at all.
  */
-const STRUCTURED_QUERY_OPTIONS = ["$select", "$expand", "$filter", "$search"];
+const STRUCTURED_QUERY_OPTIONS = ["$select", "$filter", "$search"];
 
 /**
  * Canonicalizes whatever `captureQueryString` returned, so two requests differing only in *which order*
@@ -43,9 +53,10 @@ const STRUCTURED_QUERY_OPTIONS = ["$select", "$expand", "$filter", "$search"];
  * pairs are sorted by key, same-key duplicates keep their original relative order (`URLSearchParams.sort()`
  * is a stable sort), and nothing inside any one value is ever inspected or rewritten.
  *
- * `$orderBy`, `$top`, `$skip`, `$count`, `$apply`, and any custom option all stay - untouched, opaque,
- * exactly the way `$orderBy`'s own sequence has to (see `CacheKeyParams.ts`). Only `$select`/`$expand`/
- * `$filter`/`$search` are removed, since all four are now captured structurally elsewhere (see above).
+ * `$expand`, `$orderBy`, `$top`, `$skip`, `$count`, `$apply`, and any custom option all stay - untouched,
+ * opaque. `$orderBy` stays because its own sequence is real, result-changing content (see
+ * `CacheKeyParams.ts`); `$expand` stays for the reason above. Only `$select`/`$filter`/`$search` are
+ * removed, since all three are captured structurally elsewhere with no loss of information.
  *
  * Returns `undefined` where nothing is left, mirroring "empty entries are dropped" for the rest of the
  * params object.

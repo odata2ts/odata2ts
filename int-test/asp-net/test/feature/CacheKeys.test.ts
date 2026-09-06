@@ -64,7 +64,12 @@ describe("ASP.NET Library: cache keys", () => {
 
   test("$expand produces a hop-shaped entry touchesResource can reach", async () => {
     const request = LIBRARY.Media(BOOK_DER_PROZESS).query((builder) => builder.expand("Copies"));
-    expect(request.cacheKey).toEqual(["Media", "detail", BOOK_DER_PROZESS, { expand: [["Copies", "list"]] }]);
+    expect(request.cacheKey).toEqual([
+      "Media",
+      "detail",
+      BOOK_DER_PROZESS,
+      { expand: [["Copies", "list"]], query: "%24expand=Copies" },
+    ]);
     expect(touchesResource(["Copies", "list"], request.cacheKey!)).toBe(true);
 
     const result = await request.execute();
