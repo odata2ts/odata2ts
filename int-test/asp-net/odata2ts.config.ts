@@ -1,12 +1,4 @@
-import {
-  CacheKeyMode,
-  ConfigFileOptions,
-  EmitModes,
-  KeyProperties,
-  ManagedPropertyMode,
-  Modes,
-  TypeModel,
-} from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, KeyProperties, ManagedPropertyMode, Modes, TypeModel } from "@odata2ts/odata2ts";
 
 /** The running server to refresh from, or `undefined` to read the committed snapshot - see below. */
 const SOURCE_URL = process.env.LIBRARY_BASE_URL;
@@ -68,7 +60,7 @@ const config: ConfigFileOptions = {
       // this metadata reproduces the reference model exactly, which puts every hop shape into one client -
       // to-many and to-one navigation, grade-B/C-style relations, containment and a stream - so this is
       // where the cache-key shape itself is held against a real server; see test/feature/CacheKeys.test.ts.
-      cacheKeys: { mode: CacheKeyMode.on },
+      cacheKeys: true,
     },
     /**
      * The same model once more, targeting OData 4.01 instead of the default 4.0.

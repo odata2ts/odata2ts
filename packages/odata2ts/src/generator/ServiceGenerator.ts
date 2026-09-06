@@ -26,7 +26,7 @@ import {
   SingletonType,
 } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
-import { CacheKeyMode, ConfigFileOptions, Modes, resolveCacheKeyMode } from "../OptionModel.js";
+import { ConfigFileOptions, Modes, resolveCacheKeysEnabled } from "../OptionModel.js";
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
 import { ClientApiImports, CoreImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects.js";
@@ -63,7 +63,7 @@ class ServiceGenerator {
     private options: ServiceGeneratorOptions = { v2: {}, v4: {} },
   ) {}
 
-  private readonly cacheKeyMode = resolveCacheKeyMode(this.options.cacheKeys);
+  private readonly cacheKeysEnabled = resolveCacheKeysEnabled(this.options.cacheKeys);
 
   private isV4BigNumber() {
     return this.options.v4.bigNumberAsString && this.version === ODataVersions.V4;
@@ -110,7 +110,7 @@ class ServiceGenerator {
     entityType: EntityType,
     options?: { paramsSource?: string; isEntitySet?: boolean },
   ): string {
-    if (this.cacheKeyMode === CacheKeyMode.off) {
+    if (!this.cacheKeysEnabled) {
       return "";
     }
     const rootStateFn = imports.addServiceFunction("rootState");
@@ -140,7 +140,7 @@ class ServiceGenerator {
     isCollection: boolean,
     contained: boolean,
   ): string {
-    if (this.cacheKeyMode === CacheKeyMode.off) {
+    if (!this.cacheKeysEnabled) {
       return "";
     }
 
@@ -158,7 +158,7 @@ class ServiceGenerator {
 
   /** A complex property hop: the same shape as a navigation hop, minus any entity-set identity - a complex value is never a navigation property and belongs to no entity set. */
   private emitComplexHopExpr(imports: ImportContainer, isCollection: boolean, name: string): string {
-    if (this.cacheKeyMode === CacheKeyMode.off) {
+    if (!this.cacheKeysEnabled) {
       return "";
     }
     const hopStateFn = imports.addServiceFunction("hopState");
@@ -167,7 +167,7 @@ class ServiceGenerator {
 
   /** A primitive property, primitive collection or stream property hop: bare name, no kind - stays on its parent's resource. */
   private emitBareHopExpr(imports: ImportContainer, name: string): string {
-    if (this.cacheKeyMode === CacheKeyMode.off) {
+    if (!this.cacheKeysEnabled) {
       return "";
     }
     const hopStateFn = imports.addServiceFunction("hopState");
@@ -176,7 +176,7 @@ class ServiceGenerator {
 
   /** A stream property's raw value: the property hop, then a further hop appending `$value`. */
   private emitStreamHopExpr(imports: ImportContainer, odataName: string): string {
-    if (this.cacheKeyMode === CacheKeyMode.off) {
+    if (!this.cacheKeysEnabled) {
       return "";
     }
     const hopStateFn = imports.addServiceFunction("hopState");
@@ -185,7 +185,7 @@ class ServiceGenerator {
 
   /** A subtype cast: a restriction on the very same resource, not a hop away from it. */
   private emitCastParamsExpr(imports: ImportContainer, castFqName: string): string {
-    if (this.cacheKeyMode === CacheKeyMode.off) {
+    if (!this.cacheKeysEnabled) {
       return "";
     }
     const withParamsFn = imports.addServiceFunction("withParams");
@@ -207,7 +207,7 @@ class ServiceGenerator {
     entitySetOdataName: string | undefined,
     hasParams: boolean,
   ): string {
-    if (this.cacheKeyMode === CacheKeyMode.off) {
+    if (!this.cacheKeysEnabled) {
       return "";
     }
 
@@ -241,7 +241,7 @@ class ServiceGenerator {
     fqOperationName: string,
     returnType: ReturnTypeModel | undefined,
   ): string {
-    if (this.cacheKeyMode === CacheKeyMode.off) {
+    if (!this.cacheKeysEnabled) {
       return "";
     }
     const hopStateFn = imports.addServiceFunction("hopState");
@@ -658,7 +658,7 @@ class ServiceGenerator {
             // a getter elsewhere constructs this very class as a hop off its own state (see emitNavHopExpr
             // et al.) - without this parameter that hop's cache-key state would have nowhere to go, and the
             // base class's own trailing parameter would sit unreachable behind a narrower constructor
-            ...(this.cacheKeyMode !== CacheKeyMode.off
+            ...(this.cacheKeysEnabled
               ? [
                   {
                     name: "cacheKeyState",
@@ -669,7 +669,7 @@ class ServiceGenerator {
               : []),
           ],
           statements: [
-            `super(client, basePath, name, ${qObjectName}, ${this.getServiceRuntimeOptions(model, isComplexType)}${this.cacheKeyMode !== CacheKeyMode.off ? ", cacheKeyState" : ""});`,
+            `super(client, basePath, name, ${qObjectName}, ${this.getServiceRuntimeOptions(model, isComplexType)}${this.cacheKeysEnabled ? ", cacheKeyState" : ""});`,
           ],
         },
       ],
@@ -1027,7 +1027,7 @@ class ServiceGenerator {
             // emitNavHopExpr et al.) - without this parameter that hop's cache-key state would have
             // nowhere to go, and the base class's own trailing parameter would sit unreachable behind a
             // narrower constructor
-            ...(this.cacheKeyMode !== CacheKeyMode.off
+            ...(this.cacheKeysEnabled
               ? [
                   {
                     name: "cacheKeyState",
@@ -1038,7 +1038,7 @@ class ServiceGenerator {
               : []),
           ],
           statements: [
-            `super(client, basePath, name, ${qObjectName}, new ${qIdFunctionName}(name), ${this.getServiceRuntimeOptions(model)}${this.cacheKeyMode !== CacheKeyMode.off ? ", cacheKeyState" : ""});`,
+            `super(client, basePath, name, ${qObjectName}, new ${qIdFunctionName}(name), ${this.getServiceRuntimeOptions(model)}${this.cacheKeysEnabled ? ", cacheKeyState" : ""});`,
           ],
         },
       ],
@@ -1055,7 +1055,7 @@ class ServiceGenerator {
             { name: "options", type: `${serviceOptions}${this.getServiceVersionArg()} | undefined` },
             // this base class's own `byId` computes the entity's cache-key state (see EntitySetServiceV4/V2);
             // this override only has to forward it, never compute it itself
-            ...(this.cacheKeyMode !== CacheKeyMode.off
+            ...(this.cacheKeysEnabled
               ? [
                   {
                     name: "cacheKeyState",
@@ -1066,7 +1066,7 @@ class ServiceGenerator {
               : []),
           ],
           statements: [
-            `return new ${entityServiceName}${this.getServiceVersionArg()}(client, path, name, options${this.cacheKeyMode !== CacheKeyMode.off ? ", cacheKeyState" : ""});`,
+            `return new ${entityServiceName}${this.getServiceVersionArg()}(client, path, name, options${this.cacheKeysEnabled ? ", cacheKeyState" : ""});`,
           ],
         },
       ],

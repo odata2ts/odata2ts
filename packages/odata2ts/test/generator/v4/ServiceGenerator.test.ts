@@ -5,7 +5,6 @@ import { beforeAll, beforeEach, describe, expect, test } from "vitest";
 import { digest } from "../../../src/data-model/DataModelDigestionV4.js";
 import { NamingHelper } from "../../../src/data-model/NamingHelper.js";
 import {
-  CacheKeyMode,
   ConfigFileOptions,
   EmitModes,
   KeyProperties,
@@ -188,9 +187,19 @@ describe("Service Generator Tests V4", () => {
     test("a collection getter roots the key at the entity set's own name, not its type, when the feature is on", async () => {
       addEntity();
 
-      await doGenerate({ cacheKeys: { mode: CacheKeyMode.on } });
+      await doGenerate({ cacheKeys: { enabled: true } });
 
       // "Ents" - the entity set's own name - never the entity type's FQ name ("Tester.TestEntity")
+      expect(generatedText()).toContain(
+        `rootState("Ents", "list", { entitySetName: "Ents", canonicalIdFn: (entity: unknown) => new QTestEntityId("Ents").buildCanonicalId(entity), qEntityFn: () => QTestEntity })`,
+      );
+    });
+
+    test("the bare boolean shorthand works identically to the object form", async () => {
+      addEntity();
+
+      await doGenerate({ cacheKeys: true });
+
       expect(generatedText()).toContain(
         `rootState("Ents", "list", { entitySetName: "Ents", canonicalIdFn: (entity: unknown) => new QTestEntityId("Ents").buildCanonicalId(entity), qEntityFn: () => QTestEntity })`,
       );
@@ -205,10 +214,10 @@ describe("Service Generator Tests V4", () => {
       expect(generatedText()).not.toContain("cacheKeyState");
     });
 
-    test("nothing is emitted under mode: off - identical to cacheKeys being absent", async () => {
+    test("nothing is emitted under enabled: false - identical to cacheKeys being absent", async () => {
       addEntity();
 
-      await doGenerate({ cacheKeys: { mode: CacheKeyMode.off } });
+      await doGenerate({ cacheKeys: { enabled: false } });
 
       expect(generatedText()).not.toContain("rootState");
       expect(generatedText()).not.toContain("cacheKeyState");
@@ -266,14 +275,14 @@ describe("Service Generator Tests V4", () => {
         .addFunctionImport("TotalCount", withNs("totalCount"));
     }
 
-    async function generateWith(mode: CacheKeyMode) {
+    async function generateWith(enabled: boolean) {
       buildModel();
-      await doGenerate({ cacheKeys: { mode }, enablePrimitivePropertyServices: true });
+      await doGenerate({ cacheKeys: { enabled }, enablePrimitivePropertyServices: true });
       return generatedText();
     }
 
     test("off: no cache-key expression is emitted anywhere", async () => {
-      const text = await generateWith(CacheKeyMode.off);
+      const text = await generateWith(false);
 
       expect(text).not.toContain("rootState");
       expect(text).not.toContain("hopState");
@@ -284,7 +293,7 @@ describe("Service Generator Tests V4", () => {
     });
 
     test("root, hop, complex, primitive, stream, cast and operation hops all name themselves - never a type", async () => {
-      const text = await generateWith(CacheKeyMode.on);
+      const text = await generateWith(true);
 
       // root: entity set getter on the main service - "Media", the entity SET's own name, never
       // "Tester.Medium" (the type this used to, wrongly, be rooted at)
@@ -336,7 +345,7 @@ describe("Service Generator Tests V4", () => {
     });
 
     test("createEntityService forwards the cache-key state it is handed, without computing one", async () => {
-      const text = await generateWith(CacheKeyMode.on);
+      const text = await generateWith(true);
 
       expect(text).toContain("new MediumService<V>(client, path, name, options, cacheKeyState);");
     });

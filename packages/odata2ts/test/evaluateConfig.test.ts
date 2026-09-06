@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { evaluateConfigOptions } from "../src/evaluateConfig.js";
 import {
-  CacheKeyMode,
   CliOptions,
   ConfigFileOptions,
   DeepInsertProps,
@@ -9,7 +8,7 @@ import {
   getDefaultConfig,
   Modes,
   NamingStrategies,
-  resolveCacheKeyMode,
+  resolveCacheKeysEnabled,
 } from "../src/index.js";
 
 describe("Config Evaluation Tests", () => {
@@ -316,42 +315,47 @@ describe("Config Evaluation Tests", () => {
 
   describe("cacheKeys option", () => {
     test("absent means off", () => {
-      expect(resolveCacheKeyMode(undefined)).toBe(CacheKeyMode.off);
+      expect(resolveCacheKeysEnabled(undefined)).toBe(false);
     });
 
-    test("a named mode is passed through", () => {
-      expect(resolveCacheKeyMode({ mode: CacheKeyMode.on })).toBe(CacheKeyMode.on);
-      expect(resolveCacheKeyMode({ mode: CacheKeyMode.off })).toBe(CacheKeyMode.off);
+    test("the object form is passed through", () => {
+      expect(resolveCacheKeysEnabled({ enabled: true })).toBe(true);
+      expect(resolveCacheKeysEnabled({ enabled: false })).toBe(false);
+    });
+
+    test("the bare boolean shorthand works too", () => {
+      expect(resolveCacheKeysEnabled(true)).toBe(true);
+      expect(resolveCacheKeysEnabled(false)).toBe(false);
     });
 
     test("the default is off, so a config saying nothing generates nothing", () => {
       const [only] = evaluateConfigOptions({}, { services: { a: { source: "a.xml", output: "a" } } });
-      expect(only.cacheKeys).toEqual({ mode: CacheKeyMode.off });
-      expect(resolveCacheKeyMode(only.cacheKeys)).toBe(CacheKeyMode.off);
+      expect(only.cacheKeys).toEqual({ enabled: false });
+      expect(resolveCacheKeysEnabled(only.cacheKeys)).toBe(false);
     });
 
     test("it is a per-service option, overridable from the base settings", () => {
       const [first, second] = evaluateConfigOptions(
         {},
         {
-          cacheKeys: { mode: CacheKeyMode.on },
+          cacheKeys: true,
           services: {
             a: { source: "a.xml", output: "a" },
-            b: { source: "b.xml", output: "b", cacheKeys: { mode: CacheKeyMode.off } },
+            b: { source: "b.xml", output: "b", cacheKeys: false },
           },
         },
       );
-      expect(first.cacheKeys).toEqual({ mode: CacheKeyMode.on });
-      expect(second.cacheKeys).toEqual({ mode: CacheKeyMode.off });
+      expect(first.cacheKeys).toEqual(true);
+      expect(second.cacheKeys).toEqual(false);
     });
 
     test("a service overrides the default rather than merging with it", () => {
-      // deepmerge folds the default {mode:"off"} under the service's own entry; the service must win
+      // deepmerge folds the default {enabled:false} under the service's own entry; the service must win
       const [only] = evaluateConfigOptions(
         {},
-        { services: { a: { source: "a.xml", output: "a", cacheKeys: { mode: CacheKeyMode.on } } } },
+        { services: { a: { source: "a.xml", output: "a", cacheKeys: { enabled: true } } } },
       );
-      expect(only.cacheKeys).toEqual({ mode: CacheKeyMode.on });
+      expect(only.cacheKeys).toEqual({ enabled: true });
     });
   });
 });

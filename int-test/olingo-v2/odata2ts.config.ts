@@ -1,12 +1,4 @@
-import {
-  CacheKeyMode,
-  ConfigFileOptions,
-  EmitModes,
-  KeyProperties,
-  ManagedPropertyMode,
-  Modes,
-  TypeModel,
-} from "@odata2ts/odata2ts";
+import { ConfigFileOptions, EmitModes, KeyProperties, ManagedPropertyMode, Modes, TypeModel } from "@odata2ts/odata2ts";
 
 /** The running server to refresh from, or `undefined` to read the committed snapshot - see below. */
 const SOURCE_URL = process.env.LIBRARY_BASE_URL;
@@ -70,7 +62,7 @@ const config: ConfigFileOptions = {
       output: "src-generated/library",
       // on, the counterpart of int-test/cap's V2 client: the two V2 servers answer the same model, so
       // running both is what tells a V2 quirk apart from a difference between the servers themselves.
-      cacheKeys: { mode: CacheKeyMode.on },
+      cacheKeys: true,
     },
     /**
      * The same model a third time, with renaming switched on - the V2 half of what
@@ -130,7 +122,7 @@ const config: ConfigFileOptions = {
       // bigint, which JSON.stringify refuses. Decision 1 of the cache-key plan (OData-side, pre-render
       // values via convertTo) exists specifically because of this converter, so this is where it is held
       // against a real server rather than only against a fixture.
-      cacheKeys: { mode: CacheKeyMode.on },
+      cacheKeys: true,
     },
     /**
      * The same model a fourth time, with `v2ResponseAsV4` switched on: every response is reshaped as its

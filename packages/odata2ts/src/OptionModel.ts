@@ -232,32 +232,33 @@ export enum EnumSynthesis {
   allowedValuesAndSymbolicName = "allowedValuesAndSymbolicName",
 }
 
-/**
- * How a generated client builds `RequestCmd.cacheKey` - see the docs on `cacheKeys`.
- *
- * Purely hierarchical, always: the key is the literal, named route taken to reach a response, never
- * re-rooted at a resource's own type - that used to be a second mode (`typeFlattening`), and is now what
- * `ResourceIdentityHandler` does at runtime instead, from actual responses rather than a generation-time
- * prediction. One behaviour, so a binary switch is all `mode` needs to be.
- */
-export enum CacheKeyMode {
-  /** Generate `cacheKey`/`invalidates` on every `RequestCmd`. */
-  on = "on",
-  /** Nothing is generated - identical to omitting `cacheKeys` entirely. */
-  off = "off",
-}
-
-export interface CacheKeysOptions {
+export interface CacheKeysObjectOptions {
   /**
-   * Required: naming the object is not itself a decision, and a silently defaulted mode would make
-   * whether a generated key exists at all depend on a value nobody wrote down.
+   * Required: naming the object is not itself a decision, and a silently defaulted value would make
+   * whether a generated key exists at all depend on a value nobody wrote down. Use the bare boolean shorthand
+   * (`cacheKeys: true`/`false`) where the object's only purpose would be carrying this one flag.
+   *
+   * Generates `cacheKey`/`invalidates` on every `RequestCmd` when `true`; `false` emits nothing - identical
+   * to omitting `cacheKeys` entirely. Purely hierarchical, always: the key is the literal, named route taken
+   * to reach a response, never re-rooted at a resource's own type - that used to be a second mode
+   * (`typeFlattening`), and is now what `ResourceIdentityHandler` does at runtime instead, from actual
+   * responses rather than a generation-time prediction. One behaviour, so a boolean is all this needs to be.
    */
-  mode: CacheKeyMode;
+  enabled: boolean;
 }
 
-/** The mode actually in force - `off` where the whole `cacheKeys` object was never configured. */
-export function resolveCacheKeyMode(options: CacheKeysOptions | undefined): CacheKeyMode {
-  return options?.mode ?? CacheKeyMode.off;
+/**
+ * `cacheKeys` in `ConfigFileOptions`: either the bare boolean directly, or the object form - which exists
+ * only so a later option can join `enabled` under the same key without a breaking change.
+ */
+export type CacheKeysOptions = boolean | CacheKeysObjectOptions;
+
+/** Whether cache keys are in force - `false` where the whole `cacheKeys` option was never configured. */
+export function resolveCacheKeysEnabled(options: CacheKeysOptions | undefined): boolean {
+  if (typeof options === "boolean") {
+    return options;
+  }
+  return options?.enabled ?? false;
 }
 
 /**
@@ -585,9 +586,8 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * addresses, for a cache built on top of the generated client (TanStack Query is the motivating case,
    * hence the array shape).
    *
-   * Off by default. An object rather than a bare string, because the shape has to have room for the
-   * further switches this will attract - which properties become key segments, whether operations are
-   * keyed at all - without a second top-level option.
+   * Off by default. `true`/`false` is the common case; the `{ enabled }` object form exists only for a
+   * future option to join it under the same key without a breaking change.
    */
   cacheKeys?: CacheKeysOptions;
 }
