@@ -316,7 +316,11 @@ describe("V4 EntitySetService Test", () => {
         rootState(PERSON, "list"),
       );
       const request = service.query((b) => b.expand("friends"));
-      expect(request.cacheKey).toEqual([PERSON, "list", { expand: [["Friends", "list"]] }]);
+      expect(request.cacheKey).toEqual([
+        PERSON,
+        "list",
+        { expand: [["Friends", "list"]], query: "%24expand=Friends" },
+      ]);
     });
 
     test("create() attaches deepEdit to invalidates when the payload deep-inserts a nav property", async () => {
