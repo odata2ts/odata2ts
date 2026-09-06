@@ -333,7 +333,11 @@ describe("V4 EntitySetService Test", () => {
       });
 
       expect(inOneOrder.cacheKey).toEqual(inTheOtherOrder.cacheKey);
-      expect(inOneOrder.cacheKey).toEqual([PERSON, "list", { filter: "(Age eq 25) and (UserName eq 'russellwhyte')" }]);
+      expect(inOneOrder.cacheKey).toEqual([
+        PERSON,
+        "list",
+        { query: "%24filter=%28Age+eq+25%29+and+%28UserName+eq+%27russellwhyte%27%29" },
+      ]);
       // the actual request URL keeps its own, call-site order - only the cache key canonicalizes
       expect(inOneOrder.getUrl()).toBe(
         `${BASE_URL}/${NAME}?%24filter=UserName%20eq%20'russellwhyte'%20and%20Age%20eq%2025`,

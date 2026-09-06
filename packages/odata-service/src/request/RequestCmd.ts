@@ -153,10 +153,11 @@ export abstract class RequestCmd<
    * after `super()` returns.
    *
    * The request's own rendered query string is captured off that same converted state, canonicalized (see
-   * `canonicalizeQueryString`), and merged into the params object alongside `ODataQueryBuilder`'s
-   * `expand`/`select`/`filter`/`search` output - for exactly the same reason `cacheKeyState` is read
-   * post-conversion: `GetToPostConverter` relocates the query string into the body, and only the converted
-   * state has it in the right place (see `QueryStringCapture.ts`).
+   * `canonicalizeQueryString`) - `ODataQueryBuilder`'s own `filter`/`search` output is folded into that same
+   * opaque string rather than surfaced as separate params-object entries, so `expand`/`select` are the only
+   * two structured entries `queryParams` still contributes as-is - for exactly the same reason
+   * `cacheKeyState` is read post-conversion: `GetToPostConverter` relocates the query string into the body,
+   * and only the converted state has it in the right place (see `QueryStringCapture.ts`).
    *
    * `undefined` also means this client was not generated with `cacheKeys` - which a consuming application
    * has to handle anyway when it is shared across services.
@@ -167,8 +168,12 @@ export abstract class RequestCmd<
         const info = this.getInfoConverted();
         const state = info.cacheKeyState;
         const rawQuery = captureQueryString(info.method, info.url, info.data);
-        const query = rawQuery !== undefined ? canonicalizeQueryString(rawQuery) : undefined;
-        const queryParams = query !== undefined ? { ...this.options.queryParams, query } : this.options.queryParams;
+        const { filter, search, ...restQueryParams } = this.options.queryParams ?? {};
+        const query =
+          rawQuery !== undefined
+            ? canonicalizeQueryString(rawQuery, filter as string | undefined, search as string | undefined)
+            : undefined;
+        const queryParams = query !== undefined ? { ...restQueryParams, query } : restQueryParams;
         this.cachedCacheKey = state && buildCacheKey(state, queryParams);
       }
       this.cacheKeyComputed = true;

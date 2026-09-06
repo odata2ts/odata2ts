@@ -14,16 +14,17 @@ export type ExpandHop = readonly [
 ];
 
 /**
- * The restrictions a query puts on a resource that need to stay structured, either for invalidation reach
- * or so their identity can converge regardless of call-site ordering - not the query's full identity,
- * which `RequestCmd.cacheKey` captures separately as one opaque string for everything else (see
- * `QueryStringCapture.ts`). `$expand` (read by `touchesResource`/`buildDeepEditHops`), `$select` (kept for
- * a currently-nonexistent future consumer), `$filter` and `$search` (see below) are structured; everything
- * else - `$orderBy`, `$top`, `$skip`, `$count`, `$apply`, any custom query option - never had a reason to
- * be decomposed once nothing downstream ever inspected it. `$orderBy` in particular is deliberately left
- * out here: its own sequence changes the actual result (sort priority), so - unlike `$filter`/`$search`,
- * whose multiple call-site clauses combine commutatively - it must never be reordered for convergence, and
- * stays exactly as rendered inside the opaque string instead.
+ * The restrictions a query puts on a resource, computed here rather than parsed back out of a rendered URL
+ * - not necessarily what ends up structured in the final `cacheKey`'s params object, though. `$expand` (read
+ * by `touchesResource`/`buildDeepEditHops`) and `$select` (kept for a currently-nonexistent future consumer)
+ * genuinely stay structured, their own params-object entries. `$filter`/`$search` are computed here too -
+ * this is the only place their *individual, not-yet-combined* clauses are still available to sort and group
+ * - but `RequestCmd.cacheKey` (odata-service) folds their canonical text straight into the same opaque
+ * `query` string everything else (`$orderBy`, `$top`, `$skip`, `$count`, `$apply`, any custom option) already
+ * collapses into, rather than exposing them as their own params-object keys (see `QueryStringCapture.ts`'s
+ * `canonicalizeQueryString`). `$orderBy` is the one thing deliberately never canonicalized this way: its own
+ * sequence changes the actual result (sort priority), so - unlike `$filter`/`$search`, whose multiple
+ * call-site clauses combine commutatively - it must never be reordered for convergence.
  */
 export type CacheKeyParams = {
   /** Rendered paths (bare) or hop-shaped entries where the target's own type is known, sorted by path. */
@@ -40,7 +41,9 @@ export type CacheKeyParams = {
    * containing an ungrouped `.or()` changes *meaning* depending on which neighbor ends up adjacent to it
    * after sorting (e.g. `"R and P or Q"` reads as `(R and P) or Q`, `"P or Q and R"` as `P or (Q and R)`) -
    * two different real queries could otherwise canonicalize to the identical string. Never affects what
-   * `build()` itself renders or what the server receives - this exists solely for the cache key.
+   * `build()` itself renders or what the server receives, and never becomes its own key in the final
+   * `cacheKey` either - `RequestCmd.cacheKey` reads this to replace `$filter`'s raw text inside the opaque
+   * `query` string, then discards it.
    */
   filter?: string;
   /**

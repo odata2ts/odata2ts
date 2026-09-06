@@ -485,11 +485,12 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
    * as one opaque string for everything else off the actual request. `$expand` stays hop-shaped because
    * invalidation reach (`touchesResource`, `buildDeepEditHops`) needs to find a navigation property by
    * name; `$select` stays a plain sorted array for a currently-nonexistent future consumer; `$filter`/
-   * `$search` are rendered canonically (sorted, `$filter` also safely grouped - see `CacheKeyParams.ts`)
-   * so that call-site clause ordering converges instead of leaking into the key. `$orderBy`, `top`, `skip`,
-   * `count` stay out of this entirely - never decomposed, since nothing downstream ever inspects them
-   * except identity, which the opaque capture covers (and `$orderBy`'s own sequence must never be
-   * reordered - see `CacheKeyParams.ts`).
+   * `$search` are rendered canonically here (sorted, `$filter` also safely grouped - see
+   * `CacheKeyParams.ts`) so that call-site clause ordering converges, but `RequestCmd.cacheKey` folds that
+   * canonical text into the same opaque string as everything else rather than exposing it as its own
+   * params-object key. `$orderBy`, `top`, `skip`, `count` stay out of this entirely - never decomposed,
+   * since nothing downstream ever inspects them except identity, which the opaque capture covers (and
+   * `$orderBy`'s own sequence must never be reordered - see `CacheKeyParams.ts`).
    *
    * `hoistedExpandsBucket`/`expands` are reconciled by `rawForm`, not read as a bare union - see the
    * `expandItems` computation below for why: `build()` folds `hoistedExpandsBucket` into `expands`, and a

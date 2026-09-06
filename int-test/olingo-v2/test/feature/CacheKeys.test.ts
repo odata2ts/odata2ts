@@ -43,9 +43,14 @@ describe("Olingo Library: cache keys", () => {
 
     // the rendered URL carries V2's own literal form...
     expect(decodeURIComponent(request.getUrl())).toContain(`MediumId eq guid'${BOOK_DER_PROZESS}'`);
-    // ...and the cache key's own `filter` entry is exactly that same rendering, unencoded - a single clause
-    // stays bare, exactly what `getCacheKeyParams()` itself reads off `QFilterExpression.toString()`
-    expect(request.cacheKey).toEqual(["Copies", "list", { filter: `MediumId eq guid'${BOOK_DER_PROZESS}'` }]);
+    // ...and the cache key's opaque `query` string carries that same rendering, inside the canonicalized
+    // $filter= pair - a single clause stays bare, exactly what `getCacheKeyParams()` itself reads off
+    // `QFilterExpression.toString()`
+    expect(request.cacheKey).toEqual([
+      "Copies",
+      "list",
+      { query: `%24filter=MediumId+eq+guid%27${BOOK_DER_PROZESS}%27` },
+    ]);
   });
 
   test("touchesResource reaches a hierarchical key by its own name", () => {
@@ -68,12 +73,13 @@ describe("Olingo Library: cache keys", () => {
   });
 
   /**
-   * The cache key's `filter` entry is read off `QFilterExpression.toString()`, which
-   * `int64ToBigIntConverter`'s own `convertTo` has already turned back into the wire string (`"1841000"`)
-   * before the filter clause is ever rendered - the caller's own `bigint` (what `convertFrom` hands back)
-   * never reaches the key at all, since nothing decomposes the rendered string back into a typed value any
-   * more. This is what keeps the key JSON-serialisable (a TanStack Query cache hashes it that way) without
-   * odata2ts inventing a special case for this one converter.
+   * The cache key's opaque `query` string carries the canonical `$filter=` text `getCacheKeyParams()`
+   * computed off `QFilterExpression.toString()`, which `int64ToBigIntConverter`'s own `convertTo` has
+   * already turned back into the wire string (`"1841000"`) before the filter clause is ever rendered - the
+   * caller's own `bigint` (what `convertFrom` hands back) never reaches the key at all, since nothing
+   * decomposes the rendered string back into a typed value any more. This is what keeps the key
+   * JSON-serialisable (a TanStack Query cache hashes it that way) without odata2ts inventing a special case
+   * for this one converter.
    *
    * `LibraryConverted` is the one client that carries this converter, so this is the one place the
    * decision can be held against a real server rather than only a fixture with a hand-built converter.
@@ -83,8 +89,8 @@ describe("Olingo Library: cache keys", () => {
       builder.filter(qBranch.Population.eq(BigInt(1841000))),
     );
 
-    const params = request.cacheKey![2] as { filter: string };
-    expect(params.filter).toBe("Population eq 1841000");
+    const params = request.cacheKey![2] as { query: string };
+    expect(params.query).toBe("%24filter=Population+eq+1841000");
 
     // the assertion that matters: this would throw if the caller's own bigint had reached the key instead
     expect(() => JSON.stringify(request.cacheKey)).not.toThrow();

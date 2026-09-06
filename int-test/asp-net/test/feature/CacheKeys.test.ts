@@ -81,7 +81,7 @@ describe("ASP.NET Library: cache keys", () => {
     const viaFilter = LIBRARY.Copies().query((builder, qCopy) => builder.filter(qCopy.MediumId.eq(BOOK_DER_PROZESS)));
 
     expect(viaNavigation.cacheKey).toEqual(["Media", "detail", BOOK_DER_PROZESS, "Copies", "list"]);
-    expect(viaFilter.cacheKey).toEqual(["Copies", "list", { filter: `MediumId eq ${BOOK_DER_PROZESS}` }]);
+    expect(viaFilter.cacheKey).toEqual(["Copies", "list", { query: `%24filter=MediumId+eq+${BOOK_DER_PROZESS}` }]);
     // no more convergence by construction - the two keys are legitimately different arrays now; what makes
     // them invalidate together is the response-observed identity mechanism proven below, not equal keys
 

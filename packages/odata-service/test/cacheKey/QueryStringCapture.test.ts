@@ -47,12 +47,34 @@ describe("canonicalizeQueryString", () => {
     expect(canonicalizeQueryString("custom=z&custom=a&$top=10")).toBe("%24top=10&custom=z&custom=a");
   });
 
-  test("$select/$filter/$search are stripped - captured structurally elsewhere, with no loss of information", () => {
-    expect(canonicalizeQueryString("$select=Title&$filter=Id eq 1&$search=x&$top=10")).toBe("%24top=10");
+  test("$select is stripped with nothing put back - its own structured entry already carries the whole restriction", () => {
+    expect(canonicalizeQueryString("$select=Title&$top=10")).toBe("%24top=10");
+  });
+
+  test("without a canonical filter/search to put back, $filter/$search are simply stripped too", () => {
+    expect(canonicalizeQueryString("$filter=Id eq 1&$search=x&$top=10")).toBe("%24top=10");
   });
 
   test("nothing left after stripping means undefined, not an empty string", () => {
     expect(canonicalizeQueryString("$select=Title")).toBeUndefined();
+  });
+
+  test("a canonical filter replaces $filter's own raw text, rather than sitting next to it", () => {
+    const canonicalFilter = "(Age eq 25) and (UserName eq 'russellwhyte')";
+    expect(canonicalizeQueryString("$filter=UserName eq 'russellwhyte' and Age eq 25&$top=10", canonicalFilter)).toBe(
+      canonicalizeQueryString("$top=10&$filter=whatever the raw text happened to be", canonicalFilter),
+    );
+  });
+
+  test("a canonical search replaces $search's own raw text the same way", () => {
+    const canonicalSearch = "alpha AND zeta";
+    expect(canonicalizeQueryString("$search=zeta AND alpha", undefined, canonicalSearch)).toBe(
+      canonicalizeQueryString("$search=whatever", undefined, canonicalSearch),
+    );
+  });
+
+  test("the canonical filter/search still take their sorted place among every other pair", () => {
+    expect(canonicalizeQueryString("$top=10&$filter=x", "A eq 1")).toBe("%24filter=A+eq+1&%24top=10");
   });
 
   test("$orderBy is never stripped or reordered - its own sequence is real, result-changing content", () => {
