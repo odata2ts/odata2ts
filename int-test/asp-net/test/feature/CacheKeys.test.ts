@@ -64,7 +64,12 @@ describe("ASP.NET Library: cache keys", () => {
 
   test("$expand produces a hop-shaped entry touchesResource can reach", async () => {
     const request = LIBRARY.Media(BOOK_DER_PROZESS).query((builder) => builder.expand("Copies"));
-    expect(request.cacheKey).toEqual(["Media", "detail", BOOK_DER_PROZESS, { expand: [["Copies", "list"]] }]);
+    expect(request.cacheKey).toEqual([
+      "Media",
+      "detail",
+      BOOK_DER_PROZESS,
+      { expand: [["Copies", "list"]], query: "%24expand=Copies" },
+    ]);
     expect(touchesResource(["Copies", "list"], request.cacheKey!)).toBe(true);
 
     const result = await request.execute();
@@ -76,7 +81,7 @@ describe("ASP.NET Library: cache keys", () => {
     const viaFilter = LIBRARY.Copies().query((builder, qCopy) => builder.filter(qCopy.MediumId.eq(BOOK_DER_PROZESS)));
 
     expect(viaNavigation.cacheKey).toEqual(["Media", "detail", BOOK_DER_PROZESS, "Copies", "list"]);
-    expect(viaFilter.cacheKey).toEqual(["Copies", "list", { filter: { MediumId: BOOK_DER_PROZESS } }]);
+    expect(viaFilter.cacheKey).toEqual(["Copies", "list", { query: `%24filter=MediumId%20eq%20${BOOK_DER_PROZESS}` }]);
     // no more convergence by construction - the two keys are legitimately different arrays now; what makes
     // them invalidate together is the response-observed identity mechanism proven below, not equal keys
 
@@ -238,6 +243,17 @@ describe("ASP.NET Library: cache keys", () => {
     // a read carries nothing extra - the key it should be stored under is `cacheKey`, not `invalidates`
     const read = await LIBRARY.Media(BOOK_DER_PROZESS).query().execute();
     expect(read.invalidates).toBeUndefined();
+  });
+
+  test("a groupBy ($apply) query produces a cache key distinct from the same query without it", () => {
+    // the concrete regression this whole opaque-query-string redesign fixes: $apply used to be silently
+    // excluded from the cache key, so an aggregated query collapsed onto its non-aggregated counterpart
+    const plain = LIBRARY.Copies().query((b) => b.top(5));
+    const grouped = LIBRARY.Copies().query((b) => {
+      b.top(5);
+      b.groupBy("Condition");
+    });
+    expect(grouped.cacheKey).not.toEqual(plain.cacheKey);
   });
 
   test("reading an unknown copy still answers a well-formed 404", async () => {
