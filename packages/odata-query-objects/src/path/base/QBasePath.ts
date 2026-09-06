@@ -1,6 +1,6 @@
 import { ValueConverter } from "@odata2ts/converter-api";
 import { getIdentityConverter } from "../../IdentityConverter";
-import { isPathValue, PATH_VALUE, URL_CONVERSION_OPTIONS } from "../../param/UrlParamHelper";
+import { isPathValue, URL_CONVERSION_OPTIONS } from "../../param/UrlParamHelper";
 import { UrlExpressionValueModel } from "../../param/UrlParamModel";
 import { QValuePathModel } from "../QPathModel";
 import {
@@ -51,18 +51,6 @@ export abstract class QBasePath<ValueType extends UrlExpressionValueModel, Conve
   };
 
   /**
-   * The OData-side value of what the caller passed: the property's converter applied, but not the URL
-   * rendering on top of it. This is what a cache key carries - always a JSON-serialisable primitive,
-   * unlike the caller's own value, which may be a `bigint` and therefore unhashable.
-   */
-  protected convertInputTyped = (value: InputModel<this["converter"]>): unknown => {
-    if (isPathValue(value)) {
-      return PATH_VALUE;
-    }
-    return this.converter.convertTo(value, URL_CONVERSION_OPTIONS);
-  };
-
-  /**
    * Get the path to this property.
    *
    * @returns this property path
@@ -78,38 +66,18 @@ export abstract class QBasePath<ValueType extends UrlExpressionValueModel, Conve
 
   public isNull = filterIsNull(this.path);
   public isNotNull = filterIsNotNull(this.path);
-  public equals = filterEquals<InputModel<this["converter"]>>(this.path, this.convertInput, this.convertInputTyped);
+  public equals = filterEquals<InputModel<this["converter"]>>(this.path, this.convertInput);
   public eq = this.equals;
-  public notEquals = filterNotEquals<InputModel<this["converter"]>>(
-    this.path,
-    this.convertInput,
-    this.convertInputTyped,
-  );
+  public notEquals = filterNotEquals<InputModel<this["converter"]>>(this.path, this.convertInput);
   public ne = this.notEquals;
 
-  public lowerThan = filterLowerThan<InputModel<this["converter"]>>(
-    this.path,
-    this.convertInput,
-    this.convertInputTyped,
-  );
+  public lowerThan = filterLowerThan<InputModel<this["converter"]>>(this.path, this.convertInput);
   public lt = this.lowerThan;
-  public lowerEquals = filterLowerEquals<InputModel<this["converter"]>>(
-    this.path,
-    this.convertInput,
-    this.convertInputTyped,
-  );
+  public lowerEquals = filterLowerEquals<InputModel<this["converter"]>>(this.path, this.convertInput);
   public le = this.lowerEquals;
-  public greaterThan = filterGreaterThan<InputModel<this["converter"]>>(
-    this.path,
-    this.convertInput,
-    this.convertInputTyped,
-  );
+  public greaterThan = filterGreaterThan<InputModel<this["converter"]>>(this.path, this.convertInput);
   public gt = this.greaterThan;
-  public greaterEquals = filterGreaterEquals<InputModel<this["converter"]>>(
-    this.path,
-    this.convertInput,
-    this.convertInputTyped,
-  );
+  public greaterEquals = filterGreaterEquals<InputModel<this["converter"]>>(this.path, this.convertInput);
   public ge = this.greaterEquals;
   public in = this.options.nativeIn
     ? filterIn<InputModel<this["converter"]>>(this.path, this.convertInput)
