@@ -390,6 +390,11 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     return `${encodeURIComponent(operator)}=${encodeURIComponent(value)}`;
   }
 
+  /** Every `.filter()` call's own clause, dropping any that rendered empty - shared with `getCacheKeyParams()`, so both read the identical set. */
+  private getCleanedFilters(): Array<QFilterExpression> {
+    return this.filters?.filter((f) => f.toString()) ?? [];
+  }
+
   private buildQuery(
     param: (operator: string, value: string) => string,
     opts?: { excludeExpands?: boolean },
@@ -397,7 +402,7 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     const params: Array<string> = [];
     const add = (operator: string, value: string) => params.push(param(operator, value));
 
-    const cleanedFilters = this.filters?.filter((f) => f.toString());
+    const cleanedFilters = this.getCleanedFilters();
 
     if (this.selects?.length) {
       add(ODataOperators.SELECT, this.selects.join(","));
@@ -475,13 +480,16 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
   }
 
   /**
-   * The `$expand`/`$select` structure this builder's resource needs a cache key to carry - not the query's
-   * full identity, which `RequestCmd.cacheKey` (odata-service) captures separately as one opaque string off
-   * the actual request. `$expand` stays hop-shaped because invalidation reach (`touchesResource`,
-   * `buildDeepEditHops`) needs to find a navigation property by name; `$select` stays a plain sorted array
-   * for a currently-nonexistent future consumer. Everything else this builder tracks - filters, orderBy,
-   * top, skip, count, search - was already never read by anything except identity, which the opaque capture
-   * now covers, so none of it is computed here any more.
+   * The `$expand`/`$select`/`$filter`/`$search` structure this builder's resource needs a cache key to
+   * carry - not the query's full identity, which `RequestCmd.cacheKey` (odata-service) captures separately
+   * as one opaque string for everything else off the actual request. `$expand` stays hop-shaped because
+   * invalidation reach (`touchesResource`, `buildDeepEditHops`) needs to find a navigation property by
+   * name; `$select` stays a plain sorted array for a currently-nonexistent future consumer; `$filter`/
+   * `$search` are rendered canonically (sorted, `$filter` also safely grouped - see `CacheKeyParams.ts`)
+   * so that call-site clause ordering converges instead of leaking into the key. `$orderBy`, `top`, `skip`,
+   * `count` stay out of this entirely - never decomposed, since nothing downstream ever inspects them
+   * except identity, which the opaque capture covers (and `$orderBy`'s own sequence must never be
+   * reordered - see `CacheKeyParams.ts`).
    *
    * `hoistedExpandsBucket`/`expands` are reconciled by `rawForm`, not read as a bare union - see the
    * `expandItems` computation below for why: `build()` folds `hoistedExpandsBucket` into `expands`, and a
@@ -523,9 +531,28 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
 
     expandItems.sort((a, b) => (a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0));
 
+    const sortedFilters = this.getCleanedFilters().sort(sortByRenderedText);
+    // grouping only kicks in for 2+ clauses - a lone filter stays exactly as `build()` itself renders it
+    const filter =
+      sortedFilters.length > 1
+        ? sortedFilters.map((f) => f.group().toString()).join(" and ")
+        : sortedFilters[0]?.toString();
+
+    const sortedSearchTerms = (this.searchTerms ?? []).filter((st) => st.toString()).sort(sortByRenderedText);
+    const search = sortedSearchTerms.length ? sortedSearchTerms.map((st) => st.toString()).join(" AND ") : undefined;
+
     return normalizeCacheKeyParams({
       select: this.selects?.length ? [...this.selects].sort() : undefined,
       expand: expandItems.length ? expandItems.map((i) => i.entry) : undefined,
+      filter,
+      search,
     });
   }
+}
+
+/** Plain codepoint sort by an operand's own rendered text - the same comparator `expandItems` above already uses. */
+function sortByRenderedText(a: { toString(): string }, b: { toString(): string }): number {
+  const left = a.toString();
+  const right = b.toString();
+  return left < right ? -1 : left > right ? 1 : 0;
 }

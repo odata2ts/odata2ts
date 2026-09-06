@@ -102,4 +102,68 @@ describe("CacheKeyParams", () => {
       });
     });
   });
+
+  describe("getCacheKeyParams: filter/search canonicalization", () => {
+    test("a single filter clause stays bare - no parens added where there is nothing to disambiguate", () => {
+      builder.filter([qPerson.name.eq("Heinz")]);
+      expect(builder.getCacheKeyParams()).toEqual({ filter: "name eq 'Heinz'" });
+    });
+
+    test("a single search term stays bare", () => {
+      builder.search(["testing"]);
+      expect(builder.getCacheKeyParams()).toEqual({ search: "testing" });
+    });
+
+    test("two filter clauses converge regardless of call-site order - sorted and grouped", () => {
+      const inOneOrder = new ODataQueryBuilder<QPerson>("Persons", qPerson);
+      inOneOrder.filter([qPerson.name.eq("Heinz")]);
+      inOneOrder.filter([qPerson.age.eq(8)]);
+
+      const inTheOtherOrder = new ODataQueryBuilder<QPerson>("Persons", qPerson);
+      inTheOtherOrder.filter([qPerson.age.eq(8)]);
+      inTheOtherOrder.filter([qPerson.name.eq("Heinz")]);
+
+      expect(inOneOrder.getCacheKeyParams()?.filter).toBe(inTheOtherOrder.getCacheKeyParams()?.filter);
+      expect(inOneOrder.getCacheKeyParams()).toEqual({ filter: "(age eq 8) and (name eq 'Heinz')" });
+    });
+
+    test("build() itself is unaffected by cache-key canonicalization - the real request keeps call-site order, ungrouped", () => {
+      builder.filter([qPerson.name.eq("Heinz")]);
+      builder.filter([qPerson.age.eq(8)]);
+      expect(builder.build()).toBe("Persons?%24filter=name%20eq%20'Heinz'%20and%20age%20eq%208");
+    });
+
+    test("grouping is what makes convergence safe: an ungrouped 'or' clause would otherwise change meaning depending on which neighbor sorting puts next to it", () => {
+      const inOneOrder = new ODataQueryBuilder<QPerson>("Persons", qPerson);
+      inOneOrder.filter([qPerson.age.eq(8)]);
+      inOneOrder.filter([qPerson.name.eq("Heinz").or(qPerson.name.eq("Karl"))]);
+
+      const inTheOtherOrder = new ODataQueryBuilder<QPerson>("Persons", qPerson);
+      inTheOtherOrder.filter([qPerson.name.eq("Heinz").or(qPerson.name.eq("Karl"))]);
+      inTheOtherOrder.filter([qPerson.age.eq(8)]);
+
+      expect(inOneOrder.getCacheKeyParams()?.filter).toBe(inTheOtherOrder.getCacheKeyParams()?.filter);
+      expect(inOneOrder.getCacheKeyParams()).toEqual({
+        filter: "(age eq 8) and (name eq 'Heinz' or name eq 'Karl')",
+      });
+    });
+
+    test("search clauses converge regardless of call-site order - sorted, no grouping needed", () => {
+      const inOneOrder = new ODataQueryBuilder<QPerson>("Persons", qPerson);
+      inOneOrder.search(["zeta"]);
+      inOneOrder.search(["alpha"]);
+
+      const inTheOtherOrder = new ODataQueryBuilder<QPerson>("Persons", qPerson);
+      inTheOtherOrder.search(["alpha"]);
+      inTheOtherOrder.search(["zeta"]);
+
+      expect(inOneOrder.getCacheKeyParams()?.search).toBe(inTheOtherOrder.getCacheKeyParams()?.search);
+      expect(inOneOrder.getCacheKeyParams()).toEqual({ search: "alpha AND zeta" });
+    });
+
+    test("an $orderBy is never part of getCacheKeyParams() - its own sequence is real, result-changing content, not identity noise to canonicalize", () => {
+      builder.orderBy([qPerson.age.desc()]);
+      expect(builder.getCacheKeyParams()).toBeUndefined();
+    });
+  });
 });
