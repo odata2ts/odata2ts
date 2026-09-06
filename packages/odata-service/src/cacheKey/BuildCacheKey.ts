@@ -6,10 +6,7 @@ import { sameElement } from "./KeyElementEquality";
  * object.
  *
  * The state's own restrictions and the query's are merged here rather than at either end, so that key and
- * invalidation set share one normalization and cannot drift apart. A derived relation is applied **last**
- * and replaces any entry for the same path: `/Media(5)/Copies` filtered on `MediumId eq 9` yields
- * `{filter: {MediumId: 5}}`, the same key as the unfiltered call. That query is nonsense - the navigation
- * path already pins `MediumId` to 5 - and the rule stays simple at its expense.
+ * invalidation set share one normalization and cannot drift apart.
  */
 export function buildCacheKey(
   state: CacheKeyState,
@@ -23,22 +20,8 @@ function mergeParams(
   queryParams: Readonly<Record<string, unknown>> | undefined,
   ownParams: Readonly<Record<string, unknown>> | undefined,
 ): Record<string, unknown> | undefined {
-  const merged: Record<string, unknown> = { ...queryParams };
-
-  for (const [name, value] of Object.entries(ownParams ?? {})) {
-    if (name === "filter" && isRecord(value) && isRecord(merged.filter)) {
-      // the derived relation wins per path, the query's other assertions survive next to it
-      merged.filter = { ...merged.filter, ...value };
-    } else {
-      merged[name] = value;
-    }
-  }
-
+  const merged: Record<string, unknown> = { ...queryParams, ...ownParams };
   return Object.keys(merged).length ? merged : undefined;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 /**
