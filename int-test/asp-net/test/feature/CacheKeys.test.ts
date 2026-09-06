@@ -7,9 +7,9 @@ import { expectODataError } from "../expectODataError.js";
 import { AUDIOBOOK, BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
- * `cacheKeys: { mode: "on" }`, against the one server whose metadata reproduces the reference model
- * exactly - see the config's own comment for why. Every hop shape the generator can produce meets a real
- * request here: to-many and to-one navigation, containment and a stream.
+ * `cacheKeys: true`, against the one server whose metadata reproduces the reference model exactly - see
+ * the config's own comment for why. Every hop shape the generator can produce meets a real request here:
+ * to-many and to-one navigation, containment and a stream.
  *
  * Every key assertion is paired with an executed request whose response is asserted too - the point of a
  * server int-test is that the key describes the resource the server actually served, not a fixture's idea
@@ -64,12 +64,7 @@ describe("ASP.NET Library: cache keys", () => {
 
   test("$expand produces a hop-shaped entry touchesResource can reach", async () => {
     const request = LIBRARY.Media(BOOK_DER_PROZESS).query((builder) => builder.expand("Copies"));
-    expect(request.cacheKey).toEqual([
-      "Media",
-      "detail",
-      BOOK_DER_PROZESS,
-      { expand: [["Copies", "list"]], query: "%24expand=Copies" },
-    ]);
+    expect(request.cacheKey).toEqual(["Media", "detail", BOOK_DER_PROZESS, { expand: [["Copies", "list"]] }]);
     expect(touchesResource(["Copies", "list"], request.cacheKey!)).toBe(true);
 
     const result = await request.execute();
@@ -81,7 +76,7 @@ describe("ASP.NET Library: cache keys", () => {
     const viaFilter = LIBRARY.Copies().query((builder, qCopy) => builder.filter(qCopy.MediumId.eq(BOOK_DER_PROZESS)));
 
     expect(viaNavigation.cacheKey).toEqual(["Media", "detail", BOOK_DER_PROZESS, "Copies", "list"]);
-    expect(viaFilter.cacheKey).toEqual(["Copies", "list", { query: `%24filter=MediumId%20eq%20${BOOK_DER_PROZESS}` }]);
+    expect(viaFilter.cacheKey).toEqual(["Copies", "list", { filter: `MediumId eq ${BOOK_DER_PROZESS}` }]);
     // no more convergence by construction - the two keys are legitimately different arrays now; what makes
     // them invalidate together is the response-observed identity mechanism proven below, not equal keys
 

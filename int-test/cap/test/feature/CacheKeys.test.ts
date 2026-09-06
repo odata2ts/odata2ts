@@ -6,7 +6,7 @@ import { Books } from "../../src-generated/library/LibraryModel.js";
 import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
- * `cacheKeys: { mode: "on" }`, against CAP's V4 endpoint.
+ * `cacheKeys: true`, against CAP's V4 endpoint.
  *
  * CAP declares *more* than the reference model asks: `Members/Loans` and `Members/Reservations` both carry
  * a real `Member_Id` foreign key and a `Partner`, richer than ASP.NET's leaner metadata. Since a cache key

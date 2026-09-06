@@ -4,9 +4,9 @@ import { CONVERTED } from "../LibraryConvertedConstants.js";
 import { BOOK_DER_PROZESS, COPY_KEY, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
- * `cacheKeys: { mode: "on" }`, against Apache Olingo - a native V2 server, the counterpart of
- * `int-test/cap`'s V2 *adapter* client. This is where a converted client's cache key meets a real server
- * for the first time, and where V2's own URL/filter-literal building is proven end to end.
+ * `cacheKeys: true`, against Apache Olingo - a native V2 server, the counterpart of `int-test/cap`'s V2
+ * *adapter* client. This is where a converted client's cache key meets a real server for the first time,
+ * and where V2's own URL/filter-literal building is proven end to end.
  */
 describe("Olingo Library: cache keys", () => {
   test("Books/Copies names itself by the navigation property - no entitySetName here, since this server's polymorphic, table-per-leaf-class layout leaves the target set unresolvable for this one relation", async () => {
@@ -43,12 +43,9 @@ describe("Olingo Library: cache keys", () => {
 
     // the rendered URL carries V2's own literal form...
     expect(decodeURIComponent(request.getUrl())).toContain(`MediumId eq guid'${BOOK_DER_PROZESS}'`);
-    // ...and the cache key's opaque query string is exactly that same rendering, encoded the same way
-    expect(request.cacheKey).toEqual([
-      "Copies",
-      "list",
-      { query: `%24filter=MediumId%20eq%20guid'${BOOK_DER_PROZESS}'` },
-    ]);
+    // ...and the cache key's own `filter` entry is exactly that same rendering, unencoded - a single clause
+    // stays bare, exactly what `getCacheKeyParams()` itself reads off `QFilterExpression.toString()`
+    expect(request.cacheKey).toEqual(["Copies", "list", { filter: `MediumId eq guid'${BOOK_DER_PROZESS}'` }]);
   });
 
   test("touchesResource reaches a hierarchical key by its own name", () => {
@@ -71,23 +68,23 @@ describe("Olingo Library: cache keys", () => {
   });
 
   /**
-   * The cache key's opaque `query` string is captured off the request's own rendered query string, which
+   * The cache key's `filter` entry is read off `QFilterExpression.toString()`, which
    * `int64ToBigIntConverter`'s own `convertTo` has already turned back into the wire string (`"1841000"`)
-   * before the URL is ever built - the caller's own `bigint` (what `convertFrom` hands back) never reaches
-   * the key at all, since nothing decomposes the rendered string back into a typed value any more. This is
-   * what keeps the key JSON-serialisable (a TanStack Query cache hashes it that way) without odata2ts
-   * inventing a special case for this one converter.
+   * before the filter clause is ever rendered - the caller's own `bigint` (what `convertFrom` hands back)
+   * never reaches the key at all, since nothing decomposes the rendered string back into a typed value any
+   * more. This is what keeps the key JSON-serialisable (a TanStack Query cache hashes it that way) without
+   * odata2ts inventing a special case for this one converter.
    *
    * `LibraryConverted` is the one client that carries this converter, so this is the one place the
    * decision can be held against a real server rather than only a fixture with a hand-built converter.
    */
-  test("a converted Int64 property yields a JSON-serialisable, rendered query string - never the caller's own bigint", async () => {
+  test("a converted Int64 property yields a JSON-serialisable, rendered filter clause - never the caller's own bigint", async () => {
     const request = CONVERTED.Branches().query((builder, qBranch) =>
       builder.filter(qBranch.Population.eq(BigInt(1841000))),
     );
 
-    const params = request.cacheKey![2] as { query: string };
-    expect(params.query).toBe("%24filter=Population%20eq%201841000");
+    const params = request.cacheKey![2] as { filter: string };
+    expect(params.filter).toBe("Population eq 1841000");
 
     // the assertion that matters: this would throw if the caller's own bigint had reached the key instead
     expect(() => JSON.stringify(request.cacheKey)).not.toThrow();

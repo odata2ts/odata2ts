@@ -3,7 +3,7 @@ import { afterAll, describe, expect, test } from "vitest";
 import { BOOK_DER_PROZESS, LIBRARY_V2 } from "../LibraryV2TestConstants.js";
 
 /**
- * `cacheKeys: { mode: "on" }`, against CAP's V2 endpoint (the `@cap-js-community/odata-v2-adapter`
+ * `cacheKeys: true`, against CAP's V2 endpoint (the `@cap-js-community/odata-v2-adapter`
  * translation layer, same server and data as the V4 suite).
  *
  * The V4 suite (`../../feature/CacheKeys.test.ts`) already covers hop naming in general; this file's own
@@ -106,12 +106,7 @@ describe("CAP Library: cache keys (V2)", () => {
 
   test("$expand produces a hop-shaped entry touchesResource can reach", async () => {
     const request = LIBRARY_V2.Members(MEMBER_ID).query((builder) => builder.expand("Reservations"));
-    expect(request.cacheKey).toEqual([
-      "Members",
-      "detail",
-      MEMBER_ID,
-      { expand: [["Reservations", "list"]], query: "%24expand=Reservations" },
-    ]);
+    expect(request.cacheKey).toEqual(["Members", "detail", MEMBER_ID, { expand: [["Reservations", "list"]] }]);
     expect(touchesResource(["Reservations", "list"], request.cacheKey!)).toBe(true);
 
     const result = await request.execute();
