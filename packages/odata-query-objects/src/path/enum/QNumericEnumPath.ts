@@ -23,8 +23,4 @@ export class QNumericEnumPath<EnumType extends NumericEnumLike> extends BaseEnum
   protected mapValue(value: NumericEnumMember<EnumType>): string {
     return formatWithQuotes(this.converter.convertTo(value)!);
   }
-
-  protected typedValue(value: NumericEnumMember<EnumType>): string {
-    return this.converter.convertTo(value)!;
-  }
 }
