@@ -7,7 +7,11 @@
  * odata-service); the only thing `touchesResource`/`buildDeepEditHops` ever read out of a nested expand
  * entry is more `(name, kind)` hops to keep recursing into.
  */
-export type ExpandHop = readonly [name: string, kind: "list" | "detail", nested?: { expand?: Array<string | ExpandHop> }];
+export type ExpandHop = readonly [
+  name: string,
+  kind: "list" | "detail",
+  nested?: { expand?: Array<string | ExpandHop> },
+];
 
 /**
  * The restrictions a query puts on a resource that need to stay structured for invalidation reach - not

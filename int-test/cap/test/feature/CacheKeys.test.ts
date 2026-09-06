@@ -97,6 +97,17 @@ describe("CAP Library: cache keys (V4)", () => {
     expect(result.data.value.some((book) => book.Title === "Der Prozess")).toBe(true);
   });
 
+  test("a groupBy ($apply) query produces a cache key distinct from the same query without it", () => {
+    // the concrete regression this whole opaque-query-string redesign fixes: $apply used to be silently
+    // excluded from the cache key, so an aggregated query collapsed onto its non-aggregated counterpart
+    const plain = LIBRARY.Books().query((b) => b.top(5));
+    const grouped = LIBRARY.Books().query((b) => {
+      b.top(5);
+      b.groupBy("Language");
+    });
+    expect(grouped.cacheKey).not.toEqual(plain.cacheKey);
+  });
+
   test("invalidates on a PATCH, a POST and a DELETE", async () => {
     const created = await LIBRARY.Books().create({ Title: "CacheKeys Probe", Language: "de" }).execute();
     expect(created.status).toBe(201);
