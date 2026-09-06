@@ -35,7 +35,7 @@ describe("cache key threading", () => {
       cacheKeyState: rootState(MEDIUM, "list"),
       queryParams: { top: 10 },
     });
-    expect(cmd.cacheKey).toEqual([MEDIUM, "list", { top: 10 }]);
+    expect(cmd.cacheKey).toEqual([MEDIUM, "list", { top: 10, query: "$top=10" }]);
   });
 
   test("the getter is memoized", () => {
@@ -51,6 +51,23 @@ describe("cache key threading", () => {
     const before = JSON.stringify(cmd.cacheKey);
     cmd.asPostRequest();
     expect(JSON.stringify(cmd.cacheKey)).toBe(before);
+  });
+
+  test("cacheKey's params object carries the request's own rendered query string", () => {
+    const cmd = new UrlGetRequestCmd(client, "Media?$filter=Title eq 'x'&$top=10", {
+      cacheKeyState: rootState(MEDIUM, "list"),
+    });
+    const [, , params] = cmd.cacheKey as [unknown, unknown, Record<string, unknown>];
+    expect(params.query).toBe("$filter=Title eq 'x'&$top=10");
+  });
+
+  test("cacheKey reads the query string from the body when GetToPostConverter relocated it", () => {
+    const cmd = new UrlGetRequestCmd(client, "Media?$filter=Title eq 'x'&$top=10", {
+      cacheKeyState: rootState(MEDIUM, "list"),
+    });
+    cmd.asPostRequest();
+    const [, , params] = cmd.cacheKey as [unknown, unknown, Record<string, unknown>];
+    expect(params.query).toBe("$filter=Title eq 'x'&$top=10");
   });
 
   test("an appended converter that changes the state changes the key, with no extra call", () => {

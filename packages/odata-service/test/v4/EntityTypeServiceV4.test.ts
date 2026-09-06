@@ -374,7 +374,11 @@ describe("EntityTypeService V4 Tests", () => {
     test("query() enriches expand entries by reading the property's own name and kind directly off the Q-object - no table needed", async () => {
       const service = new PersonModelService(odataClient, BASE_URL, NAME, undefined, rootState(PERSON, "detail"));
       const request = service.query((b) => b.expand("friends"));
-      expect(request.cacheKey).toEqual([PERSON, "detail", { expand: [["Friends", "list"]] }]);
+      expect(request.cacheKey).toEqual([
+        PERSON,
+        "detail",
+        { expand: [["Friends", "list"]], query: "%24expand=Friends" },
+      ]);
     });
 
     test("patch() attaches deepEdit to invalidates when the payload deep-inserts a nav property", async () => {
