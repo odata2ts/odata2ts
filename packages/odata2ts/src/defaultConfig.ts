@@ -1,14 +1,6 @@
 import deepmerge from "deepmerge";
 import { NameSettings, NamingStrategies } from "./NamingModel.js";
-import {
-  CacheKeyMode,
-  DeepInsertProps,
-  EmitModes,
-  KeyProperties,
-  ManagedPropertyMode,
-  Modes,
-  RunOptions,
-} from "./OptionModel.js";
+import { DeepInsertProps, EmitModes, KeyProperties, ManagedPropertyMode, Modes, RunOptions } from "./OptionModel.js";
 
 export type DefaultConfiguration = Omit<RunOptions, "sourceUrl" | "source" | "output" | "serviceName">;
 /**
@@ -127,7 +119,7 @@ const defaultConfig: DefaultConfiguration = {
   byTypeAndName: [],
   disableBindingProps: false,
   deepInsertProps: DeepInsertProps.all,
-  cacheKeys: { mode: CacheKeyMode.off },
+  cacheKeys: { enabled: false },
 };
 
 const { models, queryObjects, services } = defaultConfig.naming;
