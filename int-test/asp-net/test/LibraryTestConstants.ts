@@ -1,5 +1,6 @@
 import { FetchClient } from "@odata2ts/http-client-fetch";
 import { inject } from "vitest";
+import { LibraryNamespaceAliasService } from "../src-generated/library-namespace-alias/LibraryNamespaceAliasService.js";
 import { LibraryRenamedService } from "../src-generated/library-renamed/LibraryRenamedService.js";
 import { LibraryStrictService } from "../src-generated/library-strict/LibraryStrictService.js";
 import { LibraryService } from "../src-generated/library/LibraryService.js";
@@ -21,6 +22,12 @@ export const LIBRARY_RENAMED = new LibraryRenamedService(ODATA_CLIENT, BASE_URL)
  * what makes the difference between the two observable at all.
  */
 export const LIBRARY_STRICT = new LibraryStrictService(ODATA_CLIENT, BASE_URL);
+
+/**
+ * The same service through the client generated with namespace aliasing switched on. Only
+ * `NamespaceAlias.test.ts` uses it: everywhere else the raw namespace is what a cache-key literal carries.
+ */
+export const LIBRARY_NAMESPACE_ALIAS = new LibraryNamespaceAliasService(ODATA_CLIENT, BASE_URL);
 
 // Fixed keys from the server's seed data.
 

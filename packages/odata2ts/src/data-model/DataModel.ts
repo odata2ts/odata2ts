@@ -73,7 +73,10 @@ export class DataModel {
   ) {
     this.converters = converters;
     this.namespace2Alias = namespaces.reduce<Record<string, string>>((col, [ns, alias]) => {
-      if (alias) {
+      // `alias !== undefined`, not truthy: an explicitly configured `alias: ""` (see `NamespaceOptions`,
+      // NamespaceAliasResolver) is a deliberate way to drop a namespace's prefix entirely and must be
+      // stored, not treated the same as "no alias at all" the way a plain falsy check would.
+      if (alias !== undefined) {
         col[ns] = alias;
       }
       return col;
