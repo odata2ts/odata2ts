@@ -14,6 +14,10 @@ import { qTestEntity, QTestEntityId } from "./QTester.js";
 import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
+  constructor(client: ODataHttpClient, basePath: string, options?: ODataServiceOptions) {
+    super(client, basePath, { ...options, odataVersion: "2.0" });
+  }
+
   public ents(): TestEntityCollectionService;
   public ents(id: TestEntityId): TestEntityService;
   public ents(id?: TestEntityId | undefined) {

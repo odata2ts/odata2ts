@@ -16,7 +16,7 @@ import type { EditableTestEntity, TestEntity, TestEntityId } from "./TesterModel
 
 export class TesterService extends ODataService {
   constructor(client: ODataHttpClient, basePath: string, options?: ODataServiceOptions) {
-    super(client, basePath, { ...options, v2ResponseAsV4: true } as any);
+    super(client, basePath, { ...options, odataVersion: "2.0", v2ResponseAsV4: true } as any);
   }
 
   public ents(): TestEntityCollectionService<true>;

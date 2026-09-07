@@ -8,6 +8,10 @@ import { qEBook, QEBookId } from "./QTester.js";
 import type { EBook, EBookId, EditableEBook } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
+  constructor(client: ODataHttpClient, basePath: string, options?: ODataServiceOptions) {
+    super(client, basePath, { ...options, odataVersion: "2.0" });
+  }
+
   public eBooks(): EBookCollectionService;
   public eBooks(id: EBookId): EBookService;
   public eBooks(id?: EBookId | undefined) {
