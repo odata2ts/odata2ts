@@ -97,6 +97,14 @@ describe("CAP Library: cache keys (V4)", () => {
     expect(result.data.value.some((book) => book.Title === "Der Prozess")).toBe(true);
   });
 
+  test("a bound operation's cache-key literal carries the auto-synthesized namespace alias, not the raw namespace - the single-namespace case `odata2ts-namespace-alias.md` is written against (Library.Service has no second namespace to disambiguate from, but still synthesizes the same way a multi-namespace service would)", async () => {
+    const request = LIBRARY.Books().AvailableLanguages();
+    expect(request.cacheKey).toEqual(["Books", "list", "Service.AvailableLanguages"]);
+
+    const result = await request.execute();
+    expect(result.status).toBe(200);
+  });
+
   test("a groupBy ($apply) query produces a cache key distinct from the same query without it", () => {
     // the concrete regression this whole opaque-query-string redesign fixes: $apply used to be silently
     // excluded from the cache key, so an aggregated query collapsed onto its non-aggregated counterpart
