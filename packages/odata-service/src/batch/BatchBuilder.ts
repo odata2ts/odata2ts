@@ -31,6 +31,8 @@ export interface BatchAddOptions {
    * guarantees nothing (§11.7.2), so this is the only way to say it. Given as the command objects
    * themselves; the builder resolves them to wire ids. The other format could not express a dependency that
    * is a forward reference or crosses a change set - those are refused where the format cannot carry them.
+   * A target must be added exactly once: a command added more than once is an ambiguous dependency (which of
+   * its slots would the other wait on?) and is refused.
    */
   dependsOn?: Array<RequestCmd<any, any, any>>;
 }
@@ -71,7 +73,6 @@ export class BatchBuilder<R extends Array<unknown> = []> {
   private readonly __defaultFormat: BatchFormat;
   private readonly __isV2: boolean;
   private readonly __entries: Array<BatchEntry> = [];
-  private readonly __seen = new Set<RequestCmd<any, any, any>>();
   private __openGroup?: string;
 
   constructor(client: ODataHttpClient, basePath: string, defaultFormat: BatchFormat, isV2: boolean) {
@@ -83,7 +84,8 @@ export class BatchBuilder<R extends Array<unknown> = []> {
 
   /**
    * Add one request to the batch. Blob and stream commands are refused - they carry a binary body the batch
-   * wire formats cannot carry - as is adding the same instance twice.
+   * wire formats cannot carry. The same command may be added more than once: it is reused across its slots
+   * (the batch never mutates a command's state), so sending the same request twice is simply adding it twice.
    */
   public add<T>(cmd: RequestCmd<any, any, T>, options?: BatchAddOptions): BatchBuilder<[...R, BatchResponse<T>]> {
     if (BatchBuilder.isBatchIncompatible(cmd)) {
@@ -91,13 +93,9 @@ export class BatchBuilder<R extends Array<unknown> = []> {
         "A blob or stream request cannot be part of a batch - its binary body is not a body the batch wire formats carry. Send it separately.",
       );
     }
-    if (this.__seen.has(cmd)) {
-      throw new Error("The same request instance cannot be added to a batch twice - each slot is one request.");
-    }
 
     const id = String(this.__entries.length);
     this.__entries.push({ cmd, id, group: this.__openGroup, dependsOn: options?.dependsOn ?? [] });
-    this.__seen.add(cmd);
 
     return this as unknown as BatchBuilder<[...R, BatchResponse<T>]>;
   }
@@ -177,6 +175,10 @@ export class BatchBuilder<R extends Array<unknown> = []> {
 
   private __buildBody(): BatchRequestBody {
     const idOf = new Map(this.__entries.map((entry) => [entry.cmd, entry.id]));
+    const addedCount = new Map<RequestCmd<any, any, any>, number>();
+    for (const entry of this.__entries) {
+      addedCount.set(entry.cmd, (addedCount.get(entry.cmd) ?? 0) + 1);
+    }
 
     const requests = this.__entries.map((entry): BatchRequestObject => {
       const prepared = entry.prepared!;
@@ -192,8 +194,15 @@ export class BatchBuilder<R extends Array<unknown> = []> {
 
       const dependsOn = entry.dependsOn.map((dep) => idOf.get(dep));
       if (dependsOn.length > 0) {
-        if (dependsOn.some((id) => id === undefined)) {
-          throw new Error("A request depends on a command that is not part of this batch.");
+        for (const dep of entry.dependsOn) {
+          if (idOf.get(dep) === undefined) {
+            throw new Error("A request depends on a command that is not part of this batch.");
+          }
+          if ((addedCount.get(dep) ?? 0) > 1) {
+            throw new Error(
+              "A request depends on a command that was added to the batch more than once - the dependency is ambiguous. Add that command once, or add two separate commands.",
+            );
+          }
         }
         request.dependsOn = dependsOn as Array<string>;
       }

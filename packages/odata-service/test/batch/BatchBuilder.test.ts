@@ -105,11 +105,24 @@ describe("BatchBuilder via ODataService.batch()", () => {
     expect(requests[3].atomicityGroup).toBeUndefined();
   });
 
-  test("refuses to add the same request instance twice", () => {
+  test("the same command added twice yields two slots that each answer independently", async () => {
     const { client, service } = makeService();
-    const cmd = new TestCmd(client, ODataHttpMethods.Get, BASE + "/A");
+    client.batchResponse = {
+      responses: [
+        { id: "0", status: 200, body: { id: 1 } },
+        { id: "1", status: 200, body: { id: 2 } },
+      ],
+      resolvedBy: "id",
+    };
+    const cmd = new TestCmd<{ id: number }, { name: string }>(client, ODataHttpMethods.Post, BASE + "/People", {
+      name: "n",
+    });
 
-    expect(() => service.batch().add(cmd).add(cmd)).toThrow(/twice/);
+    const [first, second] = await service.batch().add(cmd).add(cmd).execute();
+
+    expect(first).toMatchObject({ status: 200, data: { id: 1 } });
+    expect(second).toMatchObject({ status: 200, data: { id: 2 } });
+    expect(client.lastBatchBody?.requests.map((request) => request.url)).toStrictEqual(["People", "People"]);
   });
 
   test("refuses a blob request, which cannot be carried by a batch", () => {
@@ -293,6 +306,21 @@ describe("BatchBuilder via ODataService.batch()", () => {
           .add(member, { dependsOn: [outsider] })
           .execute(),
       ).rejects.toThrow(/not part of this batch/);
+    });
+
+    test("refuses a dependency on a command added more than once, which is ambiguous", async () => {
+      const { client, service } = makeService();
+      const duplicated = new TestCmd(client, ODataHttpMethods.Post, BASE + "/Members", { name: "n" });
+      const member = new TestCmd(client, ODataHttpMethods.Get, BASE + "/Members(1)");
+
+      await expect(
+        service
+          .batch()
+          .add(duplicated)
+          .add(member, { dependsOn: [duplicated] })
+          .add(duplicated)
+          .execute(),
+      ).rejects.toThrow(/ambiguous/);
     });
   });
 
