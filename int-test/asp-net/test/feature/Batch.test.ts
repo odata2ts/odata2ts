@@ -31,16 +31,16 @@ describe("ASP.NET Library: $batch", () => {
   });
 
   test("continueOnError still answers the sub-request that follows a failing one", async () => {
-    const missing = LIBRARY.Members(UNKNOWN_ID).query();
-    const members = LIBRARY.Members().query((b) => b.top(1));
+    const missing = LIBRARY.Media(UNKNOWN_ID).query();
+    const media = LIBRARY.Media().query((b) => b.top(1));
 
-    const [missingResult, membersResult] = await LIBRARY.batch()
+    const [missingResult, mediaResult] = await LIBRARY.batch()
       .add(missing)
-      .add(members)
+      .add(media)
       .execute({ continueOnError: true });
 
     expect(missingResult.status).toBe(404);
-    expect(membersResult.status).toBe(200);
-    expect(membersResult.data?.value.length).toBe(1);
+    expect(mediaResult.status).toBe(200);
+    expect(mediaResult.data?.value.length).toBe(1);
   });
 });
