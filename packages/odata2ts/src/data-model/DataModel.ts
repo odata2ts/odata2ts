@@ -109,6 +109,26 @@ export class DataModel {
   }
 
   /**
+   * The effective namespace of a fully qualified name, alone - the same alias resolution
+   * {@link getDisplayFqName} applies to a whole FQN, stopping short of the local name. Used to prefix an
+   * otherwise un-namespaced cache-key identifier (an entity set's or unbound operation's own name) with its
+   * owning type's namespace, gated by `cacheKeys.namespace` - see `ServiceGenerator`'s cache-key emission.
+   *
+   * Unlike {@link getDisplayFqName}, always returns *something* to prefix with: falls back to the real,
+   * un-aliased namespace (`fqName` minus its own local name) wherever none of the alias sources cover it,
+   * since - here - there is always a namespace, just not always an alias for it.
+   */
+  public getDisplayNamespace(fqName: string): string {
+    for (const ns of this.aliasedNamespacesLongestFirst) {
+      if (fqName.startsWith(ns + ".")) {
+        return this.namespace2Alias[ns];
+      }
+    }
+    const lastDot = fqName.lastIndexOf(".");
+    return lastDot < 0 ? fqName : fqName.slice(0, lastDot);
+  }
+
+  /**
    * OData version: 2.0 or 4.0.
    * @returns
    */

@@ -159,12 +159,17 @@ const config: ConfigFileOptions = {
      * test/feature/NamespaceAlias.test.ts) is what proves it out here instead. `Library.Catalog` and
      * `Library.Circulation` do have a cast and a bound action respectively, which is what proves the other
      * two aliases through an actual cache-key literal. See test/feature/NamespaceAlias.test.ts.
+     *
+     * `cacheKeys.namespace` is also on here, sharing this client rather than getting its own: it needs the
+     * exact same explicit aliases to prove itself against a real service anyway (an entity-set root's own
+     * name and every `entitySetName` prefixed with the owning type's alias), so there is nothing a separate
+     * client would add.
      */
     libraryNamespaceAlias: {
       serviceName: "LibraryNamespaceAlias",
       source: SOURCE,
       output: "src-generated/library-namespace-alias",
-      cacheKeys: true,
+      cacheKeys: { enabled: true, namespace: true },
       namespace: {
         alias: {
           "Library.Catalog": "Catalog",

@@ -119,7 +119,7 @@ const defaultConfig: DefaultConfiguration = {
   byTypeAndName: [],
   disableBindingProps: false,
   deepInsertProps: DeepInsertProps.all,
-  cacheKeys: { enabled: false },
+  cacheKeys: { enabled: false, namespace: false },
   namespace: { alias: {}, useAliasForFolderName: false },
 };
 

@@ -245,11 +245,28 @@ export interface CacheKeysObjectOptions {
    * responses rather than a generation-time prediction. One behaviour, so a boolean is all this needs to be.
    */
   enabled: boolean;
+  /**
+   * Prefixes every entity-set-derived identifier a cache key carries - a root's own name (an entity set's
+   * or singleton's), and `entitySetName` wherever a hop attaches one - with that type's own effective
+   * namespace (its alias if it has one, its real namespace otherwise; see `NamespaceAliasResolver`).
+   *
+   * Off by default: within one generated client, a route's own name is already enough to identify a
+   * resource. Turn this on when a single cache - an `HttpClient.resourceIdentity`, or an app-level query
+   * cache keyed by `cacheKey` - is shared across *multiple* generated clients whose entity-set names might
+   * otherwise collide (`["Media", "list"]` from one service is indistinguishable from another's).
+   *
+   * Never reaches a hierarchical hop's own step name (a navigation property's odataName): that value is
+   * already nested inside an array rooted at a namespaced name, so it is never compared as a standalone
+   * identifier the way `entitySetName` is. Never reaches the raw name a `canonicalIdFn` bakes into
+   * generated code for `QId`/URL building either - that string is a real OData URL segment and must stay
+   * exactly the server's own name regardless of this option.
+   */
+  namespace?: boolean;
 }
 
 /**
  * `cacheKeys` in `ConfigFileOptions`: either the bare boolean directly, or the object form - which exists
- * only so a later option can join `enabled` under the same key without a breaking change.
+ * so `namespace` (and any future option) can join `enabled` under the same key without a breaking change.
  */
 export type CacheKeysOptions = boolean | CacheKeysObjectOptions;
 
@@ -259,6 +276,14 @@ export function resolveCacheKeysEnabled(options: CacheKeysOptions | undefined): 
     return options;
   }
   return options?.enabled ?? false;
+}
+
+/** Whether entity-set-derived cache-key identifiers carry their owning type's namespace - `false` for the bare boolean shorthand, since there is nowhere to state it. */
+export function resolveCacheKeysNamespace(options: CacheKeysOptions | undefined): boolean {
+  if (typeof options === "boolean") {
+    return false;
+  }
+  return options?.namespace ?? false;
 }
 
 /**

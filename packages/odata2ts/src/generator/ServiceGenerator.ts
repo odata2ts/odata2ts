@@ -26,7 +26,7 @@ import {
   SingletonType,
 } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
-import { ConfigFileOptions, Modes, resolveCacheKeysEnabled } from "../OptionModel.js";
+import { ConfigFileOptions, Modes, resolveCacheKeysEnabled, resolveCacheKeysNamespace } from "../OptionModel.js";
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
 import { ClientApiImports, CoreImports, QueryObjectImports, ServiceImports } from "./import/ImportObjects.js";
@@ -64,6 +64,7 @@ class ServiceGenerator {
   ) {}
 
   private readonly cacheKeysEnabled = resolveCacheKeysEnabled(this.options.cacheKeys);
+  private readonly cacheKeysNamespace = resolveCacheKeysNamespace(this.options.cacheKeys);
 
   private isV4BigNumber() {
     return this.options.v4.bigNumberAsString && this.version === ODataVersions.V4;
@@ -102,6 +103,15 @@ class ServiceGenerator {
     return `(entity: unknown) => new ${qId}("${entitySetOdataName}").buildCanonicalId(entity)`;
   }
 
+  /**
+   * `name` (an entity set's or singleton's own odataName), prefixed with `entityType`'s own effective
+   * namespace when `cacheKeys.namespace` is on - see that option's own doc comment for what this guards
+   * against and what it deliberately never reaches (a hop's own step name, a canonicalIdFn's raw name).
+   */
+  private namespacedName(entityType: EntityType, name: string): string {
+    return this.cacheKeysNamespace ? `${this.dataModel.getDisplayNamespace(entityType.fqName)}.${name}` : name;
+  }
+
   /** The root of a route: an entity set or a singleton. An operation with no declared result set is the one root with no type to head with - built as a plain object literal instead, see `emitUnboundOperationRootExpr`. */
   private emitRootStateExpr(
     imports: ImportContainer,
@@ -114,15 +124,17 @@ class ServiceGenerator {
       return "";
     }
     const rootStateFn = imports.addServiceFunction("rootState");
+    const cacheKeyName = this.namespacedName(entityType, name);
     const optionsEntries = [
       options?.paramsSource ? `params: ${options.paramsSource}` : "",
-      options?.isEntitySet ? `entitySetName: "${name}"` : "",
+      options?.isEntitySet ? `entitySetName: "${cacheKeyName}"` : "",
+      // the canonicalIdFn's own name is a real OData URL segment - always the raw `name`, never `cacheKeyName`
       options?.isEntitySet ? `canonicalIdFn: ${this.canonicalIdFnExpr(imports, entityType, name)}` : "",
       `qEntityFn: ${this.qEntityFnExpr(imports, entityType)}`,
     ]
       .filter(Boolean)
       .join(", ");
-    return `${rootStateFn}("${name}", "${kind}", { ${optionsEntries} })`;
+    return `${rootStateFn}("${cacheKeyName}", "${kind}", { ${optionsEntries} })`;
   }
 
   /**
@@ -146,7 +158,11 @@ class ServiceGenerator {
 
     const kind = isCollection ? "list" : "detail";
     const targetSet = !contained ? this.dataModel.getNavPropBindingTarget(ownerFqName, navPropOdataName) : undefined;
-    const entitySetNameEntry = targetSet ? `, entitySetName: "${targetSet.odataName}"` : "";
+    // the hop's own step name (navPropOdataName) never carries this prefix - only entitySetName does, since
+    // that is the value reused as a bare, cross-route identifier (invalidates, response-observed identity)
+    const entitySetNameEntry = targetSet
+      ? `, entitySetName: "${this.namespacedName(targetSet.entityType, targetSet.odataName)}"`
+      : "";
     const canonicalIdFnEntry = targetSet
       ? `, canonicalIdFn: ${this.canonicalIdFnExpr(imports, targetSet.entityType, targetSet.odataName)}`
       : "";
@@ -205,6 +221,11 @@ class ServiceGenerator {
    * import does declare a result `EntitySet`, `entitySetName`/`canonicalIdFn`/`qEntityFn` are still attached
    * so `ResourceIdentityHandler` can record the real entities the response carries - a separate concern from
    * what the root's own identity in the key is.
+   *
+   * `cacheKeys.namespace`, when on, still prefixes the root's own name with the *operation's* namespace
+   * (`op.fqName`) - not because the root is rooted at the operation's qualified name (it isn't, see above),
+   * but for the same collision-avoidance reason every other root gets prefixed with its own type's
+   * namespace: two different services' import names can otherwise collide identically.
    */
   private emitUnboundOperationRootExpr(
     imports: ImportContainer,
@@ -222,6 +243,9 @@ class ServiceGenerator {
       : undefined;
     const rootStateFn = imports.addServiceFunction("rootState");
     const kind = op.returnType?.isCollection ? "list" : "detail";
+    const cacheKeyName = this.cacheKeysNamespace
+      ? `${this.dataModel.getDisplayNamespace(op.fqName)}.${importOdataName}`
+      : importOdataName;
     // nested under its own "params" key, never spread directly - a composable operation's cache key later
     // merges in real query params (select/filter/...) via buildCacheKey, and those must not collide with
     // the operation's own invocation arguments
@@ -230,15 +254,16 @@ class ServiceGenerator {
     if (entitySet) {
       const canonicalIdFnEntry = `canonicalIdFn: ${this.canonicalIdFnExpr(imports, entitySet.entityType, entitySet.odataName)}, `;
       const qEntityFnEntry = `qEntityFn: ${this.qEntityFnExpr(imports, entitySet.entityType)}`;
+      const namespacedEntitySetName = this.namespacedName(entitySet.entityType, entitySet.odataName);
       return (
-        `${rootStateFn}("${importOdataName}", "${kind}", ` +
-        `{ ${paramsEntry}entitySetName: "${entitySet.odataName}", ${canonicalIdFnEntry}${qEntityFnEntry} })`
+        `${rootStateFn}("${cacheKeyName}", "${kind}", ` +
+        `{ ${paramsEntry}entitySetName: "${namespacedEntitySetName}", ${canonicalIdFnEntry}${qEntityFnEntry} })`
       );
     }
 
     return hasParams
-      ? `${rootStateFn}("${importOdataName}", "${kind}", { params: { params } })`
-      : `${rootStateFn}("${importOdataName}", "${kind}")`;
+      ? `${rootStateFn}("${cacheKeyName}", "${kind}", { params: { params } })`
+      : `${rootStateFn}("${cacheKeyName}", "${kind}")`;
   }
 
   /**

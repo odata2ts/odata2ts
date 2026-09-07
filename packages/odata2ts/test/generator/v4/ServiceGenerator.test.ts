@@ -371,6 +371,41 @@ describe("Service Generator Tests V4", () => {
         `rootState("Media", "list", { entitySetName: "Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
       );
     });
+
+    test("cacheKeys.namespace prefixes every root and entitySetName with the owning type's namespace - never a hop's own step name, never a canonicalIdFn's raw name", async () => {
+      buildModel();
+      await doGenerate({
+        cacheKeys: { enabled: true, namespace: true },
+        enablePrimitivePropertyServices: true,
+      });
+      const text = generatedText();
+
+      // entity-set root: both the root's own name and entitySetName carry the prefix; canonicalIdFn's own
+      // "Media" - a real OData URL segment - does not
+      expect(text).toContain(
+        `rootState("Tester.Media", "list", { entitySetName: "Tester.Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
+      );
+      // singleton root: prefixed the same way, even though it has no entitySetName to also prefix
+      expect(text).toContain(`rootState("Tester.MainBranch", "detail", { qEntityFn: () => QMedium })`);
+      // hierarchical hop: the hop's own step name ("reviews") is never prefixed - only entitySetName is,
+      // since that is the value reused as a bare, cross-route identifier
+      expect(text).toContain(
+        `hopState(cacheKeyState, { name: "reviews", kind: "list", entitySetName: "Tester.Reviews", canonicalIdFn: (entity: unknown) => new QReviewId("Reviews").buildCanonicalId(entity), qEntityFn: () => QReview })`,
+      );
+      // contained hop: no entitySetName to begin with, so nothing changes here regardless of the option
+      expect(text).toContain(`hopState(cacheKeyState, { name: "chapters", kind: "list", qEntityFn: () => QChapter })`);
+      // unbound function with a declared EntitySet: the import's own root name is prefixed via the
+      // *operation's* namespace, entitySetName via the entity type's - both happen to be "Tester" here
+      expect(text).toContain(
+        `rootState("Tester.NewReleases", "list", { entitySetName: "Tester.Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
+      );
+      // unbound function with no EntitySet: the import's own root name is still prefixed
+      expect(text).toContain(`rootState("Tester.TotalCount", "detail")`);
+      // the cast and bound-operation literals are untouched by this option - they already carry their own
+      // namespace unconditionally (the existing namespace.alias feature), with nothing new to add
+      expect(text).toContain(`withParams(cacheKeyState, { cast: "${withNs("Book")}" })`);
+      expect(text).toContain(`hopState(cacheKeyState, { name: "${withNs("checkOut")}" })`);
+    });
   });
 
   test("Service Generator: Min Case", async () => {
