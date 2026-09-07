@@ -239,6 +239,27 @@ describe("ServiceConfigHelper Tests", function () {
     expect(result).toStrictEqual({ mappedName });
   });
 
+  test("find config: RegExp matching against the namespace alias, not just the real namespace", () => {
+    const name = "test";
+    const mappedName = "xyz";
+    const [, alias] = DEFAULT_NAMESPACES;
+
+    // written against the alias form ("self.test"), which getByRegExp previously never tried - only
+    // getByName did
+    const aliasRegExp = new RegExp(`${alias}\\.test`);
+    createHelperWithEntities({ type: TypeModel.Any, name: aliasRegExp, mappedName });
+
+    expect(toTest.findEntityTypeConfig(DEFAULT_NAMESPACES, name)).toStrictEqual({ mappedName });
+  });
+
+  test("find config: RegExp mappedName substitution uses whichever spelling actually matched", () => {
+    const [, alias] = DEFAULT_NAMESPACES;
+
+    createHelperWithEntities({ type: TypeModel.Any, name: /self\.(.+)/, mappedName: "Aliased_$1" });
+
+    expect(toTest.findEntityTypeConfig(DEFAULT_NAMESPACES, "test")).toStrictEqual({ mappedName: "Aliased_test" });
+  });
+
   test("find config: wrong name option", () => {
     const exceptionNoName = "No value for required attribute [name] specified!";
     const exceptionWrongType = "Wrong type for attribute [name]!";
