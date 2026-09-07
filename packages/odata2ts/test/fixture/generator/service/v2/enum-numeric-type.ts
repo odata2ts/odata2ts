@@ -18,6 +18,10 @@ import type { Book, BookId, EditableBook } from "./TesterModel.js";
 import { Choice } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
+  constructor(client: ODataHttpClient, basePath: string, options?: ODataServiceOptions) {
+    super(client, basePath, { ...options, odataVersion: "2.0" });
+  }
+
   public books(): BookCollectionService;
   public books(id: BookId): BookService;
   public books(id?: BookId | undefined) {
