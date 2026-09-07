@@ -319,6 +319,31 @@ describe("V4 EntitySetService Test", () => {
       expect(request.cacheKey).toEqual([PERSON, "list", { expand: [["Friends", "list"]], query: "%24expand=Friends" }]);
     });
 
+    test("query() converges $filter cache keys regardless of call-site clause order, end to end - the real request is unaffected", () => {
+      const newService = () =>
+        new PersonModelCollectionService(odataClient, BASE_URL, NAME, undefined, rootState(PERSON, "list"));
+
+      const inOneOrder = newService().query((b, q) => {
+        b.filter(q.userName.equals("russellwhyte"));
+        b.filter(q.age.equals("25"));
+      });
+      const inTheOtherOrder = newService().query((b, q) => {
+        b.filter(q.age.equals("25"));
+        b.filter(q.userName.equals("russellwhyte"));
+      });
+
+      expect(inOneOrder.cacheKey).toEqual(inTheOtherOrder.cacheKey);
+      expect(inOneOrder.cacheKey).toEqual([
+        PERSON,
+        "list",
+        { query: "%24filter=%28Age+eq+25%29+and+%28UserName+eq+%27russellwhyte%27%29" },
+      ]);
+      // the actual request URL keeps its own, call-site order - only the cache key canonicalizes
+      expect(inOneOrder.getUrl()).toBe(
+        `${BASE_URL}/${NAME}?%24filter=UserName%20eq%20'russellwhyte'%20and%20Age%20eq%2025`,
+      );
+    });
+
     test("create() attaches deepEdit to invalidates when the payload deep-inserts a nav property", async () => {
       const TRIPS = "Trips";
       const service = new PersonModelCollectionService(

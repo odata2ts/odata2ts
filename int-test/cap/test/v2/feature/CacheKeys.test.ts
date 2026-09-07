@@ -3,7 +3,7 @@ import { afterAll, describe, expect, test } from "vitest";
 import { BOOK_DER_PROZESS, LIBRARY_V2 } from "../LibraryV2TestConstants.js";
 
 /**
- * `cacheKeys: { mode: "on" }`, against CAP's V2 endpoint (the `@cap-js-community/odata-v2-adapter`
+ * `cacheKeys: true`, against CAP's V2 endpoint (the `@cap-js-community/odata-v2-adapter`
  * translation layer, same server and data as the V4 suite).
  *
  * The V4 suite (`../../feature/CacheKeys.test.ts`) already covers hop naming in general; this file's own
