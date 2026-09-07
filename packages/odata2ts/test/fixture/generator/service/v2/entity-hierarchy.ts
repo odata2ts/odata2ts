@@ -13,10 +13,14 @@ import type {
   GrandParent,
   GrandParentId,
   Parent,
-  // @ts-ignore
+// @ts-ignore
 } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
+  constructor(client: ODataHttpClient, basePath: string, options?: ODataServiceOptions) {
+    super(client, basePath, { ...options, odataVersion: "2.0" });
+  }
+
   public tests(): ChildCollectionService;
   public tests(id: ChildId): ChildService;
   public tests(id?: ChildId | undefined) {

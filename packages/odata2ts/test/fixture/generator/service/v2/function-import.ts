@@ -18,13 +18,17 @@ import type {
   PostBestBookParams,
   TestEntity,
   TestEntityId,
-  // @ts-ignore
+// @ts-ignore
 } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
   private _qMostPop?: QMostPop;
   private _qBestBook?: QBestBook;
   private _qPostBestBook?: QPostBestBook;
+
+  constructor(client: ODataHttpClient, basePath: string, options?: ODataServiceOptions) {
+    super(client, basePath, { ...options, odataVersion: "2.0" });
+  }
 
   public tests(): TestEntityCollectionService;
   public tests(id: TestEntityId): TestEntityService;
