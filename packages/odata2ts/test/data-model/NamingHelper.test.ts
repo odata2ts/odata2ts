@@ -487,8 +487,8 @@ describe("NamingHelper Tests", function () {
       expect(toTest.getFolderPath(NAMESPACE2, "Book")).toBe("alias/book");
     });
 
-    test("useAliasForFolderName also picks up an auto-synthesized alias for a dotted namespace", () => {
-      options.namespace = { useAliasForFolderName: true };
+    test("useAliasForFolderName also picks up a project-configured alias for a dotted namespace", () => {
+      options.namespace = { useAliasForFolderName: true, alias: { "Library.Catalog": "Catalog" } };
       const nested: Array<NamespaceWithAlias> = [["Library.Catalog"]];
       toTest = new NamingHelper(deepmerge(TEST_CONFIG, options), NAMESPACE, nested);
 

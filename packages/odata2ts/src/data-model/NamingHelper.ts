@@ -31,7 +31,7 @@ export class NamingHelper {
   private readonly namespacePrefixes: Array<string>;
   private readonly options: NameSettings;
   private readonly useAliasForFolderName: boolean;
-  /** Every namespace's effective alias (server-declared, project-configured, or auto-synthesized) - computed once, here, since this is the earliest point in the pipeline that has both the digested namespaces and the resolved config. Reused by the digester for `DataModel`/`ServiceConfigHelper` rather than recomputed, so validation runs exactly once. */
+  /** Every namespace's effective alias (server-declared or project-configured) - computed once, here, since this is the earliest point in the pipeline that has both the digested namespaces and the resolved config. Reused by the digester for `DataModel`/`ServiceConfigHelper` rather than recomputed, so validation runs exactly once. */
   private readonly effectiveNamespaceAlias: Record<string, string>;
 
   constructor(options: NamingHelperSettings, mainServiceName: string, namespaces?: Array<NamespaceWithAlias>) {

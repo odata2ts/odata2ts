@@ -3,61 +3,9 @@ import { NamespaceWithAlias } from "../../src/data-model/DataModel.js";
 import { resolveNamespaceAliases } from "../../src/data-model/NamespaceAliasResolver.js";
 
 describe("resolveNamespaceAliases", () => {
-  describe("auto-synthesis", () => {
-    test("a single-segment namespace synthesizes to itself", () => {
-      const namespaces: Array<NamespaceWithAlias> = [["PublisherRegistry"]];
-      expect(resolveNamespaceAliases(namespaces, undefined)).toEqual({ PublisherRegistry: "PublisherRegistry" });
-    });
-
-    test("a single-namespace service synthesizes the same way as a multi-namespace one - no empty-string special case", () => {
-      const namespaces: Array<NamespaceWithAlias> = [["Library.Service"]];
-      expect(resolveNamespaceAliases(namespaces, undefined)).toEqual({ "Library.Service": "Service" });
-    });
-
-    test("last-dot-segment extraction across two, three and four namespaces", () => {
-      const two: Array<NamespaceWithAlias> = [["Library.Catalog"], ["Library.Circulation"]];
-      expect(resolveNamespaceAliases(two, undefined)).toEqual({
-        "Library.Catalog": "Catalog",
-        "Library.Circulation": "Circulation",
-      });
-
-      const four: Array<NamespaceWithAlias> = [
-        ["Library.Catalog"],
-        ["Library.Circulation"],
-        ["PublisherRegistry"],
-        ["Library.Service"],
-      ];
-      expect(resolveNamespaceAliases(four, undefined)).toEqual({
-        "Library.Catalog": "Catalog",
-        "Library.Circulation": "Circulation",
-        PublisherRegistry: "PublisherRegistry",
-        "Library.Service": "Service",
-      });
-    });
-
-    test("disableAutoAlias leaves every unaliased namespace without one", () => {
-      const namespaces: Array<NamespaceWithAlias> = [["Library.Catalog"], ["Library.Circulation", "Circ"]];
-      expect(resolveNamespaceAliases(namespaces, { disableAutoAlias: true })).toEqual({
-        "Library.Circulation": "Circ",
-      });
-    });
-
-    test("a synthesis collision between two namespaces drops the alias for both, without error", () => {
-      const namespaces: Array<NamespaceWithAlias> = [["A.Catalog"], ["B.Catalog"]];
-      expect(() => resolveNamespaceAliases(namespaces, undefined)).not.toThrow();
-      expect(resolveNamespaceAliases(namespaces, undefined)).toEqual({});
-    });
-
-    test("a synthesis collision against a real, unaliased namespace name is dropped without error", () => {
-      // "Catalog" is itself a real namespace, so "Foo.Catalog" can never synthesize to it
-      const namespaces: Array<NamespaceWithAlias> = [["Foo.Catalog"], ["Catalog"]];
-      expect(resolveNamespaceAliases(namespaces, undefined)).toEqual({ Catalog: "Catalog" });
-    });
-
-    test("a synthesis collision against a server-declared or project-configured alias is dropped without error", () => {
-      const namespaces: Array<NamespaceWithAlias> = [["Foo.Catalog"], ["Bar.Catalog", "Catalog"]];
-      expect(resolveNamespaceAliases(namespaces, undefined)).toEqual({ "Bar.Catalog": "Catalog" });
-    });
+  test("a namespace neither the server nor the project aliases has no effective alias", () => {
+    const namespaces: Array<NamespaceWithAlias> = [["Library.Catalog"], ["Library.Circulation"]];
+    expect(resolveNamespaceAliases(namespaces, undefined)).toEqual({});
   });
 
   describe("precedence", () => {
@@ -75,10 +23,12 @@ describe("resolveNamespaceAliases", () => {
       });
     });
 
-    test("project-configured wins over auto-synthesis for the same namespace", () => {
-      const namespaces: Array<NamespaceWithAlias> = [["Library.Catalog"]];
-      const result = resolveNamespaceAliases(namespaces, { alias: { "Library.Catalog": "Cat" } });
-      expect(result["Library.Catalog"]).toBe("Cat");
+    test("a server-declared alias for one namespace and a project-configured one for another both take effect", () => {
+      const namespaces: Array<NamespaceWithAlias> = [["Library.Catalog", "Cat"], ["Library.Circulation"]];
+      expect(resolveNamespaceAliases(namespaces, { alias: { "Library.Circulation": "Circ" } })).toEqual({
+        "Library.Catalog": "Cat",
+        "Library.Circulation": "Circ",
+      });
     });
   });
 

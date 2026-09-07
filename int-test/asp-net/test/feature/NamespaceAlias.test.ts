@@ -2,10 +2,11 @@ import { afterAll, describe, expect, test } from "vitest";
 import { LIBRARY_NAMESPACE_ALIAS } from "../LibraryTestConstants.js";
 
 /**
- * `namespace.alias`/auto-synthesis (`odata2ts-namespace-alias.md`), against the one server whose reference
- * model has all four namespaces this feature cares about: `Library.Catalog`, `Library.Circulation`,
- * `PublisherRegistry` (project-configured to `Pub` here), and `Library.Service` (which declares no types of
- * its own, so it never gets a folder and carries no cache-key literal either).
+ * `namespace.alias` (`odata2ts-namespace-alias.md`), against the one server whose reference model has all
+ * four namespaces this feature cares about: `Library.Catalog` (aliased to `Catalog`), `Library.Circulation`
+ * (aliased to `Circulation`), `PublisherRegistry` (aliased to `Pub`), and `Library.Service` (which declares
+ * no types of its own, so it never gets a folder and carries no cache-key literal either). Every alias here
+ * is explicit, project-configured - there is no auto-synthesis.
  *
  * `LIBRARY_NAMESPACE_ALIAS` is a separate client from `LIBRARY` (see the config's own comment): every other
  * assertion in this package is unaffected by aliasing, and this is the one client where it is switched on.
@@ -19,7 +20,7 @@ describe("ASP.NET Library: namespace aliasing", () => {
     }
   });
 
-  test("a subtype cast's cache-key literal carries the auto-synthesized alias, not the raw namespace", async () => {
+  test("a subtype cast's cache-key literal carries the configured alias, not the raw namespace", async () => {
     // the single-entity cast form (`Media(<id>)/Library.Catalog.Book`) is one of the things this server does
     // not serve (see the package README) - the collection form is, and is all a cast's own cache-key literal
     // needs to prove out anyway
@@ -31,7 +32,7 @@ describe("ASP.NET Library: namespace aliasing", () => {
     expect(result.data.value.length).toBeGreaterThan(0);
   });
 
-  test("a bound operation's cache-key literal carries the auto-synthesized alias too", async () => {
+  test("a bound operation's cache-key literal carries the configured alias too", async () => {
     // OutstandingBalance is a bound *function* (GET, read-only) - unlike the bound actions on this same
     // entity, calling it has no side effect on data other tests depend on
     const created = await LIBRARY_NAMESPACE_ALIAS.Members()

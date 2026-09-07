@@ -136,11 +136,11 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
   private synthesizedEnums = new Map<string, SynthesizedEnum>();
 
   /**
-   * Every namespace's effective alias (server-declared, project-configured, or auto-synthesized) - read
-   * straight off `namingHelper`, which already resolved and validated it at its own construction (see
+   * Every namespace's effective alias (server-declared or project-configured) - read straight off
+   * `namingHelper`, which already resolved and validated it at its own construction (see
    * `NamingHelper.getEffectiveNamespaceAlias`), rather than recomputed here from `options.namespace`. Feeds
    * every `NamespaceWithAlias` tuple this digester builds, `DataModel`'s included, so `namespace2Alias` (and
-   * everything reading it, `getDisplayFqName` included) carries all three sources blended into one table.
+   * everything reading it, `getDisplayFqName` included) carries both sources blended into one table.
    */
   private readonly effectiveNamespaceAlias: Record<string, string>;
 

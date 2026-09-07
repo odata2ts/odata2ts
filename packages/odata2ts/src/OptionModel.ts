@@ -265,8 +265,8 @@ export function resolveCacheKeysEnabled(options: CacheKeysOptions | undefined): 
  * Shortens a namespace wherever its length actually matters: cache-key literals that carry a fully
  * qualified name (a subtype cast, a bound operation's own name), `byTypeAndName`/`propertiesByName`
  * matchers, and - opt-in - generated folder paths. See `NamespaceAliasResolver.resolveNamespaceAliases` for
- * the three-source precedence (server-declared, then this option, then auto-synthesis) and the validation
- * rules a misconfigured `alias` entry triggers.
+ * the two-source precedence (server-declared, then this option) and the validation rules a misconfigured
+ * `alias` entry triggers.
  */
 export interface NamespaceOptions {
   /**
@@ -275,11 +275,6 @@ export interface NamespaceOptions {
    * alias is authoritative and always wins, so a project value would silently never take effect otherwise.
    */
   alias?: Record<string, string>;
-  /**
-   * Turns off auto-synthesis: a namespace neither the server nor `alias` covers keeps its full, unaliased
-   * name instead of odata2ts guessing one from the namespace's own last dot-segment. Default `false`.
-   */
-  disableAutoAlias?: boolean;
   /**
    * Opts generated folder/file paths (only consulted under `bundledFileGeneration`) into the effective
    * alias in place of the real namespace. Default `false` - folder layout is unaffected otherwise, even

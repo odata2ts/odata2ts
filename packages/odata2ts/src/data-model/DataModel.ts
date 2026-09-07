@@ -88,8 +88,8 @@ export class DataModel {
 
   /**
    * The display form of a fully qualified name: an aliased namespace prefix replaced by its effective
-   * alias, exactly where `namespace2Alias` carries one for it - server-declared, project-configured, or
-   * auto-synthesized, already blended into that one table by the time this runs (see
+   * alias, exactly where `namespace2Alias` carries one for it - server-declared or project-configured,
+   * already blended into that one table by the time this runs (see
    * `NamespaceAliasResolver.resolveNamespaceAliases`, and how the digester feeds its result into this very
    * constructor). `fqName` itself never changes here - every internal lookup (`models`,
    * `ImportContainer.addGenerated*`, error messages) keeps keying off the real, alias-free name; this is
