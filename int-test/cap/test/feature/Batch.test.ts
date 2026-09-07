@@ -45,4 +45,18 @@ describe("CAP Library: $batch", () => {
     expect(secondResult.status).toBe(200);
     expect(secondResult.data?.value.length).toBe(1);
   });
+
+  test("continueOnError still answers the sub-request that follows a failing one", async () => {
+    const missing = LIBRARY.Books(UNKNOWN_ID).query();
+    const books = LIBRARY.Books().query((b) => b.top(1));
+
+    const [missingResult, booksResult] = await LIBRARY.batch()
+      .add(missing)
+      .add(books)
+      .execute({ continueOnError: true });
+
+    expect(missingResult.status).toBe(404);
+    expect(booksResult.status).toBe(200);
+    expect(booksResult.data?.value.length).toBe(1);
+  });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { LIBRARY } from "../LibraryTestConstants.js";
+import { LIBRARY, UNKNOWN_ID } from "../LibraryTestConstants.js";
 
 /**
  * `$batch` against the Apache Olingo 2.0 server - the OData **V2** one. V2 has no JSON `$batch`, so the
@@ -24,5 +24,19 @@ describe("Olingo V2 Library: $batch", () => {
     const books = LIBRARY.Books().query((b) => b.top(1));
 
     await expect(LIBRARY.batch().add(books).execute({ format: "json" })).rejects.toThrow(/V2/);
+  });
+
+  test("continueOnError still answers the sub-request that follows a failing one", async () => {
+    const missing = LIBRARY.Books(UNKNOWN_ID).query();
+    const books = LIBRARY.Books().query((b) => b.top(1));
+
+    const [missingResult, booksResult] = await LIBRARY.batch()
+      .add(missing)
+      .add(books)
+      .execute({ continueOnError: true });
+
+    expect(missingResult.status).toBe(404);
+    expect(booksResult.status).toBe(200);
+    expect(booksResult.data?.d.results.length).toBe(1);
   });
 });

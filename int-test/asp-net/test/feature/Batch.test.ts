@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { LIBRARY } from "../LibraryTestConstants.js";
+import { LIBRARY, UNKNOWN_ID } from "../LibraryTestConstants.js";
 
 /**
  * `$batch` against the ASP.NET Core OData server - the one that, unlike the V2 server, speaks the **JSON**
@@ -28,5 +28,19 @@ describe("ASP.NET Library: $batch", () => {
 
     expect(membersResult.status).toBe(200);
     expect(membersResult.data?.value.length).toBe(2);
+  });
+
+  test("continueOnError still answers the sub-request that follows a failing one", async () => {
+    const missing = LIBRARY.Members(UNKNOWN_ID).query();
+    const members = LIBRARY.Members().query((b) => b.top(1));
+
+    const [missingResult, membersResult] = await LIBRARY.batch()
+      .add(missing)
+      .add(members)
+      .execute({ continueOnError: true });
+
+    expect(missingResult.status).toBe(404);
+    expect(membersResult.status).toBe(200);
+    expect(membersResult.data?.value.length).toBe(1);
   });
 });
