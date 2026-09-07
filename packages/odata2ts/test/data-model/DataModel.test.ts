@@ -375,4 +375,38 @@ describe("Data Model Tests", function () {
       expect(dataModel.getDisplayFqName("Xxx")).toBe("Xxx");
     });
   });
+
+  describe("getDisplayNamespace", () => {
+    test("an unaliased namespace falls back to the real, raw namespace - there is always something to prefix with here", () => {
+      expect(dataModel.getDisplayNamespace(`${NS1}.Reservation`)).toBe(NS1);
+    });
+
+    test("an aliased namespace resolves to its alias", () => {
+      expect(dataModel.getDisplayNamespace(`${NS2}.Reservation`)).toBe(ALIAS_NS2);
+    });
+
+    test("a namespace aliased to the empty string resolves to the empty string, not the raw namespace", () => {
+      const withEmptyAlias = new DataModel([[NS1], [NS2, ""]], ODataVersion.V4);
+      expect(withEmptyAlias.getDisplayNamespace(`${NS2}.Reservation`)).toBe("");
+    });
+
+    test("a namespace nested inside another aliased one resolves against the longer, more specific match", () => {
+      const outer = "Library";
+      const inner = "Library.Circulation";
+      const nested = new DataModel(
+        [
+          [outer, "Lib"],
+          [inner, "Circ"],
+        ],
+        ODataVersion.V4,
+      );
+
+      expect(nested.getDisplayNamespace(`${inner}.Reservation`)).toBe("Circ");
+      expect(nested.getDisplayNamespace(`${outer}.Branch`)).toBe("Lib");
+    });
+
+    test("a name with no namespace at all (no dot) is returned unchanged - never a real input in practice", () => {
+      expect(dataModel.getDisplayNamespace("Xxx")).toBe("Xxx");
+    });
+  });
 });
