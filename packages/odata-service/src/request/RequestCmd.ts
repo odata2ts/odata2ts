@@ -174,6 +174,53 @@ export abstract class RequestCmd<
   }
 
   /**
+   * The first half of {@link execute}: the request converters and the concurrency rule, returning the
+   * request as it will be sent.
+   *
+   * Split out so a batch can run the same pipeline once per collected command before anything is sent.
+   * Throws {@link ODataConcurrencyError} where a controlled write has no known ETag - for a direct request
+   * that is before the send, and for a batch before the whole thing goes out, so a doomed batch is refused
+   * rather than sent.
+   */
+  public prepareRequest(): RequestInfo<any> {
+    return this.applyConcurrency(this.getInfoConverted());
+  }
+
+  /**
+   * The second half of {@link execute}: the response converters and the concurrency harvesting, run
+   * against one answer and returning it.
+   *
+   * A direct request only ever sees a 2xx answer - the client throws everything else - so the conversion
+   * and harvesting run exactly as before. A batch hands non-2xx answers back as values: those are returned
+   * unconverted and nothing is harvested, because that sub-request did not happen.
+   *
+   * `request` is the prepared request {@link prepareRequest} returned.
+   */
+  public handleResponse(
+    request: RequestInfo<any>,
+    response: HttpResponseModel<any>,
+  ): HttpResponseModel<FinalResponseStructure> {
+    const succeeded = response.status >= 200 && response.status < 300;
+
+    if (!succeeded) {
+      // a batch answer of 412 has just disproved the stored ETag - the same rule as the direct path, which
+      // reaches that 412 through the thrown error instead
+      if (response.status === 412) {
+        this.evictConcurrency();
+      }
+      return response as HttpResponseModel<FinalResponseStructure>;
+    }
+
+    const converted = this.convertResponse(response);
+
+    // harvest afterwards, deliberately: the property names a collection service builds its keys from are
+    // the mapped, user-facing ones, which only exist once the converters have run
+    this.updateConcurrency(response);
+
+    return converted;
+  }
+
+  /**
    * Main method of this command object: Executes the request.
    *
    * The config type defaults to what every HTTP client understands - headers and URL params. Anything a
@@ -184,11 +231,9 @@ export abstract class RequestCmd<
    */
   public async execute<RequestConfig extends ODataRequestConfig = ODataRequestConfig>(
     requestConfig?: NoInferConfig<RequestConfig>,
-  ) {
-    // apply request converters
-    const request = this.applyConcurrency(this.getInfoConverted());
+  ): Promise<HttpResponseModel<FinalResponseStructure>> {
+    const request = this.prepareRequest();
 
-    // execute the request
     let response: HttpResponseModel<any>;
     try {
       response = await this.sendRequest(request, requestConfig);
@@ -197,14 +242,7 @@ export abstract class RequestCmd<
       throw error;
     }
 
-    // apply response converters
-    const converted = this.convertResponse(response);
-
-    // harvest afterwards, deliberately: the property names a collection service builds its keys from are
-    // the mapped, user-facing ones, which only exist once the converters have run
-    this.updateConcurrency(response);
-
-    return converted;
+    return this.handleResponse(request, response);
   }
 
   /**
@@ -249,8 +287,15 @@ export abstract class RequestCmd<
    * The error itself travels on untouched - resolving a conflict is the application's business.
    */
   private evictOnConflict(error: unknown): void {
+    if (isConcurrencyConflict(error)) {
+      this.evictConcurrency();
+    }
+  }
+
+  /** Drop the stored ETag of the resource this command addresses, if one is under concurrency control. */
+  private evictConcurrency(): void {
     const { concurrency } = this.options;
-    if (concurrency && isConcurrencyConflict(error)) {
+    if (concurrency) {
       this.client.concurrency?.evict(concurrency.key);
     }
   }

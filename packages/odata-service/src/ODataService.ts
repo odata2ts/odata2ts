@@ -1,5 +1,6 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { ODataVersionV4 } from "@odata2ts/odata-core";
+import { BatchBuilder } from "./batch/BatchBuilder.js";
 import { ODataServiceOptionsInternal } from "./ODataServiceOptions";
 import { ServiceStateHelper } from "./ServiceStateHelper.js";
 
@@ -26,5 +27,29 @@ export class ODataService<V extends ODataVersionV4 = "4.0"> {
 
   public getPath(): string {
     return this.__base.path;
+  }
+
+  /**
+   * Starts collecting requests to send them as one `$batch`.
+   *
+   * The builder applies the service's `batch` option: it refuses to be built at all where the feature was
+   * switched off, and a V2 service - which has no JSON `$batch` - rejects `execute({ format: "json" })`.
+   *
+   * The result is a tuple, element-for-element the type the application would get from running those
+   * requests one by one, so the answer of a slot that never ran is `T | undefined` rather than a second,
+   * batch-specific shape.
+   */
+  public batch(): BatchBuilder<[]> {
+    const batchOptions = this.__base.options.batch;
+    if (batchOptions?.disabled) {
+      throw new Error("Batch requests are disabled for this service (see the `batch` option).");
+    }
+
+    return new BatchBuilder(
+      this.__base.client,
+      this.__base.basePath,
+      batchOptions?.format ?? "multipart",
+      this.__base.options.odataVersion === "2.0",
+    );
   }
 }
