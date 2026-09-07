@@ -3,8 +3,8 @@ import {
   BatchHttpMethod,
   BatchRequestBody,
   BatchRequestObject,
-  BatchResponseObject,
   BatchResponseBody,
+  BatchResponseObject,
   HttpResponseModel,
   ODataHttpClient,
 } from "@odata2ts/http-client-api";
@@ -140,7 +140,7 @@ export class BatchBuilder<R extends Array<unknown> = []> {
   public async execute(options?: BatchExecuteOptions): Promise<R> {
     const format = options?.format ?? this.__defaultFormat;
     if (this.__isV2 && format === "json") {
-      throw new Error("A V2 service has no JSON $batch - use format: \"multipart\".");
+      throw new Error('A V2 service has no JSON $batch - use format: "multipart".');
     }
 
     const body = this.getRequestInfo();

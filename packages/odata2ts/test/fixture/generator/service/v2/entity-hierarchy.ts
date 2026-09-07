@@ -13,7 +13,7 @@ import type {
   GrandParent,
   GrandParentId,
   Parent,
-// @ts-ignore
+  // @ts-ignore
 } from "./TesterModel.js";
 
 export class TesterService extends ODataService {

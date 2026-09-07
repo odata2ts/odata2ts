@@ -18,7 +18,7 @@ import type {
   PostBestBookParams,
   TestEntity,
   TestEntityId,
-// @ts-ignore
+  // @ts-ignore
 } from "./TesterModel.js";
 
 export class TesterService extends ODataService {

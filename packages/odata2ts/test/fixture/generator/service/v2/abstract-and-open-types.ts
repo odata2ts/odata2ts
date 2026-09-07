@@ -9,7 +9,7 @@ import {
   qExtendedFromOpen,
   QExtendedFromOpenId,
   qOpenEntity,
-// @ts-ignore
+  // @ts-ignore
 } from "./QTester.js";
 import type {
   AbstractEntity,
@@ -22,7 +22,7 @@ import type {
   ExtendedFromOpen,
   ExtendedFromOpenId,
   OpenEntity,
-// @ts-ignore
+  // @ts-ignore
 } from "./TesterModel.js";
 
 export class TesterService extends ODataService {

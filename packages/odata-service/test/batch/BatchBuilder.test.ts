@@ -12,7 +12,13 @@ const BASE = "http://example.com/odata";
 class TestCmd<F, D = undefined> extends RequestCmd<F, D, F> {
   private readonly __url: string;
 
-  constructor(client: ODataHttpClient, method: ODataHttpMethods, url: string, data?: D, options?: RequestCmdOptions<F, D>) {
+  constructor(
+    client: ODataHttpClient,
+    method: ODataHttpMethods,
+    url: string,
+    data?: D,
+    options?: RequestCmdOptions<F, D>,
+  ) {
     super(client, method, data, options);
     this.__url = url;
   }
@@ -35,7 +41,10 @@ describe("BatchBuilder via ODataService.batch()", () => {
     const { client, service } = makeService();
     client.batchResponse = { responses: [], resolvedBy: "id" };
 
-    await service.batch().add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A")).execute();
+    await service
+      .batch()
+      .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
+      .execute();
 
     expect(client.lastBatchBody?.requests.map((request) => request.id)).toEqual(["0"]);
 
@@ -71,7 +80,10 @@ describe("BatchBuilder via ODataService.batch()", () => {
     const { client, service } = makeService();
     client.batchResponse = { responses: [], resolvedBy: "id" };
 
-    await service.batch().add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A")).execute();
+    await service
+      .batch()
+      .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
+      .execute();
 
     expect(client.lastBatchUrl).toBe(BASE + "/$batch");
   });
@@ -84,15 +96,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
     const second = new TestCmd(client, ODataHttpMethods.Post, BASE + "/C", { name: "n" });
     const after = new TestCmd(client, ODataHttpMethods.Get, BASE + "/D");
 
-    await service
-      .batch()
-      .add(before)
-      .startGroup("g")
-      .add(first)
-      .add(second)
-      .endGroup()
-      .add(after)
-      .execute();
+    await service.batch().add(before).startGroup("g").add(first).add(second).endGroup().add(after).execute();
 
     const { requests } = client.lastBatchBody!;
     expect(requests[0].atomicityGroup).toBeUndefined();
@@ -129,11 +133,17 @@ describe("BatchBuilder via ODataService.batch()", () => {
     client.batchResponse = { responses: [{ id: "0", status: 200, body: [] }], resolvedBy: "id" };
 
     await expect(
-      service.batch().add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A")).execute({ format: "json" }),
+      service
+        .batch()
+        .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
+        .execute({ format: "json" }),
     ).rejects.toThrow(/V2/);
 
     client.batchResponse = { responses: [{ id: "0", status: 200, body: [] }], resolvedBy: "id" };
-    const [slot] = await service.batch().add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A")).execute();
+    const [slot] = await service
+      .batch()
+      .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
+      .execute();
 
     expect(slot.status).toBe(200);
     expect(client.lastBatchOptions?.format).toBe("multipart");
@@ -149,11 +159,17 @@ describe("BatchBuilder via ODataService.batch()", () => {
     const { client, service } = makeService();
     client.batchResponse = { responses: [{ id: "0", status: 200, body: null }], resolvedBy: "id" };
 
-    await service.batch().add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A")).execute();
+    await service
+      .batch()
+      .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
+      .execute();
     expect(client.lastBatchOptions?.format).toBe("multipart");
 
     client.batchResponse = { responses: [{ id: "0", status: 200, body: null }], resolvedBy: "id" };
-    await service.batch().add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A")).execute({ format: "json", continueOnError: true });
+    await service
+      .batch()
+      .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
+      .execute({ format: "json", continueOnError: true });
     expect(client.lastBatchOptions).toStrictEqual({ format: "json", continueOnError: true });
   });
 
@@ -162,7 +178,10 @@ describe("BatchBuilder via ODataService.batch()", () => {
       const { client, service } = makeService();
       client.batchResponse = { responses: [{ id: "0", status: 200, body: [{ id: 1, name: "a" }] }], resolvedBy: "id" };
 
-      const [slot] = await service.batch().add(new TestCmd<Person[]>(client, ODataHttpMethods.Get, BASE + "/People")).execute();
+      const [slot] = await service
+        .batch()
+        .add(new TestCmd<Person[]>(client, ODataHttpMethods.Get, BASE + "/People"))
+        .execute();
 
       expect(slot.status).toBe(200);
       expect(slot.data).toStrictEqual([{ id: 1, name: "a" }]);
@@ -173,7 +192,10 @@ describe("BatchBuilder via ODataService.batch()", () => {
       const error = { error: { code: "X" } };
       client.batchResponse = { responses: [{ id: "0", status: 400, body: error }], resolvedBy: "id" };
 
-      const [slot] = await service.batch().add(new TestCmd<Person[]>(client, ODataHttpMethods.Get, BASE + "/People")).execute();
+      const [slot] = await service
+        .batch()
+        .add(new TestCmd<Person[]>(client, ODataHttpMethods.Get, BASE + "/People"))
+        .execute();
 
       expect(slot.status).toBe(400);
       expect(slot.data).toStrictEqual(error);
@@ -183,7 +205,10 @@ describe("BatchBuilder via ODataService.batch()", () => {
       const { client, service } = makeService();
       client.batchResponse = { responses: [{ id: "0", status: 424, body: undefined }], resolvedBy: "id" };
 
-      const [slot] = await service.batch().add(new TestCmd<Person[]>(client, ODataHttpMethods.Get, BASE + "/People")).execute();
+      const [slot] = await service
+        .batch()
+        .add(new TestCmd<Person[]>(client, ODataHttpMethods.Get, BASE + "/People"))
+        .execute();
 
       expect(slot.status).toBe(424);
       expect(slot.data).toBeUndefined();
@@ -227,10 +252,12 @@ describe("BatchBuilder via ODataService.batch()", () => {
 
     test("each slot is run through that command's own response converters", async () => {
       const { client, service } = makeService();
-      const cmd = new TestCmd<Person[]>(client, ODataHttpMethods.Get, BASE + "/People").appendResponseConverter((response) => ({
-        ...response,
-        data: response.data.map((person) => ({ ...person, name: person.name.toUpperCase() })),
-      }));
+      const cmd = new TestCmd<Person[]>(client, ODataHttpMethods.Get, BASE + "/People").appendResponseConverter(
+        (response) => ({
+          ...response,
+          data: response.data.map((person) => ({ ...person, name: person.name.toUpperCase() })),
+        }),
+      );
       client.batchResponse = { responses: [{ id: "0", status: 200, body: [{ id: 1, name: "a" }] }], resolvedBy: "id" };
 
       const [slot] = await service.batch().add(cmd).execute();
@@ -246,7 +273,11 @@ describe("BatchBuilder via ODataService.batch()", () => {
       const first = new TestCmd(client, ODataHttpMethods.Post, BASE + "/Members", { name: "n" });
       const second = new TestCmd(client, ODataHttpMethods.Get, BASE + "/Members(1)");
 
-      await service.batch().add(first).add(second, { dependsOn: [first] }).execute();
+      await service
+        .batch()
+        .add(first)
+        .add(second, { dependsOn: [first] })
+        .execute();
 
       expect(client.lastBatchBody?.requests[1].dependsOn).toStrictEqual(["0"]);
     });
@@ -256,7 +287,12 @@ describe("BatchBuilder via ODataService.batch()", () => {
       const outsider = new TestCmd(client, ODataHttpMethods.Get, BASE + "/X");
       const member = new TestCmd(client, ODataHttpMethods.Get, BASE + "/Y");
 
-      await expect(service.batch().add(member, { dependsOn: [outsider] }).execute()).rejects.toThrow(/not part of this batch/);
+      await expect(
+        service
+          .batch()
+          .add(member, { dependsOn: [outsider] })
+          .execute(),
+      ).rejects.toThrow(/not part of this batch/);
     });
   });
 
@@ -266,7 +302,9 @@ describe("BatchBuilder via ODataService.batch()", () => {
       client.batchResponse = { responses: [{ id: "0", status: 200, body: [] }], resolvedBy: "id" };
 
       const people = new TestCmd<Person[]>(client, ODataHttpMethods.Get, BASE + "/People");
-      const created = new TestCmd<{ id: number }, { name: string }>(client, ODataHttpMethods.Post, BASE + "/People", { name: "n" });
+      const created = new TestCmd<{ id: number }, { name: string }>(client, ODataHttpMethods.Post, BASE + "/People", {
+        name: "n",
+      });
 
       const [p, c] = await service.batch().add(people).add(created).execute();
 
@@ -276,10 +314,18 @@ describe("BatchBuilder via ODataService.batch()", () => {
 
     test("the tuple's element types survive startGroup and endGroup", async () => {
       const { client, service } = makeService();
-      client.batchResponse = { responses: [{ id: "0", status: 200, body: [] }, { id: "1", status: 201, body: { id: 1 } }], resolvedBy: "id" };
+      client.batchResponse = {
+        responses: [
+          { id: "0", status: 200, body: [] },
+          { id: "1", status: 201, body: { id: 1 } },
+        ],
+        resolvedBy: "id",
+      };
 
       const people = new TestCmd<Person[]>(client, ODataHttpMethods.Get, BASE + "/People");
-      const created = new TestCmd<{ id: number }, { name: string }>(client, ODataHttpMethods.Post, BASE + "/People", { name: "n" });
+      const created = new TestCmd<{ id: number }, { name: string }>(client, ODataHttpMethods.Post, BASE + "/People", {
+        name: "n",
+      });
 
       const [g, c] = await service.batch().add(people).startGroup("g").add(created).endGroup().execute();
 
