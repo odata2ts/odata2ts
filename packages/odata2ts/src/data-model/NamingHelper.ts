@@ -2,6 +2,7 @@ import { camelCase, constantCase, kebabCase, pascalCase, snakeCase } from "chang
 import { FileNamingStrategyOption, NameSettings, NamingStrategies, StandardNamingOptions } from "../NamingModel.js";
 import { RunOptions } from "../OptionModel.js";
 import { NamespaceWithAlias } from "./DataModel.js";
+import { resolveNamespaceAliases } from "./NamespaceAliasResolver.js";
 
 function getNamingStrategyImpl(strategy: NamingStrategies | undefined) {
   switch (strategy) {
@@ -22,13 +23,16 @@ const noopNamingFunction = (value: string, options?: StandardNamingOptions) => {
   return (options?.prefix || "") + value + (options?.suffix || "");
 };
 
-export interface NamingHelperSettings extends Pick<RunOptions, "allowRenaming" | "naming"> {}
+export interface NamingHelperSettings extends Pick<RunOptions, "allowRenaming" | "naming" | "namespace"> {}
 
 export class NamingHelper {
   private readonly allowModelPropRenaming: boolean;
   private readonly mainServiceName: string;
   private readonly namespacePrefixes: Array<string>;
   private readonly options: NameSettings;
+  private readonly useAliasForFolderName: boolean;
+  /** Every namespace's effective alias (server-declared, project-configured, or auto-synthesized) - computed once, here, since this is the earliest point in the pipeline that has both the digested namespaces and the resolved config. Reused by the digester for `DataModel`/`ServiceConfigHelper` rather than recomputed, so validation runs exactly once. */
+  private readonly effectiveNamespaceAlias: Record<string, string>;
 
   constructor(options: NamingHelperSettings, mainServiceName: string, namespaces?: Array<NamespaceWithAlias>) {
     if (!options) {
@@ -55,6 +59,13 @@ export class NamingHelper {
       }, [])
       .map((sn) => sn + ".")
       .sort((a, b) => (a.length === b.length ? 0 : a.length > b.length ? -1 : 1));
+    this.useAliasForFolderName = options.namespace?.useAliasForFolderName ?? false;
+    this.effectiveNamespaceAlias = resolveNamespaceAliases(namespaces, options.namespace);
+  }
+
+  /** Every namespace's effective alias - see the field doc comment. Reused by the digester so alias resolution (including its validation) runs exactly once per generation run. */
+  public getEffectiveNamespaceAlias(): Record<string, string> {
+    return this.effectiveNamespaceAlias;
   }
 
   /**
@@ -286,6 +297,9 @@ export class NamingHelper {
   };
 
   public getFolderPath(namespace: string, name: string) {
-    return `${kebabCase(namespace)}/${kebabCase(name)}`;
+    const folderNamespace = this.useAliasForFolderName
+      ? (this.effectiveNamespaceAlias[namespace] ?? namespace)
+      : namespace;
+    return `${kebabCase(folderNamespace)}/${kebabCase(name)}`;
   }
 }

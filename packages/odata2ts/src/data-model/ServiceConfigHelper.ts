@@ -153,12 +153,25 @@ export class ServiceConfigHelper {
 
   private getByRegExp(mapping: Array<[RegExp, any]>, [mainNs, alias]: NamespaceWithAlias, nameToMap: string) {
     const fqName = `${mainNs}.${nameToMap}`;
+    // matched by both spellings, same as getByName - a matcher written against the alias form should
+    // resolve regardless of which of the three sources (server-declared, project-configured, auto-
+    // synthesized) actually supplied it, exactly as one written against the real namespace already does
+    const aliasFqName = alias ? `${alias}.${nameToMap}` : undefined;
     const hayStack = [...this.mapping.Any.regExps, ...mapping];
 
     const resultList = hayStack
-      .filter(([regExp, config]) => regExp.test(fqName))
-      .map(([regExp, { name, mappedName, type, ...attrs }]) => ({
-        mappedName: mappedName ? fqName.replace(regExp, mappedName) : undefined,
+      .map(([regExp, config]): [RegExp, any, string] | undefined => {
+        if (regExp.test(fqName)) {
+          return [regExp, config, fqName];
+        }
+        if (aliasFqName && regExp.test(aliasFqName)) {
+          return [regExp, config, aliasFqName];
+        }
+        return undefined;
+      })
+      .filter((entry): entry is [RegExp, any, string] => !!entry)
+      .map(([regExp, { name, mappedName, type, ...attrs }, matchedText]) => ({
+        mappedName: mappedName ? matchedText.replace(regExp, mappedName) : undefined,
         ...attrs,
       }));
 

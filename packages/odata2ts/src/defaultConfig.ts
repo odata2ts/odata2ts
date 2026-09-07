@@ -120,6 +120,7 @@ const defaultConfig: DefaultConfiguration = {
   disableBindingProps: false,
   deepInsertProps: DeepInsertProps.all,
   cacheKeys: { enabled: false },
+  namespace: { alias: {}, disableAutoAlias: false, useAliasForFolderName: false },
 };
 
 const { models, queryObjects, services } = defaultConfig.naming;

@@ -183,13 +183,19 @@ class ServiceGenerator {
     return `cacheKeyState && ${hopStateFn}(${hopStateFn}(cacheKeyState, { name: "${odataName}" }), { name: "$value" })`;
   }
 
-  /** A subtype cast: a restriction on the very same resource, not a hop away from it. */
+  /**
+   * A subtype cast: a restriction on the very same resource, not a hop away from it. The cast's FQN is run
+   * through `getDisplayFqName` so a namespace that ends up aliased (see `NamespaceAliasResolver`) is
+   * written compactly here too - the same resolution `entityTypeName`-style consumers would use, so a cache
+   * key's `cast` entry and any matcher written against it never drift apart.
+   */
   private emitCastParamsExpr(imports: ImportContainer, castFqName: string): string {
     if (!this.cacheKeysEnabled) {
       return "";
     }
     const withParamsFn = imports.addServiceFunction("withParams");
-    return `cacheKeyState && ${withParamsFn}(cacheKeyState, { cast: "${castFqName}" })`;
+    const displayFqName = this.dataModel.getDisplayFqName(castFqName);
+    return `cacheKeyState && ${withParamsFn}(cacheKeyState, { cast: "${displayFqName}" })`;
   }
 
   /**
@@ -235,7 +241,11 @@ class ServiceGenerator {
       : `${rootStateFn}("${importOdataName}", "${kind}")`;
   }
 
-  /** A bound function/action: a hop off the resource it is bound to, with its own kind marker where the return type is structured - never a type, matching every other hop. */
+  /**
+   * A bound function/action: a hop off the resource it is bound to, with its own kind marker where the
+   * return type is structured - never a type, matching every other hop. The operation's own FQN is run
+   * through `getDisplayFqName` for the same reason `emitCastParamsExpr` does - see there.
+   */
   private emitBoundOperationHopExpr(
     imports: ImportContainer,
     fqOperationName: string,
@@ -247,7 +257,8 @@ class ServiceGenerator {
     const hopStateFn = imports.addServiceFunction("hopState");
     const isStructured = !!returnType?.fqType && returnType.dataType !== DataTypes.PrimitiveType;
     const kindEntry = isStructured ? `, kind: "${returnType!.isCollection ? "list" : "detail"}"` : "";
-    return `cacheKeyState && ${hopStateFn}(cacheKeyState, { name: "${fqOperationName}"${kindEntry} })`;
+    const displayFqName = this.dataModel.getDisplayFqName(fqOperationName);
+    return `cacheKeyState && ${hopStateFn}(cacheKeyState, { name: "${displayFqName}"${kindEntry} })`;
   }
 
   /**

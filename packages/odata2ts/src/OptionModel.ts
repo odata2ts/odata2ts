@@ -262,6 +262,33 @@ export function resolveCacheKeysEnabled(options: CacheKeysOptions | undefined): 
 }
 
 /**
+ * Shortens a namespace wherever its length actually matters: cache-key literals that carry a fully
+ * qualified name (a subtype cast, a bound operation's own name), `byTypeAndName`/`propertiesByName`
+ * matchers, and - opt-in - generated folder paths. See `NamespaceAliasResolver.resolveNamespaceAliases` for
+ * the three-source precedence (server-declared, then this option, then auto-synthesis) and the validation
+ * rules a misconfigured `alias` entry triggers.
+ */
+export interface NamespaceOptions {
+  /**
+   * Fills a namespace the server does not already declare an `Alias` for, e.g. `{ "Library.Catalog": "Cat" }`.
+   * Configuring an alias for a namespace the server already aliases is a hard error - the server's own
+   * alias is authoritative and always wins, so a project value would silently never take effect otherwise.
+   */
+  alias?: Record<string, string>;
+  /**
+   * Turns off auto-synthesis: a namespace neither the server nor `alias` covers keeps its full, unaliased
+   * name instead of odata2ts guessing one from the namespace's own last dot-segment. Default `false`.
+   */
+  disableAutoAlias?: boolean;
+  /**
+   * Opts generated folder/file paths (only consulted under `bundledFileGeneration`) into the effective
+   * alias in place of the real namespace. Default `false` - folder layout is unaffected otherwise, even
+   * where a namespace ends up aliased for every other consumer.
+   */
+  useAliasForFolderName?: boolean;
+}
+
+/**
  * Config options for CLI.
  */
 export interface CliOptions {
@@ -590,6 +617,12 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * future option to join it under the same key without a breaking change.
    */
   cacheKeys?: CacheKeysOptions;
+  /**
+   * Configures namespace aliasing - see {@link NamespaceOptions}. Deep-merged the same way as
+   * `byTypeAndName`: a top-level `alias` map and a service-level one merge key-by-key, the service-level
+   * entry winning where both name the same namespace.
+   */
+  namespace?: NamespaceOptions;
 }
 
 /**

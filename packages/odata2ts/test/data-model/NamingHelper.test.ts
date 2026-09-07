@@ -14,7 +14,7 @@ describe("NamingHelper Tests", function () {
   const OVERRIDING_SERVICE_NAME = "my_Trip";
   const TEST_CONFIG = getTestConfigMinimal();
 
-  let options: Pick<TestOptions, "serviceName" | "allowRenaming" | "naming">;
+  let options: Pick<TestOptions, "serviceName" | "allowRenaming" | "naming" | "namespace">;
   let toTest: NamingHelper;
 
   function withNs(name: string, ns = NAMESPACE) {
@@ -22,7 +22,7 @@ describe("NamingHelper Tests", function () {
   }
 
   function createHelper(overrideServiceName: boolean = false) {
-    const config = deepmerge(TEST_CONFIG, options) as Pick<RunOptions, "allowRenaming" | "naming">;
+    const config = deepmerge(TEST_CONFIG, options) as Pick<RunOptions, "allowRenaming" | "naming" | "namespace">;
     toTest = new NamingHelper(config, overrideServiceName ? OVERRIDING_SERVICE_NAME : NAMESPACE, NAMESPACES);
   }
 
@@ -473,6 +473,40 @@ describe("NamingHelper Tests", function () {
     createHelper();
 
     expect(toTest.getPrivatePropName("test")).toBe("PRE_TEST_SUF");
+  });
+
+  describe("getFolderPath", () => {
+    test("uses the real namespace by default, even where an alias is known", () => {
+      createHelper();
+      expect(toTest.getFolderPath(NAMESPACE2, "Book")).toBe("test/book");
+    });
+
+    test("useAliasForFolderName swaps in the effective (server-declared) alias", () => {
+      options.namespace = { useAliasForFolderName: true };
+      createHelper();
+      expect(toTest.getFolderPath(NAMESPACE2, "Book")).toBe("alias/book");
+    });
+
+    test("useAliasForFolderName also picks up an auto-synthesized alias for a dotted namespace", () => {
+      options.namespace = { useAliasForFolderName: true };
+      const nested: Array<NamespaceWithAlias> = [["Library.Catalog"]];
+      toTest = new NamingHelper(deepmerge(TEST_CONFIG, options), NAMESPACE, nested);
+
+      expect(toTest.getFolderPath("Library.Catalog", "Book")).toBe("catalog/book");
+    });
+
+    test("without useAliasForFolderName, folder layout is byte-identical to today's output regardless of aliasing", () => {
+      createHelper();
+      expect(toTest.getFolderPath(NAMESPACE2, "Book")).toBe(toTest.getFolderPath(NAMESPACE2, "Book"));
+      expect(toTest.getFolderPath(NAMESPACE2, "Book")).toBe(`${NAMESPACE2}/book`.toLowerCase());
+    });
+  });
+
+  describe("namespace.alias validation", () => {
+    test("surfaces at NamingHelper construction, before any digestion happens", () => {
+      options.namespace = { alias: { Typo: "T" } };
+      expect(() => createHelper()).toThrow(/does not contain that namespace/);
+    });
   });
 
   test("getNameAndServicePrefix", () => {
