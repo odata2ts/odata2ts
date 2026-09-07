@@ -87,7 +87,17 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
   public lastRequestConfig?: MockRequestConfig;
   public additionalHeaders?: Record<string, string>;
 
+  public lastBatchUrl?: string;
+  public lastBatchBody?: BatchRequestBody;
+  public lastBatchOptions?: BatchClientOptions;
+
   public responseData?: any;
+  /** The canned `$batch` data the next batch call answers with. */
+  public batchResponse?: BatchResponseBody;
+  /** The status the next batch call answers with. */
+  public batchResponseStatus = 200;
+  /** The headers the next batch call answers with. */
+  public batchResponseHeaders: Record<string, string> = {};
 
   /** How many requests actually reached this client - a write refused before sending must add none. */
   public requestCount = 0;
@@ -236,7 +246,16 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
     requestConfig?: MockRequestConfig,
     additionalHeaders?: Record<string, string>,
   ): ODataResponse<BatchResponseBody> {
-    throw new Error("Operation batch not supported!");
+    this.lastBatchUrl = url;
+    this.lastBatchBody = body;
+    this.lastBatchOptions = options;
+
+    return Promise.resolve({
+      status: this.batchResponseStatus,
+      statusText: "OK",
+      headers: this.batchResponseHeaders,
+      data: this.batchResponse ?? { responses: [], resolvedBy: "id" },
+    });
   }
 
   createBlob(

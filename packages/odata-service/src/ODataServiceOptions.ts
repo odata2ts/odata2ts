@@ -1,3 +1,4 @@
+import { BatchFormat } from "@odata2ts/http-client-api";
 import { ODataVersionV4 } from "@odata2ts/odata-core";
 
 export interface ODataServiceOptions {
@@ -8,6 +9,25 @@ export interface ODataServiceOptions {
    * Of course, it's super handy for tests as well.
    */
   noUrlEncoding?: boolean;
+  /**
+   * How the service's `$batch` requests are sent, decided by the application in `odata2ts.config.ts`.
+   * The whole feature lives on the generated main service's {@link ODataService.batch}.
+   */
+  batch?: BatchOptions;
+}
+
+/**
+ * The `$batch` options, written by the generator into every generated main service's options.
+ *
+ * - `format` - the wire format for the batch as a whole. Defaults to `"multipart"`, which works for every
+ *   OData version a generated service can address. `"json"` is the richer format and the one a server is
+ *   most likely to accept - but only where its `$batch` actually speaks it, and a V2 service never does, so
+ *   on one `format: "json"` is refused (see {@link ODataService.batch}).
+ * - `disabled` - turns the feature off for this service: `batch()` throws rather than building a request.
+ */
+export interface BatchOptions {
+  format?: BatchFormat;
+  disabled?: boolean;
 }
 
 export interface ODataServiceOptionsInternal<V extends ODataVersionV4 = "4.0"> extends ODataServiceOptions {
@@ -35,6 +55,12 @@ export interface ODataServiceOptionsInternal<V extends ODataVersionV4 = "4.0"> e
    * something an application chooses.
    */
   concurrencyControlled?: boolean;
+  /**
+   * The OData version this service addresses, as decided by the generator - hence internal, and set only
+   * for V2. It is the one thing nothing else at runtime can say: whether a `format: "json"` batch is
+   * refused for this service, since V2 has no JSON `$batch` (see {@link ODataService.batch}).
+   */
+  odataVersion?: "2.0" | "4.0" | "4.01";
 }
 
 export interface ODataServiceOptionsInternalV2<AsV4 extends boolean = false> extends ODataServiceOptions {

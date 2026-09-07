@@ -345,6 +345,11 @@ class ServiceGenerator {
     if (this.isV401()) {
       options.push(`odataVersionV4: "4.01"`);
     }
+    // only V2 carries this - it is the one runtime fact nothing else can say, and it is what makes
+    // `batch().execute({ format: "json" })` refuse on a V2 service (V2 has no JSON $batch)
+    if (this.version === ODataVersions.V2) {
+      options.push(`odataVersion: "2.0"`);
+    }
     if (this.isV2AsV4()) {
       options.push("v2ResponseAsV4: true");
     }

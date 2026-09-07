@@ -26,6 +26,10 @@ import type {
 } from "./TesterModel.js";
 
 export class TesterService extends ODataService {
+  constructor(client: ODataHttpClient, basePath: string, options?: ODataServiceOptions) {
+    super(client, basePath, { ...options, odataVersion: "2.0" });
+  }
+
   public fromAbstract(): ExtendedFromAbstractCollectionService;
   public fromAbstract(id: ExtendedFromAbstractId): ExtendedFromAbstractService;
   public fromAbstract(id?: ExtendedFromAbstractId | undefined) {
