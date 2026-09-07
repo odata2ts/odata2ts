@@ -135,6 +135,15 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    */
   private synthesizedEnums = new Map<string, SynthesizedEnum>();
 
+  /**
+   * Every namespace's effective alias (server-declared or project-configured) - read straight off
+   * `namingHelper`, which already resolved and validated it at its own construction (see
+   * `NamingHelper.getEffectiveNamespaceAlias`), rather than recomputed here from `options.namespace`. Feeds
+   * every `NamespaceWithAlias` tuple this digester builds, `DataModel`'s included, so `namespace2Alias` (and
+   * everything reading it, `getDisplayFqName` included) carries both sources blended into one table.
+   */
+  private readonly effectiveNamespaceAlias: Record<string, string>;
+
   protected constructor(
     protected version: ODataVersion,
     protected schemas: Array<S>,
@@ -143,7 +152,11 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     converters?: MappedConverterChains,
     protected references?: Array<Reference>,
   ) {
-    const namespaces = schemas.map<NamespaceWithAlias>((s) => [s.$.Namespace, s.$.Alias]);
+    this.effectiveNamespaceAlias = namingHelper.getEffectiveNamespaceAlias();
+    const namespaces = schemas.map<NamespaceWithAlias>((s) => [
+      s.$.Namespace,
+      this.effectiveNamespaceAlias[s.$.Namespace],
+    ]);
     this.dataModel = new DataModel(namespaces, version, converters);
     this.serviceConfigHelper = new ServiceConfigHelper(options);
     this.nameValidator = options.bundledFileGeneration ? new NameClashValidator(options) : new NamespaceNameValidator();
@@ -327,7 +340,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
     }
 
     this.schemas.forEach((schema) => {
-      const ns: NamespaceWithAlias = [schema.$.Namespace, schema.$.Alias];
+      const ns: NamespaceWithAlias = [schema.$.Namespace, this.effectiveNamespaceAlias[schema.$.Namespace]];
 
       // type definitions: alias for primitive types
       this.addTypeDefinition(schema.$.Namespace, schema.TypeDefinition);

@@ -349,6 +349,28 @@ describe("Service Generator Tests V4", () => {
 
       expect(text).toContain("new MediumService<V>(client, path, name, options, cacheKeyState);");
     });
+
+    test("namespace.alias shortens the cast and bound-operation cache-key literals - the only two hop names still namespace-qualified", async () => {
+      buildModel();
+      await doGenerate({
+        cacheKeys: { enabled: true },
+        enablePrimitivePropertyServices: true,
+        namespace: { alias: { [SERVICE_NAME]: "T" } },
+      });
+      const text = generatedText();
+
+      expect(text).toContain(`withParams(cacheKeyState, { cast: "T.Book" })`);
+      expect(text).toContain(`hopState(cacheKeyState, { name: "T.checkOut" })`);
+      // the un-aliased forms must not appear as a cache-key literal - "Tester.Book" legitimately still
+      // appears elsewhere (the runtime subtype `name` a cast service is constructed with), unrelated to
+      // getDisplayFqName and out of scope for this feature
+      expect(text).not.toContain(`withParams(cacheKeyState, { cast: "${withNs("Book")}" })`);
+      expect(text).not.toContain(`hopState(cacheKeyState, { name: "${withNs("checkOut")}" })`);
+      // everything else stays exactly as before - never namespace-qualified in the first place
+      expect(text).toContain(
+        `rootState("Media", "list", { entitySetName: "Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
+      );
+    });
   });
 
   test("Service Generator: Min Case", async () => {

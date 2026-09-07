@@ -140,6 +140,40 @@ const config: ConfigFileOptions = {
       // create, and after this release only `Branch` and `Copy` still are one.
       keyProperties: KeyProperties.strict,
     },
+    /**
+     * The same model once more, with namespace aliasing switched on - see `odata2ts-namespace-alias.md`.
+     *
+     * This is the one client this whole package is a good case for: the reference model's four namespaces
+     * (`Library.Catalog`, `Library.Circulation`, `PublisherRegistry`, and `Library.Service`, which declares
+     * no types of its own and so never gets a folder) let three project-configured aliases and folder-layout
+     * opt-in all show up together in one real client. There is no auto-synthesis - every alias here is
+     * explicit, on purpose.
+     *
+     * Generated separately rather than replacing the raw `library` client above, exactly like every other
+     * axis in this file: `useAliasForFolderName` moves physical files, and doing that to the client every
+     * other test file already imports from would make this feature's own test additions indistinguishable
+     * from an unrelated, unintended folder-layout change to the rest of the suite.
+     *
+     * `PublisherRegistry` declares no subtype cast and no bound operation of its own, so there is no
+     * cache-key literal to prove its alias through - `useAliasForFolderName` (the generated import paths in
+     * test/feature/NamespaceAlias.test.ts) is what proves it out here instead. `Library.Catalog` and
+     * `Library.Circulation` do have a cast and a bound action respectively, which is what proves the other
+     * two aliases through an actual cache-key literal. See test/feature/NamespaceAlias.test.ts.
+     */
+    libraryNamespaceAlias: {
+      serviceName: "LibraryNamespaceAlias",
+      source: SOURCE,
+      output: "src-generated/library-namespace-alias",
+      cacheKeys: true,
+      namespace: {
+        alias: {
+          "Library.Catalog": "Catalog",
+          "Library.Circulation": "Circulation",
+          PublisherRegistry: "Pub",
+        },
+        useAliasForFolderName: true,
+      },
+    },
   },
 };
 

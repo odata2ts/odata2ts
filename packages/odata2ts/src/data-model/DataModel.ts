@@ -62,6 +62,8 @@ export class DataModel {
    */
   private typeDefinitions = new Map<string, string>();
   private readonly namespace2Alias: { [ns: string]: string };
+  /** `namespace2Alias`'s own keys, longest first, so a namespace nested inside another aliased one resolves against the more specific match - see {@link getDisplayFqName}. */
+  private readonly aliasedNamespacesLongestFirst: Array<string>;
   private aliases: Record<string, string> = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
   private navPropBindings?: Map<string, EntitySetType>;
@@ -73,11 +75,37 @@ export class DataModel {
   ) {
     this.converters = converters;
     this.namespace2Alias = namespaces.reduce<Record<string, string>>((col, [ns, alias]) => {
-      if (alias) {
+      // `alias !== undefined`, not truthy: an explicitly configured `alias: ""` (see `NamespaceOptions`,
+      // NamespaceAliasResolver) is a deliberate way to drop a namespace's prefix entirely and must be
+      // stored, not treated the same as "no alias at all" the way a plain falsy check would.
+      if (alias !== undefined) {
         col[ns] = alias;
       }
       return col;
     }, {});
+    this.aliasedNamespacesLongestFirst = Object.keys(this.namespace2Alias).sort((a, b) => b.length - a.length);
+  }
+
+  /**
+   * The display form of a fully qualified name: an aliased namespace prefix replaced by its effective
+   * alias, exactly where `namespace2Alias` carries one for it - server-declared or project-configured,
+   * already blended into that one table by the time this runs (see
+   * `NamespaceAliasResolver.resolveNamespaceAliases`, and how the digester feeds its result into this very
+   * constructor). `fqName` itself never changes here - every internal lookup (`models`,
+   * `ImportContainer.addGenerated*`, error messages) keeps keying off the real, alias-free name; this is
+   * purely an output-side view over it, for a cache-key literal that must still carry the fully qualified
+   * name (a subtype cast, a bound operation's own name) now written more compactly.
+   */
+  public getDisplayFqName(fqName: string): string {
+    for (const ns of this.aliasedNamespacesLongestFirst) {
+      if (fqName === ns) {
+        return this.namespace2Alias[ns];
+      }
+      if (fqName.startsWith(ns + ".")) {
+        return withNamespace(this.namespace2Alias[ns], fqName.slice(ns.length + 1));
+      }
+    }
+    return fqName;
   }
 
   /**

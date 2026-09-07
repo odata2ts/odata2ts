@@ -335,4 +335,44 @@ describe("Data Model Tests", function () {
 
     expect(dataModel.getEntityType(modelName)).toStrictEqual(expectedDummy);
   });
+
+  describe("getDisplayFqName", () => {
+    test("an unaliased namespace's FQN is returned unchanged", () => {
+      expect(dataModel.getDisplayFqName(`${NS1}.Reservation`)).toBe(`${NS1}.Reservation`);
+    });
+
+    test("an aliased namespace's prefix is replaced by its alias", () => {
+      expect(dataModel.getDisplayFqName(`${NS2}.Reservation`)).toBe(`${ALIAS_NS2}.Reservation`);
+    });
+
+    test("the bare namespace itself (no local name) resolves to the bare alias", () => {
+      expect(dataModel.getDisplayFqName(NS2)).toBe(ALIAS_NS2);
+    });
+
+    test("a namespace aliased to the empty string drops the prefix entirely", () => {
+      // "" is a deliberate alias value (see NamespaceOptions), distinct from "no alias at all" - the
+      // constructor must store it (`alias !== undefined`, not a truthy check) for this to work
+      const withEmptyAlias = new DataModel([[NS1], [NS2, ""]], ODataVersion.V4);
+      expect(withEmptyAlias.getDisplayFqName(`${NS2}.Reservation`)).toBe("Reservation");
+    });
+
+    test("a namespace nested inside another aliased one resolves against the longer, more specific match", () => {
+      const outer = "Library";
+      const inner = "Library.Circulation";
+      const nested = new DataModel(
+        [
+          [outer, "Lib"],
+          [inner, "Circ"],
+        ],
+        ODataVersion.V4,
+      );
+
+      expect(nested.getDisplayFqName(`${inner}.Reservation`)).toBe("Circ.Reservation");
+      expect(nested.getDisplayFqName(`${outer}.Branch`)).toBe("Lib.Branch");
+    });
+
+    test("a name that isn't qualified by any known namespace is returned unchanged", () => {
+      expect(dataModel.getDisplayFqName("Xxx")).toBe("Xxx");
+    });
+  });
 });
