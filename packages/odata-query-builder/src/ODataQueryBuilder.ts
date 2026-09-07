@@ -67,6 +67,13 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
    * `rawForm` is exactly what this same call also pushed into `expands` - needed to tell a direct entry
    * apart from a hoisted one reconciled back from `expands` after `build()` has folded
    * `hoistedExpandsBucket` into it, without depending on whether that fold has happened yet.
+   *
+   * `entitySetName` is the *target's* entity set name, read off the same nav property's own `getBinding()`
+   * (absent for a contained target, which has none) - this, not `path`, is what an `ExpandHop`'s own name
+   * must carry: `invalidates` (`buildInvalidates`, odata-service) registers a write under its bare
+   * `[entitySetName, "list"]` entry, and `touchesResource` finds an expand hop only by scanning for that
+   * exact shape - a nav property whose OData name differs from its target's entity set name (the common
+   * case) would otherwise never match, silently breaking invalidation through `$expand`.
    */
   private expandEntries:
     | Array<{
@@ -74,6 +81,7 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
         kind?: "list" | "detail";
         rawForm: string;
         nestedBuilder?: ODataQueryBuilder<any>;
+        entitySetName?: string;
       }>
     | undefined;
 
@@ -234,7 +242,8 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
               ? ("list" as const)
               : ("detail" as const)
             : undefined;
-          return { path, rawForm: path, kind };
+          const entitySetName = entityProp?.getBinding?.()?.getEntitySetName();
+          return { path, rawForm: path, kind, entitySetName };
         }),
       );
     }
@@ -294,6 +303,7 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
         rawForm: content,
         kind: entityProp.isCollectionType() ? "list" : "detail",
         nestedBuilder: nestedEngine,
+        entitySetName: entityProp.getBinding?.()?.getEntitySetName(),
       });
     }
     if (hoistedExpands.length) {
@@ -483,8 +493,9 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
    * The `$expand`/`$select`/`$filter`/`$search` structure this builder's resource needs a cache key to
    * carry - not the query's full identity, which `RequestCmd.cacheKey` (odata-service) captures separately
    * as one opaque string for everything else off the actual request. `$expand` stays hop-shaped because
-   * invalidation reach (`touchesResource`, `buildDeepEditHops`) needs to find a navigation property by
-   * name; `$select` stays a plain sorted array for a currently-nonexistent future consumer; `$filter`/
+   * invalidation reach (`touchesResource`, `buildDeepEditHops`) needs to find a hop by its target's *entity
+   * set* name - the same name a write's own `invalidates` registers under, which a bare navigation-property
+   * name need not match; `$select` stays a plain sorted array for a currently-nonexistent future consumer; `$filter`/
    * `$search` are rendered canonically here (sorted, `$filter` also safely grouped - see
    * `CacheKeyParams.ts`) so that call-site clause ordering converges, but `RequestCmd.cacheKey` folds that
    * canonical text into the same opaque string as everything else rather than exposing it as its own
@@ -502,15 +513,18 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     // expand()/expanding()/addExpands() are the only ways to populate `expands`, and every one of them
     // also pushes onto expandEntries in the same call - so expandEntries alone is a complete, structured
     // account of every *direct* expand target on this builder. `kind`'s presence is what marks a real hop:
-    // `path` is already the property's own odataName, read straight off its Q-object wrapper at the point
-    // expand()/expanding() was called - no generated table, no type, needed to enrich it further.
+    // `path` (used for sorting, and as the entry itself where there is no `entitySetName` to prefer) is the
+    // property's own odataName, read straight off its Q-object wrapper at the point expand()/expanding() was
+    // called; the hop's own name, though, prefers `entitySetName` - see the `entitySetName` doc comment on
+    // `expandEntries` above for why a bare nav-property name cannot serve as that name.
     const expandItems: Array<{ sortKey: string; entry: string | ExpandHop }> = entries.map(
-      ({ path, kind, nestedBuilder }) => {
+      ({ path, kind, nestedBuilder, entitySetName }) => {
         if (!kind) {
           return { sortKey: path, entry: path };
         }
         const nested = nestedBuilder?.getCacheKeyParams();
-        const expandHop: ExpandHop = nested?.expand ? [path, kind, { expand: nested.expand }] : [path, kind];
+        const name = entitySetName ?? path;
+        const expandHop: ExpandHop = nested?.expand ? [name, kind, { expand: nested.expand }] : [name, kind];
         return { sortKey: path, entry: expandHop };
       },
     );

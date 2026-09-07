@@ -1,7 +1,40 @@
+import {
+  QBinding,
+  QEntityCollectionPath,
+  QId,
+  QNumberParam,
+  QNumberPath,
+  QParamModel,
+  QueryObject,
+} from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, test } from "vitest";
 import { createExpandingQueryBuilderV4 } from "../src";
 import { ODataQueryBuilder } from "../src/ODataQueryBuilder";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
+
+/**
+ * The nav property's own OData name ("copies") deliberately differs in case from its target's entity set
+ * name ("Copies") - the exact shape a real service produces, and the one an expand hop's name must resolve
+ * against (via `getBinding()`), not the nav property's own name (`getPath()`).
+ */
+class QCopy extends QueryObject {
+  public readonly id = new QNumberPath(this.withPrefix("Id"));
+}
+
+class QCopyId extends QId<number> {
+  getParams(): Array<QParamModel<any, any>> {
+    return [new QNumberParam("Id", "id")];
+  }
+}
+
+class QMedia extends QueryObject {
+  public readonly id = new QNumberPath(this.withPrefix("Id"));
+  public readonly copies = new QEntityCollectionPath(
+    this.withPrefix("copies"),
+    () => QCopy,
+    new QBinding(() => new QCopyId("Copies"), "4.0"),
+  );
+}
 
 describe("CacheKeyParams", () => {
   let builder: ODataQueryBuilder<QPerson>;
@@ -100,6 +133,18 @@ describe("CacheKeyParams", () => {
       expect(builder.getCacheKeyParams()).toEqual({
         expand: [["friends", "list", { expand: [["bestFriend", "detail"]] }]],
       });
+    });
+
+    test("expand() names a bound hop by its target's entity set, not the nav property's own OData name - so a write's `[entitySetName, 'list']` invalidates entry can find it", () => {
+      const media = new ODataQueryBuilder("Media", new QMedia());
+      media.expand(["copies"]);
+      expect(media.getCacheKeyParams()).toEqual({ expand: [["Copies", "list"]] });
+    });
+
+    test("expanding() enriches a bound hop the same way as a bare expand()", () => {
+      const media = new ODataQueryBuilder("Media", new QMedia());
+      media.expanding(createExpandingQueryBuilderV4, "copies", () => {});
+      expect(media.getCacheKeyParams()).toEqual({ expand: [["Copies", "list"]] });
     });
   });
 

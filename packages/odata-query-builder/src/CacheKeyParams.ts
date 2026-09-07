@@ -1,10 +1,14 @@
 /**
- * An expand entry once its navigation property is known: the property's own OData name and kind - the same
- * `(name, kind)` shape a structured hop in the main key already uses. The optional 3rd slot, present only
- * when a nested `expanding()` builder ran for this property, carries *further* expand hops reachable
- * underneath it - nothing else. Identity for a nested query's own filter/select/orderBy/etc. is already
- * covered by the opaque `query` string `RequestCmd.cacheKey` attaches (see `QueryStringCapture.ts` in
- * odata-service); the only thing `touchesResource`/`buildDeepEditHops` ever read out of a nested expand
+ * An expand entry once its navigation property is known: the *target's own entity set name* (never the
+ * navigation property's own OData name, which need not match it) and kind - the same `(name, kind)` shape a
+ * structured hop in the main key already uses, and specifically the shape `[entitySetName, "list"]` a
+ * write's own `invalidates` registers under, so `touchesResource` can find this hop by scanning for that
+ * exact pair. A property reached through a contained (entity-set-less) navigation falls back to its own
+ * OData name, since there is no entity set for a write to ever invalidate by anyway. The optional 3rd slot,
+ * present only when a nested `expanding()` builder ran for this property, carries *further* expand hops
+ * reachable underneath it - nothing else. Identity for a nested query's own filter/select/orderBy/etc. is
+ * already covered by the opaque `query` string `RequestCmd.cacheKey` attaches (see `QueryStringCapture.ts`
+ * in odata-service); the only thing `touchesResource`/`buildDeepEditHops` ever read out of a nested expand
  * entry is more `(name, kind)` hops to keep recursing into.
  */
 export type ExpandHop = readonly [
