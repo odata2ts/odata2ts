@@ -68,6 +68,7 @@ export enum ClientApiImports {
  */
 export enum ServiceImports {
   ODataService,
+  JsonBatchBuilder,
   ODataServiceOptions,
   ODataServiceOptionsInternal,
   ODataServiceOptionsInternalV2,

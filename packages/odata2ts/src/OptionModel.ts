@@ -531,6 +531,12 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
   v4?: V4GenerationOptions;
 
   /**
+   * Configuration of the `$batch` a generated service is stamped with - the wire format is fixed at generation
+   * time and becomes the service's builder type. See {@link BatchOptions}.
+   */
+  batch?: BatchOptions;
+
+  /**
    * OData allows for namespaces so any entity is unique by virtue of it's name within a namespace.
    * odata2ts works with these fully qualified names internally, but only uses the plain name when generating
    * stuff. This might lead to name clashes (same name in different namespaces).
@@ -742,6 +748,19 @@ export interface V4GenerationOptions {
    * on V4 services that support it.
    */
   enableNativeInOperator?: boolean;
+}
+
+/**
+ * Configuration of the `$batch` a generated service is stamped with.
+ *
+ * The wire format is fixed at generation time and becomes the service's builder type, so `dependsOn` (a
+ * JSON-only option) is in the type or not. A V2 service is always multipart, whatever is stated here.
+ */
+export interface BatchOptions {
+  /** The wire format of the generated service's `$batch`. Defaults to `multipart`. */
+  format?: "multipart" | "json";
+  /** Where `true`, `batch()` on the generated service throws. Defaults to `false`. */
+  disabled?: boolean;
 }
 
 /**
