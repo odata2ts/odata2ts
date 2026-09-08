@@ -1,4 +1,5 @@
 import { TypeConverterConfig } from "@odata2ts/converter-runtime";
+import { BatchFormat } from "@odata2ts/http-client-api";
 import { AxiosRequestConfig } from "axios";
 import { NameSettings, OverridableNamingOptions } from "./NamingModel.js";
 import { TypeModel } from "./TypeModel.js";
@@ -758,7 +759,7 @@ export interface V4GenerationOptions {
  */
 export interface BatchOptions {
   /** The wire format of the generated service's `$batch`. Defaults to `multipart`. */
-  format?: "multipart" | "json";
+  format?: BatchFormat;
   /** Where `true`, `batch()` on the generated service throws. Defaults to `false`. */
   disabled?: boolean;
 }
