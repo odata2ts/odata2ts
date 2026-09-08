@@ -377,8 +377,8 @@ export class ProjectManager {
       return false;
     }
 
-    // barrels are trivially correct, so they are type checked regardless of the debug option: an ambiguous
-    // re-export is a real problem and should surface instead of being hidden behind @ts-nocheck
+    // barrels are trivially correct, so they are type checked regardless of the enableTsNoCheck option: an
+    // ambiguous re-export is a real problem and should surface instead of being hidden behind @ts-nocheck
     const fileHandler = this.createFile(INDEX_FILE_NAME, undefined, folderPath, true);
     fileHandler.getFile().addExportDeclarations(exportDeclarations);
 
