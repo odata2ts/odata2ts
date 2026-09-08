@@ -22,13 +22,11 @@ import {
  * `tsc` over the result. No server, no Docker, no runtime: it plugs into the ordinary `yarn build` +
  * `yarn test-compile` of the repository root and therefore runs in the plain unit-test CI job.
  *
- * Two things are essential for it to be worth anything:
- *
- * - **`debug: true` everywhere.** Without it the generator writes `// @ts-nocheck` into every emitted file,
- *   and a type check over such output happily confirms code which does not compile. That is not a weaker
- *   gate, it is a worthless one.
- * - **`src-generated` is in the tsconfig's `include`** (see tsconfig.json), so files nobody imports are
- *   checked as well.
+ * One thing is essential for it to be worth anything: **`src-generated` is in the tsconfig's `include`**
+ * (see tsconfig.json), so files nobody imports are checked as well. Generated files are type-checked by
+ * default (`enableTsNoCheck` defaults to `false`) - if that ever stops being true, a type check over
+ * `// @ts-nocheck` output would happily confirm code which does not compile, which is not a weaker gate,
+ * it is a worthless one.
  *
  * The variants follow n+1 rather than 2^n: one variant per axis against the baseline, plus a single
  * "everything on" one to catch interactions. A real matrix would not only be expensive, it would be hard to
@@ -70,8 +68,6 @@ const RESOLVE_LOCATION_CLASH = [{ name: "Location_", mappedName: "ShelfLocation"
 const config: ConfigFileOptions = {
   emitMode: EmitModes.ts,
   prettier: true,
-  // mandatory, see above: without it every generated file carries `@ts-nocheck` and the gate proves nothing
-  debug: true,
   services: {
     /**
      * The baseline: plain defaults, so the other variants have something to be a variant *of*.

@@ -17,10 +17,10 @@ parsing, config-file discovery, precedence between the two, the service selectio
 messages all are. What an option does to the generated code is not - that is the business of the generator
 unit tests in `packages/odata2ts/test/generator` and of the compile gate in `int-test/config-variants`.
 
-The one deliberate exception is `debug`, in `config-file.test.ts`: it decides whether every emitted file
-opens with `@ts-nocheck`, and that is worth pinning here because it is the reason every other generating
-test configuration in this repository switches the option on. A type check over output which has exempted
-itself from type checking proves nothing.
+The one deliberate exception is `enableTsNoCheck`, in `config-file.test.ts`: it decides whether every
+emitted file opens with `@ts-nocheck`, and that is worth pinning here because a type check over output
+which has exempted itself from type checking proves nothing. The same test pins that `debug` has no
+effect on this - the two options used to be one switch and are now unrelated.
 
 ## The files
 

@@ -380,6 +380,13 @@ export interface CliOptions {
    */
   debug?: boolean;
   /**
+   * Adds `// @ts-nocheck` to the top of every generated file, so a consuming project's `tsc` skips
+   * type-checking generated code. A performance optimization, not a correctness escape hatch: it does
+   * not affect {@link debug}, which is unrelated. Defaults to `false`, so generated code is
+   * type-checked by default; set to `true` to trade that safety for the faster build.
+   */
+  enableTsNoCheck?: boolean;
+  /**
    * Overrides the service name found in the source file.
    *
    * The service name is the basis for all file names and the name of the main OData client service

@@ -78,6 +78,10 @@ export function processCliArgs(argv: Array<string>) {
       "Specify alternative to 'tsconfig.json' to use specific compilerOptions (applies if emitMode is not ts)",
     )
     .option("-d, --debug", "Verbose debug infos")
+    .option(
+      "--enable-ts-no-check",
+      "Add // @ts-nocheck to generated files, skipping downstream type checking for faster builds",
+    )
     .option("--service-name <serviceName>", "Give the service your own name")
     .addOption(
       new Option("--key-properties <mode>", "What an unannotated key property is taken to be")

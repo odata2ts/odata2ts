@@ -12,6 +12,7 @@ const defaultConfig: DefaultConfiguration = {
   mode: Modes.all,
   emitMode: EmitModes.js_dts,
   debug: false,
+  enableTsNoCheck: false,
   prettier: false,
   tsconfig: "tsconfig.json",
   converters: [],

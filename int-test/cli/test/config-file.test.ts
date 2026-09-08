@@ -88,17 +88,27 @@ describe("Config File Test", () => {
     expect(result.stderr).toContain("--output");
   });
 
-  test("debug decides whether the emitted code exempts itself from type checking", async () => {
-    // The one place `debug: false` is deliberate. Without the option every generated file opens with
-    // `@ts-nocheck`, which makes a type check over that output meaningless - the reason every other
-    // generating test configuration in this repository switches it on.
+  test("enableTsNoCheck decides whether the emitted code exempts itself from type checking", async () => {
+    // The one place `enableTsNoCheck: false` (the default) is deliberate. Without the option every
+    // generated file is type-checked, which is why no other generating test configuration in this
+    // repository needs to switch it on.
     await runCli(["-s", DUMMY_SOURCE, "-o", "build/quiet", "--service-name", "Quiet"], SINGLE_SERVICE);
     const quiet = await readFile(path.join(SINGLE_SERVICE, "build/quiet/QuietService.ts"), "utf-8");
-    expect(quiet).toContain("@ts-nocheck");
+    expect(quiet).not.toContain("@ts-nocheck");
 
-    await runCli(["-s", DUMMY_SOURCE, "-o", "build/loud", "--service-name", "Loud", "-d"], SINGLE_SERVICE);
+    await runCli(
+      ["-s", DUMMY_SOURCE, "-o", "build/loud", "--service-name", "Loud", "--enable-ts-no-check"],
+      SINGLE_SERVICE,
+    );
     const loud = await readFile(path.join(SINGLE_SERVICE, "build/loud/LoudService.ts"), "utf-8");
-    expect(loud).not.toContain("@ts-nocheck");
+    expect(loud).toContain("@ts-nocheck");
+  });
+
+  test("debug no longer has any effect on @ts-nocheck", async () => {
+    // debug and enableTsNoCheck were once the same switch; this pins that they are now unrelated.
+    await runCli(["-s", DUMMY_SOURCE, "-o", "build/debug-only", "--service-name", "DebugOnly", "-d"], SINGLE_SERVICE);
+    const debugOnly = await readFile(path.join(SINGLE_SERVICE, "build/debug-only/DebugOnlyService.ts"), "utf-8");
+    expect(debugOnly).not.toContain("@ts-nocheck");
   });
 });
 
