@@ -251,6 +251,13 @@ describe("V4 EntitySetService Test", () => {
     expect(entityService.getPath()).toBe(`${EXPECTED_PATH}('tester')`);
   });
 
+  test("byRef builds the entity-type service addressed by the batch request reference", () => {
+    const entityService = testService.byRef(1);
+
+    expectTypeOf(entityService).toEqualTypeOf<PersonModelService>();
+    expect(entityService.getPath()).toBe(`${BASE_URL}/$1`);
+  });
+
   describe("alternate keys", () => {
     let toTest: TestCollectionServiceWithAlternateKey;
 

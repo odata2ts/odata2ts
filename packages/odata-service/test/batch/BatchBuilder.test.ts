@@ -1,9 +1,11 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { describe, expect, expectTypeOf, test } from "vitest";
+import { BatchBuilder } from "../../src/batch/BatchBuilder";
 import { ODataService } from "../../src/ODataService";
 import { ODataServiceOptions } from "../../src/ODataServiceOptions";
 import { BlobGetRequestCmd } from "../../src/request/BlobGetRequestCmd";
 import { RequestCmd, RequestCmdOptions } from "../../src/request/RequestCmd";
+import { PersonModelCollectionService } from "../fixture/v4/PersonModelService";
 import { MockClient } from "../mock/MockClient";
 
 const BASE = "http://example.com/odata";
@@ -74,6 +76,18 @@ describe("BatchBuilder via ODataService.batch()", () => {
     expect(requests[0].method).toBe("get");
     expect(requests[1].method).toBe("patch");
     expect(requests[1].body).toStrictEqual({ name: "n" });
+  });
+
+  test("strips the base path off a byRef ($<id>) address, leaving the reference bare in the batch", () => {
+    const { client } = makeService();
+    const collection = new PersonModelCollectionService(client, BASE, "People");
+    const builder = new BatchBuilder(client, BASE, "multipart", false);
+
+    builder.add(collection.byRef(1).query());
+
+    const { requests } = builder.getRequestInfo();
+    expect(requests[0].url).toBe("$1");
+    expect(requests[0].method).toBe("get");
   });
 
   test("posts the batch to the service root's $batch endpoint", async () => {

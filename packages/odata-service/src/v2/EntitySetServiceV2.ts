@@ -85,6 +85,20 @@ export abstract class EntitySetServiceV2<
   }
 
   /**
+   * The entity-type service addressed by a batch request reference (`$<id>`) rather than by a known key -
+   * the single-entity twin of {@link byId} for the case where the key is not yet known because an earlier
+   * sub-request in the same batch just created the entity. The service's path is the bare `$<id>` under the
+   * base, so a request built from it goes out as `$<id>/…` in the batch.
+   *
+   * Not ETag-gated and carries no cache key - a reference is not a real address, so there is nothing to gate
+   * on or to store under.
+   */
+  public byRef(id: number): ES {
+    const { client, basePath, options } = this.__base;
+    return this.createEntityService(client, basePath, `$${id}`, options);
+  }
+
+  /**
    * The key of the addressed entity as a cache key carries it - see {@link EntitySetServiceV4.cacheKeyOf},
    * whose reasoning applies unchanged here.
    */
