@@ -46,7 +46,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
       .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
       .execute();
 
-    expect(client.lastBatchBody?.requests.map((request) => request.id)).toEqual(["0"]);
+    expect(client.lastBatchBody?.requests.map((request) => request.id)).toEqual(["1"]);
 
     client.batchResponse = { responses: [], resolvedBy: "id" };
     await service
@@ -55,7 +55,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
       .add(new TestCmd(client, ODataHttpMethods.Post, BASE + "/B"))
       .execute();
 
-    expect(client.lastBatchBody?.requests.map((request) => request.id)).toEqual(["0", "1"]);
+    expect(client.lastBatchBody?.requests.map((request) => request.id)).toEqual(["1", "2"]);
   });
 
   test("strips the service base path off every sub-request url, keeps the query", async () => {
@@ -109,8 +109,8 @@ describe("BatchBuilder via ODataService.batch()", () => {
     const { client, service } = makeService();
     client.batchResponse = {
       responses: [
-        { id: "0", status: 200, body: { id: 1 } },
-        { id: "1", status: 200, body: { id: 2 } },
+        { id: "1", status: 200, body: { id: 1 } },
+        { id: "2", status: 200, body: { id: 2 } },
       ],
       resolvedBy: "id",
     };
@@ -143,7 +143,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
 
   test("executing with format: json on a V2 service throws, while multipart goes out", async () => {
     const { client, service } = makeService({ odataVersion: "2.0" });
-    client.batchResponse = { responses: [{ id: "0", status: 200, body: [] }], resolvedBy: "id" };
+    client.batchResponse = { responses: [{ id: "1", status: 200, body: [] }], resolvedBy: "id" };
 
     await expect(
       service
@@ -152,7 +152,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
         .execute({ format: "json" }),
     ).rejects.toThrow(/V2/);
 
-    client.batchResponse = { responses: [{ id: "0", status: 200, body: [] }], resolvedBy: "id" };
+    client.batchResponse = { responses: [{ id: "1", status: 200, body: [] }], resolvedBy: "id" };
     const [slot] = await service
       .batch()
       .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
@@ -170,7 +170,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
 
   test("uses the service's default format and honours a per-call override", async () => {
     const { client, service } = makeService();
-    client.batchResponse = { responses: [{ id: "0", status: 200, body: null }], resolvedBy: "id" };
+    client.batchResponse = { responses: [{ id: "1", status: 200, body: null }], resolvedBy: "id" };
 
     await service
       .batch()
@@ -178,7 +178,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
       .execute();
     expect(client.lastBatchOptions?.format).toBe("multipart");
 
-    client.batchResponse = { responses: [{ id: "0", status: 200, body: null }], resolvedBy: "id" };
+    client.batchResponse = { responses: [{ id: "1", status: 200, body: null }], resolvedBy: "id" };
     await service
       .batch()
       .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
@@ -189,7 +189,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
   describe("slot outcomes", () => {
     test("a 2xx sub-request is returned as-is, converted", async () => {
       const { client, service } = makeService();
-      client.batchResponse = { responses: [{ id: "0", status: 200, body: [{ id: 1, name: "a" }] }], resolvedBy: "id" };
+      client.batchResponse = { responses: [{ id: "1", status: 200, body: [{ id: 1, name: "a" }] }], resolvedBy: "id" };
 
       const [slot] = await service
         .batch()
@@ -203,7 +203,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
     test("a non-2xx sub-request is returned unconverted, with the error document as data", async () => {
       const { client, service } = makeService();
       const error = { error: { code: "X" } };
-      client.batchResponse = { responses: [{ id: "0", status: 400, body: error }], resolvedBy: "id" };
+      client.batchResponse = { responses: [{ id: "1", status: 400, body: error }], resolvedBy: "id" };
 
       const [slot] = await service
         .batch()
@@ -216,7 +216,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
 
     test("a 424 is kept as a 424", async () => {
       const { client, service } = makeService();
-      client.batchResponse = { responses: [{ id: "0", status: 424, body: undefined }], resolvedBy: "id" };
+      client.batchResponse = { responses: [{ id: "1", status: 424, body: undefined }], resolvedBy: "id" };
 
       const [slot] = await service
         .batch()
@@ -231,8 +231,8 @@ describe("BatchBuilder via ODataService.batch()", () => {
       const { client, service } = makeService();
       client.batchResponse = {
         responses: [
-          { id: "0", status: 200, atomicityGroup: "g", body: { ok: true } },
-          { id: "1", status: 400, atomicityGroup: "g", body: { error: "bad" } },
+          { id: "1", status: 200, atomicityGroup: "g", body: { ok: true } },
+          { id: "2", status: 400, atomicityGroup: "g", body: { error: "bad" } },
         ],
         resolvedBy: "id",
       };
@@ -251,7 +251,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
 
     test("a slot with no answer at all is Never Ran", async () => {
       const { client, service } = makeService();
-      client.batchResponse = { responses: [{ id: "0", status: 200, body: "done" }], resolvedBy: "id" };
+      client.batchResponse = { responses: [{ id: "1", status: 200, body: "done" }], resolvedBy: "id" };
 
       const [first, second] = await service
         .batch()
@@ -271,7 +271,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
           data: response.data.map((person) => ({ ...person, name: person.name.toUpperCase() })),
         }),
       );
-      client.batchResponse = { responses: [{ id: "0", status: 200, body: [{ id: 1, name: "a" }] }], resolvedBy: "id" };
+      client.batchResponse = { responses: [{ id: "1", status: 200, body: [{ id: 1, name: "a" }] }], resolvedBy: "id" };
 
       const [slot] = await service.batch().add(cmd).execute();
 
@@ -280,7 +280,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
   });
 
   describe("dependsOn", () => {
-    test("resolves dependencies to the wire ids of the commands they name", async () => {
+    test("resolves dependencies to the wire ids they name", async () => {
       const { client, service } = makeService();
       client.batchResponse = { responses: [], resolvedBy: "id" };
       const first = new TestCmd(client, ODataHttpMethods.Post, BASE + "/Members", { name: "n" });
@@ -289,45 +289,53 @@ describe("BatchBuilder via ODataService.batch()", () => {
       await service
         .batch()
         .add(first)
-        .add(second, { dependsOn: [first] })
+        .add(second, { dependsOn: [1] })
         .execute();
 
-      expect(client.lastBatchBody?.requests[1].dependsOn).toStrictEqual(["0"]);
+      expect(client.lastBatchBody?.requests[1].dependsOn).toStrictEqual(["1"]);
     });
 
-    test("throws where a dependency names a command not in the batch", async () => {
+    test("allows depending on any request added before it", async () => {
       const { client, service } = makeService();
-      const outsider = new TestCmd(client, ODataHttpMethods.Get, BASE + "/X");
-      const member = new TestCmd(client, ODataHttpMethods.Get, BASE + "/Y");
+      client.batchResponse = { responses: [], resolvedBy: "id" };
 
-      await expect(
-        service
-          .batch()
-          .add(member, { dependsOn: [outsider] })
-          .execute(),
-      ).rejects.toThrow(/not part of this batch/);
+      await service
+        .batch()
+        .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
+        .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/B"))
+        .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/C"), { dependsOn: [1, 2] })
+        .execute();
+
+      expect(client.lastBatchBody?.requests[2].dependsOn).toStrictEqual(["1", "2"]);
     });
 
-    test("refuses a dependency on a command added more than once, which is ambiguous", async () => {
+    test("refuses a forward reference to a request not yet added", () => {
       const { client, service } = makeService();
-      const duplicated = new TestCmd(client, ODataHttpMethods.Post, BASE + "/Members", { name: "n" });
-      const member = new TestCmd(client, ODataHttpMethods.Get, BASE + "/Members(1)");
 
-      await expect(
+      expect(() =>
         service
           .batch()
-          .add(duplicated)
-          .add(member, { dependsOn: [duplicated] })
-          .add(duplicated)
-          .execute(),
-      ).rejects.toThrow(/ambiguous/);
+          .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
+          .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/B"), { dependsOn: [3] }),
+      ).toThrow(/added before it/);
+    });
+
+    test("refuses a dependency on the request's own id", () => {
+      const { client, service } = makeService();
+
+      expect(() =>
+        service
+          .batch()
+          .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
+          .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/B"), { dependsOn: [2] }),
+      ).toThrow(/added before it/);
     });
   });
 
   describe("typing", () => {
     test("the result tuple is element-for-element the commands' own response types", async () => {
       const { client, service } = makeService();
-      client.batchResponse = { responses: [{ id: "0", status: 200, body: [] }], resolvedBy: "id" };
+      client.batchResponse = { responses: [{ id: "1", status: 200, body: [] }], resolvedBy: "id" };
 
       const people = new TestCmd<Person[]>(client, ODataHttpMethods.Get, BASE + "/People");
       const created = new TestCmd<{ id: number }, { name: string }>(client, ODataHttpMethods.Post, BASE + "/People", {
@@ -344,8 +352,8 @@ describe("BatchBuilder via ODataService.batch()", () => {
       const { client, service } = makeService();
       client.batchResponse = {
         responses: [
-          { id: "0", status: 200, body: [] },
-          { id: "1", status: 201, body: { id: 1 } },
+          { id: "1", status: 200, body: [] },
+          { id: "2", status: 201, body: { id: 1 } },
         ],
         resolvedBy: "id",
       };

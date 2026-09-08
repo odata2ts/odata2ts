@@ -27,14 +27,13 @@ export type BatchResponse<T> = HttpResponseModel<T | undefined>;
 /** Options for adding one request to a batch. */
 export interface BatchAddOptions {
   /**
-   * Other commands in this batch whose sub-request must run before this one's. Order within a change set
-   * guarantees nothing (§11.7.2), so this is the only way to say it. Given as the command objects
-   * themselves; the builder resolves them to wire ids. The other format could not express a dependency that
-   * is a forward reference or crosses a change set - those are refused where the format cannot carry them.
-   * A target must be added exactly once: a command added more than once is an ambiguous dependency (which of
-   * its slots would the other wait on?) and is refused.
+   * The wire ids of the requests in this batch whose sub-request must run before this one's. Order within a
+   * change set guarantees nothing (§11.7.2), so this is the only way to say it. Each id must name a request
+   * added before this one (a wire id between `1` and this request's own id minus one); a self- or
+   * forward-reference is refused. A dependency that is a forward reference or crosses a change set is
+   * refused where the format cannot carry it.
    */
-  dependsOn?: Array<RequestCmd<any, any, any>>;
+  dependsOn?: Array<number>;
 }
 
 /** Options for sending one batch, overriding the service's defaults for this single call. */
@@ -51,8 +50,8 @@ interface BatchEntry {
   id: string;
   /** Set while an atomicity group (a multipart change set) is open. */
   group?: string;
-  /** The dependencies, as command objects, resolved to wire ids when the body is built. */
-  dependsOn: Array<RequestCmd<any, any, any>>;
+  /** The dependencies, as the wire ids of the preceding requests this one waits on. */
+  dependsOn: Array<number>;
   /** The prepared request, computed once and shared between building the body and dispatching the answer. */
   prepared?: RequestInfo<any>;
 }
@@ -94,10 +93,26 @@ export class BatchBuilder<R extends Array<unknown> = []> {
       );
     }
 
-    const id = String(this.__entries.length);
-    this.__entries.push({ cmd, id, group: this.__openGroup, dependsOn: options?.dependsOn ?? [] });
+    const id = this.__entries.length + 1;
+    this.__validateDependsOn(options?.dependsOn, id);
+    this.__entries.push({ cmd, id: String(id), group: this.__openGroup, dependsOn: options?.dependsOn ?? [] });
 
     return this as unknown as BatchBuilder<[...R, BatchResponse<T>]>;
+  }
+
+  /**
+   * A `dependsOn` may only name a request added before this one - the ids it is given are the wire ids of the
+   * requests already in the batch, and this request cannot wait on itself or on a request that comes after it.
+   * Checked here, where the dependency is stated, so a bad one is refused before the batch is built or sent.
+   */
+  private __validateDependsOn(dependsOn: Array<number> | undefined, selfRef: number): void {
+    for (const dep of dependsOn ?? []) {
+      if (!Number.isInteger(dep) || dep < 1 || dep >= selfRef) {
+        throw new Error(
+          `A request can only depend on a request added before it (a wire id between 1 and ${selfRef - 1}); got ${dep}.`,
+        );
+      }
+    }
   }
 
   /** Open an atomicity group (a multipart change set). Commands added while it is open belong to it. */
@@ -174,12 +189,6 @@ export class BatchBuilder<R extends Array<unknown> = []> {
   }
 
   private __buildBody(): BatchRequestBody {
-    const idOf = new Map(this.__entries.map((entry) => [entry.cmd, entry.id]));
-    const addedCount = new Map<RequestCmd<any, any, any>, number>();
-    for (const entry of this.__entries) {
-      addedCount.set(entry.cmd, (addedCount.get(entry.cmd) ?? 0) + 1);
-    }
-
     const requests = this.__entries.map((entry): BatchRequestObject => {
       const prepared = entry.prepared!;
       const request: BatchRequestObject = {
@@ -192,19 +201,8 @@ export class BatchBuilder<R extends Array<unknown> = []> {
         request.atomicityGroup = entry.group;
       }
 
-      const dependsOn = entry.dependsOn.map((dep) => idOf.get(dep));
-      if (dependsOn.length > 0) {
-        for (const dep of entry.dependsOn) {
-          if (idOf.get(dep) === undefined) {
-            throw new Error("A request depends on a command that is not part of this batch.");
-          }
-          if ((addedCount.get(dep) ?? 0) > 1) {
-            throw new Error(
-              "A request depends on a command that was added to the batch more than once - the dependency is ambiguous. Add that command once, or add two separate commands.",
-            );
-          }
-        }
-        request.dependsOn = dependsOn as Array<string>;
+      if (entry.dependsOn.length > 0) {
+        request.dependsOn = entry.dependsOn.map((dep) => String(dep));
       }
 
       if (prepared.headers && Object.keys(prepared.headers).length > 0) {
