@@ -10,6 +10,7 @@ import {
 import { buildDeepEditHops, CacheKeyState, withKey, withParams } from "../cacheKey/index.js";
 import { getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
+import { ref } from "../ref.js";
 import { ConcurrencyOptions, UrlBuilderRequestCmdV4 } from "../request";
 import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
@@ -110,7 +111,7 @@ export abstract class EntitySetServiceV4<
    */
   public byRef(id: number): ES {
     const { client, basePath, options } = this.__base;
-    return this.createEntityService(client, basePath, `$${id}`, options);
+    return this.createEntityService(client, basePath, ref(id), options);
   }
 
   /**
