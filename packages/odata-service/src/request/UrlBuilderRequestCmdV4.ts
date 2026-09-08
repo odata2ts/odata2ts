@@ -28,6 +28,12 @@ export class UrlBuilderRequestCmdV4<
   /**
    * Add to the existing query builder, thereby creating a clone.
    *
+   * `queryParams` is re-snapshotted off the resulting builder rather than carried over from `this.options`:
+   * it was itself only ever a snapshot of the builder at construction time (see the service methods that
+   * set it), so carrying the old one forward here would leave the new command's cache key blind to whatever
+   * `modFunction` just changed - a stale `$select`/`$expand` restriction next to a URL that no longer
+   * matches it.
+   *
    * @param modFunction the function to modify the URL
    * @returns
    */
@@ -43,7 +49,7 @@ export class UrlBuilderRequestCmdV4<
       builder,
       this.q,
       this.data,
-      this.options,
+      { ...this.options, queryParams: builder.getCacheKeyParams() },
     );
   }
 

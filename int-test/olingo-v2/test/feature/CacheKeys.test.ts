@@ -53,6 +53,21 @@ describe("Olingo Library: cache keys", () => {
     ]);
   });
 
+  test("addToQuery changes the cache key with whatever it just restricted - not frozen at the query() call's own restrictions", async () => {
+    const base = LIBRARY.Books().query((builder, qBook) => builder.filter(qBook.Language.eq("de")));
+    const widened = base.addToQuery((builder) => builder.select("Title").top(1));
+
+    expect(widened.cacheKey).not.toEqual(base.cacheKey);
+
+    const [, , params] = widened.cacheKey as [string, string, { select: Array<string>; query: string }];
+    expect(params.select).toEqual(["Title"]);
+    expect(decodeURIComponent(params.query)).toContain("$filter=Language+eq+'de'");
+    expect(decodeURIComponent(params.query)).toContain("$top=1");
+
+    const result = await widened.execute();
+    expect(result.status).toBe(200);
+  });
+
   test("touchesResource reaches a hierarchical key by its own name", () => {
     const key = LIBRARY.Members(1).Loans().query().cacheKey!;
     expect(touchesResource(["Members", "detail", 1], key)).toBe(true);

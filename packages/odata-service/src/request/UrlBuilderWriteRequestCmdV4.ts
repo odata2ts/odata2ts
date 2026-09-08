@@ -47,7 +47,10 @@ export class UrlBuilderWriteRequestCmdV4<
 
   /**
    * Overridden so the clone is a write command too: the inherited version names its own class, and would
-   * hand back a command that has silently forgotten the ETag just stated on this one.
+   * hand back a command that has silently forgotten the ETag just stated on this one. Unlike the inherited
+   * version, `queryParams` is carried over as-is rather than re-snapshotted off the new builder: a write
+   * never exposes a `cacheKey` at all (`RequestCmd.cacheKey` is `undefined` for any method but `GET`), so
+   * there is nothing here for a stale snapshot to mislead.
    */
   public addToQuery(modFunction: (urlBuilder: Builder, q: Q) => Builder) {
     if (!modFunction) {
