@@ -32,16 +32,14 @@ export interface BatchAddOptions {
    * ids; in the factory form of {@link BatchBuilder.add} a callback `(selfRef) => number[]` is resolved against
    * the id the command is about to receive, so a relative dependency (`[selfRef - 1]`) is expressible. Each id
    * must name a request added before this one (a wire id between `1` and this request's own id minus one); a
-   * self- or forward-reference is refused. A dependency that is a forward reference or crosses a change set is
-   * refused where the format cannot carry it.
+   * self- or forward-reference is refused. Only a JSON batch may order its requests, so this option lives on
+   * {@link JsonBatchBuilder.add} alone - a multipart batch carries no `dependsOn`.
    */
   dependsOn?: Array<number> | ((selfRef: number) => Array<number>);
 }
 
-/** Options for sending one batch, overriding the service's defaults for this single call. */
+/** Options for sending one batch. */
 export interface BatchExecuteOptions {
-  /** Override the service's default wire format for this one batch. */
-  format?: BatchFormat;
   /** Ask the server to answer what it can even where a sub-request fails (the `Prefer` header). */
   continueOnError?: boolean;
 }
@@ -67,38 +65,36 @@ interface BatchEntry {
  * cache-key harvesting all behave exactly as they would one by one. What the builder owns is what a direct
  * request has no need of: the wire ids, the one url rewrite (the service base path, stripped), the
  * atomicity-group framing, and the normalization of a sub-answer that never happened.
+ *
+ * The wire format is fixed for the life of a builder and carried by the two concrete subclasses
+ * {@link MultipartBatchBuilder} and {@link JsonBatchBuilder}; which one a generated service builds - and the
+ * `TBuilder` type it is stamped with - is a generation-time decision, not a per-call option.
  */
-export class BatchBuilder<R extends Array<unknown> = []> {
+export abstract class BatchBuilder<R extends Array<unknown> = []> {
   private readonly __client: ODataHttpClient;
   private readonly __basePath: string;
-  private readonly __defaultFormat: BatchFormat;
-  private readonly __isV2: boolean;
+  private readonly __format: BatchFormat;
   private readonly __entries: Array<BatchEntry> = [];
   private __openGroup?: string;
 
-  constructor(client: ODataHttpClient, basePath: string, defaultFormat: BatchFormat, isV2: boolean) {
+  protected constructor(client: ODataHttpClient, basePath: string, format: BatchFormat) {
     this.__client = client;
     this.__basePath = basePath;
-    this.__defaultFormat = defaultFormat;
-    this.__isV2 = isV2;
+    this.__format = format;
   }
 
   /**
-   * Add one request to the batch. Blob and stream commands are refused - they carry a binary body the batch
-   * wire formats cannot carry. The same command may be added more than once: it is reused across its slots
-   * (the batch never mutates a command's state), so sending the same request twice is simply adding it twice.
-   *
-   * Two forms. The plain form takes the ready command. The factory form takes a function that builds the
-   * command knowing the wire id it is about to receive - `selfRef` - so the immediately-preceding request is
-   * `selfRef - 1` and a reference to it (`byRef(selfRef - 1)`) needs no hand-counting. Both return the builder,
-   * so the chain stays fluent.
+   * Shared add plumbing: assigns the wire id, resolves and validates `dependsOn`, builds the command (plain or
+   * factory form), refuses a blob or stream, and records the entry. The subclass's public `add` picks the return
+   * type; the factory form is handed the wire id the command is about to receive, so the immediately-preceding
+   * request is `selfRef - 1`.
    */
-  public add<T>(
+  protected __addEntry<T, TThis>(
     cmdOrFactory: RequestCmd<any, any, T> | ((selfRef: number) => RequestCmd<any, any, T>),
-    options?: BatchAddOptions,
-  ): BatchBuilder<[...R, BatchResponse<T>]> {
+    dependsOnOption: BatchAddOptions["dependsOn"],
+  ): TThis {
     const id = this.__entries.length + 1;
-    const dependsOn = BatchBuilder.resolveDependsOn(options?.dependsOn, id);
+    const dependsOn = BatchBuilder.resolveDependsOn(dependsOnOption, id);
     this.__validateDependsOn(dependsOn, id);
     const cmd = typeof cmdOrFactory === "function" ? cmdOrFactory(id) : cmdOrFactory;
 
@@ -110,7 +106,7 @@ export class BatchBuilder<R extends Array<unknown> = []> {
 
     this.__entries.push({ cmd, id: String(id), group: this.__openGroup, dependsOn });
 
-    return this as unknown as BatchBuilder<[...R, BatchResponse<T>]>;
+    return this as unknown as TThis;
   }
 
   /**
@@ -118,15 +114,12 @@ export class BatchBuilder<R extends Array<unknown> = []> {
    * resolved against the id the command is about to receive - which is what lets a relative dependency
    * (`[selfRef - 1]`) name the previous request.
    */
-  private static resolveDependsOn(
-    dependsOn: BatchAddOptions["dependsOn"] | undefined,
-    selfRef: number,
-  ): Array<number> {
-    return typeof dependsOn === "function" ? dependsOn(selfRef) : dependsOn ?? [];
+  private static resolveDependsOn(dependsOn: BatchAddOptions["dependsOn"] | undefined, selfRef: number): Array<number> {
+    return typeof dependsOn === "function" ? dependsOn(selfRef) : (dependsOn ?? []);
   }
 
   /**
-   * A `dependsOn` may only name a request added before this one - the ids it is given are the wire ids of the
+   * A `dependsOn` may only name a request added before this one - the ids it are the wire ids of the
    * requests already in the batch, and this request cannot wait on itself or on a request that comes after it.
    * Checked here, where the dependency is stated, so a bad one is refused before the batch is built or sent.
    */
@@ -141,7 +134,7 @@ export class BatchBuilder<R extends Array<unknown> = []> {
   }
 
   /** Open an atomicity group (a multipart change set). Commands added while it is open belong to it. */
-  public startGroup(groupId: string): BatchBuilder<R> {
+  public startGroup(groupId: string): this {
     if (this.__openGroup !== undefined) {
       throw new Error(`An atomicity group ("${this.__openGroup}") is already open - end it before opening another.`);
     }
@@ -150,7 +143,7 @@ export class BatchBuilder<R extends Array<unknown> = []> {
   }
 
   /** Close the open atomicity group. */
-  public endGroup(): BatchBuilder<R> {
+  public endGroup(): this {
     if (this.__openGroup === undefined) {
       throw new Error("endGroup() with no atomicity group open.");
     }
@@ -176,14 +169,9 @@ export class BatchBuilder<R extends Array<unknown> = []> {
    * sub-request's real answer, converted - the builder does not invent a second result type.
    */
   public async execute(options?: BatchExecuteOptions): Promise<R> {
-    const format = options?.format ?? this.__defaultFormat;
-    if (this.__isV2 && format === "json") {
-      throw new Error('A V2 service has no JSON $batch - use format: "multipart".');
-    }
-
     const body = this.getRequestInfo();
     const response = await this.__client.batch(this.__batchUrl(), body, {
-      format,
+      format: this.__format,
       continueOnError: options?.continueOnError,
     });
 
@@ -307,5 +295,53 @@ export class BatchBuilder<R extends Array<unknown> = []> {
       500: "Internal Server Error",
     };
     return known[status] ?? "";
+  }
+}
+
+/**
+ * A `$batch` in the multipart wire format - the default. The multipart batch is the one change sets (atomicity
+ * groups) frame; it carries no `dependsOn`, so {@link MultipartBatchBuilder.add} takes no {@link BatchAddOptions}.
+ */
+export class MultipartBatchBuilder<R extends Array<unknown> = []> extends BatchBuilder<R> {
+  constructor(client: ODataHttpClient, basePath: string) {
+    super(client, basePath, "multipart");
+  }
+
+  /**
+   * Add one request to the batch. Blob and stream commands are refused - they carry a binary body the batch
+   * wire formats cannot carry. The same command may be added more than once: it is reused across its slots
+   * (the batch never mutates a command's state), so sending the same request twice is simply adding it twice.
+   *
+   * Two forms. The plain form takes the ready command. The factory form takes a function that builds the
+   * command knowing the wire id it is about to receive - `selfRef` - so the immediately-preceding request is
+   * `selfRef - 1` and a reference to it (`byRef(selfRef - 1)`) needs no hand-counting. Both return the builder,
+   * so the chain stays fluent.
+   */
+  public add<T>(
+    cmdOrFactory: RequestCmd<any, any, T> | ((selfRef: number) => RequestCmd<any, any, T>),
+  ): MultipartBatchBuilder<[...R, BatchResponse<T>]> {
+    return this.__addEntry<T, MultipartBatchBuilder<[...R, BatchResponse<T>]>>(cmdOrFactory, undefined);
+  }
+}
+
+/**
+ * A `$batch` in the JSON wire format. Only a JSON batch may order its requests, so `dependsOn` - and thus the
+ * {@link BatchAddOptions} - lives on {@link JsonBatchBuilder.add} alone.
+ */
+export class JsonBatchBuilder<R extends Array<unknown> = []> extends BatchBuilder<R> {
+  constructor(client: ODataHttpClient, basePath: string) {
+    super(client, basePath, "json");
+  }
+
+  /**
+   * Add one request to the batch, optionally naming the requests it must run after (`dependsOn`). The command
+   * may be given plain or as a factory (which is handed the wire id `selfRef` the command is about to receive);
+   * a blob or stream command is refused. Returns the builder, so the chain stays fluent.
+   */
+  public add<T>(
+    cmdOrFactory: RequestCmd<any, any, T> | ((selfRef: number) => RequestCmd<any, any, T>),
+    options?: BatchAddOptions,
+  ): JsonBatchBuilder<[...R, BatchResponse<T>]> {
+    return this.__addEntry<T, JsonBatchBuilder<[...R, BatchResponse<T>]>>(cmdOrFactory, options?.dependsOn);
   }
 }

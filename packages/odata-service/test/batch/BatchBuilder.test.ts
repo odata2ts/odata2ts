@@ -1,6 +1,6 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { BatchBuilder } from "../../src/batch/BatchBuilder";
+import { BatchAddOptions, JsonBatchBuilder, MultipartBatchBuilder } from "../../src/batch/BatchBuilder";
 import { ODataService } from "../../src/ODataService";
 import { ODataServiceOptions } from "../../src/ODataServiceOptions";
 import { BlobGetRequestCmd } from "../../src/request/BlobGetRequestCmd";
@@ -81,7 +81,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
   test("strips the base path off a byRef ($<id>) address, leaving the reference bare in the batch", () => {
     const { client } = makeService();
     const collection = new PersonModelCollectionService(client, BASE, "People");
-    const builder = new BatchBuilder(client, BASE, "multipart", false);
+    const builder = new MultipartBatchBuilder(client, BASE);
 
     builder.add(collection.byRef(1).query());
 
@@ -155,18 +155,10 @@ describe("BatchBuilder via ODataService.batch()", () => {
     expect(() => service.batch().startGroup("g1").add(cmd).endGroup()).not.toThrow();
   });
 
-  test("executing with format: json on a V2 service throws, while multipart goes out", async () => {
+  test("a V2 service's batch is always a multipart builder", async () => {
     const { client, service } = makeService({ odataVersion: "2.0" });
     client.batchResponse = { responses: [{ id: "1", status: 200, body: [] }], resolvedBy: "id" };
 
-    await expect(
-      service
-        .batch()
-        .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
-        .execute({ format: "json" }),
-    ).rejects.toThrow(/V2/);
-
-    client.batchResponse = { responses: [{ id: "1", status: 200, body: [] }], resolvedBy: "id" };
     const [slot] = await service
       .batch()
       .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
@@ -182,22 +174,24 @@ describe("BatchBuilder via ODataService.batch()", () => {
     expect(() => service.batch()).toThrow(/disabled/);
   });
 
-  test("uses the service's default format and honours a per-call override", async () => {
-    const { client, service } = makeService();
+  test("the wire format is fixed by the builder: a multipart builder goes out as multipart", async () => {
+    const { client } = makeService();
     client.batchResponse = { responses: [{ id: "1", status: 200, body: null }], resolvedBy: "id" };
 
-    await service
-      .batch()
-      .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
-      .execute();
+    await new MultipartBatchBuilder(client, BASE).add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A")).execute();
+
     expect(client.lastBatchOptions?.format).toBe("multipart");
+  });
 
+  test("the wire format is fixed by the builder: a JSON builder goes out as json", async () => {
+    const { client } = makeService();
     client.batchResponse = { responses: [{ id: "1", status: 200, body: null }], resolvedBy: "id" };
-    await service
-      .batch()
+
+    await new JsonBatchBuilder(client, BASE)
       .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
-      .execute({ format: "json", continueOnError: true });
-    expect(client.lastBatchOptions).toStrictEqual({ format: "json", continueOnError: true });
+      .execute({ continueOnError: true });
+
+    expect(client.lastBatchOptions).toMatchObject({ format: "json", continueOnError: true });
   });
 
   describe("slot outcomes", () => {
@@ -293,53 +287,47 @@ describe("BatchBuilder via ODataService.batch()", () => {
     });
   });
 
-  describe("dependsOn", () => {
-    test("resolves dependencies to the wire ids they name", async () => {
-      const { client, service } = makeService();
-      client.batchResponse = { responses: [], resolvedBy: "id" };
+  describe("dependsOn (JSON builder)", () => {
+    test("resolves dependencies to the wire ids they name", () => {
+      const { client } = makeService();
       const first = new TestCmd(client, ODataHttpMethods.Post, BASE + "/Members", { name: "n" });
       const second = new TestCmd(client, ODataHttpMethods.Get, BASE + "/Members(1)");
 
-      await service
-        .batch()
+      const { requests } = new JsonBatchBuilder(client, BASE)
         .add(first)
         .add(second, { dependsOn: [1] })
-        .execute();
+        .getRequestInfo();
 
-      expect(client.lastBatchBody?.requests[1].dependsOn).toStrictEqual(["1"]);
+      expect(requests[1].dependsOn).toStrictEqual(["1"]);
     });
 
-    test("allows depending on any request added before it", async () => {
-      const { client, service } = makeService();
-      client.batchResponse = { responses: [], resolvedBy: "id" };
+    test("allows depending on any request added before it", () => {
+      const { client } = makeService();
 
-      await service
-        .batch()
+      const { requests } = new JsonBatchBuilder(client, BASE)
         .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
         .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/B"))
         .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/C"), { dependsOn: [1, 2] })
-        .execute();
+        .getRequestInfo();
 
-      expect(client.lastBatchBody?.requests[2].dependsOn).toStrictEqual(["1", "2"]);
+      expect(requests[2].dependsOn).toStrictEqual(["1", "2"]);
     });
 
     test("refuses a forward reference to a request not yet added", () => {
-      const { client, service } = makeService();
+      const { client } = makeService();
 
       expect(() =>
-        service
-          .batch()
+        new JsonBatchBuilder(client, BASE)
           .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
           .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/B"), { dependsOn: [3] }),
       ).toThrow(/added before it/);
     });
 
     test("refuses a dependency on the request's own id", () => {
-      const { client, service } = makeService();
+      const { client } = makeService();
 
       expect(() =>
-        service
-          .batch()
+        new JsonBatchBuilder(client, BASE)
           .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
           .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/B"), { dependsOn: [2] }),
       ).toThrow(/added before it/);
@@ -367,11 +355,9 @@ describe("BatchBuilder via ODataService.batch()", () => {
     test("lets the factory address the preceding request with selfRef - 1", () => {
       const { client } = makeService();
       const collection = new PersonModelCollectionService(client, BASE, "People");
-      const builder = new BatchBuilder(client, BASE, "multipart", false);
+      const builder = new MultipartBatchBuilder(client, BASE);
 
-      builder
-        .add(collection.query())
-        .add((selfRef) => collection.byRef(selfRef - 1).query());
+      builder.add(collection.query()).add((selfRef) => collection.byRef(selfRef - 1).query());
 
       const { requests } = builder.getRequestInfo();
       expect(requests[0].url).toBe("People");
@@ -381,7 +367,7 @@ describe("BatchBuilder via ODataService.batch()", () => {
     test("resolves a factory-form dependsOn callback against the command's own id", () => {
       const { client } = makeService();
       const collection = new PersonModelCollectionService(client, BASE, "People");
-      const builder = new BatchBuilder(client, BASE, "multipart", false);
+      const builder = new JsonBatchBuilder(client, BASE);
 
       builder
         .add(collection.query())
@@ -427,6 +413,22 @@ describe("BatchBuilder via ODataService.batch()", () => {
 
       expectTypeOf(g.data).toEqualTypeOf<Person[] | undefined>();
       expectTypeOf(c.data).toEqualTypeOf<{ id: number } | undefined>();
+    });
+
+    test("the builder type is the wire format: the default service is multipart, a JSON service is json", () => {
+      const { client, service } = makeService();
+      expectTypeOf(service.batch()).toEqualTypeOf<MultipartBatchBuilder<[]>>();
+
+      const jsonService = new ODataService<"4.0", JsonBatchBuilder<[]>>(client, BASE);
+      expectTypeOf(jsonService.batch()).toEqualTypeOf<JsonBatchBuilder<[]>>();
+    });
+
+    test("dependsOn is only in the type of the JSON builder's add", () => {
+      const { client, service } = makeService();
+      expectTypeOf(service.batch().add).parameter(1).toBeUndefined();
+
+      const jsonService = new ODataService<"4.0", JsonBatchBuilder<[]>>(client, BASE);
+      expectTypeOf(jsonService.batch().add).parameter(1).toEqualTypeOf<BatchAddOptions | undefined>();
     });
   });
 });
