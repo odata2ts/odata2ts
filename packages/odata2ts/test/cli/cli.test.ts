@@ -269,6 +269,21 @@ describe("Cli Test", () => {
     await testDebug(false);
   });
 
+  async function testEnableTsNoCheck(enableTsNoCheck: boolean) {
+    const args = [...defaultArgs];
+    if (enableTsNoCheck) {
+      args.push("--enable-ts-no-check");
+    }
+    runOptions.enableTsNoCheck = enableTsNoCheck;
+
+    await testCli(args);
+  }
+
+  test("Test enableTsNoCheck option", async () => {
+    await testEnableTsNoCheck(true);
+    await testEnableTsNoCheck(false);
+  });
+
   async function testKeyProperties(keyProperties: KeyProperties | undefined) {
     const args = [...defaultArgs];
     if (keyProperties) {

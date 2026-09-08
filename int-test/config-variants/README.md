@@ -34,12 +34,10 @@ server under its OData name, whether a converter round-trips, whether a URL is o
 none of that is visible here. That is what `int-test/asp-net`, `int-test/cap` and `int-test/olingo-v2` are
 for.
 
-Two things are essential for the gate to be worth anything at all:
-
-- **`debug: true` in every variant.** Without it the generator writes `// @ts-nocheck` into every emitted
-  file, and a type check over such output happily confirms code which does not compile. That is not a
-  weaker gate, it is a worthless one.
-- **`src-generated` in the tsconfig's `include`**, so that generated files nobody imports get checked too.
+One thing is essential for the gate to be worth anything at all: **`src-generated` in the tsconfig's
+`include`**, so that generated files nobody imports get checked too. Generated files are type-checked by
+default (`enableTsNoCheck` defaults to `false`) - a `// @ts-nocheck`'d file would let a type check happily
+confirm code which does not compile, which is not a weaker gate, it is a worthless one.
 
 ## The variants
 
@@ -47,19 +45,22 @@ One variant per axis against the baseline, plus a single "everything on" one - `
 matrix would not only be expensive, it would be unreadable: with a failure, nobody could tell which axis
 caused it.
 
-| Variant           | Axis                                                                                                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `baseline`        | plain defaults, so the others have something to be a variant _of_                                                                           |
-| `modelsOnly`      | `mode: models` with `skipEditableModels`, `skipIdModels`, `skipOperations`, `skipComments` - the skip options only take effect in this mode |
-| `qObjectsOnly`    | `mode: qobjects` - query objects standing on their own, without the service layer which normally consumes them                              |
-| `namingCustom`    | every naming knob turned away from its default: another strategy per artefact kind, own prefixes and suffixes, `allowRenaming`              |
-| `enumStringUnion` | `enumType: "string-union"`                                                                                                                  |
-| `enumNumeric`     | `enumType: "numeric"`                                                                                                                       |
-| `v2Wrapping`      | `v2ResponseResultsWrapping` and `v2PayloadResultsWrapping` on bare models - with a service they meet a server in `int-test/olingo-v2`       |
-| `managedStrict`   | `managedPropertyMode: "strictOmit"` - the second write model and the services which switch to it                                            |
-| `keyStrict`       | `keyProperties: "strict"` - an unannotated non-nullable key becomes required on create                                                      |
-| `keyAllComputed`  | `keyProperties: "allComputed"` with `strictOmit` - the keys vanish from the write models entirely                                           |
-| `everythingOn`    | all of it at once - the interaction catcher                                                                                                 |
+| Variant                    | Axis                                                                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `baseline`                 | plain defaults, so the others have something to be a variant _of_                                                                           |
+| `modelsOnly`               | `mode: models` with `skipEditableModels`, `skipIdModels`, `skipOperations`, `skipComments` - the skip options only take effect in this mode |
+| `qObjectsOnly`             | `mode: qobjects` - query objects standing on their own, without the service layer which normally consumes them                              |
+| `namingCustom`             | every naming knob turned away from its default: another strategy per artefact kind, own prefixes and suffixes, `allowRenaming`              |
+| `enumStringUnion`          | `enumType: "string-union"`                                                                                                                  |
+| `enumNumeric`              | `enumType: "numeric"`                                                                                                                       |
+| `v2Wrapping`               | `v2ResponseResultsWrapping` and `v2PayloadResultsWrapping` on bare models - with a service they meet a server in `int-test/olingo-v2`       |
+| `managedStrict`            | `managedPropertyMode: "strictOmit"` - the second write model and the services which switch to it                                            |
+| `keyStrict`                | `keyProperties: "strict"` - an unannotated non-nullable key becomes required on create                                                      |
+| `keyAllComputed`           | `keyProperties: "allComputed"` with `strictOmit` - the keys vanish from the write models entirely                                           |
+| `deepInsertComposition`    | `deepInsertProps: "composition-only"` - only contained navigation properties carry a deep insert                                            |
+| `deepInsertCompositionCap` | the same value against the CAP metadata, where it removes the properties that server would drop or reject                                   |
+| `deepInsertCompositionV2`  | the same value against V2, where it must do nothing - V2 states no containment                                                              |
+| `everythingOn`             | all of it at once - the interaction catcher                                                                                                 |
 
 The sources are the committed metadata snapshots of `int-test/asp-net` and `int-test/olingo-v2`, referenced
 rather than copied so they cannot drift apart.

@@ -22,8 +22,6 @@ const config: ConfigFileOptions = {
   mode: Modes.service,
   emitMode: EmitModes.ts,
   prettier: true,
-  // otherwise: ts-nocheck above every generated file
-  debug: true,
   services: {
     // Just the Trippin service with a bit of mapping
     trippin: {
