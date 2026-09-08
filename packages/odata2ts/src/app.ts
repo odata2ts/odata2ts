@@ -96,7 +96,7 @@ export async function runApp(metadataJson: ODataEdmxModelBase<any>, options: Run
     usePrettier: options.prettier,
     tsConfigPath: options.tsconfig,
     bundledFileGeneration: options.bundledFileGeneration,
-    allowTypeChecking: options.debug,
+    allowTypeChecking: !options.enableTsNoCheck,
     odataVersionV4: options.v4.odataVersion,
   });
 
