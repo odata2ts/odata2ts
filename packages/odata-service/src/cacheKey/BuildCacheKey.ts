@@ -37,12 +37,15 @@ function mergeParams(
  * `resolveCrossRouteInvalidates`; empty, never computed here, for a client with no such store). Entries
  * another entry is a prefix of are dropped; what is left is coarsest first.
  *
- * Rule 2 is skipped where the resource has no entity set of its own - a contained entity, a complex value,
- * a singleton: nothing is ever registered under such a key. `deepEdit` hops read straight off
- * `state.params`, unlike every other params entry: they are not a restriction on the addressed resource
- * the way `filter`/`cast` are, so there is nothing to drop them for - they name additional, unrelated
- * entity sets this same write also touched, each with no key of its own yet since the entity is freshly
- * created.
+ * Rule 2 applies wherever a "detail" key goes stale and the entity set it belongs to is known - not just
+ * the addressed resource itself, but every ancestor hop too (rule 3): a list is a query *over* an entity
+ * set, so any of that set's members turning stale is reason enough to also invalidate the set's own bare
+ * list key, whichever hop the member was reached through. Skipped wherever the resource has no entity set
+ * of its own - a contained entity, a complex value, a singleton: nothing is ever registered under such a
+ * key. `deepEdit` hops read straight off `state.params`, unlike every other params entry: they are not a
+ * restriction on the addressed resource the way `filter`/`cast` are, so there is nothing to drop them for -
+ * they name additional, unrelated entity sets this same write also touched, each with no key of its own yet
+ * since the entity is freshly created.
  *
  * Deliberately does **not** enumerate the resource's children on its own: the ancestor entry covers them
  * by prefix for a hierarchical route, and `crossRouteKeys` is what reaches a route this write never took.
@@ -53,10 +56,15 @@ export function buildInvalidates(
 ): ReadonlyArray<ReadonlyArray<unknown>> {
   const deepEditHops = (state.params?.deepEdit as ReadonlyArray<string> | undefined) ?? [];
 
-  // ancestors in route order (coarsest first), then the resource itself, then its entity set, then
-  // whatever it deep-inserted into, then whatever another route to this same resource already has cached
+  const ancestorEntries = (state.ancestors ?? []).flatMap((ancestor) =>
+    ancestor.entitySetName ? [ancestor.key, [ancestor.entitySetName, "list"]] : [ancestor.key],
+  );
+
+  // ancestors in route order (coarsest first, each with its own list form alongside), then the resource
+  // itself, then its entity set, then whatever it deep-inserted into, then whatever another route to this
+  // same resource already has cached
   const candidates: Array<ReadonlyArray<unknown>> = [
-    ...(state.ancestors ?? []),
+    ...ancestorEntries,
     [state.name, ...state.steps],
     ...(state.entitySetName ? [[state.entitySetName, "list"]] : []),
     ...deepEditHops.map((entitySetName) => [entitySetName, "list"]),

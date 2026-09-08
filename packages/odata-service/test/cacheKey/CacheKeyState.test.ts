@@ -82,7 +82,7 @@ describe("CacheKeyState", () => {
 
     expect(state.name).toBe(MEDIA);
     expect(state.steps).toEqual(["detail", 5, "copies", "list"]);
-    expect(state.ancestors).toEqual([[MEDIA, "detail", 5]]);
+    expect(state.ancestors).toEqual([{ key: [MEDIA, "detail", 5] }]);
     expect(state.entitySetName).toBe(COPIES);
     expect(state.canonicalIdFn).toBe(canonicalIdOfCopies);
     expect(state.qEntityFn).toBe(qCopy);
@@ -92,7 +92,13 @@ describe("CacheKeyState", () => {
   test("an ancestor is pushed without its params object", () => {
     const parent = withParams(withKey(rootState(MEDIA, "list"), 5, { Id: 5 }), { cast: "Library.Catalog.Book" });
     const state = hopState(parent, { name: "copies", kind: "list", entitySetName: COPIES });
-    expect(state.ancestors).toEqual([[MEDIA, "detail", 5]]);
+    expect(state.ancestors).toEqual([{ key: [MEDIA, "detail", 5] }]);
+  });
+
+  test("an ancestor carries the entity set it belonged to, so a stale ancestor can invalidate that set's own list form too", () => {
+    const parent = withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 });
+    const state = hopState(parent, { name: "copies", kind: "list", entitySetName: COPIES });
+    expect(state.ancestors).toEqual([{ key: [MEDIA, "detail", 5], entitySetName: MEDIA }]);
   });
 
   test("a hop to a contained property has no entity set, so entitySetName and canonicalIdFn stay undefined", () => {
@@ -131,8 +137,8 @@ describe("CacheKeyState", () => {
       "detail",
     ]);
     expect(condition.ancestors).toEqual([
-      [MEDIA, "detail", 5],
-      [MEDIA, "detail", 5, "copies", "detail", { MediumId: 5, InventoryNumber: 7 }],
+      { key: [MEDIA, "detail", 5] },
+      { key: [MEDIA, "detail", 5, "copies", "detail", { MediumId: 5, InventoryNumber: 7 }], entitySetName: COPIES },
     ]);
   });
 
