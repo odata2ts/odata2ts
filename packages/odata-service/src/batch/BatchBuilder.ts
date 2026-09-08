@@ -28,12 +28,14 @@ export type BatchResponse<T> = HttpResponseModel<T | undefined>;
 export interface BatchAddOptions {
   /**
    * The wire ids of the requests in this batch whose sub-request must run before this one's. Order within a
-   * change set guarantees nothing (§11.7.2), so this is the only way to say it. Each id must name a request
-   * added before this one (a wire id between `1` and this request's own id minus one); a self- or
-   * forward-reference is refused. A dependency that is a forward reference or crosses a change set is
+   * change set guarantees nothing (§11.7.2), so this is the only way to say it. A static list names already-added
+   * ids; in the factory form of {@link BatchBuilder.add} a callback `(selfRef) => number[]` is resolved against
+   * the id the command is about to receive, so a relative dependency (`[selfRef - 1]`) is expressible. Each id
+   * must name a request added before this one (a wire id between `1` and this request's own id minus one); a
+   * self- or forward-reference is refused. A dependency that is a forward reference or crosses a change set is
    * refused where the format cannot carry it.
    */
-  dependsOn?: Array<number>;
+  dependsOn?: Array<number> | ((selfRef: number) => Array<number>);
 }
 
 /** Options for sending one batch, overriding the service's defaults for this single call. */
@@ -85,19 +87,42 @@ export class BatchBuilder<R extends Array<unknown> = []> {
    * Add one request to the batch. Blob and stream commands are refused - they carry a binary body the batch
    * wire formats cannot carry. The same command may be added more than once: it is reused across its slots
    * (the batch never mutates a command's state), so sending the same request twice is simply adding it twice.
+   *
+   * Two forms. The plain form takes the ready command. The factory form takes a function that builds the
+   * command knowing the wire id it is about to receive - `selfRef` - so the immediately-preceding request is
+   * `selfRef - 1` and a reference to it (`byRef(selfRef - 1)`) needs no hand-counting. Both return the builder,
+   * so the chain stays fluent.
    */
-  public add<T>(cmd: RequestCmd<any, any, T>, options?: BatchAddOptions): BatchBuilder<[...R, BatchResponse<T>]> {
+  public add<T>(
+    cmdOrFactory: RequestCmd<any, any, T> | ((selfRef: number) => RequestCmd<any, any, T>),
+    options?: BatchAddOptions,
+  ): BatchBuilder<[...R, BatchResponse<T>]> {
+    const id = this.__entries.length + 1;
+    const dependsOn = BatchBuilder.resolveDependsOn(options?.dependsOn, id);
+    this.__validateDependsOn(dependsOn, id);
+    const cmd = typeof cmdOrFactory === "function" ? cmdOrFactory(id) : cmdOrFactory;
+
     if (BatchBuilder.isBatchIncompatible(cmd)) {
       throw new Error(
         "A blob or stream request cannot be part of a batch - its binary body is not a body the batch wire formats carry. Send it separately.",
       );
     }
 
-    const id = this.__entries.length + 1;
-    this.__validateDependsOn(options?.dependsOn, id);
-    this.__entries.push({ cmd, id: String(id), group: this.__openGroup, dependsOn: options?.dependsOn ?? [] });
+    this.__entries.push({ cmd, id: String(id), group: this.__openGroup, dependsOn });
 
     return this as unknown as BatchBuilder<[...R, BatchResponse<T>]>;
+  }
+
+  /**
+   * A `dependsOn` may be stated statically or, in the factory form of {@link add}, as a callback that is
+   * resolved against the id the command is about to receive - which is what lets a relative dependency
+   * (`[selfRef - 1]`) name the previous request.
+   */
+  private static resolveDependsOn(
+    dependsOn: BatchAddOptions["dependsOn"] | undefined,
+    selfRef: number,
+  ): Array<number> {
+    return typeof dependsOn === "function" ? dependsOn(selfRef) : dependsOn ?? [];
   }
 
   /**

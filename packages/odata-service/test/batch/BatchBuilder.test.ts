@@ -346,6 +346,52 @@ describe("BatchBuilder via ODataService.batch()", () => {
     });
   });
 
+  describe("factory-form add", () => {
+    test("passes the factory the wire id the command is about to receive", async () => {
+      const { client, service } = makeService();
+      client.batchResponse = { responses: [], resolvedBy: "id" };
+      const seen: number[] = [];
+
+      await service
+        .batch()
+        .add(new TestCmd(client, ODataHttpMethods.Get, BASE + "/A"))
+        .add((selfRef) => {
+          seen.push(selfRef);
+          return new TestCmd(client, ODataHttpMethods.Get, BASE + "/B");
+        })
+        .execute();
+
+      expect(seen).toEqual([2]);
+    });
+
+    test("lets the factory address the preceding request with selfRef - 1", () => {
+      const { client } = makeService();
+      const collection = new PersonModelCollectionService(client, BASE, "People");
+      const builder = new BatchBuilder(client, BASE, "multipart", false);
+
+      builder
+        .add(collection.query())
+        .add((selfRef) => collection.byRef(selfRef - 1).query());
+
+      const { requests } = builder.getRequestInfo();
+      expect(requests[0].url).toBe("People");
+      expect(requests[1].url).toBe("$1");
+    });
+
+    test("resolves a factory-form dependsOn callback against the command's own id", () => {
+      const { client } = makeService();
+      const collection = new PersonModelCollectionService(client, BASE, "People");
+      const builder = new BatchBuilder(client, BASE, "multipart", false);
+
+      builder
+        .add(collection.query())
+        .add((selfRef) => collection.byRef(selfRef - 1).query(), { dependsOn: (selfRef) => [selfRef - 1] });
+
+      const { requests } = builder.getRequestInfo();
+      expect(requests[1].dependsOn).toStrictEqual(["1"]);
+    });
+  });
+
   describe("typing", () => {
     test("the result tuple is element-for-element the commands' own response types", async () => {
       const { client, service } = makeService();
