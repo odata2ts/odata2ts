@@ -3,7 +3,7 @@ import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { CollectionQueryBuilderV4, createQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { ModelResponseConverterV4 } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, UrlBuilderRequestCmdV4 } from "../../src";
+import { DEFAULT_HEADERS, rootState, UrlBuilderRequestCmdV4 } from "../../src";
 import { Feature, PersonModel } from "../fixture/PersonModel";
 import { QPersonV4, qPersonV4 } from "../fixture/v4/QPersonV4";
 import { MockClient } from "../mock/MockClient";
@@ -73,6 +73,20 @@ describe("UrlBuilderRequestCmdV4 tests", () => {
 
     expect(candidate.getUrl()).toBe(DEFAULT_URL);
     expect(newCandidate.getInfo()).toMatchObject({ ...candidate.getInfo(), url: DEFAULT_URL + "?$select=UserName" });
+  });
+
+  test("addToQuery updates the cache key with whatever the modification function just restricted - a stale queryParams snapshot from construction time must not survive it", () => {
+    const candidate = new UrlBuilderRequestCmdV4(client, ODataHttpMethods.Get, queryBuilder, qPersonV4, undefined, {
+      cacheKeyState: rootState("Person", "list"),
+      queryParams: queryBuilder.getCacheKeyParams(),
+    });
+    expect(candidate.cacheKey).toEqual(["Person", "list"]);
+
+    const withSelect = candidate.addToQuery((builder) => builder.select("userName"));
+    expect(withSelect.cacheKey).toEqual(["Person", "list", { select: ["UserName"] }]);
+
+    const withFilterToo = withSelect.addToQuery((builder, qPerson) => builder.filter(qPerson.age.gt("40")));
+    expect(withFilterToo.cacheKey).toEqual(["Person", "list", { select: ["UserName"], query: "%24filter=Age+gt+40" }]);
   });
 
   test("add to query multiple times", () => {
