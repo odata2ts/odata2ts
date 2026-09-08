@@ -183,7 +183,7 @@ describe("App Test", () => {
       usePrettier: false,
       bundledFileGeneration: true,
       tsConfigPath: "tsconfig.json",
-      allowTypeChecking: false,
+      allowTypeChecking: true,
       odataVersionV4: "4.0",
     });
 
@@ -212,7 +212,7 @@ describe("App Test", () => {
       usePrettier: true,
       bundledFileGeneration: false,
       tsConfigPath: "test.json",
-      allowTypeChecking: false,
+      allowTypeChecking: true,
       odataVersionV4: "4.0",
     });
 
@@ -220,6 +220,20 @@ describe("App Test", () => {
     expect(Generator.generateModels).toHaveBeenCalled();
     expect(Generator.generateQueryObjects).toHaveBeenCalled();
     expect(Generator.generateServices).not.toHaveBeenCalled();
+  });
+
+  test("App: enableTsNoCheck controls allowTypeChecking, independent of debug", async () => {
+    // enableTsNoCheck alone turns type checking off
+    runOptions.enableTsNoCheck = true;
+    await doRunApp();
+    expect(createPmSpy.mock.calls[0][4]).toMatchObject({ allowTypeChecking: false });
+
+    // debug alone does not - the two options are unrelated
+    vi.clearAllMocks();
+    runOptions.enableTsNoCheck = false;
+    runOptions.debug = true;
+    await doRunApp();
+    expect(createPmSpy.mock.calls[0][4]).toMatchObject({ allowTypeChecking: true });
   });
 
   test("App: generate also services", async () => {

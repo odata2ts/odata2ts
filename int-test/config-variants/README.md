@@ -34,12 +34,10 @@ server under its OData name, whether a converter round-trips, whether a URL is o
 none of that is visible here. That is what `int-test/asp-net`, `int-test/cap` and `int-test/olingo-v2` are
 for.
 
-Two things are essential for the gate to be worth anything at all:
-
-- **`debug: true` in every variant.** Without it the generator writes `// @ts-nocheck` into every emitted
-  file, and a type check over such output happily confirms code which does not compile. That is not a
-  weaker gate, it is a worthless one.
-- **`src-generated` in the tsconfig's `include`**, so that generated files nobody imports get checked too.
+One thing is essential for the gate to be worth anything at all: **`src-generated` in the tsconfig's
+`include`**, so that generated files nobody imports get checked too. Generated files are type-checked by
+default (`enableTsNoCheck` defaults to `false`) - a `// @ts-nocheck`'d file would let a type check happily
+confirm code which does not compile, which is not a weaker gate, it is a worthless one.
 
 ## The variants
 
