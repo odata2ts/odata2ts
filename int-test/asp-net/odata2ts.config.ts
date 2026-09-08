@@ -63,6 +63,24 @@ const config: ConfigFileOptions = {
       cacheKeys: true,
     },
     /**
+     * The same model once more, with the $batch wire format fixed to JSON at generation time.
+     *
+     * The default (multipart) `library` client above is what most users get and is where the multipart
+     * batch is held against a real server; this client is the JSON half. JSON $batch is a V4-only wire
+     * format - V2 has none (see int-test/olingo-v2) - and this server is the one that honours the
+     * reference features JSON adds on top of multipart: a referencing request must name its dependency in
+     * `dependsOn`, and the reference token may sit in a request body (`@odata.bind: "$1"`) as well as in a
+     * URL. The generator stamps the service's builder type from this option, so `batch()` here returns a
+     * JsonBatchBuilder whose `add` carries `dependsOn` (whereas the multipart clients' builder does not).
+     * See test/feature/Batch.test.ts.
+     */
+    libraryJsonBatch: {
+      serviceName: "LibraryJsonBatch",
+      source: SOURCE,
+      output: "src-generated/library-json-batch",
+      batch: { format: "json" },
+    },
+    /**
      * The same model once more, targeting OData 4.01 instead of the default 4.0.
      *
      * Not distributed across the two V4 packages the way `enableNativeInOperator` is, because it cannot be:
