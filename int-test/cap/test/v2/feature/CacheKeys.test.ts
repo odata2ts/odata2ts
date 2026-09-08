@@ -72,7 +72,7 @@ describe("CAP Library: cache keys (V2)", () => {
     expect(touchesResource(["Loans", "list"], key)).toBe(false);
   });
 
-  test("invalidates on a write through a hop reaches the ancestor too", async () => {
+  test("invalidates on a write through a hop reaches the ancestor too - and the ancestor's own list form alongside it", async () => {
     const created = await LIBRARY_V2.Members(MEMBER_ID)
       .Reservations()
       .create({ Member_Id: MEMBER_ID, ReservedAt: "2026-05-02T10:00:00Z" })
@@ -82,6 +82,7 @@ describe("CAP Library: cache keys (V2)", () => {
 
     expect(created.invalidates).toEqual([
       ["Members", "detail", MEMBER_ID],
+      ["Members", "list"],
       ["Reservations", "list"],
     ]);
 

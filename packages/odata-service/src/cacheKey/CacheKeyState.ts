@@ -48,8 +48,14 @@ export interface CacheKeyState {
   readonly entitySetName?: string;
   /** See {@link CanonicalIdFn}. Present exactly where {@link entitySetName} is - a resource with no entity set of its own has no canonical id to build either. */
   readonly canonicalIdFn?: CanonicalIdFn;
-  /** Key of every hop from the root down to the parent, params already dropped. Feeds `invalidates`. */
-  readonly ancestors?: ReadonlyArray<ReadonlyArray<unknown>>;
+  /**
+   * Every hop from the root down to the parent, params already dropped, paired with the entity set each one
+   * belonged to at the time the route left it (absent under the same conditions {@link entitySetName} is).
+   * Feeds `invalidates`: a stale ancestor is not just itself invalidated, but - since it was fetched as a
+   * "detail" resource - its own bare list form too, on the same "a detail going stale means its list may no
+   * longer agree either" logic {@link entitySetName} already applies to the addressed resource itself.
+   */
+  readonly ancestors?: ReadonlyArray<{ readonly key: ReadonlyArray<unknown>; readonly entitySetName?: string }>;
   /**
    * The addressed resource's own key or id, exactly as given to `byId` - bare for a single primary key, an
    * object keyed by the model's own mapped property names otherwise. The same shape {@link CanonicalIdFn}
@@ -147,7 +153,10 @@ export function withParams(state: CacheKeyState, params: Readonly<Record<string,
  * taken, never re-rooted.
  */
 export function hopState(state: CacheKeyState, hop: HopDescriptor): CacheKeyState {
-  const ancestors = [...(state.ancestors ?? []), [state.name, ...state.steps]];
+  const ancestors = [
+    ...(state.ancestors ?? []),
+    { key: [state.name, ...state.steps], ...(state.entitySetName ? { entitySetName: state.entitySetName } : {}) },
+  ];
   const steps = hop.kind ? [...state.steps, hop.name, hop.kind] : [...state.steps, hop.name];
   const kindIndex = hop.kind ? steps.length - 1 : state.kindIndex;
 

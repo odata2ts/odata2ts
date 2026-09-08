@@ -84,7 +84,7 @@ describe("buildInvalidates", () => {
     expect(buildInvalidates(state)).toContainEqual([MEDIA, "detail", 5]);
   });
 
-  test("a hierarchical write's own key is a prefix-redundant with its ancestor, and drops out - the ancestor and the entity-set list entry are what remain", () => {
+  test("a hierarchical write's own key is a prefix-redundant with its ancestor, and drops out - the ancestor, the ancestor's own list form, and the entity-set list entry are what remain", () => {
     const copies = hopState(withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 }), {
       name: "copies",
       kind: "list",
@@ -93,11 +93,12 @@ describe("buildInvalidates", () => {
     const key = { MediumId: 5, InventoryNumber: 7 };
     expect(buildInvalidates(withKey(copies, key, key))).toEqual([
       [MEDIA, "detail", 5],
+      [MEDIA, "list"],
       [COPIES, "list"],
     ]);
   });
 
-  test("a POST to a hierarchical collection: the own key without a key value is the ancestor plus the entity-set list", () => {
+  test("a POST to a hierarchical collection: the own key without a key value is the ancestor, the ancestor's own list form, plus the entity-set list", () => {
     const copies = hopState(withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 }), {
       name: "copies",
       kind: "list",
@@ -105,6 +106,7 @@ describe("buildInvalidates", () => {
     });
     expect(buildInvalidates(copies)).toEqual([
       [MEDIA, "detail", 5],
+      [MEDIA, "list"],
       [COPIES, "list"],
     ]);
   });
@@ -117,16 +119,20 @@ describe("buildInvalidates", () => {
     });
     expect(buildInvalidates(withKey(reservations, 9, { Id: 9 }))).toEqual([
       [MEMBERS, "detail", 42],
+      [MEMBERS, "list"],
       [RESERVATIONS, "list"],
     ]);
   });
 
-  test("a contained resource contributes no entity-set entry", () => {
+  test("a contained resource contributes no entity-set entry of its own, but its ancestor's list form still goes stale", () => {
     const chapters = hopState(withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 1, { Id: 1 }), {
       name: "chapters",
       kind: "list",
     });
-    expect(buildInvalidates(withKey(chapters, 3, { Id: 3 }))).toEqual([[MEDIA, "detail", 1]]);
+    expect(buildInvalidates(withKey(chapters, 3, { Id: 3 }))).toEqual([
+      [MEDIA, "detail", 1],
+      [MEDIA, "list"],
+    ]);
   });
 
   test("two structurally equal key objects built independently compare as one entry", () => {
@@ -137,10 +143,23 @@ describe("buildInvalidates", () => {
       { MediumId: 5, InventoryNumber: 7 },
       { MediumId: 5, InventoryNumber: 7 },
     );
-    const withOtherOrder = { ...state, ancestors: [[COPIES, "detail", { InventoryNumber: 7, MediumId: 5 }]] };
+    const withOtherOrder = {
+      ...state,
+      ancestors: [{ key: [COPIES, "detail", { InventoryNumber: 7, MediumId: 5 }] }],
+    };
     expect(buildInvalidates(withOtherOrder as typeof state)).toEqual([
       [COPIES, "detail", { InventoryNumber: 7, MediumId: 5 }],
       [COPIES, "list"],
+    ]);
+  });
+
+  test("an ancestor with no entity set of its own (a contained resource, a complex value) contributes only its own key, never a list form", () => {
+    const state = withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 });
+    const withUnlistedAncestor = { ...state, ancestors: [{ key: ["SomeComplexValue", "detail"] }] };
+    expect(buildInvalidates(withUnlistedAncestor as typeof state)).toEqual([
+      ["SomeComplexValue", "detail"],
+      [MEDIA, "detail", 5],
+      [MEDIA, "list"],
     ]);
   });
 
