@@ -53,6 +53,7 @@
         </Property>
       </EntityType>
       <EntityType Name="Book" BaseType="Library.Catalog.PrintMedium">
+        <Property Name="PublisherId" Type="Edm.Int32" />
         <Property Name="PageCount" Type="Edm.Int16" Nullable="false">
           <Annotation Term="Org.OData.Validation.V1.Minimum" Int="1" />
         </Property>
@@ -64,7 +65,9 @@
             String="Lowest age in years the book is released for; 0 means no restriction."
           />
         </Property>
-        <NavigationProperty Name="Publisher" Type="PublisherRegistry.Publisher" Partner="Books" />
+        <NavigationProperty Name="Publisher" Type="PublisherRegistry.Publisher" Partner="Books">
+          <ReferentialConstraint Property="PublisherId" ReferencedProperty="Id" />
+        </NavigationProperty>
       </EntityType>
       <EntityType Name="Magazine" BaseType="Library.Catalog.PrintMedium">
         <Property Name="IssueNumber" Type="Edm.Int32" Nullable="false" />
