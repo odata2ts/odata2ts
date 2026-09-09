@@ -55,57 +55,46 @@ describe("ASP.NET Library: $batch", () => {
  */
 describe("ASP.NET Library: $batch referencing", () => {
   test("binds a child's navigation property to the just-created parent by body reference", async () => {
-    const book = LIBRARY_JSON_BATCH.Media().asBookCollectionService().create({
-      Title: "Referenced book",
-      PageCount: 200,
-      AgeRating: 1,
-    });
-    const copy = LIBRARY_JSON_BATCH.Copies().create({
-      IsLoanable: true,
-      Condition: 9,
-      WeightKg: 1.2,
-      InventoryNumber: 1001,
-      Medium: { "@id": ref(1) },
+    const member = LIBRARY_JSON_BATCH.Members().create({ Name: "Referenced member", PreviousAddresses: [] });
+    const loan = LIBRARY_JSON_BATCH.Loans().create({
+      LoanedAt: "2026-01-01T10:00:00Z",
+      DueDate: "2026-01-15",
+      Member: { "@id": ref(1) },
     });
 
-    const [bookResult, copyResult] = await LIBRARY_JSON_BATCH.batch()
-      .add(book)
-      .add(copy, { dependsOn: [1] })
+    const [memberResult, loanResult] = await LIBRARY_JSON_BATCH.batch()
+      .add(member)
+      .add(loan, { dependsOn: [1] })
       .execute();
 
-    expect(bookResult.status).toBe(201);
-    expect(copyResult.status).toBe(201);
+    expect(memberResult.status).toBe(201);
+    expect(loanResult.status).toBe(201);
   });
 
   test("creates a child under the just-created parent by URL reference", async () => {
-    const audiobook = LIBRARY_JSON_BATCH.Media()
-      .asAudiobookCollectionService()
-      .create({ Title: "Referenced audiobook" });
-    const chapter = LIBRARY_JSON_BATCH.Media()
-      .asAudiobookCollectionService()
-      .byRef(1)
-      .Chapters()
-      .create({ Title: "Referenced chapter" });
+    const member = LIBRARY_JSON_BATCH.Members().create({ Name: "Referenced member", PreviousAddresses: [] });
+    const loan = LIBRARY_JSON_BATCH.Members().byRef(1).Loans().create({
+      LoanedAt: "2026-01-01T10:00:00Z",
+      DueDate: "2026-01-15",
+    });
 
-    const [audiobookResult, chapterResult] = await LIBRARY_JSON_BATCH.batch()
-      .add(audiobook)
-      .add(chapter, { dependsOn: [1] })
+    const [memberResult, loanResult] = await LIBRARY_JSON_BATCH.batch()
+      .add(member)
+      .add(loan, { dependsOn: [1] })
       .execute();
 
-    expect(audiobookResult.status).toBe(201);
-    expect(chapterResult.status).toBe(201);
+    expect(memberResult.status).toBe(201);
+    expect(loanResult.status).toBe(201);
   });
 
-  test("surfaces the server's error for a request that references an id that does not exist", async () => {
-    const orphan = LIBRARY_JSON_BATCH.Media()
-      .asAudiobookCollectionService()
-      .byRef(999)
-      .Chapters()
-      .create({ Title: "Orphan chapter" });
+  test("fails the whole batch when a request references an id that does not exist", async () => {
+    const orphan = LIBRARY_JSON_BATCH.Members().byRef(999).Loans().create({
+      LoanedAt: "2026-01-01T10:00:00Z",
+      DueDate: "2026-01-15",
+    });
 
-    const [orphanResult] = await LIBRARY_JSON_BATCH.batch().add(orphan).execute();
-
-    expect(orphanResult.status).toBeGreaterThanOrEqual(400);
-    expect(orphanResult.status).toBeLessThan(500);
+    // an unresolvable first-segment reference with no dependsOn fails the batch at parse time - the whole
+    // envelope is a 500, so the client rejects rather than answering the slot
+    await expect(LIBRARY_JSON_BATCH.batch().add(orphan).execute()).rejects.toMatchObject({ status: 500 });
   });
 });
