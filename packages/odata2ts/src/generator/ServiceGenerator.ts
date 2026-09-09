@@ -608,8 +608,12 @@ class ServiceGenerator {
         // the version argument is only spelled out on the constructor call for v2ResponseAsV4: without it,
         // "new Type(...)" infers AsV4's default (false), which mismatches the declared return type above
         // wherever it isn't itself the abstract AsV4 - concretely, on every getter of the main service,
-        // which pins the literal true rather than passing an abstract type parameter along
-        `const collection = new ${collectionName}${this.isV2AsV4() ? versionArg : ""}(client, path, fieldName, options${cacheKeyExpr ? `, ${cacheKeyExpr}` : ""});`,
+        // which pins the literal true rather than passing an abstract type parameter along.
+        //
+        // A navigation always addresses the contained type by its own name - never a cast of the base set -
+        // so a parent's subtype cast must not leak into the child: it would drop the nav segment on create
+        // and emit a spurious type-control-info. Reset subtype to false for the contained collection.
+        `const collection = new ${collectionName}${this.isV2AsV4() ? versionArg : ""}(client, path, fieldName, { ...options, subtype: false }${cacheKeyExpr ? `, ${cacheKeyExpr}` : ""});`,
         'return typeof id === "undefined" || id === null ? collection : collection.byId(id);',
       ],
     };
