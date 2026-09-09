@@ -84,7 +84,7 @@ export class QBinding<Id> {
    * A batch request reference (`$<id>`) is the one value this is not: it names a preceding sub-request, not an
    * entity by key, so it goes out verbatim and the service - not the id function - resolves it.
    */
-  public format(id: Id): unknown {
+  public format(id: Id | string): unknown {
     const url = isRequestReference(id) ? id : this.idFunctionFn().buildUrl(id);
 
     switch (this.notation) {
