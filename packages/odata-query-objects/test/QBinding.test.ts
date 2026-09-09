@@ -1,6 +1,14 @@
 import { describe, expect, test } from "vitest";
 import { QBinding } from "../src";
-import { QAuthorId, QBookV2, QBookV40, QBookV401, QGuidBookV40, QGuidBookV401, QGuidBookV2 } from "./fixture/BindingModel";
+import {
+  QAuthorId,
+  QBookV2,
+  QBookV40,
+  QBookV401,
+  QGuidBookV2,
+  QGuidBookV40,
+  QGuidBookV401,
+} from "./fixture/BindingModel";
 
 /**
  * Binding an already existing entity to a navigation property, stated by the key of that entity.
