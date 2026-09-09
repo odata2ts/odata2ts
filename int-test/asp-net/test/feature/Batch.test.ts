@@ -87,14 +87,17 @@ describe("ASP.NET Library: $batch referencing", () => {
     expect(loanResult.status).toBe(201);
   });
 
-  test("fails the whole batch when a request references an id that does not exist", async () => {
+  test("surfaces the server's per-slot error for a request that references an id that does not exist", async () => {
     const orphan = LIBRARY_JSON_BATCH.Members().byRef(999).Loans().create({
       LoanedAt: "2026-01-01T10:00:00Z",
       DueDate: "2026-01-15",
     });
 
-    // an unresolvable first-segment reference with no dependsOn fails the batch at parse time - the whole
-    // envelope is a 500, so the client rejects rather than answering the slot
-    await expect(LIBRARY_JSON_BATCH.batch().add(orphan).execute()).rejects.toMatchObject({ status: 500 });
+    // the server answers the unresolvable reference slot-by-slot (a 404 for the orphan request) rather than
+    // failing the whole envelope, so the batch resolves and the error is read off the slot's own status
+    const [orphanResult] = await LIBRARY_JSON_BATCH.batch().add(orphan).execute();
+
+    expect(orphanResult.status).toBeGreaterThanOrEqual(400);
+    expect(orphanResult.status).toBeLessThan(500);
   });
 });
