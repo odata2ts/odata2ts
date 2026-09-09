@@ -20,7 +20,7 @@ export class TesterService extends ODataService {
   public books(id?: BookId | undefined) {
     const fieldName = "books";
     const { client, path, options } = this.__base;
-    const collection = new BookCollectionService(client, path, fieldName, options);
+    const collection = new BookCollectionService(client, path, fieldName, { ...options, subtype: false });
     return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }
@@ -110,7 +110,7 @@ export class BookService<V extends ODataVersionV4 = "4.0"> extends EntityTypeSer
   public relatedAuthors(id?: AuthorId | undefined) {
     const fieldName = "RelatedAuthors";
     const { client, path, options } = this.__base;
-    const collection = new AuthorCollectionService(client, path, fieldName, options);
+    const collection = new AuthorCollectionService(client, path, fieldName, { ...options, subtype: false });
     return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }

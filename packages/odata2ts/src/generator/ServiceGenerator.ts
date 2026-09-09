@@ -576,6 +576,11 @@ class ServiceGenerator {
         ? this.emitRootStateExpr(imports, odataPropName, "list", entityType, { isEntitySet: true })
         : this.emitNavHopExpr(imports, ownerFqName, odataPropName, entityType, true, contained);
     const cacheKeyDestructure = ownerFqName !== undefined && cacheKeyExpr ? ", cacheKeyState" : "";
+    // A navigation always addresses the contained type by its own name - never a cast of the base set - so a
+    // parent's subtype cast must not leak into the child: it would drop the nav segment on create and emit a
+    // spurious type-control-info. The `subtype` flag only exists on the V4 options type (V2 has no subtype
+    // cast), so the reset is spelled out for V4 only; V2 passes `options` through untouched.
+    const collectionOptions = this.version === ODataVersions.V4 ? "{ ...options, subtype: false }" : "options";
 
     return {
       scope: Scope.Public,
@@ -609,11 +614,7 @@ class ServiceGenerator {
         // "new Type(...)" infers AsV4's default (false), which mismatches the declared return type above
         // wherever it isn't itself the abstract AsV4 - concretely, on every getter of the main service,
         // which pins the literal true rather than passing an abstract type parameter along.
-        //
-        // A navigation always addresses the contained type by its own name - never a cast of the base set -
-        // so a parent's subtype cast must not leak into the child: it would drop the nav segment on create
-        // and emit a spurious type-control-info. Reset subtype to false for the contained collection.
-        `const collection = new ${collectionName}${this.isV2AsV4() ? versionArg : ""}(client, path, fieldName, { ...options, subtype: false }${cacheKeyExpr ? `, ${cacheKeyExpr}` : ""});`,
+        `const collection = new ${collectionName}${this.isV2AsV4() ? versionArg : ""}(client, path, fieldName, ${collectionOptions}${cacheKeyExpr ? `, ${cacheKeyExpr}` : ""});`,
         'return typeof id === "undefined" || id === null ? collection : collection.byId(id);',
       ],
     };
