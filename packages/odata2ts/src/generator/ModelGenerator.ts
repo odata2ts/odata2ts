@@ -673,9 +673,12 @@ class ModelGenerator {
         if (byKey) {
           const target = this.dataModel.getEntityType(prop.fqType)!;
           const idName = imports.addGeneratedModel(prop.fqType, target.id.modelName);
+          // a $batch may name a preceding sub-request by its wire id ($<id>) rather than a key - the token a
+          // `ref` call yields, which the binding passes through verbatim instead of turning into a URL
+          const idShape = `${idName} | string`;
           collect(
             prop.name,
-            `{ "@id": ${idName} }`,
+            `{ "@id": ${idShape} }`,
             `Bind "${prop.name}" to an already existing entity by its key.`,
             true,
           );
