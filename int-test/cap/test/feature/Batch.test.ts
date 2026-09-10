@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { expectODataError } from "../expectODataError.js";
 import { LIBRARY, UNKNOWN_ID } from "../LibraryTestConstants.js";
 
 /**
@@ -65,12 +66,14 @@ describe("CAP Library: $batch referencing", () => {
     expect(chapterResult.status).toBe(201);
   });
 
-  test("surfaces the server's error for a request that references an id that does not exist", async () => {
+  test("rejects the whole batch for a request that references an id that does not exist", async () => {
     const orphan = LIBRARY.Audiobooks().byRef(999).Chapters().create({ Title: "Orphan chapter" });
 
-    const [orphanResult] = await LIBRARY.batch().add(orphan).execute();
-
-    expect(orphanResult.status).toBeGreaterThanOrEqual(400);
-    expect(orphanResult.status).toBeLessThan(500);
+    // the reference is unresolvable, so the batch is refused as a whole with 400 and the parser's message,
+    // not with a per-slot error
+    await expectODataError(LIBRARY.batch().add(orphan).execute(), {
+      status: 400,
+      message: /Deserialization Error: "999" does not match the id or atomicity group of any preceding request/,
+    });
   });
 });

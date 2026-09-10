@@ -39,41 +39,54 @@ describe("Olingo V2 Library: $batch", () => {
 
 /**
  * Request referencing - the baseline a V2 server must provide. A child request addressed **under** the
- * just-created parent by the parent request's id (`byRef`) is the URL form of a reference; a child bound
- * through a navigation property that carries the `$<id>` token is the body form (which V2 renders as
- * `__metadata.uri`). Both go out multipart.
+ * just-created parent by the parent request's id (`byRef`) is the URL form the V2 spec defines (§2.2.1:
+ * `$<id>` as an alias for the Resource Path). The body form places the token in a property value instead
+ * - the shape SAP documents (their API_INBOUND_DELIVERY_SRV `$batch` example) - and this server resolves
+ * it too, substituting it with the key the preceding request's answer carries. V2 resolves a `$<id>` only
+ * within the change set that carries it, so the creating parent and the referring child go out in one
+ * atomicity group.
  */
 describe("Olingo V2 Library: $batch referencing", () => {
   test("creates a child under the just-created parent by URL reference", async () => {
     const audiobook = LIBRARY.Audiobooks().create({ Title: "Referenced audiobook" });
     const chapter = LIBRARY.Audiobooks().byRef(1).Chapters().create({ Title: "Referenced chapter" });
 
-    const [audiobookResult, chapterResult] = await LIBRARY.batch().add(audiobook).add(chapter).execute();
+    const [audiobookResult, chapterResult] = await LIBRARY.batch()
+      .startGroup("g")
+      .add(audiobook)
+      .add(chapter)
+      .endGroup()
+      .execute();
 
     expect(audiobookResult.status).toBe(201);
     expect(chapterResult.status).toBe(201);
   });
 
-  test("binds a child's navigation property to the just-created parent by body reference", async () => {
+  // Body substitution in the shape SAP documents: the child's key property carries the reference token
+  // ("MediumId": "$1"), and the server substitutes it with the key the preceding request's Location
+  // carries before dispatching the request.
+  test("binds a child's key property to the just-created parent by body substitution", async () => {
     const book = LIBRARY.Books().create({ Title: "Referenced book" });
     const copy = LIBRARY.Copies().create({
-      IsLoanable: true,
+      MediumId: ref(1),
       InventoryNumber: 1001,
-      Medium: { "@id": ref(1) },
+      IsLoanable: true,
     });
 
-    const [bookResult, copyResult] = await LIBRARY.batch().add(book).add(copy).execute();
+    const [bookResult, copyResult] = await LIBRARY.batch().startGroup("g").add(book).add(copy).endGroup().execute();
 
     expect(bookResult.status).toBe(201);
     expect(copyResult.status).toBe(201);
   });
 
-  test("surfaces the server's error for a request that references an id that does not exist", async () => {
+  test("answers 424 for a request that references an id that does not exist", async () => {
     const orphan = LIBRARY.Audiobooks().byRef(999).Chapters().create({ Title: "Orphan chapter" });
 
-    const [orphanResult] = await LIBRARY.batch().add(orphan).execute();
+    const [orphanResult] = await LIBRARY.batch().startGroup("g").add(orphan).endGroup().execute();
 
-    expect(orphanResult.status).toBeGreaterThanOrEqual(400);
-    expect(orphanResult.status).toBeLessThan(500);
+    // Olingo answers the failed change set as a whole (404, "Could not find an entity set or function
+    // import for '$999'") without naming the failing part, so the client cannot attribute the failure to
+    // the request and can only report the group as failed: 424.
+    expect(orphanResult.status).toBe(424);
   });
 });

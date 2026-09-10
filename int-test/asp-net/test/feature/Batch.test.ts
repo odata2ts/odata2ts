@@ -1,5 +1,6 @@
 import { ref } from "@odata2ts/odata-service";
 import { describe, expect, test } from "vitest";
+import { expectODataError } from "../expectODataError.js";
 import { LIBRARY, LIBRARY_JSON_BATCH, UNKNOWN_ID } from "../LibraryTestConstants.js";
 
 /**
@@ -87,17 +88,19 @@ describe("ASP.NET Library: $batch referencing", () => {
     expect(loanResult.status).toBe(201);
   });
 
-  test("surfaces the server's per-slot error for a request that references an id that does not exist", async () => {
+  test("rejects the whole batch for a request that references an id that does not exist", async () => {
     const orphan = LIBRARY_JSON_BATCH.Members().byRef(999).Loans().create({
       LoanedAt: "2026-01-01T10:00:00Z",
       DueDate: "2026-01-15",
     });
 
-    // the server answers the unresolvable reference slot-by-slot (a 404 for the orphan request) rather than
-    // failing the whole envelope, so the batch resolves and the error is read off the slot's own status
-    const [orphanResult] = await LIBRARY_JSON_BATCH.batch().add(orphan).execute();
-
-    expect(orphanResult.status).toBeGreaterThanOrEqual(400);
-    expect(orphanResult.status).toBeLessThan(500);
+    // the reference is unresolvable without a dependsOn covering it, so the parser refuses the document
+    // before any request is answered: the whole batch fails with 400 and the parser's message, not with a
+    // per-slot error
+    await expectODataError(LIBRARY_JSON_BATCH.batch().add(orphan).execute(), {
+      status: 400,
+      message:
+        /Request Id reference \[999\] in Uri \[\$999\/Loans\] is not found in effective depends-on-Ids \[null\] of the request\./,
+    });
   });
 });
