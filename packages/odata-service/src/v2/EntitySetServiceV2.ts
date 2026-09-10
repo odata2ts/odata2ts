@@ -15,6 +15,7 @@ import {
 import { buildDeepEditHops, CacheKeyState, withKey, withParams } from "../cacheKey/index.js";
 import { getBodyETagV2, getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
+import { ref } from "../ref.js";
 import { ConcurrencyOptions, UrlBuilderRequestCmdV2 } from "../request";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
@@ -82,6 +83,20 @@ export abstract class EntitySetServiceV2<
       options,
       cacheKeyState && withKey(cacheKeyState, this.cacheKeyOf(id), id),
     );
+  }
+
+  /**
+   * The entity-type service addressed by a batch request reference (`$<id>`) rather than by a known key -
+   * the single-entity twin of {@link byId} for the case where the key is not yet known because an earlier
+   * sub-request in the same batch just created the entity. The service's path is the bare `$<id>` under the
+   * base, so a request built from it goes out as `$<id>/…` in the batch.
+   *
+   * Not ETag-gated and carries no cache key - a reference is not a real address, so there is nothing to gate
+   * on or to store under.
+   */
+  public byRef(id: number): ES {
+    const { client, basePath, options } = this.__base;
+    return this.createEntityService(client, basePath, ref(id), options);
   }
 
   /**

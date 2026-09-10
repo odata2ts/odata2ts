@@ -25,7 +25,7 @@ export class TesterService extends ODataService {
   public testing(id?: AbstractEntityId | undefined) {
     const fieldName = "Testing";
     const { client, path, options } = this.__base;
-    const collection = new TestEntityCollectionService(client, path, fieldName, options);
+    const collection = new TestEntityCollectionService(client, path, fieldName, { ...options, subtype: false });
     return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }

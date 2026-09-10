@@ -440,6 +440,29 @@ describe("Service Generator Tests V4", () => {
     await compareMainService("min-v401.ts");
   });
 
+  test("Service Generator: Min JSON Batch", async () => {
+    // given the JSON batch setting
+    const options: ConfigFileOptions = { batch: { format: "json" } };
+
+    // when generating
+    await doGenerate(options);
+
+    // then the main service is stamped with the JSON builder type and bakes the format, since it only
+    // takes effect at runtime
+    await compareMainService("min-json-batch.ts");
+  });
+
+  test("Service Generator: Min JSON Batch 4.01", async () => {
+    // given the JSON batch setting on a 4.01 service
+    const options: ConfigFileOptions = { v4: { odataVersion: "4.01" }, batch: { format: "json" } };
+
+    // when generating
+    await doGenerate(options);
+
+    // then both the version and the JSON builder type are spelled out on the main service
+    await compareMainService("min-json-batch-v401.ts");
+  });
+
   test("Service Generator: One EntitySet", async () => {
     // given one EntitySet
     odataBuilder

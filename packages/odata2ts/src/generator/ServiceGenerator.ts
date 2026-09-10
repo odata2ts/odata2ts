@@ -37,7 +37,7 @@ export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "p
 
 export interface ServiceGeneratorOptions extends Pick<
   ConfigFileOptions,
-  "enablePrimitivePropertyServices" | "enumType" | "managedPropertyMode" | "cacheKeys"
+  "enablePrimitivePropertyServices" | "enumType" | "managedPropertyMode" | "cacheKeys" | "batch"
 > {
   v2: Pick<NonNullable<ConfigFileOptions["v2"]>, "responseAsV4">;
   v4: Pick<NonNullable<ConfigFileOptions["v4"]>, "bigNumberAsString" | "odataVersion">;
@@ -72,6 +72,14 @@ class ServiceGenerator {
 
   private isV401() {
     return this.options.v4.odataVersion === "4.01" && this.version === ODataVersions.V4;
+  }
+
+  /**
+   * Whether the service is stamped for the JSON `$batch` format. A V2 service has no JSON `$batch`, so the
+   * ask is refused and the service is always multipart, whatever the configuration states.
+   */
+  private isJsonBatch() {
+    return this.options.batch?.format === "json" && this.version === ODataVersions.V4;
   }
 
   private isV2AsV4() {
@@ -306,11 +314,19 @@ class ServiceGenerator {
   /**
    * {@link getMainVersionArg} for the one place it must not be used: the main service's own `extends`
    * clause. `ODataService` is the single, unversioned base class every main service extends, V2 and V4
-   * alike, and it is generic only over the V4 minor version - there is no `AsV4` for it to accept.
+   * alike. Its `V` argument spells out the V4 minor version only where it deviates from the `"4.0"` default,
+   * and its `TBuilder` argument names the `$batch` builder only where the service is stamped for the JSON
+   * format - which spells out both, since a type argument cannot skip the one before it. A multipart service
+   * relies on the defaults and stays unadorned; a V2 service is always multipart, so it never carries one.
    * `v2ResponseAsV4` still reaches every sub-service, just via the runtime option
-   * ({@link getRuntimeOptions}) rather than this type argument.
+   * ({@link getRuntimeOptions}) rather than a type argument.
    */
-  private getRootServiceVersionArg() {
+  private getRootServiceVersionArg(importContainer: ImportContainer) {
+    if (this.isJsonBatch()) {
+      const builder = importContainer.addServiceObject(this.version, ServiceImports.JsonBatchBuilder);
+      const version = this.isV401() ? `"4.01"` : `"4.0"`;
+      return `<${version}, ${builder}<[]>>`;
+    }
     return this.isV401() ? `<"4.01">` : "";
   }
 
@@ -381,13 +397,26 @@ class ServiceGenerator {
     if (this.isV401()) {
       options.push(`odataVersionV4: "4.01"`);
     }
-    // only V2 carries this - it is the one runtime fact nothing else can say, and it is what makes
-    // `batch().execute({ format: "json" })` refuse on a V2 service (V2 has no JSON $batch)
+    // only V2 carries this - it is the one runtime fact nothing else can say
     if (this.version === ODataVersions.V2) {
       options.push(`odataVersion: "2.0"`);
     }
     if (this.isV2AsV4()) {
       options.push("v2ResponseAsV4: true");
+    }
+    // the batch format is a generation-time decision, baked into the constructor so the runtime builds the
+    // builder the service's type was stamped with. Only where it deviates from the multipart default is it
+    // spelled out, so the default (multipart) service's output is unchanged. A V2 service never carries a
+    // format (it is always multipart), though a disabled batch is baked wherever it was configured
+    const batchParts: Array<string> = [];
+    if (this.isJsonBatch()) {
+      batchParts.push(`format: "json"`);
+    }
+    if (this.options.batch?.disabled) {
+      batchParts.push("disabled: true");
+    }
+    if (batchParts.length) {
+      options.push(`batch: { ${batchParts.join(", ")} }`);
     }
     return options;
   }
@@ -443,7 +472,7 @@ class ServiceGenerator {
     mainServiceFile.getFile().addClass({
       isExported: true,
       name: mainServiceName,
-      extends: `${rootService}${this.getRootServiceVersionArg()}`,
+      extends: `${rootService}${this.getRootServiceVersionArg(importContainer)}`,
       ctors: runtimeOptions.length
         ? [
             {
@@ -547,6 +576,11 @@ class ServiceGenerator {
         ? this.emitRootStateExpr(imports, odataPropName, "list", entityType, { isEntitySet: true })
         : this.emitNavHopExpr(imports, ownerFqName, odataPropName, entityType, true, contained);
     const cacheKeyDestructure = ownerFqName !== undefined && cacheKeyExpr ? ", cacheKeyState" : "";
+    // A navigation always addresses the contained type by its own name - never a cast of the base set - so a
+    // parent's subtype cast must not leak into the child: it would drop the nav segment on create and emit a
+    // spurious type-control-info. The `subtype` flag only exists on the V4 options type (V2 has no subtype
+    // cast), so the reset is spelled out for V4 only; V2 passes `options` through untouched.
+    const collectionOptions = this.version === ODataVersions.V4 ? "{ ...options, subtype: false }" : "options";
 
     return {
       scope: Scope.Public,
@@ -579,8 +613,8 @@ class ServiceGenerator {
         // the version argument is only spelled out on the constructor call for v2ResponseAsV4: without it,
         // "new Type(...)" infers AsV4's default (false), which mismatches the declared return type above
         // wherever it isn't itself the abstract AsV4 - concretely, on every getter of the main service,
-        // which pins the literal true rather than passing an abstract type parameter along
-        `const collection = new ${collectionName}${this.isV2AsV4() ? versionArg : ""}(client, path, fieldName, options${cacheKeyExpr ? `, ${cacheKeyExpr}` : ""});`,
+        // which pins the literal true rather than passing an abstract type parameter along.
+        `const collection = new ${collectionName}${this.isV2AsV4() ? versionArg : ""}(client, path, fieldName, ${collectionOptions}${cacheKeyExpr ? `, ${cacheKeyExpr}` : ""});`,
         'return typeof id === "undefined" || id === null ? collection : collection.byId(id);',
       ],
     };

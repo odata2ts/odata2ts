@@ -90,6 +90,12 @@ describe("V2 EntitySetService Test", () => {
     expect(request.getInfo().data).toEqual(model);
   });
 
+  test("byRef builds the entity-type service addressed by the batch request reference", () => {
+    const entityService = testService.byRef(1);
+
+    expect(entityService.getPath()).toBe(`${BASE_URL}/$1`);
+  });
+
   describe("cache keys: expand enrichment and deepEdit", () => {
     const PERSON = "Test.Person";
 

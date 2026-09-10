@@ -1,6 +1,19 @@
 import { QId } from "../operation/QId";
 
 /**
+ * A batch request reference (OData V4.01 Part 1 §11.7.6) names a preceding sub-request of the same `$batch`
+ * by its wire id, spelled `$<id>` - the token the `ref` helper in `odata-service` produces. It is not a key:
+ * the service resolves it against that preceding sub-request's answer (its `Location`), so the client must
+ * pass it through verbatim rather than assemble a key-predicate URL.
+ *
+ * odata2ts assigns the wire ids, and the token is the id wrapped in a `$`; the check mirrors that production
+ * so a value only ever counts as a reference when it is exactly the token form a `ref` call yields.
+ */
+function isRequestReference(id: unknown): id is string {
+  return typeof id === "string" && /^\$\d+$/.test(id);
+}
+
+/**
  * How a binding to an already existing entity is spelled in a request payload.
  *
  * - {@code 4.0} keeps the binding apart from the payload: {@code "Location@odata.bind": "Branches(1)"}
@@ -67,9 +80,12 @@ export class QBinding<Id> {
 
   /**
    * The value of the binding property: the URL of the referenced entity, wrapped as the notation demands.
+   *
+   * A batch request reference (`$<id>`) is the one value this is not: it names a preceding sub-request, not an
+   * entity by key, so it goes out verbatim and the service - not the id function - resolves it.
    */
-  public format(id: Id): unknown {
-    const url = this.idFunctionFn().buildUrl(id);
+  public format(id: Id | string): unknown {
+    const url = isRequestReference(id) ? id : this.idFunctionFn().buildUrl(id);
 
     switch (this.notation) {
       case "V2":
