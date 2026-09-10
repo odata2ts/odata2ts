@@ -63,6 +63,17 @@ describe("Service Generator Tests V2", () => {
     await compareMainService("min.ts");
   });
 
+  test("Service Generator: a V2 service ignores a JSON batch ask", async () => {
+    // given a JSON batch ask - a V2 service has no JSON $batch, so it is refused at generation
+    runOptions.batch = { format: "json" };
+
+    // when generating
+    await doGenerate();
+
+    // then the main service is the plain multipart one - no builder type, no baked format
+    await compareMainService("min.ts");
+  });
+
   test("Service Generator: one EntitySet", async () => {
     // given one EntitySet
     odataBuilder

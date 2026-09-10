@@ -37,7 +37,10 @@ export class TesterService extends ODataService {
   public fromAbstract(id?: ExtendedFromAbstractId | undefined) {
     const fieldName = "FromAbstract";
     const { client, path, options } = this.__base;
-    const collection = new ExtendedFromAbstractCollectionService(client, path, fieldName, options);
+    const collection = new ExtendedFromAbstractCollectionService(client, path, fieldName, {
+      ...options,
+      subtype: false,
+    });
     return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 
@@ -46,7 +49,7 @@ export class TesterService extends ODataService {
   public fromOpen(id?: ExtendedFromOpenId | undefined) {
     const fieldName = "FromOpen";
     const { client, path, options } = this.__base;
-    const collection = new ExtendedFromOpenCollectionService(client, path, fieldName, options);
+    const collection = new ExtendedFromOpenCollectionService(client, path, fieldName, { ...options, subtype: false });
     return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }

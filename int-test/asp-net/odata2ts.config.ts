@@ -10,8 +10,9 @@ const SOURCE = "resource/library.xml";
  *
  * The source is a committed snapshot of the server's actual `$metadata` (`resource/library.xml`) -
  * odata2ts is tested against the metadata ASP.NET Core OData really emits, not against the idealized
- * reference model. Notably that metadata has no `TypeDefinition`, no `Partner` attributes and no `SRID`
- * facets, none of which the model builder can express; see FEATURE-COVERAGE.md in the server repo.
+ * reference model. Notably that metadata has no `TypeDefinition` and no `SRID` facets, neither of which
+ * the model builder can express; see FEATURE-COVERAGE.md in the server repo. `Partner` *is* declared on
+ * both sides of every relationship (6 attributes).
  *
  * The snapshot refreshes itself from a running server: point `LIBRARY_BASE_URL` at one and the first
  * service downloads `$metadata` and overwrites the file, which the services after it then read, so a
@@ -55,6 +56,24 @@ const config: ConfigFileOptions = {
       source: SOURCE,
       refreshFile: true,
       output: "src-generated/library",
+    },
+    /**
+     * The same model once more, with the $batch wire format fixed to JSON at generation time.
+     *
+     * The default (multipart) `library` client above is what most users get and is where the multipart
+     * batch is held against a real server; this client is the JSON half. JSON $batch is a V4-only wire
+     * format - V2 has none (see int-test/olingo-v2) - and this server is the one that honours the
+     * reference features JSON adds on top of multipart: a referencing request must name its dependency in
+     * `dependsOn`, and the reference token may sit in a request body (`@odata.bind: "$1"`) as well as in a
+     * URL. The generator stamps the service's builder type from this option, so `batch()` here returns a
+     * JsonBatchBuilder whose `add` carries `dependsOn` (whereas the multipart clients' builder does not).
+     * See test/feature/Batch.test.ts.
+     */
+    libraryJsonBatch: {
+      serviceName: "LibraryJsonBatch",
+      source: SOURCE,
+      output: "src-generated/library-json-batch",
+      batch: { format: "json" },
     },
     /**
      * The same model once more, targeting OData 4.01 instead of the default 4.0.

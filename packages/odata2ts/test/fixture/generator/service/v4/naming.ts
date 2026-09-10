@@ -19,7 +19,7 @@ export class tester extends ODataService {
   public NAVIGATE_TO_LIST(id?: TEST_ENTITY_ID | undefined) {
     const fieldName = "list";
     const { client, path, options } = this.__base;
-    const collection = new TEST_ENTITY_COLLECTION_SRV(client, path, fieldName, options);
+    const collection = new TEST_ENTITY_COLLECTION_SRV(client, path, fieldName, { ...options, subtype: false });
     return typeof id === "undefined" || id === null ? collection : collection.byId(id);
   }
 }

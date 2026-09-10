@@ -193,8 +193,8 @@ expectTypeOf<CapEditableAudiobooks["Chapters"]>().toEqualTypeOf<Array<CapEditabl
 // The associations keep their binding and lose the nested entity - which is the point of the option
 // here: a nested payload on `Copies` is answered by CAP with a silent no-op and one on `Publisher` with a
 // 400, while binding an existing entity works on both. The type now permits only the half that works.
-expectTypeOf<CapEditableAudiobooks["Copies"]>().toEqualTypeOf<Array<{ "@id": CapCopiesId }> | undefined>();
-expectTypeOf<CapEditableBooks["Publisher"]>().toEqualTypeOf<{ "@id": CapPublishersId } | null | undefined>();
+expectTypeOf<CapEditableAudiobooks["Copies"]>().toEqualTypeOf<Array<{ "@id": CapCopiesId | string }> | undefined>();
+expectTypeOf<CapEditableBooks["Publisher"]>().toEqualTypeOf<{ "@id": CapPublishersId | string } | null | undefined>();
 
 // Containment reshapes the contained type as well: a chapter is identified within its audiobook, so CAP
 // drops the foreign key to the parent. Before the composition was annotated, the editable model demanded

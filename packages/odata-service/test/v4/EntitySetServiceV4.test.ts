@@ -1,5 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { FlexibleODataModelPayloadV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
+import { QBinding, QEntityCollectionPath, QId, QueryObject } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
 import { DEFAULT_HEADERS, getODataVersionHeaders, RequestInfo } from "../../src";
 import { commonEntitySetTests } from "../EntitySetServiceTests";
@@ -248,6 +249,13 @@ describe("V4 EntitySetService Test", () => {
 
     expectTypeOf(entityService).toEqualTypeOf<PersonModelService>();
     expect(entityService.getPath()).toBe(`${EXPECTED_PATH}('tester')`);
+  });
+
+  test("byRef builds the entity-type service addressed by the batch request reference", () => {
+    const entityService = testService.byRef(1);
+
+    expectTypeOf(entityService).toEqualTypeOf<PersonModelService>();
+    expect(entityService.getPath()).toBe(`${BASE_URL}/$1`);
   });
 
   describe("alternate keys", () => {

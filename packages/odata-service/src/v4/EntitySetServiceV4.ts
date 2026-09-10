@@ -9,6 +9,7 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
+import { ref } from "../ref.js";
 import { ConcurrencyOptions, UrlBuilderRequestCmdV4 } from "../request";
 import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
 import { ServiceStateHelperV4, SubtypeOptions } from "./ServiceStateHelperV4.js";
@@ -83,6 +84,21 @@ export abstract class EntitySetServiceV4<
     // after a subtype cast, the cast segment's name) - path would double that segment
     const { client, basePath, options, isUrlNotEncoded } = this.__base;
     return this.createEntityService(client, basePath, this.__idFunction.buildUrl(id, isUrlNotEncoded()), options);
+  }
+
+  /**
+   * The entity-type service addressed by a batch request reference (`$<id>`) rather than by a known key -
+   * the single-entity twin of {@link byId} for the case where the key is not yet known because an earlier
+   * sub-request in the same batch just created the entity. This is the URL reference: the service's path is
+   * the bare `$<id>` under the base, so a request built from it goes out as `$<id>/…` in the batch and the
+   * service rewrites it against the preceding sub-request's answer.
+   *
+   * Not ETag-gated and carries no cache key - a reference is not a real address, so there is nothing to gate
+   * on or to store under.
+   */
+  public byRef(id: number): ES {
+    const { client, basePath, options } = this.__base;
+    return this.createEntityService(client, basePath, ref(id), options);
   }
 
   /**
@@ -229,11 +245,12 @@ export abstract class EntitySetServiceV4<
     queryFn?: (builder: CollectionQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
     const { client, qModel, createQueryBuilder, getDefaultHeaders } = this.__base;
+    const builder = createQueryBuilder(queryFn);
 
     return new UrlBuilderRequestCmdV4<ODataCollectionResponseFor<V, ReturnType>, Q>(
       client,
       ODataHttpMethods.Get,
-      createQueryBuilder(queryFn),
+      builder,
       qModel,
       undefined,
       {

@@ -15,12 +15,14 @@ import {
   ComplexType,
   DataTypes,
   EntityContainerModel,
+  EntitySetType,
   EntityType,
   FunctionImportType,
   hasUpdatableModel,
   OperationType,
   OperationTypes,
   PropertyModel,
+  ReturnTypeModel,
   SingletonType,
 } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
@@ -35,7 +37,7 @@ export interface PropsAndOps extends Required<Pick<ClassDeclarationStructure, "p
 
 export interface ServiceGeneratorOptions extends Pick<
   ConfigFileOptions,
-  "enablePrimitivePropertyServices" | "enumType" | "managedPropertyMode"
+  "enablePrimitivePropertyServices" | "enumType" | "managedPropertyMode" | "batch"
 > {
   v2: Pick<NonNullable<ConfigFileOptions["v2"]>, "responseAsV4">;
   v4: Pick<NonNullable<ConfigFileOptions["v4"]>, "bigNumberAsString" | "odataVersion">;
@@ -69,6 +71,14 @@ class ServiceGenerator {
     return this.options.v4.odataVersion === "4.01" && this.version === ODataVersions.V4;
   }
 
+  /**
+   * Whether the service is stamped for the JSON `$batch` format. A V2 service has no JSON `$batch`, so the
+   * ask is refused and the service is always multipart, whatever the configuration states.
+   */
+  private isJsonBatch() {
+    return this.options.batch?.format === "json" && this.version === ODataVersions.V4;
+  }
+
   private isV2AsV4() {
     return !!this.options.v2.responseAsV4 && this.version === ODataVersions.V2;
   }
@@ -93,11 +103,19 @@ class ServiceGenerator {
   /**
    * {@link getMainVersionArg} for the one place it must not be used: the main service's own `extends`
    * clause. `ODataService` is the single, unversioned base class every main service extends, V2 and V4
-   * alike, and it is generic only over the V4 minor version - there is no `AsV4` for it to accept.
+   * alike. Its `V` argument spells out the V4 minor version only where it deviates from the `"4.0"` default,
+   * and its `TBuilder` argument names the `$batch` builder only where the service is stamped for the JSON
+   * format - which spells out both, since a type argument cannot skip the one before it. A multipart service
+   * relies on the defaults and stays unadorned; a V2 service is always multipart, so it never carries one.
    * `v2ResponseAsV4` still reaches every sub-service, just via the runtime option
-   * ({@link getRuntimeOptions}) rather than this type argument.
+   * ({@link getRuntimeOptions}) rather than a type argument.
    */
-  private getRootServiceVersionArg() {
+  private getRootServiceVersionArg(importContainer: ImportContainer) {
+    if (this.isJsonBatch()) {
+      const builder = importContainer.addServiceObject(this.version, ServiceImports.JsonBatchBuilder);
+      const version = this.isV401() ? `"4.01"` : `"4.0"`;
+      return `<${version}, ${builder}<[]>>`;
+    }
     return this.isV401() ? `<"4.01">` : "";
   }
 
@@ -168,13 +186,26 @@ class ServiceGenerator {
     if (this.isV401()) {
       options.push(`odataVersionV4: "4.01"`);
     }
-    // only V2 carries this - it is the one runtime fact nothing else can say, and it is what makes
-    // `batch().execute({ format: "json" })` refuse on a V2 service (V2 has no JSON $batch)
+    // only V2 carries this - it is the one runtime fact nothing else can say
     if (this.version === ODataVersions.V2) {
       options.push(`odataVersion: "2.0"`);
     }
     if (this.isV2AsV4()) {
       options.push("v2ResponseAsV4: true");
+    }
+    // the batch format is a generation-time decision, baked into the constructor so the runtime builds the
+    // builder the service's type was stamped with. Only where it deviates from the multipart default is it
+    // spelled out, so the default (multipart) service's output is unchanged. A V2 service never carries a
+    // format (it is always multipart), though a disabled batch is baked wherever it was configured
+    const batchParts: Array<string> = [];
+    if (this.isJsonBatch()) {
+      batchParts.push(`format: "json"`);
+    }
+    if (this.options.batch?.disabled) {
+      batchParts.push("disabled: true");
+    }
+    if (batchParts.length) {
+      options.push(`batch: { ${batchParts.join(", ")} }`);
     }
     return options;
   }
@@ -230,7 +261,7 @@ class ServiceGenerator {
     mainServiceFile.getFile().addClass({
       isExported: true,
       name: mainServiceName,
-      extends: `${rootService}${this.getRootServiceVersionArg()}`,
+      extends: `${rootService}${this.getRootServiceVersionArg(importContainer)}`,
       ctors: runtimeOptions.length
         ? [
             {
@@ -285,29 +316,55 @@ class ServiceGenerator {
   ): PropsAndOps {
     const result: PropsAndOps = { properties: [], methods: [] };
 
-    ops.forEach(({ operation, name }) => {
+    ops.forEach((funcOrActionImport) => {
+      const { operation, name, odataName } = funcOrActionImport;
       const op = this.dataModel.getUnboundOperationType(operation);
       if (!op) {
         throw new Error(`Operation "${operation}" not found!`);
       }
+      // only a function import ever declares one - CSDL has no equivalent for an action import
+      const entitySetOdataName = "entitySet" in funcOrActionImport ? funcOrActionImport.entitySet : undefined;
 
       result.properties.push(this.generateQOperationProp(op));
-      result.methods.push(this.generateMethod(name, op, importContainer, "", this.getMainVersionArg(), false));
+      result.methods.push(
+        this.generateMethod(
+          name,
+          op,
+          importContainer,
+          "",
+          this.getMainVersionArg(),
+          false,
+          entitySetOdataName,
+          odataName,
+        ),
+      );
     });
 
     return result;
   }
 
+  /**
+   * `ownerFqName` distinguishes the two contexts this getter serves: `undefined` for an entity set on the
+   * main service (the root of a route), a real FQ type for a navigation property reached from another
+   * entity or complex type (a hop off `ownerFqName`'s `contained`/`odataPropName`).
+   */
   private generateRelatedServiceGetter(
     propName: string,
     odataPropName: string,
     entityType: EntityType,
     imports: ImportContainer,
     versionArg: string,
+    ownerFqName?: string,
+    contained = false,
   ): OptionalKind<MethodDeclarationStructure> {
     const idName = imports.addGeneratedModel(entityType.id.fqName, entityType.id.modelName);
     const serviceName = imports.addGeneratedService(entityType.fqName, entityType.serviceName);
     const collectionName = imports.addGeneratedService(entityType.fqName, entityType.serviceCollectionName);
+    // A navigation always addresses the contained type by its own name - never a cast of the base set - so a
+    // parent's subtype cast must not leak into the child: it would drop the nav segment on create and emit a
+    // spurious type-control-info. The `subtype` flag only exists on the V4 options type (V2 has no subtype
+    // cast), so the reset is spelled out for V4 only; V2 passes `options` through untouched.
+    const collectionOptions = this.version === ODataVersions.V4 ? "{ ...options, subtype: false }" : "options";
 
     return {
       scope: Scope.Public,
@@ -340,8 +397,8 @@ class ServiceGenerator {
         // the version argument is only spelled out on the constructor call for v2ResponseAsV4: without it,
         // "new Type(...)" infers AsV4's default (false), which mismatches the declared return type above
         // wherever it isn't itself the abstract AsV4 - concretely, on every getter of the main service,
-        // which pins the literal true rather than passing an abstract type parameter along
-        `const collection = new ${collectionName}${this.isV2AsV4() ? versionArg : ""}(client, path, fieldName, options);`,
+        // which pins the literal true rather than passing an abstract type parameter along.
+        `const collection = new ${collectionName}${this.isV2AsV4() ? versionArg : ""}(client, path, fieldName, ${collectionOptions});`,
         'return typeof id === "undefined" || id === null ? collection : collection.byId(id);',
       ],
     };
@@ -428,7 +485,7 @@ class ServiceGenerator {
 
     const { properties, methods }: PropsAndOps = deepmerge(
       deepmerge(
-        this.generateServiceProperties(importContainer, model.serviceName, props),
+        this.generateServiceProperties(importContainer, model.fqName, props),
         this.generateServiceOperations(importContainer, model, operations, true),
       ),
       this.generateCastOperations(importContainer, model, false),
@@ -465,7 +522,7 @@ class ServiceGenerator {
 
   private generateServiceProperties(
     importContainer: ImportContainer,
-    serviceName: string,
+    ownerFqName: string,
     props: Array<PropertyModel>,
   ): PropsAndOps {
     const result: PropsAndOps = { properties: [], methods: [] };
@@ -484,7 +541,7 @@ class ServiceGenerator {
         prop.dataType === DataTypes.ComplexType
       ) {
         result.properties.push(this.generateModelProp(importContainer, prop));
-        result.methods.push(this.generateModelPropGetter(importContainer, prop));
+        result.methods.push(this.generateModelPropGetter(importContainer, prop, ownerFqName));
       } else if (prop.isCollection) {
         // collection of EntityTypes
         if (prop.dataType === DataTypes.ModelType) {
@@ -500,6 +557,8 @@ class ServiceGenerator {
               entityType,
               importContainer,
               this.getServiceVersionArg(),
+              ownerFqName,
+              prop.contained,
             ),
           );
         }
@@ -658,9 +717,14 @@ class ServiceGenerator {
   private generateModelPropGetter(
     imports: ImportContainer,
     prop: PropertyModel,
+    ownerFqName: string,
   ): OptionalKind<MethodDeclarationStructure> {
     const model = this.dataModel.getModel(prop.fqType) as ComplexType;
     const isComplexCollection = prop.isCollection && model.dataType === DataTypes.ComplexType;
+    // an entity navigation property (never a collection here - that shape goes through
+    // generateRelatedServiceGetter instead) is grade-aware; a complex property never is, since a complex
+    // value is never a navigation property and has no relation to derive
+    const isEntityNav = model.dataType !== DataTypes.ComplexType;
 
     const type = isComplexCollection
       ? imports.addServiceObject(this.version, ServiceImports.CollectionService)
@@ -791,6 +855,10 @@ class ServiceGenerator {
               type: `${serviceOptions}${this.getServiceVersionArg()}`,
               hasQuestionToken: true,
             },
+            // a getter elsewhere constructs this very class as a hop off its own state (see
+            // emitNavHopExpr et al.) - without this parameter that hop's cache-key state would have
+            // nowhere to go, and the base class's own trailing parameter would sit unreachable behind a
+            // narrower constructor
           ],
           statements: [
             `super(client, basePath, name, ${qObjectName}, new ${qIdFunctionName}(name), ${this.getServiceRuntimeOptions(model)});`,
@@ -808,6 +876,8 @@ class ServiceGenerator {
             { name: "path", type: "string" },
             { name: "name", type: "string" },
             { name: "options", type: `${serviceOptions}${this.getServiceVersionArg()} | undefined` },
+            // this base class's own `byId` computes the entity's cache-key state (see EntitySetServiceV4/V2);
+            // this override only has to forward it, never compute it itself
           ],
           statements: [`return new ${entityServiceName}${this.getServiceVersionArg()}(client, path, name, options);`],
         },
@@ -859,6 +929,8 @@ class ServiceGenerator {
     baseFqName: string,
     versionArg: string,
     isEntityBound = false,
+    entitySetOdataName?: string,
+    importOdataName?: string,
   ): OptionalKind<MethodDeclarationStructure> {
     const isFunc = operation.type === OperationTypes.Function;
     const returnType = operation.returnType;
@@ -962,7 +1034,7 @@ class ServiceGenerator {
           name: `as${upperCaseFirst(serviceName)}`,
           scope: Scope.Public,
           statements: [
-            "const { client, path, options } = this.__base;",
+            `const { client, path, options } = this.__base;`,
             `return new ${serviceType}(client, path, "${subClass.fqName}", { ...options, subtype: true });`,
           ],
         });
