@@ -2,6 +2,7 @@ import {
   QBinding,
   QEntityCollectionPath,
   QEntityPath,
+  QGuidParam,
   QId,
   QNumberParam,
   QNumberPath,
@@ -85,5 +86,60 @@ export class QBookV2 extends QueryObject<Book> {
     this.withPrefix("RelatedAuthors"),
     () => QAuthor,
     new QBinding(() => new QAuthorId("Authors"), "V2"),
+  );
+}
+
+/**
+ * A GUID-keyed author, for the batch-reference case. A request reference (`$<id>`) is a string, so it only
+ * type-checks against a string key type - which is what a bind to a GUID-keyed entity is. The number-keyed
+ * `Author` above could never state one.
+ */
+export type GuidAuthorId = string;
+
+export interface GuidAuthor {
+  id: string;
+  name: string;
+}
+
+export class QGuidAuthor extends QueryObject<GuidAuthor> {
+  public readonly id = new QStringPath(this.withPrefix("ID"));
+  public readonly name = new QStringPath(this.withPrefix("NAME"));
+}
+
+export class QGuidAuthorId extends QId<GuidAuthorId> {
+  getParams(): Array<QParamModel<any, any>> {
+    return [new QGuidParam("ID", "id")];
+  }
+}
+
+export interface GuidBook {
+  id?: string;
+  author?: { "@id": GuidAuthorId } | null;
+}
+
+export class QGuidBookV40 extends QueryObject<GuidBook> {
+  public readonly id = new QStringPath(this.withPrefix("ID"));
+  public readonly author = new QEntityPath(
+    this.withPrefix("Author"),
+    () => QGuidAuthor,
+    new QBinding(() => new QGuidAuthorId("Authors"), "4.0"),
+  );
+}
+
+export class QGuidBookV401 extends QueryObject<GuidBook> {
+  public readonly id = new QStringPath(this.withPrefix("ID"));
+  public readonly author = new QEntityPath(
+    this.withPrefix("Author"),
+    () => QGuidAuthor,
+    new QBinding(() => new QGuidAuthorId("Authors"), "4.01"),
+  );
+}
+
+export class QGuidBookV2 extends QueryObject<GuidBook> {
+  public readonly id = new QStringPath(this.withPrefix("ID"));
+  public readonly author = new QEntityPath(
+    this.withPrefix("Author"),
+    () => QGuidAuthor,
+    new QBinding(() => new QGuidAuthorId("Authors"), "V2"),
   );
 }
