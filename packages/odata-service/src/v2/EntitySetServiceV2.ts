@@ -14,6 +14,7 @@ import {
 } from "@odata2ts/odata-query-objects";
 import { getBodyETagV2, getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
+import { ref } from "../ref.js";
 import { ConcurrencyOptions, UrlBuilderRequestCmdV2 } from "../request";
 import { ServiceStateHelperV2 } from "./ServiceStateHelperV2.js";
 
@@ -69,6 +70,20 @@ export abstract class EntitySetServiceV2<
     // path would double that segment
     const { client, basePath, options, isUrlNotEncoded } = this.__base;
     return this.createEntityService(client, basePath, this.__idFunction.buildUrl(id, isUrlNotEncoded()), options);
+  }
+
+  /**
+   * The entity-type service addressed by a batch request reference (`$<id>`) rather than by a known key -
+   * the single-entity twin of {@link byId} for the case where the key is not yet known because an earlier
+   * sub-request in the same batch just created the entity. The service's path is the bare `$<id>` under the
+   * base, so a request built from it goes out as `$<id>/…` in the batch.
+   *
+   * Not ETag-gated and carries no cache key - a reference is not a real address, so there is nothing to gate
+   * on or to store under.
+   */
+  public byRef(id: number): ES {
+    const { client, basePath, options } = this.__base;
+    return this.createEntityService(client, basePath, ref(id), options);
   }
 
   /**
@@ -163,13 +178,14 @@ export abstract class EntitySetServiceV2<
 
   public create(model: EditableT, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
+    const builder = createModelQueryBuilder(queryFn);
 
     return new UrlBuilderRequestCmdV2<
       AsV4 extends true ? ODataModelResponseV4<T> : ODataEntityModelResponseV2<T>,
       Q,
       ModelQueryBuilderV2<Q>,
       EditableT
-    >(client, ODataHttpMethods.Post, createModelQueryBuilder(queryFn), qModel, model, {
+    >(client, ODataHttpMethods.Post, builder, qModel, model, {
       headers: getDefaultHeaders(),
       mainRequestConverter: qModel,
       mainResponseConverter: new EntityResponseConverterV2<T, AsV4>(qModel, this.__base.isAsV4()),
@@ -185,11 +201,12 @@ export abstract class EntitySetServiceV2<
     queryFn?: (builder: CollectionQueryBuilderV2<Q>, qObject: Q) => void,
   ) {
     const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
+    const builder = createQueryBuilder(queryFn);
 
     return new UrlBuilderRequestCmdV2<
       AsV4 extends true ? ODataCollectionResponseV4<ReturnType> : ODataCollectionResponseV2<ReturnType>,
       Q
-    >(client, ODataHttpMethods.Get, createQueryBuilder(queryFn), qModel, undefined, {
+    >(client, ODataHttpMethods.Get, builder, qModel, undefined, {
       concurrency: this.getCollectionConcurrencyOptions(),
       headers: getDefaultHeaders(),
       mainResponseConverter: new CollectionResponseConverterV2<ReturnType, AsV4>(qModel, this.__base.isAsV4()),

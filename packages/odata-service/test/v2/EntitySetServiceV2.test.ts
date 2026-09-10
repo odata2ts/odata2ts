@@ -1,5 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { ODataEntityModelResponseV2 } from "@odata2ts/odata-core";
+import { QBinding, QEntityCollectionPath, QId, QueryObject } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
 import { DEFAULT_HEADERS, RequestInfo } from "../../src";
 import { commonEntitySetTests } from "../EntitySetServiceTests";
@@ -87,5 +88,11 @@ describe("V2 EntitySetService Test", () => {
     expect(request.getInfo().url).toBe(EXPECTED_PATH + "?$select=UserName");
     expect(request.getInfo().method).toBe("POST");
     expect(request.getInfo().data).toEqual(model);
+  });
+
+  test("byRef builds the entity-type service addressed by the batch request reference", () => {
+    const entityService = testService.byRef(1);
+
+    expect(entityService.getPath()).toBe(`${BASE_URL}/$1`);
   });
 });

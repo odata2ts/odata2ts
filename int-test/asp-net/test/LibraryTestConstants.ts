@@ -1,5 +1,6 @@
 import { FetchClient } from "@odata2ts/http-client-fetch";
 import { inject } from "vitest";
+import { LibraryJsonBatchService } from "../src-generated/library-json-batch/LibraryJsonBatchService.js";
 import { LibraryNamespaceAliasService } from "../src-generated/library-namespace-alias/LibraryNamespaceAliasService.js";
 import { LibraryRenamedService } from "../src-generated/library-renamed/LibraryRenamedService.js";
 import { LibraryStrictService } from "../src-generated/library-strict/LibraryStrictService.js";
@@ -9,6 +10,13 @@ import { LibraryService } from "../src-generated/library/LibraryService.js";
 export const BASE_URL = inject("libraryBaseUrl");
 export const ODATA_CLIENT = new FetchClient();
 export const LIBRARY = new LibraryService(ODATA_CLIENT, BASE_URL);
+
+/**
+ * The very same service through a client generated with `batch: { format: "json" }` - the one whose `$batch`
+ * builder carries the JSON wire format plus numeric `dependsOn`. Only `Batch.test.ts` uses it: the default
+ * `LIBRARY` is the multipart client.
+ */
+export const LIBRARY_JSON_BATCH = new LibraryJsonBatchService(ODATA_CLIENT, BASE_URL);
 
 /**
  * The very same service, through the client generated with `allowRenaming`. Only `Renaming.test.ts` uses

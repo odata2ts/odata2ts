@@ -17,7 +17,7 @@ export interface Book {
 export type BookId = number | { id: number };
 
 export interface EditableBook extends Partial<Pick<Book, "id">> {
-  author?: { "@id": AuthorId };
-  altAuthor?: { "@id": AuthorId } | null;
-  relatedAuthors?: Array<{ "@id": AuthorId }>;
+  author?: { "@id": AuthorId | string };
+  altAuthor?: { "@id": AuthorId | string } | null;
+  relatedAuthors?: Array<{ "@id": AuthorId | string }>;
 }

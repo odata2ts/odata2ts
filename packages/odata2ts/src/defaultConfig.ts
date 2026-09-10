@@ -35,6 +35,10 @@ const defaultConfig: DefaultConfiguration = {
     odataVersion: "4.0",
     enableNativeInOperator: false,
   },
+  batch: {
+    format: "multipart",
+    disabled: false,
+  },
   disableAutomaticNameClashResolution: false,
   bundledFileGeneration: false,
   unflattenComplexTypes: false,
