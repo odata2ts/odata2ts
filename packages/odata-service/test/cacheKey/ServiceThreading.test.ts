@@ -18,14 +18,24 @@ import { MockClient } from "../mock/MockClient";
 const MEDIUM = "Library.Catalog.Medium";
 const COPY = "Library.Catalog.Copy";
 
-type TestEntityService = EntityTypeServiceV4<TestModel, EditableTestModel, QTest, "4.0">;
+/**
+ * The real, published `EntityTypeServiceV4` no longer exposes its `CacheKeyState` (see the removed
+ * `getCacheKeyState()`, replaced by the narrow `getEntitySetName()`) - `steps`/`key` are internal wiring,
+ * asserted on here the same way `ServiceStateHelper`'s own tests reach protected internals: a test-local
+ * subclass, never shipped, with its own accessor onto `__base`.
+ */
+class TestEntityService extends EntityTypeServiceV4<TestModel, EditableTestModel, QTest, "4.0"> {
+  public getCacheKeyState() {
+    return this.__base.cacheKeyState;
+  }
+}
 
 /**
  * A minimal `EntitySetServiceV4` around a given id function, built here rather than via the shared
  * `TestCollectionService`/`TestCollectionServiceWithAlternateKey` fixtures: neither fixture's constructor
  * forwards a `cacheKeyState`, and reshaping them to do so would touch fixtures other tests already rely on.
- * `createEntityService` just needs to hand the state to *some* entity-type service, so a bare
- * `EntityTypeServiceV4` does the job without a fixture-specific subclass.
+ * `createEntityService` just needs to hand the state to *some* entity-type service, so `TestEntityService`
+ * does the job.
  */
 class TestSetService<EIdType> extends EntitySetServiceV4<
   TestModel,
@@ -51,7 +61,7 @@ class TestSetService<EIdType> extends EntitySetServiceV4<
     options: ODataServiceOptionsInternal<"4.0"> | undefined,
     cacheKeyState?: CacheKeyState,
   ): TestEntityService {
-    return new EntityTypeServiceV4(client, path, name, qTest, options, cacheKeyState);
+    return new TestEntityService(client, path, name, qTest, options, cacheKeyState);
   }
 }
 
@@ -110,5 +120,39 @@ describe("byId produces the typed key, not the rendered predicate", () => {
 
     const state = service.byId({ name: "978-3" }).getCacheKeyState()!;
     expect(state.steps).toEqual(["detail", { NAME: "978-3" }]);
+  });
+});
+
+describe("getEntitySetName - the one narrow accessor a generated service exposes publicly", () => {
+  const client = new MockClient(false);
+
+  test("reflects the root's own entity set", () => {
+    const service = new TestSetService<TestModelId>(
+      client,
+      "/root",
+      "Media",
+      new QTestIdFunction("Media"),
+      rootState(MEDIUM, "list", { entitySetName: "Media" }),
+    );
+
+    expect(service.getEntitySetName()).toBe("Media");
+  });
+
+  test("is undefined where the route was never threaded with cache-key state at all", () => {
+    const service = new TestSetService<TestModelId>(client, "/root", "Media", new QTestIdFunction("Media"));
+
+    expect(service.getEntitySetName()).toBeUndefined();
+  });
+
+  test("survives byId() unchanged - narrowing to one entity does not leave its entity set", () => {
+    const service = new TestSetService<TestModelId>(
+      client,
+      "/root",
+      "Media",
+      new QTestIdFunction("Media"),
+      rootState(MEDIUM, "list", { entitySetName: "Media" }),
+    );
+
+    expect(service.byId("5").getEntitySetName()).toBe("Media");
   });
 });
