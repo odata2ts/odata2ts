@@ -345,14 +345,15 @@ export class DataModel {
    * derived-type navigation property bound by a cast-qualified path; one reached only by first following a
    * contained collection).
    *
-   * A **plain, single-segment** binding's inherited navigation property is registered for the base type
-   * declaring it as well, since that is the model the property is generated into - `collectTypeHierarchy`
-   * climbs from the binding's own owning entity type toward its ancestors for this. A **multi-segment**
-   * path's resolved owner is registered for that type alone, deliberately without climbing any further:
-   * the walk in {@link resolveNavPropBindingPathOwner} can land on a type *below* the binding's own owning
-   * entity type (a cast to a subtype, or a hop to an unrelated type), and climbing from there would credit
-   * an ancestor with a property only the resolved subtype actually declares - e.g. a cast-qualified binding
-   * for a subtype-only navigation property must never resolve for that subtype's own base type.
+   * Each binding is registered under the type it is actually declared for - the set's own entity type for a
+   * plain, single-segment path; the type the final segment is declared on for a multi-segment path - and
+   * nothing else. The lookup does the hierarchy work instead: it walks the queried type's own ancestor
+   * chain, most derived first, and takes the first hit. A binding declared for a base type therefore
+   * serves every subtype - the navigation property is inherited, and the subtype's service needs the
+   * target exactly as the base type's does - while a subtype's own binding still wins over an inherited
+   * one, because its own type is tried first. A type that neither declares nor inherits a resolved
+   * binding gets none: an ancestor never borrows a more-derived set's target, since the binding is
+   * declared per entity set and the ancestor's own set is the only authority for its type.
    */
   public getNavPropBindingTarget(fqEntityTypeName: string, navPropOdataName: string): EntitySetType | undefined {
     if (!this.navPropBindings) {
@@ -368,10 +369,10 @@ export class DataModel {
         for (const { path, target } of source.navPropBinding ?? []) {
           const segments = path.split("/");
           const propName = segments[segments.length - 1];
-          const isMultiSegment = segments.length > 1;
-          const owner = isMultiSegment
-            ? this.resolveNavPropBindingPathOwner(source.entityType, segments.slice(0, -1))
-            : source.entityType;
+          const owner =
+            segments.length > 1
+              ? this.resolveNavPropBindingPathOwner(source.entityType, segments.slice(0, -1))
+              : source.entityType;
           if (!owner) {
             continue;
           }
@@ -382,18 +383,24 @@ export class DataModel {
             continue;
           }
 
-          const owningTypes = isMultiSegment ? [owner.fqName] : this.collectTypeHierarchy(owner);
-          for (const owningType of owningTypes) {
-            const key = `${owningType}|${propName}`;
-            if (!this.navPropBindings.has(key)) {
-              this.navPropBindings.set(key, targetSet);
-            }
+          const key = `${owner.fqName}|${propName}`;
+          if (!this.navPropBindings.has(key)) {
+            this.navPropBindings.set(key, targetSet);
           }
         }
       }
     }
 
-    return this.navPropBindings.get(`${fqEntityTypeName}|${navPropOdataName}`);
+    // an unknown type has no chain to walk: the direct lookup is all that can be tried
+    const queriedType = this.getEntityType(fqEntityTypeName);
+    const lookupChain = queriedType ? this.collectTypeHierarchy(queriedType) : [fqEntityTypeName];
+    for (const typeFqName of lookupChain) {
+      const hit = this.navPropBindings.get(`${typeFqName}|${navPropOdataName}`);
+      if (hit) {
+        return hit;
+      }
+    }
+    return undefined;
   }
 
   /**
@@ -444,7 +451,9 @@ export class DataModel {
   }
 
   /**
-   * The fully qualified names of an entity type and of all its base types.
+   * The fully qualified names of an entity type and of all its base types, most derived first - the order
+   * {@link getNavPropBindingTarget} relies on, so a type's own binding is always tried before any
+   * inherited one.
    */
   private collectTypeHierarchy(entityType: EntityType): Array<string> {
     const result: Array<string> = [];

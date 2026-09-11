@@ -13,6 +13,7 @@ import type {
   EditableAudiobookChapter as CompositionEditableAudiobookChapter,
   EditableBook as CompositionEditableBook,
 } from "../src-generated/deep-insert-composition/library-catalog/index.js";
+import type { CopyId as CompositionCopyId } from "../src-generated/deep-insert-composition/library-circulation/index.js";
 import type { PublisherId as CompositionPublisherId } from "../src-generated/deep-insert-composition/publisher-registry/index.js";
 import type { Amenities as NumericAmenities } from "../src-generated/enum-numeric/library-catalog/index.js";
 import type { Branch as NumericBranch } from "../src-generated/enum-numeric/library-circulation/index.js";
@@ -169,9 +170,15 @@ expectTypeOf<AllComputedEditableMedium>().not.toHaveProperty("PopularityScore");
 expectTypeOf<CompositionEditableAudiobook["Chapters"]>().toEqualTypeOf<
   Array<CompositionEditableAudiobookChapter> | undefined
 >();
-expectTypeOf<CompositionEditableAudiobook>().not.toHaveProperty("Copies");
+// `Copies` is plain navigation, so under this option it carries no deep insert; its binding (declared
+// for `Medium`, inherited by the subtypes) shows as the binding-reference shape only
+expectTypeOf<CompositionEditableAudiobook["Copies"]>().toEqualTypeOf<
+  Array<{ "@id": CompositionCopyId | string }> | undefined
+>();
 // nothing is contained anywhere else, so no editable model offers a deep insert at all
-expectTypeOf<CompositionEditableBook>().not.toHaveProperty("Copies");
+expectTypeOf<CompositionEditableBook["Copies"]>().toEqualTypeOf<
+  Array<{ "@id": CompositionCopyId | string }> | undefined
+>();
 // `Publisher` sits on `Book` only, reached via a cast-qualified binding path
 // (`Library.Catalog.Book/Publisher`) - resolving it needs DataModel.getNavPropBindingTarget to walk a
 // multi-segment path, so it keeps its binding-reference shape here exactly like CapEditableBooks["Publisher"]

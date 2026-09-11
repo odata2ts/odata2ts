@@ -3,6 +3,7 @@ import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { touchesResource } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
 import { Medium } from "../../src-generated/library/library-catalog/index.js";
+import { Copy } from "../../src-generated/library/library-circulation/index.js";
 import { expectODataError } from "../expectODataError.js";
 import { AUDIOBOOK, BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
@@ -234,6 +235,48 @@ describe("ASP.NET Library: cache keys", () => {
     // `buildInvalidates` collapse this route's own (longer) entry as a redundant prefix of that coarser
     // one. Either way `invalidates` still reaches this route, which is what the test title claims
     expect(patched.invalidates!.some((entry) => touchesResource(entry, request.cacheKey!))).toBe(true);
+  });
+
+  test("a read through a subtype's inherited navigated route records the resource it served, so a later direct write to it invalidates that route - the same assertion as above, through the subtype route the base test never reaches", async () => {
+    // `Copies` is declared on `Medium` and inherited by `Book`: before the fix the subtype service's hop
+    // carried no entitySetName/canonicalIdFn, so the copy this response served was never recorded against
+    // this route - the cross-route entry below could never be resolved.
+    // The spec's literal route Media(id).asBookService().Copies() 404s on this server - a cast segment on
+    // a single entity is not served here (pinned in Subtypes.test.ts) - and a to-many list three levels
+    // deep (Publishers(1)/Books(id)/Copies) 404s as well. So the assertion goes through the subtype hop
+    // this server does serve: `Books` addresses the subtype Book without a cast segment.
+    const navigated = await LIBRARY.Publishers(1).Books(BOOK_DER_PROZESS).Copies(copyKey).query().execute();
+    expect(navigated.status).toBe(200);
+    expectTypeOf(navigated).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Copy>>>();
+    expect(navigated.data.InventoryNumber).toBe(CACHE_KEY_COPY);
+
+    const patched = await LIBRARY.Copies(copyKey).patch({ Condition: 4 }).ignoreETag().execute();
+    expect(patched.status).toBe(204);
+    expect(patched.invalidates).toEqual(
+      expect.arrayContaining([
+        ["Copies", "detail", copyKey],
+        ["Copies", "list"],
+        ["Publishers", "detail", 1, "Media", "detail", BOOK_DER_PROZESS, "Copies", "detail", copyKey],
+      ]),
+    );
+  });
+
+  test("a write through a subtype's inherited navigated route invalidates the target entity set's bare list - Publishers(1).Books(id).Copies(...)", async () => {
+    // buildInvalidates' own-entity-set rule needs the hop's entitySetName, which the fix is what the
+    // subtype's hop newly carries - without it the write only invalidates what its route itself names
+    const patched = await LIBRARY.Publishers(1)
+      .Books(BOOK_DER_PROZESS)
+      .Copies(copyKey)
+      .patch({ Condition: 5 })
+      .ignoreETag()
+      .execute();
+    expect(patched.status).toBe(204);
+    expect(patched.invalidates).toEqual(
+      expect.arrayContaining([
+        ["Copies", "detail", copyKey],
+        ["Copies", "list"],
+      ]),
+    );
   });
 
   test("grade B: /Members(...)/Loans names itself by the navigation property", async () => {

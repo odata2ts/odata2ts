@@ -444,6 +444,87 @@ describe("Data Model Tests", function () {
 
       expect(dataModel.getNavPropBindingTarget(`${NS1}.Nonexistent`, "Publisher")).toBeUndefined();
     });
+
+    test("a single-segment binding declared for the base type resolves for every subtype - the inherited navigation property", () => {
+      // mirrors int-test/asp-net: the `Media` set (type `Medium`) binds `Copies`, while `Book` <-
+      // `PrintMedium` <- `Medium` all inherit the property only. The lookup must walk the queried type's
+      // own ancestor chain, or a subtype service's hop comes out without entitySetName/canonicalIdFn.
+      const medium = { fqName: `${NS1}.Medium`, baseClasses: [], props: [], baseProps: [] };
+      const printMedium = { fqName: `${NS1}.PrintMedium`, baseClasses: [`${NS1}.Medium`], props: [], baseProps: [] };
+      const book = { fqName: `${NS1}.Book`, baseClasses: [`${NS1}.PrintMedium`], props: [], baseProps: [] };
+      dataModel.addEntityType(
+        NS1,
+        "Medium",
+        // @ts-expect-error
+        medium,
+      );
+      dataModel.addEntityType(
+        NS1,
+        "PrintMedium",
+        // @ts-expect-error
+        printMedium,
+      );
+      dataModel.addEntityType(
+        NS1,
+        "Book",
+        // @ts-expect-error
+        book,
+      );
+      addEntitySet("Copies", { fqName: `${NS1}.Copy` }, []);
+      addEntitySet("Media", medium, [{ path: "Copies", target: "Copies" }]);
+
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.Medium`, "Copies")?.odataName).toBe("Copies");
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.PrintMedium`, "Copies")?.odataName).toBe("Copies");
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.Book`, "Copies")?.odataName).toBe("Copies");
+    });
+
+    test("a subtype's own binding wins over the one inherited from its base type", () => {
+      const medium = { fqName: `${NS1}.Medium`, baseClasses: [], props: [], baseProps: [] };
+      const book = { fqName: `${NS1}.Book`, baseClasses: [`${NS1}.Medium`], props: [], baseProps: [] };
+      dataModel.addEntityType(
+        NS1,
+        "Medium",
+        // @ts-expect-error
+        medium,
+      );
+      dataModel.addEntityType(
+        NS1,
+        "Book",
+        // @ts-expect-error
+        book,
+      );
+      addEntitySet("MediumCopies", { fqName: `${NS1}.Copy` }, []);
+      addEntitySet("BookCopies", { fqName: `${NS1}.Copy` }, []);
+      addEntitySet("Media", medium, [{ path: "Copies", target: "MediumCopies" }]);
+      addEntitySet("Books", book, [{ path: "Copies", target: "BookCopies" }]);
+
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.Book`, "Copies")?.odataName).toBe("BookCopies");
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.Medium`, "Copies")?.odataName).toBe("MediumCopies");
+    });
+
+    test("an ancestor that does not bind the property itself does not borrow a derived set's target", () => {
+      // a set's binding serves its own type and its subtypes - never an ancestor's: the binding is
+      // declared per entity set, and the ancestor's own set is the only authority for its type
+      const baseMedium = { fqName: `${NS1}.BaseMedium`, baseClasses: [], props: [], baseProps: [] };
+      const medium = { fqName: `${NS1}.Medium`, baseClasses: [`${NS1}.BaseMedium`], props: [], baseProps: [] };
+      dataModel.addEntityType(
+        NS1,
+        "BaseMedium",
+        // @ts-expect-error
+        baseMedium,
+      );
+      dataModel.addEntityType(
+        NS1,
+        "Medium",
+        // @ts-expect-error
+        medium,
+      );
+      addEntitySet("Copies", { fqName: `${NS1}.Copy` }, []);
+      addEntitySet("Media", medium, [{ path: "Copies", target: "Copies" }]);
+
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.Medium`, "Copies")?.odataName).toBe("Copies");
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.BaseMedium`, "Copies")).toBeUndefined();
+    });
   });
 
   describe("getDisplayFqName", () => {
