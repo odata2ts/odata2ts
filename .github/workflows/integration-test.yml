@@ -10,8 +10,9 @@ jobs:
   # Java, ...) means adding its package plus one entry here - no language-specific toolchain is ever
   # needed in this repo, since every server is consumed as a Docker image.
   #
-  # examples/* are absent here: their mock-based `test/` suites run in the unit-test stage, and the
-  # network-bound `examples/main/int-test` has its own job in coverage.yml.
+  # examples/* are absent here: their test suites are optional demonstrations, not the safety net -
+  # no CI stage runs them, and the aggregate unit run excludes `examples/**` entirely (root
+  # vite.config.ts).
   integration-test:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest # Docker is preinstalled, which testcontainers needs
@@ -36,5 +37,20 @@ jobs:
       # also generates the client of the int-test package - offline, from the committed metadata
       - name: Build packages
         run: yarn build
-      - name: Run integration tests
-        run: yarn workspace ${{ matrix.package }} test
+      # the single instrumented run per suite: the tests plus `int-test/<name>/coverage/`, which feeds
+      # the `integration` coverage flag (ADR 0004, workspace root)
+      - name: Run integration tests with coverage
+        run: yarn workspace ${{ matrix.package }} coverage
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: int-coverage-${{ matrix.name }}
+          path: int-test/${{ matrix.name }}/coverage/
+      # non-blocking by design (the action's `fail_ci_if_error` defaults to false): the tests above
+      # are the gate, this step only publishes the coverage report
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v7
+        with:
+          files: int-test/${{ matrix.name }}/coverage/lcov.info
+          flags: integration
+          token: ${{ secrets.CODECOV_TOKEN }}

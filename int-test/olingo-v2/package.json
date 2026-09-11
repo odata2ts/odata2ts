@@ -9,6 +9,7 @@
   "scripts": {
     "build": "yarn clean && yarn generate",
     "clean": "rimraf build src-generated",
+    "coverage": "vitest run --coverage",
     "generate": "odata2ts",
     "test": "vitest run",
     "test-compile": "tsc"

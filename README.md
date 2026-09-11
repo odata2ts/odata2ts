@@ -1,5 +1,6 @@
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/odata2ts/odata2ts/coverage.yml?branch=main&style=for-the-badge)](https://github.com/odata2ts/odata2ts/actions/workflows/coverage.yml)
-[![Coveralls](https://img.shields.io/coveralls/github/odata2ts/odata2ts?style=for-the-badge)](https://coveralls.io/github/odata2ts/odata2ts?branch=main)
+[![Coverage (unit)](https://codecov.io/gh/odata2ts/odata2ts/branch/main/graph/badge.svg?flag=unit&style=for-the-badge)](https://codecov.io/gh/odata2ts/odata2ts)
+[![Coverage (integration)](https://codecov.io/gh/odata2ts/odata2ts/branch/main/graph/badge.svg?flag=integration&style=for-the-badge)](https://codecov.io/gh/odata2ts/odata2ts)
 
 # odata2ts
 
