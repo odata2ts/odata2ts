@@ -99,19 +99,35 @@ describe("ASP.NET Library: cache keys", () => {
     expect(result.status).toBe(200);
   });
 
-  test("a statically-keyed hop's own segment is renamed to its entity set's name, not the hop's own (diverging) name - Publishers(1).Books(id)", () => {
+  test("a statically-keyed hop's own segment is renamed to its entity set's name, not the hop's own (diverging) name - Publishers(1).Books(id)", async () => {
     // Publishers(1).Books(id): "Books" is the hop's own name, but it binds to entity set "Media" (not
     // "Books" - no "Books" entity set exists in this model at all), and BOOK_DER_PROZESS is known the
     // moment this request is constructed - withKey already renames the segment before any response.
-    // Shape only here: this server's controllers are hand-routed (EntitySetControllers.cs), and until
-    // test-server-asp-net's own nested-route fix (test-server-asp-net#38, merged, not yet released and
-    // pinned here) ships, they don't implement a keyed GET through a to-many navigation property for any
-    // entity. The executed, end-to-end proof of the same mechanism is int-test/cap's own CacheKeys.test.ts
-    // - though CAP's own model has no name-diverging to-many relationship to exercise, so neither server
-    // today proves this both executed *and* divergent at once; this becomes that proof once the pin bumps.
+    // The genuinely divergent case executed end-to-end: int-test/cap's own CacheKeys.test.ts proves the
+    // same mechanism over a real HTTP round trip too, but CAP's model has no name-diverging navigation
+    // property to exercise, so this is the one place both properties - executed *and* divergent - meet.
     const request = LIBRARY.Publishers(1).Books(BOOK_DER_PROZESS).query();
     expect(request.cacheKey).toEqual(["Publishers", "detail", 1, "Media", "detail", BOOK_DER_PROZESS]);
     expect(touchesResource(["Media", "detail", BOOK_DER_PROZESS], request.cacheKey!)).toBe(true);
+
+    const result = await request.execute();
+    expect(result.status).toBe(200);
+    expect(result.data.Title).toBe("Der Prozess");
+
+    // the deterministic proof: a write through the hop route invalidates the direct route's own key even
+    // though nothing was ever read via that direct route first - no ResourceIdentityHandler involved
+    const patched = await LIBRARY.Publishers(1)
+      .Books(BOOK_DER_PROZESS)
+      .patch({ Title: "Der Prozess" })
+      .ignoreETag()
+      .execute();
+    expect(patched.status).toBe(204);
+    expect(patched.invalidates).toEqual(
+      expect.arrayContaining([
+        ["Media", "detail", BOOK_DER_PROZESS],
+        ["Media", "list"],
+      ]),
+    );
   });
 
   test("a to-many hop: /Media(...)/Copies names itself by the navigation property, distinct from a hand-filtered route to the same entity set", async () => {
