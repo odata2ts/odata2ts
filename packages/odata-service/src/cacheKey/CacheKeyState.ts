@@ -27,7 +27,7 @@ export type CanonicalIdFn = (entity: unknown) => string | undefined;
  * `path` - `name` for a `byId`-created service is the rendered key predicate, which must not appear in a key.
  */
 export interface CacheKeyState {
-  /** The route's own root name - an entity set's, a singleton's, or `"$operation"`. Never a type. */
+  /** The route's own root name - an entity set's, a singleton's, or an unbound operation import's. Never a type. */
   readonly name: string;
   /** Hops and kind markers accumulated so far. */
   readonly steps: ReadonlyArray<unknown>;
@@ -78,9 +78,10 @@ export interface CacheKeyState {
   readonly key?: unknown;
   /**
    * A factory for the addressed resource's own Q-object, where it is an entity or complex type - absent for
-   * `"$operation"`, the one root with no type behind it at all. The one piece of type information this state
-   * still carries, deliberately never exposed in a cache key: it exists solely so a write's payload can be
-   * walked for deep-inserted entities (`buildDeepEditHops`) without a generated, type-keyed lookup table.
+   * an unbound operation, the one root with no type behind it at all. The one piece of type information this
+   * state still carries, deliberately never exposed in a cache key: it exists solely so a write's payload
+   * can be walked for deep-inserted entities (`buildDeepEditHops`) without a generated, type-keyed lookup
+   * table.
    */
   readonly qEntityFn?: QEntityFn;
 }
