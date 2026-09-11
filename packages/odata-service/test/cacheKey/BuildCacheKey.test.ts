@@ -84,7 +84,7 @@ describe("buildInvalidates", () => {
     expect(buildInvalidates(state)).toContainEqual([MEDIA, "detail", 5]);
   });
 
-  test("a hierarchical write's own key is a prefix-redundant with its ancestor, and drops out - the ancestor, the ancestor's own list form, the hop's own canonicalKey, and the entity-set list entry are what remain", () => {
+  test("a hierarchical write's own key is a prefix-redundant with its ancestor, and drops out - the ancestor, the ancestor's own list form, the hop's own bare entity-set-keyed form, and the entity-set list entry are what remain", () => {
     const copies = hopState(withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 }), {
       name: "copies",
       kind: "list",
@@ -108,6 +108,30 @@ describe("buildInvalidates", () => {
     expect(buildInvalidates(copies)).toEqual([
       [MEDIA, "detail", 5],
       [MEDIA, "list"],
+      [COPIES, "list"],
+    ]);
+  });
+
+  test("a write three hops deep, through an ancestor whose own name diverges from its entity set, still deterministically invalidates a direct route to that ancestor - not just the ancestor's own (longer, hierarchical) key", () => {
+    // Publishers(1).Books(5).copies(...): "books" is the hop's own name, but it binds to entity set MEDIA
+    // (not "books") - the deferred follow-up this test pins: an ancestor's own hierarchical key
+    // (["Publishers","detail",1,MEDIA,"detail",5]) can never be found by scanning a *direct* Media(5)
+    // route's shorter, cached key on its own - only its own bare [MEDIA,"detail",5] form can, exactly the
+    // same reasoning rule 2 already applies to the addressed resource itself
+    const PUBLISHERS = "Publishers";
+    const publishers = withKey(rootState(PUBLISHERS, "list", { entitySetName: PUBLISHERS }), 1, { Id: 1 });
+    const books = withKey(hopState(publishers, { name: "books", kind: "list", entitySetName: MEDIA }), 5, {
+      Id: 5,
+    });
+    const copyKey = { MediumId: 5, InventoryNumber: 7 };
+    const copies = withKey(hopState(books, { name: "copies", kind: "list", entitySetName: COPIES }), copyKey, copyKey);
+
+    expect(buildInvalidates(copies)).toEqual([
+      [PUBLISHERS, "detail", 1],
+      [PUBLISHERS, "list"],
+      [MEDIA, "list"],
+      [MEDIA, "detail", 5],
+      [COPIES, "detail", copyKey],
       [COPIES, "list"],
     ]);
   });

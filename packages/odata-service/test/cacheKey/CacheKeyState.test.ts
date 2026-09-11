@@ -98,7 +98,42 @@ describe("CacheKeyState", () => {
   test("an ancestor carries the entity set it belonged to, so a stale ancestor can invalidate that set's own list form too", () => {
     const parent = withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 });
     const state = hopState(parent, { name: "copies", kind: "list", entitySetName: COPIES });
-    expect(state.ancestors).toEqual([{ key: [MEDIA, "detail", 5], entitySetName: MEDIA }]);
+    expect(state.ancestors).toEqual([
+      { key: [MEDIA, "detail", 5], entitySetName: MEDIA, keyedEntitySetForm: [MEDIA, "detail", 5] },
+    ]);
+  });
+
+  test('a keyed ancestor also carries its own bare [entitySetName, "detail", key] form, for buildInvalidates to use in place of its (hierarchical, prefixed) own key', () => {
+    // "books" is the hop's own name, but it binds to entity set "Media" (not "Books") - withKey already
+    // renamed the segment by the time this ancestor is captured, so the short form uses "Media" too, not
+    // the hop's own diverging name
+    const publishers = withKey(rootState("Publishers", "list", { entitySetName: "Publishers" }), 1, { Id: 1 });
+    const books = withKey(hopState(publishers, { name: "books", kind: "list", entitySetName: MEDIA }), 5, {
+      Id: 5,
+    });
+    const state = hopState(books, { name: "copies", kind: "list", entitySetName: COPIES });
+
+    expect(state.ancestors).toEqual([
+      {
+        key: ["Publishers", "detail", 1],
+        entitySetName: "Publishers",
+        keyedEntitySetForm: ["Publishers", "detail", 1],
+      },
+      {
+        key: ["Publishers", "detail", 1, MEDIA, "detail", 5],
+        entitySetName: MEDIA,
+        keyedEntitySetForm: [MEDIA, "detail", 5],
+      },
+    ]);
+  });
+
+  test("an ancestor that was never narrowed by its own key carries no keyedEntitySetForm - there is nothing to derive it from", () => {
+    const copies = hopState(rootState(MEDIA, "list"), { name: "copies", kind: "list", entitySetName: COPIES });
+    const state = hopState(copies, { name: "condition", kind: "detail" });
+    expect(state.ancestors).toEqual([
+      { key: [MEDIA, "list"] },
+      { key: [MEDIA, "list", "copies", "list"], entitySetName: COPIES },
+    ]);
   });
 
   test("a hop to a contained property has no entity set, so entitySetName and canonicalIdFn stay undefined", () => {
@@ -139,7 +174,11 @@ describe("CacheKeyState", () => {
     ]);
     expect(condition.ancestors).toEqual([
       { key: [MEDIA, "detail", 5] },
-      { key: [MEDIA, "detail", 5, COPIES, "detail", { MediumId: 5, InventoryNumber: 7 }], entitySetName: COPIES },
+      {
+        key: [MEDIA, "detail", 5, COPIES, "detail", { MediumId: 5, InventoryNumber: 7 }],
+        entitySetName: COPIES,
+        keyedEntitySetForm: [COPIES, "detail", { MediumId: 5, InventoryNumber: 7 }],
+      },
     ]);
   });
 
