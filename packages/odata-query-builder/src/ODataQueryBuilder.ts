@@ -11,7 +11,7 @@ import {
   QueryObjectModel,
   searchTerm,
 } from "@odata2ts/odata-query-objects";
-import { CacheKeyParams, ExpandHop, normalizeCacheKeyParams } from "./CacheKeyParams.js";
+import { CacheKeyParams, ExpandHop, normalizeCacheKeyParams, UNKNOWN_ID } from "./CacheKeyParams.js";
 import { ODataOperators } from "./ODataModel";
 import {
   ExpandingCollectionQueryBuilderV4,
@@ -536,8 +536,8 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
         const expandHop: ExpandHop =
           kind === "detail"
             ? nested?.expand
-              ? [name, kind, "?", { expand: nested.expand }]
-              : [name, kind, "?"]
+              ? [name, kind, UNKNOWN_ID, { expand: nested.expand }]
+              : [name, kind, UNKNOWN_ID]
             : nested?.expand
               ? [name, kind, { expand: nested.expand }]
               : [name, kind];

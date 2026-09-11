@@ -1,3 +1,4 @@
+import { UNKNOWN_ID } from "@odata2ts/odata-query-builder";
 import { describe, expect, test } from "vitest";
 import { touchesResource } from "../../src/cacheKey";
 
@@ -49,8 +50,19 @@ describe("touchesResource - array needle, top level", () => {
   test("a to-one hop with no addressed key of its own is not reachable by a keyed needle", () => {
     // /Copies(...)/Medium hierarchical: the hop only ever carries its own name and kind - never the
     // target's own key - so no needle carrying a key value can match it
-    const key = [COPIES, "detail", { MediumId: 5, InventoryNumber: 7 }, "medium", "detail"];
+    const key = [COPIES, "detail", { MediumId: 5, InventoryNumber: 7 }, "medium", "detail", UNKNOWN_ID];
     expect(touchesResource([MEDIA, "detail", 5], key)).toBe(false);
+  });
+
+  test("a bare 'detail' needle still matches a top-level (non-expand) '?'-terminated hop - withUnknownId's own producers, not just $expand's", () => {
+    const key = [COPIES, "detail", { MediumId: 5, InventoryNumber: 7 }, "medium", "detail", UNKNOWN_ID];
+    expect(touchesResource(["medium", "detail"], key)).toBe(true);
+  });
+
+  test("the '?' placeholder needle matches a top-level unknown-id hop, but a specific-key needle does not", () => {
+    const key = [COPIES, "detail", { MediumId: 5, InventoryNumber: 7 }, "medium", "detail", UNKNOWN_ID];
+    expect(touchesResource(["medium", "detail", UNKNOWN_ID], key)).toBe(true);
+    expect(touchesResource(["medium", "detail", 5], key)).toBe(false);
   });
 
   test("an unrelated name does not match", () => {
@@ -82,18 +94,18 @@ describe("touchesResource - expand entries, buried inside the trailing params ob
   test("a 'detail' hop's own '?' placeholder does not stand in the way of finding its nested params", () => {
     // the "?" placeholder pushes a "detail" hop's own nested params to its 4th element, not its 3rd - a
     // position shift that must not silently break recursion into it
-    const key = [MEDIA, "detail", 5, { expand: [["medium", "detail", "?", { expand: [["copies", "list"]] }]] }];
+    const key = [MEDIA, "detail", 5, { expand: [["medium", "detail", UNKNOWN_ID, { expand: [["copies", "list"]] }]] }];
     expect(touchesResource(["copies", "list"], key)).toBe(true);
   });
 
   test("a bare 'detail' hop needle (no key) matches the '?' placeholder form by prefix", () => {
-    const key = [MEDIA, "detail", 5, { expand: [["Publishers", "detail", "?"]] }];
+    const key = [MEDIA, "detail", 5, { expand: [["Publishers", "detail", UNKNOWN_ID]] }];
     expect(touchesResource(["Publishers", "detail"], key)).toBe(true);
   });
 
   test("the '?' placeholder needle matches only the unknown-id form, not a specific-key write's own entry", () => {
-    const key = [MEDIA, "detail", 5, { expand: [["Publishers", "detail", "?"]] }];
-    expect(touchesResource(["Publishers", "detail", "?"], key)).toBe(true);
+    const key = [MEDIA, "detail", 5, { expand: [["Publishers", "detail", UNKNOWN_ID]] }];
+    expect(touchesResource(["Publishers", "detail", UNKNOWN_ID], key)).toBe(true);
     expect(touchesResource(["Publishers", "detail", 5], key)).toBe(false);
   });
 

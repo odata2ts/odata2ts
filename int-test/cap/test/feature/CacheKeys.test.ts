@@ -59,7 +59,7 @@ describe("CAP Library: cache keys (V4)", () => {
 
   test("Members/IdDocument names itself by the navigation property, not by its target entity set's name", async () => {
     const request = LIBRARY.Members(MEMBER_ID).IdDocument().query();
-    expect(request.cacheKey).toEqual(["Members", "detail", MEMBER_ID, "IdDocument", "detail"]);
+    expect(request.cacheKey).toEqual(["Members", "detail", MEMBER_ID, "IdDocument", "detail", "?"]);
 
     // 204: this member has no IdDocument at all - the request itself is still well-formed
     const result = await request.execute();
@@ -107,7 +107,17 @@ describe("CAP Library: cache keys (V4)", () => {
     // test pins against regressing, distinct from ASP.NET's cast-qualified case (CAP's model is flat, no
     // BaseType hierarchy at all - see Subtypes.test.ts in the asp-net suite).
     const request = LIBRARY.Audiobooks(AUDIOBOOK).Chapters(1).up_().query();
-    expect(request.cacheKey).toEqual(["Audiobooks", "detail", AUDIOBOOK, "Chapters", "detail", 1, "up_", "detail"]);
+    expect(request.cacheKey).toEqual([
+      "Audiobooks",
+      "detail",
+      AUDIOBOOK,
+      "Chapters",
+      "detail",
+      1,
+      "up_",
+      "detail",
+      "?",
+    ]);
 
     const result = await request.execute();
     expect(result.status).toBe(200);

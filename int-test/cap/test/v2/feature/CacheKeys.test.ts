@@ -59,7 +59,7 @@ describe("CAP Library: cache keys (V2)", () => {
     const loanId = loan.data.d.Id;
 
     const request = LIBRARY_V2.Loans(loanId).Copy().query();
-    expect(request.cacheKey).toEqual(["Loans", "detail", loanId, "Copy", "detail"]);
+    expect(request.cacheKey).toEqual(["Loans", "detail", loanId, "Copy", "detail", "?"]);
 
     const result = await request.execute();
     expect(result.status).toBe(200);

@@ -1,5 +1,14 @@
+import { UNKNOWN_ID } from "@odata2ts/odata-query-builder";
 import { describe, expect, test } from "vitest";
-import { buildCacheKey, buildInvalidates, hopState, rootState, withKey, withParams } from "../../src/cacheKey";
+import {
+  buildCacheKey,
+  buildInvalidates,
+  hopState,
+  rootState,
+  withKey,
+  withParams,
+  withUnknownId,
+} from "../../src/cacheKey";
 
 const MEDIA = "Media";
 const COPIES = "Copies";
@@ -237,5 +246,25 @@ describe("buildInvalidates", () => {
   test("no crossRouteKeys given: behaves exactly as before", () => {
     const state = withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 });
     expect(buildInvalidates(state)).toEqual(buildInvalidates(state, []));
+  });
+
+  test("a write to a singleton (root-level, no ancestor) invalidates its own '?'-terminated key - nothing collapses it, and there is no list form to add", () => {
+    const state = withUnknownId(rootState("Me", "detail"));
+    expect(buildInvalidates(state)).toEqual([["Me", "detail", UNKNOWN_ID]]);
+  });
+
+  test("a write addressed through a keyless to-one hop: rules 2 and 4 stay silent - no short form is derived for a resource with no known key", () => {
+    const copy = withKey(rootState(COPIES, "list", { entitySetName: COPIES }), 5, { Id: 5 });
+    const medium = withUnknownId(hopState(copy, { name: "medium", kind: "detail", entitySetName: MEDIA }));
+    // the hop's own full key (rule 1) collapses under its ancestor's shorter prefix - exactly like any
+    // other hierarchical write (see "a hierarchical write's own key is a prefix-redundant..." above); what
+    // this pins is that nothing *extra* leaks in for the "?" case specifically - no keyedEntitySetForm for
+    // "Media" (rule 2/4 both require state.key, which a "?" resource never has), and no
+    // ["Media", "detail", "?"] short form either
+    expect(buildInvalidates(medium)).toEqual([
+      [COPIES, "detail", 5],
+      [COPIES, "list"],
+      [MEDIA, "list"],
+    ]);
   });
 });
