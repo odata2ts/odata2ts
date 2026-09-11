@@ -67,8 +67,9 @@ export class PrimitiveTypeServiceV2<T, AsV4 extends boolean = false> {
     return this.__base.path;
   }
 
-  public getCacheKeyState() {
-    return this.__base.cacheKeyState;
+  /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
+  public getEntitySetName() {
+    return this.__base.cacheKeyState?.entitySetName;
   }
 
   /**

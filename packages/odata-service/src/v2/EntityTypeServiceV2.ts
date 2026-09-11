@@ -32,8 +32,9 @@ export class EntityTypeServiceV2<T, UpdatableT, Q extends QueryObjectModel, AsV4
     return this.__base.path;
   }
 
-  public getCacheKeyState() {
-    return this.__base.cacheKeyState;
+  /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
+  public getEntitySetName() {
+    return this.__base.cacheKeyState?.entitySetName;
   }
 
   /**
