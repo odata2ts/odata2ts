@@ -12,6 +12,11 @@ import { BASE_URL, BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js"
  * them**: an individual property is not addressable, on any entity, in any of the three forms. That is a
  * gap of the server, not of the client, and it is asserted rather than dropped - CAP serves all of it,
  * see the same file in `int-test/cap` for the behaviour a working implementation shows.
+ *
+ * Reading and writing land on different statuses since server 0.4.0: routes added for nested resources
+ * (`Media({id})/Copies(...)`, `Publishers({id})/Books({id})`) made ASP.NET Core OData's routing conventions
+ * recognize the `Media({id})/{property}` shape itself, so a `PUT` to it now resolves to "shape known, verb
+ * not" (405) rather than "shape unknown" (404) - `GET` has no such route at all, so it still 404s.
  */
 describe("ASP.NET Library: property services", () => {
   const book = () => LIBRARY.Media(BOOK_DER_PROZESS);
@@ -31,7 +36,7 @@ describe("ASP.NET Library: property services", () => {
 
   test("writing an individual property is not served", async () => {
     await expectODataError(book().Title().updateValue("Der Prozess").execute(), {
-      status: 404,
+      status: 405,
       message: /No error message/,
     });
   });
