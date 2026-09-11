@@ -130,9 +130,26 @@ export function rootState(
  *
  * Rewrites the trailing kind marker rather than appending one, and pushes no ancestor: `byId` refines the
  * resource the route is at, it does not leave it.
+ *
+ * Where this narrows a **hop** (never the root, whose own name already *is* the entity set's) and the
+ * entity set is resolvable, the hop's own name in `steps` is *also* rewritten to that entity set's name -
+ * `Publishers(1).Books(id)` becomes `["Publishers","detail",1,"Media","detail",id]`, not
+ * `[...,"Books","detail",id]`. This is safe unconditionally, not just convenient: a declared key uniquely
+ * identifies an entity within its entity set by definition, so two routes narrowing to the *same*
+ * `(entitySetName, key)` pair are, by OData's own key semantics, the very same entity - there is no
+ * ambiguity a bare name could have resolved that a full key does not already settle on its own (unlike the
+ * hierarchical hop *name*, which is real and load-bearing precisely because it carries no key with it).
+ * The rewrite makes this hop's key byte-identical to what a direct route to the same entity already
+ * produces, so `touchesResource`'s existing plain scan finds one from the other with no special case; only
+ * `buildInvalidates` still needs a dedicated rule, since a *longer* key can never be found by scanning a
+ * *shorter* one it was derived from (see `BuildCacheKey.ts`).
  */
 export function withKey(state: CacheKeyState, stepKey: unknown, id: unknown): CacheKeyState {
   const steps = [...state.steps];
+  const isHop = state.kindIndex > 0;
+  if (isHop && state.entitySetName) {
+    steps[state.kindIndex - 1] = state.entitySetName;
+  }
   steps[state.kindIndex] = "detail";
   steps.push(stepKey);
 

@@ -81,6 +81,26 @@ describe("CAP Library: cache keys (V4)", () => {
     );
   });
 
+  test("a statically-keyed hop's own segment is renamed to its entity set's name, deterministically invalidating the direct route - no prior read required. Not divergent in CAP's own model - Books really is the entity set here too - see int-test/asp-net for the case where the hop's own name and its entity set genuinely differ", async () => {
+    const request = LIBRARY.Publishers(1).Books(BOOK_DER_PROZESS).query();
+    expect(request.cacheKey).toEqual(["Publishers", "detail", 1, "Books", "detail", BOOK_DER_PROZESS]);
+    expect(touchesResource(["Books", "detail", BOOK_DER_PROZESS], request.cacheKey!)).toBe(true);
+
+    const result = await request.execute();
+    expect(result.status).toBe(200);
+    expect(result.data.Title).toBe("Der Prozess");
+
+    // the deterministic proof: a write through the hop route invalidates the direct route's own key even
+    // though nothing was ever read via that direct route first - no ResourceIdentityHandler involved
+    const patched = await LIBRARY.Publishers(1).Books(BOOK_DER_PROZESS).patch({ Title: "Der Prozess" }).execute();
+    expect(patched.invalidates).toEqual(
+      expect.arrayContaining([
+        ["Books", "detail", BOOK_DER_PROZESS],
+        ["Books", "list"],
+      ]),
+    );
+  });
+
   test("Chapters/up_ - a binding declared through the contained Chapters collection - names its hop by the navigation property", async () => {
     // `up_`'s NavigationPropertyBinding is `Chapters/up_`, reached only by first following the contained
     // `Chapters` collection to `AudiobookChapter` - a real gap in DataModel.getNavPropBindingTarget this

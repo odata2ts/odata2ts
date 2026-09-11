@@ -127,10 +127,11 @@ describe("CacheKeyState", () => {
     const condition = hopState(copy, { name: "condition", kind: "detail" });
 
     expect(condition.name).toBe(MEDIA);
+    // "Copies" (the entity set), not "copies" (the hop's own OData name) - withKey already renamed it
     expect(condition.steps).toEqual([
       "detail",
       5,
-      "copies",
+      COPIES,
       "detail",
       { MediumId: 5, InventoryNumber: 7 },
       "condition",
@@ -138,7 +139,7 @@ describe("CacheKeyState", () => {
     ]);
     expect(condition.ancestors).toEqual([
       { key: [MEDIA, "detail", 5] },
-      { key: [MEDIA, "detail", 5, "copies", "detail", { MediumId: 5, InventoryNumber: 7 }], entitySetName: COPIES },
+      { key: [MEDIA, "detail", 5, COPIES, "detail", { MediumId: 5, InventoryNumber: 7 }], entitySetName: COPIES },
     ]);
   });
 
@@ -154,20 +155,38 @@ describe("CacheKeyState", () => {
     expect(state.steps).toEqual(["detail", "x", "scan", "$value"]);
   });
 
-  test("withKey after a hop keeps the navigation property's own name", () => {
+  test("withKey after a hop renames the segment to the entity set's own name, not the navigation property's", () => {
     const parent = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
     const copies = hopState(parent, { name: "copies", kind: "list", entitySetName: COPIES });
     const state = withKey(copies, 7, { InventoryNumber: 7 });
-    expect(state.steps).toEqual(["detail", 5, "copies", "detail", 7]);
+    expect(state.steps).toEqual(["detail", 5, COPIES, "detail", 7]);
   });
 
-  test("two sibling navigations of the same target entity set do not collide - each keeps its own name", () => {
+  test("withKey after a hop with no entity set of its own (contained) keeps the navigation property's own name - there is nothing to rename it to", () => {
+    const parent = withKey(rootState(MEDIA, "list"), 1, { Id: 1 });
+    const chapters = hopState(parent, { name: CHAPTERS, kind: "list" });
+    const state = withKey(chapters, 1, { Id: 1 });
+    expect(state.steps).toEqual(["detail", 1, CHAPTERS, "detail", 1]);
+  });
+
+  test("two sibling navigations to the same target entity set converge once narrowed to the same key - a declared key identifies one entity, so this is the same resource, not a collision", () => {
     const parent = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
     const primary = withKey(hopState(parent, { name: "copies", kind: "list", entitySetName: COPIES }), 3, {
       InventoryNumber: 3,
     });
     const backup = withKey(hopState(parent, { name: "backupCopies", kind: "list", entitySetName: COPIES }), 3, {
       InventoryNumber: 3,
+    });
+    expect(primary.steps).toEqual(backup.steps);
+  });
+
+  test("two sibling navigations narrowed to genuinely different keys never converge", () => {
+    const parent = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
+    const primary = withKey(hopState(parent, { name: "copies", kind: "list", entitySetName: COPIES }), 3, {
+      InventoryNumber: 3,
+    });
+    const backup = withKey(hopState(parent, { name: "backupCopies", kind: "list", entitySetName: COPIES }), 9, {
+      InventoryNumber: 9,
     });
     expect(primary.steps).not.toEqual(backup.steps);
   });
@@ -183,5 +202,32 @@ describe("CacheKeyState", () => {
     const state = hopState(parent, { name: "copies", kind: "list", entitySetName: COPIES });
     expect(state.kindIndex).toBe(state.steps.length - 1);
     expect(state.steps[state.kindIndex]).toBe("list");
+  });
+
+  describe("withKey's rename is gated on the same conditions the params-based design used to gate canonicalKey on", () => {
+    test("a root-level byId renames nothing - its own name already is the entity set's", () => {
+      const state = withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 });
+      expect(state.steps).toEqual(["detail", 5]);
+    });
+
+    test("a composite key renames the segment and stores the OData-named step form byte-identical to a direct route's own key, while state.key keeps the caller's own (possibly TS-mapped) id", () => {
+      const media = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
+      const copies = hopState(media, { name: "copies", kind: "list", entitySetName: COPIES });
+      const stepKey = { MediumId: 5, InventoryNumber: 7 };
+      const id = { mediumId: 5, inventoryNumber: 7 };
+      const state = withKey(copies, stepKey, id);
+      expect(state.steps).toEqual(["detail", 5, COPIES, "detail", stepKey]);
+      expect(state.key).toBe(id);
+    });
+
+    test("the rename does not disturb a restriction the hop already carries in params", () => {
+      const media = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
+      const copies = withParams(hopState(media, { name: "copies", kind: "list", entitySetName: COPIES }), {
+        cast: "Library.Catalog.SpecialCopy",
+      });
+      const state = withKey(copies, 3, { InventoryNumber: 3 });
+      expect(state.steps).toEqual(["detail", 5, COPIES, "detail", 3]);
+      expect(state.params).toEqual({ cast: "Library.Catalog.SpecialCopy" });
+    });
   });
 });

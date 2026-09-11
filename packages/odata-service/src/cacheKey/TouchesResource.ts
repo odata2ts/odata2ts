@@ -8,7 +8,10 @@ import { sameElement } from "./KeyElementEquality";
  * A hierarchical key is rooted at the name the route started at, so a prefix match on a name reached
  * further down the route can never reach it - one array has one prefix. This is what makes such a key
  * reachable at all without a generated table alongside it: root and every hop already share this same
- * `(name, kind, key?)` shape, so a plain contiguous scan is all `invalidates` needs.
+ * `(name, kind, key?)` shape, so a plain contiguous scan is all `invalidates` needs. It is also what lets a
+ * statically-keyed hop be found by a direct route's own key with no special case at all: `withKey` renames
+ * such a hop's own segment to its entity set's name (see `CacheKeyState.ts`), so
+ * `Publishers(1).Books(id)`'s key already contains `["Media","detail",id]` as a plain, findable suffix.
  *
  * **`expand` entries are searched too, recursively.** They live inside the trailing params object, not as
  * top-level elements, so a plain scan of `key` itself does not find them - a hop hidden two objects deep is
