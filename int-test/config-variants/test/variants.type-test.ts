@@ -13,6 +13,7 @@ import type {
   EditableAudiobookChapter as CompositionEditableAudiobookChapter,
   EditableBook as CompositionEditableBook,
 } from "../src-generated/deep-insert-composition/library-catalog/index.js";
+import type { PublisherId as CompositionPublisherId } from "../src-generated/deep-insert-composition/publisher-registry/index.js";
 import type { Amenities as NumericAmenities } from "../src-generated/enum-numeric/library-catalog/index.js";
 import type { Branch as NumericBranch } from "../src-generated/enum-numeric/library-circulation/index.js";
 import { Amenities as unionAmenityMembers } from "../src-generated/enum-string-union/library-catalog/index.js";
@@ -171,7 +172,13 @@ expectTypeOf<CompositionEditableAudiobook["Chapters"]>().toEqualTypeOf<
 expectTypeOf<CompositionEditableAudiobook>().not.toHaveProperty("Copies");
 // nothing is contained anywhere else, so no editable model offers a deep insert at all
 expectTypeOf<CompositionEditableBook>().not.toHaveProperty("Copies");
-expectTypeOf<CompositionEditableBook>().not.toHaveProperty("Publisher");
+// `Publisher` sits on `Book` only, reached via a cast-qualified binding path
+// (`Library.Catalog.Book/Publisher`) - resolving it needs DataModel.getNavPropBindingTarget to walk a
+// multi-segment path, so it keeps its binding-reference shape here exactly like CapEditableBooks["Publisher"]
+// below, rather than disappearing from the model entirely.
+expectTypeOf<CompositionEditableBook["Publisher"]>().toEqualTypeOf<
+  { "@id": CompositionPublisherId | string } | null | undefined
+>();
 
 // The read model is untouched: containment says how an entity is addressed, not how it is read, and this
 // option speaks about write payloads alone.
