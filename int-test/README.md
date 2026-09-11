@@ -75,7 +75,7 @@ Two rules hold for every test here:
   `expectTypeOf` evaluates its argument, so pass the method (`cmd.execute`), never a live call.
 
 These suites, not `examples/main`, are where important integration coverage belongs: everything in
-`examples/main` is optional (see the repository's AGENTS.md).
+`examples/main` is optional.
 
 ## Adding another test server
 
