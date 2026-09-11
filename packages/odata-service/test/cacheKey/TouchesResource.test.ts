@@ -79,6 +79,24 @@ describe("touchesResource - expand entries, buried inside the trailing params ob
     expect(touchesResource(["reservations", "list"], key)).toBe(true);
   });
 
+  test("a 'detail' hop's own '?' placeholder does not stand in the way of finding its nested params", () => {
+    // the "?" placeholder pushes a "detail" hop's own nested params to its 4th element, not its 3rd - a
+    // position shift that must not silently break recursion into it
+    const key = [MEDIA, "detail", 5, { expand: [["medium", "detail", "?", { expand: [["copies", "list"]] }]] }];
+    expect(touchesResource(["copies", "list"], key)).toBe(true);
+  });
+
+  test("a bare 'detail' hop needle (no key) matches the '?' placeholder form by prefix", () => {
+    const key = [MEDIA, "detail", 5, { expand: [["Publishers", "detail", "?"]] }];
+    expect(touchesResource(["Publishers", "detail"], key)).toBe(true);
+  });
+
+  test("the '?' placeholder needle matches only the unknown-id form, not a specific-key write's own entry", () => {
+    const key = [MEDIA, "detail", 5, { expand: [["Publishers", "detail", "?"]] }];
+    expect(touchesResource(["Publishers", "detail", "?"], key)).toBe(true);
+    expect(touchesResource(["Publishers", "detail", 5], key)).toBe(false);
+  });
+
   test("an unrelated name inside an unrelated expand entry does not match", () => {
     const key = [MEDIA, "detail", 5, { expand: [["copies", "list"]] }];
     expect(touchesResource(["members", "list"], key)).toBe(false);

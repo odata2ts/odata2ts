@@ -524,7 +524,16 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
         }
         const nested = nestedBuilder?.getCacheKeyParams();
         const name = entitySetName ?? path;
-        const expandHop: ExpandHop = nested?.expand ? [name, kind, { expand: nested.expand }] : [name, kind];
+        // "detail" carries the "?" placeholder (its id is never known here - see ExpandHop); "list" has no
+        // id slot to begin with, so its shape is unaffected.
+        const expandHop: ExpandHop =
+          kind === "detail"
+            ? nested?.expand
+              ? [name, kind, "?", { expand: nested.expand }]
+              : [name, kind, "?"]
+            : nested?.expand
+              ? [name, kind, { expand: nested.expand }]
+              : [name, kind];
         return { sortKey: path, entry: expandHop };
       },
     );

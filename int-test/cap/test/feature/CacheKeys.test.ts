@@ -3,7 +3,7 @@ import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { touchesResource } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
 import { Books } from "../../src-generated/library/LibraryModel.js";
-import { BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
+import { AUDIOBOOK, BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
 
 /**
  * `cacheKeys: true`, against CAP's V4 endpoint.
@@ -79,6 +79,42 @@ describe("CAP Library: cache keys (V4)", () => {
         ["Members", "detail", MEMBER_ID, "Loans", "list"],
       ]),
     );
+  });
+
+  test("Chapters/up_ - a binding declared through the contained Chapters collection - names its hop by the navigation property", async () => {
+    // `up_`'s NavigationPropertyBinding is `Chapters/up_`, reached only by first following the contained
+    // `Chapters` collection to `AudiobookChapter` - a real gap in DataModel.getNavPropBindingTarget this
+    // test pins against regressing, distinct from ASP.NET's cast-qualified case (CAP's model is flat, no
+    // BaseType hierarchy at all - see Subtypes.test.ts in the asp-net suite).
+    const request = LIBRARY.Audiobooks(AUDIOBOOK).Chapters(1).up_().query();
+    expect(request.cacheKey).toEqual(["Audiobooks", "detail", AUDIOBOOK, "Chapters", "detail", 1, "up_", "detail"]);
+
+    const result = await request.execute();
+    expect(result.status).toBe(200);
+    expect(result.data.Title).toBe("Der Prozess (Hoerbuch)");
+  });
+
+  test("$expand of up_ (reached only via the Chapters/up_ binding path) still enriches to a hop-shaped entry", async () => {
+    // Mirrors int-test/asp-net's cast-qualified expand test, but for the through-a-hop binding shape: before
+    // this fix, DataModel.getNavPropBindingTarget never resolved a target for `up_`, so `QAudiobookChapters_up_`
+    // carried no QBinding and this expand entry fell back to the bare `"up_"` string instead.
+    const request = LIBRARY.Audiobooks(AUDIOBOOK)
+      .Chapters(1)
+      .query((builder) => builder.expand("up_"));
+    expect(request.cacheKey).toEqual([
+      "Audiobooks",
+      "detail",
+      AUDIOBOOK,
+      "Chapters",
+      "detail",
+      1,
+      { expand: [["Audiobooks", "detail", "?"]], query: "%24expand=up_" },
+    ]);
+    expect(touchesResource(["Audiobooks", "detail"], request.cacheKey!)).toBe(true);
+    expect(touchesResource(["Audiobooks", "detail", "?"], request.cacheKey!)).toBe(true);
+
+    const result = await request.execute();
+    expect(result.status).toBe(200);
   });
 
   test("touchesResource reaches a hierarchical key by its own name", () => {

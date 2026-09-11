@@ -325,12 +325,21 @@ export class DataModel {
    *
    * Bindings are declared per entity set, while the models are generated per entity type, so a navigation
    * property realized by more than one entity set with differing targets can only be served by one of
-   * them - the first one wins. Paths of more than one segment (a binding declared for a nested or a
-   * derived navigation property) are left out: they do not address a navigation property of this very
-   * entity type.
+   * them - the first one wins. A path of more than one segment (a binding declared for a navigation
+   * property only reachable via a subtype cast or through an intermediate navigation property) is walked
+   * segment by segment via {@link resolveNavPropBindingPathOwner} to find the type the *final* segment is
+   * actually declared on, rather than being left out - both shapes occur in real, un-exotic metadata (a
+   * derived-type navigation property bound by a cast-qualified path; one reached only by first following a
+   * contained collection).
    *
-   * A binding of an inherited navigation property is registered for the base type declaring it as well,
-   * since that is the model the property is generated into.
+   * A **plain, single-segment** binding's inherited navigation property is registered for the base type
+   * declaring it as well, since that is the model the property is generated into - `collectTypeHierarchy`
+   * climbs from the binding's own owning entity type toward its ancestors for this. A **multi-segment**
+   * path's resolved owner is registered for that type alone, deliberately without climbing any further:
+   * the walk in {@link resolveNavPropBindingPathOwner} can land on a type *below* the binding's own owning
+   * entity type (a cast to a subtype, or a hop to an unrelated type), and climbing from there would credit
+   * an ancestor with a property only the resolved subtype actually declares - e.g. a cast-qualified binding
+   * for a subtype-only navigation property must never resolve for that subtype's own base type.
    */
   public getNavPropBindingTarget(fqEntityTypeName: string, navPropOdataName: string): EntitySetType | undefined {
     if (!this.navPropBindings) {
@@ -344,7 +353,13 @@ export class DataModel {
 
       for (const source of bindingSources) {
         for (const { path, target } of source.navPropBinding ?? []) {
-          if (path.includes("/")) {
+          const segments = path.split("/");
+          const propName = segments[segments.length - 1];
+          const isMultiSegment = segments.length > 1;
+          const owner = isMultiSegment
+            ? this.resolveNavPropBindingPathOwner(source.entityType, segments.slice(0, -1))
+            : source.entityType;
+          if (!owner) {
             continue;
           }
           // the target may be stated qualified by the entity container it lives in
@@ -354,8 +369,9 @@ export class DataModel {
             continue;
           }
 
-          for (const owner of this.collectTypeHierarchy(source.entityType)) {
-            const key = `${owner}|${path}`;
+          const owningTypes = isMultiSegment ? [owner.fqName] : this.collectTypeHierarchy(owner);
+          for (const owningType of owningTypes) {
+            const key = `${owningType}|${propName}`;
             if (!this.navPropBindings.has(key)) {
               this.navPropBindings.set(key, targetSet);
             }
@@ -365,6 +381,53 @@ export class DataModel {
     }
 
     return this.navPropBindings.get(`${fqEntityTypeName}|${navPropOdataName}`);
+  }
+
+  /**
+   * Walks a `NavigationPropertyBinding`/`AssociationSet` path's leading segments - everything before the
+   * navigation property the binding actually names - starting from the binding's own owning entity type,
+   * to find what type that final property is declared on.
+   *
+   * Each segment is either a navigation property's own OData name (a path through an intermediate hop,
+   * e.g. `Chapters/up_`, where `up_` is declared on whatever entity type `Chapters` itself navigates to -
+   * almost always, as here, a contained one, since only a contained collection has no entity set of its own
+   * to be bound directly) or a type name (a cast, e.g. `Book/Publisher`, where `Publisher` is declared only
+   * on the `Book` subtype). A segment is looked up as a property of the current type *first* - not by
+   * checking for a namespace-qualifying "." - because `NamingHelper.stripServicePrefix` already strips a
+   * cast segment down to its bare local name wherever its namespace matches the digester's own main
+   * namespace (the common case, confirmed against int-test/asp-net's real, digested metadata), so a cast
+   * segment reaching here is indistinguishable from a property name by shape alone; only once the property
+   * lookup fails is the segment tried as a type name, both fully qualified (a namespace the stripping left
+   * alone) and by its own bare local name (the stripped, common case).
+   */
+  private resolveNavPropBindingPathOwner(
+    startType: EntityType,
+    segments: ReadonlyArray<string>,
+  ): EntityType | undefined {
+    let currentType = startType;
+
+    for (const segment of segments) {
+      const prop = [...currentType.baseProps, ...currentType.props].find((p) => p.odataName === segment);
+      if (prop) {
+        if (prop.dataType !== DataTypes.ModelType) {
+          return undefined;
+        }
+        const targetType = this.getEntityType(prop.fqType);
+        if (!targetType) {
+          return undefined;
+        }
+        currentType = targetType;
+        continue;
+      }
+
+      const castType = this.getEntityType(segment) ?? this.getEntityTypes().find((et) => et.name === segment);
+      if (!castType) {
+        return undefined;
+      }
+      currentType = castType;
+    }
+
+    return currentType;
   }
 
   /**

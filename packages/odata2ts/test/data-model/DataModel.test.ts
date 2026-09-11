@@ -336,6 +336,116 @@ describe("Data Model Tests", function () {
     expect(dataModel.getEntityType(modelName)).toStrictEqual(expectedDummy);
   });
 
+  describe("getNavPropBindingTarget", () => {
+    function addEntitySet(name: string, entityType: unknown, navPropBinding?: Array<unknown>) {
+      dataModel.addEntitySet(
+        `${NS1}.${name}`,
+        // @ts-expect-error
+        { odataName: name, entityType, navPropBinding },
+      );
+    }
+
+    test("a plain, single-segment path resolves directly - unchanged regression coverage", () => {
+      const medium = { fqName: `${NS1}.Medium`, baseClasses: [], props: [], baseProps: [] };
+      addEntitySet("Copies", { fqName: `${NS1}.Copy` }, []);
+      addEntitySet("Media", medium, [{ path: "Copies", target: "Copies" }]);
+
+      const result = dataModel.getNavPropBindingTarget(`${NS1}.Medium`, "Copies");
+
+      expect(result?.odataName).toBe("Copies");
+    });
+
+    test("a two-segment path cast to a subtype (by its stripped, bare name) resolves the property declared on that subtype - without leaking it to any ancestor", () => {
+      // mirrors int-test/asp-net's own *digested* metadata exactly: NamingHelper.stripServicePrefix has
+      // already reduced the binding's raw XML path, `Library.Catalog.Book/Publisher`, down to `Book/Publisher`
+      // by the time it reaches here (the type's own namespace matches the digester's main namespace, the
+      // common case) - so the cast segment carries no "." at all, and must still resolve by bare name.
+      // Medium <- PrintMedium <- Book: `Publisher` isn't a property of `PrintMedium` or `Medium` at all.
+      const publisherProp = { odataName: "Publisher", dataType: DataTypes.ModelType, fqType: `${NS1}.Publisher` };
+      const medium = { fqName: `${NS1}.Medium`, baseClasses: [], props: [], baseProps: [] };
+      const printMedium = { fqName: `${NS1}.PrintMedium`, baseClasses: [`${NS1}.Medium`], props: [], baseProps: [] };
+      const book = {
+        fqName: `${NS1}.Book`,
+        name: "Book",
+        baseClasses: [`${NS1}.PrintMedium`],
+        props: [publisherProp],
+        baseProps: [],
+      };
+      dataModel.addEntityType(
+        NS1,
+        "Medium",
+        // @ts-expect-error
+        medium,
+      );
+      dataModel.addEntityType(
+        NS1,
+        "PrintMedium",
+        // @ts-expect-error
+        printMedium,
+      );
+      dataModel.addEntityType(
+        NS1,
+        "Book",
+        // @ts-expect-error
+        book,
+      );
+      addEntitySet("Publishers", { fqName: `${NS1}.Publisher` }, []);
+      addEntitySet("Media", medium, [{ path: "Book/Publisher", target: "Publishers" }]);
+
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.Book`, "Publisher")?.odataName).toBe("Publishers");
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.PrintMedium`, "Publisher")).toBeUndefined();
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.Medium`, "Publisher")).toBeUndefined();
+    });
+
+    test("a two-segment path cast by its still-fully-qualified name also resolves - defensive coverage in case stripping did not apply", () => {
+      const publisherProp = { odataName: "Publisher", dataType: DataTypes.ModelType, fqType: `${NS1}.Publisher` };
+      const medium = { fqName: `${NS1}.Medium`, baseClasses: [], props: [], baseProps: [] };
+      const book = { fqName: `${NS1}.Book`, name: "Book", baseClasses: [], props: [publisherProp], baseProps: [] };
+      dataModel.addEntityType(
+        NS1,
+        "Book",
+        // @ts-expect-error
+        book,
+      );
+      addEntitySet("Publishers", { fqName: `${NS1}.Publisher` }, []);
+      addEntitySet("Media", medium, [{ path: `${NS1}.Book/Publisher`, target: "Publishers" }]);
+
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.Book`, "Publisher")?.odataName).toBe("Publishers");
+    });
+
+    test("a two-segment path through a nested navigation property resolves the property on the reached type", () => {
+      // mirrors int-test/cap's own metadata: `Chapters/up_`, declared on the `Audiobooks` entity set,
+      // reaches `up_` only by first following the contained `Chapters` collection to `AudiobookChapter`.
+      const chaptersProp = {
+        odataName: "Chapters",
+        dataType: DataTypes.ModelType,
+        isCollection: true,
+        fqType: `${NS1}.AudiobookChapter`,
+        contained: true,
+      };
+      const upProp = { odataName: "up_", dataType: DataTypes.ModelType, fqType: `${NS1}.Audiobook` };
+      const audiobook = { fqName: `${NS1}.Audiobook`, baseClasses: [], props: [chaptersProp], baseProps: [] };
+      const chapter = { fqName: `${NS1}.AudiobookChapter`, baseClasses: [], props: [upProp], baseProps: [] };
+      dataModel.addEntityType(
+        NS1,
+        "AudiobookChapter",
+        // @ts-expect-error
+        chapter,
+      );
+      addEntitySet("Audiobooks", audiobook, [{ path: "Chapters/up_", target: "Audiobooks" }]);
+
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.AudiobookChapter`, "up_")?.odataName).toBe("Audiobooks");
+    });
+
+    test("an unresolvable intermediate segment yields undefined rather than throwing", () => {
+      const medium = { fqName: `${NS1}.Medium`, baseClasses: [], props: [], baseProps: [] };
+      addEntitySet("Publishers", { fqName: `${NS1}.Publisher` }, []);
+      addEntitySet("Media", medium, [{ path: `${NS1}.Nonexistent/Publisher`, target: "Publishers" }]);
+
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.Nonexistent`, "Publisher")).toBeUndefined();
+    });
+  });
+
   describe("getDisplayFqName", () => {
     test("an unaliased namespace's FQN is returned unchanged", () => {
       expect(dataModel.getDisplayFqName(`${NS1}.Reservation`)).toBe(`${NS1}.Reservation`);
