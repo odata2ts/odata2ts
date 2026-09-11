@@ -6,6 +6,7 @@ import {
   CacheKeyState,
   canonicalizeQueryString,
   captureQueryString,
+  evictObservedIdentity,
   recordObservedIdentities,
   resolveCrossRouteInvalidates,
 } from "../cacheKey/index.js";
@@ -293,7 +294,16 @@ export abstract class RequestCmd<
       recordObservedIdentities(this.client.resourceIdentity, this.cacheKey, request.cacheKeyState, converted.data);
     }
 
-    return this.withInvalidates(converted, request.cacheKeyState);
+    // built before evicting, deliberately: this DELETE's own `invalidates` should still carry whatever
+    // routes were recorded for the resource it just removed - eviction only has to stop a *later* write
+    // from resolving them again
+    const result = this.withInvalidates(converted, request.cacheKeyState);
+
+    if (this.method === ODataHttpMethods.Delete && request.cacheKeyState) {
+      evictObservedIdentity(this.client.resourceIdentity, request.cacheKeyState, converted.data);
+    }
+
+    return result;
   }
 
   /**
