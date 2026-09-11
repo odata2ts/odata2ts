@@ -99,25 +99,18 @@ describe("ASP.NET Library: cache keys", () => {
     expect(result.status).toBe(200);
   });
 
-  test("canonicalKey names the resource by its entity set, not the hop's own (diverging) name - Publishers(1).Books(id)", () => {
+  test("a statically-keyed hop's own segment is renamed to its entity set's name, not the hop's own (diverging) name - Publishers(1).Books(id)", () => {
     // Publishers(1).Books(id): "Books" is the hop's own name, but it binds to entity set "Media" (not
-    // "Books"), and BOOK_DER_PROZESS is known the moment this request is constructed - no response needed.
-    // Shape only here: this server's controllers are hand-routed (EntitySetControllers.cs), and none of
-    // them implement a keyed GET through a to-many navigation property for *any* entity - not a
-    // cast/subtype-specific gap like Subtypes.test.ts's, just a route this particular server never wired
-    // up. The executed, end-to-end proof of the same mechanism (a write through the hop route
-    // deterministically invalidating the direct route, no prior read required) is int-test/cap's own
-    // CacheKeys.test.ts, against a server that does serve this shape.
+    // "Books" - no "Books" entity set exists in this model at all), and BOOK_DER_PROZESS is known the
+    // moment this request is constructed - withKey already renames the segment before any response.
+    // Shape only here: this server's controllers are hand-routed (EntitySetControllers.cs), and until
+    // test-server-asp-net's own nested-route fix (test-server-asp-net#38, merged, not yet released and
+    // pinned here) ships, they don't implement a keyed GET through a to-many navigation property for any
+    // entity. The executed, end-to-end proof of the same mechanism is int-test/cap's own CacheKeys.test.ts
+    // - though CAP's own model has no name-diverging to-many relationship to exercise, so neither server
+    // today proves this both executed *and* divergent at once; this becomes that proof once the pin bumps.
     const request = LIBRARY.Publishers(1).Books(BOOK_DER_PROZESS).query();
-    expect(request.cacheKey).toEqual([
-      "Publishers",
-      "detail",
-      1,
-      "Books",
-      "detail",
-      BOOK_DER_PROZESS,
-      { canonicalKey: ["Media", "detail", BOOK_DER_PROZESS] },
-    ]);
+    expect(request.cacheKey).toEqual(["Publishers", "detail", 1, "Media", "detail", BOOK_DER_PROZESS]);
     expect(touchesResource(["Media", "detail", BOOK_DER_PROZESS], request.cacheKey!)).toBe(true);
   });
 

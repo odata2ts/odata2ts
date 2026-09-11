@@ -28,17 +28,25 @@ function mergeParams(
  * The keys a write makes stale.
  *
  * Six rules: the addressed resource's own key without its params object (a write invalidates the
- * resource however it was filtered, sorted or paged), its own `canonicalKey` where the hop that reached it
- * was statically keyed and diverges from its entity set's own name (deterministic - see `withKey` in
- * `CacheKeyState.ts` - so a write through this hop route also invalidates a direct route's cache entry
- * with no `ResourceIdentityHandler` involved), the resource's own entity set as a bare list key where it
- * belongs to one, the key of every ancestor hop - which is what catches a parent that was fetched with
- * `$expand` - a bare list-key entry per entity set the write's own payload deep-inserted into
- * (`state.params.deepEdit`, populated by `buildDeepEditHops` at the write's own call site), and whatever
- * hierarchical keys `crossRouteKeys` names - a route to this same resource the write's own route never
- * took, resolved via `ResourceIdentityHandler` from what an earlier response actually observed (see
- * `resolveCrossRouteInvalidates`; empty, never computed here, for a client with no such store). Entries
- * another entry is a prefix of are dropped; what is left is coarsest first.
+ * resource however it was filtered, sorted or paged), the same resource's own key in bare
+ * `[entitySetName, "detail", key]` form (see below - deterministic, so a write through a hop route also
+ * invalidates a direct route's cache entry with no `ResourceIdentityHandler` involved), the resource's own
+ * entity set as a bare list key where it belongs to one, the key of every ancestor hop - which is what
+ * catches a parent that was fetched with `$expand` - a bare list-key entry per entity set the write's own
+ * payload deep-inserted into (`state.params.deepEdit`, populated by `buildDeepEditHops` at the write's own
+ * call site), and whatever hierarchical keys `crossRouteKeys` names - a route to this same resource the
+ * write's own route never took, resolved via `ResourceIdentityHandler` from what an earlier response
+ * actually observed (see `resolveCrossRouteInvalidates`; empty, never computed here, for a client with no
+ * such store). Entries another entry is a prefix of are dropped; what is left is coarsest first.
+ *
+ * Rule 2 exists because a *longer* key can never be found by scanning a *shorter* one it was derived from:
+ * `withKey` already renames a statically-keyed hop's own segment to its entity set's name (`CacheKeyState.ts`),
+ * so `["Publishers","detail",1,"Media","detail",id]` already contains `["Media","detail",id]` as a plain,
+ * `touchesResource`-findable suffix - but the reverse direction (a *direct* write's own short key finding a
+ * *hop*-routed query's longer, cached one) needs that short form to exist as its own candidate here, not
+ * just as a substring of the resource's own (usually longer, and usually dropped as ancestor-redundant)
+ * rule-1 entry. At the root the two rules produce the identical entry and collapse into one via the same
+ * redundancy pass rule 4 already needs.
  *
  * Rule 3 applies wherever a "detail" key goes stale and the entity set it belongs to is known - not just
  * the addressed resource itself, but every ancestor hop too (rule 4): a list is a query *over* an entity
@@ -58,19 +66,22 @@ export function buildInvalidates(
   crossRouteKeys: ReadonlyArray<ReadonlyArray<unknown>> = [],
 ): ReadonlyArray<ReadonlyArray<unknown>> {
   const deepEditHops = (state.params?.deepEdit as ReadonlyArray<string> | undefined) ?? [];
-  const canonicalKey = state.params?.canonicalKey as ReadonlyArray<unknown> | undefined;
+  const keyedEntitySetForm =
+    state.entitySetName && state.key !== undefined
+      ? [state.entitySetName, "detail", state.steps[state.steps.length - 1]]
+      : undefined;
 
   const ancestorEntries = (state.ancestors ?? []).flatMap((ancestor) =>
     ancestor.entitySetName ? [ancestor.key, [ancestor.entitySetName, "list"]] : [ancestor.key],
   );
 
   // ancestors in route order (coarsest first, each with its own list form alongside), then the resource
-  // itself, its canonical form, then its entity set, then whatever it deep-inserted into, then whatever
-  // another route to this same resource already has cached
+  // itself, its bare entity-set-keyed form, then its entity set, then whatever it deep-inserted into, then
+  // whatever another route to this same resource already has cached
   const candidates: Array<ReadonlyArray<unknown>> = [
     ...ancestorEntries,
     [state.name, ...state.steps],
-    ...(canonicalKey ? [canonicalKey] : []),
+    ...(keyedEntitySetForm ? [keyedEntitySetForm] : []),
     ...(state.entitySetName ? [[state.entitySetName, "list"]] : []),
     ...deepEditHops.map((entitySetName) => [entitySetName, "list"]),
     ...crossRouteKeys,

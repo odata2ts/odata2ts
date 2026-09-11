@@ -20,14 +20,6 @@ export type QEntityFn = () => new (prefix?: string, separator?: string) => Query
 export type CanonicalIdFn = (entity: unknown) => string | undefined;
 
 /**
- * The array-shaped counterpart to a canonical id: `[entitySetName, "detail", key]` - exactly the `cacheKey`
- * a direct route to the same resource would already have. Not the id *string* {@link CanonicalIdFn} builds
- * for `ResourceIdentityHandler` - this is that same identity in `cacheKey`/`touchesResource`/`invalidates`
- * form, for a resource a hop narrowed to a statically-known key. See `withKey`.
- */
-export type CanonicalKey = readonly [entitySetName: string, kind: "detail", key: unknown];
-
-/**
  * What a generated service knows about the resource it addresses, in the form a cache key is built from.
  *
  * Threaded downwards through construction and never derived from a URL: the typed key value exists one call
@@ -46,7 +38,7 @@ export interface CacheKeyState {
    * collided two sibling navigations onto one key.
    */
   readonly kindIndex: number;
-  /** Restrictions and identity forms contributed by the resource itself: cast, singleton, operation, {@link CanonicalKey} (`withKey`, for a statically-keyed hop). */
+  /** Restrictions contributed by the resource itself: cast, singleton, operation. */
   readonly params?: Readonly<Record<string, unknown>>;
   /**
    * The entity set the addressed resource belongs to, by its own name - never a type. Feeds `invalidates`.
@@ -139,27 +131,29 @@ export function rootState(
  * Rewrites the trailing kind marker rather than appending one, and pushes no ancestor: `byId` refines the
  * resource the route is at, it does not leave it.
  *
- * Also attaches {@link CanonicalKey} to `params` whenever this narrows a **hop**, not the root: `state.name`
- * *is* the entity set's own name at the root already, so a root's own canonical form would just duplicate
- * its own key for nothing. `stepKey` (the OData-named form already going into `steps`), not `id` (the
- * caller's own, possibly TS-mapped form `key` stores) - `stepKey` is what makes `canonicalKey` byte-identical
- * to what a direct route's own `cacheKey` produces, which is the entire point.
+ * Where this narrows a **hop** (never the root, whose own name already *is* the entity set's) and the
+ * entity set is resolvable, the hop's own name in `steps` is *also* rewritten to that entity set's name -
+ * `Publishers(1).Books(id)` becomes `["Publishers","detail",1,"Media","detail",id]`, not
+ * `[...,"Books","detail",id]`. This is safe unconditionally, not just convenient: a declared key uniquely
+ * identifies an entity within its entity set by definition, so two routes narrowing to the *same*
+ * `(entitySetName, key)` pair are, by OData's own key semantics, the very same entity - there is no
+ * ambiguity a bare name could have resolved that a full key does not already settle on its own (unlike the
+ * hierarchical hop *name*, which is real and load-bearing precisely because it carries no key with it).
+ * The rewrite makes this hop's key byte-identical to what a direct route to the same entity already
+ * produces, so `touchesResource`'s existing plain scan finds one from the other with no special case; only
+ * `buildInvalidates` still needs a dedicated rule, since a *longer* key can never be found by scanning a
+ * *shorter* one it was derived from (see `BuildCacheKey.ts`).
  */
 export function withKey(state: CacheKeyState, stepKey: unknown, id: unknown): CacheKeyState {
   const steps = [...state.steps];
+  const isHop = state.kindIndex > 0;
+  if (isHop && state.entitySetName) {
+    steps[state.kindIndex - 1] = state.entitySetName;
+  }
   steps[state.kindIndex] = "detail";
   steps.push(stepKey);
 
-  const isHop = (state.ancestors?.length ?? 0) > 0;
-  const canonicalKey: CanonicalKey | undefined =
-    isHop && state.entitySetName ? [state.entitySetName, "detail", stepKey] : undefined;
-
-  return {
-    ...state,
-    steps,
-    key: id,
-    ...(canonicalKey ? { params: { ...state.params, canonicalKey } } : {}),
-  };
+  return { ...state, steps, key: id };
 }
 
 /** Adds a restriction the resource itself carries - a cast, a singleton marker, an operation. */
