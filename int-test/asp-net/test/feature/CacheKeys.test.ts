@@ -130,6 +130,61 @@ describe("ASP.NET Library: cache keys", () => {
     );
   });
 
+  test("a write three hops deep, through an ancestor whose own name diverges from its entity set, still deterministically invalidates a direct route to that ancestor - Publishers(1).Books(id).Copies(...)", async () => {
+    // the deferred follow-up to the previous test, closed in ADR-0003: "Books" (the ancestor hop, not the
+    // addressed resource here) diverges from its entity set "Media" too - the addressed Copy needs no
+    // divergence of its own to prove this, only its ancestor does
+    const ancestorCopyKey = { MediumId: BOOK_DER_PROZESS, InventoryNumber: CACHE_KEY_COPY + 1 };
+    const created = await LIBRARY.Copies()
+      .create({
+        MediumId: BOOK_DER_PROZESS,
+        InventoryNumber: CACHE_KEY_COPY + 1,
+        Condition: 3,
+        IsLoanable: true,
+        WeightKg: 0.5,
+      })
+      .execute();
+    expect(created.status).toBe(201);
+
+    try {
+      const request = LIBRARY.Publishers(1).Books(BOOK_DER_PROZESS).Copies(ancestorCopyKey).query();
+      expect(request.cacheKey).toEqual([
+        "Publishers",
+        "detail",
+        1,
+        "Media",
+        "detail",
+        BOOK_DER_PROZESS,
+        "Copies",
+        "detail",
+        ancestorCopyKey,
+      ]);
+      expect(touchesResource(["Media", "detail", BOOK_DER_PROZESS], request.cacheKey!)).toBe(true);
+
+      const result = await request.execute();
+      expect(result.status).toBe(200);
+      expect(result.data.InventoryNumber).toBe(CACHE_KEY_COPY + 1);
+
+      // the deterministic proof: a write three hops deep invalidates the ancestor's own direct Media(id)
+      // route too, not just the ancestor's full, hierarchical (and much longer) key
+      const patched = await LIBRARY.Publishers(1)
+        .Books(BOOK_DER_PROZESS)
+        .Copies(ancestorCopyKey)
+        .patch({ Condition: 4 })
+        .ignoreETag()
+        .execute();
+      expect(patched.status).toBe(204);
+      expect(patched.invalidates).toEqual(
+        expect.arrayContaining([
+          ["Media", "detail", BOOK_DER_PROZESS],
+          ["Media", "list"],
+        ]),
+      );
+    } finally {
+      await LIBRARY.Copies(ancestorCopyKey).delete().ignoreETag().execute();
+    }
+  });
+
   test("a to-many hop: /Media(...)/Copies names itself by the navigation property, distinct from a hand-filtered route to the same entity set", async () => {
     const viaNavigation = LIBRARY.Media(BOOK_DER_PROZESS).Copies().query();
     const viaFilter = LIBRARY.Copies().query((builder, qCopy) => builder.filter(qCopy.MediumId.eq(BOOK_DER_PROZESS)));
