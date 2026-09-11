@@ -3,14 +3,24 @@ import type { QEntityFn } from "./CacheKeyState";
 /** The discriminators of a Q-object path wrapper that leads to another entity, as opposed to a complex value or a primitive property/collection - see `QEntityPath`/`QEntityCollectionPath`. */
 const ENTITY_DISCRIMINATORS = new Set(["EntityType", "EntitySet"]);
 
+/**
+ * What the walk reads off an entity nav property's QBinding. It is the cache-key name that is read - not
+ * the raw URL name: under `cacheKeys.namespace` the generator bakes a prefixed name into the QBinding's
+ * cache-key name, and this is what a deep insert's `invalidates` entry must carry to match the same name
+ * the write's own `[entitySetName, "list"]` rule registers (issue #536).
+ */
 interface EntityBinding {
-  getEntitySetName(): string;
+  getCacheKeyEntitySetName(): string;
   buildCanonicalId(entity: unknown): string | undefined;
 }
 
 /** One entity-shaped value found while walking a data object alongside its Q-object. */
 export interface EntityGraphVisit {
-  /** The entity set this entity belongs to - absent for a contained one, which has none of its own. */
+  /**
+   * The entity set this entity belongs to, as a cache key must carry it - the binding's cache-key name
+   * (the raw name, or the generator's prefixed one under `cacheKeys.namespace`). Absent for a contained
+   * one, which has none of its own.
+   */
   entitySetName: string | undefined;
   /** This entity's own canonical id, from its own data - absent exactly where `entitySetName` is. */
   buildCanonicalId: ((entity: unknown) => string | undefined) | undefined;
@@ -73,7 +83,8 @@ export function walkEntityGraph(
       }
       if (item && typeof item === "object") {
         visit({
-          entitySetName: binding?.getEntitySetName(),
+          // the cache-key name, not the raw URL name - see `EntityBinding`
+          entitySetName: binding?.getCacheKeyEntitySetName(),
           buildCanonicalId: binding && ((entity: unknown) => binding.buildCanonicalId(entity)),
           data: item as Record<string, unknown>,
           qEntityFn: nestedQEntityFn,

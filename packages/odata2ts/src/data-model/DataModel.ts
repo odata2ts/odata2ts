@@ -129,6 +129,19 @@ export class DataModel {
   }
 
   /**
+   * `name` (an entity set's, singleton's or unbound operation's own odataName) prefixed with the
+   * {@link getDisplayNamespace effective namespace} of its owning type `fqName` - the one rule
+   * `cacheKeys.namespace` applies, shared by every emitter of a prefixed cache-key identifier
+   * (`ServiceGenerator`'s routes, `QueryObjectGenerator`'s bindings) so the two cannot drift apart.
+   *
+   * The prefix alone is a pure function of the model and its aliases; *whether* a given identifier is
+   * prefixed at all is a decision the generator option makes at each emission site.
+   */
+  public getNamespacedName(fqName: string, name: string): string {
+    return `${this.getDisplayNamespace(fqName)}.${name}`;
+  }
+
+  /**
    * OData version: 2.0 or 4.0.
    * @returns
    */

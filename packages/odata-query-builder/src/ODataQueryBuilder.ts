@@ -68,12 +68,14 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
    * apart from a hoisted one reconciled back from `expands` after `build()` has folded
    * `hoistedExpandsBucket` into it, without depending on whether that fold has happened yet.
    *
-   * `entitySetName` is the *target's* entity set name, read off the same nav property's own `getBinding()`
-   * (absent for a contained target, which has none) - this, not `path`, is what an `ExpandHop`'s own name
-   * must carry: `invalidates` (`buildInvalidates`, odata-service) registers a write under its bare
-   * `[entitySetName, "list"]` entry, and `touchesResource` finds an expand hop only by scanning for that
-   * exact shape - a nav property whose OData name differs from its target's entity set name (the common
-   * case) would otherwise never match, silently breaking invalidation through `$expand`.
+   * `entitySetName` is the *target's* entity set name as a cache key must carry it - the binding's cache-key
+   * name (`getBinding().getCacheKeyEntitySetName()`: the raw name, or the generator's prefixed one under
+   * `cacheKeys.namespace`), read off the same nav property's own `getBinding()` (absent for a contained
+   * target, which has none) - this, not `path`, is what an `ExpandHop`'s own name must carry: `invalidates`
+   * (`buildInvalidates`, odata-service) registers a write under its bare `[entitySetName, "list"]` entry,
+   * and `touchesResource` finds an expand hop only by scanning for that exact shape - a nav property whose
+   * OData name differs from its target's entity set name (the common case) would otherwise never match,
+   * silently breaking invalidation through `$expand`.
    */
   private expandEntries:
     | Array<{
@@ -242,7 +244,10 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
               ? ("list" as const)
               : ("detail" as const)
             : undefined;
-          const entitySetName = entityProp?.getBinding?.()?.getEntitySetName();
+          // the cache-key name, not the raw URL name: the write side's `[entitySetName, "list"]` invalidates
+          // entry carries the same (possibly `cacheKeys.namespace`-prefixed) name, so the two can only match
+          // if both read the binding's cache-key name (issue #536)
+          const entitySetName = entityProp?.getBinding?.()?.getCacheKeyEntitySetName();
           return { path, rawForm: path, kind, entitySetName };
         }),
       );
@@ -303,7 +308,9 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
         rawForm: content,
         kind: entityProp.isCollectionType() ? "list" : "detail",
         nestedBuilder: nestedEngine,
-        entitySetName: entityProp.getBinding?.()?.getEntitySetName(),
+        // the cache-key name, not the raw URL name - see the expand() entry: the write side's
+        // `[entitySetName, "list"]` invalidates entry carries the same name
+        entitySetName: entityProp.getBinding?.()?.getCacheKeyEntitySetName(),
       });
     }
     if (hoistedExpands.length) {

@@ -112,12 +112,13 @@ class ServiceGenerator {
   }
 
   /**
-   * `name` (an entity set's or singleton's own odataName), prefixed with `entityType`'s own effective
-   * namespace when `cacheKeys.namespace` is on - see that option's own doc comment for what this guards
-   * against and what it deliberately never reaches (a hop's own step name, a canonicalIdFn's raw name).
+   * `name` (an entity set's, singleton's or unbound operation's own odataName), prefixed with the owning
+   * type's effective namespace (of `fqName`) when `cacheKeys.namespace` is on - see that option's own doc
+   * comment for what this guards against and what it deliberately never reaches (a hop's own step name, a
+   * canonicalIdFn's raw name).
    */
-  private namespacedName(entityType: EntityType, name: string): string {
-    return this.cacheKeysNamespace ? `${this.dataModel.getDisplayNamespace(entityType.fqName)}.${name}` : name;
+  private namespacedName(fqName: string, name: string): string {
+    return this.cacheKeysNamespace ? this.dataModel.getNamespacedName(fqName, name) : name;
   }
 
   /** The root of a route: an entity set or a singleton. An operation with no declared result set is the one root with no type to head with - built as a plain object literal instead, see `emitUnboundOperationRootExpr`. */
@@ -132,7 +133,7 @@ class ServiceGenerator {
       return "";
     }
     const rootStateFn = imports.addServiceFunction("rootState");
-    const cacheKeyName = this.namespacedName(entityType, name);
+    const cacheKeyName = this.namespacedName(entityType.fqName, name);
     const optionsEntries = [
       options?.paramsSource ? `params: ${options.paramsSource}` : "",
       options?.isEntitySet ? `entitySetName: "${cacheKeyName}"` : "",
@@ -169,7 +170,7 @@ class ServiceGenerator {
     // the hop's own step name (navPropOdataName) never carries this prefix - only entitySetName does, since
     // that is the value reused as a bare, cross-route identifier (invalidates, response-observed identity)
     const entitySetNameEntry = targetSet
-      ? `, entitySetName: "${this.namespacedName(targetSet.entityType, targetSet.odataName)}"`
+      ? `, entitySetName: "${this.namespacedName(targetSet.entityType.fqName, targetSet.odataName)}"`
       : "";
     const canonicalIdFnEntry = targetSet
       ? `, canonicalIdFn: ${this.canonicalIdFnExpr(imports, targetSet.entityType, targetSet.odataName)}`
@@ -251,9 +252,7 @@ class ServiceGenerator {
       : undefined;
     const rootStateFn = imports.addServiceFunction("rootState");
     const kind = op.returnType?.isCollection ? "list" : "detail";
-    const cacheKeyName = this.cacheKeysNamespace
-      ? `${this.dataModel.getDisplayNamespace(op.fqName)}.${importOdataName}`
-      : importOdataName;
+    const cacheKeyName = this.namespacedName(op.fqName, importOdataName);
     // nested under its own "params" key, never spread directly - a composable operation's cache key later
     // merges in real query params (select/filter/...) via buildCacheKey, and those must not collide with
     // the operation's own invocation arguments
@@ -262,7 +261,7 @@ class ServiceGenerator {
     if (entitySet) {
       const canonicalIdFnEntry = `canonicalIdFn: ${this.canonicalIdFnExpr(imports, entitySet.entityType, entitySet.odataName)}, `;
       const qEntityFnEntry = `qEntityFn: ${this.qEntityFnExpr(imports, entitySet.entityType)}`;
-      const namespacedEntitySetName = this.namespacedName(entitySet.entityType, entitySet.odataName);
+      const namespacedEntitySetName = this.namespacedName(entitySet.entityType.fqName, entitySet.odataName);
       return (
         `${rootStateFn}("${cacheKeyName}", "${kind}", ` +
         `{ ${paramsEntry}entitySetName: "${namespacedEntitySetName}", ${canonicalIdFnEntry}${qEntityFnEntry} })`

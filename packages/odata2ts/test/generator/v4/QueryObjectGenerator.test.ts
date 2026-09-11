@@ -344,6 +344,23 @@ describe("Query Object Generator Tests V4", () => {
     });
   });
 
+  test(`${TEST_SUITE_NAME}: a namespaced cache key bakes its prefixed name into the binding`, async () => {
+    // given entities related to each other, reachable through entity sets
+    addRelatedEntities();
+    odataBuilder.addEntitySet("Authors", withNs("Author")).addEntitySet("Books", withNs(ENTITY_NAME), [
+      { path: "author", target: "Authors" },
+      { path: "relatedAuthors", target: "Authors" },
+    ]);
+
+    // when opting into namespaced cache keys
+    // then the q-paths' binding carries the entity set's name prefixed with its owning type's namespace as a
+    // third constructor argument - the raw name stays the QId's, so the URL is still the server's own
+    await generateAndCompare("entity-binding-cache-key-namespace.ts", {
+      skipIdModels: false,
+      cacheKeys: { enabled: true, namespace: true },
+    });
+  });
+
   test(`${TEST_SUITE_NAME}: no binding without a NavigationPropertyBinding`, async () => {
     // given entities related to each other, but no entity set stating where the navigation leads
     addRelatedEntities();

@@ -38,10 +38,14 @@ export class QBinding<Id> {
    * @param idFunctionFn returns the id function of the *target* entity set; a factory, so that a query
    *                     object and the id function of the entity it points to may live in the same module
    * @param notation the spelling of the targeted OData version
+   * @param cacheKeyEntitySetName the entity-set name as a cache key must carry it - the generator
+   *                     supplies it, already prefixed, only where `cacheKeys.namespace` is on; absent
+   *                     elsewhere, and exactly where it is, the raw name is the right one
    */
   constructor(
     private idFunctionFn: () => QId<Id>,
     private notation: BindingNotation = "4.0",
+    private cacheKeyEntitySetName?: string,
   ) {
     if (!idFunctionFn || typeof idFunctionFn !== "function") {
       throw new Error("Function which returns the id function must be supplied!");
@@ -55,9 +59,23 @@ export class QBinding<Id> {
   /**
    * The name of the entity set this binding's target belongs to - the same name {@link format} already
    * builds every URL from, exposed on its own for a caller after the resource's identity rather than a URL.
+   *
+   * This is always the raw name: it is a real OData URL segment, and it stays the server's own name
+   * wherever a {@link getCacheKeyEntitySetName cache-key name} carries a prefix this one must not.
    */
   public getEntitySetName(): string {
     return this.idFunctionFn().getName();
+  }
+
+  /**
+   * The name of the entity set this binding's target belongs to, as a cache key must carry it - the
+   * {@link getEntitySetName raw name} unless the generator supplied a prefixed one, which it does only
+   * under `cacheKeys.namespace` (the generator's own prefix rule, not re-derived here). Cache-key
+   * identity and URL building are different channels: everything that ends up in a URL keeps reading
+   * {@link getEntitySetName}, everything that ends up in a cache key reads this.
+   */
+  public getCacheKeyEntitySetName(): string {
+    return this.cacheKeyEntitySetName ?? this.idFunctionFn().getName();
   }
 
   /**
