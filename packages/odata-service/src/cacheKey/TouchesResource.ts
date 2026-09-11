@@ -36,9 +36,11 @@ function isPrefixAt(needle: ReadonlyArray<unknown>, haystack: ReadonlyArray<unkn
 
 /**
  * Every `(name, kind)` hop reachable through an `expand` entry of any params object among `key`'s own
- * elements - recursively, since a hop's own 3rd element may carry further nested params with an `expand`
- * of its own. A bare (unenriched) expand entry is just a rendered path string and contributes nothing here
- * - there is no name to find in it beyond what a plain scan of `key` already covers.
+ * elements - recursively, since a hop's own trailing element may carry further nested params with an
+ * `expand` of its own (index 2 for a "list" hop, index 3 for a "detail" hop - which carries the "?"
+ * placeholder at index 2 instead, see `ExpandHop` in odata-query-builder). A bare (unenriched) expand entry
+ * is just a rendered path string and contributes nothing here - there is no name to find in it beyond what
+ * a plain scan of `key` already covers.
  */
 function expandHopsOf(key: ReadonlyArray<unknown>): Array<ReadonlyArray<unknown>> {
   const hops: Array<ReadonlyArray<unknown>> = [];
@@ -60,7 +62,9 @@ function collectExpandHops(params: Record<string, unknown>, out: Array<ReadonlyA
       continue;
     }
     out.push(entry);
-    const nestedParams = entry[2];
+    // a "detail" hop carries the "?" placeholder at index 2 (see ExpandHop, odata-query-builder), pushing
+    // its own nested params to index 3 - a "list" hop has no such slot, so its nested params stay at index 2
+    const nestedParams = entry[1] === "detail" ? entry[3] : entry[2];
     if (typeof nestedParams === "object" && nestedParams !== null) {
       collectExpandHops(nestedParams as Record<string, unknown>, out);
     }

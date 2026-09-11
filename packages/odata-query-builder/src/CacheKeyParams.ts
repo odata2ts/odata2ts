@@ -4,18 +4,28 @@
  * structured hop in the main key already uses, and specifically the shape `[entitySetName, "list"]` a
  * write's own `invalidates` registers under, so `touchesResource` can find this hop by scanning for that
  * exact pair. A property reached through a contained (entity-set-less) navigation falls back to its own
- * OData name, since there is no entity set for a write to ever invalidate by anyway. The optional 3rd slot,
- * present only when a nested `expanding()` builder ran for this property, carries *further* expand hops
- * reachable underneath it - nothing else. Identity for a nested query's own filter/select/orderBy/etc. is
- * already covered by the opaque `query` string `RequestCmd.cacheKey` attaches (see `QueryStringCapture.ts`
- * in odata-service); the only thing `touchesResource`/`buildDeepEditHops` ever read out of a nested expand
+ * OData name, since there is no entity set for a write to ever invalidate by anyway.
+ *
+ * A `"detail"` hop carries a 3rd element too: the literal placeholder `"?"`, standing in for the id
+ * `getCacheKeyParams()` cannot know at cache-key construction time (this is an *expanded*, not addressed,
+ * resource - there is no key segment in the URL to read one off). Recording it explicitly, rather than
+ * leaving the tuple short, is what lets an application distinguish "invalidate every cached detail of this
+ * entity set reached with an unknown id" (`touchesResource([entitySetName, "detail", "?"], ...)`) from
+ * "invalidate one specific entity by its real id" (`touchesResource([entitySetName, "detail", 5], ...)`) -
+ * without it, a write's own keyed invalidation entry and a search for the unknown-id bucket would be
+ * indistinguishable by shape, forcing an application into over-broad, id-agnostic matching instead. A
+ * `"list"` hop carries no equivalent slot: a collection has no singular id to place there.
+ *
+ * The optional trailing slot, present only when a nested `expanding()` builder ran for this property,
+ * carries *further* expand hops reachable underneath it - nothing else, and it always comes last (after
+ * `"?"` for a `"detail"` hop). Identity for a nested query's own filter/select/orderBy/etc. is already
+ * covered by the opaque `query` string `RequestCmd.cacheKey` attaches (see `QueryStringCapture.ts` in
+ * odata-service); the only thing `touchesResource`/`buildDeepEditHops` ever read out of a nested expand
  * entry is more `(name, kind)` hops to keep recursing into.
  */
-export type ExpandHop = readonly [
-  name: string,
-  kind: "list" | "detail",
-  nested?: { expand?: Array<string | ExpandHop> },
-];
+export type ExpandHop =
+  | readonly [name: string, kind: "list", nested?: { expand?: Array<string | ExpandHop> }]
+  | readonly [name: string, kind: "detail", key: "?", nested?: { expand?: Array<string | ExpandHop> }];
 
 /**
  * The restrictions a query puts on a resource, computed here rather than parsed back out of a rendered URL

@@ -108,9 +108,10 @@ describe("CAP Library: cache keys (V4)", () => {
       "Chapters",
       "detail",
       1,
-      { expand: [["Audiobooks", "detail"]], query: "%24expand=up_" },
+      { expand: [["Audiobooks", "detail", "?"]], query: "%24expand=up_" },
     ]);
     expect(touchesResource(["Audiobooks", "detail"], request.cacheKey!)).toBe(true);
+    expect(touchesResource(["Audiobooks", "detail", "?"], request.cacheKey!)).toBe(true);
 
     const result = await request.execute();
     expect(result.status).toBe(200);

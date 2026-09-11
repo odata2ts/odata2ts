@@ -82,9 +82,9 @@ describe("CacheKeyParams", () => {
       expect(builder.getCacheKeyParams()).toEqual({ expand: [["friends", "list"]] });
     });
 
-    test("a to-one navigation property enriches with kind 'detail'", () => {
+    test("a to-one navigation property enriches with kind 'detail' and a '?' placeholder - its id is never known at cache-key construction time", () => {
       builder.expand(["bestFriend"]);
-      expect(builder.getCacheKeyParams()).toEqual({ expand: [["bestFriend", "detail"]] });
+      expect(builder.getCacheKeyParams()).toEqual({ expand: [["bestFriend", "detail", "?"]] });
     });
 
     test("addExpands() never enriches - it takes a raw path string, never a Q-object property, so there is no kind to read", () => {
@@ -106,13 +106,13 @@ describe("CacheKeyParams", () => {
       builder.expand(["friends", "bestFriend"]);
       expect(builder.getCacheKeyParams()).toEqual({
         expand: [
-          ["bestFriend", "detail"],
+          ["bestFriend", "detail", "?"],
           ["friends", "list"],
         ],
       });
     });
 
-    test("a nested expanding()'s own filter/select/orderBy never surfaces in the hop's 3rd element - only further expand hops do", () => {
+    test("a nested expanding()'s own filter/select/orderBy never surfaces in the hop's trailing element - only further expand hops do", () => {
       builder.expanding(createExpandingQueryBuilderV4, "friends", (nested: any, qFriend: any) => {
         nested.filter(qFriend.name.equals("x"));
       });
@@ -121,7 +121,7 @@ describe("CacheKeyParams", () => {
       });
     });
 
-    test("a nested expanding() with nothing to report contributes no 3rd element", () => {
+    test("a nested expanding() with nothing to report contributes no trailing element", () => {
       builder.expanding(createExpandingQueryBuilderV4, "friends", () => {});
       expect(builder.getCacheKeyParams()).toEqual({ expand: [["friends", "list"]] });
     });
@@ -131,7 +131,16 @@ describe("CacheKeyParams", () => {
         nested.expanding("bestFriend", () => {});
       });
       expect(builder.getCacheKeyParams()).toEqual({
-        expand: [["friends", "list", { expand: [["bestFriend", "detail"]] }]],
+        expand: [["friends", "list", { expand: [["bestFriend", "detail", "?"]] }]],
+      });
+    });
+
+    test("a nested expanding() off a to-one hop carries its own further expand hops after the '?' placeholder", () => {
+      builder.expanding(createExpandingQueryBuilderV4, "bestFriend", (nested: any) => {
+        nested.expanding("bestFriend", () => {});
+      });
+      expect(builder.getCacheKeyParams()).toEqual({
+        expand: [["bestFriend", "detail", "?", { expand: [["bestFriend", "detail", "?"]] }]],
       });
     });
 

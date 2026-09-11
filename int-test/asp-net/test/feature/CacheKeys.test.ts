@@ -87,9 +87,13 @@ describe("ASP.NET Library: cache keys", () => {
       "Media",
       "detail",
       BOOK_DER_PROZESS,
-      { expand: [["Publishers", "detail"]], query: "%24expand=Library.Catalog.Book%2FPublisher" },
+      { expand: [["Publishers", "detail", "?"]], query: "%24expand=Library.Catalog.Book%2FPublisher" },
     ]);
+    // "?" stands in for the id this expand can never know up front - "detail" alone still finds it by
+    // prefix; "?" itself is what lets an app target *only* the unknown-id bucket, distinct from a specific
+    // Publisher's own keyed invalidation entry
     expect(touchesResource(["Publishers", "detail"], request.cacheKey!)).toBe(true);
+    expect(touchesResource(["Publishers", "detail", "?"], request.cacheKey!)).toBe(true);
 
     const result = await request.execute();
     expect(result.status).toBe(200);
