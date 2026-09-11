@@ -200,7 +200,8 @@ describe("ASP.NET Library: cache keys", () => {
   });
 
   test("a read through a navigated route records the resource it served, so a later direct write to it also invalidates that route", async () => {
-    const navigated = await LIBRARY.Media(BOOK_DER_PROZESS).Copies().query().execute();
+    const request = LIBRARY.Media(BOOK_DER_PROZESS).Copies().query();
+    const navigated = await request.execute();
     expect(navigated.status).toBe(200);
     expect(navigated.data.value.some((copy) => copy.InventoryNumber === CACHE_KEY_COPY)).toBe(true);
 
@@ -210,9 +211,14 @@ describe("ASP.NET Library: cache keys", () => {
       expect.arrayContaining([
         ["Copies", "detail", copyKey],
         ["Copies", "list"],
-        ["Media", "detail", BOOK_DER_PROZESS, "Copies", "list"],
       ]),
     );
+    // the navigated route's own key need not appear verbatim: recording is params-stripped (see
+    // `recordObservedIdentities`), so the earlier "$expand produces a hop-shaped entry" test above -
+    // which observed this same copy through `Media(id)`'s bare, params-free key - already makes
+    // `buildInvalidates` collapse this route's own (longer) entry as a redundant prefix of that coarser
+    // one. Either way `invalidates` still reaches this route, which is what the test title claims
+    expect(patched.invalidates!.some((entry) => touchesResource(entry, request.cacheKey!))).toBe(true);
   });
 
   test("grade B: /Members(...)/Loans names itself by the navigation property", async () => {
