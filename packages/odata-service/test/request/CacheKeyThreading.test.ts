@@ -279,9 +279,15 @@ describe("cache key threading", () => {
         5,
         5,
       );
-      const writeCmd = new UrlWriteRequestCmd(client, ODataHttpMethods.Patch, "Media(5)", { title: "y" }, {
-        cacheKeyState: writeState,
-      });
+      const writeCmd = new UrlWriteRequestCmd(
+        client,
+        ODataHttpMethods.Patch,
+        "Media(5)",
+        { title: "y" },
+        {
+          cacheKeyState: writeState,
+        },
+      );
 
       const response = await writeCmd.execute();
 
@@ -324,9 +330,15 @@ describe("cache key threading", () => {
         5,
         5,
       );
-      const patchCmd = new UrlWriteRequestCmd(client, ODataHttpMethods.Patch, "Media(5)", { title: "y" }, {
-        cacheKeyState: patchState,
-      });
+      const patchCmd = new UrlWriteRequestCmd(
+        client,
+        ODataHttpMethods.Patch,
+        "Media(5)",
+        { title: "y" },
+        {
+          cacheKeyState: patchState,
+        },
+      );
       client.responseStatus = 204;
       client.responseData = undefined;
 
