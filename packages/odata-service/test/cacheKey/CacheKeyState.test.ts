@@ -184,4 +184,47 @@ describe("CacheKeyState", () => {
     expect(state.kindIndex).toBe(state.steps.length - 1);
     expect(state.steps[state.kindIndex]).toBe("list");
   });
+
+  describe("withKey attaches canonicalKey for a statically-keyed hop", () => {
+    test("a root-level byId gets no canonicalKey - its own name already is the entity set's", () => {
+      const state = withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 });
+      expect(state.params).toBeUndefined();
+    });
+
+    test("a hop-level byId gets canonicalKey, shaped exactly like a direct route's own cacheKey", () => {
+      const media = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
+      const copies = hopState(media, { name: "copies", kind: "list", entitySetName: COPIES });
+      const state = withKey(copies, 3, { InventoryNumber: 3 });
+      expect(state.params).toEqual({ canonicalKey: [COPIES, "detail", 3] });
+    });
+
+    test("a composite key's canonicalKey carries the OData-named step form, not the raw id", () => {
+      const media = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
+      const copies = hopState(media, { name: "copies", kind: "list", entitySetName: COPIES });
+      const stepKey = { MediumId: 5, InventoryNumber: 7 };
+      const id = { mediumId: 5, inventoryNumber: 7 };
+      const state = withKey(copies, stepKey, id);
+      expect(state.params).toEqual({ canonicalKey: [COPIES, "detail", stepKey] });
+      expect(state.key).toBe(id);
+    });
+
+    test("a hop-level byId with no entity set of its own (contained) gets no canonicalKey", () => {
+      const media = withKey(rootState(MEDIA, "list"), 1, { Id: 1 });
+      const chapters = hopState(media, { name: CHAPTERS, kind: "list" });
+      const state = withKey(chapters, 1, { Id: 1 });
+      expect(state.params).toBeUndefined();
+    });
+
+    test("canonicalKey merges alongside a restriction the hop already carries", () => {
+      const media = withKey(rootState(MEDIA, "list"), 5, { Id: 5 });
+      const copies = withParams(hopState(media, { name: "copies", kind: "list", entitySetName: COPIES }), {
+        cast: "Library.Catalog.SpecialCopy",
+      });
+      const state = withKey(copies, 3, { InventoryNumber: 3 });
+      expect(state.params).toEqual({
+        cast: "Library.Catalog.SpecialCopy",
+        canonicalKey: [COPIES, "detail", 3],
+      });
+    });
+  });
 });

@@ -106,4 +106,22 @@ describe("touchesResource - expand entries, buried inside the trailing params ob
     const key = [MEDIA, "detail", 5];
     expect(touchesResource(["copies", "list"], key)).toBe(false);
   });
+
+  test("a statically-keyed hop's own canonicalKey entry is found the same way an expand hop is", () => {
+    // Publishers(1).Books(id) - "Books" is the hop's own name, "Media" its target's entity set
+    const key = [
+      "Publishers",
+      "detail",
+      1,
+      "Books",
+      "detail",
+      "1111...1",
+      { canonicalKey: ["Media", "detail", "1111...1"] },
+    ];
+    expect(touchesResource(["Media", "detail", "1111...1"], key)).toBe(true);
+    // a plain top-level scan for the hop's own hierarchical route still works too - canonicalKey is additive
+    expect(touchesResource(["Publishers", "detail", 1, "Books", "detail", "1111...1"], key)).toBe(true);
+    // a different id's canonical form does not match
+    expect(touchesResource(["Media", "detail", "2222...2"], key)).toBe(false);
+  });
 });

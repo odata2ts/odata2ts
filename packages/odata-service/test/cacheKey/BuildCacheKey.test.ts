@@ -84,7 +84,7 @@ describe("buildInvalidates", () => {
     expect(buildInvalidates(state)).toContainEqual([MEDIA, "detail", 5]);
   });
 
-  test("a hierarchical write's own key is a prefix-redundant with its ancestor, and drops out - the ancestor, the ancestor's own list form, and the entity-set list entry are what remain", () => {
+  test("a hierarchical write's own key is a prefix-redundant with its ancestor, and drops out - the ancestor, the ancestor's own list form, the hop's own canonicalKey, and the entity-set list entry are what remain", () => {
     const copies = hopState(withKey(rootState(MEDIA, "list", { entitySetName: MEDIA }), 5, { Id: 5 }), {
       name: "copies",
       kind: "list",
@@ -94,6 +94,7 @@ describe("buildInvalidates", () => {
     expect(buildInvalidates(withKey(copies, key, key))).toEqual([
       [MEDIA, "detail", 5],
       [MEDIA, "list"],
+      [COPIES, "detail", key],
       [COPIES, "list"],
     ]);
   });
@@ -120,6 +121,7 @@ describe("buildInvalidates", () => {
     expect(buildInvalidates(withKey(reservations, 9, { Id: 9 }))).toEqual([
       [MEMBERS, "detail", 42],
       [MEMBERS, "list"],
+      [RESERVATIONS, "detail", 9],
       [RESERVATIONS, "list"],
     ]);
   });
