@@ -8,7 +8,7 @@ import {
   QueryObject,
 } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, test } from "vitest";
-import { createExpandingQueryBuilderV4 } from "../src";
+import { createExpandingQueryBuilderV4, UNKNOWN_ID } from "../src";
 import { ODataQueryBuilder } from "../src/ODataQueryBuilder";
 import { QPerson, qPerson } from "./fixture/types/QSimplePersonModel";
 
@@ -98,7 +98,7 @@ describe("CacheKeyParams", () => {
 
     test("a to-one navigation property enriches with kind 'detail' and a '?' placeholder - its id is never known at cache-key construction time", () => {
       builder.expand(["bestFriend"]);
-      expect(builder.getCacheKeyParams()).toEqual({ expand: [["bestFriend", "detail", "?"]] });
+      expect(builder.getCacheKeyParams()).toEqual({ expand: [["bestFriend", "detail", UNKNOWN_ID]] });
     });
 
     test("addExpands() never enriches - it takes a raw path string, never a Q-object property, so there is no kind to read", () => {
@@ -120,7 +120,7 @@ describe("CacheKeyParams", () => {
       builder.expand(["friends", "bestFriend"]);
       expect(builder.getCacheKeyParams()).toEqual({
         expand: [
-          ["bestFriend", "detail", "?"],
+          ["bestFriend", "detail", UNKNOWN_ID],
           ["friends", "list"],
         ],
       });
@@ -145,7 +145,7 @@ describe("CacheKeyParams", () => {
         nested.expanding("bestFriend", () => {});
       });
       expect(builder.getCacheKeyParams()).toEqual({
-        expand: [["friends", "list", { expand: [["bestFriend", "detail", "?"]] }]],
+        expand: [["friends", "list", { expand: [["bestFriend", "detail", UNKNOWN_ID]] }]],
       });
     });
 
@@ -154,7 +154,7 @@ describe("CacheKeyParams", () => {
         nested.expanding("bestFriend", () => {});
       });
       expect(builder.getCacheKeyParams()).toEqual({
-        expand: [["bestFriend", "detail", "?", { expand: [["bestFriend", "detail", "?"]] }]],
+        expand: [["bestFriend", "detail", UNKNOWN_ID, { expand: [["bestFriend", "detail", UNKNOWN_ID]] }]],
       });
     });
 

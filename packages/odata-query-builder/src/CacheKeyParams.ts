@@ -1,4 +1,12 @@
 /**
+ * The literal placeholder standing in for a `"detail"` resource's id where no key can be determined at
+ * cache-key construction time - shared by every producer of one: `ExpandHop` below, a to-one navigation
+ * hop, and a singleton root (see `withUnknownId`, odata-service). Named rather than inlined so the three
+ * producers, spread across two packages, cannot drift onto different literals by accident.
+ */
+export const UNKNOWN_ID = "?" as const;
+
+/**
  * An expand entry once its navigation property is known: the *target's own entity set name* (never the
  * navigation property's own OData name, which need not match it) and kind - the same `(name, kind)` shape a
  * structured hop in the main key already uses, and specifically the shape `[entitySetName, "list"]` a
@@ -25,7 +33,7 @@
  */
 export type ExpandHop =
   | readonly [name: string, kind: "list", nested?: { expand?: Array<string | ExpandHop> }]
-  | readonly [name: string, kind: "detail", key: "?", nested?: { expand?: Array<string | ExpandHop> }];
+  | readonly [name: string, kind: "detail", key: typeof UNKNOWN_ID, nested?: { expand?: Array<string | ExpandHop> }];
 
 /**
  * The restrictions a query puts on a resource, computed here rather than parsed back out of a rendered URL

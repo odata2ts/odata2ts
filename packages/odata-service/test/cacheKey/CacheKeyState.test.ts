@@ -1,5 +1,15 @@
+import { UNKNOWN_ID } from "@odata2ts/odata-query-builder";
 import { describe, expect, test } from "vitest";
-import { CanonicalIdFn, hopState, QEntityFn, rootState, withKey, withParams } from "../../src/cacheKey";
+import {
+  CanonicalIdFn,
+  hopState,
+  keyedEntitySetFormOf,
+  QEntityFn,
+  rootState,
+  withKey,
+  withParams,
+  withUnknownId,
+} from "../../src/cacheKey";
 
 const MEDIA = "Media";
 const COPIES = "Copies";
@@ -267,6 +277,56 @@ describe("CacheKeyState", () => {
       const state = withKey(copies, 3, { InventoryNumber: 3 });
       expect(state.steps).toEqual(["detail", 5, COPIES, "detail", 3]);
       expect(state.params).toEqual({ cast: "Library.Catalog.SpecialCopy" });
+    });
+  });
+
+  describe("withUnknownId", () => {
+    test("appends the placeholder to a singleton root's steps", () => {
+      const state = withUnknownId(rootState("Me", "detail"));
+      expect(state.steps).toEqual(["detail", UNKNOWN_ID]);
+    });
+
+    test("appends the placeholder to a to-one hop's steps, alongside its own name and kind", () => {
+      const parent = withKey(rootState(COPIES, "list"), 5, { Id: 5 });
+      const state = withUnknownId(
+        hopState(parent, {
+          name: "medium",
+          kind: "detail",
+          entitySetName: MEDIA,
+          canonicalIdFn: canonicalIdOfMedia,
+          qEntityFn: qMedium,
+        }),
+      );
+      expect(state.steps).toEqual(["detail", 5, "medium", "detail", UNKNOWN_ID]);
+      // the response still recovers the real resource - only the key in the *route* is blind
+      expect(state.entitySetName).toBe(MEDIA);
+      expect(state.canonicalIdFn).toBe(canonicalIdOfMedia);
+    });
+
+    test("does not move the kind index - it still points at the kind marker, not the placeholder", () => {
+      const state = withUnknownId(rootState("Me", "detail"));
+      expect(state.kindIndex).toBe(0);
+      expect(state.steps[state.kindIndex]).toBe("detail");
+    });
+
+    test("leaves state.key untouched, so keyedEntitySetFormOf still derives no short form for it", () => {
+      const state = withUnknownId(
+        hopState(withKey(rootState(COPIES, "list"), 5, { Id: 5 }), {
+          name: "medium",
+          kind: "detail",
+          entitySetName: MEDIA,
+        }),
+      );
+      expect(state.key).toBeUndefined();
+      expect(keyedEntitySetFormOf(state)).toBeUndefined();
+    });
+
+    test("withKey after withUnknownId replaces the placeholder rather than pushing the real key past it", () => {
+      const parent = withKey(rootState(COPIES, "list"), 5, { Id: 5 });
+      const unknown = withUnknownId(hopState(parent, { name: "medium", kind: "detail", entitySetName: MEDIA }));
+      const state = withKey(unknown, 9, { Id: 9 });
+      expect(state.steps).toEqual(["detail", 5, MEDIA, "detail", 9]);
+      expect(state.key).toEqual({ Id: 9 });
     });
   });
 });

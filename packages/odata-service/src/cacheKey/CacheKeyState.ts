@@ -1,3 +1,4 @@
+import { UNKNOWN_ID } from "@odata2ts/odata-query-builder";
 import type { QueryObjectModel } from "@odata2ts/odata-query-objects";
 
 /** Whether a resource is a collection or a single entity / complex value. */
@@ -161,9 +162,31 @@ export function withKey(state: CacheKeyState, stepKey: unknown, id: unknown): Ca
     steps[state.kindIndex - 1] = state.entitySetName;
   }
   steps[state.kindIndex] = "detail";
+  // truncate anything past the kind marker before pushing the real key - a `withUnknownId` placeholder
+  // included, so it is replaced rather than left behind with the real key pushed past it. A no-op for the
+  // ordinary case, where nothing already follows the kind marker.
+  steps.length = state.kindIndex + 1;
   steps.push(stepKey);
 
   return { ...state, steps, key: id };
+}
+
+/**
+ * Marks the current `"detail"` resource as reachable with no key that can be determined - the literal
+ * `"?"`. `$expand` already needed this for a to-one expanded hop (see `ExpandHop`, odata-query-builder);
+ * this generalises it: the `"detail"` position is never short, it carries either a real key or this
+ * placeholder, at every level, on every route. Used for exactly two producers of a keyless `"detail"`
+ * resource - a to-one navigation hop (the target's key is never in the URL, only ever discoverable from
+ * the response) and a singleton root (which has no key by definition, OData singletons carry no key
+ * predicate) - never for a `"list"` kind, which has no singular id to place there, and never for a complex
+ * or operation hop, neither of which this rule reaches.
+ *
+ * Leaves `state.key` untouched (absent), exactly like an ordinary unnarrowed hop or root - so
+ * `keyedEntitySetFormOf` still derives no short form for it, and a later `withKey` (see above) replaces
+ * the placeholder rather than pushing a real key past it.
+ */
+export function withUnknownId(state: CacheKeyState): CacheKeyState {
+  return { ...state, steps: [...state.steps, UNKNOWN_ID] };
 }
 
 /** Adds a restriction the resource itself carries - a cast, a singleton marker, an operation. */

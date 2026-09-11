@@ -32,6 +32,19 @@ describe("ASP.NET Library: cache keys", () => {
     expect(result.status).toBe(200);
   });
 
+  test("a singleton's 'detail' carries the unknown-id placeholder too - it has no key by definition, but the shape stays uniform with every other keyless 'detail'", async () => {
+    const request = LIBRARY.MainBranch().query();
+    expect(request.cacheKey).toEqual(["MainBranch", "detail", "?"]);
+
+    const result = await request.execute();
+    expect(result.status).toBe(200);
+
+    // patched to its own current value - a no-op change, so nothing needs restoring afterward
+    const patched = await LIBRARY.MainBranch().patch({ Name: result.data.Name }).execute();
+    expect(patched.status).toBe(204);
+    expect(patched.invalidates).toEqual([["MainBranch", "detail", "?"]]);
+  });
+
   test("a to-one hop off a real entity: /Copies(...)/Medium names itself by the navigation property, with no key of its own - a to-one hop never knows the target's key up front", async () => {
     const created = await LIBRARY.Copies()
       .create({
@@ -45,7 +58,7 @@ describe("ASP.NET Library: cache keys", () => {
     expect(created.status).toBe(201);
 
     const request = LIBRARY.Copies(copyKey).Medium().query();
-    expect(request.cacheKey).toEqual(["Copies", "detail", copyKey, "Medium", "detail"]);
+    expect(request.cacheKey).toEqual(["Copies", "detail", copyKey, "Medium", "detail", "?"]);
 
     const result = await request.execute();
     expect(result.status).toBe(200);
@@ -59,7 +72,9 @@ describe("ASP.NET Library: cache keys", () => {
       .patch({ Title: "Der Prozess" })
       .ignoreETag()
       .execute();
-    expect(patched.invalidates).toEqual(expect.arrayContaining([["Copies", "detail", copyKey, "Medium", "detail"]]));
+    expect(patched.invalidates).toEqual(
+      expect.arrayContaining([["Copies", "detail", copyKey, "Medium", "detail", "?"]]),
+    );
   });
 
   test("$expand produces a hop-shaped entry touchesResource can reach", async () => {

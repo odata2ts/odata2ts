@@ -1,12 +1,15 @@
+import { UNKNOWN_ID } from "@odata2ts/odata-query-builder";
 import { QBinding, QEntityCollectionPath, QId, QNumberParam, QueryObject } from "@odata2ts/odata-query-objects";
 import { describe, expect, test } from "vitest";
 import {
   CacheKeyState,
   evictObservedIdentity,
+  hopState,
   recordObservedIdentities,
   resolveCrossRouteInvalidates,
   rootState,
   withKey,
+  withUnknownId,
 } from "../../src/cacheKey";
 import { MockResourceIdentityHandler } from "../mock/MockClient";
 
@@ -80,6 +83,23 @@ describe("recordObservedIdentities", () => {
     const hierarchicalKey = ["Media", "detail", 5, { expand: [["copies", "list"]] }];
     recordObservedIdentities(handler, hierarchicalKey, state, { id: 5, title: "The Trial" });
     expect(handler.resolve("Media(5)")).toEqual([["Media", "detail", 5]]);
+  });
+
+  test("records under a '?'-terminated key from a to-one hop with no addressed key of its own - the route is still the route", () => {
+    const handler = new MockResourceIdentityHandler();
+    const parent = mediaDetailState();
+    const medium = withUnknownId(
+      hopState(parent, {
+        name: "medium",
+        kind: "detail",
+        entitySetName: "Media",
+        canonicalIdFn: (entity) => new QMediumId("Media").buildCanonicalId(entity),
+        qEntityFn: () => QMedium as any,
+      }),
+    );
+    const key = ["Media", "detail", 5, "medium", "detail", UNKNOWN_ID];
+    recordObservedIdentities(handler, key, medium, { id: 9, title: "Der Prozess" });
+    expect(handler.resolve("Media(9)")).toEqual([key]);
   });
 
   test("records every row of a list response, against the same key", () => {

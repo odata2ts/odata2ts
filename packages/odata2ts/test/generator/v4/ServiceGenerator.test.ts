@@ -301,8 +301,9 @@ describe("Service Generator Tests V4", () => {
         `rootState("Media", "list", { entitySetName: "Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
       );
       // root: singleton getter - its own name directly, no params marker needed, no entitySetName (a
-      // singleton has no "list" form for `invalidates` to ever name)
-      expect(text).toContain(`rootState("MainBranch", "detail", { qEntityFn: () => QMedium })`);
+      // singleton has no "list" form for `invalidates` to ever name). Wrapped in withUnknownId: a
+      // singleton has no key by definition, so its "detail" position carries the "?" placeholder too
+      expect(text).toContain(`withUnknownId(rootState("MainBranch", "detail", { qEntityFn: () => QMedium }))`);
       // navigation hop with no Partner/ReferentialConstraint - irrelevant now, every navigation property
       // is handled the same way regardless of what metadata backs it
       expect(text).toContain(
@@ -314,8 +315,10 @@ describe("Service Generator Tests V4", () => {
       expect(text).toContain(
         `hopState(cacheKeyState, { name: "copies", kind: "list", entitySetName: "Copies", canonicalIdFn: (entity: unknown) => new QCopyId("Copies").buildCanonicalId(entity), qEntityFn: () => QCopy })`,
       );
+      // to-one hop: wrapped in withUnknownId - the target's key is never in the URL, only ever
+      // discoverable from the response (the same gap $expand has for the identical reason)
       expect(text).toContain(
-        `hopState(cacheKeyState, { name: "medium", kind: "detail", entitySetName: "Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
+        `withUnknownId(hopState(cacheKeyState, { name: "medium", kind: "detail", entitySetName: "Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium }))`,
       );
       expect(text).not.toContain("reRoot");
       // complex property: never a navigation property, no entity set, no Q-object factory of its own
@@ -342,6 +345,12 @@ describe("Service Generator Tests V4", () => {
       // no generated nav-hops table anywhere - removed along with type-rooted identity
       expect(text).not.toContain("CacheKeyNavHops");
       expect(text).not.toContain("CACHE_KEY_NAV_HOPS");
+      // the placeholder reaches exactly the singleton root and the to-one hop, nothing else with a
+      // "detail" kind: a complex hop and an unbound operation's own keyless root stay exactly as before -
+      // `.toContain` alone would miss an accidental extra wrap here, since the unwrapped form is always a
+      // substring of the wrapped one
+      expect(text).not.toContain(`withUnknownId(hopState(cacheKeyState, { name: "details"`);
+      expect(text).not.toContain(`withUnknownId(rootState("TotalCount"`);
     });
 
     test("createEntityService forwards the cache-key state it is handed, without computing one", async () => {
@@ -385,8 +394,9 @@ describe("Service Generator Tests V4", () => {
       expect(text).toContain(
         `rootState("Tester.Media", "list", { entitySetName: "Tester.Media", canonicalIdFn: (entity: unknown) => new QMediumId("Media").buildCanonicalId(entity), qEntityFn: () => QMedium })`,
       );
-      // singleton root: prefixed the same way, even though it has no entitySetName to also prefix
-      expect(text).toContain(`rootState("Tester.MainBranch", "detail", { qEntityFn: () => QMedium })`);
+      // singleton root: prefixed the same way, even though it has no entitySetName to also prefix - and
+      // still wrapped in withUnknownId, the namespace prefix does not disturb that
+      expect(text).toContain(`withUnknownId(rootState("Tester.MainBranch", "detail", { qEntityFn: () => QMedium }))`);
       // hierarchical hop: the hop's own step name ("reviews") is never prefixed - only entitySetName is,
       // since that is the value reused as a bare, cross-route identifier
       expect(text).toContain(

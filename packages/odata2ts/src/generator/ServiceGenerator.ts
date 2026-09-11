@@ -121,6 +121,16 @@ class ServiceGenerator {
     return this.cacheKeysNamespace ? this.dataModel.getNamespacedName(fqName, name) : name;
   }
 
+  /**
+   * Wraps a `rootState`/`hopState` expression so the resource it builds is marked as reachable with no
+   * known key (see `withUnknownId`) - shared between the two producers of a keyless `"detail"` resource,
+   * a to-one navigation hop and a singleton root, so the wrapping itself cannot drift between them.
+   */
+  private wrapUnknownId(imports: ImportContainer, expr: string): string {
+    const withUnknownIdFn = imports.addServiceFunction("withUnknownId");
+    return `${withUnknownIdFn}(${expr})`;
+  }
+
   /** The root of a route: an entity set or a singleton. An operation with no declared result set is the one root with no type to head with - built as a plain object literal instead, see `emitUnboundOperationRootExpr`. */
   private emitRootStateExpr(
     imports: ImportContainer,
@@ -178,7 +188,14 @@ class ServiceGenerator {
     const qEntityFnEntry = `, qEntityFn: ${this.qEntityFnExpr(imports, elementType)}`;
 
     const hopStateFn = imports.addServiceFunction("hopState");
-    return `cacheKeyState && ${hopStateFn}(cacheKeyState, { name: "${navPropOdataName}", kind: "${kind}"${entitySetNameEntry}${canonicalIdFnEntry}${qEntityFnEntry} })`;
+    const hopExpr = `${hopStateFn}(cacheKeyState, { name: "${navPropOdataName}", kind: "${kind}"${entitySetNameEntry}${canonicalIdFnEntry}${qEntityFnEntry} })`;
+    // a to-one hop's target key is never in the URL - only ever discoverable from the response, the same
+    // gap `$expand` already has for the identical reason - so the "detail" position gets the same "?"
+    // placeholder rather than staying short (see `withUnknownId`)
+    if (kind === "detail") {
+      return `cacheKeyState && ${this.wrapUnknownId(imports, hopExpr)}`;
+    }
+    return `cacheKeyState && ${hopExpr}`;
   }
 
   /** A complex property hop: the same shape as a navigation hop, minus any entity-set identity - a complex value is never a navigation property and belongs to no entity set. */
@@ -659,7 +676,10 @@ class ServiceGenerator {
     // type-rooted shape, which had to smuggle it in since the root position was occupied by a type. No
     // `isEntitySet` either: a singleton is not itself a member of an entity set, so it has no "list" form
     // for `invalidates` to ever name.
-    const cacheKeyExpr = this.emitRootStateExpr(importContainer, odataName, "detail", entityType);
+    const rootStateExpr = this.emitRootStateExpr(importContainer, odataName, "detail", entityType);
+    // a singleton has no key by definition (OData singletons carry no key predicate), so the same "?"
+    // placeholder a keyless to-one hop gets applies here too (see `withUnknownId`)
+    const cacheKeyExpr = rootStateExpr ? this.wrapUnknownId(importContainer, rootStateExpr) : rootStateExpr;
 
     return {
       scope: Scope.Public,
