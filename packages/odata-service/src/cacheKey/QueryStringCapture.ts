@@ -6,8 +6,8 @@ import { GET_AS_POST_URL_SUFFIX } from "../request/RequestHelper.js";
  * just stored and compared as one opaque value, the same way an undecomposable filter already becomes a
  * `$raw` fragment. This is what makes cache-key identity complete for every query feature, present and
  * future, without a second, hand-maintained snapshot that has to be kept in sync with what `build()`
- * actually renders (see `spec/odata2ts-cache-key.md`, "Everything else collapses into one opaque string",
- * for the `$apply`/`groupBy` drift this replaces).
+ * actually renders (the `$apply`/`groupBy` drift this replaces is pinned by the `CacheKeys.test.ts`
+ * regression tests in `int-test/asp-net` and `int-test/cap`).
  *
  * `GetToPostConverter` (`RequestHelper.ts`) relocates a GET's query string into the POST body verbatim when
  * the URL would otherwise be too long, appending the literal `/$query` suffix to the URL. Reaching this
