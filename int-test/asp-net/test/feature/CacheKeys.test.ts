@@ -76,6 +76,25 @@ describe("ASP.NET Library: cache keys", () => {
     expect(result.status).toBe(200);
   });
 
+  test("$expand of a derived-type-only navigation property still enriches to a hop-shaped entry, reached only via a cast-qualified binding path", async () => {
+    // `Publisher` is declared only on `Book` (`Library.Catalog.Book/Publisher` in the raw metadata), so
+    // enriching this expand entry needs DataModel.getNavPropBindingTarget to resolve a binding whose path
+    // has more than one segment - a real gap this test pins against regressing. `Media(id)/Library.Catalog.Book`
+    // itself 404s on this server (see Subtypes.test.ts), so this goes through the cast *q-property*
+    // instead, which stays on the base `Media` route and is served.
+    const request = LIBRARY.Media(BOOK_DER_PROZESS).query((builder) => builder.expand("QBook_Publisher"));
+    expect(request.cacheKey).toEqual([
+      "Media",
+      "detail",
+      BOOK_DER_PROZESS,
+      { expand: [["Publishers", "detail"]], query: "%24expand=Library.Catalog.Book%2FPublisher" },
+    ]);
+    expect(touchesResource(["Publishers", "detail"], request.cacheKey!)).toBe(true);
+
+    const result = await request.execute();
+    expect(result.status).toBe(200);
+  });
+
   test("a to-many hop: /Media(...)/Copies names itself by the navigation property, distinct from a hand-filtered route to the same entity set", async () => {
     const viaNavigation = LIBRARY.Media(BOOK_DER_PROZESS).Copies().query();
     const viaFilter = LIBRARY.Copies().query((builder, qCopy) => builder.filter(qCopy.MediumId.eq(BOOK_DER_PROZESS)));

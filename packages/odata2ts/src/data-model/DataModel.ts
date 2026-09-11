@@ -388,14 +388,17 @@ export class DataModel {
    * navigation property the binding actually names - starting from the binding's own owning entity type,
    * to find what type that final property is declared on.
    *
-   * Each segment is either a fully qualified type name (a cast, e.g. `Library.Catalog.Book/Publisher`,
-   * where `Publisher` is declared only on the `Book` subtype) or a navigation property's own OData name
-   * (a path through an intermediate hop, e.g. `Chapters/up_`, where `up_` is declared on whatever entity
-   * type `Chapters` itself navigates to - almost always, as here, a contained one, since only a contained
-   * collection has no entity set of its own to be bound directly). A segment is treated as a cast exactly
-   * when it both contains a namespace-qualifying "." (a navigation property's own OData name never does)
-   * and actually resolves to a known entity type - otherwise it is looked up as a property name on the
-   * current type, inherited properties included.
+   * Each segment is either a navigation property's own OData name (a path through an intermediate hop,
+   * e.g. `Chapters/up_`, where `up_` is declared on whatever entity type `Chapters` itself navigates to -
+   * almost always, as here, a contained one, since only a contained collection has no entity set of its own
+   * to be bound directly) or a type name (a cast, e.g. `Book/Publisher`, where `Publisher` is declared only
+   * on the `Book` subtype). A segment is looked up as a property of the current type *first* - not by
+   * checking for a namespace-qualifying "." - because `NamingHelper.stripServicePrefix` already strips a
+   * cast segment down to its bare local name wherever its namespace matches the digester's own main
+   * namespace (the common case, confirmed against int-test/asp-net's real, digested metadata), so a cast
+   * segment reaching here is indistinguishable from a property name by shape alone; only once the property
+   * lookup fails is the segment tried as a type name, both fully qualified (a namespace the stripping left
+   * alone) and by its own bare local name (the stripped, common case).
    */
   private resolveNavPropBindingPathOwner(
     startType: EntityType,
@@ -404,23 +407,24 @@ export class DataModel {
     let currentType = startType;
 
     for (const segment of segments) {
-      if (segment.includes(".")) {
-        const castType = this.getEntityType(segment);
-        if (castType) {
-          currentType = castType;
-          continue;
+      const prop = [...currentType.baseProps, ...currentType.props].find((p) => p.odataName === segment);
+      if (prop) {
+        if (prop.dataType !== DataTypes.ModelType) {
+          return undefined;
         }
+        const targetType = this.getEntityType(prop.fqType);
+        if (!targetType) {
+          return undefined;
+        }
+        currentType = targetType;
+        continue;
       }
 
-      const prop = [...currentType.baseProps, ...currentType.props].find((p) => p.odataName === segment);
-      if (!prop || prop.dataType !== DataTypes.ModelType) {
+      const castType = this.getEntityType(segment) ?? this.getEntityTypes().find((et) => et.name === segment);
+      if (!castType) {
         return undefined;
       }
-      const targetType = this.getEntityType(prop.fqType);
-      if (!targetType) {
-        return undefined;
-      }
-      currentType = targetType;
+      currentType = castType;
     }
 
     return currentType;

@@ -355,16 +355,18 @@ describe("Data Model Tests", function () {
       expect(result?.odataName).toBe("Copies");
     });
 
-    test("a two-segment path cast to a subtype resolves the property declared on that subtype - without leaking it to any ancestor", () => {
-      // mirrors int-test/asp-net's own metadata exactly: Medium <- PrintMedium <- Book, and
-      // `Library.Catalog.Book/Publisher`, declared on the `Media` entity set (whose own EntityType is the
-      // root `Medium`), reaches `Publisher` only via a cast to `Book` - neither `PrintMedium` nor `Medium`
-      // has a `Publisher` property at all, so neither may resolve it.
+    test("a two-segment path cast to a subtype (by its stripped, bare name) resolves the property declared on that subtype - without leaking it to any ancestor", () => {
+      // mirrors int-test/asp-net's own *digested* metadata exactly: NamingHelper.stripServicePrefix has
+      // already reduced the binding's raw XML path, `Library.Catalog.Book/Publisher`, down to `Book/Publisher`
+      // by the time it reaches here (the type's own namespace matches the digester's main namespace, the
+      // common case) - so the cast segment carries no "." at all, and must still resolve by bare name.
+      // Medium <- PrintMedium <- Book: `Publisher` isn't a property of `PrintMedium` or `Medium` at all.
       const publisherProp = { odataName: "Publisher", dataType: DataTypes.ModelType, fqType: `${NS1}.Publisher` };
       const medium = { fqName: `${NS1}.Medium`, baseClasses: [], props: [], baseProps: [] };
       const printMedium = { fqName: `${NS1}.PrintMedium`, baseClasses: [`${NS1}.Medium`], props: [], baseProps: [] };
       const book = {
         fqName: `${NS1}.Book`,
+        name: "Book",
         baseClasses: [`${NS1}.PrintMedium`],
         props: [publisherProp],
         baseProps: [],
@@ -388,11 +390,27 @@ describe("Data Model Tests", function () {
         book,
       );
       addEntitySet("Publishers", { fqName: `${NS1}.Publisher` }, []);
-      addEntitySet("Media", medium, [{ path: `${NS1}.Book/Publisher`, target: "Publishers" }]);
+      addEntitySet("Media", medium, [{ path: "Book/Publisher", target: "Publishers" }]);
 
       expect(dataModel.getNavPropBindingTarget(`${NS1}.Book`, "Publisher")?.odataName).toBe("Publishers");
       expect(dataModel.getNavPropBindingTarget(`${NS1}.PrintMedium`, "Publisher")).toBeUndefined();
       expect(dataModel.getNavPropBindingTarget(`${NS1}.Medium`, "Publisher")).toBeUndefined();
+    });
+
+    test("a two-segment path cast by its still-fully-qualified name also resolves - defensive coverage in case stripping did not apply", () => {
+      const publisherProp = { odataName: "Publisher", dataType: DataTypes.ModelType, fqType: `${NS1}.Publisher` };
+      const medium = { fqName: `${NS1}.Medium`, baseClasses: [], props: [], baseProps: [] };
+      const book = { fqName: `${NS1}.Book`, name: "Book", baseClasses: [], props: [publisherProp], baseProps: [] };
+      dataModel.addEntityType(
+        NS1,
+        "Book",
+        // @ts-expect-error
+        book,
+      );
+      addEntitySet("Publishers", { fqName: `${NS1}.Publisher` }, []);
+      addEntitySet("Media", medium, [{ path: `${NS1}.Book/Publisher`, target: "Publishers" }]);
+
+      expect(dataModel.getNavPropBindingTarget(`${NS1}.Book`, "Publisher")?.odataName).toBe("Publishers");
     });
 
     test("a two-segment path through a nested navigation property resolves the property on the reached type", () => {
