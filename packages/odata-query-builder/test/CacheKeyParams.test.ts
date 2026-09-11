@@ -36,6 +36,20 @@ class QMedia extends QueryObject {
   );
 }
 
+/**
+ * The same nav property as `QMedia.copies`, but with the generator-supplied, prefixed cache-key name
+ * a QBinding carries only under `cacheKeys.namespace`: the raw entity-set name ("Copies", what the URL
+ * still uses) and the cache-key name ("Circulation.Copies", what a cache key must use) diverge.
+ */
+class QMediaNamespacedBinding extends QueryObject {
+  public readonly id = new QNumberPath(this.withPrefix("Id"));
+  public readonly copies = new QEntityCollectionPath(
+    this.withPrefix("copies"),
+    () => QCopy,
+    new QBinding(() => new QCopyId("Copies"), "4.0", "Circulation.Copies"),
+  );
+}
+
 describe("CacheKeyParams", () => {
   let builder: ODataQueryBuilder<QPerson>;
 
@@ -154,6 +168,19 @@ describe("CacheKeyParams", () => {
       const media = new ODataQueryBuilder("Media", new QMedia());
       media.expanding(createExpandingQueryBuilderV4, "copies", () => {});
       expect(media.getCacheKeyParams()).toEqual({ expand: [["Copies", "list"]] });
+    });
+
+    test("a generator-supplied cache-key name on the binding is what the hop carries - the raw name stays where the URL needs it", () => {
+      // under `cacheKeys.namespace` the generator bakes the prefixed name into the QBinding itself: the
+      // hop must carry that name, or a write's namespaced `[entitySetName, "list"]` invalidates entry can
+      // never find it (the #536 gap this whole option exists to close)
+      const media = new ODataQueryBuilder("Media", new QMediaNamespacedBinding());
+      media.expand(["copies"]);
+      expect(media.getCacheKeyParams()).toEqual({ expand: [["Circulation.Copies", "list"]] });
+
+      const expanding = new ODataQueryBuilder("Media", new QMediaNamespacedBinding());
+      expanding.expanding(createExpandingQueryBuilderV4, "copies", () => {});
+      expect(expanding.getCacheKeyParams()).toEqual({ expand: [["Circulation.Copies", "list"]] });
     });
   });
 

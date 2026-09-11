@@ -135,6 +135,25 @@ describe("QBinding: binding by key", () => {
   test("buildCanonicalId is unaffected by the binding notation - it never wraps like format does", () => {
     expect(new QBinding(() => new QAuthorId("Authors"), "4.01").buildCanonicalId(3)).toBe("Authors(3)");
   });
+
+  test("getCacheKeyEntitySetName falls back to the raw entity-set name where no generator-supplied name is present", () => {
+    expect(new QBinding(() => new QAuthorId("Authors")).getCacheKeyEntitySetName()).toBe("Authors");
+  });
+
+  test("getCacheKeyEntitySetName returns the generator-supplied name where one is present", () => {
+    expect(new QBinding(() => new QAuthorId("Authors"), "4.0", "Lib.Authors").getCacheKeyEntitySetName()).toBe(
+      "Lib.Authors",
+    );
+  });
+
+  test("getEntitySetName keeps returning the raw name where a generator-supplied cache-key name is present - it builds URLs and must stay the server's own name", () => {
+    expect(new QBinding(() => new QAuthorId("Authors"), "4.0", "Lib.Authors").getEntitySetName()).toBe("Authors");
+  });
+
+  test("format and buildCanonicalId are unaffected by the generator-supplied cache-key name - the URL is still built from the raw name", () => {
+    expect(new QBinding(() => new QAuthorId("Authors"), "4.0", "Lib.Authors").format(3)).toBe("Authors(3)");
+    expect(new QBinding(() => new QAuthorId("Authors"), "4.0", "Lib.Authors").buildCanonicalId(3)).toBe("Authors(3)");
+  });
 });
 
 /**

@@ -22,7 +22,7 @@ import {
 } from "../data-model/DataTypeModel.js";
 import { NamingHelper } from "../data-model/NamingHelper.js";
 import { EntityBasedGeneratorFunction, GeneratorFunctionOptions } from "../FactoryFunctionModel.js";
-import { Modes } from "../OptionModel.js";
+import { Modes, resolveCacheKeysNamespace } from "../OptionModel.js";
 import { FileHandler } from "../project/FileHandler.js";
 import { ProjectManager } from "../project/ProjectManager.js";
 import { QueryObjectImports } from "./import/ImportObjects.js";
@@ -57,6 +57,13 @@ class QueryObjectGenerator {
     private options: GeneratorFunctionOptions,
     private namingHelper: NamingHelper,
   ) {}
+
+  /**
+   * Whether a QBinding carries the generator-supplied, prefixed cache-key name as its third constructor
+   * argument - `cacheKeys.namespace` in force, the one shared gate `ServiceGenerator`'s own prefixed
+   * identifiers read (already `false` wherever cache keys are not generated at all).
+   */
+  private readonly cacheKeysNamespace = resolveCacheKeysNamespace(this.options.cacheKeys);
 
   private isV2AsV4() {
     return this.options.v2.responseAsV4 && this.version === ODataVersions.V2;
@@ -333,6 +340,12 @@ class QueryObjectGenerator {
    * Only generated where a service is generated - without one nothing would ever call the conversion, and
    * the models state the binding as it goes on the wire instead (see the model generator).
    *
+   * A third, cache-key-only argument joins the two always-present ones exactly where `cacheKeys.namespace`
+   * is in force: the entity set's own name, prefixed with its namespace. The raw name the id function
+   * carries stays the URL's; this one is what the cache-key side of the binding reads back
+   * (`QBinding.getCacheKeyEntitySetName()`), so an `$expand`'s and a deep edit's cache-key entries carry
+   * the same namespaced names a service route's `entitySetName` carries.
+   *
    * @returns the constructor argument including its leading comma, or an empty string
    */
   private generateBindingStmt(importContainer: ImportContainer, ownerFqName: string, prop: PropertyModel): string {
@@ -356,8 +369,13 @@ class QueryObjectGenerator {
     const qId = importContainer.addGeneratedQObject(target.id.fqName, target.id.qName);
     const notation =
       this.version === ODataVersions.V2 ? "V2" : this.options.v4.odataVersion === "4.01" ? "4.01" : "4.0";
-
-    return `, new ${qBinding}(() => new ${qId}("${targetSet.odataName}"), "${notation}")`;
+    // the generator-supplied cache-key name: the same prefixed name a service route's `entitySetName`
+    // carries under `cacheKeys.namespace` (the target's own namespace, per the one shared rule), absent
+    // everywhere else - the runtime falls back to the raw name wherever it is not present
+    const cacheKeyEntitySetName = this.cacheKeysNamespace
+      ? `, "${this.dataModel.getNamespacedName(targetSet.entityType.fqName, targetSet.odataName)}"`
+      : "";
+    return `, new ${qBinding}(() => new ${qId}("${targetSet.odataName}"), "${notation}"${cacheKeyEntitySetName})`;
   }
 
   /**
