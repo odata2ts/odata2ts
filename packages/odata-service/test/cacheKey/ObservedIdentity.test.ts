@@ -1,6 +1,13 @@
 import { QBinding, QEntityCollectionPath, QId, QNumberParam, QueryObject } from "@odata2ts/odata-query-objects";
 import { describe, expect, test } from "vitest";
-import { CacheKeyState, recordObservedIdentities, resolveCrossRouteInvalidates, rootState } from "../../src/cacheKey";
+import {
+  CacheKeyState,
+  evictObservedIdentity,
+  recordObservedIdentities,
+  resolveCrossRouteInvalidates,
+  rootState,
+  withKey,
+} from "../../src/cacheKey";
 import { MockResourceIdentityHandler } from "../mock/MockClient";
 
 class QCopyId extends QId<any> {
@@ -40,6 +47,22 @@ function mediaState(overrides: Partial<CacheKeyState> = {}): CacheKeyState {
   };
 }
 
+/** A `Media(5)` detail state, key already threaded - `[state.name, ...state.steps]` is `["Media","detail",5]`. */
+function mediaDetailState(overrides: Partial<CacheKeyState> = {}): CacheKeyState {
+  return withKey(mediaState(overrides), 5, 5);
+}
+
+function mediaListState(overrides: Partial<CacheKeyState> = {}): CacheKeyState {
+  return {
+    ...rootState("Media", "list", {
+      entitySetName: "Media",
+      canonicalIdFn: (entity) => new QMediumId("Media").buildCanonicalId(entity),
+      qEntityFn: () => QMedium as any,
+    }),
+    ...overrides,
+  };
+}
+
 describe("recordObservedIdentities", () => {
   test("no resourceIdentity: harmless", () => {
     expect(() => recordObservedIdentities(undefined, ["Media", "detail", 5], mediaState(), { id: 5 })).not.toThrow();
@@ -51,50 +74,66 @@ describe("recordObservedIdentities", () => {
     expect(handler.store.size).toBe(0);
   });
 
-  test("records the directly addressed resource itself", () => {
+  test("records the directly addressed resource itself, under its own key with params stripped", () => {
     const handler = new MockResourceIdentityHandler();
-    const key = ["Media", "detail", 5];
-    recordObservedIdentities(handler, key, mediaState(), { id: 5, title: "The Trial" });
-    expect(handler.resolve("Media(5)")).toEqual([key]);
+    const state = mediaDetailState();
+    const hierarchicalKey = ["Media", "detail", 5, { expand: [["copies", "list"]] }];
+    recordObservedIdentities(handler, hierarchicalKey, state, { id: 5, title: "The Trial" });
+    expect(handler.resolve("Media(5)")).toEqual([["Media", "detail", 5]]);
   });
 
   test("records every row of a list response, against the same key", () => {
     // a real V4/V2 collection response is `{value: [...]}`, never a bare array itself
     const handler = new MockResourceIdentityHandler();
-    const key = ["Media", "list"];
-    recordObservedIdentities(handler, key, mediaState({ entitySetName: "Media" }), {
+    recordObservedIdentities(handler, ["Media", "list"], mediaListState(), {
       value: [{ id: 1 }, { id: 2 }],
     });
-    expect(handler.resolve("Media(1)")).toEqual([key]);
-    expect(handler.resolve("Media(2)")).toEqual([key]);
+    expect(handler.resolve("Media(1)")).toEqual([["Media", "list"]]);
+    expect(handler.resolve("Media(2)")).toEqual([["Media", "list"]]);
   });
 
   test("records every row of a V2-wrapped list response too (`{d: {results: [...]}}`)", () => {
     const handler = new MockResourceIdentityHandler();
-    const key = ["Media", "list"];
-    recordObservedIdentities(handler, key, mediaState({ entitySetName: "Media" }), {
+    recordObservedIdentities(handler, ["Media", "list"], mediaListState(), {
       d: { results: [{ id: 1 }, { id: 2 }] },
     });
-    expect(handler.resolve("Media(1)")).toEqual([key]);
-    expect(handler.resolve("Media(2)")).toEqual([key]);
+    expect(handler.resolve("Media(1)")).toEqual([["Media", "list"]]);
+    expect(handler.resolve("Media(2)")).toEqual([["Media", "list"]]);
   });
 
   test("records every row of a `{results: [...]}` list response too (V2 with the `d` envelope already stripped)", () => {
     const handler = new MockResourceIdentityHandler();
-    const key = ["Media", "list"];
-    recordObservedIdentities(handler, key, mediaState({ entitySetName: "Media" }), {
+    recordObservedIdentities(handler, ["Media", "list"], mediaListState(), {
       results: [{ id: 1 }],
     });
-    expect(handler.resolve("Media(1)")).toEqual([key]);
+    expect(handler.resolve("Media(1)")).toEqual([["Media", "list"]]);
   });
 
   test("records every $expand'd entity too, at the same outer key - not a synthesized one", () => {
     const handler = new MockResourceIdentityHandler();
-    const key = ["Media", "detail", 5, { expand: [["copies", "list"]] }];
-    recordObservedIdentities(handler, key, mediaState(), { id: 5, copies: [{ id: 1 }, { id: 2 }] });
-    expect(handler.resolve("Media(5)")).toEqual([key]);
-    expect(handler.resolve("Copies(1)")).toEqual([key]);
-    expect(handler.resolve("Copies(2)")).toEqual([key]);
+    const state = mediaDetailState();
+    const hierarchicalKey = ["Media", "detail", 5, { expand: [["copies", "list"]] }];
+    recordObservedIdentities(handler, hierarchicalKey, state, { id: 5, copies: [{ id: 1 }, { id: 2 }] });
+    expect(handler.resolve("Media(5)")).toEqual([["Media", "detail", 5]]);
+    expect(handler.resolve("Copies(1)")).toEqual([["Media", "detail", 5]]);
+    expect(handler.resolve("Copies(2)")).toEqual([["Media", "detail", 5]]);
+  });
+
+  test("params-stripped: two reads differing only by their params object record under the identical key", () => {
+    const handler = new MockResourceIdentityHandler();
+    const state = mediaListState();
+    recordObservedIdentities(handler, ["Media", "list", { filter: "Title eq 'x'" }], state, {
+      value: [{ id: 1 }],
+    });
+    recordObservedIdentities(handler, ["Media", "list", { filter: "Title eq 'y'" }], state, {
+      value: [{ id: 1 }],
+    });
+    // both calls land under the same params-free key - a real `ResourceIdentityHandler` dedupes these into
+    // one store entry (see `InMemoryResourceIdentityHandler`), out of scope for this package
+    expect(handler.resolve("Media(1)")).toEqual([
+      ["Media", "list"],
+      ["Media", "list"],
+    ]);
   });
 
   test("a contained resource is never recorded - no canonicalIdFn, nothing to record against", () => {
@@ -172,5 +211,56 @@ describe("resolveCrossRouteInvalidates", () => {
   test("nothing recorded for this canonical id yet: an empty array, not undefined", () => {
     const handler = new MockResourceIdentityHandler();
     expect(resolveCrossRouteInvalidates(handler, mediaState({ key: 5 }), undefined)).toEqual([]);
+  });
+});
+
+describe("evictObservedIdentity", () => {
+  test("no resourceIdentity: harmless", () => {
+    expect(() => evictObservedIdentity(undefined, mediaState({ key: 5 }), undefined)).not.toThrow();
+  });
+
+  test("no canonicalIdFn (a contained resource): nothing to evict", () => {
+    const handler = new MockResourceIdentityHandler();
+    handler.record("Media(5)", ["SomeOther", "detail", 9, "media", "detail", 5]);
+    const state: CacheKeyState = { ...mediaState({ key: 5 }), canonicalIdFn: undefined };
+
+    evictObservedIdentity(handler, state, undefined);
+
+    expect(handler.resolve("Media(5)")).toEqual([["SomeOther", "detail", 9, "media", "detail", 5]]);
+  });
+
+  test("uses state.key - a DELETE's own response usually carries no body", () => {
+    const handler = new MockResourceIdentityHandler();
+    handler.record("Media(5)", ["Media", "list"]);
+    handler.record("Media(5)", ["SomeOther", "detail", 9, "media", "detail", 5]);
+
+    evictObservedIdentity(handler, mediaState({ key: 5 }), undefined);
+
+    expect(handler.resolve("Media(5)")).toEqual([]);
+  });
+
+  test("falls back to the response body when state.key is absent", () => {
+    const handler = new MockResourceIdentityHandler();
+    handler.record("Media(5)", ["Media", "list"]);
+
+    evictObservedIdentity(handler, mediaState(), { id: 5, title: "The Trial" });
+
+    expect(handler.resolve("Media(5)")).toEqual([]);
+  });
+
+  test("evicting only clears the addressed canonical id, other resources are untouched", () => {
+    const handler = new MockResourceIdentityHandler();
+    handler.record("Media(5)", ["Media", "list"]);
+    handler.record("Media(6)", ["Media", "list"]);
+
+    evictObservedIdentity(handler, mediaState({ key: 5 }), undefined);
+
+    expect(handler.resolve("Media(5)")).toEqual([]);
+    expect(handler.resolve("Media(6)")).toEqual([["Media", "list"]]);
+  });
+
+  test("nothing recorded for this canonical id yet: harmless", () => {
+    const handler = new MockResourceIdentityHandler();
+    expect(() => evictObservedIdentity(handler, mediaState({ key: 5 }), undefined)).not.toThrow();
   });
 });

@@ -259,5 +259,92 @@ describe("cache key threading", () => {
 
       expect(response.invalidates).toEqual(expect.arrayContaining([otherRoute]));
     });
+
+    test("what gets recorded off a read is params-stripped, so a later write resolves it without params", async () => {
+      const readState = rootState("Media", "list", { entitySetName: "Media", canonicalIdFn: canonicalIdOfMedia });
+      const readCmd = new UrlGetRequestCmd(client, "Media?$top=10", {
+        cacheKeyState: readState,
+        queryParams: { top: 10 },
+      });
+      client.setModelResponse({ value: [{ id: 5 }] });
+      await readCmd.execute();
+
+      // the read's own cacheKey does carry the params...
+      expect(readCmd.cacheKey).toEqual(["Media", "list", { top: 10, query: "%24top=10" }]);
+      // ...but what got recorded against the canonical id does not
+      expect(client.resourceIdentity.resolve("Media(5)")).toEqual([["Media", "list"]]);
+
+      const writeState = withKey(
+        rootState("Media", "list", { entitySetName: "Media", canonicalIdFn: canonicalIdOfMedia }),
+        5,
+        5,
+      );
+      const writeCmd = new UrlWriteRequestCmd(
+        client,
+        ODataHttpMethods.Patch,
+        "Media(5)",
+        { title: "y" },
+        {
+          cacheKeyState: writeState,
+        },
+      );
+
+      const response = await writeCmd.execute();
+
+      expect(response.invalidates).toEqual(expect.arrayContaining([["Media", "list"]]));
+    });
+
+    test("a successful DELETE evicts the resource's recorded identity", async () => {
+      const readState = rootState("Media", "detail", { entitySetName: "Media", canonicalIdFn: canonicalIdOfMedia });
+      const readCmd = new UrlGetRequestCmd(client, "SomeOther(9)/media", { cacheKeyState: withKey(readState, 5, 5) });
+      client.setModelResponse({ id: 5, title: "The Trial" });
+      await readCmd.execute();
+      expect(client.resourceIdentity.resolve("Media(5)")).toEqual([readCmd.cacheKey]);
+
+      const deleteState = withKey(
+        rootState("Media", "detail", { entitySetName: "Media", canonicalIdFn: canonicalIdOfMedia }),
+        5,
+        5,
+      );
+      const deleteCmd = new UrlWriteRequestCmd(client, ODataHttpMethods.Delete, "Media(5)", undefined, {
+        cacheKeyState: deleteState,
+      });
+
+      const response = await deleteCmd.execute();
+
+      // the delete's own response still invalidates the route recorded via the other one...
+      expect(response.invalidates).toEqual(expect.arrayContaining([readCmd.cacheKey]));
+      // ...but nothing is left recorded for it afterwards, so a later write no longer resolves it either
+      expect(client.resourceIdentity.resolve("Media(5)")).toEqual([]);
+    });
+
+    test("a 204-answered PATCH does not evict - only DELETE does", async () => {
+      const readState = rootState("Media", "detail", { entitySetName: "Media", canonicalIdFn: canonicalIdOfMedia });
+      const readCmd = new UrlGetRequestCmd(client, "Media(5)", { cacheKeyState: withKey(readState, 5, 5) });
+      client.setModelResponse({ id: 5, title: "The Trial" });
+      await readCmd.execute();
+      expect(client.resourceIdentity.resolve("Media(5)")).toEqual([readCmd.cacheKey]);
+
+      const patchState = withKey(
+        rootState("Media", "detail", { entitySetName: "Media", canonicalIdFn: canonicalIdOfMedia }),
+        5,
+        5,
+      );
+      const patchCmd = new UrlWriteRequestCmd(
+        client,
+        ODataHttpMethods.Patch,
+        "Media(5)",
+        { title: "y" },
+        {
+          cacheKeyState: patchState,
+        },
+      );
+      client.responseStatus = 204;
+      client.responseData = undefined;
+
+      await patchCmd.execute();
+
+      expect(client.resourceIdentity.resolve("Media(5)")).toEqual([readCmd.cacheKey]);
+    });
   });
 });
