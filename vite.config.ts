@@ -26,6 +26,8 @@ export default defineConfig({
      * - `examples/**` are just examples and must be build and run on demand; ok, a bit misused by the
      *   test converters, which are example converters.
      * - `odata-core` are just typing tests with no test suite at all
+     * - `.claude/**` is agent tooling state (gitignored): other sessions check out worktrees under it,
+     *   and the bare walk would run their duplicated test suites as part of this one.
      *
      * Everything else stays in: The int-tests of cli-test
      * and ts-floor-check stay too - they are local and deterministic.
@@ -33,7 +35,7 @@ export default defineConfig({
      * Note: a custom exclude replaces vitest's defaults instead of extending them, hence defaultExclude.
      */
     exclude: isAggregateRun
-      ? [...defaultExclude, "int-test/**", "examples/**", "packages/odata-core/**"]
+      ? [...defaultExclude, "int-test/**", "examples/**", "packages/odata-core/**", ".claude/**"]
       : defaultExclude,
     coverage: {
       ...coverageReporterOptions,
