@@ -99,6 +99,21 @@ describe("ASP.NET Library: cache keys", () => {
     expect(result.status).toBe(200);
   });
 
+  test("a statically-keyed hop's own segment is renamed to its entity set's name, not the hop's own (diverging) name - Publishers(1).Books(id)", () => {
+    // Publishers(1).Books(id): "Books" is the hop's own name, but it binds to entity set "Media" (not
+    // "Books" - no "Books" entity set exists in this model at all), and BOOK_DER_PROZESS is known the
+    // moment this request is constructed - withKey already renames the segment before any response.
+    // Shape only here: this server's controllers are hand-routed (EntitySetControllers.cs), and until
+    // test-server-asp-net's own nested-route fix (test-server-asp-net#38, merged, not yet released and
+    // pinned here) ships, they don't implement a keyed GET through a to-many navigation property for any
+    // entity. The executed, end-to-end proof of the same mechanism is int-test/cap's own CacheKeys.test.ts
+    // - though CAP's own model has no name-diverging to-many relationship to exercise, so neither server
+    // today proves this both executed *and* divergent at once; this becomes that proof once the pin bumps.
+    const request = LIBRARY.Publishers(1).Books(BOOK_DER_PROZESS).query();
+    expect(request.cacheKey).toEqual(["Publishers", "detail", 1, "Media", "detail", BOOK_DER_PROZESS]);
+    expect(touchesResource(["Media", "detail", BOOK_DER_PROZESS], request.cacheKey!)).toBe(true);
+  });
+
   test("a to-many hop: /Media(...)/Copies names itself by the navigation property, distinct from a hand-filtered route to the same entity set", async () => {
     const viaNavigation = LIBRARY.Media(BOOK_DER_PROZESS).Copies().query();
     const viaFilter = LIBRARY.Copies().query((builder, qCopy) => builder.filter(qCopy.MediumId.eq(BOOK_DER_PROZESS)));

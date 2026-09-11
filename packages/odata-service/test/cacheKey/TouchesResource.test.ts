@@ -106,4 +106,15 @@ describe("touchesResource - expand entries, buried inside the trailing params ob
     const key = [MEDIA, "detail", 5];
     expect(touchesResource(["copies", "list"], key)).toBe(false);
   });
+
+  test("a statically-keyed hop's own key, already renamed to its entity set's name by withKey, is found by a plain top-level scan - no params object involved at all", () => {
+    // Publishers(1).Books(id): "Books" is the hop's own OData name, but withKey already renamed this
+    // segment to "Media" (its target's entity set) when the key was applied - see CacheKeyState.ts
+    const key = ["Publishers", "detail", 1, "Media", "detail", "1111...1"];
+    expect(touchesResource(["Media", "detail", "1111...1"], key)).toBe(true);
+    // the hop's own ancestor prefix is still findable too - the rename only touches its own segment
+    expect(touchesResource(["Publishers", "detail", 1], key)).toBe(true);
+    // a different id does not match
+    expect(touchesResource(["Media", "detail", "2222...2"], key)).toBe(false);
+  });
 });
