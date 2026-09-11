@@ -54,8 +54,17 @@ export interface CacheKeyState {
    * Feeds `invalidates`: a stale ancestor is not just itself invalidated, but - since it was fetched as a
    * "detail" resource - its own bare list form too, on the same "a detail going stale means its list may no
    * longer agree either" logic {@link entitySetName} already applies to the addressed resource itself.
+   * Where that ancestor was itself narrowed by its own key, `keyedEntitySetForm` carries its bare
+   * `[entitySetName, "detail", key]` form too - the same short-form rule the addressed resource gets in
+   * `buildInvalidates`, needed for the identical reason: an ancestor's *own* full key here is hierarchical
+   * (prefixed by its own ancestors in turn), so it can never be found by scanning a direct route's shorter,
+   * cached key on its own.
    */
-  readonly ancestors?: ReadonlyArray<{ readonly key: ReadonlyArray<unknown>; readonly entitySetName?: string }>;
+  readonly ancestors?: ReadonlyArray<{
+    readonly key: ReadonlyArray<unknown>;
+    readonly entitySetName?: string;
+    readonly keyedEntitySetForm?: ReadonlyArray<unknown>;
+  }>;
   /**
    * The addressed resource's own key or id, exactly as given to `byId` - bare for a single primary key, an
    * object keyed by the model's own mapped property names otherwise. The same shape {@link CanonicalIdFn}
@@ -162,6 +171,22 @@ export function withParams(state: CacheKeyState, params: Readonly<Record<string,
 }
 
 /**
+ * A state's own bare `[entitySetName, "detail", key]` form, where it has been narrowed by its own key and
+ * has an entity set to name it by - the same short form `withKey`'s own rename already makes this state's
+ * `steps` end in, pulled out standalone for `buildInvalidates` to use as an invalidation candidate in its
+ * own right (see `BuildCacheKey.ts`'s rule 2): a state's full key is hierarchical, prefixed by every
+ * ancestor above it, so it can never be found by scanning a direct route's shorter, cached key on its own -
+ * only this bare form can. Shared between `hopState` (which precomputes it per ancestor, on the state a hop
+ * departs) and `buildInvalidates` (which computes it once more for the write's own addressed resource), so
+ * the one rule for deriving it cannot drift between the two call sites.
+ */
+export function keyedEntitySetFormOf(state: CacheKeyState): ReadonlyArray<unknown> | undefined {
+  return state.entitySetName && state.key !== undefined
+    ? [state.entitySetName, "detail", state.steps[state.steps.length - 1]]
+    : undefined;
+}
+
+/**
  * Follows one traversal step.
  *
  * The route leaves the current resource here, so its key - params dropped - is pushed onto `ancestors`. The
@@ -170,9 +195,14 @@ export function withParams(state: CacheKeyState, params: Readonly<Record<string,
  * taken, never re-rooted.
  */
 export function hopState(state: CacheKeyState, hop: HopDescriptor): CacheKeyState {
+  const keyedEntitySetForm = keyedEntitySetFormOf(state);
   const ancestors = [
     ...(state.ancestors ?? []),
-    { key: [state.name, ...state.steps], ...(state.entitySetName ? { entitySetName: state.entitySetName } : {}) },
+    {
+      key: [state.name, ...state.steps],
+      ...(state.entitySetName ? { entitySetName: state.entitySetName } : {}),
+      ...(keyedEntitySetForm ? { keyedEntitySetForm } : {}),
+    },
   ];
   const steps = hop.kind ? [...state.steps, hop.name, hop.kind] : [...state.steps, hop.name];
   const kindIndex = hop.kind ? steps.length - 1 : state.kindIndex;
