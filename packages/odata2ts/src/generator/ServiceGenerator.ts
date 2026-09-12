@@ -264,9 +264,17 @@ class ServiceGenerator {
       return "";
     }
 
+    const isFunc = op.type === OperationTypes.Function;
     const entitySet = entitySetOdataName
       ? Object.values(this.dataModel.getEntityContainer().entitySets).find((es) => es.odataName === entitySetOdataName)
       : undefined;
+    // an action with no declared result EntitySet is never cached under any key - it is always a write, so
+    // rooting it here would only ever feed a bogus, unmatchable invalidates entry (see the operation-keys
+    // spec, Part 1). A function keeps its root even without an EntitySet: unlike an action it defaults to
+    // GET, so its own root is a real, used cacheKey.
+    if (!isFunc && !entitySet) {
+      return "";
+    }
     const rootStateFn = imports.addServiceFunction("rootState");
     const kind = op.returnType?.isCollection ? "list" : "detail";
     const cacheKeyName = this.namespacedName(op.fqName, importOdataName);
