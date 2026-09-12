@@ -56,7 +56,7 @@ export class CollectionServiceV4<
 
   /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
   public getEntitySetName() {
-    return this.__base.cacheKeyState?.entitySetName;
+    return this.__base.getEntitySetName();
   }
 
   /**

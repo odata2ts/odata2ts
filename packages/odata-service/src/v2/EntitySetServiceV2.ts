@@ -12,7 +12,7 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { buildDeepEditHops, CacheKeyState, withKey, withParams } from "../cacheKey/index.js";
+import { CacheKeyState, withKey } from "../cacheKey/index.js";
 import { getBodyETagV2, getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
 import { ref } from "../ref.js";
@@ -55,7 +55,7 @@ export abstract class EntitySetServiceV2<
 
   /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
   public getEntitySetName() {
-    return this.__base.cacheKeyState?.entitySetName;
+    return this.__base.getEntitySetName();
   }
 
   /**
@@ -206,12 +206,10 @@ export abstract class EntitySetServiceV2<
   }
 
   public create(model: EditableT, queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void) {
-    const { client, qModel, getDefaultHeaders, createModelQueryBuilder, cacheKeyState } = this.__base;
+    const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
     const builder = createModelQueryBuilder(queryFn);
 
-    const deepEditHops = cacheKeyState && buildDeepEditHops(cacheKeyState.qEntityFn, model);
-    const stateForRequest =
-      deepEditHops && cacheKeyState ? withParams(cacheKeyState, { deepEdit: deepEditHops }) : cacheKeyState;
+    const stateForRequest = this.__base.writeStateFor(model);
 
     return new UrlBuilderRequestCmdV2<
       AsV4 extends true ? ODataModelResponseV4<T> : ODataEntityModelResponseV2<T>,
