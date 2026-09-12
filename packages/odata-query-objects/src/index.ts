@@ -55,6 +55,8 @@ export { QFlatComplexPath } from "./path/QFlatComplexPath";
 export { QComplexCollectionPath } from "./path/QComplexCollectionPath";
 export { QEntityPath } from "./path/QEntityPath";
 export { QEntityCollectionPath } from "./path/QEntityCollectionPath";
+export { walkEntityGraph, type EntityGraphVisit } from "./path/EntityGraphWalk";
+export type { QEntityFn } from "./path/QModelBasePath";
 export { QBinding, type BindingNotation } from "./path/QBinding";
 export * from "./path/QPathModel";
 
