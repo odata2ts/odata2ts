@@ -1,6 +1,14 @@
 import { QueryObject } from "../QueryObject";
+import type { QueryObjectModel } from "../QueryObjectModel";
 import { QBinding } from "./QBinding";
 import { QEntityPathModel } from "./QPathModel";
+
+/**
+ * A factory for a fresh, unprefixed Q-object instance of one entity/complex type - the same shape this
+ * class's own `qEntityFn` constructor argument uses (modulo the specific `Q` it yields), named so a write's
+ * payload or a read's response can be walked for the entities it embeds without any generated lookup table.
+ */
+export type QEntityFn = () => new (prefix?: string, separator?: string) => QueryObjectModel;
 
 export class QModelBasePath<Q extends QueryObject> implements QEntityPathModel<Q> {
   /**

@@ -1,11 +1,10 @@
 import { UNKNOWN_ID } from "@odata2ts/odata-query-builder";
-import type { QueryObjectModel } from "@odata2ts/odata-query-objects";
+import type { QEntityFn } from "@odata2ts/odata-query-objects";
+
+export type { QEntityFn };
 
 /** Whether a resource is a collection or a single entity / complex value. */
 export type CacheKeyKind = "list" | "detail";
-
-/** A factory for a fresh, unprefixed Q-object instance of one entity/complex type - the same shape a Q-object's own nav-property wrappers already use (`QModelBasePath`'s `qEntityFn`), reused here so a write's payload can be walked without any generated lookup table. */
-export type QEntityFn = () => new (prefix?: string, separator?: string) => QueryObjectModel;
 
 /**
  * Builds the addressed resource's own canonical id - entity-set name plus key predicate, e.g. `Copies(3)`.

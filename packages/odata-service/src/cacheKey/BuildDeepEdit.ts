@@ -1,5 +1,5 @@
+import { walkEntityGraph } from "@odata2ts/odata-query-objects";
 import type { QEntityFn } from "./CacheKeyState";
-import { walkEntityGraph } from "./EntityGraphWalk";
 
 /**
  * The entity sets a write's own payload deep-inserts into, one entry per deep-inserted entity found - never

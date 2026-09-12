@@ -1,6 +1,6 @@
 import type { ResourceIdentityHandler } from "@odata2ts/http-client-api";
+import { walkEntityGraph } from "@odata2ts/odata-query-objects";
 import type { CacheKeyState } from "./CacheKeyState";
-import { walkEntityGraph } from "./EntityGraphWalk";
 
 /**
  * Records every entity actually present in a *read's* response body against the request's own hierarchical

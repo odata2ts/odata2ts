@@ -1,18 +1,10 @@
-import type { QEntityFn } from "./CacheKeyState";
+import type { QBinding } from "./QBinding";
+import { ENTITY_COLLECTION_PATH_DISCRIMINATOR } from "./QEntityCollectionPath";
+import { ENTITY_PATH_DISCRIMINATOR } from "./QEntityPath";
+import type { QEntityFn } from "./QModelBasePath";
 
-/** The discriminators of a Q-object path wrapper that leads to another entity, as opposed to a complex value or a primitive property/collection - see `QEntityPath`/`QEntityCollectionPath`. */
-const ENTITY_DISCRIMINATORS = new Set(["EntityType", "EntitySet"]);
-
-/**
- * What the walk reads off an entity nav property's QBinding. It is the cache-key name that is read - not
- * the raw URL name: under `cacheKeys.namespace` the generator bakes a prefixed name into the QBinding's
- * cache-key name, and this is what a deep insert's `invalidates` entry must carry to match the same name
- * the write's own `[entitySetName, "list"]` rule registers (issue #536).
- */
-interface EntityBinding {
-  getCacheKeyEntitySetName(): string;
-  buildCanonicalId(entity: unknown): string | undefined;
-}
+/** The discriminators of the Q-object path wrappers that lead to another entity - `QEntityPath`'s and `QEntityCollectionPath`'s own, so a wrapper added there cannot fail to be seen here without touching this package. */
+const ENTITY_DISCRIMINATORS = new Set([ENTITY_PATH_DISCRIMINATOR, ENTITY_COLLECTION_PATH_DISCRIMINATOR]);
 
 /** One entity-shaped value found while walking a data object alongside its Q-object. */
 export interface EntityGraphVisit {
@@ -64,7 +56,7 @@ export function walkEntityGraph(
   const qEntity = new (qEntityFn())() as unknown as Record<string, unknown>;
   for (const key in qEntity) {
     const prop = qEntity[key] as
-      { discriminator?: string; getEntityFn(): QEntityFn; getBinding?(): EntityBinding | undefined } | undefined;
+      { discriminator?: string; getEntityFn(): QEntityFn; getBinding?(): QBinding<any> | undefined } | undefined;
     if (!prop || typeof prop.discriminator !== "string" || !ENTITY_DISCRIMINATORS.has(prop.discriminator)) {
       continue;
     }
@@ -83,7 +75,7 @@ export function walkEntityGraph(
       }
       if (item && typeof item === "object") {
         visit({
-          // the cache-key name, not the raw URL name - see `EntityBinding`
+          // the cache-key name, not the raw URL name - see `QBinding.getCacheKeyEntitySetName`
           entitySetName: binding?.getCacheKeyEntitySetName(),
           buildCanonicalId: binding && ((entity: unknown) => binding.buildCanonicalId(entity)),
           data: item as Record<string, unknown>,
@@ -95,7 +87,7 @@ export function walkEntityGraph(
   }
 }
 
-/** `{"@id": key}` and nothing else - the editable model's shape for "link an existing entity". */
+/** `{"@id": key}` and nothing else - the editable model's shape for "link an existing entity", i.e. exactly what `QBinding.format` yields for the `4.01` notation. */
 function isBinding(item: unknown): boolean {
   return typeof item === "object" && item !== null && Object.keys(item).length === 1 && "@id" in item;
 }
