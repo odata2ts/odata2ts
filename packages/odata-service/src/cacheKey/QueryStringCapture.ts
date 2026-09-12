@@ -86,3 +86,39 @@ export function canonicalizeQueryString(query: string, filter?: string, search?:
   const canonical = params.toString();
   return canonical.length ? canonical : undefined;
 }
+
+/**
+ * The `queryParams` object `buildCacheKey` should receive for one converted request: the builder's own
+ * cache-key params with their `filter`/`search` pulled out and folded into the request's own rendered query
+ * string (`captureQueryString` + `canonicalizeQueryString`) rather than sitting beside it.
+ *
+ * The pull and the strip are one decision spelled in two halves - `filter`/`search` leave the params
+ * object exactly where `STRIPPED_QUERY_OPTIONS` removes the raw text - so they live side by side here,
+ * where their agreement is visible: change one without the other and a filter either double-counts in the
+ * key or disappears from it, silently, with no type error to catch the drift.
+ *
+ * `filter`/`search` are the canonical strings `ODataQueryBuilder.getCacheKeyParams()` computed for this
+ * same request - `undefined` where the query had none - and are only folded in as strings: a value of any
+ * other shape is dropped, mirroring the `string | undefined` the builder actually produces. `query`
+ * itself is dropped again where nothing is left, mirroring "empty entries are dropped" for the rest of the
+ * params object.
+ */
+export function buildCacheKeyQueryParams(
+  method: ODataHttpMethods,
+  url: string,
+  data: unknown,
+  cacheKeyParams: Record<string, unknown> | undefined,
+): Record<string, unknown> {
+  const { filter, search, ...restQueryParams } = cacheKeyParams ?? {};
+  const rawQuery = captureQueryString(method, url, data);
+  const query =
+    rawQuery !== undefined
+      ? canonicalizeQueryString(
+          rawQuery,
+          typeof filter === "string" ? filter : undefined,
+          typeof search === "string" ? search : undefined,
+        )
+      : undefined;
+
+  return query !== undefined ? { ...restQueryParams, query } : restQueryParams;
+}
