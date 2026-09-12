@@ -131,30 +131,52 @@ class ServiceGenerator {
     return `${withUnknownIdFn}(${expr})`;
   }
 
-  /** The root of a route: an entity set or a singleton. An operation with no declared result set is the one root with no type to head with - built as a plain object literal instead, see `emitUnboundOperationRootExpr`. */
-  private emitRootStateExpr(
-    imports: ImportContainer,
-    name: string,
-    kind: "list" | "detail",
-    entityType: EntityType,
-    options?: { paramsSource?: string; isEntitySet?: boolean },
-  ): string {
-    if (!this.cacheKeysEnabled) {
-      return "";
-    }
-    const rootStateFn = imports.addServiceFunction("rootState");
-    const cacheKeyName = this.namespacedName(entityType.fqName, name);
-    const optionsEntries = [
-      options?.paramsSource ? `params: ${options.paramsSource}` : "",
-      options?.isEntitySet ? `entitySetName: "${cacheKeyName}"` : "",
-      // the canonicalIdFn's own name is a real OData URL segment - always the raw `name`, never `cacheKeyName`
-      options?.isEntitySet ? `canonicalIdFn: ${this.canonicalIdFnExpr(imports, entityType, name)}` : "",
-      `qEntityFn: ${this.qEntityFnExpr(imports, entityType)}`,
-    ]
-      .filter(Boolean)
-      .join(", ");
-    return `${rootStateFn}("${cacheKeyName}", "${kind}", { ${optionsEntries} })`;
+  /**
+   * The destructure fragment and the constructor-argument fragment for one emitted cache-key expression -
+   * collapses the two halves of the same decision that six call sites below used to spell out
+   * independently. `needsDestructure` defaults to "the expression is non-empty", which covers every site
+   * except `generateRelatedServiceGetter`'s root case: `emitRootStateExpr`'s result is self-contained and
+   * never reads a `cacheKeyState` destructured from `this.__base`, unlike every hop producer's.
+   */
+  private emitCacheKeyArg(expr: string, needsDestructure: boolean = !!expr): { destructure: string; arg: string } {
+    return {
+      destructure: needsDestructure ? ", cacheKeyState" : "",
+      arg: expr ? `, ${expr}` : "",
+    };
   }
+
+  /**
+   * Wraps a cache-key-emission producer so the "feature is off" guard is stated once, not at each of the
+   * eight producers below it: returns `""` immediately when cache keys are disabled, the producer's own
+   * expression otherwise - which is what keeps `off` output byte-identical to before this feature existed.
+   */
+  private guardCacheKeysOff<Args extends unknown[]>(produce: (...args: Args) => string): (...args: Args) => string {
+    return (...args: Args) => (this.cacheKeysEnabled ? produce(...args) : "");
+  }
+
+  /** The root of a route: an entity set or a singleton. An operation with no declared result set is the one root with no type to head with - built as a plain object literal instead, see `emitUnboundOperationRootExpr`. */
+  private emitRootStateExpr = this.guardCacheKeysOff(
+    (
+      imports: ImportContainer,
+      name: string,
+      kind: "list" | "detail",
+      entityType: EntityType,
+      options?: { paramsSource?: string; isEntitySet?: boolean },
+    ): string => {
+      const rootStateFn = imports.addServiceFunction("rootState");
+      const cacheKeyName = this.namespacedName(entityType.fqName, name);
+      const optionsEntries = [
+        options?.paramsSource ? `params: ${options.paramsSource}` : "",
+        options?.isEntitySet ? `entitySetName: "${cacheKeyName}"` : "",
+        // the canonicalIdFn's own name is a real OData URL segment - always the raw `name`, never `cacheKeyName`
+        options?.isEntitySet ? `canonicalIdFn: ${this.canonicalIdFnExpr(imports, entityType, name)}` : "",
+        `qEntityFn: ${this.qEntityFnExpr(imports, entityType)}`,
+      ]
+        .filter(Boolean)
+        .join(", ");
+      return `${rootStateFn}("${cacheKeyName}", "${kind}", { ${optionsEntries} })`;
+    },
+  );
 
   /**
    * A navigation property hop - always hierarchical, named by the navigation property's own OData name,
@@ -163,67 +185,58 @@ class ServiceGenerator {
    * (feeding `invalidates` and response-observed recording respectively) name the entity *set* the target
    * belongs to, absent for a contained navigation property, which has none of its own.
    */
-  private emitNavHopExpr(
-    imports: ImportContainer,
-    ownerFqName: string,
-    navPropOdataName: string,
-    elementType: EntityType,
-    isCollection: boolean,
-    contained: boolean,
-  ): string {
-    if (!this.cacheKeysEnabled) {
-      return "";
-    }
+  private emitNavHopExpr = this.guardCacheKeysOff(
+    (
+      imports: ImportContainer,
+      ownerFqName: string,
+      navPropOdataName: string,
+      elementType: EntityType,
+      isCollection: boolean,
+      contained: boolean,
+    ): string => {
+      const kind = isCollection ? "list" : "detail";
+      const targetSet = !contained ? this.dataModel.getNavPropBindingTarget(ownerFqName, navPropOdataName) : undefined;
+      // the hop's own step name (navPropOdataName) never carries this prefix - only entitySetName does, since
+      // that is the value reused as a bare, cross-route identifier (invalidates, response-observed identity)
+      const entitySetNameEntry = targetSet
+        ? `, entitySetName: "${this.namespacedName(targetSet.entityType.fqName, targetSet.odataName)}"`
+        : "";
+      const canonicalIdFnEntry = targetSet
+        ? `, canonicalIdFn: ${this.canonicalIdFnExpr(imports, targetSet.entityType, targetSet.odataName)}`
+        : "";
+      const qEntityFnEntry = `, qEntityFn: ${this.qEntityFnExpr(imports, elementType)}`;
 
-    const kind = isCollection ? "list" : "detail";
-    const targetSet = !contained ? this.dataModel.getNavPropBindingTarget(ownerFqName, navPropOdataName) : undefined;
-    // the hop's own step name (navPropOdataName) never carries this prefix - only entitySetName does, since
-    // that is the value reused as a bare, cross-route identifier (invalidates, response-observed identity)
-    const entitySetNameEntry = targetSet
-      ? `, entitySetName: "${this.namespacedName(targetSet.entityType.fqName, targetSet.odataName)}"`
-      : "";
-    const canonicalIdFnEntry = targetSet
-      ? `, canonicalIdFn: ${this.canonicalIdFnExpr(imports, targetSet.entityType, targetSet.odataName)}`
-      : "";
-    const qEntityFnEntry = `, qEntityFn: ${this.qEntityFnExpr(imports, elementType)}`;
-
-    const hopStateFn = imports.addServiceFunction("hopState");
-    const hopExpr = `${hopStateFn}(cacheKeyState, { name: "${navPropOdataName}", kind: "${kind}"${entitySetNameEntry}${canonicalIdFnEntry}${qEntityFnEntry} })`;
-    // a to-one hop's target key is never in the URL - only ever discoverable from the response, the same
-    // gap `$expand` already has for the identical reason - so the "detail" position gets the same "?"
-    // placeholder rather than staying short (see `withUnknownId`)
-    if (kind === "detail") {
-      return `cacheKeyState && ${this.wrapUnknownId(imports, hopExpr)}`;
-    }
-    return `cacheKeyState && ${hopExpr}`;
-  }
+      const hopStateFn = imports.addServiceFunction("hopState");
+      const hopExpr = `${hopStateFn}(cacheKeyState, { name: "${navPropOdataName}", kind: "${kind}"${entitySetNameEntry}${canonicalIdFnEntry}${qEntityFnEntry} })`;
+      // a to-one hop's target key is never in the URL - only ever discoverable from the response, the same
+      // gap `$expand` already has for the identical reason - so the "detail" position gets the same "?"
+      // placeholder rather than staying short (see `withUnknownId`)
+      if (kind === "detail") {
+        return `cacheKeyState && ${this.wrapUnknownId(imports, hopExpr)}`;
+      }
+      return `cacheKeyState && ${hopExpr}`;
+    },
+  );
 
   /** A complex property hop: the same shape as a navigation hop, minus any entity-set identity - a complex value is never a navigation property and belongs to no entity set. */
-  private emitComplexHopExpr(imports: ImportContainer, isCollection: boolean, name: string): string {
-    if (!this.cacheKeysEnabled) {
-      return "";
-    }
-    const hopStateFn = imports.addServiceFunction("hopState");
-    return `cacheKeyState && ${hopStateFn}(cacheKeyState, { name: "${name}", kind: "${isCollection ? "list" : "detail"}" })`;
-  }
+  private emitComplexHopExpr = this.guardCacheKeysOff(
+    (imports: ImportContainer, isCollection: boolean, name: string): string => {
+      const hopStateFn = imports.addServiceFunction("hopState");
+      return `cacheKeyState && ${hopStateFn}(cacheKeyState, { name: "${name}", kind: "${isCollection ? "list" : "detail"}" })`;
+    },
+  );
 
   /** A primitive property, primitive collection or stream property hop: bare name, no kind - stays on its parent's resource. */
-  private emitBareHopExpr(imports: ImportContainer, name: string): string {
-    if (!this.cacheKeysEnabled) {
-      return "";
-    }
+  private emitBareHopExpr = this.guardCacheKeysOff((imports: ImportContainer, name: string): string => {
     const hopStateFn = imports.addServiceFunction("hopState");
     return `cacheKeyState && ${hopStateFn}(cacheKeyState, { name: "${name}" })`;
-  }
+  });
 
   /** A stream property's raw value: the property hop, then a further hop appending `$value`. */
-  private emitStreamHopExpr(imports: ImportContainer, odataName: string): string {
-    if (!this.cacheKeysEnabled) {
-      return "";
-    }
+  private emitStreamHopExpr = this.guardCacheKeysOff((imports: ImportContainer, odataName: string): string => {
     const hopStateFn = imports.addServiceFunction("hopState");
     return `cacheKeyState && ${hopStateFn}(${hopStateFn}(cacheKeyState, { name: "${odataName}" }), { name: "$value" })`;
-  }
+  });
 
   /**
    * A subtype cast: a restriction on the very same resource, not a hop away from it. The cast's FQN is run
@@ -231,14 +244,11 @@ class ServiceGenerator {
    * written compactly here too - the same resolution `entityTypeName`-style consumers would use, so a cache
    * key's `cast` entry and any matcher written against it never drift apart.
    */
-  private emitCastParamsExpr(imports: ImportContainer, castFqName: string): string {
-    if (!this.cacheKeysEnabled) {
-      return "";
-    }
+  private emitCastParamsExpr = this.guardCacheKeysOff((imports: ImportContainer, castFqName: string): string => {
     const withParamsFn = imports.addServiceFunction("withParams");
     const displayFqName = this.dataModel.getDisplayFqName(castFqName);
     return `cacheKeyState && ${withParamsFn}(cacheKeyState, { cast: "${displayFqName}" })`;
-  }
+  });
 
   /**
    * The root of an unbound function/action import: always the import's own OData name (OData v4.01 Part 1
@@ -253,70 +263,65 @@ class ServiceGenerator {
    * but for the same collision-avoidance reason every other root gets prefixed with its own type's
    * namespace: two different services' import names can otherwise collide identically.
    */
-  private emitUnboundOperationRootExpr(
-    imports: ImportContainer,
-    op: OperationType,
-    importOdataName: string,
-    entitySetOdataName: string | undefined,
-    hasParams: boolean,
-  ): string {
-    if (!this.cacheKeysEnabled) {
-      return "";
-    }
+  private emitUnboundOperationRootExpr = this.guardCacheKeysOff(
+    (
+      imports: ImportContainer,
+      op: OperationType,
+      importOdataName: string,
+      entitySetOdataName: string | undefined,
+      hasParams: boolean,
+    ): string => {
+      const isFunc = op.type === OperationTypes.Function;
+      const entitySet = entitySetOdataName
+        ? Object.values(this.dataModel.getEntityContainer().entitySets).find(
+            (es) => es.odataName === entitySetOdataName,
+          )
+        : undefined;
+      // an action with no declared result EntitySet is never cached under any key - it is always a write, so
+      // rooting it here would only ever feed a bogus, unmatchable invalidates entry (see the operation-keys
+      // spec, Part 1). A function keeps its root even without an EntitySet: unlike an action it defaults to
+      // GET, so its own root is a real, used cacheKey.
+      if (!isFunc && !entitySet) {
+        return "";
+      }
+      const rootStateFn = imports.addServiceFunction("rootState");
+      const kind = op.returnType?.isCollection ? "list" : "detail";
+      const cacheKeyName = this.namespacedName(op.fqName, importOdataName);
+      // nested under its own "params" key, never spread directly - a composable operation's cache key later
+      // merges in real query params (select/filter/...) via buildCacheKey, and those must not collide with
+      // the operation's own invocation arguments
+      const paramsEntry = hasParams ? `params: { params }, ` : "";
 
-    const isFunc = op.type === OperationTypes.Function;
-    const entitySet = entitySetOdataName
-      ? Object.values(this.dataModel.getEntityContainer().entitySets).find((es) => es.odataName === entitySetOdataName)
-      : undefined;
-    // an action with no declared result EntitySet is never cached under any key - it is always a write, so
-    // rooting it here would only ever feed a bogus, unmatchable invalidates entry (see the operation-keys
-    // spec, Part 1). A function keeps its root even without an EntitySet: unlike an action it defaults to
-    // GET, so its own root is a real, used cacheKey.
-    if (!isFunc && !entitySet) {
-      return "";
-    }
-    const rootStateFn = imports.addServiceFunction("rootState");
-    const kind = op.returnType?.isCollection ? "list" : "detail";
-    const cacheKeyName = this.namespacedName(op.fqName, importOdataName);
-    // nested under its own "params" key, never spread directly - a composable operation's cache key later
-    // merges in real query params (select/filter/...) via buildCacheKey, and those must not collide with
-    // the operation's own invocation arguments
-    const paramsEntry = hasParams ? `params: { params }, ` : "";
+      if (entitySet) {
+        const canonicalIdFnEntry = `canonicalIdFn: ${this.canonicalIdFnExpr(imports, entitySet.entityType, entitySet.odataName)}, `;
+        const qEntityFnEntry = `qEntityFn: ${this.qEntityFnExpr(imports, entitySet.entityType)}`;
+        const namespacedEntitySetName = this.namespacedName(entitySet.entityType.fqName, entitySet.odataName);
+        return (
+          `${rootStateFn}("${cacheKeyName}", "${kind}", ` +
+          `{ ${paramsEntry}entitySetName: "${namespacedEntitySetName}", ${canonicalIdFnEntry}${qEntityFnEntry} })`
+        );
+      }
 
-    if (entitySet) {
-      const canonicalIdFnEntry = `canonicalIdFn: ${this.canonicalIdFnExpr(imports, entitySet.entityType, entitySet.odataName)}, `;
-      const qEntityFnEntry = `qEntityFn: ${this.qEntityFnExpr(imports, entitySet.entityType)}`;
-      const namespacedEntitySetName = this.namespacedName(entitySet.entityType.fqName, entitySet.odataName);
-      return (
-        `${rootStateFn}("${cacheKeyName}", "${kind}", ` +
-        `{ ${paramsEntry}entitySetName: "${namespacedEntitySetName}", ${canonicalIdFnEntry}${qEntityFnEntry} })`
-      );
-    }
-
-    return hasParams
-      ? `${rootStateFn}("${cacheKeyName}", "${kind}", { params: { params } })`
-      : `${rootStateFn}("${cacheKeyName}", "${kind}")`;
-  }
+      return hasParams
+        ? `${rootStateFn}("${cacheKeyName}", "${kind}", { params: { params } })`
+        : `${rootStateFn}("${cacheKeyName}", "${kind}")`;
+    },
+  );
 
   /**
    * A bound function/action: a hop off the resource it is bound to, with its own kind marker where the
    * return type is structured - never a type, matching every other hop. The operation's own FQN is run
    * through `getDisplayFqName` for the same reason `emitCastParamsExpr` does - see there.
    */
-  private emitBoundOperationHopExpr(
-    imports: ImportContainer,
-    fqOperationName: string,
-    returnType: ReturnTypeModel | undefined,
-  ): string {
-    if (!this.cacheKeysEnabled) {
-      return "";
-    }
-    const hopStateFn = imports.addServiceFunction("hopState");
-    const isStructured = !!returnType?.fqType && returnType.dataType !== DataTypes.PrimitiveType;
-    const kindEntry = isStructured ? `, kind: "${returnType!.isCollection ? "list" : "detail"}"` : "";
-    const displayFqName = this.dataModel.getDisplayFqName(fqOperationName);
-    return `cacheKeyState && ${hopStateFn}(cacheKeyState, { name: "${displayFqName}"${kindEntry} })`;
-  }
+  private emitBoundOperationHopExpr = this.guardCacheKeysOff(
+    (imports: ImportContainer, fqOperationName: string, returnType: ReturnTypeModel | undefined): string => {
+      const hopStateFn = imports.addServiceFunction("hopState");
+      const isStructured = !!returnType?.fqType && returnType.dataType !== DataTypes.PrimitiveType;
+      const kindEntry = isStructured ? `, kind: "${returnType!.isCollection ? "list" : "detail"}"` : "";
+      const displayFqName = this.dataModel.getDisplayFqName(fqOperationName);
+      return `cacheKeyState && ${hopStateFn}(cacheKeyState, { name: "${displayFqName}"${kindEntry} })`;
+    },
+  );
 
   /**
    * The version type argument list as seen from the main service, which pins it: the main service does not
@@ -599,7 +604,10 @@ class ServiceGenerator {
       ownerFqName === undefined
         ? this.emitRootStateExpr(imports, odataPropName, "list", entityType, { isEntitySet: true })
         : this.emitNavHopExpr(imports, ownerFqName, odataPropName, entityType, true, contained);
-    const cacheKeyDestructure = ownerFqName !== undefined && cacheKeyExpr ? ", cacheKeyState" : "";
+    const { destructure: cacheKeyDestructure, arg: cacheKeyArg } = this.emitCacheKeyArg(
+      cacheKeyExpr,
+      ownerFqName !== undefined && !!cacheKeyExpr,
+    );
     // A navigation always addresses the contained type by its own name - never a cast of the base set - so a
     // parent's subtype cast must not leak into the child: it would drop the nav segment on create and emit a
     // spurious type-control-info. The `subtype` flag only exists on the V4 options type (V2 has no subtype
@@ -638,7 +646,7 @@ class ServiceGenerator {
         // "new Type(...)" infers AsV4's default (false), which mismatches the declared return type above
         // wherever it isn't itself the abstract AsV4 - concretely, on every getter of the main service,
         // which pins the literal true rather than passing an abstract type parameter along.
-        `const collection = new ${collectionName}${this.isV2AsV4() ? versionArg : ""}(client, path, fieldName, ${collectionOptions}${cacheKeyExpr ? `, ${cacheKeyExpr}` : ""});`,
+        `const collection = new ${collectionName}${this.isV2AsV4() ? versionArg : ""}(client, path, fieldName, ${collectionOptions}${cacheKeyArg});`,
         'return typeof id === "undefined" || id === null ? collection : collection.byId(id);',
       ],
     };
@@ -688,6 +696,8 @@ class ServiceGenerator {
     // a singleton has no key by definition (OData singletons carry no key predicate), so the same "?"
     // placeholder a keyless to-one hop gets applies here too (see `withUnknownId`)
     const cacheKeyExpr = rootStateExpr ? this.wrapUnknownId(importContainer, rootStateExpr) : rootStateExpr;
+    // no emitCacheKeyArg: the root state is self-contained, so there is no `cacheKeyState` to destructure
+    // from `this.__base` - only the argument half of the pair applies here
 
     return {
       scope: Scope.Public,
@@ -961,7 +971,7 @@ class ServiceGenerator {
     const serviceType = imports.addServiceObject(this.version, ServiceImports.StreamService);
     const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
     const cacheKeyExpr = this.emitStreamHopExpr(imports, prop.odataName);
-    const cacheKeyDestructure = cacheKeyExpr ? ", cacheKeyState" : "";
+    const { destructure: cacheKeyDestructure, arg: cacheKeyArg } = this.emitCacheKeyArg(cacheKeyExpr);
 
     return {
       scope: Scope.Public,
@@ -969,7 +979,7 @@ class ServiceGenerator {
       statements: [
         `if(!${propName}) {`,
         `  const { client, path, options${cacheKeyDestructure} } = this.__base;`,
-        `  ${propName} = new ${serviceType}(client, path, "${prop.odataName}", options${cacheKeyExpr ? `, ${cacheKeyExpr}` : ""})`,
+        `  ${propName} = new ${serviceType}(client, path, "${prop.odataName}", options${cacheKeyArg})`,
         "}",
         `return ${propName}`,
       ],
@@ -1005,7 +1015,7 @@ class ServiceGenerator {
     const cacheKeyExpr = isEntityNav
       ? this.emitNavHopExpr(imports, ownerFqName, prop.odataName, model as EntityType, false, !!prop.contained)
       : this.emitComplexHopExpr(imports, prop.isCollection, prop.odataName);
-    const cacheKeyDestructure = cacheKeyExpr ? ", cacheKeyState" : "";
+    const { destructure: cacheKeyDestructure, arg: cacheKeyArg } = this.emitCacheKeyArg(cacheKeyExpr);
 
     return {
       scope: Scope.Public,
@@ -1015,7 +1025,7 @@ class ServiceGenerator {
         `if(!${privateSrvProp}) {`,
         `  const { client, path, options${cacheKeyDestructure} } = this.__base;`,
         // prettier-ignore
-        `  ${privateSrvProp} = new ${type}(client, path, "${prop.odataName}"${isComplexCollection ? `, ${imports.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName))}`: ""}, options${cacheKeyExpr ? `, ${cacheKeyExpr}` : ""})`,
+        `  ${privateSrvProp} = new ${type}(client, path, "${prop.odataName}"${isComplexCollection ? `, ${imports.addGeneratedQObject(model.fqName, firstCharLowerCase(model.qName))}`: ""}, options${cacheKeyArg})`,
         "}",
         `return ${privateSrvProp}`,
       ],
@@ -1033,7 +1043,7 @@ class ServiceGenerator {
 
     const propName = "this." + this.namingHelper.getPrivatePropName(prop.name);
     const cacheKeyExpr = this.emitBareHopExpr(imports, prop.odataName);
-    const cacheKeyDestructure = cacheKeyExpr ? ", cacheKeyState" : "";
+    const { destructure: cacheKeyDestructure, arg: cacheKeyArg } = this.emitCacheKeyArg(cacheKeyExpr);
     return {
       scope: Scope.Public,
       name: this.namingHelper.getRelatedServiceGetter(prop.name),
@@ -1041,7 +1051,7 @@ class ServiceGenerator {
         `if(!${propName}) {`,
         `  const { client, path, options${cacheKeyDestructure} } = this.__base;`,
         // prettier-ignore
-        `  ${propName} = new ${collectionServiceType}(client, path, "${prop.odataName}", new ${qCollectionName}(${enumName ?? ""}), options${cacheKeyExpr ? `, ${cacheKeyExpr}` : ""})`,
+        `  ${propName} = new ${collectionServiceType}(client, path, "${prop.odataName}", new ${qCollectionName}(${enumName ?? ""}), options${cacheKeyArg})`,
         "}",
         `return ${propName}`,
       ],
@@ -1058,7 +1068,7 @@ class ServiceGenerator {
     const v2MappedName =
       this.version === ODataVersions.V4 ? "" : prop.name !== prop.odataName ? `, "${prop.name}"` : ", undefined";
     const cacheKeyExpr = this.emitBareHopExpr(imports, prop.odataName);
-    const cacheKeyDestructure = cacheKeyExpr ? ", cacheKeyState" : "";
+    const { destructure: cacheKeyDestructure, arg: cacheKeyArg } = this.emitCacheKeyArg(cacheKeyExpr);
 
     return {
       scope: Scope.Public,
@@ -1066,7 +1076,7 @@ class ServiceGenerator {
       statements: [
         `if(!${propName}) {`,
         `  const { client, path, qModel, options${cacheKeyDestructure} } = this.__base;`,
-        `  ${propName} = new ${serviceType}(client, path, "${prop.odataName}", qModel.${prop.name}.converter${v2MappedName}, options${cacheKeyExpr ? `, ${cacheKeyExpr}` : ""})`,
+        `  ${propName} = new ${serviceType}(client, path, "${prop.odataName}", qModel.${prop.name}.converter${v2MappedName}, options${cacheKeyArg})`,
         "}",
         `return ${propName}`,
       ],
@@ -1272,6 +1282,8 @@ class ServiceGenerator {
     const cacheKeyExpr = !baseFqName
       ? this.emitUnboundOperationRootExpr(importContainer, operation, importOdataName!, entitySetOdataName, !!hasParams)
       : this.emitBoundOperationHopExpr(importContainer, operation.fqName, returnType);
+    // no emitCacheKeyArg: this site passes the state as a named options property, not a positional
+    // constructor argument, and its destructure condition is its own `needsCacheKeyState` flag
     const needsCacheKeyState = !!baseFqName && !!cacheKeyExpr;
 
     const optionStmt =
@@ -1329,13 +1341,13 @@ class ServiceGenerator {
         const serviceName = isCollection ? subClass.serviceCollectionName : subClass.serviceName;
         const serviceType = importContainer.addGeneratedService(subClass.fqName, serviceName);
         const cacheKeyExpr = this.emitCastParamsExpr(importContainer, subClass.fqName);
-        const cacheKeyDestructure = cacheKeyExpr ? ", cacheKeyState" : "";
+        const { destructure: cacheKeyDestructure, arg: cacheKeyArg } = this.emitCacheKeyArg(cacheKeyExpr);
         result.methods.push({
           name: `as${upperCaseFirst(serviceName)}`,
           scope: Scope.Public,
           statements: [
             `const { client, path, options${cacheKeyDestructure} } = this.__base;`,
-            `return new ${serviceType}(client, path, "${subClass.fqName}", { ...options, subtype: true }${cacheKeyExpr ? `, ${cacheKeyExpr}` : ""});`,
+            `return new ${serviceType}(client, path, "${subClass.fqName}", { ...options, subtype: true }${cacheKeyArg});`,
           ],
         });
       });
