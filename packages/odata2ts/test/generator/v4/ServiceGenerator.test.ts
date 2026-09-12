@@ -272,7 +272,9 @@ describe("Service Generator Tests V4", () => {
         .addFunction("newReleases", `Collection(${withNs("Medium")})`, false)
         .addFunctionImport("NewReleases", withNs("newReleases"), "Media")
         .addFunction("totalCount", ODataTypesV4.Int32, false)
-        .addFunctionImport("TotalCount", withNs("totalCount"));
+        .addFunctionImport("TotalCount", withNs("totalCount"))
+        .addAction("ping", undefined, false)
+        .addActionImport("Ping", withNs("ping"));
     }
 
     async function generateWith(enabled: boolean) {
@@ -341,6 +343,10 @@ describe("Service Generator Tests V4", () => {
       );
       // unbound function with no EntitySet: rooted at its own import name too, no sentinel needed
       expect(text).toContain(`rootState("TotalCount", "detail")`);
+      // unbound action with no declared EntitySet: no cache key at all. An action is always a write, so
+      // nothing is ever stored under this name - unlike a function, rooting it here would only ever feed
+      // a bogus invalidates entry that can never match anything (see the operation-keys spec, Part 1)
+      expect(text).not.toContain(`rootState("Ping"`);
       expect(text).not.toContain("OPERATION_ROOT");
       // no generated nav-hops table anywhere - removed along with type-rooted identity
       expect(text).not.toContain("CacheKeyNavHops");
@@ -411,6 +417,9 @@ describe("Service Generator Tests V4", () => {
       );
       // unbound function with no EntitySet: the import's own root name is still prefixed
       expect(text).toContain(`rootState("Tester.TotalCount", "detail")`);
+      // unbound action with no EntitySet: still no cache key at all, namespaced or not
+      expect(text).not.toContain(`rootState("Ping"`);
+      expect(text).not.toContain(`rootState("Tester.Ping"`);
       // the cast and bound-operation literals are untouched by this option - they already carry their own
       // namespace unconditionally (the existing namespace.alias feature), with nothing new to add
       expect(text).toContain(`withParams(cacheKeyState, { cast: "${withNs("Book")}" })`);
