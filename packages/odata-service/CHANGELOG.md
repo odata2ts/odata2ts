@@ -17,6 +17,61 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-builder bumped from ^0.18.5 to ^0.18.6
     * @odata2ts/odata-query-objects bumped from ^0.28.1 to ^0.28.2
 
+## [0.28.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service-v0.27.0...@odata2ts/odata-service-v0.28.0) (2026-09-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* a cache key for a to-one navigation hop or a singleton root now ends in an extra "?" element, e.g. `Copies(5).Medium()` is ["Copies", "detail", 5, "Medium", "detail", "?"], not [..., "detail"]; a singleton's own key is ["Me", "detail", "?"], not ["Me", "detail"]. Any consumer matching such a key by exact shape rather than by touchesResource/prefix needs updating.
+
+### Features
+
+* every keyless "detail" resource carries the "?" placeholder, not just $expand's ([7136668](https://github.com/odata2ts/odata2ts/commit/7136668b090d26a5a10db901334b5ab199eb4d63))
+* **odata-query-builder:** compute canonical filter/search clauses for cache-key convergence ([a312a95](https://github.com/odata2ts/odata2ts/commit/a312a95d081c3ae4e133d1b3aaf0d10c69f6c08a))
+* **odata-query-objects:** pass a batch request reference through a binding verbatim ([c6e6d17](https://github.com/odata2ts/odata2ts/commit/c6e6d177a7392cd07c121dce4487ecf47a6795ff))
+* **odata-service:** accept the concurrencyControlled flag from the generator ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata-service:** add OData $batch support ([#541](https://github.com/odata2ts/odata2ts/issues/541)) ([9ef3dde](https://github.com/odata2ts/odata2ts/commit/9ef3dde7452f8d857103f6d2f8773ab2192fb0ca))
+* **odata-service:** automatic ETag handling for optimistic concurrency ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** cache-key state, invalidates and response-observed identity ([#530](https://github.com/odata2ts/odata2ts/issues/530)) ([6134594](https://github.com/odata2ts/odata2ts/commit/6134594099f27f5ece50b91dfe5ee30ab953dbd4))
+* **odata-service:** canonicalize the opaque cache-key query string ([a312a95](https://github.com/odata2ts/odata2ts/commit/a312a95d081c3ae4e133d1b3aaf0d10c69f6c08a))
+* **odata-service:** capture the request's own rendered query string verbatim ([02623a1](https://github.com/odata2ts/odata2ts/commit/02623a1f586231fa686650f89739a46d9a3f9864))
+* **odata-service:** extend the statically-keyed hop rename to ancestors in buildInvalidates ([#558](https://github.com/odata2ts/odata2ts/issues/558)) ([3ce39cf](https://github.com/odata2ts/odata2ts/commit/3ce39cf3d931cfc7cb93bf463309c6792ad02b91))
+* **odata-service:** let a write state its ETag or write past it ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** read and send ETags in the entity services ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** read and send ETags in the V2 entity services ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** report a missing ETag and identify a concurrency conflict ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** send If-Match and keep the ETag store in step ([da22585](https://github.com/odata2ts/odata2ts/commit/da22585157c7c103024c5926b47383a3c99545aa))
+* **odata-service:** support referencing prior requests within a $batch ([c6e6d17](https://github.com/odata2ts/odata2ts/commit/c6e6d177a7392cd07c121dce4487ecf47a6795ff))
+* **odata-service:** thread the captured query string into RequestCmd.cacheKey ([588569e](https://github.com/odata2ts/odata2ts/commit/588569eb521ad5c8e680732019a84bd44a09c4d4))
+* **odata2ts:** discover optimistic concurrency from the service metadata ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** mark the generated services of concurrency-controlled resources ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** mark V2 main services so a json batch is refused ([9ef3dde](https://github.com/odata2ts/odata2ts/commit/9ef3dde7452f8d857103f6d2f8773ab2192fb0ca))
+* **odata2ts:** read Core.OptimisticConcurrency from entity sets and singletons ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** read the V2 concurrency token as optimistic concurrency ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** resolve annotations targeting the entity container ([30f4990](https://github.com/odata2ts/odata2ts/commit/30f4990c3b3da98ba41692463ddf956340a9b301))
+* **odata2ts:** stamp the generated service with its $batch builder type ([c6e6d17](https://github.com/odata2ts/odata2ts/commit/c6e6d177a7392cd07c121dce4487ecf47a6795ff))
+* support alternate keys & EntitySetService gets `byId` method ([#521](https://github.com/odata2ts/odata2ts/issues/521)) ([36a48ca](https://github.com/odata2ts/odata2ts/commit/36a48ca748389e921c844a4316820c41de483ef4))
+
+
+### Bug Fixes
+
+* namespace the expand and deep-edit cache-key hops under cacheKeys.namespace ([c226ee4](https://github.com/odata2ts/odata2ts/commit/c226ee4096677592bfb511d38ff3907c25140d92))
+* **odata-service:** a stale ancestor also invalidates that ancestor's own list form ([cf1ee39](https://github.com/odata2ts/odata2ts/commit/cf1ee39c2278454600e6bc49dfb90ba1f7a6e214))
+* **odata-service:** addToQuery now updates the cache key it hands back ([f60436b](https://github.com/odata2ts/odata2ts/commit/f60436bf50f2d5bb4fbd8ee9a4afe07ea74f0a5f))
+* **odata-service:** evict the stale ETag when a write is answered with 412 ([ea03923](https://github.com/odata2ts/odata2ts/commit/ea039232148ddb3c26f330b1361ec23e2b86db99))
+* **odata-service:** rename a statically-keyed hop's own segment to its entity set's name ([#555](https://github.com/odata2ts/odata2ts/issues/555)) ([7040734](https://github.com/odata2ts/odata2ts/commit/70407347f25e45d0f93883dcfecce905d084ae5a))
+* **odata-service:** strip params from recorded resource identity and evict it on delete ([#562](https://github.com/odata2ts/odata2ts/issues/562)) ([2f12a83](https://github.com/odata2ts/odata2ts/commit/2f12a833f8c7e9c89cb9f628e6b0bb96f2b8947d))
+* **odata2ts:** don't leak a parent's subtype cast into a navigation's contained collection ([c6e6d17](https://github.com/odata2ts/odata2ts/commit/c6e6d177a7392cd07c121dce4487ecf47a6795ff))
+* **odata2ts:** resolve multi-segment NavigationPropertyBinding/AssociationSet paths ([#553](https://github.com/odata2ts/odata2ts/issues/553)) ([5451393](https://github.com/odata2ts/odata2ts/commit/54513939fe2931550f0232b86f125c9544c2ad28))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-builder bumped from ^0.19.3 to ^0.20.0
+    * @odata2ts/odata-query-objects bumped from ^0.31.0 to ^0.31.1
+
 ## [0.27.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service-v0.26.0...@odata2ts/odata-service-v0.27.0) (2026-08-21)
 
 

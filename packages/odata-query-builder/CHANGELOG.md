@@ -9,6 +9,34 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
   * dependencies
     * @odata2ts/odata-query-objects bumped from ^0.27.0 to ^0.27.1
 
+## [0.20.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.19.3...@odata2ts/odata-query-builder-v0.20.0) (2026-09-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* a cache key for a to-one navigation hop or a singleton root now ends in an extra "?" element, e.g. `Copies(5).Medium()` is ["Copies", "detail", 5, "Medium", "detail", "?"], not [..., "detail"]; a singleton's own key is ["Me", "detail", "?"], not ["Me", "detail"]. Any consumer matching such a key by exact shape rather than by touchesResource/prefix needs updating.
+
+### Features
+
+* every keyless "detail" resource carries the "?" placeholder, not just $expand's ([7136668](https://github.com/odata2ts/odata2ts/commit/7136668b090d26a5a10db901334b5ab199eb4d63))
+* **odata-query-builder:** compute canonical filter/search clauses for cache-key convergence ([a312a95](https://github.com/odata2ts/odata2ts/commit/a312a95d081c3ae4e133d1b3aaf0d10c69f6c08a))
+* **odata-query-builder:** snapshot the query state as structured cache-key params ([09f969a](https://github.com/odata2ts/odata2ts/commit/09f969ae02775054e7a6c6495a7563cb219807b4))
+* **odata-service:** canonicalize the opaque cache-key query string ([a312a95](https://github.com/odata2ts/odata2ts/commit/a312a95d081c3ae4e133d1b3aaf0d10c69f6c08a))
+
+
+### Bug Fixes
+
+* namespace the expand and deep-edit cache-key hops under cacheKeys.namespace ([c226ee4](https://github.com/odata2ts/odata2ts/commit/c226ee4096677592bfb511d38ff3907c25140d92))
+* **odata-query-builder:** name expand cache-key hops by entity set, not nav property ([b8eee9d](https://github.com/odata2ts/odata2ts/commit/b8eee9d13790df1fd441b5d25c1a6c5575da6fea))
+* **odata2ts:** resolve multi-segment NavigationPropertyBinding/AssociationSet paths ([#553](https://github.com/odata2ts/odata2ts/issues/553)) ([5451393](https://github.com/odata2ts/odata2ts/commit/54513939fe2931550f0232b86f125c9544c2ad28))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-objects bumped from ^0.31.0 to ^0.31.1
+
 ## [0.19.3](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-builder-v0.19.2...@odata2ts/odata-query-builder-v0.19.3) (2026-08-21)
 
 
