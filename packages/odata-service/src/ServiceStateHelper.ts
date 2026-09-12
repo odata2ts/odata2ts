@@ -1,6 +1,6 @@
 import { ODataHttpClient } from "@odata2ts/http-client-api";
 import { ODataVersionV4 } from "@odata2ts/odata-core";
-import { CacheKeyState } from "./cacheKey/index.js";
+import { buildDeepEditHops, CacheKeyState, withParams } from "./cacheKey/index.js";
 import { ODataServiceOptionsInternal } from "./ODataServiceOptions";
 import { BIG_NUMBERS_HEADERS, DEFAULT_HEADERS, getODataVersionHeaders } from "./RequestHeaders.js";
 
@@ -15,8 +15,9 @@ export class ServiceStateHelper<V extends ODataVersionV4 = "4.0"> {
     /**
      * What resource this service addresses, in the form a cache key is built from.
      *
-     * Stored verbatim; nothing is computed from it here, and it is never derived from `name` or `path`:
-     * `name` for a `byId`-created service is the rendered key predicate, which must not appear in a key.
+     * Stored verbatim and never derived from `name` or `path`: `name` for a `byId`-created service is the
+     * rendered key predicate, which must not appear in a key. This helper owns the derivations the services
+     * used to repeat ({@link getEntitySetName}, {@link writeStateFor}).
      */
     public readonly cacheKeyState?: CacheKeyState,
   ) {
@@ -59,4 +60,25 @@ export class ServiceStateHelper<V extends ODataVersionV4 = "4.0"> {
   public isConcurrencyControlled = () => {
     return !!this.options.concurrencyControlled;
   };
+
+  /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
+  public getEntitySetName(): string | undefined {
+    return this.cacheKeyState?.entitySetName;
+  }
+
+  /**
+   * The state a write should carry: this service's own, plus whatever entity sets the given model
+   * deep-inserts into.
+   *
+   * The deep-inserted sets only ever feed `invalidates` - see {@link buildDeepEditHops} for what counts as
+   * a deep insertion and why a binding does not.
+   */
+  public writeStateFor(model: unknown): CacheKeyState | undefined {
+    const state = this.cacheKeyState;
+    if (!state) {
+      return undefined;
+    }
+    const deepEditHops = buildDeepEditHops(state.qEntityFn, model);
+    return deepEditHops ? withParams(state, { deepEdit: deepEditHops }) : state;
+  }
 }

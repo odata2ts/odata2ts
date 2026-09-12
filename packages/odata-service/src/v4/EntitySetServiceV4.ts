@@ -7,7 +7,7 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { buildDeepEditHops, CacheKeyState, withKey, withParams } from "../cacheKey/index.js";
+import { CacheKeyState, withKey } from "../cacheKey/index.js";
 import { getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { ref } from "../ref.js";
@@ -63,7 +63,7 @@ export abstract class EntitySetServiceV4<
 
   /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
   public getEntitySetName() {
-    return this.__base.cacheKeyState?.entitySetName;
+    return this.__base.getEntitySetName();
   }
 
   /**
@@ -254,25 +254,15 @@ export abstract class EntitySetServiceV4<
     createOptions?: SubtypeOptions,
     queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
-    const {
-      client,
-      basePath,
-      path,
-      getDefaultHeaders,
-      getVersionHeaders,
-      qModel,
-      createModelQueryBuilder,
-      cacheKeyState,
-    } = this.__base;
+    const { client, basePath, path, getDefaultHeaders, getVersionHeaders, qModel, createModelQueryBuilder } =
+      this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(createOptions);
 
     // add control info automatically, if required
     const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
     const actualPath = dontUseCastPathSegment ? basePath : path;
 
-    const deepEditHops = cacheKeyState && buildDeepEditHops(cacheKeyState.qEntityFn, model);
-    const stateForRequest =
-      deepEditHops && cacheKeyState ? withParams(cacheKeyState, { deepEdit: deepEditHops }) : cacheKeyState;
+    const stateForRequest = this.__base.writeStateFor(model);
 
     return new UrlBuilderRequestCmdV4<
       EntityModificationResponseV4<Response, T, V>,

@@ -2,7 +2,7 @@ import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataModelPayloadFor, ODataModelResponseFor, ODataVersionV4 } from "@odata2ts/odata-core";
 import { ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { ModelResponseConverterV4, QueryObjectModel } from "@odata2ts/odata-query-objects";
-import { buildDeepEditHops, CacheKeyState, withParams } from "../cacheKey/index.js";
+import { CacheKeyState } from "../cacheKey/index.js";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV4, UrlBuilderWriteRequestCmdV4, UrlWriteRequestCmd } from "../request";
 import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
@@ -34,7 +34,7 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
 
   /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
   public getEntitySetName() {
-    return this.__base.cacheKeyState?.entitySetName;
+    return this.__base.getEntitySetName();
   }
 
   /**
@@ -67,7 +67,6 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
       getVersionHeaders,
       createModelQueryBuilder,
       getConcurrencyOptions,
-      cacheKeyState,
     } = this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(patchOptions);
 
@@ -76,9 +75,7 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
     const actualPath = dontUseCastPathSegment ? basePath : path;
     const builder = createModelQueryBuilder(queryFn, actualPath);
 
-    const deepEditHops = cacheKeyState && buildDeepEditHops(cacheKeyState.qEntityFn, model);
-    const stateForRequest =
-      deepEditHops && cacheKeyState ? withParams(cacheKeyState, { deepEdit: deepEditHops }) : cacheKeyState;
+    const stateForRequest = this.__base.writeStateFor(model);
 
     return new UrlBuilderWriteRequestCmdV4<
       EntityModificationResponseV4<Response, T, V>,
@@ -124,7 +121,6 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
       qModel,
       createModelQueryBuilder,
       getConcurrencyOptions,
-      cacheKeyState,
     } = this.__base;
     const { dontUseCastPathSegment, useTypeCi } = this.__base.evaluateSubtypeOptions(updateOptions);
 
@@ -132,9 +128,7 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
     const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
     const actualPath = dontUseCastPathSegment ? basePath : path;
 
-    const deepEditHops = cacheKeyState && buildDeepEditHops(cacheKeyState.qEntityFn, model);
-    const stateForRequest =
-      deepEditHops && cacheKeyState ? withParams(cacheKeyState, { deepEdit: deepEditHops }) : cacheKeyState;
+    const stateForRequest = this.__base.writeStateFor(model);
 
     return new UrlBuilderWriteRequestCmdV4<
       EntityModificationResponseV4<Response, T, V>,
