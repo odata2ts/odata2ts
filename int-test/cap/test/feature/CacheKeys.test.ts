@@ -200,4 +200,16 @@ describe("CAP Library: cache keys (V4)", () => {
     const read = await LIBRARY.Books(BOOK_DER_PROZESS).query().execute();
     expect(read.invalidates).toBeUndefined();
   });
+
+  test("a bound action: /Members(...)/Library.Service.RunReminders is a write, so it carries no cacheKey of its own - its invalidates instead cover the bound member and the member list, via the member's own entity set (the action result carries none); ASP.NET's suite pins the same shape against its own action name", async () => {
+    const request = LIBRARY.Members(MEMBER_ID).RunReminders();
+    expect(request.cacheKey).toBeUndefined();
+
+    const result = await request.execute();
+    expect(result.status).toBe(200);
+    expect(result.invalidates).toEqual([
+      ["Members", "detail", MEMBER_ID],
+      ["Members", "list"],
+    ]);
+  });
 });

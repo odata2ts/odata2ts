@@ -3,10 +3,17 @@ import { walkEntityGraph } from "@odata2ts/odata-query-objects";
 import type { CacheKeyState } from "./CacheKeyState";
 
 /**
- * Records every entity actually present in a *read's* response body against the request's own hierarchical
- * cache key, **with its params object stripped** - the directly addressed resource itself (every row, for
- * a list response) plus every `$expand`'d entity at any depth - so a write reached via a completely
- * different route can later `resolve()` its way back to this one (see `ResourceIdentityHandler`).
+ * Records every entity a *read's* response proves against the request's own hierarchical cache key,
+ * **with its params object stripped** - the directly addressed resource itself (every row, for a list
+ * response) plus every `$expand`'d entity at any depth - so a write reached via a completely different
+ * route can later `resolve()` its way back to this one (see `ResourceIdentityHandler`).
+ *
+ * The directly addressed resource is recorded from the **address** where the route statically names it
+ * (`state.key` present - the same address-first rule `resolveCanonicalId` runs for a write): a detail read
+ * whose payload carries no key property at all - a `$select` that left it out - still proves the resource,
+ * because the route addressed it by name. Keyless `"detail"` states (a to-one hop, a singleton) leave
+ * `state.key` absent and stay payload-derived, exactly like every `$expand`'d entity and every list row,
+ * none of which has an address of its own.
  *
  * The recorded key is derived from `state` (`[state.name, ...state.steps]`) rather than built from a params
  * object anyone has to remember to strip: params only ever enter via `buildCacheKey`, so this is already
@@ -34,6 +41,26 @@ export function recordObservedIdentities(
   }
 
   const recordedKey = [state.name, ...state.steps];
+
+  // A state whose route statically names one resource (`state.key` present - a `withKey`'d detail read,
+  // never a list root) records the addressed resource under exactly the id `resolveCanonicalId` derives
+  // for a write: the address first, the response body only as a fallback - the fallback is what a
+  // `$select` that left the key property out of the payload still records through. Expanded entities
+  // never have an address of their own and always record from the payload.
+  if (state.key !== undefined) {
+    const id = resolveCanonicalId(state, data);
+    if (id) {
+      resourceIdentity.record(id, recordedKey);
+    }
+
+    walkEntityGraph(
+      state.qEntityFn,
+      data,
+      (visit) => recordRow(resourceIdentity, recordedKey, visit.buildCanonicalId, visit.data),
+      { skipBindings: false },
+    );
+    return;
+  }
 
   const rows = extractRows(data);
   for (const row of rows) {
@@ -99,15 +126,18 @@ function recordRow(
 }
 
 /**
- * The write's own canonical id, built from whichever of two sources is actually available: `state.key` -
- * the write's own address, always known, whatever the response says - wins where present (`PATCH`/`PUT`/
- * `DELETE`, already addressing one entity by key); the response body is the only source for a `POST` to a
- * collection, whose server-assigned key was never known beforehand - unwrapped from a V2 `{d: {...}}`
- * envelope first, the same one `ServiceStateHelperV2.etagOf` already unwraps for the identical reason. Never
- * both at once, and never a list body - a collection response names no single resource to resolve.
+ * The canonical id of the resource a request addresses, built from whichever of two sources is actually
+ * available: `state.key` - the request's own address, always known, whatever the response says - wins where
+ * present (a `withKey`'d detail read, and a `PATCH`/`PUT`/`DELETE`, already addressing one entity by key);
+ * the response body is the only source otherwise - a `POST` to a collection, whose server-assigned key was
+ * never known beforehand, or a detail read whose payload carries no key property at all - unwrapped from a
+ * V2 `{d: {...}}` envelope first, the same one `ServiceStateHelperV2.etagOf` already unwraps for the
+ * identical reason. Never both at once, and never a list body - a collection response names no single
+ * resource to resolve.
  *
- * Shared between {@link resolveCrossRouteInvalidates} and {@link evictObservedIdentity} so the one
- * derivation cannot drift between the two call sites.
+ * Shared between {@link recordObservedIdentities} (the directly addressed resource of a keyless-payload
+ * read), {@link resolveCrossRouteInvalidates} and {@link evictObservedIdentity} so the one derivation
+ * cannot drift between the call sites.
  */
 function resolveCanonicalId(state: CacheKeyState, data: unknown): string | undefined {
   if (!state.canonicalIdFn) {

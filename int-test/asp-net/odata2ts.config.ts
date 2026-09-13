@@ -197,6 +197,29 @@ const config: ConfigFileOptions = {
         useAliasForFolderName: true,
       },
     },
+    /**
+     * Two tiny synthetic models, each declaring an entity set named `Branches` - the one situation
+     * `cacheKeys.namespace` exists for, held against itself: a single app-level query cache shared across
+     * multiple generated clients whose entity-set names collide. Without the namespace prefix, both roots
+     * would key as `["Branches", "list"]` and be indistinguishable in that cache; with it, each carries its
+     * own namespace.
+     *
+     * The models are synthetic on purpose - no server in this workspace serves them, so this is a
+     * client-side assertion (the cache keys are built locally, nothing is executed), and no `refreshFile`
+     * can touch them. See the `namespace-collision` test in test/feature/CacheKeys.test.ts.
+     */
+    collisionCatalog: {
+      serviceName: "CollisionCatalog",
+      source: "resource/namespace-collision-catalog.xml",
+      output: "src-generated/namespace-collision-catalog",
+      cacheKeys: { enabled: true, namespace: true },
+    },
+    collisionRegistry: {
+      serviceName: "CollisionRegistry",
+      source: "resource/namespace-collision-registry.xml",
+      output: "src-generated/namespace-collision-registry",
+      cacheKeys: { enabled: true, namespace: true },
+    },
   },
 };
 

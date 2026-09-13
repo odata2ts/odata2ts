@@ -1,11 +1,22 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
+import { FetchClient } from "@odata2ts/http-client-fetch";
 import { ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { touchesResource } from "@odata2ts/odata-service";
 import { afterAll, describe, expect, expectTypeOf, test } from "vitest";
 import { Medium } from "../../src-generated/library/library-catalog/index.js";
 import { Copy } from "../../src-generated/library/library-circulation/index.js";
+import { LibraryService } from "../../src-generated/library/LibraryService.js";
 import { expectODataError } from "../expectODataError.js";
-import { AUDIOBOOK, BOOK_DER_PROZESS, LIBRARY } from "../LibraryTestConstants.js";
+import {
+  AUDIOBOOK,
+  BASE_URL,
+  BOOK_DER_PROZESS,
+  COLLISION_CATALOG,
+  COLLISION_REGISTRY,
+  EBOOK,
+  LIBRARY,
+  ODATA_CLIENT,
+} from "../LibraryTestConstants.js";
 
 /**
  * `cacheKeys: true`, against the one server whose metadata reproduces the reference model exactly - see
@@ -331,6 +342,119 @@ describe("ASP.NET Library: cache keys", () => {
     }
   });
 
+  test("a bound action: /Members(...)/Library.Circulation.RunReminders is a write, so it carries no cacheKey of its own - its invalidates instead cover the bound member and, via the member's own entity set, the member list; the action result carries no entity set, so the bound member does the rule-3 work", async () => {
+    const member = await LIBRARY.Members()
+      .create({ Name: "CacheKeys Test (bound action)", PreviousAddresses: [] })
+      .execute();
+    expect(member.status).toBe(201);
+    const memberId = member.data.Id;
+
+    try {
+      const request = LIBRARY.Members(memberId).RunReminders();
+      expect(request.cacheKey).toBeUndefined();
+
+      const result = await request.execute();
+      expect(result.status).toBe(200);
+      // the member list's inclusion is the observable rule-3 companion - a client-side-only expectation
+      // would make this test pass even if the generator dropped the ancestor's entity set on the action hop
+      expect(result.invalidates).toEqual([
+        ["Members", "detail", memberId],
+        ["Members", "list"],
+      ]);
+    } finally {
+      await LIBRARY.Members(memberId).delete().execute();
+    }
+  });
+
+  test("a primitive property hop stays bare - the property's name only, no kind marker of its own - so the key is the parent's plus the name; the request itself is not executed here, because this server does not serve individual properties at all (pinned in PropertyServices.test.ts)", () => {
+    const request = LIBRARY.Media(BOOK_DER_PROZESS).Title().getValue();
+    expect(request.cacheKey).toEqual(["Media", "detail", BOOK_DER_PROZESS, "Title"]);
+  });
+
+  test("differently-ordered filter clauses converge to the same key - clauses are captured canonically, not in call order", async () => {
+    const oneOrder = LIBRARY.Media().query((builder, q) => {
+      builder.filter(q.Title.eq("Der Prozess"));
+      builder.filter(q.Language.eq("de"));
+    });
+    const otherOrder = LIBRARY.Media().query((builder, q) => {
+      builder.filter(q.Language.eq("de"));
+      builder.filter(q.Title.eq("Der Prozess"));
+    });
+
+    expect(oneOrder.cacheKey).toEqual(otherOrder.cacheKey);
+
+    const [a, b] = await Promise.all([oneOrder.execute(), otherOrder.execute()]);
+    expect(a.status).toBe(200);
+    expect(b.status).toBe(200);
+    expect(a.data.value.length).toBeGreaterThan(0);
+  });
+
+  test("differently-ordered search terms converge to the same key - terms are joined canonically, not in call order", async () => {
+    const oneOrder = LIBRARY.Media().query((builder) => {
+      builder.search("Prozess").search("Der");
+    });
+    const otherOrder = LIBRARY.Media().query((builder) => {
+      builder.search("Der").search("Prozess");
+    });
+
+    expect(oneOrder.cacheKey).toEqual(otherOrder.cacheKey);
+
+    const [a, b] = await Promise.all([oneOrder.execute(), otherOrder.execute()]);
+    expect(a.status).toBe(200);
+    expect(b.status).toBe(200);
+    expect(a.data.value.length).toBeGreaterThan(0);
+  });
+
+  test("differently-ordered expands converge to the same key - entries are sorted by their own name, not in call order", async () => {
+    const oneOrder = LIBRARY.Media().query((builder) => {
+      builder.expand("QBook_Publisher").expand("Copies");
+    });
+    const otherOrder = LIBRARY.Media().query((builder) => {
+      builder.expand("Copies").expand("QBook_Publisher");
+    });
+
+    expect(oneOrder.cacheKey).toEqual(otherOrder.cacheKey);
+
+    const [a, b] = await Promise.all([oneOrder.execute(), otherOrder.execute()]);
+    expect(a.status).toBe(200);
+    expect(b.status).toBe(200);
+  });
+
+  test("a $select that leaves out the key property still records the resource - the canonical id comes from the route, not the payload; EBOOK because no other test in this file reads it, so the record below can only be this test's", async () => {
+    const read = await LIBRARY.Media(EBOOK)
+      .query((builder) => builder.select("Title"))
+      .execute();
+    expect(read.status).toBe(200);
+    expect(read.data.Id).toBeUndefined();
+
+    const record = ODATA_CLIENT.resourceIdentity!.dehydrate().find(([id]) => id.endsWith(`Media(${EBOOK})`));
+    // the full-collection read at the top of this file already recorded the bare list route for every row,
+    // so the detail route this keyless read adds sits alongside it - the point is that it is there at all
+    expect(record?.[1]).toEqual(expect.arrayContaining([["Media", "detail", EBOOK]]));
+  });
+
+  test("a navigated route's identity survives a dehydrate/hydrate round-trip into a fresh client - the SSR story: the record serializes out, into a store no request of this process filled", async () => {
+    await LIBRARY.Publishers(1).Books(BOOK_DER_PROZESS).query().execute();
+
+    const records = ODATA_CLIENT.resourceIdentity!.dehydrate();
+    const freshClient = new FetchClient();
+    freshClient.resourceIdentity!.hydrate(records);
+    const freshLibrary = new LibraryService(freshClient, BASE_URL);
+
+    // `Media` is abstract, so the write goes through the subtype service - same as every other direct
+    // write to this set in this suite
+    const patched = await freshLibrary
+      .Media(BOOK_DER_PROZESS)
+      .asBookService()
+      .patch({ Title: "Der Prozess" })
+      .ignoreETag()
+      .execute();
+    // the navigated route is not reachable from this write's own rules - only the hydrated record names it
+    expect(patched.invalidates).toEqual(
+      expect.arrayContaining([["Publishers", "detail", 1, "Media", "detail", BOOK_DER_PROZESS]]),
+    );
+  });
+
   test("containment stays hierarchical, exactly like non-contained navigation: /Media(...)/Audiobook/Chapters", async () => {
     const request = LIBRARY.Media(AUDIOBOOK).asAudiobookService().Chapters().query();
 
@@ -434,5 +558,19 @@ describe("ASP.NET Library: cache keys", () => {
       status: 404,
       message: /No error message/,
     });
+  });
+
+  test("namespace: true makes a colliding entity-set name distinguishable across clients - the option's own use case, held client-side because neither synthetic model has a server here", () => {
+    // both clients are generated from models that declare an entity set named `Branches`. Without the
+    // namespace prefix, both roots would key as ["Branches", "list"], and in the one app-level query
+    // cache the option exists for - shared across the two generated clients - they would be
+    // indistinguishable. With it, each root carries its own namespace, which is the disambiguation the
+    // option exists to provide.
+    // nothing is executed: the keys are built entirely by the generated code, locally.
+    const catalog = COLLISION_CATALOG.Branches().query();
+    const registry = COLLISION_REGISTRY.Branches().query();
+    expect(catalog.cacheKey).toEqual(["Collision.Catalog.Branches", "list"]);
+    expect(registry.cacheKey).toEqual(["Collision.Registry.Branches", "list"]);
+    expect(catalog.cacheKey).not.toEqual(registry.cacheKey);
   });
 });

@@ -1,7 +1,7 @@
 import { ref } from "@odata2ts/odata-service";
 import { describe, expect, test } from "vitest";
 import { expectODataError } from "../expectODataError.js";
-import { LIBRARY, LIBRARY_JSON_BATCH, UNKNOWN_ID } from "../LibraryTestConstants.js";
+import { BOOK_DER_PROZESS, LIBRARY, LIBRARY_JSON_BATCH, UNKNOWN_ID } from "../LibraryTestConstants.js";
 
 /**
  * `$batch` against the ASP.NET Core OData server - the one that, unlike the V2 server, speaks the **JSON**
@@ -9,6 +9,10 @@ import { LIBRARY, LIBRARY_JSON_BATCH, UNKNOWN_ID } from "../LibraryTestConstants
  * (`LIBRARY_JSON_BATCH`, generated with `batch: { format: "json" }` and the one whose builder carries the
  * JSON wire format plus numeric `dependsOn`); the multipart shape goes through `LIBRARY`.
  */
+// a dedicated key: the full suite runs every file in parallel against one server, and the fixed keys the
+// other write tests use (8801, 8802, ...) are taken - a shared key is a 409
+const BATCH_WRITE_COPY = 8803;
+
 describe("ASP.NET Library: $batch", () => {
   test("json answers every sub-request", async () => {
     const members = LIBRARY_JSON_BATCH.Members().query((b) => b.top(2));
@@ -44,6 +48,30 @@ describe("ASP.NET Library: $batch", () => {
     expect(missingResult.status).toBe(404);
     expect(mediaResult.status).toBe(200);
     expect(mediaResult.data?.value.length).toBe(1);
+  });
+
+  test("a write sub-request carries invalidates, exactly like the same write direct - on the multipart client, the one of the two batch clients generated with cacheKeys at all (the JSON one is the wire format's dedicated client, see the config)", async () => {
+    const copyKey = { MediumId: BOOK_DER_PROZESS, InventoryNumber: BATCH_WRITE_COPY };
+    const create = LIBRARY.Copies().create({
+      MediumId: copyKey.MediumId,
+      InventoryNumber: copyKey.InventoryNumber,
+      Condition: 3,
+      IsLoanable: true,
+      WeightKg: 0.5,
+    });
+    const patch = LIBRARY.Copies(copyKey).patch({ Condition: 4 }).ignoreETag();
+
+    const [created, patched] = await LIBRARY.batch().add(create).add(patch).execute();
+
+    expect(created.status).toBe(201);
+    expect(created.invalidates).toEqual([["Copies", "list"]]);
+    expect(patched.status).toBe(204);
+    expect(patched.invalidates).toEqual([
+      ["Copies", "detail", copyKey],
+      ["Copies", "list"],
+    ]);
+
+    await LIBRARY.Copies(copyKey).delete().ignoreETag().execute();
   });
 });
 

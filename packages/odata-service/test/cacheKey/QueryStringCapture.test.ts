@@ -90,4 +90,19 @@ describe("canonicalizeQueryString", () => {
       canonicalizeQueryString("$expand=Copies($filter=Condition eq 5)"),
     );
   });
+
+  test("the top-level segments of $expand sort into a canonical order, so differently-ordered .expand() calls converge - like $filter/$search", () => {
+    expect(canonicalizeQueryString("$expand=Copies,Books")).toBe(canonicalizeQueryString("$expand=Books,Copies"));
+    expect(canonicalizeQueryString("$expand=Copies,Books")).toBe("%24expand=Books%2CCopies");
+  });
+
+  test("a nested sub-query stays one $expand segment, commas included - the sort never reaches inside a segment, so a nested restriction's identity survives it", () => {
+    expect(canonicalizeQueryString("$expand=Copies($filter=Condition eq 3),Books")).toBe(
+      canonicalizeQueryString("$expand=Books,Copies($filter=Condition eq 3)"),
+    );
+    // and the sorted text still tells a restricted expand apart from a bare one
+    expect(canonicalizeQueryString("$expand=Books,Copies($filter=Condition eq 3)")).not.toBe(
+      canonicalizeQueryString("$expand=Books,Copies"),
+    );
+  });
 });

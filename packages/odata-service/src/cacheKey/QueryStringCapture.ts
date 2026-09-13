@@ -36,15 +36,22 @@ export function captureQueryString(method: ODataHttpMethods, url: string, data: 
  * `getCacheKeyParams()` computes (sorted by clause, `$filter` also safely grouped - see `CacheKeyParams.ts`),
  * so that `.filter(a).filter(b)` and `.filter(b).filter(a)` converge without needing a second, separate key.
  *
- * `$expand` is deliberately **not** touched at all, even though it also gets a structured entry. That entry
- * is narrower than its full text on purpose - it carries only `(name, kind)` hops, never a nested query's
- * own `$filter`/`$select`/`$orderBy` (`CacheKeyParams.ts`'s `expand` doc comment). `$expand=Copies` and
+ * `$expand` keeps its **full text**, even though it also gets a structured entry. That entry is narrower
+ * than the full text on purpose - it carries only `(name, kind)` hops, never a nested query's own
+ * `$filter`/`$select`/`$orderBy` (`CacheKeyParams.ts`'s `expand` doc comment). `$expand=Copies` and
  * `$expand=Copies($filter=Condition eq 3)` both structurally enrich to the identical `[["Copies","list"]]`
  * hop - so if `$expand`'s own text were also stripped from the opaque string, two requests that restrict a
  * nested collection differently would collapse onto the same cache key, a real identity violation, not
- * just weaker convergence. Keeping `$expand`'s full text here is what still tells them apart; the resulting
+ * just weaker convergence. Keeping the full text here is what still tells them apart; the resulting
  * duplication for a *bare* `$expand` (no nested restriction) is accepted as harmless, exactly as it always
  * was for `$expand`/`$select` before this canonicalization existed at all.
+ *
+ * One part of the text **is** canonicalized: the top-level segment order. `$expand` names a *set* of
+ * targets - each path an independent sub-query over the same resource, and the OData grammar (V4.01 Part 2,
+ * `$expand`) attaches no meaning to the order of the paths - so two requests differing only in which order
+ * the `.expand()` calls happened in converge the same way `$filter`/`$search` do. Only the segment order is
+ * sorted, never anything inside a segment: a nested sub-query stays one segment, comma and all, which is
+ * exactly what keeps `Copies($filter=Condition eq 3)` distinct from `Copies`.
  */
 const STRIPPED_QUERY_OPTIONS = ["$select", "$filter", "$search"];
 
@@ -56,16 +63,17 @@ const STRIPPED_QUERY_OPTIONS = ["$select", "$filter", "$search"];
  *
  * `filter`/`search` are the canonical strings `ODataQueryBuilder.getCacheKeyParams()` computed for this same
  * request (`undefined` where the query had none) - they replace whatever raw `$filter=`/`$search=` text was
- * in `query`, rather than sitting next to it. Only the top-level `key=value` pair sequence is otherwise
- * touched (ordinary URL syntax, via `URLSearchParams`, never OData grammar): pairs are sorted by key,
- * same-key duplicates keep their original relative order (`URLSearchParams.sort()` is a stable sort), and
- * nothing inside any one value is ever inspected or rewritten beyond this one substitution.
+ * in `query`, rather than sitting next to it. The top-level `key=value` pair sequence is otherwise touched
+ * (ordinary URL syntax, via `URLSearchParams`, never OData grammar): pairs are sorted by key, same-key
+ * duplicates keep their original relative order (`URLSearchParams.sort()` is a stable sort), and the
+ * `$expand` value's own top-level segment order is sorted (see above) - nothing else inside any value is
+ * ever inspected or rewritten.
  *
- * `$expand`, `$orderBy`, `$top`, `$skip`, `$count`, `$apply`, and any custom option all stay - untouched,
- * opaque, sharing this one string with the now-canonical `$filter`/`$search`. `$orderBy` stays because its
- * own sequence is real, result-changing content (see `CacheKeyParams.ts`); `$expand` stays for the reason
- * above. Only `$select` is ever fully removed with nothing put back, since nothing downstream needs its raw
- * text once its own structured entry exists.
+ * `$orderBy`, `$top`, `$skip`, `$count`, `$apply`, and any custom option all stay - untouched, opaque,
+ * sharing this one string with the now-canonical `$filter`/`$search`/`$expand` segment order. `$orderBy`
+ * stays because its own sequence is real, result-changing content (see `CacheKeyParams.ts`). Only `$select`
+ * is ever fully removed with nothing put back, since nothing downstream needs its raw text once its own
+ * structured entry exists.
  *
  * Returns `undefined` where nothing is left, mirroring "empty entries are dropped" for the rest of the
  * params object.
@@ -81,10 +89,41 @@ export function canonicalizeQueryString(query: string, filter?: string, search?:
   if (search) {
     params.set("$search", search);
   }
+  const expand = params.get("$expand");
+  if (expand !== null) {
+    params.set("$expand", sortExpandSegments(expand));
+  }
   params.sort();
 
   const canonical = params.toString();
   return canonical.length ? canonical : undefined;
+}
+
+/**
+ * The top-level segments of a `$expand` value, sorted: `$expand` names a set of targets, so call-site order
+ * is identity noise the same way `$filter`'s clause order is. A segment runs to the next comma at
+ * parenthesis depth zero - a nested sub-query (`Copies($filter=Condition eq 3)`) is one segment, its own
+ * commas and options included, and is never split or reordered within.
+ */
+function sortExpandSegments(value: string): string {
+  const segments: Array<string> = [];
+  let depth = 0;
+  let current = "";
+  for (const char of value) {
+    if (char === "(") {
+      depth++;
+    } else if (char === ")") {
+      depth--;
+    }
+    if (char === "," && depth === 0) {
+      segments.push(current);
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+  segments.push(current);
+  return segments.sort().join(",");
 }
 
 /**

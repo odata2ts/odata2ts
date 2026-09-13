@@ -243,6 +243,23 @@ const config: ConfigFileOptions = {
     },
 
     /**
+     * `cacheKeys: { enabled: true, namespace: true }` - the on side of an axis the baseline carries as its
+     * default (off), so the pair pins both ends like `keyStrict` does.
+     *
+     * `enabled` is the shape half: it threads a cache key state through every generated service and request,
+     * which the type assertions pin as the trailing constructor argument the off side does not carry.
+     * `namespace` is the value half - it prefixes key values with the EDM namespace - and a type check can
+     * only show that the full form compiles; the values meet a server in `int-test/asp-net`, where the
+     * `library` client is generated with the same option.
+     */
+    cacheKeys: {
+      serviceName: "CacheKeys",
+      source: V4_SOURCE,
+      output: "src-generated/cache-keys",
+      cacheKeys: { enabled: true, namespace: true },
+    },
+
+    /**
      * `deepInsertProps: "composition-only"`, which narrows the deep insert props to the navigation
      * properties marked `ContainsTarget="true"`.
      *
@@ -312,6 +329,7 @@ const config: ConfigFileOptions = {
       byTypeAndName: [{ name: "PublisherRegistry.Branch", type: TypeModel.EntityType, mappedName: "PublisherBranch" }],
       enumType: "numeric",
       enablePrimitivePropertyServices: true,
+      cacheKeys: { enabled: true, namespace: true },
       v4: {
         enableNativeInOperator: true,
         bigNumberAsString: true,
