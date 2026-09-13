@@ -346,5 +346,55 @@ describe("cache key threading", () => {
 
       expect(client.resourceIdentity.resolve("Media(5)")).toEqual([readCmd.cacheKey]);
     });
+
+    test("a write records nothing, even when its response body carries the entity - the read-only guard holds on the full execute path", async () => {
+      const patchState = withKey(
+        rootState("Media", "detail", { entitySetName: "Media", canonicalIdFn: canonicalIdOfMedia }),
+        5,
+        5,
+      );
+      const patchCmd = new UrlWriteRequestCmd(
+        client,
+        ODataHttpMethods.Patch,
+        "Media(5)",
+        { title: "y" },
+        {
+          cacheKeyState: patchState,
+        },
+      );
+      client.setModelResponse({ id: 5, title: "The Trial" });
+
+      await patchCmd.execute();
+
+      expect(client.resourceIdentity.dehydrate()).toEqual([]);
+    });
+
+    test("a failed write emits no invalidates and leaves the recorded identity intact - a 412 disproves nothing the read recorded", async () => {
+      const otherRoute = ["SomeOtherRoot", "detail", 9, "media", "detail", 5];
+      client.resourceIdentity.record("Media(5)", otherRoute);
+
+      const patchState = withKey(
+        rootState("Media", "detail", { entitySetName: "Media", canonicalIdFn: canonicalIdOfMedia }),
+        5,
+        5,
+      );
+      const patchCmd = new UrlWriteRequestCmd(
+        client,
+        ODataHttpMethods.Patch,
+        "Media(5)",
+        { title: "y" },
+        {
+          cacheKeyState: patchState,
+        },
+      );
+      client.failWithStatus = 412;
+
+      await expect(patchCmd.execute()).rejects.toThrow();
+
+      // the write's own `invalidates` never materialised (execute rejected before any response object
+      // could carry it), and the failed write neither recorded nor evicted: what a prior read recorded
+      // still resolves, so the next write still resolves it
+      expect(client.resourceIdentity.resolve("Media(5)")).toEqual([otherRoute]);
+    });
   });
 });

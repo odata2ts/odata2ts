@@ -5,6 +5,8 @@ import { LibraryNamespaceAliasService } from "../src-generated/library-namespace
 import { LibraryRenamedService } from "../src-generated/library-renamed/LibraryRenamedService.js";
 import { LibraryStrictService } from "../src-generated/library-strict/LibraryStrictService.js";
 import { LibraryService } from "../src-generated/library/LibraryService.js";
+import { CollisionCatalogService } from "../src-generated/namespace-collision-catalog/CollisionCatalogService.js";
+import { CollisionRegistryService } from "../src-generated/namespace-collision-registry/CollisionRegistryService.js";
 
 /** Base URL of the running server, provided by `globalSetup` (container or external server). */
 export const BASE_URL = inject("libraryBaseUrl");
@@ -36,6 +38,14 @@ export const LIBRARY_STRICT = new LibraryStrictService(ODATA_CLIENT, BASE_URL);
  * `NamespaceAlias.test.ts` uses it: everywhere else the raw namespace is what a cache-key literal carries.
  */
 export const LIBRARY_NAMESPACE_ALIAS = new LibraryNamespaceAliasService(ODATA_CLIENT, BASE_URL);
+
+/**
+ * The two synthetic `cacheKeys.namespace` clients - models no server in this workspace serves. Only
+ * `CacheKeys.test.ts` uses them, and only client-side: the collision assertion reads the cache keys the
+ * generated code builds locally, so nothing is ever executed against a URL.
+ */
+export const COLLISION_CATALOG = new CollisionCatalogService(ODATA_CLIENT, BASE_URL);
+export const COLLISION_REGISTRY = new CollisionRegistryService(ODATA_CLIENT, BASE_URL);
 
 // Fixed keys from the server's seed data.
 

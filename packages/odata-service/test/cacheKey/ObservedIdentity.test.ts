@@ -170,6 +170,22 @@ describe("recordObservedIdentities", () => {
     recordObservedIdentities(handler, ["Media", "detail", 5], mediaState(), { title: "no id here" });
     expect(handler.store.size).toBe(0);
   });
+
+  test("a keyless payload still records the addressed resource when the route names it - the same address-first rule a write runs", () => {
+    const handler = new MockResourceIdentityHandler();
+    recordObservedIdentities(handler, ["Media", "detail", 5], mediaDetailState(), { title: "no id here" });
+    expect(handler.resolve("Media(5)")).toEqual([["Media", "detail", 5]]);
+  });
+
+  test("a keyless payload records the addressed resource and its $expand'd entities alike - the address covers only the addressed one", () => {
+    const handler = new MockResourceIdentityHandler();
+    recordObservedIdentities(handler, ["Media", "detail", 5], mediaDetailState(), {
+      copies: [{ id: 1 }, { id: 2 }],
+    });
+    expect(handler.resolve("Media(5)")).toEqual([["Media", "detail", 5]]);
+    expect(handler.resolve("Copies(1)")).toEqual([["Media", "detail", 5]]);
+    expect(handler.resolve("Copies(2)")).toEqual([["Media", "detail", 5]]);
+  });
 });
 
 describe("resolveCrossRouteInvalidates", () => {
