@@ -34,10 +34,14 @@ jobs:
         run: yarn check-circular-deps
       - name: Run Tests
         run: yarn coverage
-      - name: Coveralls
-        uses: coverallsapp/github-action@v2.3.8
+      # non-blocking by design (the action's `fail_ci_if_error` defaults to false): the tests above
+      # are the gate, this step only publishes the `unit` coverage flag (ADR 0004, workspace root)
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          files: coverage/lcov.info
+          flags: unit
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   static-int-tests:
     name: Static Integration Tests
@@ -54,9 +58,23 @@ jobs:
       - name: Verify generated output type-checks under the declared minimum TypeScript version
         working-directory: int-test/ts-floor-check
         run: yarn test
+      # the single instrumented run: the CLI tests plus `int-test/cli/coverage/`, which feeds the
+      # `integration` coverage flag alongside the server suites (ADR 0004, workspace root)
       - name: Verify CLI works
         working-directory: int-test/cli
-        run: yarn test
+        run: yarn coverage
+      - name: Upload CLI coverage artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: int-coverage-cli
+          path: int-test/cli/coverage/
+      # non-blocking by design (the action's `fail_ci_if_error` defaults to false)
+      - name: Upload CLI coverage to Codecov
+        uses: codecov/codecov-action@v7
+        with:
+          files: int-test/cli/coverage/lcov.info
+          flags: integration
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   # Container-based integration tests against real OData servers. By far the most expensive part of the
   # pipeline, so they only start once the unit tests are green. They live in their own workflow file and

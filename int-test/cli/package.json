@@ -9,11 +9,14 @@
   "type": "module",
   "scripts": {
     "clean": "rimraf build",
-    "test": "vitest run run"
+    "coverage": "vitest run --coverage",
+    "test": "vitest run",
+    "test-compile": "tsc"
   },
   "devDependencies": {
     "@odata2ts/odata2ts": "workspace:^",
     "rimraf": "^6.1.3",
+    "typescript": "6.0.3",
     "vitest": "^4.1.10"
   }
 }
