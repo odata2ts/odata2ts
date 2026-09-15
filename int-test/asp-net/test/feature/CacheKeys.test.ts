@@ -106,9 +106,8 @@ describe("ASP.NET Library: cache keys", () => {
   test("$expand of a derived-type-only navigation property still enriches to a hop-shaped entry, reached only via a cast-qualified binding path", async () => {
     // `Publisher` is declared only on `Book` (`Library.Catalog.Book/Publisher` in the raw metadata), so
     // enriching this expand entry needs DataModel.getNavPropBindingTarget to resolve a binding whose path
-    // has more than one segment - a real gap this test pins against regressing. `Media(id)/Library.Catalog.Book`
-    // itself 404s on this server (see Subtypes.test.ts), so this goes through the cast *q-property*
-    // instead, which stays on the base `Media` route and is served.
+    // has more than one segment - a real gap this test pins against regressing. The expand addresses the
+    // navigation through its cast-qualified name, which keeps the request on the base `Media` route.
     const request = LIBRARY.Media(BOOK_DER_PROZESS).query((builder) => builder.expand("QBook_Publisher"));
     expect(request.cacheKey).toEqual([
       "Media",
@@ -252,10 +251,9 @@ describe("ASP.NET Library: cache keys", () => {
     // `Copies` is declared on `Medium` and inherited by `Book`: before the fix the subtype service's hop
     // carried no entitySetName/canonicalIdFn, so the copy this response served was never recorded against
     // this route - the cross-route entry below could never be resolved.
-    // The spec's literal route Media(id).asBookService().Copies() 404s on this server - a cast segment on
-    // a single entity is not served here (pinned in Subtypes.test.ts) - and a to-many list three levels
-    // deep (Publishers(1)/Books(id)/Copies) 404s as well. So the assertion goes through the subtype hop
-    // this server does serve: `Books` addresses the subtype Book without a cast segment.
+    // The assertion goes through the name-divergent subtype hop `Books`, which addresses the subtype Book
+    // by binding to the `Media` entity set - a distinct mechanism from the cast segment (pinned in
+    // Subtypes.test.ts) that this test exists to exercise.
     const navigated = await LIBRARY.Publishers(1).Books(BOOK_DER_PROZESS).Copies(copyKey).query().execute();
     expect(navigated.status).toBe(200);
     expectTypeOf(navigated).toEqualTypeOf<HttpResponseModel<ODataModelResponseV4<Copy>>>();
