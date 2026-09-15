@@ -61,8 +61,14 @@ export class PersonModelV2Service extends EntityTypeServiceV2<PersonModel, Edita
 
 /** Same entity, only declared `m:HasStream="true"` - which is all the generator does differently. */
 export class PersonModelV2MediaService extends MediaEntityServiceV2<PersonModel, EditablePersonModel, QPersonV2> {
-  constructor(client: ODataHttpClient, basePath: string, name: string, options?: ODataServiceOptionsInternalV2) {
-    super(client, basePath, name, new QPersonV2(), options);
+  constructor(
+    client: ODataHttpClient,
+    basePath: string,
+    name: string,
+    options?: ODataServiceOptionsInternalV2,
+    cacheKeyState?: CacheKeyState,
+  ) {
+    super(client, basePath, name, new QPersonV2(), options, cacheKeyState);
   }
 }
 

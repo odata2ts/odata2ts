@@ -1,4 +1,5 @@
 import { QueryObjectModel } from "@odata2ts/odata-query-objects";
+import { hopState } from "../cacheKey/index.js";
 import { EntityTypeServiceV2 } from "./EntityTypeServiceV2";
 import { StreamServiceV2 } from "./StreamServiceV2";
 
@@ -34,7 +35,11 @@ export class MediaEntityServiceV2<
   public content(): StreamServiceV2 {
     if (!this._content) {
       const { client, path, options, cacheKeyState } = this.__base;
-      this._content = new StreamServiceV2(client, path, VALUE_SEGMENT, options, cacheKeyState);
+      // the content is a resource of its own - its cache key must not collide with the entity's own JSON
+      // read, which is what reusing `cacheKeyState` verbatim would do. A bare `$value` hop, exactly like a
+      // stream property's own trailing hop, gives it a distinct key instead.
+      const contentCacheKeyState = cacheKeyState && hopState(cacheKeyState, { name: VALUE_SEGMENT });
+      this._content = new StreamServiceV2(client, path, VALUE_SEGMENT, options, contentCacheKeyState);
     }
 
     return this._content;
