@@ -1,5 +1,6 @@
 import { ODataVersionV4 } from "@odata2ts/odata-core";
 import { QueryObjectModel } from "@odata2ts/odata-query-objects";
+import { hopState } from "../cacheKey/index.js";
 import { EntityTypeServiceV4 } from "./EntityTypeServiceV4";
 import { SubtypeOptions } from "./ServiceStateHelperV4.js";
 import { StreamServiceV4 } from "./StreamServiceV4";
@@ -37,13 +38,17 @@ export class MediaEntityServiceV4<
     const { client, basePath, path, options, cacheKeyState } = this.__base;
     const { dontUseCastPathSegment } = this.__base.evaluateSubtypeOptions(subtypeOptions);
     const actualPath = dontUseCastPathSegment ? basePath : path;
+    // the content is a resource of its own - its cache key must not collide with the entity's own JSON
+    // read, which is what reusing `cacheKeyState` verbatim would do. A bare `$value` hop, exactly like a
+    // stream property's own trailing hop, gives it a distinct key instead.
+    const contentCacheKeyState = cacheKeyState && hopState(cacheKeyState, { name: VALUE_SEGMENT });
 
     // only the default is worth caching; anything else is a one-off request shape
     if (subtypeOptions) {
-      return new StreamServiceV4<V>(client, actualPath, VALUE_SEGMENT, options, cacheKeyState);
+      return new StreamServiceV4<V>(client, actualPath, VALUE_SEGMENT, options, contentCacheKeyState);
     }
     if (!this._content) {
-      this._content = new StreamServiceV4<V>(client, actualPath, VALUE_SEGMENT, options, cacheKeyState);
+      this._content = new StreamServiceV4<V>(client, actualPath, VALUE_SEGMENT, options, contentCacheKeyState);
     }
 
     return this._content;
