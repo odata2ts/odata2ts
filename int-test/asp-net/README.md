@@ -53,8 +53,6 @@ Where the server does not support something, the test asserts that rather than b
   serves it, see `int-test/cap/test/feature/PropertyServices.test.ts` for what that looks like.
 - **No complex property as a resource.** `…/Branches(1)/Address` answers 404 as well - the value is only
   reachable through `$select` on the entity.
-- **The type cast works on a collection, not on a single entity.** `/Media/Library.Catalog.Book` is served,
-  `/Media(<id>)/Library.Catalog.Book` is not. The cast _q-properties_ do work on a single entity.
 - **`$select` on a write request is ignored**: create, update and patch answer with the full entity. Same
   as CAP.
 - **Composition stops at query options.** Query options on a composable function's result are served; a
