@@ -1,7 +1,13 @@
 import { ODataHttpMethods } from "@odata2ts/http-client-api";
 import { beforeEach, describe, expect, test } from "vitest";
 import { CacheKeyState, CanonicalIdFn, rootState, withKey } from "../../src/cacheKey";
-import { RequestInfo, UrlGetRequestCmd, UrlWriteRequestCmd } from "../../src/request";
+import {
+  BlobGetRequestCmd,
+  RequestInfo,
+  StreamGetRequestCmd,
+  UrlGetRequestCmd,
+  UrlWriteRequestCmd,
+} from "../../src/request";
 import { GetToPostConverter } from "../../src/request/RequestHelper";
 import { MockClient } from "../mock/MockClient";
 
@@ -191,6 +197,21 @@ describe("cache key threading", () => {
     // a write has nothing to be stored under - only something to make stale, via `invalidates` on its
     // response - so the getter never even runs the request converter chain to look
     expect(calls).toBe(0);
+  });
+
+  describe("a stream read never gets a cacheKey", () => {
+    test("StreamGetRequestCmd ignores a supplied cacheKeyState - a ReadableStream response is single-use", () => {
+      const cmd = new StreamGetRequestCmd(client, "Media(5)/$value", {
+        cacheKeyState: rootState(MEDIUM, "detail", { entitySetName: MEDIUM, canonicalIdFn: canonicalIdOfMedia }),
+      });
+      expect(cmd.cacheKey).toBeUndefined();
+    });
+
+    test("BlobGetRequestCmd keeps its cacheKey with the identical state - a Blob is safely re-readable", () => {
+      const state = rootState(MEDIUM, "detail", { entitySetName: MEDIUM, canonicalIdFn: canonicalIdOfMedia });
+      const cmd = new BlobGetRequestCmd(client, "Media(5)/$value", { cacheKeyState: state });
+      expect(cmd.cacheKey).toEqual([MEDIUM, "detail"]);
+    });
   });
 
   describe("response-observed identity", () => {
