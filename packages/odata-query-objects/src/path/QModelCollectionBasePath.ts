@@ -32,11 +32,6 @@ export class QModelCollectionBasePath<Q extends QueryObject> implements QEntityP
     return new (this.qEntityFn())(withPrefix ? this.path : undefined);
   }
 
-  /** The factory behind {@link getEntity}, for a caller that wants to construct instances itself rather than take the one instance `getEntity` returns - a graph walk recursing property by property, say. */
-  public getEntityFn() {
-    return this.qEntityFn;
-  }
-
   public isCollectionType() {
     return true;
   }

@@ -7,7 +7,6 @@ import {
   MainResponseConverter,
   ValueResponseConverterV4,
 } from "@odata2ts/odata-query-objects";
-import { CacheKeyState } from "../cacheKey/index.js";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlRequestCmd } from "../request";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
@@ -33,19 +32,13 @@ export class PrimitiveTypeServiceV4<T, V extends ODataVersionV4 = "4.0"> {
     name: string,
     converter: ValueConverter<any, any> = getIdentityConverter(),
     options?: ODataServiceOptionsInternal<V>,
-    cacheKeyState?: CacheKeyState,
   ) {
-    this.__base = new ServiceStateHelper(client, basePath, name, options, cacheKeyState);
+    this.__base = new ServiceStateHelper(client, basePath, name, options);
     this.__converter = converter;
   }
 
   public getPath() {
     return this.__base.path;
-  }
-
-  /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
-  public getEntitySetName() {
-    return this.__base.getEntitySetName();
   }
 
   /**
@@ -55,13 +48,12 @@ export class PrimitiveTypeServiceV4<T, V extends ODataVersionV4 = "4.0"> {
    * Requesting a `null` value actually results in 204 (No Content), so `data: undefined` and not `data: { value: undefined }`.
    */
   public getValue() {
-    const { client, path, getDefaultHeaders, cacheKeyState } = this.__base;
+    const { client, path, getDefaultHeaders } = this.__base;
     const converter = this.__converter;
 
     return new UrlRequestCmd<ODataValueResponseFor<V, T> | undefined>(client, ODataHttpMethods.Get, path, undefined, {
       headers: getDefaultHeaders(),
       mainResponseConverter: new ValueResponseConverterV4(converter),
-      cacheKeyState,
     });
   }
 
@@ -80,7 +72,7 @@ export class PrimitiveTypeServiceV4<T, V extends ODataVersionV4 = "4.0"> {
    * @param value
    */
   public updateValue<Response extends boolean = false>(value: T) {
-    const { client, path, getDefaultHeaders, getVersionHeaders, cacheKeyState } = this.__base;
+    const { client, path, getDefaultHeaders, getVersionHeaders } = this.__base;
     const converter = this.__converter;
 
     return new UrlRequestCmd<ValueModificationResponseV4<Response, T, V>, T>(
@@ -95,7 +87,6 @@ export class PrimitiveTypeServiceV4<T, V extends ODataVersionV4 = "4.0"> {
           ValueModificationResponseV4<Response, T, V>,
           T
         >,
-        cacheKeyState,
       },
     );
   }
@@ -107,7 +98,7 @@ export class PrimitiveTypeServiceV4<T, V extends ODataVersionV4 = "4.0"> {
    * The response should be 204 and no data.
    */
   public deleteValue() {
-    const { client, path, cacheKeyState } = this.__base;
-    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined, { cacheKeyState });
+    const { client, path } = this.__base;
+    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path);
   }
 }

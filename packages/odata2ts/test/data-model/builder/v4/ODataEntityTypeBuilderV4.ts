@@ -7,20 +7,11 @@ export class ODataEntityTypeBuilderV4 extends ODataEntityTypeBuilderBase<EntityT
     return this.createEntityType();
   }
 
-  public addNavProp(
-    name: string,
-    type: string,
-    partner?: string,
-    nullable?: boolean,
-    contained?: boolean,
-    referentialConstraints?: Array<{ property: string; referencedProperty: string }>,
-  ) {
+  public addNavProp(name: string, type: string, partner?: string, nullable?: boolean, contained?: boolean) {
     if (!this.entityType.NavigationProperty) {
       this.entityType.NavigationProperty = [];
     }
-    this.entityType.NavigationProperty.push(
-      createNavProp(name, type, partner, nullable, contained, referentialConstraints),
-    );
+    this.entityType.NavigationProperty.push(createNavProp(name, type, partner, nullable, contained));
 
     return this;
   }

@@ -1,6 +1,5 @@
 import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataVersionV4 } from "@odata2ts/odata-core";
-import { CacheKeyState } from "./cacheKey/index.js";
 import { ODataServiceOptionsInternal } from "./ODataServiceOptions";
 import {
   BlobGetRequestCmd,
@@ -29,18 +28,12 @@ export abstract class StreamServiceBase<V extends ODataVersionV4 = "4.0"> {
     basePath: string,
     name: string,
     options?: ODataServiceOptionsInternal<V>,
-    cacheKeyState?: CacheKeyState,
   ) {
-    this.__base = new ServiceStateHelper(client, basePath, name, options, cacheKeyState);
+    this.__base = new ServiceStateHelper(client, basePath, name, options);
   }
 
   public getPath() {
     return this.__base.path;
-  }
-
-  /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
-  public getEntitySetName() {
-    return this.__base.getEntitySetName();
   }
 
   /**
@@ -50,9 +43,9 @@ export abstract class StreamServiceBase<V extends ODataVersionV4 = "4.0"> {
    * distinction a client needs to decide whether to upload, and it must not be confused with 404.
    */
   public getBlob() {
-    const { client, path, cacheKeyState } = this.__base;
+    const { client, path } = this.__base;
 
-    return new BlobGetRequestCmd(client, path, { cacheKeyState });
+    return new BlobGetRequestCmd(client, path);
   }
 
   /**
@@ -66,11 +59,9 @@ export abstract class StreamServiceBase<V extends ODataVersionV4 = "4.0"> {
    * @param mimeType overrides the blob's own type
    */
   public updateBlob(data: Blob, mimeType?: string) {
-    const { client, path, cacheKeyState } = this.__base;
+    const { client, path } = this.__base;
 
-    return new BlobUpdateRequestCmd(client, path, data, mimeType || data.type || DEFAULT_MIME_TYPE, {
-      cacheKeyState,
-    });
+    return new BlobUpdateRequestCmd(client, path, data, mimeType || data.type || DEFAULT_MIME_TYPE);
   }
 
   /**
@@ -82,9 +73,9 @@ export abstract class StreamServiceBase<V extends ODataVersionV4 = "4.0"> {
    * An entity which exists but has no content yet answers 204, so `data` is `undefined`.
    */
   public getStream() {
-    const { client, path, cacheKeyState } = this.__base;
+    const { client, path } = this.__base;
 
-    return new StreamGetRequestCmd(client, path, { cacheKeyState });
+    return new StreamGetRequestCmd(client, path);
   }
 
   /**
@@ -100,9 +91,9 @@ export abstract class StreamServiceBase<V extends ODataVersionV4 = "4.0"> {
    * @param mimeType the content's MIME type
    */
   public updateStream(data: ReadableStream, mimeType?: string) {
-    const { client, path, cacheKeyState } = this.__base;
+    const { client, path } = this.__base;
 
-    return new StreamUpdateRequestCmd(client, path, data, mimeType || DEFAULT_MIME_TYPE, { cacheKeyState });
+    return new StreamUpdateRequestCmd(client, path, data, mimeType || DEFAULT_MIME_TYPE);
   }
 
   /**
@@ -112,8 +103,8 @@ export abstract class StreamServiceBase<V extends ODataVersionV4 = "4.0"> {
    * refuse `DELETE` with 405, in which case the content can only be replaced, not removed.
    */
   public deleteBlob() {
-    const { client, path, cacheKeyState } = this.__base;
+    const { client, path } = this.__base;
 
-    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined, { cacheKeyState });
+    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path);
   }
 }

@@ -49,30 +49,6 @@ describe("ASP.NET Library: $batch", () => {
     expect(mediaResult.status).toBe(200);
     expect(mediaResult.data?.value.length).toBe(1);
   });
-
-  test("a write sub-request carries invalidates, exactly like the same write direct - on the multipart client, the one of the two batch clients generated with cacheKeys at all (the JSON one is the wire format's dedicated client, see the config)", async () => {
-    const copyKey = { MediumId: BOOK_DER_PROZESS, InventoryNumber: BATCH_WRITE_COPY };
-    const create = LIBRARY.Copies().create({
-      MediumId: copyKey.MediumId,
-      InventoryNumber: copyKey.InventoryNumber,
-      Condition: 3,
-      IsLoanable: true,
-      WeightKg: 0.5,
-    });
-    const patch = LIBRARY.Copies(copyKey).patch({ Condition: 4 }).ignoreETag();
-
-    const [created, patched] = await LIBRARY.batch().add(create).add(patch).execute();
-
-    expect(created.status).toBe(201);
-    expect(created.invalidates).toEqual([["Copies", "list"]]);
-    expect(patched.status).toBe(204);
-    expect(patched.invalidates).toEqual([
-      ["Copies", "detail", copyKey],
-      ["Copies", "list"],
-    ]);
-
-    await LIBRARY.Copies(copyKey).delete().ignoreETag().execute();
-  });
 });
 
 /**

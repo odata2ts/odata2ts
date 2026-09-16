@@ -1,6 +1,4 @@
 import { expectTypeOf } from "vitest";
-import { CopyService as BaselineCopyService } from "../src-generated/baseline/library-circulation/index.js";
-import { CopyService as CacheKeysCopyService } from "../src-generated/cache-keys/library-circulation/index.js";
 import type {
   CopiesId as CapCopiesId,
   EditableAudiobookChapters as CapEditableAudiobookChapters,
@@ -163,26 +161,6 @@ expectTypeOf<AllComputedEditableCopy>().not.toHaveProperty("MediumId");
 expectTypeOf<AllComputedEditableCopy>().not.toHaveProperty("InventoryNumber");
 // a `Core.Computed` property goes the same way, being readOnly for the same reason
 expectTypeOf<AllComputedEditableMedium>().not.toHaveProperty("PopularityScore");
-
-/* --- cacheKeys: the key state threaded through every generated service ---------------------------- */
-
-// the constructor's arguments are read off the value side - these two are value imports, not type
-// imports, because as of TypeScript 6 a class's type no longer carries its construct signature and only
-// `typeof` can see it.
-type CtorArgs<T> = T extends new (...args: infer P) => unknown ? P : never;
-type OnArgs = CtorArgs<typeof CacheKeysCopyService>;
-type OffArgs = CtorArgs<typeof BaselineCopyService>;
-type Equal<X, Y> = (<G>() => G extends X ? 1 : 2) extends <G>() => G extends Y ? 1 : 2 ? true : false;
-
-// `enabled` is the shape half of the axis: it threads the request's cache key state through every
-// service's constructor, which the off side - the baseline's default - has no argument for. So the two
-// constructors are different types, and assignable in exactly one direction: the off constructor (no
-// state argument) fits the on signature, the on one (with it) does not fit the off signature. A
-// configuration which quietly had no effect here would collapse the two into a single type and the first
-// assertion would fail.
-expectTypeOf<Equal<OnArgs, OffArgs>>().toEqualTypeOf<false>();
-expectTypeOf<[OffArgs] extends [OnArgs] ? true : false>().toEqualTypeOf<true>();
-expectTypeOf<[OnArgs] extends [OffArgs] ? true : false>().toEqualTypeOf<false>();
 
 /* --- deepInsertComposition: containment decides which navigation property carries a deep insert ---- */
 

@@ -1,4 +1,3 @@
-export * from "./CacheKeyParams";
 export * from "./ODataQueryBuilderModel";
 
 export { createQueryBuilderV2 } from "./v2/ODataQueryBuilderV2";

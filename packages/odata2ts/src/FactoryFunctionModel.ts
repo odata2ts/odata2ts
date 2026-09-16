@@ -49,7 +49,6 @@ export type GeneratorFunctionOptions = Pick<
   | "disableBindingProps"
   | "deepInsertProps"
   | "managedPropertyMode"
-  | "cacheKeys"
   | "v2"
   | "v4"
 >;

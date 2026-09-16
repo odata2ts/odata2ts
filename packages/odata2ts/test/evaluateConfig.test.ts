@@ -8,8 +8,6 @@ import {
   getDefaultConfig,
   Modes,
   NamingStrategies,
-  resolveCacheKeysEnabled,
-  resolveCacheKeysNamespace,
 } from "../src/index.js";
 
 describe("Config Evaluation Tests", () => {
@@ -311,61 +309,6 @@ describe("Config Evaluation Tests", () => {
       const result = evaluateConfigOptions(cliOpts, { mode, deepInsertProps: DeepInsertProps.compositionOnly });
 
       expect(result[0], `mode ${mode}`).toMatchObject({ deepInsertProps: DeepInsertProps.compositionOnly });
-    });
-  });
-
-  describe("cacheKeys option", () => {
-    test("absent means off", () => {
-      expect(resolveCacheKeysEnabled(undefined)).toBe(false);
-    });
-
-    test("the object form is passed through", () => {
-      expect(resolveCacheKeysEnabled({ enabled: true })).toBe(true);
-      expect(resolveCacheKeysEnabled({ enabled: false })).toBe(false);
-    });
-
-    test("the bare boolean shorthand works too", () => {
-      expect(resolveCacheKeysEnabled(true)).toBe(true);
-      expect(resolveCacheKeysEnabled(false)).toBe(false);
-    });
-
-    test("namespace: absent means off, the object form is passed through, the bare boolean shorthand has nowhere to state it so is always off", () => {
-      expect(resolveCacheKeysNamespace(undefined)).toBe(false);
-      expect(resolveCacheKeysNamespace({ enabled: true })).toBe(false);
-      expect(resolveCacheKeysNamespace({ enabled: true, namespace: true })).toBe(true);
-      expect(resolveCacheKeysNamespace({ enabled: true, namespace: false })).toBe(false);
-      expect(resolveCacheKeysNamespace(true)).toBe(false);
-    });
-
-    test("the default is off, so a config saying nothing generates nothing", () => {
-      const [only] = evaluateConfigOptions({}, { services: { a: { source: "a.xml", output: "a" } } });
-      expect(only.cacheKeys).toEqual({ enabled: false, namespace: false });
-      expect(resolveCacheKeysEnabled(only.cacheKeys)).toBe(false);
-    });
-
-    test("it is a per-service option, overridable from the base settings", () => {
-      const [first, second] = evaluateConfigOptions(
-        {},
-        {
-          cacheKeys: true,
-          services: {
-            a: { source: "a.xml", output: "a" },
-            b: { source: "b.xml", output: "b", cacheKeys: false },
-          },
-        },
-      );
-      expect(first.cacheKeys).toEqual(true);
-      expect(second.cacheKeys).toEqual(false);
-    });
-
-    test("a service overrides the default rather than merging with it", () => {
-      // deepmerge folds the default {enabled:false, namespace:false} under the service's own entry; the
-      // service's own enabled wins, namespace falls through unset from the default since it never overrode it
-      const [only] = evaluateConfigOptions(
-        {},
-        { services: { a: { source: "a.xml", output: "a", cacheKeys: { enabled: true } } } },
-      );
-      expect(only.cacheKeys).toEqual({ enabled: true, namespace: false });
     });
   });
 });

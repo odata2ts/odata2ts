@@ -7,7 +7,6 @@ import {
   ODataHttpMethods,
   ODataRequestConfig,
   ODataResponse,
-  ResourceIdentityHandler,
 } from "@odata2ts/http-client-api";
 
 export interface MockRequestConfig extends ODataRequestConfig {
@@ -39,45 +38,6 @@ export class MockConcurrencyHandler implements ConcurrencyHandler {
   }
 }
 
-/**
- * The route↔canonical-resource store of a {@link MockClient}, with its contents exposed so a test can
- * arrange and assert it - hand-rolled against the {@link ResourceIdentityHandler} contract, for the same
- * reason {@link MockConcurrencyHandler} is.
- */
-export class MockResourceIdentityHandler implements ResourceIdentityHandler {
-  public readonly store = new Map<string, Array<ReadonlyArray<unknown>>>();
-
-  public record(canonicalId: string, hierarchicalKey: ReadonlyArray<unknown>): void {
-    const keys = this.store.get(canonicalId) ?? [];
-    keys.push(hierarchicalKey);
-    this.store.set(canonicalId, keys);
-  }
-
-  public resolve(canonicalId: string): ReadonlyArray<ReadonlyArray<unknown>> {
-    return this.store.get(canonicalId) ?? [];
-  }
-
-  public evict(canonicalId: string): void {
-    this.store.delete(canonicalId);
-  }
-
-  public dehydrate(): ReadonlyArray<readonly [string, ReadonlyArray<ReadonlyArray<unknown>>]> {
-    return [...this.store.entries()];
-  }
-
-  public hydrate(entries: ReadonlyArray<readonly [string, ReadonlyArray<ReadonlyArray<unknown>>]>): void {
-    for (const [canonicalId, keys] of entries) {
-      for (const key of keys) {
-        this.record(canonicalId, key);
-      }
-    }
-  }
-}
-
-/**
- * Mock for an ODataHttpClient.
- * Use `client.lastUrl` or `client.lastData` to acces passed data.
- */
 export class MockClient implements ODataHttpClient<MockRequestConfig> {
   public lastUrl?: string;
   public lastData?: any;
@@ -112,7 +72,6 @@ export class MockClient implements ODataHttpClient<MockRequestConfig> {
   public failWithStatus?: number;
 
   public readonly concurrency = new MockConcurrencyHandler();
-  public readonly resourceIdentity = new MockResourceIdentityHandler();
 
   constructor(public isV2: boolean) {}
 

@@ -2,7 +2,7 @@ import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { FlexibleODataModelPayloadV4, ODataModelPayloadV4, ODataModelResponseV4 } from "@odata2ts/odata-core";
 import { QBinding, QEntityCollectionPath, QId, QueryObject } from "@odata2ts/odata-query-objects";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { DEFAULT_HEADERS, getODataVersionHeaders, RequestInfo, rootState } from "../../src";
+import { DEFAULT_HEADERS, getODataVersionHeaders, RequestInfo } from "../../src";
 import { commonEntitySetTests } from "../EntitySetServiceTests";
 import { EditablePersonModel, Feature, PersonModel } from "../fixture/PersonModel";
 import {
@@ -292,87 +292,6 @@ describe("V4 EntitySetService Test", () => {
     test("byId builds the entity-type service for the alternate key just as well as for the primary one", () => {
       expect(toTest.byId("7").getPath()).toBe(`${NAME}(7)`);
       expect(toTest.byId({ name: "russell" }).getPath()).toBe(`${NAME}(NAME='russell')`);
-    });
-  });
-
-  describe("cache keys: expand enrichment and deepEdit", () => {
-    const PERSON = "Test.Person";
-
-    /**
-     * `QPersonV4`'s own `friends` (the shared fixture) has no `QBinding` at all, so it is unsuitable for
-     * proving deepEdit finds the *deep-inserted* entity set, not the parent's own - a distinct, purpose-built
-     * Q-object is used instead of reshaping the shared fixture. Its field is deliberately named "friends"
-     * (matching the payload's own TS-facing name) while its wire name ("Friends") and bound entity set
-     * ("Trips") both differ from it, exercising that indexing and identity are two separate lookups.
-     */
-    class QTrip extends QueryObject {}
-    class QPersonWithTripFriends extends QueryObject {
-      public readonly friends = new QEntityCollectionPath(
-        this.withPrefix("Friends"),
-        () => QTrip,
-        new QBinding(() => ({ getName: () => "Trips" }) as unknown as QId<any>, "4.0"),
-      );
-    }
-
-    test("query() enriches expand entries by reading the property's own name and kind directly off the Q-object - no table needed", async () => {
-      const service = new PersonModelCollectionService(
-        odataClient,
-        BASE_URL,
-        NAME,
-        undefined,
-        rootState(PERSON, "list"),
-      );
-      const request = service.query((b) => b.expand("friends"));
-      expect(request.cacheKey).toEqual([PERSON, "list", { expand: [["Friends", "list"]], query: "%24expand=Friends" }]);
-    });
-
-    test("query() converges $filter cache keys regardless of call-site clause order, end to end - the real request is unaffected", () => {
-      const newService = () =>
-        new PersonModelCollectionService(odataClient, BASE_URL, NAME, undefined, rootState(PERSON, "list"));
-
-      const inOneOrder = newService().query((b, q) => {
-        b.filter(q.userName.equals("russellwhyte"));
-        b.filter(q.age.equals("25"));
-      });
-      const inTheOtherOrder = newService().query((b, q) => {
-        b.filter(q.age.equals("25"));
-        b.filter(q.userName.equals("russellwhyte"));
-      });
-
-      expect(inOneOrder.cacheKey).toEqual(inTheOtherOrder.cacheKey);
-      expect(inOneOrder.cacheKey).toEqual([
-        PERSON,
-        "list",
-        { query: "%24filter=%28Age+eq+25%29+and+%28UserName+eq+%27russellwhyte%27%29" },
-      ]);
-      // the actual request URL keeps its own, call-site order - only the cache key canonicalizes
-      expect(inOneOrder.getUrl()).toBe(
-        `${BASE_URL}/${NAME}?%24filter=UserName%20eq%20'russellwhyte'%20and%20Age%20eq%2025`,
-      );
-    });
-
-    test("create() attaches deepEdit to invalidates when the payload deep-inserts a nav property", async () => {
-      const TRIPS = "Trips";
-      const service = new PersonModelCollectionService(
-        odataClient,
-        BASE_URL,
-        NAME,
-        undefined,
-        rootState(PERSON, "list", { qEntityFn: () => QPersonWithTripFriends as any }),
-      );
-      const model = {
-        userName: "tester",
-        age: "14",
-        favFeature: Feature.Feature1,
-        features: [Feature.Feature1],
-        friends: [{ userName: "buddy", age: "15", favFeature: Feature.Feature1, features: [] }],
-      } as unknown as EditablePersonModel;
-
-      const response = await service.create(model).execute();
-      expect(response.invalidates).toEqual([
-        [PERSON, "list"],
-        [TRIPS, "list"],
-      ]);
     });
   });
 });

@@ -7,7 +7,6 @@ import {
   PrimitiveCollectionType,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { CacheKeyState } from "../cacheKey/index.js";
 import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV2, UrlRequestCmd } from "../request";
 import { CollectionModificationResponseV2 } from "./ResponseTypeChoicesV2";
@@ -29,18 +28,12 @@ export class CollectionServiceV2<
     name: string,
     qModel: Q,
     options?: ODataServiceOptionsInternalV2<AsV4>,
-    cacheKeyState?: CacheKeyState,
   ) {
-    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel, options, cacheKeyState);
+    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel, options);
   }
 
   public getPath() {
     return this.__base.path;
-  }
-
-  /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
-  public getEntitySetName() {
-    return this.__base.getEntitySetName();
   }
 
   /**
@@ -61,7 +54,7 @@ export class CollectionServiceV2<
     model: PrimitiveT,
     queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void,
   ) {
-    const { client, qModel, getDefaultHeaders, createModelQueryBuilder, cacheKeyState } = this.__base;
+    const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV2<
       CollectionModificationResponseV2<Response, PrimitiveT, AsV4>,
@@ -75,7 +68,6 @@ export class CollectionServiceV2<
         CollectionModificationResponseV2<Response, PrimitiveT, AsV4>,
         T
       >,
-      cacheKeyState,
     });
   }
 
@@ -97,7 +89,7 @@ export class CollectionServiceV2<
     models: Array<PrimitiveT>,
     queryFn?: (builder: ModelQueryBuilderV2<Q>, qObject: Q) => void,
   ) {
-    const { client, qModel, getDefaultHeaders, createModelQueryBuilder, cacheKeyState } = this.__base;
+    const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV2<
       CollectionModificationResponseV2<Response, PrimitiveT, AsV4>,
@@ -111,7 +103,6 @@ export class CollectionServiceV2<
         CollectionModificationResponseV2<Response, PrimitiveT, AsV4>,
         T
       >,
-      cacheKeyState,
     });
   }
 
@@ -119,26 +110,23 @@ export class CollectionServiceV2<
    * Delete the whole collection.
    */
   public delete() {
-    const { client, path, cacheKeyState } = this.__base;
+    const { client, path } = this.__base;
 
-    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined, { cacheKeyState });
+    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined);
   }
 
   /**
    * Query collection.
    */
   public query<ReturnType = T>(queryFn?: (builder: CollectionQueryBuilderV2<Q>, qObject: Q) => void) {
-    const { client, qModel, getDefaultHeaders, createQueryBuilder, cacheKeyState } = this.__base;
-    const builder = createQueryBuilder(queryFn);
+    const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV2<
       AsV4 extends true ? ODataCollectionResponseV4<ReturnType> : ODataCollectionResponseV2<ReturnType>,
       Q
-    >(client, ODataHttpMethods.Get, builder, qModel, undefined, {
+    >(client, ODataHttpMethods.Get, createQueryBuilder(queryFn), qModel, undefined, {
       headers: getDefaultHeaders(),
       mainResponseConverter: new CollectionResponseConverterV2<ReturnType, AsV4>(qModel, this.__base.isAsV4()),
-      cacheKeyState,
-      queryParams: builder.getCacheKeyParams(),
     });
   }
 }

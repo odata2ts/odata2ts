@@ -2,7 +2,6 @@ import { ODataHttpClient, ODataHttpMethods } from "@odata2ts/http-client-api";
 import { ODataModelPayloadFor, ODataModelResponseFor, ODataVersionV4 } from "@odata2ts/odata-core";
 import { ModelQueryBuilderV4 } from "@odata2ts/odata-query-builder";
 import { ModelResponseConverterV4, QueryObjectModel } from "@odata2ts/odata-query-objects";
-import { CacheKeyState } from "../cacheKey/index.js";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV4, UrlBuilderWriteRequestCmdV4, UrlWriteRequestCmd } from "../request";
 import { EntityModificationResponseV4 } from "./ResponseTypeChoicesV4";
@@ -23,18 +22,12 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
     name: string,
     qModel: Q,
     options?: ODataServiceOptionsInternal<V>,
-    cacheKeyState?: CacheKeyState,
   ) {
-    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, options, cacheKeyState);
+    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, options);
   }
 
   public getPath() {
     return this.__base.path;
-  }
-
-  /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
-  public getEntitySetName() {
-    return this.__base.getEntitySetName();
   }
 
   /**
@@ -73,21 +66,17 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
     // add control info automatically, if required
     const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
     const actualPath = dontUseCastPathSegment ? basePath : path;
-    const builder = createModelQueryBuilder(queryFn, actualPath);
-
-    const stateForRequest = this.__base.writeStateFor(model);
 
     return new UrlBuilderWriteRequestCmdV4<
       EntityModificationResponseV4<Response, T, V>,
       Q,
       ModelQueryBuilderV4<Q>,
       ODataModelPayloadFor<V, Partial<UpdatableT>>
-    >(client, ODataHttpMethods.Patch, builder, qModel, data, {
+    >(client, ODataHttpMethods.Patch, createModelQueryBuilder(queryFn, actualPath), qModel, data, {
       headers: { ...getDefaultHeaders(), ...getVersionHeaders() },
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
       concurrency: getConcurrencyOptions(),
-      cacheKeyState: stateForRequest,
     });
   }
 
@@ -128,8 +117,6 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
     const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
     const actualPath = dontUseCastPathSegment ? basePath : path;
 
-    const stateForRequest = this.__base.writeStateFor(model);
-
     return new UrlBuilderWriteRequestCmdV4<
       EntityModificationResponseV4<Response, T, V>,
       Q,
@@ -140,7 +127,6 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
       mainRequestConverter: qModel,
       mainResponseConverter: new ModelResponseConverterV4(qModel),
       concurrency: getConcurrencyOptions(),
-      cacheKeyState: stateForRequest,
     });
   }
 
@@ -152,11 +138,10 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
    * Spec: {@link https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_DeleteanEntity}
    */
   public delete() {
-    const { client, path, getDefaultHeaders, getConcurrencyOptions, cacheKeyState } = this.__base;
+    const { client, path, getDefaultHeaders, getConcurrencyOptions } = this.__base;
     return new UrlWriteRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined, {
       headers: getDefaultHeaders(),
       concurrency: getConcurrencyOptions(),
-      cacheKeyState,
     });
   }
 
@@ -168,22 +153,18 @@ export class EntityTypeServiceV4<T, UpdatableT, Q extends QueryObjectModel, V ex
    * @param queryFn provide the query logic with the help of the builder and the query-object
    */
   public query<ReturnType extends Partial<T> = T>(queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void) {
-    const { client, qModel, createModelQueryBuilder, getDefaultHeaders, getConcurrencyOptions, cacheKeyState } =
-      this.__base;
-    const builder = createModelQueryBuilder(queryFn);
+    const { client, qModel, createModelQueryBuilder, getDefaultHeaders, getConcurrencyOptions } = this.__base;
 
     return new UrlBuilderRequestCmdV4<ODataModelResponseFor<V, ReturnType>, Q, ModelQueryBuilderV4<Q>>(
       client,
       ODataHttpMethods.Get,
-      builder,
+      createModelQueryBuilder(queryFn),
       qModel,
       undefined,
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new ModelResponseConverterV4(qModel),
         concurrency: getConcurrencyOptions(),
-        cacheKeyState,
-        queryParams: builder.getCacheKeyParams(),
       },
     );
   }

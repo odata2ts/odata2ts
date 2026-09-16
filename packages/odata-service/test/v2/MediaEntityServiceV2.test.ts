@@ -1,6 +1,5 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { rootState, withKey } from "../../src/";
 import { PersonModelV2MediaService } from "../fixture/v2/PersonModelV2Service";
 import { MockClient } from "../mock/MockClient";
 
@@ -88,24 +87,5 @@ describe("MediaEntityService V2 Test", () => {
     expect(odataClient.lastData).toStrictEqual({ UserName: "tester" });
 
     expect(service.query().getUrl()).toBe(ENTITY_PATH);
-  });
-
-  describe("cacheKey identity", () => {
-    const cachedService = new PersonModelV2MediaService(
-      new MockClient(true),
-      BASE_URL,
-      NAME,
-      undefined,
-      withKey(rootState("EBooks", "list", { entitySetName: "EBooks" }), 1, { Id: 1 }),
-    );
-
-    test("the content's cacheKey does not collide with the entity's own JSON read", () => {
-      expect(cachedService.query().cacheKey).toEqual(["EBooks", "detail", 1]);
-      expect(cachedService.getBlob().cacheKey).toEqual(["EBooks", "detail", 1, "$value"]);
-    });
-
-    test("getStream() still never gets a cacheKey, even with content correctly threaded", () => {
-      expect(cachedService.getStream().cacheKey).toBeUndefined();
-    });
   });
 });

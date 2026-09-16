@@ -12,7 +12,6 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { CacheKeyState, withKey } from "../cacheKey/index.js";
 import { getBodyETagV2, getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
 import { ref } from "../ref.js";
@@ -43,19 +42,13 @@ export abstract class EntitySetServiceV2<
     qModel: Q,
     idFunction: QId<EIdType>,
     options?: ODataServiceOptionsInternalV2<AsV4>,
-    cacheKeyState?: CacheKeyState,
   ) {
-    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel, options, cacheKeyState);
+    this.__base = new ServiceStateHelperV2(client, basePath, name, qModel, options);
     this.__idFunction = idFunction;
   }
 
   public getPath() {
     return this.__base.path;
-  }
-
-  /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
-  public getEntitySetName() {
-    return this.__base.getEntitySetName();
   }
 
   /**
@@ -67,7 +60,6 @@ export abstract class EntitySetServiceV2<
     path: string,
     name: string,
     options: ODataServiceOptionsInternalV2<AsV4> | undefined,
-    cacheKeyState?: CacheKeyState,
   ): ES;
 
   /**
@@ -76,14 +68,8 @@ export abstract class EntitySetServiceV2<
   public byId(id: EIdType): ES {
     // basePath, not path: __idFunction already builds the key predicate under this set's own name -
     // path would double that segment
-    const { client, basePath, options, isUrlNotEncoded, cacheKeyState } = this.__base;
-    return this.createEntityService(
-      client,
-      basePath,
-      this.__idFunction.buildUrl(id, isUrlNotEncoded()),
-      options,
-      cacheKeyState && withKey(cacheKeyState, this.cacheKeyOf(id), id),
-    );
+    const { client, basePath, options, isUrlNotEncoded } = this.__base;
+    return this.createEntityService(client, basePath, this.__idFunction.buildUrl(id, isUrlNotEncoded()), options);
   }
 
   /**
@@ -98,21 +84,6 @@ export abstract class EntitySetServiceV2<
   public byRef(id: number): ES {
     const { client, basePath, options } = this.__base;
     return this.createEntityService(client, basePath, ref(id), options);
-  }
-
-  /**
-   * The key of the addressed entity as a cache key carries it - see {@link EntitySetServiceV4.cacheKeyOf},
-   * whose reasoning applies unchanged here.
-   */
-  private cacheKeyOf(id: EIdType): unknown {
-    const params = this.__idFunction.getParamsFor(id);
-    const primary = this.__idFunction.getPrimaryParams();
-    const isPrimarySingle = params.length === 1 && primary.length === 1 && primary[0].getName() === params[0].getName();
-
-    const values = Object.fromEntries(
-      params.map((param) => [param.getName(), param.convertTo((id as any)?.[param.getMappedName()] ?? id)]),
-    );
-    return isPrimarySingle ? Object.values(values)[0] : values;
   }
 
   /**
@@ -209,8 +180,6 @@ export abstract class EntitySetServiceV2<
     const { client, qModel, getDefaultHeaders, createModelQueryBuilder } = this.__base;
     const builder = createModelQueryBuilder(queryFn);
 
-    const stateForRequest = this.__base.writeStateFor(model);
-
     return new UrlBuilderRequestCmdV2<
       AsV4 extends true ? ODataModelResponseV4<T> : ODataEntityModelResponseV2<T>,
       Q,
@@ -220,7 +189,6 @@ export abstract class EntitySetServiceV2<
       headers: getDefaultHeaders(),
       mainRequestConverter: qModel,
       mainResponseConverter: new EntityResponseConverterV2<T, AsV4>(qModel, this.__base.isAsV4()),
-      cacheKeyState: stateForRequest,
     });
   }
 
@@ -232,7 +200,7 @@ export abstract class EntitySetServiceV2<
   public query<ReturnType extends Partial<T> = T>(
     queryFn?: (builder: CollectionQueryBuilderV2<Q>, qObject: Q) => void,
   ) {
-    const { client, qModel, getDefaultHeaders, createQueryBuilder, cacheKeyState } = this.__base;
+    const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
     const builder = createQueryBuilder(queryFn);
 
     return new UrlBuilderRequestCmdV2<
@@ -242,8 +210,6 @@ export abstract class EntitySetServiceV2<
       concurrency: this.getCollectionConcurrencyOptions(),
       headers: getDefaultHeaders(),
       mainResponseConverter: new CollectionResponseConverterV2<ReturnType, AsV4>(qModel, this.__base.isAsV4()),
-      cacheKeyState,
-      queryParams: builder.getCacheKeyParams(),
     });
   }
 }
