@@ -62,8 +62,6 @@ export class DataModel {
    */
   private typeDefinitions = new Map<string, string>();
   private readonly namespace2Alias: { [ns: string]: string };
-  /** `namespace2Alias`'s own keys, longest first, so a namespace nested inside another aliased one resolves against the more specific match - see {@link getDisplayFqName}. */
-  private readonly aliasedNamespacesLongestFirst: Array<string>;
   private aliases: Record<string, string> = {};
   private container: EntityContainerModel = { entitySets: {}, singletons: {}, functions: {}, actions: {} };
   private navPropBindings?: Map<string, EntitySetType>;
@@ -83,62 +81,6 @@ export class DataModel {
       }
       return col;
     }, {});
-    this.aliasedNamespacesLongestFirst = Object.keys(this.namespace2Alias).sort((a, b) => b.length - a.length);
-  }
-
-  /**
-   * The display form of a fully qualified name: an aliased namespace prefix replaced by its effective
-   * alias, exactly where `namespace2Alias` carries one for it - server-declared or project-configured,
-   * already blended into that one table by the time this runs (see
-   * `NamespaceAliasResolver.resolveNamespaceAliases`, and how the digester feeds its result into this very
-   * constructor). `fqName` itself never changes here - every internal lookup (`models`,
-   * `ImportContainer.addGenerated*`, error messages) keeps keying off the real, alias-free name; this is
-   * purely an output-side view over it, for a cache-key literal that must still carry the fully qualified
-   * name (a subtype cast, a bound operation's own name) now written more compactly.
-   */
-  public getDisplayFqName(fqName: string): string {
-    for (const ns of this.aliasedNamespacesLongestFirst) {
-      if (fqName === ns) {
-        return this.namespace2Alias[ns];
-      }
-      if (fqName.startsWith(ns + ".")) {
-        return withNamespace(this.namespace2Alias[ns], fqName.slice(ns.length + 1));
-      }
-    }
-    return fqName;
-  }
-
-  /**
-   * The effective namespace of a fully qualified name, alone - the same alias resolution
-   * {@link getDisplayFqName} applies to a whole FQN, stopping short of the local name. Used to prefix an
-   * otherwise un-namespaced cache-key identifier (an entity set's or unbound operation's own name) with its
-   * owning type's namespace, gated by `cacheKeys.namespace` - see `ServiceGenerator`'s cache-key emission.
-   *
-   * Unlike {@link getDisplayFqName}, always returns *something* to prefix with: falls back to the real,
-   * un-aliased namespace (`fqName` minus its own local name) wherever none of the alias sources cover it,
-   * since - here - there is always a namespace, just not always an alias for it.
-   */
-  public getDisplayNamespace(fqName: string): string {
-    for (const ns of this.aliasedNamespacesLongestFirst) {
-      if (fqName.startsWith(ns + ".")) {
-        return this.namespace2Alias[ns];
-      }
-    }
-    const lastDot = fqName.lastIndexOf(".");
-    return lastDot < 0 ? fqName : fqName.slice(0, lastDot);
-  }
-
-  /**
-   * `name` (an entity set's, singleton's or unbound operation's own odataName) prefixed with the
-   * {@link getDisplayNamespace effective namespace} of its owning type `fqName` - the one rule
-   * `cacheKeys.namespace` applies, shared by every emitter of a prefixed cache-key identifier
-   * (`ServiceGenerator`'s routes, `QueryObjectGenerator`'s bindings) so the two cannot drift apart.
-   *
-   * The prefix alone is a pure function of the model and its aliases; *whether* a given identifier is
-   * prefixed at all is a decision the generator option makes at each emission site.
-   */
-  public getNamespacedName(fqName: string, name: string): string {
-    return `${this.getDisplayNamespace(fqName)}.${name}`;
   }
 
   /**

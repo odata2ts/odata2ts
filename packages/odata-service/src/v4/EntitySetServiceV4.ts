@@ -7,7 +7,6 @@ import {
   QId,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { CacheKeyState, withKey } from "../cacheKey/index.js";
 import { getBodyETagV4 } from "../ETagExtraction.js";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { ref } from "../ref.js";
@@ -51,19 +50,13 @@ export abstract class EntitySetServiceV4<
     qModel: Q,
     idFunction: QId<EIdType>,
     options?: ODataServiceOptionsInternal<V>,
-    cacheKeyState?: CacheKeyState,
   ) {
-    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, options, cacheKeyState);
+    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, options);
     this.__idFunction = idFunction;
   }
 
   public getPath() {
     return this.__base.path;
-  }
-
-  /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
-  public getEntitySetName() {
-    return this.__base.getEntitySetName();
   }
 
   /**
@@ -76,7 +69,6 @@ export abstract class EntitySetServiceV4<
     path: string,
     name: string,
     options: ODataServiceOptionsInternal<V> | undefined,
-    cacheKeyState?: CacheKeyState,
   ): ES;
 
   /**
@@ -90,14 +82,8 @@ export abstract class EntitySetServiceV4<
   public byId(id: EIdType): ES {
     // basePath, not path: __idFunction already builds the key predicate under this set's own name (or,
     // after a subtype cast, the cast segment's name) - path would double that segment
-    const { client, basePath, options, isUrlNotEncoded, cacheKeyState } = this.__base;
-    return this.createEntityService(
-      client,
-      basePath,
-      this.__idFunction.buildUrl(id, isUrlNotEncoded()),
-      options,
-      cacheKeyState && withKey(cacheKeyState, this.cacheKeyOf(id), id),
-    );
+    const { client, basePath, options, isUrlNotEncoded } = this.__base;
+    return this.createEntityService(client, basePath, this.__idFunction.buildUrl(id, isUrlNotEncoded()), options);
   }
 
   /**
@@ -113,34 +99,6 @@ export abstract class EntitySetServiceV4<
   public byRef(id: number): ES {
     const { client, basePath, options } = this.__base;
     return this.createEntityService(client, basePath, ref(id), options);
-  }
-
-  /**
-   * The key element a cache key carries for the addressed entity - the bare value for a single-property
-   * key and an object for a composite or alternate one, the very shape a hand-written key would take.
-   *
-   * "Single-property key" means the *primary* key and only the primary key: an alternate key never gets
-   * the bare form, even where it too has just one property, because the bare form is what a bare
-   * primitive `byId(5)` resolves to (`QId.findSingleParam`, always the primary key's own single-property
-   * set where one exists) - a single-property alternate key must stay disambiguated as `{Isbn: "..."}` or
-   * it would collide with the primary key's own bare cache entry. Matched structurally, by name, since
-   * `getParamsFor`/`getPrimaryParams` construct their param objects afresh on every call.
-   *
-   * OData-side: `convertTo` applied, `formatUrlValue` not. A caller-side value may be a `bigint`, which
-   * `JSON.stringify` refuses, and a cache hashes its keys with exactly that.
-   *
-   * `id` itself - not this - is what `withKey` stores for canonical-id purposes (`CacheKeyState.key`):
-   * `QId.buildCanonicalId` wants mapped names, this wants OData ones, and the two must not be confused.
-   */
-  private cacheKeyOf(id: EIdType): unknown {
-    const params = this.__idFunction.getParamsFor(id);
-    const primary = this.__idFunction.getPrimaryParams();
-    const isPrimarySingle = params.length === 1 && primary.length === 1 && primary[0].getName() === params[0].getName();
-
-    const values = Object.fromEntries(
-      params.map((param) => [param.getName(), param.convertTo((id as any)?.[param.getMappedName()] ?? id)]),
-    );
-    return isPrimarySingle ? Object.values(values)[0] : values;
   }
 
   /**
@@ -262,8 +220,6 @@ export abstract class EntitySetServiceV4<
     const data = useTypeCi ? this.__base.addTypeControlInfo(model) : model;
     const actualPath = dontUseCastPathSegment ? basePath : path;
 
-    const stateForRequest = this.__base.writeStateFor(model);
-
     return new UrlBuilderRequestCmdV4<
       EntityModificationResponseV4<Response, T, V>,
       Q,
@@ -276,7 +232,6 @@ export abstract class EntitySetServiceV4<
       // an entity that does not exist yet cannot require its own ETag, so a create is never gated - it
       // only harvests, storing the ETag of what it just made
       concurrency: { ...this.getCollectionConcurrencyOptions(), controlled: false },
-      cacheKeyState: stateForRequest,
     });
   }
 
@@ -289,7 +244,7 @@ export abstract class EntitySetServiceV4<
   public query<ReturnType extends Partial<T> = T>(
     queryFn?: (builder: CollectionQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
-    const { client, qModel, createQueryBuilder, getDefaultHeaders, cacheKeyState } = this.__base;
+    const { client, qModel, createQueryBuilder, getDefaultHeaders } = this.__base;
     const builder = createQueryBuilder(queryFn);
 
     return new UrlBuilderRequestCmdV4<ODataCollectionResponseFor<V, ReturnType>, Q>(
@@ -302,8 +257,6 @@ export abstract class EntitySetServiceV4<
         headers: getDefaultHeaders(),
         mainResponseConverter: new CollectionResponseConverterV4(qModel),
         concurrency: this.getCollectionConcurrencyOptions(),
-        cacheKeyState,
-        queryParams: builder.getCacheKeyParams(),
       },
     );
   }

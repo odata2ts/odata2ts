@@ -2,7 +2,7 @@ import { ODataHttpMethods } from "@odata2ts/http-client-api";
 import { RequestConverter } from "./converter/RequestConverter";
 import { RequestInfo } from "./RequestInfo";
 
-export const GET_AS_POST_URL_SUFFIX = "/$query";
+const GET_AS_POST_URL_SUFFIX = "/$query";
 const GET_AS_POST_HEADER = {
   "Content-Type": "text/plain",
 };
@@ -20,6 +20,5 @@ export const GetToPostConverter: RequestConverter<any> = (request) => {
     url + GET_AS_POST_URL_SUFFIX,
     { ...request.headers, ...GET_AS_POST_HEADER },
     body,
-    request.cacheKeyState,
   );
 };

@@ -12,8 +12,7 @@ const SOURCE = "resource/library.xml";
  * odata2ts is tested against the metadata ASP.NET Core OData really emits, not against the idealized
  * reference model. Notably that metadata has no `TypeDefinition` and no `SRID` facets, neither of which
  * the model builder can express; see FEATURE-COVERAGE.md in the server repo. `Partner` *is* declared on
- * both sides of every relationship (6 attributes) - which is what puts grade A and grade B navigation
- * properties into this client's `cacheKeys` derivation, see the `library` service below.
+ * both sides of every relationship (6 attributes).
  *
  * The snapshot refreshes itself from a running server: point `LIBRARY_BASE_URL` at one and the first
  * service downloads `$metadata` and overwrites the file, which the services after it then read, so a
@@ -57,10 +56,6 @@ const config: ConfigFileOptions = {
       source: SOURCE,
       refreshFile: true,
       output: "src-generated/library",
-      // this metadata reproduces the reference model exactly, which puts every hop shape into one client -
-      // to-many and to-one navigation, grade-B/C-style relations, containment and a stream - so this is
-      // where the cache-key shape itself is held against a real server; see test/feature/CacheKeys.test.ts.
-      cacheKeys: true,
     },
     /**
      * The same model once more, with the $batch wire format fixed to JSON at generation time.
@@ -172,22 +167,13 @@ const config: ConfigFileOptions = {
      * other test file already imports from would make this feature's own test additions indistinguishable
      * from an unrelated, unintended folder-layout change to the rest of the suite.
      *
-     * `PublisherRegistry` declares no subtype cast and no bound operation of its own, so there is no
-     * cache-key literal to prove its alias through - `useAliasForFolderName` (the generated import paths in
-     * test/feature/NamespaceAlias.test.ts) is what proves it out here instead. `Library.Catalog` and
-     * `Library.Circulation` do have a cast and a bound action respectively, which is what proves the other
-     * two aliases through an actual cache-key literal. See test/feature/NamespaceAlias.test.ts.
-     *
-     * `cacheKeys.namespace` is also on here, sharing this client rather than getting its own: it needs the
-     * exact same explicit aliases to prove itself against a real service anyway (an entity-set root's own
-     * name and every `entitySetName` prefixed with the owning type's alias), so there is nothing a separate
-     * client would add.
+     * `useAliasForFolderName` (the generated import paths in test/feature/NamespaceAlias.test.ts) is what
+     * proves the aliases out here.
      */
     libraryNamespaceAlias: {
       serviceName: "LibraryNamespaceAlias",
       source: SOURCE,
       output: "src-generated/library-namespace-alias",
-      cacheKeys: { enabled: true, namespace: true },
       namespace: {
         alias: {
           "Library.Catalog": "Catalog",
@@ -196,29 +182,6 @@ const config: ConfigFileOptions = {
         },
         useAliasForFolderName: true,
       },
-    },
-    /**
-     * Two tiny synthetic models, each declaring an entity set named `Branches` - the one situation
-     * `cacheKeys.namespace` exists for, held against itself: a single app-level query cache shared across
-     * multiple generated clients whose entity-set names collide. Without the namespace prefix, both roots
-     * would key as `["Branches", "list"]` and be indistinguishable in that cache; with it, each carries its
-     * own namespace.
-     *
-     * The models are synthetic on purpose - no server in this workspace serves them, so this is a
-     * client-side assertion (the cache keys are built locally, nothing is executed), and no `refreshFile`
-     * can touch them. See the `namespace-collision` test in test/feature/CacheKeys.test.ts.
-     */
-    collisionCatalog: {
-      serviceName: "CollisionCatalog",
-      source: "resource/namespace-collision-catalog.xml",
-      output: "src-generated/namespace-collision-catalog",
-      cacheKeys: { enabled: true, namespace: true },
-    },
-    collisionRegistry: {
-      serviceName: "CollisionRegistry",
-      source: "resource/namespace-collision-registry.xml",
-      output: "src-generated/namespace-collision-registry",
-      cacheKeys: { enabled: true, namespace: true },
     },
   },
 };

@@ -11,7 +11,6 @@ import {
   QueryObjectModel,
   searchTerm,
 } from "@odata2ts/odata-query-objects";
-import { CacheKeyParams, ExpandHop, normalizeCacheKeyParams, UNKNOWN_ID } from "./CacheKeyParams.js";
 import { ODataOperators } from "./ODataModel";
 import {
   ExpandingCollectionQueryBuilderV4,
@@ -49,50 +48,6 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
    * the complex hop, until they reach a context that can embed them (see `expanding()` / `buildNested()`).
    */
   private hoistedExpandsBucket: Array<string> | undefined;
-
-  /**
-   * Structured, per-property information `getCacheKeyParams()` needs to enrich an expand entry - kept
-   * entirely separate from `expands`/`hoistedExpandsBucket`, which hold whatever `build()` renders onto
-   * the wire (a bare path for `expand()`, a fully rendered sub-query string for `expanding()`) and must
-   * stay untouched by anything cache-key related.
-   *
-   * `path` is the rendered OData path (a nav/complex property's own odataName, read directly off its
-   * Q-object wrapper - never a type, never looked up in a generated table), used both as the hop's own
-   * identity and for sorting and `rawForm`-based reconciliation with `expands`/`hoistedExpandsBucket`.
-   * `kind` is only known where the caller passed an actual `keyof Q` naming a nav/complex property (never
-   * for `addExpands()`'s raw strings, and never for a `QSelectExpression` passed to `expand()`, neither of
-   * which resolve to a Q-object property this could read a kind off) - its absence is exactly what marks
-   * an entry as a bare, unenriched path rather than a hop.
-   *
-   * `rawForm` is exactly what this same call also pushed into `expands` - needed to tell a direct entry
-   * apart from a hoisted one reconciled back from `expands` after `build()` has folded
-   * `hoistedExpandsBucket` into it, without depending on whether that fold has happened yet.
-   *
-   * `entitySetName` is the *target's* entity set name as a cache key must carry it - the binding's cache-key
-   * name (`getBinding().getCacheKeyEntitySetName()`: the raw name, or the generator's prefixed one under
-   * `cacheKeys.namespace`), read off the same nav property's own `getBinding()` (absent for a contained
-   * target, which has none) - this, not `path`, is what an `ExpandHop`'s own name must carry: `invalidates`
-   * (`buildInvalidates`, odata-service) registers a write under its bare `[entitySetName, "list"]` entry,
-   * and `touchesResource` finds an expand hop only by scanning for that exact shape - a nav property whose
-   * OData name differs from its target's entity set name (the common case) would otherwise never match,
-   * silently breaking invalidation through `$expand`.
-   */
-  private expandEntries:
-    | Array<{
-        path: string;
-        kind?: "list" | "detail";
-        rawForm: string;
-        nestedBuilder?: ODataQueryBuilder<any>;
-        entitySetName?: string;
-      }>
-    | undefined;
-
-  private getExpandEntries() {
-    if (!this.expandEntries) {
-      this.expandEntries = [];
-    }
-    return this.expandEntries;
-  }
 
   constructor(path: string, qEntity: Q, config?: ODataQueryBuilderConfig) {
     if (!qEntity || !path || !path.trim()) {
@@ -156,9 +111,6 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     const filteredPaths = paths.filter((p): p is string => !!p);
     if (filteredPaths.length) {
       this.getExpands().push(...filteredPaths);
-      // a raw path string, not a `keyof Q` - there is no Q-object property to read a kind off, so an
-      // addExpands() entry can never be enriched, whatever string happens to be passed
-      this.getExpandEntries().push(...filteredPaths.map((path) => ({ path, rawForm: path })));
     }
   };
 
@@ -223,34 +175,9 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
   } */
 
   public expand(props: NullableParamList<keyof Q | QSelectExpression>) {
-    // filterSelectAndMapPath's own first step is this identical filter, so filteredProps lines up
-    // position-for-position with filteredPaths below - and, since expand() rejects flat/complex properties
-    // at the type level (the one case that would expand one prop into several leaf paths), each valid
-    // entry here resolves to exactly one path, keeping the two arrays the same length too
-    const filteredProps = props.filter((p): p is keyof Q | QSelectExpression => !!p);
     const filteredPaths = this.filterSelectAndMapPath(props);
     if (filteredPaths.length) {
       this.getExpands().push(...filteredPaths);
-      this.getExpandEntries().push(
-        ...filteredPaths.map((path, i) => {
-          const prop = filteredProps[i];
-          // "*" (a select()-only wildcard, occasionally passed here anyway despite the type system) names
-          // no real property of Q - guarded here rather than assumed away, since it resolves to `undefined`
-          // and has no `isCollectionType()` to read a kind off
-          const entityProp =
-            typeof prop === "string" ? this.getEntityProp<QEntityPathModel<Q>>(prop as keyof Q) : undefined;
-          const kind = entityProp
-            ? entityProp.isCollectionType()
-              ? ("list" as const)
-              : ("detail" as const)
-            : undefined;
-          // the cache-key name, not the raw URL name: the write side's `[entitySetName, "list"]` invalidates
-          // entry carries the same (possibly `cacheKeys.namespace`-prefixed) name, so the two can only match
-          // if both read the binding's cache-key name (issue #536)
-          const entitySetName = entityProp?.getBinding?.()?.getCacheKeyEntitySetName();
-          return { path, rawForm: path, kind, entitySetName };
-        }),
-      );
     }
   }
 
@@ -301,17 +228,6 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
       this.getSelects().push(content);
     } else {
       this.getExpands().push(content);
-      // navigation only - a complex property has no entity set and cannot be written to independently,
-      // so there is nothing for touchesResource to reach through it; only the entity case is tracked here
-      this.getExpandEntries().push({
-        path,
-        rawForm: content,
-        kind: entityProp.isCollectionType() ? "list" : "detail",
-        nestedBuilder: nestedEngine,
-        // the cache-key name, not the raw URL name - see the expand() entry: the write side's
-        // `[entitySetName, "list"]` invalidates entry carries the same name
-        entitySetName: entityProp.getBinding?.()?.getCacheKeyEntitySetName(),
-      });
     }
     if (hoistedExpands.length) {
       this.getHoistedExpandsBucket().push(...hoistedExpands.map((fragment) => `${path}/${fragment}`));
@@ -407,11 +323,6 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     return `${encodeURIComponent(operator)}=${encodeURIComponent(value)}`;
   }
 
-  /** Every `.filter()` call's own clause, dropping any that rendered empty - shared with `getCacheKeyParams()`, so both read the identical set. */
-  private getCleanedFilters(): Array<QFilterExpression> {
-    return this.filters?.filter((f) => f.toString()) ?? [];
-  }
-
   private buildQuery(
     param: (operator: string, value: string) => string,
     opts?: { excludeExpands?: boolean },
@@ -419,7 +330,7 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
     const params: Array<string> = [];
     const add = (operator: string, value: string) => params.push(param(operator, value));
 
-    const cleanedFilters = this.getCleanedFilters();
+    const cleanedFilters = this.filters?.filter((f) => f.toString());
 
     if (this.selects?.length) {
       add(ODataOperators.SELECT, this.selects.join(","));
@@ -495,95 +406,4 @@ export class ODataQueryBuilder<Q extends QueryObjectModel> {
 
     return { content, hoistedExpands };
   }
-
-  /**
-   * The `$expand`/`$select`/`$filter`/`$search` structure this builder's resource needs a cache key to
-   * carry - not the query's full identity, which `RequestCmd.cacheKey` (odata-service) captures separately
-   * as one opaque string for everything else off the actual request. `$expand` stays hop-shaped because
-   * invalidation reach (`touchesResource`, `buildDeepEditHops`) needs to find a hop by its target's *entity
-   * set* name - the same name a write's own `invalidates` registers under, which a bare navigation-property
-   * name need not match; `$select` stays a plain sorted array for a currently-nonexistent future consumer; `$filter`/
-   * `$search` are rendered canonically here (sorted, `$filter` also safely grouped - see
-   * `CacheKeyParams.ts`) so that call-site clause ordering converges, but `RequestCmd.cacheKey` folds that
-   * canonical text into the same opaque string as everything else rather than exposing it as its own
-   * params-object key. `$orderBy`, `top`, `skip`, `count` stay out of this entirely - never decomposed,
-   * since nothing downstream ever inspects them except identity, which the opaque capture covers (and
-   * `$orderBy`'s own sequence must never be reordered - see `CacheKeyParams.ts`).
-   *
-   * `hoistedExpandsBucket`/`expands` are reconciled by `rawForm`, not read as a bare union - see the
-   * `expandItems` computation below for why: `build()` folds `hoistedExpandsBucket` into `expands`, and a
-   * cache key asked for before or after that fold must answer identically.
-   */
-  public getCacheKeyParams(): CacheKeyParams | undefined {
-    const entries = this.expandEntries ?? [];
-
-    // expand()/expanding()/addExpands() are the only ways to populate `expands`, and every one of them
-    // also pushes onto expandEntries in the same call - so expandEntries alone is a complete, structured
-    // account of every *direct* expand target on this builder. `kind`'s presence is what marks a real hop:
-    // `path` (used for sorting, and as the entry itself where there is no `entitySetName` to prefer) is the
-    // property's own odataName, read straight off its Q-object wrapper at the point expand()/expanding() was
-    // called; the hop's own name, though, prefers `entitySetName` - see the `entitySetName` doc comment on
-    // `expandEntries` above for why a bare nav-property name cannot serve as that name.
-    const expandItems: Array<{ sortKey: string; entry: string | ExpandHop }> = entries.map(
-      ({ path, kind, nestedBuilder, entitySetName }) => {
-        if (!kind) {
-          return { sortKey: path, entry: path };
-        }
-        const nested = nestedBuilder?.getCacheKeyParams();
-        const name = entitySetName ?? path;
-        // "detail" carries the "?" placeholder (its id is never known here - see ExpandHop); "list" has no
-        // id slot to begin with, so its shape is unaffected.
-        const expandHop: ExpandHop =
-          kind === "detail"
-            ? nested?.expand
-              ? [name, kind, UNKNOWN_ID, { expand: nested.expand }]
-              : [name, kind, UNKNOWN_ID]
-            : nested?.expand
-              ? [name, kind, { expand: nested.expand }]
-              : [name, kind];
-        return { sortKey: path, entry: expandHop };
-      },
-    );
-
-    // A fragment relayed from a complex-typed descendant (a navigation property reached *through* a
-    // complex property) is never pushed to expandEntries at all - navigation-only hop-shaping (already
-    // decided) does not reach through a complex hop, so it always stays a bare string. It lives in
-    // hoistedExpandsBucket before build() folds it into expands, and in expands afterwards - reconciled
-    // here by rawForm (not path, which a nested expanding()'s rendered content never matches) so the
-    // answer does not depend on whether getCacheKeyParams() is asked before or after a request's URL was
-    // built.
-    const accountedForRawForms = new Set(entries.map((e) => e.rawForm));
-    const hoisted = [...(this.expands ?? []), ...(this.hoistedExpandsBucket ?? [])].filter(
-      (raw) => !accountedForRawForms.has(raw),
-    );
-    for (const raw of hoisted) {
-      expandItems.push({ sortKey: raw, entry: raw });
-    }
-
-    expandItems.sort((a, b) => (a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0));
-
-    const sortedFilters = this.getCleanedFilters().sort(sortByRenderedText);
-    // grouping only kicks in for 2+ clauses - a lone filter stays exactly as `build()` itself renders it
-    const filter =
-      sortedFilters.length > 1
-        ? sortedFilters.map((f) => f.group().toString()).join(" and ")
-        : sortedFilters[0]?.toString();
-
-    const sortedSearchTerms = (this.searchTerms ?? []).filter((st) => st.toString()).sort(sortByRenderedText);
-    const search = sortedSearchTerms.length ? sortedSearchTerms.map((st) => st.toString()).join(" AND ") : undefined;
-
-    return normalizeCacheKeyParams({
-      select: this.selects?.length ? [...this.selects].sort() : undefined,
-      expand: expandItems.length ? expandItems.map((i) => i.entry) : undefined,
-      filter,
-      search,
-    });
-  }
-}
-
-/** Plain codepoint sort by an operand's own rendered text - the same comparator `expandItems` above already uses. */
-function sortByRenderedText(a: { toString(): string }, b: { toString(): string }): number {
-  const left = a.toString();
-  const right = b.toString();
-  return left < right ? -1 : left > right ? 1 : 0;
 }

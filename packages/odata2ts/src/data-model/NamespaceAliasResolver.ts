@@ -14,9 +14,8 @@ function isValidAliasValue(alias: string): boolean {
  *
  * Returns one flat map from real namespace to effective alias, covering only the namespaces that end up
  * with one - the single already-merged table every consumer (`DataModel.namespace2Alias`,
- * `ServiceConfigHelper`'s per-call `NamespaceWithAlias` tuples, `NamingHelper.getFolderPath`,
- * `DataModel.getDisplayFqName`) reads from, so neither needs to know which of the two sources actually
- * supplied a given value.
+ * `ServiceConfigHelper`'s per-call `NamespaceWithAlias` tuples, `NamingHelper.getFolderPath`) reads from,
+ * so neither needs to know which of the two sources actually supplied a given value.
  *
  * Throws where a project setting is unambiguously wrong (an alias for an unknown or already-aliased
  * namespace, an alias that isn't a valid CSDL `SimpleIdentifier`) or would silently collapse two namespaces

@@ -1,14 +1,5 @@
 import { HttpResponseModel, ODataHttpClient, ODataHttpMethods, ODataRequestConfig } from "@odata2ts/http-client-api";
 import { MainResponseConverter } from "@odata2ts/odata-query-objects";
-import {
-  buildCacheKey,
-  buildCacheKeyQueryParams,
-  buildInvalidates,
-  CacheKeyState,
-  evictObservedIdentity,
-  recordObservedIdentities,
-  resolveCrossRouteInvalidates,
-} from "../cacheKey/index.js";
 import { getHeaderETag } from "../ETagExtraction";
 import { isConcurrencyConflict, ODataConcurrencyError } from "../ODataConcurrencyError";
 import { MainRequestConverter, RequestConverter } from "./converter/RequestConverter";
@@ -56,20 +47,6 @@ export interface RequestCmdOptions<ResponseStructure, DataStructure> {
    * to the user facing model.
    */
   mainResponseConverter?: MainResponseConverter<ResponseStructure, any>;
-  /**
-   * What resource this request addresses - see {@link CacheKeyState}. Absent where the client was
-   * generated without `cacheKeys`, which is what makes {@link RequestCmd.cacheKey} optional.
-   */
-  cacheKeyState?: CacheKeyState;
-  /**
-   * The query's own restrictions, snapshotted off the query builder rather than parsed back out of the
-   * URL. Set only by a read: these are what the *query* restricts the resource by, so a read is keyed
-   * by them, while a write's builder - where it has one at all - only shapes the response it asks back,
-   * never the identity of the resource it changes. `buildInvalidates` strips a resource's own params from
-   * its key for the same reason, so a write folding its `$select`/`$expand` in here would buy nothing but
-   * a mismatch between two identical writes that differ only in what they ask back.
-   */
-  queryParams?: Record<string, unknown>;
 }
 
 /**
@@ -88,9 +65,6 @@ export abstract class RequestCmd<
    * through the write command classes; when present it wins over the store.
    */
   protected etagOverride?: string;
-
-  private cachedCacheKey?: ReadonlyArray<unknown>;
-  private cacheKeyComputed = false;
 
   public constructor(
     protected client: ODataHttpClient,
@@ -114,9 +88,9 @@ export abstract class RequestCmd<
    * The data (if any) is presented with user facing typings.
    */
   public getInfo(): RequestInfo<DataStructure> {
-    const { headers, cacheKeyState } = this.options;
+    const { headers } = this.options;
 
-    return new RequestInfo<DataStructure>(this.method, this.getUrl(), headers, this.data, cacheKeyState);
+    return new RequestInfo<DataStructure>(this.method, this.getUrl(), headers, this.data);
   }
 
   /**
@@ -137,42 +111,6 @@ export abstract class RequestCmd<
     }
 
     return converter.convert(request);
-  }
-
-  /**
-   * The key this request's resource should be cached under - available before the request goes out, which
-   * is when a cache needs it.
-   *
-   * `undefined` for any method but `GET`: a write has nothing to be stored under, only something to make
-   * stale - that is what {@link invalidates} on its response is for. Mirrors that asymmetry from the other
-   * side: a read never gets `invalidates`, a write never gets a `cacheKey`.
-   *
-   * Read through the converter chain, so any converter's effect on the resource identity is visible
-   * without a second call. Lazy is required rather than stylistic: `getUrl()` cannot run from the base
-   * constructor, because subclasses overriding it read parameter-property fields TypeScript assigns only
-   * after `super()` returns.
-   *
-   * The request's own rendered query string is captured off that same converted state, and `ODataQueryBuilder`'s
-   * own `filter`/`search` output is folded into that same opaque string rather than surfaced as separate
-   * params-object entries (see `buildCacheKeyQueryParams`) - so `expand`/`select` are the only two structured
-   * entries `queryParams` still contributes as-is - for exactly the same reason `cacheKeyState` is read
-   * post-conversion: `GetToPostConverter` relocates the query string into the body, and only the converted
-   * state has it in the right place (see `QueryStringCapture.ts`).
-   *
-   * `undefined` also means this client was not generated with `cacheKeys` - which a consuming application
-   * has to handle anyway when it is shared across services.
-   */
-  public get cacheKey(): ReadonlyArray<unknown> | undefined {
-    if (!this.cacheKeyComputed) {
-      if (this.method === ODataHttpMethods.Get) {
-        const info = this.getInfoConverted();
-        const state = info.cacheKeyState;
-        const queryParams = buildCacheKeyQueryParams(info.method, info.url, info.data, this.options.queryParams);
-        this.cachedCacheKey = state && buildCacheKey(state, queryParams);
-      }
-      this.cacheKeyComputed = true;
-    }
-    return this.cachedCacheKey;
   }
 
   /**
@@ -249,16 +187,14 @@ export abstract class RequestCmd<
   }
 
   /**
-   * The second half of {@link execute}: the response converters and the concurrency / cache-key
-   * harvesting, run against one answer and returning it.
+   * The second half of {@link execute}: the response converters and the concurrency harvesting, run
+   * against one answer and returning it.
    *
    * A direct request only ever sees a 2xx answer - the client throws everything else - so the conversion
    * and harvesting run exactly as before. A batch hands non-2xx answers back as values: those are returned
    * unconverted and nothing is harvested, because that sub-request did not happen.
    *
-   * `request` is the prepared request {@link prepareRequest} returned: the harvested state is read off its
-   * post-conversion {@link CacheKeyState}, the very same state the key is built from, so key and what a write
-   * reports as stale cannot drift apart.
+   * `request` is the prepared request {@link prepareRequest} returned.
    */
   public handleResponse(
     request: RequestInfo<any>,
@@ -281,22 +217,7 @@ export abstract class RequestCmd<
     // the mapped, user-facing ones, which only exist once the converters have run
     this.updateConcurrency(response);
 
-    // response-observed identity is read off the converted, mapped-name body too - a read only, by
-    // construction, since `this.cacheKey` is `undefined` for anything else
-    if (request.cacheKeyState) {
-      recordObservedIdentities(this.client.resourceIdentity, this.cacheKey, request.cacheKeyState, converted.data);
-    }
-
-    // built before evicting, deliberately: this DELETE's own `invalidates` should still carry whatever
-    // routes were recorded for the resource it just removed - eviction only has to stop a *later* write
-    // from resolving them again
-    const result = this.withInvalidates(converted, request.cacheKeyState);
-
-    if (this.method === ODataHttpMethods.Delete && request.cacheKeyState) {
-      evictObservedIdentity(this.client.resourceIdentity, request.cacheKeyState, converted.data);
-    }
-
-    return result;
+    return converted;
   }
 
   /**
@@ -325,23 +246,6 @@ export abstract class RequestCmd<
   }
 
   /**
-   * Attaches what this write makes stale - from the very same state the key is built from, so key and
-   * invalidation set cannot drift apart, plus whatever route to this same resource
-   * `resolveCrossRouteInvalidates` finds already cached under some other route. A read adds nothing: what
-   * it should be stored under is {@link cacheKey}.
-   */
-  private withInvalidates(
-    response: HttpResponseModel<FinalResponseStructure>,
-    state: CacheKeyState | undefined,
-  ): HttpResponseModel<FinalResponseStructure> {
-    if (!state || this.method === ODataHttpMethods.Get) {
-      return response;
-    }
-    const crossRouteKeys = resolveCrossRouteInvalidates(this.client.resourceIdentity, state, response.data);
-    return { ...response, invalidates: buildInvalidates(state, crossRouteKeys) };
-  }
-
-  /**
    * Adds the `If-Match` header a write to a concurrency-controlled resource requires (OData V4.01 Part 1,
    * §8.3.1), or refuses the write where nothing is known: the service would answer `428` and change
    * nothing, so there is nothing to gain from sending it.
@@ -365,13 +269,7 @@ export abstract class RequestCmd<
       return request;
     }
 
-    return new RequestInfo(
-      request.method,
-      request.url,
-      { ...request.headers, "If-Match": etag },
-      request.data,
-      request.cacheKeyState,
-    );
+    return new RequestInfo(request.method, request.url, { ...request.headers, "If-Match": etag }, request.data);
   }
 
   /**

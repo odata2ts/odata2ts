@@ -233,74 +233,6 @@ export enum EnumSynthesis {
   allowedValuesAndSymbolicName = "allowedValuesAndSymbolicName",
 }
 
-export interface CacheKeysObjectOptions {
-  /**
-   * Required: naming the object is not itself a decision, and a silently defaulted value would make
-   * whether a generated key exists at all depend on a value nobody wrote down. Use the bare boolean shorthand
-   * (`cacheKeys: true`/`false`) where the object's only purpose would be carrying this one flag.
-   *
-   * Generates `cacheKey`/`invalidates` on every `RequestCmd` when `true`; `false` emits nothing - identical
-   * to omitting `cacheKeys` entirely. Purely hierarchical, always: the key is the literal, named route taken
-   * to reach a response, never re-rooted at a resource's own type - that used to be a second mode
-   * (`typeFlattening`), and is now what `ResourceIdentityHandler` does at runtime instead, from actual
-   * responses rather than a generation-time prediction. One behaviour, so a boolean is all this needs to be.
-   */
-  enabled: boolean;
-  /**
-   * Prefixes every entity-set-derived identifier a cache key carries - a root's own name (an entity set's
-   * or singleton's), a hop's `entitySetName` wherever one is attached, and the entity-set name a binding
-   * carries as its own cache-key name - with that type's own effective namespace (its alias if it has one,
-   * its real namespace otherwise; see `NamespaceAliasResolver`).
-   *
-   * Off by default: within one generated client, a route's own name is already enough to identify a
-   * resource. Turn this on when a single cache - an app-level query cache keyed by `cacheKey` - is shared
-   * across *multiple* generated clients whose entity-set names might otherwise collide
-   * (`["Media", "list"]` from one service is indistinguishable from another's).
-   *
-   * Never reaches a hierarchical hop's own step name (a navigation property's odataName): that value is
-   * already nested inside an array rooted at a namespaced name, so it is never compared as a standalone
-   * identifier the way `entitySetName` is. Never reaches the raw name a `canonicalIdFn` bakes into
-   * generated code for `QId`/URL building either - that string is a real OData URL segment and must stay
-   * exactly the server's own name regardless of this option. Nor does it reach a binding's own
-   * `getEntitySetName()` (the name the URL is still built from), nor the canonical ids that key an
-   * `HttpClient.resourceIdentity` per-resource store - both are built from the raw name, so this option
-   * can never disambiguate them: a collision there needs a per-service store, not a prefixed key.
-   *
-   * One documented limitation: where a binding is suppressed entirely (`disableBindingProps` or
-   * `skipIdModels`), an `$expand` hop has no binding to read the name from and silently falls back to the
-   * bare navigation-property name - the pre-#536 broken shape, with no warning.
-   */
-  namespace?: boolean;
-}
-
-/**
- * `cacheKeys` in `ConfigFileOptions`: either the bare boolean directly, or the object form - which exists
- * so `namespace` (and any future option) can join `enabled` under the same key without a breaking change.
- */
-export type CacheKeysOptions = boolean | CacheKeysObjectOptions;
-
-/** Whether cache keys are in force - `false` where the whole `cacheKeys` option was never configured. */
-export function resolveCacheKeysEnabled(options: CacheKeysOptions | undefined): boolean {
-  if (typeof options === "boolean") {
-    return options;
-  }
-  return options?.enabled ?? false;
-}
-
-/**
- * Whether entity-set-derived cache-key identifiers carry their owning type's namespace - `false` for the
- * bare boolean shorthand (there is nowhere to state it) and `false` whenever cache keys are off at all,
- * since the prefix only has a use where a cache key is generated. This is the one shared gate for the
- * prefixed name, so the emitters (`ServiceGenerator`'s routes, `QueryObjectGenerator`'s bindings) read the
- * same predicate and cannot drift apart on whether it is in force.
- */
-export function resolveCacheKeysNamespace(options: CacheKeysOptions | undefined): boolean {
-  if (typeof options === "boolean") {
-    return false;
-  }
-  return resolveCacheKeysEnabled(options) && (options?.namespace ?? false);
-}
-
 /**
  * Shortens a namespace wherever its length actually matters: cache-key literals that carry a fully
  * qualified name (a subtype cast, a bound operation's own name), `byTypeAndName`/`propertiesByName`
@@ -656,15 +588,6 @@ export interface ConfigFileOptions extends Omit<CliOptions, "sourceUrl" | "sourc
    * ({@code "Author@odata.bind"}).
    */
   deepInsertProps?: DeepInsertProps;
-  /**
-   * Generate `RequestCmd.cacheKey`: a structured, typed key identifying the *resource* a request
-   * addresses, for a cache built on top of the generated client (TanStack Query is the motivating case,
-   * hence the array shape).
-   *
-   * Off by default. `true`/`false` is the common case; the `{ enabled }` object form exists only for a
-   * future option to join it under the same key without a breaking change.
-   */
-  cacheKeys?: CacheKeysOptions;
   /**
    * Configures namespace aliasing - see {@link NamespaceOptions}. Deep-merged the same way as
    * `byTypeAndName`: a top-level `alias` map and a service-level one merge key-by-key, the service-level

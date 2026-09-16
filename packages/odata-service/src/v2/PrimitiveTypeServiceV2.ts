@@ -8,7 +8,6 @@ import {
   ResponseValueConverterV2,
   ValueResponseConverterV2,
 } from "@odata2ts/odata-query-objects";
-import { CacheKeyState } from "../cacheKey/index.js";
 import { ODataServiceOptionsInternalV2 } from "../ODataServiceOptions";
 import { UrlRequestCmd } from "../request";
 import { ServiceStateHelper } from "../ServiceStateHelper.js";
@@ -40,9 +39,8 @@ export class PrimitiveTypeServiceV2<T, AsV4 extends boolean = false> {
     converter: ValueConverter<any, T> = getIdentityConverter(),
     mappedName?: string,
     options?: ODataServiceOptionsInternalV2<AsV4>,
-    cacheKeyState?: CacheKeyState,
   ) {
-    this.__base = new ServiceStateHelper(client, basePath, name, options, cacheKeyState);
+    this.__base = new ServiceStateHelper(client, basePath, name, options);
     this.__asV4 = options?.v2ResponseAsV4;
     /*
      * The two conversion methods are delegated to rather than pulled off the converter, because a
@@ -67,11 +65,6 @@ export class PrimitiveTypeServiceV2<T, AsV4 extends boolean = false> {
     return this.__base.path;
   }
 
-  /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
-  public getEntitySetName() {
-    return this.__base.getEntitySetName();
-  }
-
   /**
    * Get the primitive value.
    * Spec: {@link https://www.odata.org/documentation/odata-version-2-0/operations/} - 2.2 Retrieving individual properties
@@ -79,7 +72,7 @@ export class PrimitiveTypeServiceV2<T, AsV4 extends boolean = false> {
    * Always returns the response structure, the value might be `null`.
    */
   public getValue() {
-    const { client, path, getDefaultHeaders, cacheKeyState } = this.__base;
+    const { client, path, getDefaultHeaders } = this.__base;
     const converter = this.__converter;
 
     return new UrlRequestCmd<AsV4 extends true ? ODataValueResponseV4<T> : ODataValueResponseV2<T>>(
@@ -90,7 +83,6 @@ export class PrimitiveTypeServiceV2<T, AsV4 extends boolean = false> {
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new ValueResponseConverterV2<T, AsV4>(converter, this.__asV4 as AsV4),
-        cacheKeyState,
       },
     );
   }
@@ -104,13 +96,12 @@ export class PrimitiveTypeServiceV2<T, AsV4 extends boolean = false> {
    * @param value
    */
   public updateValue(value: T) {
-    const { client, path, getDefaultHeaders, name, cacheKeyState } = this.__base;
+    const { client, path, getDefaultHeaders, name } = this.__base;
     const converter = this.__converter;
 
     return new UrlRequestCmd<undefined, T>(client, ODataHttpMethods.Put, path, value, {
       headers: getDefaultHeaders(),
       mainRequestConverter: new ValueRequestConverter(converter, name!),
-      cacheKeyState,
     });
   }
 
@@ -120,8 +111,8 @@ export class PrimitiveTypeServiceV2<T, AsV4 extends boolean = false> {
    * Returns 204 with no data.
    */
   public deleteValue() {
-    const { client, path, cacheKeyState } = this.__base;
+    const { client, path } = this.__base;
 
-    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined, { cacheKeyState });
+    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined);
   }
 }

@@ -18,11 +18,7 @@ export class StreamGetRequestCmd extends RequestCmd<ReadableStream | undefined> 
     protected url: string,
     options: RequestCmdOptions<ReadableStream | undefined, undefined> = {},
   ) {
-    // A ReadableStream response is single-use: unlike every other cacheKey, which promises the response
-    // body is safe to store and read back later, a cached ReadableStream would hand a second reader an
-    // already-drained stream. So this command never carries one, whatever the caller passes in - a stream
-    // read stays uncacheable structurally, not by every call site remembering to omit it.
-    super(client, ODataHttpMethods.Get, undefined, { ...options, cacheKeyState: undefined });
+    super(client, ODataHttpMethods.Get, undefined, options);
   }
 
   public getUrl(): string {

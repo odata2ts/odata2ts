@@ -1,6 +1,6 @@
 import { HttpResponseModel } from "@odata2ts/http-client-api";
 import { beforeEach, describe, expect, expectTypeOf, test } from "vitest";
-import { MediaEntityServiceV4, rootState, withKey } from "../../src/";
+import { MediaEntityServiceV4 } from "../../src/";
 import { EditablePersonModel, PersonModel } from "../fixture/PersonModel";
 import { QPersonV4 } from "../fixture/v4/QPersonV4";
 import { MockClient } from "../mock/MockClient";
@@ -110,25 +110,5 @@ describe("MediaEntityService V4 Test", () => {
     expect(odataClient.lastData).toStrictEqual({ UserName: "tester" });
 
     expect(service.query().getUrl()).toBe(ENTITY_PATH);
-  });
-
-  describe("cacheKey identity", () => {
-    const cachedService = new MediaEntityServiceV4<PersonModel, EditablePersonModel, QPersonV4>(
-      new MockClient(false),
-      BASE_URL,
-      NAME,
-      new QPersonV4(),
-      undefined,
-      withKey(rootState("EBooks", "list", { entitySetName: "EBooks" }), 1, { Id: 1 }),
-    );
-
-    test("the content's cacheKey does not collide with the entity's own JSON read", () => {
-      expect(cachedService.query().cacheKey).toEqual(["EBooks", "detail", 1]);
-      expect(cachedService.getBlob().cacheKey).toEqual(["EBooks", "detail", 1, "$value"]);
-    });
-
-    test("getStream() still never gets a cacheKey, even with content correctly threaded", () => {
-      expect(cachedService.getStream().cacheKey).toBeUndefined();
-    });
   });
 });

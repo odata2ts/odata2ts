@@ -7,7 +7,6 @@ import {
   PrimitiveCollectionType,
   QueryObjectModel,
 } from "@odata2ts/odata-query-objects";
-import { CacheKeyState } from "../cacheKey/index.js";
 import { ODataServiceOptionsInternal } from "../ODataServiceOptions";
 import { UrlBuilderRequestCmdV4, UrlRequestCmd } from "../request";
 import { CollectionModificationResponseV4 } from "./ResponseTypeChoicesV4";
@@ -45,18 +44,12 @@ export class CollectionServiceV4<
     name: string,
     qModel: Q,
     options?: ODataServiceOptionsInternal<V>,
-    cacheKeyState?: CacheKeyState,
   ) {
-    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, options, cacheKeyState);
+    this.__base = new ServiceStateHelperV4(client, basePath, name, qModel, options);
   }
 
   public getPath() {
     return this.__base.path;
-  }
-
-  /** The entity set this resource belongs to, by its own name - absent for a contained entity, a complex value, or a singleton. */
-  public getEntitySetName() {
-    return this.__base.getEntitySetName();
   }
 
   /**
@@ -78,23 +71,20 @@ export class CollectionServiceV4<
     model: PrimitiveT,
     queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
-    const { client, getDefaultHeaders, getVersionHeaders, qModel, createModelQueryBuilder, cacheKeyState } =
-      this.__base;
-    const builder = createModelQueryBuilder(queryFn);
+    const { client, getDefaultHeaders, getVersionHeaders, qModel, createModelQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV4<
       CollectionModificationResponseV4<Response, PrimitiveT, V>,
       Q,
       ModelQueryBuilderV4<Q>,
       PrimitiveT
-    >(client, ODataHttpMethods.Post, builder, qModel, model, {
+    >(client, ODataHttpMethods.Post, createModelQueryBuilder(queryFn), qModel, model, {
       headers: { ...getDefaultHeaders(), ...getVersionHeaders() },
       mainRequestConverter: qModel,
       mainResponseConverter: new CollectionResponseConverterV4(qModel) as MainResponseConverter<
         CollectionModificationResponseV4<Response, PrimitiveT, V>,
         T
       >,
-      cacheKeyState,
     });
   }
 
@@ -117,16 +107,14 @@ export class CollectionServiceV4<
     models: Array<PrimitiveT>,
     queryFn?: (builder: ModelQueryBuilderV4<Q>, qObject: Q) => void,
   ) {
-    const { client, getDefaultHeaders, getVersionHeaders, qModel, createModelQueryBuilder, cacheKeyState } =
-      this.__base;
-    const builder = createModelQueryBuilder(queryFn);
+    const { client, getDefaultHeaders, getVersionHeaders, qModel, createModelQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV4<
       CollectionModificationResponseV4<Response, PrimitiveT, V>,
       Q,
       ModelQueryBuilderV4<Q>,
       Array<PrimitiveT>
-    >(client, ODataHttpMethods.Put, builder, qModel, models, {
+    >(client, ODataHttpMethods.Put, createModelQueryBuilder(queryFn), qModel, models, {
       headers: { ...getDefaultHeaders(), ...getVersionHeaders() },
       mainRequestConverter: new CollectionRequestConverter<Array<PrimitiveT>>(
         qModel as unknown as Pick<QueryObjectModel<Array<PrimitiveT>>, "convertToOData">,
@@ -135,7 +123,6 @@ export class CollectionServiceV4<
         CollectionModificationResponseV4<Response, PrimitiveT, V>,
         T
       >,
-      cacheKeyState,
     });
   }
 
@@ -144,9 +131,9 @@ export class CollectionServiceV4<
    * Spec: https://docs.oasis-open.org/odata/odata/v4.01/odata-v4.01-part1-protocol.html#sec_UpdateaCollectionProperty
    */
   public delete() {
-    const { client, path, cacheKeyState } = this.__base;
+    const { client, path } = this.__base;
 
-    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined, { cacheKeyState });
+    return new UrlRequestCmd<undefined>(client, ODataHttpMethods.Delete, path, undefined);
   }
 
   /**
@@ -156,20 +143,17 @@ export class CollectionServiceV4<
    * @param queryFn provide the query logic with the help of the builder and the query-object
    */
   public query<ReturnType = T>(queryFn?: (builder: CollectionQueryBuilderV4<Q>, qObject: Q) => void) {
-    const { client, qModel, getDefaultHeaders, createQueryBuilder, cacheKeyState } = this.__base;
-    const builder = createQueryBuilder(queryFn);
+    const { client, qModel, getDefaultHeaders, createQueryBuilder } = this.__base;
 
     return new UrlBuilderRequestCmdV4<ODataCollectionResponseFor<V, ReturnType>, Q>(
       client,
       ODataHttpMethods.Get,
-      builder,
+      createQueryBuilder(queryFn),
       qModel,
       undefined,
       {
         headers: getDefaultHeaders(),
         mainResponseConverter: new CollectionResponseConverterV4(qModel),
-        cacheKeyState,
-        queryParams: builder.getCacheKeyParams(),
       },
     );
   }

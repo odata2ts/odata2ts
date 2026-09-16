@@ -140,7 +140,7 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    * `namingHelper`, which already resolved and validated it at its own construction (see
    * `NamingHelper.getEffectiveNamespaceAlias`), rather than recomputed here from `options.namespace`. Feeds
    * every `NamespaceWithAlias` tuple this digester builds, `DataModel`'s included, so `namespace2Alias` (and
-   * everything reading it, `getDisplayFqName` included) carries both sources blended into one table.
+   * everything reading it) carries both sources blended into one table.
    */
   private readonly effectiveNamespaceAlias: Record<string, string>;
 
@@ -212,31 +212,6 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
    */
   protected isContained(p: Property): boolean {
     return false;
-  }
-
-  /**
-   * The inverse navigation property on the related type, where the model declares one.
-   *
-   * Undefined here, because a navigation property only states its partner outright in V4. V2 has to
-   * resolve it from the `<Association>` the navigation property points at and overrides this
-   * accordingly.
-   */
-  protected getPartner(p: Property, fqOwnerName?: string): string | undefined {
-    return undefined;
-  }
-
-  /**
-   * The foreign key a navigation property is realized by: the dependent property and the principal
-   * property it references, one entry per property of a composite key.
-   *
-   * Undefined here, because only V4 states the constraint on the navigation property itself. V2 states
-   * it once on the `<Association>` instead and overrides this to resolve it from there.
-   */
-  protected getReferentialConstraints(
-    p: Property,
-    fqOwnerName?: string,
-  ): ReadonlyArray<{ property: string; referencedProperty: string }> | undefined {
-    return undefined;
   }
 
   protected abstract digestOperations(schema: SchemaV3 | SchemaV4): void;
@@ -929,9 +904,6 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       );
     }
 
-    const partner = this.getPartner(p, fqOwnerName);
-    const referentialConstraints = this.getReferentialConstraints(p, fqOwnerName);
-
     return {
       odataName: p.$.Name,
       name: modelName,
@@ -942,8 +914,6 @@ export abstract class Digester<S extends Schema<ET, CT>, ET extends EntityType, 
       // only set when it applies: a flag on every single property would be noise
       ...(odataDataType === ODataTypesV4.Stream ? { isStream: true } : undefined),
       ...(this.isContained(p) ? { contained: true } : undefined),
-      ...(partner ? { partner } : undefined),
-      ...(referentialConstraints?.length ? { referentialConstraints } : undefined),
       ...(isOptionalParameter(p.Annotation) ? { omittable: true } : undefined),
       managed: toManagedState(
         typeof entityPropConfig?.managed !== "undefined" ? entityPropConfig.managed : configProp?.managed,

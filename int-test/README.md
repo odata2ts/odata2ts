@@ -75,7 +75,7 @@ Two rules hold for every test here:
   `expectTypeOf` evaluates its argument, so pass the method (`cmd.execute`), never a live call.
 
 These suites, not `examples/main`, are where important integration coverage belongs: everything in
-`examples/main` is optional.
+`examples/main` is optional (see the repository's CLAUDE.md).
 
 ## Adding another test server
 

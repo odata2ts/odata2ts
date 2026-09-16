@@ -8,5 +8,4 @@ export * from "./v4/index";
 export * from "./RequestHeaders";
 export * from "./ref";
 export * from "./request/index";
-export * from "./cacheKey/index";
 export * from "./batch/index";
