@@ -13,6 +13,49 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-objects bumped from ^0.28.0 to ^0.28.1
     * @odata2ts/odata-service bumped from ^0.23.0 to ^0.23.1
 
+## [0.45.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.44.0...@odata2ts/odata2ts-v0.45.0) (2026-09-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **odata2ts:** generated code is type-checked by default now; set `enableTsNoCheck: true` to restore the prior unconditional `// @ts-nocheck` behavior, and drop any `debug: true` that was only there to disable it.
+
+### Features
+
+* **odata-service:** add OData $batch support ([#541](https://github.com/odata2ts/odata2ts/issues/541)) ([98103eb](https://github.com/odata2ts/odata2ts/commit/98103ebe8734490cb29ad5bd9a4b5f6f6816d9b2))
+* **odata-service:** support referencing prior requests within a $batch ([09a25d6](https://github.com/odata2ts/odata2ts/commit/09a25d6c2702eadbb31568423f074d9a7e7a5ae9))
+* **odata2ts:** add namespace aliasing for config matchers and folder layout ([#543](https://github.com/odata2ts/odata2ts/issues/543)) ([751c4ae](https://github.com/odata2ts/odata2ts/commit/751c4ae0417b6afa2142977a4210299967ec5d63))
+* **odata2ts:** discover optimistic concurrency from the service metadata ([cdeb4d6](https://github.com/odata2ts/odata2ts/commit/cdeb4d66b3c26fcd40dae215bb19bb72efc4a1a7))
+* **odata2ts:** Evaluate OptionalParameter Annotation ([f8eca7a](https://github.com/odata2ts/odata2ts/commit/f8eca7a07a2c9ce4d6109370ccba7918467f270b))
+* **odata2ts:** make ts-nocheck opt-in and decouple it from debug ([#546](https://github.com/odata2ts/odata2ts/issues/546)) ([a425633](https://github.com/odata2ts/odata2ts/commit/a42563301509d5fb0467d1e06b787d0b62717ad1))
+* **odata2ts:** mark the generated services of concurrency-controlled resources ([cdeb4d6](https://github.com/odata2ts/odata2ts/commit/cdeb4d66b3c26fcd40dae215bb19bb72efc4a1a7))
+* **odata2ts:** mark V2 main services so a json batch is refused ([7fd8e5b](https://github.com/odata2ts/odata2ts/commit/7fd8e5b0a2910fd44542df1dbf1db78e731f227d))
+* **odata2ts:** read Core.OptimisticConcurrency from entity sets and singletons ([cdeb4d6](https://github.com/odata2ts/odata2ts/commit/cdeb4d66b3c26fcd40dae215bb19bb72efc4a1a7))
+* **odata2ts:** read the V2 concurrency token as optimistic concurrency ([cdeb4d6](https://github.com/odata2ts/odata2ts/commit/cdeb4d66b3c26fcd40dae215bb19bb72efc4a1a7))
+* **odata2ts:** resolve annotations targeting the entity container ([cdeb4d6](https://github.com/odata2ts/odata2ts/commit/cdeb4d66b3c26fcd40dae215bb19bb72efc4a1a7))
+* **odata2ts:** stamp the generated service with its $batch builder type ([09a25d6](https://github.com/odata2ts/odata2ts/commit/09a25d6c2702eadbb31568423f074d9a7e7a5ae9))
+* support alternate keys & EntitySetService gets `byId` method ([#521](https://github.com/odata2ts/odata2ts/issues/521)) ([47d7426](https://github.com/odata2ts/odata2ts/commit/47d7426a50973e0c6e9d86450ab62c04bd1b90c6))
+
+
+### Bug Fixes
+
+* **odata2ts:** don't leak a parent's subtype cast into a navigation's contained collection ([09a25d6](https://github.com/odata2ts/odata2ts/commit/09a25d6c2702eadbb31568423f074d9a7e7a5ae9))
+* **odata2ts:** resolve a navigation binding declared on a base type for every subtype ([ddfa845](https://github.com/odata2ts/odata2ts/commit/ddfa845c1ded830783f635802d85ceaccedf270a))
+* **odata2ts:** resolve multi-segment NavigationPropertyBinding/AssociationSet paths ([#553](https://github.com/odata2ts/odata2ts/issues/553)) ([77e1380](https://github.com/odata2ts/odata2ts/commit/77e13804767088eba526202bd2ed91542fb3fa87))
+* **odata2ts:** resolve the prettier config for the metadata file, not its directory ([e4dda9a](https://github.com/odata2ts/odata2ts/commit/e4dda9a66d5f8ef35c1ac09a5dba28069c031f1e))
+* **odata2ts:** send If-Match for actions bound to a concurrency-controlled entity ([81f5fca](https://github.com/odata2ts/odata2ts/commit/81f5fca0af275f3ea62bebafea6c19135ff4c2d1)), closes [#514](https://github.com/odata2ts/odata2ts/issues/514)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.31.0 to ^0.32.0
+    * @odata2ts/odata-service bumped from ^0.27.0 to ^0.28.0
+  * peerDependencies
+    * @odata2ts/odata-query-objects bumped from ^0.31.0 to ^0.32.0
+    * @odata2ts/odata-service bumped from ^0.27.0 to ^0.28.0
+
 ## [0.44.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata2ts-v0.43.0...@odata2ts/odata2ts-v0.44.0) (2026-08-21)
 
 

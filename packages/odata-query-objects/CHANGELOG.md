@@ -33,6 +33,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * ESM tends to break stuff
 
+## [0.32.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.31.0...@odata2ts/odata-query-objects-v0.32.0) (2026-09-16)
+
+
+### Features
+
+* **odata-query-objects:** pass a batch request reference through a binding verbatim ([4933f6e](https://github.com/odata2ts/odata2ts/commit/4933f6e6fd1ad272ffddf4f5c63902990de84a50))
+* **odata-service:** add OData $batch support ([#541](https://github.com/odata2ts/odata2ts/issues/541)) ([98103eb](https://github.com/odata2ts/odata2ts/commit/98103ebe8734490cb29ad5bd9a4b5f6f6816d9b2))
+* support alternate keys & EntitySetService gets `byId` method ([#521](https://github.com/odata2ts/odata2ts/issues/521)) ([47d7426](https://github.com/odata2ts/odata2ts/commit/47d7426a50973e0c6e9d86450ab62c04bd1b90c6))
+
 ## [0.31.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-query-objects-v0.30.1...@odata2ts/odata-query-objects-v0.31.0) (2026-08-21)
 
 
