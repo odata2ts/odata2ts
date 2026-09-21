@@ -17,6 +17,37 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
     * @odata2ts/odata-query-builder bumped from ^0.18.5 to ^0.18.6
     * @odata2ts/odata-query-objects bumped from ^0.28.1 to ^0.28.2
 
+## [0.28.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service-v0.27.0...@odata2ts/odata-service-v0.28.0) (2026-09-21)
+
+
+### Features
+
+* **odata-service:** accept the concurrencyControlled flag from the generator ([3170764](https://github.com/odata2ts/odata2ts/commit/3170764ed0bff5202c6fdc3ae3906a889408191b))
+* **odata-service:** add OData $batch support ([#541](https://github.com/odata2ts/odata2ts/issues/541)) ([98103eb](https://github.com/odata2ts/odata2ts/commit/98103ebe8734490cb29ad5bd9a4b5f6f6816d9b2))
+* **odata-service:** automatic ETag handling for optimistic concurrency ([6b4af8b](https://github.com/odata2ts/odata2ts/commit/6b4af8b3ca61dff5e8ebbf9f3f9da384a00d3f2e))
+* **odata-service:** let a write state its ETag or write past it ([6b4af8b](https://github.com/odata2ts/odata2ts/commit/6b4af8b3ca61dff5e8ebbf9f3f9da384a00d3f2e))
+* **odata-service:** read and send ETags in the entity services ([6b4af8b](https://github.com/odata2ts/odata2ts/commit/6b4af8b3ca61dff5e8ebbf9f3f9da384a00d3f2e))
+* **odata-service:** read and send ETags in the V2 entity services ([6b4af8b](https://github.com/odata2ts/odata2ts/commit/6b4af8b3ca61dff5e8ebbf9f3f9da384a00d3f2e))
+* **odata-service:** report a missing ETag and identify a concurrency conflict ([6b4af8b](https://github.com/odata2ts/odata2ts/commit/6b4af8b3ca61dff5e8ebbf9f3f9da384a00d3f2e))
+* **odata-service:** send If-Match and keep the ETag store in step ([6b4af8b](https://github.com/odata2ts/odata2ts/commit/6b4af8b3ca61dff5e8ebbf9f3f9da384a00d3f2e))
+* **odata-service:** support referencing prior requests within a $batch ([09a25d6](https://github.com/odata2ts/odata2ts/commit/09a25d6c2702eadbb31568423f074d9a7e7a5ae9))
+* **odata2ts:** stamp the generated service with its $batch builder type ([09a25d6](https://github.com/odata2ts/odata2ts/commit/09a25d6c2702eadbb31568423f074d9a7e7a5ae9))
+* support alternate keys & EntitySetService gets `byId` method ([#521](https://github.com/odata2ts/odata2ts/issues/521)) ([47d7426](https://github.com/odata2ts/odata2ts/commit/47d7426a50973e0c6e9d86450ab62c04bd1b90c6))
+
+
+### Bug Fixes
+
+* **odata-service:** evict the stale ETag when a write is answered with 412 ([6cb2658](https://github.com/odata2ts/odata2ts/commit/6cb265837a537a2cec4f2643c841c7d9014d2a2b))
+* **odata2ts:** don't leak a parent's subtype cast into a navigation's contained collection ([09a25d6](https://github.com/odata2ts/odata2ts/commit/09a25d6c2702eadbb31568423f074d9a7e7a5ae9))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @odata2ts/odata-query-builder bumped from ^0.19.3 to ^0.19.4
+    * @odata2ts/odata-query-objects bumped from ^0.31.0 to ^0.32.0
+
 ## [0.27.0](https://github.com/odata2ts/odata2ts/compare/@odata2ts/odata-service-v0.26.0...@odata2ts/odata-service-v0.27.0) (2026-08-21)
 
 
