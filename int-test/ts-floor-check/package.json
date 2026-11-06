@@ -18,6 +18,6 @@
   "devDependencies": {
     "@odata2ts/odata2ts": "workspace:^",
     "rimraf": "^6.1.3",
-    "vitest": "^4.1.10"
+    "vitest": "^5.0.0"
   }
 }
